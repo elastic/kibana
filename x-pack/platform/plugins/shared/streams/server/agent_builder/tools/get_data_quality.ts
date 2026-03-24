@@ -10,8 +10,6 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { Streams } from '@kbn/streams-schema';
-import { mapPercentageToQuality } from '@kbn/dataset-quality-plugin/common';
-import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
 import dateMath from '@kbn/datemath';
 import dedent from 'dedent';
 import type { GetScopedClients } from '../../routes/types';
@@ -140,6 +138,24 @@ export const createGetDataQualityTool = ({
     }
   },
 });
+
+// Inlined from @kbn/dataset-quality-plugin/common to avoid a cyclic dependency
+// (dataset-quality already depends on streams). If these definitions drift,
+// consider extracting them into a shared package.
+type QualityIndicators = 'good' | 'poor' | 'degraded';
+
+const POOR_QUALITY_MINIMUM_PERCENTAGE = 3;
+const DEGRADED_QUALITY_MINIMUM_PERCENTAGE = 0;
+
+const mapPercentageToQuality = (percentages: number[]): QualityIndicators => {
+  if (percentages.some((percentage) => percentage > POOR_QUALITY_MINIMUM_PERCENTAGE)) {
+    return 'poor';
+  }
+  if (percentages.some((percentage) => percentage > DEGRADED_QUALITY_MINIMUM_PERCENTAGE)) {
+    return 'degraded';
+  }
+  return 'good';
+};
 
 export const computeQualityMetrics = ({
   totalCount,
