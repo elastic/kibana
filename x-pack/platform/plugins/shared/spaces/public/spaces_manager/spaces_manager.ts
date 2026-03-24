@@ -212,4 +212,10 @@ export class SpacesManager {
   public getRolesForSpace(id: string): Promise<Role[]> {
     return this.http.get(`/internal/security/roles/${id}`);
   }
+
+  public async getFeatureVisibility(
+    id: string
+  ): Promise<{ featureVisibility: { disabledFeatures: string[] } }> {
+    return this.http.get(`/internal/spaces/space/${encodeURIComponent(id)}/feature_visibility`);
+  }
 }

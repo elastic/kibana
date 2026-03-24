@@ -922,6 +922,185 @@ describe('#update', () => {
     expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
   });
 
+  describe('disabledFeatures preservation across solution switching', () => {
+    test('preserves stored disabledFeatures when switching from classic to non-classic solution', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      const storedClassicDisabledFeatures = ['feature_1'];
+      const existingSavedObject: SavedObject = {
+        ...savedObject,
+        attributes: {
+          ...(savedObject.attributes as object),
+          solution: 'classic',
+          disabledFeatures: storedClassicDisabledFeatures,
+        },
+      };
+      mockCallWithRequestRepository.get.mockResolvedValue(existingSavedObject);
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        undefined
+      );
+      const id = savedObject.id;
+      await client.update(id, { ...spaceToUpdate, solution: 'es', disabledFeatures: [] });
+
+      expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith('space', id, {
+        ...attributes,
+        solution: 'es',
+        disabledFeatures: storedClassicDisabledFeatures,
+      });
+    });
+
+    test('preserves stored disabledFeatures when switching from non-classic to non-classic solution', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      const storedClassicDisabledFeatures = ['feature_1'];
+      const existingSavedObject: SavedObject = {
+        ...savedObject,
+        attributes: {
+          ...(savedObject.attributes as object),
+          solution: 'es',
+          disabledFeatures: storedClassicDisabledFeatures,
+        },
+      };
+      mockCallWithRequestRepository.get.mockResolvedValue(existingSavedObject);
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        undefined
+      );
+      const id = savedObject.id;
+      await client.update(id, { ...spaceToUpdate, solution: 'es', disabledFeatures: [] });
+
+      expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith('space', id, {
+        ...attributes,
+        solution: 'es',
+        disabledFeatures: storedClassicDisabledFeatures,
+      });
+    });
+
+    test('preserves stored disabledFeatures when switching from non-classic to classic solution', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      const storedClassicDisabledFeatures = ['feature_1'];
+      const existingSavedObject: SavedObject = {
+        ...savedObject,
+        attributes: {
+          ...(savedObject.attributes as object),
+          solution: 'es',
+          disabledFeatures: storedClassicDisabledFeatures,
+        },
+      };
+      mockCallWithRequestRepository.get.mockResolvedValue(existingSavedObject);
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        undefined
+      );
+      const id = savedObject.id;
+      await client.update(id, {
+        ...spaceToUpdate,
+        solution: 'classic',
+        disabledFeatures: ['feature_2', 'feature_3'],
+      });
+
+      expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith('space', id, {
+        ...attributes,
+        solution: 'classic',
+        disabledFeatures: storedClassicDisabledFeatures,
+      });
+    });
+
+    test('does not preserve stored disabledFeatures when switching from non-classic to classic solution if disabledFeatures have changes', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      const storedClassicDisabledFeatures = ['feature_1'];
+      const existingSavedObject: SavedObject = {
+        ...savedObject,
+        attributes: {
+          ...(savedObject.attributes as object),
+          solution: 'es',
+          disabledFeatures: storedClassicDisabledFeatures,
+        },
+      };
+      mockCallWithRequestRepository.get.mockResolvedValue(existingSavedObject);
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        undefined
+      );
+      const id = savedObject.id;
+      await client.update(id, {
+        ...spaceToUpdate,
+        solution: 'classic',
+        disabledFeatures: ['feature_1', 'feature_2', 'feature_3'],
+      });
+
+      expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith('space', id, {
+        ...attributes,
+        solution: 'classic',
+        disabledFeatures: ['feature_1', 'feature_2', 'feature_3'],
+      });
+    });
+
+    test('does not preserve stored disabledFeatures when switching from classic to classic solution', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      const storedClassicDisabledFeatures = ['feature_1'];
+      const existingSavedObject: SavedObject = {
+        ...savedObject,
+        attributes: {
+          ...(savedObject.attributes as object),
+          solution: 'classic',
+          disabledFeatures: storedClassicDisabledFeatures, // should be ignored
+        },
+      };
+      mockCallWithRequestRepository.get.mockResolvedValue(existingSavedObject);
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        undefined
+      );
+      const id = savedObject.id;
+      await client.update(id, {
+        ...spaceToUpdate,
+        solution: 'classic',
+        disabledFeatures: ['feature_2'],
+      });
+
+      expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith('space', id, {
+        ...attributes,
+        solution: 'classic',
+        disabledFeatures: ['feature_2'],
+      });
+    });
+  });
+
   describe('when config.allowFeatureVisibility is disabled', () => {
     test(`updates space without disabledFeatures`, async () => {
       const mockDebugLogger = createMockDebugLogger();
