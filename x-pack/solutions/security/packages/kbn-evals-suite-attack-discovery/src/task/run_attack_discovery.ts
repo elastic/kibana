@@ -28,6 +28,12 @@ let defaultPromptPromise: Promise<string> | undefined;
 let continuePromptPromise: Promise<string> | undefined;
 
 const loadDefaultPrompt = (): Promise<string> => {
+  // Allow prompt override via env var for A/B testing
+  const overridePath = process.env.ATTACK_DISCOVERY_PROMPT_OVERRIDE;
+  if (overridePath) {
+    return Fs.readFile(overridePath, 'utf-8');
+  }
+
   if (!defaultPromptPromise) {
     defaultPromptPromise = Fs.readFile(
       Path.resolve(__dirname, '../prompts/attack_discovery_default_prompt.text'),
