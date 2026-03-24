@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { map } from 'rxjs';
 import {
   EuiCode,
   EuiFlexGroup,
@@ -13,6 +14,7 @@ import {
   EuiLoadingSpinner,
   EuiScreenReaderOnly,
   EuiSkeletonText,
+  EuiSpacer,
   EuiText,
   logicalCSS,
   useEuiTheme,
@@ -27,17 +29,25 @@ import {
 } from '@kbn/unified-data-table';
 import { css } from '@emotion/react';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-plugin/server/resources/alert_events';
+import type {
+  EpisodesFilterState,
+  EpisodesSortState,
+} from '@kbn/alerting-v2-episodes-ui/utils/build_episodes_esql_query';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
 import { pagesToDatatableRecords } from '@kbn/alerting-v2-episodes-ui/utils/pages_to_datatable_records';
 import { AlertingEpisodeStatusBadge } from '@kbn/alerting-v2-episodes-ui/components/alerting_episode_status_badge';
 import { useAlertingRulesIndex } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_index';
+import useObservable from 'react-use/lib/useObservable';
+import type { InputTimeRange } from '@kbn/data-plugin/public/query';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+import { EpisodesFilterBar } from './components/episodes_filter_bar';
 
 const PAGE_SIZE = 50;
 
-/** Narrow columns so `rule.id` / time keep flexible width */
+const DEFAULT_SORT: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' };
+
 const ALERTS_V2_TABLE_SETTINGS: UnifiedDataTableSettings = {
   columns: {
     duration: { width: 100 },
@@ -53,8 +63,20 @@ export function AlertsV2Page() {
   const services = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const { euiTheme } = useEuiTheme();
+  const timefilter = services.data.query.timefilter.timefilter;
 
-  const [sort] = useState<SortOrder[]>([['@timestamp', 'desc']]);
+  const timeRange$ = useMemo(
+    () => timefilter.getTimeUpdate$().pipe(map(() => timefilter.getTime())),
+    [timefilter]
+  );
+
+  const timeRange = useObservable(
+    timeRange$,
+    timefilter?.getTime() ?? { from: 'now-24h', to: 'now' }
+  );
+
+  const [filterState, setFilterState] = useState<EpisodesFilterState>({});
+  const [sortState, setSortState] = useState<EpisodesSortState>(DEFAULT_SORT);
   const [columns, setColumns] = useState<string[]>([
     '@timestamp',
     'rule.id',
@@ -63,15 +85,44 @@ export function AlertsV2Page() {
   ]);
   const [rowHeight, setRowHeight] = useState(2);
 
+  const handleTimeChange = useCallback(
+    (range: InputTimeRange) => {
+      timefilter.setTime(range);
+    },
+    [timefilter]
+  );
+
   const {
     data: episodesData,
     dataView,
     isLoading,
     fetchNextPage,
+    refetch,
   } = useFetchAlertingEpisodesQuery({
     pageSize: PAGE_SIZE,
     services,
+    filterState,
+    sortState,
+    timeRange,
   });
+
+  const sort: SortOrder[] = useMemo(
+    () => [[sortState.sortField, sortState.sortDirection]],
+    [sortState.sortField, sortState.sortDirection]
+  );
+
+  const onSort = useCallback((nextSort: string[][]) => {
+    if (nextSort.length > 0) {
+      // Table supports multiple sort columns; the last element is the one the user just changed
+      const [field, dir] = nextSort[nextSort.length - 1];
+      if (field != null && dir != null) {
+        setSortState({
+          sortField: String(field),
+          sortDirection: dir === 'asc' ? 'asc' : 'desc',
+        });
+      }
+    }
+  }, []);
 
   const ruleIds = useMemo(
     () => [
@@ -87,6 +138,15 @@ export function AlertsV2Page() {
     ruleIds,
     services,
   });
+
+  const ruleOptions = useMemo(
+    () =>
+      Object.entries(rulesIndex).map(([id, rule]) => ({
+        label: rule.metadata?.name ?? id,
+        value: id,
+      })),
+    [rulesIndex]
+  );
 
   const rows = useMemo(() => pagesToDatatableRecords(episodesData?.pages), [episodesData?.pages]);
 
@@ -121,6 +181,19 @@ export function AlertsV2Page() {
           min-width: 0;
         `}
       >
+        <EuiFlexItem grow={false}>
+          <EpisodesFilterBar
+            filterState={filterState}
+            onFilterChange={setFilterState}
+            timeRange={timeRange}
+            onTimeChange={handleTimeChange}
+            ruleOptions={ruleOptions}
+            onRefresh={() => refetch()}
+            isLoading={isLoading}
+            services={services}
+          />
+          <EuiSpacer size="s" />
+        </EuiFlexItem>
         <EuiFlexItem
           grow
           css={css`
@@ -227,6 +300,7 @@ export function AlertsV2Page() {
                 // Sorting
                 isSortEnabled
                 sort={sort}
+                onSort={onSort}
                 // Rows
                 rowHeightState={rowHeight}
                 onUpdateRowHeight={setRowHeight}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { FindRulesResponse } from '@kbn/alerting-v2-plugin/public/services/rules_api';
 import useAsync from 'react-use/lib/useAsync';
@@ -23,10 +23,12 @@ type Rule = FindRulesResponse['items'][number];
 
 /**
  * Provides a rules index by id, fetching uncached rules
- * with the minimum number of bulk requests possible
+ * with the minimum number of bulk requests possible.
+ * Returns rulesIndex as state so consumers re-render when rules are loaded.
  */
 export const useAlertingRulesIndex = ({ ruleIds, services }: UseAlertingRulesIndexOptions) => {
   const cacheRef = useRef<Record<string, Rule>>({});
+  const [rulesIndex, setRulesIndex] = useState<Record<string, Rule>>({});
 
   const { loading, error } = useAsync(async () => {
     const uncachedIds = ruleIds.filter((id) => !cacheRef.current[id]);
@@ -41,10 +43,11 @@ export const useAlertingRulesIndex = ({ ruleIds, services }: UseAlertingRulesInd
     rulesResponse.items.forEach((rule) => {
       cacheRef.current[rule.id] = rule;
     });
+    setRulesIndex({ ...cacheRef.current });
   }, [ruleIds, services.http]);
 
   return {
-    rulesIndex: cacheRef.current,
+    rulesIndex,
     loading,
     error,
   };
