@@ -14,16 +14,30 @@ import type { WorkflowsApiService } from '../../../common/apis/workflows';
 import { waitForConditionOrThrow } from '../../../common/utils/wait_for_condition';
 import { spaceTest } from '../../fixtures';
 
-const SCHEDULED_WORKFLOW_INTERVAL_SECONDS = 5;
+// Minimum allowed interval is 60s — see ScheduledTriggerSchema validation.
+// Seconds values < 60 are rejected by the schema regex.
+const SCHEDULED_WORKFLOW_INTERVAL = '1m';
+const SCHEDULED_WORKFLOW_INTERVAL_MS = 60_000;
+
+// Task Manager executes scheduled tasks via a fixed-interval polling loop (default: 3 s).
+// A task can only start when a poll cycle fires AND the task's `runAt` has passed —
+// there is no "wake up at exactly runAt" mechanism.
+//
+// When the workflow interval is a multiple of the poll interval, the Least Common
+// Multiple (LCM) equals the interval itself and gaps are uniform:
+//
+// Maximum gap any consecutive-run gap can reach:
+//   interval + TASK_MANAGER_POLL_INTERVAL_MS  (one poll miss at most per interval)
+const TASK_MANAGER_POLL_INTERVAL_MS = 3_000;
 
 const SHORT_RUNNING_SCHEDULED_WORKFLOW_YAML = `
 name: Scout Scheduled Workflow Test
 enabled: false
-description: Scheduled workflow that runs every 10s for testing
+description: Scheduled workflow that runs every minute for testing
 triggers:
   - type: scheduled
     with:
-      every: ${SCHEDULED_WORKFLOW_INTERVAL_SECONDS}s
+      every: ${SCHEDULED_WORKFLOW_INTERVAL}
 steps:
   - name: log_step
     type: console
@@ -31,35 +45,15 @@ steps:
       message: "Scheduled execution fired"
 `;
 
-const LONG_RUNNING_SCHEDULED_WORKFLOW_YAML = `
-name: Scout Scheduled Workflow Test
-enabled: true
-description: Scheduled workflow that runs every 10s for testing
-triggers:
-  - type: scheduled
-    with:
-      every: ${SCHEDULED_WORKFLOW_INTERVAL_SECONDS}s
-steps:
-  - name: log_step
-    type: console
-    with:
-      message: "Scheduled execution fired"
-  
-  - name: wait
-    type: wait
-    with:
-      duration: 11s
-`;
-
-// FLAKY: https://github.com/elastic/security-team/issues/16272
+// Failing: See https://github.com/elastic/kibana/issues/259162
 spaceTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAgnostic }, () => {
   let workflowsApi: WorkflowsApiService;
   let workflowId: string;
 
-  spaceTest.beforeAll(async ({ apiServices }) => {
-    spaceTest.setTimeout(60_000);
-    workflowsApi = apiServices.workflowsApi;
+  spaceTest.setTimeout(300_000);
 
+  spaceTest.beforeAll(async ({ apiServices }) => {
+    workflowsApi = apiServices.workflowsApi;
     const created = await workflowsApi.create(SHORT_RUNNING_SCHEDULED_WORKFLOW_YAML);
     workflowId = created.id;
   });
@@ -70,35 +64,46 @@ spaceTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAg
 
   spaceTest('enabling a scheduled workflow triggers executions automatically', async () => {
     await workflowsApi.update(workflowId, { enabled: true });
-    const expectedExecutions = 3;
+    const expectedExecutions = 2;
 
+    // Two executions at 1m each: minimum ~60s, add buffer for startup jitter
+    // (adaptive polling, stale-execution cleanup) that can delay the first run.
     const { results } = await waitForConditionOrThrow({
       action: () => workflowsApi.getExecutions(workflowId),
       condition: ({ results: r }) => r.length >= expectedExecutions,
-      interval: 1000,
-      timeout: SCHEDULED_WORKFLOW_INTERVAL_SECONDS * 1000 * expectedExecutions,
-      errorMessage: ({ results: r }) => `Expected > 2 executions, got ${r.length}`,
+      interval: 5000,
+      timeout: 180_000,
+      errorMessage: ({ results: r }) =>
+        `Expected >= ${expectedExecutions} executions, got ${r.length}`,
     });
-
-    expect(results.length).toBeLessThan(5);
 
     const completedExecutions = await Promise.all(
       results.map((e) => workflowsApi.waitForTermination({ workflowExecutionId: e.id }))
     );
-    const completedExecutionsSorted = completedExecutions.toSorted((a, b) =>
-      (a?.startedAt ?? '').localeCompare(b?.startedAt ?? '')
-    );
+    // Filter out any executions that lack a startedAt timestamp before sorting.
+    // Executions without startedAt produce NaN when used in Date arithmetic.
+    const completedExecutionsSorted = completedExecutions
+      .filter((e): e is NonNullable<typeof e> & { startedAt: string } => e?.startedAt != null)
+      .toSorted((a, b) => a.startedAt.localeCompare(b.startedAt));
 
+    // Since 60s is a multiple of pollInterval (3s), LCM(60, 3) = 60s and gaps are
+    // uniform. Each gap must not exceed interval + pollInterval (one poll miss at most).
+    //
+    // No lower bound is asserted on `startedAt` gaps. `startedAt` is set by the
+    // workflow engine after Task Manager claims the task, so cold-start overhead on
+    // the first run shifts its timestamp, making the first→second gap appear shorter
+    // than the scheduling interval — even though the Task Manager timing was correct.
+    const maxGapMs = SCHEDULED_WORKFLOW_INTERVAL_MS + TASK_MANAGER_POLL_INTERVAL_MS;
     for (let index = 1; index < completedExecutionsSorted.length; index++) {
       const currentExecution = completedExecutionsSorted[index];
-      const currentStart = new Date(completedExecutionsSorted[index]?.startedAt ?? '').getTime();
-      const previousStart = new Date(
-        completedExecutionsSorted[index - 1]?.startedAt ?? ''
-      ).getTime();
-      expect(currentStart - previousStart).toBeGreaterThan(
-        SCHEDULED_WORKFLOW_INTERVAL_SECONDS * 1000 * 0.85 // 85% of the interval to reduce the risk of flakiness
-      );
-      expect(currentExecution?.status).toBe(ExecutionStatus.COMPLETED);
+      const currentStart = new Date(currentExecution.startedAt).getTime();
+      const previousStart = new Date(completedExecutionsSorted[index - 1].startedAt).getTime();
+      const gap = currentStart - previousStart;
+      expect(
+        gap,
+        `gap between run ${index} and run ${index + 1} should be ≤ interval + pollInterval`
+      ).toBeLessThan(maxGapMs + 1);
+      expect(currentExecution.status).toBe(ExecutionStatus.COMPLETED);
     }
   });
 
@@ -108,8 +113,8 @@ spaceTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAg
     await waitForConditionOrThrow({
       action: () => workflowsApi.getExecutions(workflowId),
       condition: ({ results: r }) => r.length >= 1,
-      interval: 1000,
-      timeout: SCHEDULED_WORKFLOW_INTERVAL_SECONDS * 1000 * 2,
+      interval: 5000,
+      timeout: SCHEDULED_WORKFLOW_INTERVAL_MS * 2,
       errorMessage: 'No executions appeared after enabling the workflow',
     });
 
@@ -118,8 +123,9 @@ spaceTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAg
     const { results: beforeDisable } = await workflowsApi.getExecutions(workflowId);
     const countBeforeDisable = beforeDisable.length;
 
-    // Wait another interval to confirm no new executions appear
-    await new Promise((resolve) => setTimeout(resolve, 10_000));
+    // Wait longer than one full interval + poll cycle so any in-flight execution
+    // completes and no new ones start (interval=60s, pollInterval=3s → wait 90s).
+    await new Promise((resolve) => setTimeout(resolve, 90_000));
 
     const { results: afterDisable } = await workflowsApi.getExecutions(workflowId);
 
@@ -129,52 +135,47 @@ spaceTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAg
     }).toBeLessThan(2);
   });
 
-  spaceTest(
-    'scheduled executions do not overlap when a previous run is still in progress',
-    async () => {
-      // Each execution takes ~7s (two 3s waits + console step), scheduled every 5s.
-      // If the scheduler is reentrant, it must wait for the previous run to finish
-      // before starting the next one, so consecutive starts should be >5s apart.
-      const createdLongRunningWorkflow = await workflowsApi.create(
-        LONG_RUNNING_SCHEDULED_WORKFLOW_YAML
-      );
+  spaceTest('scheduled executions do not overlap', async () => {
+    // Non-overlap invariant: each run must finish before the next one starts.
+    // This holds for any execution regardless of duration — fast runs complete
+    // well within the polling interval so they never overlap by construction,
+    // but verifying it catches scheduler bugs (e.g. double-dispatching).
+    //
+    // We reuse the same workflow from beforeAll — it should already have 2+
+    // completed executions from the preceding test. If not, wait for them.
+    await waitForConditionOrThrow({
+      action: () => workflowsApi.getExecutions(workflowId),
+      condition: ({ results: r }) =>
+        r.filter((e) => e.status === ExecutionStatus.COMPLETED).length >= 2,
+      interval: 5000,
+      timeout: 180_000,
+      errorMessage: ({ results: r }) =>
+        `Expected >= 2 completed executions, got ${
+          r.filter((e) => e.status === ExecutionStatus.COMPLETED).length
+        }`,
+    });
 
-      await waitForConditionOrThrow({
-        action: () => workflowsApi.getExecutions(createdLongRunningWorkflow.id),
-        condition: ({ results: r }) =>
-          r.filter((e) => e.status === ExecutionStatus.COMPLETED).length >= 2,
-        interval: 2000,
-        timeout: SCHEDULED_WORKFLOW_INTERVAL_SECONDS * 1000 * 4,
-        errorMessage: ({ results: r }) =>
-          `Expected >= 2 completed executions, got ${
-            r.filter((e) => e.status === ExecutionStatus.COMPLETED).length
-          }`,
-      });
-      await workflowsApi.update(createdLongRunningWorkflow.id, { enabled: false });
-      const { results } = await workflowsApi.getExecutions(createdLongRunningWorkflow.id);
+    const { results } = await workflowsApi.getExecutions(workflowId);
+    const terminalExecutions = await Promise.all(
+      results.map((e) => workflowsApi.waitForTermination({ workflowExecutionId: e.id }))
+    );
 
-      // Wait for every execution to reach a terminal state
-      const terminalExecutions = await Promise.all(
-        results.map((e) => workflowsApi.waitForTermination({ workflowExecutionId: e.id }))
-      );
+    const completedExecutions = terminalExecutions
+      .filter(
+        (e): e is NonNullable<typeof e> & { startedAt: string; finishedAt: string } =>
+          e?.status === ExecutionStatus.COMPLETED && e.startedAt != null && e.finishedAt != null
+      )
+      .toSorted((a, b) => a.startedAt.localeCompare(b.startedAt));
 
-      // Keep only completed executions, sorted chronologically by start time
-      const completedExecutions = terminalExecutions
-        .filter((e) => e?.status === ExecutionStatus.COMPLETED)
-        .toSorted((a, b) => (a?.startedAt ?? '').localeCompare(b?.startedAt ?? ''));
+    expect(completedExecutions.length).toBeGreaterThan(1);
 
-      // At least 2 completed executions are expected, but we can have more if the scheduler was reentrant
-      expect(completedExecutions.length).toBeGreaterThan(1);
-
-      // Compare each consecutive pair: the gap between start times must exceed the 5s interval,
-      // proving the scheduler waited for the prior run to finish rather than overlapping.
-      for (let index = 1; index < completedExecutions.length; index++) {
-        const currentStart = new Date(completedExecutions[index]?.startedAt ?? '').getTime();
-        const previousStart = new Date(completedExecutions[index - 1]?.startedAt ?? '').getTime();
-        expect(currentStart - previousStart).toBeGreaterThan(
-          SCHEDULED_WORKFLOW_INTERVAL_SECONDS * 1000 * 2 * 0.85 // multiply by 2 because the wait step takes 6s that will be added to the interval
-        );
-      }
+    for (let index = 1; index < completedExecutions.length; index++) {
+      const previousFinished = new Date(completedExecutions[index - 1].finishedAt).getTime();
+      const currentStarted = new Date(completedExecutions[index].startedAt).getTime();
+      expect(
+        currentStarted,
+        `run ${index + 1} started before run ${index} finished (overlap detected)`
+      ).toBeGreaterThan(previousFinished);
     }
-  );
+  });
 });

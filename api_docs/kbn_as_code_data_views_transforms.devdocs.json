@@ -1,0 +1,47 @@
+{
+  "id": "@kbn/as-code-data-views-transforms",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/as-code-data-views-transforms",
+        "id": "def-common.foo",
+        "type": "Function",
+        "tags": [],
+        "label": "foo",
+        "description": [],
+        "signature": [
+          "() => string"
+        ],
+        "path": "src/platform/packages/shared/as-code/data-views-transforms/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
