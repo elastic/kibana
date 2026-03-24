@@ -6,12 +6,11 @@
  */
 
 import React from 'react';
-import { MAX_DURATION, validateMaxDuration } from '@kbn/alerting-v2-schemas';
+import { MAX_DURATION, parseDurationToMs, validateMaxDuration } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import type { FormValues } from '../types';
-import { parseDuration } from '../utils';
 import { LookbackWindow } from './lookback_window';
 
 const LOOKBACK_WINDOW_ROW_ID = 'ruleV2FormLookbackWindowField';
@@ -48,11 +47,9 @@ export const LookbackWindowField = () => {
       render={({ field, fieldState: { error } }) => {
         let showIntervalWarning = false;
         if (field.value && scheduleEvery) {
-          try {
-            showIntervalWarning = parseDuration(field.value) < parseDuration(scheduleEvery);
-          } catch {
-            // invalid duration — no warning
-          }
+          const lookbackMs = parseDurationToMs(field.value);
+          const everyMs = parseDurationToMs(scheduleEvery);
+          showIntervalWarning = !isNaN(lookbackMs) && !isNaN(everyMs) && lookbackMs < everyMs;
         }
 
         return (

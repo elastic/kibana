@@ -13,6 +13,7 @@ export {
   validateMaxDuration,
   validateMinDuration,
   validateEsqlQuery,
+  parseDurationToMs,
 } from './validation';
 export * from './notification_policy_data_schema';
 export type { NotificationPolicyResponse } from './notification_policy_response';
