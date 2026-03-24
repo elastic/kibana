@@ -11,7 +11,7 @@ page_description: |
 
   Go to the [{{fleet}}](docs-content://reference/fleet/index.md) docs for more information about {{fleet}}.
 
-note: 'In {{ecloud}}, {{fleet}} flags are already configured. If a setting is applicable to {{ech}} environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")'
+note: 'In {{ecloud}}, {{fleet}} flags are already configured.
 
 groups:
   - group: General {{fleet}} settings

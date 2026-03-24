@@ -7,7 +7,6 @@ id: security-settings-kb
 page_description: |
   You do not need to configure any additional settings to use the {{security-features}} in {{kib}}. They are enabled by default.
 important: "In high-availability deployments, make sure you use the same security settings for all instances of {{kib}}. Also consider storing sensitive security settings, such as encryption and decryption keys, securely in the Kibana keystore, instead of keeping them in clear text in the `kibana.yml` file."
-note: 'If a setting is applicable to {{ech}} environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")'
 
 groups:
   - group: Authentication security settings

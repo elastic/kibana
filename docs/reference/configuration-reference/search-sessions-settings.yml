@@ -6,7 +6,6 @@ collection: Background search and search sessions settings in Kibana
 id: search-session-settings-kb
 important: |
   **Background search replaces Search sessions.** [Background search](docs-content://explore-analyze/discover/background-search.md) is a feature introduced in version 9.2. It replaces the **Search sessions** feature, deprecated in version 8.15.
-note: 'If a setting is applicable to {{ech}} environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")'
 
 groups:
   - group: Background search settings
