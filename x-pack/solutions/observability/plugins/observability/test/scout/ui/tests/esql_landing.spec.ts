@@ -18,8 +18,9 @@
  * and update the classic-mode redirect assertion there to expect an ES|QL Discover URL.
  */
 
-import { test, tags } from '@kbn/scout-oblt';
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
+import { test } from '../fixtures';
 import { generateLogsData, TEST_START_DATE, TEST_END_DATE } from '../fixtures/generators';
 import { BIGGER_TIMEOUT } from '../fixtures/constants';
 
