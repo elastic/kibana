@@ -8,8 +8,7 @@
  */
 
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
-import React, { useCallback, useEffect } from 'react';
-import type { DiscoverMainContentProps } from '../layout/discover_main_content';
+import { useCallback, useEffect, type ReactElement } from 'react';
 import {
   DEFAULT_HISTOGRAM_KEY_PREFIX,
   selectTabRuntimeState,
@@ -24,7 +23,7 @@ export const useUnifiedHistogramCommon = ({
 }: {
   currentTabId: string;
   layoutProps?: UnifiedHistogramPartialLayoutProps;
-  panelsToggle?: DiscoverMainContentProps['panelsToggle'];
+  panelsToggle?: ReactElement;
   localStorageKeyPrefix?: string;
 }) => {
   const runtimeStateManager = useRuntimeStateManager();
@@ -49,10 +48,7 @@ export const useUnifiedHistogramCommon = ({
   }, [currentTabId, layoutProps, localStorageKeyPrefix, runtimeStateManager]);
 
   const renderCustomChartToggleActions = useCallback(
-    () =>
-      React.isValidElement(panelsToggle)
-        ? React.cloneElement(panelsToggle, { renderedFor: 'histogram' })
-        : panelsToggle,
+    () => panelsToggle ?? undefined,
     [panelsToggle]
   );
 
