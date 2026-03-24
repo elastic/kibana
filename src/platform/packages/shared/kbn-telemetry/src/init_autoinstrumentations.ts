@@ -10,39 +10,36 @@
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { UndiciInstrumentation } from '@opentelemetry/instrumentation-undici';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
-import { HapiInstrumentation } from '@opentelemetry/instrumentation-hapi';
+import type { OutgoingHttpHeaders } from 'http';
 
 export function maybeInitAutoInstrumentations() {
-  /**
-   * Auto-instrumentation is intentionally opt-in.
-   *
-   * It can increase trace volume significantly, and Kibana generally relies on explicit
-   * instrumentation for tracing. For evals, enabling this provides request-scoped context
-   * propagation (so W3C baggage like `kibana.evals.run_id` can be extracted and attached).
-   */
-  if (process.env.KBN_OTEL_AUTO_INSTRUMENTATIONS === 'true') {
-    // Register OpenTelemetry auto-instrumentations once per process.
-    // NOTE: these instrumentations must not be enabled alongside Elastic APM.
-    const INSTRUMENTATIONS_REGISTERED = Symbol.for('kbn.tracing.instrumentations_registered');
-    if (!(globalThis as any)[INSTRUMENTATIONS_REGISTERED]) {
-      (globalThis as any)[INSTRUMENTATIONS_REGISTERED] = true;
-      registerInstrumentations({
-        instrumentations: [
-          // Kibana runs on Hapi. This instrumentation gives us higher-level request spans
-          // and ensures context propagation for request-scoped correlation (like eval run ids).
-          new HapiInstrumentation(),
-          // Create incoming HTTP server spans and extract trace context + baggage.
-          new HttpInstrumentation({
-            // Only create outgoing spans when there is an active parent span.
-            // This keeps noise down and ensures spans remain connected to request traces.
-            requireParentforOutgoingSpans: true,
-          }),
-          // undici is used by Elasticsearch client; require a parent so we don't create a new trace per request.
-          new UndiciInstrumentation({
-            requireParentforSpans: true,
-          }),
-        ],
-      });
-    }
+  // Register OpenTelemetry auto-instrumentations once per process.
+  // NOTE: these instrumentations must not be enabled alongside Elastic APM.
+  const INSTRUMENTATIONS_REGISTERED = Symbol.for('kbn.tracing.instrumentations_registered');
+  if (!(globalThis as any)[INSTRUMENTATIONS_REGISTERED]) {
+    (globalThis as any)[INSTRUMENTATIONS_REGISTERED] = true;
+    registerInstrumentations({
+      instrumentations: [
+        // Create incoming HTTP server spans and extract trace context + baggage.
+        new HttpInstrumentation({
+          // Only create outgoing spans when there is an active parent span.
+          // This keeps noise down and ensures spans remain connected to request traces.
+          requireParentforOutgoingSpans: true,
+          // Discard spans for Elasticsearch requests because they are already instrumented by the library.
+          ignoreOutgoingRequestHook: (request) => {
+            const headers = (request.headers || {}) as OutgoingHttpHeaders;
+            // Default headers for the ES client: https://github.com/elastic/kibana/blob/8c43c76a8b76eedc622307c544466f9024c4251c/src/core/packages/elasticsearch/client-server-internal/src/headers.ts#L64-L69
+            const isElasticsearch =
+              headers['x-elastic-product-origin'] === 'kibana' &&
+              headers['user-agent']?.startsWith('Kibana/') === true;
+            return isElasticsearch;
+          },
+        }),
+        // require a parent so we don't create a new trace per request.
+        new UndiciInstrumentation({
+          requireParentforSpans: true,
+        }),
+      ],
+    });
   }
 }

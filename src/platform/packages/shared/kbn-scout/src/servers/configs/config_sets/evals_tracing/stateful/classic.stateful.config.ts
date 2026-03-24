@@ -122,7 +122,6 @@ export const servers: ScoutServerConfig = {
     ...defaultConfig.kbnTestServer,
     env: {
       ...defaultConfig.kbnTestServer.env,
-      ...(shouldEnableTracing ? { KBN_OTEL_AUTO_INSTRUMENTATIONS: 'true' } : {}),
     },
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
