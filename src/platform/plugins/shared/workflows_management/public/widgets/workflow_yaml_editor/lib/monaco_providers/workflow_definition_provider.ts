@@ -145,7 +145,7 @@ const rootSectionKeys: Record<string, string> = {
  * template expressions. Supports steps, consts, inputs, variables,
  * foreach, and root section navigation.
  */
-export class StepDefinitionProvider implements monaco.languages.DefinitionProvider {
+export class WorkflowDefinitionProvider implements monaco.languages.DefinitionProvider {
   private readonly getWorkflowLookup: () => WorkflowLookup | undefined;
   private readonly getYamlDocument: () => YAML.Document | null;
 
@@ -271,9 +271,12 @@ function findArrayItemByName(
   return null;
 }
 
-export function registerStepDefinitionProvider(config: {
+export function registerWorkflowDefinitionProvider(config: {
   getWorkflowLookup: () => WorkflowLookup | undefined;
   getYamlDocument: () => YAML.Document | null;
 }): monaco.IDisposable {
-  return monaco.languages.registerDefinitionProvider('yaml', new StepDefinitionProvider(config));
+  return monaco.languages.registerDefinitionProvider(
+    'yaml',
+    new WorkflowDefinitionProvider(config)
+  );
 }

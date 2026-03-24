@@ -95,7 +95,7 @@ import {
   registerMonacoConnectorHandler,
   registerUnifiedHoverProvider,
 } from '../lib/monaco_providers';
-import { registerStepDefinitionProvider } from '../lib/monaco_providers/step_definition_provider';
+import { registerWorkflowDefinitionProvider } from '../lib/monaco_providers/workflow_definition_provider';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { useRegisterHoverCommands } from '../lib/use_register_hover_commands';
@@ -441,7 +441,7 @@ export const WorkflowYAMLEditor = ({
         disposablesRef.current.push(hoverDisposable);
 
         // Register go-to-definition for step/consts/inputs/variables/foreach references (Cmd+Click)
-        const definitionDisposable = registerStepDefinitionProvider({
+        const definitionDisposable = registerWorkflowDefinitionProvider({
           getWorkflowLookup: () => workflowLookupRef.current,
           getYamlDocument: () => yamlDocumentRef.current,
         });
