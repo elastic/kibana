@@ -91,6 +91,16 @@ export interface WorkflowExecutionTelemetryMetadata {
    * E.g., { "if": 100, "console": 40, "elasticsearch_search": 250 }
    */
   stepAvgDurationsByType?: Record<string, number>;
+  /**
+   * Cross-workflow nesting depth for sub-workflow executions (1 = direct child).
+   * Only present when triggered by a parent workflow step.
+   */
+  compositionDepth?: number;
+  /**
+   * The workflow ID of the parent that invoked this sub-workflow.
+   * Only present for sub-workflow executions when available in context.
+   */
+  parentWorkflowId?: string;
 }
 
 /**
@@ -195,6 +205,8 @@ export function extractExecutionMetadata(
   // Extract alert rule ID
   const ruleId = extractAlertRuleId(workflowExecution);
 
+  const compositionContext = extractCompositionContext(workflowExecution);
+
   // Extract or calculate queue delay
   const queueDelayMs = extractQueueDelayMs(workflowExecution);
 
@@ -221,6 +233,7 @@ export function extractExecutionMetadata(
     hasErrorHandling,
     uniqueStepIdsExecuted: uniqueStepIdsSet.size,
     ...(ruleId && { ruleId }),
+    ...compositionContext,
     ...(timeToFirstStep !== undefined && { timeToFirstStep }),
     ...(queueDelayMs !== undefined && { queueDelayMs }),
     timedOut: timeoutInfo.timedOut,
@@ -230,6 +243,33 @@ export function extractExecutionMetadata(
     }),
     ...(stepDurations.length > 0 && { stepDurations }),
     ...(Object.keys(stepAvgDurationsByType).length > 0 && { stepAvgDurationsByType }),
+  };
+}
+
+/**
+ * Extracts composition context for sub-workflow executions (triggered by workflow.execute / workflow.executeAsync).
+ * Returns empty object for top-level executions.
+ *
+ * @param workflowExecution - The workflow execution
+ * @returns compositionDepth and optional parentWorkflowId when this is a child execution
+ */
+export function extractCompositionContext(workflowExecution: EsWorkflowExecution): {
+  compositionDepth?: number;
+  parentWorkflowId?: string;
+} {
+  if (workflowExecution.triggeredBy !== 'workflow-step') {
+    return {};
+  }
+
+  const context = workflowExecution.context || {};
+  const parentDepth = context.parentDepth;
+  const compositionDepth = typeof parentDepth === 'number' ? parentDepth + 1 : 1;
+  const parentWorkflowId =
+    typeof context.parentWorkflowId === 'string' ? context.parentWorkflowId : undefined;
+
+  return {
+    compositionDepth,
+    ...(parentWorkflowId && { parentWorkflowId }),
   };
 }
 
