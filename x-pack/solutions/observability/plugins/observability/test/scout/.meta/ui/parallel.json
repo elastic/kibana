@@ -1,5 +1,5 @@
 {
-  "sha1": "c84c46c3f03153c2bb439e8a8f9358b9e08e6f66",
+  "sha1": "25b02780ca060f02d4c86c8f211d3ed20f3dee2f",
   "tests": [
     {
       "id": "f3ddbbb53c28ebe-f2cd2d3cdc77643",
@@ -13,8 +13,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 17,
-        "column": 16
+        "line": 20,
+        "column": 1
       }
     },
     {
@@ -157,7 +157,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 33,
+        "line": 34,
         "column": 9
       }
     },
@@ -173,7 +173,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 56,
+        "line": 57,
         "column": 9
       }
     },
@@ -189,7 +189,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 75,
+        "line": 76,
         "column": 9
       }
     },
@@ -205,7 +205,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 94,
+        "line": 95,
         "column": 9
       }
     },
@@ -221,7 +221,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 120,
+        "line": 121,
         "column": 9
       }
     },
@@ -237,14 +237,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 128,
+        "line": 129,
         "column": 9
       }
     },
     {
       "id": "d727dcfffd97d68-e91ca78d2096478",
       "title": "Custom Threshold Rule - Ad-hoc Data View should create a custom threshold rule with an ad-hoc data view",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -253,14 +253,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/custom_threshold_rule/ad_hoc_data_view.spec.ts",
-        "line": 57,
+        "line": 32,
         "column": 9
       }
     },
     {
       "id": "19ff7375d931f4e-920679a76f69971",
       "title": "Custom threshold preview chart should render the empty chart only once at bootstrap",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -269,14 +269,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/custom_threshold_rule/custom_threshold_preview_chart.spec.ts",
-        "line": 28,
+        "line": 27,
         "column": 9
       }
     },
     {
-      "id": "19ff7375d931f4e-30615e975f2f139",
-      "title": "Custom threshold preview chart should handle the error message correctly",
-      "expectedStatus": "skipped",
+      "id": "19ff7375d931f4e-07ca570af3e7fd8",
+      "title": "Custom threshold preview chart should show an error message when the equation is invalid",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -285,7 +285,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/custom_threshold_rule/custom_threshold_preview_chart.spec.ts",
-        "line": 33,
+        "line": 32,
         "column": 9
       }
     },
@@ -621,7 +621,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_rules_tab/rules_page_rules_tab.admin.spec.ts",
-        "line": 23,
+        "line": 31,
         "column": 9
       }
     },
@@ -637,7 +637,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_rules_tab/rules_page_rules_tab.admin.spec.ts",
-        "line": 27,
+        "line": 35,
         "column": 9
       }
     },
@@ -653,7 +653,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_rules_tab/rules_page_rules_tab.admin.spec.ts",
-        "line": 33,
+        "line": 41,
         "column": 9
       }
     },
@@ -669,7 +669,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_rules_tab/rules_page_rules_tab.admin.spec.ts",
-        "line": 65,
+        "line": 73,
         "column": 9
       }
     },

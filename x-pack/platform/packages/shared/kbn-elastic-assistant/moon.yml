@@ -57,6 +57,7 @@ dependsOn:
   - '@kbn/core-analytics-browser'
   - '@kbn/shared-ux-utility'
   - '@kbn/shared-ux-ai-components'
+  - '@kbn/inference-connectors'
 tags:
   - shared-browser
   - package
