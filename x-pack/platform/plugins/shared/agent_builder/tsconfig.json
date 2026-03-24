@@ -117,5 +117,9 @@
     "@kbn/fs",
     "@kbn/react-hooks",
     "@kbn/search-inference-endpoints",
+    "@kbn/connector-specs",
+    "@kbn/workflows-execution-engine",
+    "@kbn/tooling-log",
+    "@kbn/test",
   ]
 }
