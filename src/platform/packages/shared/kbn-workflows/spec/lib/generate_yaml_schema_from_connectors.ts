@@ -20,7 +20,6 @@ import {
   getOnFailureStepSchema,
   getParallelStepSchema,
   getSwitchStepSchema,
-  getTriggerSchema,
   getWhileStepSchema,
   getWorkflowSettingsSchema,
   LoopBreakStepSchema,
@@ -36,6 +35,7 @@ import {
   WorkflowSettingsSchema,
 } from '../schema';
 import type { JsonModelSchema } from '../schema/common/json_model_schema';
+import { getTriggerSchema } from '../schema/triggers';
 
 export function getStepId(stepName: string): string {
   // Using step name as is, don't do any escaping to match the workflow engine behavior

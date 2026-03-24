@@ -79,17 +79,21 @@ const queryStreamDefinitionSchema = baseStreamDefinitionSchema
   })
   .meta({ id: 'QueryStreamDefinition' });
 
-const queryStreamGetResponseSchema = baseStreamGetResponseSchema.extend({
-  stream: queryStreamDefinitionSchema,
-  inherited_fields: inheritedFieldDefinitionSchema,
-});
+const queryStreamGetResponseSchema = baseStreamGetResponseSchema
+  .extend({
+    stream: queryStreamDefinitionSchema,
+    inherited_fields: inheritedFieldDefinitionSchema,
+  })
+  .meta({ id: 'QueryStreamGetResponse' });
 
-const queryStreamUpsertRequestSchema = baseStreamUpsertRequestSchema.extend({
-  stream: baseStreamUpsertDefinitionSchema.extend({
-    type: z.literal('query'),
-    query: QueryWithEsql.right,
-  }),
-});
+const queryStreamUpsertRequestSchema = baseStreamUpsertRequestSchema
+  .extend({
+    stream: baseStreamUpsertDefinitionSchema.extend({
+      type: z.literal('query'),
+      query: QueryWithEsql.right,
+    }),
+  })
+  .meta({ id: 'QueryStreamUpsertRequest' });
 
 export const QueryStream: {
   Definition: Validation<BaseStream.Model['Definition'], QueryStream.Definition>;
