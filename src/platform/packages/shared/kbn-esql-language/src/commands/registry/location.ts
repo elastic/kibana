@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isFunctionExpression, isOptionNode } from '../../ast/is';
-import { within } from '../../ast/location';
-import type { ESQLAst, ESQLAstAllCommands, ESQLSingleAstItem } from '../../types';
-import { Walker } from '../../ast/walker';
+import { isFunctionExpression, isOptionNode } from '@elastic/esql';
+import { within, Walker } from '@elastic/esql';
+import type { ESQLAst, ESQLAstAllCommands, ESQLSingleAstItem } from '@elastic/esql/types';
 import { Location } from './types';
 import { isTimeseriesSourceCommand } from '../definitions/utils/timeseries_check';
 
@@ -22,6 +21,7 @@ const commandOptionNameToLocation: Record<string, Location> = {
   stats: Location.STATS,
   'inline stats': Location.STATS,
   by: Location.STATS_BY,
+  'limit:by': Location.LIMIT_BY,
   enrich: Location.ENRICH,
   with: Location.ENRICH_WITH,
   dissect: Location.DISSECT,

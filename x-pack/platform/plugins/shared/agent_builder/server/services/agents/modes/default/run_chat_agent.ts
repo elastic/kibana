@@ -8,7 +8,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import { filter, finalize, from, merge, shareReplay, Subject } from 'rxjs';
 import { Command } from '@langchain/langgraph';
-import { isStreamEvent, type ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
+import {
+  isStreamEvent,
+  reverseMap,
+  type ToolIdMapping,
+} from '@kbn/agent-builder-genai-utils/langchain';
 import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
@@ -22,6 +26,7 @@ import {
   addRoundCompleteEvent,
   extractRound,
   prepareConversation,
+  selectSkills,
   selectTools,
   getPendingRound,
   evictInternalEvents,
@@ -48,6 +53,11 @@ export type RunChatAgentFn = (
   params: RunChatAgentParams,
   context: AgentHandlerContext
 ) => Promise<RunAgentResponse>;
+
+/*
+ * Max number of agent cycles allowed before forcing an answer.
+ */
+const CYCLE_LIMIT = 15;
 
 /**
  * Create the handler function for the default agentBuilder agent.
@@ -82,6 +92,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     promptManager,
     filestore,
     skills,
+    skillsStore,
     toolManager,
     experimentalFeatures,
   } = context;
@@ -99,6 +110,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
   const resolvedConfiguration = resolveConfiguration(agentConfiguration);
+
+  const pluginSkillIds = await context.plugins.resolveSkillIds(agentConfiguration.plugin_ids ?? []);
+  const filteredSkills = await selectSkills({
+    skills,
+    skillsStore,
+    agentConfiguration,
+    additionalSkillIds: pluginSkillIds,
+  });
+
   logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
 
   const manualEvents$ = new Subject<ChatAgentEvent>();
@@ -126,6 +146,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const { staticTools, dynamicTools } = await selectTools({
     conversation: processedConversation,
     previousDynamicToolIds: conversation?.state?.dynamic_tool_ids ?? [],
+    filteredSkills,
     skills,
     toolProvider,
     agentConfiguration,
@@ -162,11 +183,11 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     }
   );
 
-  const cycleLimit = 10;
-  const graphRecursionLimit = getRecursionLimit(cycleLimit);
+  const graphRecursionLimit = getRecursionLimit(CYCLE_LIMIT);
 
   // Create unified result transformer for tool result optimization
   const resultTransformer = createResultTransformer({
+    processedConversation,
     toolRegistry,
     toolManager,
     filestore,
@@ -202,8 +223,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const eventStream = agentGraph.streamEvents(
     createInitializerCommand({
       conversation: processedConversation,
-      agentBuilderToLangchainIdMap: toolManager.getToolIdMapping(),
-      cycleLimit,
+      agentBuilderToLangchainIdMap: reverseMap(toolManager.getToolIdMapping()),
+      cycleLimit: CYCLE_LIMIT,
     }),
     {
       version: 'v2',

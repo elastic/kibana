@@ -42,7 +42,7 @@ export async function ensureAgentPoliciesFleetServerKeysAndPolicies({
     agentPolicies,
     async (agentPolicy) => {
       const [latestFleetPolicy] = await Promise.all([
-        agentPolicyService.getLatestFleetPolicy(esClient, agentPolicy.id),
+        agentPolicyService.getLatestFleetPolicyRevision(esClient, agentPolicy.id),
         ensureDefaultEnrollmentAPIKeyForAgentPolicy(soClient, esClient, agentPolicy.id),
       ]);
 

@@ -1726,7 +1726,7 @@
           "\nThis type is used by consumers to register a new app link for a sample dataset."
         ],
         "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-        "lineNumber": 46,
+        "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1751,7 +1751,7 @@
               " | null"
             ],
             "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-            "lineNumber": 50,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1769,7 +1769,7 @@
               "(objectId: string) => string"
             ],
             "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-            "lineNumber": 54,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1785,7 +1785,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-                "lineNumber": 58,
+                "lineNumber": 53,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1804,7 +1804,7 @@
               "\nThe label for this app link."
             ],
             "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-            "lineNumber": 59,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1819,7 +1819,7 @@
               "\nThe icon for this app link."
             ],
             "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-            "lineNumber": 63,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1837,7 +1837,7 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-            "lineNumber": 67,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1913,19 +1913,10 @@
           {
             "parentPluginId": "home",
             "id": "def-server.SampleDatasetDashboardPanel.embeddableType",
-            "type": "Enum",
+            "type": "string",
             "tags": [],
             "label": "embeddableType",
             "description": [],
-            "signature": [
-              {
-                "pluginId": "home",
-                "scope": "server",
-                "docId": "kibHomePluginApi",
-                "section": "def-server.EmbeddableTypes",
-                "text": "EmbeddableTypes"
-              }
-            ],
             "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
             "lineNumber": 24,
             "columnNumber": 3,
@@ -1961,7 +1952,7 @@
           "This type is used to identify an object in a sample dataset."
         ],
         "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-        "lineNumber": 38,
+        "lineNumber": 33,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1976,7 +1967,7 @@
               "The type of the sample object."
             ],
             "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-            "lineNumber": 40,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1991,7 +1982,7 @@
               "The ID of the sample object."
             ],
             "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-            "lineNumber": 42,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2080,20 +2071,6 @@
     "enums": [
       {
         "parentPluginId": "home",
-        "id": "def-server.EmbeddableTypes",
-        "type": "Enum",
-        "tags": [],
-        "label": "EmbeddableTypes",
-        "description": [],
-        "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-        "lineNumber": 27,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "home",
         "id": "def-server.TutorialsCategory",
         "type": "Enum",
         "tags": [],
@@ -2116,7 +2093,7 @@
         "label": "ArtifactsSchema",
         "description": [],
         "signature": [
-          "{ readonly application?: Readonly<{} & { path: string; label: string; }> | undefined; readonly exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; readonly dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }"
+          "{ readonly application?: Readonly<{} & { label: string; path: string; }> | undefined; readonly exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; readonly dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }"
         ],
         "path": "src/platform/plugins/shared/home/server/services/tutorials/lib/tutorial_schema.ts",
         "lineNumber": 43,
@@ -2257,7 +2234,7 @@
           "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; iconPath?: string | undefined; statusMsg?: string | undefined; } & { id: string; name: string; description: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { id: string; type: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; defaultIndex: string; dataIndices: Readonly<{ indexSettings?: Record<string, any> | undefined; isDataStream?: boolean | undefined; } & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>"
         ],
         "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-        "lineNumber": 36,
+        "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2274,7 +2251,7 @@
               "SampleDatasetProviderContext"
             ],
             "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-            "lineNumber": 36,
+            "lineNumber": 31,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false
@@ -2351,7 +2328,7 @@
             "section": "def-server.TutorialContext",
             "text": "TutorialContext"
           },
-          ") => Readonly<{ artifacts?: Readonly<{ application?: Readonly<{} & { path: string; label: string; }> | undefined; exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; } & { dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }> | undefined; euiIconType?: string | undefined; isBeta?: boolean | undefined; previewImagePath?: string | undefined; moduleName?: string | undefined; completionTimeMinutes?: number | undefined; elasticCloud?: Readonly<{} & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; text?: string | undefined; title?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { index: string | string[]; query: Record<string, any>; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; onPremElasticCloud?: Readonly<{} & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; text?: string | undefined; title?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { index: string | string[]; query: Record<string, any>; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; omitServerless?: boolean | undefined; customStatusCheckName?: string | undefined; integrationBrowserCategories?: string[] | undefined; eprPackageOverlap?: string | undefined; } & { id: string; name: string; category: \"security\" | \"metrics\" | \"other\" | \"logging\"; shortDescription: string; longDescription: string; onPrem: Readonly<{} & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; text?: string | undefined; title?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { index: string | string[]; query: Record<string, any>; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }>; }>"
+          ") => Readonly<{ artifacts?: Readonly<{ application?: Readonly<{} & { label: string; path: string; }> | undefined; exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; } & { dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }> | undefined; euiIconType?: string | undefined; isBeta?: boolean | undefined; previewImagePath?: string | undefined; moduleName?: string | undefined; completionTimeMinutes?: number | undefined; elasticCloud?: Readonly<{} & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; text?: string | undefined; title?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { index: string | string[]; query: Record<string, any>; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; onPremElasticCloud?: Readonly<{} & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; text?: string | undefined; title?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { index: string | string[]; query: Record<string, any>; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; omitServerless?: boolean | undefined; customStatusCheckName?: string | undefined; integrationBrowserCategories?: string[] | undefined; eprPackageOverlap?: string | undefined; } & { id: string; name: string; category: \"security\" | \"metrics\" | \"other\" | \"logging\"; shortDescription: string; longDescription: string; onPrem: Readonly<{} & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; text?: string | undefined; title?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { index: string | string[]; query: Record<string, any>; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }>; }>"
         ],
         "path": "src/platform/plugins/shared/home/server/services/tutorials/lib/tutorials_registry_types.ts",
         "lineNumber": 33,
@@ -2393,7 +2370,7 @@
         "label": "TutorialSchema",
         "description": [],
         "signature": [
-          "{ readonly artifacts?: Readonly<{ application?: Readonly<{} & { path: string; label: string; }> | undefined; exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; } & { dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }> | undefined; readonly euiIconType?: string | undefined; readonly isBeta?: boolean | undefined; readonly previewImagePath?: string | undefined; readonly moduleName?: string | undefined; readonly completionTimeMinutes?: number | undefined; readonly elasticCloud?: Readonly<{} & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; text?: string | undefined; title?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { index: string | string[]; query: Record<string, any>; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; readonly onPremElasticCloud?: Readonly<{} & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; text?: string | undefined; title?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { index: string | string[]; query: Record<string, any>; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; readonly omitServerless?: boolean | undefined; readonly customStatusCheckName?: string | undefined; readonly integrationBrowserCategories?: string[] | undefined; readonly eprPackageOverlap?: string | undefined; readonly id: string; readonly name: string; readonly category: \"security\" | \"metrics\" | \"other\" | \"logging\"; readonly shortDescription: string; readonly longDescription: string; readonly onPrem: Readonly<{} & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; text?: string | undefined; title?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { index: string | string[]; query: Record<string, any>; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }>; }"
+          "{ readonly artifacts?: Readonly<{ application?: Readonly<{} & { label: string; path: string; }> | undefined; exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; } & { dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }> | undefined; readonly euiIconType?: string | undefined; readonly isBeta?: boolean | undefined; readonly previewImagePath?: string | undefined; readonly moduleName?: string | undefined; readonly completionTimeMinutes?: number | undefined; readonly elasticCloud?: Readonly<{} & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; text?: string | undefined; title?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { index: string | string[]; query: Record<string, any>; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; readonly onPremElasticCloud?: Readonly<{} & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; text?: string | undefined; title?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { index: string | string[]; query: Record<string, any>; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; readonly omitServerless?: boolean | undefined; readonly customStatusCheckName?: string | undefined; readonly integrationBrowserCategories?: string[] | undefined; readonly eprPackageOverlap?: string | undefined; readonly id: string; readonly name: string; readonly category: \"security\" | \"metrics\" | \"other\" | \"logging\"; readonly shortDescription: string; readonly longDescription: string; readonly onPrem: Readonly<{} & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; text?: string | undefined; title?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { index: string | string[]; query: Record<string, any>; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }>; }"
         ],
         "path": "src/platform/plugins/shared/home/server/services/tutorials/lib/tutorial_schema.ts",
         "lineNumber": 153,

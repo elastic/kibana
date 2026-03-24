@@ -88,8 +88,10 @@ export function SchemaChangesReviewModal({
       setSimulationError(null);
       setFieldConflicts([]);
 
+      // Filter for fields that have actual ES mappings to simulate.
+      // Exclude 'unmapped' type since it's a description-only override that doesn't affect ES mappings.
       const mappedFields = changes
-        .filter((field) => field.status === 'mapped')
+        .filter((field) => field.status === 'mapped' && field.type && field.type !== 'unmapped')
         .map((field) => ({
           ...convertToFieldDefinitionConfig(field as MappedSchemaField),
           name: field.name,
@@ -509,18 +511,46 @@ export function SchemaChangesReviewModal({
 }
 
 export function getChanges(fields: SchemaEditorField[], storedFields: SchemaEditorField[]) {
-  const addedFields = fields.filter(
-    (field) =>
-      (field.status === 'mapped' || field.status === 'unmapped') &&
-      !storedFields.some((stored) => stored.name === field.name)
-  );
+  /**
+   * This modal is meant to review ES mapping-affecting changes.
+   *
+   * We intentionally ignore:
+   * - description-only changes
+   * - typeless doc-only overrides (`{ description }`)
+   * - fields with `type: 'unmapped'` (description-only overrides for wired streams)
+   *
+   * We include:
+   * - adding/changing/removing real mapping overrides (type/format/advanced params)
+   */
+  const getMappingAffectingConfig = (field: SchemaEditorField) => {
+    // Only mapped fields can affect ES mappings; unmapped/inherited entries are either doc-only or inherited.
+    if (field.status !== 'mapped') return null;
 
-  const changedFields = fields.filter((field) => {
+    // Documentation-only fields (no type or type='unmapped') should not be treated as mapping changes.
+    // 'unmapped' type represents a description-only override that doesn't affect ES mappings.
+    if (!field.type || field.type === 'unmapped') return null;
+
+    return {
+      type: field.type,
+      ...(field.type === 'date' && field.format ? { format: field.format } : {}),
+      ...(field.additionalParameters && Object.keys(field.additionalParameters).length > 0
+        ? { additionalParameters: field.additionalParameters }
+        : {}),
+      // `alias_for` impacts mappings (alias field), but is not always present.
+      ...(field.alias_for ? { alias_for: field.alias_for } : {}),
+    };
+  };
+
+  return fields.filter((field) => {
+    if (field.status === 'inherited') return false;
+
     const stored = storedFields.find(
-      (storedField) => field.status !== 'inherited' && storedField.name === field.name
+      (storedField) => storedField.status !== 'inherited' && storedField.name === field.name
     );
-    return stored && !isEqual(stored, field);
-  });
 
-  return [...addedFields, ...changedFields];
+    const currentConfig = getMappingAffectingConfig(field);
+    const storedConfig = stored ? getMappingAffectingConfig(stored) : null;
+
+    return !isEqual(storedConfig, currentConfig);
+  });
 }

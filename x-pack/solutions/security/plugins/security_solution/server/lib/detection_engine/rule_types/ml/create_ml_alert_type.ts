@@ -31,7 +31,10 @@ export const createMlAlertType = (
       },
     },
     schemas: {
-      params: { type: 'zod', schema: MachineLearningRuleParams },
+      params: {
+        type: 'zod',
+        schema: MachineLearningRuleParams,
+      },
     },
     actionGroups: [
       {

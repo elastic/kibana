@@ -12,6 +12,8 @@ export {
 } from './constants';
 
 export {
+  panelGridSchema,
+  sectionGridSchema,
   lensAttachmentPanelSchema,
   genericAttachmentPanelSchema,
   attachmentPanelSchema,
@@ -27,6 +29,7 @@ export type {
   AttachmentPanel,
   DashboardSection,
   DashboardAttachmentData,
+  DashboardAttachmentOrigin,
   PanelAddedEventData,
   PanelsRemovedEventData,
   DashboardUiEvent,

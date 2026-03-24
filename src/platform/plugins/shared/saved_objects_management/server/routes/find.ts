@@ -13,6 +13,7 @@ import type { IRouter } from '@kbn/core/server';
 import type { v1 } from '../../common';
 import { injectMetaAttributes, toSavedObjectWithMeta } from '../lib';
 import type { ISavedObjectsManagement } from '../services';
+import { SAVED_OBJECT_TYPES_MAX_SIZE } from '.';
 
 export const registerFindRoute = (
   router: IRouter,
@@ -44,13 +45,19 @@ export const registerFindRoute = (
         query: schema.object({
           perPage: schema.number({ min: 0, defaultValue: 20 }),
           page: schema.number({ min: 0, defaultValue: 1 }),
-          type: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
+          type: schema.oneOf([
+            schema.string(),
+            schema.arrayOf(schema.string(), { maxSize: SAVED_OBJECT_TYPES_MAX_SIZE }),
+          ]),
           search: schema.maybe(schema.string()),
           defaultSearchOperator: searchOperatorSchema,
           sortField: schema.maybe(sortFieldSchema),
           sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
           hasReference: schema.maybe(
-            schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])
+            schema.oneOf([
+              referenceSchema,
+              schema.arrayOf(referenceSchema, { maxSize: SAVED_OBJECT_TYPES_MAX_SIZE }),
+            ])
           ),
           hasReferenceOperator: searchOperatorSchema,
         }),

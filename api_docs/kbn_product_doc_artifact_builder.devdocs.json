@@ -30,7 +30,7 @@
           "() => void"
         ],
         "path": "x-pack/packages/ai-infra/product-doc-artifact-builder/src/command.ts",
-        "lineNumber": 81,
+        "lineNumber": 135,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

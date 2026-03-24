@@ -19,7 +19,6 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import { TaskStatus, type StreamQuery, type Streams } from '@kbn/streams-schema';
@@ -37,7 +36,7 @@ import { ManualFlowForm } from './manual_flow_form/manual_flow_form';
 import type { Flow, SaveData } from './types';
 import { defaultQuery } from './utils/default_query';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
-import { validateQuery } from './common/validate_query';
+import { validateEsqlQuery } from './common/validate_query';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useTaskPolling } from '../../../hooks/use_task_polling';
 import { SignificantEventsGenerationPanel } from '../generation_panel';
@@ -79,7 +78,6 @@ export function AddSignificantEventFlyout({
 
   const { scheduleOnboardingTask, getOnboardingTaskStatus, cancelOnboardingTask } =
     useOnboardingApi({
-      connectorId: aiFeatures?.genAiConnectors.selectedConnector,
       saveQueries: false,
     });
 
@@ -165,19 +163,12 @@ export function AddSignificantEventFlyout({
 
       setGeneratedQueries(
         completedQueries
-          .filter((nextQuery) => {
-            const validation = validateQuery({
-              title: nextQuery.title,
-              kql: { query: nextQuery.kql },
-            });
-            return validation.kql.isInvalid === false;
-          })
+          .filter((nextQuery) => validateEsqlQuery(nextQuery.esql.query).isInvalid === false)
           .map((nextQuery) => ({
             id: v4(),
-            kql: { query: nextQuery.kql },
             esql: nextQuery.esql,
             title: nextQuery.title,
-            feature: nextQuery.feature,
+            description: nextQuery.description,
             severity_score: nextQuery.severity_score,
             evidence: nextQuery.evidence,
           }))
@@ -201,13 +192,8 @@ export function AddSignificantEventFlyout({
   }, [selectedFlow]);
 
   const generateQueries = () => {
-    if (!aiFeatures?.genAiConnectors.selectedConnector) {
-      return;
-    }
-
     setSelectedFlow('ai');
     setGeneratedQueries([]);
-
     scheduleTask();
   };
 
@@ -267,7 +253,6 @@ export function AddSignificantEventFlyout({
                   isGeneratingQueries={isGenerating}
                   isSavingManualEntry={isSubmitting}
                   selectedFlow={selectedFlow}
-                  aiFeatures={aiFeatures}
                 />
               </EuiPanel>
             </EuiFlexItem>
@@ -301,14 +286,10 @@ export function AddSignificantEventFlyout({
                       <EuiSpacer size="m" />
                       <ManualFlowForm
                         isSubmitting={isSubmitting}
-                        isEditMode={isEditMode}
                         setQuery={(next: StreamQuery) => setQueries([next])}
                         query={queries[0]}
-                        setCanSave={(next: boolean) => {
-                          setCanSave(next);
-                        }}
+                        setCanSave={setCanSave}
                         definition={definition.stream}
-                        dataViews={dataViewsFetch.value ?? []}
                       />
                     </>
                   )}
@@ -376,24 +357,14 @@ export function AddSignificantEventFlyout({
                         case 'manual':
                           onSave({
                             type: 'single',
-                            query: {
-                              ...queries[0],
-                              feature: queries[0].feature
-                                ? omit(queries[0].feature, 'description')
-                                : undefined,
-                            },
+                            query: queries[0],
                             isUpdating: isEditMode,
                           }).finally(() => setIsSubmitting(false));
                           break;
                         case 'ai':
                           onSave({
                             type: 'multiple',
-                            queries: queries.map((nextQuery) => ({
-                              ...nextQuery,
-                              feature: nextQuery.feature
-                                ? omit(nextQuery.feature, 'description')
-                                : undefined,
-                            })),
+                            queries,
                           }).finally(() => setIsSubmitting(false));
                           break;
                       }

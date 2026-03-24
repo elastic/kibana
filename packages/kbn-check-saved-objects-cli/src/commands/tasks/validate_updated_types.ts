@@ -12,7 +12,7 @@ import { defaultKibanaIndex } from '@kbn/migrator-test-kit';
 import type { Task, TaskContext } from '../types';
 import { getUpdatedTypes, validateChangesExistingType } from '../../snapshots';
 import { getLatestTypeFixtures } from '../../migrations/fixtures';
-import { getVersions } from '../../migrations/versions';
+import { getVersions } from '../../migrations';
 
 export const validateUpdatedTypes: Task = (ctx, task) => {
   const subtasks: ListrTask<TaskContext>[] = [
@@ -29,14 +29,18 @@ export const validateUpdatedTypes: Task = (ctx, task) => {
     {
       title: 'Validating changes in updated types',
       task: (_, subtask) => {
-        const validateChangesTasks: ListrTask<TaskContext>[] = ctx.updatedTypes.map(({ name }) => ({
-          title: `Checking updates on type '${name}'`,
-          task: () =>
-            validateChangesExistingType({
-              from: ctx.from!.typeDefinitions[name],
-              to: ctx.to?.typeDefinitions[name]!,
-            }),
-        }));
+        const validateChangesTasks: ListrTask<TaskContext>[] = ctx.updatedTypes.map(
+          (registeredType) => ({
+            title: `Checking updates on type '${registeredType.name}'`,
+            task: (__, typeTask) =>
+              validateChangesExistingType({
+                from: ctx.from!.typeDefinitions[registeredType.name],
+                to: ctx.to?.typeDefinitions[registeredType.name]!,
+                registeredType,
+                log: (msg) => (typeTask.output = msg),
+              }),
+          })
+        );
 
         return subtask.newListr<TaskContext>(validateChangesTasks, {
           exitOnError: false,
@@ -44,6 +48,29 @@ export const validateUpdatedTypes: Task = (ctx, task) => {
         });
       },
       skip: () => ctx.updatedTypes.length === 0,
+    },
+    {
+      title: 'Validating updated types against current serverless baseline',
+      task: (_, subtask) => {
+        const validateChangesTasks: ListrTask<TaskContext>[] = ctx.updatedTypes
+          .filter(({ name }) => Boolean(ctx.serverlessFrom!.typeDefinitions[name]))
+          .map((registeredType) => ({
+            title: `Checking updates on type '${registeredType.name}' against serverless baseline`,
+            task: (__, typeTask) =>
+              validateChangesExistingType({
+                from: ctx.serverlessFrom!.typeDefinitions[registeredType.name],
+                to: ctx.to?.typeDefinitions[registeredType.name]!,
+                registeredType,
+                log: (msg) => (typeTask.output = msg),
+              }),
+          }));
+
+        return subtask.newListr<TaskContext>(validateChangesTasks, {
+          exitOnError: false,
+          rendererOptions: { showErrorMessage: true },
+        });
+      },
+      skip: () => !ctx.serverlessFrom || ctx.updatedTypes.length === 0,
     },
     {
       title: 'Verifying fixtures for updated types',

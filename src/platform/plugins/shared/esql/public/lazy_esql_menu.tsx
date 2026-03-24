@@ -10,7 +10,7 @@ import React, { Suspense } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { helpLabel } from '@kbn/esql-editor';
-import { getKibanaServices } from './kibana_services';
+import { useKibanaServices } from './kibana_services';
 
 const LazyESQLMenu = React.lazy(async () => {
   const module = await import('@kbn/esql-editor');
@@ -39,7 +39,7 @@ export const ESQLMenu: React.FC<{
   hideHistory?: boolean;
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
 }> = (props) => {
-  const deps = getKibanaServices();
+  const deps = useKibanaServices();
 
   const content = (
     <Suspense fallback={helpPopoverFallback}>
@@ -48,7 +48,7 @@ export const ESQLMenu: React.FC<{
   );
 
   if (!deps) {
-    return content;
+    return null;
   }
 
   return <KibanaContextProvider services={{ ...deps }}>{content}</KibanaContextProvider>;

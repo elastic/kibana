@@ -9,7 +9,6 @@
 
 import { useEffect, useState } from 'react';
 import { distinctUntilChanged, filter, switchMap, tap } from 'rxjs';
-import React from 'react';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { Profile } from '../types';
 
@@ -20,7 +19,6 @@ export type RootProfileState =
   | { rootProfileLoading: true }
   | {
       rootProfileLoading: false;
-      AppWrapper: Profile['getRenderAppWrapper'];
       getDefaultAdHocDataViews: Profile['getDefaultAdHocDataViews'];
       getDefaultEsqlQuery: Profile['getDefaultEsqlQuery'];
     };
@@ -44,10 +42,9 @@ export const useRootProfile = () => {
         filter((id) => id !== undefined),
         tap(() => setRootProfileState({ rootProfileLoading: true })),
         switchMap((solutionNavId) => profilesManager.resolveRootProfile({ solutionNavId })),
-        tap(({ getRenderAppWrapper, getDefaultAdHocDataViews, getDefaultEsqlQuery }) =>
+        tap(({ getDefaultAdHocDataViews, getDefaultEsqlQuery }) =>
           setRootProfileState({
             rootProfileLoading: false,
-            AppWrapper: getRenderAppWrapper?.(BaseAppWrapper) ?? BaseAppWrapper,
             getDefaultAdHocDataViews:
               getDefaultAdHocDataViews?.(baseGetDefaultAdHocDataViews) ??
               baseGetDefaultAdHocDataViews,
@@ -65,8 +62,6 @@ export const useRootProfile = () => {
 
   return rootProfileState;
 };
-
-export const BaseAppWrapper: Profile['getRenderAppWrapper'] = ({ children }) => <>{children}</>;
 
 const baseGetDefaultAdHocDataViews: Profile['getDefaultAdHocDataViews'] = () => [];
 

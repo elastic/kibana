@@ -6,12 +6,14 @@
  */
 
 import { badData, badRequest } from '@hapi/boom';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { StreamQuery } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
-import { WiredIngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest/wired';
-import type { ClassicIngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest/classic';
-import { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
+import {
+  WiredIngestUpsertRequest,
+  type ClassicIngestUpsertRequest,
+  IngestUpsertRequest,
+} from '@kbn/streams-schema';
 import type { AttachmentClient } from '../../../lib/streams/attachments/attachment_client';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
