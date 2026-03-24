@@ -29,10 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const query = await esql.getEsqlEditorQuery();
       expect(query).to.contain('`extension.raw` : "css"');
       expect(await filterBar.getFilterCount()).to.be(0);
-
-      // switch back to data view mode for the next test
-      await discover.selectDataViewMode();
-      await discover.waitUntilTabIsLoaded();
     });
 
     it('uses the correct query and filters', async () => {
