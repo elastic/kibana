@@ -57,6 +57,7 @@ const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
   const sortFieldMap: Record<FindRulesSortField, string> = {
     kind: 'kind',
     enabled: 'enabled',
+    name: 'metadata.name.keyword',
   };
 
   return sortFieldMap[sortField];

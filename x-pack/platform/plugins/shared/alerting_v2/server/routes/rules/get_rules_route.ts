@@ -17,7 +17,11 @@ import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
 
-const sortFieldSchema = schema.oneOf([schema.literal('kind'), schema.literal('enabled')]);
+const sortFieldSchema = schema.oneOf([
+  schema.literal('kind'),
+  schema.literal('enabled'),
+  schema.literal('name'),
+]);
 
 const getRulesQuerySchema = schema.object({
   page: schema.maybe(schema.number({ min: 1 })),

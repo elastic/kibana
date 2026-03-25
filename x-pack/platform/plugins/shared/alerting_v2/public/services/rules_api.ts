@@ -14,7 +14,7 @@ import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
 /** Re-exported from the shared schemas package. */
 export type { RuleResponse as RuleApiResponse };
 
-export type ListRulesSortField = 'kind' | 'enabled';
+export type ListRulesSortField = 'kind' | 'enabled' | 'name';
 
 export interface FindRulesResponse {
   items: RuleResponse[];

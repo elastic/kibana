@@ -79,22 +79,57 @@ const STATUS_FILTER_OPTIONS: FilterPopoverOption[] = [
 const SORT_FIELD_TO_TABLE_FIELD: Record<ListRulesSortField, RulesListTableSortField> = {
   kind: 'kind',
   enabled: 'enabled',
+  name: 'metadata',
 };
+
+const TABLE_FIELD_TO_API_SORT_FIELD = Object.fromEntries(
+  Object.entries(SORT_FIELD_TO_TABLE_FIELD).map(([api, table]) => [table, api])
+) as Partial<Record<string, ListRulesSortField>>;
 
 export const buildRulesListFilter = ({
   enabled,
   kind,
+  tags,
 }: {
-  enabled?: boolean;
-  kind?: 'alert' | 'signal';
+  enabled?: string;
+  kind?: string;
+  tags?: string[];
 }) => {
+  const enabledValue = enabled === 'true' ? true : enabled === 'false' ? false : undefined;
+  const kindValue = kind === 'alert' || kind === 'signal' ? kind : undefined;
+
+  const tagClause =
+    tags && tags.length > 0
+      ? `(${tags.map((t) => `metadata.labels: "${t.replace(/"/g, '\\"')}"`).join(' OR ')})`
+      : undefined;
+
   const clauses = [
-    enabled === undefined ? undefined : `enabled: ${enabled}`,
-    kind ? `kind: ${kind}` : undefined,
+    enabledValue === undefined ? undefined : `enabled: ${enabledValue}`,
+    tagClause,
+    kindValue ? `kind: ${kindValue}` : undefined,
   ].filter((clause): clause is string => Boolean(clause));
 
   return clauses.length > 0 ? clauses.join(' AND ') : undefined;
 };
+
+const filterButtonStyles = (
+  euiTheme: ReturnType<typeof useEuiTheme>['euiTheme'],
+  buttonWidth: number = 112
+) => css`
+  min-inline-size: ${buttonWidth}px;
+  inline-size: ${buttonWidth}px;
+  box-shadow: inset 0 0 0 1px ${euiTheme.colors.borderBaseSubdued};
+  border-radius: ${euiTheme.border.radius.medium};
+
+  .euiButtonEmpty__content {
+    inline-size: 100%;
+    justify-content: space-between;
+  }
+
+  .euiFilterButton__text {
+    min-inline-size: 0;
+  }
+`;
 
 const SingleSelectionFilterPopover = ({
   label,
@@ -147,21 +182,6 @@ const SingleSelectionFilterPopover = ({
   );
 
   const activeCount = value ? 1 : 0;
-  const buttonStyles = css`
-    min-inline-size: ${buttonWidth}px;
-    inline-size: ${buttonWidth}px;
-    box-shadow: inset 0 0 0 1px ${euiTheme.colors.borderBaseSubdued};
-    border-radius: ${euiTheme.border.radius.medium};
-
-    .euiButtonEmpty__content {
-      inline-size: 100%;
-      justify-content: space-between;
-    }
-
-    .euiFilterButton__text {
-      min-inline-size: 0;
-    }
-  `;
 
   return (
     <EuiPopover
@@ -176,7 +196,7 @@ const SingleSelectionFilterPopover = ({
           isSelected={isOpen}
           hasActiveFilters={activeCount > 0}
           numActiveFilters={activeCount > 0 ? activeCount : undefined}
-          css={buttonStyles}
+          css={filterButtonStyles(euiTheme, buttonWidth)}
           data-test-subj={dataTestSubj}
         >
           {label}
@@ -249,6 +269,91 @@ const ModeFilterPopover = ({
   />
 );
 
+const TagsFilterPopover = ({
+  options,
+  value,
+  onChange,
+}: {
+  options: string[];
+  value: string[];
+  onChange: (values: string[]) => void;
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const selectableOptions = useMemo<EuiSelectableOption[]>(() => {
+    const selectedSet = new Set(value);
+    return options.map((tag) => ({
+      key: tag,
+      label: tag,
+      checked: selectedSet.has(tag) ? 'on' : undefined,
+      'data-test-subj': `rulesListTagsFilterOption-${tag}`,
+    }));
+  }, [options, value]);
+
+  const togglePopover = useCallback(() => setIsOpen((prev) => !prev), []);
+  const closePopover = useCallback(() => setIsOpen(false), []);
+
+  const handleSelectionChange = useCallback(
+    (updatedOptions: EuiSelectableOption[]) => {
+      const selected = updatedOptions
+        .filter((opt) => opt.checked === 'on')
+        .map((opt) => opt.key as string);
+      onChange(selected);
+    },
+    [onChange]
+  );
+
+  const activeCount = value.length;
+
+  return (
+    <EuiPopover
+      aria-label={i18n.translate('xpack.alertingV2.rulesList.tagsFilter.popoverLabel', {
+        defaultMessage: 'Tags filter options',
+      })}
+      isOpen={isOpen}
+      closePopover={closePopover}
+      panelPaddingSize="none"
+      button={
+        <EuiFilterButton
+          iconType="arrowDown"
+          onClick={togglePopover}
+          isSelected={isOpen}
+          hasActiveFilters={activeCount > 0}
+          numActiveFilters={activeCount > 0 ? activeCount : undefined}
+          css={filterButtonStyles(euiTheme)}
+          data-test-subj="rulesListTagsFilter"
+        >
+          {i18n.translate('xpack.alertingV2.rulesList.tagsFilter.label', {
+            defaultMessage: 'Tags',
+          })}
+        </EuiFilterButton>
+      }
+    >
+      <EuiSelectable
+        aria-label={i18n.translate('xpack.alertingV2.rulesList.tagsFilter.ariaLabel', {
+          defaultMessage: 'Filter rules by tags',
+        })}
+        searchable
+        options={selectableOptions}
+        onChange={handleSelectionChange}
+        listProps={{
+          paddingSize: 's',
+          showIcons: true,
+          style: { minWidth: 240 },
+        }}
+      >
+        {(list, search) => (
+          <>
+            {search}
+            {list}
+          </>
+        )}
+      </EuiSelectable>
+    </EuiPopover>
+  );
+};
+
 export const RulesListPage = () => {
   const { basePath } = useService(CoreStart('http'));
 
@@ -258,23 +363,20 @@ export const RulesListPage = () => {
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [searchInput, setSearchInput] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [tagsFilter, setTagsFilter] = useState<string[]>([]);
   const [modeFilter, setModeFilter] = useState('');
-  const [sortField, setSortField] = useState<ListRulesSortField | undefined>(undefined);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc' | undefined>(undefined);
+  const [sortField, setSortField] = useState<ListRulesSortField>('name');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const debouncedSearch = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);
-
-  const enabledFilterValue =
-    statusFilter === 'true' ? true : statusFilter === 'false' ? false : undefined;
-  const kindFilterValue =
-    modeFilter === 'alert' || modeFilter === 'signal' ? modeFilter : undefined;
 
   const filter = useMemo(
     () =>
       buildRulesListFilter({
-        enabled: enabledFilterValue,
-        kind: kindFilterValue,
+        enabled: statusFilter,
+        tags: tagsFilter,
+        kind: modeFilter,
       }),
-    [enabledFilterValue, kindFilterValue]
+    [statusFilter, tagsFilter, modeFilter]
   );
 
   useEffect(() => {
@@ -297,16 +399,27 @@ export const RulesListPage = () => {
     }
 
     if (sort) {
-      const nextSortField =
-        sort.field === 'kind' || sort.field === 'enabled' ? sort.field : undefined;
-
-      setSortField(nextSortField);
-      setSortDirection(nextSortField ? sort.direction : undefined);
+      const nextSortField = TABLE_FIELD_TO_API_SORT_FIELD[sort.field as string];
       if (nextSortField) {
-        setPage(1);
+        const sortChanged = nextSortField !== sortField || sort.direction !== sortDirection;
+        setSortField(nextSortField);
+        setSortDirection(sort.direction);
+        if (sortChanged) {
+          setPage(1);
+        }
       }
     }
   };
+
+  const availableTagOptions = useMemo(() => {
+    const tagSet = new Set<string>(tagsFilter);
+    for (const rule of data?.items ?? []) {
+      for (const tag of rule.metadata.labels ?? []) {
+        tagSet.add(tag);
+      }
+    }
+    return [...tagSet].sort();
+  }, [data?.items, tagsFilter]);
 
   const hasActiveFilters = Boolean(filter);
 
@@ -369,6 +482,11 @@ export const RulesListPage = () => {
             <EuiFlexItem grow={false}>
               <EuiFilterGroup>
                 <StatusFilterPopover value={statusFilter} onChange={setStatusFilter} />
+                <TagsFilterPopover
+                  options={availableTagOptions}
+                  value={tagsFilter}
+                  onChange={setTagsFilter}
+                />
                 <ModeFilterPopover value={modeFilter} onChange={setModeFilter} />
               </EuiFilterGroup>
             </EuiFlexItem>
@@ -381,7 +499,7 @@ export const RulesListPage = () => {
             perPage={perPage}
             search={debouncedSearch}
             hasActiveFilters={hasActiveFilters}
-            sortField={sortField ? SORT_FIELD_TO_TABLE_FIELD[sortField] : undefined}
+            sortField={SORT_FIELD_TO_TABLE_FIELD[sortField]}
             sortDirection={sortDirection}
             isLoading={isLoading}
             onTableChange={onTableChange}

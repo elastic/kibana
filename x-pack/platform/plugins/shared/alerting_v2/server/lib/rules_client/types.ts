@@ -15,7 +15,7 @@ export interface CreateRuleParams {
   options?: { id?: string };
 }
 
-export type FindRulesSortField = 'kind' | 'enabled';
+export type FindRulesSortField = 'kind' | 'enabled' | 'name';
 
 export interface FindRulesParams {
   page?: number;
