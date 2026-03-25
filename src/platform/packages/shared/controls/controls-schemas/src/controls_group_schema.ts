@@ -34,44 +34,41 @@ export const controlWidthSchema = schema.oneOf(
   }
 );
 
-export const pinnedControlSchema = schema.object({
+export const pinnedControlSchema = {
   uid: schema.maybe(schema.string({ meta: { description: 'The unique ID of the control' } })),
   width: controlWidthSchema,
   grow: schema.boolean({
     defaultValue: DEFAULT_PINNED_CONTROL_STATE.grow,
     meta: { description: 'Expand width of the control panel to fit available space.' },
   }),
-});
+};
 
 export const controlsGroupSchema = schema.arrayOf(
-  // order will be determined by the array
-  schema.oneOf([
-    schema
-      .allOf([
-        schema.object({ type: schema.literal(OPTIONS_LIST_CONTROL) }),
-        schema.object({ config: optionsListDSLControlSchema }),
-        pinnedControlSchema,
-      ])
-      .extendsDeep({ unknowns: 'allow' }), // allows for legacy unknowns such as `parentField` and `enhancements`
-    schema
-      .allOf([
-        schema.object({ type: schema.literal(RANGE_SLIDER_CONTROL) }),
-        schema.object({ config: rangeSliderControlSchema }),
-        pinnedControlSchema,
-      ])
-      .extendsDeep({ unknowns: 'allow' }),
-    schema
-      .allOf([
-        schema.object({ type: schema.literal(TIME_SLIDER_CONTROL) }),
-        schema.object({ config: timeSliderControlSchema }),
-        pinnedControlSchema,
-      ])
-      .extendsDeep({ unknowns: 'allow' }), // allows for legacy unknowns such as `useGlobalFilters`
-    schema.allOf([
-      schema.object({ type: schema.literal(ESQL_CONTROL) }),
-      schema.object({ config: optionsListESQLControlSchema }),
-      pinnedControlSchema,
-    ]), // variable controls do not need `unknowns: 'allow'` because they have no legacy values
+  /**
+   * - keep types in alphabetical order for the sake of documentation
+   * - control order will be determined by the array
+   */
+  schema.discriminatedUnion('type', [
+    schema.object({
+      type: schema.literal(ESQL_CONTROL),
+      config: optionsListESQLControlSchema,
+      ...pinnedControlSchema,
+    }),
+    schema.object({
+      type: schema.literal(OPTIONS_LIST_CONTROL),
+      config: optionsListDSLControlSchema,
+      ...pinnedControlSchema,
+    }),
+    schema.object({
+      type: schema.literal(RANGE_SLIDER_CONTROL),
+      config: rangeSliderControlSchema,
+      ...pinnedControlSchema,
+    }),
+    schema.object({
+      type: schema.literal(TIME_SLIDER_CONTROL),
+      config: timeSliderControlSchema,
+      ...pinnedControlSchema,
+    }),
   ]),
   {
     defaultValue: [],

@@ -9,8 +9,9 @@
 
 import type React from 'react';
 
+import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
-import type { controlSchema, dataControlSchema } from './control_schema';
+import { controlTitleSchema, dataControlSchema } from './control_schema';
 import type {
   controlsGroupSchema,
   controlWidthSchema,
@@ -29,14 +30,16 @@ import type { timeSliderControlSchema } from './time_slider_schema';
 
 export type ControlsGroupState = TypeOf<typeof controlsGroupSchema>;
 export type PinnedControlState = ControlsGroupState[number];
-export type PinnedControlLayoutState = TypeOf<typeof pinnedControlSchema> & {
+export type PinnedControlLayoutState = typeof pinnedControlSchema & {
   order: number;
   type: string;
 };
 export type ControlWidth = TypeOf<typeof controlWidthSchema>;
-export type ControlState = TypeOf<typeof controlSchema>;
+const controlStateSchema = schema.object(controlTitleSchema);
+export type ControlState = TypeOf<typeof controlStateSchema>;
 
-export type DataControlState = TypeOf<typeof dataControlSchema>;
+const dataControlStateSchema = schema.object(dataControlSchema);
+export type DataControlState = TypeOf<typeof dataControlStateSchema>;
 
 export type OptionsListDisplaySettings = TypeOf<typeof optionsListDisplaySettingsSchema>;
 

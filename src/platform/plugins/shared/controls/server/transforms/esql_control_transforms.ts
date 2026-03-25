@@ -42,16 +42,18 @@ export const registerESQLControlTransforms = (embeddable: EmbeddableSetup) => {
         } = convertCamelCasedKeysToSnakeCase<LegacyStoredESQLControlExplicitInput>(
           state as LegacyStoredESQLControlExplicitInput
         );
-        return {
-          available_options,
+
+        const shared = {
           control_type: control_type as OptionsListESQLControlState['control_type'],
           display_settings,
-          esql_query: esql_query ?? '',
           selected_options: selected_options ?? DEFAULT_ESQL_OPTIONS_LIST_STATE.selected_options,
           single_select: single_select ?? DEFAULT_ESQL_OPTIONS_LIST_STATE.single_select,
           variable_name: variable_name ?? '',
           variable_type: variable_type as OptionsListESQLControlState['variable_type'],
         };
+        return control_type === 'STATIC_VALUES'
+          ? { ...shared, control_type: 'STATIC_VALUES', available_options: available_options ?? [] }
+          : { ...shared, control_type: 'VALUES_FROM_QUERY', esql_query: esql_query ?? '' };
       },
     }),
   });

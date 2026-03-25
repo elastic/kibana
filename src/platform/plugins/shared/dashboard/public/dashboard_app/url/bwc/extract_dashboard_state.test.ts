@@ -11,8 +11,7 @@ import { omit } from 'lodash';
 import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
 import { extractDashboardState } from './extract_dashboard_state';
 
-// Failing: See https://github.com/elastic/kibana/issues/257722
-describe.skip('extractDashboardState', () => {
+describe('extractDashboardState', () => {
   test('should extract all DashboardState fields', () => {
     const optionalState = {
       time_range: {
