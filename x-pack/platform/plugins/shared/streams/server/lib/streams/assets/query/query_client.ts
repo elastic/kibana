@@ -26,6 +26,7 @@ import {
   ASSET_ID,
   ASSET_TYPE,
   ASSET_UUID,
+  QUERY_DESCRIPTION,
   QUERY_ESQL_QUERY,
   QUERY_EVIDENCE,
   QUERY_FEATURE_FILTER,
@@ -42,8 +43,10 @@ import { computeRuleId } from './helpers/query';
 
 type TermQueryFieldValue = string | boolean | number | null;
 
+export type RuleUnbackedFilter = 'exclude' | 'include' | 'only';
+
 export interface QueryLinkFilters {
-  ruleBacked?: boolean;
+  ruleUnbacked?: RuleUnbackedFilter;
 }
 
 interface TermQueryOpts {
@@ -62,28 +65,26 @@ function termQuery<T extends string>(
   return [{ term: { [field]: value } }];
 }
 
-function ruleBackedFilter(value: boolean | undefined): QueryDslQueryContainer[] {
-  if (value === undefined) {
-    return [];
+function ruleUnbackedFilter(value: RuleUnbackedFilter = 'exclude'): QueryDslQueryContainer[] {
+  switch (value) {
+    case 'include':
+      return [];
+    case 'only':
+      return termQuery(RULE_BACKED, false);
+    case 'exclude':
+      // Also include legacy docs that predate the rule_backed field.
+      return [
+        {
+          bool: {
+            should: [
+              { term: { [RULE_BACKED]: true } },
+              { bool: { must_not: [{ exists: { field: RULE_BACKED } }] } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      ];
   }
-
-  if (!value) {
-    return termQuery(RULE_BACKED, false);
-  }
-
-  // When filtering for rule-backed queries, also include legacy docs
-  // that predate the rule_backed field.
-  return [
-    {
-      bool: {
-        should: [
-          { term: { [RULE_BACKED]: true } },
-          { bool: { must_not: [{ exists: { field: RULE_BACKED } }] } },
-        ],
-        minimum_should_match: 1,
-      },
-    },
-  ];
 }
 
 function termsQuery<T extends string>(
@@ -131,6 +132,7 @@ function toQueryLink<TQueryLink extends QueryLinkRequest>(
 
 type QueryLinkStorageFields = Omit<QueryLink, 'query' | 'stream_name'> & {
   [QUERY_TITLE]: string;
+  [QUERY_DESCRIPTION]: string;
   [QUERY_ESQL_QUERY]: string;
   [QUERY_SEVERITY_SCORE]?: number;
 };
@@ -168,6 +170,7 @@ function fromStorage(link: StoredQueryLink): QueryLink {
     query: {
       id: storageFields[ASSET_ID],
       title: storageFields[QUERY_TITLE],
+      description: storageFields[QUERY_DESCRIPTION],
       /**
        * The storageClient migrateSource converts the `kql` and `feature` filter to esql, making safe their removal here.
        */
@@ -187,6 +190,7 @@ function toStorage(definition: Streams.all.Definition, request: QueryLinkRequest
     ...rest,
     [STREAM_NAME]: definition.name,
     [QUERY_TITLE]: query.title,
+    [QUERY_DESCRIPTION]: query.description,
     [QUERY_ESQL_QUERY]: query.esql.query,
     [QUERY_SEVERITY_SCORE]: query.severity_score,
     [QUERY_EVIDENCE]: query.evidence,
@@ -322,7 +326,7 @@ export class QueryClient {
     const filter = [
       ...termsQuery(STREAM_NAME, streamNames),
       ...termQuery(ASSET_TYPE, 'query'),
-      ...ruleBackedFilter(filters?.ruleBacked),
+      ...ruleUnbackedFilter(filters?.ruleUnbacked),
     ];
 
     const queriesResponse = await this.dependencies.storageClient.search({
@@ -343,7 +347,7 @@ export class QueryClient {
    * Used internally by promoteQueries.
    */
   private async getUnbackedQueries(streamName: string): Promise<QueryLink[]> {
-    return this.getQueryLinks([streamName], { ruleBacked: false });
+    return this.getQueryLinks([streamName], { ruleUnbacked: 'only' });
   }
 
   /**
@@ -370,7 +374,7 @@ export class QueryClient {
    * Returns all query links across streams that do not have a backing Kibana rule.
    */
   async getAllUnbackedQueries(): Promise<QueryLink[]> {
-    return this.getQueryLinks([], { ruleBacked: false });
+    return this.getQueryLinks([], { ruleUnbacked: 'only' });
   }
 
   async bulkGetByIds(name: string, ids: string[]) {
@@ -402,7 +406,7 @@ export class QueryClient {
     const filter = [
       ...termsQuery(STREAM_NAME, streamNames),
       ...termQuery(ASSET_TYPE, 'query'),
-      ...ruleBackedFilter(filters?.ruleBacked),
+      ...ruleUnbackedFilter(filters?.ruleUnbacked),
     ];
 
     const assetsResponse = await this.dependencies.storageClient.search({
@@ -417,6 +421,7 @@ export class QueryClient {
           filter,
           should: [
             ...wildcardQuery(QUERY_TITLE, query),
+            ...wildcardQuery(QUERY_DESCRIPTION, query),
             ...wildcardQuery(QUERY_KQL_BODY, query),
             ...wildcardQuery(QUERY_FEATURE_NAME, query),
             ...wildcardQuery(QUERY_FEATURE_FILTER, query),
@@ -513,6 +518,10 @@ export class QueryClient {
         const link = toQueryLinkFromQuery({ query, stream });
         nextQueriesToCreate.push(link);
         allNextQueryLinks.push(link);
+      } else if (!currentLink.rule_backed) {
+        // Unbacked queries have no rule, so breaking-change handling doesn't apply.
+        // Preserve the link as-is and update only the query content.
+        allNextQueryLinks.push({ ...currentLink, query });
       } else if (hasBreakingChange(currentLink.query, query)) {
         const link = toQueryLinkFromQuery({ query, stream });
         nextQueriesUpdatedWithBreakingChange.push(link);
@@ -524,7 +533,10 @@ export class QueryClient {
       }
     }
 
-    const currentQueriesToDelete = currentQueryLinks.filter((link) => !nextIds.has(link.query.id));
+    // Only delete rule-backed queries that are no longer in the input list.
+    const currentQueriesToDelete = currentQueryLinks.filter(
+      (link) => link.rule_backed && !nextIds.has(link.query.id)
+    );
     const currentQueriesToDeleteBeforeUpdate = currentQueryLinks.filter((link) =>
       nextQueriesUpdatedWithBreakingChange.some((updated) => updated.query.id === link.query.id)
     );
@@ -542,7 +554,7 @@ export class QueryClient {
         [ASSET_ID]: link[ASSET_ID],
         [ASSET_TYPE]: link[ASSET_TYPE],
         query: link.query,
-        rule_backed: true,
+        rule_backed: link.rule_backed,
         rule_id: link.rule_id,
       }))
     );

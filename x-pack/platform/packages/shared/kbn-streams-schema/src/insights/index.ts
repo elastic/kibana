@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 
 /** Impact severity level for an insight (display label). */

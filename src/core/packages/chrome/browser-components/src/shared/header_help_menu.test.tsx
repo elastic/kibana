@@ -7,45 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ComponentProps } from 'react';
-import { BehaviorSubject, of } from 'rxjs';
+import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import type { ChromeHelpExtension } from '@kbn/core-chrome-browser';
 
 import { HeaderHelpMenu } from './header_help_menu';
+import { TestChromeProviders, serverlessCoreEnv } from '../test_helpers';
 
 describe('HeaderHelpMenu', () => {
-  const application = applicationServiceMock.createInternalStartContract();
+  afterEach(() => jest.clearAllMocks());
 
-  const defaultComponentProps: Pick<
-    ComponentProps<typeof HeaderHelpMenu>,
-    | 'kibanaVersion'
-    | 'docLinks'
-    | 'navigateToUrl'
-    | 'defaultContentLinks$'
-    | 'helpExtension$'
-    | 'helpSupportUrl$'
-    | 'kibanaDocLink'
-    | 'isServerless'
-  > = {
-    navigateToUrl: application.navigateToUrl,
-    kibanaVersion: 'version',
-    docLinks: docLinksServiceMock.createStartContract(),
-    defaultContentLinks$: of([]),
-    helpExtension$: new BehaviorSubject(undefined),
-    helpSupportUrl$: new BehaviorSubject(''),
-    kibanaDocLink: '',
-    isServerless: false,
+  const renderAndOpenMenu = ({
+    chrome,
+    coreEnv,
+  }: {
+    chrome?: ReturnType<typeof chromeServiceMock.createStartContract>;
+    coreEnv?: typeof serverlessCoreEnv;
+  } = {}) => {
+    const component = mountWithIntl(
+      <TestChromeProviders chrome={chrome} coreEnv={coreEnv}>
+        <HeaderHelpMenu />
+      </TestChromeProviders>
+    );
+    component.find('EuiButtonEmpty').simulate('click');
+    return component;
   };
 
   test('it only renders the default content', () => {
-    const component = mountWithIntl(
-      <HeaderHelpMenu {...defaultComponentProps} globalHelpExtensionMenuLinks$={of([])} />
-    );
-
-    expect(component.find('EuiButtonEmpty').length).toBe(1); // only the toggle view on/off button
-    component.find('EuiButtonEmpty').simulate('click');
+    const component = renderAndOpenMenu();
 
     const buttons = component.find('EuiButtonEmpty');
     const buttonTexts = buttons.map((button) => button.text()).filter((text) => text.trim() !== '');
@@ -53,44 +44,56 @@ describe('HeaderHelpMenu', () => {
     expect(buttonTexts).toEqual(['Kibana documentation', 'Ask Elastic', 'Open an issue in GitHub']);
   });
 
-  test("it doesn't render the version details when the prop isServerless is true", () => {
+  test("it doesn't render the version details when serverless", () => {
     const component = mountWithIntl(
-      <HeaderHelpMenu
-        {...defaultComponentProps}
-        isServerless={true}
-        globalHelpExtensionMenuLinks$={of([])}
-      />
+      <TestChromeProviders coreEnv={serverlessCoreEnv}>
+        <HeaderHelpMenu />
+      </TestChromeProviders>
     );
-
     expect(component.find('[data-test-subj="kbnVersionString"]').exists()).toBeFalsy();
   });
 
-  test('it renders the global custom content + the default content', () => {
-    const component = mountWithIntl(
-      <HeaderHelpMenu
-        {...defaultComponentProps}
-        globalHelpExtensionMenuLinks$={of([
-          {
-            linkType: 'custom',
-            href: 'my-link-2',
-            content: 'Some other text for the link',
-            priority: 10,
-          },
-          {
-            linkType: 'custom',
-            href: 'my-link',
-            content: 'Some text for the link',
-            'data-test-subj': 'my-test-custom-link',
-            priority: 100,
-          },
-        ])}
-      />
+  test('it renders content and passes hideHelpMenu action', () => {
+    const content = jest.fn(() => <span data-test-subj="react-content-node">React Content</span>);
+    const chrome = chromeServiceMock.createStartContract();
+    chrome.getHelpExtension$.mockReturnValue(
+      new BehaviorSubject<ChromeHelpExtension | undefined>({
+        appName: 'Test App',
+        content,
+      })
     );
 
-    expect(component.find('EuiButtonEmpty').length).toBe(1); // only the toggle view on/off button
-    component.find('EuiButtonEmpty').simulate('click');
+    const component = renderAndOpenMenu({ chrome });
 
-    // 2 custom global link + 4 default links + the toggle button
+    expect(component.find('[data-test-subj="react-content-node"]').exists()).toBeTruthy();
+    expect(content).toHaveBeenCalledWith(
+      expect.objectContaining({ hideHelpMenu: expect.any(Function) })
+    );
+  });
+
+  test('it renders the global custom content + the default content', () => {
+    const chrome = chromeServiceMock.createStartContract();
+    chrome.getGlobalHelpExtensionMenuLinks$.mockReturnValue(
+      new BehaviorSubject([
+        {
+          linkType: 'custom' as const,
+          href: 'my-link-2',
+          content: 'Some other text for the link',
+          priority: 10,
+        },
+        {
+          linkType: 'custom' as const,
+          href: 'my-link',
+          content: 'Some text for the link',
+          'data-test-subj': 'my-test-custom-link',
+          priority: 100,
+        },
+      ])
+    );
+
+    const component = renderAndOpenMenu({ chrome });
+
+    // 2 custom global link + 3 default links + the toggle button
     expect(component.find('EuiButtonEmpty').length).toBe(6);
 
     expect(component.find('[data-test-subj="my-test-custom-link"]').exists()).toBeTruthy();

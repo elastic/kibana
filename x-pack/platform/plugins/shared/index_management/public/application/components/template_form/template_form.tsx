@@ -18,7 +18,6 @@ import type { CommonWizardSteps } from '../shared';
 import { StepSettingsContainer, StepMappingsContainer, StepAliasesContainer } from '../shared';
 import { documentationService } from '../../services/documentation';
 import { SectionError } from '../section_error';
-import { serializeAsESLifecycle } from '../../../../common/lib';
 import type { SimulateTemplateProps, SimulateTemplateFilters } from '../index_templates';
 import {
   SimulateTemplateFlyoutContent,
@@ -26,6 +25,7 @@ import {
   LegacyIndexTemplatesDeprecation,
 } from '../index_templates';
 import { StepLogisticsContainer, StepComponentContainer, StepReviewContainer } from './steps';
+import { buildTemplateFromWizardData } from './utils/build_template_from_wizard_data';
 
 const { stripEmptyFields } = serializers;
 const { FormWizard, FormWizardStep } = Forms;
@@ -185,57 +185,14 @@ export const TemplateForm = ({
     </>
   ) : null;
 
-  /**
-   * If no mappings, settings or aliases are defined, it is better to not send empty
-   * object for those values.
-   * This method takes care of that and other cleanup of empty fields.
-   * @param template The template object to clean up
-   */
-  const cleanupTemplateObject = (template: TemplateDeserialized) => {
-    const outputTemplate = { ...template };
-
-    if (outputTemplate.template) {
-      if (outputTemplate.template.settings === undefined) {
-        delete outputTemplate.template.settings;
-      }
-      if (outputTemplate.template.mappings === undefined) {
-        delete outputTemplate.template.mappings;
-      }
-      if (outputTemplate.template.aliases === undefined) {
-        delete outputTemplate.template.aliases;
-      }
-      if (Object.keys(outputTemplate.template).length === 0) {
-        delete outputTemplate.template;
-      }
-      if (outputTemplate.lifecycle) {
-        delete outputTemplate.lifecycle;
-      }
-    }
-
-    return outputTemplate;
-  };
-
   const buildTemplateObject = useCallback(
     (initialTemplate: TemplateDeserialized) =>
       (wizardData: WizardContent): TemplateDeserialized => {
-        const outputTemplate = {
-          ...wizardData.logistics,
-          _kbnMeta: initialTemplate._kbnMeta,
-          deprecated: initialTemplate.deprecated,
-          composedOf: wizardData.components,
-          template: {
-            settings: wizardData.settings,
-            mappings: wizardData.mappings,
-            aliases: wizardData.aliases,
-            lifecycle: wizardData.logistics.lifecycle
-              ? serializeAsESLifecycle(wizardData.logistics.lifecycle)
-              : undefined,
-            ...(dataStreamOptions && { data_stream_options: dataStreamOptions }),
-          },
-          ignoreMissingComponentTemplates: initialTemplate.ignoreMissingComponentTemplates,
-        };
-
-        return cleanupTemplateObject(outputTemplate as TemplateDeserialized);
+        return buildTemplateFromWizardData({
+          initialTemplate,
+          wizardData,
+          dataStreamOptions,
+        });
       },
     [dataStreamOptions]
   );

@@ -19,7 +19,7 @@ import {
   ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
-import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
+import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
@@ -150,7 +150,7 @@ export const MisconfigurationsPreview = ({
   return (
     <ExpandablePanel
       header={{
-        iconType: !isPreviewMode && hasMisconfigurationFindings ? 'arrowStart' : '',
+        iconType: !isPreviewMode && hasMisconfigurationFindings ? 'chevronLimitLeft' : '',
         title: (
           <EuiTitle
             css={css`

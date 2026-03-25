@@ -17,9 +17,10 @@ import { useCascadeTable, useAdaptedTableRows, type TableProps } from '.';
 describe('table', () => {
   const createHookWrapper = ({
     children,
+    data = [],
     helper: Helper = React.Fragment,
-  }: PropsWithChildren<{ helper?: React.FC<PropsWithChildren> }>) => (
-    <DataCascadeProvider cascadeGroups={[]}>
+  }: PropsWithChildren<{ data?: GroupNode[]; helper?: React.FC<PropsWithChildren> }>) => (
+    <DataCascadeProvider data={data} cascadeGroups={[]}>
       <Helper>{children}</Helper>
     </DataCascadeProvider>
   );
@@ -38,7 +39,6 @@ describe('table', () => {
       const { result } = renderHook(useCascadeTable, {
         wrapper: createHookWrapper,
         initialProps: {
-          initialData: [],
           allowMultipleRowToggle: false,
           enableRowSelection: false,
           header: jest.fn(),
@@ -50,7 +50,7 @@ describe('table', () => {
       expect(result.current).toHaveProperty('rows');
     });
 
-    it('table rows value and length is derived from the `initialData` prop', () => {
+    it('table rows value and length is derived from the provider data', () => {
       const data = Array.from(new Array(10)).map((_, index) => ({
         id: String(index),
         name: `Item ${index}`,
@@ -60,10 +60,10 @@ describe('table', () => {
         wrapper: ({ children }) =>
           createHookWrapper({
             children,
+            data,
             helper: TestHelper,
           }),
         initialProps: {
-          initialData: data,
           allowMultipleRowToggle: false,
           enableRowSelection: false,
           header: jest.fn(),
@@ -85,10 +85,10 @@ describe('table', () => {
           wrapper: ({ children }) =>
             createHookWrapper({
               children,
+              data,
               helper: TestHelper,
             }),
           initialProps: {
-            initialData: data,
             allowMultipleRowToggle: true,
             enableRowSelection: false,
             header: jest.fn(),
@@ -116,10 +116,10 @@ describe('table', () => {
           wrapper: ({ children }) =>
             createHookWrapper({
               children,
+              data,
               helper: TestHelper,
             }),
           initialProps: {
-            initialData: data,
             allowMultipleRowToggle: false,
             enableRowSelection: false,
             header: jest.fn(),
@@ -153,10 +153,10 @@ describe('table', () => {
           wrapper: ({ children }) =>
             createHookWrapper({
               children,
+              data,
               helper: TestHelper,
             }),
           initialProps: {
-            initialData: data,
             allowMultipleRowToggle: false,
             enableRowSelection: false,
             header: jest.fn(),

@@ -7,8 +7,7 @@
 
 import type { ToolSchema } from '@kbn/inference-common';
 import { insightCoreSchema, type InsightCore } from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
-import zodToJsonSchema from 'zod-to-json-schema';
+import { z } from '@kbn/zod/v4';
 
 export const SUBMIT_INSIGHTS_TOOL_NAME = 'submit_insights';
 
@@ -16,8 +15,8 @@ const insightsToolArgsZodSchema = z.object({
   insights: z.array(insightCoreSchema),
 });
 
-export const insightsSchema = zodToJsonSchema(insightsToolArgsZodSchema, {
-  $refStrategy: 'none',
+export const insightsSchema = z.toJSONSchema(insightsToolArgsZodSchema, {
+  reused: 'ref',
 }) as unknown as ToolSchema;
 
 export function parseInsightsWithErrors(data: unknown): {

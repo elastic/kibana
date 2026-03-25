@@ -73,7 +73,7 @@ function SingleSloConfiguration({ onCreate, onCancel }: SingleConfigurationProps
 
     onCreate({
       slo_id: selectedSloDefinition.id,
-      slo_instance_id: hasGroupBy ? selectedInstanceId ?? ALL_VALUE : undefined,
+      slo_instance_id: hasGroupBy ? selectedInstanceId ?? ALL_VALUE : ALL_VALUE,
       remote_name: remoteName,
       overview_mode: 'single',
     });
@@ -141,10 +141,10 @@ function SingleSloConfiguration({ onCreate, onCancel }: SingleConfigurationProps
 
 function GroupSloConfiguration({ onCreate, onCancel, initialInput }: GroupConfigurationProps) {
   const [selectedGroupFilters, setSelectedGroupFilters] = useState<GroupFilters>({
-    group_by: initialInput?.group_filters?.group_by ?? 'status',
-    filters: initialInput?.group_filters?.filters ?? [],
-    kql_query: initialInput?.group_filters?.kql_query ?? '',
-    groups: initialInput?.group_filters?.groups ?? [],
+    group_by: initialInput?.group_filters.group_by ?? 'status',
+    filters: initialInput?.group_filters.filters ?? [],
+    kql_query: initialInput?.group_filters.kql_query ?? '',
+    groups: initialInput?.group_filters.groups ?? [],
   });
 
   const onConfirmClick = () =>

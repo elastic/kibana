@@ -40,19 +40,13 @@ export default function ({ getService }: FtrProviderContext) {
   }
   // @skipInServerlessMKI - this test uses internal index manipulation in before/after hooks
   // @skipInServerlessMKI - if you are removing this annotation, make sure to add the test suite to the MKI pipeline in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml
-  // Failing: See https://github.com/elastic/kibana/issues/251553
+  // FLAKY: https://github.com/elastic/kibana/issues/236619
   describe.skip('@ess @serverless @skipInServerlessMKI When attempting to call an endpoint api', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     let actionId = '';
     let agentId = '';
 
     const canReadSecuritySolutionApiList: ApiCallsInterface[] = [
-      {
-        method: 'get',
-        path: ACTION_DETAILS_ROUTE,
-        body: undefined,
-        version: '2023-10-31',
-      },
       {
         method: 'get',
         path: `${ACTION_STATUS_ROUTE}?agent_ids={agentId}`,
@@ -83,6 +77,12 @@ export default function ({ getService }: FtrProviderContext) {
     ];
 
     const canReadActionsLogManagementApiList: ApiCallsInterface[] = [
+      {
+        method: 'get',
+        path: ACTION_DETAILS_ROUTE,
+        body: undefined,
+        version: '2023-10-31',
+      },
       {
         method: 'get',
         path: BASE_ENDPOINT_ACTION_ROUTE,
@@ -156,14 +156,14 @@ export default function ({ getService }: FtrProviderContext) {
     let adminSupertest: TestAgent;
     let t1AnalystSupertest: TestAgent;
     let endpointOperationsAnalystSupertest: TestAgent;
-    let platformEnginnerSupertest: TestAgent;
+    let platformEngineerSupertest: TestAgent;
     before(async () => {
       adminSupertest = await utils.createSuperTest();
       t1AnalystSupertest = await utils.createSuperTest(ROLE.t1_analyst);
       endpointOperationsAnalystSupertest = await utils.createSuperTest(
         ROLE.endpoint_operations_analyst
       );
-      platformEnginnerSupertest = await utils.createSuperTest(ROLE.platform_engineer);
+      platformEngineerSupertest = await utils.createSuperTest(ROLE.platform_engineer);
 
       indexedData = await endpointTestResources.loadEndpointData();
       agentId = indexedData.hosts[0].agent.id;
@@ -218,7 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
         it(`should return 403 when [${apiListItem.method.toUpperCase()} ${
           apiListItem.path
         }]`, async () => {
-          await platformEnginnerSupertest[apiListItem.method](replacePathIds(apiListItem.path))
+          await platformEngineerSupertest[apiListItem.method](replacePathIds(apiListItem.path))
             .set('kbn-xsrf', 'xxx')
             .send(getBodyPayload(apiListItem))
             .expect(403, {
@@ -237,7 +237,7 @@ export default function ({ getService }: FtrProviderContext) {
         it(`should return 200 when [${apiListItem.method.toUpperCase()} ${
           apiListItem.path
         }]`, async () => {
-          await platformEnginnerSupertest[apiListItem.method](replacePathIds(apiListItem.path))
+          await platformEngineerSupertest[apiListItem.method](replacePathIds(apiListItem.path))
             .set('kbn-xsrf', 'xxx')
             .set(
               apiListItem.version ? 'Elastic-Api-Version' : 'foo',

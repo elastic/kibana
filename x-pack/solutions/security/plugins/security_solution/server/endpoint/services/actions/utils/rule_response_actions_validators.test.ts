@@ -23,6 +23,7 @@ import { getRuleMock } from '../../../../lib/detection_engine/routes/__mocks__/r
 import type { RuleAlertType } from '../../../../lib/detection_engine/rule_schema';
 import { getQueryRuleParams } from '../../../../lib/detection_engine/rule_schema/model/rule_schemas.mock';
 import type { EnabledAutomatedResponseActionsCommands } from '../../../../../common/endpoint/service/response_actions/constants';
+import type { ScriptsLibraryClientInterface } from '../../scripts_library';
 
 describe('Rules Endpoint response actions validators', () => {
   let endpointService: ReturnType<typeof createMockEndpointAppContextService>;
@@ -60,6 +61,9 @@ describe('Rules Endpoint response actions validators', () => {
     endpointAuthz = await endpointService.getEndpointAuthz(httpServerMock.createKibanaRequest());
     rulePayload = { response_actions: [createRulePayloadResponseActionMock()] };
     existingRule = getRuleMock(getQueryRuleParams());
+    // @ts-expect-error assignment to readonly is ok here
+    // eslint-disable-next-line require-atomic-updates
+    endpointService.experimentalFeatures.responseActionsEndpointAutomatedRunScript = true;
   });
 
   describe('validateRuleResponseActions()', () => {
@@ -123,6 +127,22 @@ describe('Rules Endpoint response actions validators', () => {
         permission: 'canSuspendProcess',
         responseAction: createRulePayloadResponseActionMock({
           params: { command: 'suspend-process', config: { overwrite: true } },
+        }),
+      },
+      {
+        actionName: 'runscript',
+        permission: 'canWriteExecuteOperations',
+        responseAction: createRulePayloadResponseActionMock({
+          params: {
+            command: 'runscript',
+            config: {
+              linux: {
+                scriptId: '1-2-3',
+              },
+              macos: { scriptId: '' },
+              windows: { scriptId: '' },
+            },
+          },
         }),
       },
     ];
@@ -191,6 +211,194 @@ describe('Rules Endpoint response actions validators', () => {
         await expect(validateRuleResponseActions(options)).rejects.toThrow(
           "Invalid [kill-process] response action configuration: 'field' is required when 'overwrite' is 'false'"
         );
+      });
+    });
+
+    describe('and response action is runscript', () => {
+      let scriptsClientMock: jest.Mocked<ScriptsLibraryClientInterface>;
+
+      beforeEach(() => {
+        scriptsClientMock = endpointService.getScriptsLibraryClient(
+          'default',
+          'foo'
+        ) as jest.Mocked<ScriptsLibraryClientInterface>;
+      });
+
+      it('should error if all OS script IDs are empty strings', async () => {
+        rulePayload.response_actions = [
+          createRulePayloadResponseActionMock({
+            params: {
+              command: 'runscript',
+              config: {
+                linux: { scriptId: '' },
+                macos: { scriptId: '' },
+                windows: { scriptId: '' },
+              },
+            },
+          }),
+        ];
+
+        await expect(validateRuleResponseActions(options)).rejects.toThrow(
+          'Invalid [runscript] response action configuration: no scripts specified'
+        );
+      });
+
+      it('should error if all OS script IDs are undefined', async () => {
+        rulePayload.response_actions = [
+          createRulePayloadResponseActionMock({
+            params: {
+              command: 'runscript',
+              config: {
+                linux: {},
+                macos: {},
+                windows: {},
+              },
+            },
+          }),
+        ];
+
+        await expect(validateRuleResponseActions(options)).rejects.toThrow(
+          'Invalid [runscript] response action configuration: no scripts specified'
+        );
+      });
+
+      it('should succeed when at least one OS has a valid script ID', async () => {
+        rulePayload.response_actions = [
+          createRulePayloadResponseActionMock({
+            params: {
+              command: 'runscript',
+              config: {
+                linux: { scriptId: '1-2-3' },
+                macos: { scriptId: '' },
+                windows: { scriptId: '' },
+              },
+            },
+          }),
+        ];
+
+        await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
+      });
+
+      it('should succeed when multiple OS platforms have valid script IDs', async () => {
+        rulePayload.response_actions = [
+          createRulePayloadResponseActionMock({
+            params: {
+              command: 'runscript',
+              config: {
+                linux: { scriptId: '1-2-3' },
+                macos: { scriptId: '1-2-3' },
+                windows: { scriptId: '' },
+              },
+            },
+          }),
+        ];
+
+        await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
+      });
+
+      it('should error if any of the script IDs are invalid', async () => {
+        rulePayload.response_actions = [
+          createRulePayloadResponseActionMock({
+            params: {
+              command: 'runscript',
+              config: {
+                linux: { scriptId: '1-2-3' },
+                macos: { scriptId: '1-2-3' },
+                windows: { scriptId: '3-2-1' },
+              },
+            },
+          }),
+        ];
+
+        await expect(validateRuleResponseActions(options)).rejects.toThrow(
+          'Invalid [windows] [runscript] response action configuration: script [3-2-1] not found'
+        );
+        // Call to client should de-dup IDs
+        expect(scriptsClientMock.list).toHaveBeenCalledWith({ kuery: 'id:("1-2-3" OR "3-2-1")' });
+      });
+
+      it('should error if script does not support specified OS type', async () => {
+        rulePayload.response_actions = [
+          createRulePayloadResponseActionMock({
+            params: {
+              command: 'runscript',
+              config: {
+                linux: { scriptId: '' },
+                macos: { scriptId: '' },
+                windows: { scriptId: '1-2-3' },
+              },
+            },
+          }),
+        ];
+
+        await expect(validateRuleResponseActions(options)).rejects.toThrow(
+          "Invalid [windows] [runscript] response action configuration: script [1-2-3, script one] is not compatible with host OS 'windows']"
+        );
+      });
+
+      it('should error if script requires input arguments but none were defined', async () => {
+        const listResponse = await scriptsClientMock.list();
+        listResponse.data[0].requiresInput = true;
+        scriptsClientMock.list.mockResolvedValue(listResponse);
+
+        rulePayload.response_actions = [
+          createRulePayloadResponseActionMock({
+            params: {
+              command: 'runscript',
+              config: {
+                linux: { scriptId: '1-2-3' },
+                macos: { scriptId: '' },
+                windows: { scriptId: '' },
+              },
+            },
+          }),
+        ];
+
+        await expect(validateRuleResponseActions(options)).rejects.toThrow(
+          'Invalid [linux] [runscript] response action configuration: script [1-2-3, script one] requires input but no input was provided'
+        );
+      });
+
+      it('should succeed with script that requires input arguments and they are defined on rule payload', async () => {
+        const listResponse = await scriptsClientMock.list();
+        listResponse.data[0].requiresInput = true;
+        scriptsClientMock.list.mockResolvedValue(listResponse);
+
+        rulePayload.response_actions = [
+          createRulePayloadResponseActionMock({
+            params: {
+              command: 'runscript',
+              config: {
+                linux: { scriptId: '1-2-3', scriptInput: 'foo' },
+                macos: { scriptId: '' },
+                windows: { scriptId: '' },
+              },
+            },
+          }),
+        ];
+
+        await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
+      });
+
+      it('should only validate script ID if it is included in rule update payload', async () => {
+        // IDs in existing rule that are not being used in rule update should not have a need to be validated
+        rulePayload.response_actions = [];
+        existingRule.params.responseActions = [
+          {
+            actionTypeId: '.endpoint',
+            params: {
+              command: 'runscript',
+              config: {
+                linux: { scriptId: '1-2-3' },
+                macos: { scriptId: '' },
+                windows: { scriptId: '' },
+              },
+            },
+          },
+        ];
+
+        await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
+        expect(scriptsClientMock.list).not.toHaveBeenCalled();
       });
     });
   });
