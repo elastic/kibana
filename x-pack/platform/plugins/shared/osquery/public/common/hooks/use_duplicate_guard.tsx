@@ -54,7 +54,7 @@ export const useDuplicateGuard = ({ copyMutation, resourceType }: UseDuplicateGu
       confirmButtonText={i18n.translate('xpack.osquery.duplicateConfirmation.confirmButtonLabel', {
         defaultMessage: 'Duplicate',
       })}
-      defaultFocusedButton="confirm"
+      defaultFocusedButton="cancel"
     >
       <FormattedMessage
         id="xpack.osquery.duplicateConfirmation.body"
