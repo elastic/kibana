@@ -9,6 +9,8 @@ applies_to:
 
 # Banner settings in {{kib}} [banners-settings-kb]
 
+:::{settings} /reference/configuration-reference/banner-settings.yml
+:::
 
 Banners are disabled by default. You need to manually configure them in order to use the feature.
 

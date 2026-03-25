@@ -9,6 +9,8 @@ applies_to:
 
 # Cases settings in {{kib}} [cases-settings]
 
+:::{settings} /reference/configuration-reference/cases-settings.yml
+:::
 
 You do not need to configure any additional settings to use [cases](docs-content://explore-analyze/alerts-cases/cases.md) in {{kib}}. To provide greater control over case features, you can configure the following settings in the `kibana.yml` file:
 

@@ -9,6 +9,8 @@ applies_to:
 
 # Logs settings in {{kib}} [logs-ui-settings-kb]
 
+:::{settings} /reference/configuration-reference/logs-settings.yml
+:::
 
 You do not need to configure any settings to use the Logs app in {{kib}}. It is enabled by default.
 

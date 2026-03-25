@@ -10,6 +10,8 @@ applies_to:
 
 # {{fleet}} settings in {{kib}} [fleet-settings-kb]
 
+:::{settings} /reference/configuration-reference/fleet-settings.yml
+:::
 
 ::::{note}
 In {{ecloud}}, {{fleet}} flags are already configured.

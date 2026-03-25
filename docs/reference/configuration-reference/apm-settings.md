@@ -9,6 +9,9 @@ applies_to:
 
 # APM settings in Kibana [apm-settings-kb]
 
+:::{settings} /reference/configuration-reference/apm-settings.yml
+:::
+
 These settings allow the APM app to function, and specify the data that it surfaces. Unless you’ve customized your setup, you do not need to configure any settings to use the APM app. It is enabled by default.
 
 :::{note}

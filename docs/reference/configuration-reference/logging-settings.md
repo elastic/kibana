@@ -9,6 +9,9 @@ applies_to:
 
 # Logging settings [logging-settings]
 
+:::{settings} /reference/configuration-reference/logging-settings.yml
+:::
+
 You do not need to configure any additional settings to use the logging features in {{kib}}. Logging is enabled by default and will log at `info` level using the `pattern` layout, which outputs logs to `stdout`.
 
 However, if you are planning to ingest your logs using Elasticsearch or another tool, we recommend using the `json` layout, which produces logs in ECS format. In general, `pattern` layout is recommended when raw logs will be read by a human, and `json` layout when logs will be read by a machine.
