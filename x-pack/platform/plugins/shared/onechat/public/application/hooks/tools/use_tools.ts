@@ -8,7 +8,7 @@
 import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { useQuery } from '@kbn/react-query';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { queryKeys } from '../../query_keys';
 import { labels } from '../../utils/i18n';
 import { useOnechatServices } from '../use_onechat_service';
@@ -22,7 +22,9 @@ export const useToolsService = () => {
     queryFn: () => toolsService.list(),
   });
 
-  return { tools: data ?? [], isLoading, error, isError };
+  const tools = useMemo(() => data ?? [], [data]);
+
+  return { tools, isLoading, error, isError };
 };
 
 export const useToolService = (toolId?: string) => {

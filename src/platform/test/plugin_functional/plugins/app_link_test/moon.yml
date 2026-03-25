@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/app-link-test-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/app-link-test-plugin'
+  title: '@kbn/app-link-test-plugin'
   description: Moon project for @kbn/app-link-test-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/platform/test/plugin_functional/plugins/app_link_test
+  sourceRoot: src/platform/test/plugin_functional/plugins/app_link_test
 dependsOn:
   - '@kbn/core'
   - '@kbn/shared-ux-link-redirect-app'
