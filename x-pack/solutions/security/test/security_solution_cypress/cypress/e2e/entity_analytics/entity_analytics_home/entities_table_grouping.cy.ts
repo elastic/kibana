@@ -224,8 +224,10 @@ describe(
 
     beforeEach(() => {
       login();
+      setGrouping(['entity.relationships.resolution.resolved_to']);
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
       cy.get(PAGE_TITLE).should('exist');
+      waitForGroupingTable();
     });
 
     after(() => {
@@ -233,7 +235,6 @@ describe(
     });
 
     it('selecting "None" shows flat data table', () => {
-      waitForGroupingTable();
       selectGroupingOption(PANEL_NONE);
       cy.get(ENTITIES_TABLE_GRID).should('exist');
       // Grouped table should not exist in flat mode
@@ -241,8 +242,7 @@ describe(
     });
 
     it('can switch between Resolution and Entity type', () => {
-      // Page loads with Resolution default
-      waitForGroupingTable();
+      // Page loads with Resolution default (set in beforeEach)
       cy.get(GROUPING_LEVEL_0).should('contain', 'Alice Johnson');
 
       // Switch to Entity type
