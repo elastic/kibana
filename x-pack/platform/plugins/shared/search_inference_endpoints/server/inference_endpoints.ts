@@ -176,6 +176,7 @@ const fetchEndpoints = async (
           serviceSettings,
         },
         capabilities: {},
+        isPreconfigured: false,
         isInferenceEndpoint: true,
       };
       endpoints.push(connector);

@@ -43,6 +43,7 @@
       "licenseManagement",
       "security",
       "workflowsManagement",
+      "searchInferenceEndpoints",
       "usageCollection",
       "usageApi",
       "home",

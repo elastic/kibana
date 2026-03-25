@@ -33,8 +33,6 @@ dependsOn:
   - '@kbn/test-subj-selector'
   - '@kbn/scout-info'
   - '@kbn/scout-reporting'
-  - '@kbn/synthtrace'
-  - '@kbn/synthtrace-client'
   - '@kbn/zod'
   - '@kbn/core-http-common'
   - '@kbn/axe-config'

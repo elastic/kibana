@@ -1213,7 +1213,7 @@
           "\nRepresents an Elasticsearch cluster API client created by the platform.\nIt allows to call API on behalf of the internal Kibana user and\nthe actual user that is derived from the request headers (via `asScoped(...)`).\n"
         ],
         "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-        "lineNumber": 56,
+        "lineNumber": 46,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2219,7 +2219,7 @@
               "; }"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-            "lineNumber": 64,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2235,7 +2235,7 @@
               "{ (request: ",
               "ScopeableUrlRequest",
               ", opts: ",
-              "SpaceNPRERouting",
+              "AsScopedOptions",
               "): ",
               "IScopedClusterClient",
               "; (request: ",
@@ -2245,7 +2245,7 @@
               "; }"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-            "lineNumber": 75,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2261,7 +2261,7 @@
                   "ScopeableUrlRequest"
                 ],
                 "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-                "lineNumber": 75,
+                "lineNumber": 65,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2275,10 +2275,10 @@
                 "label": "opts",
                 "description": [],
                 "signature": [
-                  "SpaceNPRERouting"
+                  "AsScopedOptions"
                 ],
                 "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-                "lineNumber": 75,
+                "lineNumber": 65,
                 "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2300,7 +2300,7 @@
               "{ (request: ",
               "ScopeableUrlRequest",
               ", opts: ",
-              "SpaceNPRERouting",
+              "AsScopedOptions",
               "): ",
               "IScopedClusterClient",
               "; (request: ",
@@ -2310,7 +2310,7 @@
               "; }"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-            "lineNumber": 76,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2328,7 +2328,7 @@
                   "ScopeableRequest"
                 ],
                 "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-                "lineNumber": 87,
+                "lineNumber": 77,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2355,7 +2355,7 @@
           "IClusterClient"
         ],
         "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-        "lineNumber": 90,
+        "lineNumber": 80,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2373,7 +2373,7 @@
               "() => Promise<void>"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-            "lineNumber": 96,
+            "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5837,45 +5837,6 @@
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/scoped_cluster_client.ts",
             "lineNumber": 37,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-elasticsearch-server",
-        "id": "def-server.SpaceNPRERouting",
-        "type": "Interface",
-        "tags": [],
-        "label": "SpaceNPRERouting",
-        "description": [
-          "\n{@link AsScopedOptions} variant that routes requests to the NPRE configured for the current\nKibana space. Requires a {@link ScopeableUrlRequest} to be passed to `asScoped` so the space\ncan be extracted from the URL pathname."
-        ],
-        "signature": [
-          "SpaceNPRERouting",
-          " extends ",
-          "AsScopedOptions"
-        ],
-        "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-        "lineNumber": 46,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.SpaceNPRERouting.projectRouting",
-            "type": "string",
-            "tags": [],
-            "label": "projectRouting",
-            "description": [],
-            "signature": [
-              "\"space\""
-            ],
-            "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
-            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
