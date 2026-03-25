@@ -136,18 +136,23 @@ export const useEsqlCallbacks = ({
           previousColumnsQueryRef.current = queryToExecute;
         }
 
+        // Capture the controller before the await so the aborted check
+        // refers to this request's signal, not a newer one that may have
+        // replaced it on the ref during the async gap.
+        const currentController = columnsAbortControllerRef.current;
+
         clearCacheWhenOld(esqlFieldsCache, queryToExecute);
         const timeRange = data.query.timefilter.timefilter.getTime();
         const result = await memoizedFieldsFromESQL({
           esqlQuery: queryToExecute,
           search: data.search.search,
           timeRange,
-          signal: columnsAbortControllerRef.current.signal,
+          signal: currentController.signal,
           variables: esqlService?.variablesService?.esqlVariables,
           dropNullColumns: true,
         }).result;
 
-        if (columnsAbortControllerRef.current.signal.aborted) {
+        if (currentController.signal.aborted) {
           esqlFieldsCache.delete(queryToExecute);
           return [];
         }
