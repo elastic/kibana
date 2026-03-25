@@ -24,6 +24,7 @@ import { registerAgents } from './agent_builder/agents';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 import { registerTools } from './agent_builder/tools/register_tools';
 import { registerSkills } from './agent_builder/skills/register_skills';
+import { socAlertTriggerDefinition } from '../common/workflows';
 import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
 import { SavedObjectsClientFactory } from './endpoint/services/saved_objects';
 import { registerEntityStoreDataViewRefreshTask } from './lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task';
@@ -256,13 +257,15 @@ export class Plugin implements ISecuritySolutionPlugin {
     const experimentalFeatures = this.config.experimentalFeatures;
     const endpointAppContextService = this.endpointAppContextService;
 
-    registerTools(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
-      this.logger.error(`Error registering security tools: ${error}`);
-    });
+    registerTools(agentBuilder, core, logger, experimentalFeatures, endpointAppContextService).catch(
+      (error) => {
+        this.logger.error(`Error registering security tools: ${error}`);
+      }
+    );
     registerAttachments(agentBuilder).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
     });
-    registerAgents(agentBuilder, core, logger).catch((error) => {
+    registerAgents(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
       this.logger.error(`Error registering security agent: ${error}`);
     });
     registerSkills({
@@ -702,6 +705,10 @@ export class Plugin implements ISecuritySolutionPlugin {
         return startPlugins.security;
       },
     });
+
+    if (experimentalFeatures.aiSocAgents && plugins.workflowsExtensions) {
+      plugins.workflowsExtensions.registerTriggerDefinition(socAlertTriggerDefinition);
+    }
 
     return {
       setProductFeaturesConfigurator:

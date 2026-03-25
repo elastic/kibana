@@ -250,6 +250,14 @@ export const allowedExperimentalValues = Object.freeze({
    * Uses entity store v2 for entity analytics skill
    */
   entityAnalyticsEntityStoreV2: false,
+
+  /**
+   * Enables AI SOC agents, tools, and skills in Agent Builder.
+   * Gates the registration of specialized SOC agents (Triage, Investigator,
+   * Correlator, Responder, Reporter, MITRE Analyst) and their associated
+   * tools and skills for end-to-end security operations workflows.
+   */
+  aiSocAgents: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

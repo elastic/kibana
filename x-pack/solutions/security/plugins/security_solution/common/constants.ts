@@ -722,3 +722,11 @@ export enum SecurityAgentBuilderAttachments {
 }
 
 export const THREAT_HUNTING_AGENT_ID = `${internalNamespaces.security}.agent`;
+
+// AI SOC Agent IDs
+export const TRIAGE_AGENT_ID = `${internalNamespaces.security}.triage`;
+export const INVESTIGATOR_AGENT_ID = `${internalNamespaces.security}.investigator`;
+export const CORRELATOR_AGENT_ID = `${internalNamespaces.security}.correlator`;
+export const RESPONDER_AGENT_ID = `${internalNamespaces.security}.responder`;
+export const REPORTER_AGENT_ID = `${internalNamespaces.security}.reporter`;
+export const MITRE_ANALYST_AGENT_ID = `${internalNamespaces.security}.mitre_analyst`;
