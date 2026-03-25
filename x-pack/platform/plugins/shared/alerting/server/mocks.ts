@@ -133,11 +133,9 @@ const createAbortableSearchServiceMock = () => {
 
 const createRuleMonitoringServiceMock = () => {
   const mock = lazyObject({
-    setLastRunMetricsTotalSearchDurationMs: jest.fn(),
-    setLastRunMetricsTotalIndexingDurationMs: jest.fn(),
-    setLastRunMetricsTotalAlertsDetected: jest.fn(),
-    setLastRunMetricsTotalAlertsCreated: jest.fn(),
-    setLastRunMetricsGapDurationS: jest.fn(),
+    setMetric: jest.fn(),
+    setMetrics: jest.fn(),
+    clearGapRange: jest.fn(),
   }) as unknown as jest.Mocked<PublicRuleMonitoringService>;
 
   return mock;

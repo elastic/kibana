@@ -6,8 +6,8 @@
  */
 
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { ENTITY_STORE_ROUTES } from '../../../../common';
-import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
+import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
+import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import type { EntityMaintainerListEntry } from '../../../domain/entity_maintainers';

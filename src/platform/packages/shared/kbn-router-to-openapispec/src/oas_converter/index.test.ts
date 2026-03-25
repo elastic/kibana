@@ -46,4 +46,46 @@ describe('OasConverter', () => {
       },
     });
   });
+
+  it('maps field availability metadata to x-state', () => {
+    const converter = new OasConverter();
+    const obj = schema.object({
+      foo: schema.string({
+        meta: { availability: { stability: 'stable', since: '9.4.0' } },
+      }),
+    });
+
+    expect(converter.convert(obj)).toEqual({
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        foo: {
+          type: 'string',
+          'x-state': 'Generally available; added in 9.4.0',
+        },
+      },
+      required: ['foo'],
+    });
+  });
+
+  it('omits field since metadata from x-state in serverless mode', () => {
+    const converter = new OasConverter({ serverless: true });
+    const obj = schema.object({
+      foo: schema.string({
+        meta: { availability: { stability: 'stable', since: '9.4.0' } },
+      }),
+    });
+
+    expect(converter.convert(obj)).toEqual({
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        foo: {
+          type: 'string',
+          'x-state': 'Generally available',
+        },
+      },
+      required: ['foo'],
+    });
+  });
 });
