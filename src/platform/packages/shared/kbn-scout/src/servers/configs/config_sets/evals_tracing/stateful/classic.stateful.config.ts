@@ -122,6 +122,12 @@ export const servers: ScoutServerConfig = {
     ...defaultConfig.kbnTestServer,
     env: {
       ...defaultConfig.kbnTestServer.env,
+      ...(shouldEnableTracing
+        ? {
+            ELASTIC_APM_ACTIVE: 'false',
+            ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: 'false',
+          }
+        : {}),
     },
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
