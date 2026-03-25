@@ -60,11 +60,11 @@ apiTest.describe(
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
-        expect(esqlResult.documents).toHaveLength(2);
-        expect(esqlResult.documents[0]['location.city']).toBe('New York');
-        expect(esqlResult.documents[0]['location.country']).toBe('US');
-        expect(esqlResult.documents[1]['location.city']).toBe('London');
-        expect(esqlResult.documents[1]['location.country']).toBe('GB');
+        expect(esqlResult.documentsOrdered).toHaveLength(2);
+        expect(esqlResult.documentsOrdered[0]['location.city']).toBe('New York');
+        expect(esqlResult.documentsOrdered[0]['location.country']).toBe('US');
+        expect(esqlResult.documentsOrdered[1]['location.city']).toBe('London');
+        expect(esqlResult.documentsOrdered[1]['location.country']).toBe('GB');
       }
     );
 
@@ -94,11 +94,11 @@ apiTest.describe(
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
-        expect(esqlResult.documents).toHaveLength(2);
-        expect(esqlResult.documents[0]['location.city']).toBe('New York');
-        expect(esqlResult.documents[0]['location.country']).toBe('US');
-        expect(esqlResult.documents[1]['location.city']).toBeNull();
-        expect(esqlResult.documents[1]['location.country']).toBeNull();
+        expect(esqlResult.documentsOrdered).toHaveLength(2);
+        expect(esqlResult.documentsOrdered[0]['location.city']).toBe('New York');
+        expect(esqlResult.documentsOrdered[0]['location.country']).toBe('US');
+        expect(esqlResult.documentsOrdered[1]['location.city']).toBeNull();
+        expect(esqlResult.documentsOrdered[1]['location.country']).toBeNull();
       }
     );
 
@@ -126,8 +126,8 @@ apiTest.describe(
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         // Only the doc with ip survives the WHERE filter
-        expect(esqlResult.documents).toHaveLength(1);
-        expect(esqlResult.documents[0]['location.city']).toBe('New York');
+        expect(esqlResult.documentsOrdered).toHaveLength(1);
+        expect(esqlResult.documentsOrdered[0]['location.city']).toBe('New York');
       }
     );
 
@@ -153,9 +153,9 @@ apiTest.describe(
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      expect(esqlResult.documents).toHaveLength(1);
-      expect(esqlResult.documents[0]['location.city']).toBe('New York');
-      expect(esqlResult.documents[0]['location.country']).toBe('US');
+      expect(esqlResult.documentsOrdered).toHaveLength(1);
+      expect(esqlResult.documentsOrdered[0]['location.city']).toBe('New York');
+      expect(esqlResult.documentsOrdered[0]['location.country']).toBe('US');
     });
 
     apiTest(
@@ -182,9 +182,9 @@ apiTest.describe(
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
-        expect(esqlResult.documents).toHaveLength(1);
-        expect(esqlResult.documents[0]['location.city']).toBe('Test city');
-        expect(esqlResult.documents[0]['location.country']).toBe('Test country');
+        expect(esqlResult.documentsOrdered).toHaveLength(1);
+        expect(esqlResult.documentsOrdered[0]['location.city']).toBe('Test city');
+        expect(esqlResult.documentsOrdered[0]['location.country']).toBe('Test country');
       }
     );
   }

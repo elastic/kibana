@@ -45,6 +45,15 @@ const getErrorMessage = (
   defaultMessage: string | undefined,
   createEnrichPolicyUrl: string
 ): ReactNode => {
+  if (isError) {
+    return (
+      <FormattedMessage
+        id="xpack.streams.enrichPolicySelector.errorMessage"
+        defaultMessage="Error fetching enrich policies"
+      />
+    );
+  }
+
   if (noPoliciesFound) {
     return (
       <FormattedMessage
@@ -63,15 +72,6 @@ const getErrorMessage = (
     );
   }
 
-  if (isError) {
-    return (
-      <FormattedMessage
-        id="xpack.streams.enrichPolicySelector.errorMessage"
-        defaultMessage="Error fetching enrich policies"
-      />
-    );
-  }
-
   return defaultMessage;
 };
 
@@ -83,8 +83,8 @@ export const EnrichPolicySelector = () => {
     path: '/data/index_management/enrich_policies/create',
   });
   const noPoliciesFound = useMemo(() => {
-    return isFetched && policies.length === 0;
-  }, [isFetched, policies]);
+    return isFetched && !isError && policies.length === 0;
+  }, [isFetched, isError, policies]);
 
   return (
     <Controller
@@ -102,7 +102,7 @@ export const EnrichPolicySelector = () => {
             'xpack.streams.streamDetailView.managementTab.enrichment.processor.enrichPolicyLabel',
             { defaultMessage: 'Enrich policy' }
           )}
-          isInvalid={fieldState.invalid || noPoliciesFound}
+          isInvalid={fieldState.invalid || noPoliciesFound || isError}
           error={getErrorMessage(
             noPoliciesFound,
             isError,
@@ -111,7 +111,7 @@ export const EnrichPolicySelector = () => {
           )}
         >
           <EuiSelect
-            isInvalid={fieldState.invalid || noPoliciesFound}
+            isInvalid={fieldState.invalid || noPoliciesFound || isError}
             hasNoInitialSelection
             options={policies.map((policy) => ({
               text: policy.name,

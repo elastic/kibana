@@ -35,7 +35,7 @@ describe('transpile - Streamlang DSL to ES|QL)', () => {
     expect(result.query).toMatchSnapshot();
   });
 
-  it('should reject mustache template syntax in json_extract field names', () => {
+  it('should reject mustache template syntax in json_extract field names', async () => {
     const dsl = {
       steps: [
         {
@@ -46,10 +46,10 @@ describe('transpile - Streamlang DSL to ES|QL)', () => {
       ],
     } as unknown as StreamlangDSL;
 
-    expect(() => transpile(dsl)).toThrow();
+    await expect(transpile(dsl)).rejects.toThrow();
   });
 
-  it('should reject invalid json_extract selectors', () => {
+  it('should reject invalid json_extract selectors', async () => {
     const dsl = {
       steps: [
         {
@@ -60,6 +60,6 @@ describe('transpile - Streamlang DSL to ES|QL)', () => {
       ],
     } as unknown as StreamlangDSL;
 
-    expect(() => transpile(dsl)).toThrow('consecutive dots');
+    await expect(transpile(dsl)).rejects.toThrow('consecutive dots');
   });
 });

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
 import type { StreamlangProcessorDefinition } from '../processors';
 
-export interface EnrichPolicyMetadata {
-  matchField: string;
-  enrichFields: readonly string[];
-}
+export type EnrichPolicyResolverMetadata = Pick<
+  SerializedEnrichPolicy,
+  'matchField' | 'enrichFields'
+>;
 
 /**
  * Resolver for enrich policies
@@ -23,7 +24,9 @@ export interface EnrichPolicyMetadata {
  * Output:
  * { matchField: 'ip', enrichFields: ['city', 'country'] }
  */
-export type EnrichPolicyResolver = (policyName: string) => Promise<EnrichPolicyMetadata | null>;
+export type EnrichPolicyResolver = (
+  policyName: string
+) => Promise<EnrichPolicyResolverMetadata | null>;
 
 export type StreamlangResolver = EnrichPolicyResolver;
 
