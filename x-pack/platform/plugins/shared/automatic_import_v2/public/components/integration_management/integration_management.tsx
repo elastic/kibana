@@ -6,8 +6,10 @@
  */
 import React, { useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
+import useObservable from 'react-use/lib/useObservable';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
+import { MINIMUM_LICENSE_TYPE } from '../../../common/constants';
 import { ManagementContents } from './management_contents/management_contents';
 import { ButtonsFooter } from '../../common/components/button_footer';
 import { ConnectorSelector } from '../../common/components/connector_selector';
@@ -18,6 +20,7 @@ import * as i18n from './translations';
 import { useGetIntegrationById, useKibana } from '../../common';
 import { normalizeTitleName } from '../../common/lib/helper_functions';
 import { useTelemetry } from '../telemetry_context';
+import { LicensePaywallCard } from '../license_paywall/license_paywall_card';
 
 const INTEGRATIONS_APP_ID = 'integrations';
 const INTEGRATIONS_MANAGE_PATH = '/browse?view=manage';
@@ -66,9 +69,33 @@ const IntegrationManagementContents: React.FC = () => {
 };
 
 export const IntegrationManagement = React.memo(() => {
-  const { application } = useKibana().services;
+  const services = useKibana().services;
+  const { application } = services;
+  const license = useObservable(services.licensing.license$);
+  const hasEnterpriseLicense = useMemo(
+    () =>
+      Boolean(
+        license?.isAvailable && license?.isActive && license?.hasAtLeast(MINIMUM_LICENSE_TYPE)
+      ),
+    [license]
+  );
+
   const { integrationId } = useParams<{ integrationId?: string }>();
   const { integration, isLoading, isError } = useGetIntegrationById(integrationId);
+  const { reportCancelButtonClicked } = useTelemetry();
+
+  const navigateToManage = useCallback(() => {
+    application.navigateToApp(INTEGRATIONS_APP_ID, { path: INTEGRATIONS_MANAGE_PATH });
+  }, [application]);
+
+  const handlePaywallCancel = useCallback(() => {
+    reportCancelButtonClicked();
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      navigateToManage();
+    }
+  }, [navigateToManage, reportCancelButtonClicked]);
 
   const initialFormData = useMemo(() => {
     if (!integration) return undefined;
@@ -90,6 +117,20 @@ export const IntegrationManagement = React.memo(() => {
       ),
     [integration?.dataStreams]
   );
+
+  if (!hasEnterpriseLicense) {
+    return (
+      <>
+        <KibanaPageTemplate restrictWidth={PAGE_RESTRICT_WIDTH}>
+          <KibanaPageTemplate.Header pageTitle={i18n.PAGE_TITLE_NEW_INTEGRATION} />
+          <KibanaPageTemplate.Section>
+            <LicensePaywallCard />
+          </KibanaPageTemplate.Section>
+        </KibanaPageTemplate>
+        <ButtonsFooter hideActionButton onCancel={handlePaywallCancel} />
+      </>
+    );
+  }
 
   // Loading state when fetching existing integration
   if (integrationId && isLoading) {
