@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HttpStart } from '@kbn/core/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
+import type { WorkflowApi } from '@kbn/workflows-ui';
 import {
   exportSingleWorkflow,
   exportWorkflows,
@@ -36,10 +36,12 @@ const createWorkflow = (overrides: Partial<WorkflowListItemDto> = {}): WorkflowL
   ...overrides,
 });
 
-const createMockHttp = (): jest.Mocked<HttpStart> =>
+const createMockWorkflowApi = (): WorkflowApi =>
   ({
-    post: jest.fn().mockResolvedValue(new Blob(['zip-data'], { type: 'application/zip' })),
-  } as unknown as jest.Mocked<HttpStart>);
+    exportWorkflows: jest
+      .fn()
+      .mockResolvedValue(new Blob(['zip-data'], { type: 'application/zip' })),
+  } as unknown as WorkflowApi);
 
 describe('export_workflows', () => {
   beforeEach(() => {
@@ -96,27 +98,25 @@ describe('export_workflows', () => {
 
   describe('exportWorkflows', () => {
     it('should export single workflow as YAML when array has length 1', async () => {
-      const http = createMockHttp();
-      const result = await exportWorkflows([createWorkflow()], http);
+      const api = createMockWorkflowApi();
+      const result = await exportWorkflows([createWorkflow()], api);
 
       expect(result).toBe(1);
       const [filename] = mockDownloadFileAs.mock.calls[0];
       expect(filename).toMatch(/\.yml$/);
-      expect(http.post).not.toHaveBeenCalled();
+      expect(api.exportWorkflows).not.toHaveBeenCalled();
     });
 
-    it('should export multiple workflows as ZIP via server API', async () => {
-      const http = createMockHttp();
+    it('should export multiple workflows as ZIP via WorkflowApi', async () => {
+      const api = createMockWorkflowApi();
       const workflows = [
         createWorkflow({ id: 'w-1', name: 'First' }),
         createWorkflow({ id: 'w-2', name: 'Second' }),
       ];
-      const result = await exportWorkflows(workflows, http);
+      const result = await exportWorkflows(workflows, api);
 
       expect(result).toBe(2);
-      expect(http.post).toHaveBeenCalledWith('/api/workflows/_export', {
-        body: JSON.stringify({ ids: ['w-1', 'w-2'] }),
-      });
+      expect(api.exportWorkflows).toHaveBeenCalledWith({ ids: ['w-1', 'w-2'] });
       expect(mockDownloadFileAs).toHaveBeenCalledTimes(1);
       const [filename, payload] = mockDownloadFileAs.mock.calls[0];
       expect(filename).toMatch(/^workflows_export_.*\.zip$/);
@@ -124,25 +124,25 @@ describe('export_workflows', () => {
     });
 
     it('should return 0 and skip download when all definitions are null', async () => {
-      const http = createMockHttp();
+      const api = createMockWorkflowApi();
       const workflows = [
         createWorkflow({ definition: null }),
         createWorkflow({ definition: null }),
       ];
-      const result = await exportWorkflows(workflows, http);
+      const result = await exportWorkflows(workflows, api);
 
       expect(result).toBe(0);
       expect(mockDownloadFileAs).not.toHaveBeenCalled();
-      expect(http.post).not.toHaveBeenCalled();
+      expect(api.exportWorkflows).not.toHaveBeenCalled();
     });
 
     it('should only export workflows with non-null definitions', async () => {
-      const http = createMockHttp();
+      const api = createMockWorkflowApi();
       const workflows = [
         createWorkflow({ id: 'w-1', name: 'Has Def' }),
         createWorkflow({ id: 'w-2', name: 'No Def', definition: null }),
       ];
-      const result = await exportWorkflows(workflows, http);
+      const result = await exportWorkflows(workflows, api);
 
       expect(result).toBe(1);
       const [filename] = mockDownloadFileAs.mock.calls[0];

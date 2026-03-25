@@ -35,7 +35,7 @@ describe('get_step_definitions output size', () => {
     registerGetStepDefinitionsTool(agentBuilder, {
       getAvailableConnectors: jest
         .fn()
-        .mockResolvedValue({ connectorsByType: {}, totalConnectors: 0 }),
+        .mockResolvedValue({ connectorTypes: {}, totalConnectors: 0 }),
     } as any);
   });
 

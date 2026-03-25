@@ -87,6 +87,32 @@ describe('Legend Settings', () => {
     expect(lineLimit).toBeDisabled();
   });
 
+  it('should have default width limit set to 250 and be enabled when it is on', async () => {
+    await renderLegendSettingsPopover({
+      shouldTruncate: true,
+      position: Position.Bottom,
+      location: 'outside',
+      layout: LegendLayout.List,
+      onLayoutChange: jest.fn(),
+    });
+    const widthLimit = screen.getByRole('spinbutton', { name: 'Width limit' });
+    expect(widthLimit).toHaveValue(250);
+    expect(widthLimit).not.toBeDisabled();
+  });
+
+  it('should have default width limit set to 250 and be disabled when it is off', async () => {
+    await renderLegendSettingsPopover({
+      shouldTruncate: false,
+      position: Position.Bottom,
+      location: 'outside',
+      layout: LegendLayout.List,
+      onLayoutChange: jest.fn(),
+    });
+    const widthLimit = screen.getByRole('spinbutton', { name: 'Width limit' });
+    expect(widthLimit).toHaveValue(250);
+    expect(widthLimit).toBeDisabled();
+  });
+
   it('should have the `Label truncation` switch enabled by default', async () => {
     await renderLegendSettingsPopover();
     const switchElement = screen.getByRole('switch', { name: 'Label truncation' });

@@ -12,13 +12,15 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ImportWorkflowsFlyout } from './import_workflows_flyout';
-import type { WorkflowPreview } from '../../../../common/lib/export';
+import type { WorkflowPreview } from '../../../common/lib/export/workflow_preview';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useTelemetry } from '../../../hooks/use_telemetry';
 import { parseImportFile } from '../lib/parse_import_file';
 import type { ClientPreflightResult } from '../lib/parse_import_file';
 
 jest.mock('../lib/parse_import_file');
 jest.mock('../../../hooks/use_kibana');
+jest.mock('../../../hooks/use_telemetry');
 jest.mock('../../../widgets/worflows_triggers_list/worflows_triggers_list', () => ({
   WorkflowsTriggersList: ({ triggers }: { triggers: Array<{ type: string }> }) => (
     <span data-test-subj="mock-triggers-list">
@@ -28,18 +30,29 @@ jest.mock('../../../widgets/worflows_triggers_list/worflows_triggers_list', () =
 }));
 
 const mockParseImportFile = parseImportFile as jest.MockedFunction<typeof parseImportFile>;
-jest.mock('@kbn/workflows-ui', () => ({
-  useRunWorkflow: () => ({
-    mutate: jest.fn(),
-    mutateAsync: jest.fn(),
-    isLoading: false,
-    data: undefined,
-    error: null,
-    reset: jest.fn(),
-  }),
-}));
+
+// var avoids TDZ when the hoisted jest.mock factory assigns these before `let` would init
+const mockMgetWorkflows = jest.fn();
+const mockBulkCreateWorkflows = jest.fn();
+jest.mock('@kbn/workflows-ui', () => {
+  return {
+    useRunWorkflow: () => ({
+      mutate: jest.fn(),
+      mutateAsync: jest.fn(),
+      isLoading: false,
+      data: undefined,
+      error: null,
+      reset: jest.fn(),
+    }),
+    useWorkflowsApi: () => ({
+      mgetWorkflows: mockMgetWorkflows,
+      bulkCreateWorkflows: mockBulkCreateWorkflows,
+    }),
+  };
+});
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseTelemetry = useTelemetry as jest.MockedFunction<typeof useTelemetry>;
 
 const createWorkflowPreview = (props: Partial<WorkflowPreview>): WorkflowPreview => ({
   id: 'test',
@@ -137,29 +150,32 @@ const createPreflightResult = (
 };
 
 describe('ImportWorkflowsFlyout', () => {
-  let mockHttpPost: jest.Mock;
   let mockToasts: {
     addSuccess: jest.Mock;
     addWarning: jest.Mock;
     addDanger: jest.Mock;
     addError: jest.Mock;
   };
+  let mockTelemetry: Record<string, jest.Mock>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockHttpPost = jest.fn();
     mockToasts = {
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
       addDanger: jest.fn(),
       addError: jest.fn(),
     };
+    mockTelemetry = {
+      reportWorkflowImported: jest.fn(),
+      reportWorkflowExported: jest.fn(),
+    };
     mockUseKibana.mockReturnValue({
       services: {
-        http: { post: mockHttpPost },
         notifications: { toasts: mockToasts },
       },
     } as any);
+    mockUseTelemetry.mockReturnValue(mockTelemetry as any);
   });
 
   afterEach(async () => {
@@ -195,7 +211,7 @@ describe('ImportWorkflowsFlyout', () => {
       await waitFor(() => {
         expect(screen.getByText(/exceeds the 10 MB limit/)).toBeInTheDocument();
       });
-      expect(mockHttpPost).not.toHaveBeenCalled();
+      expect(mockMgetWorkflows).not.toHaveBeenCalled();
     });
   });
 
@@ -205,7 +221,7 @@ describe('ImportWorkflowsFlyout', () => {
         workflows: [createWorkflowPreview({ id: 'test', name: 'Test' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValue({ conflicts: [] });
+      mockMgetWorkflows.mockResolvedValue([]);
 
       renderFlyout();
 
@@ -214,12 +230,7 @@ describe('ImportWorkflowsFlyout', () => {
 
       await waitFor(() => {
         expect(mockParseImportFile).toHaveBeenCalled();
-        expect(mockHttpPost).toHaveBeenCalledWith(
-          '/api/workflows/_check-conflicts',
-          expect.objectContaining({
-            body: JSON.stringify({ ids: ['test'] }),
-          })
-        );
+        expect(mockMgetWorkflows).toHaveBeenCalledWith({ ids: ['test'], source: ['name'] });
       });
     });
 
@@ -242,9 +253,7 @@ describe('ImportWorkflowsFlyout', () => {
         ],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValue({
-        conflicts: [{ id: 'w-1', existingName: 'Existing Workflow' }],
-      });
+      mockMgetWorkflows.mockResolvedValue([{ id: 'w-1', name: 'Existing Workflow' }]);
 
       renderFlyout();
 
@@ -267,7 +276,7 @@ describe('ImportWorkflowsFlyout', () => {
         workflows: [createWorkflowPreview({ id: 'test', name: 'Test' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValue({ conflicts: [] });
+      mockMgetWorkflows.mockResolvedValue([]);
 
       renderFlyout();
 
@@ -318,7 +327,7 @@ describe('ImportWorkflowsFlyout', () => {
         ],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValue({ conflicts: [] });
+      mockMgetWorkflows.mockResolvedValue([]);
 
       renderFlyout();
 
@@ -353,7 +362,7 @@ describe('ImportWorkflowsFlyout', () => {
       });
       clientResult.workflows[0].name = null;
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValue({ conflicts: [] });
+      mockMgetWorkflows.mockResolvedValue([]);
 
       renderFlyout();
 
@@ -369,7 +378,7 @@ describe('ImportWorkflowsFlyout', () => {
     it('should not render preview when workflows array is empty', async () => {
       const clientResult = createPreflightResult();
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValue({ conflicts: [] });
+      mockMgetWorkflows.mockResolvedValue([]);
 
       renderFlyout();
 
@@ -389,7 +398,8 @@ describe('ImportWorkflowsFlyout', () => {
         workflows: [createWorkflowPreview({ id: 'test', name: 'Test' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValueOnce({ conflicts: [] }).mockResolvedValueOnce({
+      mockMgetWorkflows.mockResolvedValueOnce([]);
+      mockBulkCreateWorkflows.mockResolvedValueOnce({
         created: [{ id: 'w-1', name: 'Test' }],
         failed: [],
         parseErrors: [],
@@ -423,7 +433,8 @@ describe('ImportWorkflowsFlyout', () => {
         ],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValueOnce({ conflicts: [] }).mockResolvedValueOnce({
+      mockMgetWorkflows.mockResolvedValueOnce([]);
+      mockBulkCreateWorkflows.mockResolvedValueOnce({
         created: [{ id: 'w-1' }],
         failed: [{ index: 1, error: 'invalid yaml' }],
         parseErrors: [],
@@ -455,7 +466,8 @@ describe('ImportWorkflowsFlyout', () => {
         workflows: [createWorkflowPreview({ id: 'w-1', name: 'Workflow 1' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValueOnce({ conflicts: [] }).mockResolvedValueOnce({
+      mockMgetWorkflows.mockResolvedValueOnce([]);
+      mockBulkCreateWorkflows.mockResolvedValueOnce({
         created: [],
         failed: [{ index: 0, error: 'bad yaml' }],
         parseErrors: [],
@@ -486,7 +498,8 @@ describe('ImportWorkflowsFlyout', () => {
         workflows: [createWorkflowPreview({ id: 'w-1', name: 'Workflow 1' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValueOnce({ conflicts: [] }).mockResolvedValueOnce({
+      mockMgetWorkflows.mockResolvedValueOnce([]);
+      mockBulkCreateWorkflows.mockResolvedValueOnce({
         created: [{ id: 'w-1' }],
         failed: [],
         parseErrors: ['Entry readme.txt is not a .yml file'],
@@ -517,9 +530,7 @@ describe('ImportWorkflowsFlyout', () => {
         workflows: [createWorkflowPreview({ id: 'w-1', name: 'Existing' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValueOnce({
-        conflicts: [{ id: 'w-1', existingName: 'Existing' }],
-      });
+      mockMgetWorkflows.mockResolvedValueOnce([{ id: 'w-1', name: 'Existing' }]);
 
       renderFlyout();
 
@@ -535,7 +546,7 @@ describe('ImportWorkflowsFlyout', () => {
       const select = screen.getByTestId('import-workflows-conflict-resolution');
       fireEvent.change(select, { target: { value: 'overwrite' } });
 
-      mockHttpPost.mockResolvedValueOnce({
+      mockBulkCreateWorkflows.mockResolvedValueOnce({
         created: [{ id: 'w-1' }],
         failed: [],
         parseErrors: [],
@@ -544,22 +555,73 @@ describe('ImportWorkflowsFlyout', () => {
       fireEvent.click(screen.getByTestId('import-workflows-confirm'));
 
       await waitFor(() => {
-        const importCall = mockHttpPost.mock.calls.find(
-          (call: unknown[]) => call[0] === '/api/workflows/_bulk_create'
+        expect(mockBulkCreateWorkflows).toHaveBeenCalledWith(
+          expect.objectContaining({ overwrite: true })
         );
-        expect(importCall).toBeDefined();
-        expect(importCall![1]).toEqual(expect.objectContaining({ query: { overwrite: true } }));
       });
     });
 
-    it('should call _bulk_create with new IDs when conflict resolution is generateNewIds', async () => {
+    it('should call bulkCreateWorkflows with new IDs when conflict resolution is generateNewIds', async () => {
       const clientResult = createPreflightResult({
         format: 'zip',
         workflows: [createWorkflowPreview({ id: 'w-1', name: 'Existing' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValueOnce({
-        conflicts: [{ id: 'w-1', existingName: 'Existing' }],
+      mockMgetWorkflows.mockResolvedValueOnce([{ id: 'w-1', name: 'Existing' }]);
+
+      renderFlyout();
+
+      const input = getFileInput();
+      fireEvent.change(input, {
+        target: { files: [createSmallFile('test.zip', 'zip-content')] },
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('import-workflows-confirm')).not.toBeDisabled();
+      });
+
+      mockBulkCreateWorkflows.mockResolvedValueOnce({
+        created: [{ id: 'w-new' }],
+        failed: [],
+        parseErrors: [],
+      });
+
+      fireEvent.click(screen.getByTestId('import-workflows-confirm'));
+
+      await waitFor(() => {
+        const [{ workflows }] = mockBulkCreateWorkflows.mock.calls[0];
+        expect(workflows).toHaveLength(1);
+        expect(workflows[0].id).not.toBe('w-1');
+        expect(workflows[0].id).toMatch(/^workflow-/);
+      });
+    });
+  });
+
+  describe('telemetry', () => {
+    it('should report successful import telemetry with workflow metadata', async () => {
+      const clientResult = createPreflightResult({
+        format: 'zip',
+        workflows: [
+          createWorkflowPreview({
+            id: 'w-1',
+            name: 'Workflow 1',
+            stepCount: 3,
+            triggers: [{ type: 'manual' }],
+          }),
+          createWorkflowPreview({
+            id: 'w-2',
+            name: 'Workflow 2',
+            stepCount: 7,
+            triggers: [{ type: 'alert' }, { type: 'scheduled' }],
+          }),
+        ],
+      });
+      mockParseImportFile.mockResolvedValue(clientResult);
+      mockMgetWorkflows.mockResolvedValueOnce([]);
+      mockBulkCreateWorkflows.mockResolvedValueOnce({
+        created: [{ id: 'w-1' }, { id: 'w-2' }],
+        failed: [],
+        parseErrors: [],
       });
 
       renderFlyout();
@@ -573,8 +635,93 @@ describe('ImportWorkflowsFlyout', () => {
         expect(screen.getByTestId('import-workflows-confirm')).not.toBeDisabled();
       });
 
-      mockHttpPost.mockResolvedValueOnce({
-        created: [{ id: 'w-new' }],
+      fireEvent.click(screen.getByTestId('import-workflows-confirm'));
+
+      await waitFor(() => {
+        expect(mockTelemetry.reportWorkflowImported).toHaveBeenCalledTimes(1);
+      });
+
+      expect(mockTelemetry.reportWorkflowImported).toHaveBeenCalledWith({
+        workflowCount: 2,
+        format: 'zip',
+        conflictResolution: 'generateNewIds',
+        hasConflicts: false,
+        successCount: 2,
+        failedCount: 0,
+        minStepCount: 3,
+        maxStepCount: 7,
+        minTriggerCount: 1,
+        maxTriggerCount: 2,
+      });
+    });
+
+    it('should report failed import telemetry with error', async () => {
+      const clientResult = createPreflightResult({
+        workflows: [createWorkflowPreview({ id: 'w-1', name: 'Test', stepCount: 2, triggers: [] })],
+      });
+      mockParseImportFile.mockResolvedValue(clientResult);
+      mockMgetWorkflows.mockResolvedValueOnce([]);
+      mockBulkCreateWorkflows.mockRejectedValueOnce(new Error('Server error'));
+
+      renderFlyout();
+
+      const input = getFileInput();
+      fireEvent.change(input, {
+        target: { files: [createSmallFile('test.yml', 'name: Test')] },
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('import-workflows-confirm')).not.toBeDisabled();
+      });
+
+      fireEvent.click(screen.getByTestId('import-workflows-confirm'));
+
+      await waitFor(() => {
+        expect(mockTelemetry.reportWorkflowImported).toHaveBeenCalledTimes(1);
+      });
+
+      expect(mockTelemetry.reportWorkflowImported).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowCount: 1,
+          format: 'yaml',
+          successCount: 0,
+          failedCount: 1,
+          error: expect.any(Error),
+        })
+      );
+    });
+
+    it('should report import telemetry with overwrite conflict resolution', async () => {
+      const clientResult = createPreflightResult({
+        format: 'zip',
+        workflows: [
+          createWorkflowPreview({
+            id: 'w-1',
+            name: 'Existing',
+            stepCount: 4,
+            triggers: [{ type: 'manual' }],
+          }),
+        ],
+      });
+      mockParseImportFile.mockResolvedValue(clientResult);
+      mockMgetWorkflows.mockResolvedValueOnce([{ id: 'w-1', name: 'Existing' }]);
+
+      renderFlyout();
+
+      const input = getFileInput();
+      fireEvent.change(input, {
+        target: { files: [createSmallFile('test.zip', 'zip-content')] },
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('import-workflows-confirm')).not.toBeDisabled();
+      });
+
+      const select = screen.getByTestId('import-workflows-conflict-resolution');
+      fireEvent.change(select, { target: { value: 'overwrite' } });
+
+      mockBulkCreateWorkflows.mockResolvedValueOnce({
+        created: [{ id: 'w-1' }],
         failed: [],
         parseErrors: [],
       });
@@ -582,15 +729,37 @@ describe('ImportWorkflowsFlyout', () => {
       fireEvent.click(screen.getByTestId('import-workflows-confirm'));
 
       await waitFor(() => {
-        const importCall = mockHttpPost.mock.calls.find(
-          (call: unknown[]) => call[0] === '/api/workflows/_bulk_create'
-        );
-        expect(importCall).toBeDefined();
-        const body = JSON.parse(importCall![1].body);
-        expect(body.workflows).toHaveLength(1);
-        expect(body.workflows[0].id).not.toBe('w-1');
-        expect(body.workflows[0].id).toMatch(/^workflow-/);
+        expect(mockTelemetry.reportWorkflowImported).toHaveBeenCalledTimes(1);
       });
+
+      expect(mockTelemetry.reportWorkflowImported).toHaveBeenCalledWith(
+        expect.objectContaining({
+          conflictResolution: 'overwrite',
+          hasConflicts: true,
+        })
+      );
+    });
+
+    it('should not report telemetry when import is not triggered', async () => {
+      const clientResult = createPreflightResult({
+        workflows: [createWorkflowPreview({ id: 'test', name: 'Test' })],
+      });
+      mockParseImportFile.mockResolvedValue(clientResult);
+      mockMgetWorkflows.mockResolvedValue([]);
+
+      renderFlyout();
+
+      const input = getFileInput();
+      fireEvent.change(input, {
+        target: { files: [createSmallFile('test.yml', 'name: Test')] },
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('import-workflows-confirm')).not.toBeDisabled();
+      });
+
+      // Do not click import — telemetry should not be called
+      expect(mockTelemetry.reportWorkflowImported).not.toHaveBeenCalled();
     });
   });
 

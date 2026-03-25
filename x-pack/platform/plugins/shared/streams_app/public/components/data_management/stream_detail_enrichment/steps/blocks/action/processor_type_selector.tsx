@@ -613,6 +613,23 @@ const getAvailableProcessors: (
       );
     },
   },
+  json_extract: {
+    type: 'json_extract' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.jsonExtractInputDisplay',
+      {
+        defaultMessage: 'JSON extract',
+      }
+    ),
+    getDocUrl: () => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.jsonExtractHelpText"
+          defaultMessage="Extract values from JSON strings."
+        />
+      );
+    },
+  },
   ...configDrivenProcessors,
   ...(isWired
     ? {}
@@ -645,6 +662,7 @@ const PROCESSOR_GROUP_MAP: Record<
   drop_document: 'remove',
   grok: 'extract',
   dissect: 'extract',
+  json_extract: 'extract',
   convert: 'convert',
   date: 'convert',
   replace: 'convert',

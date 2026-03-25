@@ -101,11 +101,11 @@ export interface LegendSettingsProps<LegendStats extends LegendValue = XYLegendV
   /**
    * Sets the max label width in pixels (list layout only)
    */
-  listLayoutMaxWidth?: number;
+  maxPixels?: number;
   /**
-   * Callback on max width limit option change
+   * Callback on max width in pixels option change
    */
-  onListLayoutMaxWidthChange?: (value: number) => void;
+  onMaxPixelsChange?: (value: number) => void;
   /**
    * Defines if the legend items will be truncated or not
    */
@@ -174,7 +174,7 @@ const DEFAULT_TRUNCATE_LINES = 1;
 const MAX_TRUNCATE_LINES = 5;
 const MIN_TRUNCATE_LINES = 1;
 const DEFAULT_TRUNCATE_WIDTH_LIMIT = 250;
-const MIN_TRUNCATE_WIDTH_LIMIT = 50;
+const MIN_TRUNCATE_WIDTH_LIMIT = 10;
 const MAX_TRUNCATE_WIDTH_LIMIT = 1000;
 
 export const MaxLinesInput = ({
@@ -335,8 +335,8 @@ export function LegendSettings<LegendStats extends LegendValue = XYLegendValue>(
   onLegendStatsChange = noop,
   maxLines,
   onMaxLinesChange = noop,
-  listLayoutMaxWidth,
-  onListLayoutMaxWidthChange = noop,
+  maxPixels,
+  onMaxPixelsChange = noop,
   shouldTruncate,
   onTruncateLegendChange = noop,
   legendSize,
@@ -545,8 +545,8 @@ export function LegendSettings<LegendStats extends LegendValue = XYLegendValue>(
               {usesWidthLimitTruncation ? (
                 <WidthLimitInput
                   disabled={!shouldTruncate}
-                  value={listLayoutMaxWidth ?? DEFAULT_TRUNCATE_WIDTH_LIMIT}
-                  setValue={onListLayoutMaxWidthChange}
+                  value={maxPixels ?? DEFAULT_TRUNCATE_WIDTH_LIMIT}
+                  setValue={onMaxPixelsChange}
                 />
               ) : (
                 <MaxLinesInput
