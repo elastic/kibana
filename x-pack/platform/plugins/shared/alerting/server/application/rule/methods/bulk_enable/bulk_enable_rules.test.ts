@@ -14,7 +14,7 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import type { SavedObject } from '@kbn/core/server';
-import type { RawRule } from '@kbn/alerting-plugin/server/types';
+import type { RawRule } from '../../../../types';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
