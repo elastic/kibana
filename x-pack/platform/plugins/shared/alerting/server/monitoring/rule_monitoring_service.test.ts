@@ -95,6 +95,10 @@ describe('RuleMonitoringService', () => {
             timestamp: mockNow,
             metrics: {
               duration: 100000,
+              gap_duration_s: null,
+              gap_range: null,
+              total_indexing_duration_ms: null,
+              total_search_duration_ms: null,
             },
           },
         },
@@ -103,25 +107,11 @@ describe('RuleMonitoringService', () => {
       expect(ruleMonitoringService.getMonitoring()).toEqual(customMonitoring);
     });
 
-    it('should set totalSearchDurationMs', () => {
-      const ruleMonitoringService = new RuleMonitoringService();
-      const { setLastRunMetricsTotalSearchDurationMs } =
-        ruleMonitoringService.getLastRunMetricsSetters();
-      setLastRunMetricsTotalSearchDurationMs(123);
-
-      const {
-        run: {
-          last_run: { metrics },
-        },
-      } = ruleMonitoringService.getMonitoring();
-      expect(metrics.total_search_duration_ms).toEqual(123);
-    });
-
     it('should set totalIndexDurationMs', () => {
       const ruleMonitoringService = new RuleMonitoringService();
-      const { setLastRunMetricsTotalIndexingDurationMs } =
-        ruleMonitoringService.getLastRunMetricsSetters();
-      setLastRunMetricsTotalIndexingDurationMs(234);
+      const { setMetric } = ruleMonitoringService.getSetters();
+
+      setMetric('total_indexing_duration_ms', 234);
 
       const {
         run: {
@@ -131,38 +121,11 @@ describe('RuleMonitoringService', () => {
       expect(metrics.total_indexing_duration_ms).toEqual(234);
     });
 
-    it('should set totalAlertsDetected', () => {
-      const ruleMonitoringService = new RuleMonitoringService();
-      const { setLastRunMetricsTotalAlertsDetected } =
-        ruleMonitoringService.getLastRunMetricsSetters();
-      setLastRunMetricsTotalAlertsDetected(345);
-
-      const {
-        run: {
-          last_run: { metrics },
-        },
-      } = ruleMonitoringService.getMonitoring();
-      expect(metrics.total_alerts_detected).toEqual(345);
-    });
-
-    it('should set totalAlertsCreated', () => {
-      const ruleMonitoringService = new RuleMonitoringService();
-      const { setLastRunMetricsTotalAlertsCreated } =
-        ruleMonitoringService.getLastRunMetricsSetters();
-      setLastRunMetricsTotalAlertsCreated(456);
-
-      const {
-        run: {
-          last_run: { metrics },
-        },
-      } = ruleMonitoringService.getMonitoring();
-      expect(metrics.total_alerts_created).toEqual(456);
-    });
-
     it('should set gapDurationS', () => {
       const ruleMonitoringService = new RuleMonitoringService();
-      const { setLastRunMetricsGapDurationS } = ruleMonitoringService.getLastRunMetricsSetters();
-      setLastRunMetricsGapDurationS(567);
+      const { setMetric } = ruleMonitoringService.getSetters();
+
+      setMetric('gap_duration_s', 567);
 
       const {
         run: {
@@ -174,8 +137,9 @@ describe('RuleMonitoringService', () => {
 
     it('should set gapRange', () => {
       const ruleMonitoringService = new RuleMonitoringService();
-      const { setLastRunMetricsGapRange } = ruleMonitoringService.getLastRunMetricsSetters();
-      setLastRunMetricsGapRange({
+      const { setMetric } = ruleMonitoringService.getSetters();
+
+      setMetric('gap_range', {
         gte: '2020-01-01T00:00:00.000Z',
         lte: '2020-01-01T01:00:00.000Z',
       });
@@ -187,6 +151,66 @@ describe('RuleMonitoringService', () => {
       } = ruleMonitoringService.getMonitoring();
       expect(metrics.gap_range?.gte).toEqual('2020-01-01T00:00:00.000Z');
       expect(metrics.gap_range?.lte).toEqual('2020-01-01T01:00:00.000Z');
+    });
+
+    it('should clear the previously set gapRange', () => {
+      const ruleMonitoringService = new RuleMonitoringService();
+      const { setMetric, clearGapRange } = ruleMonitoringService.getSetters();
+
+      setMetric('gap_range', {
+        gte: '2020-01-01T00:00:00.000Z',
+        lte: '2020-01-01T01:00:00.000Z',
+      });
+
+      const {
+        run: {
+          last_run: { metrics: metricBeforeClearing },
+        },
+      } = ruleMonitoringService.getMonitoring();
+
+      expect(metricBeforeClearing.gap_range).toBeDefined();
+
+      clearGapRange();
+
+      const {
+        run: {
+          last_run: { metrics: metricsAfterClearing },
+        },
+      } = ruleMonitoringService.getMonitoring();
+
+      expect(metricsAfterClearing.gap_range).toBeNull();
+    });
+  });
+
+  describe('addFrameworkMetrics', () => {
+    it('exposes total_search_duration_ms via getMonitoring() for the rule saved object', () => {
+      const ruleMonitoringService = new RuleMonitoringService();
+      ruleMonitoringService.addFrameworkMetrics({ total_search_duration_ms: 42 });
+
+      expect(
+        ruleMonitoringService.getMonitoring().run.last_run.metrics.total_search_duration_ms
+      ).toBe(42);
+    });
+
+    it('replaces prior framework total_search_duration_ms', () => {
+      const ruleMonitoringService = new RuleMonitoringService();
+      ruleMonitoringService.addFrameworkMetrics({ total_search_duration_ms: 10 });
+      ruleMonitoringService.addFrameworkMetrics({ total_search_duration_ms: 20 });
+
+      expect(
+        ruleMonitoringService.getMonitoring().run.last_run.metrics.total_search_duration_ms
+      ).toBe(20);
+    });
+
+    it('preserves executor metrics when addFrameworkMetrics sets total_search_duration_ms', () => {
+      const ruleMonitoringService = new RuleMonitoringService();
+      const { setMetric } = ruleMonitoringService.getSetters();
+      setMetric('total_indexing_duration_ms', 99);
+      ruleMonitoringService.addFrameworkMetrics({ total_search_duration_ms: 42 });
+
+      const { metrics } = ruleMonitoringService.getMonitoring().run.last_run;
+      expect(metrics.total_search_duration_ms).toBe(42);
+      expect(metrics.total_indexing_duration_ms).toBe(99);
     });
   });
 });

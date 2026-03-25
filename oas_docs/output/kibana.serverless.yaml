@@ -307,6 +307,15 @@ tags:
       url: https://www.elastic.co/docs/deploy-manage/distributed-architecture/kibana-tasks-management
     name: task manager
     x-displayName: Task manager
+  - name: workflows
+    description: |
+      Workflows enable you to automate multi-step processes directly in Kibana. Define sequences of steps in YAML to transform data insights into automated actions and outcomes, without needing external automation tools.
+
+      Use the workflows APIs to create, manage, and run workflows programmatically. You can also search, export, import, and monitor workflow executions.
+    externalDocs:
+      description: Workflows documentation
+      url: https://www.elastic.co/docs/explore-analyze/workflows
+    x-displayName: Workflows
 paths:
   /api/actions/connector_types:
     get:
@@ -24716,6 +24725,11 @@ paths:
                                               type: array
                                             type:
                                               type: string
+                                            var_group_selections:
+                                              additionalProperties:
+                                                type: string
+                                              description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                              type: object
                                             vars:
                                               additionalProperties:
                                                 additionalProperties: false
@@ -25815,6 +25829,11 @@ paths:
                                             type: array
                                           type:
                                             type: string
+                                          var_group_selections:
+                                            additionalProperties:
+                                              type: string
+                                            description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                            type: object
                                           vars:
                                             additionalProperties:
                                               additionalProperties: false
@@ -26696,6 +26715,11 @@ paths:
                                               type: array
                                             type:
                                               type: string
+                                            var_group_selections:
+                                              additionalProperties:
+                                                type: string
+                                              description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                              type: object
                                             vars:
                                               additionalProperties:
                                                 additionalProperties: false
@@ -27556,6 +27580,11 @@ paths:
                                             type: array
                                           type:
                                             type: string
+                                          var_group_selections:
+                                            additionalProperties:
+                                              type: string
+                                            description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                            type: object
                                           vars:
                                             additionalProperties:
                                               additionalProperties: false
@@ -28654,6 +28683,11 @@ paths:
                                             type: array
                                           type:
                                             type: string
+                                          var_group_selections:
+                                            additionalProperties:
+                                              type: string
+                                            description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                            type: object
                                           vars:
                                             additionalProperties:
                                               additionalProperties: false
@@ -29627,6 +29661,11 @@ paths:
                                             type: array
                                           type:
                                             type: string
+                                          var_group_selections:
+                                            additionalProperties:
+                                              type: string
+                                            description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                            type: object
                                           vars:
                                             additionalProperties:
                                               additionalProperties: false
@@ -31959,6 +31998,11 @@ paths:
                                   type: array
                                 type:
                                   type: string
+                                var_group_selections:
+                                  additionalProperties:
+                                    type: string
+                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                  type: object
                                 vars:
                                   additionalProperties:
                                     additionalProperties: false
@@ -48525,6 +48569,11 @@ paths:
                                     type: array
                                   type:
                                     type: string
+                                  var_group_selections:
+                                    additionalProperties:
+                                      type: string
+                                    description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                    type: object
                                   vars:
                                     additionalProperties:
                                       additionalProperties: false
@@ -49071,6 +49120,11 @@ paths:
                             type: array
                           type:
                             type: string
+                          var_group_selections:
+                            additionalProperties:
+                              type: string
+                            description: Variable group selections. Maps var_group name to the selected option name within that group.
+                            type: object
                           vars:
                             additionalProperties:
                               additionalProperties: false
@@ -49639,6 +49693,11 @@ paths:
                                   type: array
                                 type:
                                   type: string
+                                var_group_selections:
+                                  additionalProperties:
+                                    type: string
+                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                  type: object
                                 vars:
                                   additionalProperties:
                                     additionalProperties: false
@@ -50236,6 +50295,11 @@ paths:
                                     type: array
                                   type:
                                     type: string
+                                  var_group_selections:
+                                    additionalProperties:
+                                      type: string
+                                    description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                    type: object
                                   vars:
                                     additionalProperties:
                                       additionalProperties: false
@@ -50882,6 +50946,11 @@ paths:
                                   type: array
                                 type:
                                   type: string
+                                var_group_selections:
+                                  additionalProperties:
+                                    type: string
+                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                  type: object
                                 vars:
                                   additionalProperties:
                                     additionalProperties: false
@@ -51432,6 +51501,11 @@ paths:
                             type: array
                           type:
                             type: string
+                          var_group_selections:
+                            additionalProperties:
+                              type: string
+                            description: Variable group selections. Maps var_group name to the selected option name within that group.
+                            type: object
                           vars:
                             additionalProperties:
                               additionalProperties: false
@@ -51996,6 +52070,11 @@ paths:
                                   type: array
                                 type:
                                   type: string
+                                var_group_selections:
+                                  additionalProperties:
+                                    type: string
+                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                  type: object
                                 vars:
                                   additionalProperties:
                                     additionalProperties: false
@@ -52937,6 +53016,11 @@ paths:
                                           type: array
                                         type:
                                           type: string
+                                        var_group_selections:
+                                          additionalProperties:
+                                            type: string
+                                          description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                          type: object
                                         vars:
                                           additionalProperties:
                                             additionalProperties: false
@@ -53441,6 +53525,11 @@ paths:
                                       type: array
                                     type:
                                       type: string
+                                    var_group_selections:
+                                      additionalProperties:
+                                        type: string
+                                      description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                      type: object
                                     vars:
                                       additionalProperties:
                                         additionalProperties: false
@@ -62969,6 +63058,10 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                field_descriptions:
+                  additionalProperties:
+                    type: string
+                  type: object
                 query:
                   additionalProperties: false
                   type: object
@@ -64643,6 +64736,2252 @@ paths:
       summary: Get Timelines or Timeline templates
       tags:
         - Security Timeline API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/workflows:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Delete multiple workflows by their IDs.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:delete.
+      operationId: delete-workflows
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkDeleteWorkflowsRequestExample:
+                description: Example request for deleting multiple workflows
+                value:
+                  ids:
+                    - workflow-c3d4e5f6-a7b8-9012-cdef-234567890123
+                    - workflow-d4e5f6a7-b8c9-0123-defa-345678901234
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                ids:
+                  description: Array of workflow IDs to delete.
+                  items:
+                    description: Workflow ID to delete.
+                    type: string
+                  maxItems: 1000
+                  type: array
+              required:
+                - ids
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                bulkDeleteWorkflowsResponseExample:
+                  description: Example response after deleting multiple workflows
+                  value:
+                    deleted: 2
+                    failures: []
+                    total: 2
+          description: Indicates a successful response
+      summary: Bulk delete workflows
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X DELETE "${KIBANA_URL}/api/workflows" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "ids": ["workflow-c3d4e5f6-a7b8-9012-cdef-234567890123", "workflow-d4e5f6a7-b8c9-0123-defa-345678901234"]
+              }'
+        - lang: Console
+          source: |
+            DELETE kbn://api/workflows
+            {
+              "ids": ["workflow-c3d4e5f6-a7b8-9012-cdef-234567890123", "workflow-d4e5f6a7-b8c9-0123-defa-345678901234"]
+            }
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve a paginated list of workflows with optional filtering.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
+      operationId: get-workflows
+      parameters:
+        - description: Free-text search query.
+          in: query
+          name: query
+          required: false
+          schema:
+            type: string
+        - description: Number of results per page.
+          in: query
+          name: size
+          required: false
+          schema:
+            minimum: 1
+            type: number
+        - description: Page number.
+          in: query
+          name: page
+          required: false
+          schema:
+            minimum: 1
+            type: number
+        - description: Filter by enabled state.
+          in: query
+          name: enabled
+          required: false
+          schema:
+            anyOf:
+              - type: boolean
+              - items:
+                  type: boolean
+                maxItems: 2
+                type: array
+        - description: Filter by creator.
+          in: query
+          name: createdBy
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - items:
+                  type: string
+                maxItems: 1000
+                type: array
+        - description: Filter by tags.
+          in: query
+          name: tags
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - items:
+                  type: string
+                maxItems: 1000
+                type: array
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getWorkflowsResponseExample:
+                  description: Example response returning a paginated list of workflows
+                  value:
+                    page: 1
+                    results:
+                      - createdAt: '2025-11-20T10:30:00.000Z'
+                        definition:
+                          description: This is a workflow example
+                          enabled: true
+                          inputs:
+                            - default: hello world
+                              name: message
+                              type: string
+                          name: Example definition
+                          steps:
+                            - name: hello_world_step
+                              type: console
+                              with:
+                                message: '{{ inputs.message }}'
+                          triggers:
+                            - type: manual
+                        description: This is a workflow example
+                        enabled: true
+                        history:
+                          - duration: 5000
+                            finishedAt: '2025-11-20T12:00:05.000Z'
+                            id: exec-001
+                            startedAt: '2025-11-20T12:00:00.000Z'
+                            status: completed
+                            workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                            workflowName: Example definition
+                        id: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                        name: Example definition
+                        tags:
+                          - example
+                        valid: true
+                    size: 20
+                    total: 1
+          description: Indicates a successful response
+      summary: Get workflows
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows?size=20&page=1" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows?size=20&page=1
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create multiple workflows in a single request. Optionally overwrite existing workflows.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:create AND workflowsManagement:update.
+      operationId: post-workflows
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: Whether to overwrite existing workflows.
+          in: query
+          name: overwrite
+          required: false
+          schema:
+            default: false
+            type: boolean
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkCreateWorkflowsRequestExample:
+                description: Example request for creating multiple workflows at once
+                value:
+                  workflows:
+                    - yaml: |
+                        name: Example definition
+                        enabled: true
+                        description: This is a workflow example
+                        triggers:
+                          - type: manual
+                        inputs:
+                          - name: message
+                            type: string
+                            default: "hello world"
+                        steps:
+                          - name: hello_world_step
+                            type: console
+                            with:
+                              message: "{{ inputs.message }}"
+                    - id: workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901
+                      yaml: |
+                        name: Second workflow
+                        enabled: false
+                        description: Another workflow
+                        triggers:
+                          - type: manual
+                        steps:
+                          - name: log_step
+                            type: console
+                            with:
+                              message: "Hello from second workflow"
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                workflows:
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        maxLength: 255
+                        pattern: ^[a-zA-Z0-9][a-zA-Z0-9._-]{0,254}$
+                        type: string
+                      yaml:
+                        maxLength: 1048576
+                        type: string
+                    required:
+                      - yaml
+                  maxItems: 500
+                  type: array
+              required:
+                - workflows
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                bulkCreateWorkflowsResponseExample:
+                  description: Example response after creating multiple workflows
+                  value:
+                    created:
+                      - id: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                        name: Example definition
+                      - id: workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901
+                        name: Second workflow
+                    failures: []
+                    total: 2
+          description: Indicates a successful response
+      summary: Bulk create workflows
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/workflows?overwrite=false" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "workflows": [
+                  { "yaml": "name: Example definition\nenabled: true\ndescription: This is a workflow example\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"\n" },
+                  { "id": "workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901", "yaml": "name: Second workflow\nenabled: false\ndescription: Another workflow\ntriggers:\n  - type: manual\nsteps:\n  - name: log_step\n    type: console\n    with:\n      message: \"Hello from second workflow\"\n" }
+                ]
+              }'
+        - lang: Console
+          source: |
+            POST kbn://api/workflows?overwrite=false
+            {
+              "workflows": [
+                { "yaml": "name: Example definition\nenabled: true\ndescription: This is a workflow example\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"\n" },
+                { "id": "workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901", "yaml": "name: Second workflow\nenabled: false\ndescription: Another workflow\ntriggers:\n  - type: manual\nsteps:\n  - name: log_step\n    type: console\n    with:\n      message: \"Hello from second workflow\"\n" }
+              ]
+            }
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/workflows/aggs:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/aggs</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve distinct values and their counts for the specified workflow fields. Useful for building filters such as lists of tags or creators.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
+      operationId: get-workflows-aggs
+      parameters:
+        - description: Fields to aggregate on.
+          in: query
+          name: fields
+          required: true
+          schema:
+            items:
+              description: Field name to aggregate.
+              type: string
+            maxItems: 25
+            type: array
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getAggsResponseExample:
+                  description: Example response with tag and createdBy aggregations
+                  value:
+                    createdBy:
+                      - doc_count: 2
+                        key: elastic
+                    tags:
+                      - doc_count: 1
+                        key: reporting
+                      - doc_count: 1
+                        key: security
+                      - doc_count: 1
+                        key: triage
+          description: Indicates a successful response
+      summary: Get workflow aggregations
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows/aggs?fields=tags&fields=createdBy" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows/aggs?fields=tags&fields=createdBy
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/workflows/connectors:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/connectors</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve the Kibana action connectors that can be used in workflow steps, grouped by connector type. Each type includes its configured instances and availability status.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
+      operationId: get-workflows-connectors
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getConnectorsResponseExample:
+                  description: Example response with available connector types and their instances
+                  value:
+                    connectorTypes:
+                      .email:
+                        actionTypeId: .email
+                        displayName: Email
+                        enabled: true
+                        enabledInConfig: true
+                        enabledInLicense: true
+                        instances: []
+                        minimumLicenseRequired: gold
+                        subActions:
+                          - displayName: Send
+                            name: send
+                      .slack_api:
+                        actionTypeId: .slack_api
+                        displayName: Slack
+                        enabled: true
+                        enabledInConfig: true
+                        enabledInLicense: true
+                        instances:
+                          - id: slack-connector-1
+                            isDeprecated: false
+                            isPreconfigured: false
+                            name: Team Notifications
+                        minimumLicenseRequired: gold
+                        subActions:
+                          - displayName: Post Message
+                            name: postMessage
+                    totalConnectors: 1
+          description: Indicates a successful response
+      summary: Get available connectors
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows/connectors" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows/connectors
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/workflows/executions/{executionId}:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/executions/{executionId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve details of a single workflow execution by its ID.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution.
+      operationId: get-workflows-executions-executionid
+      parameters:
+        - description: Workflow execution ID
+          in: path
+          name: executionId
+          required: true
+          schema:
+            type: string
+        - description: Include execution input data.
+          in: query
+          name: includeInput
+          required: false
+          schema:
+            default: false
+            type: boolean
+        - description: Include execution output data.
+          in: query
+          name: includeOutput
+          required: false
+          schema:
+            default: false
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getExecutionResponseExample:
+                  description: Example response returning a workflow execution with step details
+                  value:
+                    duration: 3000
+                    executedBy: elastic
+                    finishedAt: '2025-11-20T12:00:03.000Z'
+                    id: exec-a1b2c3d4-e5f6-7890
+                    input:
+                      message: hello world
+                    isTestRun: false
+                    output: hello world
+                    spaceId: default
+                    startedAt: '2025-11-20T12:00:00.000Z'
+                    status: completed
+                    stepExecutions:
+                      - executionTimeMs: 1000
+                        finishedAt: '2025-11-20T12:00:02.000Z'
+                        globalExecutionIndex: 0
+                        id: step-exec-001
+                        isTestRun: false
+                        scopeStack: []
+                        spaceId: default
+                        startedAt: '2025-11-20T12:00:01.000Z'
+                        status: completed
+                        stepExecutionIndex: 0
+                        stepId: hello_world_step
+                        stepType: console
+                        topologicalIndex: 0
+                        workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                        workflowRunId: exec-a1b2c3d4-e5f6-7890
+                    triggeredBy: manual
+                    workflowDefinition:
+                      description: This is a workflow example
+                      enabled: true
+                      inputs:
+                        - default: hello world
+                          name: message
+                          type: string
+                      name: Example definition
+                      steps:
+                        - name: hello_world_step
+                          type: console
+                          with:
+                            message: '{{ inputs.message }}'
+                      triggers:
+                        - type: manual
+                    workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                    yaml: |
+                      name: Example definition
+                      enabled: true
+                      description: This is a workflow example
+                      triggers:
+                        - type: manual
+                      inputs:
+                        - name: message
+                          type: string
+                          default: "hello world"
+                      steps:
+                        - name: hello_world_step
+                          type: console
+                          with:
+                            message: "{{ inputs.message }}"
+          description: Indicates a successful response
+      summary: Get a workflow execution
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows/executions/{executionId}?includeInput=true&includeOutput=true" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows/executions/{executionId}?includeInput=true&includeOutput=true
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/workflows/executions/{executionId}/cancel:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/executions/{executionId}/cancel</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Cancel a running workflow execution by its ID.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:cancelExecution.
+      operationId: post-workflows-executions-executionid-cancel
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: Workflow execution ID
+          in: path
+          name: executionId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Indicates a successful response
+      summary: Cancel a workflow execution
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/workflows/executions/{executionId}/cancel" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            POST kbn://api/workflows/executions/{executionId}/cancel
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/workflows/executions/{executionId}/children:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/executions/{executionId}/children</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve child workflow executions spawned by sub-workflow steps within a parent execution.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution.
+      operationId: get-workflows-executions-executionid-children
+      parameters:
+        - description: Workflow execution ID
+          in: path
+          name: executionId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getChildrenExecutionsResponseExample:
+                  description: Example response returning child workflow executions spawned by sub-workflow steps
+                  value:
+                    - executionId: child-exec-001
+                      parentStepExecutionId: step-exec-003
+                      status: completed
+                      stepExecutions:
+                        - executionTimeMs: 1000
+                          finishedAt: '2025-11-20T12:00:07.000Z'
+                          globalExecutionIndex: 0
+                          id: child-step-001
+                          isTestRun: false
+                          scopeStack: []
+                          startedAt: '2025-11-20T12:00:06.000Z'
+                          status: completed
+                          stepExecutionIndex: 0
+                          stepId: hello_world_step
+                          stepType: console
+                          topologicalIndex: 0
+                          workflowId: workflow-e5f6a7b8-c9d0-1234-efab-456789012345
+                          workflowRunId: child-exec-001
+                      workflowId: workflow-e5f6a7b8-c9d0-1234-efab-456789012345
+                      workflowName: Child Workflow
+          description: Indicates a successful response
+      summary: Get child executions
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows/executions/{executionId}/children" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows/executions/{executionId}/children
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/workflows/executions/{executionId}/logs:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/executions/{executionId}/logs</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve paginated logs for a workflow execution. Optionally filter by a specific step execution.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution.
+      operationId: get-workflows-executions-executionid-logs
+      parameters:
+        - description: Workflow execution ID
+          in: path
+          name: executionId
+          required: true
+          schema:
+            type: string
+        - description: Filter logs by a specific step execution ID.
+          in: query
+          name: stepExecutionId
+          required: false
+          schema:
+            type: string
+        - description: Number of log entries per page.
+          in: query
+          name: size
+          required: false
+          schema:
+            default: 100
+            maximum: 100
+            minimum: 1
+            type: number
+        - description: Page number.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+        - description: Field to sort by.
+          in: query
+          name: sortField
+          required: false
+          schema:
+            type: string
+        - description: Sort order.
+          in: query
+          name: sortOrder
+          required: false
+          schema:
+            enum:
+              - asc
+              - desc
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getExecutionLogsResponseExample:
+                  description: Example response returning paginated execution logs
+                  value:
+                    logs:
+                      - additionalData:
+                          executionId: exec-a1b2c3d4-e5f6-7890
+                          workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                        connectorType: console
+                        duration: 150
+                        id: log-001
+                        level: info
+                        message: Workflow execution started
+                        stepId: hello_world_step
+                        stepName: Hello World
+                        timestamp: '2025-11-20T12:00:01.000Z'
+                      - additionalData:
+                          executionId: exec-a1b2c3d4-e5f6-7890
+                          workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                        connectorType: console
+                        duration: 200
+                        id: log-002
+                        level: info
+                        message: Step completed successfully
+                        stepId: hello_world_step
+                        stepName: Hello World
+                        timestamp: '2025-11-20T12:00:02.000Z'
+                    page: 1
+                    size: 100
+                    total: 2
+          description: Indicates a successful response
+      summary: Get execution logs
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows/executions/{executionId}/logs?size=100&page=1" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows/executions/{executionId}/logs?size=100&page=1
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/workflows/executions/{executionId}/resume:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/executions/{executionId}/resume</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Resume a paused workflow execution with the provided input.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
+      operationId: post-workflows-executions-executionid-resume
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: Workflow execution ID
+          in: path
+          name: executionId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              resumeExecutionRequestExample:
+                description: Example request to resume a paused workflow execution
+                value:
+                  input:
+                    approved: true
+                    comment: Approved by analyst
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                input:
+                  additionalProperties: {}
+                  description: Input data to resume the execution with.
+                  type: object
+              required:
+                - input
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                resumeExecutionResponseExample:
+                  description: Example response confirming the resume was scheduled
+                  value:
+                    executionId: exec-a1b2c3d4-e5f6-7890
+                    message: Workflow resume scheduled
+                    success: true
+          description: Indicates a successful response
+      summary: Resume a workflow execution
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/workflows/executions/{executionId}/resume" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "input": {
+                  "approved": true,
+                  "comment": "Approved by analyst"
+                }
+              }'
+        - lang: Console
+          source: |
+            POST kbn://api/workflows/executions/{executionId}/resume
+            {
+              "input": {
+                "approved": true,
+                "comment": "Approved by analyst"
+              }
+            }
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/workflows/executions/{executionId}/step/{stepExecutionId}:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/executions/{executionId}/step/{stepExecutionId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve details of a single step execution within a workflow execution.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution.
+      operationId: get-workflows-executions-executionid-step-stepexecutionid
+      parameters:
+        - description: Workflow execution ID.
+          in: path
+          name: executionId
+          required: true
+          schema:
+            type: string
+        - description: Step execution ID.
+          in: path
+          name: stepExecutionId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getStepExecutionResponseExample:
+                  description: Example response returning a single step execution
+                  value:
+                    error: null
+                    executionTimeMs: 1000
+                    finishedAt: '2025-11-20T12:00:02.000Z'
+                    globalExecutionIndex: 0
+                    id: step-exec-001
+                    input:
+                      message: hello world
+                    isTestRun: false
+                    output: hello world
+                    scopeStack: []
+                    spaceId: default
+                    startedAt: '2025-11-20T12:00:01.000Z'
+                    state: null
+                    status: completed
+                    stepExecutionIndex: 0
+                    stepId: hello_world_step
+                    stepType: console
+                    topologicalIndex: 0
+                    workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                    workflowRunId: exec-a1b2c3d4-e5f6-7890
+          description: Indicates a successful response
+      summary: Get a step execution
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows/executions/{executionId}/step/{stepExecutionId}" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows/executions/{executionId}/step/{stepExecutionId}
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/workflows/export:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/export</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Export one or more workflows YAML files as a ZIP archive.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
+      operationId: post-workflows-export
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              exportWorkflowsRequestExample:
+                description: Example request to export workflows as a ZIP archive
+                value:
+                  ids:
+                    - workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                    - workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                ids:
+                  description: Array of workflow IDs to export.
+                  items:
+                    description: Workflow ID to export.
+                    maxLength: 255
+                    type: string
+                  maxItems: 500
+                  minItems: 1
+                  type: array
+              required:
+                - ids
+      responses:
+        '200':
+          content:
+            application/zip:
+              examples:
+                exportWorkflowsResponseExample:
+                  description: A ZIP archive containing the exported workflow YAML files
+                  value: '{binary ZIP content}'
+          description: A ZIP archive containing the exported workflow YAML files
+      summary: Export workflows
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/workflows/export" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -o workflows_export.zip \
+              -d '{
+                "ids": ["workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890", "workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901"]
+              }'
+        - lang: Console
+          source: |
+            POST kbn://api/workflows/export
+            {
+              "ids": ["workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890", "workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901"]
+            }
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/workflows/mget:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/mget</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve multiple workflows by their IDs in a single request. Optionally use the `source` parameter to return only specific fields from each workflow document.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
+      operationId: post-workflows-mget
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              mgetWorkflowsRequestExample:
+                description: Example request to retrieve multiple workflows by their IDs
+                value:
+                  ids:
+                    - workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                    - workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901
+                  source:
+                    - name
+                    - enabled
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                ids:
+                  description: Array of workflow IDs to look up.
+                  items:
+                    description: Workflow ID.
+                    maxLength: 255
+                    type: string
+                  maxItems: 500
+                  minItems: 1
+                  type: array
+                source:
+                  description: Array of source fields to include.
+                  items:
+                    description: Source field.
+                    maxLength: 255
+                    type: string
+                  maxItems: 10
+                  minItems: 1
+                  type: array
+              required:
+                - ids
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                mgetWorkflowsResponseExample:
+                  description: Example response returning the requested workflows with projected fields
+                  value:
+                    - enabled: true
+                      id: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                      name: Example definition
+                    - enabled: false
+                      id: workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901
+                      name: Second workflow
+          description: Indicates a successful response
+      summary: Get workflows by IDs
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/workflows/mget" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "ids": ["workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890", "workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901"],
+                "source": ["name", "enabled"]
+              }'
+        - lang: Console
+          source: |
+            POST kbn://api/workflows/mget
+            {
+              "ids": ["workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890", "workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901"],
+              "source": ["name", "enabled"]
+            }
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/workflows/schema:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/schema</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve the JSON schema used to validate workflow YAML definitions. The schema includes available step types based on the configured connectors in the current space.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
+      operationId: get-workflows-schema
+      parameters:
+        - description: When true, returns a permissive schema that allows additional properties. When false, returns a strict schema for full validation.
+          in: query
+          name: loose
+          required: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getSchemaResponseExample:
+                  description: Example response returning the workflow JSON schema (truncated)
+                  value:
+                    $schema: http://json-schema.org/draft-07/schema#
+                    type: object
+                    properties:
+                      description:
+                        type: string
+                      enabled:
+                        default: true
+                        type: boolean
+                      name:
+                        minLength: 1
+                        type: string
+                      tags:
+                        items:
+                          type: string
+                        type: array
+                      version:
+                        const: '1'
+                        default: '1'
+                        description: The version of the workflow schema
+                        type: string
+                    required:
+                      - name
+                      - triggers
+                      - steps
+          description: Indicates a successful response
+      summary: Get workflow JSON schema
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows/schema?loose=false" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows/schema?loose=false
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/workflows/stats:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/stats</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve summary statistics about workflows, including total, enabled, and disabled counts, as well as execution history metrics for the last 30 days.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
+      operationId: get-workflows-stats
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getStatsResponseExample:
+                  description: Example response with workflow counts and 30-day execution history
+                  value:
+                    executions:
+                      - cancelled: 1
+                        completed: 45
+                        date: '2025-11-20'
+                        failed: 2
+                        timestamp: '2025-11-20T00:00:00.000Z'
+                      - cancelled: 0
+                        completed: 50
+                        date: '2025-11-21'
+                        failed: 0
+                        timestamp: '2025-11-21T00:00:00.000Z'
+                    workflows:
+                      disabled: 3
+                      enabled: 12
+          description: Indicates a successful response
+      summary: Get workflow statistics
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows/stats" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows/stats
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/workflows/step/test:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/step/test</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Execute a single step from a workflow definition in test mode.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
+      operationId: post-workflows-step-test
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              testStepRequestExample:
+                description: Example request to test a single workflow step
+                value:
+                  contextOverride:
+                    inputs:
+                      message: override message
+                  stepId: hello_world_step
+                  workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                  workflowYaml: |
+                    name: Example definition
+                    enabled: true
+                    description: This is a workflow example
+                    triggers:
+                      - type: manual
+                    inputs:
+                      - name: message
+                        type: string
+                        default: "hello world"
+                    steps:
+                      - name: hello_world_step
+                        type: console
+                        with:
+                          message: "{{ inputs.message }}"
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                contextOverride:
+                  additionalProperties: {}
+                  description: Context overrides for the step execution.
+                  type: object
+                stepId:
+                  description: ID of the step to test.
+                  type: string
+                workflowId:
+                  description: ID of the workflow containing the step.
+                  type: string
+                workflowYaml:
+                  description: YAML definition of the workflow containing the step.
+                  type: string
+              required:
+                - stepId
+                - contextOverride
+                - workflowYaml
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                testStepResponseExample:
+                  description: Example response returning the step test execution ID
+                  value:
+                    workflowExecutionId: step-test-exec-a1b2c3d4
+          description: Indicates a successful response
+      summary: Test a workflow step
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/workflows/step/test" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "stepId": "hello_world_step",
+                "workflowId": "workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                "workflowYaml": "name: Example definition\nenabled: true\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"",
+                "contextOverride": { "inputs": { "message": "override message" } }
+              }'
+        - lang: Console
+          source: |
+            POST kbn://api/workflows/step/test
+            {
+              "stepId": "hello_world_step",
+              "workflowId": "workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+              "workflowYaml": "name: Example definition\nenabled: true\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"",
+              "contextOverride": { "inputs": { "message": "override message" } }
+            }
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/workflows/test:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/test</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Execute a workflow in test mode without requiring it to be saved or enabled. Provide either a workflow ID to test a saved workflow, a YAML definition to test an unsaved draft, or both to test a modified version of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
+      operationId: post-workflows-test
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              testWorkflowByIdRequestExample:
+                description: Example request to test a saved workflow by its ID
+                value:
+                  inputs:
+                    message: test message
+                  workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+              testWorkflowByYamlRequestExample:
+                description: Example request to test an unsaved workflow YAML draft
+                value:
+                  inputs:
+                    message: test message
+                  workflowYaml: |
+                    name: Example definition
+                    enabled: true
+                    description: This is a workflow example
+                    triggers:
+                      - type: manual
+                    inputs:
+                      - name: message
+                        type: string
+                        default: "hello world"
+                    steps:
+                      - name: hello_world_step
+                        type: console
+                        with:
+                          message: "{{ inputs.message }}"
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                inputs:
+                  additionalProperties: {}
+                  description: Key-value inputs for the test execution.
+                  type: object
+                workflowId:
+                  description: ID of an existing workflow to test.
+                  type: string
+                workflowYaml:
+                  description: YAML definition to test.
+                  type: string
+              required:
+                - inputs
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                testWorkflowResponseExample:
+                  description: Example response returning the test execution ID
+                  value:
+                    workflowExecutionId: test-exec-a1b2c3d4-e5f6
+          description: Indicates a successful response
+      summary: Test a workflow
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/workflows/test" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "workflowId": "workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                "inputs": { "message": "test message" }
+              }'
+        - lang: Console
+          source: |
+            POST kbn://api/workflows/test
+            {
+              "workflowId": "workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+              "inputs": { "message": "test message" }
+            }
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/workflows/workflow:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/workflow</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create a new workflow from a YAML definition. The YAML is validated and parsed before the workflow is saved. An optional custom ID can be provided.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:create.
+      operationId: post-workflows-workflow
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              createWorkflowRequestExample:
+                description: Example request for creating a workflow from a YAML definition
+                value:
+                  yaml: |
+                    name: Example definition
+                    enabled: true
+                    description: This is a workflow example
+                    triggers:
+                      - type: manual
+                    inputs:
+                      - name: message
+                        type: string
+                        default: "hello world"
+                    steps:
+                      - name: hello_world_step
+                        type: console
+                        with:
+                          message: "{{ inputs.message }}"
+              createWorkflowWithIdRequestExample:
+                description: Example request for creating a workflow with a custom ID
+                value:
+                  id: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                  yaml: |
+                    name: Example definition
+                    enabled: true
+                    description: This is a workflow example
+                    triggers:
+                      - type: manual
+                    inputs:
+                      - name: message
+                        type: string
+                        default: "hello world"
+                    steps:
+                      - name: hello_world_step
+                        type: console
+                        with:
+                          message: "{{ inputs.message }}"
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                id:
+                  maxLength: 255
+                  pattern: ^[a-zA-Z0-9][a-zA-Z0-9._-]{0,254}$
+                  type: string
+                yaml:
+                  maxLength: 1048576
+                  type: string
+              required:
+                - yaml
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                createWorkflowResponseExample:
+                  description: Example response returning the created workflow
+                  value:
+                    createdAt: '2025-11-20T10:30:00.000Z'
+                    createdBy: elastic
+                    definition:
+                      description: This is a workflow example
+                      enabled: true
+                      inputs:
+                        - default: hello world
+                          name: message
+                          type: string
+                      name: Example definition
+                      steps:
+                        - name: hello_world_step
+                          type: console
+                          with:
+                            message: '{{ inputs.message }}'
+                      triggers:
+                        - type: manual
+                    description: This is a workflow example
+                    enabled: true
+                    id: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                    lastUpdatedAt: '2025-11-20T10:30:00.000Z'
+                    lastUpdatedBy: elastic
+                    name: Example definition
+                    valid: true
+                    yaml: |
+                      name: Example definition
+                      enabled: true
+                      description: This is a workflow example
+                      triggers:
+                        - type: manual
+                      inputs:
+                        - name: message
+                          type: string
+                          default: "hello world"
+                      steps:
+                        - name: hello_world_step
+                          type: console
+                          with:
+                            message: "{{ inputs.message }}"
+          description: Indicates a successful response
+      summary: Create a workflow
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/workflows/workflow" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "yaml": "name: Example definition\nenabled: true\ndescription: This is a workflow example\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"\n"
+              }'
+        - lang: Console
+          source: |
+            POST kbn://api/workflows/workflow
+            {
+              "yaml": "name: Example definition\nenabled: true\ndescription: This is a workflow example\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"\n"
+            }
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/workflows/workflow/{id}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/workflow/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Delete a single workflow by its ID.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:delete.
+      operationId: delete-workflows-workflow-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: Workflow ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Indicates a successful response
+      summary: Delete a workflow
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X DELETE "${KIBANA_URL}/api/workflows/workflow/{id}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            DELETE kbn://api/workflows/workflow/{id}
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/workflow/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve a single workflow by its ID.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
+      operationId: get-workflows-workflow-id
+      parameters:
+        - description: Workflow ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getWorkflowResponseExample:
+                  description: Example response returning a single workflow
+                  value:
+                    createdAt: '2025-11-20T10:30:00.000Z'
+                    createdBy: elastic
+                    definition:
+                      description: This is a workflow example
+                      enabled: true
+                      inputs:
+                        - default: hello world
+                          name: message
+                          type: string
+                      name: Example definition
+                      steps:
+                        - name: hello_world_step
+                          type: console
+                          with:
+                            message: '{{ inputs.message }}'
+                      triggers:
+                        - type: manual
+                    description: This is a workflow example
+                    enabled: true
+                    id: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                    lastUpdatedAt: '2025-11-21T14:00:00.000Z'
+                    lastUpdatedBy: elastic
+                    name: Example definition
+                    valid: true
+                    yaml: |
+                      name: Example definition
+                      enabled: true
+                      description: This is a workflow example
+                      triggers:
+                        - type: manual
+                      inputs:
+                        - name: message
+                          type: string
+                          default: "hello world"
+                      steps:
+                        - name: hello_world_step
+                          type: console
+                          with:
+                            message: "{{ inputs.message }}"
+          description: Indicates a successful response
+      summary: Get a workflow
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows/workflow/{id}" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows/workflow/{id}
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/workflow/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Partially update an existing workflow. You can update individual fields such as name, description, enabled state, tags, or the YAML definition without providing all fields.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:update.
+      operationId: put-workflows-workflow-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: Workflow ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateWorkflowEnableExample:
+                description: Example request to enable a workflow and update its tags
+                value:
+                  enabled: true
+                  tags:
+                    - production
+              updateWorkflowFullExample:
+                description: Example request to update multiple workflow fields
+                value:
+                  description: Updated workflow description
+                  enabled: true
+                  name: Updated example
+                  tags:
+                    - example
+                    - updated
+                  yaml: |
+                    name: Updated example
+                    enabled: true
+                    description: Updated workflow description
+                    triggers:
+                      - type: manual
+                    inputs:
+                      - name: message
+                        type: string
+                        default: "hello world"
+                    steps:
+                      - name: hello_world_step
+                        type: console
+                        with:
+                          message: "{{ inputs.message }}"
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                description:
+                  type: string
+                enabled:
+                  type: boolean
+                name:
+                  type: string
+                tags:
+                  items:
+                    type: string
+                  type: array
+                yaml:
+                  type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateWorkflowResponseExample:
+                  description: Example response returning the updated workflow
+                  value:
+                    enabled: false
+                    id: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                    lastUpdatedAt: '2026-03-23T13:38:59.568Z'
+                    lastUpdatedBy: elastic
+                    valid: true
+                    validationErrors: []
+          description: Indicates a successful response
+      summary: Update a workflow
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X PUT "${KIBANA_URL}/api/workflows/workflow/{id}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "enabled": true,
+                "tags": ["production"]
+              }'
+        - lang: Console
+          source: |
+            PUT kbn://api/workflows/workflow/{id}
+            {
+              "enabled": true,
+              "tags": ["production"]
+            }
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/workflows/workflow/{id}/clone:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/workflow/{id}/clone</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create a copy of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:create.
+      operationId: post-workflows-workflow-id-clone
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: Workflow ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                cloneWorkflowResponseExample:
+                  description: Example response returning the cloned workflow with a new ID
+                  value:
+                    createdAt: '2025-11-22T11:00:00.000Z'
+                    createdBy: elastic
+                    definition:
+                      description: This is a workflow example
+                      enabled: false
+                      inputs:
+                        - default: hello world
+                          name: message
+                          type: string
+                      name: Example definition (copy)
+                      steps:
+                        - name: hello_world_step
+                          type: console
+                          with:
+                            message: '{{ inputs.message }}'
+                      triggers:
+                        - type: manual
+                    description: This is a workflow example
+                    enabled: false
+                    id: workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901
+                    lastUpdatedAt: '2025-11-22T11:00:00.000Z'
+                    lastUpdatedBy: elastic
+                    name: Example definition (copy)
+                    valid: true
+                    yaml: |
+                      name: Example definition (copy)
+                      enabled: false
+                      description: This is a workflow example
+                      triggers:
+                        - type: manual
+                      inputs:
+                        - name: message
+                          type: string
+                          default: "hello world"
+                      steps:
+                        - name: hello_world_step
+                          type: console
+                          with:
+                            message: "{{ inputs.message }}"
+          description: Indicates a successful response
+      summary: Clone a workflow
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/workflows/workflow/{id}/clone" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            POST kbn://api/workflows/workflow/{id}/clone
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/workflows/workflow/{id}/run:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/workflow/{id}/run</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Execute a workflow by its ID with the provided inputs. The workflow must be enabled and have a valid definition. Returns an execution ID that can be used to monitor progress.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
+      operationId: post-workflows-workflow-id-run
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: Workflow ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              runWorkflowRequestExample:
+                description: Example request to execute a workflow with inputs
+                value:
+                  inputs:
+                    message: hello from the API
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                inputs:
+                  additionalProperties: {}
+                  description: Key-value inputs for the workflow execution.
+                  type: object
+                metadata:
+                  additionalProperties: {}
+                  description: Optional metadata for the execution.
+                  type: object
+              required:
+                - inputs
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                runWorkflowResponseExample:
+                  description: Example response returning the execution ID
+                  value:
+                    workflowExecutionId: exec-a1b2c3d4-e5f6-7890
+          description: Indicates a successful response
+      summary: Run a workflow
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/workflows/workflow/{id}/run" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "inputs": {
+                  "message": "hello from the API"
+                }
+              }'
+        - lang: Console
+          source: |
+            POST kbn://api/workflows/workflow/{id}/run
+            {
+              "inputs": {
+                "message": "hello from the API"
+              }
+            }
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/workflows/workflow/{workflowId}/executions:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/workflow/{workflowId}/executions</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve a paginated list of executions for a specific workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution.
+      operationId: get-workflows-workflow-workflowid-executions
+      parameters:
+        - description: Workflow ID
+          in: path
+          name: workflowId
+          required: true
+          schema:
+            type: string
+        - description: Filter by execution status.
+          in: query
+          name: statuses
+          required: false
+          schema:
+            anyOf:
+              - enum:
+                  - pending
+                  - waiting
+                  - waiting_for_input
+                  - running
+                  - completed
+                  - failed
+                  - cancelled
+                  - timed_out
+                  - skipped
+                type: string
+              - items:
+                  enum:
+                    - pending
+                    - waiting
+                    - waiting_for_input
+                    - running
+                    - completed
+                    - failed
+                    - cancelled
+                    - timed_out
+                    - skipped
+                  type: string
+                maxItems: 9
+                type: array
+        - description: Filter by execution type.
+          in: query
+          name: executionTypes
+          required: false
+          schema:
+            anyOf:
+              - enum:
+                  - test
+                  - production
+                type: string
+              - items:
+                  enum:
+                    - test
+                    - production
+                  type: string
+                maxItems: 2
+                type: array
+        - description: Filter by the user who triggered the execution.
+          in: query
+          name: executedBy
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - items:
+                  type: string
+                maxItems: 100
+                type: array
+        - description: Whether to exclude step-level execution data.
+          in: query
+          name: omitStepRuns
+          required: false
+          schema:
+            type: boolean
+        - description: Page number.
+          in: query
+          name: page
+          required: false
+          schema:
+            minimum: 1
+            type: number
+        - description: Number of results per page.
+          in: query
+          name: size
+          required: false
+          schema:
+            maximum: 100
+            minimum: 1
+            type: number
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getWorkflowExecutionsResponseExample:
+                  description: Example response returning a paginated list of executions for a workflow
+                  value:
+                    page: 1
+                    results:
+                      - duration: 3000
+                        error: null
+                        executedBy: elastic
+                        finishedAt: '2025-11-20T12:00:03.000Z'
+                        id: exec-001
+                        isTestRun: false
+                        spaceId: default
+                        startedAt: '2025-11-20T12:00:00.000Z'
+                        status: completed
+                        triggeredBy: manual
+                        workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                      - duration: 2000
+                        error:
+                          message: Step 'hello_world_step' failed
+                        executedBy: elastic
+                        finishedAt: '2025-11-20T13:00:02.000Z'
+                        id: exec-002
+                        isTestRun: false
+                        spaceId: default
+                        startedAt: '2025-11-20T13:00:00.000Z'
+                        status: failed
+                        triggeredBy: manual
+                        workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                    size: 20
+                    total: 2
+          description: Indicates a successful response
+      summary: Get workflow executions
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows/workflow/{workflowId}/executions?page=1&size=20" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows/workflow/{workflowId}/executions?page=1&size=20
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/workflows/workflow/{workflowId}/executions/steps:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/workflow/{workflowId}/executions/steps</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve a paginated list of step-level execution records for a specific workflow. Optionally filter by step ID and include input or output data.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution.
+      operationId: get-workflows-workflow-workflowid-executions-steps
+      parameters:
+        - description: Workflow ID
+          in: path
+          name: workflowId
+          required: true
+          schema:
+            type: string
+        - description: Filter by step ID.
+          in: query
+          name: stepId
+          required: false
+          schema:
+            type: string
+        - description: Include step input data.
+          in: query
+          name: includeInput
+          required: false
+          schema:
+            type: boolean
+        - description: Include step output data.
+          in: query
+          name: includeOutput
+          required: false
+          schema:
+            type: boolean
+        - description: Page number for pagination.
+          in: query
+          name: page
+          required: false
+          schema:
+            minimum: 1
+            type: number
+        - description: Number of results per page.
+          in: query
+          name: size
+          required: false
+          schema:
+            maximum: 100
+            minimum: 1
+            type: number
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getWorkflowStepExecutionsResponseExample:
+                  description: Example response returning step execution records for a workflow
+                  value:
+                    results:
+                      - executionTimeMs: 1000
+                        finishedAt: '2025-11-20T12:00:02.000Z'
+                        globalExecutionIndex: 0
+                        id: step-exec-001
+                        input:
+                          message: hello world
+                        isTestRun: false
+                        scopeStack: []
+                        spaceId: default
+                        startedAt: '2025-11-20T12:00:01.000Z'
+                        status: completed
+                        stepExecutionIndex: 0
+                        stepId: hello_world_step
+                        stepType: console
+                        topologicalIndex: 0
+                        workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                        workflowRunId: exec-001
+                    total: 1
+          description: Indicates a successful response
+      summary: Get workflow step executions
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows/workflow/{workflowId}/executions/steps?includeInput=true" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows/workflow/{workflowId}/executions/steps?includeInput=true
+      x-state: ''
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -69612,6 +71951,10 @@ components:
           properties:
             description:
               type: string
+            field_descriptions:
+              additionalProperties:
+                type: string
+              type: object
             query:
               additionalProperties: false
               type: object
@@ -70498,6 +72841,66 @@ components:
                           type: string
                       required:
                         - internal_networks_field
+            - additionalProperties: false
+              description: JsonExtract processor - Extract values from JSON strings using JSONPath-like selectors
+              type: object
+              properties:
+                action:
+                  enum:
+                    - json_extract
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                extractions:
+                  description: List of extraction specifications
+                  items:
+                    description: A single extraction specification
+                    type: object
+                    properties:
+                      selector:
+                        description: JSONPath-like selector to extract value (e.g., "user.id", "$.metadata.client.ip", "items[0].name")
+                        minLength: 1
+                        type: string
+                      target_field:
+                        description: Target field to store the extracted value
+                        minLength: 1
+                        type: string
+                      type:
+                        description: Data type for the extracted value. Defaults to "keyword". Ensures consistent types across transpilers.
+                        enum:
+                          - keyword
+                          - integer
+                          - long
+                          - double
+                          - boolean
+                        type: string
+                    required:
+                      - selector
+                      - target_field
+                  minItems: 1
+                  type: array
+                field:
+                  description: Source field containing the JSON string to parse
+                  minLength: 1
+                  type: string
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                ignore_missing:
+                  description: Skip processing when source field is missing
+                  type: boolean
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_Condition'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+                - field
+                - extractions
             - additionalProperties: false
               description: Manual ingest pipeline wrapper around native Elasticsearch processors
               type: object

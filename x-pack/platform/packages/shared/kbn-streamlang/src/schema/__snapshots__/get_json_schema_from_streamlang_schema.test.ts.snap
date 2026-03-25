@@ -1575,6 +1575,90 @@ Object {
             },
             Object {
               "additionalProperties": false,
+              "description": "Extract values from JSON strings using JSONPath-like selectors",
+              "properties": Object {
+                "action": Object {
+                  "const": "json_extract",
+                  "type": "string",
+                },
+                "customIdentifier": Object {
+                  "description": "Custom identifier to correlate this processor across outputs",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "description": Object {
+                  "description": "Human-readable notes about this processor step",
+                  "type": "string",
+                },
+                "extractions": Object {
+                  "description": "List of extraction specifications",
+                  "items": Object {
+                    "additionalProperties": false,
+                    "description": "A single extraction specification",
+                    "properties": Object {
+                      "selector": Object {
+                        "description": "JSONPath-like selector to extract value (e.g., \\"user.id\\", \\"$.metadata.client.ip\\", \\"items[0].name\\")",
+                        "minLength": 1,
+                        "type": "string",
+                      },
+                      "target_field": Object {
+                        "description": "Target field to store the extracted value",
+                        "minLength": 1,
+                        "type": "string",
+                      },
+                      "type": Object {
+                        "description": "Data type for the extracted value. Defaults to \\"keyword\\". Ensures consistent types across transpilers.",
+                        "enum": Array [
+                          "keyword",
+                          "integer",
+                          "long",
+                          "double",
+                          "boolean",
+                        ],
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "selector",
+                      "target_field",
+                    ],
+                    "type": "object",
+                  },
+                  "minItems": 1,
+                  "type": "array",
+                },
+                "field": Object {
+                  "description": "Source field containing the JSON string to parse",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "ignore_failure": Object {
+                  "description": "Continue pipeline execution if this processor fails",
+                  "type": "boolean",
+                },
+                "ignore_missing": Object {
+                  "description": "Skip processing when source field is missing",
+                  "type": "boolean",
+                },
+                "where": Object {
+                  "allOf": Array [
+                    Object {
+                      "$ref": "#/definitions/Condition",
+                    },
+                  ],
+                  "description": "Conditional expression controlling whether this processor runs",
+                },
+              },
+              "required": Array [
+                "action",
+                "field",
+                "extractions",
+              ],
+              "title": "JSON Extract",
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
               "description": "Execute raw Elasticsearch ingest processors directly",
               "properties": Object {
                 "action": Object {
@@ -1656,6 +1740,7 @@ Object {
                 "sort",
                 "convert",
                 "concat",
+                "json_extract",
                 "manual_ingest_pipeline",
               ],
               "type": "string",
@@ -2897,6 +2982,90 @@ Object {
               },
               Object {
                 "additionalProperties": false,
+                "description": "Extract values from JSON strings using JSONPath-like selectors",
+                "properties": Object {
+                  "action": Object {
+                    "const": "json_extract",
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "extractions": Object {
+                    "description": "List of extraction specifications",
+                    "items": Object {
+                      "additionalProperties": false,
+                      "description": "A single extraction specification",
+                      "properties": Object {
+                        "selector": Object {
+                          "description": "JSONPath-like selector to extract value (e.g., \\"user.id\\", \\"$.metadata.client.ip\\", \\"items[0].name\\")",
+                          "minLength": 1,
+                          "type": "string",
+                        },
+                        "target_field": Object {
+                          "description": "Target field to store the extracted value",
+                          "minLength": 1,
+                          "type": "string",
+                        },
+                        "type": Object {
+                          "description": "Data type for the extracted value. Defaults to \\"keyword\\". Ensures consistent types across transpilers.",
+                          "enum": Array [
+                            "keyword",
+                            "integer",
+                            "long",
+                            "double",
+                            "boolean",
+                          ],
+                          "type": "string",
+                        },
+                      },
+                      "required": Array [
+                        "selector",
+                        "target_field",
+                      ],
+                      "type": "object",
+                    },
+                    "minItems": 1,
+                    "type": "array",
+                  },
+                  "field": Object {
+                    "description": "Source field containing the JSON string to parse",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "ignore_missing": Object {
+                    "description": "Skip processing when source field is missing",
+                    "type": "boolean",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/Condition",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "field",
+                  "extractions",
+                ],
+                "title": "JSON Extract",
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
                 "description": "Execute raw Elasticsearch ingest processors directly",
                 "properties": Object {
                   "action": Object {
@@ -2978,6 +3147,7 @@ Object {
                   "sort",
                   "convert",
                   "concat",
+                  "json_extract",
                   "manual_ingest_pipeline",
                 ],
                 "type": "string",

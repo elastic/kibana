@@ -20,10 +20,12 @@ import {
 
 apiTest.describe('dashboards - update', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
+  let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
     // returns editor role in most deployment project and deployment types
     editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
+    viewerCredentials = await requestAuth.getApiKeyForViewer();
     await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
     await kbnClient.importExport.load(KBN_ARCHIVES.TAGS);
   });
@@ -123,4 +125,23 @@ apiTest.describe('dashboards - update', { tag: tags.deploymentAgnostic }, () => 
       '[request body.panels]: expected value of type [array] but got [Object]'
     );
   });
+
+  apiTest(
+    'validation - returns error if user does not have permission to update a dashboard',
+    async ({ apiClient }) => {
+      const response = await apiClient.put(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...viewerCredentials.apiKeyHeader,
+        },
+        body: {
+          title: 'Refresh Requests (Updated again)',
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(403);
+      expect(response.body.message).toBe('Unable to update dashboard');
+    }
+  );
 });

@@ -13,7 +13,8 @@ import { isPassThroughAny } from '@kbn/zod-helpers/v4';
 import zodToJsonSchema, { jsonDescription } from 'zod-to-json-schema';
 import type { OpenAPIV3 } from 'openapi-types';
 
-import type { KnownParameters } from '../../type';
+import type { ConvertOptions, KnownParameters } from '../../type';
+import { getXState } from '../../util';
 import { validatePathParameters } from '../common';
 
 // Adapted from from https://github.com/jlalmes/trpc-openapi/blob/aea45441af785518df35c2bc173ae2ea6271e489/src/utils/zod.ts#L1
@@ -634,7 +635,15 @@ const OAS_EXTENSIONS_MARKER = 'x-kbn-oas-extensions';
  */
 export interface OasMetaExtensions {
   discriminator?: OpenAPIV3.DiscriminatorObject;
+  availability?: {
+    stability?: 'experimental' | 'beta' | 'stable';
+    since?: string;
+  };
 }
+
+type NormalizedOasMetaExtensions = Omit<OasMetaExtensions, 'availability'> & {
+  'x-state'?: string;
+};
 
 /**
  * Reads the stable OAS component name for a Zod v4 schema, if one was declared
@@ -654,6 +663,23 @@ function getZodV4ComponentId(schema: z4.core.$ZodType): string | undefined {
 function getZodV4OasExtensions(schema: z4.core.$ZodType): OasMetaExtensions | undefined {
   const meta = z4.globalRegistry.get(schema);
   return meta?.openapi as OasMetaExtensions | undefined;
+}
+
+function normalizeOasMetaExtensions(
+  schema: z4.ZodType,
+  env: ConvertOptions['env']
+): NormalizedOasMetaExtensions | undefined {
+  const meta = getZodV4OasExtensions(schema);
+  const autoDiscriminator = meta?.discriminator ? undefined : getZodV4AutoDiscriminator(schema);
+  const { availability, ...rest } = meta ?? {};
+  const xState = getXState(availability, env ?? { serverless: false });
+  const extensions = {
+    ...rest,
+    ...(autoDiscriminator ? { discriminator: autoDiscriminator } : {}),
+    ...(xState !== undefined ? { 'x-state': xState } : {}),
+  };
+
+  return Object.keys(extensions).length > 0 ? extensions : undefined;
 }
 
 /**
@@ -748,14 +774,19 @@ function extractDefsToShared(
     replacements[`#/$defs/${key}`] = `#/components/schemas/${uniqueKey}`;
 
     if (stableId) {
-      const { [COMPONENT_ID_MARKER]: _idMarker, [OAS_EXTENSIONS_MARKER]: oasExt, ...rest } = def;
+      const {
+        [COMPONENT_ID_MARKER]: _idMarker,
+        [OAS_EXTENSIONS_MARKER]: oasExt,
+        openapi: _openapi,
+        ...rest
+      } = def;
 
       shared[uniqueKey] = {
         ...rest,
         ...(oasExt as OasMetaExtensions | undefined),
       } as OpenAPIV3.SchemaObject;
     } else {
-      const { [OAS_EXTENSIONS_MARKER]: _ext, ...rest } = def;
+      const { [OAS_EXTENSIONS_MARKER]: _ext, openapi: _openapi, ...rest } = def;
       shared[uniqueKey] = rest as OpenAPIV3.SchemaObject;
     }
   }
@@ -802,7 +833,12 @@ function hoistMarkedSchemas(
   const name = obj[COMPONENT_ID_MARKER];
 
   if (typeof name === 'string') {
-    const { [COMPONENT_ID_MARKER]: _idMarker, [OAS_EXTENSIONS_MARKER]: oasExt, ...rest } = obj;
+    const {
+      [COMPONENT_ID_MARKER]: _idMarker,
+      [OAS_EXTENSIONS_MARKER]: oasExt,
+      openapi: _openapi,
+      ...rest
+    } = obj;
 
     // Recursively handle nested marked schemas within this node first
     const processed: Record<string, unknown> = {};
@@ -823,6 +859,34 @@ function hoistMarkedSchemas(
 
   for (const [k, v] of Object.entries(obj)) {
     result[k] = hoistMarkedSchemas(v, shared);
+  }
+
+  return result;
+}
+
+function mergeInlineOasExtensions(node: unknown): unknown {
+  if (typeof node !== 'object' || node === null) {
+    return node;
+  }
+
+  if (Array.isArray(node)) {
+    return node.map((item) => mergeInlineOasExtensions(item));
+  }
+
+  const obj = node as Record<string, unknown>;
+  if ('$ref' in obj) {
+    return obj;
+  }
+
+  const { [OAS_EXTENSIONS_MARKER]: oasExt, openapi: _openapi, ...rest } = obj;
+  const result: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(rest)) {
+    result[key] = mergeInlineOasExtensions(value);
+  }
+
+  if (oasExt && typeof oasExt === 'object') {
+    Object.assign(result, oasExt);
   }
 
   return result;
@@ -912,7 +976,7 @@ function jsonSchemaToOpenApi30(node: Record<string, unknown>): Record<string, un
   return result;
 }
 
-export const convert = (schema: z.ZodTypeAny) => {
+export const convert = (schema: z.ZodTypeAny, opts: ConvertOptions = {}) => {
   // Unwrap DeepStrict pipes, optional/default wrappers, transforms, etc.
   // This is critical because makeZodValidationObject wraps ALL Zod schemas
   // (including v3) with v4's DeepStrict, producing a v4 pipe around v3 schemas.
@@ -954,17 +1018,13 @@ export const convert = (schema: z.ZodTypeAny) => {
           (js as any)[COMPONENT_ID_MARKER] = componentName;
         }
 
-        const oasExtensions = getZodV4OasExtensions(zodSchema);
+        const oasExtensions = normalizeOasMetaExtensions(
+          zodSchema as unknown as z4.ZodType,
+          opts.env
+        );
 
         if (oasExtensions) {
           (js as any)[OAS_EXTENSIONS_MARKER] = oasExtensions;
-        } else {
-          // Auto-detect ZodDiscriminatedUnion and inject a discriminator when
-          // the user hasn't supplied one explicitly via .meta({ openapi: { ... } }).
-          const autoDiscriminator = getZodV4AutoDiscriminator(zodSchema as unknown as z4.ZodType);
-          if (autoDiscriminator) {
-            (js as any)[OAS_EXTENSIONS_MARKER] = { discriminator: autoDiscriminator };
-          }
         }
       },
     }) as Record<string, any>;
@@ -1009,9 +1069,12 @@ export const convert = (schema: z.ZodTypeAny) => {
     // (single-use, non-recursive schemas don't appear in $defs — we hoist them
     // here so they still become named components).
     processedSchema = hoistMarkedSchemas(processedSchema, shared) as Record<string, unknown>;
+    processedSchema = mergeInlineOasExtensions(processedSchema) as Record<string, unknown>;
 
     for (const [key, value] of Object.entries(shared)) {
-      shared[key] = hoistMarkedSchemas(value, shared) as OpenAPIV3.SchemaObject;
+      shared[key] = mergeInlineOasExtensions(
+        hoistMarkedSchemas(value, shared)
+      ) as OpenAPIV3.SchemaObject;
     }
 
     // Apply the same JSON-description post-processing as v3

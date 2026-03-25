@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
+import { of } from 'rxjs';
 
 import { AppContextProvider } from '../../../../app_context';
 import type { AppDependencies } from '../../../../app_context';
@@ -16,6 +17,7 @@ import { IndexActionsContextMenu } from './index_actions_context_menu';
 import type { Index } from '@kbn/index-management-shared-types';
 import { notificationService } from '../../../../services/notification';
 import { navigateToIndexDetailsPage, getIndexDetailsLink } from '../../../../services/routing';
+import { type DocCountResult, RequestResultType } from '../index_table/get_doc_count';
 
 // EUI context menus keep inactive panels mounted with `pointer-events: none`,
 // which can cause user-event to throw when interacting with menu items.
@@ -587,6 +589,73 @@ describe('IndexActionsContextMenu', () => {
         expect(convertBtn).not.toBeDisabled();
       });
 
+      it('SHOULD use loaded doc count when index documents are missing', async () => {
+        const props = getBaseProps();
+        const docCount$ = of({
+          'index-1': { status: RequestResultType.Success, count: 10 },
+        });
+        const convertible: MenuProps = {
+          ...props,
+          indices: [
+            {
+              name: 'index-1',
+              status: 'open' as Index['status'],
+              primary: 1,
+              hidden: false,
+              aliases: [],
+              isFrozen: false,
+            } satisfies Partial<Index>,
+          ] as Index[],
+          docCountApi: {
+            getByName: jest.fn(),
+            getObservable: () => docCount$,
+            abort: jest.fn(),
+          },
+        };
+
+        renderWithProviders(<IndexActionsContextMenu {...convertible} />);
+
+        await openContextMenu();
+        const convertBtn = await screen.findByTestId('convertToLookupIndexButton');
+
+        expect(convertBtn).not.toBeDisabled();
+      });
+
+      it('SHOULD keep convert action disabled when docCountApi emits an error and documents are missing', async () => {
+        // Fail-safe: if the doc-count request errors out and the index has no cached
+        // document count, we cannot determine convertibility, so the action stays
+        // disabled rather than allowing a potentially invalid conversion.
+        const props = getBaseProps();
+        const docCount$ = of<Record<string, DocCountResult>>({
+          'index-1': { status: RequestResultType.Error },
+        });
+        const errorProps: MenuProps = {
+          ...props,
+          indices: [
+            {
+              name: 'index-1',
+              status: 'open' as Index['status'],
+              primary: 1,
+              hidden: false,
+              aliases: [],
+              isFrozen: false,
+            } satisfies Partial<Index>,
+          ] as Index[],
+          docCountApi: {
+            getByName: jest.fn(),
+            getObservable: () => docCount$,
+            abort: jest.fn(),
+          },
+        };
+
+        renderWithProviders(<IndexActionsContextMenu {...errorProps} />);
+
+        await openContextMenu();
+        const convertBtn = await screen.findByTestId('convertToLookupIndexButton');
+
+        expect(convertBtn).toBeDisabled();
+      });
+
       it('SHOULD open the Convert to Lookup modal', async () => {
         const props = getBaseProps();
         const convertible: MenuProps = {
@@ -641,6 +710,89 @@ describe('IndexActionsContextMenu', () => {
 
         const tooltip = await screen.findByText(/less than 2 billion documents/i);
         expect(tooltip).toBeInTheDocument();
+      });
+    });
+
+    describe('AND WHEN doc count is missing and not yet cached', () => {
+      it('SHOULD call getByName when the popover opens', async () => {
+        const props = getBaseProps();
+        const getByName = jest.fn();
+        const emptyDocCount$ = of<Record<string, DocCountResult>>({});
+        const missingDocsProps: MenuProps = {
+          ...props,
+          indices: [
+            {
+              name: 'index-1',
+              status: 'open' as Index['status'],
+              primary: 1,
+              hidden: false,
+              aliases: [],
+              isFrozen: false,
+              // documents intentionally omitted to simulate a missing count
+            } satisfies Partial<Index>,
+          ] as Index[],
+          docCountApi: {
+            getByName,
+            getObservable: () => emptyDocCount$,
+            abort: jest.fn(),
+          },
+        };
+
+        renderWithProviders(<IndexActionsContextMenu {...missingDocsProps} />);
+        await openContextMenu();
+
+        expect(getByName).toHaveBeenCalledWith('index-1');
+      });
+
+      it('SHOULD NOT call getByName when documents are already present on the index', async () => {
+        const props = getBaseProps(); // has documents: 100
+        const getByName = jest.fn();
+        const docCount$ = of<Record<string, DocCountResult>>({});
+        const propsWithDocs: MenuProps = {
+          ...props,
+          docCountApi: {
+            getByName,
+            getObservable: () => docCount$,
+            abort: jest.fn(),
+          },
+        };
+
+        renderWithProviders(<IndexActionsContextMenu {...propsWithDocs} />);
+        await openContextMenu();
+
+        expect(getByName).not.toHaveBeenCalled();
+      });
+
+      it('SHOULD NOT call getByName when the doc count is already in the observable cache', async () => {
+        const props = getBaseProps();
+        const getByName = jest.fn();
+        const cachedDocCount$ = of<Record<string, DocCountResult>>({
+          'index-1': { status: RequestResultType.Success, count: 10 },
+        });
+        const propsWithCache: MenuProps = {
+          ...props,
+          indices: [
+            {
+              name: 'index-1',
+              status: 'open' as Index['status'],
+              primary: 1,
+              hidden: false,
+              aliases: [],
+              isFrozen: false,
+              // documents intentionally omitted
+            } satisfies Partial<Index>,
+          ] as Index[],
+          docCountApi: {
+            getByName,
+            getObservable: () => cachedDocCount$,
+            abort: jest.fn(),
+          },
+        };
+
+        renderWithProviders(<IndexActionsContextMenu {...propsWithCache} />);
+        await openContextMenu();
+
+        expect(getByName).not.toHaveBeenCalled();
       });
     });
 
