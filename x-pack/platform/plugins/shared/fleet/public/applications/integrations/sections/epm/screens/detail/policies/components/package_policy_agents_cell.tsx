@@ -52,7 +52,7 @@ const AddAgentButton = ({
     <AddAgentHelpPopover
       button={
         <EuiButton
-          iconType="plusInCircle"
+          iconType="plusCircle"
           data-test-subj="addAgentButton"
           onClick={onAddAgentCloseHelp}
           size="s"
@@ -69,7 +69,7 @@ const AddAgentButton = ({
     />
   ) : (
     <EuiButton
-      iconType="plusInCircle"
+      iconType="plusCircle"
       data-test-subj="addAgentButton"
       onClick={onAddAgent}
       size="s"

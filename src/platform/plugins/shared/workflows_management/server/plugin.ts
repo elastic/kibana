@@ -19,6 +19,9 @@ import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { TriggerType } from '@kbn/workflows';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows/types/latest';
 import { registerWorkflowAgentBuilderIntegration } from './agent_builder';
+import { defineRoutes } from './api/routes';
+import { WorkflowsManagementApi } from './api/workflows_management_api';
+import { WorkflowsService } from './api/workflows_management_service';
 import {
   getWorkflowsConnectorAdapter,
   getConnectorType as getWorkflowsConnectorType,
@@ -45,9 +48,6 @@ import type {
   WorkflowsServerPluginStartDeps,
 } from './types';
 import { registerUISettings } from './ui_settings';
-import { defineRoutes } from './workflows_management/routes';
-import { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
-import { WorkflowsService } from './workflows_management/workflows_management_service';
 import { stepSchemas } from '../common/step_schemas';
 
 export class WorkflowsPlugin

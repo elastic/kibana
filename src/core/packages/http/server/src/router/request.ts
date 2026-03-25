@@ -63,7 +63,10 @@ export type KibanaRequestRouteOptions<Method extends RouteMethod> = (Method exte
   | 'get'
   | 'options'
   ? Required<Omit<RouteConfigOptions<Method>, 'body'>>
-  : Required<RouteConfigOptions<Method>>) & { security?: RouteSecurity };
+  : Required<RouteConfigOptions<Method>>) & {
+  security?: RouteSecurity;
+  authRequired: boolean | 'optional';
+};
 
 /**
  * Request specific route information exposed to a handler.
