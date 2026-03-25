@@ -115,7 +115,7 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
             data-test-subj={AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ}
             target="_blank"
             iconSide="left"
-            iconType="launch"
+            iconType="rocket"
             href={armTemplateUrl}
           >
             <FormattedMessage

@@ -10,7 +10,6 @@ import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { NotesTab } from './notes_tab';
 import { AttackDetailsProvider } from '../../context';
-import { NOTES_TAB_CONTENT_TEST_ID } from '../../constants/test_ids';
 
 jest.mock('../../../../common/hooks/use_space_id', () => ({
   useSpaceId: () => 'default',
@@ -39,13 +38,13 @@ jest.mock('../../hooks/use_attack_details', () => ({
   }),
 }));
 
-jest.mock('../../../shared/components/notes_details_content', () => ({
+jest.mock('../../../../flyout_v2/notes/components/notes_details_content', () => ({
   NotesDetailsContent: jest.fn(() => (
     <div data-test-subj="notes-details-content">{'Notes details content'}</div>
   )),
 }));
 
-jest.mock('../../../document_details/shared/hooks/use_timeline_config', () => ({
+jest.mock('../../../../flyout_v2/notes/hooks/use_timeline_config', () => ({
   useTimelineConfig: jest.fn().mockReturnValue(undefined),
 }));
 
@@ -63,9 +62,22 @@ describe('NotesTab', () => {
     jest.clearAllMocks();
   });
 
-  it('renders panel with notes tab content test id', () => {
+  it('renders notes details content', () => {
     renderNotesTab();
 
-    expect(screen.getByTestId(NOTES_TAB_CONTENT_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByTestId('notes-details-content')).toBeInTheDocument();
+  });
+
+  it('passes hideTimelineIcon=false to NotesDetailsContent', () => {
+    const { NotesDetailsContent } = jest.requireMock(
+      '../../../../flyout_v2/notes/components/notes_details_content'
+    );
+
+    renderNotesTab();
+
+    expect(NotesDetailsContent).toHaveBeenCalledWith(
+      expect.objectContaining({ hideTimelineIcon: false }),
+      expect.anything()
+    );
   });
 });
