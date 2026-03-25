@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { expect, type Locator } from '@playwright/test';
+import type { Locator } from '@playwright/test';
 import type { ScoutPage } from '..';
+import { expect } from '../../../ui';
 
 /**
  * Page object that wraps common interactions with the Kibana Monaco-based code editor.
