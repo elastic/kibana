@@ -7,20 +7,37 @@
 
 import React from 'react';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import type { ResolverCellActionRenderer } from '../../../resolver/types';
-import { CellActionsMode, SecurityCellActions } from '../../../common/components/cell_actions';
+import {
+  type CellActionFieldValue,
+  CellActionsMode,
+  SecurityCellActions,
+} from '../../../common/components/cell_actions';
 import { getSourcererScopeId } from '../../../helpers';
+
+export interface CellActionRendererProps {
+  children: React.ReactNode;
+  field: string;
+  scopeId: string;
+  value: CellActionFieldValue;
+}
+
+export type CellActionRenderer = (props: CellActionRendererProps) => React.ReactNode | null;
+
+/**
+ * No-op cell action renderer for callers that never want cell actions (e.g. Discover, EASE flyout).
+ */
+export const noopCellActionRenderer: CellActionRenderer = ({ children }) => <>{children}</>;
 
 /**
  * Default cell action renderer for Security Solution. This component is used to render cell actions for fields in Security Solution.
  * This is used in the expandable flyout and in the new flyout (though only when used in Security Solution).
  */
-export const analyzerCellActionRenderer: ResolverCellActionRenderer = ({
+export const cellActionRenderer: CellActionRenderer = ({
   field,
   value,
   children,
   scopeId,
-}) => (
+}: CellActionRendererProps) => (
   <SecurityCellActions
     data={{
       field,
