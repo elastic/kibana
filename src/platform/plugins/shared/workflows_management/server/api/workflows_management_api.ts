@@ -252,6 +252,9 @@ export class WorkflowsManagementApi {
       spaceId,
       payload: {
         inputs: manualInputs,
+        event: {
+          inputs: manualInputs,
+        },
       },
       request,
     });
@@ -323,10 +326,18 @@ export class WorkflowsManagementApi {
 
     const workflowJson = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
     const { event, ...manualInputs } = inputs;
+
+    let resolvedEvent = event;
+
+    if (!event) {
+      resolvedEvent = {
+        inputs: manualInputs,
+      };
+    }
+
     const context = {
-      event,
+      event: resolvedEvent,
       spaceId,
-      inputs: manualInputs,
     };
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(

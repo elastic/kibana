@@ -110,6 +110,7 @@ function extractInputKeyPrefix(lineUpToCursor: string): string {
 export async function getWorkflowInputsSuggestions(
   autocompleteContext: WorkflowInputsContext
 ): Promise<monaco.languages.CompletionItem[] | null> {
+  console.log('getWorkflowInputsSuggestions');
   const { focusedStepInfo, lineParseResult, lineUpToCursor, range, workflows } =
     autocompleteContext;
 

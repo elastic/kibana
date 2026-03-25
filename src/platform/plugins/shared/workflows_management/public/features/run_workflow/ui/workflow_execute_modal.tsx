@@ -27,6 +27,7 @@ import { parseDocument } from 'yaml';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowYaml } from '@kbn/workflows';
+import type { ManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
 import { ENABLED_TRIGGER_TABS } from './constants';
 import { TRIGGER_TABS_DESCRIPTIONS, TRIGGER_TABS_LABELS } from './translations';
@@ -42,14 +43,20 @@ function getDefaultTrigger(definition: WorkflowYaml | null): WorkflowTriggerTab 
     return 'alert';
   }
 
-  const hasManualTrigger = definition.triggers?.some((trigger) => trigger.type === 'manual');
+  const manualTrigger = definition.triggers?.find((trigger) => trigger.type === 'manual') as
+    | ManualTrigger
+    | undefined;
   // Check if inputs exist and have properties (handles both new and legacy formats)
-  const normalizedInputs = normalizeFieldsToJsonSchema(definition.inputs);
-  const hasInputs =
-    normalizedInputs?.properties && Object.keys(normalizedInputs.properties).length > 0;
 
-  if (hasManualTrigger && hasInputs) {
-    return 'manual';
+  if (manualTrigger) {
+    const normalizedInputs = normalizeFieldsToJsonSchema(manualTrigger.inputs);
+
+    const hasInputs =
+      normalizedInputs?.properties && Object.keys(normalizedInputs.properties).length > 0;
+
+    if (hasInputs) {
+      return 'manual';
+    }
   }
   return 'alert';
 }
@@ -100,22 +107,34 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
 
     // Extract inputs from yamlString if definition.inputs is undefined
     const normalizedInputs = useMemo(() => {
-      if (definition?.inputs) {
-        return normalizeFieldsToJsonSchema(definition.inputs);
-      }
-      if (yamlString) {
+      let triggers = definition?.triggers;
+
+      if (!triggers && yamlString) {
         try {
           const yamlDoc = parseDocument(yamlString);
           const yamlJson = yamlDoc.toJSON();
-          if (yamlJson && typeof yamlJson === 'object' && 'inputs' in yamlJson) {
-            return normalizeFieldsToJsonSchema(yamlJson.inputs);
+          if (yamlJson) {
+            triggers = yamlJson.triggers;
           }
         } catch (e) {
           // ignore errors when extracting from YAML
         }
       }
+
+      if (!triggers) {
+        return undefined;
+      }
+
+      const manualTrigger = triggers.find((trigger) => trigger.type === 'manual') as
+        | ManualTrigger
+        | undefined;
+
+      if (manualTrigger) {
+        return normalizeFieldsToJsonSchema(manualTrigger.inputs ?? {});
+      }
+
       return undefined;
-    }, [definition?.inputs, yamlString]);
+    }, [definition?.triggers, yamlString]);
 
     const shouldAutoRun = useMemo(() => {
       if (!definition) {

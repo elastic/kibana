@@ -14,7 +14,7 @@ import type { JsonModelSchemaType } from '../schema/common/json_model_schema';
 import type { JsonSchema } from '../schema/common/json_model_shape_schema';
 import type {
   LegacyWorkflowInput,
-  WorkflowInputSchema,
+  FlatInputSchema,
 } from '../schema/triggers/manual_trigger_schema';
 
 export type NormalizableFieldSchema =
@@ -68,7 +68,7 @@ function convertLegacyFieldToJsonSchemaProperty(field: LegacyWorkflowInput): JSO
  * @returns The fields in the new JSON Schema object format
  */
 export function convertLegacyFieldsToJsonSchema(
-  legacyFields: Array<z.infer<typeof WorkflowInputSchema>>
+  legacyFields: Array<z.infer<typeof FlatInputSchema>>
 ): JsonModelSchemaType {
   const properties: Record<string, JsonSchema> = {};
   const required: string[] = [];
