@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { EuiThemeProvider } from '@elastic/eui';
 import { FormattedValue, FormattedKey } from './formatted_value';
+import { KibanaStyledComponentsThemeProvider } from '@kbn/react-kibana-context-styled';
 
 const renderWithTheme = (component: React.ReactNode) =>
-  render(<EuiThemeProvider>{component}</EuiThemeProvider>);
+  render(<KibanaStyledComponentsThemeProvider>{component}</KibanaStyledComponentsThemeProvider>);
 
 describe('FormattedKey', () => {
   it('renders the key when value is present', () => {
