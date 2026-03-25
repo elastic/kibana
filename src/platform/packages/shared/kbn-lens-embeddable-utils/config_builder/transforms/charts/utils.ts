@@ -14,7 +14,7 @@ import type {
   FormBasedLayer,
   GaugeVisualizationState,
   HeatmapVisualizationState,
-  XYState,
+  XYVisualizationState,
   MetricVisualizationState,
   SharedPartitionLayerState,
   TextBasedLayer,
@@ -158,7 +158,7 @@ type LegendTruncateAfterLines = TypeOf<typeof legendTruncateAfterLinesSchema>;
 
 export function getLegendTruncateAfterLines(
   legend:
-    | Pick<XYState['legend'], 'shouldTruncate' | 'maxLines'>
+    | Pick<XYVisualizationState['legend'], 'shouldTruncate' | 'maxLines'>
     | Pick<HeatmapVisualizationState['legend'], 'shouldTruncate' | 'maxLines'>
     | Pick<SharedPartitionLayerState, 'truncateLegend' | 'legendMaxLines'>
 ): LegendTruncateAfterLines {

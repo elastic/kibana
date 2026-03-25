@@ -16,7 +16,7 @@ import {
   TABS_LOCAL_STORAGE_KEY,
   type TabsInternalStatePayload,
 } from './tabs_storage_manager';
-import type { RecentlyClosedTabState, TabState } from './redux/types';
+import type { RecentlyClosedTabState, TabState } from './redux';
 import { NEW_TAB_ID, TAB_STATE_URL_KEY } from '../../../../common/constants';
 import { DEFAULT_TAB_STATE, fromSavedSearchToSavedObjectTab } from './redux';
 import {
