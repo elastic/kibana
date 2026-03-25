@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { isBoolean, isString } from 'lodash';
 import { z } from '@kbn/zod/v4';
-import { defineVersioning, type StorageSchemaVersioning } from '@kbn/storage-adapter';
+import { defineVersioning } from '@kbn/storage-adapter';
 import { ensureMetadata } from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
 import {
@@ -25,7 +26,6 @@ import {
   QUERY_DESCRIPTION,
 } from '../fields';
 import { computeRuleId, buildEsqlQueryFromKql } from './helpers/query';
-import type { StoredQueryLink } from './query_client';
 
 const v1Schema = z.looseObject({
   [ASSET_UUID]: z.string(),
@@ -33,11 +33,10 @@ const v1Schema = z.looseObject({
   [ASSET_TYPE]: z.string(),
   [STREAM_NAME]: z.string(),
   [QUERY_KQL_BODY]: z.string().optional(),
-  [QUERY_ESQL_QUERY]: z.string().optional(),
   [QUERY_TITLE]: z.string().optional(),
   [QUERY_SEVERITY_SCORE]: z.number().optional(),
-  [RULE_BACKED]: z.boolean().optional(),
-  [RULE_ID]: z.string().optional(),
+  [QUERY_FEATURE_FILTER]: z.string().optional(),
+  [QUERY_FEATURE_NAME]: z.string().optional(),
 });
 
 const v2Schema = z.looseObject({
@@ -49,67 +48,50 @@ const v2Schema = z.looseObject({
   [QUERY_ESQL_QUERY]: z.string(),
   [QUERY_TITLE]: z.string().optional(),
   [QUERY_SEVERITY_SCORE]: z.number().optional(),
+  [QUERY_DESCRIPTION]: z.string(),
   [RULE_BACKED]: z.boolean(),
   [RULE_ID]: z.string(),
 });
 
-function migrateV1ToV2(input: unknown): Record<string, unknown> {
-  const migrated = { ...(input as Record<string, unknown>) };
-
-  if (!migrated[QUERY_ESQL_QUERY]) {
-    const streamName = migrated[STREAM_NAME] as string;
-    const featureFilterJson = migrated[QUERY_FEATURE_FILTER];
-    let featureFilter: Condition | undefined;
-    if (featureFilterJson && typeof featureFilterJson === 'string' && featureFilterJson !== '') {
-      try {
-        featureFilter = JSON.parse(featureFilterJson) as Condition;
-      } catch {
-        featureFilter = undefined;
-      }
-    }
-
-    const queryInput = {
-      kql: { query: migrated[QUERY_KQL_BODY] as string },
-      feature:
-        migrated[QUERY_FEATURE_NAME] && featureFilter
-          ? {
-              name: migrated[QUERY_FEATURE_NAME] as string,
-              filter: featureFilter,
-              type: 'system' as const,
-            }
-          : undefined,
-    };
-
-    migrated[QUERY_ESQL_QUERY] = buildEsqlQueryFromKql([streamName, `${streamName}.*`], queryInput);
-  }
-
-  migrated[QUERY_ESQL_QUERY] = ensureMetadata(migrated[QUERY_ESQL_QUERY] as string);
-
-  if (!(RULE_ID in migrated)) {
-    migrated[RULE_ID] = computeRuleId(
-      migrated[ASSET_UUID] as string,
-      migrated[QUERY_KQL_BODY] as string
-    );
-  }
-
-  if (!(RULE_BACKED in migrated)) {
-    migrated[RULE_BACKED] = true;
-  }
-  
-  // Back-fill description for queries created before the field was introduced.
-  if (!(QUERY_DESCRIPTION in migrated)) {
-    migrated[QUERY_DESCRIPTION] = '';
-  }
-
-  return migrated;
-}
-
-// Type assertion routed through `unknown` because `z.looseObject` adds
-// `{ [k: string]: unknown }` to the Zod output type, which doesn't structurally
-// overlap with `StoredQueryLink`.
 export const queryVersioning = defineVersioning(v1Schema)
   .addVersion({
     schema: v2Schema,
-    migrate: (input) => migrateV1ToV2(input) as unknown as z.input<typeof v2Schema>,
+    migrate: (input) => {
+      const existing = input as Record<string, unknown>;
+      let esqlQuery = isString(existing[QUERY_ESQL_QUERY]) ? existing[QUERY_ESQL_QUERY] : undefined;
+
+      if (!esqlQuery) {
+        const streamName = input[STREAM_NAME];
+        let featureFilter: Condition | undefined;
+
+        if (input[QUERY_FEATURE_FILTER]) {
+          try {
+            featureFilter = JSON.parse(input[QUERY_FEATURE_FILTER]) as Condition;
+          } catch {
+            featureFilter = undefined;
+          }
+        }
+
+        esqlQuery = buildEsqlQueryFromKql([streamName, `${streamName}.*`], {
+          kql: { query: input[QUERY_KQL_BODY] ?? '' },
+          feature:
+            input[QUERY_FEATURE_NAME] && featureFilter
+              ? { name: input[QUERY_FEATURE_NAME], filter: featureFilter, type: 'system' as const }
+              : undefined,
+        });
+      }
+
+      return {
+        ...input,
+        [QUERY_ESQL_QUERY]: ensureMetadata(esqlQuery),
+        [RULE_ID]: isString(existing[RULE_ID])
+          ? existing[RULE_ID]
+          : computeRuleId(input[ASSET_UUID], input[QUERY_KQL_BODY] ?? ''),
+        [RULE_BACKED]: isBoolean(existing[RULE_BACKED]) ? existing[RULE_BACKED] : true,
+        [QUERY_DESCRIPTION]: isString(existing[QUERY_DESCRIPTION])
+          ? existing[QUERY_DESCRIPTION]
+          : '',
+      };
+    },
   })
-  .build() as unknown as StorageSchemaVersioning<StoredQueryLink>;
+  .build();

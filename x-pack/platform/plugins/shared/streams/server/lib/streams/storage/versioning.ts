@@ -6,8 +6,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { defineVersioning, type StorageSchemaVersioning } from '@kbn/storage-adapter';
-import type { Streams } from '@kbn/streams-schema';
+import { defineVersioning } from '@kbn/storage-adapter';
+import { Streams } from '@kbn/streams-schema';
 import { migrateOnRead } from './migrate_on_read';
 
 /**
@@ -20,25 +20,9 @@ const v1Schema = z.looseObject({
   name: z.string(),
 });
 
-/**
- * v2 schema validates the post-migration shape: `description` and `updated_at`
- * are guaranteed by `migrateOnRead`. The complex `ingest`, `query`, and
- * `query_streams` fields are opaque (ES mapping has `enabled: false`), so they
- * pass through without structural validation.
- */
-const v2Schema = z.looseObject({
-  name: z.string(),
-  description: z.string(),
-  updated_at: z.string(),
-});
-
-// Type assertion routed through `unknown` because `z.looseObject` adds
-// `{ [k: string]: unknown }` to the Zod output type, which doesn't structurally
-// overlap with `Streams.all.Definition`.
 export const streamsVersioning = defineVersioning(v1Schema)
   .addVersion({
-    schema: v2Schema,
-    migrate: (input) =>
-      migrateOnRead(input as Record<string, unknown>) as unknown as z.input<typeof v2Schema>,
+    schema: Streams.all.Definition.right,
+    migrate: (input) => migrateOnRead(input),
   })
-  .build() as unknown as StorageSchemaVersioning<Streams.all.Definition>;
+  .build();
