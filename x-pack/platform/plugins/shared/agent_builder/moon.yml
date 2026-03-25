@@ -120,7 +120,7 @@ dependsOn:
   - '@kbn/fs'
   - '@kbn/react-hooks'
   - '@kbn/search-inference-endpoints'
-  tags:
+tags:
   - plugin
   - prod
   - group-platform
