@@ -91,6 +91,7 @@ import {
 } from '../../../../components/discover_grid_flyout';
 import type { CascadedDocumentsContext } from './cascaded_documents';
 import { isCascadedDocumentsVisible } from './cascaded_documents';
+import { SaveDiscoverTableButton } from './save_discover_table_button';
 
 // export needs for testing
 export const onResize = (
@@ -521,6 +522,14 @@ function DiscoverDocumentsComponent({
     viewModeToggle,
   ]);
 
+  const isEmbeddedEditor = services.embeddableEditor.isEmbeddedEditor();
+
+  const saveModalButton = useMemo(
+    () =>
+      isEmbeddedEditor ? undefined : <SaveDiscoverTableButton key="SaveDiscoverTableButton" />,
+    [isEmbeddedEditor]
+  );
+
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       // class is used in tests
@@ -595,6 +604,7 @@ function DiscoverDocumentsComponent({
             totalHits={totalHits}
             onFetchMoreRecords={onFetchMoreRecords}
             externalCustomRenderers={cellRenderers}
+            externalAdditionalControls={saveModalButton}
             dataGridDensityState={density}
             onUpdateDataGridDensity={onUpdateDensity}
             onUpdateESQLQuery={onUpdateESQLQuery}

@@ -55,39 +55,46 @@ export class EmbeddableEditorService {
     }
   };
 
-  public transferBackToEditor(action: TransferAction.Cancel | TransferAction.SaveSession): void;
+  public transferBackToEditor(
+    action: TransferAction.Cancel | TransferAction.SaveSession,
+    options?: Omit<TransferAction, 'state'> & { state: never }
+  ): void;
   public transferBackToEditor(
     action: TransferAction.SaveByValue,
-    state: SavedSearchByValueAttributes
+    options: Required<Pick<TransferOptions, 'state'>> & Omit<TransferOptions, 'state'>
   ): void;
-  public transferBackToEditor(action: TransferAction, state?: SavedSearchByValueAttributes): void;
+  public transferBackToEditor(action: TransferAction, options?: TransferOptions): void;
   /**
    * Initiates a navigation back to the editing application, either cancelling the current action to return
    * or passing a state for an embeddable to receive an updated view.
    *
    * **NOTE**: Cancelling will never pass an updated state, so the state param is ignored for cancel actions.
    */
-  public transferBackToEditor(action: TransferAction, state?: SavedSearchByValueAttributes) {
-    if (this.embeddableState) {
-      const app = this.embeddableState.originatingApp;
-      const path = this.embeddableState.originatingPath;
+  public transferBackToEditor(action: TransferAction, options?: TransferOptions) {
+    const app = options?.app || this.embeddableState?.originatingApp;
+    const path = options?.path || this.embeddableState?.originatingPath;
 
-      if (app && path) {
-        this.embeddableStateTransfer.clearEditorState('discover');
-        this.embeddableStateTransfer.navigateToWithEmbeddablePackages(app, {
-          path,
-          state:
-            action !== TransferAction.Cancel
-              ? [
-                  {
-                    type: SEARCH_EMBEDDABLE_TYPE,
-                    serializedState: { attributes: state },
-                    embeddableId: this.embeddableState?.embeddableId,
-                  },
-                ]
-              : [],
-        });
-      }
+    if (app) {
+      this.embeddableStateTransfer.clearEditorState('discover');
+      this.embeddableStateTransfer.navigateToWithEmbeddablePackages(app, {
+        path,
+        state:
+          action !== TransferAction.Cancel
+            ? [
+                {
+                  type: SEARCH_EMBEDDABLE_TYPE,
+                  serializedState: { attributes: options?.state },
+                  embeddableId: this.embeddableState?.embeddableId,
+                },
+              ]
+            : [],
+      });
     }
   }
+}
+
+interface TransferOptions {
+  state?: SavedSearchByValueAttributes;
+  path?: string;
+  app?: string;
 }
