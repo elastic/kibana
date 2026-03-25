@@ -269,36 +269,35 @@ export const tagProcessedAlertsStep = createServerStepDefinition({
 
     // Use update_by_query instead of bulk update with IDs
     // This avoids the liquid template array serialization limit
+    const nowIso = new Date().toISOString();
     const result = await esClient.updateByQuery({
       index: indexPattern,
       max_docs: maxAlerts,
       refresh: true,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              { terms: { 'kibana.alert.workflow_status': ['open', 'acknowledged'] } },
-              {
-                bool: {
-                  must_not: [
-                    { exists: { field: 'kibana.alert.building_block_type' } },
-                    { exists: { field: 'kibana.alert.pipeline.processed' } },
-                  ],
-                },
+      query: {
+        bool: {
+          filter: [
+            { terms: { 'kibana.alert.workflow_status': ['open', 'acknowledged'] } },
+            {
+              bool: {
+                must_not: [
+                  { exists: { field: 'kibana.alert.building_block_type' } },
+                  { exists: { field: 'kibana.alert.pipeline.processed' } },
+                ],
               },
-            ],
-          },
+            },
+          ],
         },
-        script: {
-          source:
-            "ctx._source.putIfAbsent('kibana', new HashMap()); " +
-            "ctx._source.kibana.putIfAbsent('alert', new HashMap()); " +
-            "ctx._source.kibana.alert.putIfAbsent('pipeline', new HashMap()); " +
-            "ctx._source.kibana.alert.pipeline.processed = true; " +
-            "ctx._source.kibana.alert.pipeline.processed_at = params.now;",
-          params: { now: now.toISOString() },
-          lang: 'painless',
-        },
+      },
+      script: {
+        source:
+          "if (ctx._source.kibana == null) ctx._source.kibana = new HashMap();" +
+          "if (ctx._source.kibana.alert == null) ctx._source.kibana.alert = new HashMap();" +
+          "if (ctx._source.kibana.alert.pipeline == null) ctx._source.kibana.alert.pipeline = new HashMap();" +
+          "ctx._source.kibana.alert.pipeline.processed = true;" +
+          "ctx._source.kibana.alert.pipeline.processed_at = params.now;",
+        params: { now: nowIso },
+        lang: 'painless',
       },
     });
 
