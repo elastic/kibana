@@ -444,19 +444,20 @@ const CODES = Object.freeze({
   ),
   'ra_runscript_error_invalid-input': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.runscript.invalidInput',
-    { defaultMessage: 'Script input is invalid' }
+    { defaultMessage: 'Script action input is invalid' }
   ),
   'ra_runscript_error_not-permitted': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.runscript.notPermitted',
-    { defaultMessage: 'The runscript operation is not permitted' }
+    { defaultMessage: 'Misconfiguration - no permission to use Fleet API for script retrieval' }
   ),
   'ra_runscript_error_too-big': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.runscript.tooBig',
     { defaultMessage: 'Script too large' }
   ),
+  // DEV: was too long in queue, because of no network, other action instance was stuck, etc
   'ra_runscript_error_queue-timeout': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.runscript.queueTimeout',
-    { defaultMessage: '??' }
+    { defaultMessage: 'Action timed out' }
   ),
   'ra_runscript_error_download-failed': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.runscript.downloadFailed',
@@ -464,7 +465,7 @@ const CODES = Object.freeze({
   ),
   'ra_runscript_error_api-unreachable': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.runscript.unreachable',
-    { defaultMessage: 'Unable to download script for execution - fleet server API not reachable' }
+    { defaultMessage: 'Unable to download script for execution - Fleet Server API not reachable' }
   ),
   'ra_runscript_error_not-enough-free-space': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.runscript.notEnoughFreeSpace',
@@ -476,7 +477,7 @@ const CODES = Object.freeze({
   ),
   ra_runscript_error_processing: i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.runscript.processing',
-    { defaultMessage: '???' }
+    { defaultMessage: 'Error occurred during action processing' }
   ),
   'ra_runscript_error_upload-timeout': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.runscript.uploadTimeout',
@@ -484,15 +485,16 @@ const CODES = Object.freeze({
   ),
   'ra_runscript_error_processing-timeout': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.runscript.processingTimeout',
-    { defaultMessage: '????' }
+    { defaultMessage: 'Action processing timeout has been reached' }
   ),
+  // DEV: reboot, etc
   'ra_runscript_error_processing-interrupted': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.runscript.processingInterrupted',
-    { defaultMessage: '????' }
+    { defaultMessage: 'Action has been interrupted' }
   ),
   'ra_runscript_error_disk-quota': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.runscript.diskQuota',
-    { defaultMessage: '???' }
+    { defaultMessage: 'Too many actions' }
   ),
 });
 
