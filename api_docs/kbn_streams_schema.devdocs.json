@@ -1643,7 +1643,7 @@
           "(feature: z.infer<any>, other: z.infer<any>) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-        "lineNumber": 65,
+        "lineNumber": 96,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1659,7 +1659,7 @@
               "z.infer<any>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-            "lineNumber": 65,
+            "lineNumber": 96,
             "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
@@ -1676,7 +1676,7 @@
               "z.infer<any>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-            "lineNumber": 65,
+            "lineNumber": 96,
             "columnNumber": 58,
             "deprecated": false,
             "trackAdoption": false,
@@ -1751,7 +1751,7 @@
           "(feature: z.infer<any>) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-        "lineNumber": 61,
+        "lineNumber": 92,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1767,7 +1767,7 @@
               "z.infer<any>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-            "lineNumber": 61,
+            "lineNumber": 92,
             "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
@@ -1966,7 +1966,7 @@
           "(feature: z.infer<any>, other: z.infer<any>) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-        "lineNumber": 73,
+        "lineNumber": 104,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1982,7 +1982,7 @@
               "z.infer<any>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-            "lineNumber": 73,
+            "lineNumber": 104,
             "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
@@ -1999,7 +1999,7 @@
               "z.infer<any>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-            "lineNumber": 73,
+            "lineNumber": 104,
             "columnNumber": 58,
             "deprecated": false,
             "trackAdoption": false,
@@ -2163,7 +2163,7 @@
           "(feature: unknown) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-        "lineNumber": 57,
+        "lineNumber": 83,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2179,8 +2179,45 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-            "lineNumber": 57,
+            "lineNumber": 83,
             "columnNumber": 27,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.isFeatureWithFilter",
+        "type": "Function",
+        "tags": [],
+        "label": "isFeatureWithFilter",
+        "description": [],
+        "signature": [
+          "(feature: unknown) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
+        "lineNumber": 87,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.isFeatureWithFilter.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "feature",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
+            "lineNumber": 87,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2394,9 +2431,7 @@
         "type": "Function",
         "tags": [],
         "label": "isOtelStream",
-        "description": [
-          "\nDetermines whether a stream should conform to OpenTelemetry (OTel) naming convention or not.\n\nA stream should conform to OTel in the following cases:\n- If it is a wired stream (Streams.WiredStream.Definition)\n- If its name matches the pattern `logs-*.otel-*`\n"
-        ],
+        "description": [],
         "signature": [
           "(stream: ",
           {
@@ -2409,7 +2444,7 @@
           ".all.Definition) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/is_otel_stream.ts",
-        "lineNumber": 10,
+        "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2420,9 +2455,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "stream",
-            "description": [
-              "- The stream definition to check"
-            ],
+            "description": [],
             "signature": [
               {
                 "pluginId": "@kbn/streams-schema",
@@ -2434,16 +2467,14 @@
               ".all.Definition"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/is_otel_stream.ts",
-            "lineNumber": 20,
+            "lineNumber": 26,
             "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "boolean - true if the stream should conform to OTel naming convention, false otherwise"
-        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -5544,7 +5575,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-        "lineNumber": 44,
+        "lineNumber": 45,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5561,7 +5592,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-        "lineNumber": 28,
+        "lineNumber": 29,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5727,7 +5758,7 @@
           "\"dataset_analysis\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-        "lineNumber": 16,
+        "lineNumber": 17,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5858,6 +5889,40 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.ECS_CONTENT_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "ECS_CONTENT_FIELD",
+        "description": [],
+        "signature": [
+          "\"message\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/is_otel_stream.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.ECS_SEVERITY_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "ECS_SEVERITY_FIELD",
+        "description": [],
+        "signature": [
+          "\"log.level\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/is_otel_stream.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.EffectiveFailureStore",
         "type": "Type",
         "tags": [],
@@ -5903,7 +5968,7 @@
           "\"error_logs\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-        "lineNumber": 19,
+        "lineNumber": 20,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5985,7 +6050,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-        "lineNumber": 55,
+        "lineNumber": 80,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6002,7 +6067,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-        "lineNumber": 46,
+        "lineNumber": 70,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6019,7 +6084,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-        "lineNumber": 14,
+        "lineNumber": 15,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6036,8 +6101,25 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-        "lineNumber": 13,
+        "lineNumber": 14,
         "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.FeatureWithFilter",
+        "type": "Type",
+        "tags": [],
+        "label": "FeatureWithFilter",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
+        "lineNumber": 81,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6232,6 +6314,74 @@
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/record_types.ts",
         "lineNumber": 31,
         "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.IdentifiedFeature",
+        "type": "Type",
+        "tags": [],
+        "label": "IdentifiedFeature",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
+        "lineNumber": 59,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.identifiedFeatureSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "identifiedFeatureSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
+        "lineNumber": 48,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.IgnoredFeature",
+        "type": "Type",
+        "tags": [],
+        "label": "IgnoredFeature",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.ignoredFeatureSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "ignoredFeatureSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
+        "lineNumber": 61,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6778,7 +6928,7 @@
           "\"log_patterns\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-        "lineNumber": 18,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6795,7 +6945,7 @@
           "\"log_samples\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-        "lineNumber": 17,
+        "lineNumber": 18,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6994,6 +7144,42 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.OTEL_CONTENT_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "OTEL_CONTENT_FIELD",
+        "description": [
+          "\nDetermines whether a stream should conform to OpenTelemetry (OTel) naming convention or not.\n\nA stream should conform to OTel in the following cases:\n- If it is a wired stream whose root is NOT `logs.ecs` (ECS wired streams use ECS naming)\n- If its name matches the pattern `logs-*.otel-*`\n"
+        ],
+        "signature": [
+          "\"body.text\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/is_otel_stream.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.OTEL_SEVERITY_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "OTEL_SEVERITY_FIELD",
+        "description": [],
+        "signature": [
+          "\"severity_text\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/is_otel_stream.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.PhaseName",
         "type": "Type",
         "tags": [],
@@ -7036,7 +7222,7 @@
         "label": "RootStreamName",
         "description": [],
         "signature": [
-          "\"logs\" | \"logs.otel\" | \"logs.ecs\""
+          "\"logs\" | \"logs.ecs\" | \"logs.otel\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
         "lineNumber": 17,
@@ -7995,7 +8181,7 @@
           "readonly [\"dataset_analysis\", \"log_samples\", \"log_patterns\", \"error_logs\"]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-        "lineNumber": 21,
+        "lineNumber": 22,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
