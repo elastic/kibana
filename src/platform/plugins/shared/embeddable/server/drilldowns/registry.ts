@@ -58,7 +58,9 @@ export function getDrilldownRegistry() {
         );
 
       if (drilldownSchemas.length === 0) {
-        throw new Error('Supported triggers do not intersect with registered drilldowns. Remove drilldown schema from your embeddable schema.');
+        throw new Error(
+          'Supported triggers do not intersect with registered drilldowns. Remove drilldown schema from your embeddable schema.'
+        );
       }
 
       return schema.object({

@@ -28,6 +28,7 @@ import type {
   LensInternalApi,
   LensRuntimeState,
 } from '@kbn/lens-common';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { APP_ID, getEditPath } from '../../../common/constants';
 import type { LensEmbeddableStartServices } from '../types';
 import {
@@ -43,7 +44,6 @@ import {
   apiPublishesIsEditableByUser,
 } from '../type_guards';
 import type { SearchContextConfig } from './initialize_search_context';
-import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 function getSupportedTriggers(
   getState: GetStateType,
@@ -55,7 +55,7 @@ function getSupportedTriggers(
     if (currentState.attributes?.visualizationType) {
       return [
         ...panelTriggers,
-        ...(visualizationMap[currentState.attributes.visualizationType]?.triggers ?? [])
+        ...(visualizationMap[currentState.attributes.visualizationType]?.triggers ?? []),
       ];
     }
     return panelTriggers;
