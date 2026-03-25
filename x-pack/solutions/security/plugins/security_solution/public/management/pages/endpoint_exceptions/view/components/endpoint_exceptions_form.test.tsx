@@ -22,6 +22,8 @@ import { GLOBAL_ARTIFACT_TAG } from '../../../../../../common/endpoint/service/a
 import { useFetchPolicyData } from '../../../../components/policy_selector/hooks/use_fetch_policy_data';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { buildPerPolicyTag } from '../../../../../../common/endpoint/service/artifacts/utils';
+import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../hooks/artifacts/use_endpoint_per_policy_opt_in';
+import type { UseQueryResult } from '@kbn/react-query';
 
 jest.setTimeout(15_000);
 
@@ -30,6 +32,12 @@ jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/containers/source');
 jest.mock('../../../../../common/hooks/use_license');
 jest.mock('../../../../components/policy_selector/hooks/use_fetch_policy_data');
+jest.mock('../../../../hooks/artifacts/use_endpoint_per_policy_opt_in');
+
+const mockedUseGetEndpointExceptionsPerPolicyOptIn =
+  useGetEndpointExceptionsPerPolicyOptIn as jest.MockedFunction<
+    typeof useGetEndpointExceptionsPerPolicyOptIn
+  >;
 
 /** When some props and states change, `EndpointExceptionsForm` will recreate its internal `processChanged` function,
  * and therefore will call it from a `useEffect` hook.
@@ -151,6 +159,9 @@ describe('Endpoint exceptions form', () => {
         ] as PackagePolicy[],
       },
     });
+    mockedUseGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({
+      data: true,
+    } as UseQueryResult<boolean, Error>);
 
     formProps = {
       item: latestUpdatedItem,
@@ -505,6 +516,15 @@ describe('Endpoint exceptions form', () => {
 
     beforeEach(() => {
       mockLicenseService.isPlatinumPlus.mockReturnValue(true);
+    });
+
+    it('should not display policy assignment when user has not opted in', async () => {
+      mockedUseGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({
+        data: false,
+      } as UseQueryResult<boolean, Error>);
+      await act(() => render());
+
+      expect(renderResult.queryByTestId(`${formPrefix}-effectedPolicies`)).not.toBeInTheDocument();
     });
 
     it('should not display policy assignment when license is below platinum', async () => {
