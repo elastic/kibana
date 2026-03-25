@@ -7,12 +7,21 @@
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools } from '@kbn/agent-builder-common';
+import {
+  SECURITY_ALERTS_TOOL_ID,
+  SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
+  SECURITY_MITRE_MAPPING_TOOL_ID,
+  SECURITY_LABS_SEARCH_TOOL_ID,
+  SECURITY_REPORT_GENERATE_TOOL_ID,
+  SECURITY_CASE_MANAGE_TOOL_ID,
+} from '../../tools';
 
 export const getIncidentReportingSkill = () =>
   defineSkillType({
     id: 'incident-reporting',
     name: 'incident-reporting',
     basePath: 'skills/security/alerts',
+    experimental: true,
     description:
       'Guide to generating structured incident reports: executive summaries, technical timelines, MITRE ATT&CK mappings, impact assessments, and recommended follow-up actions with optional compliance framework mappings (NIST, ISO 27001).',
     content: `# Incident Reporting Guide
@@ -301,10 +310,33 @@ Steps:
 - Version the report if it will be updated as new information becomes available
 - Do not include raw log data in executive reports; reference it in technical appendices
 - Ensure all timestamps use a consistent timezone (preferably UTC)
+
+## Report Generation Process
+1. Gather all available investigation context: alerts, investigation findings, correlation results, response actions
+2. Query attack discovery for additional context that may have been missed
+3. Map all findings to MITRE ATT&CK techniques for standardized reporting
+4. Check Elastic Security Labs for relevant published threat research to cite
+5. Generate the report in the requested format
+6. Attach the completed report to the associated case
+7. Update the case status and add any follow-up actions as case comments
+
+## Accuracy Guidelines
+- Accuracy is paramount — never speculate or include unverified information in reports
+- Clearly distinguish between confirmed facts, high-confidence assessments, and hypotheses
+- Always cite the data source for every claim (which index, which alert, which query)
+- Reports should be self-contained — a reader should understand the full context without external references
+- Use consistent terminology throughout the report
+- When generating reports for regulatory purposes, consult product documentation for compliance-specific guidance
 `,
     getRegistryTools: () => [
       platformCoreTools.search,
       platformCoreTools.cases,
       platformCoreTools.productDocumentation,
+      SECURITY_ALERTS_TOOL_ID,
+      SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
+      SECURITY_MITRE_MAPPING_TOOL_ID,
+      SECURITY_LABS_SEARCH_TOOL_ID,
+      SECURITY_REPORT_GENERATE_TOOL_ID,
+      SECURITY_CASE_MANAGE_TOOL_ID,
     ],
   });

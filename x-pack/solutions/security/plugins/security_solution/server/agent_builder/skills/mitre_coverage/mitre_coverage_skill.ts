@@ -6,12 +6,20 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import {
+  SECURITY_ALERTS_TOOL_ID,
+  SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
+  SECURITY_MITRE_MAPPING_TOOL_ID,
+  SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
+  SECURITY_LABS_SEARCH_TOOL_ID,
+} from '../../tools';
 
 export const getMitreCoverageSkill = () =>
   defineSkillType({
     id: 'mitre-coverage',
     name: 'mitre-coverage',
     basePath: 'skills/security/alerts/rules',
+    experimental: true,
     description:
       'Guide to analyzing MITRE ATT&CK detection coverage: map active detection rules to MITRE techniques, identify coverage gaps, prioritize uncovered techniques by severity, and recommend new detection rules.',
     content: `# MITRE ATT&CK Coverage Analysis Guide
@@ -206,9 +214,20 @@ Steps:
 - Do not equate coverage with effectiveness; a rule may exist but perform poorly
 - Recommend periodic coverage audits (quarterly) to account for new MITRE techniques and rule changes
 - Always note when coverage data may be incomplete due to rules without MITRE mappings
+- Consider sub-techniques separately from parent techniques — a rule for T1059 does not necessarily cover T1059.001
+- Quality of coverage matters more than quantity — ten noisy low-confidence rules are worse than two precise high-confidence rules
+- Factor in the environment's data sources: do not recommend rules for data that is not being collected
+- Prioritize detection at the earliest possible stage of the kill chain
+- Consider rule type diversity: environments benefit from a mix of signature-based, behavioral, and anomaly-based detections
+- When recommending new rules, use the create detection rule tool to implement critical-priority rules directly
 `,
     getRegistryTools: () => [
       'platform.core.search',
       'platform.core.execute_esql',
+      SECURITY_ALERTS_TOOL_ID,
+      SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
+      SECURITY_MITRE_MAPPING_TOOL_ID,
+      SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
+      SECURITY_LABS_SEARCH_TOOL_ID,
     ],
   });

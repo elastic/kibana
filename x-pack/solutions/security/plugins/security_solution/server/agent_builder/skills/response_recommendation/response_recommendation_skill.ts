@@ -7,12 +7,19 @@
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools } from '@kbn/agent-builder-common';
+import {
+  SECURITY_ALERTS_TOOL_ID,
+  SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
+  SECURITY_RESPONSE_ACTIONS_TOOL_ID,
+  SECURITY_CASE_MANAGE_TOOL_ID,
+} from '../../tools';
 
 export const getResponseRecommendationSkill = () =>
   defineSkillType({
     id: 'response-recommendation',
     name: 'response-recommendation',
     basePath: 'skills/security/alerts',
+    experimental: true,
     description:
       'Guide to assessing blast radius and producing confidence-scored containment recommendations: evaluate compromise scope, rank response actions by effectiveness and risk, output confidence scores (0.0-1.0) with rollback procedures.',
     content: `# Response Recommendation Guide
@@ -111,11 +118,50 @@ Assign a confidence score (0.0 - 1.0) to each recommendation:
 - Preserve forensic evidence: never recommend destructive actions
 - Proportional response: match response to confirmed threat level
 - Every recommendation must include a rollback procedure
-- Never inflate confidence scores — they drive automation decisions`,
+- Never inflate confidence scores — they drive automation decisions
+
+## Containment Options Reference
+
+### Host-Level Containment
+- **Network isolation**: Disconnect the host from the network while preserving forensic state
+- **Process termination**: Kill specific malicious processes
+- **Service disabling**: Disable compromised services
+- **Full endpoint isolation**: Use Elastic Defend to isolate the endpoint
+
+### Account-Level Containment
+- **Password reset**: Force credential rotation for compromised accounts
+- **Session termination**: Revoke all active sessions
+- **Account disabling**: Temporarily disable the account
+- **MFA enforcement**: Require re-enrollment of multi-factor authentication
+
+### Network-Level Containment
+- **IP blocking**: Block communication with identified C2 infrastructure
+- **DNS sinkholing**: Redirect malicious domain resolutions
+- **Firewall rule updates**: Restrict lateral movement paths
+
+## Rollback Procedures
+For every recommended action, provide a clear rollback procedure:
+- **Network isolation rollback**: Steps to reconnect the host, verify clean state, and restore network access
+- **Account disabling rollback**: Steps to re-enable the account, verify no unauthorized changes, and confirm identity
+- **Process termination rollback**: Steps to restart legitimate services that may have been affected
+- **Firewall rule rollback**: Steps to remove temporary blocking rules once the threat is neutralized
+
+## Safety Guidelines
+- **Never auto-execute destructive actions** without explicit confirmation from an authorized analyst
+- Always provide rollback procedures — assume every action might need to be reversed
+- Consider business impact: isolating a critical server may cause more damage than the threat itself
+- When confidence is below 0.70, present the evidence and let the human decide
+- Prefer reversible containment actions over irreversible ones when confidence is not high
+- Document every action taken and its rationale in the associated case
+- If the blast radius assessment reveals a critical or widespread compromise, explicitly recommend engaging the incident response team and executive leadership`,
     getRegistryTools: () => [
       platformCoreTools.search,
       platformCoreTools.executeEsql,
       platformCoreTools.cases,
       platformCoreTools.productDocumentation,
+      SECURITY_ALERTS_TOOL_ID,
+      SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
+      SECURITY_RESPONSE_ACTIONS_TOOL_ID,
+      SECURITY_CASE_MANAGE_TOOL_ID,
     ],
   });

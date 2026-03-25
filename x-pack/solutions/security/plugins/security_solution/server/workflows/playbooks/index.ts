@@ -34,7 +34,6 @@ triggers:
 steps:
   - name: triage
     type: ai.agent
-    agent-id: security.triage
     with:
       schema:
         type: object
@@ -57,7 +56,7 @@ steps:
             description: Suggested next action based on triage
         required: [verdict, confidence, summary, key_evidence, recommended_action]
       message: >
-        Triage the following security alert:
+        Use the alert-triage skill to triage the following security alert:
         Alert ID: {{ context.event.alert_id }}
         Rule: {{ context.event.rule_name }}
         Severity: {{ context.event.severity }}
@@ -78,7 +77,6 @@ steps:
 
   - name: investigate
     type: ai.agent
-    agent-id: security.investigator
     if: "steps.triage.output.structured_output.verdict == 'true_positive'"
     with:
       schema:
@@ -104,7 +102,7 @@ steps:
             description: Assessed severity after investigation
         required: [timeline, affected_entities, attack_vector, root_cause, severity]
       message: >
-        Investigate the alert that was triaged as a true positive:
+        Use the investigation skill to investigate the alert that was triaged as a true positive:
         Verdict: {{ steps.triage.output.structured_output.verdict }}
         Confidence: {{ steps.triage.output.structured_output.confidence }}
         Summary: {{ steps.triage.output.structured_output.summary }}
@@ -115,7 +113,6 @@ steps:
 
   - name: respond
     type: ai.agent
-    agent-id: security.responder
     if: "steps.investigate.output.structured_output.severity == 'critical' OR steps.investigate.output.structured_output.severity == 'high'"
     with:
       schema:
@@ -137,7 +134,7 @@ steps:
             description: Steps to roll back response actions if needed
         required: [confidence, recommended_actions, blast_radius, rollback_procedures]
       message: >
-        Based on the investigation findings, recommend containment actions:
+        Use the response-recommendation skill to recommend containment actions based on the investigation findings:
         Severity: {{ steps.investigate.output.structured_output.severity }}
         Attack Vector: {{ steps.investigate.output.structured_output.attack_vector }}
         Root Cause: {{ steps.investigate.output.structured_output.root_cause }}
@@ -159,7 +156,6 @@ steps:
 
   - name: report
     type: ai.agent
-    agent-id: security.reporter
     with:
       schema:
         type: object
@@ -175,7 +171,7 @@ steps:
             description: Generated case identifier for tracking
         required: [report_markdown, executive_summary, case_id]
       message: >
-        Generate an incident report based on the completed workflow steps.
+        Use the incident-reporting skill to generate an incident report based on the completed workflow steps.
 
         Triage findings:
         Verdict: {{ steps.triage.output.structured_output.verdict | default: "unknown" }}
@@ -210,7 +206,6 @@ description: Deep investigation pipeline - Investigate, Correlate, MITRE Map, Re
 steps:
   - name: investigate
     type: ai.agent
-    agent-id: security.investigator
     with:
       schema:
         type: object
@@ -231,14 +226,13 @@ steps:
             description: Confidence score 0.0-1.0 in findings
         required: [timeline, affected_entities, root_cause, confidence]
       message: >
-        Conduct a deep investigation of the following finding:
+        Use the investigation skill to conduct a deep investigation of the following finding:
         {{ context.event.alert_id }}
 
         Build timeline, identify affected entities, and analyze root cause.
 
   - name: correlate
     type: ai.agent
-    agent-id: security.correlator
     with:
       schema:
         type: object
@@ -256,7 +250,7 @@ steps:
             description: Reconstructed attack chain from correlated events
         required: [campaigns, related_findings, attack_chain]
       message: >
-        Analyze the investigation findings for cross-campaign correlation:
+        Use the investigation skill to analyze the investigation findings for cross-campaign correlation:
         Timeline: {{ steps.investigate.output.structured_output.timeline }}
         Affected Entities: {{ steps.investigate.output.structured_output.affected_entities }}
         Root Cause: {{ steps.investigate.output.structured_output.root_cause }}
@@ -265,7 +259,6 @@ steps:
 
   - name: mitre_analysis
     type: ai.agent
-    agent-id: security.mitre_analyst
     with:
       schema:
         type: object
@@ -285,7 +278,7 @@ steps:
             description: Recommendations for improving detection coverage
         required: [covered_techniques, gaps, recommendations]
       message: >
-        Map the correlated findings to MITRE ATT&CK:
+        Use the mitre-coverage skill to map the correlated findings to MITRE ATT&CK:
         Attack Chain: {{ steps.correlate.output.structured_output.attack_chain }}
         Campaigns: {{ steps.correlate.output.structured_output.campaigns }}
         Related Findings: {{ steps.correlate.output.structured_output.related_findings }}
@@ -294,7 +287,6 @@ steps:
 
   - name: report
     type: ai.agent
-    agent-id: security.reporter
     with:
       schema:
         type: object
@@ -304,7 +296,7 @@ steps:
             description: Full investigation report in Markdown format
         required: [report_markdown]
       message: >
-        Generate a comprehensive investigation report:
+        Use the incident-reporting skill to generate a comprehensive investigation report:
         - Investigation Timeline: {{ steps.investigate.output.structured_output.timeline }}
         - Affected Entities: {{ steps.investigate.output.structured_output.affected_entities }}
         - Root Cause: {{ steps.investigate.output.structured_output.root_cause }}
@@ -375,7 +367,6 @@ steps:
 
   - name: correlate
     type: ai.agent
-    agent-id: security.correlator
     if: "steps.hunt.output.structured_output.findings | size > 0"
     with:
       schema:
@@ -398,7 +389,7 @@ steps:
             description: Assessment of whether findings constitute a coordinated campaign
         required: [patterns, campaign_assessment]
       message: >
-        Correlate the threat hunt findings across campaigns:
+        Use the investigation skill to correlate the threat hunt findings across campaigns:
         Findings: {{ steps.hunt.output.structured_output.findings }}
         Overall Severity: {{ steps.hunt.output.structured_output.severity }}
         Areas Searched: {{ steps.hunt.output.structured_output.hunt_areas_searched }}
@@ -407,11 +398,10 @@ steps:
 
   - name: create_rules
     type: ai.agent
-    agent-id: security.mitre_analyst
     if: "steps.correlate.output.structured_output.patterns | size > 0"
     with:
       message: >
-        Based on the hunt and correlation findings, recommend new detection rules:
+        Use the mitre-coverage skill to recommend new detection rules based on the hunt and correlation findings:
         Patterns: {{ steps.correlate.output.structured_output.patterns }}
         Campaign Assessment: {{ steps.correlate.output.structured_output.campaign_assessment }}
 
@@ -435,7 +425,6 @@ triggers:
 steps:
   - name: audit
     type: ai.agent
-    agent-id: security.mitre_analyst
     with:
       schema:
         type: object
@@ -466,7 +455,7 @@ steps:
             description: Percentage of MITRE techniques covered (0-100)
         required: [total_rules, covered_techniques, uncovered_techniques, coverage_percentage]
       message: >
-        Conduct a comprehensive MITRE ATT&CK detection coverage audit:
+        Use the mitre-coverage skill to conduct a comprehensive MITRE ATT&CK detection coverage audit:
         1. Query all active detection rules
         2. Map rules to MITRE techniques
         3. Identify coverage gaps
@@ -476,7 +465,6 @@ steps:
 
   - name: generate_rules
     type: ai.agent
-    agent-id: security.mitre_analyst
     if: "steps.audit.output.structured_output.uncovered_techniques | size > 0"
     with:
       schema:
@@ -502,7 +490,7 @@ steps:
             description: Number of rules generated
         required: [created_rules, rule_count]
       message: >
-        Based on the coverage audit, generate detection rules for the top priority gaps:
+        Use the mitre-coverage skill to generate detection rules for the top priority gaps based on the coverage audit:
         Coverage: {{ steps.audit.output.structured_output.coverage_percentage }}%
         Total Rules: {{ steps.audit.output.structured_output.total_rules }}
         Uncovered Techniques: {{ steps.audit.output.structured_output.uncovered_techniques }}

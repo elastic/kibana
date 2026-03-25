@@ -7,12 +7,20 @@
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools } from '@kbn/agent-builder-common';
+import {
+  SECURITY_ALERTS_TOOL_ID,
+  SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
+  SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
+  SECURITY_LABS_SEARCH_TOOL_ID,
+  SECURITY_THREAT_INTEL_ENRICH_TOOL_ID,
+} from '../../tools';
 
 export const getAlertTriageSkill = () =>
   defineSkillType({
     id: 'alert-triage',
     name: 'alert-triage',
     basePath: 'skills/security/alerts',
+    experimental: true,
     description:
       'Guide to systematically triaging security alerts: severity assessment, entity context gathering, threat intelligence correlation, verdict classification (true_positive, benign_true_positive, false_positive), and recommended next actions with confidence scoring.',
     content: `# Alert Triage Guide
@@ -220,11 +228,24 @@ Steps:
 - Always provide actionable next steps, not just the classification
 - Reference specific evidence (alert IDs, entity names, TI matches) in the reasoning
 - Consider the organizational context: asset criticality and business impact should influence priority
+
+## Escalation Guidelines
+- **Escalate immediately** if: confidence >= 0.8 for true_positive with critical/high severity, or multiple correlated alerts suggest an active campaign
+- **Escalate for review** if: confidence is between 0.5 and 0.8, or the alert involves sensitive assets (domain controllers, executive accounts, crown jewel systems)
+- **Close with documentation** if: confidence >= 0.8 for false_positive or benign_true_positive, with clear supporting evidence
+- Never dismiss an alert without checking entity risk scores and attack discovery context
+- When in doubt, escalate rather than close — false negatives are more costly than false positives in security
+- Document your reasoning thoroughly so that Tier 2 analysts can quickly understand your assessment
 `,
     getRegistryTools: () => [
       platformCoreTools.search,
       platformCoreTools.executeEsql,
       platformCoreTools.cases,
       platformCoreTools.productDocumentation,
+      SECURITY_ALERTS_TOOL_ID,
+      SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
+      SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
+      SECURITY_LABS_SEARCH_TOOL_ID,
+      SECURITY_THREAT_INTEL_ENRICH_TOOL_ID,
     ],
   });

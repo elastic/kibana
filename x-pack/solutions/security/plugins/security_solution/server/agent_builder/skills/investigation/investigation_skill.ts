@@ -7,12 +7,24 @@
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools } from '@kbn/agent-builder-common';
+import {
+  SECURITY_ALERTS_TOOL_ID,
+  SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
+  SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
+  SECURITY_THREAT_INTEL_ENRICH_TOOL_ID,
+  SECURITY_TIMELINE_CREATE_TOOL_ID,
+  SECURITY_CASE_MANAGE_TOOL_ID,
+  SECURITY_LABS_SEARCH_TOOL_ID,
+  SECURITY_MITRE_MAPPING_TOOL_ID,
+  SECURITY_ENTITY_STORE_QUERY_TOOL_ID,
+} from '../../tools';
 
 export const getInvestigationSkill = () =>
   defineSkillType({
     id: 'investigation',
     name: 'investigation',
     basePath: 'skills/security/alerts',
+    experimental: true,
     description:
       'Guide to conducting systematic security investigations: scope definition, evidence collection, timeline reconstruction, cross-source correlation, root cause analysis, and findings documentation with confidence assessment.',
     content: `# Security Investigation Guide
@@ -239,6 +251,14 @@ Steps:
 - Reference specific event IDs, timestamps, and entity identifiers in all findings
 - Keep the investigation narrative coherent; connect each finding to the overall story
 - Consider anti-forensic techniques that may have been used to obscure evidence
+
+## Case Creation Guidelines
+- Create a case when: the investigation confirms malicious activity, multiple entities are affected, or the incident requires cross-team coordination
+- Always attach the investigation timeline and IOC list to the case
+- Set appropriate severity and assign to the relevant team
+- Link related alerts to the case for full traceability
+- Preserve the chain of evidence — note exactly which queries and data sources you used
+- When evidence is ambiguous, state the uncertainty clearly rather than drawing unsupported conclusions
 `,
     getRegistryTools: () => [
       platformCoreTools.search,
@@ -246,5 +266,14 @@ Steps:
       platformCoreTools.cases,
       platformCoreTools.getDocumentById,
       platformCoreTools.productDocumentation,
+      SECURITY_ALERTS_TOOL_ID,
+      SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
+      SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
+      SECURITY_THREAT_INTEL_ENRICH_TOOL_ID,
+      SECURITY_TIMELINE_CREATE_TOOL_ID,
+      SECURITY_CASE_MANAGE_TOOL_ID,
+      SECURITY_LABS_SEARCH_TOOL_ID,
+      SECURITY_MITRE_MAPPING_TOOL_ID,
+      SECURITY_ENTITY_STORE_QUERY_TOOL_ID,
     ],
   });
