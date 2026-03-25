@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityType } from '@kbn/entity-store';
+import type { EntityType } from '@kbn/entity-store/common';
 
 export interface WatchlistEntityDoc {
   '@timestamp'?: string;

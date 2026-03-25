@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { getLatestEntitiesIndexName } from '@kbn/entity-store';
+export { getLatestEntitiesIndexName } from '@kbn/entity-store/common';
 
 export const ENTITY_ANALYTICS_TABLE_ID = 'entity-analytics-home-table';
 

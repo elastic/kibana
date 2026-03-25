@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import type { EntityType } from '@kbn/entity-store';
+import type { EntityType } from '@kbn/entity-store/common';
 
 interface EsHit {
   _source: Record<string, FieldValue>;

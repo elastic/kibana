@@ -7,8 +7,8 @@
 
 import { uniq } from 'lodash';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ALL_ENTITY_TYPES } from '@kbn/entity-store';
-import type { EntityType } from '@kbn/entity-store';
+import { ALL_ENTITY_TYPES } from '@kbn/entity-store/common';
+import type { EntityType } from '@kbn/entity-store/common';
 import type { MonitoringEntitySource } from '../../../../../../../common/api/entity_analytics';
 import type { EntityStoreEntityIdsByType } from '../../../entities/service';
 import type { WatchlistBulkEntity } from '../../types';
