@@ -10,7 +10,6 @@ import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiButton,
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiFilterButton,
   EuiFilterGroup,
@@ -95,9 +94,8 @@ function getStatusDisplay(status: TaskStatus): {
 export const ManageIntegrationsTable: React.FC<{
   integrations: CreatedIntegrationRow[];
   isLoading: boolean;
-  isError: boolean;
   onRefetch: () => void;
-}> = ({ integrations, isLoading, isError, onRefetch }) => {
+}> = ({ integrations, isLoading, onRefetch }) => {
   const [isActionsFilterOpen, setIsActionsFilterOpen] = useState(false);
   const [isStatusFilterOpen, setIsStatusFilterOpen] = useState(false);
   const [selectedActions, setSelectedActions] = useState<string[]>([]);
@@ -824,22 +822,6 @@ export const ManageIntegrationsTable: React.FC<{
 
   if (isLoading) {
     return <EuiEmptyPrompt icon={<EuiLoadingSpinner size="xl" />} />;
-  }
-
-  if (isError) {
-    return (
-      <EuiCallOut
-        announceOnMount
-        color="danger"
-        iconType="error"
-        title={
-          <FormattedMessage
-            id="xpack.fleet.epmList.manageIntegrations.errorTitle"
-            defaultMessage="Unable to load integrations"
-          />
-        }
-      />
-    );
   }
 
   return (

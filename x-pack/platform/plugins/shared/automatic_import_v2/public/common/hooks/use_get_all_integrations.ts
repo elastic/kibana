@@ -16,8 +16,6 @@ import { useKibana } from './use_kibana';
 export interface UseGetAllIntegrationsResult {
   integrations: AllIntegrationsResponseIntegration[];
   isLoading: boolean;
-  isError: boolean;
-  error: Error | null;
   refetch: () => void;
 }
 
@@ -27,7 +25,7 @@ export interface UseGetAllIntegrationsResult {
 export function useGetAllIntegrations(): UseGetAllIntegrationsResult {
   const { http } = useKibana().services;
 
-  const { data, isLoading, isError, error, refetch } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ['all-integrations'],
     queryFn: async (): Promise<GetAllAutoImportIntegrationsResponse> => {
       try {
@@ -45,8 +43,6 @@ export function useGetAllIntegrations(): UseGetAllIntegrationsResult {
   return {
     integrations: data ?? [],
     isLoading,
-    isError,
-    error: error as Error | null,
     refetch,
   };
 }
