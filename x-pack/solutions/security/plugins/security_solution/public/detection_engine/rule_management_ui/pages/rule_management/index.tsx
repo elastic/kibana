@@ -113,7 +113,7 @@ const RulesPageContent = () => {
                 <EuiToolTip position="top" content={i18n.UPLOAD_VALUE_LISTS_TOOLTIP}>
                   <EuiButtonEmpty
                     data-test-subj="open-value-lists-modal-button"
-                    iconType="importAction"
+                    iconType="download"
                     isDisabled={isImportValueListDisabled}
                     onClick={showValueListFlyout}
                   >
@@ -124,7 +124,7 @@ const RulesPageContent = () => {
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   data-test-subj="rules-import-modal-button"
-                  iconType="importAction"
+                  iconType="download"
                   isDisabled={!canEditRules || loading}
                   onClick={showImportModal}
                 >
@@ -138,7 +138,7 @@ const RulesPageContent = () => {
                   <SecuritySolutionLinkButton
                     data-test-subj="create-new-rule"
                     fill
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     isDisabled={!canEditRules || loading}
                     deepLinkId={SecurityPageName.rulesCreate}
                   >

@@ -77,6 +77,7 @@ export function useDissectPatternSuggestion(
                     path: { name: params.streamName },
                     body: {
                       connector_id: params.connectorId,
+                      field_name: params.fieldName,
                       sample_messages: sampleMessages,
                       review_fields: reviewFields,
                     },

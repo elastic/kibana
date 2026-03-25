@@ -14,6 +14,7 @@ import { FilterByAssigneesPopover } from '../../../../common/components/filter_b
 import type { AssigneesIdsSelection } from '../../../../common/components/assignees/types';
 import { SecurityPageName } from '../../../../app/types';
 import { SecuritySolutionLinkButton } from '../../../../common/components/links';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const BUTTON_MANAGE_RULES = i18n.translate('xpack.securitySolution.alertsPage.buttonManageRules', {
   defaultMessage: 'Manage rules',
@@ -36,6 +37,7 @@ export interface HeaderSectionProps {
  * UI section of the alerts page that renders the assignees button and a button to navigate to the rules page.
  */
 export const HeaderSection = memo(({ assignees, setAssignees }: HeaderSectionProps) => {
+  const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
   const handleSelectedAssignees = useCallback(
     (newAssignees: AssigneesIdsSelection[]) => {
       if (!isEqual(newAssignees, assignees)) {
@@ -53,15 +55,17 @@ export const HeaderSection = memo(({ assignees, setAssignees }: HeaderSectionPro
           onSelectionChange={handleSelectedAssignees}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <SecuritySolutionLinkButton
-          deepLinkId={SecurityPageName.rules}
-          data-test-subj={GO_TO_RULES_BUTTON_TEST_ID}
-          fill
-        >
-          {BUTTON_MANAGE_RULES}
-        </SecuritySolutionLinkButton>
-      </EuiFlexItem>
+      {canReadRules ? (
+        <EuiFlexItem>
+          <SecuritySolutionLinkButton
+            deepLinkId={SecurityPageName.rules}
+            data-test-subj={GO_TO_RULES_BUTTON_TEST_ID}
+            fill
+          >
+            {BUTTON_MANAGE_RULES}
+          </SecuritySolutionLinkButton>
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
   );
 });

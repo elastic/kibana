@@ -355,7 +355,17 @@ export const patchCase = async ({
   caseId: string;
   updatedCase: Pick<
     CasePatchRequest,
-    'description' | 'status' | 'tags' | 'title' | 'settings' | 'connector'
+    | 'description'
+    | 'status'
+    | 'tags'
+    | 'title'
+    | 'settings'
+    | 'connector'
+    | 'severity'
+    | 'assignees'
+    | 'category'
+    | 'customFields'
+    | 'extended_fields'
   >;
   version: string;
   signal?: AbortSignal;
