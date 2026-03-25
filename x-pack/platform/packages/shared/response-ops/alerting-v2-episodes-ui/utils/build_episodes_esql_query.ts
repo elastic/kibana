@@ -16,8 +16,6 @@ import {
 export interface EpisodesFilterState {
   /** Single episode status (inactive | pending | active | recovering) or null for All */
   status?: string | null;
-  /** Severity values (e.g. critical, high, medium, low) */
-  severity?: string[] | null;
   /** Rule ID or null */
   ruleId?: string | null;
   /** KQL query string for full-text search; applied via request filter, not inlined in ES|QL */
