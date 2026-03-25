@@ -220,17 +220,19 @@ export class AssetManagerClient {
           esClient: this.esClient,
           logger: this.logger,
         }),
-        stopStatusReportTask({
-          taskManager: this.taskManager,
-          logger: this.logger,
-          namespace: this.namespace,
-        }),
       ]);
 
       const remainingEngines = await this.engineDescriptorClient.getAll();
       if (remainingEngines.length === 0) {
         this.logger.debug(`Deleting global state because last engine was uninstalled`);
-        await this.globalStateClient.delete();
+        await Promise.all([
+          this.globalStateClient.delete(),
+          stopStatusReportTask({
+            taskManager: this.taskManager,
+            logger: this.logger,
+            namespace: this.namespace,
+          }),
+        ]);
       }
 
       this.logger.get(type).debug(`Uninstalled definition: ${type}`);
