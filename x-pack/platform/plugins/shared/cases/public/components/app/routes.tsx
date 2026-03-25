@@ -91,18 +91,18 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
         </Route>
 
         {isTemplatesEnabled && (
-          <>
-            <Route exact path={getCasesConfigureCreateTemplatePath(basePath)}>
-              <Suspense fallback={<EuiLoadingSpinner />}>
-                <CreateTemplateLazy />
-              </Suspense>
-            </Route>
-            <Route exact path={getCasesConfigureEditTemplatePath(basePath)}>
-              <Suspense fallback={<EuiLoadingSpinner />}>
-                <EditTemplateLazy />
-              </Suspense>
-            </Route>
-          </>
+          <Route exact path={getCasesConfigureCreateTemplatePath(basePath)}>
+            <Suspense fallback={<EuiLoadingSpinner />}>
+              <CreateTemplateLazy />
+            </Suspense>
+          </Route>
+        )}
+        {isTemplatesEnabled && (
+          <Route exact path={getCasesConfigureEditTemplatePath(basePath)}>
+            <Suspense fallback={<EuiLoadingSpinner />}>
+              <EditTemplateLazy />
+            </Suspense>
+          </Route>
         )}
 
         <Route path={getCasesConfigurePath(basePath)}>
