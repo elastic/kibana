@@ -82,7 +82,6 @@
     "@kbn/data-view-utils",
     "@kbn/presentation-publishing",
     "@kbn/aiops-log-pattern-analysis",
-    "@kbn/field-types",
     "@kbn/elastic-agent-utils",
     "@kbn/custom-icons",
     "@kbn/observability-ai-assistant-plugin",
