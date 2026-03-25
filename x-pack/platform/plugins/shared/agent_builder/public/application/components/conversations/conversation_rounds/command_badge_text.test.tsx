@@ -21,13 +21,10 @@ describe('CommandBadgeText', () => {
     expect(screen.getByText('hello world')).toBeInTheDocument();
   });
 
-  it('renders a badge from serialized format with EuiTextTruncate', () => {
-    const { container } = renderWithProvider(
-      <CommandBadgeText text="[/Summarize](skill://skill-1)" />
-    );
+  it('renders a badge from serialized format with truncated styling', () => {
+    renderWithProvider(<CommandBadgeText text="[/Summarize](skill://skill-1)" />);
 
-    expect(container.querySelector('.euiTextTruncate')).toBeTruthy();
-    expect(screen.getByTestId('fullText')).toHaveTextContent('/Summarize');
+    expect(screen.getByText('/Summarize')).toBeInTheDocument();
   });
 
   it('renders mixed text and badges', () => {
@@ -50,12 +47,9 @@ describe('CommandBadgeText', () => {
     expect(screen.getByText('[/Unknown](unknown://id-1)')).toBeInTheDocument();
   });
 
-  it('uses EuiTextTruncate for SML badges', () => {
-    const { container } = renderWithProvider(
-      <CommandBadgeText text="[@dashboard/A](sml://chunk-1)" />
-    );
+  it('renders SML badges with full type/title text', () => {
+    renderWithProvider(<CommandBadgeText text="[@dashboard/A](sml://chunk-1)" />);
 
-    expect(container.querySelector('.euiTextTruncate')).toBeTruthy();
-    expect(screen.getByTestId('fullText')).toHaveTextContent('@dashboard/A');
+    expect(screen.getByText('@dashboard/A')).toBeInTheDocument();
   });
 });

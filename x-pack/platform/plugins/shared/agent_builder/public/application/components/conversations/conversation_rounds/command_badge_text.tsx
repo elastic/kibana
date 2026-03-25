@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiTextTruncate, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import {
   COMMAND_BADGE_MAX_WIDTH_CH,
   deserializeCommandBadge,
@@ -45,20 +45,25 @@ export const CommandBadgeText: React.FC<CommandBadgeTextProps> = ({ text }) => {
           return <React.Fragment key={index}>{segment.value}</React.Fragment>;
         }
 
+        const sequence = getCommandDefinition(segment.data.commandId)?.sequence ?? '';
+        const fullBadgeText = `${sequence}${segment.data.label}`;
         return (
           <span
             key={index}
+            title={fullBadgeText}
             css={[
               badgeStyle,
               css`
                 display: inline-block;
                 max-width: ${COMMAND_BADGE_MAX_WIDTH_CH}ch;
                 vertical-align: middle;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
               `,
             ]}
           >
-            {getCommandDefinition(segment.data.commandId)?.sequence ?? ''}
-            <EuiTextTruncate text={segment.data.label} />
+            {fullBadgeText}
           </span>
         );
       })}
