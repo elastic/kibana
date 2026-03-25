@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { SessionError } from './session_error';
+export { SessionError, SessionErrorReason } from './session_error';
 export { SessionMissingError } from './session_missing_error';
 export { SessionExpiredError } from './session_expired_error';
 export { SessionConcurrencyLimitError } from './session_concurrency_limit_error';

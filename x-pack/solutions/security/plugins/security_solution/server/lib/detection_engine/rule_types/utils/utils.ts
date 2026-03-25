@@ -39,7 +39,6 @@ import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { Privilege } from '../../../../../common/api/detection_engine';
-import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
 import type {
   SearchAfterAndBulkCreateReturnType,
   SignalSearchResponse,
@@ -110,10 +109,7 @@ export const hasTimestampFields = async (args: {
         : timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices
     )}`;
 
-    await ruleExecutionLogger.logStatusChange({
-      newStatus: RuleExecutionStatusEnum['partial failure'],
-      message: errorString,
-    });
+    ruleExecutionLogger.warn(errorString);
 
     return { foundNoIndices: false, warningMessage: errorString };
   }
@@ -347,10 +343,7 @@ export const getRuleRangeTuples = async ({
   if (maxSignals > maxAlertsAllowed) {
     maxSignalsToUse = maxAlertsAllowed;
     warningStatusMessage = `The rule's max alerts per run setting (${maxSignals}) is greater than the Kibana alerting limit (${maxAlertsAllowed}). The rule will only write a maximum of ${maxAlertsAllowed} alerts per rule run.`;
-    await ruleExecutionLogger.logStatusChange({
-      newStatus: RuleExecutionStatusEnum['partial failure'],
-      message: warningStatusMessage,
-    });
+    ruleExecutionLogger.warn(warningStatusMessage);
   }
 
   const tuples = [
@@ -821,6 +814,14 @@ export const getMaxSignalsWarning = (): string => {
 
 export const getSuppressionMaxSignalsWarning = (): string => {
   return `This rule reached the maximum alert limit for the rule execution. Some alerts were not created or suppressed.`;
+};
+
+export const getMissingIdFieldWarning = (): string => {
+  return `ES|QL query does not return _id metadata field for a non-aggregating query. This may result in duplicate alerts. Consider adding "METADATA _id" to the FROM command and make sure _id is not excluded by KEEP or DROP commands.`;
+};
+
+export const getMetadataIdInjectionFailedWarning = (reason: string): string => {
+  return `Failed to automatically inject METADATA _id into ES|QL query: ${reason}. This may result in duplicate alerts. Try manually adding "METADATA _id" to the FROM command and ensure _id is returned in the query results.`;
 };
 
 export const getDisabledActionsWarningText = ({

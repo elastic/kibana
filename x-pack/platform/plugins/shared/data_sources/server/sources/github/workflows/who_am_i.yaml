@@ -1,0 +1,13 @@
+version: '1'
+name: 'sources.github.who_am_i'
+description: 'Return the authenticated GitHub user profile. Includes login, name, email, URL, and bio. No inputs required.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs: []
+steps:
+  - name: get-me
+    type: github.getMe
+    connector-id: <%= github-stack-connector-id %>
+    with: {}

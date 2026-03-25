@@ -13,7 +13,7 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { colorByValueSchema } from '../color';
-import { esqlColumnSchema } from '../metric_ops';
+import { esqlColumnWithFormatSchema } from '../metric_ops';
 import {
   sharedPanelInfoSchema,
   layerSettingsSchema,
@@ -64,7 +64,7 @@ const heatmapSharedStateSchema = {
   ),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
-  axes: schema.maybe(
+  axis: schema.maybe(
     schema.object(
       {
         x: schema.maybe(
@@ -129,13 +129,13 @@ const heatmapSharedStateSchema = {
 };
 
 const heatmapAxesStateSchemaProps = {
-  xAxis: bucketOperationDefinitionSchema,
-  yAxis: schema.maybe(bucketOperationDefinitionSchema),
+  x: bucketOperationDefinitionSchema,
+  y: schema.maybe(bucketOperationDefinitionSchema),
 };
 
 const heatmapAxesStateESQLSchemaProps = {
-  xAxis: esqlColumnSchema,
-  yAxis: schema.maybe(esqlColumnSchema),
+  x: esqlColumnWithFormatSchema,
+  y: schema.maybe(esqlColumnWithFormatSchema),
 };
 
 const heatmapStateMetricOptionsSchemaProps = {
@@ -160,7 +160,7 @@ export const heatmapStateSchemaESQL = schema.object(
     ...heatmapSharedStateSchema,
     ...heatmapAxesStateESQLSchemaProps,
     ...datasetEsqlTableSchema,
-    metric: esqlColumnSchema.extends(heatmapStateMetricOptionsSchemaProps),
+    metric: esqlColumnWithFormatSchema.extends(heatmapStateMetricOptionsSchemaProps),
   },
   { meta: { id: 'heatmapESQL', title: 'Heatmap Chart (ES|QL)' } }
 );

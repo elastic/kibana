@@ -65,7 +65,10 @@ const mockAttack = getMockAttackDiscoveryAlerts()[0];
 function renderAttack(attack: AttackDiscoveryAlert) {
   return render(
     <TestProviders>
-      <AttacksGroupTakeActionItems attack={attack} />
+      <AttacksGroupTakeActionItems
+        attack={attack}
+        telemetrySource="attacks_page_group_take_action"
+      />
     </TestProviders>
   );
 }
@@ -230,8 +233,9 @@ describe('AttacksGroupTakeActionItems', () => {
   });
 
   describe('investigate in timeline', () => {
-    it('should render the `Investigate in timeline` action item', async () => {
+    it('renders the `Investigate in timeline` action item when user has timeline read privileges', async () => {
       const { findByText } = renderAttack(mockAttack);
+
       expect(await findByText('Investigate in timeline')).toBeInTheDocument();
     });
   });

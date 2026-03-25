@@ -77,6 +77,7 @@ describe('RetentionCard', () => {
     it('shows inherit label for wired child inheriting', () => {
       const definition: Streams.WiredStream.GetResponse = {
         stream: {
+          type: 'wired',
           name: 'logs-test.child',
           description: '',
           updated_at: new Date().toISOString(),
@@ -123,6 +124,7 @@ describe('RetentionCard', () => {
       // Non-inheriting wired stream: ingest.lifecycle is not inherit, effective lifecycle still ILM
       const definition: Streams.WiredStream.GetResponse = {
         stream: {
+          type: 'wired',
           name: 'logs-test.child',
           description: '',
           updated_at: new Date().toISOString(),

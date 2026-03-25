@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/deeplinks-workflows'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/workflows-eng'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/deeplinks-workflows'
+  title: '@kbn/deeplinks-workflows'
   description: Moon project for @kbn/deeplinks-workflows
   channel: ''
   owner: '@elastic/workflows-eng'
-  metadata:
-    sourceRoot: src/platform/packages/shared/deeplinks/workflows
+  sourceRoot: src/platform/packages/shared/deeplinks/workflows
 dependsOn: []
 tags:
   - shared-common

@@ -45,13 +45,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('endpoint tabular view', () => {
       describe('group by', () => {
+        const elasticModelGroupId = 'Elastic';
+
         it('defaults to group by models', async () => {
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupBySelection(
-            'Models'
+            'Model Author'
           );
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByViewToBeDisplayed();
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByTable(
-            'elastic'
+            elasticModelGroupId
           );
         });
 
@@ -79,29 +81,28 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('can collapse group accordions', async () => {
-          const modelGroup = 'elastic';
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByViewToBeDisplayed();
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByAccordionsToBeOpen(
-            modelGroup
+            elasticModelGroupId
           );
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.toggleGroupByAccordion(
-            modelGroup
+            elasticModelGroupId
           );
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByAccordionsToBeClosed(
-            modelGroup
+            elasticModelGroupId
           );
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.toggleGroupByAccordion(
-            modelGroup
+            elasticModelGroupId
           );
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByAccordionsToBeOpen(
-            modelGroup
+            elasticModelGroupId
           );
         });
       });
       describe('group by None', () => {
         beforeEach(async () => {
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupBySelection(
-            'Models'
+            'Model Author'
           );
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.selectGroupByOption(
             'none'

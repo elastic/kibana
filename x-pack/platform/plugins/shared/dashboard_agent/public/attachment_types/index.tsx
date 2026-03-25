@@ -7,25 +7,47 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
+import type { AttachmentLifecycleParams } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
-import type { DashboardRendererProps } from '@kbn/dashboard-plugin/public';
+import type {
+  DashboardApi,
+  DashboardRendererProps,
+  DashboardStart,
+} from '@kbn/dashboard-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { DashboardCanvasContent } from './dashboard_canvas_content';
+import { handlePreviewInDashboard } from './handle_preview_in_dashboard';
+import { onAttachmentMount } from './create_attachment_mount_handler';
 
 export const registerDashboardAttachmentUiDefinition = ({
-  attachments,
+  agentBuilder: {
+    attachments,
+    events: { chat$ },
+  },
   dashboardLocator,
   unifiedSearch,
-  doesSavedDashboardExist,
+  dashboardPlugin,
 }: {
-  attachments: AttachmentServiceStartContract;
+  agentBuilder: AgentBuilderPluginStart;
   dashboardLocator?: DashboardRendererProps['locator'];
   unifiedSearch: UnifiedSearchPublicPluginStart;
-  doesSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
+  dashboardPlugin: DashboardStart;
 }): (() => void) => {
+  let dashboardApi: DashboardApi | undefined;
+  // maintains a dashboardApi reference for access in getActionButtons
+  const dashboardAppApiSubscription = dashboardPlugin.dashboardAppClientApi$.subscribe((api) => {
+    dashboardApi = api;
+  });
+
+  const findDashboardsServicePromise = dashboardPlugin.findDashboardsService();
+  const checkSavedDashboardExist = async (dashboardId: string) => {
+    const findDashboardsService = await findDashboardsServicePromise;
+    const result = await findDashboardsService.findById(dashboardId);
+    return result.status === 'success';
+  };
   attachments.addAttachmentType<DashboardAttachment>(DASHBOARD_ATTACHMENT_TYPE, {
     getLabel: (attachment) => {
       return (
@@ -36,21 +58,21 @@ export const registerDashboardAttachmentUiDefinition = ({
       );
     },
     getIcon: () => 'productDashboard',
+    onAttachmentMount: (params: AttachmentLifecycleParams<DashboardAttachment>) =>
+      onAttachmentMount({ ...params, dashboardPlugin, chat$ }),
     renderCanvasContent: (props, callbacks) => (
       <DashboardCanvasContent
         {...props}
-        registerActionButtons={callbacks.registerActionButtons}
-        updateOrigin={callbacks.updateOrigin}
+        {...callbacks}
         dashboardLocator={dashboardLocator}
         searchBarComponent={unifiedSearch.ui.SearchBar}
-        doesSavedDashboardExist={doesSavedDashboardExist}
+        checkSavedDashboardExist={checkSavedDashboardExist}
       />
     ),
-    getActionButtons: ({ openCanvas }) => {
-      if (!openCanvas) {
+    getActionButtons: ({ attachment, openCanvas, isCanvas, updateOrigin }) => {
+      if (isCanvas) {
         return [];
       }
-
       return [
         {
           label: i18n.translate('xpack.dashboardAgent.attachments.dashboard.previewActionLabel', {
@@ -58,11 +80,26 @@ export const registerDashboardAttachmentUiDefinition = ({
           }),
           icon: 'eye',
           type: ActionButtonType.SECONDARY,
-          handler: openCanvas,
+          handler: () => {
+            if (!dashboardApi) {
+              openCanvas?.();
+              return;
+            }
+
+            handlePreviewInDashboard({
+              attachment,
+              dashboardApi,
+              checkSavedDashboardExist,
+              updateOrigin,
+            });
+          },
         },
       ];
     },
   });
 
-  return () => {};
+  return () => {
+    dashboardAppApiSubscription.unsubscribe();
+    dashboardApi = undefined;
+  };
 };

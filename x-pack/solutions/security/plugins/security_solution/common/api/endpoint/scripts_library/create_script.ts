@@ -11,6 +11,7 @@ import {
   ScriptDescriptionSchema,
   ScriptExampleSchema,
   ScriptFileSchema,
+  ScriptFileTypeSchema,
   ScriptInstructionsSchema,
   ScriptNameSchema,
   ScriptPathToExecutableSchema,
@@ -24,11 +25,17 @@ export const CreateScriptRequestSchema = {
     name: ScriptNameSchema,
     platform: ScriptPlatformSchema,
     file: ScriptFileSchema,
+    fileType: ScriptFileTypeSchema,
     requiresInput: schema.maybe(ScriptRequiresInputSchema),
     description: schema.maybe(ScriptDescriptionSchema),
     instructions: schema.maybe(ScriptInstructionsSchema),
     example: schema.maybe(ScriptExampleSchema),
-    pathToExecutable: schema.maybe(ScriptPathToExecutableSchema),
+    pathToExecutable: schema.conditional(
+      schema.siblingRef('fileType'),
+      'archive',
+      ScriptPathToExecutableSchema,
+      schema.never()
+    ),
     tags: schema.maybe(getScriptsTagSchema('post')),
   }),
 };

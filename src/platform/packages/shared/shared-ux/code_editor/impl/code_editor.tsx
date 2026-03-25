@@ -108,6 +108,13 @@ export interface CodeEditorProps
   codeActions?: monaco.languages.CodeActionProvider;
 
   /**
+   * Document highlight provider for highlighting all occurrences of a symbol
+   * Documentation for the provider can be found here:
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.DocumentHighlightProvider.html
+   */
+  documentHighlightProvider?: monaco.languages.DocumentHighlightProvider;
+
+  /**
    * Function called before the editor is mounted in the view
    */
   editorWillMount?: () => void;
@@ -226,6 +233,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   placeholder,
   languageConfiguration,
   codeActions,
+  documentHighlightProvider,
   'aria-label': ariaLabel = i18n.translate('sharedUXPackages.codeEditor.ariaLabel', {
     defaultMessage: 'Code Editor',
   }),
@@ -460,6 +468,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         if (codeActions) {
           monaco.languages.registerCodeActionProvider(languageId, codeActions);
         }
+
+        if (documentHighlightProvider) {
+          monaco.languages.registerDocumentHighlightProvider(languageId, documentHighlightProvider);
+        }
       });
 
       monaco.editor.addKeybindingRule({
@@ -477,6 +489,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       hoverProvider,
       inlineCompletionsProvider,
       codeActions,
+      documentHighlightProvider,
       languageConfiguration,
       enableFindAction,
     ]

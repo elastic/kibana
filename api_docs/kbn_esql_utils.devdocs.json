@@ -52,7 +52,7 @@
           " ? T : string) | undefined) => string"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers/index.ts",
-        "lineNumber": 594,
+        "lineNumber": 595,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -68,7 +68,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers/index.ts",
-            "lineNumber": 597,
+            "lineNumber": 598,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -92,7 +92,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers/index.ts",
-            "lineNumber": 598,
+            "lineNumber": 599,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -115,7 +115,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers/index.ts",
-            "lineNumber": 599,
+            "lineNumber": 600,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -132,7 +132,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers/index.ts",
-            "lineNumber": 600,
+            "lineNumber": 601,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -151,7 +151,7 @@
               " ? unknown : unknown"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers/index.ts",
-            "lineNumber": 601,
+            "lineNumber": 602,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -168,7 +168,7 @@
               "\"+\" | \"-\" | \"is_not_null\" | \"is_null\""
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers/index.ts",
-            "lineNumber": 602,
+            "lineNumber": 603,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -187,7 +187,7 @@
               " ? T : string) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers/index.ts",
-            "lineNumber": 603,
+            "lineNumber": 604,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -484,6 +484,66 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.buildMetricsInfoQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "buildMetricsInfoQuery",
+        "description": [
+          "\nAppends \"| METRICS_INFO\" to an ES|QL query if it has no transformational commands.\nSORT is removed from the query. LIMIT, if present, is appended after METRICS_INFO."
+        ],
+        "signature": [
+          "(esql: string | undefined, dimensions: string[] | undefined) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_metrics_info.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.buildMetricsInfoQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [
+              "the ES|QL query."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_metrics_info.ts",
+            "lineNumber": 23,
+            "columnNumber": 39,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.buildMetricsInfoQuery.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "dimensions",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_metrics_info.ts",
+            "lineNumber": 23,
+            "columnNumber": 54,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "the query with \"| METRICS_INFO\" added, or an empty string if not allowed."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.constructCascadeQuery",
         "type": "Function",
         "tags": [],
@@ -505,7 +565,7 @@
           " | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers/index.ts",
-        "lineNumber": 296,
+        "lineNumber": 297,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -521,7 +581,7 @@
               "CascadeQueryArgs"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers/index.ts",
-            "lineNumber": 296,
+            "lineNumber": 297,
             "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
@@ -636,7 +696,7 @@
           "[] | undefined) => string"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-        "lineNumber": 440,
+        "lineNumber": 448,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -652,7 +712,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-            "lineNumber": 441,
+            "lineNumber": 449,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -676,7 +736,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-            "lineNumber": 442,
+            "lineNumber": 450,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -713,7 +773,7 @@
           "[]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-        "lineNumber": 57,
+        "lineNumber": 58,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -736,7 +796,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-            "lineNumber": 57,
+            "lineNumber": 58,
             "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
@@ -767,7 +827,7 @@
           "; }"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-        "lineNumber": 533,
+        "lineNumber": 541,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -786,7 +846,7 @@
               ", string>"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-            "lineNumber": 534,
+            "lineNumber": 542,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -807,7 +867,7 @@
           "(esql: string) => string[]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-        "lineNumber": 470,
+        "lineNumber": 478,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -823,7 +883,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-            "lineNumber": 470,
+            "lineNumber": 478,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
@@ -846,7 +906,7 @@
           "(esql: string) => string[]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-        "lineNumber": 553,
+        "lineNumber": 561,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -862,7 +922,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-            "lineNumber": 553,
+            "lineNumber": 561,
             "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
@@ -882,7 +942,7 @@
           "\nFetches editor extensions from the registry based on the provided query string and active solution ID."
         ],
         "signature": [
-          "(this: void | { forceRefresh?: boolean | undefined; } | undefined, http: ",
+          "(http: ",
           "HttpSetup",
           ", queryString: string, activeSolutionId: ",
           {
@@ -892,49 +952,80 @@
             "section": "def-common.ESQLRegistrySolutionId",
             "text": "ESQLRegistrySolutionId"
           },
-          ") => Promise<{ recommendedQueries: ",
-          {
-            "pluginId": "@kbn/esql-types",
-            "scope": "common",
-            "docId": "kibKbnEsqlTypesPluginApi",
-            "section": "def-common.RecommendedQuery",
-            "text": "RecommendedQuery"
-          },
-          "[]; recommendedFields: ",
-          {
-            "pluginId": "@kbn/esql-types",
-            "scope": "common",
-            "docId": "kibKbnEsqlTypesPluginApi",
-            "section": "def-common.RecommendedField",
-            "text": "RecommendedField"
-          },
-          "[]; }>"
+          ") => Promise<EditorExtensions>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/extensions.ts",
-        "lineNumber": 38,
+        "lineNumber": 86,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
-        "returnComment": [
-          "A promise that resolves to the editor extensions."
-        ],
         "children": [
           {
             "parentPluginId": "@kbn/esql-utils",
             "id": "def-common.getEditorExtensions.$1",
-            "type": "Uncategorized",
+            "type": "Object",
             "tags": [],
-            "label": "args",
-            "description": [],
-            "signature": [
-              "Args"
+            "label": "http",
+            "description": [
+              "The HTTP service to use for the request."
             ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/utils/cache.ts",
-            "lineNumber": 90,
-            "columnNumber": 73,
+            "signature": [
+              "HttpSetup"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/extensions.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getEditorExtensions.$2",
+            "type": "string",
+            "tags": [],
+            "label": "queryString",
+            "description": [
+              "The query string to search for extensions."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/extensions.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getEditorExtensions.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "activeSolutionId",
+            "description": [
+              "The active solution ID to filter extensions."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLRegistrySolutionId",
+                "text": "ESQLRegistrySolutionId"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/extensions.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
+        ],
+        "returnComment": [
+          "A promise that resolves to the editor extensions.\nResults are cached by index pattern so they are computed once per source and reused\nacross all consumers. While the user is still typing the source name the function\nreturns an empty result immediately without making any HTTP requests."
         ],
         "initialIsOpen": false
       },
@@ -956,7 +1047,7 @@
             "section": "def-public.DataViewsServicePublic",
             "text": "DataViewsServicePublic"
           },
-          "; query: string; options?: { allowNoIndex?: boolean | undefined; createNewInstanceEvenIfCachedOneAvailable?: boolean | undefined; skipFetchFields?: boolean | undefined; idPrefix?: string | undefined; } | undefined; http?: ",
+          "; query: string; options?: { allowNoIndex?: boolean | undefined; createNewInstanceEvenIfCachedOneAvailable?: boolean | undefined; skipFetchFields?: boolean | undefined; id?: string | undefined; idPrefix?: string | undefined; } | undefined; http?: ",
           "HttpSetup",
           " | undefined; }) => Promise<",
           {
@@ -969,7 +1060,7 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-        "lineNumber": 29,
+        "lineNumber": 40,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -982,7 +1073,7 @@
             "label": "{\n  dataViewsService,\n  query,\n  options,\n  http,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-            "lineNumber": 59,
+            "lineNumber": 71,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -1004,7 +1095,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-                "lineNumber": 61,
+                "lineNumber": 73,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1017,7 +1108,7 @@
                 "label": "query",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-                "lineNumber": 63,
+                "lineNumber": 75,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1030,10 +1121,10 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ allowNoIndex?: boolean | undefined; createNewInstanceEvenIfCachedOneAvailable?: boolean | undefined; skipFetchFields?: boolean | undefined; idPrefix?: string | undefined; } | undefined"
+                  "{ allowNoIndex?: boolean | undefined; createNewInstanceEvenIfCachedOneAvailable?: boolean | undefined; skipFetchFields?: boolean | undefined; id?: string | undefined; idPrefix?: string | undefined; } | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-                "lineNumber": 64,
+                "lineNumber": 76,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1050,7 +1141,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-                "lineNumber": 71,
+                "lineNumber": 84,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1516,7 +1607,7 @@
           "[]>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-        "lineNumber": 132,
+        "lineNumber": 133,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1529,7 +1620,7 @@
             "label": "{\n  esqlQuery,\n  search,\n  signal,\n  filter,\n  dropNullColumns,\n  timeRange,\n  variables,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-            "lineNumber": 140,
+            "lineNumber": 141,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -1542,7 +1633,7 @@
                 "label": "esqlQuery",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-                "lineNumber": 141,
+                "lineNumber": 142,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1608,7 +1699,7 @@
                   "<SearchStrategyResponse>"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-                "lineNumber": 142,
+                "lineNumber": 143,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1666,7 +1757,7 @@
                   "AbortSignal | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-                "lineNumber": 143,
+                "lineNumber": 144,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1682,7 +1773,7 @@
                   "unknown"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-                "lineNumber": 144,
+                "lineNumber": 145,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1698,7 +1789,7 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-                "lineNumber": 145,
+                "lineNumber": 146,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1721,7 +1812,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-                "lineNumber": 146,
+                "lineNumber": 147,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1744,7 +1835,7 @@
                   "[] | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-                "lineNumber": 147,
+                "lineNumber": 148,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1798,7 +1889,7 @@
           "[]>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-        "lineNumber": 70,
+        "lineNumber": 71,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1811,7 +1902,7 @@
             "label": "{\n  esqlQuery,\n  search,\n  signal,\n  filter,\n  dropNullColumns,\n  timeRange,\n  variables,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-            "lineNumber": 78,
+            "lineNumber": 79,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -1824,7 +1915,7 @@
                 "label": "esqlQuery",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-                "lineNumber": 79,
+                "lineNumber": 80,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1890,7 +1981,7 @@
                   "<SearchStrategyResponse>"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-                "lineNumber": 80,
+                "lineNumber": 81,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1948,7 +2039,7 @@
                   "AbortSignal | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-                "lineNumber": 81,
+                "lineNumber": 82,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1964,7 +2055,7 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-                "lineNumber": 82,
+                "lineNumber": 83,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1980,7 +2071,7 @@
                   "unknown"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-                "lineNumber": 83,
+                "lineNumber": 84,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2003,7 +2094,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-                "lineNumber": 84,
+                "lineNumber": 85,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2026,7 +2117,7 @@
                   "[] | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-                "lineNumber": 85,
+                "lineNumber": 86,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2048,7 +2139,7 @@
           "(esql: string) => string[]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-        "lineNumber": 302,
+        "lineNumber": 310,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2064,7 +2155,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-            "lineNumber": 302,
+            "lineNumber": 310,
             "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
@@ -2082,7 +2173,7 @@
         "label": "getESQLResults",
         "description": [],
         "signature": [
-          "({\n  esqlQuery,\n  search,\n  signal,\n  filter,\n  dropNullColumns,\n  timeRange,\n  variables,\n  timezone,\n}: { esqlQuery: string; search: ",
+          "({\n  esqlQuery,\n  search,\n  signal,\n  filter,\n  dropNullColumns,\n  timeRange,\n  variables,\n  timezone,\n  executionContext,\n}: { esqlQuery: string; search: ",
           {
             "pluginId": "@kbn/search-types",
             "scope": "common",
@@ -2106,7 +2197,9 @@
             "section": "def-common.ESQLControlVariable",
             "text": "ESQLControlVariable"
           },
-          "[] | undefined; timezone?: string | undefined; }) => Promise<{ response: ",
+          "[] | undefined; timezone?: string | undefined; executionContext?: ",
+          "KibanaExecutionContext",
+          " | undefined; }) => Promise<{ response: ",
           {
             "pluginId": "@kbn/es-types",
             "scope": "common",
@@ -2125,7 +2218,7 @@
           "; }>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-        "lineNumber": 173,
+        "lineNumber": 174,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2135,10 +2228,10 @@
             "id": "def-common.getESQLResults.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  esqlQuery,\n  search,\n  signal,\n  filter,\n  dropNullColumns,\n  timeRange,\n  variables,\n  timezone,\n}",
+            "label": "{\n  esqlQuery,\n  search,\n  signal,\n  filter,\n  dropNullColumns,\n  timeRange,\n  variables,\n  timezone,\n  executionContext,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-            "lineNumber": 182,
+            "lineNumber": 184,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -2151,7 +2244,7 @@
                 "label": "esqlQuery",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-                "lineNumber": 183,
+                "lineNumber": 185,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2217,7 +2310,7 @@
                   "<SearchStrategyResponse>"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-                "lineNumber": 184,
+                "lineNumber": 186,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2275,7 +2368,7 @@
                   "AbortSignal | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-                "lineNumber": 185,
+                "lineNumber": 187,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2291,7 +2384,7 @@
                   "unknown"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-                "lineNumber": 186,
+                "lineNumber": 188,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2307,7 +2400,7 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-                "lineNumber": 187,
+                "lineNumber": 189,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2330,7 +2423,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-                "lineNumber": 188,
+                "lineNumber": 190,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2353,7 +2446,7 @@
                   "[] | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-                "lineNumber": 189,
+                "lineNumber": 191,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2369,7 +2462,24 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-                "lineNumber": 190,
+                "lineNumber": 192,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/esql-utils",
+                "id": "def-common.getESQLResults.$1.executionContext",
+                "type": "Object",
+                "tags": [],
+                "label": "executionContext",
+                "description": [],
+                "signature": [
+                  "KibanaExecutionContext",
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
+                "lineNumber": 193,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2392,7 +2502,7 @@
         "signature": [
           "(core: Pick<",
           "CoreStart",
-          ", \"application\" | \"http\">, getLicense: (() => Promise<",
+          ", \"http\" | \"application\">, getLicense: (() => Promise<",
           {
             "pluginId": "@kbn/licensing-types",
             "scope": "common",
@@ -2428,7 +2538,7 @@
             "signature": [
               "Pick<",
               "CoreStart",
-              ", \"application\" | \"http\">"
+              ", \"http\" | \"application\">"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/sources.ts",
             "lineNumber": 102,
@@ -2687,21 +2797,15 @@
         "tags": [],
         "label": "getIndexForESQLQuery",
         "description": [
-          "\nThis can be used to get an initial index for a default ES|QL query.\nCould be used during onboarding when data views to get a better index are not yet available.\nCan be used in combination with {@link getESQLAdHocDataview} to create a dataview for the index."
+          "\nGets an initial index for a default ES|QL query by querying both local and remote (CCS) indices.\nCould be used during onboarding when data views to get a better index are not yet available.\nCan be used in combination with {@link getESQLAdHocDataview} to create a dataview for the index.\n\nPrefers a local `logs*` pattern if any local index starts with \"logs\",\notherwise returns the first available non-hidden index (local or remote)."
         ],
         "signature": [
-          "(deps: { dataViews: { getIndices: (props: { pattern: string; showAllIndices?: boolean | undefined; isRollupIndex: (indexName: string) => boolean; projectRouting?: string | undefined; }) => Promise<",
-          {
-            "pluginId": "dataViews",
-            "scope": "public",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-public.MatchedItem",
-            "text": "MatchedItem"
-          },
-          "[]>; }; }) => Promise<string | null>"
+          "(deps: { http: ",
+          "HttpSetup",
+          "; }) => Promise<string | null>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-        "lineNumber": 104,
+        "lineNumber": 133,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2714,32 +2818,24 @@
             "label": "deps",
             "description": [],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-            "lineNumber": 109,
+            "lineNumber": 141,
             "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/esql-utils",
-                "id": "def-common.getIndexForESQLQuery.$1.dataViews",
+                "id": "def-common.getIndexForESQLQuery.$1.http",
                 "type": "Object",
                 "tags": [],
-                "label": "dataViews",
+                "label": "http",
                 "description": [],
                 "signature": [
-                  "{ getIndices: (props: { pattern: string; showAllIndices?: boolean | undefined; isRollupIndex: (indexName: string) => boolean; projectRouting?: string | undefined; }) => Promise<",
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "public",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-public.MatchedItem",
-                    "text": "MatchedItem"
-                  },
-                  "[]>; }"
+                  "HttpSetup"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-                "lineNumber": 110,
-                "columnNumber": 3,
+                "lineNumber": 141,
+                "columnNumber": 52,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2762,7 +2858,7 @@
           "(esql: string | undefined) => string"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_index_pattern_from_query.ts",
-        "lineNumber": 47,
+        "lineNumber": 49,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2780,7 +2876,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_index_pattern_from_query.ts",
-            "lineNumber": 54,
+            "lineNumber": 56,
             "columnNumber": 46,
             "deprecated": false,
             "trackAdoption": false,
@@ -3180,7 +3276,7 @@
           "[] | undefined) => Record<string, string | number | (string | number)[] | Record<string, string | number> | undefined>[]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-        "lineNumber": 43,
+        "lineNumber": 44,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3196,7 +3292,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-            "lineNumber": 44,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3220,7 +3316,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-            "lineNumber": 45,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3244,7 +3340,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-            "lineNumber": 46,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3308,7 +3404,7 @@
           "(esql: string) => string[]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-        "lineNumber": 291,
+        "lineNumber": 299,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3324,7 +3420,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-            "lineNumber": 291,
+            "lineNumber": 299,
             "columnNumber": 46,
             "deprecated": false,
             "trackAdoption": false,
@@ -3423,6 +3519,47 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getSourceCommandFromESQLQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "getSourceCommandFromESQLQuery",
+        "description": [],
+        "signature": [
+          "(esql: string | undefined) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_index_pattern_from_query.ts",
+        "lineNumber": 85,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getSourceCommandFromESQLQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [
+              "- The ES|QL query string to parse"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_index_pattern_from_query.ts",
+            "lineNumber": 89,
+            "columnNumber": 47,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "The source command name, or an empty string if not found"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.getStartEndParams",
         "type": "Function",
         "tags": [],
@@ -3440,7 +3577,7 @@
           " | undefined) => ({ _tstart: string; _tend?: undefined; } | { _tend: string; _tstart?: undefined; })[]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-        "lineNumber": 23,
+        "lineNumber": 24,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3456,7 +3593,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-            "lineNumber": 23,
+            "lineNumber": 24,
             "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
@@ -3480,7 +3617,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-            "lineNumber": 23,
+            "lineNumber": 24,
             "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
@@ -3627,7 +3764,7 @@
           " | undefined) => string | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-        "lineNumber": 414,
+        "lineNumber": 422,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3643,7 +3780,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-            "lineNumber": 414,
+            "lineNumber": 422,
             "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
@@ -3661,7 +3798,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-            "lineNumber": 414,
+            "lineNumber": 422,
             "columnNumber": 62,
             "deprecated": false,
             "trackAdoption": false,
@@ -3734,7 +3871,7 @@
           "(query: string) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-        "lineNumber": 606,
+        "lineNumber": 614,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3750,7 +3887,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-            "lineNumber": 606,
+            "lineNumber": 614,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
@@ -3773,7 +3910,7 @@
           "(query: string) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-        "lineNumber": 21,
+        "lineNumber": 22,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3789,7 +3926,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
-            "lineNumber": 21,
+            "lineNumber": 22,
             "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
@@ -3797,6 +3934,49 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.hasTimeseriesInfoCommand",
+        "type": "Function",
+        "tags": [],
+        "label": "hasTimeseriesInfoCommand",
+        "description": [
+          "\nDetermines if an ES|QL query contains the METRICS_INFO or TS_INFO commands.\n"
+        ],
+        "signature": [
+          "(esql?: string | undefined) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "lineNumber": 630,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.hasTimeseriesInfoCommand.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [
+              "- The ES|QL query string to analyze"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "lineNumber": 630,
+            "columnNumber": 42,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "true if the query contains the METRICS_INFO or TS_INFO commands, false otherwise"
+        ],
         "initialIsOpen": false
       },
       {
@@ -4120,7 +4300,7 @@
           "[]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-        "lineNumber": 315,
+        "lineNumber": 323,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4136,7 +4316,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-            "lineNumber": 316,
+            "lineNumber": 324,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4160,7 +4340,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-            "lineNumber": 317,
+            "lineNumber": 325,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4184,7 +4364,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-            "lineNumber": 318,
+            "lineNumber": 326,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4202,12 +4382,14 @@
         "type": "Function",
         "tags": [],
         "label": "prettifyQuery",
-        "description": [],
+        "description": [
+          "\nPrettifies an ES|QL query with configurable line wrapping."
+        ],
         "signature": [
-          "(src: string) => string"
+          "(src: string, lineWidth?: number | undefined) => string"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-        "lineNumber": 275,
+        "lineNumber": 280,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4218,16 +4400,37 @@
             "type": "string",
             "tags": [],
             "label": "src",
-            "description": [],
+            "description": [
+              "- The raw ES|QL query string"
+            ],
             "signature": [
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-            "lineNumber": 275,
+            "lineNumber": 280,
             "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.prettifyQuery.$2",
+            "type": "number",
+            "tags": [],
+            "label": "lineWidth",
+            "description": [
+              "- Optional line width in characters; when provided, output is wrapped to fit. Otherwise uses the library default (80)."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "lineNumber": 280,
+            "columnNumber": 44,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -4405,7 +4608,7 @@
           "(esql: string) => string[]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-        "lineNumber": 280,
+        "lineNumber": 288,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4421,7 +4624,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-            "lineNumber": 280,
+            "lineNumber": 288,
             "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,

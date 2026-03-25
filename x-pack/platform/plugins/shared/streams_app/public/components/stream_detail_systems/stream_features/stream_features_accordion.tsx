@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiAccordion, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
+import {
+  EuiAccordion,
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+} from '@elastic/eui';
 import type { Feature, Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -22,9 +30,12 @@ const getUnderlineOnHoverStyle = (textDecoration: 'underline' | 'none') => css`
 const underlineOnHoverStyle = getUnderlineOnHoverStyle('underline');
 const noUnderlineOnHoverStyle = getUnderlineOnHoverStyle('none');
 
+type TabId = 'active' | 'excluded';
+
 interface StreamFeaturesAccordionProps {
   definition: Streams.all.Definition;
   features: Feature[];
+  excludedFeatures: Feature[];
   isLoadingFeatures: boolean;
   refreshFeatures: () => void;
   isIdentifyingFeatures: boolean;
@@ -35,12 +46,24 @@ interface StreamFeaturesAccordionProps {
 export const StreamFeaturesAccordion = ({
   definition,
   features,
+  excludedFeatures,
   isLoadingFeatures,
   refreshFeatures,
   isIdentifyingFeatures,
   selectedFeature,
   onSelectFeature,
 }: StreamFeaturesAccordionProps) => {
+  const [selectedTab, setSelectedTab] = useState<TabId>('active');
+  const totalCount = features.length + excludedFeatures.length;
+
+  const handleTabChange = useCallback(
+    (tab: TabId) => {
+      onSelectFeature(null);
+      setSelectedTab(tab);
+    },
+    [onSelectFeature]
+  );
+
   return (
     <EuiAccordion
       initialIsOpen={true}
@@ -51,21 +74,38 @@ export const StreamFeaturesAccordion = ({
             {BUTTON_LABEL}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{features.length}</EuiBadge>
+            <EuiBadge color="hollow">{totalCount}</EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
       }
       buttonProps={{ css: noUnderlineOnHoverStyle }}
     >
       <EuiSpacer size="s" />
+      <EuiTabs bottomBorder={false} size="s">
+        <EuiTab
+          isSelected={selectedTab === 'active'}
+          onClick={() => handleTabChange('active')}
+          append={<EuiBadge color="hollow">{features.length}</EuiBadge>}
+        >
+          {ACTIVE_TAB_LABEL}
+        </EuiTab>
+        <EuiTab
+          isSelected={selectedTab === 'excluded'}
+          onClick={() => handleTabChange('excluded')}
+          append={<EuiBadge color="hollow">{excludedFeatures.length}</EuiBadge>}
+        >
+          {EXCLUDED_TAB_LABEL}
+        </EuiTab>
+      </EuiTabs>
       <StreamFeaturesTable
         definition={definition}
         isLoadingFeatures={isLoadingFeatures}
-        features={features}
+        features={selectedTab === 'active' ? features : excludedFeatures}
         refreshFeatures={refreshFeatures}
         isIdentifyingFeatures={isIdentifyingFeatures}
         selectedFeature={selectedFeature}
         onSelectFeature={onSelectFeature}
+        mode={selectedTab}
       />
     </EuiAccordion>
   );
@@ -73,4 +113,12 @@ export const StreamFeaturesAccordion = ({
 
 const BUTTON_LABEL = i18n.translate('xpack.streams.streamFeaturesAccordion.buttonLabel', {
   defaultMessage: 'Stream features',
+});
+
+const ACTIVE_TAB_LABEL = i18n.translate('xpack.streams.streamFeaturesAccordion.activeTab', {
+  defaultMessage: 'Active',
+});
+
+const EXCLUDED_TAB_LABEL = i18n.translate('xpack.streams.streamFeaturesAccordion.excludedTab', {
+  defaultMessage: 'Excluded',
 });
