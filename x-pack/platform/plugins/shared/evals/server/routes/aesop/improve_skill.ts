@@ -18,6 +18,7 @@ const improveSkillParamsSchema = z.object({
 
 const improveSkillBodySchema = z.object({
   connector_id: z.string().min(1),
+  use_agent: z.boolean().optional().default(false),
 });
 
 export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependencies) {
@@ -47,7 +48,7 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
         const { skillId } = request.params;
-        const { connector_id: connectorId } = request.body;
+        const { connector_id: connectorId, use_agent: useAgent } = request.body;
 
         try {
           const skillDoc = await esClient.get({
@@ -66,11 +67,124 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
             });
           }
 
-          logger.info('[AESOP] Improving skill with LLM', {
+          logger.info('[AESOP] Improving skill', {
             skill_id: skillId,
             skill_name: skill.name,
+            mode: useAgent ? 'agent' : 'direct-llm',
           });
 
+          // Try agent-based improvement if requested
+          if (useAgent) {
+            const agentBuilderStart = evalsContext.getAgentBuilderStart();
+            if (agentBuilderStart) {
+              try {
+                const { AgentOrchestrator } = await import(
+                  '../../lib/aesop/agents/agent_orchestrator'
+                );
+                const { ensureAesopAgents } = await import(
+                  '../../lib/aesop/agents/ensure_agents'
+                );
+
+                const agentRegistry = await agentBuilderStart.agents.getRegistry({ request });
+                await ensureAesopAgents(agentRegistry, logger);
+
+                const orchestrator = new AgentOrchestrator({
+                  agentBuilderStart,
+                  request,
+                  connectorId,
+                  logger,
+                });
+
+                const feedback = [
+                  skill.validation?.llm_feedback || '',
+                  ...(skill.validation?.weaknesses || []),
+                  ...(skill.validation?.suggestions || []),
+                ].join('\n');
+
+                const improved = await orchestrator.improveSkill(
+                  skill.markdown || '',
+                  feedback
+                );
+
+                if (improved?.markdown) {
+                  await esClient.update({
+                    index: '.aesop-proposed-skills',
+                    id: skillId,
+                    body: {
+                      doc: {
+                        name: improved.name || skill.name,
+                        description: improved.description || skill.description,
+                        markdown: improved.markdown,
+                        validation: { status: 'pending' },
+                        improvement_history: [
+                          ...(skill.improvement_history || []),
+                          {
+                            improved_at: new Date().toISOString(),
+                            improved_by: 'agent',
+                            connector_id: connectorId,
+                            previous_score: skill.validation?.final_score,
+                          },
+                        ],
+                        last_edited_at: new Date().toISOString(),
+                        last_edited_by: 'agent-auto-improve',
+                      },
+                    },
+                    refresh: 'wait_for',
+                  });
+
+                  // Auto-validate after improvement
+                  const { AgentOrchestrator: ValidatorOrchestrator } = await import(
+                    '../../lib/aesop/agents/agent_orchestrator'
+                  );
+                  const validator = new ValidatorOrchestrator({
+                    agentBuilderStart,
+                    request,
+                    connectorId,
+                    logger,
+                  });
+
+                  const startTime = Date.now();
+                  const validationResult = await validator.validateSkill(improved.markdown);
+                  if (validationResult) {
+                    await esClient.update({
+                      index: '.aesop-proposed-skills',
+                      id: skillId,
+                      body: {
+                        doc: {
+                          validation: {
+                            status: validationResult.passed ? 'passed' : 'failed',
+                            final_score: validationResult.score,
+                            completed_at: new Date().toISOString(),
+                            duration_ms: Date.now() - startTime,
+                            criteria: validationResult.criteria,
+                            llm_feedback: validationResult.feedback,
+                            strengths: validationResult.strengths,
+                            weaknesses: validationResult.weaknesses,
+                            suggestions: validationResult.suggestions,
+                            validated_by: 'agent',
+                          },
+                        },
+                      },
+                      refresh: 'wait_for',
+                    });
+                  }
+
+                  return response.ok({
+                    body: {
+                      success: true,
+                      skill_id: skillId,
+                      message: `Skill improved and re-validated by agent`,
+                      mode: 'agent',
+                    },
+                  });
+                }
+              } catch (err) {
+                logger.warn(`[AESOP] Agent improvement failed, falling back to direct LLM: ${err instanceof Error ? err.message : String(err)}`);
+              }
+            }
+          }
+
+          // Direct LLM improvement (fallback or primary)
           const actionsStart = evalsContext.getActionsStart();
           if (!actionsStart) {
             throw new Error('Actions plugin not available');

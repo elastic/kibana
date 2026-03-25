@@ -115,6 +115,7 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
                 });
 
                 // Fire-and-forget agent-based validation
+                const agentStartTime = Date.now();
                 (async () => {
                   try {
                     const result = await orchestrator.validateSkill(skill.markdown || '');
@@ -129,7 +130,7 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
                               final_score: result.score,
                               completed_at: new Date().toISOString(),
                               connector_id: connectorId,
-                              duration_ms: Date.now() - Date.now(),
+                              duration_ms: Date.now() - agentStartTime,
                               criteria: result.criteria,
                               llm_feedback: result.feedback,
                               strengths: result.strengths,
