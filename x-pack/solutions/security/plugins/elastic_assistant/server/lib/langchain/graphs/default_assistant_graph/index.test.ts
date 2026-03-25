@@ -25,6 +25,7 @@ import { promptGroupId } from '../../../prompt/local_prompt_object';
 
 jest.mock('./graph');
 jest.mock('./helpers');
+jest.mock('@langchain/classic/agents');
 jest.mock('@kbn/langchain/server/tracers/apm');
 jest.mock('@kbn/langchain/server/tracers/telemetry');
 jest.mock('@kbn/security-ai-prompts');

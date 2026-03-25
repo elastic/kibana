@@ -3184,7 +3184,7 @@
   dependencies:
     is-negated-glob "^1.0.0"
 
-"@hapi/accept@6.0.3", "@hapi/accept@^6.0.1", "@hapi/accept@^6.0.3":
+"@hapi/accept@6.0.3", "@hapi/accept@^6.0.1":
   version "6.0.3"
   resolved "https://registry.yarnpkg.com/@hapi/accept/-/accept-6.0.3.tgz#eef0800a4f89cd969da8e5d0311dc877c37279ab"
   integrity sha512-p72f9k56EuF0n3MwlBNThyVE5PXX40g+aQh+C/xbKrfzahM2Oispv3AXmOIU51t3j77zay1qrX7IIziZXspMlw==
@@ -3220,7 +3220,7 @@
   dependencies:
     "@hapi/hoek" "^11.0.2"
 
-"@hapi/bounce@^3.0.1", "@hapi/bounce@^3.0.2":
+"@hapi/bounce@^3.0.1":
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/@hapi/bounce/-/bounce-3.0.2.tgz#6499a1e2db6a699e2c8d284045af46b9d8d9d57d"
   integrity sha512-d0XmlTi3H9HFDHhQLjg4F4auL1EY3Wqj7j7/hGDhFFe6xAbnm3qiGrXeT93zZnPH8gH+SKAFYiRzu26xkXcH3g==
@@ -3303,7 +3303,7 @@
     "@hapi/validate" "^2.0.1"
     "@hapi/wreck" "^18.0.1"
 
-"@hapi/hapi@21.3.10":
+"@hapi/hapi@21.3.10", "@hapi/hapi@^21.1.0":
   version "21.3.10"
   resolved "https://registry.yarnpkg.com/@hapi/hapi/-/hapi-21.3.10.tgz#0357db7ca49415e50e5df80ba50ad3964f2a62f3"
   integrity sha512-CmEcmTREW394MaGGKvWpoOK4rG8tKlpZLs30tbaBzhCrhiL2Ti/HARek9w+8Ya4nMBGcd+kDAzvU44OX8Ms0Jg==
@@ -3325,30 +3325,6 @@
     "@hapi/subtext" "^8.1.0"
     "@hapi/teamwork" "^6.0.0"
     "@hapi/topo" "^6.0.1"
-    "@hapi/validate" "^2.0.1"
-
-"@hapi/hapi@^21.1.0":
-  version "21.4.4"
-  resolved "https://registry.yarnpkg.com/@hapi/hapi/-/hapi-21.4.4.tgz#89c239135be1ff2adeb586df157dee7a49593291"
-  integrity sha512-vI6JPLR99WZDKI1nriD0qXDPp8sKFkZfNVGrDDZafDQ8jU+3ERMwS0vPac5aGae6yyyoGZGOBiYExw4N8ScSTQ==
-  dependencies:
-    "@hapi/accept" "^6.0.3"
-    "@hapi/ammo" "^6.0.1"
-    "@hapi/boom" "^10.0.1"
-    "@hapi/bounce" "^3.0.2"
-    "@hapi/call" "^9.0.1"
-    "@hapi/catbox" "^12.1.1"
-    "@hapi/catbox-memory" "^6.0.2"
-    "@hapi/heavy" "^8.0.1"
-    "@hapi/hoek" "^11.0.7"
-    "@hapi/mimos" "^7.0.1"
-    "@hapi/podium" "^5.0.2"
-    "@hapi/shot" "^6.0.2"
-    "@hapi/somever" "^4.1.1"
-    "@hapi/statehood" "^8.2.1"
-    "@hapi/subtext" "^8.1.1"
-    "@hapi/teamwork" "^6.0.1"
-    "@hapi/topo" "^6.0.2"
     "@hapi/validate" "^2.0.1"
 
 "@hapi/heavy@^8.0.1":
@@ -3425,7 +3401,7 @@
   resolved "https://registry.yarnpkg.com/@hapi/pinpoint/-/pinpoint-2.0.1.tgz#32077e715655fc00ab8df74b6b416114287d6513"
   integrity sha512-EKQmr16tM8s16vTT3cA5L0kZZcTMU5DUOZTuvpnY738m+jyP3JIUj+Mm1xc1rsLkGBQ/gVnfKYPwOmPg1tUR4Q==
 
-"@hapi/podium@^5.0.0", "@hapi/podium@^5.0.1", "@hapi/podium@^5.0.2":
+"@hapi/podium@^5.0.0", "@hapi/podium@^5.0.1":
   version "5.0.2"
   resolved "https://registry.yarnpkg.com/@hapi/podium/-/podium-5.0.2.tgz#6b1431bec13f55525cdfa83b2a7684c212c96189"
   integrity sha512-T7gf2JYHQQfEfewTQFbsaXoZxSvuXO/QBIGljucUQ/lmPnTTNAepoIKOakWNVWvo2fMEDjycu77r8k6dhreqHA==
@@ -3434,7 +3410,7 @@
     "@hapi/teamwork" "^6.0.0"
     "@hapi/validate" "^2.0.1"
 
-"@hapi/shot@^6.0.1", "@hapi/shot@^6.0.2":
+"@hapi/shot@^6.0.1":
   version "6.0.2"
   resolved "https://registry.yarnpkg.com/@hapi/shot/-/shot-6.0.2.tgz#30f0688a9fb800d8ad6dbf4b2033173335dd5571"
   integrity sha512-WKK1ShfJTrL1oXC0skoIZQYzvLsyMDEF8lfcWuQBjpjCN29qivr9U36ld1z0nt6edvzv28etNMOqUF4klnHryw==
@@ -3450,7 +3426,7 @@
     "@hapi/bounce" "^3.0.1"
     "@hapi/hoek" "^11.0.2"
 
-"@hapi/statehood@^8.1.1", "@hapi/statehood@^8.2.1":
+"@hapi/statehood@^8.1.1":
   version "8.2.1"
   resolved "https://registry.yarnpkg.com/@hapi/statehood/-/statehood-8.2.1.tgz#4435f11f78873f07aa7422a95386ae9802a914e1"
   integrity sha512-xf72TG/QINW26jUu+uL5H+crE1o8GplIgfPWwPZhnAGJzetIVAQEQYvzq+C0aEVHg5/lMMtQ+L9UryuSa5Yjkg==
@@ -3463,7 +3439,7 @@
     "@hapi/iron" "^7.0.1"
     "@hapi/validate" "^2.0.1"
 
-"@hapi/subtext@^8.1.0", "@hapi/subtext@^8.1.1":
+"@hapi/subtext@^8.1.0":
   version "8.1.1"
   resolved "https://registry.yarnpkg.com/@hapi/subtext/-/subtext-8.1.1.tgz#48b93ab9196f7bf5902060ec92459fc354acba6e"
   integrity sha512-ex1Y2s/KuJktS8Ww0k6XJ5ysSKrzNym4i5pDVuCwlSgHHviHUsT1JNzE6FYhNU9TTHSNdyfue/t2m89bpkX9Jw==
@@ -3476,7 +3452,7 @@
     "@hapi/pez" "^6.1.0"
     "@hapi/wreck" "^18.0.1"
 
-"@hapi/teamwork@^6.0.0", "@hapi/teamwork@^6.0.1":
+"@hapi/teamwork@^6.0.0":
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/@hapi/teamwork/-/teamwork-6.0.1.tgz#2f6496170f47abd8446930447f64e64ba1d57d3f"
   integrity sha512-52OXRslUfYwXAOG8k58f2h2ngXYQGP0x5RPOo+eWA/FtyLgHjGMrE3+e9LSXP/0q2YfHAK5wj9aA9DTy1K+kyQ==
@@ -14695,9 +14671,9 @@
     use-sync-external-store "^1.0.0"
 
 "@xstate5/react@npm:@xstate/react@^5.0.3":
-  version "5.0.5"
-  resolved "https://registry.yarnpkg.com/@xstate/react/-/react-5.0.5.tgz#a6a88dd040c6ee58d094de2918631f95c783306c"
-  integrity sha512-MfF/cPHa3lNKJmGFpUycMbNP25qBXyZXrxc8VYNroAu0Nnk0DV5WzAkTcQXma0xEC4dSwsoA+YQuKbZATtqvgg==
+  version "5.0.3"
+  resolved "https://registry.yarnpkg.com/@xstate/react/-/react-5.0.3.tgz#3cd48ea64510aa2cc4ecc0c9f17747134173d363"
+  integrity sha512-Zdnn0VTPcVdoaAiW0OX6Nkvdoe7SNGjfaZqM61NKhjt2aNULqiicmDu2tOd1ChzlRWYDxGTdbzVqqVyMLpoHJw==
   dependencies:
     use-isomorphic-layout-effect "^1.1.2"
     use-sync-external-store "^1.2.0"
@@ -25591,12 +25567,12 @@ mime-db@1.52.0:
   resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.52.0.tgz#bbabcdc02859f4987301c856e3387ce5ec43bf70"
   integrity sha512-sPU4uV7dYlvtWJxwwxHD0PuihVNiE7TyAbQ5SWxDCB9mUYvOgroQOwYQQOKPJ8CIbE+1ETVlOoK1UC2nU3gYvg==
 
-mime-db@1.53.0, mime-db@^1.52.0:
+mime-db@1.53.0:
   version "1.53.0"
   resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.53.0.tgz#3cb63cd820fc29896d9d4e8c32ab4fcd74ccb447"
   integrity sha512-oHlN/w+3MQ3rba9rqFr6V/ypF10LSkdwUysQL7GkXoTgIWeV+tcXGA852TBxH+gsh8UWoyhR1hKcoMJTuWflpg==
 
-"mime-db@>= 1.40.0 < 2", mime-db@^1.54.0:
+"mime-db@>= 1.40.0 < 2", mime-db@^1.52.0, mime-db@^1.54.0:
   version "1.54.0"
   resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.54.0.tgz#cddb3ee4f9c64530dff640236661d42cb6a314f5"
   integrity sha512-aU5EJuIN2WDemCcAp2vFBfp/m4EAhWJnUNSSw0ixs7/kXbd6Pg64EmwJkNdFhB8aWt1sH2CTXrLxo/iAGV3oPQ==
@@ -34318,9 +34294,9 @@ xpath@^0.0.33:
   integrity sha512-NNXnzrkDrAzalLhIUc01jO2mOzXGXh1JwPgkihcLLzw98c0WgYDmmjSh1Kl3wzaxSVWMuA+fe0WTWOBDWCBmNA==
 
 "xstate5@npm:xstate@^5.19.2":
-  version "5.26.0"
-  resolved "https://registry.yarnpkg.com/xstate/-/xstate-5.26.0.tgz#51dfd0f4db1ae82f9da6e7076c9431b72595108e"
-  integrity sha512-Fvi9VBoqHgsGYLU2NTag8xDTWtKqUC0+ue7EAhBNBb06wf620QEy05upBaEI1VLMzIn63zugLV8nHb69ZUWYAA==
+  version "5.19.2"
+  resolved "https://registry.yarnpkg.com/xstate/-/xstate-5.19.2.tgz#db3f1ee614bbb6a49ad3f0c96ddbf98562d456ba"
+  integrity sha512-B8fL2aP0ogn5aviAXFzI5oZseAMqN00fg/TeDa3ZtatyDcViYLIfuQl4y8qmHCiKZgGEzmnTyNtNQL9oeJE2gw==
 
 xstate@4.38.3:
   version "4.38.3"
