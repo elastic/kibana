@@ -355,7 +355,7 @@ const styles = {
             cursor: 'pointer',
           }
         : {
-            touchAction: 'none',
+            userSelect: 'none',
             '&:hover': {
               cursor: 'move',
               backgroundColor: `${transparentize(euiTheme.colors.vis.euiColorVis0, 0.1)}`,
@@ -396,9 +396,11 @@ const styles = {
       '&.kbnGridSectionHeader--active': {
         zIndex: euiTheme.levels.modal,
         pointerEvents: 'auto',
+        userSelect: 'none',
         backgroundColor: euiTheme.colors.backgroundBasePlain,
         '.kbnGridSection--dragHandle': {
           cursor: 'move',
+          userSelect: 'none',
           opacity: 1,
           pointerEvents: 'none',
         },
