@@ -213,7 +213,9 @@ describe('#extendsDeep', () => {
     const forbidSchema = type.extendsDeep({ unknowns: 'forbid' });
     expect(() =>
       forbidSchema.validate([{ foo: 'test', bar: 'test' }])
-    ).toThrowErrorMatchingInlineSnapshot(`"[0.bar]: definition for this key is missing"`);
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[0.bar]: Additional properties are not allowed ('bar' was unexpected)"`
+    );
   });
 });
 

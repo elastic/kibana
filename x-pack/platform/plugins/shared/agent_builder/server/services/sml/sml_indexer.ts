@@ -12,6 +12,7 @@ import type {
   ISavedObjectsRepository,
 } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SmlTypeRegistry } from './sml_type_registry';
 import type { SmlIndexAction, SmlContext } from './types';
 import { createSmlStorage, smlIndexName } from './sml_storage';
@@ -34,6 +35,7 @@ export interface SmlIndexer {
     esClient: ElasticsearchClient;
     savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
     logger: Logger;
+    request?: KibanaRequest;
   }) => Promise<void>;
 }
 
@@ -58,6 +60,7 @@ class SmlIndexerImpl implements SmlIndexer {
     esClient,
     savedObjectsClient,
     logger: contextLogger,
+    request,
   }: {
     originId: string;
     attachmentType: string;
@@ -66,6 +69,7 @@ class SmlIndexerImpl implements SmlIndexer {
     esClient: ElasticsearchClient;
     savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
     logger: Logger;
+    request?: KibanaRequest;
   }): Promise<void> {
     this.logger.info(
       `SML indexer: indexAttachment called — originId='${originId}', type='${attachmentType}', action='${action}', spaces=[${spaces.join(
@@ -94,6 +98,7 @@ class SmlIndexerImpl implements SmlIndexer {
       esClient,
       savedObjectsClient,
       logger: contextLogger,
+      request,
     };
 
     this.logger.info(
