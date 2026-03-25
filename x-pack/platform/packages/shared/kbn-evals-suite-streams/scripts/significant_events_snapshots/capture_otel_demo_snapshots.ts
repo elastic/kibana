@@ -250,18 +250,18 @@ async function processScenario(
   await deployDemo({ demoType, log, logsIndex });
   log.info('[2/8] Deployment complete');
 
-  // Step 2 — Configure significant events and the connector after Streams
-  // is enabled so the settings APIs are available.
+  // Step 3 — Configure significant events and the connector. Must run after
+  // deployDemo (Step 2) which enables Kibana Streams and its settings APIs.
   log.info('[3/8] Configuring significant events...');
   await enableSignificantEvents(config, log);
   await configureModelSelectionSettings(config, log, connectorId);
 
   try {
-    // Step 3 — Accumulate baseline traffic
+    // Step 4 — Accumulate baseline traffic
     log.info('[4/8] Accumulating baseline traffic...');
     await sleep(baselineWaitMs, log, 'baseline traffic');
 
-    // Step 4 — Apply failure (if applicable)
+    // Step 5 — Apply failure (if applicable)
     if (isFailure) {
       log.info(`[5/8] Applying failure scenario "${scenario.id}"...`);
       await patchScenarios({ demoType, scenarioIds: [scenario.id], log });
@@ -272,14 +272,14 @@ async function processScenario(
       log.info('[5/8] Skipped failure data accumulation (healthy baseline)');
     }
 
-    // Step 5 — Run feature extraction
+    // Step 6 — Run feature extraction
     log.info('[6/8] Running feature extraction...');
     await triggerSigEventsKIFeatureExtraction(config, log, logsIndex);
     await waitForSigEventsKIFeatureExtraction(config, log, logsIndex);
     await logSigEventsExtractedKIFeatures(config, log, logsIndex);
     await persistSigEventsExtractedKIsForSnapshot(config, esClient, log, scenario.id);
 
-    // Step 6 — Create a snapshot of the logs and extracted features
+    // Step 7 — Create a snapshot of the logs and extracted features
     log.info('[7/8] Creating GCS snapshot...');
     await createSnapshot({ esClient, log, snapshotName: scenario.id, runId });
   } finally {
