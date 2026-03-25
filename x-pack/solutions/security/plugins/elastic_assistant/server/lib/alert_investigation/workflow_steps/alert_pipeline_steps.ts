@@ -109,17 +109,8 @@ export const fetchUnprocessedAlertsStep = createServerStepDefinition({
 export const DeduplicateAlertsStepId = 'security.deduplicateAlerts';
 
 const DedupInputSchema = z.object({
+  alert_ids: LiquidArraySchema,
   index_pattern: SafeAlertIndexPattern,
-  max_alerts: z
-    .number()
-    .min(1)
-    .max(PIPELINE_LIMITS.MAX_ALERTS_PER_RUN)
-    .default(PIPELINE_LIMITS.DEFAULT_MAX_ALERTS),
-  lookback_minutes: z
-    .number()
-    .min(1)
-    .max(PIPELINE_LIMITS.MAX_LOOKBACK_MINUTES)
-    .default(PIPELINE_LIMITS.DEFAULT_LOOKBACK_MINUTES),
   similarity_threshold: z.number().min(0).max(1).default(PIPELINE_LIMITS.JACCARD_SIMILARITY_THRESHOLD),
 });
 
@@ -145,48 +136,16 @@ export const deduplicateAlertsStep = createServerStepDefinition({
     const esClient = context.contextManager.getScopedEsClient();
     const logger = adaptWorkflowLogger(context.logger);
     const {
+      alert_ids: alertIds,
       index_pattern: indexPattern,
-      max_alerts: maxAlerts,
-      lookback_minutes: lookbackMinutes,
       similarity_threshold: threshold,
     } = context.input;
 
-    // Self-contained: fetch alerts directly instead of via liquid template
-    const now = new Date();
-    const lookbackTime = new Date(now.getTime() - lookbackMinutes * 60 * 1000);
-
-    const searchResponse = await esClient.search({
-      index: indexPattern,
-      query: {
-        bool: {
-          filter: [
-            { terms: { 'kibana.alert.workflow_status': ['open', 'acknowledged'] } },
-            { range: { '@timestamp': { gte: lookbackTime.toISOString() } } },
-            {
-              bool: {
-                must_not: [
-                  { exists: { field: 'kibana.alert.building_block_type' } },
-                  { exists: { field: 'kibana.alert.pipeline.processed' } },
-                ],
-              },
-            },
-          ],
-        },
-      },
-      sort: [{ 'kibana.alert.risk_score': { order: 'desc' as const } }],
-      size: maxAlerts,
-    });
-
-    const alerts = searchResponse.hits.hits
-      .filter((hit): hit is typeof hit & { _id: string } => hit._id != null)
-      .map((hit) => ({
-        _id: hit._id,
-        _source: (hit._source ?? {}) as Record<string, unknown>,
-      }));
-
-    if (alerts.length === 0) {
+    if (alertIds.length === 0) {
       return { output: { leader_alert_ids: [], total_before: 0, total_after: 0, dedup_rate: 0 } };
     }
+
+    const alerts = await fetchAlertsByIds({ esClient, indexPattern, alertIds, logger });
 
     const dedupResult = await deduplicateAlerts({
       alerts,
@@ -274,12 +233,8 @@ export const extractEntitiesStep = createServerStepDefinition({
 export const TagProcessedAlertsStepId = 'security.tagProcessedAlerts';
 
 const TagInputSchema = z.object({
+  alert_ids: LiquidArraySchema,
   index_pattern: SafeAlertIndexPattern,
-  max_alerts: z
-    .number()
-    .min(1)
-    .max(PIPELINE_LIMITS.MAX_ALERTS_PER_RUN)
-    .default(PIPELINE_LIMITS.DEFAULT_MAX_ALERTS),
 });
 
 const TagOutputSchema = z.object({
@@ -301,29 +256,22 @@ export const tagProcessedAlertsStep = createServerStepDefinition({
   outputSchema: TagOutputSchema,
   handler: async (context) => {
     const esClient = context.contextManager.getScopedEsClient();
-    const { index_pattern: indexPattern, max_alerts: maxAlerts } = context.input;
+    const { alert_ids: alertIds, index_pattern: indexPattern } = context.input;
 
-    // Use update_by_query instead of bulk update with IDs
-    // This avoids the liquid template array serialization limit
+    const validIds = alertIds.filter((id: string) => id && id.length > 0);
+
+    if (validIds.length === 0) {
+      return { output: { tagged_count: 0 } };
+    }
+
+    context.logger.info(`Tagging ${validIds.length} alerts as processed`);
+
     const nowIso = new Date().toISOString();
     const result = await esClient.updateByQuery({
       index: indexPattern,
-      max_docs: maxAlerts,
       refresh: true,
       query: {
-        bool: {
-          filter: [
-            { terms: { 'kibana.alert.workflow_status': ['open', 'acknowledged'] } },
-            {
-              bool: {
-                must_not: [
-                  { exists: { field: 'kibana.alert.building_block_type' } },
-                  { exists: { field: 'kibana.alert.pipeline.processed' } },
-                ],
-              },
-            },
-          ],
-        },
+        ids: { values: validIds },
       },
       script: {
         source:
