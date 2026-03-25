@@ -108,6 +108,7 @@ const statsRoute = createDatasetQualityServerRoute({
 
     // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    const esClientAsSecondaryAuthUser = coreContext.elasticsearch.client.asSecondaryAuthUser;
 
     const { dataStreams, datasetUserPrivileges } = await getDataStreams({
       esClient,
@@ -123,7 +124,7 @@ const statsRoute = createDatasetQualityServerRoute({
     const [dataStreamsStats, dataStreamsCreationDate] = await Promise.all([
       isServerless
         ? getDataStreamsMeteringStats({
-            esClient: coreContext.elasticsearch.client.asSecondaryAuthUser,
+            esClient: esClientAsSecondaryAuthUser,
             dataStreams: dataStreamsNames,
           })
         : getDataStreamsStats({
@@ -133,9 +134,7 @@ const statsRoute = createDatasetQualityServerRoute({
 
       params.query.includeCreationDate
         ? getDataStreamsCreationDate({
-            esClient: isServerless
-              ? coreContext.elasticsearch.client.asSecondaryAuthUser
-              : esClient,
+            esClient: esClientAsSecondaryAuthUser,
             dataStreams: dataStreamsNames,
           })
         : ({} as Record<string, number | undefined>),
