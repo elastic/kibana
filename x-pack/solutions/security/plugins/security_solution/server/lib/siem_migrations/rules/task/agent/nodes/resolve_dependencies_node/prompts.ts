@@ -61,11 +61,6 @@ The custom_rule data model represents the logic and actions of a correlation rul
   - Log Source Types (sensordevicetype): Device types rules might filter on.
 
 
-### General Guidelines
-
-- you must ignore certain attributes which very QRadar specific such as
-
-
 Dependencies can be found in multiple ways. We list down certain guidelines to correctly identify and resolve dependencies.
 
 #### Logic Flattening & Substitution Strategy (CRITICAL)

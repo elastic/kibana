@@ -83,7 +83,9 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
             const content = entry.buffer.toString('utf8');
             const fileName = entry.path;
 
-            packageKnowledgeBase = `${packageKnowledgeBase}\n Source : ${fileName} \n\n ${content} \n -------\n `;
+            packageKnowledgeBase = [packageKnowledgeBase, ` Source : ${fileName}`, content].join(
+              '\n'
+            );
           }
         },
         (path) => relevantPaths?.includes(path) ?? false
@@ -110,6 +112,7 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
         pkg.title,
         pkg.description,
         ...logsDataStreams.map((stream) => stream.title),
+        packageKnowledgeBase,
       ].join(' - '),
       fields_metadata: fieldsMetadata,
     };
