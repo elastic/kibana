@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { IntegrationSettings } from '../../types';
+import { MAX_DESCRIPTION_LENGTH, MAX_TITLE_LENGTH } from '../../../../../../common/constants';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { PackageCardPreview } from './package_card_preview';
 import { useActions } from '../../state';
@@ -108,6 +109,7 @@ export const IntegrationStep = React.memo<IntegrationStepProps>(({ integrationSe
                   name="title"
                   value={integrationSettings?.title ?? ''}
                   onChange={onChange.title}
+                  maxLength={MAX_TITLE_LENGTH}
                   data-test-subj="integrationTitleInput"
                 />
               </EuiFormRow>
@@ -116,6 +118,7 @@ export const IntegrationStep = React.memo<IntegrationStepProps>(({ integrationSe
                   name="description"
                   value={integrationSettings?.description ?? ''}
                   onChange={onChange.description}
+                  maxLength={MAX_DESCRIPTION_LENGTH}
                   data-test-subj="integrationDescriptionInput"
                 />
               </EuiFormRow>
