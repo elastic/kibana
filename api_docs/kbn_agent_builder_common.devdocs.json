@@ -1260,7 +1260,7 @@
           "<T> | undefined"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/versioned_attachment.ts",
-        "lineNumber": 198,
+        "lineNumber": 224,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1283,7 +1283,7 @@
               "<string, T>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/versioned_attachment.ts",
-            "lineNumber": 199,
+            "lineNumber": 225,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5405,6 +5405,10 @@
               },
               {
                 "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/services/agents/modes/utils/prepare_conversation.test.ts"
+              },
+              {
+                "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/services/agents/modes/utils/prepare_conversation.ts"
               },
               {
@@ -7440,6 +7444,10 @@
               },
               {
                 "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/services/agents/modes/utils/prepare_conversation.test.ts"
+              },
+              {
+                "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/services/agents/modes/utils/prepare_conversation.ts"
               },
               {
@@ -7666,7 +7674,7 @@
         "label": "TimeRange",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/attachment_types.ts",
-        "lineNumber": 61,
+        "lineNumber": 63,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7679,7 +7687,7 @@
             "label": "from",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/attachment_types.ts",
-            "lineNumber": 62,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7692,7 +7700,7 @@
             "label": "to",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/attachment_types.ts",
-            "lineNumber": 63,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8477,7 +8485,7 @@
           "\nResponse from the update origin API endpoint."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/versioned_attachment.ts",
-        "lineNumber": 281,
+        "lineNumber": 307,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8490,7 +8498,7 @@
             "label": "success",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/versioned_attachment.ts",
-            "lineNumber": 285,
+            "lineNumber": 311,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8513,7 +8521,7 @@
               "<string, unknown>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/versioned_attachment.ts",
-            "lineNumber": 286,
+            "lineNumber": 312,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8766,6 +8774,24 @@
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/versioned_attachment.ts",
             "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.VersionedAttachment.origin_snapshot_at",
+            "type": "string",
+            "tags": [],
+            "label": "origin_snapshot_at",
+            "description": [
+              "\nWhen this attachment's content was last captured from the origin (for by-reference attachments),\nor when the attachment was stored."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/versioned_attachment.ts",
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

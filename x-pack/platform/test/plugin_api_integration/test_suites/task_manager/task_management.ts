@@ -49,9 +49,9 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const supertest = getService('supertest');
   const testHistoryIndex = '.kibana_task_manager_test_result';
+  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  // Failing: See https://github.com/elastic/kibana/issues/246444
-  describe.skip('scheduling and running tasks', () => {
+  describe('scheduling and running tasks', () => {
     beforeEach(async () => {
       // clean up before each test
       await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
@@ -726,6 +726,9 @@ export default function ({ getService }: FtrProviderContext) {
           result.userScope?.apiKeyId
         );
       });
+
+      // wait for the api_key_to_invalidate saved object to be older than the invalidation removalDelay (1s)
+      await delay(1000);
 
       // run the api key invalidation task
       await supertest

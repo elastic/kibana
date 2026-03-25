@@ -198,7 +198,7 @@ describe('Executor', () => {
     } catch (e) {
       expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
       expect(e.message).toBe(
-        'Request validation failed (Error: [foo]: definition for this key is missing)'
+        "Request validation failed (Error: [foo]: Additional properties are not allowed ('foo' was unexpected))"
       );
     }
   });

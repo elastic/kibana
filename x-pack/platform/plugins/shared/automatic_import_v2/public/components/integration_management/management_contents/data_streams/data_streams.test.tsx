@@ -25,6 +25,13 @@ jest.mock('../../../../common', () => ({
 }));
 const mockUseGetIntegrationById = useGetIntegrationById as jest.Mock;
 
+const mockReportDataStreamFlyoutOpened = jest.fn();
+jest.mock('../../../telemetry_context', () => ({
+  useTelemetry: () => ({
+    reportDataStreamFlyoutOpened: mockReportDataStreamFlyoutOpened,
+  }),
+}));
+
 jest.mock('./create_data_stream_flyout', () => ({
   CreateDataStreamFlyout: jest.fn(({ onClose }) => (
     <div data-test-subj="createDataStreamFlyoutMock">
@@ -154,6 +161,43 @@ describe('DataStreams', () => {
 
       // Flyout should be closed
       expect(queryByTestId('createDataStreamFlyoutMock')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('telemetry', () => {
+    it('should call reportDataStreamFlyoutOpened when add data stream button is clicked', () => {
+      mockUseGetIntegrationById.mockReturnValue({
+        integration: undefined,
+        isLoading: false,
+      });
+
+      const { getByTestId } = renderDataStreams('test-id');
+
+      fireEvent.click(getByTestId('addDataStreamButton'));
+
+      expect(mockReportDataStreamFlyoutOpened).toHaveBeenCalledWith(
+        expect.objectContaining({ isFirstDataStream: true })
+      );
+    });
+
+    it('should report isFirstDataStream as false when integration already has data streams', () => {
+      mockUseGetIntegrationById.mockReturnValue({
+        integration: {
+          title: 'My Integration',
+          dataStreams: [{ dataStreamId: 'ds-1', title: 'Existing' }],
+        },
+        isLoading: false,
+      });
+
+      const { getByTestId } = renderDataStreams('test-id');
+
+      fireEvent.click(getByTestId('addDataStreamButton'));
+
+      expect(mockReportDataStreamFlyoutOpened).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isFirstDataStream: false,
+        })
+      );
     });
   });
 

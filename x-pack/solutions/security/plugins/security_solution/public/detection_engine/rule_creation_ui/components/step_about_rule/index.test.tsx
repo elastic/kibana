@@ -64,7 +64,7 @@ export const stepDefineStepMLRule: DefineStepRule = {
   ruleType: 'machine_learning',
   index: ['default-index-*'],
   queryBar: { query: { query: '', language: '' }, filters: [], saved_id: null },
-  machineLearningJobId: ['auth_high_count_logon_events_for_a_source_ip'],
+  machineLearningJobId: ['auth_high_count_logon_events_for_a_source_ip_ea'],
   anomalyThreshold: 50,
   threshold: { cardinality: { value: '', field: [] }, value: '100', field: [] },
   threatIndex: [],
@@ -432,12 +432,12 @@ describe.skip('StepAboutRuleComponent', () => {
     (useFetchIndex as jest.Mock).mockClear();
     useSecurityJobsMock.mockImplementation(() => {
       return {
-        jobs: [{ id: 'auth_high_count_logon_events_for_a_source_ip', isInstalled: true }],
+        jobs: [{ id: 'auth_high_count_logon_events_for_a_source_ip_ea', isInstalled: true }],
         loading: false,
       };
     });
     useGetInstalledJobMock.mockImplementation((jobIds: string[]) => {
-      expect(jobIds).toEqual(['auth_high_count_logon_events_for_a_source_ip']);
+      expect(jobIds).toEqual(['auth_high_count_logon_events_for_a_source_ip_ea']);
       return { jobs: [{ results_index_name: 'shared' }] };
     });
 
@@ -453,7 +453,7 @@ describe.skip('StepAboutRuleComponent', () => {
     (useFetchIndex as jest.Mock).mockClear();
     useSecurityJobsMock.mockImplementation(() => {
       return {
-        jobs: [{ id: 'auth_high_count_logon_events_for_a_source_ip', isInstalled: false }],
+        jobs: [{ id: 'auth_high_count_logon_events_for_a_source_ip_ea', isInstalled: false }],
         loading: false,
       };
     });

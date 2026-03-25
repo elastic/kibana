@@ -17,6 +17,7 @@ import { PAGE_RESTRICT_WIDTH } from './constants';
 import * as i18n from './translations';
 import { useGetIntegrationById, useKibana } from '../../common';
 import { normalizeTitleName } from '../../common/lib/helper_functions';
+import { useTelemetry } from '../telemetry_context';
 
 const INTEGRATIONS_APP_ID = 'integrations';
 const INTEGRATIONS_MANAGE_PATH = '/browse?view=manage';
@@ -26,18 +27,25 @@ const IntegrationManagementContents: React.FC = () => {
   const { integrationId } = useParams<{ integrationId?: string }>();
   const { integration } = useGetIntegrationById(integrationId);
   const hasDataStreams = (integration?.dataStreams?.length ?? 0) > 0;
+  const { reportCancelButtonClicked, reportDoneButtonClicked } = useTelemetry();
 
   const navigateToManage = useCallback(() => {
     application.navigateToApp(INTEGRATIONS_APP_ID, { path: INTEGRATIONS_MANAGE_PATH });
   }, [application]);
 
   const handleCancel = useCallback(() => {
+    reportCancelButtonClicked();
     if (window.history.length > 1) {
       window.history.back();
     } else {
       navigateToManage();
     }
-  }, [navigateToManage]);
+  }, [navigateToManage, reportCancelButtonClicked]);
+
+  const handleDone = useCallback(() => {
+    reportDoneButtonClicked();
+    navigateToManage();
+  }, [navigateToManage, reportDoneButtonClicked]);
 
   return (
     <>
@@ -49,7 +57,7 @@ const IntegrationManagementContents: React.FC = () => {
         </KibanaPageTemplate.Section>
       </KibanaPageTemplate>
       <ButtonsFooter
-        onAction={navigateToManage}
+        onAction={handleDone}
         isActionDisabled={!hasDataStreams}
         onCancel={handleCancel}
       />
