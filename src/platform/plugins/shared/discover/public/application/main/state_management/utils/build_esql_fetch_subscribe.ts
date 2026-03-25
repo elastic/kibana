@@ -162,8 +162,7 @@ export const buildEsqlFetchSubscribe = ({
 
     const { viewMode, hideTable } = getCurrentTab().appState;
     const currentDataView = getCurrentDataView();
-    const isChartAvailable =
-      isChartAvailableForDataView(currentDataView) && !hasTransformationalCommand(nextQuery.esql);
+    const isChartAvailable = isChartAvailableForDataView(currentDataView);
     const changeHideTable = !isChartAvailable && hideTable === true;
     const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
 
