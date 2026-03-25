@@ -21,7 +21,7 @@ import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
 import type { DiscoverInternalState } from '../../../state_management/redux';
-import { selectTab } from '../../../state_management/redux/selectors';
+import { selectTab } from '../../../state_management/redux';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
