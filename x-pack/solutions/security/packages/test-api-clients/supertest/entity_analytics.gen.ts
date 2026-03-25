@@ -552,9 +552,9 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
-  internalUploadAssetCriticalityRecords(kibanaSpace: string = 'default') {
+  internalUploadAssetCriticalityV2Csv(kibanaSpace: string = 'default') {
     return supertest
-      .post(getRouteUrlForSpace('/internal/asset_criticality/upload_csv', kibanaSpace))
+      .post(getRouteUrlForSpace('/internal/asset_criticality/upload_csv_v2', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
