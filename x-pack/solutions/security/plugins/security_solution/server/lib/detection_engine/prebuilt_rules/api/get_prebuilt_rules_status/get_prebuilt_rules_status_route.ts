@@ -65,6 +65,8 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
             mlAuthz
           );
 
+          const deprecatedRules = await ruleAssetsClient.fetchDeprecatedRules();
+
           const upgradeableRulesTags = upgradableRules.reduce<string[]>((tags, rule) => {
             const ruleTags = currentRuleVersionsMap.get(rule.rule_id)?.tags;
             if (ruleTags) {
@@ -79,6 +81,7 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
               num_prebuilt_rules_to_install: installableRuleAssets.length,
               num_prebuilt_rules_to_upgrade: upgradableRules.length,
               num_prebuilt_rules_total_in_package: latestRuleVersions.length,
+              num_prebuilt_rules_deprecated: deprecatedRules.length,
             },
             aggregated_fields: {
               upgradeable_rules: {
