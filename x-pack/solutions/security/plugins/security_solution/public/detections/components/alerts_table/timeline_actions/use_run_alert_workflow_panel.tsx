@@ -125,7 +125,7 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose }: AlertWorkflowsPanelPr
               return 0;
             }),
           listView: true,
-          hideLabel: true,
+          hideTopRowHeader: true,
           hideViewWorkflowLink: true,
           listViewMaxHeight: 240,
           showSelectedInSearch: false,

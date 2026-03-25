@@ -51,7 +51,7 @@ const defaultConfig: WorkflowSelectorConfig = {
     loadFailed: i18n.FAILED_TO_LOAD_WORKFLOWS,
   },
   listView: false,
-  hideLabel: false,
+  hideTopRowHeader: false,
   hideViewWorkflowLink: false,
   showSelectedInSearch: true,
 };
@@ -282,7 +282,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     ? i18n.LOADING_WORKFLOWS
     : undefined;
 
-  const listView = useCallback(
+  const renderListView = useCallback(
     (list: ReactElement, search?: ReactElement) => {
       return (
         <EuiPanel paddingSize="none">
@@ -316,7 +316,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     ]
   );
 
-  const popoverView = useCallback(
+  const renderPopoverView = useCallback(
     (list: ReactElement, search?: ReactElement) => {
       return (
         <EuiInputPopover
@@ -359,9 +359,9 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
 
   return (
     <EuiFormRow
-      label={finalConfig.hideLabel ? undefined : finalConfig.label}
+      label={finalConfig.hideTopRowHeader ? undefined : finalConfig.label}
       labelAppend={
-        finalConfig.hideLabel ? undefined : (
+        finalConfig.hideTopRowHeader ? undefined : (
           <EuiLink {...workflowManagementLinkProps} external={false}>
             {finalConfig.createWorkflowLinkText}{' '}
             <EuiIcon type="plusInCircle" size="s" aria-hidden={true} />
@@ -416,7 +416,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
           }}
           renderOption={renderWorkflowOption}
         >
-          {finalConfig.listView ? listView : popoverView}
+          {finalConfig.listView ? renderListView : renderPopoverView}
         </EuiSelectable>
       )}
     </EuiFormRow>

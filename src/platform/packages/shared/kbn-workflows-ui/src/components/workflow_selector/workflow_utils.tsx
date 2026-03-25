@@ -51,7 +51,8 @@ export interface WorkflowSelectorConfig {
   createWorkflowLinkText?: string;
   listView?: boolean;
   listViewMaxHeight?: number;
-  hideLabel?: boolean;
+  // hides the 'Select workflow' label and 'Create new' link
+  hideTopRowHeader?: boolean;
   hideViewWorkflowLink?: boolean;
   // When true (default), the selected workflow's name is displayed in the search input.
   showSelectedInSearch?: boolean;
