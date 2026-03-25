@@ -28,13 +28,26 @@ export interface DocumentSeverityProps {
    * Default to false.
    */
   showCellActions?: boolean;
+  /**
+   * Required when `showCellActions` is true; ignored otherwise.
+   */
+  scopeId?: string;
+  /**
+   * When true, filter/toggle-column actions are disabled. Required when `showCellActions` is true.
+   */
+  isRulePreview?: boolean;
 }
 
 /**
  * Document details severity displayed in flyout right section header
  */
 export const DocumentSeverity = memo(
-  ({ getFieldsData, showCellActions = false }: DocumentSeverityProps) => {
+  ({
+    getFieldsData,
+    showCellActions = false,
+    scopeId = '',
+    isRulePreview = false,
+  }: DocumentSeverityProps) => {
     const { euiTheme } = useEuiTheme();
 
     const severityToColorMap = useRiskSeverityColors();
@@ -63,7 +76,12 @@ export const DocumentSeverity = memo(
         {severity && (
           <>
             {showCellActions ? (
-              <CellActions field={ALERT_SEVERITY} value={severity}>
+              <CellActions
+                field={ALERT_SEVERITY}
+                value={severity}
+                scopeId={scopeId}
+                isRulePreview={isRulePreview}
+              >
                 <EuiBadge color={color} data-test-subj={SEVERITY_VALUE_TEST_ID}>
                   {displayValue}
                 </EuiBadge>

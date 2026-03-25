@@ -116,7 +116,13 @@ export const getTableTabColumns: ColumnsProvider = ({
     render: (values, data) => {
       const fieldFromBrowserField = getFieldFromBrowserField(data.field, browserFields);
       return (
-        <CellActions field={data.field} value={values} isObjectArray={data.isObjectArray}>
+        <CellActions
+          field={data.field}
+          value={values}
+          isObjectArray={data.isObjectArray}
+          scopeId={scopeId}
+          isRulePreview={isRulePreview}
+        >
           <TableFieldValueCell
             scopeId={scopeId}
             data={data as EventFieldsData}

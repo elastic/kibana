@@ -245,7 +245,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
         ),
         render: (user: string) => (
           <EuiText grow={false} size="xs">
-            <CellActions field={USER_NAME_FIELD_NAME} value={user}>
+            <CellActions field={USER_NAME_FIELD_NAME} value={user} scopeId={scopeId}>
               <PreviewLink
                 field={USER_NAME_FIELD_NAME}
                 value={user}

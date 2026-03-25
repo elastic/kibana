@@ -12,14 +12,16 @@ import type { HighlightedFieldsTableRow } from '../../right/components/highlight
  * Converts the highlighted fields to a format that can be consumed by the HighlightedFields component
  * @param highlightedFields field/value pairs
  * @param scopeId used in the alerts page for CellActions
- * @param isPreview used in the alerts page for CellActions and also to hide PreviewLinks
  * @param showCellActions used in alert summary page to hide CellActions entirely
+ * @param ancestorsIndexName optional index for preview links
+ * @param isRulePreview disables some cell actions when true
  */
 export const convertHighlightedFieldsToTableRow = (
   highlightedFields: UseHighlightedFieldsResult,
   scopeId: string,
   showCellActions: boolean,
-  ancestorsIndexName?: string
+  ancestorsIndexName?: string,
+  isRulePreview = false
 ): HighlightedFieldsTableRow[] => {
   const fieldNames = Object.keys(highlightedFields);
   return fieldNames.map((fieldName) => {
@@ -38,6 +40,7 @@ export const convertHighlightedFieldsToTableRow = (
         values,
         scopeId,
         showCellActions,
+        isRulePreview,
         ancestorsIndexName,
       },
     };

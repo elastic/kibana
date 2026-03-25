@@ -76,6 +76,7 @@ export const InvestigationSection = memo(() => {
         scopeId={scopeId}
         showCellActions={true}
         showEditButton={true}
+        isRulePreview={isRulePreview}
         ancestorsIndexName={ancestorIndex}
       />
     </ExpandableSection>

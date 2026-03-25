@@ -46,6 +46,10 @@ export interface HighlightedFieldsTableRow {
      */
     showCellActions: boolean;
     /**
+     * Matches document details rule preview mode for cell actions
+     */
+    isRulePreview: boolean;
+    /**
      * The indexName to be passed to the flyout preview panel
      * when clicking on "Source event" id
      */
@@ -80,13 +84,18 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
       originalField?: string;
       values: string[] | null | undefined;
       scopeId: string;
-      isPreview: boolean;
+      isRulePreview: boolean;
       showCellActions: boolean;
       ancestorsIndexName?: string;
     }) => (
       <>
         {description.showCellActions ? (
-          <CellActions field={description.field} value={description.values}>
+          <CellActions
+            field={description.field}
+            value={description.values}
+            scopeId={description.scopeId}
+            isRulePreview={description.isRulePreview}
+          >
             <HighlightedFieldsCell
               values={description.values}
               field={description.field}
@@ -133,6 +142,10 @@ export interface HighlightedFieldsProps {
    */
   showEditButton?: boolean;
   /**
+   * When true, filter/toggle-column cell actions are disabled (e.g. rule preview mode).
+   */
+  isRulePreview?: boolean;
+  /**
    * The indexName to be passed to the flyout preview panel
    * when clicking on "Source event" id
    */
@@ -150,6 +163,7 @@ export const HighlightedFields = memo(
     scopeId = '',
     showCellActions,
     showEditButton = false,
+    isRulePreview = false,
     ancestorsIndexName,
   }: HighlightedFieldsProps) => {
     const [isEditLoading, setIsEditLoading] = useState(false);
@@ -165,9 +179,10 @@ export const HighlightedFields = memo(
           highlightedFields,
           scopeId,
           showCellActions,
-          ancestorsIndexName
+          ancestorsIndexName,
+          isRulePreview
         ),
-      [highlightedFields, scopeId, showCellActions, ancestorsIndexName]
+      [highlightedFields, scopeId, showCellActions, ancestorsIndexName, isRulePreview]
     );
 
     return (

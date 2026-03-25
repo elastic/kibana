@@ -64,7 +64,12 @@ export const DocumentStatus: FC = () => {
       {!statusData || !hasData(statusData) || isRulePreview ? (
         getEmptyTagValue()
       ) : (
-        <CellActions field={SIGNAL_STATUS_FIELD_NAME} value={statusData.values[0]}>
+        <CellActions
+          field={SIGNAL_STATUS_FIELD_NAME}
+          value={statusData.values[0]}
+          scopeId={scopeId}
+          isRulePreview={isRulePreview}
+        >
           <StatusPopoverButton
             eventId={eventId}
             contextId={scopeId}

@@ -9,7 +9,6 @@ import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { SECURITY_CELL_ACTIONS_DETAILS_FLYOUT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { useAlertsContext } from '../../../../detections/components/alerts_table/alerts_context';
-import { useDocumentDetailsContext } from '../context';
 import { getSourcererScopeId } from '../../../../helpers';
 import { SecurityCellActionType } from '../../../../app/actions/constants';
 import { CellActionsMode, SecurityCellActions } from '../../../../common/components/cell_actions';
@@ -28,6 +27,14 @@ interface CellActionsProps {
    */
   isObjectArray?: boolean;
   /**
+   * Timeline or page scope id (e.g. from document details or attack flyout); used for sourcerer and cell action metadata.
+   */
+  scopeId: string;
+  /**
+   * When true, filter/toggle-column cell actions are disabled (e.g. rule preview mode).
+   */
+  isRulePreview?: boolean;
+  /**
    * React components to render
    */
   children: React.ReactNode | string;
@@ -36,8 +43,14 @@ interface CellActionsProps {
 /**
  * Security cell action wrapper for document details flyout
  */
-export const CellActions: FC<CellActionsProps> = ({ field, value, isObjectArray, children }) => {
-  const { scopeId, isRulePreview } = useDocumentDetailsContext();
+export const CellActions: FC<CellActionsProps> = ({
+  field,
+  value,
+  isObjectArray,
+  scopeId,
+  isRulePreview = false,
+  children,
+}) => {
   const { alertsTableRef } = useAlertsContext();
 
   const data = useMemo(() => ({ field, value }), [field, value]);

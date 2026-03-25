@@ -91,7 +91,7 @@ export const HOST_PREVIEW_BANNER = {
  * Host preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
 export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName }) => {
-  const { scopeId } = useDocumentDetailsContext();
+  const { scopeId, isRulePreview } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
 
@@ -144,7 +144,12 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
       {
         title: FAMILY,
         description: hostOSFamilyValue ? (
-          <CellActions field={'host.os.family'} value={hostOSFamilyValue}>
+          <CellActions
+            field={'host.os.family'}
+            value={hostOSFamilyValue}
+            scopeId={scopeId}
+            isRulePreview={isRulePreview}
+          >
             {hostOSFamilyValue}
           </CellActions>
         ) : (
@@ -152,7 +157,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
         ),
       },
     ],
-    [hostOSFamilyValue]
+    [hostOSFamilyValue, scopeId, isRulePreview]
   );
 
   const hostLastSeen: DescriptionList[] = useMemo(

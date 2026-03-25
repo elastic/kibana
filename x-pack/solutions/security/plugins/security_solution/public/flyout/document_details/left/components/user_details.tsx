@@ -240,7 +240,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
         ),
         render: (host: string) => (
           <EuiText grow={false} size="xs">
-            <CellActions field={HOST_NAME_FIELD_NAME} value={host}>
+            <CellActions field={HOST_NAME_FIELD_NAME} value={host} scopeId={scopeId}>
               <PreviewLink
                 field={HOST_NAME_FIELD_NAME}
                 value={host}

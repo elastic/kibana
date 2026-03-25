@@ -85,7 +85,7 @@ export const USER_PREVIEW_BANNER = {
  * User preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
 export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName }) => {
-  const { scopeId } = useDocumentDetailsContext();
+  const { scopeId, isRulePreview } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
 
@@ -158,7 +158,12 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
       {
         title: USER_DOMAIN,
         description: userDomainValue ? (
-          <CellActions field={'user.domain'} value={userDomainValue}>
+          <CellActions
+            field={'user.domain'}
+            value={userDomainValue}
+            scopeId={scopeId}
+            isRulePreview={isRulePreview}
+          >
             {userDomainValue}
           </CellActions>
         ) : (
@@ -166,7 +171,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
         ),
       },
     ],
-    [userDomainValue]
+    [userDomainValue, scopeId, isRulePreview]
   );
 
   const userLastSeen: DescriptionList[] = useMemo(

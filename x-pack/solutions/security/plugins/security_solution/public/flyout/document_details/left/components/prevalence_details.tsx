@@ -103,6 +103,10 @@ interface PrevalenceDetailsRow extends PrevalenceData {
    */
   scopeId: string;
   /**
+   * Matches document details rule preview mode for cell actions
+   */
+  isRulePreview: boolean;
+  /**
    * True if user have the correct timeline read privilege
    */
   canUseTimeline: boolean;
@@ -133,7 +137,12 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
       <EuiFlexGroup direction="column" gutterSize="none">
         {data.values.map((value) => (
           <EuiFlexItem key={value}>
-            <CellActions field={data.field} value={value}>
+            <CellActions
+              field={data.field}
+              value={value}
+              scopeId={data.scopeId}
+              isRulePreview={data.isRulePreview}
+            >
               <PreviewLink
                 field={data.field}
                 value={value}
@@ -363,7 +372,7 @@ export const PrevalenceDetails: React.FC = () => {
     EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE
   );
 
-  const { investigationFields, scopeId, searchHit } = useDocumentDetailsContext();
+  const { investigationFields, scopeId, searchHit, isRulePreview } = useDocumentDetailsContext();
 
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
@@ -438,9 +447,10 @@ export const PrevalenceDetails: React.FC = () => {
         to: absoluteEnd,
         isPlatinumPlus,
         scopeId,
+        isRulePreview,
         canUseTimeline,
       })),
-    [data, absoluteStart, absoluteEnd, canUseTimeline, isPlatinumPlus, scopeId]
+    [data, absoluteStart, absoluteEnd, canUseTimeline, isPlatinumPlus, scopeId, isRulePreview]
   );
 
   const upsell = (
