@@ -107,7 +107,7 @@ function shiftAndNormalizeStops(
  * @param xAccessor - The x-axis accessor key
  * @returns The minimum interval in milliseconds, or undefined if cannot be computed
  */
-function computeMinIntervalFromData(
+export function computeMinIntervalFromData(
   data: Array<Record<string, string | number>>,
   xAccessor: string | undefined
 ): number | undefined {
@@ -253,7 +253,7 @@ function computeColorRanges(
  *
  * (copied from x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/date_histogram.tsx)
  */
-function getDateFormatPattern(
+export function getDateFormatPattern(
   intervalMs: number | undefined,
   uiSettings: CoreSetup['uiSettings'] | undefined
 ): string | undefined {
