@@ -15,6 +15,7 @@ import {
   getFallbackDataBounds,
 } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
+import { LinkPatternInput } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import type { KbnPalettes } from '@kbn/palettes';
 import type {
@@ -328,7 +329,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
             showLabel={false}
             data-test-subj="lns-table-column-one-click-filter"
             checked={Boolean(column?.oneClickFilter)}
-            disabled={column.hidden}
+            disabled={column.hidden || column.useLink}
             onChange={() => {
               const newState = {
                 ...localState,
@@ -347,6 +348,64 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
             }}
           />
         </EuiFormRow>
+      )}
+      {props.groupId === 'rows' && (
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate('xpack.lens.table.columnUseLinkLabel', {
+            defaultMessage: 'Use Link',
+          })}
+          display="columnCompressed"
+        >
+          <EuiSwitch
+            compressed
+            label={i18n.translate('xpack.lens.table.columnUseLinkLabel', {
+              defaultMessage: 'Use Link',
+            })}
+            showLabel={false}
+            data-test-subj="lns-table-column-use-link"
+            checked={Boolean(column?.useLink)}
+            disabled={column.hidden || column.oneClickFilter}
+            onChange={() => {
+              const newState = {
+                ...localState,
+                columns: localState.columns.map((currentColumn) => {
+                  if (currentColumn.columnId === accessor) {
+                    return {
+                      ...currentColumn,
+                      useLink: !column.useLink,
+                    };
+                  } else {
+                    return currentColumn;
+                  }
+                }),
+              };
+              setLocalState(newState);
+            }}
+          />
+        </EuiFormRow>
+      )}
+      {(props.groupId === 'rows' && column.useLink) && (
+        <LinkPatternInput
+          value={column.linkPattern || ''}
+          defaultValue={''}
+          onChange={(value) => {
+            const newState = {
+              ...localState,
+              columns: localState.columns.map((currentColumn) => {
+                if (currentColumn.columnId === accessor) {
+                  return {
+                    ...currentColumn,
+                    linkPattern: value,
+                  };
+                } else {
+                  return currentColumn;
+                }
+              }),
+            };
+            setLocalState(newState);
+          }}
+        />
       )}
     </div>
   );
