@@ -7,7 +7,6 @@
 import { useResizeObserver } from '@elastic/eui';
 import type { CSSProperties } from 'react';
 import { useCallback, useMemo, useRef, useState } from 'react';
-
 export function useSecondaryFiltersWidthStyle({
   isMedium,
   enabled,
@@ -43,7 +42,7 @@ export function useSecondaryFiltersWidthStyle({
 
       const updateTextAreaRef = () => {
         const textArea = container.querySelector<HTMLTextAreaElement>(
-          'textarea[data-test-subj="apmUnifiedSearchBar"]'
+          '[data-apm-unified-search-root] textarea'
         );
         setQueryTextAreaElement((prev) => (prev === textArea ? prev : textArea ?? null));
       };

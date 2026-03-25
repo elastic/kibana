@@ -165,8 +165,7 @@ export function ApmMainTemplate({
         isPageDataLoaded={isLoading === false}
         pageHeader={{
           ...pageHeader,
-          // @ts-expect-error - This color is valid but not typed
-          color: 'subdued',
+          color: 'subdued' as unknown as EuiPageHeaderProps['color'],
           tabs: undefined,
           rightSideItems: [],
           pageTitle: titleWithActions,

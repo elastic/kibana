@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { EuiSuperUpdateButtonProps } from '@elastic/eui';
 import { EuiSuperDatePicker } from '@elastic/eui';
-import type { MutableRefObject } from 'react';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -23,20 +21,12 @@ export function DatePicker({
   refreshPaused,
   refreshInterval,
   onTimeRangeRefresh,
-  compressed,
-  pendingKuery,
-  submitActionRef,
-  updateButtonProps,
 }: {
   rangeFrom?: string;
   rangeTo?: string;
   refreshPaused?: boolean;
   refreshInterval?: number;
   onTimeRangeRefresh: () => void;
-  compressed?: boolean;
-  pendingKuery?: string;
-  submitActionRef?: MutableRefObject<(() => void) | undefined>;
-  updateButtonProps?: EuiSuperUpdateButtonProps & { needsUpdate?: boolean };
 }) {
   const history = useHistory();
   const location = useLocation();
@@ -59,7 +49,6 @@ export function DatePicker({
     rangeTo?: string;
     refreshPaused?: boolean;
     refreshInterval?: number;
-    kuery?: string;
   }) {
     try {
       history.push({
@@ -93,22 +82,8 @@ export function DatePicker({
     updateUrl({
       rangeFrom: start,
       rangeTo: end,
-      ...(pendingKuery !== undefined && { kuery: pendingKuery }),
     });
   }
-
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const clickSubmitButton = useCallback(() => {
-    wrapperRef.current
-      ?.querySelector<HTMLButtonElement>('[data-test-subj="querySubmitButton"]')
-      ?.click();
-  }, []);
-
-  useEffect(() => {
-    if (submitActionRef) {
-      submitActionRef.current = clickSubmitButton;
-    }
-  }, [submitActionRef, clickSubmitButton]);
 
   useEffect(() => {
     // set time if both to and from are given in the url
@@ -122,32 +97,22 @@ export function DatePicker({
   }, [rangeFrom, rangeTo, plugins]);
 
   return (
-    <div ref={wrapperRef}>
-      <EuiSuperDatePicker
-        compressed={compressed}
-        start={rangeFrom}
-        end={rangeTo}
-        isPaused={refreshPaused}
-        refreshInterval={refreshInterval}
-        onTimeChange={onTimeChange}
-        onRefresh={() => {
-          if (pendingKuery !== undefined) {
-            updateUrl({ kuery: pendingKuery });
-          }
-          clearCache();
-          onTimeRangeRefresh();
-        }}
-        onRefreshChange={({
-          isPaused: nextRefreshPaused,
-          refreshInterval: nextRefreshInterval,
-        }) => {
-          onRefreshChange({ nextRefreshPaused, nextRefreshInterval });
-        }}
-        showUpdateButton={true}
-        updateButtonProps={updateButtonProps}
-        commonlyUsedRanges={commonlyUsedRanges}
-        width={isMobile ? 'full' : 'auto'}
-      />
-    </div>
+    <EuiSuperDatePicker
+      start={rangeFrom}
+      end={rangeTo}
+      isPaused={refreshPaused}
+      refreshInterval={refreshInterval}
+      onTimeChange={onTimeChange}
+      onRefresh={() => {
+        clearCache();
+        onTimeRangeRefresh();
+      }}
+      onRefreshChange={({ isPaused: nextRefreshPaused, refreshInterval: nextRefreshInterval }) => {
+        onRefreshChange({ nextRefreshPaused, nextRefreshInterval });
+      }}
+      showUpdateButton={true}
+      commonlyUsedRanges={commonlyUsedRanges}
+      width={isMobile ? 'full' : 'auto'}
+    />
   );
 }

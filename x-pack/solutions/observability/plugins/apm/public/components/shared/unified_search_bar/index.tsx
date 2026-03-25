@@ -269,26 +269,28 @@ export function UnifiedSearchBar({
   };
 
   return (
-    <SearchBar
-      appName={i18n.translate('xpack.apm.appName', {
-        defaultMessage: 'APM',
-      })}
-      iconType="search"
-      placeholder={searchbarPlaceholder}
-      useDefaultBehaviors={true}
-      indexPatterns={dataView ? [dataView] : undefined}
-      showQueryInput={showQueryInput}
-      showQueryMenu={false}
-      showFilterBar={false}
-      showDatePicker={showDatePicker}
-      showSubmitButton={showSubmitButton}
-      displayStyle="inPage"
-      onQuerySubmit={handleSubmit}
-      onRefresh={onRefresh}
-      onRefreshChange={onRefreshChange}
-      isClearable={isClearable}
-      dataTestSubj="apmUnifiedSearchBar"
-      filtersForSuggestions={filtersForSearchBarSuggestions}
-    />
+    <div data-apm-unified-search-root={true}>
+      <SearchBar
+        appName={i18n.translate('xpack.apm.appName', {
+          defaultMessage: 'APM',
+        })}
+        iconType="search"
+        placeholder={searchbarPlaceholder}
+        useDefaultBehaviors={true}
+        indexPatterns={dataView ? [dataView] : undefined}
+        showQueryInput={showQueryInput}
+        showQueryMenu={false}
+        showFilterBar={false}
+        showDatePicker={showDatePicker}
+        showSubmitButton={showSubmitButton}
+        displayStyle="inPage"
+        onQuerySubmit={handleSubmit}
+        onRefresh={onRefresh}
+        onRefreshChange={onRefreshChange}
+        isClearable={isClearable}
+        dataTestSubj="apmUnifiedSearchBar"
+        filtersForSuggestions={filtersForSearchBarSuggestions}
+      />
+    </div>
   );
 }
