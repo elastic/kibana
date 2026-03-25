@@ -121,13 +121,6 @@ export const INSIGHTS_TEST_ID = `${PREFIX}Insights` as const;
 export const INSIGHTS_HEADER_TEST_ID = INSIGHTS_TEST_ID + HEADER_TEST_ID;
 export const INSIGHTS_CONTENT_TEST_ID = INSIGHTS_TEST_ID + CONTENT_TEST_ID;
 
-/* Summary row */
-
-export const SUMMARY_ROW_LOADING_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Loading`;
-export const SUMMARY_ROW_TEXT_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Text`;
-export const SUMMARY_ROW_VALUE_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Value`;
-export const SUMMARY_ROW_BUTTON_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Button`;
-
 /* Entities */
 
 export const INSIGHTS_ENTITIES_TEST_ID = `${PREFIX}InsightsEntities` as const;
@@ -163,21 +156,6 @@ export const ENTITIES_HOST_OVERVIEW_MISCONFIGURATIONS_TEST_ID =
   `${ENTITIES_HOST_OVERVIEW_TEST_ID}Misconfigurations` as const;
 export const ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID =
   `${ENTITIES_HOST_OVERVIEW_TEST_ID}Vulnerabilities` as const;
-
-/* Correlations */
-
-export const CORRELATIONS_TEST_ID = `${PREFIX}Correlations` as const;
-export const CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID =
-  `${CORRELATIONS_TEST_ID}SuppressedAlerts` as const;
-export const CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID =
-  `${CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID}TechnicalPreview` as const;
-export const CORRELATIONS_RELATED_CASES_TEST_ID = `${CORRELATIONS_TEST_ID}RelatedCases` as const;
-export const CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID =
-  `${CORRELATIONS_TEST_ID}RelatedAlertsBySession` as const;
-export const CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID =
-  `${CORRELATIONS_TEST_ID}RelatedAlertsBySameSourceEvent` as const;
-export const CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID =
-  `${CORRELATIONS_TEST_ID}RelatedAlertsByAncestry` as const;
 
 /* Visualizations section */
 
