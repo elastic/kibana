@@ -26,8 +26,20 @@ class DatasetQualityPrivileges {
   public async getHasIndexPrivileges(
     esClient: ElasticsearchClient,
     indexes: string[],
-    privileges: SecurityIndexPrivilege[]
+    privileges: SecurityIndexPrivilege[],
+    isSecurityEnabled: boolean
   ): Promise<Awaited<Record<string, SecurityHasPrivilegesPrivileges>>> {
+    if (!isSecurityEnabled) {
+      return Object.fromEntries(
+        indexes.map((index) => [
+          index,
+          Object.fromEntries(
+            privileges.map((p) => [p, true])
+          ) as unknown as SecurityHasPrivilegesPrivileges,
+        ])
+      );
+    }
+
     try {
       const indexPrivileges = await esClient.security.hasPrivileges({
         index: indexes.map((dataStream) => ({ names: dataStream, privileges })),
@@ -35,16 +47,6 @@ class DatasetQualityPrivileges {
 
       return indexPrivileges.index;
     } catch (error) {
-      if (error instanceof errors.ResponseError && isSecurityDisabledError(error)) {
-        return Object.fromEntries(
-          indexes.map((index) => [
-            index,
-            Object.fromEntries(
-              privileges.map((p) => [p, true])
-            ) as unknown as SecurityHasPrivilegesPrivileges,
-          ])
-        );
-      }
       if (
         error instanceof errors.ResponseError &&
         isUnknownPrivilegeError(error, FAILURE_STORE_PRIVILEGES)
@@ -89,34 +91,33 @@ class DatasetQualityPrivileges {
 
   public async getCanViewIntegrations(
     esClient: ElasticsearchClient,
+    isSecurityEnabled: boolean,
     space = '*'
   ): Promise<boolean> {
-    try {
-      const applicationPrivileges = await esClient.security.hasPrivileges({
-        application: [
-          {
-            application: 'kibana-.kibana',
-            privileges: ['feature_fleet.read'],
-            resources: [space],
-          },
-        ],
-      });
-
-      return (
-        applicationPrivileges.application?.['kibana-.kibana']?.[space]?.['feature_fleet.read'] ??
-        false
-      );
-    } catch (error) {
-      if (error instanceof errors.ResponseError && isSecurityDisabledError(error)) {
-        return true;
-      }
-      throw error;
+    if (!isSecurityEnabled) {
+      return true;
     }
+
+    const applicationPrivileges = await esClient.security.hasPrivileges({
+      application: [
+        {
+          application: 'kibana-.kibana',
+          privileges: ['feature_fleet.read'],
+          resources: [space],
+        },
+      ],
+    });
+
+    return (
+      applicationPrivileges.application?.['kibana-.kibana']?.[space]?.['feature_fleet.read'] ??
+      false
+    );
   }
 
   public async getDatasetPrivileges(
     esClient: ElasticsearchClient,
     dataset: string[],
+    isSecurityEnabled: boolean,
     space = '*'
   ): Promise<{
     datasetsPrivilages: Record<
@@ -130,13 +131,18 @@ class DatasetQualityPrivileges {
     >;
     canViewIntegrations: boolean;
   }> {
-    const indexPrivileges = await this.getHasIndexPrivileges(esClient, dataset, [
-      'read',
-      'monitor',
-      'view_index_metadata',
-      FAILURE_STORE_PRIVILEGE,
-      MANAGE_FAILURE_STORE_PRIVILEGE,
-    ]);
+    const indexPrivileges = await this.getHasIndexPrivileges(
+      esClient,
+      dataset,
+      [
+        'read',
+        'monitor',
+        'view_index_metadata',
+        FAILURE_STORE_PRIVILEGE,
+        MANAGE_FAILURE_STORE_PRIVILEGE,
+      ],
+      isSecurityEnabled
+    );
 
     const datasetsPrivilages = Object.fromEntries(
       Object.entries(indexPrivileges).map(([index, privileges]) => [
@@ -150,13 +156,18 @@ class DatasetQualityPrivileges {
       ])
     );
 
-    const canViewIntegrations = await this.getCanViewIntegrations(esClient, space);
+    const canViewIntegrations = await this.getCanViewIntegrations(
+      esClient,
+      isSecurityEnabled,
+      space
+    );
 
     return { datasetsPrivilages, canViewIntegrations };
   }
 
   public async canReadDataset(
     esClient: ElasticsearchClient,
+    isSecurityEnabled: boolean,
     type = DEFAULT_DATASET_TYPE,
     datasetQuery = '*-*',
     space = '*'
@@ -169,6 +180,7 @@ class DatasetQualityPrivileges {
     const datasetUserPrivileges = await datasetQualityPrivileges.getDatasetPrivileges(
       esClient,
       [datasetName],
+      isSecurityEnabled,
       space
     );
 
@@ -177,11 +189,12 @@ class DatasetQualityPrivileges {
 
   public async throwIfCannotReadDataset(
     esClient: ElasticsearchClient,
+    isSecurityEnabled: boolean,
     type = DEFAULT_DATASET_TYPE,
     datasetQuery = '*-*',
     space = '*'
   ): Promise<void> {
-    if (!(await this.canReadDataset(esClient, type, datasetQuery, space))) {
+    if (!(await this.canReadDataset(esClient, isSecurityEnabled, type, datasetQuery, space))) {
       const datasetName = streamPartsToIndexPattern({
         typePattern: type,
         datasetPattern: datasetQuery,
@@ -193,15 +206,6 @@ class DatasetQualityPrivileges {
 }
 
 export const datasetQualityPrivileges = new DatasetQualityPrivileges();
-
-function isSecurityDisabledError(error: errors.ResponseError): boolean {
-  // ES returns a "no handler found" error body when security is disabled.
-  // Use case-insensitive matching and handle both plain-text and JSON body formats.
-  const body = error.body;
-  const bodyText =
-    typeof body === 'string' ? body : (body as { error?: string } | undefined)?.error ?? '';
-  return bodyText.toLowerCase().includes('no handler found');
-}
 
 function isUnknownPrivilegeError(
   error: errors.ResponseError,

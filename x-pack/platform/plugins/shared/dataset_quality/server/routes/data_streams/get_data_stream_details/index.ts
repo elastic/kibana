@@ -27,12 +27,14 @@ export async function getDataStreamDetails({
   start,
   end,
   isServerless,
+  isSecurityEnabled,
 }: {
   esClient: IScopedClusterClient;
   dataStream: string;
   start: number;
   end: number;
   isServerless: boolean;
+  isSecurityEnabled: boolean;
 }): Promise<DataStreamDetails> {
   throwIfInvalidDataStreamParams(dataStream);
 
@@ -43,7 +45,8 @@ export async function getDataStreamDetails({
     await datasetQualityPrivileges.getHasIndexPrivileges(
       esClientAsCurrentUser,
       [dataStream],
-      ['monitor', FAILURE_STORE_PRIVILEGE, MANAGE_FAILURE_STORE_PRIVILEGE]
+      ['monitor', FAILURE_STORE_PRIVILEGE, MANAGE_FAILURE_STORE_PRIVILEGE],
+      isSecurityEnabled
     )
   )[dataStream];
 
@@ -52,6 +55,7 @@ export async function getDataStreamDetails({
         await getDataStreams({
           esClient: esClientAsCurrentUser,
           datasetQuery: dataStream,
+          isSecurityEnabled,
         })
       ).dataStreams[0]
     : undefined;
