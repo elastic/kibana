@@ -47,10 +47,14 @@ export function useMonitorListColumns({
   loading,
   overviewStatus,
   setMonitorPendingDeletion,
+  setMonitorPendingReset,
+  isResetFixable,
 }: {
   loading: boolean;
   overviewStatus: OverviewStatusState | null;
   setMonitorPendingDeletion: (configs: string[]) => void;
+  setMonitorPendingReset: (configs: string[]) => void;
+  isResetFixable: (configId: string) => boolean;
 }): Array<EuiBasicTableColumn<EncryptedSyntheticsSavedMonitor>> {
   const history = useHistory();
   const { http, spaces } = useKibana<ClientPluginsStart>().services;
@@ -308,6 +312,29 @@ export function useMonitorListColumns({
             canEditSynthetics && !isActionLoading(fields) && isPublicLocationsAllowed(fields),
           onClick: (fields) => {
             setMonitorPendingDeletion([fields[ConfigKey.CONFIG_ID]]);
+          },
+        },
+        {
+          'data-test-subj': 'syntheticsMonitorResetAction',
+          isPrimary: false,
+          name: (fields) => (
+            <span
+              aria-label={i18n.translate('xpack.synthetics.management.monitorList.resetLabel', {
+                defaultMessage: 'Reset monitor {monitorName}',
+                values: { monitorName: fields[ConfigKey.NAME] },
+              })}
+            >
+              {labels.RESET_LABEL}
+            </span>
+          ),
+          description: labels.RESET_LABEL,
+          icon: 'refresh' as const,
+          type: 'icon' as const,
+          color: 'warning' as const,
+          available: (fields) => isResetFixable(fields[ConfigKey.CONFIG_ID]),
+          enabled: (fields) => canEditSynthetics && !isActionLoading(fields),
+          onClick: (fields) => {
+            setMonitorPendingReset([fields[ConfigKey.CONFIG_ID]]);
           },
         },
         {

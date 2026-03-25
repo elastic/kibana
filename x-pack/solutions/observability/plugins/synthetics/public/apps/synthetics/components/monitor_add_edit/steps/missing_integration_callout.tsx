@@ -15,6 +15,7 @@ import { kibanaService } from '../../../../../utils/kibana_service';
 export const MissingIntegrationCallout = ({ configId }: { configId: string }) => {
   const {
     isUnhealthy: hasMissingIntegrations,
+    isResetFixable,
     getUnhealthyLocationStatuses: getMissingStatuses,
     resetMonitor,
     isResetting,
@@ -23,6 +24,7 @@ export const MissingIntegrationCallout = ({ configId }: { configId: string }) =>
   });
 
   const isMissing = hasMissingIntegrations(configId);
+  const canReset = isResetFixable(configId);
   const missingStatuses = getMissingStatuses(configId);
 
   const handleReset = useCallback(async () => {
@@ -67,15 +69,19 @@ export const MissingIntegrationCallout = ({ configId }: { configId: string }) =>
             </ul>
           </EuiText>
         )}
-        <EuiSpacer size="s" />
-        <EuiButton
-          data-test-subj="syntheticsMissingIntegrationResetButton"
-          color="warning"
-          onClick={handleReset}
-          isLoading={isResetting}
-        >
-          {RESET_BUTTON_LABEL}
-        </EuiButton>
+        {canReset && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiButton
+              data-test-subj="syntheticsMissingIntegrationResetButton"
+              color="warning"
+              onClick={handleReset}
+              isLoading={isResetting}
+            >
+              {RESET_BUTTON_LABEL}
+            </EuiButton>
+          </>
+        )}
       </EuiCallOut>
       <EuiSpacer size="m" />
     </>

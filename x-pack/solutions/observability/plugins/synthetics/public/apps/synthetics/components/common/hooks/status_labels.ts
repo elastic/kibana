@@ -49,3 +49,11 @@ export const getStatusLabel = (status: LocationHealthStatusValue): string | unde
   if (status === LocationHealthStatusValue.Healthy) return undefined;
   return STATUS_LABELS[status];
 };
+
+export const RESET_FIXABLE_STATUSES = new Set([
+  LocationHealthStatusValue.MissingPackagePolicy,  
+  LocationHealthStatusValue.AgentPolicyMismatch,
+]);
+
+export const isResetFixableStatus = (status: LocationHealthStatusValue): boolean =>
+  RESET_FIXABLE_STATUSES.has(status);
