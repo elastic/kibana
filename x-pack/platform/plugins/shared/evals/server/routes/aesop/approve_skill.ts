@@ -141,35 +141,7 @@ export function registerApproveSkillRoute({ router, logger }: AESOPRouteDependen
             1024
           );
 
-          let createdSkill: { id: string };
-
-          if (isUpdateExisting) {
-            // Update existing user skill
-            createdSkill = await skillRegistry.update(agentBuilderSkillId, {
-              name: sanitizeSkillName(skill.name),
-              description: sanitizedDescription,
-              content: sanitizedContent,
-              tool_ids: toolIds,
-            });
-          } else {
-            // Create new skill
-            createdSkill = await skillRegistry.create({
-              id: agentBuilderSkillId,
-              name: sanitizeSkillName(skill.name),
-              description: sanitizedDescription,
-              content: sanitizedContent,
-              tool_ids: toolIds,
-            });
-          }
-
-          logger.info('[AESOP] Skill deployed to Agent Builder', {
-            skill_id: skillId,
-            agent_builder_skill_id: createdSkill.id,
-            update_existing: isUpdateExisting,
-            tools: toolIds,
-          });
-
-          // 6. Update proposed skill document with approval
+          // 6a. Mark deployment intent in ES FIRST (before deploying to Agent Builder)
           await esClient.update({
             index: '.aesop-proposed-skills',
             id: skillId,
@@ -184,9 +156,65 @@ export function registerApproveSkillRoute({ router, logger }: AESOPRouteDependen
                 deployment: {
                   deployed: true,
                   deployed_at: new Date().toISOString(),
-                  agent_builder_skill_id: createdSkill.id,
                   tool_ids: toolIds,
                   updated_existing: isUpdateExisting || false,
+                },
+              },
+            },
+            refresh: 'wait_for',
+          });
+
+          // 6b. Deploy to Agent Builder
+          let createdSkill: { id: string };
+          try {
+            if (isUpdateExisting) {
+              // Update existing user skill
+              createdSkill = await skillRegistry.update(agentBuilderSkillId, {
+                name: sanitizeSkillName(skill.name || 'Untitled Skill'),
+                description: sanitizedDescription,
+                content: sanitizedContent,
+                tool_ids: toolIds,
+              });
+            } else {
+              // Create new skill
+              createdSkill = await skillRegistry.create({
+                id: agentBuilderSkillId,
+                name: sanitizeSkillName(skill.name || 'Untitled Skill'),
+                description: sanitizedDescription,
+                content: sanitizedContent,
+                tool_ids: toolIds,
+              });
+            }
+          } catch (deployError) {
+            // Rollback: revert deployment status on Agent Builder failure
+            await esClient.update({
+              index: '.aesop-proposed-skills',
+              id: skillId,
+              body: {
+                doc: {
+                  review: { status: 'pending_review' },
+                  deployment: { deployed: false },
+                },
+              },
+            }).catch(() => {});
+            throw deployError;
+          }
+
+          logger.info('[AESOP] Skill deployed to Agent Builder', {
+            skill_id: skillId,
+            agent_builder_skill_id: createdSkill.id,
+            update_existing: isUpdateExisting,
+            tools: toolIds,
+          });
+
+          // 6c. Update ES document with Agent Builder skill ID
+          await esClient.update({
+            index: '.aesop-proposed-skills',
+            id: skillId,
+            body: {
+              doc: {
+                deployment: {
+                  agent_builder_skill_id: createdSkill.id,
                 },
               },
             },

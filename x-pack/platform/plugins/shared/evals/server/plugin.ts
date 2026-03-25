@@ -117,7 +117,7 @@ export class EvalsPlugin
         // workflows.registerWorkflowsFromDirectory(workflowsPath);
         this.logger.debug('AESOP workflow registration skipped (Workflows API not yet available)');
       } catch (error) {
-        this.logger.warn(`Failed to register AESOP workflows: ${error.message}`);
+        this.logger.warn(`Failed to register AESOP workflows: ${error instanceof Error ? error.message : String(error)}`);
       }
     } else {
       this.logger.debug('Workflows plugin not available - AESOP workflows can be triggered via API only');
@@ -155,7 +155,7 @@ export class EvalsPlugin
         this.logger.info('AESOP agents created successfully');
       } catch (error) {
         this.logger.warn(
-          `Failed to auto-create AESOP agents (this is expected if Agent Builder plugin is not available): ${error.message}`
+          `Failed to auto-create AESOP agents (this is expected if Agent Builder plugin is not available): ${error instanceof Error ? error.message : String(error)}`
         );
       }
     } else {

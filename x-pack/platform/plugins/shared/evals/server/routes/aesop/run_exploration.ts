@@ -162,6 +162,19 @@ export function registerRunExplorationRoute({ router, logger }: AESOPRouteDepend
             async () => executionId
           );
 
+          // Eagerly create skill registry while request is still active
+          let skillRegistry: any;
+          const agentBuilderStart = evalsContext.getAgentBuilderStart();
+          if (agentBuilderStart) {
+            try {
+              skillRegistry = await agentBuilderStart.skills.getRegistry({ request });
+            } catch (err) {
+              logger.warn('[AESOP] Could not create skill registry', {
+                error: err instanceof Error ? err.message : String(err),
+              });
+            }
+          }
+
           // Fire-and-forget: run the 5-phase exploration asynchronously
           const executor = new ExplorationWorkflowExecutor(
             currentUserClient,
@@ -176,11 +189,7 @@ export function registerRunExplorationRoute({ router, logger }: AESOPRouteDepend
               samplingConfig,
               connectorId,
               actionsClient,
-              getSkillRegistry: async () => {
-                const agentBuilderStart = evalsContext.getAgentBuilderStart();
-                if (!agentBuilderStart) return undefined;
-                return agentBuilderStart.skills.getRegistry({ request });
-              },
+              getSkillRegistry: async () => skillRegistry,
             }
           );
           executor.execute().catch((err) => {
