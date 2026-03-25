@@ -33,53 +33,15 @@ fileGroups:
     - '!src/entry.js'
     - '!**/*.config.js'
     - '!target/**/*'
-    - version_dependencies.txt
 tasks:
-  extract-version-dependencies:
-    command: node
-    args:
-      - $workspaceRoot/scripts/extract_version_dependencies.js
-      - src/platform/packages/private/kbn-ui-shared-deps-src/version_dependencies.txt
-      - '--collect'
-      - '@babel/plugin-transform-numeric-separator'
-      - '--collect'
-      - babel-loader
-      - '--collect'
-      - chroma-js
-      - '--collect'
-      - css-loader
-      - '--collect'
-      - dompurify
-      - '--collect'
-      - mini-css-extract-plugin
-      - '--collect'
-      - monaco-editor
-      - '--collect'
-      - monaco-yaml
-      - '--collect'
-      - react-use
-      - '--collect'
-      - webpack
-      - '--transitive'
-    env:
-      CI_STATS_DISABLED: 'true'
-    inputs:
-      - /package.json
-      - /yarn.lock
-    outputs:
-      - version_dependencies.txt
-    options:
-      runFromWorkspaceRoot: true
   build-webpack:
     command: yarn
     args:
       - build
     deps:
-      - extract-version-dependencies
       - ^:build-webpack
     inputs:
       - '@group(src)'
-      - package.json
       - webpack.config.js
       - /src/platform/packages/shared/kbn-repo-info/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/kbn-ui-theme/**/*.{js,ts,tsx}
@@ -121,11 +83,9 @@ tasks:
       - build
       - '--watch'
     deps:
-      - extract-version-dependencies
       - ^:build-webpack
     inputs:
       - '@group(src)'
-      - package.json
       - webpack.config.js
     outputs:
       - /target/build/src/platform/packages/private/kbn-ui-shared-deps-src
