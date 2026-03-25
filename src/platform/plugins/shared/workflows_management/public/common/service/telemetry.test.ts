@@ -762,7 +762,7 @@ describe('WorkflowsBaseTelemetry', () => {
       const call = jest.mocked(mockClient.reportEvent).mock.calls[0];
       const eventData = call[1];
       expect(eventData).not.toHaveProperty('workflowId');
-      expect(eventData.result).toBe('success');
+      expect(eventData).toHaveProperty('result', 'success');
     });
 
     it('reports a failed test run initiation', () => {
@@ -1177,7 +1177,7 @@ describe('WorkflowsBaseTelemetry', () => {
       );
 
       const call = jest.mocked(mockClient.reportEvent).mock.calls[0];
-      const eventData = call[1];
+      const eventData = call[1] as unknown as Record<string, unknown>;
       expect(eventData.errorTypes).toEqual(
         expect.arrayContaining(['yaml', 'step-name-validation'])
       );

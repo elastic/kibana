@@ -8,16 +8,12 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { createWorkflow, updateWorkflow } from './workflows_api';
-
-const createMockHttp = (): jest.Mocked<Pick<HttpSetup, 'post' | 'put'>> => ({
-  post: jest.fn().mockResolvedValue({ id: 'wf-1' }),
-  put: jest.fn().mockResolvedValue(undefined),
-});
 
 describe('createWorkflow', () => {
   it('calls http.post with the correct path and body', async () => {
-    const http = createMockHttp();
+    const http = httpServiceMock.createStartContract();
     const yaml = 'name: test-workflow\nsteps: []';
 
     await createWorkflow(http as unknown as HttpSetup, yaml);
@@ -29,7 +25,7 @@ describe('createWorkflow', () => {
   });
 
   it('returns the response from http.post', async () => {
-    const http = createMockHttp();
+    const http = httpServiceMock.createStartContract();
     const mockResponse = { id: 'wf-123', name: 'test' };
     http.post.mockResolvedValue(mockResponse);
 
@@ -38,7 +34,7 @@ describe('createWorkflow', () => {
   });
 
   it('propagates errors from http.post', async () => {
-    const http = createMockHttp();
+    const http = httpServiceMock.createStartContract();
     const error = new Error('Network error');
     http.post.mockRejectedValue(error);
 
@@ -50,7 +46,7 @@ describe('createWorkflow', () => {
 
 describe('updateWorkflow', () => {
   it('calls http.put with the correct path including workflow id', async () => {
-    const http = createMockHttp();
+    const http = httpServiceMock.createStartContract();
     const id = 'wf-42';
     const yaml = 'name: updated-workflow';
 
@@ -63,7 +59,7 @@ describe('updateWorkflow', () => {
   });
 
   it('uses the id in the URL path', async () => {
-    const http = createMockHttp();
+    const http = httpServiceMock.createStartContract();
 
     await updateWorkflow(http as unknown as HttpSetup, 'my-special-id', 'yaml: content');
 
@@ -74,7 +70,7 @@ describe('updateWorkflow', () => {
   });
 
   it('propagates errors from http.put', async () => {
-    const http = createMockHttp();
+    const http = httpServiceMock.createStartContract();
     const error = new Error('Forbidden');
     http.put.mockRejectedValue(error);
 
@@ -84,12 +80,13 @@ describe('updateWorkflow', () => {
   });
 
   it('serializes the yaml in the request body', async () => {
-    const http = createMockHttp();
+    const http = httpServiceMock.createStartContract();
     const yaml = 'name: my-workflow\nsteps:\n  - type: .slack.postMessage';
 
     await updateWorkflow(http as unknown as HttpSetup, 'id-1', yaml);
 
-    const callBody = http.put.mock.calls[0][1]?.body as string;
+    const callBody = (http.put.mock.calls[0] as unknown as [string, { body: string }])[1]
+      ?.body as string;
     expect(JSON.parse(callBody)).toEqual({ yaml });
   });
 });

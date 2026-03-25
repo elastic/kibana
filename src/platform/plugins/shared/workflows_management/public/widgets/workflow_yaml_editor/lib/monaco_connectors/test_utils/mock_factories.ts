@@ -79,7 +79,7 @@ export const createMockHoverContext = (
   stepContext,
   yamlPath: ['steps', '0', 'type'],
   currentValue: connectorType,
-  position: { lineNumber: 1, column: 1 } satisfies HoverContext['position'],
+  position: { lineNumber: 1, column: 1 } as HoverContext['position'],
   model: { id: 'mock-model' } as HoverContext['model'],
   yamlDocument: YAML.parseDocument(`name: test\nsteps:\n  - name: s\n    type: ${connectorType}`),
   ...overrides,

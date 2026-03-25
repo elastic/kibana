@@ -182,7 +182,7 @@ describe('schema - additional coverage', () => {
       };
 
       const contracts = convertDynamicConnectorsToContracts(types);
-      expect(contracts[0].instances).toBe(instances);
+      expect(contracts[0]).toHaveProperty('instances', instances);
     });
   });
 

@@ -101,13 +101,6 @@ const buildMockState = (overrides: Record<string, unknown> = {}) => ({
   },
 });
 
-// Create a selector-based state mock
-const createSelectorMock = (state: ReturnType<typeof buildMockState>) => {
-  return (selector: Function) => {
-    return selector(state);
-  };
-};
-
 describe('WorkflowDetailTestStepModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();

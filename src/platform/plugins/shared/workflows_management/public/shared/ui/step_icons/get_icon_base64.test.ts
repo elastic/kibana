@@ -122,7 +122,7 @@ describe('resolveIconToDataUrl', () => {
     const svgMarkup = '<svg><rect/></svg>';
     renderToStaticMarkup.mockReturnValue(svgMarkup);
 
-    const IconComponent: React.FC<{ width: number; height: number }> = () => null;
+    const IconComponent: React.FC = () => null;
     const result = await resolveIconToDataUrl(IconComponent, FALLBACK_URL);
 
     expect(result).toBe(`data:image/svg+xml;base64,${btoa(svgMarkup)}`);
