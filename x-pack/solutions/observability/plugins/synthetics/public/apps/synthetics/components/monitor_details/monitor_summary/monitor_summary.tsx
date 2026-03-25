@@ -16,8 +16,10 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useParams } from 'react-router-dom';
 import { LoadWhenInView } from '@kbn/observability-shared-plugin/public';
 import { MonitorMWsCallout } from '../../common/mws_callout/monitor_mws_callout';
+import { MissingIntegrationCallout } from '../../monitor_add_edit/steps/missing_integration_callout';
 import { SummaryPanel } from './summary_panel';
 
 import { useMonitorDetailsPage } from '../use_monitor_details_page';
@@ -33,6 +35,7 @@ import { MonitorPendingWrapper } from '../monitor_pending_wrapper';
 import { useMonitorAttachmentConfig } from '../hooks/use_monitor_attachment_config';
 
 export const MonitorSummary = () => {
+  const { monitorId: configId } = useParams<{ monitorId: string }>();
   const { from, to } = useMonitorRangeFrom();
 
   const dateLabel = from === 'now-30d/d' ? LAST_30_DAYS_LABEL : TO_DATE_LABEL;
@@ -47,6 +50,8 @@ export const MonitorSummary = () => {
   }
 
   return (
+    <>
+      <MissingIntegrationCallout configId={configId} />
     <MonitorPendingWrapper>
       <MonitorMWsCallout />
       <SummaryPanel dateLabel={dateLabel} from={from} to={to} />
@@ -96,6 +101,7 @@ export const MonitorSummary = () => {
         <TestRunsTable paginable={false} from={from} to={to} />
       </LoadWhenInView>
     </MonitorPendingWrapper>
+    </>
   );
 };
 
