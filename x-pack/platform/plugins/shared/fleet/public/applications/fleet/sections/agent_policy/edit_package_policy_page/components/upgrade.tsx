@@ -136,7 +136,7 @@ const ReadyToUpgradeCallOut = ({
         defaultMessage: 'Ready to upgrade',
       })}
       color="success"
-      iconType="checkInCircleFilled"
+      iconType="checkCircleFill"
     >
       <FormattedMessage
         id="xpack.fleet.upgradePackagePolicy.statusCallout.successContent"
