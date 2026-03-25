@@ -893,6 +893,12 @@ describe('RulesListPage', () => {
         '(metadata.labels: "my \\"special\\" tag")'
       );
     });
+
+    it('escapes backslashes in tag values before escaping double quotes', () => {
+      expect(buildRulesListFilter({ tags: ['test\\'] })).toBe(
+        '(metadata.labels: "test\\\\")'
+      );
+    });
   });
 
   describe('bulk actions menu', () => {
