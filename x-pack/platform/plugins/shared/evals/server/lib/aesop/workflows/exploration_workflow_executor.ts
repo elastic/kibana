@@ -1049,7 +1049,7 @@ If no improvements are warranted, return an empty array: []`;
             skillId: `skill-improve-${patternId}`,
             name: String(item.name || `Improved: ${baseSkill.name}`),
             description: String(item.description || ''),
-            confidence: item.confidence != null ? Math.max(0, Math.min(1, Number(item.confidence))) : 0.7,
+            confidence: item.confidence != null && !isNaN(Number(item.confidence)) ? Math.max(0, Math.min(1, Number(item.confidence))) : 0.7,
             markdown: String(item.markdown || ''),
             sourceIndices: this.schemas.map((s) => s.indexName),
             derivedFrom: 'skill_improvement' as const,

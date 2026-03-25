@@ -57,7 +57,10 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
             id: skillId,
           });
 
-          const skill = skillDoc._source as ProposedSkillDocument;
+          const skill = skillDoc._source as ProposedSkillDocument | undefined;
+          if (!skill) {
+            return response.notFound({ body: { message: `Skill ${skillId} not found or source unavailable` } });
+          }
 
           logger.info('[AESOP] Starting LLM-based skill validation', {
             skill_id: skillId,
@@ -493,7 +496,10 @@ async function runLLMValidationAndGetScore({
     index: '.aesop-proposed-skills',
     id: skillId,
   });
-  const currentSkill = skillDoc._source as ProposedSkillDocument;
+  const currentSkill = skillDoc._source as ProposedSkillDocument | undefined;
+  if (!currentSkill) {
+    throw new Error(`Skill ${skillId} source unavailable`);
+  }
 
   const systemPrompt =
     'You are an expert skill evaluator for a security operations platform. ' +
@@ -585,7 +591,10 @@ async function runLLMImprovement({
     index: '.aesop-proposed-skills',
     id: skillId,
   });
-  const skill = skillDoc._source as ProposedSkillDocument;
+  const skill = skillDoc._source as ProposedSkillDocument | undefined;
+  if (!skill) {
+    throw new Error(`Skill ${skillId} source unavailable`);
+  }
 
   if (!skill.validation?.llm_feedback) {
     logger.warn('[AESOP] No validation feedback available for improvement, skipping', {

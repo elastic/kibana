@@ -75,7 +75,10 @@ export function registerRedeploySkillRoute({ router, logger }: AESOPRouteDepende
             id: skillId,
           });
 
-          const skill = skillDoc._source as ProposedSkillDocument;
+          const skill = skillDoc._source as ProposedSkillDocument | undefined;
+          if (!skill) {
+            return response.notFound({ body: { message: `Skill ${skillId} not found or source unavailable` } });
+          }
           const agentBuilderSkillId = skill.deployment?.agent_builder_skill_id || `aesop-${skillId}`;
           const toolIds = inferTools(skill.markdown || '').slice(0, MAX_TOOLS);
 

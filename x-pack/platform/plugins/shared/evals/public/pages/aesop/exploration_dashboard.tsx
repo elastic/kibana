@@ -218,7 +218,7 @@ export const ExplorationDashboard = () => {
                 title={activeExplorations.length}
                 description="Active Explorations"
                 titleColor="primary"
-                isLoading={activeExplorations.length > 0}
+                isLoading={isLoading}
               />
             </EuiPanel>
           </EuiFlexItem>

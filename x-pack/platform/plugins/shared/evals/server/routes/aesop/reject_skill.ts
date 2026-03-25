@@ -98,13 +98,20 @@ export function registerRejectSkillRoute({ router, logger }: AESOPRouteDependenc
               id: skillId,
             });
           } catch (error) {
-            if (getErrorMessage(error).includes('not found')) {
+            if (
+              getErrorMessage(error).toLowerCase().includes('not_found') ||
+              getErrorMessage(error).includes('document_missing_exception') ||
+              (error as any)?.meta?.statusCode === 404
+            ) {
               throw new SkillNotFoundError(skillId);
             }
             throw error;
           }
 
-          const skill = skillDoc._source as ProposedSkillDocument;
+          const skill = skillDoc._source as ProposedSkillDocument | undefined;
+          if (!skill) {
+            return response.notFound({ body: { message: `Skill ${skillId} not found or source unavailable` } });
+          }
 
           // 2. Validate skill is not already deployed
           if (skill.deployment?.deployed) {
