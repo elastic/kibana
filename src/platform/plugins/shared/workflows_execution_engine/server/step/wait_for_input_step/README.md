@@ -15,7 +15,8 @@ steps:
 ## Configuration
 
 - **`type`**: Must be `"waitForInput"`
-- **`with.message`**: Message displayed to the human reviewer (required)
+- **`with.message`**: Message displayed to the human reviewer (optional)
+- **`with.schema`**: JSON Schema describing the expected input payload (optional). When provided, the resume UI renders validation and autocomplete from the schema, and default values are pre-filled
 
 ## Execution Flow
 
@@ -67,24 +68,32 @@ steps:
         approvedBy: "{{ steps.request-approval.output.approvedBy }}"
 ```
 
-### Collect structured data
+### Typed input with schema
 
 ```yaml
 steps:
-  - name: get-ticket-number
+  - name: get-ticket-info
     type: waitForInput
     with:
-      message: "Enter the incident ticket number to attach to this action"
+      message: "Provide ticket details"
+      schema:
+        properties:
+          ticketNumber:
+            type: string
+          severity:
+            type: string
+            enum: [low, medium, high]
+            default: medium
+        required:
+          - ticketNumber
 
   - name: log-ticket
     type: console
     with:
-      message: "Ticket: {{ steps.get-ticket-number.output.ticketNumber }}"
+      message: "Ticket: {{ steps.get-ticket-info.output.ticketNumber }} ({{ steps.get-ticket-info.output.severity }})"
 ```
 
 ## Implementation Details
-
-**Status detection:** `tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_INPUT)` — returns `true` on first call (enter wait), `false` on resume call (exit wait).
 
 **Resume input:** Stored in `workflowExecution.context.resumeInput` by the resume API handler and cleared by the step after reading it, so subsequent `waitForInput` steps are not auto-completed.
 

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import React from 'react';
 import { render } from '@testing-library/react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { TestProviders } from '../../../common/mock';
 import {
   SUMMARY_ROW_TEXT_TEST_ID,
   SUMMARY_ROW_VALUE_TEST_ID,
-} from '../../../flyout/document_details/right/components/test_ids';
-import { PREVALENCE_TEST_ID } from './test_ids';
-import React from 'react';
+  PREVALENCE_TEST_ID,
+} from './test_ids';
 import { PrevalenceOverview } from './prevalence_overview';
 import {
   EXPANDABLE_PANEL_HEADER_RIGHT_SECTION_TEST_ID,

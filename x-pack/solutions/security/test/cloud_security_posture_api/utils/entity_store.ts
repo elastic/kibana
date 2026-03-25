@@ -8,7 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
-import type SuperTest from 'supertest';
+import type { Agent } from 'supertest';
 import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { CLOUD_ASSET_DISCOVERY_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 
@@ -16,7 +16,7 @@ export interface EntityStoreHelpersDeps {
   es: Client;
   logger: ToolingLog;
   retry: RetryService;
-  supertest: SuperTest.Agent;
+  supertest: Pick<Agent, 'get' | 'post' | 'delete'>;
 }
 
 /**
