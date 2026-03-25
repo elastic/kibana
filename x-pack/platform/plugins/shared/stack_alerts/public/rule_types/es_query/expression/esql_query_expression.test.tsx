@@ -38,7 +38,6 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
   const module = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
     ...module,
-    getFields: jest.fn().mockResolvedValue([]),
   };
 });
 
@@ -60,16 +59,18 @@ jest.mock('@kbn/esql-utils', () => {
     getESQLResults: jest.fn().mockResolvedValue({}),
     getIndexPattern: jest.fn(),
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
-    getESQLAdHocDataview: jest
-      .fn()
-      .mockResolvedValue({ timeFieldName: '@timestamp', getIndexPattern: jest.fn() }),
+    getESQLAdHocDataview: jest.fn().mockResolvedValue({
+      timeFieldName: '@timestamp',
+      getIndexPattern: jest.fn().mockReturnValue('*'),
+    }),
     formatESQLColumns: jest.fn().mockReturnValue([]),
     getProjectRoutingFromEsqlQuery: jest.fn().mockReturnValue(undefined),
   };
 });
 
-const { getFields } = jest.requireMock('@kbn/triggers-actions-ui-plugin/public');
-const { getProjectRoutingFromEsqlQuery } = jest.requireMock('@kbn/esql-utils');
+const esqlUtilsMock = jest.requireMock('@kbn/esql-utils');
+const triggersActionsCommonMock = jest.requireMock('@kbn/triggers-actions-ui-plugin/public/common');
+const { getProjectRoutingFromEsqlQuery } = esqlUtilsMock;
 
 const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
   <I18nProvider>{children}</I18nProvider>
@@ -77,6 +78,12 @@ const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
 
 const dataMock = dataPluginMock.createStartContract();
 const dataViewMock = dataViewPluginMocks.createStartContract();
+
+const defaultFieldSpecs = [
+  { name: '@timestamp', type: 'date', searchable: true, aggregatable: true, isMapped: true },
+  { name: 'event.ingested', type: 'date', searchable: true, aggregatable: true, isMapped: true },
+];
+
 const unifiedSearchMock = unifiedSearchPluginMock.createStartContract();
 const chartsStartMock = chartPluginMock.createStartContract();
 
@@ -103,6 +110,20 @@ describe('EsqlQueryRuleTypeExpression', () => {
 
     hasExpressionValidationErrors.mockReturnValue(false);
     global.Date.now = jest.fn(() => fakeNow.getTime());
+
+    esqlUtilsMock.getESQLResults.mockResolvedValue({});
+    esqlUtilsMock.getESQLAdHocDataview.mockResolvedValue({
+      timeFieldName: '@timestamp',
+      getIndexPattern: jest.fn().mockReturnValue('*'),
+    });
+    esqlUtilsMock.getProjectRoutingFromEsqlQuery.mockReturnValue(undefined);
+
+    triggersActionsCommonMock.getTimeFieldOptions.mockReturnValue([
+      { value: '@timestamp', text: '@timestamp' },
+      { value: 'event.ingested', text: 'event.ingested' },
+    ]);
+
+    dataViewMock.getFieldsForWildcard = jest.fn().mockResolvedValue(defaultFieldSpecs);
   });
 
   test('should render EsqlQueryRuleTypeExpression with chosen time field', async () => {
@@ -138,7 +159,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
     expect(timeFieldText).toBeInTheDocument();
   });
 
-  test('should pass projectRouting to getFields when query contains SET project_routing', async () => {
+  test('should pass projectRouting to getFieldsForWildcard when query contains SET project_routing', async () => {
     const mockProjectRouting = '_alias:my-project-id';
     getProjectRoutingFromEsqlQuery.mockReturnValue(mockProjectRouting);
 
@@ -171,11 +192,17 @@ describe('EsqlQueryRuleTypeExpression', () => {
       );
     });
 
-    await waitFor(() => expect(getFields).toHaveBeenCalled());
-    expect(getFields.mock.calls[0][2]).toBe(mockProjectRouting);
+    await waitFor(() => expect(dataViewMock.getFieldsForWildcard).toHaveBeenCalled());
+    expect(dataViewMock.getFieldsForWildcard).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pattern: '*',
+        allowNoIndex: true,
+        projectRouting: mockProjectRouting,
+      })
+    );
   });
 
-  test('should pass undefined projectRouting to getFields when query has no SET project_routing', async () => {
+  test('should pass undefined projectRouting to getFieldsForWildcard when query has no SET project_routing', async () => {
     getProjectRoutingFromEsqlQuery.mockReturnValue(undefined);
 
     await act(async () => {
@@ -205,8 +232,14 @@ describe('EsqlQueryRuleTypeExpression', () => {
       );
     });
 
-    await waitFor(() => expect(getFields).toHaveBeenCalled());
-    expect(getFields.mock.calls[0][2]).toBeUndefined();
+    await waitFor(() => expect(dataViewMock.getFieldsForWildcard).toHaveBeenCalled());
+    expect(dataViewMock.getFieldsForWildcard).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pattern: '*',
+        allowNoIndex: true,
+        projectRouting: undefined,
+      })
+    );
   });
 
   it('should render EsqlQueryRuleTypeExpression with expected components', () => {
@@ -271,7 +304,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
   });
 
   test('should show success message if Test Query is successful', async () => {
-    const { getESQLResults } = jest.requireMock('@kbn/esql-utils');
+    const { getESQLResults } = esqlUtilsMock;
 
     getESQLResults.mockResolvedValue({
       response: {
@@ -284,8 +317,6 @@ describe('EsqlQueryRuleTypeExpression', () => {
         values: [['2023-07-12T13:32:04.174Z', '1.8.0', null]],
       },
     });
-    getFields.mockResolvedValue([]);
-
     render(
       <EsqlQueryExpression
         unifiedSearch={unifiedSearchMock}
@@ -317,7 +348,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
   });
 
   test('should show grouped success message if Test Query is successful', async () => {
-    const { getESQLResults } = jest.requireMock('@kbn/esql-utils');
+    const { getESQLResults } = esqlUtilsMock;
 
     getESQLResults.mockResolvedValue({
       response: {
@@ -330,8 +361,6 @@ describe('EsqlQueryRuleTypeExpression', () => {
         values: [['2023-07-12T13:32:04.174Z', '1.8.0', null]],
       },
     });
-    getFields.mockResolvedValue([]);
-
     render(
       <EsqlQueryExpression
         unifiedSearch={unifiedSearchMock}
@@ -363,7 +392,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
   });
 
   test('should show error message if Test Query is throws error', async () => {
-    const { getESQLResults } = jest.requireMock('@kbn/esql-utils');
+    const { getESQLResults } = esqlUtilsMock;
 
     getESQLResults.mockRejectedValue('Error getting test results.!');
 

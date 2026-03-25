@@ -43,26 +43,6 @@ describe('Data API', () => {
       });
       expect(fields).toEqual(mockFields.fields);
     });
-
-    test('fetches index fields with projectRouting', async () => {
-      http.post.mockResolvedValueOnce(mockFields);
-      const projectRouting = '_alias:my-project-id';
-      const fields = await getESIndexFields({ indexes, http, projectRouting });
-
-      expect(http.post).toHaveBeenCalledWith('/internal/triggers_actions_ui/data/_fields', {
-        body: JSON.stringify({ indexPatterns: indexes, projectRouting }),
-      });
-      expect(fields).toEqual(mockFields.fields);
-    });
-
-    test('omits projectRouting from body when undefined', async () => {
-      http.post.mockResolvedValueOnce(mockFields);
-      await getESIndexFields({ indexes, http, projectRouting: undefined });
-
-      expect(http.post).toHaveBeenCalledWith('/internal/triggers_actions_ui/data/_fields', {
-        body: `{"indexPatterns":${JSON.stringify(indexes)}}`,
-      });
-    });
   });
 
   describe('matching indices', () => {

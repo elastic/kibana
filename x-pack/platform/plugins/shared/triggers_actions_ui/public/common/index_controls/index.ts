@@ -67,8 +67,8 @@ export const getIndexOptions = async (http: HttpSetup, pattern: string) => {
   return options;
 };
 
-export const getFields = async (http: HttpSetup, indexes: string[], projectRouting?: string) => {
-  return await getESIndexFields({ indexes, http, projectRouting });
+export const getFields = async (http: HttpSetup, indexes: string[]) => {
+  return await getESIndexFields({ indexes, http });
 };
 
 export const firstFieldOption = {

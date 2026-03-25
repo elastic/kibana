@@ -20,7 +20,6 @@ import { NORMALIZED_FIELD_TYPES } from '../../../common';
 
 const bodySchema = schema.object({
   indexPatterns: schema.arrayOf(schema.string()),
-  projectRouting: schema.maybe(schema.string()),
 });
 
 type RequestBody = TypeOf<typeof bodySchema>;
@@ -64,7 +63,7 @@ export function createFieldsRoute(logger: Logger, router: IRouter, baseRoute: st
 
     try {
       const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
-      rawFields = await getRawFields(esClient, req.body.indexPatterns, req.body.projectRouting);
+      rawFields = await getRawFields(esClient, req.body.indexPatterns);
     } catch (err) {
       const indexPatterns = req.body.indexPatterns.join(',');
       logger.warn(
@@ -105,17 +104,12 @@ interface Field {
   aggregatable: boolean;
 }
 
-async function getRawFields(
-  esClient: ElasticsearchClient,
-  indexes: string[],
-  projectRouting?: string
-): Promise<RawFields> {
+async function getRawFields(esClient: ElasticsearchClient, indexes: string[]): Promise<RawFields> {
   const params = {
     index: indexes,
     fields: ['*'],
     ignore_unavailable: true,
     allow_no_indices: true,
-    ...(projectRouting ? { project_routing: projectRouting } : {}),
   };
   const result = await esClient.fieldCaps(params);
   return result as RawFields;

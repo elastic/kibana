@@ -46,20 +46,13 @@ export async function getMatchingIndices({
 export async function getESIndexFields({
   indexes,
   http,
-  projectRouting,
 }: {
   indexes: string[];
   http: HttpSetup;
-  projectRouting?: string;
 }): Promise<FieldOption[]> {
   const { fields } = await http.post<{ fields: ReturnType<typeof getESIndexFields> }>(
     `${DATA_API_ROOT}/_fields`,
-    {
-      body: JSON.stringify({
-        indexPatterns: indexes,
-        ...(projectRouting ? { projectRouting } : {}),
-      }),
-    }
+    { body: JSON.stringify({ indexPatterns: indexes }) }
   );
   return fields;
 }
