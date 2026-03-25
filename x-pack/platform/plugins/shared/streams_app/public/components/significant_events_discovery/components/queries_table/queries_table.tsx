@@ -111,6 +111,10 @@ export function QueriesTable() {
   }>({ ...DEFAULT_PAGINATION });
 
   const [selectedQuery, setSelectedQuery] = useState<SignificantEventQueryRow | null>(null);
+
+  const handleSelectQuery = useCallback((item: SignificantEventQueryRow) => {
+    setSelectedQuery((prev) => (prev?.query.id === item.query.id ? null : item));
+  }, []);
   const {
     data: queriesData,
     isLoading: queriesLoading,
@@ -217,25 +221,30 @@ export function QueriesTable() {
         field: 'details',
         name: '',
         width: '40px',
-        render: (_: unknown, item: SignificantEventQueryRow) => (
-          <EuiButtonIcon
-            data-test-subj="queriesDiscoveryDetailsButton"
-            iconType="expand"
-            aria-label={DETAILS_BUTTON_ARIA_LABEL}
-            onClick={() => setSelectedQuery(item)}
-          />
-        ),
+        render: (_: unknown, item: SignificantEventQueryRow) => {
+          const isSelected = selectedQuery?.query.id === item.query.id;
+          return (
+            <EuiButtonIcon
+              data-test-subj="queriesDiscoveryDetailsButton"
+              iconType={isSelected ? 'minimize' : 'expand'}
+              aria-label={DETAILS_BUTTON_ARIA_LABEL}
+              onClick={() => handleSelectQuery(item)}
+            />
+          );
+        },
       },
       {
         field: 'query.title',
         name: TITLE_COLUMN,
+        truncateText: true,
         render: (_: unknown, item: SignificantEventQueryRow) => (
-          <EuiLink onClick={() => {}}>{item.query.title}</EuiLink>
+          <EuiLink onClick={() => handleSelectQuery(item)}>{item.query.title}</EuiLink>
         ),
       },
       {
         field: 'query.severity_score',
         name: IMPACT_COLUMN,
+        width: '100px',
         render: (_: unknown, item: SignificantEventQueryRow) => {
           return <SeverityBadge score={item.query.severity_score} />;
         },
@@ -243,6 +252,7 @@ export function QueriesTable() {
       {
         field: 'occurrences',
         name: LAST_OCCURRED_COLUMN,
+        width: '240px',
         render: (_: unknown, item: SignificantEventQueryRow) => {
           return <EuiText size="s">{formatLastOccurredAt(item.occurrences)}</EuiText>;
         },
@@ -270,6 +280,7 @@ export function QueriesTable() {
       {
         field: 'stream_name',
         name: STREAM_COLUMN,
+        width: '130px',
         render: (_: unknown, item: SignificantEventQueryRow) => (
           <EuiBadge color="hollow">{item.stream_name}</EuiBadge>
         ),
@@ -277,6 +288,7 @@ export function QueriesTable() {
       {
         field: 'rule_backed',
         name: BACKED_STATUS_COLUMN,
+        width: '120px',
         render: (_: unknown, item: SignificantEventQueryRow) => {
           return (
             <EuiToolTip
@@ -294,6 +306,7 @@ export function QueriesTable() {
       },
       {
         name: ACTIONS_COLUMN_TITLE,
+        width: '100px',
         actions: [
           {
             name: OPEN_IN_DISCOVER_ACTION_TITLE,
@@ -329,7 +342,7 @@ export function QueriesTable() {
         ],
       },
     ];
-  }, [share.url.locators, streamsData, timeState]);
+  }, [share.url.locators, streamsData, timeState, selectedQuery, handleSelectQuery]);
 
   const isLoading = queriesLoading || streamsLoading;
   if (isLoading) {
@@ -434,6 +447,9 @@ export function QueriesTable() {
           columns={columns}
           itemId={(item) => item.query.id}
           items={tableItems}
+          rowProps={(item: SignificantEventQueryRow) => ({
+            isSelected: selectedQuery?.query.id === item.query.id,
+          })}
           loading={queriesLoading || streamsLoading}
           noItemsMessage={!queriesLoading && !streamsLoading ? NO_ITEMS_MESSAGE : ''}
           pagination={{
