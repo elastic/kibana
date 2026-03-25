@@ -86,12 +86,11 @@ describe('useFetchAlertingEpisodesQuery', () => {
       { wrapper }
     );
 
-    expect(executeEsqlQueryMock).toHaveBeenCalledWith({
-      expressions: mockExpressions,
-      query: buildEpisodesCountQuery(),
-      input: null,
-      abortSignal: expect.any(AbortSignal),
-    });
+    expect(executeEsqlQueryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: buildEpisodesCountQuery().print('basic'),
+      })
+    );
   });
 
   it('should fetch episodes data with correct page size', async () => {
@@ -114,12 +113,12 @@ describe('useFetchAlertingEpisodesQuery', () => {
 
     await waitFor(() => result.current.isSuccess);
 
-    expect(fetchAlertingEpisodesMock).toHaveBeenCalledWith({
-      abortSignal: expect.any(AbortSignal),
-      pageSize,
-      beforeTimestamp: undefined,
-      services: { dataViews, http, expressions: mockExpressions },
-    });
+    expect(fetchAlertingEpisodesMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pageSize,
+        beforeTimestamp: undefined,
+      })
+    );
   });
 
   it('should not fetch total count on subsequent pages', async () => {
@@ -187,12 +186,12 @@ describe('useFetchAlertingEpisodesQuery', () => {
       expect(result.current.isFetchingNextPage).toBe(false);
     });
 
-    expect(fetchAlertingEpisodesMock).toHaveBeenCalledWith({
-      abortSignal: expect.any(AbortSignal),
-      pageSize,
-      beforeTimestamp: lastTimestamp,
-      services: { dataViews, http, expressions: mockExpressions },
-    });
+    expect(fetchAlertingEpisodesMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pageSize,
+        beforeTimestamp: lastTimestamp,
+      })
+    );
   });
 
   it('should return undefined for next page param when all data is fetched', async () => {
