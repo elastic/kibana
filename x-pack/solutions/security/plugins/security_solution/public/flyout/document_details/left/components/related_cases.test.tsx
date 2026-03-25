@@ -12,7 +12,7 @@ import {
   CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID,
 } from './test_ids';
 import { RelatedCases } from './related_cases';
-import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
+import { useFetchRelatedCases } from '../../../../flyout_v2/document/hooks/use_fetch_related_cases';
 import {
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
@@ -22,7 +22,7 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 import { TestProviders } from '../../../../common/mock';
 import { APP_UI_ID } from '../../../../../common';
 
-jest.mock('../../shared/hooks/use_fetch_related_cases');
+jest.mock('../../../../flyout_v2/document/hooks/use_fetch_related_cases');
 
 const mockNavigateToApp = jest.fn();
 jest.mock('../../../../common/lib/kibana', () => {

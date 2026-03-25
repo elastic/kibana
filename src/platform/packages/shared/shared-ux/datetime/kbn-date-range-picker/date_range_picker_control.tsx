@@ -22,6 +22,7 @@ import {
 
 import { FOCUSABLE_SELECTOR } from './constants';
 import { resolveInitialFocus } from './utils';
+import { DateRangePickerAutoRefreshButton } from './date_range_picker_auto_refresh_button';
 import { useDateRangePickerContext } from './date_range_picker_context';
 import { useSelectTextPartsWithArrowKeys } from './hooks/use_select_text_parts_with_arrow_keys';
 import { useInputHintText } from './hooks/use_input_hint_text';
@@ -52,6 +53,10 @@ export function DateRangePickerControl() {
     width,
     disabled,
     isLoading,
+    settings,
+    hasAutoRefresh,
+    autoRefreshSecondsRemaining,
+    toggleAutoRefresh,
   } = useDateRangePickerContext();
   const { euiTheme } = useEuiTheme();
   const hintText = useInputHintText(text);
@@ -165,6 +170,17 @@ export function DateRangePickerControl() {
         isLoading={isLoading}
         fullWidth={width !== 'auto'}
         clear={isEditing && text !== '' ? { onClick: onInputClear } : undefined}
+        append={
+          hasAutoRefresh && settings.autoRefresh?.isEnabled ? (
+            <DateRangePickerAutoRefreshButton
+              isPaused={settings.autoRefresh.isPaused}
+              interval={settings.autoRefresh.interval}
+              secondsRemaining={autoRefreshSecondsRemaining}
+              onClick={toggleAutoRefresh}
+              disabled={disabled}
+            />
+          ) : undefined
+        }
       >
         {isEditing ? (
           <EuiFieldText

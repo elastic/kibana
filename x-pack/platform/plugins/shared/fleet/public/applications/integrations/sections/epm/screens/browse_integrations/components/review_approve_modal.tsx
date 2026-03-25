@@ -34,9 +34,14 @@ import type { EuiBasicTableColumn, EuiComboBoxOptionOption } from '@elastic/eui'
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverValid from 'semver/functions/valid';
-import type { DataStreamResponse } from '@kbn/automatic-import-v2-plugin/common';
 
-import { useGetCategoriesQuery } from '../../../../../hooks';
+import { useGetCategoriesQuery, useStartServices } from '../../../../../hooks';
+
+import type {
+  AIV2Telemetry,
+  DataStreamResponse,
+  DataStreamResultsFlyoutComponent,
+} from './manage_integrations_table';
 
 type ReviewDataStream = DataStreamResponse;
 
@@ -84,6 +89,10 @@ const DataCollectionMethodsCell: React.FC<{
       {hiddenCount > 0 && (
         <EuiFlexItem grow={false}>
           <EuiPopover
+            aria-label={i18n.translate(
+              'xpack.fleet.epmList.manageIntegrations.actions.reviewCollectionMethodsExpandAriaLabel',
+              { defaultMessage: 'Show all data collection methods' }
+            )}
             anchorPosition="downLeft"
             button={
               <EuiBadge
@@ -134,11 +143,7 @@ export const ReviewApproveModal: React.FC<{
     version: string,
     categories: string[]
   ) => Promise<void>;
-  DataStreamResultsFlyoutComponent?: React.ComponentType<{
-    integrationId: string;
-    dataStream: ReviewDataStream;
-    onClose: () => void;
-  }>;
+  DataStreamResultsFlyoutComponent?: DataStreamResultsFlyoutComponent;
 }> = ({
   isOpen,
   integrationId,
@@ -148,6 +153,7 @@ export const ReviewApproveModal: React.FC<{
   onApproveAndDeploy,
   DataStreamResultsFlyoutComponent,
 }) => {
+  const { automaticImportVTwo } = useStartServices();
   const [isLoadingReviewDetails, setIsLoadingReviewDetails] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
   const [reviewError, setReviewError] = useState<string | null>(null);
@@ -210,6 +216,14 @@ export const ReviewApproveModal: React.FC<{
     onClose();
   }, [isApproving, onClose]);
 
+  const handleCancelClick = useCallback(() => {
+    (automaticImportVTwo?.telemetry as AIV2Telemetry)?.reportEvent(
+      'aiv2_approve_modal_cancel_clicked',
+      {}
+    );
+    closeModal();
+  }, [automaticImportVTwo, closeModal]);
+
   const normalizedVersion = reviewVersion.trim();
   const isVersionValid = Boolean(semverValid(normalizedVersion));
   const isVersionInputInvalid = isVersionTouched && !isVersionValid;
@@ -236,6 +250,10 @@ export const ReviewApproveModal: React.FC<{
       return;
     }
 
+    (automaticImportVTwo?.telemetry as AIV2Telemetry)?.reportEvent(
+      'aiv2_approve_modal_approve_clicked',
+      {}
+    );
     setIsApproving(true);
     setReviewError(null);
     try {
@@ -253,7 +271,14 @@ export const ReviewApproveModal: React.FC<{
     } finally {
       setIsApproving(false);
     }
-  }, [integrationId, onApproveAndDeploy, onClose, reviewVersion, selectedCategories]);
+  }, [
+    automaticImportVTwo,
+    integrationId,
+    onApproveAndDeploy,
+    onClose,
+    reviewVersion,
+    selectedCategories,
+  ]);
 
   const tableRows: ReviewTableRow[] = (reviewDetails?.dataStreams ?? []).map((dataStream) => ({
     id: dataStream.dataStreamId,
@@ -307,6 +332,7 @@ export const ReviewApproveModal: React.FC<{
     return (
       <DataStreamResultsFlyoutComponent
         integrationId={integrationId}
+        integrationName={reviewDetails?.title ?? ''}
         dataStream={selectedDataStreamForFlyout}
         onClose={() => setSelectedDataStreamForFlyout(null)}
       />
@@ -426,7 +452,10 @@ export const ReviewApproveModal: React.FC<{
         )}
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={closeModal} data-test-subj="manageIntegrationReviewModalCancel">
+        <EuiButtonEmpty
+          onClick={handleCancelClick}
+          data-test-subj="manageIntegrationReviewModalCancel"
+        >
           <FormattedMessage
             id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalCancel"
             defaultMessage="Cancel"

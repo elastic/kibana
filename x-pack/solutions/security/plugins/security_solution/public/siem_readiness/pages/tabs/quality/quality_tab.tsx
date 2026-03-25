@@ -316,7 +316,7 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
                 size="xs"
                 href={dataQualityUrl}
                 target="_blank"
-                iconType="popout"
+                iconType="external"
                 iconSide="right"
               >
                 {i18n.translate('xpack.securitySolution.siemReadiness.quality.action.view', {
@@ -409,7 +409,7 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
               <EuiButtonEmpty
                 iconSide="right"
                 size="s"
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 onClick={handleCreateCase}
                 data-test-subj="createNewCaseButton"
               >
