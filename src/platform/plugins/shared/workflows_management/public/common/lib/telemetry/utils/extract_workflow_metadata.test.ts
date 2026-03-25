@@ -8,7 +8,6 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
-
 import {
   extractStepInfoFromWorkflowYaml,
   extractWorkflowMetadata,
