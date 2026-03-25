@@ -101,6 +101,7 @@ export function FeaturesTable() {
             }
           ),
         });
+        setSelectedFeatures([]);
       } else {
         notifications.toasts.addWarning({
           title: i18n.translate(
@@ -122,6 +123,7 @@ export function FeaturesTable() {
       }
     } catch (error) {
       hideBulkDeleteModal();
+      setSelectedFeatures([]);
       notifications.toasts.addError(error instanceof Error ? error : new Error(String(error)), {
         title: i18n.translate(
           'xpack.streams.significantEventsDiscovery.featuresTable.bulkDeleteUnexpectedError.title',
