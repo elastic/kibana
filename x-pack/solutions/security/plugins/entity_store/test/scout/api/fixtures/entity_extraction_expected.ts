@@ -272,6 +272,20 @@ export const expectedHostEntities = [
       },
     },
   },
+  {
+    _index: '.entities.v2.latest.security_default',
+    _id: '57c90235aa397f0a2acabc5b998be85b',
+    _source: {
+      '@timestamp': '2026-01-20T12:05:23.000Z',
+      host: { id: 'host-nonidp-001' },
+      entity: {
+        name: 'host-nonidp-001',
+        type: 'Host',
+        id: 'host:host-nonidp-001',
+        EngineMetadata: { Type: 'host', UntypedId: 'host-nonidp-001' },
+      },
+    },
+  },
 ];
 
 export const expectedUserEntities = [
@@ -615,6 +629,21 @@ export const expectedUserEntities = [
         type: 'Identity',
         id: 'user:no.module.user@unknown',
         EngineMetadata: { Type: 'user', UntypedId: 'no.module.user@unknown' },
+      },
+    },
+  },
+  {
+    _index: '.entities.v2.latest.security_default',
+    _id: '8b022706c522aff12ed7fc2dfc6e71ba',
+    _source: {
+      '@timestamp': '2026-01-20T12:05:23.000Z',
+      user: { name: 'alice.local' },
+      host: { id: 'host-nonidp-001' },
+      entity: {
+        name: 'alice.local',
+        type: 'Identity',
+        id: 'user:alice.local@host-nonidp-001@local',
+        EngineMetadata: { Type: 'user', UntypedId: 'alice.local@host-nonidp-001@local' },
       },
     },
   },
