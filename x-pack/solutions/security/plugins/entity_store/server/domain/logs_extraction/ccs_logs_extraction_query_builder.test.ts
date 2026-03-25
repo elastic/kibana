@@ -10,7 +10,7 @@ import { getEntityDefinition } from '../../../common/domain/definitions/registry
 import { validateQuery } from '@kbn/esql-language';
 
 describe('buildCcsLogsExtractionEsqlQuery', () => {
-  it('generates query for generic entity type', () => {
+  it('generates query for generic entity type', async () => {
     const query = buildCcsLogsExtractionEsqlQuery({
       indexPatterns: ['remote_cluster:logs-*'],
       entityDefinition: getEntityDefinition('generic', 'default'),
@@ -19,10 +19,10 @@ describe('buildCcsLogsExtractionEsqlQuery', () => {
       docsLimit: 10000,
     });
     expect(query).toMatchSnapshot();
-    expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+    await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 
-  it('generates expected query for host entity type', () => {
+  it('generates expected query for host entity type', async () => {
     const query = buildCcsLogsExtractionEsqlQuery({
       indexPatterns: ['remote:metrics-*'],
       entityDefinition: getEntityDefinition('host', 'default'),
@@ -31,10 +31,10 @@ describe('buildCcsLogsExtractionEsqlQuery', () => {
       docsLimit: 5000,
     });
     expect(query).toMatchSnapshot();
-    expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+    await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 
-  it('generates expected query with pagination', () => {
+  it('generates expected query with pagination', async () => {
     const query = buildCcsLogsExtractionEsqlQuery({
       indexPatterns: ['remote:logs-*'],
       entityDefinition: getEntityDefinition('user', 'default'),
@@ -48,7 +48,7 @@ describe('buildCcsLogsExtractionEsqlQuery', () => {
     });
     expect(query).toContain('FirstSeenLogInPage > TO_DATETIME("2022-01-01T12:00:00.000Z")');
     expect(query).toMatchSnapshot();
-    expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+    await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 
   it('inserts whenConditionTrueSetFieldsAfterStats EVAL after STATS and before KEEP without recent. prefix', () => {
