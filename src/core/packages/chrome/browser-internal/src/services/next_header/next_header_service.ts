@@ -8,17 +8,17 @@
  */
 
 import { ReplaySubject } from 'rxjs';
-import type { ChromeProjectHeaderConfig } from '@kbn/core-chrome-browser';
+import type { ChromeNextHeaderConfig } from '@kbn/core-chrome-browser';
 import { createState } from '../../state/state_helpers';
 
-export class ProjectHeaderService {
+export class NextHeaderService {
   private readonly stop$ = new ReplaySubject<void>(1);
-  private readonly config = createState<ChromeProjectHeaderConfig | undefined>(undefined);
+  private readonly config = createState<ChromeNextHeaderConfig | undefined>(undefined);
 
   public start() {
     return {
       get$: () => this.config.$,
-      set: (value?: ChromeProjectHeaderConfig) => this.config.set(value),
+      set: (value?: ChromeNextHeaderConfig) => this.config.set(value),
       /** @internal Reset to initial state (e.g. on app change). */
       reset: () => this.config.set(undefined),
     };

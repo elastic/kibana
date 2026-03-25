@@ -61,9 +61,9 @@ export type {
 } from './sidebar';
 
 export type {
-  ChromeProjectHeaderConfig,
-  ChromeProjectHeaderMetadataItem,
-  ChromeProjectHeaderGlobalActions,
-  ChromeProjectHeaderTab,
-  ChromeProjectHeaderCallout,
-} from './project_header';
+  ChromeNextHeaderConfig,
+  ChromeNextHeaderMetadataItem,
+  ChromeNextHeaderGlobalActions,
+  ChromeNextHeaderTab,
+  ChromeNextHeaderCallout,
+} from './next_header';

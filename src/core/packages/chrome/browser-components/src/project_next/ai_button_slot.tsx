@@ -7,4 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ProjectHeaderService } from './project_header_service';
+import React from 'react';
+import { useAiButton } from './hooks';
+
+/**
+ * Renders the AI button in the Chrome-Next project header.
+ * The plugin owns the component; Chrome just places it in the slot.
+ */
+export const AiButtonSlot = React.memo(() => {
+  const node = useAiButton();
+
+  if (!node) {
+    return null;
+  }
+
+  return <>{node}</>;
+});

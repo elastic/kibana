@@ -64,6 +64,7 @@ export interface ChromeState {
   globalFooter: State<ReactNode>;
   customNavLink: State<ChromeNavLink | undefined>;
   appMenu: State<AppMenuConfig | undefined>;
+  aiButton: State<ReactNode>;
 
   /** Help system */
   help: {
@@ -107,6 +108,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
 
   // UI Elements (not reset on app change)
   const globalFooter = createState<ReactNode>(null);
+  const aiButton = createState<ReactNode>(undefined);
   const customNavLink = createState<ChromeNavLink | undefined>(undefined);
 
   // Help System
@@ -130,6 +132,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     },
     headerBanner,
     globalFooter,
+    aiButton,
     customNavLink,
     appMenu,
     help: {

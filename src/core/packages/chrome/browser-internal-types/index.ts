@@ -15,7 +15,7 @@ import type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
-  ChromeProjectHeaderConfig,
+  ChromeNextHeaderConfig,
   ChromeProjectNavigationNode,
   ChromeSetProjectBreadcrumbsParams,
   ChromeUserBanner,
@@ -106,13 +106,13 @@ export interface InternalChromeStart extends ChromeStart {
     ): void;
   };
 
-  /** @internal Extends the public projectHeader with `get$` for Chrome layout components. */
-  projectHeader: ChromeStart['projectHeader'] & {
-    /**
-     * Get an observable of the current project header configuration.
-     * Used by Chrome-Next layout components to render the title area,
-     * global actions, and app menu.
-     */
-    get$(): Observable<ChromeProjectHeaderConfig | undefined>;
+  /** @internal Extends public `next` with `get$` for Chrome layout components. */
+  next: ChromeStart['next'] & {
+    header: ChromeStart['next']['header'] & {
+      get$(): Observable<ChromeNextHeaderConfig | undefined>;
+    };
+    aiButton: ChromeStart['next']['aiButton'] & {
+      get$(): Observable<ReactNode | undefined>;
+    };
   };
 }

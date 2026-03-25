@@ -10,11 +10,11 @@
 import type { AppMenuConfigNext } from '@kbn/core-chrome-app-menu-components';
 
 /**
- * Unified configuration for the Chrome-controlled project header.
- * Apps provide structured data via `chrome.projectHeader.set(config)`;
+ * Unified configuration for the Chrome-controlled Chrome-Next header.
+ * Apps provide structured data via `chrome.next.header.set(config)`;
  * Chrome renders title area, global actions, and app menu.
  */
-export interface ChromeProjectHeaderConfig {
+export interface ChromeNextHeaderConfig {
   /**
    * Page title displayed in the Chrome-controlled header.
    * Can be the app name (e.g. "Discover") or a viewed object
@@ -27,7 +27,7 @@ export interface ChromeProjectHeaderConfig {
    * E.g. "Managed", "Read-only", creation date, severity.
    * Limited to a single row; Chrome controls layout.
    */
-  metadata?: ChromeProjectHeaderMetadataItem[];
+  metadata?: ChromeNextHeaderMetadataItem[];
 
   /**
    * Global object actions whose icon, label, and position are fixed by Chrome.
@@ -35,19 +35,19 @@ export interface ChromeProjectHeaderConfig {
    *
    * Rendering order (fixed by Chrome): edit, share, favorite.
    */
-  globalActions?: ChromeProjectHeaderGlobalActions;
+  globalActions?: ChromeNextHeaderGlobalActions;
 
   /**
    * Optional tabs rendered as part of the header.
    * When provided, increases the top bar height dynamically.
    */
-  tabs?: ChromeProjectHeaderTab[];
+  tabs?: ChromeNextHeaderTab[];
 
   /**
    * Optional single callout rendered below the title/tabs area.
    * Only one callout at a time. Chrome controls styling.
    */
-  callout?: ChromeProjectHeaderCallout;
+  callout?: ChromeNextHeaderCallout;
 
   /**
    * App menu (toolbar actions). Items, primary action, secondary action.
@@ -56,7 +56,7 @@ export interface ChromeProjectHeaderConfig {
   appMenu?: AppMenuConfigNext;
 }
 
-export interface ChromeProjectHeaderMetadataItem {
+export interface ChromeNextHeaderMetadataItem {
   label: string;
   type: 'badge' | 'text';
   /** Badge color (EUI badge color). Only used when type is 'badge'. */
@@ -68,7 +68,7 @@ export interface ChromeProjectHeaderMetadataItem {
  * Global actions whose icon, label, and position are fixed by Chrome.
  * Apps provide only the behavioral handlers.
  */
-export interface ChromeProjectHeaderGlobalActions {
+export interface ChromeNextHeaderGlobalActions {
   /** Edit action. Chrome renders a pencil icon next to the title. */
   edit?: {
     onClick: () => void;
@@ -84,7 +84,7 @@ export interface ChromeProjectHeaderGlobalActions {
   };
 }
 
-export interface ChromeProjectHeaderTab {
+export interface ChromeNextHeaderTab {
   id: string;
   label: string;
   isSelected?: boolean;
@@ -93,7 +93,7 @@ export interface ChromeProjectHeaderTab {
   badge?: number;
 }
 
-export interface ChromeProjectHeaderCallout {
+export interface ChromeNextHeaderCallout {
   title: string;
   color: 'primary' | 'warning' | 'danger' | 'success';
   text?: string;

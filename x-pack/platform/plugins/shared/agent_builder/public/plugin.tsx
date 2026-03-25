@@ -289,6 +289,14 @@ export class AgentBuilderPlugin
         // right before the user profile
         order: 1001,
       });
+
+      core.chrome.next.aiButton.set(
+        <AgentBuilderNavControlInitiator
+          coreStart={core}
+          pluginsStart={startDependencies}
+          agentBuilderService={agentBuilderService}
+        />
+      );
     }
 
     return agentBuilderService;

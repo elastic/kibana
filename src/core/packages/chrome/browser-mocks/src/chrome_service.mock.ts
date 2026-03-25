@@ -98,9 +98,15 @@ const createStartContractMock = () => {
       getNavigation$: jest.fn().mockReturnValue(new BehaviorSubject({} as any)),
       getProjectHome$: jest.fn().mockReturnValue(of('/')),
     }),
-    projectHeader: lazyObject({
-      get$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
-      set: jest.fn(),
+    next: lazyObject({
+      header: lazyObject({
+        get$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
+        set: jest.fn(),
+      }),
+      aiButton: lazyObject({
+        get$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
+        set: jest.fn(),
+      }),
     }),
     setGlobalFooter: jest.fn(),
     getGlobalFooter$: jest.fn().mockReturnValue(new BehaviorSubject(null)),

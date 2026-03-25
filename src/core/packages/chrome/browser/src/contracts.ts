@@ -10,7 +10,7 @@
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import type { ChromeProjectHeaderConfig } from './project_header';
+import type { ChromeNextHeaderConfig } from './next_header';
 import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
 import type { ChromeDocTitle } from './doc_title';
@@ -324,19 +324,28 @@ export interface ChromeStart {
   getActiveSolutionNavId(): SolutionId | null;
 
   /**
-   * APIs for the Chrome-controlled project header (Chrome-Next).
-   * Provides a unified configuration surface for page identity, global
-   * actions, and app menu — all rendered by Chrome rather than by individual apps.
+   * Chrome-Next APIs: header configuration, AI button slot, and future slots.
    */
-  projectHeader: {
-    /**
-     * Set the project header configuration for the current page.
-     * Chrome renders the title, metadata, global actions, and app menu.
-     *
-     * Pass `undefined` to clear (e.g. on unmount or route change).
-     * Automatically cleared on app change.
-     */
-    set(config?: ChromeProjectHeaderConfig): void;
+  next: {
+    header: {
+      /**
+       * Set the Chrome-Next header configuration for the current page.
+       * Chrome renders the title, metadata, global actions, and app menu.
+       *
+       * Pass `undefined` to clear (e.g. on unmount or route change).
+       * Automatically cleared on app change.
+       */
+      set(config?: ChromeNextHeaderConfig): void;
+    };
+    aiButton: {
+      /**
+       * Set the AI button component for the Chrome-Next header.
+       * The plugin owns the full component (rendering, state, tooltips, shortcuts).
+       * Chrome renders it in a fixed slot at the far right of the header.
+       * Pass `undefined` to remove. Global — persists across app changes.
+       */
+      set(node?: ReactNode): void;
+    };
   };
 
   /**
