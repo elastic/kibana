@@ -201,6 +201,43 @@ export async function ensureESQLTimeFieldOnAdHocDataViews({
       continue;
     }
 
+    // Saved data view ids (form → ES|QL): never call getESQLAdHocDataview with options.id set to
+    // that id — it creates an ES|QL ad-hoc instance under the same id and replaces the DataViews
+    // cache entry so isPersisted() becomes false (picker shows "Temporary")
+    if (layer.index && typeof dataViewsService.get === 'function') {
+      try {
+        const maybePersisted = await dataViewsService.get(layer.index);
+        if (
+          maybePersisted &&
+          typeof maybePersisted.isPersisted === 'function' &&
+          maybePersisted.isPersisted()
+        ) {
+          const specFromDv = maybePersisted.toSpec(false);
+          if (specFromDv.timeFieldName) {
+            result[layer.index] = { ...existingSpec, ...specFromDv };
+            continue;
+          }
+          const freshDataView = await getESQLAdHocDataview({
+            dataViewsService,
+            query: layer.query.esql,
+            options: {
+              skipFetchFields: true,
+              createNewInstanceEvenIfCachedOneAvailable: true,
+            },
+            http,
+          });
+          result[layer.index] = {
+            ...existingSpec,
+            ...specFromDv,
+            timeFieldName: freshDataView.timeFieldName ?? specFromDv.timeFieldName,
+          };
+          continue;
+        }
+      } catch {
+        // layer.index is not a loadable saved id — fall through to ad-hoc path below
+      }
+    }
+
     const freshDataView = await getESQLAdHocDataview({
       dataViewsService,
       query: layer.query.esql,
