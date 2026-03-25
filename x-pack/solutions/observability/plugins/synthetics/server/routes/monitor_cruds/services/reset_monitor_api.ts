@@ -118,17 +118,18 @@ export class ResetMonitorAPI {
       return this.forceReset(monitors, allPrivateLocations, spaceId);
     }
 
-    const validLocationIds = await this.getValidLocationIds(allPrivateLocations);
+    const validLocationIds =
+      await this.getLocationIdsWithExistingAgentPolicy(allPrivateLocations);
     return this.defaultReset(monitors, allPrivateLocations, spaceId, validLocationIds);
   }
 
-  private async getValidLocationIds(
+  private async getLocationIdsWithExistingAgentPolicy(
     allPrivateLocations: Awaited<ReturnType<typeof getPrivateLocations>>
   ): Promise<Set<string>> {
     const { server } = this.routeContext;
     const agentPolicyIds = allPrivateLocations.map((loc) => loc.agentPolicyId).filter(Boolean);
     if (agentPolicyIds.length === 0) {
-      return new Set(allPrivateLocations.map((loc) => loc.id));
+      return new Set();
     }
 
     const internalSoClient = server.coreStart.savedObjects.createInternalRepository();
