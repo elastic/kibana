@@ -12,6 +12,12 @@ import { createPluginsService, type PluginsServiceStart } from './plugin_service
 import type { PluginClient, PersistedPluginDefinition } from './client';
 import type { SkillClient } from '../skills/persisted/client';
 
+const mockRandomUUID = jest.fn().mockReturnValue('test-plugin-uuid');
+jest.mock('crypto', () => ({
+  ...jest.requireActual('crypto'),
+  randomUUID: () => mockRandomUUID(),
+}));
+
 const mockParsePluginFromUrl = jest.fn();
 const mockParsePluginFromFile = jest.fn();
 jest.mock('./utils', () => ({
@@ -203,7 +209,7 @@ describe('PluginsService', () => {
               { name: 'schema.json', relativePath: 'schema.json', content: '{}' },
             ],
             tool_ids: [],
-            plugin_id: expect.any(String),
+            plugin_id: 'test-plugin-uuid',
           },
           {
             id: 'my-plugin-code-reviewer',
@@ -213,14 +219,12 @@ describe('PluginsService', () => {
             content: 'Review code.',
             referenced_content: [],
             tool_ids: [],
-            plugin_id: expect.any(String),
+            plugin_id: 'test-plugin-uuid',
           },
         ]);
 
-        const generatedPluginId = mockSkillClient.bulkCreate.mock.calls[0][0][0].plugin_id;
-
         expect(mockClient.create).toHaveBeenCalledWith({
-          id: generatedPluginId,
+          id: 'test-plugin-uuid',
           name: 'my-plugin',
           version: '1.0.0',
           description: 'A test plugin',
@@ -379,11 +383,11 @@ describe('PluginsService', () => {
           expect.arrayContaining([
             expect.objectContaining({
               id: 'custom-name-pdf-processor',
-              plugin_id: expect.any(String),
+              plugin_id: 'test-plugin-uuid',
             }),
             expect.objectContaining({
               id: 'custom-name-code-reviewer',
-              plugin_id: expect.any(String),
+              plugin_id: 'test-plugin-uuid',
             }),
           ])
         );
