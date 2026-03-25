@@ -328,6 +328,7 @@ async function processGrokPatterns({
           path: { name: streamName },
           body: {
             connector_id: connectorId,
+            field_name: fieldName,
             sample_messages: group.messages,
             review_fields: getGrokReviewFields(group.nodes as GrokPatternNode[], 10),
           },
@@ -471,6 +472,7 @@ async function processDissectPattern({
       path: { name: streamName },
       body: {
         connector_id: connectorId,
+        field_name: fieldName,
         sample_messages: largestGroup.messages.slice(0, 10),
         review_fields: reviewFields,
       },
