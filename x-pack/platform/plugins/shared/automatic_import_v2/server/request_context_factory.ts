@@ -14,6 +14,7 @@ import type {
   AutomaticImportV2PluginSetupDependencies,
 } from './types';
 import type { AutomaticImportService } from './services';
+import { MINIMUM_LICENSE_TYPE } from '../common/constants';
 
 export interface IRequestContextFactory {
   create(
@@ -54,6 +55,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
     const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
     const fieldsMetadataClient = await startPlugins.fieldsMetadata.getClient(request);
+    const { license } = await context.licensing;
 
     const reportTelemetryEvent = <TEventType extends string>(
       eventType: TEventType,
@@ -92,6 +94,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       internalEsClient,
       fieldsMetadataClient,
       reportTelemetryEvent,
+      isAvailable: () => license.hasAtLeast(MINIMUM_LICENSE_TYPE),
     };
   }
 }
