@@ -44,7 +44,7 @@ export class SLOPlugin
   private readonly telemetryService = new SloTelemetryService();
   private experimentalFeatures: ExperimentalFeatures = {
     ruleFormV2: { enabled: false },
-    compositeSlo: { enabled: false },
+    compositeSlo: { enabled: true }, // TODO: revert to false before merging
   };
 
   constructor(private readonly initContext: PluginInitializerContext<SLOConfig>) {

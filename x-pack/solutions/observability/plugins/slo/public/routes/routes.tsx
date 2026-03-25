@@ -9,12 +9,15 @@ import {
   SLOS_MANAGEMENT_PATH,
   SLOS_PATH,
   SLOS_WELCOME_PATH,
+  SLO_COMPOSITE_CREATE_PATH,
+  SLO_COMPOSITE_EDIT_PATH,
   SLO_CREATE_PATH,
   SLO_DETAIL_PATH,
   SLO_EDIT_PATH,
   SLO_SETTINGS_PATH,
 } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React from 'react';
+import { CompositeSloEditPage } from '../pages/composite_slo_edit/composite_slo_edit';
 import { SloDetailsPage } from '../pages/slo_details/slo_details';
 import { SloEditPage } from '../pages/slo_edit/slo_edit';
 import { SloManagementPage } from '../pages/slo_management/slo_management_page';
@@ -68,6 +71,20 @@ export const getRoutes = (): {
     [SLOS_MANAGEMENT_PATH]: {
       handler: () => {
         return <SloManagementPage />;
+      },
+      params: {},
+      exact: true,
+    },
+    [SLO_COMPOSITE_CREATE_PATH]: {
+      handler: () => {
+        return <CompositeSloEditPage />;
+      },
+      params: {},
+      exact: true,
+    },
+    [SLO_COMPOSITE_EDIT_PATH]: {
+      handler: () => {
+        return <CompositeSloEditPage />;
       },
       params: {},
       exact: true,
