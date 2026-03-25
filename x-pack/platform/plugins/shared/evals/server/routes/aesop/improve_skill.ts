@@ -55,7 +55,10 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
             id: skillId,
           });
 
-          const skill = skillDoc._source as ProposedSkillDocument;
+          const skill = skillDoc._source as ProposedSkillDocument | undefined;
+          if (!skill) {
+            return response.notFound({ body: { message: `Skill ${skillId} not found or source unavailable` } });
+          }
 
           if (!skill.validation?.llm_feedback) {
             return response.badRequest({

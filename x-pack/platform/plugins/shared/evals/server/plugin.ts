@@ -21,7 +21,6 @@ import type {
 import { registerRoutes } from './routes/register_routes';
 import { registerAESOPRoutes } from './routes/aesop/register_aesop_routes';
 import { DatasetService } from './storage/dataset_service';
-import { createAESOPAgents } from './lib/aesop/agents/create_aesop_agents';
 import { ensureAesopILMPolicy } from './lib/aesop/storage/index_lifecycle';
 
 export class EvalsPlugin
@@ -139,28 +138,6 @@ export class EvalsPlugin
         `[AESOP] ILM policy setup failed: ${err instanceof Error ? err.message : String(err)}`
       );
     });
-
-    // ═══════════════════════════════════════════════════════════════
-    // AESOP: Auto-create custom agents on plugin start
-    // ═══════════════════════════════════════════════════════════════
-    if (plugins.agentBuilder) {
-      try {
-        this.logger.info('Auto-creating AESOP custom agents...');
-        // Create a system request for agent initialization
-        const request = {
-          headers: {},
-          // Add minimal request context needed for agent creation
-        } as any;
-        await createAESOPAgents(plugins.agentBuilder, request);
-        this.logger.info('AESOP agents created successfully');
-      } catch (error) {
-        this.logger.warn(
-          `Failed to auto-create AESOP agents (this is expected if Agent Builder plugin is not available): ${error instanceof Error ? error.message : String(error)}`
-        );
-      }
-    } else {
-      this.logger.debug('Agent Builder plugin not available - skipping AESOP agent creation');
-    }
 
     return {
       datasetService: this.datasetService,

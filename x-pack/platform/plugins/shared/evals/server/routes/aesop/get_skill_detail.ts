@@ -45,6 +45,10 @@ export function registerGetSkillDetailRoute({ router, logger }: AESOPRouteDepend
             id: skillId,
           });
 
+          if (!doc._source) {
+            return response.notFound({ body: { message: `Skill ${skillId} not found or source unavailable` } });
+          }
+
           return response.ok({
             body: {
               id: doc._id,

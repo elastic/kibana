@@ -39,7 +39,11 @@ export function sanitizeSkillId(raw: string): string {
   let id = raw.toLowerCase().replace(/[^a-z0-9_-]/g, '-').replace(/-+/g, '-');
   if (id.length > SKILL_ID_MAX) id = id.slice(0, SKILL_ID_MAX);
   id = id.replace(/^[^a-z0-9]+/, '').replace(/[^a-z0-9]+$/, '');
-  return SKILL_ID_RE.test(id) ? id : `aesop-${id}`.slice(0, SKILL_ID_MAX);
+  if (!id || !SKILL_ID_RE.test(id)) {
+    // Generate a safe fallback ID
+    return `aesop-${Date.now().toString(36)}`;
+  }
+  return id;
 }
 
 export function sanitizeSkillName(name: string): string {
@@ -95,7 +99,10 @@ export function registerApproveSkillRoute({ router, logger }: AESOPRouteDependen
             id: skillId,
           });
 
-          const skill = skillDoc._source as ProposedSkillDocument;
+          const skill = skillDoc._source as ProposedSkillDocument | undefined;
+          if (!skill) {
+            return response.notFound({ body: { message: `Skill ${skillId} not found or source unavailable` } });
+          }
 
           // 2. Validate skill passed evaluations
           if (skill.validation?.status !== 'passed') {
