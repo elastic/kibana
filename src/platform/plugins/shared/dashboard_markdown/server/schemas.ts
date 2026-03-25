@@ -13,7 +13,7 @@ import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import {
   BY_REF_SCHEMA_META,
   BY_VALUE_SCHEMA_META,
-} from '@kbn/presentation-publishing-schemas/src/types';
+} from '@kbn/presentation-publishing-schemas';
 
 // Markdown by-value state schema (contains content)
 const markdownByValueStateSchema = schema.object({
