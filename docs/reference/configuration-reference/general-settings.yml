@@ -423,7 +423,7 @@ groups:
           The maximum number of sockets that can be used for communications with {{es}}.
           It is available in {{ecloud}} 8.2.0 and later versions.
         datatype: int
-        default: Infinity
+        default: 800
         applies_to:
           stack: ga
           ech: ga
