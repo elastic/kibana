@@ -47,7 +47,7 @@ interface RuleActionsMenuProps {
   onToggleEnabled: (rule: RuleApiResponse) => void;
 }
 
-export type RulesListTableSortField = 'kind' | 'enabled';
+export type RulesListTableSortField = 'kind' | 'enabled' | 'metadata';
 
 const RuleActionsMenu = ({
   rule,
@@ -260,6 +260,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
           <FormattedMessage id="xpack.alertingV2.rulesList.column.name" defaultMessage="Name" />
         ),
         truncateText: true,
+        sortable: true,
         render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) => (
           <div>
             {metadata?.name ?? rule.id}
