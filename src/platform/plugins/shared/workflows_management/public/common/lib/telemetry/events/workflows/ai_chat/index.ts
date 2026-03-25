@@ -69,6 +69,14 @@ const workflowAiProposalReceivedSchema: RootSchema<ReportWorkflowAiProposalRecei
       optional: true,
     },
   },
+  conversationId: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The agent builder conversation ID, for joining with agent_builder_round_complete events',
+      optional: true,
+    },
+  },
   proposalId: {
     type: 'keyword',
     _meta: {
@@ -99,6 +107,14 @@ const workflowAiProposalResolvedSchema: RootSchema<ReportWorkflowAiProposalResol
     type: 'keyword',
     _meta: {
       description: 'The workflow ID if editing an existing workflow',
+      optional: true,
+    },
+  },
+  conversationId: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The agent builder conversation ID, for joining with agent_builder_round_complete events',
       optional: true,
     },
   },

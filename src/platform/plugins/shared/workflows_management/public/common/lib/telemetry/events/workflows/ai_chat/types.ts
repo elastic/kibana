@@ -42,6 +42,7 @@ export interface ReportWorkflowAiChatOpenedParams {
 export interface ReportWorkflowAiProposalReceivedParams {
   eventName: string;
   workflowId?: string;
+  conversationId?: string;
   proposalId: string;
   toolId: string;
   sessionType: WorkflowAiSessionType;
@@ -50,6 +51,7 @@ export interface ReportWorkflowAiProposalReceivedParams {
 export interface ReportWorkflowAiProposalResolvedParams {
   eventName: string;
   workflowId?: string;
+  conversationId?: string;
   proposalId: string;
   resolution: 'accepted' | 'rejected';
   toolId: string;

@@ -579,6 +579,7 @@ export class WorkflowsBaseTelemetry {
 
   reportAiProposalReceived = (params: {
     workflowId?: string;
+    conversationId?: string;
     proposalId: string;
     toolId: string;
     sessionType: WorkflowAiSessionType;
@@ -586,6 +587,7 @@ export class WorkflowsBaseTelemetry {
     this.telemetryService.reportEvent(WorkflowAiChatEventTypes.WorkflowAiProposalReceived, {
       eventName: workflowEventNames[WorkflowAiChatEventTypes.WorkflowAiProposalReceived],
       ...(params.workflowId && { workflowId: params.workflowId }),
+      ...(params.conversationId && { conversationId: params.conversationId }),
       proposalId: params.proposalId,
       toolId: params.toolId,
       sessionType: params.sessionType,
@@ -594,6 +596,7 @@ export class WorkflowsBaseTelemetry {
 
   reportAiProposalResolved = (params: {
     workflowId?: string;
+    conversationId?: string;
     proposalId: string;
     resolution: 'accepted' | 'rejected';
     toolId: string;
@@ -602,6 +605,7 @@ export class WorkflowsBaseTelemetry {
     this.telemetryService.reportEvent(WorkflowAiChatEventTypes.WorkflowAiProposalResolved, {
       eventName: workflowEventNames[WorkflowAiChatEventTypes.WorkflowAiProposalResolved],
       ...(params.workflowId && { workflowId: params.workflowId }),
+      ...(params.conversationId && { conversationId: params.conversationId }),
       proposalId: params.proposalId,
       resolution: params.resolution,
       toolId: params.toolId,

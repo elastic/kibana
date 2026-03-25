@@ -86,6 +86,7 @@ export const useAgentBuilderIntegration = ({
           tracker.updateStatus(pending.proposalId, 'accepted');
           telemetry.reportAiProposalResolved({
             workflowId,
+            conversationId: conversationIdRef.current,
             proposalId: pending.proposalId,
             resolution: 'accepted',
             toolId: pending.toolId,
@@ -99,6 +100,7 @@ export const useAgentBuilderIntegration = ({
           tracker.cascadeDecline(pending.proposalId);
           telemetry.reportAiProposalResolved({
             workflowId,
+            conversationId: conversationIdRef.current,
             proposalId: pending.proposalId,
             resolution: 'rejected',
             toolId: pending.toolId,
@@ -118,6 +120,7 @@ export const useAgentBuilderIntegration = ({
 
           telemetry.reportAiProposalResolved({
             workflowId,
+            conversationId: conversationIdRef.current,
             proposalId: record.proposalId,
             resolution: 'accepted',
             toolId: record.toolId,
@@ -133,6 +136,7 @@ export const useAgentBuilderIntegration = ({
 
           telemetry.reportAiProposalResolved({
             workflowId,
+            conversationId: conversationIdRef.current,
             proposalId: record.proposalId,
             resolution: 'rejected',
             toolId: record.toolId,
@@ -150,6 +154,7 @@ export const useAgentBuilderIntegration = ({
       onProposalReceived: ({ proposalId, toolId }) => {
         telemetry.reportAiProposalReceived({
           workflowId,
+          conversationId: conversationIdRef.current,
           proposalId,
           toolId,
           sessionType,
@@ -274,12 +279,14 @@ export const useAgentBuilderIntegration = ({
       });
       chatRefHandle.current = chatRef;
 
-      telemetry.reportWorkflowAiChatOpened({
-        entryPoint: 'workflow_editor',
-        sessionType: workflowId ? 'edit' : 'create',
-        workflowId,
-      });
-      chatOpenedReportedRef.current = true;
+      if (!chatOpenedReportedRef.current) {
+        telemetry.reportWorkflowAiChatOpened({
+          entryPoint: 'workflow_editor',
+          sessionType: workflowId ? 'edit' : 'create',
+          workflowId,
+        });
+        chatOpenedReportedRef.current = true;
+      }
     },
     [agentBuilder, editorRef, attachmentId, workflowId, workflowName, validationErrors, telemetry]
   );

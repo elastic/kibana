@@ -18,24 +18,34 @@ jest.mock('../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_the
   WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
 }));
 
+jest.mock('@kbn/workflows-ui', () => ({
+  useWorkflowsApi: jest.fn(() => ({
+    createWorkflow: jest.fn(),
+    updateWorkflow: jest.fn(),
+  })),
+  WorkflowApi: jest.fn(),
+}));
+
 const createMockServices = ({
   currentAppId = 'other',
   currentLocation = '/',
 }: { currentAppId?: string; currentLocation?: string } = {}) => ({
-  http: {
-    post: jest.fn(),
-    put: jest.fn(),
-  } as any,
-  notifications: {
-    toasts: {
-      addSuccess: jest.fn(),
-      addDanger: jest.fn(),
+  core: {
+    http: {
+      post: jest.fn(),
+      put: jest.fn(),
     },
-  } as any,
-  application: {
-    navigateToApp: jest.fn(),
-    currentAppId$: new BehaviorSubject<string | undefined>(currentAppId),
-    currentLocation$: new BehaviorSubject<string>(currentLocation),
+    notifications: {
+      toasts: {
+        addSuccess: jest.fn(),
+        addDanger: jest.fn(),
+      },
+    },
+    application: {
+      navigateToApp: jest.fn(),
+      currentAppId$: new BehaviorSubject<string | undefined>(currentAppId),
+      currentLocation$: new BehaviorSubject<string>(currentLocation),
+    },
   } as any,
 });
 
@@ -174,7 +184,7 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
         const openInEditorButton = buttons.find((b) => b.label === 'Open in editor')!;
         openInEditorButton.handler();
 
-        expect(services.application.navigateToApp).toHaveBeenCalledWith('workflows', {
+        expect(services.core.application.navigateToApp).toHaveBeenCalledWith('workflows', {
           path: 'wf-123',
         });
       });

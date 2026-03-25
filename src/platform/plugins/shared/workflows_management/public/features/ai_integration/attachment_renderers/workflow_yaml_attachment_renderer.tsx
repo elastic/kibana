@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { Subscription } from 'rxjs';
 import { combineLatest } from 'rxjs';
 import type {
@@ -18,9 +18,10 @@ import type {
 } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { CodeEditor } from '@kbn/code-editor';
-import type { ApplicationStart, HttpSetup, NotificationsStart } from '@kbn/core/public';
+import type { ApplicationStart, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { WorkflowApi } from '@kbn/workflows-ui';
+import { KibanaContextProvider, useKibana } from '@kbn/kibana-react-plugin/public';
+import { useWorkflowsApi, type WorkflowApi } from '@kbn/workflows-ui';
 import { PLUGIN_ID } from '../../../../common';
 import type { TelemetryServiceClient } from '../../../common/lib/telemetry/types';
 import { WorkflowsBaseTelemetry } from '../../../common/service/telemetry';
@@ -49,7 +50,7 @@ const extractErrorMessage = (error: unknown): string =>
 
 interface SaveWorkflowParams {
   workflowApi: WorkflowApi;
-  notifications: NotificationsStart;
+  notifications: CoreStart['notifications'];
   yaml: string;
   workflowId?: string;
   updateOrigin: CanvasRenderCallbacks['updateOrigin'];
@@ -128,8 +129,6 @@ const WorkflowYamlCanvasContent: React.FC<{
   isSidebar: boolean;
   registerActionButtons: CanvasRenderCallbacks['registerActionButtons'];
   updateOrigin: CanvasRenderCallbacks['updateOrigin'];
-  http: HttpSetup;
-  notifications: NotificationsStart;
   application: ApplicationStart;
   isOnWorkflowPage: (workflowId: string) => boolean;
   telemetry?: WorkflowsBaseTelemetry;
@@ -138,15 +137,14 @@ const WorkflowYamlCanvasContent: React.FC<{
   isSidebar,
   registerActionButtons,
   updateOrigin,
-  http,
-  notifications,
   application,
   isOnWorkflowPage,
   telemetry,
 }) => {
   useWorkflowsMonacoTheme();
 
-  const workflowApi = useMemo(() => new WorkflowApi(http), [http]);
+  const workflowApi = useWorkflowsApi();
+  const { notifications } = useKibana<{ notifications: CoreStart['notifications'] }>().services;
 
   // Defer button registration past the initial mount cycle so the parent
   // flyout's clearing effect (which also fires on mount) doesn't overwrite
@@ -280,16 +278,13 @@ const WorkflowYamlCanvasContent: React.FC<{
 };
 
 export const createWorkflowYamlAttachmentUiDefinition = ({
-  http,
-  notifications,
-  application,
+  core,
   telemetry: telemetryClient,
 }: {
-  http: HttpSetup;
-  notifications: NotificationsStart;
-  application: ApplicationStart;
+  core: CoreStart;
   telemetry?: TelemetryServiceClient;
 }): AttachmentUIDefinition<WorkflowYamlAttachment> => {
+  const { application } = core;
   const telemetry = telemetryClient ? new WorkflowsBaseTelemetry(telemetryClient) : undefined;
   let currentAppId: string | undefined;
   let currentLocation = '';
@@ -350,17 +345,17 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
     },
 
     renderCanvasContent: ({ attachment, isSidebar }, { registerActionButtons, updateOrigin }) => (
-      <WorkflowYamlCanvasContent
-        attachment={attachment}
-        isSidebar={isSidebar}
-        registerActionButtons={registerActionButtons}
-        updateOrigin={updateOrigin}
-        http={http}
-        notifications={notifications}
-        application={application}
-        isOnWorkflowPage={isOnWorkflowPage}
-        telemetry={telemetry}
-      />
+      <KibanaContextProvider services={core}>
+        <WorkflowYamlCanvasContent
+          attachment={attachment}
+          isSidebar={isSidebar}
+          registerActionButtons={registerActionButtons}
+          updateOrigin={updateOrigin}
+          application={application}
+          isOnWorkflowPage={isOnWorkflowPage}
+          telemetry={telemetry}
+        />
+      </KibanaContextProvider>
     ),
   };
 };

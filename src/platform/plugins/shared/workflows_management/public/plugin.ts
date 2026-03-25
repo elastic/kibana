@@ -98,9 +98,7 @@ export class WorkflowsPlugin
             const [coreStart] = await core.getStartServices();
             const { registerWorkflowAttachmentRenderers } = await aiIntegrationModule;
             registerWorkflowAttachmentRenderers(agentBuilder.contract.attachments, {
-              http: coreStart.http,
-              notifications: coreStart.notifications,
-              application: coreStart.application,
+              core: coreStart,
               telemetry: this.telemetryService.getClient(),
             });
             return agentBuilder.contract;
