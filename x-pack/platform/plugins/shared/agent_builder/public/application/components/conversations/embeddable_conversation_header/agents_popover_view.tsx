@@ -33,9 +33,6 @@ const labels = {
   agentDetails: i18n.translate('xpack.agentBuilder.embeddableAgentsView.agentDetails', {
     defaultMessage: 'Agent details',
   }),
-  manageAgents: i18n.translate('xpack.agentBuilder.embeddableAgentsView.manageAgents', {
-    defaultMessage: 'Manage agents',
-  }),
   selectAgent: i18n.translate('xpack.agentBuilder.embeddableAgentsView.selectAgent', {
     defaultMessage: 'Select an agent',
   }),
@@ -59,7 +56,6 @@ export const AgentsPopoverView: React.FC<AgentsPopoverViewProps> = ({
   const { euiTheme } = useEuiTheme();
   const { agentId, setAgentId } = useConversationContext();
   const { agents } = useAgentBuilderAgents();
-  const { createAgentBuilderUrl } = useNavigation();
   const { agentOptions, renderAgentOption } = useAgentOptions({ agents, selectedAgentId: agentId });
 
   const agentListStyles = css`
@@ -69,10 +65,10 @@ export const AgentsPopoverView: React.FC<AgentsPopoverViewProps> = ({
     }
   `;
 
+  const { createAgentBuilderUrl } = useNavigation();
   const agentDetailsHref = agentId
     ? createAgentBuilderUrl(appPaths.agent.overview({ agentId }))
     : undefined;
-  const manageAgentsHref = createAgentBuilderUrl(appPaths.manage.agents);
 
   const handleAgentChange = (
     _options: AgentOption[],
@@ -162,15 +158,6 @@ export const AgentsPopoverView: React.FC<AgentsPopoverViewProps> = ({
         >
           {(list) => list}
         </EuiSelectable>
-      </EuiFlexItem>
-
-      <EuiHorizontalRule margin="none" />
-
-      {/* Manage agents footer */}
-      <EuiFlexItem grow={false} css={rowPaddingStyles}>
-        <EuiButton href={manageAgentsHref} fullWidth size="s">
-          {labels.manageAgents}
-        </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

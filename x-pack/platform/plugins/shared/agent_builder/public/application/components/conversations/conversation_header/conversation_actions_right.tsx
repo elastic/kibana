@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { MoreActionsButton } from './more_actions_button';
@@ -14,6 +14,9 @@ import { MoreActionsButton } from './more_actions_button';
 const labels = {
   container: i18n.translate('xpack.agentBuilder.conversationActions.container', {
     defaultMessage: 'Conversation actions',
+  }),
+  close: i18n.translate('xpack.agentBuilder.conversationActions.close', {
+    defaultMessage: 'Close',
   }),
 };
 
@@ -26,13 +29,22 @@ export const ConversationRightActions: React.FC<ConversationRightActionsProps> =
 
   return (
     <EuiFlexGroup
-      gutterSize="s"
+      gutterSize="xs"
       justifyContent="flexEnd"
       alignItems="center"
       aria-label={labels.container}
       responsive={false}
     >
       <MoreActionsButton onCloseSidebar={isEmbeddedContext ? onClose : undefined} />
+      {isEmbeddedContext && (
+        <EuiButtonIcon
+          color="text"
+          iconType="cross"
+          size="m"
+          onClick={onClose}
+          aria-label={labels.close}
+        />
+      )}
     </EuiFlexGroup>
   );
 };
