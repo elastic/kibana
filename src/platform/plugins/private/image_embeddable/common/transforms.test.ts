@@ -77,7 +77,7 @@ describe('Image embeddable transformOut', () => {
     });
   });
 
-  it('passes through current state without changes', () => {
+  it('passes through snake_case state without changes', () => {
     const current = {
       drilldowns: [{
         label: 'some drilldown',
