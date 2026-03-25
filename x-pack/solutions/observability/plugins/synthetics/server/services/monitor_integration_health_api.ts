@@ -28,7 +28,7 @@ const STATUS_REASONS: Record<
   string
 > = {
   [LocationHealthStatusValue.MissingPackagePolicy]:
-    'The Fleet package policy for this monitor/location pair does not exist.',
+    'The Fleet package policy for this monitor and private location pair does not exist.',
   [LocationHealthStatusValue.MissingAgentPolicy]:
     'The agent policy referenced by this private location no longer exists.',
   [LocationHealthStatusValue.AgentPolicyMismatch]:
@@ -127,7 +127,8 @@ export class MonitorIntegrationHealthApi {
             loc.id,
             existingPrivateLocation.label,
             LocationHealthStatusValue.MissingAgentPolicy,
-            newFormatPolicyId
+            newFormatPolicyId,
+            existingPrivateLocation.agentPolicyId
           );
         }
 
@@ -144,7 +145,8 @@ export class MonitorIntegrationHealthApi {
             loc.id,
             existingPrivateLocation.label,
             LocationHealthStatusValue.MissingPackagePolicy,
-            newFormatPolicyId
+            newFormatPolicyId,
+            existingPrivateLocation.agentPolicyId
           );
         }
 
@@ -160,7 +162,8 @@ export class MonitorIntegrationHealthApi {
             loc.id,
             existingPrivateLocation.label,
             LocationHealthStatusValue.AgentPolicyMismatch,
-            resolvedPolicyId
+            resolvedPolicyId,
+            expectedAgentPolicyId
           );
         }
 
@@ -168,7 +171,8 @@ export class MonitorIntegrationHealthApi {
           loc.id,
           existingPrivateLocation.label,
           LocationHealthStatusValue.Healthy,
-          resolvedPolicyId
+          resolvedPolicyId,
+          expectedAgentPolicyId
         );
       });
 
@@ -288,7 +292,8 @@ export class MonitorIntegrationHealthApi {
           loc.id,
           existingPrivateLocation?.label ?? loc.label ?? loc.id,
           status,
-          expectedPolicyId
+          expectedPolicyId,
+          existingPrivateLocation?.agentPolicyId
         );
       });
 
@@ -305,13 +310,15 @@ export class MonitorIntegrationHealthApi {
     locationId: string,
     locationLabel: string,
     status: LocationHealthStatusValue,
-    policyId: string
+    packagePolicyId: string,
+    agentPolicyId?: string
   ): LocationHealthStatus {
     return {
       locationId,
       locationLabel,
       status,
-      policyId,
+      packagePolicyId,
+      agentPolicyId,
       ...(status !== LocationHealthStatusValue.Healthy ? { reason: STATUS_REASONS[status] } : {}),
     };
   }

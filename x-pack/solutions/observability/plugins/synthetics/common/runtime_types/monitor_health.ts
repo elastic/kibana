@@ -18,7 +18,8 @@ export interface LocationHealthStatus {
   locationId: string;
   locationLabel: string;
   status: LocationHealthStatusValue;
-  policyId: string;
+  packagePolicyId: string;
+  agentPolicyId?: string;
   reason?: string;
 }
 

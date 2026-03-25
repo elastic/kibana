@@ -358,7 +358,8 @@ describe('MonitorIntegrationHealthApi', () => {
               locationId: 'priv-loc-1',
               locationLabel: 'Private Location priv-loc-1',
               status: LocationHealthStatusValue.Healthy,
-              policyId: expectedPolicyId,
+              packagePolicyId: expectedPolicyId,
+              agentPolicyId: 'agent-policy-1',
             },
           ],
         },
@@ -534,7 +535,7 @@ describe('MonitorIntegrationHealthApi', () => {
       const result = await api.getHealth(['mon-1']);
 
       expect(result.monitors[0].locations[0].status).toBe(LocationHealthStatusValue.Healthy);
-      expect(result.monitors[0].locations[0].policyId).toBe(expectedPolicyId);
+      expect(result.monitors[0].locations[0].packagePolicyId).toBe(expectedPolicyId);
     });
   });
 
@@ -614,7 +615,7 @@ describe('MonitorIntegrationHealthApi', () => {
       const result = await api.getHealth(['mon-1']);
 
       expect(result.monitors[0].locations[0].status).toBe(LocationHealthStatusValue.Healthy);
-      expect(result.monitors[0].locations[0].policyId).toBe(legacyPolicyId);
+      expect(result.monitors[0].locations[0].packagePolicyId).toBe(legacyPolicyId);
       expect(result.monitors[0].isUnhealthy).toBe(false);
     });
 
@@ -643,7 +644,7 @@ describe('MonitorIntegrationHealthApi', () => {
       const result = await api.getHealth(['mon-1']);
 
       expect(result.monitors[0].locations[0].status).toBe(LocationHealthStatusValue.Healthy);
-      expect(result.monitors[0].locations[0].policyId).toBe(newPolicyId);
+      expect(result.monitors[0].locations[0].packagePolicyId).toBe(newPolicyId);
     });
 
     it('reports AgentPolicyMismatch for legacy policy attached to wrong agent', async () => {
@@ -668,7 +669,7 @@ describe('MonitorIntegrationHealthApi', () => {
       expect(result.monitors[0].locations[0].status).toBe(
         LocationHealthStatusValue.AgentPolicyMismatch
       );
-      expect(result.monitors[0].locations[0].policyId).toBe(legacyPolicyId);
+      expect(result.monitors[0].locations[0].packagePolicyId).toBe(legacyPolicyId);
     });
   });
 

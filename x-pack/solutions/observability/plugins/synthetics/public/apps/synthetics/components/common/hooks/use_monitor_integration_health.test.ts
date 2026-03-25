@@ -37,7 +37,7 @@ const healthyMonitor = {
       locationId: 'loc-1',
       locationLabel: 'Location 1',
       status: LocationHealthStatusValue.Healthy,
-      policyId: 'mon-1-loc-1',
+      packagePolicyId: 'mon-1-loc-1',
     },
   ],
 };
@@ -51,14 +51,14 @@ const unhealthyMonitor = {
       locationId: 'loc-1',
       locationLabel: 'Location 1',
       status: LocationHealthStatusValue.MissingPackagePolicy,
-      policyId: 'mon-2-loc-1',
+      packagePolicyId: 'mon-2-loc-1',
       reason: 'Missing',
     },
     {
       locationId: 'loc-2',
       locationLabel: 'Location 2',
       status: LocationHealthStatusValue.Healthy,
-      policyId: 'mon-2-loc-2',
+      packagePolicyId: 'mon-2-loc-2',
     },
   ],
 };

@@ -22,7 +22,8 @@ export interface MonitorIntegrationStatus {
   configId: string;
   locationId: string;
   locationLabel: string;
-  policyId: string;
+  packagePolicyId: string;
+  agentPolicyId?: string;
   status: LocationHealthStatusValue;
   isUnhealthy: boolean;
 }
@@ -93,7 +94,8 @@ export const useMonitorIntegrationHealth = (
         configId: monitor.configId,
         locationId: loc.locationId,
         locationLabel: loc.locationLabel,
-        policyId: loc.policyId,
+        packagePolicyId: loc.packagePolicyId,
+        agentPolicyId: loc.agentPolicyId,
         status: loc.status,
         isUnhealthy: loc.status !== LocationHealthStatusValue.Healthy,
       }));
