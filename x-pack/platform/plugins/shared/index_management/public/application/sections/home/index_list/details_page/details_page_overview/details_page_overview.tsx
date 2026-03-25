@@ -84,10 +84,10 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
   const fetchDocCount = useCallback(async () => {
     try {
       const { data, error } = await loadIndexDocCount(name);
-      if (error) {
+      if (error || !data) {
         setDocCount({ isLoading: false, isError: true });
       } else {
-        setDocCount({ count: data?.[name] ?? 0, isLoading: false, isError: false });
+        setDocCount({ count: data[name], isLoading: false, isError: false });
       }
     } catch {
       setDocCount({ isLoading: false, isError: true });

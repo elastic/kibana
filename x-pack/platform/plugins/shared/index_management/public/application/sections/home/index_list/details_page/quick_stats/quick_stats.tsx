@@ -12,16 +12,15 @@ import type { Index } from '../../../../../../../common';
 import { loadIndexDocCount } from '../../../../../services/api';
 import { StorageDetails } from './storage_details';
 import { StatusDetails } from './status_details';
+import { SizeDocCountDetails } from './size_doc_count_details';
+import { AliasesDetails } from './aliases_details';
+import { DataStreamDetails } from './data_stream_details';
 
 export interface DocCountState {
   count?: number;
   isLoading: boolean;
   isError: boolean;
 }
-import { SizeDocCountDetails } from './size_doc_count_details';
-import { AliasesDetails } from './aliases_details';
-import { DataStreamDetails } from './data_stream_details';
-
 interface Props {
   indexDetails: Index;
 }
@@ -48,10 +47,10 @@ export const QuickStats = ({ indexDetails }: Props) => {
   const fetchDocCount = useCallback(async () => {
     try {
       const { data, error } = await loadIndexDocCount(name);
-      if (error) {
+      if (error || !data) {
         setDocCount({ isLoading: false, isError: true });
       } else {
-        setDocCount({ count: data?.[name] ?? 0, isLoading: false, isError: false });
+        setDocCount({ count: data[name], isLoading: false, isError: false });
       }
     } catch {
       setDocCount({ isLoading: false, isError: true });
