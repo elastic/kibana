@@ -20,7 +20,6 @@ export { DataCascadeRow, DataCascadeRowCell } from './data_cascade_impl';
 export type {
   DataCascadeRowProps,
   DataCascadeRowCellProps,
-  CascadeRowCellNestedVirtualizationAnchorProps,
   CascadeGroupNodeUIInteraction,
 } from './data_cascade_impl';
 

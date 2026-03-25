@@ -20,7 +20,6 @@ export type {
   DataCascadeImplRef,
   DataCascadeRowProps,
   DataCascadeRowCellProps,
-  CascadeRowCellNestedVirtualizationAnchorProps,
   CascadeGroupNodeUIInteraction,
   DataCascadeUISnapshot,
   DataCascadeRestorableState,
