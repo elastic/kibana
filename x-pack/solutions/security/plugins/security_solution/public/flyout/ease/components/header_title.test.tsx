@@ -22,8 +22,10 @@ import {
   HeaderTitle,
 } from './header_title';
 import { useDateFormat, useTimeZone } from '../../../common/lib/kibana';
-import { RISK_SCORE_VALUE_TEST_ID } from '../../document_details/right/components/test_ids';
-import { SEVERITY_VALUE_TEST_ID } from '../../../flyout_v2/document/components/test_ids';
+import {
+  RISK_SCORE_VALUE_TEST_ID,
+  SEVERITY_VALUE_TEST_ID,
+} from '../../../flyout_v2/document/components/test_ids';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -46,6 +48,7 @@ const mockContextValue = {
     'event.kind': ['signal'],
     'kibana.alert.rule.name': ['rule-name'],
     'kibana.alert.severity': ['low'],
+    'kibana.alert.risk_score': ['47'],
   }),
 } as unknown as EaseDetailsContext;
 

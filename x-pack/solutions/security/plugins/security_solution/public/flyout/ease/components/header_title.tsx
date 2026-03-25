@@ -17,9 +17,9 @@ import { DocumentSeverity } from '../../../flyout_v2/document/components/severit
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { getAlertTitle } from '../../../flyout_v2/document/utils/get_header_title';
 import { getField } from '../../document_details/shared/utils';
-import { RiskScore } from '../../document_details/right/components/risk_score';
+import { RiskScore } from '../../../flyout_v2/document/components/risk_score';
 import { useEaseDetailsContext } from '../context';
-import { AlertHeaderBlock } from '../../shared/components/alert_header_block';
+import { AlertHeaderBlock } from '../../../flyout_v2/document/components/alert_header_block';
 
 export const HEADER_TITLE_TEST_ID = 'ease-alert-flyout-header-title';
 export const HEADER_SUMMARY_TEST_ID = 'ease-alert-flyout-header-summary';
@@ -80,7 +80,7 @@ export const HeaderTitle = memo(() => {
                 />
               }
             >
-              <RiskScore getFieldsData={getFieldsData} />
+              <RiskScore hit={hit} />
             </AlertHeaderBlock>
           </EuiFlexItem>
           <EuiFlexItem>

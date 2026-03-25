@@ -14,6 +14,7 @@ import { ALERT_RULE_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { HeaderTitle } from './components/header_title';
 import { DocumentSeverity } from './components/severity';
+import { HeaderActions } from './components/header_actions';
 import { HEADER_TIMESTAMP_TEST_ID } from './components/test_ids';
 import { useKibana } from '../../common/lib/kibana';
 import { getRuleDetailsUrl } from '../../common/components/link_to';
@@ -61,6 +62,7 @@ export const Header: FC<HeaderProps> = memo(({ hit }) => {
       )}
       <EuiSpacer size="xs" />
       <HeaderTitle hit={hit} titleHref={ruleDetailsHref} />
+      <HeaderActions hit={hit} />
     </>
   );
 });

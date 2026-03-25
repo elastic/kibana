@@ -14,6 +14,8 @@ export const HEADER_TITLE_LINK_TEST_ID = `${PREFIX}AlertTitleLink` as const;
 export const HEADER_EVENT_TITLE_TEST_ID = `${PREFIX}EventTitle` as const;
 export const HEADER_TIMESTAMP_TEST_ID = `${PREFIX}Timestamp` as const;
 export const SEVERITY_VALUE_TEST_ID = 'severity' as const;
+export const RISK_SCORE_TITLE_TEST_ID = `${PREFIX}RiskScoreTitle` as const;
+export const RISK_SCORE_VALUE_TEST_ID = `${PREFIX}RiskScoreValue` as const;
 
 /* About */
 

@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { Notes } from './notes';
 import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
 import { DocumentStatus } from './status';
-import { RiskScore } from './risk_score';
+import { RiskScore } from '../../../../flyout_v2/document/components/risk_score';
 import { useRefetchByScope } from '../hooks/use_refetch_by_scope';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
@@ -30,7 +30,7 @@ import {
   HEADER_TITLE_TEST_ID,
   HEADER_TIMESTAMP_TEST_ID,
 } from '../../../../flyout_v2/document/components/test_ids';
-import { AlertHeaderBlock } from '../../../shared/components/alert_header_block';
+import { AlertHeaderBlock } from '../../../../flyout_v2/document/components/alert_header_block';
 
 // minWidth for each block, allows to switch for a 1 row 4 blocks to 2 rows with 2 block each
 const blockStyles = {
@@ -100,10 +100,10 @@ export const AlertHeaderTitle = memo(() => {
         }
         data-test-subj={RISK_SCORE_TITLE_TEST_ID}
       >
-        <RiskScore getFieldsData={getFieldsData} />
+        <RiskScore hit={hit} />
       </AlertHeaderBlock>
     ),
-    [getFieldsData]
+    [hit]
   );
 
   const assignees = useMemo(

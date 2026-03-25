@@ -38,6 +38,12 @@ jest.mock('./components/severity', () => ({
   ),
 }));
 
+jest.mock('./components/header_actions', () => ({
+  HeaderActions: ({ hit }: { hit: DataTableRecord }) => (
+    <div data-test-subj="mockHeaderActions" data-hit-id={hit.id} />
+  ),
+}));
+
 jest.mock('../../common/components/formatted_date', () => ({
   PreferenceFormattedDate: ({ value }: { value: Date }) => (
     <div data-test-subj="mockPreferenceFormattedDate">{value.toISOString()}</div>
@@ -71,6 +77,12 @@ const renderHeader = (props: Parameters<typeof Header>[0]) =>
   );
 
 describe('<DocumentHeader />', () => {
+  it('should pass the hit to header actions', () => {
+    const { getByTestId } = renderHeader({ hit: alertHit });
+
+    expect(getByTestId('mockHeaderActions')).toHaveAttribute('data-hit-id', '1');
+  });
+
   it('should pass the hit to the severity component', () => {
     const { getByTestId } = renderHeader({ hit: alertHit });
 
@@ -106,4 +118,5 @@ describe('<DocumentHeader />', () => {
 
     expect(getByTestId('mockHeaderTitle')).toHaveAttribute('data-title-href', '');
   });
+
 });

@@ -15,10 +15,10 @@ import {
   ASSIGNEES_TITLE_TEST_ID,
   NOTES_TITLE_TEST_ID,
   RISK_SCORE_TITLE_TEST_ID,
-  RISK_SCORE_VALUE_TEST_ID,
   STATUS_BUTTON_TEST_ID,
   STATUS_TITLE_TEST_ID,
 } from './test_ids';
+import { RISK_SCORE_VALUE_TEST_ID } from '../../../../flyout_v2/document/components/test_ids';
 import { AlertHeaderTitle } from './alert_header_title';
 import moment from 'moment-timezone';
 import { useDateFormat, useTimeZone } from '../../../../common/lib/kibana';
@@ -53,6 +53,7 @@ const mockContextValue = {
     'event.kind': ['signal'],
     'kibana.alert.rule.name': ['rule-name'],
     'kibana.alert.severity': ['low'],
+    'kibana.alert.risk_score': ['47'],
   }),
 } as unknown as DocumentDetailsContext;
 const HEADER_TEXT_TEST_ID = `${HEADER_TITLE_TEST_ID}Text`;
