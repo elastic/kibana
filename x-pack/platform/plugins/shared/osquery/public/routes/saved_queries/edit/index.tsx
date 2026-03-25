@@ -16,7 +16,6 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { UseEuiTheme } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,7 +24,7 @@ import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
-import { WithHeaderLayout } from '../../../components/layouts';
+import { WithHeaderLayout, fullWidthFormContentCss } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { EditSavedQueryForm } from './form';
 import { useDeleteSavedQuery, useUpdateSavedQuery, useSavedQuery } from '../../../saved_queries';
@@ -35,15 +34,6 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_fe
 const euiCalloutCss = {
   margin: '10px',
 };
-
-const fullWidthContentCss = ({ euiTheme }: UseEuiTheme) => ({
-  padding: `0 ${euiTheme.size.l}`,
-  flex: 1,
-  minWidth: 0,
-  maxWidth: 1200,
-  margin: '0 auto',
-  width: '100%',
-});
 
 const EditSavedQueryPageComponent = () => {
   const confirmModalTitleId = useGeneratedHtmlId();
@@ -233,7 +223,7 @@ const EditSavedQueryPageComponent = () => {
   if (queryHistoryRework) {
     if (error) {
       return (
-        <div css={fullWidthContentCss}>
+        <div css={fullWidthFormContentCss}>
           <EuiSpacer size="l" />
           {backLink}
           <EuiSpacer size="m" />
@@ -254,7 +244,7 @@ const EditSavedQueryPageComponent = () => {
     }
 
     return (
-      <div css={fullWidthContentCss}>
+      <div css={fullWidthFormContentCss}>
         <EuiSpacer size="l" />
         {backLink}
         <EuiSpacer size="m" />

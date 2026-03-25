@@ -20,28 +20,28 @@ jest.mock('../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_the
 }));
 
 jest.mock('./step_execute_manual_form', () => ({
-  StepExecuteManualForm: ({ value, onChange, errors, warnings }: any) => (
+  StepExecuteManualForm: ({ value, setValue, errors, warnings }: any) => (
     <div data-test-subj="mockManualForm">
       <span data-test-subj="manualFormValue">{value}</span>
       {errors && <span data-test-subj="manualFormErrors">{errors}</span>}
       {warnings && <span data-test-subj="manualFormWarnings">{warnings}</span>}
       <button
         data-test-subj="manualFormChange"
-        onClick={() => onChange('{"updated":"value"}')}
+        onClick={() => setValue('{"updated":"value"}')}
         type="button"
       >
         {'change'}
       </button>
       <button
         data-test-subj="manualFormInvalidChange"
-        onClick={() => onChange('invalid-json')}
+        onClick={() => setValue('invalid-json')}
         type="button"
       >
         {'invalid change'}
       </button>
       <button
         data-test-subj="manualFormValidMatchingSchema"
-        onClick={() => onChange('{"requiredField":"ok"}')}
+        onClick={() => setValue('{"requiredField":"ok"}')}
         type="button"
       >
         {'valid matching schema'}
