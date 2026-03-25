@@ -698,7 +698,6 @@ const WorkflowSchemaBase = z.object({
   settings: WorkflowSettingsSchema.optional(),
   enabled: z.boolean().default(true),
   tags: z.array(z.string()).optional(),
-  inputs: WorkflowInputSchema.optional(), // TODO: remove this once
   outputs: z.union([JsonModelSchema, z.array(WorkflowOutputSchema)]).optional(),
   consts: WorkflowConstsSchema.optional(),
   steps: z.array(StepSchema).min(1),
@@ -719,13 +718,11 @@ function normalizeFieldsToJsonSchema(value: unknown): z.infer<typeof JsonModelSc
 export const WorkflowSchema = WorkflowSchemaBase.extend({
   triggers: z.array(TriggerSchema).min(1),
 }).transform((data) => {
-  const normalizedInputs = normalizeFieldsToJsonSchema(data.inputs);
   const normalizedOutputs = normalizeFieldsToJsonSchema(data.outputs);
 
-  const { inputs: _, outputs: __, ...rest } = data;
+  const { outputs: __, ...rest } = data;
   return {
     ...rest,
-    ...(normalizedInputs !== undefined && { inputs: normalizedInputs }),
     ...(normalizedOutputs !== undefined && { outputs: normalizedOutputs }),
   };
 });
@@ -751,22 +748,6 @@ const WorkflowSchemaForAutocompleteBase = z
       .array(z.object({ type: z.string().catch('') }).passthrough())
       .catch([])
       .default([]),
-    inputs: z
-      .union([
-        // New JSON Schema format
-        JsonModelSchema,
-        // Legacy array format (for backward compatibility during parsing)
-        z.array(
-          z
-            .object({
-              name: z.string().catch(''),
-              type: z.string().catch(''),
-            })
-            .passthrough()
-        ),
-      ])
-      .optional()
-      .catch(undefined),
     outputs: z
       .union([
         JsonModelSchema,
