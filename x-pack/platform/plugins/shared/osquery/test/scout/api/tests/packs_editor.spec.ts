@@ -10,7 +10,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData } from '../fixtures';
 
-// TODO: replace '@local-stateful-classic' with tags.stateful.classic once #258883 and #259343 are released
+// TODO: replace '@local-stateful-classic' with tags.stateful.classic once #258883 is released
 apiTest.describe(
   'Osquery packs - editor',
   { tag: ['@local-stateful-classic', ...tags.serverless.security.complete] },
