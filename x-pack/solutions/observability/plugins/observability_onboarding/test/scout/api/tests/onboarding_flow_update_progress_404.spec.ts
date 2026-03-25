@@ -7,7 +7,6 @@
 
 import { expect } from '@kbn/scout-oblt/api';
 import { tags } from '@kbn/scout-oblt';
-import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { ONBOARDING_COMMON_HEADERS } from '../fixtures/constants';
 import { apiTest } from '../fixtures';
 
@@ -15,19 +14,17 @@ apiTest.describe(
   'Observability onboarding POST flow step — missing session',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    let adminCredentials: RoleApiCredentials;
-
-    apiTest.beforeAll(async ({ requestAuth }) => {
-      adminCredentials = await requestAuth.getApiKey('admin');
-    });
-
-    apiTest('returns 404 when onboardingId does not exist', async ({ apiClient }) => {
+    apiTest('returns 404 when onboardingId does not exist', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+      const adminHeaders = {
+        ...ONBOARDING_COMMON_HEADERS,
+        ...cookieHeader,
+      };
       const response = await apiClient.post(
         'internal/observability_onboarding/flow/test-onboarding-id/step/ea-download',
         {
           headers: {
-            ...ONBOARDING_COMMON_HEADERS,
-            ...adminCredentials.apiKeyHeader,
+            ...adminHeaders,
           },
           responseType: 'json',
           body: {

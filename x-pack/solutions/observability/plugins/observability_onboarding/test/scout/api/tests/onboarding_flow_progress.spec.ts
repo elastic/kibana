@@ -8,20 +8,16 @@
 import { log, timerange } from '@kbn/synthtrace-client';
 import { expect } from '@kbn/scout-oblt/api';
 import { tags } from '@kbn/scout-oblt';
+import type { KibanaRole } from '@kbn/scout-oblt';
 import { ONBOARDING_COMMON_HEADERS } from '../fixtures/constants';
 import { apiTest } from '../fixtures';
 
-/** Matches deployment-agnostic FTR `custom_roles/noAccessUserRole` (cookie session, not API key). */
-const NO_ACCESS_USER_ROLE = {
+const NO_ACCESS_USER_ROLE: KibanaRole = {
   elasticsearch: {
-    cluster: [] as string[],
-    indices: [] as Array<{ names: string[]; privileges: string[] }>,
+    cluster: [],
+    indices: [],
   },
-  kibana: [] as Array<{
-    base: string[];
-    feature: Record<string, string[]>;
-    spaces: string[];
-  }>,
+  kibana: [],
 };
 
 apiTest.describe(
