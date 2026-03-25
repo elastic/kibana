@@ -35,7 +35,7 @@ const walkSchema = (ctx: IContext, schema: Schema): void => {
     return;
   }
 
-  mutations.processAllTypes(schema);
+  mutations.processAllTypes(ctx, schema);
   /* At runtime 'type' can be broader than 'NonArraySchemaObjectType', so we set it to 'string' */
   const type: undefined | string = schema.type;
   if (type === 'array') {
