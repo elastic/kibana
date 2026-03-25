@@ -7,8 +7,9 @@
 
 import { isString } from 'lodash';
 import { z } from '@kbn/zod/v4';
-import { defineVersioning } from '@kbn/storage-adapter';
+import { defineVersioning, type StorageSchemaVersioning } from '@kbn/storage-adapter';
 import { featureStatusSchema } from '@kbn/streams-schema';
+import type { StoredFeature } from './stored_feature';
 import {
   STREAM_NAME,
   FEATURE_UUID,
@@ -80,4 +81,4 @@ export const featureVersioning = defineVersioning(v1Schema)
       };
     },
   })
-  .build();
+  .build() as StorageSchemaVersioning<StoredFeature>;
