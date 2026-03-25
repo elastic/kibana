@@ -22,9 +22,9 @@ apiTest.describe('Workflows Import/Export API', { tag: [...tags.stateful.classic
 
   apiTest.afterEach(async ({ kbnClient }) => {
     const response = await kbnClient.request<{ results?: Array<{ id: string }> }>({
-      method: 'POST',
-      path: '/api/workflows/search',
-      body: { size: 10000, page: 1 },
+      method: 'GET',
+      path: '/api/workflows',
+      query: { size: 10000, page: 1 },
     });
     const ids = response.data.results?.map((w) => w.id) || [];
     if (ids.length > 0) {
@@ -37,7 +37,7 @@ apiTest.describe('Workflows Import/Export API', { tag: [...tags.stateful.classic
   });
 
   apiTest('should bulk create a single workflow', async ({ apiClient }) => {
-    const response = await apiClient.post('api/workflows/_bulk_create', {
+    const response = await apiClient.post('api/workflows', {
       headers: {
         ...COMMON_HEADERS,
         ...adminCredentials.apiKeyHeader,
@@ -52,7 +52,7 @@ apiTest.describe('Workflows Import/Export API', { tag: [...tags.stateful.classic
   });
 
   apiTest('should bulk create multiple workflows', async ({ apiClient }) => {
-    const response = await apiClient.post('api/workflows/_bulk_create', {
+    const response = await apiClient.post('api/workflows', {
       headers: {
         ...COMMON_HEADERS,
         ...adminCredentials.apiKeyHeader,
@@ -70,42 +70,39 @@ apiTest.describe('Workflows Import/Export API', { tag: [...tags.stateful.classic
     expect(response.body.created).toHaveLength(2);
   });
 
-  apiTest(
-    'should detect conflicts via check-conflicts endpoint',
-    async ({ kbnClient, apiClient }) => {
-      const createResponse = await kbnClient.request<{ id: string }>({
-        method: 'POST',
-        path: '/api/workflows',
-        body: { yaml: SIMPLE_WORKFLOW_YAML },
-      });
-      const existingId = createResponse.data.id;
+  apiTest('should detect conflicts', async ({ kbnClient, apiClient }) => {
+    const createResponse = await kbnClient.request<{ id: string }>({
+      method: 'POST',
+      path: '/api/workflows/workflow',
+      body: { yaml: SIMPLE_WORKFLOW_YAML },
+    });
+    const existingId = createResponse.data.id;
 
-      const response = await apiClient.post('api/workflows/_check-conflicts', {
-        headers: {
-          ...COMMON_HEADERS,
-          ...adminCredentials.apiKeyHeader,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ids: [existingId, 'nonexistent-id'] }),
-      });
+    const response = await apiClient.post('api/workflows/mget', {
+      headers: {
+        ...COMMON_HEADERS,
+        ...adminCredentials.apiKeyHeader,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ids: [existingId, 'nonexistent-id'], source: ['name'] }),
+    });
 
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.conflicts).toHaveLength(1);
-      expect(response.body.conflicts[0].id).toBe(existingId);
-    }
-  );
+    expect(response).toHaveStatusCode(200);
+    expect(response.body).toHaveLength(1);
+    expect(response.body[0].id).toBe(existingId);
+  });
 
   apiTest(
     'should overwrite existing workflow via bulk create',
     async ({ kbnClient, apiClient }) => {
       const createResponse = await kbnClient.request<{ id: string }>({
         method: 'POST',
-        path: '/api/workflows',
+        path: '/api/workflows/workflow',
         body: { yaml: SIMPLE_WORKFLOW_YAML },
       });
       const existingId = createResponse.data.id;
 
-      const response = await apiClient.post('api/workflows/_bulk_create?overwrite=true', {
+      const response = await apiClient.post('api/workflows?overwrite=true', {
         headers: {
           ...COMMON_HEADERS,
           ...adminCredentials.apiKeyHeader,
@@ -124,12 +121,12 @@ apiTest.describe('Workflows Import/Export API', { tag: [...tags.stateful.classic
   apiTest('should export workflows as a ZIP archive', async ({ kbnClient, apiClient }) => {
     const createResponse = await kbnClient.request<{ id: string }>({
       method: 'POST',
-      path: '/api/workflows',
+      path: '/api/workflows/workflow',
       body: { yaml: SIMPLE_WORKFLOW_YAML },
     });
     const workflowId = createResponse.data.id;
 
-    const exportResponse = await apiClient.post('api/workflows/_export', {
+    const exportResponse = await apiClient.post('api/workflows/export', {
       headers: {
         ...COMMON_HEADERS,
         ...adminCredentials.apiKeyHeader,
@@ -149,7 +146,7 @@ apiTest.describe('Workflows Import/Export API', { tag: [...tags.stateful.classic
   });
 
   apiTest('should return 404 when exporting non-existent workflows', async ({ apiClient }) => {
-    const response = await apiClient.post('api/workflows/_export', {
+    const response = await apiClient.post('api/workflows/export', {
       headers: {
         ...COMMON_HEADERS,
         ...adminCredentials.apiKeyHeader,
@@ -166,12 +163,12 @@ apiTest.describe('Workflows Import/Export API', { tag: [...tags.stateful.classic
     async ({ kbnClient, apiClient }) => {
       const createResponse = await kbnClient.request<{ id: string; yaml: string }>({
         method: 'POST',
-        path: '/api/workflows',
+        path: '/api/workflows/workflow',
         body: { yaml: SIMPLE_WORKFLOW_YAML },
       });
       const originalId = createResponse.data.id;
 
-      const exportResponse = await apiClient.post('api/workflows/_export', {
+      const exportResponse = await apiClient.post('api/workflows/export', {
         headers: {
           ...COMMON_HEADERS,
           ...adminCredentials.apiKeyHeader,
@@ -192,7 +189,7 @@ apiTest.describe('Workflows Import/Export API', { tag: [...tags.stateful.classic
       const reImportedYaml = workflowEntries[0].getData().toString('utf-8');
       const reImportedId = workflowEntries[0].entryName.replace('.yml', '');
 
-      const importResponse = await apiClient.post('api/workflows/_bulk_create?overwrite=true', {
+      const importResponse = await apiClient.post('api/workflows?overwrite=true', {
         headers: {
           ...COMMON_HEADERS,
           ...adminCredentials.apiKeyHeader,
