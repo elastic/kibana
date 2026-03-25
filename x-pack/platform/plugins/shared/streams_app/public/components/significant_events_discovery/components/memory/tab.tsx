@@ -111,6 +111,7 @@ export function MemoryTab() {
             })}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            incremental
             isClearable
             fullWidth
             data-test-subj="streamsMemorySearch"
