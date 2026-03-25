@@ -1,0 +1,180 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { KibanaRequest } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
+import { lastValueFrom, timeout, catchError, filter, map, of } from 'rxjs';
+
+export interface AgentOrchestrationConfig {
+  agentBuilderStart: any;
+  request: KibanaRequest;
+  connectorId: string;
+  logger: Logger;
+  timeoutMs?: number;
+}
+
+export class AgentOrchestrator {
+  private readonly timeoutMs: number;
+
+  constructor(private readonly config: AgentOrchestrationConfig) {
+    this.timeoutMs = config.timeoutMs || 120_000;
+  }
+
+  async executeAgent(agentId: string, message: string): Promise<string> {
+    const { agentBuilderStart, request, connectorId, logger } = this.config;
+
+    logger.info(`[AESOP] Executing agent: ${agentId}`);
+
+    const { executionId, events$ } = await agentBuilderStart.execution.executeAgent({
+      request,
+      params: {
+        agentId,
+        connectorId,
+        storeConversation: false,
+        nextInput: { message },
+      },
+    });
+
+    logger.debug(`[AESOP] Agent ${agentId} execution started: ${executionId}`);
+
+    try {
+      const response = await lastValueFrom(
+        events$.pipe(
+          filter(
+            (event: any) =>
+              event.type === 'messageComplete' || event.type === 'conversationUpdate'
+          ),
+          map((event: any) => {
+            if (event.type === 'messageComplete' && event.message?.content) {
+              return event.message.content;
+            }
+            if (event.type === 'conversationUpdate') {
+              const messages = event.conversation?.messages || [];
+              const lastAssistant = messages
+                .filter((m: any) => m.role === 'assistant')
+                .pop();
+              return lastAssistant?.content || '';
+            }
+            return '';
+          }),
+          filter((text: string) => text.length > 0),
+          timeout(this.timeoutMs),
+          catchError((err) => {
+            logger.error(
+              `[AESOP] Agent ${agentId} stream error: ${err instanceof Error ? err.message : String(err)}`
+            );
+            return of('');
+          })
+        )
+      );
+
+      logger.info(`[AESOP] Agent ${agentId} completed (${response.length} chars)`);
+      return response;
+    } catch (error) {
+      // lastValueFrom throws EmptyError when observable completes without emitting
+      logger.error(`[AESOP] Agent ${agentId} execution failed`, {
+        error: error instanceof Error ? error.message : String(error),
+        execution_id: executionId,
+      });
+      return '';
+    }
+  }
+
+  async runDiscoveryPipeline(context: {
+    indexNames: string[];
+    analystRole: string;
+  }): Promise<any[]> {
+    const { logger } = this.config;
+
+    // Phase 1-2: Schema Explorer
+    logger.info('[AESOP] Agent pipeline Phase 1-2: Schema Explorer');
+    const schemaResponse = await this.executeAgent(
+      'aesop.schema-explorer',
+      `Explore and profile these indices: ${context.indexNames.join(', ')}. Focus on security-relevant data for a ${context.analystRole}.`
+    );
+
+    if (!schemaResponse) {
+      logger.warn('[AESOP] Schema explorer returned empty');
+      return [];
+    }
+
+    // Phase 3-4: Pattern Miner
+    logger.info('[AESOP] Agent pipeline Phase 3-4: Pattern Miner');
+    const patternResponse = await this.executeAgent(
+      'aesop.pattern-miner',
+      `Find automation-worthy patterns in this data. Schema context:\n${schemaResponse}`
+    );
+
+    if (!patternResponse) {
+      logger.warn('[AESOP] Pattern miner returned empty');
+      return [];
+    }
+
+    // Phase 5: Skill Generator
+    logger.info('[AESOP] Agent pipeline Phase 5: Skill Generator');
+    const skillResponse = await this.executeAgent(
+      'aesop.skill-generator',
+      `Generate Agent Builder skills from these patterns and schemas.\n\nSchemas:\n${schemaResponse}\n\nPatterns:\n${patternResponse}`
+    );
+
+    if (!skillResponse) {
+      logger.warn('[AESOP] Skill generator returned empty');
+      return [];
+    }
+
+    return this.parseSkillsFromResponse(skillResponse);
+  }
+
+  async validateSkill(skillMarkdown: string): Promise<any> {
+    const response = await this.executeAgent(
+      'aesop.skill-validator',
+      `Evaluate this Agent Builder skill:\n\n${skillMarkdown}`
+    );
+
+    if (!response) return null;
+    return this.parseJsonFromResponse(response);
+  }
+
+  async improveSkill(skillMarkdown: string, feedback: string): Promise<any> {
+    const response = await this.executeAgent(
+      'aesop.skill-improver',
+      `Improve this skill based on the feedback.\n\nCurrent Skill:\n${skillMarkdown}\n\nFeedback:\n${feedback}`
+    );
+
+    if (!response) return null;
+    return this.parseJsonFromResponse(response);
+  }
+
+  private parseSkillsFromResponse(response: string): any[] {
+    try {
+      let cleaned = response;
+      cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/g, '');
+      cleaned = cleaned.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim();
+      const match = cleaned.match(/\[[\s\S]*\]/);
+      return match ? JSON.parse(match[0]) : [];
+    } catch {
+      this.config.logger.error('[AESOP] Failed to parse skills from agent response');
+      return [];
+    }
+  }
+
+  private parseJsonFromResponse(response: string): any | null {
+    try {
+      let cleaned = response;
+      cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/g, '');
+      cleaned = cleaned.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim();
+      if (!cleaned.startsWith('{')) {
+        const match = cleaned.match(/\{[\s\S]*\}/);
+        if (match) cleaned = match[0];
+      }
+      return JSON.parse(cleaned);
+    } catch {
+      this.config.logger.error('[AESOP] Failed to parse JSON from agent response');
+      return null;
+    }
+  }
+}

@@ -19,6 +19,7 @@ const runSkillValidationParamsSchema = z.object({
 const runSkillValidationBodySchema = z.object({
   connector_id: z.string().min(1),
   auto_converge: z.boolean().optional().default(false),
+  use_agent: z.boolean().optional().default(false),
 });
 
 export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDependencies) {
@@ -48,7 +49,7 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
         const { skillId } = request.params;
-        const { connector_id: connectorId, auto_converge: autoConverge } = request.body;
+        const { connector_id: connectorId, auto_converge: autoConverge, use_agent: useAgent } = request.body;
 
         try {
           // 1. Load skill
@@ -90,6 +91,88 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
           }
 
           const actionsClient = await actionsStart.getActionsClientWithRequest(request);
+
+          // Try agent-based validation if requested and available
+          if (useAgent) {
+            const agentBuilderStart = evalsContext.getAgentBuilderStart();
+            if (agentBuilderStart) {
+              try {
+                const { AgentOrchestrator } = await import(
+                  '../../lib/aesop/agents/agent_orchestrator'
+                );
+                const { ensureAesopAgents } = await import(
+                  '../../lib/aesop/agents/ensure_agents'
+                );
+
+                const agentRegistry = await agentBuilderStart.agents.getRegistry({ request });
+                await ensureAesopAgents(agentRegistry, logger);
+
+                const orchestrator = new AgentOrchestrator({
+                  agentBuilderStart,
+                  request,
+                  connectorId,
+                  logger,
+                });
+
+                // Fire-and-forget agent-based validation
+                (async () => {
+                  try {
+                    const result = await orchestrator.validateSkill(skill.markdown || '');
+                    if (result) {
+                      await esClient.update({
+                        index: '.aesop-proposed-skills',
+                        id: skillId,
+                        body: {
+                          doc: {
+                            validation: {
+                              status: result.passed ? 'passed' : 'failed',
+                              final_score: result.score,
+                              completed_at: new Date().toISOString(),
+                              connector_id: connectorId,
+                              duration_ms: Date.now() - Date.now(),
+                              criteria: result.criteria,
+                              llm_feedback: result.feedback,
+                              strengths: result.strengths,
+                              weaknesses: result.weaknesses,
+                              suggestions: result.suggestions,
+                              iterations: [{ score: result.score, iteration: 1 }],
+                              validated_by: 'agent',
+                            },
+                          },
+                        },
+                        refresh: 'wait_for',
+                      });
+                    }
+                  } catch (err) {
+                    logger.error('[AESOP] Agent-based validation failed, results not saved', {
+                      error: err instanceof Error ? err.message : String(err),
+                      skill_id: skillId,
+                    });
+                    // Fall back: mark as failed so user can retry with direct LLM
+                    await esClient.update({
+                      index: '.aesop-proposed-skills',
+                      id: skillId,
+                      body: { doc: { validation: { status: 'failed', error: 'Agent validation failed' } } },
+                    }).catch(() => {});
+                  }
+                })();
+
+                return response.ok({
+                  body: {
+                    success: true,
+                    skill_id: skillId,
+                    skill_name: skill.name,
+                    status: 'validating',
+                    message: `Agent-based validation started for skill: ${skill.name}`,
+                    mode: 'agent',
+                  },
+                });
+              } catch (err) {
+                logger.warn(`[AESOP] Agent validation setup failed, falling back to direct LLM: ${err instanceof Error ? err.message : String(err)}`);
+                // Fall through to direct LLM validation
+              }
+            }
+          }
 
           if (autoConverge) {
             // 4a. Use convergence loop: iterate improve->validate until passing

@@ -100,6 +100,11 @@ interface ExplorationConfig {
   actionsClient?: any;
 
   getSkillRegistry?: () => Promise<any | undefined>;
+
+  // Agent orchestration (optional — falls back to direct LLM when unavailable)
+  useAgentOrchestration?: boolean;
+  getAgentBuilderStart?: () => any;
+  request?: any; // KibanaRequest for agent execution
 }
 
 interface SchemaInfo {
@@ -698,7 +703,57 @@ export class ExplorationWorkflowExecutor {
       }
     }
 
-    if (useLLM) {
+    // Try agent orchestration first (if enabled and available)
+    let agentOrchestrationSucceeded = false;
+    if (
+      this.config.useAgentOrchestration &&
+      this.config.getAgentBuilderStart?.() &&
+      connectorId &&
+      this.config.request
+    ) {
+      try {
+        await this.updateStep(5, 1, 6, 'Running agent-based skill discovery...');
+        const { AgentOrchestrator } = await import('../agents/agent_orchestrator');
+        const { ensureAesopAgents } = await import('../agents/ensure_agents');
+
+        const agentBuilderStart = this.config.getAgentBuilderStart();
+        const agentRegistry = await agentBuilderStart.agents.getRegistry({
+          request: this.config.request,
+        });
+        await ensureAesopAgents(agentRegistry, this.logger);
+
+        const orchestrator = new AgentOrchestrator({
+          agentBuilderStart,
+          request: this.config.request,
+          connectorId,
+          logger: this.logger,
+        });
+
+        const agentSkills = await orchestrator.runDiscoveryPipeline({
+          indexNames: this.schemas.map((s) => s.indexName),
+          analystRole: this.config.roleDescription,
+        });
+
+        if (agentSkills.length > 0) {
+          this.skills.push(...this.parseLLMSkills(JSON.stringify(agentSkills)));
+          this.logger.info(
+            `[AESOP] Agent orchestration generated ${agentSkills.length} skills`
+          );
+          agentOrchestrationSucceeded = true;
+        } else {
+          this.logger.warn(
+            '[AESOP] Agent orchestration returned no skills, falling back to direct LLM'
+          );
+        }
+      } catch (error) {
+        this.logger.warn(
+          `[AESOP] Agent orchestration failed, falling back to direct LLM: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    }
+
+    // Direct LLM synthesis (fallback or primary)
+    if (!agentOrchestrationSucceeded && useLLM) {
       // LLM-powered skill synthesis — generates much higher quality skills
       await this.updateStep(
         5,
@@ -707,7 +762,7 @@ export class ExplorationWorkflowExecutor {
         'Generating skills with LLM...'
       );
       await this.synthesizeSkillsWithLLM(actionsClient, connectorId);
-    } else {
+    } else if (!agentOrchestrationSucceeded) {
       // Template-based fallback
       await this.updateStep(5, 0, 6, 'Matching patterns to skill templates...');
 

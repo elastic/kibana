@@ -19,6 +19,7 @@ import { calibrateSamplingStrategy } from '../../services/sampling_strategy';
 const runExplorationBodySchema = z.object({
   include_sample_data: z.boolean().optional().default(true),
   connector_id: z.string().optional(),
+  use_agent_orchestration: z.boolean().optional().default(false),
 });
 
 export function registerRunExplorationRoute({ router, logger }: AESOPRouteDependencies) {
@@ -190,6 +191,9 @@ export function registerRunExplorationRoute({ router, logger }: AESOPRouteDepend
               connectorId,
               actionsClient,
               getSkillRegistry: async () => skillRegistry,
+              useAgentOrchestration: request.body.use_agent_orchestration,
+              getAgentBuilderStart: () => agentBuilderStart,
+              request,
             }
           );
           executor.execute().catch((err) => {

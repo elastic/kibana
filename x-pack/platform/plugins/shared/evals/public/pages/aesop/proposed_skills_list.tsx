@@ -26,6 +26,7 @@ import {
   EuiStat,
   EuiCallOut,
   EuiSuperSelect,
+  EuiSwitch,
 } from '@elastic/eui';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useHistory } from 'react-router-dom';
@@ -77,6 +78,7 @@ export const ProposedSkillsList = () => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending_review'>('pending_review');
   const [derivedFromFilter, setDerivedFromFilter] = useState<string>('all');
   const [discoveryConnectorId, setDiscoveryConnectorId] = useState<string>('');
+  const [useAgentOrchestration, setUseAgentOrchestration] = useState(false);
   const { data: connectors } = useLLMConnectors();
 
   // Auto-select first .gen-ai connector once
@@ -124,6 +126,7 @@ export const ProposedSkillsList = () => {
       return await api.http.post('/internal/aesop/exploration/run', {
         body: JSON.stringify({
           connector_id: discoveryConnectorId || undefined,
+          use_agent_orchestration: useAgentOrchestration,
         }),
         version: '1',
       });
@@ -364,6 +367,15 @@ export const ProposedSkillsList = () => {
                       prepend="LLM"
                       disabled={isDiscoveryRunning}
                       aria-label="Select LLM connector for skill discovery"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiSwitch
+                      label="Use Agents"
+                      checked={useAgentOrchestration}
+                      onChange={(e) => setUseAgentOrchestration(e.target.checked)}
+                      compressed
+                      disabled={isDiscoveryRunning}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
