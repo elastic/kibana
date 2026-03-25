@@ -30,7 +30,6 @@ export function registerProtectionUpdatesNoteRoutes(
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -55,7 +54,6 @@ export function registerProtectionUpdatesNoteRoutes(
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {
