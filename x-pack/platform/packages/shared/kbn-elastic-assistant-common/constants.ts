@@ -140,3 +140,20 @@ export const ELASTIC_AI_ASSISTANT_CHECKPOINT_SAVER_ENABLED_FEATURE_FLAG =
 
 export const ASSISTANT_INTERRUPTS_ENABLED_FEATURE_FLAG =
   'securitySolution.assistantInterruptsEnabled' as const;
+
+/**
+ * Feature flag for the automated alert investigation pipeline (spike/PoC).
+ * When enabled, the pipeline automatically processes security alerts through:
+ * - Deduplication (hash + Jaccard similarity)
+ * - Entity extraction (30+ ECS fields → 13 observable types)
+ * - Case matching (weighted entity overlap scoring)
+ * - Alert-to-case attachment
+ * - Incremental Attack Discovery per case
+ *
+ * Default: false (disabled)
+ * Toggle via: `xpack.feature_flags.overrides.elasticAssistant.alertInvestigationPipelineEnabled: true`
+ *
+ * @see https://github.com/elastic/security-team/issues/16339
+ */
+export const ALERT_INVESTIGATION_PIPELINE_ENABLED_FEATURE_FLAG =
+  'elasticAssistant.alertInvestigationPipelineEnabled' as const;
