@@ -30,6 +30,7 @@ jest.mock('../../../common/lib/kibana', () => ({
   useKibana: () => mockUseKibana(),
   useRouterNavigate: (path: string) => {
     mockUseRouterNavigate(path);
+
     return { onClick: jest.fn(), href: path };
   },
 }));
@@ -72,6 +73,7 @@ let capturedOnDirtyStateChange: ((isDirty: boolean) => void) | undefined;
 jest.mock('./form', () => ({
   EditSavedQueryForm: (props: { onDirtyStateChange?: (isDirty: boolean) => void }) => {
     capturedOnDirtyStateChange = props.onDirtyStateChange;
+
     return (
       <div data-test-subj="edit-saved-query-form">
         <button data-test-subj="make-form-dirty" onClick={() => props.onDirtyStateChange?.(true)}>
