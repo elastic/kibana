@@ -10,12 +10,12 @@ import { render } from '@testing-library/react';
 import { CorrelationsDetails } from './correlations_details';
 import { TestProviders } from '../../../../common/mock';
 import { DocumentDetailsContext } from '../../shared/context';
-import { useShowRelatedAlertsByAncestry } from '../../shared/hooks/use_show_related_alerts_by_ancestry';
-import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
-import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
-import { useShowRelatedAttacks } from '../../shared/hooks/use_show_related_attacks';
-import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
-import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_alerts';
+import { useShowRelatedAlertsByAncestry } from '../../../../flyout_v2/document/hooks/use_show_related_alerts_by_ancestry';
+import { useShowRelatedAlertsBySameSourceEvent } from '../../../../flyout_v2/document/hooks/use_show_related_alerts_by_same_source_event';
+import { useShowRelatedAlertsBySession } from '../../../../flyout_v2/document/hooks/use_show_related_alerts_by_session';
+import { useShowRelatedAttacks } from '../../../../flyout_v2/document/hooks/use_show_related_attacks';
+import { useShowRelatedCases } from '../../../../flyout_v2/document/hooks/use_show_related_cases';
+import { useShowSuppressedAlerts } from '../../../../flyout_v2/document/hooks/use_show_suppressed_alerts';
 import {
   CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID,
   CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TABLE_TEST_ID,
@@ -24,29 +24,33 @@ import {
   CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID,
   CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID,
 } from './test_ids';
-import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
-import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_related_alerts_by_ancestry';
-import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_fetch_related_alerts_by_same_source_event';
-import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
+import { useFetchRelatedAlertsBySession } from '../../../../flyout_v2/document/hooks/use_fetch_related_alerts_by_session';
+import { useFetchRelatedAlertsByAncestry } from '../../../../flyout_v2/document/hooks/use_fetch_related_alerts_by_ancestry';
+import { useFetchRelatedAlertsBySameSourceEvent } from '../../../../flyout_v2/document/hooks/use_fetch_related_alerts_by_same_source_event';
+import { useFetchRelatedCases } from '../../../../flyout_v2/document/hooks/use_fetch_related_cases';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID } from '../../../../flyout_v2/shared/components/test_ids';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
+const useAlertsPrivilegesMock = useAlertsPrivileges as jest.Mock;
+
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
-jest.mock('../../shared/hooks/use_show_related_alerts_by_ancestry');
-jest.mock('../../shared/hooks/use_show_related_alerts_by_same_source_event');
-jest.mock('../../shared/hooks/use_show_related_alerts_by_session');
-jest.mock('../../shared/hooks/use_show_related_attacks');
-jest.mock('../../shared/hooks/use_show_related_cases');
-jest.mock('../../shared/hooks/use_show_suppressed_alerts');
-jest.mock('../../shared/hooks/use_fetch_related_alerts_by_session');
-jest.mock('../../shared/hooks/use_fetch_related_alerts_by_ancestry');
-jest.mock('../../shared/hooks/use_fetch_related_alerts_by_same_source_event');
-jest.mock('../../shared/hooks/use_fetch_related_cases');
+jest.mock('../../../../flyout_v2/document/hooks/use_show_related_alerts_by_ancestry');
+jest.mock('../../../../flyout_v2/document/hooks/use_show_related_alerts_by_same_source_event');
+jest.mock('../../../../flyout_v2/document/hooks/use_show_related_alerts_by_session');
+jest.mock('../../../../flyout_v2/document/hooks/use_show_related_attacks');
+jest.mock('../../../../flyout_v2/document/hooks/use_show_related_cases');
+jest.mock('../../../../flyout_v2/document/hooks/use_show_suppressed_alerts');
+jest.mock('../../../../flyout_v2/document/hooks/use_fetch_related_alerts_by_session');
+jest.mock('../../../../flyout_v2/document/hooks/use_fetch_related_alerts_by_ancestry');
+jest.mock('../../../../flyout_v2/document/hooks/use_fetch_related_alerts_by_same_source_event');
+jest.mock('../../../../flyout_v2/document/hooks/use_fetch_related_cases');
 jest.mock('../../../../data_view_manager/hooks/use_security_default_patterns');
 jest.mock('../../../../common/hooks/use_experimental_features');
 
@@ -73,12 +77,15 @@ describe('CorrelationsDetails', () => {
     (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
       indexPatterns: ['index'],
     });
+    useAlertsPrivilegesMock.mockReturnValue({
+      hasAlertsRead: true,
+    });
   });
 
   it('renders all sections', () => {
     jest
       .mocked(useShowRelatedAlertsByAncestry)
-      .mockReturnValue({ show: true, documentId: 'event-id' });
+      .mockReturnValue({ show: true, ancestryDocumentId: 'event-id' });
     jest
       .mocked(useShowRelatedAlertsBySameSourceEvent)
       .mockReturnValue({ show: true, originalEventId: 'originalEventId' });
@@ -130,7 +137,7 @@ describe('CorrelationsDetails', () => {
   it('should render no section and show error message if show values are false', () => {
     jest
       .mocked(useShowRelatedAlertsByAncestry)
-      .mockReturnValue({ show: false, documentId: 'event-id' });
+      .mockReturnValue({ show: false, ancestryDocumentId: 'event-id' });
     jest
       .mocked(useShowRelatedAlertsBySameSourceEvent)
       .mockReturnValue({ show: false, originalEventId: 'originalEventId' });

@@ -252,6 +252,20 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
   type: waitForInput
   with:
     message: "Please approve before continuing"`,
+        `- name: collect_reason
+  type: waitForInput
+  with:
+    message: "Provide a reason for escalation"
+    schema:
+      properties:
+        reason:
+          type: string
+        severity:
+          type: string
+          enum: [low, medium, high]
+          default: medium
+      required:
+        - reason`,
       ],
     },
   },

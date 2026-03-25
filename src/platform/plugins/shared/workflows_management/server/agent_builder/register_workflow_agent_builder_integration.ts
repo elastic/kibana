@@ -19,8 +19,8 @@ import { registerGetWorkflowTool } from './tools/get_workflow_tool';
 import { registerListWorkflowsTool } from './tools/list_workflows_tool';
 import { registerValidateWorkflowTool } from './tools/validate_workflow_tool';
 import { registerWorkflowEditTools } from './tools/workflow_edit_tools';
+import type { WorkflowsManagementApi } from '../api/workflows_management_api';
 import type { AgentBuilderPluginSetupContract } from '../types';
-import type { WorkflowsManagementApi } from '../workflows_management/workflows_management_api';
 
 interface RegisterWorkflowAgentBuilderIntegrationParams {
   agentBuilder: AgentBuilderPluginSetupContract;

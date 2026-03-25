@@ -41,7 +41,7 @@ For a new dashboard:
 
 For an existing dashboard:
 - Reuse \`data.dashboardAttachment.id\` from the latest dashboard tool result as \`dashboardAttachmentId\`.
-- Use \`remove_panels\` to remove existing panels by \`panelId\`.
+- Use \`remove_panels\` to remove existing panels by \`uid\`.
 - Use \`add_panels_from_attachments\` to add new visualization attachments.
 - Use \`update_panels_from_attachments\` to refresh existing dashboard panels after their source visualization attachments have been updated.
 - Use \`add_section\` or \`remove_section\` for section changes.
@@ -51,15 +51,15 @@ Supported operations:
 - \`set_metadata\`: set or update dashboard title and description.
 - \`upsert_markdown\`: create or replace the markdown summary panel.
 - \`add_panels_from_attachments\`: add panels from visualization attachments, each with explicit \`grid\` coordinates and an optional \`sectionId\`.
-- \`update_panels_from_attachments\`: refresh existing panels that were created from the specified visualization attachment IDs while preserving their current \`panelId\` and \`grid\`.
+- \`update_panels_from_attachments\`: refresh existing panels that were created from the specified visualization attachment IDs while preserving their current \`uid\` and \`grid\`.
 - \`add_section\`: create a new section with its own \`grid.y\` and section-relative panel coordinates.
-- \`remove_section\`: remove a section by \`sectionId\` with \`panelAction: "promote" | "delete"\`.
-- \`remove_panels\`: remove existing panels by \`panelId\`.
+- \`remove_section\`: remove a section by \`uid\` with \`panelAction: "promote" | "delete"\`.
+- \`remove_panels\`: remove existing panels by \`uid\`.
 
 After a successful call:
 - Render the dashboard attachment inline so the user can see and interact with the dashboard card. Do NOT render individual visualization attachments inline during dashboard composition - only the final dashboard attachment should be rendered.
 - Remember \`data.dashboardAttachment.id\` for follow-up updates.
-- Use returned \`panelId\` values for future panel removals.
+- Use returned \`uid\` values for future panel removals.
 - Use returned \`sectionId\` values for future section-targeted changes.
 - If \`data.failures\` is present, explain which attachments failed and why.
 
@@ -70,7 +70,7 @@ After a successful call:
 - \`update_panels_from_attachments\` uses visualization attachment IDs to re-resolve and refresh existing dashboard panels that already reference those attachments.
 - A successful dashboard call returns a dashboard attachment in \`data.dashboardAttachment\`.
 - Use \`data.dashboardAttachment.id\` as \`dashboardAttachmentId\` when updating that dashboard later.
-- Never invent \`dashboardAttachmentId\`, \`panelId\`, or \`sectionId\`. Reuse the values returned by prior tool results.
+- Never invent \`dashboardAttachmentId\`, \`uid\`, or \`sectionId\`. Reuse the values returned by prior tool results.
 
 ${dashboardCompositionPrompt}
 

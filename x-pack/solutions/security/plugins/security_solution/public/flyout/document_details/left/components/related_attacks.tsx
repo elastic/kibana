@@ -18,6 +18,7 @@ import {
 } from './correlations_details_alerts_table';
 import { CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID } from './test_ids';
 import { AttackDetailsPreviewPanelKey } from '../../../attack_details/constants/panel_keys';
+import { ATTACK_PREVIEW_BANNER } from '../../../attack_details/context';
 
 export interface RelatedAttacksProps {
   /**
@@ -48,6 +49,7 @@ export const RelatedAttacks: React.FC<RelatedAttacksProps> = ({ attackIds, scope
         params: {
           attackId,
           indexName,
+          banner: ATTACK_PREVIEW_BANNER,
         },
       });
     },

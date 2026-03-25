@@ -32,6 +32,7 @@ import {
   AIValueUpsellingPageLazy,
   EntityAnalyticsUpsellingPageLazy,
   EntityAnalyticsUpsellingSectionLazy,
+  GraphVisualizationUpsellingSectionLazy,
   SiemMigrationsStartUpsellSectionLazy,
   SiemMigrationsTranslatedRulesUpsellPageLazy,
 } from './lazy_upselling';
@@ -129,6 +130,11 @@ export const upsellingSections: UpsellingSections = [
     id: 'siem_migrations_start',
     minimumLicenseRequired: 'enterprise',
     component: SiemMigrationsStartUpsellSectionLazy,
+  },
+  {
+    id: 'graph_visualization',
+    minimumLicenseRequired: 'platinum',
+    component: GraphVisualizationUpsellingSectionLazy,
   },
 ];
 
