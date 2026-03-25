@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: Remove eslint exceptions comments and fix the issues
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import type { StackFrame } from '@kbn/workflows';
 
 export interface ScopeData {
@@ -72,17 +69,21 @@ export class WorkflowScopeStack {
    * Retrieves the current scope data from the top of the scope stack.
    *
    * This method returns the scope information for the most recently entered scope
-   * within the current step frame. If the stack is empty, it returns null.
+   * within the current step frame. Callers must check {@link isEmpty} before calling
+   * this method.
    *
-   * @returns The current scope data containing node ID, node type, scope ID, and step ID,
-   *          or null if the stack is empty
+   * @returns The current scope data containing node ID, node type, scope ID, and step ID
+   * @throws {Error} If the scope stack is empty
    */
-  getCurrentScope(): ScopeData | null {
-    if (this.isEmpty()) {
-      return null;
+  getCurrentScope(): ScopeData {
+    const topFrame = this._stackFrames.at(-1);
+    if (!topFrame) {
+      throw new Error('ScopeStack is empty');
     }
-    const topFrame = this._stackFrames.at(-1)!;
-    const topScope = topFrame.nestedScopes.at(-1)!;
+    const topScope = topFrame.nestedScopes.at(-1);
+    if (!topScope) {
+      throw new Error('ScopeStack frame has no nested scopes');
+    }
     return {
       nodeId: topScope.nodeId,
       nodeType: topScope.nodeType,
@@ -102,45 +103,34 @@ export class WorkflowScopeStack {
    * @returns A new WorkflowScopeStack instance with the entered scope
    */
   public enterScope(enterScopeData: ScopeData): WorkflowScopeStack {
-    if (this._stackFrames.length && this._stackFrames.at(-1)!.stepId === enterScopeData.stepId) {
-      if (
-        this._stackFrames.at(-1)?.nestedScopes?.length &&
-        this._stackFrames.at(-1)!.nestedScopes.at(-1)?.nodeId === enterScopeData.nodeId
-      ) {
-        const clonedFrames = this.cloneFrames(this.stackFrames);
-        const stackFrame = clonedFrames.at(-1)!;
+    const topFrame = this._stackFrames.at(-1);
 
+    if (topFrame && topFrame.stepId === enterScopeData.stepId) {
+      const lastScope = topFrame.nestedScopes.at(-1);
+
+      if (lastScope && lastScope.nodeId === enterScopeData.nodeId) {
         if (enterScopeData.scopeId) {
-          stackFrame.nestedScopes.at(-1)!.scopeId = enterScopeData.scopeId;
+          return WorkflowScopeStack.fromStackFrames([
+            ...this._stackFrames.slice(0, -1),
+            {
+              ...topFrame,
+              nestedScopes: [
+                ...topFrame.nestedScopes.slice(0, -1),
+                { ...lastScope, scopeId: enterScopeData.scopeId },
+              ],
+            },
+          ]);
         }
 
-        return WorkflowScopeStack.fromStackFrames(clonedFrames);
+        return WorkflowScopeStack.fromStackFrames(this._stackFrames);
       }
 
-      const clonedFrames = this.cloneFrames(this.stackFrames);
-      const stackFrame = clonedFrames.at(-1)!;
-      return WorkflowScopeStack.fromStackFrames(
-        clonedFrames.slice(0, -1).concat([
-          {
-            ...stackFrame,
-            nestedScopes: [
-              ...stackFrame.nestedScopes,
-              {
-                nodeId: enterScopeData.nodeId,
-                nodeType: enterScopeData.nodeType,
-                scopeId: enterScopeData.scopeId,
-              },
-            ],
-          },
-        ])
-      );
-    }
-
-    return WorkflowScopeStack.fromStackFrames(
-      this.cloneFrames(this.stackFrames).concat([
+      return WorkflowScopeStack.fromStackFrames([
+        ...this._stackFrames.slice(0, -1),
         {
-          stepId: enterScopeData.stepId,
+          ...topFrame,
           nestedScopes: [
+            ...topFrame.nestedScopes,
             {
               nodeId: enterScopeData.nodeId,
               nodeType: enterScopeData.nodeType,
@@ -148,8 +138,22 @@ export class WorkflowScopeStack {
             },
           ],
         },
-      ])
-    );
+      ]);
+    }
+
+    return WorkflowScopeStack.fromStackFrames([
+      ...this._stackFrames,
+      {
+        stepId: enterScopeData.stepId,
+        nestedScopes: [
+          {
+            nodeId: enterScopeData.nodeId,
+            nodeType: enterScopeData.nodeType,
+            scopeId: enterScopeData.scopeId,
+          },
+        ],
+      },
+    ]);
   }
 
   /**
@@ -162,20 +166,16 @@ export class WorkflowScopeStack {
    * @returns A new WorkflowScopeStack instance with the exited scope removed
    */
   public exitScope(): WorkflowScopeStack {
-    if (this._stackFrames.length && this._stackFrames.at(-1)!.nestedScopes.length > 1) {
-      const clonedFrames = this.cloneFrames(this.stackFrames);
-      const stackFrame = clonedFrames.at(-1)!;
-      return WorkflowScopeStack.fromStackFrames(
-        clonedFrames.slice(0, -1).concat([
-          {
-            ...stackFrame,
-            nestedScopes: stackFrame.nestedScopes.slice(0, -1),
-          },
-        ])
-      );
+    const topFrame = this._stackFrames.at(-1);
+
+    if (topFrame && topFrame.nestedScopes.length > 1) {
+      return WorkflowScopeStack.fromStackFrames([
+        ...this._stackFrames.slice(0, -1),
+        { ...topFrame, nestedScopes: topFrame.nestedScopes.slice(0, -1) },
+      ]);
     }
 
-    return WorkflowScopeStack.fromStackFrames(this.cloneFrames(this.stackFrames).slice(0, -1));
+    return WorkflowScopeStack.fromStackFrames(this._stackFrames.slice(0, -1));
   }
 
   /**

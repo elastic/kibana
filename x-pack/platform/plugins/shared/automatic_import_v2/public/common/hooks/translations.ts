@@ -53,19 +53,6 @@ export const SAVE_INTEGRATION_ERROR = i18n.translate(
   }
 );
 
-export const LOAD_CONNECTORS_ERROR_TITLE = i18n.translate(
-  'xpack.automaticImportV2.hooks.loadConnectors.errorTitle',
-  {
-    defaultMessage: 'Unable to load connectors',
-  }
-);
-export const LOAD_CONNECTORS_ERROR_MESSAGE = i18n.translate(
-  'xpack.automaticImportV2.hooks.loadConnectors.errorMessage',
-  {
-    defaultMessage: 'Failed to load connectors',
-  }
-);
-
 export const UPLOAD_SAMPLES_SUCCESS = i18n.translate(
   'xpack.automaticImportV2.hooks.uploadSamples.success',
   {
