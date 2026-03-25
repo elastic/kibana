@@ -80,14 +80,14 @@ export const caseMatchingStep = createServerStepDefinition({
 
     // Group alerts by shared entities (host + user combination)
     // This is a lightweight grouping that doesn't require the Cases plugin
-    const alertGroups = new Map<string, string[]>();
+    const entityAlertMap = new Map<string, string[]>();
     for (const entity of entities) {
       if (entity.type_key === 'hostname' || entity.type_key === 'user') {
         const groupKey = `${entity.type_key}::${entity.value}`;
-        if (!alertGroups.has(groupKey)) {
-          alertGroups.set(groupKey, []);
+        if (!entityAlertMap.has(groupKey)) {
+          entityAlertMap.set(groupKey, []);
         }
-        const group = alertGroups.get(groupKey)!;
+        const group = entityAlertMap.get(groupKey)!;
         if (!group.includes(entity.alert_id)) {
           group.push(entity.alert_id);
         }
@@ -99,7 +99,7 @@ export const caseMatchingStep = createServerStepDefinition({
     const groupAlerts = new Map<string, Set<string>>();
     let groupCounter = 0;
 
-    for (const [, alertIds] of alertGroups) {
+    for (const [, alertIds] of entityAlertMap) {
       // Find existing group for any of these alerts
       let existingGroupId: string | undefined;
       for (const alertId of alertIds) {
