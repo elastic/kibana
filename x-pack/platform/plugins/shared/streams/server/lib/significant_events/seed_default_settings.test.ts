@@ -29,12 +29,10 @@ describe('seedDefaultSettings', () => {
 
   beforeEach(() => {
     mockClient = {
-      getSettings: jest.fn().mockResolvedValue({
-        connectorIdKnowledgeIndicatorExtraction: undefined,
-        connectorIdRuleGeneration: undefined,
-        connectorIdDiscovery: undefined,
-      }),
-      updateSettings: jest.fn().mockResolvedValue(undefined),
+      getSettings: jest.fn(),
+      getSettingsWithSource: jest.fn().mockResolvedValue({ connectors: {} }),
+      updateSettings: jest.fn(),
+      updateSettingsWithSource: jest.fn().mockResolvedValue(undefined),
     };
 
     mockModelSettingsConfigService = {
@@ -61,17 +59,117 @@ describe('seedDefaultSettings', () => {
       logger: mockLogger,
     });
 
-  it('skips ES call and write when any connector field is already set', async () => {
-    mockClient.getSettings.mockResolvedValue({
-      connectorIdKnowledgeIndicatorExtraction: 'existing',
-      connectorIdRuleGeneration: undefined,
-      connectorIdDiscovery: undefined,
+  it('seeds all three slots on first run when no SO exists', async () => {
+    mockClient.getSettingsWithSource.mockResolvedValue({ connectors: {} });
+    mockEsClient.inference.get.mockResolvedValue({
+      endpoints: makeEndpoints(Object.values(DEFAULT_CONNECTOR_IDS)),
+    });
+
+    await run();
+
+    expect(mockClient.updateSettingsWithSource).toHaveBeenCalledWith({
+      connectors: {
+        kiFeatureExtractionConnector: {
+          id: DEFAULT_CONNECTOR_IDS.kiFeatureExtractionConnector,
+          source: 'system',
+        },
+        kiQueryGenerationConnector: {
+          id: DEFAULT_CONNECTOR_IDS.kiQueryGenerationConnector,
+          source: 'system',
+        },
+        discoveryAndSigEventsConnector: {
+          id: DEFAULT_CONNECTOR_IDS.discoveryAndSigEventsConnector,
+          source: 'system',
+        },
+      },
+    });
+  });
+
+  it('skips a slot with source: user', async () => {
+    mockClient.getSettingsWithSource.mockResolvedValue({
+      connectors: {
+        kiFeatureExtractionConnector: { id: 'user-chosen', source: 'user' },
+      },
+    });
+    mockEsClient.inference.get.mockResolvedValue({
+      endpoints: makeEndpoints(Object.values(DEFAULT_CONNECTOR_IDS)),
+    });
+
+    await run();
+
+    const call = mockClient.updateSettingsWithSource.mock.calls[0][0];
+    expect(call.connectors).not.toHaveProperty('kiFeatureExtractionConnector');
+    expect(call.connectors!.kiQueryGenerationConnector).toEqual({
+      id: DEFAULT_CONNECTOR_IDS.kiQueryGenerationConnector,
+      source: 'system',
+    });
+    expect(call.connectors!.discoveryAndSigEventsConnector).toEqual({
+      id: DEFAULT_CONNECTOR_IDS.discoveryAndSigEventsConnector,
+      source: 'system',
+    });
+  });
+
+  it('re-seeds a slot with source: system', async () => {
+    mockClient.getSettingsWithSource.mockResolvedValue({
+      connectors: {
+        kiFeatureExtractionConnector: { id: 'old-system-connector', source: 'system' },
+      },
+    });
+    mockEsClient.inference.get.mockResolvedValue({
+      endpoints: makeEndpoints([DEFAULT_CONNECTOR_IDS.kiFeatureExtractionConnector]),
+    });
+
+    await run();
+
+    const call = mockClient.updateSettingsWithSource.mock.calls[0][0];
+    expect(call.connectors!.kiFeatureExtractionConnector).toEqual({
+      id: DEFAULT_CONNECTOR_IDS.kiFeatureExtractionConnector,
+      source: 'system',
+    });
+  });
+
+  it('partially seeds — one slot user-set, two slots seeded', async () => {
+    mockClient.getSettingsWithSource.mockResolvedValue({
+      connectors: {
+        kiQueryGenerationConnector: { id: 'user-picked', source: 'user' },
+      },
+    });
+    mockEsClient.inference.get.mockResolvedValue({
+      endpoints: makeEndpoints([
+        DEFAULT_CONNECTOR_IDS.kiFeatureExtractionConnector,
+        DEFAULT_CONNECTOR_IDS.discoveryAndSigEventsConnector,
+      ]),
+    });
+
+    await run();
+
+    const call = mockClient.updateSettingsWithSource.mock.calls[0][0];
+    expect(call.connectors).toEqual({
+      kiFeatureExtractionConnector: {
+        id: DEFAULT_CONNECTOR_IDS.kiFeatureExtractionConnector,
+        source: 'system',
+      },
+      discoveryAndSigEventsConnector: {
+        id: DEFAULT_CONNECTOR_IDS.discoveryAndSigEventsConnector,
+        source: 'system',
+      },
+    });
+    expect(call.connectors).not.toHaveProperty('kiQueryGenerationConnector');
+  });
+
+  it('skips ES call and write when all slots have source: user', async () => {
+    mockClient.getSettingsWithSource.mockResolvedValue({
+      connectors: {
+        kiFeatureExtractionConnector: { id: 'u1', source: 'user' },
+        kiQueryGenerationConnector: { id: 'u2', source: 'user' },
+        discoveryAndSigEventsConnector: { id: 'u3', source: 'user' },
+      },
     });
 
     await run();
 
     expect(mockEsClient.inference.get).not.toHaveBeenCalled();
-    expect(mockClient.updateSettings).not.toHaveBeenCalled();
+    expect(mockClient.updateSettingsWithSource).not.toHaveBeenCalled();
   });
 
   it('does not write when no desired connectors are available', async () => {
@@ -81,53 +179,20 @@ describe('seedDefaultSettings', () => {
 
     await run();
 
-    expect(mockClient.updateSettings).not.toHaveBeenCalled();
+    expect(mockClient.updateSettingsWithSource).not.toHaveBeenCalled();
   });
 
   it('ignores endpoints with non-chat_completion task type', async () => {
     mockEsClient.inference.get.mockResolvedValue({
       endpoints: makeEndpoints(
-        [DEFAULT_CONNECTOR_IDS.knowledgeIndicatorExtraction],
+        [DEFAULT_CONNECTOR_IDS.kiFeatureExtractionConnector],
         'sparse_embedding'
       ),
     });
 
     await run();
 
-    expect(mockClient.updateSettings).not.toHaveBeenCalled();
-  });
-
-  it('writes all three connectors when all are available', async () => {
-    mockEsClient.inference.get.mockResolvedValue({
-      endpoints: makeEndpoints(Object.values(DEFAULT_CONNECTOR_IDS)),
-    });
-
-    await run();
-
-    expect(mockClient.updateSettings).toHaveBeenCalledWith({
-      connectorIdKnowledgeIndicatorExtraction: DEFAULT_CONNECTOR_IDS.knowledgeIndicatorExtraction,
-      connectorIdRuleGeneration: DEFAULT_CONNECTOR_IDS.ruleGeneration,
-      connectorIdDiscovery: DEFAULT_CONNECTOR_IDS.discovery,
-    });
-  });
-
-  it('writes only available connectors and omits missing ones', async () => {
-    mockEsClient.inference.get.mockResolvedValue({
-      endpoints: makeEndpoints([
-        DEFAULT_CONNECTOR_IDS.knowledgeIndicatorExtraction,
-        DEFAULT_CONNECTOR_IDS.discovery,
-      ]),
-    });
-
-    await run();
-
-    expect(mockClient.updateSettings).toHaveBeenCalledWith({
-      connectorIdKnowledgeIndicatorExtraction: DEFAULT_CONNECTOR_IDS.knowledgeIndicatorExtraction,
-      connectorIdDiscovery: DEFAULT_CONNECTOR_IDS.discovery,
-    });
-    expect(mockClient.updateSettings.mock.calls[0][0]).not.toHaveProperty(
-      'connectorIdRuleGeneration'
-    );
+    expect(mockClient.updateSettingsWithSource).not.toHaveBeenCalled();
   });
 
   it('does not write when endpoints field is absent from response', async () => {
@@ -135,6 +200,72 @@ describe('seedDefaultSettings', () => {
 
     await run();
 
-    expect(mockClient.updateSettings).not.toHaveBeenCalled();
+    expect(mockClient.updateSettingsWithSource).not.toHaveBeenCalled();
+  });
+
+  it('skips write when system slot already has the current default and it is still available', async () => {
+    mockClient.getSettingsWithSource.mockResolvedValue({
+      connectors: {
+        kiFeatureExtractionConnector: {
+          id: DEFAULT_CONNECTOR_IDS.kiFeatureExtractionConnector,
+          source: 'system',
+        },
+        kiQueryGenerationConnector: {
+          id: DEFAULT_CONNECTOR_IDS.kiQueryGenerationConnector,
+          source: 'system',
+        },
+        discoveryAndSigEventsConnector: {
+          id: DEFAULT_CONNECTOR_IDS.discoveryAndSigEventsConnector,
+          source: 'system',
+        },
+      },
+    });
+    mockEsClient.inference.get.mockResolvedValue({
+      endpoints: makeEndpoints(Object.values(DEFAULT_CONNECTOR_IDS)),
+    });
+
+    await run();
+
+    expect(mockClient.updateSettingsWithSource).not.toHaveBeenCalled();
+  });
+
+  it('updates system slot to new default when stored ID differs from default but is still available in EIS', async () => {
+    const oldDefaultId = '.old-model-chat_completion';
+    mockClient.getSettingsWithSource.mockResolvedValue({
+      connectors: {
+        kiFeatureExtractionConnector: { id: oldDefaultId, source: 'system' },
+      },
+    });
+    // Both old and new default are available — simulates model rotation where old model not yet removed
+    mockEsClient.inference.get.mockResolvedValue({
+      endpoints: makeEndpoints([oldDefaultId, DEFAULT_CONNECTOR_IDS.kiFeatureExtractionConnector]),
+    });
+
+    await run();
+
+    const call = mockClient.updateSettingsWithSource.mock.calls[0][0];
+    expect(call.connectors!.kiFeatureExtractionConnector).toEqual({
+      id: DEFAULT_CONNECTOR_IDS.kiFeatureExtractionConnector,
+      source: 'system',
+    });
+  });
+
+  it('warns and does not write when system slot has stale ID and default is also unavailable', async () => {
+    mockClient.getSettingsWithSource.mockResolvedValue({
+      connectors: {
+        kiFeatureExtractionConnector: { id: '.removed-model-chat_completion', source: 'system' },
+      },
+    });
+    // Neither stored ID nor default is available
+    mockEsClient.inference.get.mockResolvedValue({
+      endpoints: makeEndpoints(['some-unrelated-connector']),
+    });
+
+    await run();
+
+    expect(mockClient.updateSettingsWithSource).not.toHaveBeenCalled();
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('kiFeatureExtractionConnector')
+    );
   });
 });

@@ -6,6 +6,9 @@
  */
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { CONNECTOR_SLOT_NAMES } from '../saved_objects/significant_events/model_settings_config';
+import type { ConnectorSlotName } from '../saved_objects/significant_events/model_settings_config';
+import type { ConnectorSlotUpdate } from '../saved_objects/significant_events/model_settings_config_client';
 import type { ModelSettingsConfigService } from '../saved_objects/significant_events/model_settings_config_service';
 import { DEFAULT_CONNECTOR_IDS } from './constants';
 
@@ -21,14 +24,14 @@ export const seedDefaultSettings = async ({
   logger: Logger;
 }): Promise<void> => {
   const client = modelSettingsConfigService.getClient({ soClient });
-  const currentSettings = await client.getSettings();
+  const { connectors: currentConnectors } = await client.getSettingsWithSource();
 
-  if (
-    currentSettings.connectorIdKnowledgeIndicatorExtraction ||
-    currentSettings.connectorIdRuleGeneration ||
-    currentSettings.connectorIdDiscovery
-  ) {
-    logger.debug('SigEvents connector settings already configured, skipping seed');
+  const slotsNeedingUpdate = CONNECTOR_SLOT_NAMES.filter(
+    (slotName) => currentConnectors[slotName]?.source !== 'user'
+  );
+
+  if (slotsNeedingUpdate.length === 0) {
+    logger.debug('All SigEvents connector slots are user-configured, skipping seed');
     return;
   }
 
@@ -38,30 +41,42 @@ export const seedDefaultSettings = async ({
     endpoints.filter((ep) => ep.task_type === 'chat_completion').map((ep) => ep.inference_id)
   );
 
-  const filteredSettings: {
-    connectorIdKnowledgeIndicatorExtraction?: string;
-    connectorIdRuleGeneration?: string;
-    connectorIdDiscovery?: string;
-  } = {};
+  const updates: Partial<Record<ConnectorSlotName, ConnectorSlotUpdate>> = {};
+  const staleSlots: ConnectorSlotName[] = [];
 
-  if (availableIds.has(DEFAULT_CONNECTOR_IDS.knowledgeIndicatorExtraction)) {
-    filteredSettings.connectorIdKnowledgeIndicatorExtraction =
-      DEFAULT_CONNECTOR_IDS.knowledgeIndicatorExtraction;
-  }
-  if (availableIds.has(DEFAULT_CONNECTOR_IDS.ruleGeneration)) {
-    filteredSettings.connectorIdRuleGeneration = DEFAULT_CONNECTOR_IDS.ruleGeneration;
-  }
-  if (availableIds.has(DEFAULT_CONNECTOR_IDS.discovery)) {
-    filteredSettings.connectorIdDiscovery = DEFAULT_CONNECTOR_IDS.discovery;
+  for (const slotName of slotsNeedingUpdate) {
+    const defaultId = DEFAULT_CONNECTOR_IDS[slotName];
+    const storedId = currentConnectors[slotName]?.id;
+
+    if (storedId && !availableIds.has(storedId)) {
+      // Stored ID is no longer available in EIS — stale
+      if (availableIds.has(defaultId)) {
+        updates[slotName] = { id: defaultId, source: 'system' };
+      } else {
+        staleSlots.push(slotName);
+      }
+    } else if (!storedId || storedId !== defaultId) {
+      // Absent or pointing at something other than the current default
+      if (availableIds.has(defaultId)) {
+        updates[slotName] = { id: defaultId, source: 'system' };
+      }
+    }
+    // else: storedId === defaultId and still available — nothing to do
   }
 
-  if (Object.keys(filteredSettings).length === 0) {
-    logger.debug('No desired SigEvents connectors available in this environment, skipping seed');
+  if (staleSlots.length > 0) {
+    logger.warn(
+      `SigEvents connector slots have stale IDs with no available replacement: ${staleSlots.join(
+        ', '
+      )}`
+    );
+  }
+
+  if (Object.keys(updates).length === 0) {
+    logger.debug('No SigEvents connector updates needed');
     return;
   }
 
-  await client.updateSettings(filteredSettings);
-  logger.info(
-    `Seeded default SigEvents connector settings: ${Object.keys(filteredSettings).join(', ')}`
-  );
+  await client.updateSettingsWithSource({ connectors: updates });
+  logger.info(`Seeded default SigEvents connector settings: ${Object.keys(updates).join(', ')}`);
 };

@@ -6,7 +6,7 @@
  */
 
 export const DEFAULT_CONNECTOR_IDS = {
-  knowledgeIndicatorExtraction: '.google-gemini-3.0-flash-chat_completion',
-  ruleGeneration: '.openai-gpt-5.2-chat_completion',
-  discovery: '.anthropic-claude-4.6-sonnet-chat_completion',
+  kiFeatureExtractionConnector: '.google-gemini-3.0-flash-chat_completion',
+  kiQueryGenerationConnector: '.openai-gpt-5.2-chat_completion',
+  discoveryAndSigEventsConnector: '.anthropic-claude-4.6-sonnet-chat_completion',
 } as const;
