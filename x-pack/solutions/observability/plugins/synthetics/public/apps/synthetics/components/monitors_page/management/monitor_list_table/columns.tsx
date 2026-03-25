@@ -53,7 +53,10 @@ export function useMonitorListColumns({
   loading: boolean;
   overviewStatus: OverviewStatusState | null;
   setMonitorPendingDeletion: (configs: string[]) => void;
-  setMonitorPendingReset: (configs: string[]) => void;
+  setMonitorPendingReset: (val: {
+    resetIds: string[];
+    skippedMonitors: Array<{ id: string; name: string }>;
+  }) => void;
   isResetFixable: (configId: string) => boolean;
 }): Array<EuiBasicTableColumn<EncryptedSyntheticsSavedMonitor>> {
   const history = useHistory();
@@ -334,7 +337,7 @@ export function useMonitorListColumns({
           available: (fields) => isResetFixable(fields[ConfigKey.CONFIG_ID]),
           enabled: (fields) => canEditSynthetics && !isActionLoading(fields),
           onClick: (fields) => {
-            setMonitorPendingReset([fields[ConfigKey.CONFIG_ID]]);
+            setMonitorPendingReset({ resetIds: [fields[ConfigKey.CONFIG_ID]], skippedMonitors: [] });
           },
         },
         {

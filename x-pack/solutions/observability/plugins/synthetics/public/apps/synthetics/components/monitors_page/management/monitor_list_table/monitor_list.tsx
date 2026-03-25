@@ -53,7 +53,10 @@ export const MonitorList = ({
   const isXl = useIsWithinMinBreakpoint('xxl');
 
   const [monitorPendingDeletion, setMonitorPendingDeletion] = useState<string[]>([]);
-  const [monitorPendingReset, setMonitorPendingReset] = useState<string[]>([]);
+  const [monitorPendingReset, setMonitorPendingReset] = useState<{
+    resetIds: string[];
+    skippedMonitors: Array<{ id: string; name: string }>;
+  } | null>(null);
   const { resetMonitors, isResetFixable } = useMonitorIntegrationHealth();
 
   const handleOnChange = useCallback(
@@ -154,10 +157,11 @@ export const MonitorList = ({
           selection={selection}
         />
       </EuiPanel>
-      {monitorPendingReset.length > 0 && (
+      {monitorPendingReset !== null && monitorPendingReset.resetIds.length > 0 && (
         <ResetMonitorModal
-          configIds={monitorPendingReset}
-          onClose={() => setMonitorPendingReset([])}
+          configIds={monitorPendingReset.resetIds}
+          skippedMonitors={monitorPendingReset.skippedMonitors}
+          onClose={() => setMonitorPendingReset(null)}
           resetMonitors={resetMonitors}
         />
       )}
