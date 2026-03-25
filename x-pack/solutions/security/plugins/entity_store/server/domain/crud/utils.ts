@@ -19,6 +19,7 @@ import type {
 import { BadCRUDRequestError } from '../errors';
 
 type CrudOperation = 'create' | 'update';
+const GENERIC_TYPE = 'generic' as EntityType;
 
 export function hashEuid(id: string): string {
   // EUID generation uses MD5. It is not a security-related feature.
@@ -140,7 +141,7 @@ function transformDoc(
     '@timestamp': new Date().toISOString(),
   };
 
-  if (type === 'generic') {
+  if (type === GENERIC_TYPE) {
     return doc;
   }
 
