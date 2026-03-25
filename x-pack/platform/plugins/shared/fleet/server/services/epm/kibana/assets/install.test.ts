@@ -145,6 +145,36 @@ describe('createSavedObjectKibanaAsset', () => {
     expect(result.typeMigrationVersion).toEqual('8.6.0');
     expect(result.coreMigrationVersion).toEqual('8.7.0');
   });
+
+  it('should rewrite alerting_rule_template IDs when installing as additional space', () => {
+    const asset = createAsset({
+      id: 'system-logs-template',
+      type: KibanaSavedObjectType.alertingRuleTemplate,
+      attributes: { name: '[System] Logs template' },
+    });
+    const result = createSavedObjectKibanaAsset(asset, {
+      installAsAdditionalSpace: true,
+      spaceId: 'my-space',
+    });
+
+    expect(result.id).not.toEqual('system-logs-template');
+    expect(result.originId).toEqual('system-logs-template');
+  });
+
+  it('should not rewrite alerting_rule_template IDs for the primary install space', () => {
+    const asset = createAsset({
+      id: 'system-logs-template',
+      type: KibanaSavedObjectType.alertingRuleTemplate,
+      attributes: { name: '[System] Logs template' },
+    });
+    const result = createSavedObjectKibanaAsset(asset, {
+      installAsAdditionalSpace: false,
+      spaceId: 'default',
+    });
+
+    expect(result.id).toEqual('system-logs-template');
+    expect(result.originId).toBeUndefined();
+  });
 });
 
 describe('replaceIdsInKibanaAsset', () => {

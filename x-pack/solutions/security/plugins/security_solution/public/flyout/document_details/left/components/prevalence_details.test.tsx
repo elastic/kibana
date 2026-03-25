@@ -153,7 +153,10 @@ describe('PrevalenceDetails', () => {
     mockUiSettingsGet.mockReturnValue(true);
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    (useUserPrivileges as jest.Mock).mockReturnValue({ timelinePrivileges: { read: true } });
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      timelinePrivileges: { read: true },
+      rulesPrivileges: { rules: { read: true } },
+    });
   });
 
   it('should render the table with all data if license is platinum', () => {
@@ -281,7 +284,10 @@ describe('PrevalenceDetails', () => {
   });
 
   it('should render formatted numbers as text if user lacks timeline read privileges', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({ timelinePrivileges: { read: false } });
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      timelinePrivileges: { read: false },
+      rulesPrivileges: { rules: { read: true } },
+    });
     (usePrevalence as jest.Mock).mockReturnValue({
       loading: false,
       error: false,

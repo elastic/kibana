@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
+import { useAssistantContext } from '@kbn/elastic-assistant';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import {
   API_VERSIONS,
   ATTACK_DISCOVERY_GENERATE,
@@ -59,6 +60,7 @@ export const useAttackDiscovery = ({
 
   const { data: aiConnectors } = useLoadConnectors({
     http,
+    featureId: 'attack_discovery',
     settings,
   });
 
