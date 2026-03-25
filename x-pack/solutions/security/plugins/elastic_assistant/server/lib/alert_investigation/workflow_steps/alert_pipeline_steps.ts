@@ -155,7 +155,7 @@ export const deduplicateAlertsStep = createServerStepDefinition({
     const now = new Date();
     const lookbackTime = new Date(now.getTime() - lookbackMinutes * 60 * 1000);
 
-    const result = await esClient.search({
+    const searchResponse = await esClient.search({
       index: indexPattern,
       query: {
         bool: {
@@ -177,7 +177,7 @@ export const deduplicateAlertsStep = createServerStepDefinition({
       size: maxAlerts,
     });
 
-    const alerts = result.hits.hits
+    const alerts = searchResponse.hits.hits
       .filter((hit): hit is typeof hit & { _id: string } => hit._id != null)
       .map((hit) => ({
         _id: hit._id,
@@ -188,7 +188,7 @@ export const deduplicateAlertsStep = createServerStepDefinition({
       return { output: { leader_alert_ids: [], total_before: 0, total_after: 0, dedup_rate: 0 } };
     }
 
-    const result = await deduplicateAlerts({
+    const dedupResult = await deduplicateAlerts({
       alerts,
       esClient,
       logger,
@@ -197,10 +197,10 @@ export const deduplicateAlertsStep = createServerStepDefinition({
 
     return {
       output: {
-        leader_alert_ids: result.leaders.map((l) => l._id),
-        total_before: result.stats.totalAlerts,
-        total_after: result.stats.uniqueClusters,
-        dedup_rate: result.stats.deduplicationRate,
+        leader_alert_ids: dedupResult.leaders.map((l) => l._id),
+        total_before: dedupResult.stats.totalAlerts,
+        total_after: dedupResult.stats.uniqueClusters,
+        dedup_rate: dedupResult.stats.deduplicationRate,
       },
     };
   },
