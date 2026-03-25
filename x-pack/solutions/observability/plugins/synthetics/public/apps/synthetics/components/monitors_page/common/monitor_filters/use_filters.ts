@@ -66,7 +66,7 @@ export function useMonitorFiltersState() {
   const { configIds } = urlParams;
   useEffect(() => {
     dispatch(updateManagementPageStateAction({ configIds }));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, JSON.stringify(configIds)]);
   const { useLogicalAndFor } = urlParams;
 

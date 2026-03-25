@@ -337,7 +337,10 @@ export function useMonitorListColumns({
           available: (fields) => isResetFixable(fields[ConfigKey.CONFIG_ID]),
           enabled: (fields) => canEditSynthetics && !isActionLoading(fields),
           onClick: (fields) => {
-            setMonitorPendingReset({ resetIds: [fields[ConfigKey.CONFIG_ID]], skippedMonitors: [] });
+            setMonitorPendingReset({
+              resetIds: [fields[ConfigKey.CONFIG_ID]],
+              skippedMonitors: [],
+            });
           },
         },
         {

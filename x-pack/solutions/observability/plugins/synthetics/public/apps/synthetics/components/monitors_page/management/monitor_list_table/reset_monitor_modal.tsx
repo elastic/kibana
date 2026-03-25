@@ -94,13 +94,10 @@ export const ResetMonitorModal = ({
           >
             <EuiText size="s">
               <p>
-                {i18n.translate(
-                  'xpack.synthetics.resetMonitorModal.skippedWarning.description',
-                  {
-                    defaultMessage:
-                      'These monitors have issues that cannot be fixed by resetting. Check your Fleet agents.',
-                  }
-                )}
+                {i18n.translate('xpack.synthetics.resetMonitorModal.skippedWarning.description', {
+                  defaultMessage:
+                    'These monitors have issues that cannot be fixed by resetting. Check your Fleet agents.',
+                })}
               </p>
             </EuiText>
             <EuiAccordion
