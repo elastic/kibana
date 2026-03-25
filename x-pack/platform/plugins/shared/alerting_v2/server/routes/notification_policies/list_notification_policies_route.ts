@@ -24,12 +24,12 @@ const sortFieldSchema = z.enum([
 ]);
 
 const listNotificationPoliciesQuerySchema = z.object({
-  page: z.number().min(1).optional(),
-  perPage: z.number().min(1).max(100).optional(),
+  page: z.coerce.number().min(1).optional(),
+  perPage: z.coerce.number().min(1).max(100).optional(),
   search: z.string().optional(),
   destinationType: z.string().optional(),
   createdBy: z.string().optional(),
-  enabled: z.boolean().optional(),
+  enabled: z.coerce.boolean().optional(),
   sortField: sortFieldSchema.optional(),
   sortOrder: z.enum(['asc', 'desc']).optional(),
 });

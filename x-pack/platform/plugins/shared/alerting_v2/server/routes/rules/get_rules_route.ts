@@ -19,8 +19,8 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
 
 const getRulesQuerySchema = z.object({
-  page: z.number().min(1).optional().describe('The page number to return.'),
-  perPage: z
+  page: z.coerce.number().min(1).optional().describe('The page number to return.'),
+  perPage: z.coerce
     .number()
     .min(1)
     .max(1000)
