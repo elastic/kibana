@@ -122,12 +122,12 @@ evaluate.describe('Pipeline suggestion quality evaluation', { tag: tags.stateful
           const isInlineMode =
             example.input.sample_documents && example.input.sample_documents.length > 0;
 
-          if (isInlineMode) {
-            example.input.stream_name = 'logs.otel';
-          }
+          const evaluationExample = isInlineMode
+            ? { ...example, input: { ...example.input, stream_name: 'logs.otel' } }
+            : example;
 
           await evaluatePipelineSuggestion({
-            example,
+            example: evaluationExample,
             datasetName: `Pipeline Suggestion - ${example.input.system}`,
             datasetDescription: dataset.description,
           });

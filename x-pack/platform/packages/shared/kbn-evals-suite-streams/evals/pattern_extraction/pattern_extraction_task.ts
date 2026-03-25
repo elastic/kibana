@@ -72,12 +72,12 @@ const extractFields = (
   value: Record<string, unknown>,
   fieldToParse: string,
   originalMessage: string
-): Record<string, string | number | boolean | null> => {
+): Record<string, string | number> => {
   // Only exclude metadata fields, not fieldToParse.
   // If the pattern extracts a body.text field, it's the extracted message (e.g., GREEDYDATA)
   // which IS a valid extraction result we want to show to the evaluator.
   const excluded = new Set(['stream.name', '@timestamp']);
-  const fields: Record<string, string | number | boolean | null> = {};
+  const fields: Record<string, string | number> = {};
 
   for (const [key, val] of Object.entries(value)) {
     if (!excluded.has(key) && (typeof val === 'string' || typeof val === 'number')) {

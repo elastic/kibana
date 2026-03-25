@@ -74,10 +74,11 @@ export const createPatternExtractionLlmEvaluator = (
   kind: 'LLM',
   evaluate: async ({ output, expected, input, metadata }) => {
     const { parsedLogs, heuristicPattern, suggestedProcessor, patternType } = output.output;
-    const exp = expected as PatternExtractionGroundTruth;
+    const exp = expected as PatternExtractionGroundTruth | undefined;
     const inp = input as PatternExtractionEvaluationExample['input'] | undefined;
 
-    const { expected_fields: expectedFields, pattern_characteristics: characteristics } = exp;
+    const expectedFields = exp?.expected_fields;
+    const characteristics = exp?.pattern_characteristics;
 
     const expectedTimestamp = expectedFields?.timestamp?.field_name;
     const expectedLogLevel = expectedFields?.log_level?.field_name;

@@ -31,7 +31,7 @@ export interface PatternQualityMetrics {
 
 export interface ParsedLog {
   parsed: boolean;
-  fields: Record<string, string | number | boolean | null>;
+  fields: Record<string, string | number>;
   originalMessage: string;
 }
 
