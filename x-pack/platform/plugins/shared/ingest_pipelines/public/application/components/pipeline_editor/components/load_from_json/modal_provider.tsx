@@ -61,7 +61,7 @@ const defaultValue = {};
 const defaultValueRaw = JSON.stringify(defaultValue, null, 2);
 
 const isValidXJson = (content: string): boolean => {
-  if (content.trim() === '') return true;
+  if (content.trim() === '') return false;
   try {
     JSON.parse(collapseLiteralStrings(content));
     return true;
