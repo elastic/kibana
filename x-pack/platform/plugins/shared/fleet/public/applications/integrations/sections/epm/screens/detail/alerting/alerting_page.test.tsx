@@ -321,7 +321,7 @@ describe('AlertingPage', () => {
       expect(screen.queryByText('Idle data streams alerting available')).not.toBeInTheDocument();
     });
 
-    it('should not show callout when inactivity template exists', async () => {
+    it('should not show callout when inactivity template exists in default space', async () => {
       mockExperimentalFeaturesGet.mockReturnValue({
         enableIntegrationInactivityAlerting: true,
       });
@@ -347,6 +347,58 @@ describe('AlertingPage', () => {
             },
             'fleet-system-inactivity-monitoring': {
               id: 'fleet-system-inactivity-monitoring',
+              type: 'alerting_rule_template',
+              attributes: { title: '[System] Idle data streams' },
+            },
+          },
+        },
+        userCreatedRules: [],
+        isLoading: false,
+        fetchError: undefined,
+        refetch: jest.fn(),
+      });
+
+      renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByText('[System] Template')).toBeInTheDocument();
+      });
+
+      expect(screen.queryByText('Idle data streams alerting available')).not.toBeInTheDocument();
+    });
+
+    it('should not show callout when space-specific inactivity template exists', async () => {
+      mockExperimentalFeaturesGet.mockReturnValue({
+        enableIntegrationInactivityAlerting: true,
+      });
+
+      mockUseAlertingAssets.mockReturnValue({
+        alertingAssets: [
+          { id: 'template-1', type: 'alerting_rule_template' },
+          {
+            id: 'fleet-system-inactivity-monitoring-my-space',
+            type: 'alerting_rule_template',
+          },
+        ],
+        alertingAssetsByType: {
+          alerting_rule_template: [
+            { id: 'template-1', type: 'alerting_rule_template' },
+            {
+              id: 'fleet-system-inactivity-monitoring-my-space',
+              type: 'alerting_rule_template',
+            },
+          ],
+        },
+        deferredAlerts: [],
+        assetSavedObjectsByType: {
+          alerting_rule_template: {
+            'template-1': {
+              id: 'template-1',
+              type: 'alerting_rule_template',
+              attributes: { title: '[System] Template' },
+            },
+            'fleet-system-inactivity-monitoring-my-space': {
+              id: 'fleet-system-inactivity-monitoring-my-space',
               type: 'alerting_rule_template',
               attributes: { title: '[System] Idle data streams' },
             },
