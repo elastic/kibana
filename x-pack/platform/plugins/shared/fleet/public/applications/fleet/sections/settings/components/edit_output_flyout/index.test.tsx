@@ -517,7 +517,7 @@ describe('EditOutputFlyout', () => {
         is_default_monitoring: false,
       });
 
-      expect(utils.queryByText('OpenTelemetry Exportern')).toBeNull();
+      expect(utils.queryByText('OpenTelemetry Exporter')).toBeNull();
       expect(utils.queryByLabelText('Advanced YAML Configuration')).toBeNull();
     });
 

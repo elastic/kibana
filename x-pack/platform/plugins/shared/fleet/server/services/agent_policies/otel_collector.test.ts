@@ -1442,5 +1442,48 @@ describe('generateOtelcolConfig', () => {
         auth: { authenticator: 'beatsauth/default' },
       });
     });
+
+    it('should handle malformed YAML without throwing', () => {
+      const outputWithBadYaml: Output = {
+        ...defaultOutput,
+        otel_exporter_config_yaml: ': invalid yaml',
+      };
+
+      expect(() => generateOtelcolConfig(inputs, outputWithBadYaml)).not.toThrow();
+
+      const result = generateOtelcolConfig(inputs, outputWithBadYaml);
+      expect(result.exporters?.['elasticsearch/default']).toEqual({
+        endpoints: defaultOutput.hosts,
+        auth: { authenticator: 'beatsauth/default' },
+      });
+    });
+
+    it('should ignore non-object YAML (scalar)', () => {
+      const outputWithScalarYaml: Output = {
+        ...defaultOutput,
+        otel_exporter_config_yaml: 'just a string',
+      };
+
+      const result = generateOtelcolConfig(inputs, outputWithScalarYaml);
+
+      expect(result.exporters?.['elasticsearch/default']).toEqual({
+        endpoints: defaultOutput.hosts,
+        auth: { authenticator: 'beatsauth/default' },
+      });
+    });
+
+    it('should ignore non-object YAML (array)', () => {
+      const outputWithArrayYaml: Output = {
+        ...defaultOutput,
+        otel_exporter_config_yaml: '- a\n- b',
+      };
+
+      const result = generateOtelcolConfig(inputs, outputWithArrayYaml);
+
+      expect(result.exporters?.['elasticsearch/default']).toEqual({
+        endpoints: defaultOutput.hosts,
+        auth: { authenticator: 'beatsauth/default' },
+      });
+    });
   });
 });

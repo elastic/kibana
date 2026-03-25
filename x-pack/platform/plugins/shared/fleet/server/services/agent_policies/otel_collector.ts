@@ -450,6 +450,21 @@ function attachOtelcolExporter(
   return config;
 }
 
+function parseOtelExporterConfigYaml(yaml: string | null | undefined): Record<string, unknown> {
+  if (!yaml) return {};
+  try {
+    const parsed = load(yaml);
+    if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return parsed as Record<string, unknown>;
+    }
+    return {};
+  } catch {
+    // Malformed YAML — skip extra config rather than crashing policy generation.
+    // The UI validates YAML before saving; this path is only reachable via direct API writes.
+    return {};
+  }
+}
+
 function generateOtelcolExporter(
   dataOutput: Output,
   proxy?: FleetProxy
@@ -461,9 +476,7 @@ function generateOtelcolExporter(
     case outputType.Elasticsearch: {
       const outputID = getOutputIdForAgentPolicy(dataOutput);
       const beatsauthID = `beatsauth/${outputID}`;
-      const extraExporterConfig = dataOutput.otel_exporter_config_yaml
-        ? (load(dataOutput.otel_exporter_config_yaml) as Record<string, unknown>) ?? {}
-        : {};
+      const extraExporterConfig = parseOtelExporterConfigYaml(dataOutput.otel_exporter_config_yaml);
       return {
         extensions: {
           [beatsauthID]: buildBeatsauthConfig(dataOutput, proxy),
