@@ -29,6 +29,8 @@ import {
   validateSkillContent,
   suggestCorrectIndexName,
 } from '../validation/skill_content_validator';
+import { SkillDeduplicator } from '../dedup/skill_deduplicator';
+import { ConversationAnalyzer, type ConversationInsights } from '../analysis/conversation_analyzer';
 
 const PROPOSED_SKILLS_INDEX = '.aesop-proposed-skills';
 const DISCOVERED_PATTERNS_INDEX = '.aesop-discovered-patterns';
@@ -167,6 +169,7 @@ export class ExplorationWorkflowExecutor {
   private relationships: RelationshipInfo[] = [];
   private patterns: PatternInfo[] = [];
   private skills: ProposedSkill[] = [];
+  private conversationInsights: ConversationInsights | null = null;
 
   constructor(
     private readonly esClient: ElasticsearchClient,
@@ -197,6 +200,14 @@ export class ExplorationWorkflowExecutor {
 
       // Phase 4: Pattern Mining
       await this.executePhase(4, 'Pattern Mining', () => this.phasePatternMining());
+
+      // Analyze Agent Builder conversations for additional context
+      this.conversationInsights = await ConversationAnalyzer.analyze(this.esClient, this.logger);
+      if (this.conversationInsights.totalConversations > 0) {
+        this.logger.info(
+          `[AESOP] Analyzed ${this.conversationInsights.totalConversations} Agent Builder conversations`
+        );
+      }
 
       // Phase 5: Skill Synthesis
       await this.executePhase(5, 'Skill Synthesis', () => this.phaseSkillSynthesis());
@@ -720,6 +731,32 @@ export class ExplorationWorkflowExecutor {
     this.skills = validatedSkills;
     this.skills.sort((a, b) => b.confidence - a.confidence);
 
+    // Deduplicate within this batch
+    const batchDeduped = SkillDeduplicator.deduplicate(
+      this.skills.map((s) => ({
+        id: s.skillId,
+        name: s.name,
+        sourceIndices: s.sourceIndices,
+        confidence: s.confidence,
+      }))
+    );
+    const batchDedupedIds = new Set(batchDeduped.map((s) => s.id));
+    this.skills = this.skills.filter((s) => batchDedupedIds.has(s.skillId));
+
+    // Deduplicate against existing skills from previous runs
+    const existingDeduped = await SkillDeduplicator.deduplicateAgainstExisting(
+      this.esClient,
+      this.skills.map((s) => ({
+        id: s.skillId,
+        name: s.name,
+        sourceIndices: s.sourceIndices,
+        confidence: s.confidence,
+      })),
+      this.logger
+    );
+    const existingDedupedIds = new Set(existingDeduped.map((s) => s.id));
+    this.skills = this.skills.filter((s) => existingDedupedIds.has(s.skillId));
+
     // Store proposed skills
     await this.updateStep(5, 5, 6, 'Storing proposed skills...');
     await this.ensureIndex(PROPOSED_SKILLS_INDEX);
@@ -1237,6 +1274,33 @@ Respond with ONLY a JSON array (no markdown fences): [{ "name": "...", ... }, ..
       sections.push(`- ${pattern.patternName} (freq: ${pattern.frequency}, confidence: ${Math.round(pattern.confidence * 100)}%)`);
       if (pattern.exampleQueries[0]) {
         sections.push(`  Query: ${pattern.exampleQueries[0]}`);
+      }
+    }
+
+    if (this.conversationInsights && this.conversationInsights.totalConversations > 0) {
+      sections.push('\n## Agent Builder Conversation Insights');
+      sections.push(
+        `Analyzed ${this.conversationInsights.totalConversations} conversations (${this.conversationInsights.totalMessages} messages)`
+      );
+      if (this.conversationInsights.toolUsage.length > 0) {
+        sections.push(
+          `Most used tools: ${this.conversationInsights.toolUsage
+            .slice(0, 5)
+            .map((t) => `${t.tool} (${t.count}x)`)
+            .join(', ')}`
+        );
+      }
+      if (this.conversationInsights.esqlPatterns.length > 0) {
+        sections.push('Common ES|QL patterns:');
+        for (const q of this.conversationInsights.esqlPatterns.slice(0, 5)) {
+          sections.push(`  - ${q.slice(0, 200)}`);
+        }
+      }
+      if (this.conversationInsights.recurringFlows.length > 0) {
+        sections.push('Recurring investigation flows:');
+        for (const f of this.conversationInsights.recurringFlows.slice(0, 3)) {
+          sections.push(`  - ${f.steps.join(' \u2192 ')} (${f.frequency}x)`);
+        }
       }
     }
 
