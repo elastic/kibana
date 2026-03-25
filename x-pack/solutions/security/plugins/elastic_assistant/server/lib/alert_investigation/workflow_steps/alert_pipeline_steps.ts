@@ -238,8 +238,12 @@ export const extractEntitiesStep = createServerStepDefinition({
 export const TagProcessedAlertsStepId = 'security.tagProcessedAlerts';
 
 const TagInputSchema = z.object({
-  alert_ids: LiquidArraySchema,
   index_pattern: SafeAlertIndexPattern,
+  max_alerts: z
+    .number()
+    .min(1)
+    .max(PIPELINE_LIMITS.MAX_ALERTS_PER_RUN)
+    .default(PIPELINE_LIMITS.DEFAULT_MAX_ALERTS),
 });
 
 const TagOutputSchema = z.object({
@@ -252,74 +256,55 @@ export const tagProcessedAlertsStep = createServerStepDefinition({
   label: 'Tag Alerts as Processed',
   description: 'Tags processed alerts to prevent re-processing in subsequent pipeline runs.',
   documentation: {
-    details: 'Sets kibana.alert.pipeline.processed field on alert documents.',
+    details:
+      'Uses update_by_query to tag all unprocessed alerts in the lookback window. ' +
+      'Does not depend on alert IDs from previous steps (avoids liquid template size limits).',
     examples: [],
   },
   inputSchema: TagInputSchema,
   outputSchema: TagOutputSchema,
   handler: async (context) => {
     const esClient = context.contextManager.getScopedEsClient();
-    const { alert_ids: alertIds, index_pattern: indexPattern } = context.input;
+    const { index_pattern: indexPattern, max_alerts: maxAlerts } = context.input;
 
-    const validIds = alertIds.filter((id: string) => id && id.length > 0);
-
-    if (validIds.length === 0) {
-      return { output: { tagged_count: 0 } };
-    }
-
-    context.logger.info(`Tagging ${validIds.length} alerts as processed`);
-
-    const body = validIds.flatMap((id: string) => [
-      { update: { _id: id } },
-      {
-        doc: {
-          kibana: {
-            alert: { pipeline: { processed: true, processed_at: new Date().toISOString() } },
+    // Use update_by_query instead of bulk update with IDs
+    // This avoids the liquid template array serialization limit
+    const result = await esClient.updateByQuery({
+      index: indexPattern,
+      max_docs: maxAlerts,
+      refresh: true,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              { terms: { 'kibana.alert.workflow_status': ['open', 'acknowledged'] } },
+              {
+                bool: {
+                  must_not: [
+                    { exists: { field: 'kibana.alert.building_block_type' } },
+                    { exists: { field: 'kibana.alert.pipeline.processed' } },
+                  ],
+                },
+              },
+            ],
           },
         },
+        script: {
+          source:
+            "ctx._source.putIfAbsent('kibana', new HashMap()); " +
+            "ctx._source.kibana.putIfAbsent('alert', new HashMap()); " +
+            "ctx._source.kibana.alert.putIfAbsent('pipeline', new HashMap()); " +
+            "ctx._source.kibana.alert.pipeline.processed = true; " +
+            "ctx._source.kibana.alert.pipeline.processed_at = params.now;",
+          params: { now: now.toISOString() },
+          lang: 'painless',
+        },
       },
-    ]);
+    });
 
-    const result = await esClient.bulk({ index: indexPattern, operations: body, refresh: 'wait_for' });
+    const tagged = result.updated ?? 0;
+    context.logger.info(`Tagged ${tagged} alerts as processed`);
 
-    if (result.errors) {
-      const failures = result.items.filter((item) => item.update?.error);
-      const failureRate = failures.length / validIds.length;
-
-      // Log first 5 failures with details
-      for (const failure of failures.slice(0, 5)) {
-        context.logger.error(
-          `Failed to tag alert ${failure.update?._id}: ${
-            failure.update?.error?.reason ?? 'Unknown error'
-          }`
-        );
-      }
-
-      // Fail fast if >50% errors (systemic issue like index readonly)
-      if (failureRate > 0.5) {
-        throw new Error(
-          `Bulk tag operation failed for ${failures.length}/${alertIds.length} alerts (${Math.round(
-            failureRate * 100
-          )}%). ` +
-            `This indicates a systemic issue (index readonly, permissions, etc.). ` +
-            `First error: ${failures[0]?.update?.error?.reason ?? 'Unknown'}. ` +
-            `Check Elasticsearch logs for details.`
-        );
-      }
-
-      // Warn on partial failures (10-50%)
-      if (failureRate > 0.1) {
-        context.logger.warn(
-          `Partial failure tagging alerts: ${failures.length}/${alertIds.length} failed (${Math.round(
-            failureRate * 100
-          )}%). ` +
-            `Pipeline will continue but these alerts may be re-processed.`
-        );
-      }
-
-      return { output: { tagged_count: alertIds.length - failures.length } };
-    }
-
-    return { output: { tagged_count: alertIds.length } };
+    return { output: { tagged_count: tagged } };
   },
 });
