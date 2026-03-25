@@ -34,6 +34,19 @@ jest.mock('../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: () => true,
 }));
 
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useUiSetting$: () => [false],
+}));
+
+jest.mock('../components/entity_store/hooks/use_entity_store', () => ({
+  useEntityStoreStatus: () => ({
+    data: {
+      status: 'stopped',
+    },
+    isFetching: false,
+  }),
+}));
+
 jest.mock('../api/hooks/use_risk_engine_status', () => ({
   useRiskEngineStatus: () => ({
     data: {

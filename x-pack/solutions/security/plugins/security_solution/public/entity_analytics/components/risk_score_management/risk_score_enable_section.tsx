@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,6 +30,12 @@ import { useDisableRiskEngineMutation } from '../../api/hooks/use_disable_risk_e
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import type { RiskEngineMissingPrivilegesResponse } from '../../hooks/use_missing_risk_engine_privileges';
 import { useInvalidateRiskEngineSettingsQuery } from './hooks/risk_score_configurable_risk_engine_settings_hooks';
+import {
+  useEntityStoreStatus,
+  useEnableEntityStoreMutation,
+  useStopEntityEngineMutation,
+} from '../entity_store/hooks/use_entity_store';
+import { useEntityStoreTypes } from '../../hooks/use_enabled_entity_types';
 
 const MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING = '50px';
 const toastOptions = {
@@ -115,9 +122,16 @@ export const RiskScoreEnableSection: React.FC<{
   selectedSettingsMatchSavedSettings: boolean;
   saveSelectedSettingsMutation: UseMutationResult<void, unknown, void, unknown>;
 }> = ({ privileges, selectedSettingsMatchSavedSettings, saveSelectedSettingsMutation }) => {
+  const [isEntityStoreV2Enabled] = useUiSetting$<boolean>('securitySolution:entityStoreEnableV2');
   const { addSuccess } = useAppToasts();
-  const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();
+  const { data: riskEngineStatus, isFetching: isRiskEngineStatusLoading } = useRiskEngineStatus({
+    enabled: !isEntityStoreV2Enabled,
+  });
+  const entityStoreStatus = useEntityStoreStatus({
+    enabled: isEntityStoreV2Enabled,
+  });
   const invalidateRiskEngineSettingsQuery = useInvalidateRiskEngineSettingsQuery();
+  const entityTypes = useEntityStoreTypes();
 
   const initRiskEngineMutation = useInitRiskEngineMutation({
     onSuccess: async () => {
@@ -137,30 +151,65 @@ export const RiskScoreEnableSection: React.FC<{
     },
   });
 
-  const currentRiskEngineStatus = riskEngineStatus?.risk_engine_status;
+  const enableEntityStoreMutation = useEnableEntityStoreMutation({
+    onSuccess: () => {
+      addSuccess(i18n.RISK_ENGINE_TURNED_ON, toastOptions);
+    },
+  });
+  const stopEntityEngineMutation = useStopEntityEngineMutation(entityTypes);
+
+  const getRiskEngineStatus = () => {
+    if (!isEntityStoreV2Enabled) {
+      return riskEngineStatus?.risk_engine_status;
+    }
+    const status = entityStoreStatus.data?.status || '';
+    if (['installing', 'running', 'starting'].includes(status)) {
+      return RiskEngineStatusEnum.ENABLED;
+    }
+    if (status === 'stopped') {
+      return RiskEngineStatusEnum.DISABLED;
+    }
+    return RiskEngineStatusEnum.NOT_INSTALLED;
+  };
+
+  const currentRiskEngineStatus = getRiskEngineStatus();
 
   const isLoading =
     saveSelectedSettingsMutation.isLoading ||
     initRiskEngineMutation.isLoading ||
     enableRiskEngineMutation.isLoading ||
     disableRiskEngineMutation.isLoading ||
+    enableEntityStoreMutation.isLoading ||
+    stopEntityEngineMutation.isLoading ||
     privileges.isLoading ||
-    isStatusLoading;
+    isRiskEngineStatusLoading ||
+    (isEntityStoreV2Enabled && entityStoreStatus.isLoading);
 
   const onSwitchClick = async () => {
     if (!currentRiskEngineStatus || isLoading) {
       return;
     }
 
-    if (currentRiskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED) {
-      if (!selectedSettingsMatchSavedSettings) {
-        await saveSelectedSettingsMutation.mutateAsync();
+    if (isEntityStoreV2Enabled) {
+      if (currentRiskEngineStatus === RiskEngineStatusEnum.ENABLED) {
+        stopEntityEngineMutation.mutate();
+      } else {
+        if (!selectedSettingsMatchSavedSettings) {
+          await saveSelectedSettingsMutation.mutateAsync();
+        }
+        enableEntityStoreMutation.mutate({});
       }
-      await initRiskEngineMutation.mutateAsync();
-    } else if (currentRiskEngineStatus === RiskEngineStatusEnum.ENABLED) {
-      disableRiskEngineMutation.mutate();
-    } else if (currentRiskEngineStatus === RiskEngineStatusEnum.DISABLED) {
-      enableRiskEngineMutation.mutate();
+    } else {
+      if (currentRiskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED) {
+        if (!selectedSettingsMatchSavedSettings) {
+          await saveSelectedSettingsMutation.mutateAsync();
+        }
+        await initRiskEngineMutation.mutateAsync();
+      } else if (currentRiskEngineStatus === RiskEngineStatusEnum.ENABLED) {
+        disableRiskEngineMutation.mutate();
+      } else if (currentRiskEngineStatus === RiskEngineStatusEnum.DISABLED) {
+        enableRiskEngineMutation.mutate();
+      }
     }
   };
 
@@ -169,15 +218,23 @@ export const RiskScoreEnableSection: React.FC<{
     const errorBody = initRiskEngineMutation.error.body;
     initRiskEngineErrors = [errorBody.message];
   }
+  if (enableEntityStoreMutation.isError) {
+    initRiskEngineErrors = [enableEntityStoreMutation.error.body.message];
+  }
+
   return (
     <>
       <>
         {initRiskEngineMutation.isError && <RiskScoreErrorPanel errors={initRiskEngineErrors} />}
+        {enableEntityStoreMutation.isError && <RiskScoreErrorPanel errors={initRiskEngineErrors} />}
         {disableRiskEngineMutation.isError && (
           <RiskScoreErrorPanel errors={[disableRiskEngineMutation.error.body.message]} />
         )}
         {enableRiskEngineMutation.isError && (
           <RiskScoreErrorPanel errors={[enableRiskEngineMutation.error.body.message]} />
+        )}
+        {stopEntityEngineMutation.isError && (
+          <RiskScoreErrorPanel errors={[i18n.ERROR_PANEL_MESSAGE]} />
         )}
 
         <EuiSpacer size="m" />

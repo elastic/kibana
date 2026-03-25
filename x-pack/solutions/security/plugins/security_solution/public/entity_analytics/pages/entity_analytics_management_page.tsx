@@ -16,6 +16,7 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import moment from 'moment';
 import { useMutation } from '@kbn/react-query';
 import { RiskScorePreviewSection } from '../components/risk_score_management/risk_score_preview_section';
@@ -34,6 +35,7 @@ import { useConfigurableRiskEngineSettings } from '../components/risk_score_mana
 import { RiskScoreSaveBar } from '../components/risk_score_management/risk_score_save_bar';
 import { RiskScoreGeneralSection } from '../components/risk_score_management/risk_score_general_section';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
 
 const TEN_SECONDS = 10000;
 
@@ -41,6 +43,7 @@ export const EntityAnalyticsManagementPage = () => {
   const { euiTheme } = useEuiTheme();
   const styles = getEntityAnalyticsRiskScorePageStyles(euiTheme);
   const privileges = useMissingRiskEnginePrivileges();
+  const [isEntityStoreV2Enabled] = useUiSetting$<boolean>('securitySolution:entityStoreEnableV2');
   const {
     savedRiskEngineSettings,
     selectedRiskEngineSettings,
@@ -57,18 +60,35 @@ export const EntityAnalyticsManagementPage = () => {
   const { data: riskEngineStatus } = useRiskEngineStatus({
     refetchInterval: TEN_SECONDS,
     structuralSharing: false, // Force the component to rerender after every Risk Engine Status API call
+    enabled: !isEntityStoreV2Enabled,
   });
-  const currentRiskEngineStatus = riskEngineStatus?.risk_engine_status;
-  const runEngineEnabled = currentRiskEngineStatus === 'ENABLED';
+  const entityStoreStatus = useEntityStoreStatus({
+    enabled: isEntityStoreV2Enabled,
+  });
+
+  const getRiskEngineStatus = () => {
+    if (!isEntityStoreV2Enabled) {
+      return riskEngineStatus?.risk_engine_status;
+    }
+    const status = entityStoreStatus.data?.status || '';
+    if (['installing', 'running', 'starting'].includes(status)) {
+      return 'ENABLED';
+    }
+    return 'DISABLED'; // Default mapped status for V2 logic below
+  };
+
+  const currentRiskEngineStatus = getRiskEngineStatus();
+
+  const runEngineEnabled = currentRiskEngineStatus === 'ENABLED' && !isEntityStoreV2Enabled;
   const [isLoadingRunRiskEngine, setIsLoadingRunRiskEngine] = useState(false);
   const { mutate: scheduleNowRiskEngine } = useScheduleNowRiskEngineMutation();
   const { addSuccess, addError } = useAppToasts();
-  const userCanRunEngine =
-    (!privileges.isLoading &&
+  const userCanRunEngine = Boolean(
+    !privileges.isLoading &&
       (privileges.hasAllRequiredPrivileges ||
         (!privileges.hasAllRequiredPrivileges &&
-          privileges.missingPrivileges?.clusterPrivileges?.run?.length === 0))) ||
-    false;
+          privileges.missingPrivileges?.clusterPrivileges?.run?.length === 0))
+  );
   const riskScoreResetToZeroIsEnabled = useIsExperimentalFeatureEnabled(
     'enableRiskScoreResetToZero'
   );
@@ -98,16 +118,14 @@ export const EntityAnalyticsManagementPage = () => {
 
   const { status, runAt } = riskEngineStatus?.risk_engine_task_status || {};
 
-  const isRunning = status === 'running' || (!!runAt && new Date(runAt) < new Date());
+  const isRunning = Boolean(status === 'running' || (runAt && new Date(runAt) < new Date()));
 
-  const runEngineBtnIsDisabled =
-    !currentRiskEngineStatus || isLoadingRunRiskEngine || !userCanRunEngine || isRunning;
+  const runEngineBtnIsDisabled = Boolean(
+    !currentRiskEngineStatus || isLoadingRunRiskEngine || !userCanRunEngine || isRunning
+  );
 
-  const formatTimeFromNow = (time: string | undefined): string => {
-    if (!time) {
-      return '';
-    }
-    return i18n.RISK_ENGINE_NEXT_RUN_TIME(moment(time).fromNow(true));
+  const formatTimeFromNow = (time?: string): string => {
+    return time ? i18n.RISK_ENGINE_NEXT_RUN_TIME(moment(time).fromNow(true)) : '';
   };
 
   const countDownText = isRunning

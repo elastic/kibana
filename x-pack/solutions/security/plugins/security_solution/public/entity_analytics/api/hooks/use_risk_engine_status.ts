@@ -40,7 +40,7 @@ export const useRiskEngineCountdownTime = (riskEngineStatus?: RiskEngineStatusRe
 export const useRiskEngineStatus = (
   queryOptions: Pick<
     UseQueryOptions<unknown, unknown, RiskEngineStatusResponse, string[]>,
-    'refetchInterval' | 'structuralSharing'
+    'refetchInterval' | 'structuralSharing' | 'enabled'
   > = {}
 ) => {
   const { fetchRiskEngineStatus } = useEntityAnalyticsRoutes();

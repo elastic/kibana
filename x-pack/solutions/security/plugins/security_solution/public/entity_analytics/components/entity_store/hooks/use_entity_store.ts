@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UseMutationOptions } from '@kbn/react-query';
+import type { UseMutationOptions, UseQueryOptions } from '@kbn/react-query';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
@@ -29,7 +29,11 @@ interface ResponseError {
   body: { message: string };
 }
 
-interface Options {
+interface Options
+  extends Omit<
+    UseQueryOptions<GetEntityStoreStatusResponse, IHttpFetchError>,
+    'queryKey' | 'queryFn'
+  > {
   withComponents?: boolean;
 }
 
@@ -45,6 +49,7 @@ export const useEntityStoreStatus = (opts: Options = {}) => {
       }
       return false;
     },
+    ...opts,
   });
 };
 
@@ -74,8 +79,13 @@ export const useEnableEntityStoreMutation = (
     },
     {
       mutationKey: ENABLE_STORE_STATUS_KEY,
-      onSuccess: () => queryClient.refetchQueries(ENTITY_STORE_STATUS),
       ...options,
+      onSuccess: (...args) => {
+        queryClient.refetchQueries(ENTITY_STORE_STATUS);
+        if (options?.onSuccess) {
+          options.onSuccess(...args);
+        }
+      },
     }
   );
 };
