@@ -66,7 +66,6 @@ jest.mock('./workflow_execution_panel', () => ({
   ),
 }));
 
-let capturedStepDetailsProps: Record<string, unknown> = {};
 jest.mock('./workflow_step_execution_details', () => ({
   WorkflowStepExecutionDetails: (props: Record<string, unknown>) => {
     mockStepExecutionDetailsProps.current = props;
@@ -490,7 +489,7 @@ describe('WorkflowExecutionDetail - pausedStepDef resolution', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    capturedStepDetailsProps = {};
+    mockStepExecutionDetailsProps.current = {};
     mockRemoveQueries = jest.fn();
     mockUseQueryClient.mockReturnValue({ removeQueries: mockRemoveQueries } as any);
     mockUseWorkflowUrlState.mockReturnValue({
@@ -524,8 +523,8 @@ describe('WorkflowExecutionDetail - pausedStepDef resolution', () => {
       </TestWrapper>
     );
 
-    expect(capturedStepDetailsProps.resumeMessage).toBe('Top-level approval required');
-    expect(capturedStepDetailsProps.resumeSchema).toMatchObject({ type: 'object' });
+    expect(mockStepExecutionDetailsProps.current.resumeMessage).toBe('Top-level approval required');
+    expect(mockStepExecutionDetailsProps.current.resumeSchema).toMatchObject({ type: 'object' });
   });
 
   it('resolves resumeMessage and resumeSchema for a waitForInput step nested inside if', () => {
@@ -559,8 +558,8 @@ describe('WorkflowExecutionDetail - pausedStepDef resolution', () => {
       </TestWrapper>
     );
 
-    expect(capturedStepDetailsProps.resumeMessage).toBe('Nested approval required');
-    expect(capturedStepDetailsProps.resumeSchema).toMatchObject({ type: 'object' });
+    expect(mockStepExecutionDetailsProps.current.resumeMessage).toBe('Nested approval required');
+    expect(mockStepExecutionDetailsProps.current.resumeSchema).toMatchObject({ type: 'object' });
   });
 
   it('resolves resumeSchema for a waitForInput step nested inside foreach', () => {
@@ -594,8 +593,10 @@ describe('WorkflowExecutionDetail - pausedStepDef resolution', () => {
       </TestWrapper>
     );
 
-    expect(capturedStepDetailsProps.resumeSchema).toMatchObject({ type: 'object' });
-    expect(capturedStepDetailsProps.resumeMessage).toBe('Approve item {{ foreach.item }}');
+    expect(mockStepExecutionDetailsProps.current.resumeSchema).toMatchObject({ type: 'object' });
+    expect(mockStepExecutionDetailsProps.current.resumeMessage).toBe(
+      'Approve item {{ foreach.item }}'
+    );
   });
 });
 

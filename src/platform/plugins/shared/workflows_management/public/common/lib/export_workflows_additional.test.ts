@@ -21,7 +21,7 @@ jest.mock('../../../common/lib/yaml', () => ({
 
 // Mock extractReferencedWorkflowIds
 const mockExtractReferencedWorkflowIds = jest.fn();
-jest.mock('../../../common/lib/export/extract_workflow_references', () => ({
+jest.mock('./export/extract_workflow_references', () => ({
   extractReferencedWorkflowIds: (...args: unknown[]) => mockExtractReferencedWorkflowIds(...args),
 }));
 

@@ -118,7 +118,7 @@ describe('KibanaMonacoConnectorHandler', () => {
       const result = await handler.generateHoverContent(context);
 
       expect(result).not.toBeNull();
-      expect(result?.value).toContain('Technical Preview');
+      expect(result?.value).toContain('Tech Preview');
     });
 
     it('should return null when connector is not found', async () => {
