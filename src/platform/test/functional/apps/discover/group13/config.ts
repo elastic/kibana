@@ -15,5 +15,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('.')],
+    junit: {
+      reportName: 'Discover - Group 13',
+    },
   };
 }
