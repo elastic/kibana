@@ -1267,7 +1267,6 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           );
           expect(flapping).to.eql(result);
         });
-
       });
     }
   });
