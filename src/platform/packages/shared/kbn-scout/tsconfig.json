@@ -19,8 +19,10 @@
     "@kbn/dev-cli-errors",
     "@kbn/ci-stats-reporter",
     "@kbn/repo-info",
+    "@kbn/repo-packages",
     "@kbn/es",
     "@kbn/dev-proc-runner",
+    "@kbn/kbn-client",
     "@kbn/test",
     "@kbn/es-archiver",
     "@kbn/dev-utils",
@@ -28,12 +30,8 @@
     "@kbn/test-subj-selector",
     "@kbn/scout-info",
     "@kbn/scout-reporting",
-    "@kbn/synthtrace",
-    "@kbn/synthtrace-client",
     "@kbn/zod",
     "@kbn/core-http-common",
-    "@kbn/streams-schema",
-    "@kbn/streamlang",
     "@kbn/axe-config",
     "@kbn/peggy"
   ]

@@ -54,22 +54,20 @@ export function getValueColumns(
   }
   if (isAPIReferenceLineLayer(layer)) {
     return [
-      ...layer.thresholds.map((t, index) =>
-        getValueColumn(`referenceLine${index}`, t.column, 'number')
-      ),
+      ...layer.thresholds.map((t, index) => getValueColumn(`referenceLine${index}`, t, 'number')),
     ];
   }
   const xColumnType =
     xAxisScale === 'temporal' ? 'date' : xAxisScale === 'linear' ? 'number' : undefined;
   return [
     ...(layer.x
-      ? [getValueColumn(getAccessorNameForXY(layer, X_ACCESSOR), layer.x.column, xColumnType)]
+      ? [getValueColumn(getAccessorNameForXY(layer, X_ACCESSOR), layer.x, xColumnType)]
       : []),
     ...layer.y.map((y, index) =>
-      getValueColumn(getAccessorNameForXY(layer, METRIC_ACCESSOR_PREFIX, index), y.column, 'number')
+      getValueColumn(getAccessorNameForXY(layer, METRIC_ACCESSOR_PREFIX, index), y, 'number')
     ),
     ...(layer.breakdown_by
-      ? [getValueColumn(getAccessorNameForXY(layer, BREAKDOWN_ACCESSOR), layer.breakdown_by.column)]
+      ? [getValueColumn(getAccessorNameForXY(layer, BREAKDOWN_ACCESSOR), layer.breakdown_by)]
       : []),
   ];
 }

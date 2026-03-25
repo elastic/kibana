@@ -17,7 +17,6 @@ import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { act } from 'react-dom/test-utils';
-import { PanelsToggle } from '../../../../components/panels_toggle';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { internalStateActions } from '../../state_management/redux';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
@@ -99,18 +98,10 @@ const setup = async ({
     columns: [],
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     onAddFilter: jest.fn(),
-    panelsToggle: (
-      <PanelsToggle
-        sidebarToggleState$={
-          new BehaviorSubject<SidebarToggleState>({
-            isCollapsed: true,
-            toggle: () => {},
-          })
-        }
-        isChartAvailable={undefined}
-        renderedFor="root"
-      />
-    ),
+    sidebarToggleState$: new BehaviorSubject<SidebarToggleState>({
+      isCollapsed: true,
+      toggle: () => {},
+    }),
   };
 
   render(

@@ -65,6 +65,7 @@ import type {
   UpgradePackagePolicyResponse,
   PackagePolicyInput,
   NewPackagePolicyInput,
+  PackagePolicyConfigRecord,
   PackagePolicyConfigRecordEntry,
   PackagePolicyInputStream,
   PackageInfo,
@@ -159,7 +160,12 @@ import { getAuthzFromRequest, doesNotHaveRequiredFleetAuthz } from './security';
 import { agentPolicyService, getAgentPolicySavedObjectType } from './agent_policy';
 import { getPackageInfo, ensureInstalledPackage, getInstallationObject } from './epm/packages';
 import { getAssetsDataFromAssetsMap } from './epm/packages/assets';
-import { compileTemplate, getMetaVariables } from './epm/agent/agent';
+import {
+  compileTemplate,
+  getMetaVariables,
+  mergeCompiledTemplates,
+  type MetaVariable,
+} from './epm/agent/agent';
 import { escapeSearchQueryPhrase, normalizeKuery } from './saved_object';
 import { appContextService, cloudConnectorService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
@@ -575,7 +581,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     // Make sure the associated package is installed
     if (!enrichedPackagePolicy.package?.name) {
-      throw new FleetError('Package policy without package are not supported');
+      throw new FleetError(
+        `Package policy "${enrichedPackagePolicy.name}" without package are not supported`
+      );
     }
     if (!options?.skipEnsureInstalled) {
       await ensureInstalledPackage({
@@ -959,7 +967,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         const agentPolicyIdsOfPackagePolicy = packagePolicy.policy_ids;
 
         if (!packagePolicy.package) {
-          throw new FleetError('Package policy without package are not supported');
+          throw new FleetError(
+            `Package policy "${packagePolicy.name}" without package are not supported`
+          );
         }
 
         const { id, ...pkgPolicyWithoutId } = packagePolicy;
@@ -1112,7 +1122,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const packageInfos = await getPackageInfoForPackagePolicies([packagePolicy], soClient);
 
     if (!packagePolicy.package) {
-      throw new FleetError('Package policy without package are not supported');
+      throw new FleetError(
+        `Package policy "${packagePolicy.name}" without package are not supported`
+      );
     }
 
     const pkgInfo = packageInfos.get(
@@ -1550,7 +1562,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     let { version, ...restOfPackagePolicy } = packagePolicy;
 
     if (!packagePolicy.package?.name) {
-      throw new FleetError('Package policy without package are not supported');
+      throw new FleetError(
+        `Package policy "${packagePolicy.name}" without package are not supported`
+      );
     }
 
     const pkgInfo = await getPackageInfo({
@@ -1970,13 +1984,17 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
 
         if (!packagePolicy.package?.name) {
-          throw new FleetError('Package policies without package are not supported');
+          throw new FleetError(
+            `Package policy "${packagePolicy.name}" without package are not supported`
+          );
         }
         const pkgInfoAndAsset = packageInfosandAssetsMap.get(
           `${packagePolicy.package.name}-${packagePolicy.package.version}`
         );
         if (!pkgInfoAndAsset) {
-          throw new FleetError('Package info and assets not found');
+          throw new FleetError(
+            `Package info and assets not found: ${packagePolicy.package.name}-${packagePolicy.package.version}`
+          );
         }
         const { pkgInfo, assetsMap } = pkgInfoAndAsset;
         let inputs = getInputsWithIds(restOfPackagePolicy, oldPackagePolicy.id, undefined, pkgInfo);
@@ -3562,6 +3580,19 @@ export function _compilePackagePolicyInputs(
     });
 }
 
+function _compileAndMergeTemplatePaths(
+  templates: string[],
+  templateVars: PackagePolicyConfigRecord,
+  metaVars: MetaVariable
+): Record<string, any> {
+  let compiled: Record<string, any> = {};
+  for (const templateStr of templates) {
+    const result = compileTemplate(templateVars, metaVars, templateStr);
+    compiled = mergeCompiledTemplates(compiled, result);
+  }
+  return compiled;
+}
+
 function _compilePackagePolicyInput(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
@@ -3591,6 +3622,23 @@ function _compilePackagePolicyInput(
       `Input template not found, unable to find input type ${input.type}`
     );
   }
+
+  const templateVars = Object.assign({}, vars, input.vars);
+  const metaVars = getMetaVariables(pkgInfo, input, undefined, agentVersion);
+
+  if (packageInput.template_paths?.length) {
+    const templates = packageInput.template_paths.map((tp) => {
+      const [asset] = getAssetsDataFromAssetsMap(pkgInfo, assetsMap, (path: string) =>
+        path.endsWith(`/agent/input/${tp}`)
+      );
+      if (!asset || !asset.buffer) {
+        throw new InputNotFoundError(`Unable to load input template at /agent/input/${tp}`);
+      }
+      return asset.buffer.toString();
+    });
+    return _compileAndMergeTemplatePaths(templates, templateVars, metaVars);
+  }
+
   if (!packageInput.template_path) {
     return undefined;
   }
@@ -3607,8 +3655,8 @@ function _compilePackagePolicyInput(
 
   return compileTemplate(
     // Populate template variables from package- and input-level vars
-    Object.assign({}, vars, input.vars),
-    getMetaVariables(pkgInfo, input, undefined, agentVersion),
+    templateVars,
+    metaVars,
     pkgInputTemplate.buffer.toString()
   );
 }
@@ -3748,13 +3796,29 @@ function _compilePackageStream(
     );
   }
 
-  if (!streamFromPkg.template_path) {
-    throw new StreamNotFoundError(
-      `Stream template path not found for dataset ${stream.data_stream.dataset}`
-    );
+  const datasetPath = packageDataStream.path;
+  const templateVars = Object.assign({}, vars, input.vars, stream.vars);
+  const metaVars = getMetaVariables(pkgInfo, input, streamIn, agentVersion);
+
+  if (streamFromPkg.template_paths?.length) {
+    const templates = streamFromPkg.template_paths.map((tp) => {
+      const asset = _getAssetForTemplatePath(pkgInfo, assetsMap, datasetPath, tp);
+      if (!asset || !asset.buffer) {
+        throw new StreamNotFoundError(
+          `Unable to load stream template ${tp} for dataset ${stream.data_stream.dataset}`
+        );
+      }
+      return asset.buffer.toString();
+    });
+    stream.compiled_stream = _compileAndMergeTemplatePaths(templates, templateVars, metaVars);
+    return { ...stream };
   }
 
-  const datasetPath = packageDataStream.path;
+  if (!streamFromPkg.template_path) {
+    throw new StreamNotFoundError(
+      `Neither template_path nor template_paths found for dataset ${stream.data_stream.dataset}`
+    );
+  }
 
   const pkgStreamTemplate = _getAssetForTemplatePath(
     pkgInfo,
@@ -3771,8 +3835,8 @@ function _compilePackageStream(
 
   const yaml = compileTemplate(
     // Populate template variables from package-, input-, and stream-level vars
-    Object.assign({}, vars, input.vars, stream.vars),
-    getMetaVariables(pkgInfo, input, streamIn, agentVersion),
+    templateVars,
+    metaVars,
     pkgStreamTemplate.buffer.toString()
   );
 

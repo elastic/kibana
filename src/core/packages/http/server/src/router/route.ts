@@ -242,12 +242,28 @@ export interface AuthzDisabled {
 }
 
 /**
- * Describes the authentication status when authentication is enabled.
- *
- * - `enabled`: A boolean or string indicating the authentication status. Can be `true` (authentication required) or `'optional'` (authentication is optional).
+ * Describes the authentication status when authentication is enabled (default).
  */
 export interface AuthcEnabled {
-  enabled: true | 'optional';
+  enabled: true;
+}
+
+/**
+ * Describes the authentication status when authentication is switched to a minimal mode (only existence of credentials
+ * is checked). Requires an explicit reason explaining why full authentication can be deferred to Elasticsearch.
+ */
+export interface AuthcMinimal {
+  enabled: 'minimal';
+  reason: string;
+}
+
+/**
+ * Describes the authentication status when authentication is optional. Requires an explicit reason explaining why
+ * authentication is optional.
+ */
+export interface AuthcOptional {
+  enabled: 'optional';
+  reason: string;
 }
 
 /**
@@ -262,9 +278,10 @@ export interface AuthcDisabled {
 }
 
 /**
- * Represents the authentication status for a route. It can either be enabled (`AuthcEnabled`) or disabled (`AuthcDisabled`).
+ * Represents the authentication status for a route. It can either be enabled (`AuthcEnabled`), minimal (`AuthcMinimal`),
+ * optional (`AuthcOptional`), or disabled (`AuthcDisabled`).
  */
-export type RouteAuthc = AuthcEnabled | AuthcDisabled;
+export type RouteAuthc = AuthcEnabled | AuthcMinimal | AuthcOptional | AuthcDisabled;
 
 /**
  * Represents the authorization status for a route. It can either be enabled (`AuthzEnabled`) or disabled (`AuthzDisabled`).

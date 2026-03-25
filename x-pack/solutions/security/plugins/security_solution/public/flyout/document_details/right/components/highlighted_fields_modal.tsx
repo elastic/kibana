@@ -5,52 +5,52 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useCallback } from 'react';
 import type { FC } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiSpacer,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
-  useGeneratedHtmlId,
-  EuiBadge,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiSpacer,
+  EuiText,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import type { RuleResponse, RuleUpdateProps } from '../../../../../common/api/detection_engine';
 import { getDefineStepsData } from '../../../../detection_engine/common/helpers';
 import { useRuleIndexPattern } from '../../../../detection_engine/rule_creation_ui/pages/form';
 import { useDefaultIndexPattern } from '../../../../detection_engine/rule_management/hooks/use_default_index_pattern';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useUpdateRule } from '../../../../detection_engine/rule_management/logic/use_update_rule';
+import type { FormSchema } from '../../../../shared_imports';
 import {
-  Form,
   Field,
-  getUseField,
-  useForm,
   FIELD_TYPES,
   fieldValidators,
+  Form,
+  getUseField,
+  useForm,
 } from '../../../../shared_imports';
-import type { FormSchema } from '../../../../shared_imports';
-import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
+import { useHighlightedFields } from '../../../../flyout_v2/document/hooks/use_highlighted_fields';
 import {
   HIGHLIGHTED_FIELDS_MODAL_CANCEL_BUTTON_TEST_ID,
+  HIGHLIGHTED_FIELDS_MODAL_CUSTOM_FIELDS_TEST_ID,
+  HIGHLIGHTED_FIELDS_MODAL_DEFAULT_FIELDS_TEST_ID,
   HIGHLIGHTED_FIELDS_MODAL_DESCRIPTION_TEST_ID,
   HIGHLIGHTED_FIELDS_MODAL_SAVE_BUTTON_TEST_ID,
-  HIGHLIGHTED_FIELDS_MODAL_DEFAULT_FIELDS_TEST_ID,
-  HIGHLIGHTED_FIELDS_MODAL_CUSTOM_FIELDS_TEST_ID,
-  HIGHLIGHTED_FIELDS_MODAL_TITLE_TEST_ID,
   HIGHLIGHTED_FIELDS_MODAL_TEST_ID,
+  HIGHLIGHTED_FIELDS_MODAL_TITLE_TEST_ID,
 } from './test_ids';
 
 const SUCCESSFULLY_SAVED_RULE = (ruleName: string) =>
@@ -90,9 +90,9 @@ const formConfig = {
 
 interface HighlightedFieldsModalProps {
   /**
-   * The data formatted for field browser
+   * Document record to extract highlighted fields from
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
+  hit: DataTableRecord;
   /**
    * The rule
    */
@@ -117,7 +117,7 @@ interface HighlightedFieldsModalProps {
 export const HighlightedFieldsModal: FC<HighlightedFieldsModalProps> = ({
   rule,
   customHighlightedFields,
-  dataFormattedForFieldBrowser,
+  hit,
   setIsEditLoading,
   setIsModalVisible,
 }) => {
@@ -135,7 +135,7 @@ export const HighlightedFieldsModal: FC<HighlightedFieldsModalProps> = ({
   const modalTitleId = useGeneratedHtmlId();
 
   const defaultFields = useHighlightedFields({
-    dataFormattedForFieldBrowser,
+    hit,
     investigationFields: customHighlightedFields,
     type: 'default',
   });

@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import type { IdentifyFeaturesResult, TaskResult } from '@kbn/streams-schema';
 import { baseFeatureSchema, featureSchema, type Feature } from '@kbn/streams-schema';
 import { v4 as uuid } from 'uuid';
@@ -119,6 +120,7 @@ export const listFeaturesRoute = createServerRoute({
     query: z.optional(
       z.object({
         type: z.string().optional(),
+        include_excluded: BooleanFromString.optional(),
       })
     ),
   }),
@@ -137,6 +139,7 @@ export const listFeaturesRoute = createServerRoute({
 
     const { hits: features } = await featureClient.getFeatures(params.path.name, {
       type: params.query?.type ? [params.query.type] : [],
+      includeExcluded: params.query?.include_excluded,
     });
 
     return {
@@ -167,7 +170,7 @@ export const listAllFeaturesRoute = createServerRoute({
     const streams = await streamsClient.listStreams();
     const streamNames = streams.map((stream) => stream.name);
 
-    const { hits: features } = await featureClient.getAllFeatures(streamNames);
+    const { hits: features } = await featureClient.getFeatures(streamNames);
 
     return {
       features,
@@ -199,6 +202,16 @@ export const bulkFeaturesRoute = createServerRoute({
           }),
           z.object({
             delete: z.object({
+              id: z.string(),
+            }),
+          }),
+          z.object({
+            exclude: z.object({
+              id: z.string(),
+            }),
+          }),
+          z.object({
+            restore: z.object({
               id: z.string(),
             }),
           }),
