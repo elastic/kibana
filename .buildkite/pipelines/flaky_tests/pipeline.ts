@@ -224,10 +224,11 @@ for (const testSuite of testSuites) {
         );
       }
       const agentQueue = suiteName.includes('defend_workflows') ? 'n2-4-virt' : 'n2-4-spot';
+      const diskSizeGb = suiteName.includes('defend_workflows') ? 120 : undefined;
       steps.push({
         command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
         label: group.name,
-        agents: expandAgentQueue(agentQueue),
+        agents: expandAgentQueue(agentQueue, diskSizeGb),
         key: `${TestSuiteType.CYPRESS}-${suiteIndex++}`,
         depends_on: 'build',
         timeout_in_minutes: 150,
@@ -246,29 +247,6 @@ for (const testSuite of testSuites) {
           // The security solution cypress tests don't recognize CLI_NUMBER and CLI_COUNT, they use `BUILDKITE_PARALLEL_JOB_COUNT` and `BUILDKITE_PARALLEL_JOB`, which cannot be overridden here.
           // Use `RUN_ALL_TESTS` to make Security Solution Cypress tests run all tests instead of a subset.
           RUN_ALL_TESTS: 'true',
-        },
-      });
-      break;
-    case 'elastic_synthetics':
-      const synthGroup = groups.find((g) => g.key === testSuite.key);
-      if (!synthGroup) {
-        throw new Error(
-          `Group configuration was not found in groups.json for the following synthetics suite: {${suiteName}}.`
-        );
-      }
-      steps.push({
-        command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
-        label: synthGroup.name,
-        agents: expandAgentQueue('n2-4-spot'),
-        key: `${TestSuiteType.SYNTHETICS}-${suiteIndex++}`,
-        depends_on: 'build',
-        timeout_in_minutes: 30,
-        parallelism: testSuite.count,
-        concurrency,
-        concurrency_group: process.env.UUID,
-        concurrency_method: 'eager',
-        retry: {
-          automatic: [{ exit_status: '-1', limit: 3 }],
         },
       });
       break;

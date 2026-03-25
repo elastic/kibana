@@ -16,7 +16,7 @@ import {
 import type { ICommandCallbacks } from '../types';
 import { autocomplete } from './autocomplete';
 import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '../../../parser';
+import { Parser } from '@elastic/esql';
 
 const metadataFields = [...METADATA_FIELDS].sort();
 

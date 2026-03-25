@@ -16,14 +16,9 @@ import {
 import {
   metricOperationDefinitionSchema,
   esqlColumnSchema,
-  esqlColumnOperationWithLabelAndFormatSchema,
+  esqlColumnWithFormatSchema,
 } from '../metric_ops';
-import {
-  colorByValueAbsolute,
-  staticColorSchema,
-  applyColorToSchema,
-  colorByValueSchema,
-} from '../color';
+import { staticColorSchema, applyColorToSchema, colorByValueSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
   collapseBySchema,
@@ -268,7 +263,7 @@ const metricStateSecondaryMetricOptionsSchema = {
   /**
    * Color configuration
    */
-  color: schema.maybe(schema.oneOf([colorByValueAbsolute, staticColorSchema])),
+  color: schema.maybe(staticColorSchema),
 };
 
 const metricStateBreakdownByOptionsSchema = {
@@ -350,11 +345,11 @@ export const metricStateSchemaNoESQL = schema.object({
   ),
 });
 
-const primaryMetricESQL = esqlColumnOperationWithLabelAndFormatSchema
+const primaryMetricESQL = esqlColumnWithFormatSchema
   .extends(metricStatePrimaryMetricOptionsSchema)
   .extends(metricStateBackgroundChartSchemaESQL);
 
-const secondaryMetricESQL = esqlColumnOperationWithLabelAndFormatSchema.extends(
+const secondaryMetricESQL = esqlColumnWithFormatSchema.extends(
   metricStateSecondaryMetricOptionsSchema
 );
 
@@ -374,7 +369,9 @@ export const esqlMetricState = schema.object({
   /**
    * Configure how to break down the metric (e.g. show one metric per term).
    */
-  breakdown_by: schema.maybe(esqlColumnSchema.extends(metricStateBreakdownByOptionsSchema)),
+  breakdown_by: schema.maybe(
+    esqlColumnWithFormatSchema.extends(metricStateBreakdownByOptionsSchema)
+  ),
 });
 
 export const metricStateSchema = schema.oneOf([metricStateSchemaNoESQL, esqlMetricState], {

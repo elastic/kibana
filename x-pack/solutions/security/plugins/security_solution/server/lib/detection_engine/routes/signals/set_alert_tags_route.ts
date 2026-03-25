@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import {
+  ALERTS_API_ALL,
+  ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
+} from '@kbn/security-solution-features/constants';
 import { SetAlertTagsRequestBody } from '../../../../../common/api/detection_engine/alert_tags';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
@@ -22,7 +25,9 @@ export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
       access: 'public',
       security: {
         authz: {
-          requiredPrivileges: [ALERTS_API_READ],
+          requiredPrivileges: [
+            { anyRequired: [ALERTS_API_ALL, ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE] },
+          ],
         },
       },
     })

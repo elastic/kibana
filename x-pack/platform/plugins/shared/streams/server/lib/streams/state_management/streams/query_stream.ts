@@ -6,8 +6,9 @@
  */
 
 import { cloneDeep, isEqual } from 'lodash';
-import { Parser, validateQuery } from '@kbn/esql-language';
-import type { ESQLSource, ESQLCommand } from '@kbn/esql-language';
+import { validateQuery } from '@kbn/esql-language';
+import { Parser } from '@elastic/esql';
+import type { ESQLSource, ESQLCommand } from '@elastic/esql/types';
 import { Streams, getEsqlViewName, getParentId, isChildOf } from '@kbn/streams-schema';
 import { getErrorMessage } from '../../errors/parse_error';
 import { StatusError } from '../../errors/status_error';
@@ -230,7 +231,7 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
 
       // Validate the ES|QL query can be executed (basic test with LIMIT 0)
       try {
-        await this.dependencies.scopedClusterClient.asCurrentUser.esql.query({
+        await this.dependencies.esClient.esql.query({
           query: `${this._definition.query.esql}\n| LIMIT 0`,
           format: 'json',
         });
@@ -478,7 +479,7 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
       // Verify the view exists before updating
       try {
         await getEsqlView({
-          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          esClient: this.dependencies.esClient,
           logger: this.dependencies.logger,
           name: this._definition.query.view,
         });

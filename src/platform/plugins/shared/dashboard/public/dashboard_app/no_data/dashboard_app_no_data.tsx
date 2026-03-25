@@ -68,10 +68,9 @@ export const DashboardAppNoDataPage = ({
     abortController?.abort(AbortReason.REPLACED);
     if (lensHelpersAsync.value) {
       const abc = new AbortController();
-      const { dataViews } = dataService;
-      const indexName = (await getIndexForESQLQuery({ dataViews })) ?? '*';
+      const indexName = (await getIndexForESQLQuery({ http: coreServices.http })) ?? '*';
       const dataView = await getESQLAdHocDataview({
-        dataViewsService: dataViews,
+        dataViewsService: dataService.dataViews,
         query: `FROM ${indexName}`,
         http: coreServices.http,
       });
@@ -157,7 +156,7 @@ export const isDashboardAppInNoDataState = async () => {
 
   // consider has data if there is at least one dashboard
   const { total } = await dashboardClient
-    .search({ search: '', per_page: 1 })
+    .search({ query: '', per_page: 1 })
     .catch(() => ({ total: 0 }));
   if (total > 0) return false;
 

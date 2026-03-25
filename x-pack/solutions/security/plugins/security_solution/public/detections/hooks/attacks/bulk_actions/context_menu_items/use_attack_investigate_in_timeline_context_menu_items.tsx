@@ -27,8 +27,12 @@ export const useAttackInvestigateInTimelineContextMenuItems = ({
   clearSelection,
   setIsLoading,
   refresh,
+  telemetrySource,
 }: UseAttackInvestigateInTimelineContextMenuItemsProps): BulkAttackContextMenuItems => {
-  const bulkActionItems = useBulkAttackInvestigateInTimelineItems({ closePopover });
+  const bulkActionItems = useBulkAttackInvestigateInTimelineItems({
+    closePopover,
+    telemetrySource,
+  });
 
   const alertItems = useMemo(
     () =>

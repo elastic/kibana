@@ -12,7 +12,7 @@ import { usePagination, useSorting } from './use_pagination_and_sorting';
 /**
  * Adds pagination and sorting state to useFetchAlerts. It is used in alerts table local to correlation details
  */
-export const usePaginatedAlerts = (alertIds: string[]) => {
+export const usePaginatedAlerts = (alertIds: string[], index?: string) => {
   const { setPagination, pagination, pageSizeOptions } = usePagination();
   const { sorting, sortConfig, setSorting } = useSorting();
 
@@ -21,6 +21,7 @@ export const usePaginatedAlerts = (alertIds: string[]) => {
     from: pagination.pageIndex * pagination.pageSize,
     size: pagination.pageSize,
     sort: sortConfig,
+    index,
   });
 
   const paginationConfig = useMemo(() => {

@@ -12,6 +12,7 @@ value:
   description: A case description.
   settings:
     syncAlerts: true
+    extractObservables: false
   owner: cases
   customFields:
     - key: d312efda-ec2b-42ec-9e2c-84981795c581

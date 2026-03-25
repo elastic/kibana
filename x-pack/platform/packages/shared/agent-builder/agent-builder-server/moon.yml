@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/agent-builder-server'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/workchat-eng'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/agent-builder-server'
+  title: '@kbn/agent-builder-server'
   description: Moon project for @kbn/agent-builder-server
   channel: ''
   owner: '@elastic/workchat-eng'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/agent-builder/agent-builder-server
+  sourceRoot: x-pack/platform/packages/shared/agent-builder/agent-builder-server
 dependsOn:
   - '@kbn/inference-langchain'
   - '@kbn/zod'
@@ -41,14 +40,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

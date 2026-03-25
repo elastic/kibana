@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/flyout-system-example-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/flyout-system-example-plugin'
+  title: '@kbn/flyout-system-example-plugin'
   description: Moon project for @kbn/flyout-system-example-plugin
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: examples/flyout_system
+  sourceRoot: examples/flyout_system
 dependsOn:
   - '@kbn/core'
   - '@kbn/developer-examples-plugin'

@@ -19,7 +19,7 @@ export function RuleDetailsPageProvider({ getService }: FtrProviderContext) {
       return await testSubjects.getVisibleText('ruleDetailsTitle');
     },
     async getRuleType() {
-      return await testSubjects.getVisibleText('ruleTypeLabel');
+      return await testSubjects.getVisibleText('ruleSummaryRuleType');
     },
     async getAPIKeyOwner() {
       return await testSubjects.getVisibleText('apiKeyOwnerLabel');

@@ -6,10 +6,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { CaseResponseProperties as CaseResponsePropertiesSchema } from '../../bundled-types.gen';
 import { CasesStepBaseConfigSchema } from './shared';
 import { MAX_COMMENT_LENGTH } from '../../constants';
+import * as i18n from '../translations';
 
 export const AddCommentStepTypeId = 'cases.addComment';
 
@@ -33,6 +35,22 @@ export const addCommentStepCommonDefinition: CommonStepDefinition<
   AddCommentStepOutputSchema
 > = {
   id: AddCommentStepTypeId,
+  category: StepCategory.Kibana,
+  label: i18n.ADD_COMMENT_STEP_LABEL,
+  description: i18n.ADD_COMMENT_STEP_DESCRIPTION,
+  documentation: {
+    details: i18n.ADD_COMMENT_STEP_DOCUMENTATION_DETAILS,
+    examples: [
+      `## Add comment to a case
+\`\`\`yaml
+- name: add_case_comment
+  type: ${AddCommentStepTypeId}
+  with:
+    case_id: "abc-123-def-456"
+    comment: "Investigating this incident now."
+\`\`\``,
+    ],
+  },
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
   configSchema: CasesStepBaseConfigSchema,

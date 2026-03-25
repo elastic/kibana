@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { errors } from '@elastic/elasticsearch';
 import type {

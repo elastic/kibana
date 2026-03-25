@@ -10,6 +10,10 @@ import { PREFIX } from '../../../shared/test_ids';
 /* Visualization tab */
 
 export const ANALYZER_GRAPH_TEST_ID = `${PREFIX}AnalyzerGraph` as const;
+export const ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID =
+  `${PREFIX}AnalyzerColdFrozenTierCallout` as const;
+export const ANALYZER_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID =
+  `${PREFIX}AnalyzerColdFrozenTierCalloutDismissButton` as const;
 export const SESSION_VIEW_TEST_ID = `${PREFIX}SessionView` as const;
 export const GRAPH_VISUALIZATION_TEST_ID = `${PREFIX}GraphVisualization` as const;
 
@@ -42,6 +46,10 @@ export const PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID =
   `${PREVALENCE_DETAILS_TABLE_TEST_ID}UserPrevalenceCell` as const;
 export const PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID =
   `${PREVALENCE_DETAILS_TABLE_TEST_ID}UpsellCell` as const;
+export const PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_TEST_ID =
+  `${PREVALENCE_DETAILS_TEST_ID}ColdFrozenTierCallout` as const;
+export const PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID =
+  `${PREVALENCE_DETAILS_TEST_ID}ColdFrozenTierCalloutDismissButton` as const;
 
 /* Entities */
 
@@ -116,6 +124,10 @@ export const CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID =
   `${CORRELATIONS_DETAILS_TEST_ID}AlertsBySessionSection` as const;
 export const CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID =
   `${CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID}Table` as const;
+export const CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID =
+  `${CORRELATIONS_DETAILS_TEST_ID}RelatedAttacksSection` as const;
+export const CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TABLE_TEST_ID =
+  `${CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID}Table` as const;
 export const CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID =
   `${CORRELATIONS_DETAILS_TEST_ID}CasesSection` as const;
 export const CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID =
@@ -135,9 +147,3 @@ export const RESPONSE_NO_DATA_TEST_ID = `${RESPONSE_TEST_ID}NoData` as const;
 
 export const INVESTIGATION_GUIDE_TEST_ID = `${PREFIX}InvestigationGuide` as const;
 export const INVESTIGATION_GUIDE_LOADING_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Loading` as const;
-
-/* Notes */
-
-export const ATTACH_TO_TIMELINE_CALLOUT_TEST_ID = `${PREFIX}AttachToTimelineCallout` as const;
-export const ATTACH_TO_TIMELINE_CHECKBOX_TEST_ID = `${PREFIX}AttachToTimelineCheckbox` as const;
-export const SAVE_TIMELINE_BUTTON_TEST_ID = `${PREFIX}SaveTimelineButton` as const;

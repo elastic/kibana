@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
@@ -96,24 +96,26 @@ This tool will:
         }
 
         // Step 2: Generate visualization configuration with shared chart-type + graph flow
-        const { selectedChartType, validatedConfig, esqlQuery } = await buildVisualizationConfig({
-          nlQuery,
-          index,
-          chartType,
-          esql,
-          existingConfig,
-          parsedExistingConfig,
-          modelProvider,
-          logger,
-          events,
-          esClient,
-        });
+        const { selectedChartType, validatedConfig, esqlQuery, timeRange } =
+          await buildVisualizationConfig({
+            nlQuery,
+            index,
+            chartType,
+            esql,
+            existingConfig,
+            parsedExistingConfig,
+            modelProvider,
+            logger,
+            events,
+            esClient,
+          });
 
         const visualizationData = {
           query: nlQuery,
           visualization: validatedConfig,
           chart_type: selectedChartType,
           esql: esqlQuery,
+          ...(timeRange && { time_range: timeRange }),
         };
 
         // Step 4: Try to store as attachment (optional - may fail if visualization type not registered)

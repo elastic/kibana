@@ -7,6 +7,7 @@
 
 import type { ConversationRound, ToolCallWithResult } from '@kbn/agent-builder-common';
 import { isToolCallStep } from '@kbn/agent-builder-common';
+import { isExcludedFromFilestore } from '@kbn/agent-builder-common/tools';
 import type { ToolResultWithMeta } from '@kbn/agent-builder-server/runner';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
@@ -65,7 +66,10 @@ export const extractConversationToolResults = (
 ): ToolResultWithMeta[] => {
   const results: ToolResultWithMeta[] = [];
   for (const round of conversation) {
-    const toolCalls = round.steps.filter(isToolCallStep).flatMap(toolCallToResults);
+    const toolCalls = round.steps
+      .filter(isToolCallStep)
+      .filter((step) => !isExcludedFromFilestore(step.tool_id))
+      .flatMap(toolCallToResults);
     results.push(...toolCalls);
   }
   return results;

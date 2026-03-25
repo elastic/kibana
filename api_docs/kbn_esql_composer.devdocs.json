@@ -497,13 +497,7 @@
         "description": [],
         "signature": [
           "(queryAst: ",
-          {
-            "pluginId": "@kbn/esql-language",
-            "scope": "common",
-            "docId": "kibKbnEsqlLanguagePluginApi",
-            "section": "def-common.ESQLAstQueryExpression",
-            "text": "ESQLAstQueryExpression"
-          },
+          "ESQLAstQueryExpression",
           ", params: ",
           "Params",
           "<string> | undefined) => void"
@@ -532,13 +526,7 @@
             "label": "queryAst",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/esql-language",
-                "scope": "common",
-                "docId": "kibKbnEsqlLanguagePluginApi",
-                "section": "def-common.ESQLAstQueryExpression",
-                "text": "ESQLAstQueryExpression"
-              }
+              "ESQLAstQueryExpression"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/pipeline/replace_parameters.ts",
             "lineNumber": 18,

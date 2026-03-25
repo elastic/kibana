@@ -6,6 +6,7 @@
  */
 
 import type {
+  AlertFormatter,
   RuleTypeModel,
   RuleTypeParams,
   RuleTypeRegistryContract,
@@ -19,7 +20,7 @@ export type ObservabilityRuleTypeFormatter = (options: {
 }) => { reason: string; link?: string; hasBasePath?: boolean };
 
 export interface ObservabilityRuleTypeModel<Params extends RuleTypeParams = RuleTypeParams>
-  extends RuleTypeModel<Params> {
+  extends Omit<RuleTypeModel<Params>, 'format'> {
   format: ObservabilityRuleTypeFormatter;
   priority?: number;
 }
@@ -35,7 +36,9 @@ export function createObservabilityRuleTypeRegistry(ruleTypeRegistry: RuleTypeRe
     register: (type: ObservabilityRuleTypeModel<any>) => {
       const { format, priority, ...rest } = type;
       formatters.push({ typeId: type.id, priority: priority || 0, fn: format });
-      ruleTypeRegistry.register(rest);
+      // Pass format to platform registry as well for platform-level "View in App" support
+      // Cast to AlertFormatter since ObservabilityRuleTypeFormatter is compatible at runtime
+      ruleTypeRegistry.register({ ...rest, format: format as AlertFormatter });
     },
     getFormatter: (typeId: string) => {
       return formatters.find((formatter) => formatter.typeId === typeId)?.fn;

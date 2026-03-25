@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   EuiFlyout,
   useGeneratedHtmlId,
@@ -37,7 +37,7 @@ import {
 } from './form';
 import { DslStepsFlyoutArrayView } from './sections';
 import { useStyles } from './use_styles';
-import type { EditDslStepsFlyoutProps } from './types';
+import type { EditDslStepsFlyoutChangeMeta, EditDslStepsFlyoutProps } from './types';
 
 const FragmentFormWrapper = ({ children }: React.PropsWithChildren) => <>{children}</>;
 
@@ -96,12 +96,73 @@ export const EditDslStepsFlyout = ({
   }, [onChange]);
 
   const lastEmittedOutputRef = useRef<IngestStreamLifecycleDSL>(initialStepsRef.current);
+  const lastEmittedMetaRef = useRef<EditDslStepsFlyoutChangeMeta>({ invalidStepIndices: [] });
   const hasInitializedSubscriptionRef = useRef(false);
   const pendingOnChangeOutputRef = useRef<IngestStreamLifecycleDSL | null>(null);
   const pendingOnChangeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastAppliedInitialStepsRef = useRef<IngestStreamLifecycleDSL>(initialSteps);
+
+  useEffect(() => {
+    if (lastAppliedInitialStepsRef.current === initialSteps) return;
+    lastAppliedInitialStepsRef.current = initialSteps;
+
+    // Keep `hook_form_lib`'s defaultValue in sync with the latest draft owned by the parent.
+    // This allows fields to rehydrate correctly if flyout contents are remounted (e.g. push↔overlay).
+    lastEmittedOutputRef.current = initialSteps;
+
+    if (pendingOnChangeTimeoutRef.current) {
+      clearTimeout(pendingOnChangeTimeoutRef.current);
+      pendingOnChangeTimeoutRef.current = null;
+    }
+    pendingOnChangeOutputRef.current = null;
+
+    form.updateFieldValues(initialSteps);
+  }, [form, initialSteps]);
 
   const { onStepFieldErrorsChange, tabHasErrors, pruneToStepPaths, reindexErrorsAfterRemoval } =
     useDslStepsFlyoutTabErrors();
+
+  const buildInvalidStepIndices = useCallback(
+    (next: IngestStreamLifecycleDSL): number[] => {
+      const stepCount = next.dsl?.downsample?.length ?? 0;
+      const indices: number[] = [];
+      for (let i = 0; i < stepCount; i++) {
+        const stepPath = `_meta.downsampleSteps[${i}]`;
+        if (tabHasErrors(stepPath)) indices.push(i);
+      }
+      return indices;
+    },
+    [tabHasErrors]
+  );
+
+  const scheduleOnChangeEmit = useCallback(() => {
+    if (pendingOnChangeTimeoutRef.current) {
+      clearTimeout(pendingOnChangeTimeoutRef.current);
+    }
+
+    pendingOnChangeTimeoutRef.current = setTimeout(() => {
+      pendingOnChangeTimeoutRef.current = null;
+      const toEmit = pendingOnChangeOutputRef.current;
+      pendingOnChangeOutputRef.current = null;
+
+      if (!toEmit) return;
+
+      const metaToEmit: EditDslStepsFlyoutChangeMeta = {
+        invalidStepIndices: buildInvalidStepIndices(toEmit),
+      };
+
+      if (
+        isEqual(toEmit, lastEmittedOutputRef.current) &&
+        isEqual(metaToEmit, lastEmittedMetaRef.current)
+      ) {
+        return;
+      }
+
+      lastEmittedOutputRef.current = toEmit;
+      lastEmittedMetaRef.current = metaToEmit;
+      onChangeRef.current(toEmit, metaToEmit);
+    }, onChangeDebounceMs);
+  }, [buildInvalidStepIndices, onChangeDebounceMs]);
 
   useEffect(() => {
     const sub = form.subscribe(({ data }) => {
@@ -128,21 +189,19 @@ export const EditDslStepsFlyout = ({
         hasInitializedSubscriptionRef.current = true;
       }
 
-      if (isEqual(next, lastEmittedOutputRef.current)) return;
+      const metaForNext: EditDslStepsFlyoutChangeMeta = {
+        invalidStepIndices: buildInvalidStepIndices(next),
+      };
+
+      if (
+        isEqual(next, lastEmittedOutputRef.current) &&
+        isEqual(metaForNext, lastEmittedMetaRef.current)
+      ) {
+        return;
+      }
 
       pendingOnChangeOutputRef.current = next;
-      if (pendingOnChangeTimeoutRef.current) {
-        clearTimeout(pendingOnChangeTimeoutRef.current);
-      }
-      pendingOnChangeTimeoutRef.current = setTimeout(() => {
-        pendingOnChangeTimeoutRef.current = null;
-        const toEmit = pendingOnChangeOutputRef.current;
-        pendingOnChangeOutputRef.current = null;
-        if (!toEmit) return;
-        if (isEqual(toEmit, lastEmittedOutputRef.current)) return;
-        lastEmittedOutputRef.current = toEmit;
-        onChangeRef.current(toEmit);
-      }, onChangeDebounceMs);
+      scheduleOnChangeEmit();
     });
 
     return () => {
@@ -153,7 +212,15 @@ export const EditDslStepsFlyout = ({
       pendingOnChangeOutputRef.current = null;
       sub.unsubscribe();
     };
-  }, [form, onChangeDebounceMs]);
+  }, [buildInvalidStepIndices, form, onChangeDebounceMs, scheduleOnChangeEmit]);
+
+  useEffect(() => {
+    // Re-emit meta when tab errors change without any DSL change.
+    if (!hasInitializedSubscriptionRef.current) return;
+    if (pendingOnChangeTimeoutRef.current) return;
+    pendingOnChangeOutputRef.current = lastEmittedOutputRef.current;
+    scheduleOnChangeEmit();
+  }, [buildInvalidStepIndices, scheduleOnChangeEmit]);
 
   const hasFormErrors = form.getErrors().length > 0;
   const isSaveDisabledDueToInvalid = form.isValid === false || hasFormErrors;
