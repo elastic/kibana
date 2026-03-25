@@ -38,7 +38,7 @@ export const createIndexSyncService = ({
       entityStoreEntityIdsByType: EntityStoreEntityIdsByType;
     }[]
   ) => {
-    sourcesSyncService.syncBySourceIds({
+    await sourcesSyncService.syncBySourceIds({
       descriptorClient,
       sources,
       process: async (source, entityStoreEntityIdsByType) => {

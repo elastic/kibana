@@ -58,7 +58,7 @@ export const WatchlistSyncUtils = (
 
     log.info(`Created watchlist: ${JSON.stringify(watchlist)}`);
 
-    const { body: entitySource } = await entityAnalyticsApi.createEntitySource({
+    const { body: entitySource } = await entityAnalyticsApi.createWatchlistEntitySource({
       params: { watchlist_id: watchlist.id },
       body: {
         type: 'index',
