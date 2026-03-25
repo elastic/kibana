@@ -2377,10 +2377,10 @@
     semver "^7.6.3"
     topojson-client "^3.1.0"
 
-"@elastic/eslint-plugin-eui@2.10.0":
-  version "2.10.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.10.0.tgz#e03738608457dfa1718394e51eb6879a00586d6e"
-  integrity sha512-kVk1YOZZt3QaSMfQ+pXM+xAQLtAmsDqTW5YL17SsKZUUX6YKsF4s1GS2szwrx2Q/UAyaaxmtOSn4RM/qopUbvw==
+"@elastic/eslint-plugin-eui@2.11.0":
+  version "2.11.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.11.0.tgz#27abb0d3a86879f7629f0aef24342bf3359ec3d4"
+  integrity sha512-P+1njt18ong32ucBiXI3+c0/sKjoX3ffsArcHhmsJW5y9+rvdzZ9rtgWLtRhhtJnpiBI0fyDabEff/ISCU7tZg==
 
 "@elastic/esql@1.7.0":
   version "1.7.0"
@@ -12125,6 +12125,7 @@
   integrity sha512-9FC/6ho8uFa8fV50+FPy/ngWN53jaUu4GRXlAjcxIRrzhltJnpKkBG2Tp0IDraFJeWrOpk84RJ9EMEEYzaI1Bw==
 
 "@redocly/ajv@^8.11.2", "@redocly/ajv@^8.18.0", "ajv@npm:@redocly/ajv@8.18.0":
+  name ajv
   version "8.18.0"
   resolved "https://registry.yarnpkg.com/@redocly/ajv/-/ajv-8.18.0.tgz#e6c7ba549111838baa950bc31acbc84b06f0239f"
   integrity sha512-F+LMD2IDIXuHxgpLJh3nkLj9+tSaEzoUWd+7fONGq5pe2169FUDjpEkOfEpoGLz1sbZni/69p07OsecNfAOpqA==

@@ -16,9 +16,9 @@
 @elastic/apm-rum-core@5.25.1
 @elastic/charts@71.3.0
 @elastic/esql@1.7.0
-@elastic/eui-theme-borealis@6.2.0
-@elastic/eui-theme-common@8.1.0
-@elastic/eui@113.3.0
+@elastic/eui-theme-borealis@7.0.0
+@elastic/eui-theme-common@9.0.0
+@elastic/eui@114.0.0
 @elastic/numeral@2.5.1
 @elastic/prismjs-esql@1.1.2
 @emotion/babel-plugin@11.13.5
