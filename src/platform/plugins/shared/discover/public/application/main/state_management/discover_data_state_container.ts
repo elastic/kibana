@@ -230,11 +230,6 @@ export function getDataStateContainer({
     dataSubjects,
     getCurrentTab,
     injectCurrentTab,
-    getCurrentDataView: () => {
-      const { id: currentTabId } = getCurrentTab();
-
-      return selectTabRuntimeState(runtimeStateManager, currentTabId).currentDataView$.getValue();
-    },
   });
 
   // The main subscription to handle state changes

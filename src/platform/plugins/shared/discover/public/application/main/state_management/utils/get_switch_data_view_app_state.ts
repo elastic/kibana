@@ -15,7 +15,6 @@ import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { getSortArray } from '@kbn/discover-utils';
 import type { DiscoverAppState } from '../redux';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
-import { isChartAvailableForDataView } from './is_chart_available';
 
 /**
  * Helper function to remove or adapt the currently selected columns/sort to be valid with the next
@@ -71,14 +70,11 @@ export function getDataViewAppState(
     );
   }
 
-  const isChartAvailable = isChartAvailableForDataView(nextDataView);
-
   return {
     dataSource: nextDataView.id
       ? createDataViewDataSource({ dataViewId: nextDataView.id })
       : undefined,
     columns,
     sort: nextSort,
-    ...(!isChartAvailable && { hideTable: false }),
   };
 }

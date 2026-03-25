@@ -27,6 +27,7 @@ import { render, screen } from '@testing-library/react';
 const setup = async ({
   dataView,
   prevSidebarClosed,
+  hideTable = false,
   dataMainMsg = {
     fetchStatus: FetchStatus.COMPLETE,
     foundDocuments: true,
@@ -34,6 +35,7 @@ const setup = async ({
 }: {
   dataView: DataView;
   prevSidebarClosed?: boolean;
+  hideTable?: boolean;
   dataMainMsg?: DataMainMsg;
 }) => {
   if (typeof prevSidebarClosed === 'boolean') {
@@ -59,6 +61,7 @@ const setup = async ({
       tabId: toolkit.getCurrentTab().id,
       appState: {
         dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
+        hideTable,
         query: { query: '', language: 'kuery' },
       },
     })
@@ -108,6 +111,15 @@ const setup = async ({
 describe('Discover component', () => {
   test('selected data view without time field displays no chart and table toggle', async () => {
     await setup({ dataView: dataViewMock });
+    expect(screen.queryByTestId('dscHideHistogramButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('dscShowHistogramButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('dscHideTableButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('dscShowTableButton')).not.toBeInTheDocument();
+  }, 10000);
+
+  test('selected data view without time field still shows results when table is collapsed', async () => {
+    await setup({ dataView: dataViewMock, hideTable: true });
+    expect(screen.queryByTestId('discoverDocumentsTable')).toBeInTheDocument();
     expect(screen.queryByTestId('dscHideHistogramButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('dscShowHistogramButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('dscHideTableButton')).not.toBeInTheDocument();
