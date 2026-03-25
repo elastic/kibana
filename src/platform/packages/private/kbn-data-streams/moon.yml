@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/core-elasticsearch-client-server-mocks'
+  - '@kbn/utils'
 tags:
   - shared-server
   - package
