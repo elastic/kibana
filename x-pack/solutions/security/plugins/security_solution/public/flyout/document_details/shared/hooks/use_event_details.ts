@@ -46,6 +46,10 @@ export interface UseEventDetailsParams {
    * Name of the index used in the parent's page
    */
   indexName: string | undefined;
+  /**
+   * Whether to skip the event details retrieval
+   */
+  skip?: boolean;
 }
 
 export interface UseEventDetailsResult {
@@ -85,6 +89,7 @@ export interface UseEventDetailsResult {
 export const useEventDetails = ({
   eventId,
   indexName,
+  skip = false,
 }: UseEventDetailsParams): UseEventDetailsResult => {
   const currentSpaceId = useSpaceId();
   // TODO Replace getAlertIndexAlias way to retrieving the eventIndex with the GET /_alias
@@ -114,7 +119,7 @@ export const useEventDetails = ({
       indexName: eventIndex,
       eventId: eventId ?? '',
       runtimeMappings,
-      skip: !eventId,
+      skip: !eventId || skip,
     });
   const { getFieldsData } = useGetFieldsData({ fieldsData: searchHit?.fields });
 
