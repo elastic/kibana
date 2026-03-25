@@ -18,7 +18,6 @@ import type {
 } from '../../../common/domain/definitions/entity_schema';
 import { BadCRUDRequestError } from '../errors';
 
-
 type CrudOperation = 'create' | 'update';
 
 export function hashEuid(id: string): string {
@@ -131,7 +130,11 @@ function assertOnlyNonForcedAttributesInReq(fields: Record<string, EntityField>)
   }
 }
 
-function transformDoc(operation: CrudOperation, type: EntityType, data: Entity): Record<string, unknown> {
+function transformDoc(
+  operation: CrudOperation,
+  type: EntityType,
+  data: Entity
+): Record<string, unknown> {
   const doc: Record<string, unknown> = {
     ...data,
     '@timestamp': new Date().toISOString(),

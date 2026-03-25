@@ -341,14 +341,7 @@ describe('crud_client utils', () => {
           entity: { id: 'host-1', type: 'Host' },
           host: { name: 'my-host' },
         };
-        const result = validateAndTransformDoc(
-          'update',
-          'host',
-          'default',
-          doc,
-          undefined,
-          true
-        );
+        const result = validateAndTransformDoc('update', 'host', 'default', doc, undefined, true);
 
         expect(result.doc).not.toHaveProperty('entity');
         expect(result.doc).toHaveProperty('host.entity.id', 'host-1');
@@ -415,14 +408,7 @@ describe('crud_client utils', () => {
           entity: { id: 'host:flat-host' },
           host: { name: 'flat-host' },
         };
-        const result = validateAndTransformDoc(
-          'update',
-          'host',
-          'default',
-          doc,
-          undefined,
-          false
-        );
+        const result = validateAndTransformDoc('update', 'host', 'default', doc, undefined, false);
 
         expect(result.id).toBe('host:flat-host');
         expect(result.doc).not.toHaveProperty('entity');
