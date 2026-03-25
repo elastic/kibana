@@ -25,11 +25,11 @@ export const ReviewRuleDeprecationRequestBody = z
   .nullable();
 
 export interface DeprecatedRuleForReview {
-  /** Rule saved object ID */
+  /** Installed rule saved object ID */
   id: string;
   /** Rule signature ID */
   rule_id: string;
-  version: number;
+  /** Installed rule name (may differ from the package name if customized) */
   name: string;
   deprecated_reason?: string;
 }

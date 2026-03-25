@@ -21,6 +21,7 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
@@ -78,11 +79,12 @@ export const DeprecatedRulesModal: React.FC<DeprecatedRulesModalProps> = ({
         <EuiModalHeader>
           <EuiFlexGroup direction="column">
             <EuiModalHeaderTitle>{i18n.DEPRECATED_RULES_MODAL_TITLE}</EuiModalHeaderTitle>
-            <EuiText size="s">
+            <EuiText size="m">
               <p>{i18n.DEPRECATED_RULES_MODAL_DESCRIPTION(rules.length)}</p>
             </EuiText>
           </EuiFlexGroup>
         </EuiModalHeader>
+        <EuiHorizontalRule />
         <EuiModalBody>
           {isLoading ? (
             <EuiLoadingSpinner size="m" />
@@ -94,7 +96,7 @@ export const DeprecatedRulesModal: React.FC<DeprecatedRulesModalProps> = ({
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={onClose} data-test-subj="deprecated-rules-modal-close">
-                {i18n.CLOSE}
+                {i18n.CLOSE_MODAL}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -117,7 +119,7 @@ export const DeprecatedRulesModal: React.FC<DeprecatedRulesModalProps> = ({
           onCancel={hideConfirm}
           onConfirm={handleDeleteAll}
           confirmButtonText={i18n.DELETE_ALL_DEPRECATED_RULES(rules.length)}
-          cancelButtonText={i18n.CANCEL}
+          cancelButtonText={i18n.CANCEL_DELETE}
           buttonColor="danger"
           defaultFocusedButton="confirm"
           data-test-subj="deprecated-rules-delete-all-confirm-modal"

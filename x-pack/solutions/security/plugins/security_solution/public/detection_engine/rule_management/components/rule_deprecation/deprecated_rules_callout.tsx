@@ -13,6 +13,7 @@ interface DeprecatedRulesCalloutProps {
   description: string;
   buttonLabel: string;
   onButtonClick: () => void;
+  onDismiss?: () => void;
   isButtonDisabled?: boolean;
   dataTestSubj?: string;
 }
@@ -22,12 +23,19 @@ export const DeprecatedRulesCallout: React.FC<DeprecatedRulesCalloutProps> = ({
   description,
   buttonLabel,
   onButtonClick,
+  onDismiss,
   isButtonDisabled = false,
   dataTestSubj,
 }) => {
   return (
     <>
-      <EuiCallOut title={title} color="warning" iconType="warning" data-test-subj={dataTestSubj}>
+      <EuiCallOut
+        title={title}
+        color="warning"
+        iconType="warning"
+        onDismiss={onDismiss}
+        data-test-subj={dataTestSubj}
+      >
         <p>{description}</p>
         <EuiButton
           color="warning"

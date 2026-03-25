@@ -15,6 +15,7 @@ import {
 import type { DeprecatedRuleForReview } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { RuleParams } from '../../../rule_schema';
+import { invariant } from '../../../../../../common/utils/invariant';
 import { buildSiemResponse } from '../../../routes/utils';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
@@ -58,54 +59,60 @@ export const reviewRuleDeprecationRoute = (router: SecuritySolutionPluginRouter)
               ids,
             });
 
-            const ruleIdMap = new Map<string, string>();
+            // Map rule_id -> { id, name } from the installed rules
+            const installedRuleMap = new Map<string, { id: string; name: string }>();
             for (const rule of fetchedRules) {
-              ruleIdMap.set(rule.params.ruleId, rule.id);
+              installedRuleMap.set(rule.params.ruleId, { id: rule.id, name: rule.name });
             }
 
             const deprecatedAssets = await ruleAssetsClient.fetchDeprecatedRules([
-              ...ruleIdMap.keys(),
+              ...installedRuleMap.keys(),
             ]);
 
-            const rules: DeprecatedRuleForReview[] = deprecatedAssets.map((asset) => ({
-              id: ruleIdMap.get(asset.rule_id) as string,
-              rule_id: asset.rule_id,
-              version: asset.version,
-              name: asset.name,
-              ...(asset.deprecated_reason != null && {
-                deprecated_reason: asset.deprecated_reason,
-              }),
-            }));
+            const rules: DeprecatedRuleForReview[] = deprecatedAssets.map((asset) => {
+              const installedRule = installedRuleMap.get(asset.rule_id);
+              invariant(
+                installedRule,
+                `Expected installed rule for rule_id ${asset.rule_id} to exist`
+              );
+              return {
+                id: installedRule.id,
+                rule_id: asset.rule_id,
+                name: installedRule.name,
+                ...(asset.deprecated_reason != null && {
+                  deprecated_reason: asset.deprecated_reason,
+                }),
+              };
+            });
 
             return response.ok({ body: { rules } });
           }
 
-          // No ids filter: fetch all deprecated assets and all installed rule
-          // versions in parallel, then cross-reference in memory.
-          // We fetch all installed rules rather than scoping by rule_ids because
-          // fetchInstalledRuleVersionsByIds filters by alert SO ID, not rule_id.
-          const [deprecatedAssets, installedVersions] = await Promise.all([
-            ruleAssetsClient.fetchDeprecatedRules(),
-            ruleObjectsClient.fetchInstalledRuleVersions(),
-          ]);
+          // Retrieve all deprecated rule assets to compare in memory
+          const deprecatedAssets = await ruleAssetsClient.fetchDeprecatedRules();
+          const deprecatedRuleIds = deprecatedAssets.map((asset) => asset.rule_id);
 
-          const installedRuleIdMap = new Map<string, string>();
-          for (const installed of installedVersions) {
-            installedRuleIdMap.set(installed.rule_id, installed.id);
-          }
+          // Only fetch installed rules that match deprecated rule_ids
+          const installedRules = await ruleObjectsClient.fetchInstalledRulesByIds({
+            ruleIds: deprecatedRuleIds,
+          });
 
-          // Only include deprecated assets that are actually installed
-          const rules: DeprecatedRuleForReview[] = deprecatedAssets
-            .filter((asset) => installedRuleIdMap.has(asset.rule_id))
-            .map((asset) => ({
-              id: installedRuleIdMap.get(asset.rule_id) as string,
-              rule_id: asset.rule_id,
-              version: asset.version,
-              name: asset.name,
-              ...(asset.deprecated_reason != null && {
+          // Build response from installed rules that have matching deprecated assets
+          const deprecatedAssetMap = new Map(
+            deprecatedAssets.map((asset) => [asset.rule_id, asset])
+          );
+
+          const rules: DeprecatedRuleForReview[] = installedRules.map((rule) => {
+            const asset = deprecatedAssetMap.get(rule.rule_id);
+            return {
+              id: rule.id,
+              rule_id: rule.rule_id,
+              name: rule.name,
+              ...(asset?.deprecated_reason != null && {
                 deprecated_reason: asset.deprecated_reason,
               }),
-            }));
+            };
+          });
 
           return response.ok({ body: { rules } });
         } catch (err) {

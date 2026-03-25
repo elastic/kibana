@@ -18,7 +18,7 @@ export const DEPRECATION_TABLE_CALLOUT_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.deprecation.tableCalloutDescription',
   {
     defaultMessage:
-      'Delete these rules. If needed, duplicate them as custom rules before deleting to continue using them.',
+      'Delete these rules. If needed, duplicate them as custom rules before deleting to continue using them. This reminder will appear again in 7 days if dismissed.',
   }
 );
 
@@ -65,9 +65,12 @@ export const DEPRECATED_RULES_MODAL_DESCRIPTION = (count: number) =>
     values: { count },
   });
 
-export const CLOSE = i18n.translate('xpack.securitySolution.detectionEngine.deprecation.close', {
-  defaultMessage: 'Close',
-});
+export const CLOSE_MODAL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.deprecation.close',
+  {
+    defaultMessage: 'Close',
+  }
+);
 
 export const DELETE_ALL_DEPRECATED_RULES = (count: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.deprecation.deleteAllDeprecatedRules', {
@@ -91,6 +94,9 @@ export const DELETE_ALL_CONFIRMATION_DESCRIPTION = (count: number) =>
     }
   );
 
-export const CANCEL = i18n.translate('xpack.securitySolution.detectionEngine.deprecation.cancel', {
-  defaultMessage: 'Cancel',
-});
+export const CANCEL_DELETE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.deprecation.cancel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
