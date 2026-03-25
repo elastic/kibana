@@ -9,7 +9,7 @@ applies_to:
 
 # Map settings in {{kib}}
 
-:::{settings} /reference/configuration-reference/maps-settings.yml
+:::{settings} /reference/configuration-reference/map-settings.yml
 :::
 
 `map.regionmap` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
