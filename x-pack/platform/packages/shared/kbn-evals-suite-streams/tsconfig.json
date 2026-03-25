@@ -27,6 +27,7 @@
     "@kbn/inference-prompt-utils",
     "@kbn/zod",
     "@kbn/es-snapshot-loader",
-    "@kbn/es-errors"
+    "@kbn/es-errors",
+    "@kbn/otel-demo"
   ]
 }
