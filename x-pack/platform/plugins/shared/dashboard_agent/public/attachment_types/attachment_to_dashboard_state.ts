@@ -21,12 +21,17 @@ const lensConfigBuilder = new LensConfigBuilder();
 
 const buildPanelFromConfig = ({ config, type, uid, grid }: AttachmentPanel): DashboardPanel => {
   let configObject = config;
-  if (type === LENS_EMBEDDABLE_TYPE && config.attributes && isLensAPIFormat(config.attributes)) {
-    const lensAttributes = lensConfigBuilder.fromAPIFormat(config.attributes);
-    configObject = {
-      ...config,
-      attributes: lensAttributes,
-    };
+  if (type === LENS_EMBEDDABLE_TYPE) {
+    if (isLensAPIFormat(config)) {
+      configObject = {
+        attributes: lensConfigBuilder.fromAPIFormat(config),
+      };
+    } else if (config.attributes && isLensAPIFormat(config.attributes)) {
+      configObject = {
+        ...config,
+        attributes: lensConfigBuilder.fromAPIFormat(config.attributes),
+      };
+    }
   }
   return {
     type,
