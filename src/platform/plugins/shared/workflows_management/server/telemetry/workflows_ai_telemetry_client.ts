@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AnalyticsServiceSetup, AnalyticsServiceStart, Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import {
   WORKFLOWS_AI_EDIT_RESULT_EVENT_TYPE,
   type WorkflowsAiEditResultParams,
@@ -26,14 +26,12 @@ interface CompactValidation {
 export class WorkflowsAiTelemetryClient {
   private lastValidationFailed = new Map<string, boolean>();
 
-  static setup(analytics: AnalyticsServiceSetup): void {
+  constructor(private readonly analytics: AnalyticsServiceSetup, private readonly logger: Logger) {
     analytics.registerEventType({
       eventType: WORKFLOWS_AI_EDIT_RESULT_EVENT_TYPE,
       schema: workflowsAiEditResultSchema,
     });
   }
-
-  constructor(private readonly analytics: AnalyticsServiceStart, private readonly logger: Logger) {}
 
   reportEditResult(params: {
     toolId: string;

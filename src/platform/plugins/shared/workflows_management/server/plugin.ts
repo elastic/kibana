@@ -78,7 +78,7 @@ export class WorkflowsPlugin
   ) {
     this.logger.debug('Workflows Management: Setup');
 
-    WorkflowsAiTelemetryClient.setup(core.analytics);
+    this.aiTelemetryClient = new WorkflowsAiTelemetryClient(core.analytics, this.logger);
 
     registerUISettings(core, plugins);
 

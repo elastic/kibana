@@ -14,6 +14,11 @@ export enum WorkflowAiChatEventTypes {
    */
   WorkflowAiChatOpened = 'workflows_ai_chat_opened',
   /**
+   * When a proposal (inline diff) is shown to the user in the editor.
+   * Fires from the attachment bridge when the server emits a yaml_changed event.
+   */
+  WorkflowAiProposalReceived = 'workflows_ai_proposal_received',
+  /**
    * When a proposal (inline diff) is accepted or rejected by the user.
    */
   WorkflowAiProposalResolved = 'workflows_ai_proposal_resolved',
@@ -34,6 +39,14 @@ export interface ReportWorkflowAiChatOpenedParams {
   workflowId?: string;
 }
 
+export interface ReportWorkflowAiProposalReceivedParams {
+  eventName: string;
+  workflowId?: string;
+  proposalId: string;
+  toolId: string;
+  sessionType: WorkflowAiSessionType;
+}
+
 export interface ReportWorkflowAiProposalResolvedParams {
   eventName: string;
   workflowId?: string;
@@ -47,6 +60,7 @@ export interface ReportWorkflowAiSessionCompletedParams {
   eventName: string;
   sessionType: WorkflowAiSessionType;
   workflowId?: string;
+  conversationId?: string;
   proposalsAccepted: number;
   proposalsDeclined: number;
   proposalsPending: number;

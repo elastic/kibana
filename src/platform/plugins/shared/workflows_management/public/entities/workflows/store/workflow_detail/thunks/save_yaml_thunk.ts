@@ -50,12 +50,13 @@ export const saveYamlThunk = createAsyncThunk<
           },
         });
 
+    const isAiAssisted = selectAiAssisted(getState());
+
     try {
       const state = getState();
       const yamlString = selectYamlString(state);
       const workflowDefinition = selectWorkflowDefinition(state);
       const id = selectWorkflowId(state);
-      const isAiAssisted = selectAiAssisted(state);
 
       if (!yamlString) {
         return rejectWithValue('No YAML content to save');
@@ -137,12 +138,14 @@ export const saveYamlThunk = createAsyncThunk<
           isBulkAction: false,
           error: errorObj,
           origin: 'workflow_detail',
+          aiAssisted: isAiAssisted,
         });
       } else {
         telemetry.reportWorkflowCreated({
           workflowDefinition: errorWorkflowDefinition || undefined,
           error: errorObj,
           origin: 'workflow_detail',
+          aiAssisted: isAiAssisted,
         });
       }
 

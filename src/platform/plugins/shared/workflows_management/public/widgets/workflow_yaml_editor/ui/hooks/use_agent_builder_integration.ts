@@ -10,6 +10,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { v4 } from 'uuid';
+import { isConversationIdSetEvent } from '@kbn/agent-builder-common/chat/events';
 import type { monaco } from '@kbn/monaco';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '../../../../../common/agent_builder/constants';
 import { setAiAssisted } from '../../../../entities/workflows/store/workflow_detail/slice';
@@ -55,6 +56,7 @@ export const useAgentBuilderIntegration = ({
   const attachmentBridgeRef = useRef<AttachmentBridge | null>(null);
   const trackerRef = useRef<ProposalTracker | null>(null);
   const chatOpenedReportedRef = useRef(false);
+  const conversationIdRef = useRef<string | undefined>(undefined);
   const validationErrorsRef = useRef(validationErrors);
   validationErrorsRef.current = validationErrors;
   const chatRefHandle = useRef<{ close: () => void } | null>(null);
@@ -77,23 +79,53 @@ export const useAgentBuilderIntegration = ({
 
     const manager = new ProposalManager();
     manager.initialize(editor, {
-      onAccept: () => {
+      onHunkAccepted: () => {
+        dispatch(setAiAssisted(true));
+        const pending = tracker.getAllRecords().find((r) => r.status === 'pending');
+        if (pending) {
+          tracker.updateStatus(pending.proposalId, 'accepted');
+          telemetry.reportAiProposalResolved({
+            workflowId,
+            proposalId: pending.proposalId,
+            resolution: 'accepted',
+            toolId: pending.toolId,
+            isBulkAction: false,
+          });
+        }
+      },
+      onHunkRejected: () => {
+        const pending = tracker.getAllRecords().find((r) => r.status === 'pending');
+        if (pending) {
+          tracker.cascadeDecline(pending.proposalId);
+          telemetry.reportAiProposalResolved({
+            workflowId,
+            proposalId: pending.proposalId,
+            resolution: 'rejected',
+            toolId: pending.toolId,
+            isBulkAction: false,
+          });
+        }
+      },
+      onAccept: ({ isBulkAction }) => {
         const pendingRecords = tracker.getAllRecords().filter((r) => r.status === 'pending');
+
+        if (pendingRecords.length > 0) {
+          dispatch(setAiAssisted(true));
+        }
 
         for (const record of pendingRecords) {
           tracker.updateStatus(record.proposalId, 'accepted');
-          dispatch(setAiAssisted(true));
 
           telemetry.reportAiProposalResolved({
             workflowId,
             proposalId: record.proposalId,
             resolution: 'accepted',
             toolId: record.toolId,
-            isBulkAction: pendingRecords.length > 1,
+            isBulkAction,
           });
         }
       },
-      onReject: () => {
+      onReject: ({ isBulkAction }) => {
         const pendingRecords = tracker.getAllRecords().filter((r) => r.status === 'pending');
 
         for (const record of pendingRecords) {
@@ -104,7 +136,7 @@ export const useAgentBuilderIntegration = ({
             proposalId: record.proposalId,
             resolution: 'rejected',
             toolId: record.toolId,
-            isBulkAction: pendingRecords.length > 1,
+            isBulkAction,
           });
         }
       },
@@ -115,8 +147,22 @@ export const useAgentBuilderIntegration = ({
     const bridge = new AttachmentBridge();
     bridge.start(agentBuilder.events.chat$, manager, editorRef, tracker, {
       workflowId: attachmentId,
+      onProposalReceived: ({ proposalId, toolId }) => {
+        telemetry.reportAiProposalReceived({
+          workflowId,
+          proposalId,
+          toolId,
+          sessionType,
+        });
+      },
     });
     attachmentBridgeRef.current = bridge;
+
+    const conversationIdSub = agentBuilder.events.chat$.subscribe((event) => {
+      if (isConversationIdSetEvent(event)) {
+        conversationIdRef.current = event.data.conversation_id;
+      }
+    });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).__wfTestBridge = {
@@ -154,15 +200,6 @@ export const useAgentBuilderIntegration = ({
         attachments: [attachment],
       });
       agentBuilder.addAttachment(attachment);
-
-      if (!chatOpenedReportedRef.current) {
-        chatOpenedReportedRef.current = true;
-        telemetry.reportWorkflowAiChatOpened({
-          entryPoint: 'header_on_editor_page',
-          sessionType,
-          workflowId,
-        });
-      }
     };
 
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -185,17 +222,20 @@ export const useAgentBuilderIntegration = ({
         telemetry.reportWorkflowAiSessionCompleted({
           sessionType,
           workflowId,
+          conversationId: conversationIdRef.current,
           proposalsAccepted: records.filter((r) => r.status === 'accepted').length,
           proposalsDeclined: records.filter((r) => r.status === 'declined').length,
           proposalsPending: records.filter((r) => r.status === 'pending').length,
         });
       }
       chatOpenedReportedRef.current = false;
+      conversationIdRef.current = undefined;
 
       if (debounceTimer) {
         clearTimeout(debounceTimer);
       }
       modelListener?.dispose();
+      conversationIdSub.unsubscribe();
       chatRefHandle.current = null;
       agentBuilder.clearChatConfig();
       bridge.stop();

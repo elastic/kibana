@@ -489,6 +489,13 @@ export class WorkflowsBaseTelemetry {
     });
   };
 
+  reportWorkflowCreateOpened = (params: { editorType?: WorkflowEditorType }) => {
+    this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowCreateOpened, {
+      eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowCreateOpened],
+      ...(params.editorType && { editorType: params.editorType }),
+    });
+  };
+
   // Import/Export actions
 
   /**
@@ -570,6 +577,21 @@ export class WorkflowsBaseTelemetry {
     });
   };
 
+  reportAiProposalReceived = (params: {
+    workflowId?: string;
+    proposalId: string;
+    toolId: string;
+    sessionType: WorkflowAiSessionType;
+  }) => {
+    this.telemetryService.reportEvent(WorkflowAiChatEventTypes.WorkflowAiProposalReceived, {
+      eventName: workflowEventNames[WorkflowAiChatEventTypes.WorkflowAiProposalReceived],
+      ...(params.workflowId && { workflowId: params.workflowId }),
+      proposalId: params.proposalId,
+      toolId: params.toolId,
+      sessionType: params.sessionType,
+    });
+  };
+
   reportAiProposalResolved = (params: {
     workflowId?: string;
     proposalId: string;
@@ -590,6 +612,7 @@ export class WorkflowsBaseTelemetry {
   reportWorkflowAiSessionCompleted = (params: {
     sessionType: WorkflowAiSessionType;
     workflowId?: string;
+    conversationId?: string;
     proposalsAccepted: number;
     proposalsDeclined: number;
     proposalsPending: number;
@@ -598,6 +621,7 @@ export class WorkflowsBaseTelemetry {
       eventName: workflowEventNames[WorkflowAiChatEventTypes.WorkflowAiSessionCompleted],
       sessionType: params.sessionType,
       ...(params.workflowId && { workflowId: params.workflowId }),
+      ...(params.conversationId && { conversationId: params.conversationId }),
       proposalsAccepted: params.proposalsAccepted,
       proposalsDeclined: params.proposalsDeclined,
       proposalsPending: params.proposalsPending,

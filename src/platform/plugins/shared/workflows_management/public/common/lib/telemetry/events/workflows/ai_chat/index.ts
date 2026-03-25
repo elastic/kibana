@@ -10,6 +10,7 @@
 import type { RootSchema } from '@kbn/core/public';
 import type {
   ReportWorkflowAiChatOpenedParams,
+  ReportWorkflowAiProposalReceivedParams,
   ReportWorkflowAiProposalResolvedParams,
   ReportWorkflowAiSessionCompletedParams,
 } from './types';
@@ -17,6 +18,7 @@ import { WorkflowAiChatEventTypes } from './types';
 
 export const workflowAiChatEventNames = {
   [WorkflowAiChatEventTypes.WorkflowAiChatOpened]: 'Workflow AI chat opened',
+  [WorkflowAiChatEventTypes.WorkflowAiProposalReceived]: 'Workflow AI proposal received',
   [WorkflowAiChatEventTypes.WorkflowAiProposalResolved]: 'Workflow AI proposal resolved',
   [WorkflowAiChatEventTypes.WorkflowAiSessionCompleted]: 'Workflow AI session completed',
 };
@@ -54,6 +56,39 @@ const workflowAiChatOpenedSchema: RootSchema<ReportWorkflowAiChatOpenedParams> =
     _meta: {
       description: 'The workflow ID if editing an existing workflow',
       optional: true,
+    },
+  },
+};
+
+const workflowAiProposalReceivedSchema: RootSchema<ReportWorkflowAiProposalReceivedParams> = {
+  ...eventNameSchema,
+  workflowId: {
+    type: 'keyword',
+    _meta: {
+      description: 'The workflow ID if editing an existing workflow',
+      optional: true,
+    },
+  },
+  proposalId: {
+    type: 'keyword',
+    _meta: {
+      description: 'The unique ID of the proposal shown to the user',
+      optional: false,
+    },
+  },
+  toolId: {
+    type: 'keyword',
+    _meta: {
+      description: 'The edit tool that produced this proposal',
+      optional: false,
+    },
+  },
+  sessionType: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Whether this is an edit session (existing workflow) or create session (new workflow)',
+      optional: false,
     },
   },
 };
@@ -115,6 +150,14 @@ const workflowAiSessionCompletedSchema: RootSchema<ReportWorkflowAiSessionComple
       optional: true,
     },
   },
+  conversationId: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The agent builder conversation ID, for joining with agent_builder_round_complete events',
+      optional: true,
+    },
+  },
   proposalsAccepted: {
     type: 'integer',
     _meta: {
@@ -140,6 +183,7 @@ const workflowAiSessionCompletedSchema: RootSchema<ReportWorkflowAiSessionComple
 
 export const workflowAiChatEventSchemas = {
   [WorkflowAiChatEventTypes.WorkflowAiChatOpened]: workflowAiChatOpenedSchema,
+  [WorkflowAiChatEventTypes.WorkflowAiProposalReceived]: workflowAiProposalReceivedSchema,
   [WorkflowAiChatEventTypes.WorkflowAiProposalResolved]: workflowAiProposalResolvedSchema,
   [WorkflowAiChatEventTypes.WorkflowAiSessionCompleted]: workflowAiSessionCompletedSchema,
 };

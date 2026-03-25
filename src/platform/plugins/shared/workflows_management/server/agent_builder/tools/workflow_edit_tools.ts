@@ -109,7 +109,8 @@ const emitDiffAndUpdateYaml = async (
   proposalId: string,
   description: string | undefined,
   workflowId: string | undefined,
-  workflowName: string | undefined
+  workflowName: string | undefined,
+  toolId: string
 ): Promise<{ diffAttachmentId: string; attachmentVersion: number | undefined }> => {
   const diffAttachment = await context.attachments.add({
     type: WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
@@ -136,6 +137,7 @@ const emitDiffAndUpdateYaml = async (
     workflowId,
     name: workflowName,
     attachmentVersion,
+    toolId,
   });
 
   return { diffAttachmentId: diffAttachment.id, attachmentVersion };
@@ -166,7 +168,7 @@ const runCompactValidation = async (
 };
 
 const extractConversationId = (context: ToolHandlerContext): string | undefined => {
-  const agentEntry = context.runContext.stack.find((entry) => entry.type === 'agent');
+  const agentEntry = context.runContext.stack.findLast((entry) => entry.type === 'agent');
   return agentEntry && 'conversationId' in agentEntry ? agentEntry.conversationId : undefined;
 };
 
@@ -209,7 +211,8 @@ const handleEditResult = async (
     proposalId,
     description,
     workflowId,
-    workflowName
+    workflowName,
+    toolId
   );
 
   const validation = await runCompactValidation(result.yaml, api, context);
@@ -488,7 +491,8 @@ export function registerWorkflowEditTools(
         proposalId,
         description,
         attachment.workflowId,
-        attachment.name
+        attachment.name,
+        workflowTools.replaceYaml
       );
 
       const validation = await runCompactValidation(yaml, api, context);

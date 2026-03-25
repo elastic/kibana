@@ -10,6 +10,7 @@
 import type { RootSchema } from '@kbn/core/public';
 import type {
   ReportWorkflowAiChatOpenedParams,
+  ReportWorkflowAiProposalReceivedParams,
   ReportWorkflowAiProposalResolvedParams,
   ReportWorkflowAiSessionCompletedParams,
   WorkflowAiChatEventTypes,
@@ -35,6 +36,7 @@ import type {
   WorkflowLifecycleEventTypes,
 } from './lifecycle/types';
 import type {
+  ReportWorkflowCreateOpenedActionParams,
   ReportWorkflowDetailViewedActionParams,
   ReportWorkflowListViewedActionParams,
   WorkflowUIEventTypes,
@@ -107,9 +109,11 @@ export interface WorkflowsTelemetryEventsMap {
   [WorkflowExecutionEventTypes.WorkflowRunCancelled]: ReportWorkflowRunCancelledActionParams;
   [WorkflowUIEventTypes.WorkflowListViewed]: ReportWorkflowListViewedActionParams;
   [WorkflowUIEventTypes.WorkflowDetailViewed]: ReportWorkflowDetailViewedActionParams;
+  [WorkflowUIEventTypes.WorkflowCreateOpened]: ReportWorkflowCreateOpenedActionParams;
   [WorkflowImportExportEventTypes.WorkflowExported]: ReportWorkflowExportedActionParams;
   [WorkflowImportExportEventTypes.WorkflowImported]: ReportWorkflowImportedActionParams;
   [WorkflowAiChatEventTypes.WorkflowAiChatOpened]: ReportWorkflowAiChatOpenedParams;
+  [WorkflowAiChatEventTypes.WorkflowAiProposalReceived]: ReportWorkflowAiProposalReceivedParams;
   [WorkflowAiChatEventTypes.WorkflowAiProposalResolved]: ReportWorkflowAiProposalResolvedParams;
   [WorkflowAiChatEventTypes.WorkflowAiSessionCompleted]: ReportWorkflowAiSessionCompletedParams;
 }
