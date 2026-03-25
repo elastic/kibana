@@ -49,11 +49,13 @@ interface TraceQueryParams {
   metadataFields: string[];
 }
 
-function createBaseTraceQuery({ indexes, filters, metadataFields }: TraceQueryParams): ComposerQuery {
+function createBaseTraceQuery({
+  indexes,
+  filters,
+  metadataFields,
+}: TraceQueryParams): ComposerQuery {
   const whereClauses = getWhereClauses(filters);
-  const query = metadataFields.length
-    ? esql.from([indexes], metadataFields)
-    : esql.from(indexes);
+  const query = metadataFields.length ? esql.from([indexes], metadataFields) : esql.from(indexes);
   for (const clause of whereClauses) {
     query.pipe(`WHERE ${clause}`);
   }
