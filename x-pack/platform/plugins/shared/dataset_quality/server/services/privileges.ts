@@ -195,8 +195,12 @@ class DatasetQualityPrivileges {
 export const datasetQualityPrivileges = new DatasetQualityPrivileges();
 
 function isSecurityDisabledError(error: errors.ResponseError): boolean {
-  const body = error.body as { error?: string } | undefined;
-  return Boolean(body?.error && body.error.includes('no handler found'));
+  // ES returns a "no handler found" error body when security is disabled.
+  // Use case-insensitive matching and handle both plain-text and JSON body formats.
+  const body = error.body;
+  const bodyText =
+    typeof body === 'string' ? body : (body as { error?: string } | undefined)?.error ?? '';
+  return bodyText.toLowerCase().includes('no handler found');
 }
 
 function isUnknownPrivilegeError(
