@@ -92,6 +92,7 @@ export class AgentBuilderPlugin
       });
 
       setupDeps.searchInferenceEndpoints.features.register({
+        parentFeatureId: AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID,
         featureId: AGENT_BUILDER_INFERENCE_FEATURE_ID,
         featureName: 'Agent Builder',
         featureDescription: 'Agent Builder inference endpoint configuration',
