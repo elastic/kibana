@@ -25,7 +25,8 @@ import { FormattedRelativePreferenceDate } from '../../../common/components/form
 import { DocumentDetailsRightPanelKey } from '../../document_details/shared/constants/panel_keys';
 import { useBasicDataFromDetailsData } from '../../document_details/shared/hooks/use_basic_data_from_details_data';
 import { useEventDetails } from '../../document_details/shared/hooks/use_event_details';
-import { getAlertTitle, getEventTitle, getField } from '../../document_details/shared/utils';
+import { getAlertTitle, getEventTitle } from '../../../flyout_v2/document/utils/get_header_title';
+import { getField } from '../../document_details/shared/utils';
 import { RulePanelKey } from '../../rule_details/right';
 import { NetworkPanelKey } from '../../network_details';
 import { useRuleDetails } from '../../rule_details/hooks/use_rule_details';
@@ -158,8 +159,12 @@ export const DocumentDetailsHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item
   const title = useMemo(
     () =>
       isAlert
-        ? getAlertTitle({ ruleName })
-        : getEventTitle({ eventKind, eventCategory, getFieldsData }),
+        ? getAlertTitle(ruleName)
+        : getEventTitle(
+            eventKind,
+            eventCategory,
+            (field) => getField(getFieldsData(field)) ?? undefined
+          ),
     [isAlert, ruleName, eventKind, eventCategory, getFieldsData]
   );
 

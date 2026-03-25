@@ -13,6 +13,7 @@ import type { FtrProviderContext } from '../../../api_integration/ftr_provider_c
 import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 
 const PARENT_PACKAGE = 'parent_with_dep';
+const PARENT_WITH_DEP_ALT = 'parent_with_dep_alt';
 const DEP_PACKAGE = 'dep_package';
 const VERSION = '1.0.0';
 const DEP_VERSION_NEWER = '2.0.0';
@@ -74,6 +75,7 @@ export default function (providerContext: FtrProviderContext) {
     afterEach(async () => {
       if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
       await uninstallPackage(PARENT_PACKAGE, VERSION);
+      await uninstallPackage(PARENT_WITH_DEP_ALT, VERSION);
       await uninstallPackage(DEP_PACKAGE, VERSION);
       await uninstallPackage(DEP_PACKAGE, DEP_VERSION_NEWER);
     });
@@ -127,6 +129,27 @@ export default function (providerContext: FtrProviderContext) {
 
       expect(await installationExists(PARENT_PACKAGE)).toBe(false);
       expect(await installationExists(DEP_PACKAGE)).toBe(false);
+    });
+
+    it('serializes two installs with dependencies via lock (both succeed, no concurrent dependency resolution)', async () => {
+      await uninstallPackage(PARENT_PACKAGE, VERSION);
+      await uninstallPackage(PARENT_WITH_DEP_ALT, VERSION);
+      await uninstallPackage(DEP_PACKAGE, VERSION);
+
+      const [res1, res2] = await Promise.all([
+        installPackage(PARENT_PACKAGE, VERSION),
+        installPackage(PARENT_WITH_DEP_ALT, VERSION),
+      ]);
+
+      expect(res1.status).toBe(200);
+      expect(res2.status).toBe(200);
+
+      expect(await installationExists(DEP_PACKAGE)).toBe(true);
+      expect(await installationExists(PARENT_PACKAGE)).toBe(true);
+      expect(await installationExists(PARENT_WITH_DEP_ALT)).toBe(true);
+
+      const depInstallation = await getInstallationSavedObject(DEP_PACKAGE);
+      expect(depInstallation?.version).toBe(VERSION);
     });
   });
 }

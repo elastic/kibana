@@ -87,6 +87,8 @@ curl -X POST -u elastic:changeme -H 'Content-Type: application/json' \
 
 The trigger id is `example.customTrigger` (kebab-case namespace, camelCase event). The event payload must match the trigger’s `eventSchema` (`message` required, `source` optional).
 
+For information about some guardrails in event-driven triggers see [Event-driven guardrails](../../src/platform/plugins/shared/workflows_extensions/dev_docs/TRIGGERS.md#event-driven-guardrails).
+
 ## Key Points
 
 1. **Shared Common Fields**: The `id`, `inputSchema`, and `outputSchema` are defined in `common/types.ts` and imported by both server and public implementations to ensure consistency.

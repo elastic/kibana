@@ -4,6 +4,7 @@ plugins:
     - advanced_settings
     - alerting
     - apm
+    - automatic_import_v2
     - banners
     - cloud_security_posture
     - console

@@ -9,145 +9,80 @@ import type {
   AttachmentPanel,
   DashboardSection as AgentDashboardSection,
 } from '@kbn/dashboard-agent-common';
-import { isGenericAttachmentPanel, isLensAttachmentPanel } from '@kbn/dashboard-agent-common';
-import type { DashboardState } from '@kbn/dashboard-plugin/common';
+import { isSection } from '@kbn/dashboard-agent-common';
+import { type DashboardState } from '@kbn/dashboard-plugin/common';
 import type { DashboardPanel, DashboardSection } from '@kbn/dashboard-plugin/server';
-import {
-  type LensAttributes,
-  LensConfigBuilder,
-  type LensApiSchemaType,
-} from '@kbn/lens-embeddable-utils/config_builder';
-import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils/config_builder/utils';
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 
 const lensConfigBuilder = new LensConfigBuilder();
 
-const buildLensPanelFromApi = (
-  config: LensApiSchemaType,
-  uid?: string
-): Omit<DashboardPanel, 'grid'> => ({
-  type: 'lens',
-  config: {
-    attributes: lensConfigBuilder.fromAPIFormat(config),
-  },
-  uid,
-});
-
-const isLensEmbeddableType = (
-  embeddableType: string,
-  rawConfig: unknown
-): rawConfig is LensAttributes => {
-  return embeddableType === LENS_EMBEDDABLE_TYPE && isLensLegacyAttributes(rawConfig);
-};
-
-interface BuildPanelFromRawConfigOptions {
-  embeddableType: string;
-  rawConfig: Record<string, unknown>;
-  title: string | undefined;
-  uid?: string;
-}
-
-const buildPanelFromRawConfig = ({
-  embeddableType,
-  rawConfig,
-  title,
-  uid,
-}: BuildPanelFromRawConfigOptions): Omit<DashboardPanel, 'grid'> => {
+const buildPanelFromConfig = ({ config, type, uid, grid }: AttachmentPanel): DashboardPanel => {
+  let configObject = config;
+  if (type === LENS_EMBEDDABLE_TYPE && config.attributes && isLensAPIFormat(config.attributes)) {
+    const lensAttributes = lensConfigBuilder.fromAPIFormat(config.attributes);
+    configObject = {
+      ...config,
+      attributes: lensAttributes,
+    };
+  }
   return {
-    type: embeddableType,
-    config: isLensEmbeddableType(embeddableType, rawConfig)
-      ? {
-          title: title ?? rawConfig.title ?? 'Panel',
-          attributes: lensConfigBuilder.toAPIFormat(rawConfig),
-        }
-      : rawConfig,
+    type,
     uid,
+    grid,
+    config: configObject,
   };
 };
 
-const normalizePanels = (panels: AttachmentPanel[]): DashboardPanel[] => {
-  const panelList = panels ?? [];
+type AgentWidget = AttachmentPanel | AgentDashboardSection;
+type DashboardWidget = DashboardPanel | DashboardSection;
 
-  return panelList.reduce<DashboardPanel[]>((acc, panel) => {
-    if (isLensAttachmentPanel(panel)) {
-      acc.push({
-        ...buildLensPanelFromApi(panel.visualization as LensApiSchemaType, panel.panelId),
-        grid: panel.grid,
-      });
-    } else if (isGenericAttachmentPanel(panel)) {
-      acc.push({
-        ...buildPanelFromRawConfig({
-          embeddableType: panel.type,
-          rawConfig: panel.rawConfig,
-          title: panel.title,
-          uid: panel.panelId,
-        }),
-        grid: panel.grid,
-      });
-    }
-    return acc;
-  }, []);
-};
-
-const normalizeSections = (sections: AgentDashboardSection[]): DashboardSection[] => {
-  return (sections ?? []).map((section) => ({
-    uid: section.sectionId,
-    title: section.title,
-    collapsed: section.collapsed,
-    grid: {
-      y: section.grid.y,
-    },
-    panels: normalizePanels(section.panels),
-  }));
-};
-
-const normalizeDashboardWidgets = ({
-  panels,
-  sections,
-}: {
-  panels: AttachmentPanel[];
-  sections?: AgentDashboardSection[];
-}): DashboardState['panels'] => {
-  return [...normalizePanels(panels), ...normalizeSections(sections ?? [])];
-};
-
-export const DEFAULT_TIME_RANGE = { from: 'now-24h', to: 'now' };
-
-// We want to override all possible fields except for project_routing.
-const getEmptyDashboardState = (): Omit<Required<DashboardState>, 'project_routing'> => ({
-  title: '',
-  description: '',
-  panels: [],
-  time_range: DEFAULT_TIME_RANGE,
-  query: { query: '', language: 'kuery' },
-  filters: [],
-  options: {
-    hide_panel_titles: false,
-    hide_panel_borders: false,
-    use_margins: true,
-    auto_apply_filters: true,
-    sync_colors: false,
-    sync_cursor: true,
-    sync_tooltips: false,
-  },
-  pinned_panels: [],
-  refresh_interval: { pause: true, value: 0 },
-  tags: [],
-  access_control: {},
+const normalizeSection = (section: AgentDashboardSection): DashboardSection => ({
+  uid: section.uid, // id generation should never happen
+  title: section.title,
+  collapsed: section.collapsed,
+  grid: { y: section.grid.y },
+  panels: section.panels.map(buildPanelFromConfig),
 });
 
-export const getStateFromAttachment = (attachment: DashboardAttachment): DashboardState => {
-  const { title, description, panels = [], sections = [] } = attachment.data;
+const normalizeWidgets = (widgets: AgentWidget[]): DashboardWidget[] =>
+  (widgets ?? []).map((widget) =>
+    isSection(widget) ? normalizeSection(widget) : buildPanelFromConfig(widget)
+  );
 
-  return {
-    ...getEmptyDashboardState(),
-    title: title ?? '',
-    description: description ?? '',
-    panels: normalizeDashboardWidgets({
-      panels,
-      sections,
-    }),
+export const DEFAULT_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
+
+// Default values for all dashboard state fields except project_routing.
+const EMPTY_DASHBOARD_STATE: Readonly<Omit<Required<DashboardState>, 'project_routing'>> =
+  Object.freeze({
+    title: '',
+    description: '',
+    panels: [],
     time_range: DEFAULT_TIME_RANGE,
-  };
-};
+    query: { query: '', language: 'kuery' },
+    filters: [],
+    options: {
+      hide_panel_titles: false,
+      hide_panel_borders: false,
+      use_margins: true,
+      auto_apply_filters: true,
+      sync_colors: false,
+      sync_cursor: true,
+      sync_tooltips: false,
+    },
+    pinned_panels: [],
+    refresh_interval: { pause: true, value: 0 },
+    tags: [],
+    access_control: {},
+  });
+
+export const getStateFromAttachment = ({
+  data: { title, description, panels = [] },
+}: DashboardAttachment): DashboardState => ({
+  ...EMPTY_DASHBOARD_STATE,
+  title,
+  description,
+  panels: normalizeWidgets(panels),
+});
