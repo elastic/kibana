@@ -10,8 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import type { DataPublicPluginStart, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import type { TabState } from '../redux/types';
-import type { ReactiveTabRuntimeState } from '../redux/runtime_state';
+import type { ReactiveTabRuntimeState, TabState } from '../redux';
 import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '../../../../../common';
 
 export function createSearchSessionRestorationDataProvider(deps: {

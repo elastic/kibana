@@ -30,7 +30,7 @@ export function getActionOptions(
         defaultMessage: 'Manual',
       }),
       description: i18n.translate('workflows.actionsMenu.manualDescription', {
-        defaultMessage: 'Manually start from the UI',
+        defaultMessage: 'Trigger - Manually start from the UI',
       }),
       iconType: 'play',
       iconColor: 'success',
@@ -41,7 +41,7 @@ export function getActionOptions(
         defaultMessage: 'Alert',
       }),
       description: i18n.translate('workflows.actionsMenu.alertDescription', {
-        defaultMessage: 'When an alert from rule is created',
+        defaultMessage: 'Trigger - When an alert from rule is created',
       }),
       iconType: 'bell',
       iconColor: euiTheme.colors.vis.euiColorVis6,
@@ -52,7 +52,7 @@ export function getActionOptions(
         defaultMessage: 'Schedule',
       }),
       description: i18n.translate('workflows.actionsMenu.scheduleDescription', {
-        defaultMessage: 'On a schedule (e.g. every 10 minutes)',
+        defaultMessage: 'Trigger - On a schedule (e.g. every 10 minutes)',
       }),
       iconType: 'clock',
       iconColor: euiTheme.colors.textParagraph,
@@ -66,6 +66,7 @@ export function getActionOptions(
       description: t.description ?? t.id,
       iconType: (t.icon != null ? t.icon : 'bolt') as IconType,
       iconColor: euiTheme.colors.vis.euiColorVis6,
+      stability: 'tech_preview',
     }));
   const triggersGroup: ActionOptionData = {
     iconType: 'bolt',
@@ -90,17 +91,6 @@ export function getActionOptions(
       defaultMessage: 'Work with Kibana data and features directly from your workflow',
     }),
     options: [],
-  };
-  const httpRequest: ActionOptionData = {
-    iconType: 'globe',
-    iconColor: euiTheme.colors.vis.euiColorVis0,
-    id: 'http',
-    label: i18n.translate('workflows.actionsMenu.http', {
-      defaultMessage: 'HTTP',
-    }),
-    description: i18n.translate('workflows.actionsMenu.httpDescription', {
-      defaultMessage: 'Make an generic HTTP request',
-    }),
   };
   const externalGroup: ActionOptionData = {
     iconType: 'plugs',
@@ -168,6 +158,17 @@ export function getActionOptions(
           defaultMessage: 'Define condition with KQL to execute the action',
         }),
         iconType: 'branch',
+        iconColor: euiTheme.colors.vis.euiColorVis0,
+      },
+      {
+        id: 'switch',
+        label: i18n.translate('workflows.actionsMenu.switch', {
+          defaultMessage: 'Switch',
+        }),
+        description: i18n.translate('workflows.actionsMenu.switchDescription', {
+          defaultMessage: 'Multi-way branching based on expression value matching',
+        }),
+        iconType: 'productStreamsWired',
         iconColor: euiTheme.colors.vis.euiColorVis0,
       },
       {
@@ -315,7 +316,6 @@ export function getActionOptions(
     aiGroup,
     dataTransformationGroup,
     externalGroup,
-    httpRequest,
     flowControlGroup,
   ];
 }

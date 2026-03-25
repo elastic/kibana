@@ -11,7 +11,7 @@
 
 import fs from 'fs';
 
-interface PackageInfo {
+export interface PackageInfo {
   name: string;
   requestedVersions: string[];
   resolvedVersion?: string;
@@ -22,6 +22,15 @@ interface PackageInfo {
 
 const makeKey = (name: string, version: string) => `${name}@${version}`;
 const trimQuotes = (str: string) => str.replace(/(^"|"$)/g, '');
+const splitDependencyLine = (line: string) => {
+  const match = line.trim().match(/^(\S+)\s+(.+)$/);
+
+  if (!match) {
+    throw new Error(`Unable to parse yarn.lock dependency line: ${line}`);
+  }
+
+  return [trimQuotes(match[1]), trimQuotes(match[2])] as const;
+};
 
 export const parseYarnLock = (content: string, focus?: string[]): Record<string, PackageInfo> => {
   const packages: Record<string, PackageInfo> = {};
@@ -57,20 +66,20 @@ export const parseYarnLock = (content: string, focus?: string[]): Record<string,
         packageInfo.resolvedUrl = value;
       } else if (key === 'integrity') {
         packageInfo.integrity = value;
-      } else if (key === 'dependencies:') {
+      } else if (key === 'dependencies:' || key === 'optionalDependencies:') {
         let depCount = 0;
         if (focusSet === null) {
-          packageInfo.dependencies = {};
+          packageInfo.dependencies = packageInfo.dependencies || {};
           for (let j = i + 1; j < lines.length; j++) {
             const depLine = lines[j];
-            if (depLine.trim() === '') break;
-            const [depKey, depVersion] = depLine.trim().split(/\s+/).map(trimQuotes);
+            if (!/^\s{4,}\S/.test(depLine)) break;
+            const [depKey, depVersion] = splitDependencyLine(depLine);
             packageInfo.dependencies![depKey] = depVersion;
             depCount++;
           }
         } else {
           for (let j = i + 1; j < lines.length; j++) {
-            if (lines[j].trim() === '') break;
+            if (!/^\s{4,}\S/.test(lines[j])) break;
             depCount++;
           }
         }
@@ -86,7 +95,10 @@ export const parseYarnLock = (content: string, focus?: string[]): Record<string,
     if (!packages[entryKey]) {
       packages[entryKey] = packageInfo;
     } else {
-      console.warn(`Duplicate entry for ${entryKey} found. Skipping.`);
+      const existing = packages[entryKey];
+      existing.requestedVersions = Array.from(
+        new Set([...existing.requestedVersions, ...packageInfo.requestedVersions])
+      ).sort();
     }
   }
   return packages;

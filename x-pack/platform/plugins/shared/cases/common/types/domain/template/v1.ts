@@ -86,6 +86,10 @@ export const TemplateSchema = z.object({
    * Whether this is the latest version for a templateId
    */
   isLatest: z.boolean().optional(),
+  /**
+   * Whether this template is enabled. Disabled templates are not shown in the case creation flow.
+   */
+  isEnabled: z.boolean().optional(),
 });
 
 export type Template = z.infer<typeof TemplateSchema>;

@@ -12,9 +12,10 @@ import { RELATED_INTEGRATION } from '../../../detections/constants';
 import { IntegrationIcon } from './integration_icon';
 import { DocumentSeverity } from '../../document_details/right/components/severity';
 import { useBasicDataFromDetailsData } from '../../document_details/shared/hooks/use_basic_data_from_details_data';
-import { FlyoutTitle } from '../../shared/components/flyout_title';
+import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
-import { getAlertTitle, getField } from '../../document_details/shared/utils';
+import { getAlertTitle } from '../../../flyout_v2/document/utils/get_header_title';
+import { getField } from '../../document_details/shared/utils';
 import { RiskScore } from '../../document_details/right/components/risk_score';
 import { useEaseDetailsContext } from '../context';
 import { AlertHeaderBlock } from '../../shared/components/alert_header_block';
@@ -37,7 +38,7 @@ export const HeaderTitle = memo(() => {
     [getFieldsData]
   );
 
-  const title = useMemo(() => getAlertTitle({ ruleName }), [ruleName]);
+  const title = useMemo(() => getAlertTitle(ruleName), [ruleName]);
 
   const date = useMemo(() => new Date(timestamp), [timestamp]);
 
