@@ -6,6 +6,7 @@
  */
 
 import https from 'https';
+import tls from 'tls';
 import axios from 'axios';
 import { format } from 'url';
 import { pickBy } from 'lodash';
@@ -55,19 +56,40 @@ export function registerKibanaFunction({
       const requestUrl = request.rewrittenUrl || request.url;
       const core = await resources.plugins.core.start();
 
+      function stripIpv6Brackets(hostname: string) {
+        return hostname.startsWith('[') && hostname.endsWith(']')
+          ? hostname.slice(1, -1)
+          : hostname;
+      }
+
+      function isLoopbackHostname(hostname: string) {
+        return hostname === 'localhost' || hostname === '::1' || hostname.startsWith('127.');
+      }
+
       function getLocalServerUrl() {
+        const { publicBaseUrl } = core.http.basePath;
         const serverInfo = core.http.getServerInfo();
         let { hostname } = serverInfo;
 
-        if (hostname === '0.0.0.0' || hostname === '::' || hostname === '::1') {
-          hostname = 'localhost';
+        if (hostname === '0.0.0.0') {
+          hostname = '127.0.0.1';
+        } else if (hostname === '::') {
+          hostname = '::1';
         }
 
         const host = hostname.includes(':')
           ? `[${hostname}]:${serverInfo.port}`
           : `${hostname}:${serverInfo.port}`;
 
-        return { host, protocol: serverInfo.protocol };
+        let tlsHostname: string | undefined;
+        if (publicBaseUrl && serverInfo.protocol === 'https') {
+          const parsedPublicBaseUrl = new URL(publicBaseUrl);
+          if (parsedPublicBaseUrl.protocol === 'https:') {
+            tlsHostname = stripIpv6Brackets(parsedPublicBaseUrl.hostname);
+          }
+        }
+
+        return { host, hostname, protocol: serverInfo.protocol, tlsHostname };
       }
 
       function getPathnameWithSpaceId() {
@@ -114,13 +136,18 @@ export function registerKibanaFunction({
         );
       });
 
-      // The server certificate may not cover the local hostname, so skip
-      // hostname verification for this loopback self-request while still
-      // validating the certificate chain.
-      const httpsAgent =
-        localServer.protocol === 'https'
-          ? new https.Agent({ checkServerIdentity: () => undefined })
-          : undefined;
+      let httpsAgent: https.Agent | undefined;
+      if (localServer.protocol === 'https') {
+        if (localServer.tlsHostname) {
+          const { tlsHostname } = localServer;
+          httpsAgent = new https.Agent({
+            servername: tlsHostname,
+            checkServerIdentity: (_, cert) => tls.checkServerIdentity(tlsHostname, cert),
+          });
+        } else if (isLoopbackHostname(localServer.hostname)) {
+          httpsAgent = new https.Agent({ checkServerIdentity: () => undefined });
+        }
+      }
 
       try {
         const response = await axios({
