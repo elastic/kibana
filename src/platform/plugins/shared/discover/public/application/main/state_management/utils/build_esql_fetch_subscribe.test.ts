@@ -8,12 +8,14 @@
  */
 
 import { waitFor } from '@testing-library/react';
+import { filter, firstValueFrom } from 'rxjs';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type { EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { DataDocuments$ } from '../discover_data_state_container';
 import { FetchStatus } from '../../../types';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
@@ -87,6 +89,25 @@ const msgComplete = {
   ],
   query,
 };
+
+const waitForCompleteForQuery = async ({
+  documents$,
+  esql,
+}: {
+  documents$: DataDocuments$;
+  esql: string;
+}) =>
+  firstValueFrom(
+    documents$.pipe(
+      filter(
+        (msg) =>
+          msg.fetchStatus === FetchStatus.COMPLETE &&
+          msg.query !== undefined &&
+          'esql' in msg.query &&
+          msg.query.esql === esql
+      )
+    )
+  );
 
 const setupTest = async ({
   appState,
@@ -211,6 +232,8 @@ describe('buildEsqlFetchSubscribe', () => {
   test('changing a ES|QL query with no transformational commands should not change state when loading and finished if index pattern and columns are the same', async () => {
     const { replaceUrlState, dataState, tabId } = await setupTest({});
     const documents$ = dataState.data$.documents$;
+    const sameIndexQuery = 'from the-data-view-title | where field1 > 0';
+    const differentIndexQuery = 'from the-data-view-title2 | where field1 > 0';
     documents$.next(msgComplete);
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     replaceUrlState.mockClear();
@@ -225,9 +248,10 @@ describe('buildEsqlFetchSubscribe', () => {
         } as unknown as DataTableRecord,
       ],
       // non transformational command, same columns as msgComplete
-      query: { esql: 'from the-data-view-title | where field1 > 0' },
+      query: { esql: sameIndexQuery },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
+    await waitForCompleteForQuery({ documents$, esql: sameIndexQuery });
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
     replaceUrlState.mockClear();
 
     documents$.next({
@@ -240,13 +264,12 @@ describe('buildEsqlFetchSubscribe', () => {
         } as unknown as DataTableRecord,
       ],
       // non transformational command, different index
-      query: { esql: 'from the-data-view-title2 | where field1 > 0' },
+      query: { esql: differentIndexQuery },
     });
-    await waitFor(() => {
-      expect(replaceUrlState).toHaveBeenCalledWith({
-        tabId,
-        appState: { columns: ['field1', 'field2'] },
-      });
+    await waitForCompleteForQuery({ documents$, esql: differentIndexQuery });
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId,
+      appState: { columns: ['field1', 'field2'] },
     });
   });
 
