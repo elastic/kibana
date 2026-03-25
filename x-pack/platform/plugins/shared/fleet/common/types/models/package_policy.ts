@@ -66,6 +66,7 @@ export interface NewPackagePolicyInput {
   enabled: boolean;
   keep_enabled?: boolean;
   vars?: PackagePolicyConfigRecord;
+  var_group_selections?: Record<string, string>;
   config?: PackagePolicyConfigRecord;
   streams: NewPackagePolicyInputStream[];
   deprecated?: DeprecationInfo;

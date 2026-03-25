@@ -103,6 +103,9 @@ export interface BuilderParameters {
       };
     };
   };
+  extended_fields: {
+    parameters: { payload: { extended_fields: Record<string, string> } };
+  };
 }
 
 export interface CreateUserAction<T extends keyof BuilderParameters> {

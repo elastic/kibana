@@ -55,9 +55,9 @@ export class AgentBuilderPlatformPlugin
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.agentBuilder.tools.getRegistry({ request });
       },
-      getActionSavedObjectsClient: async () => {
+      getActionSavedObjectsClient: async (request) => {
         const [coreStart] = await coreSetup.getStartServices();
-        return coreStart.savedObjects.createInternalRepository(['action']);
+        return coreStart.savedObjects.getScopedClient(request, { includedHiddenTypes: ['action'] });
       },
       logger: this.logger.get('sml-connector'),
     });

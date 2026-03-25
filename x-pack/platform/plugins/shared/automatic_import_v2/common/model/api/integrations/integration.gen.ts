@@ -35,7 +35,7 @@ export const ApproveIntegrationRequest = z
     /**
      * The categories of the integration
      */
-    categories: z.array(z.string()).optional(),
+    categories: z.array(z.string()).max(50).optional(),
     /**
      * The LangSmith tracing options
      */
@@ -96,7 +96,7 @@ export const CreateAutoImportIntegrationRequestBody = z
     /**
      * The data streams of the integration
      */
-    dataStreams: z.array(DataStream).optional(),
+    dataStreams: z.array(DataStream).max(50).optional(),
   })
   .strict();
 export type CreateAutoImportIntegrationRequestBodyInput = z.input<
@@ -210,14 +210,15 @@ export const UpdateAutoImportIntegrationRequestBody = z
             /**
              * The input types of the data stream
              */
-            inputTypes: z.array(InputType).optional(),
+            inputTypes: z.array(InputType).max(100).optional(),
             /**
              * The raw samples of the data stream
              */
-            rawSamples: z.array(NonEmptyString).optional(),
+            rawSamples: z.array(NonEmptyString).max(1000).optional(),
           })
           .strict()
       )
+      .max(50)
       .optional(),
   })
   .strict();
