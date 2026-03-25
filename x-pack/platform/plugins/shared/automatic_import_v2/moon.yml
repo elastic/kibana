@@ -46,6 +46,7 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/es-ui-shared-plugin'
   - '@kbn/ai-assistant-connector-selector-action'
+  - '@kbn/inference-connectors'
   - '@kbn/management-settings-ids'
   - '@kbn/langchain'
   - '@kbn/core-lifecycle-browser-mocks'
@@ -59,6 +60,7 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/code-editor'
   - '@kbn/monaco'
+  - '@kbn/scout'
   - '@kbn/core-analytics-browser'
 tags:
   - plugin
@@ -72,6 +74,7 @@ fileGroups:
     - public/**/*
     - server/**/*.ts
     - common/**/*.ts
+    - test/scout_automatic_import_v2/**/*
     - '!target/**/*'
 tasks:
   jest:

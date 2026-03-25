@@ -245,6 +245,44 @@ describe('WorkflowExecutionTelemetryClient', () => {
       const [, eventData] = telemetry.reportEvent.mock.calls[0];
       expect(eventData).not.toHaveProperty('queueDelayMs');
     });
+
+    it('should omit composition fields for top-level executions', () => {
+      const workflowExecution = createMockWorkflowExecution({ triggeredBy: 'manual' });
+
+      client.reportWorkflowExecutionCompleted({
+        workflowExecution,
+        stepExecutions: [],
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventData).not.toHaveProperty('compositionDepth');
+      expect(eventData).not.toHaveProperty('parentWorkflowId');
+      expect(eventData).not.toHaveProperty('parentWorkflowInvocation');
+    });
+
+    it('should include compositionDepth and parentWorkflowId for sub-workflow executions', () => {
+      const workflowExecution = createMockWorkflowExecution({
+        triggeredBy: 'workflow-step',
+        context: {
+          parentDepth: 0,
+          parentWorkflowId: 'parent-wf-id',
+          parentWorkflowInvocation: 'sync',
+        },
+      });
+
+      client.reportWorkflowExecutionCompleted({
+        workflowExecution,
+        stepExecutions: [],
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventData).toMatchObject({
+        triggerType: 'workflow-step',
+        compositionDepth: 1,
+        parentWorkflowId: 'parent-wf-id',
+        parentWorkflowInvocation: 'sync',
+      });
+    });
   });
 
   describe('reportWorkflowExecutionFailed', () => {
@@ -342,6 +380,36 @@ describe('WorkflowExecutionTelemetryClient', () => {
         timeoutExceededByMs: 30000, // 30 seconds over
       });
     });
+
+    it('should include composition fields for failed sub-workflow executions', () => {
+      const workflowExecution = createMockWorkflowExecution({
+        status: ExecutionStatus.FAILED,
+        triggeredBy: 'workflow-step',
+        context: {
+          parentDepth: 1,
+          parentWorkflowId: 'parent-wf-id',
+          parentWorkflowInvocation: 'async',
+        },
+        error: {
+          message: 'Child failed',
+          type: 'ExecutionError',
+        },
+      });
+
+      client.reportWorkflowExecutionFailed({
+        workflowExecution,
+        stepExecutions: [],
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventData).toMatchObject({
+        triggerType: 'workflow-step',
+        compositionDepth: 2,
+        parentWorkflowId: 'parent-wf-id',
+        parentWorkflowInvocation: 'async',
+        errorMessage: 'Child failed',
+      });
+    });
   });
 
   describe('reportWorkflowExecutionCancelled', () => {
@@ -382,6 +450,34 @@ describe('WorkflowExecutionTelemetryClient', () => {
         successfulStepCount: 1,
         queueDelayMs: 100,
         timedOut: false,
+      });
+    });
+
+    it('should include composition fields for cancelled sub-workflow executions', () => {
+      const workflowExecution = createMockWorkflowExecution({
+        status: ExecutionStatus.CANCELLED,
+        triggeredBy: 'workflow-step',
+        context: {
+          parentDepth: 0,
+          parentWorkflowId: 'parent-wf-id',
+          parentWorkflowInvocation: 'sync',
+        },
+        cancellationReason: 'Parent cancelled',
+        cancelledAt: '2024-01-01T00:00:30.000Z',
+      });
+
+      client.reportWorkflowExecutionCancelled({
+        workflowExecution,
+        stepExecutions: [],
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventData).toMatchObject({
+        triggerType: 'workflow-step',
+        compositionDepth: 1,
+        parentWorkflowId: 'parent-wf-id',
+        parentWorkflowInvocation: 'sync',
+        cancellationReason: 'Parent cancelled',
       });
     });
   });
