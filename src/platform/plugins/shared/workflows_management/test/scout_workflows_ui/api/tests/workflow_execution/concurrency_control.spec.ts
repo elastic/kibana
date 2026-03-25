@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { WorkflowExecutionDto } from '@kbn/workflows/types/latest';
 import { ExecutionStatus } from '@kbn/workflows/types/latest';
 import type { WorkflowsApiService } from '../../../common/apis/workflows';
 import { spaceTest } from '../../fixtures';
-import { WORKFLOWS_API_SUPPORTED_TAGS } from '../../fixtures/constants';
 
 const getConcurrencyWorkflowYaml = (strategy: string) => `
 name: Scout API Test Workflow
@@ -50,10 +50,9 @@ steps:
     with:
       message: "Hello from Scout API test 2"
 `;
-
 spaceTest.describe(
   'Workflow execution concurrency control',
-  { tag: WORKFLOWS_API_SUPPORTED_TAGS },
+  { tag: tags.deploymentAgnostic },
   () => {
     spaceTest.afterAll(async ({ apiServices }) => {
       await apiServices.workflowsApi.deleteAll();
