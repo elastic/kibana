@@ -131,31 +131,36 @@ export class DatePicker {
     await this.typeAbsoluteRange({ from, to, validateDates: true, containerLocator });
   }
 
+  /**
+   * Reads the current time range from the kbn-date-range-picker (used in Unified Search).
+   * Use this method for pages that render the Unified Search bar.
+   */
   async getTimeConfig(): Promise<{ start: string; end: string }> {
-    await this.openCustomRangePanel();
+    await this.page.testSubj.locator('dateRangePickerControlButton').click();
 
-    const startInput = this.page.testSubj
-      .locator('dateRangePickerStartDatePart')
-      .getByRole('textbox');
-    const endInput = this.page.testSubj.locator('dateRangePickerEndDatePart').getByRole('textbox');
+    const value = await this.page.testSubj.locator('dateRangePickerInput').inputValue();
 
-    // Ensure Absolute tab is selected to read the text fields
-    await this.page.testSubj
-      .locator('dateRangePickerStartDatePart')
-      .getByRole('button', { name: 'Absolute' })
-      .click();
-    await this.page.testSubj
-      .locator('dateRangePickerEndDatePart')
-      .getByRole('button', { name: 'Absolute' })
-      .click();
-
-    const start = await startInput.inputValue();
-    const end = await endInput.inputValue();
-
-    // Close the panel without applying
     await this.page.keyboard.press('Escape');
 
-    return { start, end };
+    const [start, end] = value.split(' → ');
+
+    return { start: start.trim() ?? '', end: end.trim() ?? '' };
+  }
+
+  /**
+   * Reads the current time range from EuiSuperDatePicker (used in pages that have not yet
+   * migrated to kbn-date-range-picker, e.g. Infra asset details).
+   * Use this method for pages that render EuiSuperDatePicker directly.
+   */
+  async getTimeConfigLegacy(): Promise<{ start: string; end: string }> {
+    const start = await this.page.testSubj
+      .locator('superDatePickerstartDatePopoverButton')
+      .textContent();
+    const end = await this.page.testSubj
+      .locator('superDatePickerendDatePopoverButton')
+      .textContent();
+
+    return { start: start?.trim() ?? '', end: end?.trim() ?? '' };
   }
 
   async startAutoRefresh(interval: number, dateUnit: DateUnitSelector = DateUnitSelector.Seconds) {

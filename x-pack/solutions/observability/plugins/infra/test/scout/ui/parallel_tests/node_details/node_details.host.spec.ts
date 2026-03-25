@@ -72,7 +72,7 @@ test.describe(
       for (const { name, clickFn } of tabs) {
         await test.step(`click ${name} tab and verify date range is preserved`, async () => {
           await (nodeDetailsPage as any)[clickFn]();
-          const timeConfig = await datePicker.getTimeConfig();
+          const timeConfig = await datePicker.getTimeConfigLegacy();
           // Parse returned date strings in UTC (configured in Playwright config) and compare UTC timestamps
           const actualStart = moment.tz(timeConfig.start, DATE_PICKER_FORMAT, true, 'UTC');
           const actualEnd = moment.tz(timeConfig.end, DATE_PICKER_FORMAT, true, 'UTC');
@@ -89,7 +89,7 @@ test.describe(
 
       await test.step('refresh page and verify date range is preserved', async () => {
         await nodeDetailsPage.refreshPage();
-        const timeConfig = await datePicker.getTimeConfig();
+        const timeConfig = await datePicker.getTimeConfigLegacy();
         // Parse returned date strings in UTC (configured in Playwright config) and compare UTC timestamps
         const actualStart = moment.tz(timeConfig.start, DATE_PICKER_FORMAT, true, 'UTC');
         const actualEnd = moment.tz(timeConfig.end, DATE_PICKER_FORMAT, true, 'UTC');
