@@ -453,6 +453,14 @@ export const fetchEndpointExceptionPerPolicyOptInStatus = (): Cypress.Chainable<
     headers: { 'elastic-api-version': '1' },
   }).then((response) => response.body.status);
 
+export const enableEndpointExceptionPerPolicyOptIn = () =>
+  request<GetEndpointExceptionsPerPolicyOptInResponse>({
+    method: 'POST',
+    url: ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE,
+    headers: { 'elastic-api-version': '1' },
+    failOnStatusCode: false,
+  });
+
 export const resetEndpointExceptionPerPolicyOptInStatus = () => {
   const index = '.kibana_security_solution';
   const id = 'security:reference-data:ENDPOINT-EXCEPTIONS-PER-POLICY-OPT-IN-STATUS';
