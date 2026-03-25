@@ -13,6 +13,7 @@ import { DISABLE_LEAD_GENERATION_URL } from '../../../../../common/entity_analyt
 import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { APP_ID } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const disableLeadGenerationRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -34,7 +35,7 @@ export const disableLeadGenerationRoute = (
         validate: {},
       },
 
-      async (_context, _request, response): Promise<IKibanaResponse> => {
+      withMinimumLicense(async (_context, _request, response): Promise<IKibanaResponse> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -50,6 +51,6 @@ export const disableLeadGenerationRoute = (
             body: error.message,
           });
         }
-      }
+      })
     );
 };

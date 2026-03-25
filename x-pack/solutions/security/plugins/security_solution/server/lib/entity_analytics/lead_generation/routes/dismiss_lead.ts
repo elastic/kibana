@@ -16,6 +16,7 @@ import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { APP_ID } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { createLeadDataClient } from '../lead_data_client';
+import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const dismissLeadRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
@@ -38,7 +39,7 @@ export const dismissLeadRoute = (router: EntityAnalyticsRoutesDeps['router'], lo
         },
       },
 
-      async (context, request, response): Promise<IKibanaResponse> => {
+      withMinimumLicense(async (context, request, response): Promise<IKibanaResponse> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -65,6 +66,6 @@ export const dismissLeadRoute = (router: EntityAnalyticsRoutesDeps['router'], lo
             body: error.message,
           });
         }
-      }
+      })
     );
 };

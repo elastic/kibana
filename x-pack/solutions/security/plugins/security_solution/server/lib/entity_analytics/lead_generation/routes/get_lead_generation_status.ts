@@ -14,6 +14,7 @@ import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { APP_ID } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { createLeadDataClient } from '../lead_data_client';
+import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const getLeadGenerationStatusRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -35,7 +36,7 @@ export const getLeadGenerationStatusRoute = (
         validate: {},
       },
 
-      async (context, _request, response): Promise<IKibanaResponse> => {
+      withMinimumLicense(async (context, _request, response): Promise<IKibanaResponse> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -55,6 +56,6 @@ export const getLeadGenerationStatusRoute = (
             body: error.message,
           });
         }
-      }
+      })
     );
 };
