@@ -85,7 +85,8 @@ export async function getDiverseSampleDocuments({
                 docs: {
                   top_hits: {
                     size: 1,
-                    _source: true,
+                    _source: false,
+                    fields: [{ field: '*', include_unmapped: true }],
                   },
                 },
               },

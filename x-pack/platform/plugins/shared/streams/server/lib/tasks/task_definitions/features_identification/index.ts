@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { chunk, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   isInferenceProviderError,
   type BoundInferenceClient,
@@ -105,11 +105,16 @@ export interface IterationTelemetry {
   tokensUsed: ChatCompletionTokenCount;
   ignoredFeaturesCount: number;
   codeIgnoredCount: number;
+  totalFilters: number;
+  filtersCapped: boolean;
+  hasFilteredDocuments: boolean;
 }
 
 export interface IdentifyStreamFeaturesOptions {
   streamName: string;
-  sampleDocuments: Array<SearchHit<Record<string, unknown>>>;
+  esClient: ElasticsearchClient;
+  start: number;
+  end: number;
   existingFeatures: Feature[];
   inferenceClient: BoundInferenceClient;
   systemPrompt: string;
@@ -125,7 +130,9 @@ export interface IdentifyStreamFeaturesOptions {
 
 export async function identifyStreamFeatures({
   streamName,
-  sampleDocuments,
+  esClient,
+  start,
+  end,
   existingFeatures,
   inferenceClient,
   systemPrompt,
@@ -138,9 +145,6 @@ export async function identifyStreamFeatures({
   features: Feature[];
   tokensUsed: ChatCompletionTokenCount;
 }> {
-  const batches = chunk(sampleDocuments, DOCUMENTS_BATCH_SIZE);
-  const effectiveMaxIterations = Math.min(maxIterations, batches.length);
-
   const excludedSummaries: ExcludedFeatureSummary[] = excludedFeatures
     .slice(0, MAX_EXCLUDED_FEATURES_FOR_PROMPT)
     .map(({ id, type, subtype, title, description, properties }) => ({
@@ -162,20 +166,34 @@ export async function identifyStreamFeatures({
     cached: 0,
   };
 
-  for (let i = 0; i < effectiveMaxIterations; i++) {
+  for (let i = 0; i < maxIterations; i++) {
     if (signal.aborted) {
       logger.debug('Feature identification aborted');
       throw new Error('Request was aborted');
     }
 
-    const batch = batches[i];
+    const batchResult = await fetchSampleDocuments({
+      esClient,
+      index: streamName,
+      start,
+      end,
+      features: known.getAll().filter(isFeatureWithFilter),
+      logger,
+      size: DOCUMENTS_BATCH_SIZE,
+    });
+
+    if (batchResult.documents.length === 0) {
+      logger.debug('Stopping: no documents available for sampling');
+      break;
+    }
+
     const previousFeatures = known.getTopByConfidence(MAX_PREVIOUSLY_IDENTIFIED_FEATURES);
 
     logger.debug(
       () =>
-        `Iteration ${i + 1}/${effectiveMaxIterations}: processing ${batch.length} documents, ${
-          known.length
-        } features known`
+        `Iteration ${i + 1}/${maxIterations}: processing ${
+          batchResult.documents.length
+        } documents, ${known.length} features known`
     );
 
     const iterationStart = Date.now();
@@ -190,7 +208,7 @@ export async function identifyStreamFeatures({
         ignoredFeatures,
       } = await identifyFeatures({
         streamName,
-        sampleDocuments: batch,
+        sampleDocuments: batchResult.documents,
         excludedFeatures: excludedSummaries,
         inferenceClient,
         systemPrompt,
@@ -214,13 +232,16 @@ export async function identifyStreamFeatures({
         {
           iteration: i + 1,
           state: 'failure',
-          docsCount: batch.length,
+          docsCount: batchResult.documents.length,
           featuresNew: 0,
           featuresUpdated: 0,
           durationMs: Date.now() - iterationStart,
           tokensUsed: emptyTokens,
           ignoredFeaturesCount: 0,
           codeIgnoredCount: 0,
+          totalFilters: batchResult.totalFilters,
+          filtersCapped: batchResult.filtersCapped,
+          hasFilteredDocuments: batchResult.hasFilteredDocuments,
         },
         []
       );
@@ -250,13 +271,16 @@ export async function identifyStreamFeatures({
     const iterationEntry: IterationTelemetry = {
       iteration: i + 1,
       state: 'success',
-      docsCount: batch.length,
+      docsCount: batchResult.documents.length,
       featuresNew: newFeatures.length,
       featuresUpdated: updatedFeatures.length,
       durationMs: Date.now() - iterationStart,
       tokensUsed,
       ignoredFeaturesCount: ignoredFeatures.length,
       codeIgnoredCount,
+      totalFilters: batchResult.totalFilters,
+      filtersCapped: batchResult.filtersCapped,
+      hasFilteredDocuments: batchResult.hasFilteredDocuments,
     };
     await onIterationComplete?.(iterationEntry, changedFeatures);
 
@@ -268,11 +292,6 @@ export async function identifyStreamFeatures({
           tokensUsed.cached ?? 0
         }`
     );
-
-    if (newFeatures.length === 0) {
-      logger.debug('Stopping: no new features found');
-      break;
-    }
   }
 
   return {
@@ -374,34 +393,14 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
                 const esClient = scopedClusterClient.asCurrentUser;
 
-                const {
-                  documents: sampleDocuments,
-                  totalFilters,
-                  filtersCapped,
-                  hasFilteredDocuments,
-                } = await fetchSampleDocuments({
-                  esClient,
-                  index: stream.name,
-                  start,
-                  end,
-                  features: allExistingFeatures.filter(isFeatureWithFilter),
-                  logger: taskContext.logger,
-                });
-
-                if (sampleDocuments.length === 0) {
-                  taskContext.logger.debug(
-                    () =>
-                      `No sample documents found for stream ${streamName}, skipping features identification`
-                  );
-                  return getDeleteTaskRunResult();
-                }
-
                 const existingFeatures = allExistingFeatures.filter((f) => !isComputedFeature(f));
 
                 const [{ features: inferredFeatures }, computedFeatures] = await Promise.all([
                   identifyStreamFeatures({
                     streamName: stream.name,
-                    sampleDocuments,
+                    esClient,
+                    start,
+                    end,
                     existingFeatures,
                     excludedFeatures,
                     inferenceClient: boundInferenceClient,
@@ -432,9 +431,9 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                         excluded_features_count: excludedFeatures.length,
                         llm_ignored_count: it.ignoredFeaturesCount,
                         code_ignored_count: it.codeIgnoredCount,
-                        total_filters: totalFilters,
-                        filters_capped: filtersCapped,
-                        has_filtered_documents: hasFilteredDocuments,
+                        total_filters: it.totalFilters,
+                        filters_capped: it.filtersCapped,
+                        has_filtered_documents: it.hasFilteredDocuments,
                       });
                     },
                   }),
