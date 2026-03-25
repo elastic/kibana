@@ -13,7 +13,6 @@ import type {
   ElasticsearchClient,
 } from '@kbn/core/server';
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
-import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
@@ -69,7 +68,6 @@ export const ENTITY_SOURCE_FIELDS = [
 ];
 
 const GenerateLeadsRequestBody = z.object({
-  connectorId: z.string().optional(),
   mode: z.enum(['adhoc', 'scheduled']).optional().default('adhoc'),
 });
 
@@ -106,27 +104,8 @@ export const generateLeadsRoute = (
           const spaceId = getSpaceId();
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
-          let chatModel: InferenceChatModel | undefined;
-          const { connectorId, mode } = request.body;
+          const { mode } = request.body;
           const generationMode: LeadGenerationMode = mode ?? 'adhoc';
-
-          if (connectorId) {
-            try {
-              const [, startPlugins] = await getStartServices();
-              chatModel = await startPlugins.inference.getChatModel({
-                request,
-                connectorId,
-                chatModelOptions: { temperature: 0.3, maxRetries: 1, disableStreaming: true },
-              });
-              logger.debug(
-                `[LeadGeneration] Created LLM chat model with connector "${connectorId}"`
-              );
-            } catch (chatModelError) {
-              logger.warn(
-                `[LeadGeneration] Failed to create chat model for connector "${connectorId}", proceeding with rule-based synthesis: ${chatModelError}`
-              );
-            }
-          }
 
           const routeStart = Date.now();
 
@@ -156,7 +135,7 @@ export const generateLeadsRoute = (
           );
 
           const generateStart = Date.now();
-          const leads = await engine.generateLeads(leadEntities, { chatModel });
+          const leads = await engine.generateLeads(leadEntities);
           logger.debug(
             `[LeadGeneration][Telemetry] Engine pipeline: ${Date.now() - generateStart}ms (${
               leads.length
