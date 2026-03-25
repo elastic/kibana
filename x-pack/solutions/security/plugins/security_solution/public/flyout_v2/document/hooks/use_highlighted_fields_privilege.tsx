@@ -7,14 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
-import type { RuleResponse } from '../../../../../common/api/detection_engine';
-import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
-import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
-import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { explainLackOfPermission } from '../../../../common/utils/privileges';
-import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message';
+import type { RuleResponse } from '../../../../common/api/detection_engine';
+import { hasMlAdminPermissions } from '../../../../common/machine_learning/has_ml_admin_permissions';
+import { hasMlLicense } from '../../../../common/machine_learning/has_ml_license';
+import { isMlRule } from '../../../../common/machine_learning/helpers';
+import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { explainLackOfPermission } from '../../../common/utils/privileges';
+import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message';
 
 export interface UseHighlightedFieldsPrivilegeParams {
   /**
@@ -71,13 +71,13 @@ export const useHighlightedFieldsPrivilege = ({
     }
     if (isEditRuleDisabled && (!isExistingRule || !rule)) {
       return i18n.translate(
-        'xpack.securitySolution.flyout.right.investigation.highlightedFields.editHighlightedFieldsDeletedRuleTooltip',
+        'xpack.securitySolution.flyout.document.investigation.highlightedFields.editHighlightedFieldsDeletedRuleTooltip',
         { defaultMessage: 'Deleted rule cannot be edited.' }
       );
     }
     if (upsellingMessage && rule?.immutable) {
       return i18n.translate(
-        'xpack.securitySolution.flyout.right.investigation.highlightedFields.editHighlightedFieldsButtonUpsellingTooltip',
+        'xpack.securitySolution.flyout.document.investigation.highlightedFields.editHighlightedFieldsButtonUpsellingTooltip',
         {
           defaultMessage: '{upsellingMessage}',
           values: { upsellingMessage },
@@ -85,7 +85,7 @@ export const useHighlightedFieldsPrivilege = ({
       );
     }
     return i18n.translate(
-      'xpack.securitySolution.flyout.right.investigation.highlightedFields.editHighlightedFieldsButtonTooltip',
+      'xpack.securitySolution.flyout.document.investigation.highlightedFields.editHighlightedFieldsButtonTooltip',
       { defaultMessage: 'Edit highlighted fields' }
     );
   }, [canEditRules, hasMlPermissions, isEditRuleDisabled, isExistingRule, rule, upsellingMessage]);
