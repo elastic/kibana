@@ -7,8 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { CommonStepDefinition } from './step_registry/types';
-export type { CommonTriggerDefinition } from './trigger_registry/types';
-export { EVENT_FIELD_PREFIX } from './trigger_registry/constants';
-export { DataMapStepTypeId } from './steps/data';
-export { MANUAL_TRIGGER_ID } from './triggers';
+export { commonManualTriggerDefinition as manualTriggerDefinition } from '../../common/triggers/manual';
