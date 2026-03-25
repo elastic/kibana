@@ -142,6 +142,7 @@ describe('Test discover app state', () => {
         'rowHeight',
         'breakdownField',
         'hideChart',
+        'hideTable',
       ]);
     });
 
@@ -171,6 +172,7 @@ describe('Test discover app state', () => {
         'columns',
         'rowHeight',
         'breakdownField',
+        'hideTable',
       ]);
     });
 

@@ -32,6 +32,7 @@ describe('toSavedSearch', () => {
           columns: ['message', 'extension'],
           grid: {},
           hideChart: false,
+          hideTable: false,
           isTextBasedQuery: false,
         },
       },
@@ -43,6 +44,7 @@ describe('toSavedSearch', () => {
       columns: ['message', 'extension'],
       grid: {},
       hideChart: false,
+      hideTable: false,
       isTextBasedQuery: false,
       kibanaSavedObjectMeta: {
         searchSourceJSON: '{}',
@@ -165,6 +167,7 @@ describe('toSavedSearch', () => {
           columns: ['my', 'tab', 'columns'],
           grid: {},
           hideChart: false,
+          hideTable: false,
           isTextBasedQuery: false,
         },
       },
@@ -176,6 +179,7 @@ describe('toSavedSearch', () => {
       columns: ['message', 'extension'],
       grid: {},
       hideChart: false,
+      hideTable: false,
       isTextBasedQuery: false,
       kibanaSavedObjectMeta: {
         searchSourceJSON: '{}',

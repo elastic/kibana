@@ -57,7 +57,10 @@ export const getDefaultProfileState = ({
         stateUpdate.hideChart = defaultState.hideChart;
       }
 
-      if (resetDefaultProfileState.hideTable && defaultState.hideTable !== undefined) {
+      if (
+        shouldResetDefaultProfileField(defaultProfileState, 'hideTable') &&
+        defaultState.hideTable !== undefined
+      ) {
         stateUpdate.hideTable = defaultState.hideTable;
       }
 
