@@ -27,8 +27,7 @@ import {
 } from '../../screens/experimental';
 import { ServerlessRoleName } from '../../support/roles';
 
-// Failing: See https://github.com/elastic/kibana/issues/258936
-describe.skip(
+describe(
   'EXPERIMENTAL - History (queryHistoryRework)',
   {
     tags: ['@ess', '@experimental'],
@@ -166,7 +165,9 @@ describe.skip(
         .and('have.attr', 'placeholder', 'Search by query or pack name');
 
       // Filter to "uptime" queries
+      cy.intercept('GET', '/api/osquery/history*').as('historySearchUptime');
       cy.getBySel(HISTORY_SEARCH_INPUT).type('uptime{enter}');
+      cy.wait('@historySearchUptime');
       cy.getBySel(UNIFIED_HISTORY_TABLE).find('tbody tr').should('have.length.above', 0);
       cy.getBySel(UNIFIED_HISTORY_TABLE)
         .find('tbody tr')
@@ -175,7 +176,9 @@ describe.skip(
         });
 
       // Filter to "processes" queries
+      cy.intercept('GET', '/api/osquery/history*').as('historySearchProcesses');
       cy.getBySel(HISTORY_SEARCH_INPUT).clear().type('processes{enter}');
+      cy.wait('@historySearchProcesses');
       cy.getBySel(UNIFIED_HISTORY_TABLE).find('tbody tr').should('have.length.above', 0);
       cy.getBySel(UNIFIED_HISTORY_TABLE)
         .find('tbody tr')
@@ -184,11 +187,15 @@ describe.skip(
         });
 
       // Non-matching search shows empty state
+      cy.intercept('GET', '/api/osquery/history*').as('historySearchEmpty');
       cy.getBySel(HISTORY_SEARCH_INPUT).clear().type('zzz_nonexistent_query_zzz{enter}');
+      cy.wait('@historySearchEmpty');
       cy.getBySel(UNIFIED_HISTORY_TABLE).contains('No items found').should('exist');
 
       // Clearing search restores all results
+      cy.intercept('GET', '/api/osquery/history*').as('historySearchClear');
       cy.getBySel(HISTORY_SEARCH_INPUT).clear().type('{enter}');
+      cy.wait('@historySearchClear');
       cy.getBySel(UNIFIED_HISTORY_TABLE).find('tbody tr').should('have.length.above', 1);
     });
 
@@ -255,7 +262,7 @@ describe.skip(
       cy.getBySel(UNIFIED_HISTORY_TABLE)
         .find('tbody tr')
         .each(($row) => {
-          cy.wrap($row).should('contain', 'uptime');
+          expect($row.text()).to.include('uptime');
         });
 
       // Clear tag filter and restore all results
@@ -276,7 +283,7 @@ describe.skip(
       cy.getBySel(UNIFIED_HISTORY_TABLE)
         .find('tbody tr')
         .each(($row) => {
-          cy.wrap($row).should('contain', 'processes');
+          expect($row.text()).to.include('processes');
         });
     });
 
@@ -311,7 +318,7 @@ describe.skip(
       cy.getBySel(UNIFIED_HISTORY_TABLE)
         .find('tbody tr')
         .each(($row) => {
-          cy.wrap($row).should('contain', 'uptime');
+          expect($row.text()).to.include('uptime');
         });
     });
 
