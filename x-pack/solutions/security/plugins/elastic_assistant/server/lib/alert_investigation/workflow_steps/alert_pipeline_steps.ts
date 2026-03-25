@@ -15,6 +15,23 @@ import { DEFAULT_PIPELINE_CONFIG } from '../types';
 import { fetchAlertsByIds, adaptWorkflowLogger } from '../utils';
 import { PIPELINE_LIMITS, SAFE_ALERTS_INDEX_PATTERN } from '../constants';
 
+/**
+ * Zod transform that accepts both string[] and JSON-serialized string.
+ * Elastic Workflows liquid templates serialize arrays to strings when passing
+ * between steps (e.g. {{steps.fetch_alerts.result.alert_ids}}).
+ */
+const AlertIdsSchema = z
+  .union([z.array(z.string()), z.string()])
+  .transform((val): string[] => {
+    if (Array.isArray(val)) return val;
+    try {
+      const parsed = JSON.parse(val);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return val ? val.split(',').map((s: string) => s.trim()) : [];
+    }
+  });
+
 const SafeAlertIndexPattern = z
   .string()
   .default('.alerts-security.alerts-default')
@@ -108,7 +125,7 @@ export const fetchUnprocessedAlertsStep = createServerStepDefinition({
 export const DeduplicateAlertsStepId = 'security.deduplicateAlerts';
 
 const DedupInputSchema = z.object({
-  alert_ids: z.array(z.string()),
+  alert_ids: AlertIdsSchema,
   index_pattern: SafeAlertIndexPattern,
   similarity_threshold: z.number().default(PIPELINE_LIMITS.JACCARD_SIMILARITY_THRESHOLD),
 });
@@ -172,7 +189,7 @@ export const deduplicateAlertsStep = createServerStepDefinition({
 export const ExtractEntitiesStepId = 'security.extractEntities';
 
 const ExtractInputSchema = z.object({
-  alert_ids: z.array(z.string()),
+  alert_ids: AlertIdsSchema,
   index_pattern: SafeAlertIndexPattern,
 });
 
@@ -237,7 +254,7 @@ export const extractEntitiesStep = createServerStepDefinition({
 export const TagProcessedAlertsStepId = 'security.tagProcessedAlerts';
 
 const TagInputSchema = z.object({
-  alert_ids: z.array(z.string()),
+  alert_ids: AlertIdsSchema,
   index_pattern: SafeAlertIndexPattern,
 });
 
