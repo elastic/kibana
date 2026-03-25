@@ -89,9 +89,13 @@ async function createTypeCheckConfigs(
 }
 
 async function detectLocalChanges(): Promise<string[]> {
-  const { stdout } = await execa('git', ['status', '--porcelain'], {
-    cwd: REPO_ROOT,
-  });
+  const { stdout } = await execa(
+    'git',
+    ['status', '--porcelain', '--', '.', ':!:config/node.options', ':!config/kibana.yml'],
+    {
+      cwd: REPO_ROOT,
+    }
+  );
 
   return stdout
     .split('\n')
