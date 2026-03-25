@@ -9,19 +9,22 @@
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { MetricsESQLResponse } from '../../../../types';
-import { createInitialMetricsTelemetry, parseMetricsResponse } from './parse_metrics_response';
+import {
+  createInitialMetricsTelemetry,
+  parseMetricsWithTelemetry,
+} from './parse_metrics_response_with_telemetry';
 import { sum } from 'lodash';
 
-describe('parseMetricsResponse', () => {
+describe('parseMetricsWithTelemetry', () => {
   it('returns empty metricItems and allDimensions for empty input', () => {
-    expect(parseMetricsResponse([])).toEqual({
+    expect(parseMetricsWithTelemetry([])).toEqual({
       metricItems: [],
       allDimensions: [],
       telemetry: createInitialMetricsTelemetry(),
     });
   });
 
-  it('returns units: [] when unit is null', () => {
+  it('returns units: [null] when unit is null', () => {
     const response: MetricsESQLResponse[] = [
       {
         metric_name: 'my.metric',
@@ -32,7 +35,7 @@ describe('parseMetricsResponse', () => {
         dimension_fields: ['host.name'],
       },
     ];
-    const result = parseMetricsResponse(response);
+    const result = parseMetricsWithTelemetry(response);
     expect(result).toEqual({
       metricItems: [
         {
@@ -40,7 +43,7 @@ describe('parseMetricsResponse', () => {
           dataStream: 'my-index',
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
-          units: [],
+          units: [null],
           dimensionFields: [{ name: 'host.name' }],
         },
       ],
@@ -49,7 +52,7 @@ describe('parseMetricsResponse', () => {
         total_number_of_metrics: 1,
         total_number_of_dimensions: 1,
         metrics_by_type: { gauge: 1 },
-        units: {},
+        units: { none: 1 },
         multi_value_counts: {
           data_streams: 0,
           field_types: 0,
@@ -70,7 +73,7 @@ describe('parseMetricsResponse', () => {
         dimension_fields: ['host.name'],
       },
     ];
-    const result = parseMetricsResponse(response);
+    const result = parseMetricsWithTelemetry(response);
     expect(result).toEqual({
       metricItems: [
         {
@@ -108,7 +111,7 @@ describe('parseMetricsResponse', () => {
         dimension_fields: 'host.name',
       },
     ];
-    const result = parseMetricsResponse(response);
+    const result = parseMetricsWithTelemetry(response);
     expect(result).toEqual({
       metricItems: [
         {
@@ -130,7 +133,7 @@ describe('parseMetricsResponse', () => {
       ],
       allDimensions: [{ name: 'host.name' }],
       telemetry: {
-        total_number_of_metrics: 2,
+        total_number_of_metrics: 1,
         total_number_of_dimensions: 1,
         metrics_by_type: { gauge: 1 },
         units: { percent: 1 },
@@ -154,7 +157,7 @@ describe('parseMetricsResponse', () => {
         dimension_fields: 'host.name',
       },
     ];
-    const result = parseMetricsResponse(response);
+    const result = parseMetricsWithTelemetry(response);
     expect(result).toEqual({
       metricItems: [
         {
@@ -192,7 +195,7 @@ describe('parseMetricsResponse', () => {
         dimension_fields: ['host.name', 'pod.name'],
       },
     ];
-    const result = parseMetricsResponse(response);
+    const result = parseMetricsWithTelemetry(response);
     expect(result).toEqual({
       metricItems: [
         {
@@ -254,7 +257,7 @@ describe('parseMetricsResponse', () => {
         dimension_fields: ['host.name'],
       },
     ];
-    const result = parseMetricsResponse(response);
+    const result = parseMetricsWithTelemetry(response);
     expect(result.allDimensions).toHaveLength(3);
     const dimensionNames = result.allDimensions.map((d) => d.name);
     expect(dimensionNames).toContain('host.name');
@@ -297,7 +300,7 @@ describe('parseMetricsResponse', () => {
           dimension_fields: ['host.name', 'pod.name'],
         },
       ];
-      const result = parseMetricsResponse(response, getFieldType);
+      const result = parseMetricsWithTelemetry(response, getFieldType);
       expect(result.metricItems[0].dimensionFields).toEqual([
         { name: 'host.name', type: 'keyword' },
         { name: 'pod.name', type: 'keyword' },
@@ -319,7 +322,7 @@ describe('parseMetricsResponse', () => {
           dimension_fields: ['host.name', 'unknown.field'],
         },
       ];
-      const result = parseMetricsResponse(response, getFieldType);
+      const result = parseMetricsWithTelemetry(response, getFieldType);
       expect(result.metricItems[0].dimensionFields).toEqual([
         { name: 'host.name', type: 'keyword' },
         { name: 'unknown.field' },
@@ -349,7 +352,7 @@ describe('parseMetricsResponse', () => {
           dimension_fields: ['container.id'],
         },
       ];
-      const result = parseMetricsResponse(response, getFieldType);
+      const result = parseMetricsWithTelemetry(response, getFieldType);
       expect(result.allDimensions).toEqual([
         { name: 'host.name', type: 'keyword' },
         { name: 'container.id', type: 'keyword' },

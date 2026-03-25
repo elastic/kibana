@@ -10,11 +10,7 @@
 import { BehaviorSubject, skip } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { type DiscoverEBTContextProps, DiscoverEBTManager } from '.';
-import type { MetricsTelemetry } from '@kbn/unified-chart-section-viewer';
-import {
-  METRICS_INFO_TELEMETRY_EVENT_TYPE,
-  registerDiscoverEBTManagerAnalytics,
-} from './discover_ebt_manager_registrations';
+import { registerDiscoverEBTManagerAnalytics } from './discover_ebt_manager_registrations';
 import { ContextualProfileLevel } from '../context_awareness/profiles_manager';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
@@ -126,63 +122,6 @@ describe('DiscoverEBTManager', () => {
               _meta: {
                 description:
                   "List of field names if they are part of ECS schema. For non ECS compliant fields, there's a <non-ecs> placeholder",
-              },
-            },
-          },
-        },
-      });
-
-      expect(coreSetupMock.analytics.registerEventType).toHaveBeenCalledWith({
-        eventType: METRICS_INFO_TELEMETRY_EVENT_TYPE,
-        schema: {
-          total_number_of_metrics: {
-            type: 'integer',
-            _meta: {
-              description:
-                'Number of metric rows returned after METRICS_INFO parse (supported types only)',
-            },
-          },
-          total_number_of_dimensions: {
-            type: 'integer',
-            _meta: {
-              description: 'Distinct dimension field names across returned metrics',
-            },
-          },
-          metrics_by_type: {
-            type: 'pass_through',
-            _meta: {
-              description:
-                'Counts per OpenTelemetry metric type observed in METRICS_INFO rows (dynamic keys)',
-            },
-          },
-          units: {
-            type: 'pass_through',
-            _meta: {
-              description: 'Counts per unit string observed in METRICS_INFO rows (dynamic keys)',
-            },
-          },
-          multi_value_counts: {
-            properties: {
-              data_streams: {
-                type: 'integer',
-                _meta: {
-                  description:
-                    'Count of METRICS_INFO rows where data_stream had more than one value',
-                },
-              },
-              field_types: {
-                type: 'integer',
-                _meta: {
-                  description:
-                    'Count of METRICS_INFO rows where field_type had more than one value',
-                },
-              },
-              metric_types: {
-                type: 'integer',
-                _meta: {
-                  description:
-                    'Count of METRICS_INFO rows where metric_type had more than one value',
-                },
               },
             },
           },
@@ -1105,33 +1044,6 @@ describe('DiscoverEBTManager', () => {
       expect(analyzeSpy).toHaveBeenCalledTimes(1);
 
       analyzeSpy.mockRestore();
-    });
-  });
-
-  describe('trackMetricsInfoTelemetry', () => {
-    it('should report discover_metrics_info_telemetry with payload', () => {
-      registerDiscoverEBTManagerAnalytics(coreSetupMock, discoverEbtContext$);
-      discoverEBTContextManager.initialize({
-        core: coreSetupMock,
-        discoverEbtContext$,
-      });
-      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
-      scopedManager.setAsActiveManager();
-
-      const telemetry: MetricsTelemetry = {
-        total_number_of_metrics: 1,
-        total_number_of_dimensions: 2,
-        metrics_by_type: { gauge: 1 },
-        units: { percent: 1 },
-        multi_value_counts: { data_streams: 0, field_types: 0, metric_types: 0 },
-      };
-
-      scopedManager.trackMetricsInfoTelemetry(telemetry);
-
-      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
-        METRICS_INFO_TELEMETRY_EVENT_TYPE,
-        telemetry
-      );
     });
   });
 });

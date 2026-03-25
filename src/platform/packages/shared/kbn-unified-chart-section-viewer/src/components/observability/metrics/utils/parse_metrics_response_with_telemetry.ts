@@ -12,13 +12,8 @@ import type {
   MetricsESQLResponse,
   MetricsTelemetry,
   ParsedMetricItem,
-  ParsedMetricsResult,
+  ParsedMetricsWithTelemetry,
 } from '../../../../types';
-
-/** Full parse output including aggregated METRICS_INFO telemetry (for callbacks, not part of {@link ParsedMetricsResult}). */
-export type ParseMetricsResponseResult = ParsedMetricsResult & {
-  telemetry: MetricsTelemetry;
-};
 
 import { toArray } from './to_array';
 import { ALLOWED_METRIC_TYPES } from '../../../../common/constants';
@@ -34,11 +29,11 @@ export const createInitialMetricsTelemetry = (): MetricsTelemetry => ({
   multi_value_counts: { data_streams: 0, field_types: 0, metric_types: 0 },
 });
 
-export const parseMetricsResponse = (
+export const parseMetricsWithTelemetry = (
   response: MetricsESQLResponse[],
   getFieldType?: (name: string) => string | undefined
-): ParseMetricsResponseResult => {
-  const result: ParsedMetricItem[] = [];
+): ParsedMetricsWithTelemetry => {
+  const parsedMetrics: ParsedMetricItem[] = [];
   const telemetry = createInitialMetricsTelemetry();
 
   const allDimensionsSet = new Set<string>();
@@ -76,7 +71,7 @@ export const parseMetricsResponse = (
     });
 
     for (const stream of dataStreams) {
-      result.push({
+      parsedMetrics.push({
         metricName: metric.metric_name,
         dataStream: stream,
         units,
@@ -91,7 +86,7 @@ export const parseMetricsResponse = (
   telemetry.total_number_of_metrics = response.length;
 
   return {
-    metricItems: result,
+    metricItems: parsedMetrics,
     allDimensions: Array.from(allDimensionsSet).map(toDimension),
     telemetry,
   };

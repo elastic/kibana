@@ -50,6 +50,8 @@ export type MetricUnit =
   | 'count'
   | `{${string}}`; // otel special units of count
 
+export type TelemetryUnitKey = MetricUnit | 'none';
+
 export interface MetricsESQLResponse {
   metric_name: string;
   data_stream: string[] | string;
@@ -72,7 +74,7 @@ export interface MetricsTelemetry {
   total_number_of_metrics: number;
   total_number_of_dimensions: number;
   metrics_by_type: Partial<Record<MappingTimeSeriesMetricType, number>>;
-  units: Partial<Record<MetricUnit, number>>;
+  units: Partial<Record<TelemetryUnitKey, number>>;
   multi_value_counts: {
     data_streams: number;
     field_types: number;
@@ -80,14 +82,25 @@ export interface MetricsTelemetry {
   };
 }
 
-export interface ParsedMetricsResult {
+export interface ParsedMetrics {
   metricItems: ParsedMetricItem[];
   allDimensions: Dimension[];
 }
 
-export interface MetricsInfoResponse {
+export interface MetricsInfo {
   loading: boolean;
   error: Error | null;
   metricItems: ParsedMetricItem[];
   allDimensions: Dimension[];
+}
+
+export type ParsedMetricsWithTelemetry = ParsedMetrics & {
+  telemetry: MetricsTelemetry;
+};
+
+export interface Metric {
+  readonly dataStreams: string[];
+  readonly units: (MetricUnit | null)[];
+  readonly metricTypes: MappingTimeSeriesMetricType[];
+  readonly fieldTypes: ES_FIELD_TYPES[];
 }

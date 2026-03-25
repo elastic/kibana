@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function toArray<T>(value: T | T[] | null | undefined): T[] {
-  if (value == null) return [];
-  return Array.isArray(value) ? value : [value];
+type ToArrayResult<V> = null extends V ? (NonNullable<V> | null)[] : NonNullable<V>[];
+
+export function toArray<V>(value: V | V[] | null | undefined): ToArrayResult<V> {
+  if (value === undefined) return [] as ToArrayResult<V>;
+  if (value === null) return [null] as ToArrayResult<V>;
+  return (Array.isArray(value) ? value : [value]) as ToArrayResult<V>;
 }

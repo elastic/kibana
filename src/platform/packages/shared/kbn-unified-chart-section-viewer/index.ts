@@ -18,9 +18,10 @@ export { EventBasedTelemetryProvider, useTelemetry } from './src/context/ebt_tel
 export type { UnifiedMetricsGridRestorableState } from './src/restorable_state';
 export type {
   ParsedMetricItem,
-  MetricsInfoResponse,
+  MetricsInfo,
   MetricsTelemetry,
-  ParsedMetricsResult,
+  ParsedMetrics,
+  ParsedMetricsWithTelemetry,
   MetricsESQLResponse,
   Dimension,
   MetricUnit,
