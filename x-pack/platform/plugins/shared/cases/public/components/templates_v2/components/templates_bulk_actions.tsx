@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlexItem, EuiText, EuiButtonEmpty, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import type { Template } from '../../../../common/types/domain/template/v1';
-import * as i18n from '../../templates/translations';
+import * as i18n from '../translations';
 import { useBulkDeleteTemplates } from '../hooks/use_bulk_delete_templates';
 import { useBulkExportTemplates } from '../hooks/use_bulk_export_templates';
 import { DeleteConfirmationModal } from '../../configure_cases/delete_confirmation_modal';
