@@ -9,22 +9,22 @@
 
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { MARKDOWN_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import type { MarkdownSearchRequestBody, MarkdownSearchResponseBody } from './types';
+import type { MarkdownSearchRequestQuery, MarkdownSearchResponseBody } from './types';
 import { getMarkdownMeta } from '../../saved_object_utils';
 import type { MarkdownAttributes } from '../../markdown_saved_object';
 
 export async function search(
   requestCtx: RequestHandlerContext,
-  searchBody: MarkdownSearchRequestBody
+  searchQuery: MarkdownSearchRequestQuery
 ): Promise<MarkdownSearchResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
   const soResponse = await core.savedObjects.client.find<MarkdownAttributes>({
     type: MARKDOWN_SAVED_OBJECT_TYPE,
     searchFields: ['title^3', 'description'],
     fields: ['description', 'title'],
-    search: searchBody.search,
-    perPage: searchBody.per_page,
-    page: searchBody.page ? +searchBody.page : undefined,
+    search: searchQuery.query,
+    perPage: searchQuery.per_page,
+    page: searchQuery.page ? +searchQuery.page : undefined,
     defaultSearchOperator: 'AND',
   });
 

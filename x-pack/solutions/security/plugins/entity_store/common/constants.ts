@@ -36,10 +36,11 @@ export const ENTITY_STORE_ROUTES = {
   CHECK_PRIVILEGES: `${ENTITY_STORE_BASE_ROUTE}/check_privileges`,
   FORCE_LOG_EXTRACTION: `${ENTITY_STORE_BASE_ROUTE}/{entityType}/force_log_extraction`,
   FORCE_HISTORY_SNAPSHOT: `${ENTITY_STORE_BASE_ROUTE}/force_history_snapshot`,
+  CRUD_CREATE: `${ENTITY_STORE_BASE_ROUTE}/entities/{entityType}`,
+  CRUD_UPDATE: `${ENTITY_STORE_BASE_ROUTE}/entities/{entityType}`,
+  CRUD_BULK_UPDATE: `${ENTITY_STORE_BASE_ROUTE}/entities/bulk`,
   CRUD_GET: `${ENTITY_STORE_BASE_ROUTE}/entities`,
   SEARCH_ENTITIES: `${ENTITY_STORE_BASE_ROUTE}/entities/search`,
-  CRUD_UPSERT: `${ENTITY_STORE_BASE_ROUTE}/entities/{entityType}`,
-  CRUD_UPSERT_BULK: `${ENTITY_STORE_BASE_ROUTE}/entities/bulk`,
   CRUD_DELETE: `${ENTITY_STORE_BASE_ROUTE}/entities/`,
   RESOLUTION_LINK: `${ENTITY_STORE_BASE_ROUTE}/resolution/link`,
   RESOLUTION_UNLINK: `${ENTITY_STORE_BASE_ROUTE}/resolution/unlink`,
@@ -60,8 +61,6 @@ export const getErrorMessage = (error: unknown): string => {
   }
   return String(error);
 };
-
-// Entity types (slim definitions; for EUID translation use common/euid_helpers)
 export interface IdentitySourceFields {
   /** Fields that participate in identity (EUID composition). */
   requiresOneOf: string[];

@@ -6,8 +6,9 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
+import type { Entity } from '../common/constants';
 import { ENTITY_STORE_ROUTES } from '../common/constants';
-import type { Entity, EntityType } from '../common';
+import type { EntityType } from '../common';
 import { API_VERSIONS } from '../common/constants';
 export interface SearchEntitiesFromEntityStoreParams {
   entityTypes: EntityType[];

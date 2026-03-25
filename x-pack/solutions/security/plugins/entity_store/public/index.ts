@@ -11,7 +11,6 @@ export { useInstallEntityStoreV2 } from './hooks/useInstallEntityStoreV2';
 export { EntityStoreEuidApiProvider, useEntityStoreEuidApi } from './euid_api_context';
 export type { EntityStoreEuidApi, NonEcsTimelineDataRow } from './euid_api_context';
 
-export { FF_ENABLE_ENTITY_STORE_V2 } from '../common/constants';
 export { ALL_ENTITY_TYPES } from '../common';
 export type { IdentitySourceFields } from '../common';
 
@@ -21,14 +20,18 @@ export type {
   SearchEntitiesFromEntityStoreResponse,
 } from './search_entities_api';
 
-export { upsertEntityInEntityStore } from './upsert_entity_store_api';
-export type { UpsertEntityInEntityStoreParams } from './upsert_entity_store_api';
+export { updateEntity } from './update_entity_store_api';
+export type {
+  UpdateEntityInEntityStoreParams,
+  UpdateEntityInEntityStoreResponse,
+} from './update_entity_store_api';
 
 /** Load the EUID API (euid, filter builders). Use when you need them; prefer useEntityStoreEuidApi() in React. */
 export const loadEuidApi = () =>
   import('./euid_browser').then((m) => ({
     euid: m.euid,
   }));
+export { FF_ENABLE_ENTITY_STORE_V2, ENTITY_STORE_ROUTES } from '../common';
 
 export function plugin() {
   return new EntityStorePlugin();
