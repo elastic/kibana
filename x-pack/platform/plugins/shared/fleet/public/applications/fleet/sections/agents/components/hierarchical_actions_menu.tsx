@@ -185,7 +185,7 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
     </EuiButton>
   ) : (
     <EuiButtonIcon
-      iconType="boxesHorizontal"
+      iconType="boxesVertical"
       onClick={toggleMenu}
       aria-label={i18n.translate('xpack.fleet.hierarchicalMenu.openMenuAriaLabel', {
         defaultMessage: 'Open menu',
