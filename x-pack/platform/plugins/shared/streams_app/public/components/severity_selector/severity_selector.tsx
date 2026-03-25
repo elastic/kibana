@@ -12,7 +12,7 @@ import {
   SeverityBadge,
   SIGNIFICANT_EVENT_SEVERITY,
   scoreSeverity,
-} from '../../../significant_events_discovery/components/severity_badge/severity_badge';
+} from '../significant_events_discovery/components/severity_badge/severity_badge';
 
 export function SeveritySelector({
   severityScore,
@@ -36,6 +36,7 @@ export function SeveritySelector({
 
   return (
     <EuiSuperSelect
+      aria-label={SEVERITY_SELECTOR_ARIA_LABEL}
       disabled={disabled}
       options={severityOptions}
       valueOfSelected={
@@ -53,3 +54,10 @@ export function SeveritySelector({
     />
   );
 }
+
+const SEVERITY_SELECTOR_ARIA_LABEL = i18n.translate(
+  'xpack.streams.significantEvents.severitySelector.ariaLabel',
+  {
+    defaultMessage: 'Select severity',
+  }
+);

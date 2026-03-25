@@ -39,7 +39,7 @@ import { StreamsESQLEditor } from '../../../esql_query_editor';
 import type { SignificantEventItem } from '../../../../hooks/use_fetch_significant_events';
 import { InfoPanel } from '../../../info_panel';
 import { SparkPlot } from '../../../spark_plot';
-import { SeveritySelector } from '../../../stream_detail_significant_events_view/add_significant_event_flyout/common/severity_selector';
+import { SeveritySelector } from '../../../severity_selector';
 import { SeverityBadge } from '../severity_badge/severity_badge';
 import { OCCURRENCES_COLUMN, OCCURRENCES_TOOLTIP_NAME } from './translations';
 

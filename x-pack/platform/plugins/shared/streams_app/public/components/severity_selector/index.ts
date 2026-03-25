@@ -5,16 +5,4 @@
  * 2.0.
  */
 
-import type { StreamQuery } from '@kbn/streams-schema';
-import { v4 } from 'uuid';
-
-export function defaultQuery(): StreamQuery {
-  return {
-    id: v4(),
-    title: '',
-    description: '',
-    esql: {
-      query: '',
-    },
-  };
-}
+export { SeveritySelector } from './severity_selector';
