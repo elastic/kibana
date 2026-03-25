@@ -34,7 +34,7 @@ function replaceFieldInQuery(obj: unknown, oldField: string, newField: string): 
 
 export function rewriteFilterForSloSummary(filter: Filter): Filter {
   const field = filter.meta?.key;
-  if (!field || field.startsWith(SLO_GROUPINGS_PREFIX) || isSummaryNativeField(field)) {
+  if (!field || isSummaryNativeField(field)) {
     return filter;
   }
 
