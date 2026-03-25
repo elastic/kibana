@@ -310,7 +310,7 @@ export const AgentSkills: React.FC = () => {
                   isSelected={selectedSkillId === skill.id}
                   onSelect={(s) => setSelectedSkillId(s.id)}
                   onRemove={handleRemoveSkill}
-                  isRemoving={updateSkillsMutation.isLoading}
+                  isRemoving={mutatingSkillId === skill.id}
                   readOnly={enableElasticCapabilities && skill.readonly}
                 />
               ))

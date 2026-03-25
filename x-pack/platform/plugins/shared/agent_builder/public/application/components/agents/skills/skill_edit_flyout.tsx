@@ -118,18 +118,6 @@ export const SkillEditFlyout: React.FC<SkillEditFlyoutProps> = ({ skillId, onClo
           </EuiFlexGroup>
         ) : (
           <FormProvider {...form}>
-            {skill && skill.readonly && (
-              <>
-                <EuiCallOut
-                  announceOnMount
-                  color="warning"
-                  iconType="warning"
-                  title={labels.agentSkills.sharedSkillWarning}
-                />
-                <EuiSpacer size="m" />
-              </>
-            )}
-
             <EuiForm component="form" onSubmit={handleSubmit(onSubmit)}>
               <SkillForm control={control} toolOptions={toolOptions} readonlySkillId={skillId} />
             </EuiForm>

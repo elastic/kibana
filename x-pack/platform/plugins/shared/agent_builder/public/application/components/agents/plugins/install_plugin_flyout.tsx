@@ -53,8 +53,11 @@ export const InstallPluginFlyout: React.FC<InstallPluginFlyoutProps> = ({
 
   const handleInstallSuccess = useCallback(
     async (data: PluginDefinition) => {
-      await onPluginInstalled?.(data);
-      onClose();
+      try {
+        await onPluginInstalled?.(data);
+      } finally {
+        onClose();
+      }
     },
     [onPluginInstalled, onClose]
   );

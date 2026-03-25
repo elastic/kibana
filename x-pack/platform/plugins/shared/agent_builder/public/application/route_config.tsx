@@ -252,7 +252,7 @@ export const getAgentSettingsNavItems = (agentId: string): SidebarNavItem[] => {
         (route.navLabel ?? route.isAgentDisplayName) && route.sidebarView === 'agentSettings'
     )
     .map((route) => ({
-      label: route.navLabel!,
+      label: route.navLabel ?? '',
       path: route.path.replace(':agentId', agentId),
       icon: route.navIcon,
       section: route.navSection,

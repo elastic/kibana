@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
-import { css } from '@emotion/react';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { useAgentId } from '../../../hooks/use_conversation';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
@@ -51,10 +50,6 @@ const fullscreenLabels = {
     defaultMessage: 'Open in full screen',
   }),
 };
-
-const popoverMinWidthStyles = css`
-  min-width: 240px;
-`;
 
 interface MoreActionsButtonProps {
   onCloseSidebar?: () => void;
@@ -180,9 +175,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
         closePopover={closePopover}
         panelPaddingSize="xs"
         anchorPosition="downCenter"
-        panelProps={{
-          css: popoverMinWidthStyles,
-        }}
         aria-label={fullscreenLabels.actionsAriaLabel}
       >
         <EuiContextMenuPanel size="s" items={menuItems} />
