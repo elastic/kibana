@@ -155,6 +155,7 @@ import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
+import { useDeprecatedRuleDetailsCallout } from '../../../rule_management/components/rule_deprecation';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const RULE_EXCEPTION_LIST_TYPES = [
@@ -453,6 +454,11 @@ export const RuleDetailsPage = connector(
       onUpgrade: refreshRule,
     });
 
+    const deprecationCallout = useDeprecatedRuleDetailsCallout({
+      rule,
+      confirmDeletion,
+    });
+
     const ruleStatusInfo = useMemo(() => {
       return (
         <>
@@ -640,6 +646,7 @@ export const RuleDetailsPage = connector(
         <NeedAdminForUpdateRulesCallOut />
         <MissingDetectionsPrivilegesCallOut />
         {upgradeCallout}
+        {deprecationCallout}
         {isBulkDuplicateConfirmationVisible && (
           <BulkActionDuplicateExceptionsConfirmation
             onCancel={cancelRuleDuplication}

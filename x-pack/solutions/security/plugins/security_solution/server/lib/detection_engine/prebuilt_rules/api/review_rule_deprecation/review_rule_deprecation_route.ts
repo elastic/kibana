@@ -80,18 +80,14 @@ export const reviewRuleDeprecationRoute = (router: SecuritySolutionPluginRouter)
             return response.ok({ body: { rules } });
           }
 
-          // No ids filter: fetch all deprecated assets, then resolve their
-          // installed rule alert SO IDs via the rule objects client.
-          const deprecatedAssets = await ruleAssetsClient.fetchDeprecatedRules();
-          const deprecatedRuleIds = deprecatedAssets.map((asset) => asset.rule_id);
-
-          if (deprecatedRuleIds.length === 0) {
-            return response.ok({ body: { rules: [] } });
-          }
-
-          const installedVersions = await ruleObjectsClient.fetchInstalledRuleVersionsByIds({
-            ruleIds: deprecatedRuleIds,
-          });
+          // No ids filter: fetch all deprecated assets and all installed rule
+          // versions in parallel, then cross-reference in memory.
+          // We fetch all installed rules rather than scoping by rule_ids because
+          // fetchInstalledRuleVersionsByIds filters by alert SO ID, not rule_id.
+          const [deprecatedAssets, installedVersions] = await Promise.all([
+            ruleAssetsClient.fetchDeprecatedRules(),
+            ruleObjectsClient.fetchInstalledRuleVersions(),
+          ]);
 
           const installedRuleIdMap = new Map<string, string>();
           for (const installed of installedVersions) {
