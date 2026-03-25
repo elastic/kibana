@@ -42,9 +42,9 @@ For dashboard discovery:
 Build the request for ${dashboardTools.manageDashboard} as an ordered \
 \`operations\` array. Operations run in order, so earlier operations should set up state needed by later ones.
 
-When a dashboard needs sections, prefer a batched two-call workflow:
-1. Call ${dashboardTools.manageDashboard} once with all needed \`add_section\` operations to create the section structure.
-2. Call ${dashboardTools.manageDashboard} once more with all section-targeted \`create_visualization_panels\` and/or \`add_panels_from_attachments\` operations, passing the returned section uids as \`sectionId\`.
+When a dashboard needs sections, prefer a single batched call:
+1. Use \`add_section\` with its optional \`panels\` array when you already know the inline visualizations that belong in the new section.
+2. Use follow-up \`create_visualization_panels\` or \`add_panels_from_attachments\` with \`sectionId\` only when you need to target an existing section returned by an earlier tool result.
 
 Do **not** make one ${dashboardTools.manageDashboard} call per section unless a later step truly depends on the result of an earlier section-specific change.
 
@@ -53,7 +53,7 @@ For a new dashboard:
 - Use \`add_markdown\` when a summary panel is useful.
 - Use \`create_visualization_panels\` to create Lens visualization panels inline from natural language.
 - Use \`add_panels_from_attachments\` when the user already has standalone visualization attachments they want to place on the dashboard.
-- Use \`add_section\` when panels naturally group into distinct topics or the dashboard is large enough that sections improve scanability.
+- Use \`add_section\` when panels naturally group into distinct topics or the dashboard is large enough that sections improve scanability. Include \`panels\` on the section when you can create that section's inline visualizations immediately.
 
 For an existing dashboard:
 - Reuse \`data.dashboardAttachment.id\` from the latest dashboard tool result as \`dashboardAttachmentId\`.
@@ -73,7 +73,7 @@ Supported operations:
 - Batch multiple panel creations into the same \`create_visualization_panels\` operation whenever they can be planned together, even when they target different \`sectionId\` values.
 - \`edit_visualization_panels\`: update existing Lens visualization panels by \`panelId\`, preserving their current placement.
 - \`update_panel_layouts\`: resize, reposition, or move existing panels by \`panelId\` by updating \`grid\` and optionally changing \`sectionId\`.
-- \`add_section\`: create a new empty section with its own \`grid.y\`. Add section panels later with \`create_visualization_panels\` or \`add_panels_from_attachments\` using \`sectionId\`.
+- \`add_section\`: create a new section with its own \`grid.y\`, and optionally create that section's initial inline Lens visualization panels with \`panels\`. Those nested panel grids are section-relative and do not need a \`sectionId\`.
 - \`remove_section\`: remove a section by \`uid\` with \`panelAction: "promote" | "delete"\`.
 - \`remove_panels\`: remove existing panels by \`uid\`.
 

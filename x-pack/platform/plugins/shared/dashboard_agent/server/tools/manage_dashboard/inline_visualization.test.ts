@@ -69,6 +69,11 @@ describe('createVisualizationResolver', () => {
         config: { type: 'metric' },
       },
     });
+    expect(mockedBuildVisualizationConfig).toHaveBeenCalledWith(
+      expect.objectContaining({
+        includeTimeRange: false,
+      })
+    );
   });
 
   it('passes the existing Lens config when editing a Lens panel', async () => {
@@ -96,6 +101,7 @@ describe('createVisualizationResolver', () => {
     expect(mockedBuildVisualizationConfig).toHaveBeenCalledWith(
       expect.objectContaining({
         existingConfig: JSON.stringify({ type: 'bar' }),
+        parsedExistingConfig: { type: 'bar' },
       })
     );
   });

@@ -28,6 +28,17 @@ const createMockLogger = (): Logger =>
     warn: jest.fn(),
   } as unknown as Logger);
 
+const createDeferred = <T>() => {
+  let resolve!: (value: T) => void;
+  let reject!: (error?: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+
+  return { promise, resolve, reject };
+};
+
 const getSections = (panels: DashboardAttachmentData['panels']): DashboardSection[] =>
   panels.filter(isSection);
 
@@ -241,6 +252,353 @@ describe('executeDashboardOperations', () => {
       grid: { y: 12 },
       panels: [],
     });
+  });
+
+  it('adds a section with inline visualization panels in a single operation', async () => {
+    const result = await executeDashboardOperations({
+      dashboardData: {
+        title: 'Test dashboard',
+        description: 'Description',
+        panels: [],
+      },
+      operations: [
+        {
+          operation: 'add_section',
+          title: 'Overview',
+          grid: { y: 12 },
+          panels: [
+            {
+              query: 'show total requests',
+              grid: { x: 0, y: 0, w: 24, h: 9 },
+            },
+            {
+              query: 'show error rate',
+              grid: { x: 24, y: 0, w: 24, h: 9 },
+            },
+          ],
+        },
+      ],
+      logger,
+      resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
+      resolveVisualizationConfig: createResolveVisualizationConfig({
+        'show total requests': createResolvedVisualization({
+          type: 'lens',
+          config: { type: 'metric' },
+        }),
+        'show error rate': createResolvedVisualization({
+          type: 'lens',
+          config: { type: 'bar' },
+        }),
+      }),
+    });
+
+    const panelsOnly = getPanelsOnly(result.dashboardData.panels);
+    const sections = getSections(result.dashboardData.panels);
+
+    expect(panelsOnly).toEqual([]);
+    expect(sections).toHaveLength(1);
+    expect(sections[0]).toEqual({
+      uid: expect.any(String),
+      title: 'Overview',
+      collapsed: false,
+      grid: { y: 12 },
+      panels: [
+        expect.objectContaining({
+          type: 'lens',
+          config: { type: 'metric' },
+          grid: { x: 0, y: 0, w: 24, h: 9 },
+        }),
+        expect.objectContaining({
+          type: 'lens',
+          config: { type: 'bar' },
+          grid: { x: 24, y: 0, w: 24, h: 9 },
+        }),
+      ],
+    });
+  });
+
+  it('records inline visualization failures when adding a section and keeps successful panels', async () => {
+    const result = await executeDashboardOperations({
+      dashboardData: {
+        title: 'Test dashboard',
+        description: 'Description',
+        panels: [],
+      },
+      operations: [
+        {
+          operation: 'add_section',
+          title: 'Overview',
+          grid: { y: 12 },
+          panels: [
+            {
+              query: 'show total requests',
+              grid: { x: 0, y: 0, w: 24, h: 9 },
+            },
+            {
+              query: 'show p95 latency',
+              grid: { x: 24, y: 0, w: 24, h: 9 },
+            },
+          ],
+        },
+      ],
+      logger,
+      resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
+      resolveVisualizationConfig: createResolveVisualizationConfig({
+        'show total requests': createResolvedVisualization({
+          type: 'lens',
+          config: { type: 'metric' },
+        }),
+        'show p95 latency': {
+          type: 'failure',
+          failure: {
+            type: 'add_section',
+            identifier: 'show p95 latency',
+            error: 'ES|QL generation failed',
+          },
+        },
+      }),
+    });
+
+    const sections = getSections(result.dashboardData.panels);
+
+    expect(sections).toHaveLength(1);
+    expect(sections[0].panels).toEqual([
+      expect.objectContaining({
+        type: 'lens',
+        config: { type: 'metric' },
+        grid: { x: 0, y: 0, w: 24, h: 9 },
+      }),
+    ]);
+    expect(result.failures).toEqual([
+      {
+        type: 'add_section',
+        identifier: 'show p95 latency',
+        error: 'ES|QL generation failed',
+      },
+    ]);
+  });
+
+  it('resolves inline panels for multiple section creations in parallel', async () => {
+    const firstSectionPanel = createDeferred<ResolvedVisualizationResult>();
+    const secondSectionPanel = createDeferred<ResolvedVisualizationResult>();
+    const resolveVisualizationConfig = jest.fn<
+      ReturnType<ResolveVisualizationConfig>,
+      Parameters<ResolveVisualizationConfig>
+    >(async ({ nlQuery }) => {
+      if (nlQuery === 'show total requests') {
+        return firstSectionPanel.promise;
+      }
+
+      return secondSectionPanel.promise;
+    });
+
+    const resultPromise = executeDashboardOperations({
+      dashboardData: {
+        title: 'Test dashboard',
+        description: 'Description',
+        panels: [],
+      },
+      operations: [
+        {
+          operation: 'add_section',
+          title: 'Overview',
+          grid: { y: 0 },
+          panels: [
+            {
+              query: 'show total requests',
+              grid: { x: 0, y: 0, w: 24, h: 9 },
+            },
+          ],
+        },
+        {
+          operation: 'add_section',
+          title: 'Errors',
+          grid: { y: 1 },
+          panels: [
+            {
+              query: 'show error rate',
+              grid: { x: 24, y: 0, w: 24, h: 9 },
+            },
+          ],
+        },
+      ],
+      logger,
+      resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
+      resolveVisualizationConfig,
+    });
+
+    await Promise.resolve();
+
+    expect(resolveVisualizationConfig).toHaveBeenCalledTimes(2);
+    expect(resolveVisualizationConfig).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        operationType: 'add_section',
+        identifier: 'show total requests',
+      })
+    );
+    expect(resolveVisualizationConfig).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        operationType: 'add_section',
+        identifier: 'show error rate',
+      })
+    );
+
+    secondSectionPanel.resolve(
+      createResolvedVisualization({
+        type: 'lens',
+        config: { type: 'bar' },
+      })
+    );
+    firstSectionPanel.resolve(
+      createResolvedVisualization({
+        type: 'lens',
+        config: { type: 'metric' },
+      })
+    );
+
+    const result = await resultPromise;
+
+    expect(getSections(result.dashboardData.panels)).toEqual([
+      expect.objectContaining({
+        title: 'Overview',
+        panels: [expect.objectContaining({ config: { type: 'metric' } })],
+      }),
+      expect.objectContaining({
+        title: 'Errors',
+        panels: [expect.objectContaining({ config: { type: 'bar' } })],
+      }),
+    ]);
+  });
+
+  it('pre-resolves top-level visualization creations alongside section creations', async () => {
+    const sectionPanel = createDeferred<ResolvedVisualizationResult>();
+    const topLevelPanel = createDeferred<ResolvedVisualizationResult>();
+    const resolveVisualizationConfig = jest.fn<
+      ReturnType<ResolveVisualizationConfig>,
+      Parameters<ResolveVisualizationConfig>
+    >(async ({ nlQuery }) => {
+      if (nlQuery === 'show total requests') {
+        return sectionPanel.promise;
+      }
+
+      return topLevelPanel.promise;
+    });
+
+    const resultPromise = executeDashboardOperations({
+      dashboardData: {
+        title: 'Test dashboard',
+        description: 'Description',
+        panels: [],
+      },
+      operations: [
+        {
+          operation: 'add_section',
+          title: 'Overview',
+          grid: { y: 0 },
+          panels: [
+            {
+              query: 'show total requests',
+              grid: { x: 0, y: 0, w: 24, h: 9 },
+            },
+          ],
+        },
+        {
+          operation: 'create_visualization_panels',
+          panels: [
+            {
+              query: 'show error rate',
+              grid: { x: 0, y: 1, w: 24, h: 9 },
+            },
+          ],
+        },
+      ],
+      logger,
+      resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
+      resolveVisualizationConfig,
+    });
+
+    await Promise.resolve();
+
+    expect(resolveVisualizationConfig).toHaveBeenCalledTimes(2);
+    expect(resolveVisualizationConfig).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        operationType: 'add_section',
+        identifier: 'show total requests',
+      })
+    );
+    expect(resolveVisualizationConfig).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        operationType: 'create_visualization_panels',
+        identifier: 'show error rate',
+      })
+    );
+
+    topLevelPanel.resolve(
+      createResolvedVisualization({
+        type: 'lens',
+        config: { type: 'bar' },
+      })
+    );
+    sectionPanel.resolve(
+      createResolvedVisualization({
+        type: 'lens',
+        config: { type: 'metric' },
+      })
+    );
+
+    const result = await resultPromise;
+
+    expect(getSections(result.dashboardData.panels)).toEqual([
+      expect.objectContaining({
+        title: 'Overview',
+        panels: [expect.objectContaining({ config: { type: 'metric' } })],
+      }),
+    ]);
+    expect(getPanelsOnly(result.dashboardData.panels)).toEqual([
+      expect.objectContaining({ config: { type: 'bar' } }),
+    ]);
+  });
+
+  it('throws once up front when visualization creation operations are present without a resolver', async () => {
+    await expect(
+      executeDashboardOperations({
+        dashboardData: {
+          title: 'Test dashboard',
+          description: 'Description',
+          panels: [],
+        },
+        operations: [
+          {
+            operation: 'add_section',
+            title: 'Overview',
+            grid: { y: 0 },
+            panels: [
+              {
+                query: 'show total requests',
+                grid: { x: 0, y: 0, w: 24, h: 9 },
+              },
+            ],
+          },
+          {
+            operation: 'create_visualization_panels',
+            panels: [
+              {
+                query: 'show error rate',
+                grid: { x: 24, y: 0, w: 24, h: 9 },
+              },
+            ],
+          },
+        ],
+        logger,
+        resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
+      })
+    ).rejects.toThrow(
+      'Inline visualization resolver is required for visualization creation operations.'
+    );
   });
 
   it('adds attachment panels into a target section when sectionId is provided', async () => {

@@ -58,7 +58,7 @@ Use operations[] to:
 4. create Lens visualization panels inline from natural language
 5. edit existing Lens visualization panels
 6. update panel layouts without changing content
-7. add / remove sections (batch section creation first, then populate via sectionId)
+7. add / remove sections, including inline section panels during add_section
 8. remove panels`,
     schema: manageDashboardSchema,
     handler: async (

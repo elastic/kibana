@@ -25,7 +25,7 @@ export type ResolvedVisualizationResult =
     };
 
 interface ResolveVisualizationConfigParams {
-  operationType: 'create_visualization_panels' | 'edit_visualization_panels';
+  operationType: 'add_section' | 'create_visualization_panels' | 'edit_visualization_panels';
   identifier: string;
   nlQuery: string;
   index?: string;
@@ -84,6 +84,8 @@ export const createVisualizationResolver = ({
         chartType,
         esql,
         existingConfig: existingConfig ? JSON.stringify(existingConfig) : undefined,
+        parsedExistingConfig: existingConfig,
+        includeTimeRange: false,
         modelProvider,
         logger,
         events,
