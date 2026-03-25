@@ -62,7 +62,7 @@ export const GapFillStatusSelector = ({
   const trigger = (
     <EuiFilterButton
       grow
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={toggle}
       numFilters={options.length}
       isSelected={isOpen}

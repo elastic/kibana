@@ -16,6 +16,9 @@ import type { StartServices } from '../../../types';
 import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 import { flyoutProviders } from './flyout_provider';
 
+jest.mock('../../../common/components/user_privileges/user_privileges_context', () => ({
+  UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
 jest.mock('../../../common/components/discover_in_timeline/provider', () => ({
   DiscoverInTimelineContextProvider: ({ children }: { children: React.ReactNode }) => (
     <>{children}</>
