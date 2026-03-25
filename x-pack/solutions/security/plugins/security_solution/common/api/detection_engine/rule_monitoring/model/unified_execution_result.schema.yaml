@@ -22,6 +22,7 @@ components:
       properties:
         execution_uuid:
           type: string
+          nullable: true
           description: Unique identifier of this execution.
         execution_start:
           type: string
@@ -29,6 +30,7 @@ components:
           description: Start time of the execution (event.start from the Alerting Framework execute event).
         execution_duration_ms:
           type: integer
+          nullable: true
           description: Total execution duration in milliseconds (converted from event.duration nanoseconds).
         schedule_delay_ms:
           type: integer

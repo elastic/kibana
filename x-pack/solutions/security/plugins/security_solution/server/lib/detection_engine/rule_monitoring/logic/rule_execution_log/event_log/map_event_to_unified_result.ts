@@ -20,21 +20,28 @@ import { nsToMs, toOptionalInt } from './utils';
  * If the underlying event source changes, only this function needs to be updated.
  */
 export const mapEventToUnifiedResult = (event: IValidatedEvent): UnifiedExecutionResult => {
-  invariant(
-    event?.kibana?.alert?.rule?.execution?.uuid,
-    'Required "kibana.alert.rule.execution.uuid" field is not found'
-  );
-  invariant(event?.event?.start, 'Required "event.start" field is not found');
-
   return {
-    execution_uuid: event.kibana.alert.rule.execution.uuid,
-    execution_start: event.event.start,
+    execution_uuid: event?.kibana?.alert?.rule?.execution?.uuid ?? null,
+    execution_start: extractExecutionStart(event),
     execution_duration_ms: extractDurationMs(event),
     schedule_delay_ms: extractScheduleDelayMs(event),
     backfill: extractBackfill(event),
     outcome: extractOutcome(event),
     metrics: extractMetrics(event),
   };
+};
+
+/**
+ * Attempt to fall back to `@timestamp` when `event.start` is missing.
+ * `event.start` – time when execution started.
+ * `@timestamp` – time when event was indexed (right after execution finished).
+ * We expect that `event.start` is always present, but since it's not required in the
+ * Event Log schema, we are adding this just-in-case fallback.
+ */
+const extractExecutionStart = (event: IValidatedEvent): string => {
+  const executionStart = event?.event?.start ?? event?.['@timestamp'];
+  invariant(executionStart, 'Neither "event.start" nor "@timestamp" field is found');
+  return executionStart;
 };
 
 const extractOutcome = (event: IValidatedEvent): UnifiedExecutionResult['outcome'] => {
@@ -48,7 +55,7 @@ const extractOutcome = (event: IValidatedEvent): UnifiedExecutionResult['outcome
 
 const extractMetrics = (event: IValidatedEvent): UnifiedExecutionResult['metrics'] => {
   const metrics = event?.kibana?.alert?.rule?.execution?.metrics;
-  // TODO: Remove this comment once we merge Maxim's PR
+  // TODO: Remove this comment along with `additionalMetrics` once we merge Maxim's PR
   // `alerts_candidate_count` and `matched_indices_count` are to be added to the
   // Alerting Framework event log schema in an upcoming PR.
   const additionalMetrics = metrics as Record<string, unknown> | undefined;
@@ -69,10 +76,7 @@ const extractMetrics = (event: IValidatedEvent): UnifiedExecutionResult['metrics
   };
 };
 
-const extractDurationMs = (event: IValidatedEvent): number => {
-  invariant(event?.event?.duration != null, 'Required "event.duration" field is not found');
-  return nsToMs(event.event.duration) ?? 0;
-};
+const extractDurationMs = (event: IValidatedEvent): number | null => nsToMs(event?.event?.duration);
 
 const extractScheduleDelayMs = (event: IValidatedEvent): number | null =>
   nsToMs(event?.kibana?.task?.schedule_delay);

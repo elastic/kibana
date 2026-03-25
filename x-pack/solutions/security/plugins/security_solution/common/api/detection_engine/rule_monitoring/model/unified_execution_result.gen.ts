@@ -33,7 +33,7 @@ export const UnifiedExecutionResult = z.object({
   /**
    * Unique identifier of this execution.
    */
-  execution_uuid: z.string(),
+  execution_uuid: z.string().nullable(),
   /**
    * Start time of the execution (event.start from the Alerting Framework execute event).
    */
@@ -41,7 +41,7 @@ export const UnifiedExecutionResult = z.object({
   /**
    * Total execution duration in milliseconds (converted from event.duration nanoseconds).
    */
-  execution_duration_ms: z.number().int(),
+  execution_duration_ms: z.number().int().nullable(),
   /**
    * Delay between scheduled and actual start time in milliseconds (from kibana.task.schedule_delay).
    */
