@@ -93,7 +93,6 @@
     "cypress:run:qa:serverless:investigations:timeline_templates": "yarn cypress:qa:serverless --spec './cypress/e2e/investigations/timeline_templates/**/*.cy.ts'",
     "cypress:run:qa:serverless:investigations:timelines": "yarn cypress:qa:serverless --spec './cypress/e2e/investigations/timelines/**/*.cy.ts'",
     "cypress:run:qa:serverless:investigations:filters": "yarn cypress:qa:serverless --spec './cypress/e2e/explore/filters/**/*.cy.ts'",
-    "cypress:run:qa:serverless:investigations:guided_onboarding": "yarn cypress:qa:serverless --spec './cypress/e2e/explore/guided_onboarding/**/*.cy.ts'",
     "cypress:run:qa:serverless:investigations:inspect": "yarn cypress:qa:serverless --spec './cypress/e2e/explore/inspect/**/*.cy.ts'",
     "cypress:run:qa:serverless:investigations:navigation": "yarn cypress:qa:serverless --spec './cypress/e2e/explore/navigation/**/*.cy.ts'",
     "cypress:run:qa:serverless:investigations:overview": "yarn cypress:qa:serverless --spec './cypress/e2e/explore/overview/**/*.cy.ts'",
