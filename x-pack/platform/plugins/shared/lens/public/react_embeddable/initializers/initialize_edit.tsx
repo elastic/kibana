@@ -43,17 +43,22 @@ import {
   apiPublishesIsEditableByUser,
 } from '../type_guards';
 import type { SearchContextConfig } from './initialize_search_context';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 function getSupportedTriggers(
   getState: GetStateType,
   visualizationMap: LensEmbeddableStartServices['visualizationMap']
 ) {
   return () => {
+    const panelTriggers = [ON_OPEN_PANEL_MENU];
     const currentState = getState();
     if (currentState.attributes?.visualizationType) {
-      return visualizationMap[currentState.attributes.visualizationType]?.triggers || [];
+      return [
+        ...panelTriggers,
+        ...(visualizationMap[currentState.attributes.visualizationType]?.triggers ?? [])
+      ];
     }
-    return [];
+    return panelTriggers;
   };
 }
 
