@@ -18,7 +18,11 @@ import {
   CENTER_ANIMATION_DURATION_MS,
 } from './constants';
 import type { Environment } from '../../../../common/environment_rt';
-import { PopoverContent, type ServiceMapSelection } from './popover/popover_content';
+import {
+  PopoverContent,
+  type PopoverContentProps,
+  type ServiceMapSelection,
+} from './popover/popover_content';
 import type { ServiceMapNode, ServiceMapEdge } from '../../../../common/service_map';
 import { DiagnosticFlyout } from './diagnostic_tool/diagnostic_flyout';
 
@@ -36,6 +40,7 @@ const OFFSCREEN_STYLE: PopoverPosition = {
 
 /**
  * Calculates the popover position for an edge (at the midpoint between source and target nodes).
+ * Uses absolute positions when nodes are inside groups.
  * Returns offscreen position if source or target nodes cannot be found.
  */
 function getEdgePopoverPosition(
@@ -43,12 +48,16 @@ function getEdgePopoverPosition(
   reactFlowInstance: ReactFlowInstance,
   viewport: Viewport
 ): PopoverPosition {
-  const sourceNode = reactFlowInstance.getNode(edge.source);
-  const targetNode = reactFlowInstance.getNode(edge.target);
+  const sourceNode = reactFlowInstance.getNode(edge.source) as ServiceMapNode | undefined;
+  const targetNode = reactFlowInstance.getNode(edge.target) as ServiceMapNode | undefined;
 
   if (!sourceNode?.position || !targetNode?.position) {
     return OFFSCREEN_STYLE;
   }
+
+  const allNodes = reactFlowInstance.getNodes() as ServiceMapNode[];
+  const sourceAbs = getNodeAbsolutePosition(sourceNode, allNodes);
+  const targetAbs = getNodeAbsolutePosition(targetNode, allNodes);
 
   const zoom = viewport.zoom;
 
@@ -57,10 +66,10 @@ function getEdgePopoverPosition(
   const targetWidth = targetNode.measured?.width ?? targetNode.width ?? DEFAULT_NODE_SIZE;
   const targetHeight = targetNode.measured?.height ?? targetNode.height ?? DEFAULT_NODE_SIZE;
 
-  const sourceCenterX = sourceNode.position.x + sourceWidth / 2;
-  const sourceCenterY = sourceNode.position.y + sourceHeight / 2;
-  const targetCenterX = targetNode.position.x + targetWidth / 2;
-  const targetCenterY = targetNode.position.y + targetHeight / 2;
+  const sourceCenterX = sourceAbs.x + sourceWidth / 2;
+  const sourceCenterY = sourceAbs.y + sourceHeight / 2;
+  const targetCenterX = targetAbs.x + targetWidth / 2;
+  const targetCenterY = targetAbs.y + targetHeight / 2;
 
   const midX = (sourceCenterX + targetCenterX) / 2;
   const midY = (sourceCenterY + targetCenterY) / 2;
@@ -78,7 +87,29 @@ function getEdgePopoverPosition(
 }
 
 /**
+ * When a node has parentId (e.g. inside a group), position is relative to the parent.
+ * Returns the absolute position in flow coordinates for correct popover placement.
+ */
+function getNodeAbsolutePosition(
+  node: ServiceMapNode,
+  allNodes: ServiceMapNode[]
+): { x: number; y: number } {
+  let x = node.position.x;
+  let y = node.position.y;
+  let current: ServiceMapNode | undefined = node;
+  while (current?.parentId) {
+    const parent = allNodes.find((n) => n.id === current!.parentId);
+    if (!parent) break;
+    x += parent.position.x;
+    y += parent.position.y;
+    current = parent;
+  }
+  return { x, y };
+}
+
+/**
  * Calculates the popover position for a node (centered horizontally, positioned at top of node).
+ * Uses absolute position so the popover is correct when the node is inside a group.
  * Returns offscreen position if node position is not available.
  */
 function getNodePopoverPosition(
@@ -90,14 +121,17 @@ function getNodePopoverPosition(
     return OFFSCREEN_STYLE;
   }
 
+  const allNodes = reactFlowInstance.getNodes() as ServiceMapNode[];
+  const { x: absX, y: absY } = getNodeAbsolutePosition(node, allNodes);
+
   const zoom = viewport.zoom;
   const fullNode = reactFlowInstance.getNode(node.id);
   const nodeWidth = fullNode?.measured?.width ?? fullNode?.width ?? DEFAULT_NODE_SIZE;
 
-  const centerX = node.position.x + nodeWidth / 2;
+  const centerX = absX + nodeWidth / 2;
   const x = centerX * zoom + viewport.x;
 
-  const topY = node.position.y;
+  const topY = absY;
   const y = topY * zoom + viewport.y;
 
   return {
@@ -107,7 +141,7 @@ function getNodePopoverPosition(
   };
 }
 
-interface MapPopoverProps {
+export interface MapPopoverProps {
   selectedNode: ServiceMapNode | null;
   selectedEdge: ServiceMapEdge | null;
   focusedServiceName?: string;
@@ -116,6 +150,8 @@ interface MapPopoverProps {
   start: string;
   end: string;
   onClose: () => void;
+  /** When provided, used instead of default PopoverContent (e.g. embeddable context). */
+  renderPopoverContent?: (props: PopoverContentProps) => React.ReactNode;
 }
 
 export function MapPopover({
@@ -127,6 +163,7 @@ export function MapPopover({
   start,
   end,
   onClose,
+  renderPopoverContent,
 }: MapPopoverProps) {
   const { euiTheme } = useEuiTheme();
   const popoverRef = useRef<EuiPopover>(null);
@@ -169,7 +206,12 @@ export function MapPopover({
     (event: MouseEvent<HTMLAnchorElement>) => {
       event.preventDefault();
       if (selectedNode) {
-        reactFlowInstance.setCenter(selectedNode.position.x, selectedNode.position.y, {
+        const allNodes = reactFlowInstance.getNodes() as ServiceMapNode[];
+        const { x, y } = getNodeAbsolutePosition(selectedNode, allNodes);
+        const fullNode = reactFlowInstance.getNode(selectedNode.id);
+        const w = fullNode?.measured?.width ?? fullNode?.width ?? DEFAULT_NODE_SIZE;
+        const h = fullNode?.measured?.height ?? fullNode?.height ?? DEFAULT_NODE_SIZE;
+        reactFlowInstance.setCenter(x + w / 2, y + h / 2, {
           zoom: reactFlowInstance.getZoom(),
           duration: CENTER_ANIMATION_DURATION_MS,
         });
@@ -225,16 +267,29 @@ export function MapPopover({
           'aria-modal': 'false',
         }}
       >
-        <PopoverContent
-          selectedNode={selectedNode}
-          selectedEdge={selectedEdge}
-          environment={environment}
-          kuery={kuery}
-          start={start}
-          end={end}
-          onFocusClick={onFocusClick}
-          onOpenDiagnostic={handleOpenDiagnostic}
-        />
+        {renderPopoverContent ? (
+          renderPopoverContent({
+            selectedNode,
+            selectedEdge,
+            environment,
+            kuery,
+            start,
+            end,
+            onFocusClick,
+            onOpenDiagnostic: handleOpenDiagnostic,
+          })
+        ) : (
+          <PopoverContent
+            selectedNode={selectedNode}
+            selectedEdge={selectedEdge}
+            environment={environment}
+            kuery={kuery}
+            start={start}
+            end={end}
+            onFocusClick={onFocusClick}
+            onOpenDiagnostic={handleOpenDiagnostic}
+          />
+        )}
       </EuiPopover>
       {diagnosticFlyoutSelection && (
         <>

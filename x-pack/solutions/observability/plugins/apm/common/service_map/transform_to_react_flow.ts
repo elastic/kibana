@@ -13,6 +13,7 @@ import type { AgentName } from '@kbn/apm-types';
 import {
   SERVICE_NAME,
   AGENT_NAME,
+  SERVICE_ENVIRONMENT,
   SPAN_TYPE,
   SPAN_SUBTYPE,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -51,6 +52,7 @@ function toServiceNodeData(node: ServiceConnectionNode): ServiceNodeData {
     id: node.id,
     label: node[SERVICE_NAME] ?? node.label ?? node.id,
     agentName: node[AGENT_NAME] as AgentName,
+    serviceEnvironment: node[SERVICE_ENVIRONMENT] ?? undefined,
     isService: true,
     serviceAnomalyStats: node.serviceAnomalyStats,
   };
@@ -141,7 +143,25 @@ export function transformToReactFlow(
     }),
   ];
 
-  const reactFlowNodes = [...uniqueNodes.values()].map((node) => toReactFlowNode(node));
+  const baseNodes = [...uniqueNodes.values()].map((node) => toReactFlowNode(node));
+  const hasBadgeData = Boolean(data.serviceAlertsCounts || data.serviceSloStats);
+  const reactFlowNodes = hasBadgeData
+    ? baseNodes.map((node) => {
+        if (node.type === 'service' && node.data.isService) {
+          const serviceData = node.data as ServiceNodeData;
+          return {
+            ...node,
+            data: {
+              ...serviceData,
+              alertsCount: data.serviceAlertsCounts?.[node.id],
+              sloCount: data.serviceSloStats?.[node.id]?.sloCount,
+              sloStatus: data.serviceSloStats?.[node.id]?.sloStatus,
+            },
+          };
+        }
+        return node;
+      })
+    : baseNodes;
 
   const reactFlowEdges: ServiceMapEdge[] = [];
   for (const edge of markedEdges) {

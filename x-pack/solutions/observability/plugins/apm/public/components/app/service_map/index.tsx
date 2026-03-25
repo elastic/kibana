@@ -8,7 +8,7 @@
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import React, { useLayoutEffect, useRef, useState, useCallback } from 'react';
+import React, { useLayoutEffect, useRef, useState, useCallback, useMemo } from 'react';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import { cx } from '@emotion/css';
 import {
@@ -33,7 +33,14 @@ import type { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
 import { useServiceMap } from './use_service_map';
+import { useServiceMapGroupByValues } from './use_service_map_group_by_values';
 import { ServiceMapGraph } from './graph';
+import {
+  DEFAULT_SERVICE_MAP_CONTROL_STATE,
+  type ServiceMapControlState,
+} from './service_map_control_state';
+import { filterServiceMapElements } from './filter_service_map_nodes';
+import { isServiceNodeData } from '../../../../common/service_map';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -138,7 +145,39 @@ export function ServiceMap({
   const windowHeight = useWindowSize().height;
   const { euiTheme } = useEuiTheme();
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [controlState, setControlState] = useState<ServiceMapControlState>(
+    DEFAULT_SERVICE_MAP_CONTROL_STATE
+  );
   const { styles, bodyClassesToToggle } = useServiceMapFullScreen();
+
+  const { nodes: filteredNodes, edges: filteredEdges } = useMemo(
+    () => filterServiceMapElements(data.nodes, data.edges, controlState),
+    [data.nodes, data.edges, controlState]
+  );
+
+  /** Service nodes before any SLO/anomaly filter, for dropdown counts (so users see how many per status). */
+  const allServiceNodesForCounts = useMemo(
+    () => data.nodes.filter((n) => n.type === 'service' && isServiceNodeData(n.data)),
+    [data.nodes]
+  );
+
+  const serviceNamesForGroupBy = useMemo(
+    () =>
+      filteredNodes
+        .filter((n) => n.type === 'service')
+        .map((n) => n.id),
+    [filteredNodes]
+  );
+
+  const { data: serviceGroupByValues } = useServiceMapGroupByValues({
+    serviceNames: serviceNamesForGroupBy,
+    groupByField: controlState.groupBy,
+    start,
+    end,
+    environment,
+    kuery: kuery ?? '',
+  });
+
   const fullScreenContainerStyles = styles[SERVICE_MAP_FULL_SCREEN_CLASS];
 
   // Temporary hack to work around bottom padding introduced by EuiPage
@@ -257,8 +296,8 @@ export function ServiceMap({
             {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
             <ServiceMapGraph
               height={mapHeight}
-              nodes={data.nodes}
-              edges={data.edges}
+              nodes={filteredNodes}
+              edges={filteredEdges}
               serviceName={serviceName}
               environment={environment}
               kuery={kuery}
@@ -267,6 +306,12 @@ export function ServiceMap({
               isFullscreen={isFullscreen}
               onToggleFullscreen={onToggleFullscreen}
               fullMapHref={fullMapHref}
+              controlState={controlState}
+              onControlStateChange={(update) =>
+                setControlState((prev) => ({ ...prev, ...update }))
+              }
+              serviceGroupByValues={serviceGroupByValues}
+              allServiceNodesForCounts={allServiceNodesForCounts}
             />
           </div>
         </EuiPanel>

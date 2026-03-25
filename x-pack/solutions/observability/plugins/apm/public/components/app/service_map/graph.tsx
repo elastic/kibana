@@ -33,15 +33,20 @@ import { i18n } from '@kbn/i18n';
 import '@xyflow/react/dist/style.css';
 import { css } from '@emotion/react';
 import { applyDagreLayout } from './layout';
+import { ServiceMapControlsPanel } from './service_map_controls_panel';
+import type { ServiceMapControlState, LayoutDirection } from './service_map_control_state';
 import { FIT_VIEW_PADDING, FIT_VIEW_DURATION, FIT_VIEW_DEFER_MS } from './constants';
 import { ServiceNode } from './service_node';
 import { DependencyNode } from './dependency_node';
 import { GroupedResourcesNode } from './grouped_resources_node';
+import { SubflowGroupNode } from './subflow_group_node';
 import { ServiceMapEdge } from './service_map_edge';
+import { applyGroupBy } from './apply_group_by';
 import { useEdgeHighlighting } from './use_edge_highlighting';
 import { useReducedMotion } from './use_reduced_motion';
 import { useKeyboardNavigation } from './use_keyboard_navigation';
 import { MapPopover } from './popover';
+import type { PopoverContentProps } from './popover/popover_content';
 import { ServiceMapMinimap } from './service_map_minimap';
 import type { Environment } from '../../../../common/environment_rt';
 import type {
@@ -53,6 +58,7 @@ const nodeTypes: NodeTypes = {
   service: ServiceNode,
   dependency: DependencyNode,
   groupedResources: GroupedResourcesNode,
+  subflowGroup: SubflowGroupNode,
 };
 
 const edgeTypes: EdgeTypes = {
@@ -73,6 +79,22 @@ interface GraphProps {
   onToggleFullscreen?: () => void;
   /** When set, shows a "View full service map" button that links to the full map (focused map only) */
   fullMapHref?: string;
+  /** When false, hides the minimap (e.g. in embeddable preview). Default true. */
+  showMinimap?: boolean;
+  /** When false, disables the node/edge detail popover (e.g. in embeddable where router is unavailable). Default true. */
+  showPopover?: boolean;
+  /** When provided, used as popover content instead of default (e.g. embeddable context with Discover in header). */
+  renderPopoverContent?: (props: PopoverContentProps) => React.ReactNode;
+  /** Control state for options panel (search, filters, group by, layout). */
+  controlState?: ServiceMapControlState;
+  /** Callback when control state changes. */
+  onControlStateChange?: (state: Partial<ServiceMapControlState>) => void;
+  /** Layout direction; used when controlState is not provided. */
+  layoutDirection?: LayoutDirection;
+  /** Per-service group-by field values from API (for fields not on the map response). */
+  serviceGroupByValues?: Record<string, string>;
+  /** All service nodes before SLO/anomaly filter; used for filter dropdown counts. */
+  allServiceNodesForCounts?: ServiceMapNode[];
 }
 
 function GraphInner({
@@ -87,6 +109,14 @@ function GraphInner({
   isFullscreen = false,
   onToggleFullscreen,
   fullMapHref,
+  showMinimap = true,
+  showPopover = true,
+  renderPopoverContent,
+  controlState,
+  onControlStateChange,
+  layoutDirection: layoutDirectionProp,
+  serviceGroupByValues,
+  allServiceNodesForCounts,
 }: GraphProps) {
   const { euiTheme } = useEuiTheme();
   const { fitView } = useReactFlow();
@@ -112,24 +142,35 @@ function GraphInner({
     [getAnimationDuration]
   );
 
+  const layoutDirection = controlState?.layoutDirection ?? layoutDirectionProp ?? 'horizontal';
   const layoutedNodes = useMemo(
-    () => applyDagreLayout(initialNodes, initialEdges),
-    [initialNodes, initialEdges]
+    () =>
+      applyDagreLayout(initialNodes, initialEdges, {
+        rankdir: layoutDirection === 'vertical' ? 'TB' : 'LR',
+      }),
+    [initialNodes, initialEdges, layoutDirection]
   );
 
-  const [nodes, setNodes, onNodesChange] = useNodesState<ServiceMapNode>(layoutedNodes);
+  const nodesWithGrouping = useMemo(() => {
+    if (controlState?.groupBy) {
+      return applyGroupBy(layoutedNodes, initialEdges, controlState.groupBy, serviceGroupByValues);
+    }
+    return layoutedNodes;
+  }, [layoutedNodes, initialEdges, controlState?.groupBy, serviceGroupByValues]);
+
+  const [nodes, setNodes, onNodesChange] = useNodesState<ServiceMapNode>(nodesWithGrouping);
   const [edges, setEdges, onEdgesChange] = useEdgesState<ServiceMapEdgeType>(initialEdges);
 
   useEffect(() => {
-    setNodes(layoutedNodes);
+    setNodes(nodesWithGrouping);
     setEdges(applyEdgeHighlighting(initialEdges, selectedNodeIdRef.current));
 
-    if (layoutedNodes.length > 0) {
+    if (nodesWithGrouping.length > 0) {
       const timer = setTimeout(() => fitView(getFitViewOptions()), FIT_VIEW_DEFER_MS);
       return () => clearTimeout(timer);
     }
   }, [
-    layoutedNodes,
+    nodesWithGrouping,
     initialEdges,
     setNodes,
     setEdges,
@@ -295,6 +336,16 @@ function GraphInner({
       z-index: ${euiTheme.levels.content};
       position: relative;
       margin: ${euiTheme.size.s};
+      display: flex;
+      flex-direction: column;
+
+      /* React Flow renders zoom/fit first; pull settings + separator to the top */
+      .apm-service-map-controls-settings {
+        order: -1;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+      }
 
       button,
       a[data-test-subj='serviceMapViewFullMapButton'] {
@@ -426,19 +477,44 @@ function GraphInner({
               />
             </ControlButton>
           )}
+          {controlState && onControlStateChange && (
+            <div
+              className="apm-service-map-controls-settings"
+              data-test-subj="serviceMapControlsSettingsGroup"
+            >
+              <ServiceMapControlsPanel
+                nodes={nodes}
+                controlState={controlState}
+                onControlStateChange={onControlStateChange}
+                allServiceNodesForCounts={allServiceNodesForCounts}
+                serviceGroupByValues={serviceGroupByValues}
+              />
+              <div
+                css={css`
+                  border-top: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
+                  width: 100%;
+                `}
+                role="presentation"
+                data-test-subj="serviceMapControlsSeparator"
+              />
+            </div>
+          )}
         </Controls>
-        <ServiceMapMinimap />
+        {showMinimap && <ServiceMapMinimap />}
       </ReactFlow>
-      <MapPopover
-        selectedNode={selectedNodeForPopover}
-        selectedEdge={selectedEdgeForPopover}
-        focusedServiceName={serviceName}
-        environment={environment}
-        kuery={kuery}
-        start={start}
-        end={end}
-        onClose={handlePopoverClose}
-      />
+      {showPopover && (
+        <MapPopover
+          selectedNode={selectedNodeForPopover}
+          selectedEdge={selectedEdgeForPopover}
+          focusedServiceName={serviceName}
+          environment={environment}
+          kuery={kuery}
+          start={start}
+          end={end}
+          onClose={handlePopoverClose}
+          renderPopoverContent={renderPopoverContent}
+        />
+      )}
     </div>
   );
 }

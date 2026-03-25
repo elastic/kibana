@@ -7,6 +7,7 @@
 
 import Dagre from '@dagrejs/dagre';
 import type { Node, Edge } from '@xyflow/react';
+import { Position } from '@xyflow/react';
 import {
   NODE_WIDTH,
   NODE_HEIGHT,
@@ -88,7 +89,12 @@ export function applyDagreLayout<T extends Record<string, unknown>>(
   // Run layout algorithm
   Dagre.layout(g);
 
-  // Apply calculated positions to nodes
+  // Edge connection points: vertical (TB) = bottom→top, horizontal (LR) = right→left (per React Flow Dagre example)
+  const isHorizontal = opts.rankdir === 'LR';
+  const sourcePosition = isHorizontal ? Position.Right : Position.Bottom;
+  const targetPosition = isHorizontal ? Position.Left : Position.Top;
+
+  // Apply calculated positions and handle positions to nodes
   return nodes.map((node) => {
     const dagreNode = g.node(node.id);
 
@@ -102,6 +108,8 @@ export function applyDagreLayout<T extends Record<string, unknown>>(
         x: Math.round(dagreNode.x - opts.nodeWidth / 2),
         y: Math.round(dagreNode.y - opts.nodeHeight / 2),
       },
+      sourcePosition,
+      targetPosition,
     };
   });
 }

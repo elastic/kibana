@@ -38,8 +38,15 @@ import LatencyChart from './latency_chart';
 import ThroughputChart from './throughput_chart';
 import type { AlertDetailsAppSectionProps } from './types';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
+import { AlertDetailsServiceMapSection } from '../alert_details_service_map_section';
+import type { EmbeddableDeps } from '../../../../embeddable/types';
 
-export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAppSectionProps) {
+export function AlertDetailsAppSection({
+  rule,
+  alert,
+  timeZone,
+  embeddableDeps,
+}: AlertDetailsAppSectionProps) {
   const { services } = useKibana();
   createCallApmApi(services as CoreStart);
 
@@ -122,6 +129,17 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
               offset={''}
               threshold={thresholdComponent}
             />
+            {embeddableDeps != null ? (
+              <>
+                <EuiSpacer size="s" />
+                <AlertDetailsServiceMapSection
+                  alert={alert}
+                  rule={rule}
+                  timeZone={timeZone}
+                  embeddableDeps={embeddableDeps as EmbeddableDeps}
+                />
+              </>
+            ) : null}
             <EuiSpacer size="s" />
             <EuiFlexGroup direction="row" gutterSize="s">
               <ThroughputChart
