@@ -126,6 +126,9 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         rowProps={tableRowProps}
         selection={!isSelectorView ? selection : undefined}
         sorting={sorting}
+        tableLayout="auto"
+        scrollableInline
+        responsiveBreakpoint={false}
       />
     </>
   );
