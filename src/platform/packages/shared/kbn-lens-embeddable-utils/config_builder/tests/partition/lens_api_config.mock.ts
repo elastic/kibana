@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LensApiState } from '../../schema';
+import type { MosaicState } from '../../schema/charts/mosaic';
+import type { PieState } from '../../schema/charts/pie';
+import type { TreemapState } from '../../schema/charts/treemap';
+import type { WaffleState } from '../../schema/charts/waffle';
 
-export const esqlCharts: Array<LensApiState> = [
+type PartitionConfig = PieState | MosaicState | TreemapState | WaffleState;
+
+export const esqlCharts: Array<PartitionConfig> = [
   {
     title: 'basic pie',
     sampling: 1,

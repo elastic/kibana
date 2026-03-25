@@ -452,7 +452,7 @@ function fromLensStateToSharedPartitionAPI(
     size: layerState.legendSize,
   });
   const valueDisplay = stripUndefined({
-    visible: layerState.numberDisplay === 'hidden' ? false : undefined,
+    visible: layerState.numberDisplay !== 'hidden',
     mode:
       layerState.numberDisplay === 'percent'
         ? ('percentage' as const)
@@ -653,13 +653,13 @@ function convertStateCategoryDisplayOption(
   categoryDisplay: LensPartitionVisualizationState['layers'][0]['categoryDisplay']
 ): PieState['labels'] {
   if (categoryDisplay === 'default') {
-    return { position: 'outside' };
+    return { visible: true, position: 'outside' };
   }
   if (categoryDisplay === 'hide') {
     return { visible: false };
   }
   if (categoryDisplay === 'inside') {
-    return { position: 'inside' };
+    return { visible: true, position: 'inside' };
   }
   return undefined;
 }

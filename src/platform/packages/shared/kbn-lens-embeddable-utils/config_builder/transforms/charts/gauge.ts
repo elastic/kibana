@@ -155,13 +155,13 @@ function reverseBuildVisualizationState(
   } as GaugeState;
 
   if (props.metric) {
-    const titleVisible = visualization.labelMajorMode !== 'none';
+    props.metric.title = {
+      visible: visualization.labelMajorMode !== 'none',
+    };
     const titleValue = visualization.labelMajor;
-    if (!titleVisible || titleValue) {
-      props.metric.title = {
-        ...(titleValue ? { text: titleValue } : {}),
-        ...(!titleVisible ? { visible: false } : {}),
-      };
+
+    if (titleValue) {
+      props.metric.title.text = titleValue;
     }
 
     if (visualization.labelMinor) {
@@ -173,8 +173,8 @@ function reverseBuildVisualizationState(
         visualization.ticksPosition === 'hidden'
           ? { visible: false }
           : visualization.ticksPosition === 'bands'
-          ? { mode: 'bands' }
-          : { mode: 'auto' };
+          ? { visible: true, mode: 'bands' }
+          : { visible: true, mode: 'auto' };
     }
 
     if (visualization.colorMode === 'palette' && visualization.palette) {
