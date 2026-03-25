@@ -6,7 +6,7 @@
  */
 
 import React, { type FC, useMemo, useCallback, type ReactElement, type ReactNode } from 'react';
-import { type Criteria, EuiBasicTable, formatDate } from '@elastic/eui';
+import { type Criteria, type EuiBasicTableColumn, EuiBasicTable, formatDate } from '@elastic/eui';
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { Filter } from '@kbn/es-query';
 import { isRight } from 'fp-ts/Either';
@@ -17,15 +17,35 @@ import { CellTooltipWrapper } from '../../shared/components/cell_tooltip_wrapper
 import type { DataProvider } from '../../../../../common/types';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { InvestigateInTimelineButton } from '../../../../common/components/event_details/investigate_in_timeline_button';
 import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
 import { getDataProvider } from '../../../../common/components/event_details/use_action_cell_data_provider';
 import { AlertPreviewButton } from '../../../shared/components/alert_preview_button';
 import { PreviewLink } from '../../../shared/components/preview_link';
+import { FlyoutMissingAlertsPrivilege } from '../../../shared/components/flyout_missing_alerts_privilege';
 
 export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const dataProviderLimit = 5;
+type CorrelationsTableRow = Record<string, unknown>;
+export type CorrelationsCustomTableColumn = EuiBasicTableColumn<CorrelationsTableRow> & {
+  /**
+   * Preserve array values for field-based custom columns.
+   * Applied only when `field` is provided.
+   */
+  preserveArray?: boolean;
+};
+
+type CorrelationsFieldColumn = Extract<
+  EuiBasicTableColumn<CorrelationsTableRow>,
+  { field: string }
+>;
+
+const isPreserveArrayFieldColumn = (
+  column: CorrelationsCustomTableColumn
+): column is CorrelationsFieldColumn & { preserveArray: true } =>
+  'field' in column && typeof column.field === 'string' && column.preserveArray === true;
 
 export interface CorrelationsDetailsAlertsTableProps {
   /**
@@ -56,6 +76,18 @@ export interface CorrelationsDetailsAlertsTableProps {
    * Data test subject string for testing
    */
   ['data-test-subj']?: string;
+  /**
+   * Optional index to query alerts from
+   */
+  indexName?: string;
+  /**
+   * Optional table columns override
+   */
+  columns?: Array<CorrelationsCustomTableColumn>;
+  /**
+   * Optional data view id to use when opening timeline.
+   */
+  timelineDataViewId?: string;
 }
 
 /**
@@ -69,7 +101,11 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
   eventId,
   noItemsMessage,
   'data-test-subj': dataTestSubj,
+  indexName,
+  columns,
+  timelineDataViewId,
 }) => {
+  const { hasAlertsRead } = useAlertsPrivileges();
   const {
     setPagination,
     setSorting,
@@ -78,7 +114,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
     paginationConfig,
     sorting,
     error,
-  } = usePaginatedAlerts(alertIds || []);
+  } = usePaginatedAlerts(alertIds || [], indexName);
 
   const onTableChange = useCallback(
     ({ page, sort }: Criteria<Record<string, unknown>>) => {
@@ -94,20 +130,30 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
     [setPagination, setSorting]
   );
 
+  const mappedValueFields = useMemo(() => {
+    return new Set(
+      (columns ?? []).filter(isPreserveArrayFieldColumn).map((column) => column.field)
+    );
+  }, [columns]);
+
   const mappedData = useMemo(() => {
     return data
       .map((hit) => ({ fields: hit.fields ?? {}, id: hit._id, index: hit._index }))
       .map((dataWithMeta) => {
         const res = Object.keys(dataWithMeta.fields).reduce((result, fieldName) => {
+          const fieldValue = dataWithMeta.fields?.[fieldName];
+          const shouldKeepArray = mappedValueFields.has(fieldName);
           result[fieldName] =
-            dataWithMeta.fields?.[fieldName]?.[0] || dataWithMeta.fields?.[fieldName];
+            Array.isArray(fieldValue) && !shouldKeepArray
+              ? fieldValue[0] ?? fieldValue
+              : fieldValue;
           return result;
-        }, {} as Record<string, unknown>);
+        }, {} as CorrelationsTableRow);
         res.id = dataWithMeta.id;
         res.index = dataWithMeta.index;
         return res;
       });
-  }, [data]);
+  }, [data, mappedValueFields]);
 
   const shouldUseFilters = Boolean(
     alertIds && alertIds.length && alertIds.length >= dataProviderLimit
@@ -121,10 +167,10 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
     [alertIds, shouldUseFilters]
   );
 
-  const columns = useMemo(
+  const defaultColumns = useMemo<Array<EuiBasicTableColumn<CorrelationsTableRow>>>(
     () => [
       {
-        render: (row: Record<string, unknown>) => (
+        render: (row: CorrelationsTableRow) => (
           <AlertPreviewButton
             id={row.id as string}
             indexName={row.index as string}
@@ -161,7 +207,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
           />
         ),
         truncateText: true,
-        render: (row: Record<string, unknown>) => {
+        render: (row: CorrelationsTableRow) => {
           const ruleName = row[ALERT_RULE_NAME] as string;
           const ruleId = row['kibana.alert.rule.uuid'] as string;
           return (
@@ -217,48 +263,55 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
     [scopeId, dataTestSubj]
   );
 
+  const panelContent = !hasAlertsRead ? (
+    <FlyoutMissingAlertsPrivilege data-test-subj={`${dataTestSubj}MissingAlertsPrivilege`} />
+  ) : (
+    <EuiBasicTable<CorrelationsTableRow>
+      data-test-subj={`${dataTestSubj}Table`}
+      loading={loading || alertsLoading}
+      tableCaption={i18n.translate(
+        'xpack.securitySolution.flyout.left.insights.correlations.correlatedAlertsCaption',
+        {
+          defaultMessage: 'Correlated alerts',
+        }
+      )}
+      items={mappedData}
+      columns={columns ?? defaultColumns}
+      pagination={paginationConfig}
+      sorting={sorting}
+      onChange={onTableChange}
+      noItemsMessage={noItemsMessage}
+    />
+  );
+
   return (
     <ExpandablePanel
       header={{
         title,
         iconType: 'warning',
         headerContent:
-          alertIds && alertIds.length && alertIds.length > 0 ? (
+          hasAlertsRead && alertIds && alertIds.length && alertIds.length > 0 ? (
             <div data-test-subj={`${dataTestSubj}InvestigateInTimeline`}>
               <InvestigateInTimelineButton
                 dataProviders={dataProviders}
                 filters={filters}
                 asEmptyButton
                 iconType="timeline"
+                dataViewId={timelineDataViewId}
               >
                 {ACTION_INVESTIGATE_IN_TIMELINE}
               </InvestigateInTimelineButton>
             </div>
           ) : null,
       }}
-      content={{ error }}
+      content={{ error: hasAlertsRead ? error : undefined }}
       expand={{
         expandable: true,
         expandedOnFirstRender: true,
       }}
       data-test-subj={dataTestSubj}
     >
-      <EuiBasicTable<Record<string, unknown>>
-        data-test-subj={`${dataTestSubj}Table`}
-        loading={loading || alertsLoading}
-        tableCaption={i18n.translate(
-          'xpack.securitySolution.flyout.left.insights.correlations.correlatedAlertsCaption',
-          {
-            defaultMessage: 'Correlated alerts',
-          }
-        )}
-        items={mappedData}
-        columns={columns}
-        pagination={paginationConfig}
-        sorting={sorting}
-        onChange={onTableChange}
-        noItemsMessage={noItemsMessage}
-      />
+      {panelContent}
     </ExpandablePanel>
   );
 };

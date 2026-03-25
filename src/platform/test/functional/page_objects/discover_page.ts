@@ -233,7 +233,7 @@ export class DiscoverPageObject extends FtrService {
 
   public async clickNewSearchButton() {
     await this.testSubjects.click('discoverNewButton');
-    await this.testSubjects.moveMouseTo('unifiedFieldListSidebar__toggle-collapse'); // cancel tooltips
+    await this.testSubjects.moveMouseTo('dscHideSidebarButton'); // cancel tooltips
     await this.header.waitUntilLoadingHasFinished();
   }
 
@@ -621,17 +621,13 @@ export class DiscoverPageObject extends FtrService {
 
   public async closeSidebar() {
     await this.retry.tryForTime(2 * 1000, async () => {
-      await this.testSubjects.click('unifiedFieldListSidebar__toggle-collapse');
-      await this.testSubjects.missingOrFail('unifiedFieldListSidebar__toggle-collapse');
+      await this.testSubjects.click('dscHideSidebarButton');
       await this.testSubjects.missingOrFail('fieldList');
     });
   }
 
   public async isSidebarPanelOpen() {
-    return (
-      (await this.testSubjects.exists('fieldList')) &&
-      (await this.testSubjects.exists('unifiedFieldListSidebar__toggle-collapse'))
-    );
+    return await this.testSubjects.exists('fieldList');
   }
 
   public async getSidebarWidth() {
@@ -1149,6 +1145,15 @@ export class DiscoverPageObject extends FtrService {
       await this.header.waitUntilLoadingHasFinished();
       await this.dashboard.waitForRenderComplete();
     });
+  }
+
+  /**
+   * Returns the ID of the first tab in the Discover session
+   * @returns The ID of the first tab in the Discover session
+   */
+  public async getFirstTabId() {
+    const tabEls = await this.testSubjects.findAll('*unifiedTabs_tab_');
+    return (await tabEls[0].getAttribute('data-test-subj'))?.replace('unifiedTabs_tab_', '');
   }
 
   /** Discover Embeddable helper methods end   */

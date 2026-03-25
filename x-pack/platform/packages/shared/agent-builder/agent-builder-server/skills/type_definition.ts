@@ -27,6 +27,7 @@ export type SkillsDirectoryStructure = Directory<{
   skills: Directory<{
     platform: FileDirectory<{
       dashboard: FileDirectory;
+      streams: FileDirectory;
       visualization: FileDirectory;
       workflows: FileDirectory;
     }>;
@@ -84,6 +85,11 @@ export interface SkillDefinition<
    * Max 1024 characters. Non-empty. Describes what the skill does and when to use it.
    */
   description: string;
+  /**
+   * When true, this skill is only available when experimental features are enabled.
+   * Defaults to false.
+   */
+  experimental?: boolean;
   /**
    * Content of the skill.
    */
