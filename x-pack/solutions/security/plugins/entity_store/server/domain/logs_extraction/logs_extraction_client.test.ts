@@ -14,10 +14,8 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import moment from 'moment';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
-import {
-  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
-  HASHED_ID_FIELD,
-} from './logs_extraction_query_builder';
+import { HASHED_ID_FIELD } from './logs_extraction_query_builder';
+import { ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD } from './query_builder_commons';
 import {
   LogExtractionConfig,
   type EngineDescriptorClient,
@@ -60,7 +58,7 @@ function createMockEngineDescriptor(
 
 function createMockGlobalStateClient(
   logExtractionOverrides?: Partial<{ lookbackPeriod: string; delay: string }>
-): jest.Mocked<Pick<EntityStoreGlobalStateClient, 'find' | 'findOrThrow'>> {
+): jest.Mocked<Pick<EntityStoreGlobalStateClient, 'find' | 'findOrThrow' | 'update'>> {
   const logsExtraction = LogExtractionConfig.parse({
     docsLimit: 10000,
     additionalIndexPatterns: [],
@@ -71,6 +69,7 @@ function createMockGlobalStateClient(
   return {
     find: jest.fn().mockResolvedValue(state),
     findOrThrow: jest.fn().mockResolvedValue(state),
+    update: jest.fn().mockResolvedValue({}),
   };
 }
 
@@ -740,6 +739,71 @@ describe('LogsExtractionClient', () => {
 
       expect(localIndexPatterns).not.toContain('.alerts-security.alerts-default');
       expect(remoteIndexPatterns).not.toContain('.alerts-security.alerts-default');
+    });
+  });
+
+  describe('updateConfig', () => {
+    it('should merge provided params over current config and persist via globalStateClient', async () => {
+      await client.updateConfig({ delay: '5m' });
+
+      expect(mockGlobalStateClient.findOrThrow).toHaveBeenCalledTimes(1);
+      expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
+        logsExtraction: expect.objectContaining({ delay: '5m' }),
+      });
+    });
+
+    it('should return the merged config', async () => {
+      const result = await client.updateConfig({ delay: '5m', frequency: '2m' });
+
+      expect(result.delay).toBe('5m');
+      expect(result.frequency).toBe('2m');
+    });
+
+    it('should preserve existing config values not present in params', async () => {
+      // createMockGlobalStateClient sets lookbackPeriod to '3h'
+      const result = await client.updateConfig({ delay: '5m' });
+
+      expect(result.lookbackPeriod).toBe('3h');
+    });
+
+    it('should apply defaults for any config fields absent from both params and current state', async () => {
+      // logsExtraction from mock has all fields set via LogExtractionConfig.parse
+      // providing no params should keep the full config intact
+      const result = await client.updateConfig({});
+
+      expect(result.delay).toBe('1m');
+      expect(result.lookbackPeriod).toBe('3h');
+      expect(result.docsLimit).toBe(10000);
+    });
+
+    it('should update multiple fields at once', async () => {
+      const result = await client.updateConfig({
+        filter: 'agent.type:filebeat',
+        additionalIndexPatterns: ['custom-logs-*'],
+        lookbackPeriod: '6h',
+        delay: '30s',
+        frequency: '1m',
+        docsLimit: 5000,
+        fieldHistoryLength: 5,
+      });
+
+      expect(result.filter).toBe('agent.type:filebeat');
+      expect(result.additionalIndexPatterns).toEqual(['custom-logs-*']);
+      expect(result.lookbackPeriod).toBe('6h');
+      expect(result.delay).toBe('30s');
+      expect(result.frequency).toBe('1m');
+      expect(result.docsLimit).toBe(5000);
+      expect(result.fieldHistoryLength).toBe(5);
+    });
+
+    it('should throw when global state is not found', async () => {
+      const notFoundError = new Error('No global state found for this namespace');
+      mockGlobalStateClient.findOrThrow.mockRejectedValue(notFoundError);
+
+      await expect(client.updateConfig({ delay: '5m' })).rejects.toThrow(
+        'No global state found for this namespace'
+      );
+      expect(mockGlobalStateClient.update).not.toHaveBeenCalled();
     });
   });
 

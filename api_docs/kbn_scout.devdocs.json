@@ -2049,7 +2049,7 @@
         "tags": [],
         "label": "KbnClient",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+        "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
         "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
@@ -2065,7 +2065,7 @@
             "signature": [
               "KbnClientStatus"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
@@ -2081,7 +2081,7 @@
             "signature": [
               "KbnClientPlugins"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
@@ -2097,7 +2097,7 @@
             "signature": [
               "KbnClientVersion"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
@@ -2111,9 +2111,15 @@
             "label": "savedObjects",
             "description": [],
             "signature": [
-              "KbnClientSavedObjects"
+              {
+                "pluginId": "@kbn/kbn-client",
+                "scope": "common",
+                "docId": "kibKbnKbnClientPluginApi",
+                "section": "def-common.KbnClientSavedObjects",
+                "text": "KbnClientSavedObjects"
+              }
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
             "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
@@ -2129,7 +2135,7 @@
             "signature": [
               "KbnClientSpaces"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
@@ -2145,7 +2151,7 @@
             "signature": [
               "KbnClientUiSettings"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
             "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
@@ -2161,7 +2167,7 @@
             "signature": [
               "KbnClientImportExport"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
             "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
@@ -2179,7 +2185,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
             "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
@@ -2194,14 +2200,14 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/kbn-client",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnKbnClientPluginApi",
                     "section": "def-common.KbnClientOptions",
                     "text": "KbnClientOptions"
                   }
                 ],
-                "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+                "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
                 "lineNumber": 48,
                 "columnNumber": 15,
                 "deprecated": false,
@@ -2222,12 +2228,18 @@
             ],
             "signature": [
               "<T>(options: ",
-              "ReqOptions",
+              {
+                "pluginId": "@kbn/kbn-client",
+                "scope": "common",
+                "docId": "kibKbnKbnClientPluginApi",
+                "section": "def-common.ReqOptions",
+                "text": "ReqOptions"
+              },
               ") => Promise<",
               "AxiosResponse",
               "<T, any, {}>>"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
             "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
@@ -2241,9 +2253,15 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "ReqOptions"
+                  {
+                    "pluginId": "@kbn/kbn-client",
+                    "scope": "common",
+                    "docId": "kibKbnKbnClientPluginApi",
+                    "section": "def-common.ReqOptions",
+                    "text": "ReqOptions"
+                  }
                 ],
-                "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+                "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
                 "lineNumber": 80,
                 "columnNumber": 20,
                 "deprecated": false,
@@ -2263,7 +2281,7 @@
             "signature": [
               "(relativeUrl: string) => string"
             ],
-            "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+            "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
             "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
@@ -2279,7 +2297,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/platform/packages/shared/kbn-test/src/kbn_client/kbn_client.ts",
+                "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
                 "lineNumber": 84,
                 "columnNumber": 14,
                 "deprecated": false,
@@ -3008,7 +3026,7 @@
             "label": "title",
             "description": [],
             "path": "node_modules/playwright/types/test.d.ts",
-            "lineNumber": 2695,
+            "lineNumber": 2747,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false
@@ -3026,7 +3044,7 @@
               ") => void | Promise<void>"
             ],
             "path": "node_modules/playwright/types/test.d.ts",
-            "lineNumber": 2695,
+            "lineNumber": 2747,
             "columnNumber": 19,
             "deprecated": false,
             "trackAdoption": false,
@@ -3043,7 +3061,7 @@
                   "TestArgs"
                 ],
                 "path": "node_modules/playwright/types/test.d.ts",
-                "lineNumber": 2601,
+                "lineNumber": 2653,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3059,7 +3077,7 @@
                   "TestInfo"
                 ],
                 "path": "node_modules/playwright/types/test.d.ts",
-                "lineNumber": 2601,
+                "lineNumber": 2653,
                 "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3085,7 +3103,7 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/api/index.ts",
-        "lineNumber": 72,
+        "lineNumber": 75,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3099,7 +3117,7 @@
             "label": "title",
             "description": [],
             "path": "node_modules/playwright/types/test.d.ts",
-            "lineNumber": 2695,
+            "lineNumber": 2747,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false
@@ -3117,7 +3135,7 @@
               ") => void | Promise<void>"
             ],
             "path": "node_modules/playwright/types/test.d.ts",
-            "lineNumber": 2695,
+            "lineNumber": 2747,
             "columnNumber": 19,
             "deprecated": false,
             "trackAdoption": false,
@@ -3134,7 +3152,7 @@
                   "TestArgs"
                 ],
                 "path": "node_modules/playwright/types/test.d.ts",
-                "lineNumber": 2601,
+                "lineNumber": 2653,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3150,7 +3168,7 @@
                   "TestInfo"
                 ],
                 "path": "node_modules/playwright/types/test.d.ts",
-                "lineNumber": 2601,
+                "lineNumber": 2653,
                 "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3206,7 +3224,7 @@
             "label": "title",
             "description": [],
             "path": "node_modules/playwright/types/test.d.ts",
-            "lineNumber": 2695,
+            "lineNumber": 2747,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false
@@ -3224,7 +3242,7 @@
               ") => void | Promise<void>"
             ],
             "path": "node_modules/playwright/types/test.d.ts",
-            "lineNumber": 2695,
+            "lineNumber": 2747,
             "columnNumber": 19,
             "deprecated": false,
             "trackAdoption": false,
@@ -3241,7 +3259,7 @@
                   "TestArgs"
                 ],
                 "path": "node_modules/playwright/types/test.d.ts",
-                "lineNumber": 2601,
+                "lineNumber": 2653,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3257,7 +3275,106 @@
                   "TestInfo"
                 ],
                 "path": "node_modules/playwright/types/test.d.ts",
-                "lineNumber": 2601,
+                "lineNumber": 2653,
+                "columnNumber": 44,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout",
+        "id": "def-common.coreWorkerFixtures",
+        "type": "Function",
+        "tags": [],
+        "label": "coreWorkerFixtures",
+        "description": [
+          "\nThe coreWorkerFixtures setup defines foundational fixtures that are essential\nfor running tests in the \"kbn-scout\" framework. These fixtures provide reusable,\nscoped resources for each Playwright worker, ensuring that tests have consistent\nand isolated access to critical services such as logging, configuration, and\nclients for interacting with Kibana and Elasticsearch."
+        ],
+        "signature": [
+          "TestType",
+          "<",
+          "PlaywrightTestArgs",
+          " & ",
+          "PlaywrightTestOptions",
+          ", ",
+          "PlaywrightWorkerArgs",
+          " & ",
+          "PlaywrightWorkerOptions",
+          " & ",
+          "CoreWorkerFixtures",
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
+        "lineNumber": 105,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.coreWorkerFixtures.$1",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "node_modules/playwright/types/test.d.ts",
+            "lineNumber": 2747,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.coreWorkerFixtures.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "(args: TestArgs & WorkerArgs, testInfo: ",
+              "TestInfo",
+              ") => void | Promise<void>"
+            ],
+            "path": "node_modules/playwright/types/test.d.ts",
+            "lineNumber": 2747,
+            "columnNumber": 19,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.coreWorkerFixtures.$2.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "TestArgs"
+                ],
+                "path": "node_modules/playwright/types/test.d.ts",
+                "lineNumber": 2653,
+                "columnNumber": 28,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.coreWorkerFixtures.$2.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "testInfo",
+                "description": [],
+                "signature": [
+                  "TestInfo"
+                ],
+                "path": "node_modules/playwright/types/test.d.ts",
+                "lineNumber": 2653,
                 "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3433,97 +3550,101 @@
       },
       {
         "parentPluginId": "@kbn/scout",
-        "id": "def-common.getSynthtraceClient",
+        "id": "def-common.esArchiverFixture",
         "type": "Function",
         "tags": [],
-        "label": "getSynthtraceClient",
+        "label": "esArchiverFixture",
         "description": [],
         "signature": [
-          "(synthClient: TClient, { esClient, kbnUrl, log, config }: ",
-          "SynthtraceClientOptions",
-          ", overrides: { skipInstallation?: boolean | undefined; }) => Promise<",
-          {
-            "pluginId": "@kbn/synthtrace",
-            "scope": "server",
-            "docId": "kibKbnSynthtracePluginApi",
-            "section": "def-server.GetClientsReturn",
-            "text": "GetClientsReturn"
-          },
-          "<TClient>>"
+          "TestType",
+          "<",
+          "PlaywrightTestArgs",
+          " & ",
+          "PlaywrightTestOptions",
+          ", ",
+          "PlaywrightWorkerArgs",
+          " & ",
+          "PlaywrightWorkerOptions",
+          " & ",
+          "CoreWorkerFixtures",
+          " & { esArchiver: ",
+          "EsArchiverFixture",
+          "; }>"
         ],
-        "path": "src/platform/packages/shared/kbn-scout/src/common/services/synthtrace.ts",
-        "lineNumber": 41,
-        "columnNumber": 1,
+        "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/es_archiver.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/scout",
-            "id": "def-common.getSynthtraceClient.$1",
-            "type": "Uncategorized",
+            "id": "def-common.esArchiverFixture.$1",
+            "type": "string",
             "tags": [],
-            "label": "synthClient",
+            "label": "title",
             "description": [],
-            "signature": [
-              "TClient"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/common/services/synthtrace.ts",
-            "lineNumber": 44,
-            "columnNumber": 3,
+            "path": "node_modules/playwright/types/test.d.ts",
+            "lineNumber": 2747,
+            "columnNumber": 4,
             "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/scout",
-            "id": "def-common.getSynthtraceClient.$2",
-            "type": "Object",
+            "id": "def-common.esArchiverFixture.$2",
+            "type": "Function",
             "tags": [],
-            "label": "{ esClient, kbnUrl, log, config }",
+            "label": "body",
             "description": [],
             "signature": [
-              "SynthtraceClientOptions"
+              "(args: TestArgs & WorkerArgs, testInfo: ",
+              "TestInfo",
+              ") => void | Promise<void>"
             ],
-            "path": "src/platform/packages/shared/kbn-scout/src/common/services/synthtrace.ts",
-            "lineNumber": 45,
-            "columnNumber": 3,
+            "path": "node_modules/playwright/types/test.d.ts",
+            "lineNumber": 2747,
+            "columnNumber": 19,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/scout",
-            "id": "def-common.getSynthtraceClient.$3",
-            "type": "Object",
-            "tags": [],
-            "label": "overrides",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-scout/src/common/services/synthtrace.ts",
-            "lineNumber": 46,
-            "columnNumber": 14,
-            "deprecated": false,
-            "trackAdoption": false,
+            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/scout",
-                "id": "def-common.getSynthtraceClient.$3.skipInstallation",
-                "type": "CompoundType",
+                "id": "def-common.esArchiverFixture.$2.$1",
+                "type": "Uncategorized",
                 "tags": [],
-                "label": "skipInstallation",
+                "label": "args",
                 "description": [],
                 "signature": [
-                  "boolean | undefined"
+                  "TestArgs"
                 ],
-                "path": "src/platform/packages/shared/kbn-scout/src/common/services/synthtrace.ts",
-                "lineNumber": 46,
-                "columnNumber": 16,
+                "path": "node_modules/playwright/types/test.d.ts",
+                "lineNumber": 2653,
+                "columnNumber": 28,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.esArchiverFixture.$2.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "testInfo",
+                "description": [],
+                "signature": [
+                  "TestInfo"
+                ],
+                "path": "node_modules/playwright/types/test.d.ts",
+                "lineNumber": 2653,
+                "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false
               }
             ]
           }
         ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -3547,15 +3668,7 @@
           "CoreWorkerFixtures",
           " & { esArchiver: ",
           "EsArchiverFixture",
-          "; } & ",
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.SynthtraceFixture",
-            "text": "SynthtraceFixture"
-          },
-          " & { apiServices: ",
+          "; } & { apiServices: ",
           {
             "pluginId": "@kbn/scout",
             "scope": "common",
@@ -3580,7 +3693,7 @@
             "label": "title",
             "description": [],
             "path": "node_modules/playwright/types/test.d.ts",
-            "lineNumber": 2695,
+            "lineNumber": 2747,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false
@@ -3598,7 +3711,7 @@
               ") => void | Promise<void>"
             ],
             "path": "node_modules/playwright/types/test.d.ts",
-            "lineNumber": 2695,
+            "lineNumber": 2747,
             "columnNumber": 19,
             "deprecated": false,
             "trackAdoption": false,
@@ -3615,7 +3728,7 @@
                   "TestArgs"
                 ],
                 "path": "node_modules/playwright/types/test.d.ts",
-                "lineNumber": 2601,
+                "lineNumber": 2653,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3631,7 +3744,7 @@
                   "TestInfo"
                 ],
                 "path": "node_modules/playwright/types/test.d.ts",
-                "lineNumber": 2601,
+                "lineNumber": 2653,
                 "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3702,17 +3815,11 @@
           "CoreWorkerFixtures",
           " & { esArchiver: ",
           "EsArchiverFixture",
+          "; } & { linkedProject: ",
+          "LinkedProjectFixture",
           "; } & { uiSettings: ",
           "UiSettingsFixture",
-          "; } & ",
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.SynthtraceFixture",
-            "text": "SynthtraceFixture"
-          },
-          " & { apiServices: ",
+          "; } & { apiServices: ",
           {
             "pluginId": "@kbn/scout",
             "scope": "common",
@@ -3753,7 +3860,7 @@
             "label": "title",
             "description": [],
             "path": "node_modules/playwright/types/test.d.ts",
-            "lineNumber": 2695,
+            "lineNumber": 2747,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false
@@ -3771,7 +3878,7 @@
               ") => void | Promise<void>"
             ],
             "path": "node_modules/playwright/types/test.d.ts",
-            "lineNumber": 2695,
+            "lineNumber": 2747,
             "columnNumber": 19,
             "deprecated": false,
             "trackAdoption": false,
@@ -3788,7 +3895,7 @@
                   "TestArgs"
                 ],
                 "path": "node_modules/playwright/types/test.d.ts",
-                "lineNumber": 2601,
+                "lineNumber": 2653,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3804,7 +3911,7 @@
                   "TestInfo"
                 ],
                 "path": "node_modules/playwright/types/test.d.ts",
-                "lineNumber": 2601,
+                "lineNumber": 2653,
                 "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4001,7 +4108,7 @@
           "(tests: List) => MergedTestType<List>"
         ],
         "path": "node_modules/playwright/types/test.d.ts",
-        "lineNumber": 8425,
+        "lineNumber": 8497,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4017,7 +4124,7 @@
               "List"
             ],
             "path": "node_modules/playwright/types/test.d.ts",
-            "lineNumber": 8428,
+            "lineNumber": 8500,
             "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
@@ -4127,7 +4234,7 @@
             "label": "title",
             "description": [],
             "path": "node_modules/playwright/types/test.d.ts",
-            "lineNumber": 2695,
+            "lineNumber": 2747,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false
@@ -4145,7 +4252,7 @@
               ") => void | Promise<void>"
             ],
             "path": "node_modules/playwright/types/test.d.ts",
-            "lineNumber": 2695,
+            "lineNumber": 2747,
             "columnNumber": 19,
             "deprecated": false,
             "trackAdoption": false,
@@ -4162,7 +4269,7 @@
                   "TestArgs"
                 ],
                 "path": "node_modules/playwright/types/test.d.ts",
-                "lineNumber": 2601,
+                "lineNumber": 2653,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4178,112 +4285,7 @@
                   "TestInfo"
                 ],
                 "path": "node_modules/playwright/types/test.d.ts",
-                "lineNumber": 2601,
-                "columnNumber": 44,
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/scout",
-        "id": "def-common.synthtraceFixture",
-        "type": "Function",
-        "tags": [],
-        "label": "synthtraceFixture",
-        "description": [],
-        "signature": [
-          "TestType",
-          "<",
-          "PlaywrightTestArgs",
-          " & ",
-          "PlaywrightTestOptions",
-          ", ",
-          "PlaywrightWorkerArgs",
-          " & ",
-          "PlaywrightWorkerOptions",
-          " & ",
-          "CoreWorkerFixtures",
-          " & ",
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.SynthtraceFixture",
-            "text": "SynthtraceFixture"
-          },
-          ">"
-        ],
-        "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/synthtrace.ts",
-        "lineNumber": 41,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/scout",
-            "id": "def-common.synthtraceFixture.$1",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "path": "node_modules/playwright/types/test.d.ts",
-            "lineNumber": 2695,
-            "columnNumber": 4,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout",
-            "id": "def-common.synthtraceFixture.$2",
-            "type": "Function",
-            "tags": [],
-            "label": "body",
-            "description": [],
-            "signature": [
-              "(args: TestArgs & WorkerArgs, testInfo: ",
-              "TestInfo",
-              ") => void | Promise<void>"
-            ],
-            "path": "node_modules/playwright/types/test.d.ts",
-            "lineNumber": 2695,
-            "columnNumber": 19,
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "@kbn/scout",
-                "id": "def-common.synthtraceFixture.$2.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "args",
-                "description": [],
-                "signature": [
-                  "TestArgs"
-                ],
-                "path": "node_modules/playwright/types/test.d.ts",
-                "lineNumber": 2601,
-                "columnNumber": 28,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/scout",
-                "id": "def-common.synthtraceFixture.$2.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "testInfo",
-                "description": [],
-                "signature": [
-                  "TestInfo"
-                ],
-                "path": "node_modules/playwright/types/test.d.ts",
-                "lineNumber": 2601,
+                "lineNumber": 2653,
                 "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4350,17 +4352,11 @@
           "CoreWorkerFixtures",
           " & { esArchiver: ",
           "EsArchiverFixture",
+          "; } & { linkedProject: ",
+          "LinkedProjectFixture",
           "; } & { uiSettings: ",
           "UiSettingsFixture",
-          "; } & ",
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.SynthtraceFixture",
-            "text": "SynthtraceFixture"
-          },
-          " & { apiServices: ",
+          "; } & { apiServices: ",
           {
             "pluginId": "@kbn/scout",
             "scope": "common",
@@ -4401,7 +4397,7 @@
             "label": "title",
             "description": [],
             "path": "node_modules/playwright/types/test.d.ts",
-            "lineNumber": 2695,
+            "lineNumber": 2747,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false
@@ -4419,7 +4415,7 @@
               ") => void | Promise<void>"
             ],
             "path": "node_modules/playwright/types/test.d.ts",
-            "lineNumber": 2695,
+            "lineNumber": 2747,
             "columnNumber": 19,
             "deprecated": false,
             "trackAdoption": false,
@@ -4436,7 +4432,7 @@
                   "TestArgs"
                 ],
                 "path": "node_modules/playwright/types/test.d.ts",
-                "lineNumber": 2601,
+                "lineNumber": 2653,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4452,7 +4448,7 @@
                   "TestInfo"
                 ],
                 "path": "node_modules/playwright/types/test.d.ts",
-                "lineNumber": 2601,
+                "lineNumber": 2653,
                 "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4484,7 +4480,7 @@
           ">"
         ],
         "path": "node_modules/playwright/types/test.d.ts",
-        "lineNumber": 8405,
+        "lineNumber": 8477,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4498,7 +4494,7 @@
             "label": "title",
             "description": [],
             "path": "node_modules/playwright/types/test.d.ts",
-            "lineNumber": 2695,
+            "lineNumber": 2747,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false
@@ -4516,7 +4512,7 @@
               ") => void | Promise<void>"
             ],
             "path": "node_modules/playwright/types/test.d.ts",
-            "lineNumber": 2695,
+            "lineNumber": 2747,
             "columnNumber": 19,
             "deprecated": false,
             "trackAdoption": false,
@@ -4533,7 +4529,7 @@
                   "TestArgs"
                 ],
                 "path": "node_modules/playwright/types/test.d.ts",
-                "lineNumber": 2601,
+                "lineNumber": 2653,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4549,7 +4545,7 @@
                   "TestInfo"
                 ],
                 "path": "node_modules/playwright/types/test.d.ts",
-                "lineNumber": 2601,
+                "lineNumber": 2653,
                 "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4914,7 +4910,7 @@
           "CDPSession"
         ],
         "path": "node_modules/playwright-core/types/types.d.ts",
-        "lineNumber": 15471,
+        "lineNumber": 15554,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4936,7 +4932,7 @@
               ".Events ? T : never]) => void) => this"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 15495,
+            "lineNumber": 15578,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4952,7 +4948,7 @@
                   "T"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 15495,
+                "lineNumber": 15578,
                 "columnNumber": 50,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4973,7 +4969,7 @@
                   ".Events ? T : never]) => void"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 15495,
+                "lineNumber": 15578,
                 "columnNumber": 60,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4999,7 +4995,7 @@
               ".Events ? T : never]) => void) => this"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 15496,
+            "lineNumber": 15579,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5015,7 +5011,7 @@
                   "T"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 15496,
+                "lineNumber": 15579,
                 "columnNumber": 59,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5036,7 +5032,7 @@
                   ".Events ? T : never]) => void"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 15496,
+                "lineNumber": 15579,
                 "columnNumber": 69,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5062,7 +5058,7 @@
               ".Events ? T : never]) => void) => this"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 15497,
+            "lineNumber": 15580,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5078,7 +5074,7 @@
                   "T"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 15497,
+                "lineNumber": 15580,
                 "columnNumber": 51,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5099,7 +5095,7 @@
                   ".Events ? T : never]) => void"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 15497,
+                "lineNumber": 15580,
                 "columnNumber": 61,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5125,7 +5121,7 @@
               ".Events ? T : never]) => void) => this"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 15498,
+            "lineNumber": 15581,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5141,7 +5137,7 @@
                   "T"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 15498,
+                "lineNumber": 15581,
                 "columnNumber": 62,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5162,7 +5158,7 @@
                   ".Events ? T : never]) => void"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 15498,
+                "lineNumber": 15581,
                 "columnNumber": 72,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5188,7 +5184,7 @@
               ".Events ? T : never]) => void) => this"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 15499,
+            "lineNumber": 15582,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5204,7 +5200,7 @@
                   "T"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 15499,
+                "lineNumber": 15582,
                 "columnNumber": 52,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5225,7 +5221,7 @@
                   ".Events ? T : never]) => void"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 15499,
+                "lineNumber": 15582,
                 "columnNumber": 62,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5251,7 +5247,7 @@
               ".CommandReturnValues[T]>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 15500,
+            "lineNumber": 15583,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5269,7 +5265,7 @@
                   "T"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 15505,
+                "lineNumber": 15588,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5289,7 +5285,7 @@
                   ".CommandParameters[T] | undefined"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 15506,
+                "lineNumber": 15589,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5311,7 +5307,7 @@
               "() => Promise<void>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 15508,
+            "lineNumber": 15591,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5329,7 +5325,7 @@
         "label": "CookieHeader",
         "description": [],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
-        "lineNumber": 39,
+        "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5345,7 +5341,7 @@
               "[Cookie: string]:  string"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
-            "lineNumber": 40,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5494,7 +5490,7 @@
           "Locator"
         ],
         "path": "node_modules/playwright-core/types/types.d.ts",
-        "lineNumber": 12188,
+        "lineNumber": 12247,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5516,7 +5512,7 @@
               "<E, void, R>, options?: { timeout?: number | undefined; } | undefined): Promise<R>; }"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 12196,
+            "lineNumber": 12255,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5535,7 +5531,7 @@
                   "<E, Arg, R>"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 12229,
+                "lineNumber": 12288,
                 "columnNumber": 83,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5554,7 +5550,7 @@
                   "Arg"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 12229,
+                "lineNumber": 12288,
                 "columnNumber": 124,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5568,7 +5564,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 12229,
+                "lineNumber": 12288,
                 "columnNumber": 144,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5584,7 +5580,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12230,
+                    "lineNumber": 12289,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -5611,7 +5607,7 @@
               "<E, void, R>, options?: { timeout?: number | undefined; } | undefined): Promise<R>; }"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 12232,
+            "lineNumber": 12291,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5630,7 +5626,7 @@
                   "<E, void, R>"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 12265,
+                "lineNumber": 12324,
                 "columnNumber": 78,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5644,7 +5640,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 12265,
+                "lineNumber": 12324,
                 "columnNumber": 130,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5660,7 +5656,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12266,
+                    "lineNumber": 12325,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -5691,7 +5687,7 @@
               "<R>>; }"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 12268,
+            "lineNumber": 12327,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5710,7 +5706,7 @@
                   "<E, Arg, R>"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 12300,
+                "lineNumber": 12359,
                 "columnNumber": 89,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5729,7 +5725,7 @@
                   "Arg"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 12300,
+                "lineNumber": 12359,
                 "columnNumber": 130,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5759,7 +5755,7 @@
               "<R>>; }"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 12301,
+            "lineNumber": 12360,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5778,7 +5774,7 @@
                   "<E, void, R>"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 12333,
+                "lineNumber": 12392,
                 "columnNumber": 84,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5804,7 +5800,7 @@
               "<E[], void, R>): Promise<R>; }"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 12334,
+            "lineNumber": 12393,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5823,7 +5819,7 @@
                   "<E[], Arg, R>"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 12361,
+                "lineNumber": 12420,
                 "columnNumber": 86,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5842,7 +5838,7 @@
                   "Arg"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 12361,
+                "lineNumber": 12420,
                 "columnNumber": 129,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5868,7 +5864,7 @@
               "<E[], void, R>): Promise<R>; }"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 12362,
+            "lineNumber": 12421,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5887,7 +5883,7 @@
                   "<E[], void, R>"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 12389,
+                "lineNumber": 12448,
                 "columnNumber": 81,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5911,7 +5907,7 @@
               "<HTMLElement | SVGElement> | null>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 12390,
+            "lineNumber": 12449,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5924,7 +5920,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 12398,
+                "lineNumber": 12457,
                 "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5940,7 +5936,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12399,
+                    "lineNumber": 12458,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -5948,6 +5944,26 @@
                 ]
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.Locator.toString",
+            "type": "Function",
+            "tags": [],
+            "label": "toString",
+            "description": [
+              "\nReturns a human-readable representation of the locator, using the\n[locator.description()](https://playwright.dev/docs/api/class-locator#locator-description) if one exists;\notherwise, it generates a string based on the locator's selector."
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "node_modules/playwright-core/types/types.d.ts",
+            "lineNumber": 12460,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -5965,7 +5981,7 @@
               "[]>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 12401,
+            "lineNumber": 12466,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5985,7 +6001,7 @@
               "() => Promise<string[]>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 12425,
+            "lineNumber": 12490,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6005,7 +6021,7 @@
               "() => Promise<string[]>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 12443,
+            "lineNumber": 12508,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6028,7 +6044,7 @@
               "Locator"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 12459,
+            "lineNumber": 12524,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6046,7 +6062,7 @@
                   "Locator"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 12472,
+                "lineNumber": 12537,
                 "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6068,7 +6084,7 @@
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<string>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 12474,
+            "lineNumber": 12539,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6081,7 +6097,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 12515,
+                "lineNumber": 12580,
                 "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6099,7 +6115,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12516,
+                    "lineNumber": 12581,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6122,7 +6138,7 @@
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<void>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 12525,
+            "lineNumber": 12590,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6135,7 +6151,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 12529,
+                "lineNumber": 12594,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6153,7 +6169,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12530,
+                    "lineNumber": 12595,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6176,7 +6192,7 @@
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<{ x: number; y: number; width: number; height: number; } | null>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 12539,
+            "lineNumber": 12604,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6189,7 +6205,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 12565,
+                "lineNumber": 12630,
                 "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6207,7 +6223,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12566,
+                    "lineNumber": 12631,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6230,7 +6246,7 @@
               "(options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 12595,
+            "lineNumber": 12660,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6243,7 +6259,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 12624,
+                "lineNumber": 12689,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6261,7 +6277,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12625,
+                    "lineNumber": 12690,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6281,7 +6297,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12630,
+                    "lineNumber": 12695,
                     "columnNumber": 5,
                     "deprecated": true,
                     "trackAdoption": false,
@@ -6300,7 +6316,7 @@
                       "{ x: number; y: number; } | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12636,
+                    "lineNumber": 12701,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6318,7 +6334,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12646,
+                    "lineNumber": 12711,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6336,7 +6352,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12654,
+                    "lineNumber": 12719,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6359,7 +6375,7 @@
               "(options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 12661,
+            "lineNumber": 12726,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6372,7 +6388,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 12682,
+                "lineNumber": 12747,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6390,7 +6406,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12683,
+                    "lineNumber": 12748,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6410,7 +6426,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12688,
+                    "lineNumber": 12753,
                     "columnNumber": 5,
                     "deprecated": true,
                     "trackAdoption": false,
@@ -6429,7 +6445,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12694,
+                    "lineNumber": 12759,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6449,10 +6465,10 @@
               "\nClick an element.\n\n**Details**\n\nThis method clicks the element by performing the following steps:\n1. Wait for [actionability](https://playwright.dev/docs/actionability) checks on the element, unless\n   [`force`](https://playwright.dev/docs/api/class-locator#locator-click-option-force) option is set.\n1. Scroll the element into view if needed.\n1. Use [page.mouse](https://playwright.dev/docs/api/class-page#page-mouse) to click in the center of the\n   element, or the specified\n   [`position`](https://playwright.dev/docs/api/class-locator#locator-click-option-position).\n1. Wait for initiated navigations to either succeed or fail, unless\n   [`noWaitAfter`](https://playwright.dev/docs/api/class-locator#locator-click-option-no-wait-after) option is\n   set.\n\nIf the element is detached from the DOM at any moment during the action, this method throws.\n\nWhen all steps combined have not finished during the specified\n[`timeout`](https://playwright.dev/docs/api/class-locator#locator-click-option-timeout), this method throws a\n[TimeoutError](https://playwright.dev/docs/api/class-timeouterror). Passing zero timeout disables this.\n\n**Usage**\n\nClick a button:\n\n```js\nawait page.getByRole('button').click();\n```\n\nShift-right-click at a specific position on a canvas:\n\n```js\nawait page.locator('canvas').click({\n  button: 'right',\n  modifiers: ['Shift'],\n  position: { x: 23, y: 32 },\n});\n```\n"
             ],
             "signature": [
-              "(options?: { button?: \"right\" | \"left\" | \"middle\" | undefined; clickCount?: number | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>"
+              "(options?: { button?: \"right\" | \"left\" | \"middle\" | undefined; clickCount?: number | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; steps?: number | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 12703,
+            "lineNumber": 12768,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6465,7 +6481,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 12745,
+                "lineNumber": 12810,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6483,7 +6499,7 @@
                       "\"right\" | \"left\" | \"middle\" | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12746,
+                    "lineNumber": 12811,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6501,7 +6517,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12751,
+                    "lineNumber": 12816,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6519,7 +6535,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12756,
+                    "lineNumber": 12821,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6537,7 +6553,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12761,
+                    "lineNumber": 12826,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6555,7 +6571,7 @@
                       "(\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12766,
+                    "lineNumber": 12831,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6575,7 +6591,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12773,
+                    "lineNumber": 12838,
                     "columnNumber": 5,
                     "deprecated": true,
                     "trackAdoption": false,
@@ -6594,7 +6610,25 @@
                       "{ x: number; y: number; } | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12781,
+                    "lineNumber": 12846,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/scout",
+                    "id": "def-common.Locator.click.$1.steps",
+                    "type": "number",
+                    "tags": [],
+                    "label": "steps",
+                    "description": [
+                      "\nDefaults to 1. Sends `n` interpolated `mousemove` events to represent travel between Playwright's current cursor\nposition and the provided destination. When set to 1, emits a single `mousemove` event at the destination location."
+                    ],
+                    "signature": [
+                      "number | undefined"
+                    ],
+                    "path": "node_modules/playwright-core/types/types.d.ts",
+                    "lineNumber": 12856,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6612,7 +6646,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12791,
+                    "lineNumber": 12862,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6630,7 +6664,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12799,
+                    "lineNumber": 12870,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6654,7 +6688,7 @@
               "FrameLocator"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 12808,
+            "lineNumber": 12879,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6674,7 +6708,7 @@
               "() => Promise<number>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 12830,
+            "lineNumber": 12901,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6691,10 +6725,10 @@
               "\nDouble-click an element.\n\n**Details**\n\nThis method double clicks the element by performing the following steps:\n1. Wait for [actionability](https://playwright.dev/docs/actionability) checks on the element, unless\n   [`force`](https://playwright.dev/docs/api/class-locator#locator-dblclick-option-force) option is set.\n1. Scroll the element into view if needed.\n1. Use [page.mouse](https://playwright.dev/docs/api/class-page#page-mouse) to double click in the center of the\n   element, or the specified\n   [`position`](https://playwright.dev/docs/api/class-locator#locator-dblclick-option-position).\n\nIf the element is detached from the DOM at any moment during the action, this method throws.\n\nWhen all steps combined have not finished during the specified\n[`timeout`](https://playwright.dev/docs/api/class-locator#locator-dblclick-option-timeout), this method throws a\n[TimeoutError](https://playwright.dev/docs/api/class-timeouterror). Passing zero timeout disables this.\n\n**NOTE** `element.dblclick()` dispatches two `click` events and a single `dblclick` event.\n"
             ],
             "signature": [
-              "(options?: { button?: \"right\" | \"left\" | \"middle\" | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>"
+              "(options?: { button?: \"right\" | \"left\" | \"middle\" | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; steps?: number | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 12846,
+            "lineNumber": 12917,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6707,7 +6741,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 12869,
+                "lineNumber": 12940,
                 "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6725,7 +6759,7 @@
                       "\"right\" | \"left\" | \"middle\" | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12870,
+                    "lineNumber": 12941,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6743,7 +6777,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12875,
+                    "lineNumber": 12946,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6761,7 +6795,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12880,
+                    "lineNumber": 12951,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6779,7 +6813,7 @@
                       "(\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12885,
+                    "lineNumber": 12956,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6799,7 +6833,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12892,
+                    "lineNumber": 12963,
                     "columnNumber": 5,
                     "deprecated": true,
                     "trackAdoption": false,
@@ -6818,7 +6852,25 @@
                       "{ x: number; y: number; } | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12898,
+                    "lineNumber": 12969,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/scout",
+                    "id": "def-common.Locator.dblclick.$1.steps",
+                    "type": "number",
+                    "tags": [],
+                    "label": "steps",
+                    "description": [
+                      "\nDefaults to 1. Sends `n` interpolated `mousemove` events to represent travel between Playwright's current cursor\nposition and the provided destination. When set to 1, emits a single `mousemove` event at the destination location."
+                    ],
+                    "signature": [
+                      "number | undefined"
+                    ],
+                    "path": "node_modules/playwright-core/types/types.d.ts",
+                    "lineNumber": 12979,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6836,7 +6888,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12908,
+                    "lineNumber": 12985,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6854,7 +6906,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12916,
+                    "lineNumber": 12993,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6878,7 +6930,7 @@
               "Locator"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 12925,
+            "lineNumber": 13002,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6896,13 +6948,33 @@
                   "string"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 12938,
+                "lineNumber": 13015,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.Locator.description",
+            "type": "Function",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "\nReturns locator description previously set with\n[locator.describe(description)](https://playwright.dev/docs/api/class-locator#locator-describe). Returns `null` if\nno custom description has been set. Prefer\n[locator.toString()](https://playwright.dev/docs/api/class-locator#locator-to-string) for a human-readable\nrepresentation, as it uses the description when available.\n\n**Usage**\n\n```js\nconst button = page.getByRole('button').describe('Subscribe button');\nconsole.log(button.description()); // \"Subscribe button\"\n\nconst input = page.getByRole('textbox');\nconsole.log(input.description()); // null\n```\n"
+            ],
+            "signature": [
+              "() => string | null"
+            ],
+            "path": "node_modules/playwright-core/types/types.d.ts",
+            "lineNumber": 13017,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -6920,7 +6992,7 @@
               " | undefined, options?: { timeout?: number | undefined; } | undefined) => Promise<void>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 12940,
+            "lineNumber": 13037,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6938,7 +7010,7 @@
                   "string"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 12985,
+                "lineNumber": 13082,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6958,7 +7030,7 @@
                   " | undefined"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 12985,
+                "lineNumber": 13082,
                 "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6972,7 +7044,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 12985,
+                "lineNumber": 13082,
                 "columnNumber": 73,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6990,7 +7062,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 12986,
+                    "lineNumber": 13083,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -7012,10 +7084,10 @@
             "signature": [
               "(target: ",
               "Locator",
-              ", options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; sourcePosition?: { x: number; y: number; } | undefined; targetPosition?: { x: number; y: number; } | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>"
+              ", options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; sourcePosition?: { x: number; y: number; } | undefined; steps?: number | undefined; targetPosition?: { x: number; y: number; } | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 12995,
+            "lineNumber": 13092,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7033,7 +7105,7 @@
                   "Locator"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13020,
+                "lineNumber": 13117,
                 "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7047,7 +7119,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13020,
+                "lineNumber": 13117,
                 "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7065,7 +7137,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13021,
+                    "lineNumber": 13118,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -7085,7 +7157,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13026,
+                    "lineNumber": 13123,
                     "columnNumber": 5,
                     "deprecated": true,
                     "trackAdoption": false,
@@ -7104,7 +7176,25 @@
                       "{ x: number; y: number; } | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13032,
+                    "lineNumber": 13129,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/scout",
+                    "id": "def-common.Locator.dragTo.$2.steps",
+                    "type": "number",
+                    "tags": [],
+                    "label": "steps",
+                    "description": [
+                      "\nDefaults to 1. Sends `n` interpolated `mousemove` events to represent travel between the `mousedown` and `mouseup`\nof the drag. When set to 1, emits a single `mousemove` event at the destination location."
+                    ],
+                    "signature": [
+                      "number | undefined"
+                    ],
+                    "path": "node_modules/playwright-core/types/types.d.ts",
+                    "lineNumber": 13139,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -7122,7 +7212,7 @@
                       "{ x: number; y: number; } | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13042,
+                    "lineNumber": 13145,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -7140,7 +7230,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13052,
+                    "lineNumber": 13155,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -7158,7 +7248,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13060,
+                    "lineNumber": 13163,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -7183,7 +7273,7 @@
               "<Node>[]>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13067,
+            "lineNumber": 13170,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7203,7 +7293,7 @@
               "(value: string, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13075,
+            "lineNumber": 13178,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7221,7 +7311,7 @@
                   "string"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13099,
+                "lineNumber": 13202,
                 "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7235,7 +7325,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13099,
+                "lineNumber": 13202,
                 "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7253,7 +7343,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13100,
+                    "lineNumber": 13203,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -7273,7 +7363,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13105,
+                    "lineNumber": 13208,
                     "columnNumber": 5,
                     "deprecated": true,
                     "trackAdoption": false,
@@ -7292,7 +7382,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13111,
+                    "lineNumber": 13214,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -7320,7 +7410,7 @@
               "Locator"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13120,
+            "lineNumber": 13223,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7333,7 +7423,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13137,
+                "lineNumber": 13240,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7352,7 +7442,7 @@
                       " | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13138,
+                    "lineNumber": 13241,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -7371,7 +7461,7 @@
                       " | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13152,
+                    "lineNumber": 13255,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -7389,7 +7479,7 @@
                       "string | RegExp | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13161,
+                    "lineNumber": 13264,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -7407,7 +7497,7 @@
                       "string | RegExp | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13167,
+                    "lineNumber": 13270,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -7425,7 +7515,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13174,
+                    "lineNumber": 13277,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -7449,7 +7539,7 @@
               "Locator"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13180,
+            "lineNumber": 13283,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7469,7 +7559,7 @@
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<void>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13185,
+            "lineNumber": 13288,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7482,7 +7572,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13189,
+                "lineNumber": 13292,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7500,7 +7590,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13190,
+                    "lineNumber": 13293,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -7524,7 +7614,7 @@
               "FrameLocator"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13199,
+            "lineNumber": 13302,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7542,7 +7632,7 @@
                   "string"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13212,
+                "lineNumber": 13315,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7564,7 +7654,7 @@
               "(name: string, options?: { timeout?: number | undefined; } | undefined) => Promise<string | null>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13214,
+            "lineNumber": 13317,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7582,7 +7672,7 @@
                   "string"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13224,
+                "lineNumber": 13327,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7596,7 +7686,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13224,
+                "lineNumber": 13327,
                 "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7614,7 +7704,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13225,
+                    "lineNumber": 13328,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -7638,7 +7728,7 @@
               "Locator"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13234,
+            "lineNumber": 13337,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7656,7 +7746,7 @@
                   "string | RegExp"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13252,
+                "lineNumber": 13355,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7670,7 +7760,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13252,
+                "lineNumber": 13355,
                 "columnNumber": 47,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7688,7 +7778,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13253,
+                    "lineNumber": 13356,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -7712,7 +7802,7 @@
               "Locator"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13260,
+            "lineNumber": 13363,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7730,7 +7820,7 @@
                   "string | RegExp"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13282,
+                "lineNumber": 13385,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7744,7 +7834,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13282,
+                "lineNumber": 13385,
                 "columnNumber": 45,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7762,7 +7852,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13283,
+                    "lineNumber": 13386,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -7786,7 +7876,7 @@
               "Locator"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13290,
+            "lineNumber": 13393,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7804,7 +7894,7 @@
                   "string | RegExp"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13312,
+                "lineNumber": 13415,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7818,7 +7908,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13312,
+                "lineNumber": 13415,
                 "columnNumber": 51,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7836,7 +7926,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13313,
+                    "lineNumber": 13416,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -7856,11 +7946,11 @@
               "\nAllows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),\n[ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and\n[accessible name](https://w3c.github.io/accname/#dfn-accessible-name).\n\n**Usage**\n\nConsider the following DOM structure.\n\n```html\n<h3>Sign up</h3>\n<label>\n  <input type=\"checkbox\" /> Subscribe\n</label>\n<br/>\n<button>Submit</button>\n```\n\nYou can locate each element by it's implicit role:\n\n```js\nawait expect(page.getByRole('heading', { name: 'Sign up' })).toBeVisible();\n\nawait page.getByRole('checkbox', { name: 'Subscribe' }).check();\n\nawait page.getByRole('button', { name: /submit/i }).click();\n```\n\n**Details**\n\nRole selector **does not replace** accessibility audits and conformance tests, but rather gives early feedback\nabout the ARIA guidelines.\n\nMany html elements have an implicitly [defined role](https://w3c.github.io/html-aam/#html-element-role-mappings)\nthat is recognized by the role selector. You can find all the\n[supported roles here](https://www.w3.org/TR/wai-aria-1.2/#role_definitions). ARIA guidelines **do not recommend**\nduplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to default values."
             ],
             "signature": [
-              "(role: \"log\" | \"search\" | \"term\" | \"link\" | \"none\" | \"list\" | \"alert\" | \"application\" | \"form\" | \"grid\" | \"group\" | \"status\" | \"code\" | \"main\" | \"article\" | \"blockquote\" | \"button\" | \"caption\" | \"dialog\" | \"figure\" | \"img\" | \"menu\" | \"menuitem\" | \"meter\" | \"option\" | \"strong\" | \"table\" | \"time\" | \"switch\" | \"alertdialog\" | \"banner\" | \"cell\" | \"checkbox\" | \"columnheader\" | \"combobox\" | \"complementary\" | \"contentinfo\" | \"definition\" | \"directory\" | \"document\" | \"feed\" | \"gridcell\" | \"heading\" | \"listbox\" | \"listitem\" | \"marquee\" | \"math\" | \"menubar\" | \"menuitemcheckbox\" | \"menuitemradio\" | \"navigation\" | \"note\" | \"presentation\" | \"progressbar\" | \"radio\" | \"radiogroup\" | \"region\" | \"row\" | \"rowgroup\" | \"rowheader\" | \"scrollbar\" | \"searchbox\" | \"separator\" | \"slider\" | \"spinbutton\" | \"tab\" | \"tablist\" | \"tabpanel\" | \"textbox\" | \"timer\" | \"toolbar\" | \"tooltip\" | \"tree\" | \"treegrid\" | \"treeitem\" | \"generic\" | \"deletion\" | \"emphasis\" | \"insertion\" | \"paragraph\" | \"subscript\" | \"superscript\", options?: { checked?: boolean | undefined; disabled?: boolean | undefined; exact?: boolean | undefined; expanded?: boolean | undefined; includeHidden?: boolean | undefined; level?: number | undefined; name?: string | RegExp | undefined; pressed?: boolean | undefined; selected?: boolean | undefined; } | undefined) => ",
+              "(role: \"log\" | \"search\" | \"term\" | \"link\" | \"none\" | \"list\" | \"alert\" | \"application\" | \"form\" | \"grid\" | \"group\" | \"status\" | \"main\" | \"article\" | \"blockquote\" | \"button\" | \"caption\" | \"code\" | \"dialog\" | \"figure\" | \"img\" | \"menu\" | \"menuitem\" | \"meter\" | \"option\" | \"strong\" | \"table\" | \"time\" | \"switch\" | \"alertdialog\" | \"banner\" | \"cell\" | \"checkbox\" | \"columnheader\" | \"combobox\" | \"complementary\" | \"contentinfo\" | \"definition\" | \"directory\" | \"document\" | \"feed\" | \"gridcell\" | \"heading\" | \"listbox\" | \"listitem\" | \"marquee\" | \"math\" | \"menubar\" | \"menuitemcheckbox\" | \"menuitemradio\" | \"navigation\" | \"note\" | \"presentation\" | \"progressbar\" | \"radio\" | \"radiogroup\" | \"region\" | \"row\" | \"rowgroup\" | \"rowheader\" | \"scrollbar\" | \"searchbox\" | \"separator\" | \"slider\" | \"spinbutton\" | \"tab\" | \"tablist\" | \"tabpanel\" | \"textbox\" | \"timer\" | \"toolbar\" | \"tooltip\" | \"tree\" | \"treegrid\" | \"treeitem\" | \"generic\" | \"deletion\" | \"emphasis\" | \"insertion\" | \"paragraph\" | \"subscript\" | \"superscript\", options?: { checked?: boolean | undefined; disabled?: boolean | undefined; exact?: boolean | undefined; expanded?: boolean | undefined; includeHidden?: boolean | undefined; level?: number | undefined; name?: string | RegExp | undefined; pressed?: boolean | undefined; selected?: boolean | undefined; } | undefined) => ",
               "Locator"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13320,
+            "lineNumber": 13423,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7875,10 +7965,10 @@
                   "Required aria role."
                 ],
                 "signature": [
-                  "\"log\" | \"search\" | \"term\" | \"link\" | \"none\" | \"list\" | \"alert\" | \"application\" | \"form\" | \"grid\" | \"group\" | \"status\" | \"code\" | \"main\" | \"article\" | \"blockquote\" | \"button\" | \"caption\" | \"dialog\" | \"figure\" | \"img\" | \"menu\" | \"menuitem\" | \"meter\" | \"option\" | \"strong\" | \"table\" | \"time\" | \"switch\" | \"alertdialog\" | \"banner\" | \"cell\" | \"checkbox\" | \"columnheader\" | \"combobox\" | \"complementary\" | \"contentinfo\" | \"definition\" | \"directory\" | \"document\" | \"feed\" | \"gridcell\" | \"heading\" | \"listbox\" | \"listitem\" | \"marquee\" | \"math\" | \"menubar\" | \"menuitemcheckbox\" | \"menuitemradio\" | \"navigation\" | \"note\" | \"presentation\" | \"progressbar\" | \"radio\" | \"radiogroup\" | \"region\" | \"row\" | \"rowgroup\" | \"rowheader\" | \"scrollbar\" | \"searchbox\" | \"separator\" | \"slider\" | \"spinbutton\" | \"tab\" | \"tablist\" | \"tabpanel\" | \"textbox\" | \"timer\" | \"toolbar\" | \"tooltip\" | \"tree\" | \"treegrid\" | \"treeitem\" | \"generic\" | \"deletion\" | \"emphasis\" | \"insertion\" | \"paragraph\" | \"subscript\" | \"superscript\""
+                  "\"log\" | \"search\" | \"term\" | \"link\" | \"none\" | \"list\" | \"alert\" | \"application\" | \"form\" | \"grid\" | \"group\" | \"status\" | \"main\" | \"article\" | \"blockquote\" | \"button\" | \"caption\" | \"code\" | \"dialog\" | \"figure\" | \"img\" | \"menu\" | \"menuitem\" | \"meter\" | \"option\" | \"strong\" | \"table\" | \"time\" | \"switch\" | \"alertdialog\" | \"banner\" | \"cell\" | \"checkbox\" | \"columnheader\" | \"combobox\" | \"complementary\" | \"contentinfo\" | \"definition\" | \"directory\" | \"document\" | \"feed\" | \"gridcell\" | \"heading\" | \"listbox\" | \"listitem\" | \"marquee\" | \"math\" | \"menubar\" | \"menuitemcheckbox\" | \"menuitemradio\" | \"navigation\" | \"note\" | \"presentation\" | \"progressbar\" | \"radio\" | \"radiogroup\" | \"region\" | \"row\" | \"rowgroup\" | \"rowheader\" | \"scrollbar\" | \"searchbox\" | \"separator\" | \"slider\" | \"spinbutton\" | \"tab\" | \"tablist\" | \"tabpanel\" | \"textbox\" | \"timer\" | \"toolbar\" | \"tooltip\" | \"tree\" | \"treegrid\" | \"treeitem\" | \"generic\" | \"deletion\" | \"emphasis\" | \"insertion\" | \"paragraph\" | \"subscript\" | \"superscript\""
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13360,
+                "lineNumber": 13463,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7892,7 +7982,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13360,
+                "lineNumber": 13463,
                 "columnNumber": 860,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7910,7 +8000,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13361,
+                    "lineNumber": 13464,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -7928,7 +8018,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13368,
+                    "lineNumber": 13471,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -7946,7 +8036,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13377,
+                    "lineNumber": 13480,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -7964,7 +8054,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13385,
+                    "lineNumber": 13488,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -7982,7 +8072,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13392,
+                    "lineNumber": 13495,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -8000,7 +8090,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13400,
+                    "lineNumber": 13503,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -8018,7 +8108,7 @@
                       "string | RegExp | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13408,
+                    "lineNumber": 13511,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -8036,7 +8126,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13417,
+                    "lineNumber": 13520,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -8054,7 +8144,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13424,
+                    "lineNumber": 13527,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -8078,7 +8168,7 @@
               "Locator"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13432,
+            "lineNumber": 13535,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8096,7 +8186,7 @@
                   "string | RegExp"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13468,
+                "lineNumber": 13571,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8119,7 +8209,7 @@
               "Locator"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13470,
+            "lineNumber": 13573,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8137,7 +8227,7 @@
                   "string | RegExp"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13514,
+                "lineNumber": 13617,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8151,7 +8241,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13514,
+                "lineNumber": 13617,
                 "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8169,7 +8259,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13515,
+                    "lineNumber": 13618,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -8193,7 +8283,7 @@
               "Locator"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13522,
+            "lineNumber": 13625,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8211,7 +8301,7 @@
                   "string | RegExp"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13542,
+                "lineNumber": 13645,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8225,7 +8315,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13542,
+                "lineNumber": 13645,
                 "columnNumber": 45,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8243,7 +8333,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13543,
+                    "lineNumber": 13646,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -8266,7 +8356,7 @@
               "() => Promise<void>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13550,
+            "lineNumber": 13653,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8286,7 +8376,7 @@
               "(options?: { force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13556,
+            "lineNumber": 13659,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8299,7 +8389,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13582,
+                "lineNumber": 13685,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8317,7 +8407,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13583,
+                    "lineNumber": 13686,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -8335,7 +8425,7 @@
                       "(\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13588,
+                    "lineNumber": 13691,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -8355,7 +8445,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13595,
+                    "lineNumber": 13698,
                     "columnNumber": 5,
                     "deprecated": true,
                     "trackAdoption": false,
@@ -8374,7 +8464,7 @@
                       "{ x: number; y: number; } | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13601,
+                    "lineNumber": 13704,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -8392,7 +8482,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13611,
+                    "lineNumber": 13714,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -8410,7 +8500,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13619,
+                    "lineNumber": 13722,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -8433,7 +8523,7 @@
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<string>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13628,
+            "lineNumber": 13731,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8446,7 +8536,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13632,
+                "lineNumber": 13735,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8464,7 +8554,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13633,
+                    "lineNumber": 13736,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -8487,7 +8577,7 @@
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<string>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13642,
+            "lineNumber": 13745,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8500,7 +8590,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13653,
+                "lineNumber": 13756,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8518,7 +8608,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13654,
+                    "lineNumber": 13757,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -8541,7 +8631,7 @@
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<string>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13663,
+            "lineNumber": 13766,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8554,7 +8644,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13684,
+                "lineNumber": 13787,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8572,7 +8662,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13685,
+                    "lineNumber": 13788,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -8595,7 +8685,7 @@
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<boolean>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13694,
+            "lineNumber": 13797,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8608,7 +8698,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13709,
+                "lineNumber": 13812,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8626,7 +8716,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13710,
+                    "lineNumber": 13813,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -8649,7 +8739,7 @@
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<boolean>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13719,
+            "lineNumber": 13822,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8662,7 +8752,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13734,
+                "lineNumber": 13837,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8680,7 +8770,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13735,
+                    "lineNumber": 13838,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -8703,7 +8793,7 @@
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<boolean>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13744,
+            "lineNumber": 13847,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8716,7 +8806,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13761,
+                "lineNumber": 13864,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8734,7 +8824,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13762,
+                    "lineNumber": 13865,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -8757,7 +8847,7 @@
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<boolean>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13771,
+            "lineNumber": 13874,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8770,7 +8860,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13786,
+                "lineNumber": 13889,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8788,7 +8878,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13787,
+                    "lineNumber": 13890,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -8811,7 +8901,7 @@
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<boolean>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13796,
+            "lineNumber": 13899,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8824,7 +8914,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13811,
+                "lineNumber": 13914,
                 "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8842,7 +8932,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13812,
+                    "lineNumber": 13915,
                     "columnNumber": 5,
                     "deprecated": true,
                     "trackAdoption": false,
@@ -8866,7 +8956,7 @@
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<boolean>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13820,
+            "lineNumber": 13923,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8879,7 +8969,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13835,
+                "lineNumber": 13938,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8897,11 +8987,15 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13836,
+                    "lineNumber": 13939,
                     "columnNumber": 5,
                     "deprecated": true,
                     "trackAdoption": false,
                     "references": [
+                      {
+                        "plugin": "apm",
+                        "path": "x-pack/solutions/observability/plugins/apm/test/scout/ui/fixtures/page_objects/agent_configurations.ts"
+                      },
                       {
                         "plugin": "synthetics",
                         "path": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/fixtures/page_objects/synthetics_app.ts"
@@ -8931,7 +9025,7 @@
               "Locator"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13844,
+            "lineNumber": 13947,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8958,7 +9052,7 @@
               "Locator"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13856,
+            "lineNumber": 13959,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8977,7 +9071,7 @@
                   "Locator"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13865,
+                "lineNumber": 13968,
                 "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8991,7 +9085,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13865,
+                "lineNumber": 13968,
                 "columnNumber": 56,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9010,7 +9104,7 @@
                       " | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13866,
+                    "lineNumber": 13969,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -9029,7 +9123,7 @@
                       " | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13880,
+                    "lineNumber": 13983,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -9047,7 +9141,7 @@
                       "string | RegExp | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13889,
+                    "lineNumber": 13992,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -9065,7 +9159,7 @@
                       "string | RegExp | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13895,
+                    "lineNumber": 13998,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -9089,7 +9183,7 @@
               "Locator"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13903,
+            "lineNumber": 14006,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9105,7 +9199,7 @@
                   "number"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13914,
+                "lineNumber": 14017,
                 "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9130,7 +9224,7 @@
               "Locator"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13916,
+            "lineNumber": 14019,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9148,7 +9242,7 @@
                   "Locator"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13942,
+                "lineNumber": 14045,
                 "columnNumber": 6,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9171,7 +9265,7 @@
               "Page"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13944,
+            "lineNumber": 14047,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9191,7 +9285,7 @@
               "(key: string, options?: { delay?: number | undefined; noWaitAfter?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 13949,
+            "lineNumber": 14052,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9209,7 +9303,7 @@
                   "string"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13988,
+                "lineNumber": 14091,
                 "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9223,7 +9317,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 13988,
+                "lineNumber": 14091,
                 "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9241,7 +9335,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13989,
+                    "lineNumber": 14092,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -9261,7 +9355,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 13994,
+                    "lineNumber": 14097,
                     "columnNumber": 5,
                     "deprecated": true,
                     "trackAdoption": false,
@@ -9280,7 +9374,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14002,
+                    "lineNumber": 14105,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -9303,7 +9397,7 @@
               "(text: string, options?: { delay?: number | undefined; noWaitAfter?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 14011,
+            "lineNumber": 14114,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9321,7 +9415,7 @@
                   "string"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 14040,
+                "lineNumber": 14143,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9335,7 +9429,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 14040,
+                "lineNumber": 14143,
                 "columnNumber": 45,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9353,7 +9447,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14041,
+                    "lineNumber": 14144,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -9373,7 +9467,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14046,
+                    "lineNumber": 14149,
                     "columnNumber": 5,
                     "deprecated": true,
                     "trackAdoption": false,
@@ -9392,7 +9486,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14052,
+                    "lineNumber": 14155,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -9417,7 +9511,7 @@
               " | undefined) => Promise<Buffer>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 14061,
+            "lineNumber": 14164,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9434,7 +9528,7 @@
                   " | undefined"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 14088,
+                "lineNumber": 14191,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9456,7 +9550,7 @@
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<void>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 14090,
+            "lineNumber": 14193,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9469,7 +9563,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 14098,
+                "lineNumber": 14201,
                 "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9487,7 +9581,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14099,
+                    "lineNumber": 14202,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -9514,7 +9608,7 @@
               "<Node>[] | readonly { value?: string | undefined; label?: string | undefined; index?: number | undefined; }[] | null, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<string[]>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 14108,
+            "lineNumber": 14211,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9536,7 +9630,7 @@
                   "<Node>[] | readonly { value?: string | undefined; label?: string | undefined; index?: number | undefined; }[] | null"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 14151,
+                "lineNumber": 14254,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9550,7 +9644,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 14181,
+                "lineNumber": 14284,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9568,7 +9662,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14182,
+                    "lineNumber": 14285,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -9588,7 +9682,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14187,
+                    "lineNumber": 14290,
                     "columnNumber": 5,
                     "deprecated": true,
                     "trackAdoption": false,
@@ -9607,7 +9701,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14193,
+                    "lineNumber": 14296,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -9630,7 +9724,7 @@
               "(options?: { force?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 14202,
+            "lineNumber": 14305,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9643,7 +9737,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 14211,
+                "lineNumber": 14314,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9661,7 +9755,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14212,
+                    "lineNumber": 14315,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -9679,7 +9773,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14217,
+                    "lineNumber": 14320,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -9702,7 +9796,7 @@
               "(checked: boolean, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 14226,
+            "lineNumber": 14329,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9720,7 +9814,7 @@
                   "boolean"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 14254,
+                "lineNumber": 14357,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9734,7 +9828,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 14254,
+                "lineNumber": 14357,
                 "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9752,7 +9846,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14255,
+                    "lineNumber": 14358,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -9772,7 +9866,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14260,
+                    "lineNumber": 14363,
                     "columnNumber": 5,
                     "deprecated": true,
                     "trackAdoption": false,
@@ -9791,7 +9885,7 @@
                       "{ x: number; y: number; } | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14266,
+                    "lineNumber": 14369,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -9809,7 +9903,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14276,
+                    "lineNumber": 14379,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -9827,7 +9921,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14284,
+                    "lineNumber": 14387,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -9850,7 +9944,7 @@
               "(files: string | readonly string[] | { name: string; mimeType: string; buffer: Buffer; } | readonly { name: string; mimeType: string; buffer: Buffer; }[], options?: { noWaitAfter?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 14291,
+            "lineNumber": 14394,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9866,7 +9960,7 @@
                   "string | readonly string[] | { name: string; mimeType: string; buffer: Buffer; } | readonly { name: string; mimeType: string; buffer: Buffer; }[]"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 14333,
+                "lineNumber": 14436,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9880,7 +9974,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 14363,
+                "lineNumber": 14466,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9900,7 +9994,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14364,
+                    "lineNumber": 14467,
                     "columnNumber": 5,
                     "deprecated": true,
                     "trackAdoption": false,
@@ -9919,7 +10013,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14370,
+                    "lineNumber": 14473,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -9942,7 +10036,7 @@
               "(options?: { force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 14379,
+            "lineNumber": 14482,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9955,7 +10049,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 14403,
+                "lineNumber": 14506,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9973,7 +10067,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14404,
+                    "lineNumber": 14507,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -9991,7 +10085,7 @@
                       "(\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14409,
+                    "lineNumber": 14512,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -10011,7 +10105,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14416,
+                    "lineNumber": 14519,
                     "columnNumber": 5,
                     "deprecated": true,
                     "trackAdoption": false,
@@ -10030,7 +10124,7 @@
                       "{ x: number; y: number; } | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14422,
+                    "lineNumber": 14525,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -10048,7 +10142,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14432,
+                    "lineNumber": 14535,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -10066,7 +10160,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14440,
+                    "lineNumber": 14543,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -10089,7 +10183,7 @@
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<string | null>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 14449,
+            "lineNumber": 14552,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10102,7 +10196,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 14458,
+                "lineNumber": 14561,
                 "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10120,7 +10214,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14459,
+                    "lineNumber": 14562,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -10145,7 +10239,7 @@
               "(text: string, options?: { delay?: number | undefined; noWaitAfter?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 14468,
+            "lineNumber": 14571,
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
@@ -10164,7 +10258,7 @@
                   "string"
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 14483,
+                "lineNumber": 14586,
                 "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10178,7 +10272,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 14483,
+                "lineNumber": 14586,
                 "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10196,7 +10290,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14484,
+                    "lineNumber": 14587,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -10216,7 +10310,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14489,
+                    "lineNumber": 14592,
                     "columnNumber": 5,
                     "deprecated": true,
                     "trackAdoption": false,
@@ -10235,7 +10329,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14495,
+                    "lineNumber": 14598,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -10258,7 +10352,7 @@
               "(options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 14504,
+            "lineNumber": 14607,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10271,7 +10365,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 14532,
+                "lineNumber": 14635,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10289,7 +10383,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14533,
+                    "lineNumber": 14636,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -10309,7 +10403,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14538,
+                    "lineNumber": 14641,
                     "columnNumber": 5,
                     "deprecated": true,
                     "trackAdoption": false,
@@ -10328,7 +10422,7 @@
                       "{ x: number; y: number; } | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14544,
+                    "lineNumber": 14647,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -10346,7 +10440,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14554,
+                    "lineNumber": 14657,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -10364,7 +10458,7 @@
                       "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14562,
+                    "lineNumber": 14665,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -10387,7 +10481,7 @@
               "(options?: { state?: \"hidden\" | \"visible\" | \"attached\" | \"detached\" | undefined; timeout?: number | undefined; } | undefined) => Promise<void>"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
-            "lineNumber": 14569,
+            "lineNumber": 14672,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10400,7 +10494,7 @@
                 "label": "options",
                 "description": [],
                 "path": "node_modules/playwright-core/types/types.d.ts",
-                "lineNumber": 14586,
+                "lineNumber": 14689,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10418,7 +10512,7 @@
                       "\"hidden\" | \"visible\" | \"attached\" | \"detached\" | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14587,
+                    "lineNumber": 14690,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -10436,7 +10530,7 @@
                       "number | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
-                    "lineNumber": 14598,
+                    "lineNumber": 14701,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -10457,7 +10551,7 @@
         "label": "PageObjects",
         "description": [],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-        "lineNumber": 34,
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -10473,7 +10567,7 @@
               "DatePicker"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 35,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10489,7 +10583,7 @@
               "DiscoverApp"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 36,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10505,7 +10599,23 @@
               "DashboardApp"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 37,
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.PageObjects.dashboardLinks",
+            "type": "Object",
+            "tags": [],
+            "label": "dashboardLinks",
+            "description": [],
+            "signature": [
+              "DashboardLinks"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10521,7 +10631,7 @@
               "FilterBar"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 38,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10537,7 +10647,7 @@
               "MapsPage"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 39,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10553,7 +10663,7 @@
               "RenderablePage"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 40,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10569,7 +10679,7 @@
               "CollapsibleNav"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 41,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10585,7 +10695,7 @@
               "Toasts"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 42,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10601,7 +10711,7 @@
               "Inspector"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 43,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10617,7 +10727,7 @@
               "LensApp"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 44,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10633,7 +10743,23 @@
               "LoginPage"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 45,
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.PageObjects.overlays",
+            "type": "Object",
+            "tags": [],
+            "label": "overlays",
+            "description": [],
+            "signature": [
+              "OverlaysPage"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10923,7 +11049,7 @@
         "label": "RoleSessionCredentials",
         "description": [],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
-        "lineNumber": 43,
+        "lineNumber": 45,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -10936,7 +11062,7 @@
             "label": "cookieValue",
             "description": [],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
-            "lineNumber": 44,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10958,7 +11084,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
-            "lineNumber": 45,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10974,7 +11100,7 @@
         "label": "SamlAuth",
         "description": [],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
-        "lineNumber": 48,
+        "lineNumber": 50,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -10996,7 +11122,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
-            "lineNumber": 49,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11009,7 +11135,7 @@
             "label": "customRoleName",
             "description": [],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
-            "lineNumber": 50,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11041,7 +11167,7 @@
               ") => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
-            "lineNumber": 51,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -11071,7 +11197,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
-                "lineNumber": 51,
+                "lineNumber": 53,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11117,7 +11243,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
-            "lineNumber": 53,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -11150,7 +11276,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
-                "lineNumber": 83,
+                "lineNumber": 85,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11172,7 +11298,7 @@
         "label": "ScoutParallelTestFixtures",
         "description": [],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/parallel_run_fixtures.ts",
-        "lineNumber": 49,
+        "lineNumber": 48,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -11194,7 +11320,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/parallel_run_fixtures.ts",
-            "lineNumber": 50,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11227,7 +11353,7 @@
               "<HTMLElement | SVGElement> | null>; typeWithDelay: (selector: string, text: string, options?: { delay: number; } | undefined) => Promise<void>; clearInput: (selector: string) => Promise<void>; dragTo: (sourceSelector: string, targetSelector: string) => Promise<void>; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/parallel_run_fixtures.ts",
-            "lineNumber": 51,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11249,7 +11375,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/parallel_run_fixtures.ts",
-            "lineNumber": 52,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11265,7 +11391,7 @@
         "label": "ScoutParallelWorkerFixtures",
         "description": [],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/parallel_run_fixtures.ts",
-        "lineNumber": 55,
+        "lineNumber": 54,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -11287,7 +11413,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/parallel_run_fixtures.ts",
-            "lineNumber": 56,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11309,7 +11435,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/parallel_run_fixtures.ts",
-            "lineNumber": 57,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11331,7 +11457,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/parallel_run_fixtures.ts",
-            "lineNumber": 58,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11345,15 +11471,15 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/kbn-client",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnKbnClientPluginApi",
                 "section": "def-common.KbnClient",
                 "text": "KbnClient"
               }
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/parallel_run_fixtures.ts",
-            "lineNumber": 59,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11369,7 +11495,7 @@
               "default"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/parallel_run_fixtures.ts",
-            "lineNumber": 60,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11385,7 +11511,7 @@
               "ScoutSpaceParallelFixture"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/parallel_run_fixtures.ts",
-            "lineNumber": 61,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11407,7 +11533,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/parallel_run_fixtures.ts",
-            "lineNumber": 62,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11543,7 +11669,15 @@
                 "section": "def-common.UrlParts",
                 "text": "UrlParts"
               },
-              "; fleet?: ",
+              "; linkedElasticsearch?: ",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.UrlParts",
+                "text": "UrlParts"
+              },
+              " | undefined; fleet?: ",
               {
                 "pluginId": "@kbn/test",
                 "scope": "common",
@@ -11570,7 +11704,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/server_config.d.ts",
-            "lineNumber": 19,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11586,7 +11720,7 @@
               "{ from: string; license?: string | undefined; files: string[]; serverArgs: string[]; ssl: boolean; secureFiles?: string[] | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/server_config.d.ts",
-            "lineNumber": 20,
+            "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11599,10 +11733,10 @@
             "label": "esServerlessOptions",
             "description": [],
             "signature": [
-              "{ uiam: boolean; } | undefined"
+              "{ uiam: boolean; cps?: boolean | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/server_config.d.ts",
-            "lineNumber": 28,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11618,7 +11752,7 @@
               "{ env: any; buildArgs: string[]; sourceArgs: string[]; serverArgs: string[]; useDedicatedTestRunner?: boolean | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/server_config.d.ts",
-            "lineNumber": 29,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -11786,6 +11920,22 @@
           },
           {
             "parentPluginId": "@kbn/scout",
+            "id": "def-common.ScoutTestConfig.linkedProject",
+            "type": "Object",
+            "tags": [],
+            "label": "linkedProject",
+            "description": [],
+            "signature": [
+              "{ hosts: { elasticsearch: string; }; auth: { username: string; password: string; }; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
             "id": "def-common.ScoutTestConfig.metadata",
             "type": "Any",
             "tags": [],
@@ -11795,7 +11945,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 29,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12102,9 +12252,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/kbn-client",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnKbnClientPluginApi",
                 "section": "def-common.KbnClient",
                 "text": "KbnClient"
               }
@@ -12149,6 +12299,22 @@
           },
           {
             "parentPluginId": "@kbn/scout",
+            "id": "def-common.ScoutWorkerFixtures.linkedProject",
+            "type": "Object",
+            "tags": [],
+            "label": "linkedProject",
+            "description": [],
+            "signature": [
+              "LinkedProjectFixture"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
             "id": "def-common.ScoutWorkerFixtures.uiSettings",
             "type": "Object",
             "tags": [],
@@ -12158,7 +12324,7 @@
               "UiSettingsFixture"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
-            "lineNumber": 80,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12180,203 +12346,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
-            "lineNumber": 81,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout",
-            "id": "def-common.ScoutWorkerFixtures.apmSynthtraceEsClient",
-            "type": "Object",
-            "tags": [],
-            "label": "apmSynthtraceEsClient",
-            "description": [],
-            "signature": [
-              "{ clean: () => Promise<void>; index: (streamOrGenerator: MaybeArray<",
-              "Readable",
-              " | ",
-              {
-                "pluginId": "@kbn/synthtrace-client",
-                "scope": "common",
-                "docId": "kibKbnSynthtraceClientPluginApi",
-                "section": "def-common.SynthtraceGenerator",
-                "text": "SynthtraceGenerator"
-              },
-              "<",
-              {
-                "pluginId": "@kbn/synthtrace-client",
-                "scope": "common",
-                "docId": "kibKbnSynthtraceClientPluginApi",
-                "section": "def-common.ApmFields",
-                "text": "ApmFields"
-              },
-              ">>, pipelineCallback?: ((base: ",
-              "Readable",
-              ") => NodeJS.WritableStream) | undefined) => Promise<void>; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
             "lineNumber": 82,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout",
-            "id": "def-common.ScoutWorkerFixtures.infraSynthtraceEsClient",
-            "type": "Object",
-            "tags": [],
-            "label": "infraSynthtraceEsClient",
-            "description": [],
-            "signature": [
-              "{ clean: () => Promise<void>; index: (streamOrGenerator: MaybeArray<",
-              "Readable",
-              " | ",
-              {
-                "pluginId": "@kbn/synthtrace-client",
-                "scope": "common",
-                "docId": "kibKbnSynthtraceClientPluginApi",
-                "section": "def-common.SynthtraceGenerator",
-                "text": "SynthtraceGenerator"
-              },
-              "<",
-              {
-                "pluginId": "@kbn/synthtrace-client",
-                "scope": "common",
-                "docId": "kibKbnSynthtraceClientPluginApi",
-                "section": "def-common.InfraDocument",
-                "text": "InfraDocument"
-              },
-              ">>, pipelineCallback?: ((base: ",
-              "Readable",
-              ") => NodeJS.WritableStream) | undefined) => Promise<void>; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
-            "lineNumber": 83,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/scout",
-        "id": "def-common.SynthtraceFixture",
-        "type": "Interface",
-        "tags": [],
-        "label": "SynthtraceFixture",
-        "description": [],
-        "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/synthtrace.ts",
-        "lineNumber": 22,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/scout",
-            "id": "def-common.SynthtraceFixture.apmSynthtraceEsClient",
-            "type": "Object",
-            "tags": [],
-            "label": "apmSynthtraceEsClient",
-            "description": [],
-            "signature": [
-              "{ clean: () => Promise<void>; index: (streamOrGenerator: MaybeArray<",
-              "Readable",
-              " | ",
-              {
-                "pluginId": "@kbn/synthtrace-client",
-                "scope": "common",
-                "docId": "kibKbnSynthtraceClientPluginApi",
-                "section": "def-common.SynthtraceGenerator",
-                "text": "SynthtraceGenerator"
-              },
-              "<",
-              {
-                "pluginId": "@kbn/synthtrace-client",
-                "scope": "common",
-                "docId": "kibKbnSynthtraceClientPluginApi",
-                "section": "def-common.ApmFields",
-                "text": "ApmFields"
-              },
-              ">>, pipelineCallback?: ((base: ",
-              "Readable",
-              ") => NodeJS.WritableStream) | undefined) => Promise<void>; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/synthtrace.ts",
-            "lineNumber": 23,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout",
-            "id": "def-common.SynthtraceFixture.infraSynthtraceEsClient",
-            "type": "Object",
-            "tags": [],
-            "label": "infraSynthtraceEsClient",
-            "description": [],
-            "signature": [
-              "{ clean: () => Promise<void>; index: (streamOrGenerator: MaybeArray<",
-              "Readable",
-              " | ",
-              {
-                "pluginId": "@kbn/synthtrace-client",
-                "scope": "common",
-                "docId": "kibKbnSynthtraceClientPluginApi",
-                "section": "def-common.SynthtraceGenerator",
-                "text": "SynthtraceGenerator"
-              },
-              "<",
-              {
-                "pluginId": "@kbn/synthtrace-client",
-                "scope": "common",
-                "docId": "kibKbnSynthtraceClientPluginApi",
-                "section": "def-common.InfraDocument",
-                "text": "InfraDocument"
-              },
-              ">>, pipelineCallback?: ((base: ",
-              "Readable",
-              ") => NodeJS.WritableStream) | undefined) => Promise<void>; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/synthtrace.ts",
-            "lineNumber": 24,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout",
-            "id": "def-common.SynthtraceFixture.logsSynthtraceEsClient",
-            "type": "Object",
-            "tags": [],
-            "label": "logsSynthtraceEsClient",
-            "description": [],
-            "signature": [
-              "{ clean: () => Promise<void>; index: (streamOrGenerator: MaybeArray<",
-              "Readable",
-              " | ",
-              {
-                "pluginId": "@kbn/synthtrace-client",
-                "scope": "common",
-                "docId": "kibKbnSynthtraceClientPluginApi",
-                "section": "def-common.SynthtraceGenerator",
-                "text": "SynthtraceGenerator"
-              },
-              "<",
-              {
-                "pluginId": "@kbn/synthtrace-client",
-                "scope": "common",
-                "docId": "kibKbnSynthtraceClientPluginApi",
-                "section": "def-common.LogDocument",
-                "text": "LogDocument"
-              },
-              ">>, pipelineCallback?: ((base: ",
-              "Readable",
-              ") => NodeJS.WritableStream) | undefined) => Promise<void>; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/synthtrace.ts",
-            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

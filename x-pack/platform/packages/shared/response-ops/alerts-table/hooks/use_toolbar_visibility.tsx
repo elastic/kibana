@@ -239,7 +239,10 @@ export const useGetToolbarVisibility = ({
   const defaultVisibility = useGetDefaultVisibility(defaultVisibilityProps);
   const options = useMemo(() => {
     const isBulkActionsActive =
-      selectedRowsCount === 0 || selectedRowsCount === undefined || bulkActions.length === 0;
+      selectedRowsCount === 0 ||
+      selectedRowsCount === undefined ||
+      bulkActions.length === 0 ||
+      !bulkActions.some((panel) => panel.items?.length);
 
     if (isBulkActionsActive) {
       return {

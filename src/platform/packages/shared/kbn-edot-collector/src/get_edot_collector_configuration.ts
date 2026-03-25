@@ -43,7 +43,7 @@ export function getEdotCollectorConfiguration({
       elasticapm: {},
     },
     processors: {
-      elastictrace: {},
+      elasticapm: {},
     },
     exporters: {
       elasticsearch: {
@@ -71,7 +71,7 @@ export function getEdotCollectorConfiguration({
       pipelines: {
         traces: {
           receivers: ['otlp'],
-          processors: ['elastictrace'],
+          processors: ['elasticapm'],
           exporters: ['elasticapm', 'elasticsearch'],
         },
         metrics: {

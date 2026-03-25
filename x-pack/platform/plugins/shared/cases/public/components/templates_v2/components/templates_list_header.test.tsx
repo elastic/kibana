@@ -36,7 +36,7 @@ describe('TemplatesListHeader', () => {
     renderWithTestingProviders(<TemplatesListHeader />);
 
     expect(await screen.findByTestId('create-template-button')).toBeInTheDocument();
-    expect(screen.getByText('Create template')).toBeInTheDocument();
+    expect(screen.getByText('Create')).toBeInTheDocument();
   });
 
   it('opens the import template flyout when clicking the import button', async () => {

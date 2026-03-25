@@ -30,6 +30,10 @@ validation against the vendor API.
 - If non-MCP: valid structure with required fields, correct auth type
 - **ID alignment**: `metadata.id` (e.g. `.zendesk`), `DataSource.stackConnectors[].type`, `DataSource.iconType`, and
   `ConnectorIconsMap` key all match. IDs must start with a dot.
+- **`metadata.description` quality**: The description must list the key actions the connector supports and the objects
+  they operate on (e.g., "Search messages, list public channels, and send messages in Slack"). Flag descriptions that
+  are vague ("Connect to X to pull data"), say nothing about capabilities ("Kibana Stack Connector for X"), or omit
+  actions the connector actually provides. Keep to one sentence, ~15 words.
 - **Schema UI**: Every config field in `schema` has `.meta()` with at least `label` (or uses a `UISchemas.*` helper).
   Otherwise fields render as unlabeled.
 - **Action param schema (Workflow editor)**: For custom connector actions, the Zod schema in the input handler should
@@ -83,6 +87,20 @@ validation against the vendor API.
 - `docs/reference/toc.yml` entry exists in the correct section
 - **Icon**: Data source has an icon (ConnectorIconsMap entry and, if custom, spec icon component or asset). No
   placeholder icons or generated icons. If a brand icon does not exist elsewhere in the repo, prompt the user to provide one.
+
+#### Docs quality checks
+
+If the PR includes documentation changes in `docs/reference/connectors-kibana/`, run the following skills on each
+connector doc file. These require skills from https://github.com/elastic/elastic-docs-skills — if any are
+unavailable, tell the user to install them (`curl -sSL https://raw.githubusercontent.com/elastic/elastic-docs-skills/main/install.sh | bash`).
+
+1. **`docs-check-style`** — Elastic style guide compliance. Flag violations.
+2. **`crosslink-validator`** — Validate cross-links resolve. Flag broken links.
+3. **`frontmatter-audit`** — Check `applies_to`, `description`, `navigation_title` completeness.
+4. **`content-type-checker`** — Verify page follows correct content type guidelines.
+5. **`applies-to-tagging`** — Validate `applies_to` tags match connector availability.
+
+Report documentation issues alongside code issues.
 
 ### Naming and conventions
 

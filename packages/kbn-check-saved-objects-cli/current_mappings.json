@@ -618,6 +618,9 @@
       "duration": {
         "type": "unsigned_long"
       },
+      "extended_fields": {
+        "type": "flattened"
+      },
       "external_service": {
         "properties": {
           "connector_name": {
@@ -699,6 +702,17 @@
       },
       "tags": {
         "type": "keyword"
+      },
+      "template": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "version": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
       },
       "title": {
         "fields": {
@@ -1419,8 +1433,7 @@
   },
   "entity-store-global-state": {
     "dynamic": false,
-    "properties": {
-    }
+    "properties": {}
   },
   "epm-packages": {
     "dynamic": false,
@@ -1428,6 +1441,17 @@
       "additional_spaces_installed_kibana": {
         "index": false,
         "type": "flattened"
+      },
+      "dependencies": {
+        "properties": {
+          "name": {
+            "type": "keyword"
+          },
+          "version": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
       },
       "es_index_patterns": {
         "dynamic": false,
@@ -1495,6 +1519,10 @@
       "internal": {
         "type": "boolean"
       },
+      "is_dependency_of": {
+        "dynamic": false,
+        "properties": {}
+      },
       "keep_policies_up_to_date": {
         "index": false,
         "type": "boolean"
@@ -1507,10 +1535,17 @@
         "enabled": false,
         "type": "object"
       },
+      "installed_as_dependency": {
+        "type": "boolean"
+      },
       "name": {
         "type": "keyword"
       },
       "package_assets": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "pending_upgrade_review": {
         "dynamic": false,
         "properties": {}
       },
@@ -1997,6 +2032,9 @@
       "keep_monitoring_alive": {
         "type": "boolean"
       },
+      "min_agent_version": {
+        "type": "keyword"
+      },
       "monitoring_enabled": {
         "index": false,
         "type": "keyword"
@@ -2013,6 +2051,10 @@
       "overrides": {
         "index": false,
         "type": "flattened"
+      },
+      "package_agent_version_conditions": {
+        "dynamic": false,
+        "properties": {}
       },
       "required_versions": {
         "index": false,
@@ -2162,6 +2204,9 @@
             "type": "keyword"
           }
         }
+      },
+      "package_agent_version_condition": {
+        "type": "keyword"
       },
       "policy_id": {
         "type": "keyword"
@@ -2336,6 +2381,10 @@
       }
     }
   },
+  "inference-settings": {
+    "dynamic": false,
+    "properties": {}
+  },
   "infra-custom-dashboards": {
     "dynamic": false,
     "properties": {
@@ -2423,6 +2472,9 @@
       "keep_monitoring_alive": {
         "type": "boolean"
       },
+      "min_agent_version": {
+        "type": "keyword"
+      },
       "monitoring_diagnostics": {
         "index": false,
         "type": "flattened"
@@ -2451,6 +2503,10 @@
       "overrides": {
         "index": false,
         "type": "flattened"
+      },
+      "package_agent_version_conditions": {
+        "dynamic": false,
+        "properties": {}
       },
       "required_versions": {
         "index": false,
@@ -2782,6 +2838,9 @@
             "type": "keyword"
           }
         }
+      },
+      "package_agent_version_condition": {
+        "type": "keyword"
       },
       "policy_id": {
         "type": "keyword"
@@ -3196,6 +3255,20 @@
       }
     }
   },
+  "oauth_state": {
+    "dynamic": false,
+    "properties": {
+      "connectorId": {
+        "type": "keyword"
+      },
+      "expiresAt": {
+        "type": "date"
+      },
+      "state": {
+        "type": "keyword"
+      }
+    }
+  },
   "observability-onboarding-state": {
     "properties": {
       "progress": {
@@ -3227,6 +3300,9 @@
         "type": "date"
       },
       "created_by": {
+        "type": "keyword"
+      },
+      "created_by_profile_uid": {
         "type": "keyword"
       },
       "description": {
@@ -3273,6 +3349,9 @@
         "type": "date"
       },
       "updated_by": {
+        "type": "keyword"
+      },
+      "updated_by_profile_uid": {
         "type": "keyword"
       },
       "version": {
@@ -3334,6 +3413,9 @@
       "created_by": {
         "type": "text"
       },
+      "created_by_profile_uid": {
+        "type": "keyword"
+      },
       "description": {
         "type": "text"
       },
@@ -3361,6 +3443,9 @@
       },
       "updated_by": {
         "type": "text"
+      },
+      "updated_by_profile_uid": {
+        "type": "keyword"
       },
       "version": {
         "type": "keyword"
@@ -3591,6 +3676,9 @@
   "security-rule": {
     "dynamic": false,
     "properties": {
+      "deprecated": {
+        "type": "boolean"
+      },
       "name": {
         "fields": {
           "keyword": {
@@ -4114,6 +4202,10 @@
     "dynamic": false,
     "properties": {}
   },
+  "streams-significant-events-settings": {
+    "dynamic": false,
+    "properties": {}
+  },
   "synthetics-dynamic-settings": {
     "dynamic": false,
     "properties": {}
@@ -4409,6 +4501,9 @@
       "attempts": {
         "type": "integer"
       },
+      "cost": {
+        "type": "keyword"
+      },
       "enabled": {
         "type": "boolean"
       },
@@ -4477,6 +4572,25 @@
     "properties": {
       "count": {
         "type": "integer"
+      }
+    }
+  },
+  "uiam_api_keys_provisioning_status": {
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "entityId": {
+        "type": "keyword"
+      },
+      "entityType": {
+        "type": "keyword"
+      },
+      "message": {
+        "type": "text"
+      },
+      "status": {
+        "type": "keyword"
       }
     }
   },
@@ -4560,6 +4674,20 @@
     "dynamic": false,
     "properties": {
       "domainId": {
+        "type": "keyword"
+      }
+    }
+  },
+  "user_connector_token": {
+    "dynamic": false,
+    "properties": {
+      "connectorId": {
+        "type": "keyword"
+      },
+      "credentialType": {
+        "type": "keyword"
+      },
+      "profileUid": {
         "type": "keyword"
       }
     }

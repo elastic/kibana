@@ -1555,7 +1555,7 @@
             "label": "task_type",
             "description": [],
             "signature": [
-              "\"completion\" | \"rerank\" | \"text_embedding\" | \"sparse_embedding\" | \"chat_completion\""
+              "\"completion\" | \"sparse_embedding\" | \"text_embedding\" | \"rerank\" | \"chat_completion\""
             ],
             "path": "src/platform/packages/shared/kbn-esql-types/src/inference_endpoint_autocomplete_types.ts",
             "lineNumber": 17,
@@ -2710,6 +2710,22 @@
             ],
             "path": "src/platform/packages/shared/kbn-esql-types/src/esql_telemetry_types.ts",
             "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.TelemetryLatencyProps.callbacksDuration",
+            "type": "number",
+            "tags": [],
+            "label": "callbacksDuration",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/esql_telemetry_types.ts",
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

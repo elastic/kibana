@@ -142,7 +142,7 @@ function reverseBuildVisualizationState(
   const tagBy = getTagcloudTagBy(layer, visualization);
 
   return {
-    type: 'tagcloud',
+    type: 'tag_cloud',
     dataset,
     ...generateApiLayer(layer),
     metric,
@@ -178,8 +178,8 @@ function buildFormBasedLayer(layer: TagcloudStateNoESQL): FormBasedPersistedStat
 
 function getValueColumns(layer: TagcloudStateESQL) {
   return [
-    getValueColumn(getAccessorName('metric'), layer.metric.column, 'number'),
-    getValueColumn(getAccessorName('tag'), layer.tag_by.column),
+    getValueColumn(getAccessorName('metric'), layer.metric, 'number'),
+    getValueColumn(getAccessorName('tag'), layer.tag_by),
   ];
 }
 
@@ -218,14 +218,14 @@ export function fromAPItoLensState(
       datasourceStates: layers,
       internalReferences,
       visualization,
-      adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
+      adHocDataViews,
     },
   };
 }
 
 export function fromLensStateToAPI(
   config: LensAttributes
-): Extract<LensApiState, { type: 'tagcloud' }> {
+): Extract<LensApiState, { type: 'tag_cloud' }> {
   const { state } = config;
   const visualization = state.visualization as LensTagCloudState;
   const layers = getDatasourceLayers(state);

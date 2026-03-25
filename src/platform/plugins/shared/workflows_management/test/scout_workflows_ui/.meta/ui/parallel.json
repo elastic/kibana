@@ -1,5 +1,5 @@
 {
-  "sha1": "e7ddc17a5fc05109ca09d3969cddb585cb0889a9",
+  "sha1": "d53646b7d45a2ff6451382e633fece361ae379bb",
   "tests": [
     {
       "id": "a8dc0a71dd65d42-65fd9c357892a20",
@@ -30,6 +30,280 @@
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/internal_actions/national_parks.spec.ts",
         "line": 43,
+        "column": 7
+      }
+    },
+    {
+      "id": "44500196ae15bcc-e237d01d0946069",
+      "title": "Variable validation: data.map item and index bindings item and index references inside data.map with.fields are valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/data_map_variable_validation.spec.ts",
+        "line": 33,
+        "column": 9
+      }
+    },
+    {
+      "id": "44500196ae15bcc-eebb2585dd38aa4",
+      "title": "Variable validation: data.map item and index bindings invalid variable inside data.map with.fields is still flagged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/data_map_variable_validation.spec.ts",
+        "line": 42,
+        "column": 9
+      }
+    },
+    {
+      "id": "5d3ca3f46faaa5d-e23cfd203181a44",
+      "title": "Proposed changes accept and reject accept replace hunk applies the change",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
+        "line": 108,
+        "column": 9
+      }
+    },
+    {
+      "id": "5d3ca3f46faaa5d-2a1bc8fdac48de2",
+      "title": "Proposed changes accept and reject reject replace hunk restores original",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
+        "line": 116,
+        "column": 9
+      }
+    },
+    {
+      "id": "5d3ca3f46faaa5d-170fef60e98b706",
+      "title": "Proposed changes accept and reject accept insert hunk applies the change",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
+        "line": 108,
+        "column": 9
+      }
+    },
+    {
+      "id": "5d3ca3f46faaa5d-dbf4c859cfba6c3",
+      "title": "Proposed changes accept and reject reject insert hunk restores original",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
+        "line": 116,
+        "column": 9
+      }
+    },
+    {
+      "id": "5d3ca3f46faaa5d-d3a7f847e738cac",
+      "title": "Proposed changes accept and reject accept delete hunk applies the change",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
+        "line": 108,
+        "column": 9
+      }
+    },
+    {
+      "id": "5d3ca3f46faaa5d-96c28f102915036",
+      "title": "Proposed changes accept and reject reject delete hunk restores original",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
+        "line": 116,
+        "column": 9
+      }
+    },
+    {
+      "id": "5d3ca3f46faaa5d-d7b875948aafe7e",
+      "title": "Proposed changes accept and reject accept all with multiple hunks produces full afterYaml",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
+        "line": 125,
+        "column": 7
+      }
+    },
+    {
+      "id": "5d3ca3f46faaa5d-ad09e3a99333fa2",
+      "title": "Proposed changes accept and reject reject all with multiple hunks restores original",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
+        "line": 133,
+        "column": 7
+      }
+    },
+    {
+      "id": "5d3ca3f46faaa5d-c533945754fe7f7",
+      "title": "Proposed changes accept and reject accept first hunk then decline rest produces partial result",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
+        "line": 141,
+        "column": 7
+      }
+    },
+    {
+      "id": "5d3ca3f46faaa5d-ed485a258140ebf",
+      "title": "Proposed changes accept and reject Modifier+Shift+A accepts pending proposals when pointer is over editor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
+        "line": 163,
+        "column": 7
+      }
+    },
+    {
+      "id": "5d3ca3f46faaa5d-06c72f96f33cc85",
+      "title": "Proposed changes accept and reject Modifier+Backspace rejects pending proposals when pointer is over editor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
+        "line": 182,
+        "column": 7
+      }
+    },
+    {
+      "id": "5d3ca3f46faaa5d-b6799cdc6085b17",
+      "title": "Proposed changes accept and reject undo dismisses all pending proposals",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
+        "line": 201,
+        "column": 7
+      }
+    },
+    {
+      "id": "5d3ca3f46faaa5d-e64dc37d828b378",
+      "title": "Proposed changes accept and reject new proposals work after resolving a previous batch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
+        "line": 214,
+        "column": 7
+      }
+    },
+    {
+      "id": "5d3ca3f46faaa5d-48768f6d4d9859b",
+      "title": "Proposed changes accept and reject bulk bar disappears after all proposals are resolved",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
+        "line": 241,
+        "column": 7
+      }
+    },
+    {
+      "id": "5d3ca3f46faaa5d-5296679e3249226",
+      "title": "Proposed changes accept and reject accept hunk then undo restores proposal and bulk bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
+        "line": 254,
+        "column": 7
+      }
+    },
+    {
+      "id": "5d3ca3f46faaa5d-03a35bbb5085497",
+      "title": "Proposed changes accept and reject reject hunk then undo restores AI content and bulk bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
+        "line": 273,
+        "column": 7
+      }
+    },
+    {
+      "id": "5d3ca3f46faaa5d-676c4cd699672a9",
+      "title": "Proposed changes accept and reject accept all then undo step-by-step restores hunks individually",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
+        "line": 295,
         "column": 7
       }
     },
@@ -75,7 +349,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 39,
+        "line": 40,
         "column": 9
       }
     },
@@ -93,7 +367,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 70,
+        "line": 71,
         "column": 9
       }
     },
@@ -111,7 +385,25 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 93,
+        "line": 94,
+        "column": 9
+      }
+    },
+    {
+      "id": "02966260206ed5b-f9053316b789cab",
+      "title": "Sanity tests for workflows should not show validation errors for YAML comment lines with liquid variables",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
+        "line": 136,
         "column": 9
       }
     },
@@ -129,7 +421,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/alert_trigger.spec.ts",
-        "line": 77,
+        "line": 81,
         "column": 9
       }
     },
@@ -147,8 +439,22 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/alert_trigger.spec.ts",
-        "line": 207,
+        "line": 211,
         "column": 9
+      }
+    },
+    {
+      "id": "f4e4fdce94026fa-cfea30731e1cb4b",
+      "title": "Workflow execution - Step scroll clicking a step in execution tree scrolls YAML editor to that step",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/execution_step_scroll.spec.ts",
+        "line": 26,
+        "column": 7
       }
     },
     {
@@ -189,7 +495,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/test_run.spec.ts",
-        "line": 25,
+        "line": 26,
         "column": 7
       }
     },
@@ -203,7 +509,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/test_run.spec.ts",
-        "line": 48,
+        "line": 51,
         "column": 7
       }
     },
@@ -217,7 +523,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/test_run.spec.ts",
-        "line": 71,
+        "line": 76,
         "column": 7
       }
     },
@@ -231,8 +537,134 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/test_run.spec.ts",
-        "line": 114,
+        "line": 124,
         "column": 7
+      }
+    },
+    {
+      "id": "73da9b8552b62dd-2aaeb1a8c275eeb",
+      "title": "Variable scope validation: use-before-declaration assign: same-line quoted scalar — use before declaration is flagged, valid after fix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_variable_validation.spec.ts",
+        "line": 42,
+        "column": 9
+      }
+    },
+    {
+      "id": "73da9b8552b62dd-602f7647d2dc3e8",
+      "title": "Variable scope validation: use-before-declaration capture: same-line quoted scalar — use before declaration is flagged, valid after fix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_variable_validation.spec.ts",
+        "line": 54,
+        "column": 9
+      }
+    },
+    {
+      "id": "73da9b8552b62dd-9c87ec3e05df52c",
+      "title": "Variable scope validation: use-before-declaration assign: cross-line block scalar — use before declaration is flagged, valid after fix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_variable_validation.spec.ts",
+        "line": 66,
+        "column": 9
+      }
+    },
+    {
+      "id": "73da9b8552b62dd-3a4fdb7ede9e974",
+      "title": "Variable scope validation: use-before-declaration capture: cross-line block scalar — use before declaration is flagged, valid after fix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_variable_validation.spec.ts",
+        "line": 78,
+        "column": 9
+      }
+    },
+    {
+      "id": "73da9b8552b62dd-ed8b45084a8e5a6",
+      "title": "Variable scope validation: use-before-declaration mixed: assign in scope + capture out of scope on same line",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_variable_validation.spec.ts",
+        "line": 90,
+        "column": 9
+      }
+    },
+    {
+      "id": "73da9b8552b62dd-ed1e52e80f59ae2",
+      "title": "Variable scope validation: use-before-declaration multiple assigns interleaved across lines — only out-of-scope reference is flagged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_variable_validation.spec.ts",
+        "line": 99,
+        "column": 9
+      }
+    },
+    {
+      "id": "73da9b8552b62dd-f32d207c0b66ef6",
+      "title": "Variable scope validation: use-before-declaration capture: first reference before block is flagged, second reference after block is valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_variable_validation.spec.ts",
+        "line": 112,
+        "column": 9
       }
     },
     {
@@ -250,6 +682,20 @@
       }
     },
     {
+      "id": "611939e87af9d3e-3173b9e49af5f6a",
+      "title": "WorkflowsList/BulkActions should keep list order stable when bulk-enabling N-1 workflows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/bulk_actions.spec.ts",
+        "line": 48,
+        "column": 7
+      }
+    },
+    {
       "id": "611939e87af9d3e-2fa309b19ed98e8",
       "title": "WorkflowsList/BulkActions should disable enabled workflows",
       "expectedStatus": "passed",
@@ -259,7 +705,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/bulk_actions.spec.ts",
-        "line": 53,
+        "line": 83,
         "column": 7
       }
     },
@@ -273,7 +719,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/bulk_actions.spec.ts",
-        "line": 81,
+        "line": 106,
         "column": 7
       }
     },
@@ -287,7 +733,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/bulk_actions.spec.ts",
-        "line": 105,
+        "line": 130,
         "column": 7
       }
     },
@@ -315,7 +761,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/filter_sort_search.spec.ts",
-        "line": 59,
+        "line": 53,
         "column": 7
       }
     },
@@ -329,7 +775,105 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/filter_sort_search.spec.ts",
-        "line": 93,
+        "line": 81,
+        "column": 7
+      }
+    },
+    {
+      "id": "3507ba0ce025308-36230ada0572c5b",
+      "title": "WorkflowsList/ImportExport should import a single YAML workflow via flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
+        "line": 48,
+        "column": 7
+      }
+    },
+    {
+      "id": "3507ba0ce025308-3b394365212ab70",
+      "title": "WorkflowsList/ImportExport should import ZIP with multiple workflows via flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
+        "line": 70,
+        "column": 7
+      }
+    },
+    {
+      "id": "3507ba0ce025308-8fc4d9afbaa7798",
+      "title": "WorkflowsList/ImportExport should show conflict resolution UI when re-importing existing workflows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
+        "line": 104,
+        "column": 7
+      }
+    },
+    {
+      "id": "3507ba0ce025308-952c2205e283055",
+      "title": "WorkflowsList/ImportExport should create new workflow when choosing \"generate new IDs\" for conflicts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
+        "line": 126,
+        "column": 7
+      }
+    },
+    {
+      "id": "3507ba0ce025308-c301ca289b10e33",
+      "title": "WorkflowsList/ImportExport should overwrite existing workflow when choosing \"overwrite\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
+        "line": 154,
+        "column": 7
+      }
+    },
+    {
+      "id": "3507ba0ce025308-c2fe4e94332cdd0",
+      "title": "WorkflowsList/ImportExport should close flyout without importing when cancel is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
+        "line": 183,
+        "column": 7
+      }
+    },
+    {
+      "id": "3507ba0ce025308-1c0ebd9363a3fea",
+      "title": "WorkflowsList/ImportExport should export selected workflows via bulk action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
+        "line": 198,
         "column": 7
       }
     },
@@ -385,7 +929,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/single_actions.spec.ts",
-        "line": 98,
+        "line": 106,
         "column": 7
       }
     },
@@ -399,7 +943,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/single_actions.spec.ts",
-        "line": 122,
+        "line": 138,
         "column": 7
       }
     },
@@ -413,7 +957,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/single_actions.spec.ts",
-        "line": 149,
+        "line": 161,
         "column": 7
       }
     },
@@ -427,7 +971,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/single_actions.spec.ts",
-        "line": 173,
+        "line": 181,
         "column": 7
       }
     }

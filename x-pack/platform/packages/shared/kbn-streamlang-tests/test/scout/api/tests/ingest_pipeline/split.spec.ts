@@ -8,11 +8,13 @@
 import { expect } from '@kbn/scout/api';
 import type { SplitProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { tags } from '@kbn/scout';
+import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Streamlang to Ingest Pipeline - Split Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest('should split a string field into an array (in-place)', async ({ testBed }) => {
       const indexName = 'streams-e2e-test-split-basic';
@@ -226,15 +228,25 @@ apiTest.describe(
       expect(ingestedDocs).toHaveLength(2);
 
       // First doc should have tags split (where condition matched)
-      const doc1 = ingestedDocs.find((d: any) => d.event?.kind === 'test');
+      const doc1 = ingestedDocs.find(
+        (d: Record<string, unknown>) => asDoc(asDoc(d)?.event)?.kind === 'test'
+      );
       expect(doc1).toStrictEqual(
-        expect.objectContaining({ tags: ['foo', 'bar', 'baz'], 'event.kind': 'test' })
+        expect.objectContaining({
+          tags: ['foo', 'bar', 'baz'],
+          event: expect.objectContaining({ kind: 'test' }),
+        })
       );
 
       // Second doc should keep original tags (where condition not matched)
-      const doc2 = ingestedDocs.find((d: any) => d.event?.kind === 'production');
+      const doc2 = ingestedDocs.find(
+        (d: Record<string, unknown>) => asDoc(asDoc(d)?.event)?.kind === 'production'
+      );
       expect(doc2).toStrictEqual(
-        expect.objectContaining({ tags: 'one,two,three', 'event.kind': 'production' })
+        expect.objectContaining({
+          tags: 'one,two,three',
+          event: expect.objectContaining({ kind: 'production' }),
+        })
       );
     });
 
@@ -270,24 +282,28 @@ apiTest.describe(
         expect(ingestedDocs).toHaveLength(2);
 
         // First doc should have tags_array created (where condition matched)
-        const doc1 = ingestedDocs.find((d: any) => d.event?.kind === 'test');
+        const doc1 = ingestedDocs.find(
+          (d: Record<string, unknown>) => asDoc(asDoc(d)?.event)?.kind === 'test'
+        );
         expect(doc1).toStrictEqual(
           expect.objectContaining({
             tags: 'foo,bar,baz', // Original preserved
             tags_array: ['foo', 'bar', 'baz'], // New field created
-            'event.kind': 'test',
+            event: expect.objectContaining({ kind: 'test' }),
           })
         );
 
         // Second doc should not have tags_array (where condition not matched)
-        const doc2 = ingestedDocs.find((d: any) => d.event?.kind === 'production');
+        const doc2 = ingestedDocs.find(
+          (d: Record<string, unknown>) => asDoc(asDoc(d)?.event)?.kind === 'production'
+        );
         expect(doc2).toStrictEqual(
           expect.objectContaining({
             tags: 'one,two,three',
-            'event.kind': 'production',
+            event: expect.objectContaining({ kind: 'production' }),
           })
         );
-        expect((doc2 as Record<string, unknown>).tags_array).toBeUndefined();
+        expect(asDoc(doc2)?.tags_array).toBeUndefined();
       }
     );
 

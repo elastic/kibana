@@ -11,6 +11,7 @@ import type {
   ConvertProcessor,
   GrokProcessor,
   JoinProcessor,
+  JsonExtractProcessor,
   LowercaseProcessor,
   MathProcessor,
   NetworkDirectionProcessor,
@@ -35,8 +36,13 @@ import {
 } from '@kbn/streamlang';
 import { isConditionBlock } from '@kbn/streamlang/types/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
-import { Streams, isSchema, type FieldDefinition } from '@kbn/streams-schema';
-import type { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
+import {
+  Streams,
+  isSchema,
+  type FieldDefinition,
+  type ClassicFieldDefinition,
+} from '@kbn/streams-schema';
+import type { IngestUpsertRequest } from '@kbn/streams-schema';
 import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
 import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
@@ -55,6 +61,7 @@ import type {
   EnrichmentDataSourceWithUIAttributes,
   GrokFormState,
   JoinFormState,
+  JsonExtractFormState,
   LowercaseFormState,
   ManualIngestPipelineFormState,
   MathFormState,
@@ -89,6 +96,7 @@ export const SPECIALISED_TYPES = [
   'split',
   'sort',
   'concat',
+  'json_extract',
   'network_direction',
 ];
 
@@ -318,6 +326,17 @@ const defaultConcatProcessorFormState = (): ConcatFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultJsonExtractProcessorFormState = (
+  sampleDocs: FlattenRecord[]
+): JsonExtractFormState => ({
+  action: 'json_extract' as const,
+  field: getDefaultTextField(sampleDocs, PRIORITIZED_CONTENT_FIELDS),
+  extractions: [{ selector: '', target_field: '', type: 'keyword' }],
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
 const defaultNetworkDirectionProcessorFormState = (): NetworkDirectionFormState => ({
   action: 'network_direction' as const,
   source_ip: '',
@@ -357,6 +376,7 @@ const defaultProcessorFormStateByType: Record<
   split: defaultSplitProcessorFormState,
   sort: defaultSortProcessorFormState,
   concat: defaultConcatProcessorFormState,
+  json_extract: defaultJsonExtractProcessorFormState,
   network_direction: defaultNetworkDirectionProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
@@ -425,7 +445,8 @@ export const getFormStateFromActionStep = (
     step.action === 'join' ||
     step.action === 'split' ||
     step.action === 'sort' ||
-    step.action === 'concat'
+    step.action === 'concat' ||
+    step.action === 'json_extract'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
@@ -771,6 +792,26 @@ export const convertFormStateToProcessor = (
       };
     }
 
+    if (formState.action === 'json_extract') {
+      const { field, extractions, ignore_failure, ignore_missing } = formState;
+
+      const filteredExtractions = extractions.filter(
+        (e) => !isEmpty(e.selector) && !isEmpty(e.target_field)
+      );
+
+      return {
+        processorDefinition: {
+          action: 'json_extract',
+          field,
+          extractions: filteredExtractions,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as JsonExtractProcessor,
+      };
+    }
+
     if (formState.action === 'network_direction') {
       const { source_ip, destination_ip, target_field, ignore_failure, ignore_missing } = formState;
 
@@ -965,7 +1006,8 @@ export const buildUpsertStreamRequestPayload = (
           ...(fields && {
             classic: {
               ...definition.stream.ingest.classic,
-              field_overrides: fields,
+              // Cast is safe: callers provide fields with types for classic streams
+              field_overrides: fields as ClassicFieldDefinition,
             },
           }),
         },

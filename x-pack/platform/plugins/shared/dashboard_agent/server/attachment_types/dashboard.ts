@@ -9,6 +9,7 @@ import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachm
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   dashboardAttachmentDataSchema,
+  isSection,
   type DashboardAttachmentData,
 } from '@kbn/dashboard-agent-common';
 
@@ -40,19 +41,25 @@ export const createDashboardAttachmentType = (): AttachmentTypeDefinition<
       };
     },
     getAgentDescription: () =>
-      `A dashboard attachment is rendered as an interactive card in the UI that the user can click to open. Do NOT use <visualization> tags or any custom rendering elements for dashboard results. Instead, summarize the dashboard content (title, description, panel list) in plain text.`,
+      `A dashboard attachment represents a composed dashboard with panels and sections. Rendering it inline displays an interactive dashboard card in the conversation UI that the user can click to open the full dashboard. Summarize the dashboard content (title, description, panel list) in plain text alongside the rendered attachment.`,
     getTools: () => [],
   };
 };
 
 const formatDashboardAttachment = (attachmentId: string, data: DashboardAttachmentData): string => {
-  // Count top-level panels plus panels in all sections
-  const sectionPanelCount = (data.sections ?? []).reduce(
-    (acc, section) => acc + section.panels.length,
-    0
-  );
-  const panelCount = data.panels.length + sectionPanelCount;
-  const sectionCount = data.sections?.length ?? 0;
+  // Count panels and sections from the unified panels array
+  let panelCount = 0;
+  let sectionCount = 0;
+
+  for (const widget of data.panels) {
+    if (isSection(widget)) {
+      sectionCount++;
+      panelCount += widget.panels.length;
+    } else {
+      panelCount++;
+    }
+  }
+
   const sectionInfo =
     sectionCount > 0 ? `, ${sectionCount} section${sectionCount !== 1 ? 's' : ''}` : '';
 

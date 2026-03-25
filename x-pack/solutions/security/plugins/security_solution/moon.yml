@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/security-solution-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-solution'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/security-solution-plugin'
+  title: '@kbn/security-solution-plugin'
   description: Moon project for @kbn/security-solution-plugin
   channel: ''
   owner: '@elastic/security-solution'
-  metadata:
-    sourceRoot: x-pack/solutions/security/plugins/security_solution
+  sourceRoot: x-pack/solutions/security/plugins/security_solution
 dependsOn:
   - '@kbn/setup-node-env'
   - '@kbn/core'
@@ -53,6 +52,7 @@ dependsOn:
   - '@kbn/securitysolution-list-utils'
   - '@kbn/securitysolution-io-ts-list-types'
   - '@kbn/securitysolution-io-ts-alerting-types'
+  - '@kbn/kbn-client'
   - '@kbn/test'
   - '@kbn/std'
   - '@kbn/rule-data-utils'
@@ -76,6 +76,7 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/ecs-data-quality-dashboard'
   - '@kbn/elastic-assistant'
+  - '@kbn/inference-connectors'
   - '@kbn/elastic-assistant-plugin'
   - '@kbn/data-views-plugin'
   - '@kbn/datemath'
@@ -276,11 +277,14 @@ dependsOn:
   - '@kbn/as-code-filters-transforms'
   - '@kbn/cps-utils'
   - '@kbn/cps'
+  - '@kbn/esql-language'
   - '@kbn/workflows-ui'
   - '@kbn/workflows-management-plugin'
   - '@kbn/workflows'
   - '@kbn/deeplinks-workflows'
   - '@kbn/core-rendering-browser'
+  - '@kbn/anonymization-plugin'
+  - '@kbn/anonymization-common'
 tags:
   - plugin
   - prod
@@ -293,6 +297,7 @@ fileGroups:
     - server/**/*
     - scripts/**/*
     - test/scout/**/*
+    - test/scout_security_attacks_alignment/**/*
     - common/**/*.json
     - server/**/*.json
     - scripts/**/*.json

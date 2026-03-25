@@ -178,16 +178,32 @@ Eval suites can be triggered in PR CI by adding GitHub labels:
 
 Evals support optional PR labels for selecting which connector projects to run and (separately) which connector should be used for LLM-as-a-judge evaluators:
 
-- **Model selection**:
-  - `models:all` to opt into **all** available connector projects (LiteLLM + EIS)
+- **Model selection** (required — evals are skipped if no `models:*` label is present):
   - `models:<model-group>` to select one or more model groups
     - LiteLLM model groups typically look like `llm-gateway/<model>`
     - EIS model groups are expressed as `eis/<modelId>` (e.g. `models:eis/gpt-4.1`)
+  - `models:weekly-eis-models` — curated alias that expands to the same EIS model set used by the weekly evals pipeline
 - **Judge override**:
   - `models:judge:<connector-id>` to override the connector id used for LLM-as-a-judge evaluators in CI.
     This takes precedence over the Vault `evaluationConnectorId` fallback (env var overrides still apply in local runs).
 
-#### CI ops: create/update model + judge labels
+Model group aliases (like `models:weekly-eis-models`) are defined in `MODEL_GROUP_ALIASES` in `.buildkite/pipelines/evals/eval_pipeline.ts`.
+
+#### Automated label sync
+
+The `models:*` and `models:judge:*` labels are automatically synced from LiteLLM and EIS model discovery:
+
+- **Weekly**: The weekly LLM evals pipeline includes a label sync step that runs alongside the build.
+- **On demand**: Add the `ci:sync-model-labels` label to any PR to trigger label sync in PR CI.
+
+The sync step:
+1. Discovers available models from both **LiteLLM** (`GET /v1/models`) and **EIS** (via `discover_eis_models.js`)
+2. Creates/updates labels for all discovered models
+3. Marks stale labels as deprecated (renamed from `models:*` to `deprecated:models:*`)
+
+Deprecated labels are kept for historical record — they remain visible on past PRs. The `deprecated:` prefix moves them out of the `models:` autocomplete namespace so they don't clutter label suggestions.
+
+#### CI ops: create/update model + judge labels manually
 
 The helper script `scripts/create_models_labels.sh` is idempotent (safe to re-run) and supports targeting a specific repo.
 
@@ -195,6 +211,12 @@ Update **all** model + judge labels (LiteLLM + EIS) using default discovery sour
 
 ```bash
 ./scripts/create_models_labels.sh --repo elastic/kibana --update-all-labels
+```
+
+To also deprecate stale labels in one step:
+
+```bash
+./scripts/create_models_labels.sh --repo elastic/kibana --update-all-labels --prune
 ```
 
 If you need to run only a subset:
@@ -551,6 +573,25 @@ EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200 node scripts/playwrigh
 
 This creates a dedicated `evaluationsEsClient` that connects to your evaluations cluster while `esClient` continues to use your test environment cluster.
 
+#### Using Separate Clusters and Kibana
+
+Use these settings when traces, evaluation results, or managed datasets live outside the default Scout Kibana/Elasticsearch pair.
+
+| Variable | CLI flag | Purpose |
+| --- | --- | --- |
+| `TRACING_ES_URL` | `--trace-es-url` | Sends trace-based evaluator queries to a separate monitoring Elasticsearch cluster. |
+| `EVALUATIONS_ES_URL` | `--evaluations-es-url` | Exports evaluation scores to a separate Elasticsearch cluster. |
+| `EVALUATIONS_KBN_URL` | `--evaluations-kbn-url` | Routes dataset upsert and dataset lookup operations to a separate Kibana instance. |
+| `EVALUATIONS_KBN_API_KEY` | `--evaluations-kbn-api-key` | Optional API key used for dataset Kibana operations when `EVALUATIONS_KBN_URL` is set. |
+
+#### Using a Separate Kibana for Dataset Operations
+
+By default, dataset sync (`POST /internal/evals/datasets/_upsert`) and dataset resolution by name use the same Kibana client as the eval run.
+If your datasets are curated in another Kibana instance, set `EVALUATIONS_KBN_URL` (or `--evaluations-kbn-url`) so dataset operations target that instance instead.
+
+When that remote Kibana should be accessed with an API key, set `EVALUATIONS_KBN_API_KEY` (or `--evaluations-kbn-api-key`).
+When `EVALUATIONS_KBN_API_KEY` is provided, requests use `Authorization: ApiKey ...`; otherwise URL-embedded credentials in `EVALUATIONS_KBN_URL` are used.
+
 ## Customizing Report Display
 
 By default, evaluation results are displayed in the terminal as a formatted table. You can override this behavior to create custom reports (e.g., JSON files, dashboards, or custom formats).
@@ -601,9 +642,13 @@ The evaluation results are automatically exported to Elasticsearch in datastream
 
 ### Golden cluster API key privileges (required)
 
-When exporting to a “golden”/centralized Elasticsearch cluster via `EVALUATIONS_ES_URL` + `EVALUATIONS_ES_API_KEY`, the exporter will **ensure the `kibana-evaluations` data stream exists**. This requires the ability to create the data stream (internally an `indices:admin/data_stream/create` action), which is granted by index privileges like `create_index` (or broader `manage`/`all`) on the `kibana-evaluations*` pattern.
+When exporting to a “golden”/centralized Elasticsearch cluster via `EVALUATIONS_ES_URL` + `EVALUATIONS_ES_API_KEY`, `@kbn/evals` will export documents into the `kibana-evaluations` data stream.
 
-Use Kibana Dev Tools on the golden cluster to create an API key with the minimal required privileges:
+When exporting to an external cluster (`EVALUATIONS_ES_URL`/`EVALUATIONS_ES_API_KEY`), `@kbn/evals` does **not** attempt to create/update templates or create the data stream. Instead it runs a **preflight export check** (sentinel write + best-effort cleanup) to fail fast when the cluster is misconfigured (missing data stream, incompatible mappings, missing write privileges, etc).
+
+#### Writer key (minimal)
+
+Use Kibana Dev Tools on the golden cluster to create an API key with the minimal privileges required to export results:
 
 ```http
 POST /_security/api_key
@@ -612,13 +657,11 @@ POST /_security/api_key
   "expiration": "365d",
   "role_descriptors": {
     "kbn-evals-evaluations-writer": {
-      "cluster": ["manage_index_templates"],
+      "cluster": [],
       "indices": [
         {
           "names": ["kibana-evaluations*"],
           "privileges": [
-            "auto_configure",
-            "create_index",
             "create_doc",
             "read",
             "view_index_metadata"
@@ -636,6 +679,8 @@ POST /_security/api_key
 ```
 
 Then copy the returned `encoded` value into `evaluationsEs.apiKey` (Vault `kbn-evals` config) as `EVALUATIONS_ES_API_KEY`.
+
+`@kbn/evals` also runs a preflight check that writes a single sentinel document (with a deterministic ID) to validate that exports will succeed. It attempts to delete the document afterwards, but deletion failures are ignored (so the writer key does not need `delete`). Any leftover preflight document uses `run_id:"kbn-evals-preflight"` and `evaluator.name:"preflight"` and should not interfere with normal analysis.
 
 ### Exporting to a separate Elasticsearch cluster
 

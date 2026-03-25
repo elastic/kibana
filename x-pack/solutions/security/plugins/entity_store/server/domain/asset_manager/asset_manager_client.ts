@@ -6,7 +6,11 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
@@ -23,7 +27,7 @@ import {
   HistorySnapshotState,
   LogExtractionConfig,
 } from '../saved_objects';
-import type { HistorySnapshotBodyParams, LogExtractionBodyParams } from '../../routes/constants';
+import type { HistorySnapshotBodyParams, LogExtractionInstallParams } from '../../routes/constants';
 import {
   ENGINE_STATUS,
   ENTITY_STORE_CLUSTER_PRIVILEGES,
@@ -38,7 +42,7 @@ import type {
   GetStatusResult,
 } from '../types';
 import { getExtractEntityTaskId } from '../../tasks/extract_entity_task';
-import { getLatestEntitiesIndexName } from './latest_index';
+import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
 import { getLatestIndexTemplateId } from './latest_index_template';
 import { getUpdatesIndexTemplateId } from './updates_index_template';
 import { getComponentTemplateName, getUpdatesComponentTemplateName } from './component_templates';
@@ -54,6 +58,7 @@ import {
   ENTITY_STORE_INITIALIZATION_FAILURE_EVENT,
 } from '../../telemetry/events';
 import { getErrorMessage } from '../../../common';
+import { stopAndRemoveV1, stopAndRemoveV1SharedTasks } from '../../infra/remove_v1';
 
 interface AssetManagerDependencies {
   logger: Logger;
@@ -66,6 +71,7 @@ interface AssetManagerDependencies {
   logsExtractionClient: LogsExtractionClient;
   security: SecurityPluginStart;
   analytics: TelemetryReporter;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 export class AssetManagerClient {
@@ -79,6 +85,7 @@ export class AssetManagerClient {
   private readonly logsExtractionClient: LogsExtractionClient;
   private readonly security: SecurityPluginStart;
   private readonly analytics: TelemetryReporter;
+  private readonly savedObjectsClient: SavedObjectsClientContract;
 
   constructor(deps: AssetManagerDependencies) {
     this.logger = deps.logger;
@@ -91,20 +98,36 @@ export class AssetManagerClient {
     this.logsExtractionClient = deps.logsExtractionClient;
     this.security = deps.security;
     this.analytics = deps.analytics;
+    this.savedObjectsClient = deps.savedObjectsClient;
   }
 
   public async init(
     request: KibanaRequest,
     entityTypes: EntityType[],
-    logsExtractionParams?: LogExtractionBodyParams,
+    logsExtractionParams?: LogExtractionInstallParams,
     historySnapshotParams?: HistorySnapshotBodyParams
   ) {
     try {
       const logsExtraction = LogExtractionConfig.parse(logsExtractionParams ?? {});
       const historySnapshot = HistorySnapshotState.parse(historySnapshotParams ?? {});
-
       await Promise.all([
         this.globalStateClient.init({ historySnapshot, logsExtraction }),
+
+        ...entityTypes.map((type) =>
+          stopAndRemoveV1({
+            type,
+            namespace: this.namespace,
+            logger: this.logger,
+            esClient: this.esClient,
+            taskManager: this.taskManager,
+            savedObjectsClient: this.savedObjectsClient,
+          })
+        ),
+        stopAndRemoveV1SharedTasks({
+          namespace: this.namespace,
+          logger: this.logger,
+          taskManager: this.taskManager,
+        }),
 
         ...entityTypes.map((type) => this.initEntity(request, type, logsExtraction)),
 
