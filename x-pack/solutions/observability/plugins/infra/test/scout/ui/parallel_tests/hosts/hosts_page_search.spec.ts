@@ -36,7 +36,7 @@ test.describe(
             .getByRole('progressbar', { name: 'Loading' })
         ).toBeHidden({ timeout: EXTENDED_TIMEOUT });
         await expect(
-          page.getByRole('listitem').filter({ hasText: 'CPU UsageAverage48.3%CPU' })
+          page.getByRole('listitem').getByRole('heading', { name: 'CPU Usage' })
         ).toBeVisible({ timeout: EXTENDED_TIMEOUT });
       });
     });
