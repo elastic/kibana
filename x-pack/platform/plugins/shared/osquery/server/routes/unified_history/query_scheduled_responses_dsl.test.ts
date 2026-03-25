@@ -283,6 +283,57 @@ describe('buildScheduledResponsesQuery', () => {
     });
   });
 
+  describe('sortDirection', () => {
+    test('defaults to desc when not provided', () => {
+      const result = buildScheduledResponsesQuery({ spaceId: defaultSpaceId });
+      const aggs = result.body.aggs as Record<string, unknown>;
+      const multiTerms = (aggs.scheduled_executions as Record<string, unknown>)
+        .multi_terms as Record<string, unknown>;
+
+      expect(multiTerms.order).toEqual({ planned_time: 'desc' });
+    });
+
+    test('orders ascending when sortDirection is asc', () => {
+      const result = buildScheduledResponsesQuery({
+        spaceId: defaultSpaceId,
+        sortDirection: 'asc',
+      });
+      const aggs = result.body.aggs as Record<string, unknown>;
+      const multiTerms = (aggs.scheduled_executions as Record<string, unknown>)
+        .multi_terms as Record<string, unknown>;
+
+      expect(multiTerms.order).toEqual({ planned_time: 'asc' });
+    });
+
+    test('cursor filter uses gte when sortDirection is asc', () => {
+      const result = buildScheduledResponsesQuery({
+        spaceId: defaultSpaceId,
+        cursor: '2024-06-01T00:00:00.000Z',
+        sortDirection: 'asc',
+      });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      expect(filters).toContainEqual({
+        range: { planned_schedule_time: { gte: '2024-06-01T00:00:00.000Z' } },
+      });
+    });
+
+    test('cursor filter uses lte when sortDirection is desc', () => {
+      const result = buildScheduledResponsesQuery({
+        spaceId: defaultSpaceId,
+        cursor: '2024-06-01T00:00:00.000Z',
+        sortDirection: 'desc',
+      });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      expect(filters).toContainEqual({
+        range: { planned_schedule_time: { lte: '2024-06-01T00:00:00.000Z' } },
+      });
+    });
+  });
+
   describe('combined options', () => {
     test('applies packIds, cursor, and date range filters together', () => {
       const result = buildScheduledResponsesQuery({
