@@ -103,7 +103,7 @@
               "() => Promise<void>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-            "lineNumber": 384,
+            "lineNumber": 394,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -131,7 +131,7 @@
               ") => Promise<void>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-            "lineNumber": 463,
+            "lineNumber": 473,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -154,7 +154,7 @@
                   "[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-                "lineNumber": 464,
+                "lineNumber": 474,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -171,7 +171,7 @@
                   "ExportScoresOptions"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-                "lineNumber": 465,
+                "lineNumber": 475,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -199,7 +199,7 @@
               " | null>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-            "lineNumber": 582,
+            "lineNumber": 592,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -215,7 +215,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-                "lineNumber": 583,
+                "lineNumber": 593,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -229,7 +229,7 @@
                 "label": "options",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-                "lineNumber": 584,
+                "lineNumber": 594,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -245,7 +245,7 @@
                       "string | undefined"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-                    "lineNumber": 584,
+                    "lineNumber": 594,
                     "columnNumber": 17,
                     "deprecated": false,
                     "trackAdoption": false
@@ -261,7 +261,7 @@
                       "string | undefined"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-                    "lineNumber": 584,
+                    "lineNumber": 594,
                     "columnNumber": 39,
                     "deprecated": false,
                     "trackAdoption": false
@@ -290,7 +290,7 @@
               "[]>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-            "lineNumber": 651,
+            "lineNumber": 661,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -306,7 +306,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-                "lineNumber": 652,
+                "lineNumber": 662,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -320,7 +320,7 @@
                 "label": "options",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-                "lineNumber": 653,
+                "lineNumber": 663,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -336,7 +336,7 @@
                       "string | undefined"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-                    "lineNumber": 653,
+                    "lineNumber": 663,
                     "columnNumber": 17,
                     "deprecated": false,
                     "trackAdoption": false
@@ -352,7 +352,7 @@
                       "string | undefined"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-evals/src/utils/score_repository.ts",
-                    "lineNumber": 653,
+                    "lineNumber": 663,
                     "columnNumber": 39,
                     "deprecated": false,
                     "trackAdoption": false
@@ -2688,15 +2688,7 @@
           "LinkedProjectFixture",
           "; } & { uiSettings: ",
           "UiSettingsFixture",
-          "; } & ",
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.SynthtraceFixture",
-            "text": "SynthtraceFixture"
-          },
-          " & { apiServices: ",
+          "; } & { apiServices: ",
           {
             "pluginId": "@kbn/scout",
             "scope": "common",

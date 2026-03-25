@@ -7,6 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { DEFAULT_LOGS_INDEX } from '../../scripts/significant_events_snapshots/lib/constants';
 
 const SIGEVENTS_INDEX_TEMPLATE = 'sigevents-otel-logs';
 
@@ -22,12 +23,16 @@ const SIGEVENTS_INDEX_TEMPLATE = 'sigevents-otel-logs';
  *    which ES's date parser rejects. Ignoring malformed values lets the
  *    document index successfully while silently dropping the unparseable field.
  */
-export async function ensureLogsIndexTemplate(esClient: Client, log: ToolingLog): Promise<void> {
+export async function ensureLogsIndexTemplate(
+  esClient: Client,
+  log: ToolingLog,
+  streamName: string = DEFAULT_LOGS_INDEX
+): Promise<void> {
   log.debug(`Creating index template "${SIGEVENTS_INDEX_TEMPLATE}"`);
 
   await esClient.indices.putIndexTemplate({
     name: SIGEVENTS_INDEX_TEMPLATE,
-    index_patterns: ['logs'],
+    index_patterns: [streamName],
     data_stream: {},
     template: {
       settings: {
