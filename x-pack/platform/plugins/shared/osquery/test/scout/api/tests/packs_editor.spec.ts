@@ -6,14 +6,14 @@
  */
 
 import type { RoleApiCredentials } from '@kbn/scout';
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData } from '../fixtures';
 
-// TODO: replace '@local-stateful-classic' with tags.stateful.classic once #258883 is released
+// TODO: run tests on Elastic Cloud once bug fix #258883 is released
+// Update tags to tags.stateful.classic and tags.serverless.security.complete
 apiTest.describe(
   'Osquery packs - editor',
-  { tag: ['@local-stateful-classic', ...tags.serverless.security.complete] },
+  { tag: ['@local-stateful-classic', '@local-serverless-security_complete'] },
   () => {
     let editorCredentials: RoleApiCredentials;
     const createdPackIds: string[] = [];

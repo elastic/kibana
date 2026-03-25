@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import type { RoleApiCredentials } from '@kbn/scout';
-import { tags } from '@kbn/scout';
+import type { RoleSessionCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import { apiTest, testData } from '../fixtures';
 
-// TODO: replace '@local-stateful-classic' with tags.stateful.classic once #258866 is released
+// TODO: run on Elastic Cloud once PR #258866 makes it to prod
 apiTest.describe(
   'Osquery packs - admin',
-  { tag: ['@local-stateful-classic', ...tags.serverless.security.complete] },
+  {
+    tag: ['@local-stateful-classic', ...tags.serverless.security.complete],
+  },
   () => {
-    let adminCredentials: RoleApiCredentials;
+    let adminCredentials: RoleSessionCredentials;
     const createdPackIds: string[] = [];
 
-    apiTest.beforeAll(async ({ requestAuth }) => {
-      adminCredentials = await requestAuth.getApiKeyForAdmin();
+    apiTest.beforeAll(async ({ samlAuth }) => {
+      // use cookie-based authentication
+      adminCredentials = await samlAuth.asInteractiveUser('admin');
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
@@ -30,7 +33,7 @@ apiTest.describe(
 
     apiTest('includes profile_uid fields on create and find', async ({ apiClient }) => {
       const createResponse = await apiClient.post(testData.API_PATHS.OSQUERY_PACKS, {
-        headers: { ...testData.COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+        headers: { ...testData.COMMON_HEADERS, ...adminCredentials.cookieHeader },
         body: testData.getMinimalPack(),
         responseType: 'json',
       });
@@ -45,7 +48,7 @@ apiTest.describe(
       const findResponse = await apiClient.get(
         `${testData.API_PATHS.OSQUERY_PACKS}?search=${createResponse.body.data.name}`,
         {
-          headers: { ...testData.COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+          headers: { ...testData.COMMON_HEADERS, ...adminCredentials.cookieHeader },
           responseType: 'json',
         }
       );
