@@ -244,7 +244,9 @@ const categoricalColorMappingSchema = schema.object(
       }),
       { maxSize: 1000 }
     ),
-    unassignedColor: schema.maybe(colorDefSchema),
+    unassigned: schema.maybe(colorDefSchema, {
+      meta: { description: 'The color to use for unassigned values.' },
+    }),
   },
   { meta: { id: 'categoricalColorMapping', title: 'Categorical Color Mapping' } }
 );

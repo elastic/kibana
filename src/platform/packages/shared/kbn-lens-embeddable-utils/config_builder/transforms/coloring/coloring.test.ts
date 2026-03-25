@@ -828,7 +828,7 @@ describe('Color util transforms', () => {
             color: { type: 'color_code', value: '#ff0000' },
           },
         ],
-        unassignedColor: { type: 'color_code', value: '#00ff00' },
+        unassigned: { type: 'color_code', value: '#00ff00' },
       };
 
       const lensState = fromColorMappingAPIToLensState(originalColorMapping);

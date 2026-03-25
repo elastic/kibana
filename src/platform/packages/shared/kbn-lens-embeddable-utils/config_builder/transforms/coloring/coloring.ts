@@ -411,8 +411,8 @@ export function fromColorMappingAPIToLensState(
           type: 'other',
         },
       ],
-      color: colorMapping.unassignedColor
-        ? fromColorDefAPIToLensState(colorMapping.unassignedColor)
+      color: colorMapping.unassigned
+        ? fromColorDefAPIToLensState(colorMapping.unassigned)
         : { type: 'loop' },
       touched: false,
     },
