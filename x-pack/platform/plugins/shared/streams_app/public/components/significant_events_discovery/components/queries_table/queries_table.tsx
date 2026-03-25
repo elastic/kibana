@@ -379,7 +379,7 @@ export function QueriesTable() {
               showQueryMenu={false}
               showQueryInput
               showDatePicker={false}
-              submitButtonStyle="iconOnly"
+              showSubmitButton={false}
               displayStyle="inPage"
               disableQueryLanguageSwitcher
               onQuerySubmit={(queryPayload) => {
