@@ -15,6 +15,7 @@ import type { RiskSeverity } from '../../../../common/search_strategy';
 import { RiskScoreLevel } from '../severity/common';
 import { EntityDetailsLink } from '../../../common/components/links';
 import type { EntityType } from '../../../../common/entity_analytics/types';
+import { useIsIdBasedRiskScoringEnabled } from './is_id_based_risk_scoring_enabled';
 
 type RiskScoreColumn = EuiBasicTableColumn<EntityRiskScoreRecord> & {
   field: keyof EntityRiskScoreRecord;
@@ -27,15 +28,23 @@ export const RiskScorePreviewTable = ({
   items: EntityRiskScoreRecord[];
   type: EntityType;
 }) => {
+  const idBasedRiskScoringEnabled = useIsIdBasedRiskScoringEnabled();
+  const nameColumnTitle = idBasedRiskScoringEnabled ? (
+    <FormattedMessage
+      id="xpack.securitySolution.riskScore.previewTable.idColumnTitle"
+      defaultMessage="ID"
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.securitySolution.riskScore.previewTable.nameColumnTitle"
+      defaultMessage="Name"
+    />
+  );
+
   const columns: RiskScoreColumn[] = [
     {
       field: 'id_value',
-      name: (
-        <FormattedMessage
-          id="xpack.securitySolution.riskScore.previewTable.nameColumnTitle"
-          defaultMessage="Name"
-        />
-      ),
+      name: nameColumnTitle,
       render: (entityName: string) => (
         <EntityDetailsLink entityName={entityName} entityType={type} />
       ),

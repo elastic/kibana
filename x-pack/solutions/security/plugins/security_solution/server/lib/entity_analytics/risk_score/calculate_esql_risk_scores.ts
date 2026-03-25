@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+// TODO: When entityStoreV2 (securitySolution:entityStoreEnableV2) is permanently enabled:
+// 1. Remove the `idBasedRiskScoringEnabled` parameter from calculateScoresWithESQL, getCompositeQuery,
+//    getESQL, and buildRiskScoreBucket.
+// 2. Delete all V1 (legacy) code paths — the `else` branches and the V1 block in getESQL.
+// 3. Remove legacy identifier field mapping (`EntityTypeToIdentifierField`) and keep `entity.id`
+//    as the single output id field across entity types.
+// 4. Remove the FF read from risk_score_service.ts and risk_score_preview_section.tsx.
+
 import { isEmpty, omit } from 'lodash';
 import type { FieldValue, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
@@ -16,8 +24,9 @@ import {
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { toEntries } from 'fp-ts/Record';
 
-import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
+import { euid } from '@kbn/entity-store/common';
 import { getEntityAnalyticsEntityTypes } from '../../../../common/entity_analytics/utils';
+
 import type { EntityType } from '../../../../common/search_strategy';
 import type { ExperimentalFeatures } from '../../../../common';
 
@@ -32,9 +41,36 @@ import type { AssetCriticalityService } from '../asset_criticality/asset_critica
 import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics';
 import type { CalculateScoresParams, RiskScoreBucket, RiskScoreCompositeBuckets } from '../types';
 import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
-import { filterFromRange } from './helpers';
+import {
+  escapeEsqlStringLiteral,
+  filterFromRange,
+  getOutputIdentifierField,
+  getQueryIdentifierField,
+  getRiskScoreEntityIdField,
+} from './helpers';
 import { applyScoreModifiers } from './apply_score_modifiers';
 import type { PrivmonUserCrudService } from '../privilege_monitoring/users/privileged_users_crud';
+
+/**
+ * Build V2 identity projection for ESQL.
+ * Returns the identity source fields, the columns to emit for the identity stats,
+ * and the clause to filter documents by the required fields.
+ */
+const getIdentityStatsForEsql = (
+  entityType: EntityType
+): {
+  identitySourceFields: string[];
+  identityStatsColumns: string;
+} => {
+  const { identitySourceFields } = euid.getEuidSourceFields(entityType);
+
+  // Emit positional columns (`id_src_0`, `id_src_1`, ...) for each identity source field
+  const identityStatsColumns = identitySourceFields
+    .map((field, i) => `id_src_${i} = FIRST(TO_STRING(${field}), time)`)
+    .join(',\n          ');
+
+  return { identitySourceFields, identityStatsColumns };
+};
 
 type ESQLResults = Array<
   [EntityType, { scores: EntityRiskScoreRecord[]; afterKey: EntityAfterKey }]
@@ -47,12 +83,13 @@ export const calculateScoresWithESQL = async (
     esClient: ElasticsearchClient;
     logger: Logger;
     experimentalFeatures: ExperimentalFeatures;
+    idBasedRiskScoringEnabled: boolean;
   } & CalculateScoresParams & {
       filters?: Array<{ entity_types: string[]; filter: string }>;
     }
 ): Promise<RiskScoresPreviewResponse> =>
   withSecuritySpan('calculateRiskScores', async () => {
-    const { identifierType, logger, esClient } = params;
+    const { identifierType, logger, esClient, idBasedRiskScoringEnabled } = params;
     const now = new Date().toISOString();
 
     const identifierTypes: EntityType[] = identifierType
@@ -64,7 +101,7 @@ export const calculateScoresWithESQL = async (
       const filter = getFilters(params, entityType);
       return {
         entityType,
-        query: getCompositeQuery([entityType], filter, params),
+        query: getCompositeQuery([entityType], filter, params, idBasedRiskScoringEnabled),
       };
     });
 
@@ -84,6 +121,9 @@ export const calculateScoresWithESQL = async (
           .search<never, RiskScoreCompositeBuckets>(query)
           .catch((e) => {
             logger.error(`Error executing composite query for ${entityType}: ${e.message}`);
+            logger.debug(
+              `Full composite query error: ${JSON.stringify(e?.body?.error?.root_cause || e)}`
+            );
             error = e;
             return null;
           });
@@ -159,9 +199,11 @@ export const calculateScoresWithESQL = async (
           buckets: Array<{ key: Record<string, string> }>;
           after_key?: Record<string, string>;
         };
-        const entities = buckets.map(
-          ({ key }) => key[(EntityTypeToIdentifierField as Record<string, string>)[entityType]]
-        );
+        const typedEntityType = entityType as EntityType;
+        const entityIdField = getQueryIdentifierField(typedEntityType, idBasedRiskScoringEnabled);
+        const entities = buckets
+          .map(({ key }) => key[entityIdField])
+          .filter((entity): entity is string => entity != null && entity !== '');
 
         if (entities.length === 0) {
           return Promise.resolve([
@@ -171,32 +213,46 @@ export const calculateScoresWithESQL = async (
         }
         const bounds = {
           lower: (params.afterKeys as Record<string, Record<string, string>>)[entityType]?.[
-            (EntityTypeToIdentifierField as Record<string, string>)[entityType]
+            entityIdField
           ],
-          upper: afterKey?.[(EntityTypeToIdentifierField as Record<string, string>)[entityType]],
+          upper: afterKey?.[entityIdField],
         };
 
         const query = getESQL(
-          entityType as EntityType,
+          typedEntityType,
           bounds,
           params.alertSampleSizePerShard || 10000,
           params.pageSize,
-          params.index
+          params.index,
+          idBasedRiskScoringEnabled
         );
 
-        const entityFilter = getFilters(params, entityType as EntityType);
+        const identitySourceFields = idBasedRiskScoringEnabled
+          ? getIdentityStatsForEsql(typedEntityType).identitySourceFields
+          : undefined;
+
+        const entityFilter = getFilters(params, typedEntityType);
         return esClient.esql
           .query({
             query,
             filter: { bool: { filter: entityFilter } },
           })
-          .then((rs) => rs.values.map(buildRiskScoreBucket(entityType as EntityType, params.index)))
+          .then((rs) =>
+            rs.values.map(
+              buildRiskScoreBucket(
+                typedEntityType,
+                params.index,
+                idBasedRiskScoringEnabled,
+                identitySourceFields
+              )
+            )
+          )
 
           .then(async (riskScoreBuckets) => {
-            const results = await applyScoreModifiers({
+            return applyScoreModifiers({
               now,
               experimentalFeatures: params.experimentalFeatures,
-              identifierType: entityType as EntityType,
+              identifierType: typedEntityType,
               deps: {
                 assetCriticalityService: params.assetCriticalityService,
                 privmonUserCrudService: params.privmonUserCrudService,
@@ -206,13 +262,12 @@ export const calculateScoresWithESQL = async (
               page: {
                 buckets: riskScoreBuckets,
                 bounds,
-                identifierField: (EntityTypeToIdentifierField as Record<string, string>)[
-                  entityType
-                ],
+                identifierField: getOutputIdentifierField(
+                  typedEntityType,
+                  idBasedRiskScoringEnabled
+                ),
               },
             });
-
-            return results;
           })
           .then((scores: EntityRiskScoreRecord[]): ESQLResults[number] => {
             return [
@@ -238,7 +293,7 @@ export const calculateScoresWithESQL = async (
     );
     const esqlResults = await Promise.all(promises);
 
-    const results: RiskScoresPreviewResponse = esqlResults.reduce<RiskScoresPreviewResponse>(
+    return esqlResults.reduce<RiskScoresPreviewResponse>(
       (res, [entityType, { afterKey, scores }]) => {
         res.after_keys[entityType] = afterKey || {};
         res.scores[entityType] = scores;
@@ -246,8 +301,6 @@ export const calculateScoresWithESQL = async (
       },
       { after_keys: {}, scores: {} }
     );
-
-    return results;
   });
 
 const getFilters = (options: CalculateScoresParams, entityType?: EntityType) => {
@@ -298,13 +351,26 @@ const getFilters = (options: CalculateScoresParams, entityType?: EntityType) => 
 export const getCompositeQuery = (
   entityTypes: EntityType[],
   filter: QueryDslQueryContainer[],
-  params: CalculateScoresParams
+  params: CalculateScoresParams,
+  idBasedRiskScoringEnabled: boolean
 ) => {
+  const runtimeMappings = idBasedRiskScoringEnabled
+    ? {
+        ...params.runtimeMappings,
+        ...Object.fromEntries(
+          entityTypes.map((entityType) => [
+            getRiskScoreEntityIdField(entityType),
+            euid.getEuidPainlessRuntimeMapping(entityType),
+          ])
+        ),
+      }
+    : params.runtimeMappings;
+
   return {
     size: 0,
     index: params.index,
     ignore_unavailable: true,
-    runtime_mappings: params.runtimeMappings,
+    runtime_mappings: runtimeMappings,
     query: {
       function_score: {
         query: {
@@ -323,7 +389,7 @@ export const getCompositeQuery = (
       },
     },
     aggs: entityTypes.reduce((aggs, entityType) => {
-      const idField = EntityTypeToIdentifierField[entityType];
+      const idField = getQueryIdentifierField(entityType, idBasedRiskScoringEnabled);
       return {
         ...aggs,
         [entityType]: {
@@ -346,9 +412,56 @@ export const getESQL = (
   },
   sampleSize: number,
   pageSize: number,
-  index: string = '.alerts-security.alerts-default'
+  index: string = '.alerts-security.alerts-default',
+  idBasedRiskScoringEnabled: boolean = false
 ) => {
-  const identifierField = EntityTypeToIdentifierField[entityType];
+  if (idBasedRiskScoringEnabled) {
+    // V2: EUID-based identification with runtime EVAL and identity source fields for entity store
+    const identifierField = getQueryIdentifierField(entityType, idBasedRiskScoringEnabled);
+    const { identityStatsColumns } = getIdentityStatsForEsql(entityType);
+    const docContainsEuidField = euid.getEuidEsqlDocumentsContainsIdFilter(entityType);
+
+    const lower = afterKeys.lower
+      ? `${identifierField} > "${escapeEsqlStringLiteral(afterKeys.lower)}"`
+      : undefined;
+    const upper = afterKeys.upper
+      ? `${identifierField} <= "${escapeEsqlStringLiteral(afterKeys.upper)}"`
+      : undefined;
+    if (!lower && !upper) {
+      throw new Error('Either lower or upper after key must be provided for pagination');
+    }
+    const rangeClause = [lower, upper].filter(Boolean).join(' AND ');
+
+    const statsClause = `| STATS
+          alert_count = count(risk_score),
+          scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${sampleSize}, "desc"), ${RIEMANN_ZETA_S_VALUE}),
+          risk_inputs = TOP(input, 10, "desc"),
+          ${identityStatsColumns}
+      BY ${identifierField}`;
+
+    return /* ESQL */ `
+    FROM ${index} METADATA _index
+      | WHERE kibana.alert.risk_score IS NOT NULL
+      | WHERE ${docContainsEuidField}
+      | RENAME kibana.alert.risk_score as risk_score,
+               kibana.alert.rule.name as rule_name,
+               kibana.alert.rule.uuid as rule_id,
+               kibana.alert.uuid as alert_id,
+               event.kind as category,
+               @timestamp as time
+      | EVAL ${identifierField} = ${euid.getEuidEsqlEvaluation(entityType, { withTypeId: true })}
+      | WHERE ${rangeClause}
+      | EVAL rule_name_b64 = TO_BASE64(rule_name),
+             category_b64 = TO_BASE64(category)
+      | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
+      ${statsClause}
+      | SORT scores DESC
+      | LIMIT ${pageSize}
+    `;
+  }
+
+  // V1: Legacy name-based identification
+  const identifierField = getQueryIdentifierField(entityType, idBasedRiskScoringEnabled);
 
   const lower = afterKeys.lower ? `${identifierField} > ${afterKeys.lower}` : undefined;
   const upper = afterKeys.upper ? `${identifierField} <= ${afterKeys.upper}` : undefined;
@@ -357,7 +470,7 @@ export const getESQL = (
   }
   const rangeClause = [lower, upper].filter(Boolean).join(' and ');
 
-  const query = /* SQL */ `
+  return /* ESQL */ `
   FROM ${index} METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND KQL("${rangeClause}")
     | RENAME kibana.alert.risk_score as risk_score,
@@ -377,19 +490,63 @@ export const getESQL = (
     | SORT scores DESC
     | LIMIT ${pageSize}
   `;
+};
 
-  return query;
+/**
+ * ESQL row layout:
+ * - base columns: count, score, risk_inputs
+ * - optional V2 columns: id_src_0...id_src_n
+ * - trailing BY column: entity identifier
+ */
+const ESQL_ROW_INDEX = {
+  count: 0,
+  score: 1,
+  riskInputs: 2,
+  identityStart: 3,
+} as const;
+
+const getEntityRowIndex = (identityCount: number): number =>
+  ESQL_ROW_INDEX.identityStart + identityCount;
+
+/**
+ * V2 ESQL appends dynamic identity columns (`id_src_0`, `id_src_1`, ...) before the BY column.
+ * This function rebuilds an object keyed by the original field names
+ */
+const buildIdentitySourceFromRow = (
+  row: FieldValue[],
+  identitySourceFields: string[] | undefined,
+  idBasedRiskScoringEnabled: boolean
+): RiskScoreBucket['euid_fields'] => {
+  if (!idBasedRiskScoringEnabled || !identitySourceFields || identitySourceFields.length === 0) {
+    return undefined;
+  }
+
+  return Object.fromEntries(
+    identitySourceFields
+      .map((field, i) => [field, row[ESQL_ROW_INDEX.identityStart + i]])
+      .filter(([, value]) => value != null && value !== '')
+      .map(([field, value]) => [field, String(value)])
+  );
 };
 
 export const buildRiskScoreBucket =
-  (entityType: EntityType, index: string) =>
+  (
+    entityType: EntityType,
+    index: string,
+    idBasedRiskScoringEnabled: boolean,
+    identitySourceFields?: string[]
+  ) =>
   (row: FieldValue[]): RiskScoreBucket => {
-    const [count, score, _inputs, entity] = row as [
-      number,
-      number,
-      string | string[], // ES Multivalue nonsense: if it's just one value we get the value, if it's multiple we get an array
-      string
-    ];
+    const identityCount = identitySourceFields?.length ?? 0;
+    const count = row[ESQL_ROW_INDEX.count] as number;
+    const score = row[ESQL_ROW_INDEX.score] as number;
+    const _inputs = row[ESQL_ROW_INDEX.riskInputs] as string | string[];
+    const entity = row[getEntityRowIndex(identityCount)] as string;
+    const identitySource = buildIdentitySourceFromRow(
+      row,
+      identitySourceFields,
+      idBasedRiskScoringEnabled
+    );
 
     const inputs = (Array.isArray(_inputs) ? _inputs : [_inputs]).map((input, i) => {
       let parsedRiskInputData = JSON.parse('{}');
@@ -435,8 +592,10 @@ export const buildRiskScoreBucket =
       };
     });
 
-    return {
-      key: { [EntityTypeToIdentifierField[entityType]]: entity },
+    const bucket: RiskScoreBucket = {
+      key: {
+        [getOutputIdentifierField(entityType, idBasedRiskScoringEnabled)]: entity,
+      },
       doc_count: count,
       top_inputs: {
         doc_count: inputs.length,
@@ -452,4 +611,8 @@ export const buildRiskScoreBucket =
         },
       },
     };
+    if (identitySource !== undefined) {
+      bucket.euid_fields = identitySource;
+    }
+    return bucket;
   };

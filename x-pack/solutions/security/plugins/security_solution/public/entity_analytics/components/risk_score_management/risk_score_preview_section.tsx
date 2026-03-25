@@ -24,7 +24,10 @@ import type { BoolQuery } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PageScope } from '../../../data_view_manager/constants';
 import type { EntityType } from '../../../../common/entity_analytics/types';
-import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
+import {
+  EntityTypeToIdentifierField,
+  EntityIdentifierFields,
+} from '../../../../common/entity_analytics/types';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 import { RISK_SCORE_INDEX_PATTERN } from '../../../../common/entity_analytics/risk_engine';
 import { RiskScorePreviewTable } from './risk_score_preview_table';
@@ -38,6 +41,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useEntityAnalyticsTypes } from '../../hooks/use_enabled_entity_types';
 import type { AlertFilter } from './common';
+import { useIsIdBasedRiskScoringEnabled } from './is_id_based_risk_scoring_enabled';
 
 interface IRiskScorePreviewPanel {
   showMessage: React.ReactNode;
@@ -138,7 +142,7 @@ const RiskScorePreviewPanel = ({
         buttonContent={trigger === 'closed' ? showMessage : hideMessage}
         forceState={trigger}
         onToggle={onToggle}
-        extraAction={<EuiIcon type={EntityIconByType[type]} />}
+        extraAction={<EuiIcon type={EntityIconByType[type]} aria-hidden={true} />}
       >
         <>
           <EuiSpacer size={'m'} />
@@ -156,6 +160,12 @@ const RiskEnginePreview: React.FC<{
   alertFilters?: Array<AlertFilter>;
 }> = ({ includeClosedAlerts, from, to, alertFilters }) => {
   const entityTypes = useEntityAnalyticsTypes();
+  const idBasedRiskScoringEnabled = useIsIdBasedRiskScoringEnabled();
+  const getEntityIdentifierField = (entityType: EntityType) => {
+    return idBasedRiskScoringEnabled
+      ? EntityIdentifierFields.generic
+      : EntityTypeToIdentifierField[entityType];
+  };
 
   const [filters] = useState<{ bool: BoolQuery }>({
     bool: { must: [], filter: [], should: [], must_not: [] },
@@ -213,7 +223,7 @@ const RiskEnginePreview: React.FC<{
           <RiskScorePreviewPanel
             items={getRiskiestScores(
               data?.scores[entityType],
-              EntityTypeToIdentifierField[entityType]
+              getEntityIdentifierField(entityType)
             )}
             showMessage={
               <FormattedMessage

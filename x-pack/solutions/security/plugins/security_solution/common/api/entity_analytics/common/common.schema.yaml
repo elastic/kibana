@@ -183,6 +183,9 @@ components:
           type: string
           example: "example.host"
           description: The identifier value defining this risk score. Coupled with `id_field`, uniquely identifies the entity being scored.
+        euid_fields_raw:
+          type: string
+          description: JSON-encoded source field values keyed by ECS field path which generated the entities ID.
         calculated_level:
           $ref: "#/components/schemas/EntityRiskLevels"
           example: "Critical"

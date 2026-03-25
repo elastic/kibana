@@ -38,6 +38,9 @@ Object {
               "category_1_score": Object {
                 "type": "float",
               },
+              "euid_fields_raw": Object {
+                "type": "keyword",
+              },
               "id_field": Object {
                 "type": "keyword",
               },
@@ -117,6 +120,9 @@ Object {
               "category_1_score": Object {
                 "type": "float",
               },
+              "euid_fields_raw": Object {
+                "type": "keyword",
+              },
               "id_field": Object {
                 "type": "keyword",
               },
@@ -195,6 +201,9 @@ Object {
               },
               "category_1_score": Object {
                 "type": "float",
+              },
+              "euid_fields_raw": Object {
+                "type": "keyword",
               },
               "id_field": Object {
                 "type": "keyword",

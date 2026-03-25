@@ -36,7 +36,10 @@ type Handler = (
   response: KibanaResponseFactory
 ) => Promise<IKibanaResponse<RiskScoresCalculationResponse>>;
 
-const handler: (logger: Logger) => Handler = (logger) => async (context, request, response) => {
+const handler: (
+  logger: Logger,
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
+) => Handler = (logger, getStartServices) => async (context, request, response) => {
   const securityContext = await context.securitySolution;
 
   securityContext.getAuditLogger()?.log({
@@ -54,7 +57,13 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
   const siemResponse = buildSiemResponse(response);
   const soClient = coreContext.savedObjects.client;
 
-  const riskScoreService = buildRiskScoreServiceForRequest(securityContext, coreContext, logger);
+  const [, startPlugins] = await getStartServices();
+  const riskScoreService = buildRiskScoreServiceForRequest(
+    securityContext,
+    coreContext,
+    logger,
+    startPlugins.entityStore
+  );
 
   const { identifier_type: identifierType, identifier, refresh } = request.body;
 
@@ -186,7 +195,7 @@ export const deprecatedRiskScoreEntityCalculationRoute = (
           },
         },
       },
-      withRiskEnginePrivilegeCheck(getStartServices, handler(logger))
+      withRiskEnginePrivilegeCheck(getStartServices, handler(logger, getStartServices))
     );
 };
 
@@ -214,6 +223,6 @@ export const riskScoreEntityCalculationRoute = (
           },
         },
       },
-      withRiskEnginePrivilegeCheck(getStartServices, handler(logger))
+      withRiskEnginePrivilegeCheck(getStartServices, handler(logger, getStartServices))
     );
 };

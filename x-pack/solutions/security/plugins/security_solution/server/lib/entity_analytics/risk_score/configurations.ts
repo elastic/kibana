@@ -22,6 +22,16 @@ const commonRiskFields: FieldMap = {
     array: false,
     required: false,
   },
+  // Persist identity source fields as a JSON string because ESQL cannot reliably
+  // read flattened/object identity maps in this flow yet.
+  // TODO: Replace euid_fields_raw with structured identity fields once ESQL
+  // supports flattened usage:
+  // https://github.com/elastic/elasticsearch/pull/142375
+  euid_fields_raw: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   calculated_level: {
     type: 'keyword',
     array: false,

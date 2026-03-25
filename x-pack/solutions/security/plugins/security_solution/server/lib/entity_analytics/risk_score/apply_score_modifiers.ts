@@ -21,7 +21,11 @@ import type { PrivmonUserCrudService } from '../privilege_monitoring/users/privi
 
 import type { RiskScoreBucket } from '../types';
 import { RIEMANN_ZETA_VALUE } from './constants';
-import { getGlobalWeightForIdentifierType, max10DecimalPlaces } from './helpers';
+import {
+  getGlobalWeightForIdentifierType,
+  max10DecimalPlaces,
+  serializeIdentitySourceFields,
+} from './helpers';
 
 import {
   applyCriticalityModifier,
@@ -150,7 +154,7 @@ export const riskScoreDocFactory =
 
     const legacyCat2Fields = buildLegacyCriticalityFields(found);
 
-    return {
+    const record: EntityRiskScoreRecord = {
       '@timestamp': now,
       id_field: identifierField,
       id_value: bucket.key[identifierField],
@@ -169,6 +173,10 @@ export const riskScoreDocFactory =
         contribution_score: riskInput.contribution,
       })),
     };
+    if (bucket.euid_fields !== undefined) {
+      record.euid_fields_raw = serializeIdentitySourceFields(bucket.euid_fields);
+    }
+    return record as EntityRiskScoreRecord;
   };
 
 const getProportionalModifierContribution =

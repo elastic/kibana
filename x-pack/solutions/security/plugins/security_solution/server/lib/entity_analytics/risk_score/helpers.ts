@@ -8,7 +8,10 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
 import type { EntityType } from '../../../../common/entity_analytics/types';
-import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
+import {
+  EntityIdentifierFields,
+  EntityTypeToIdentifierField,
+} from '../../../../common/entity_analytics/types';
 import type {
   RiskScoresCalculationResponse,
   AssetCriticalityRecord,
@@ -27,11 +30,43 @@ import {
 } from '../../../../common/entity_analytics/risk_engine';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
 import { applyCriticalityToScore, getCriticalityModifier } from '../asset_criticality/helpers';
-import type { CalculateScoresParams, RiskScoreBucket } from '../types';
+import type { CalculateScoresParams, IdentitySourceFieldsMap, RiskScoreBucket } from '../types';
 import { RIEMANN_ZETA_VALUE } from './constants';
 
 export const getFieldForIdentifier = (identifierType: EntityType): string =>
   EntityTypeToIdentifierField[identifierType];
+
+/**
+ * Internal runtime field name for risk score composite aggregation and ESQL.
+ * Using our own name (instead of ECS identity fields like user.entity.id) avoids the
+ * Painless script referencing the same field it defines, which causes script_exception
+ * in composite aggs. API responses continue to expose normalized `entity.id` for V2.
+ */
+export const getRiskScoreEntityIdField = (entityType: string): string => `${entityType}_id`;
+
+/**
+ * Returns the identifier field used inside queries (composite aggs, ESQL BY clauses).
+ * V2 uses a synthetic runtime field; V1 uses the legacy ECS field.
+ */
+export const getQueryIdentifierField = (
+  entityType: EntityType,
+  idBasedRiskScoringEnabled: boolean
+): string =>
+  idBasedRiskScoringEnabled
+    ? getRiskScoreEntityIdField(entityType)
+    : EntityTypeToIdentifierField[entityType];
+
+/**
+ * Returns the identifier field exposed in API responses and stored in risk score documents.
+ * V2 normalizes to `entity.id`; V1 uses the per-type ECS field.
+ */
+export const getOutputIdentifierField = (
+  entityType: EntityType,
+  idBasedRiskScoringEnabled: boolean
+): string =>
+  idBasedRiskScoringEnabled
+    ? EntityIdentifierFields.generic
+    : EntityTypeToIdentifierField[entityType];
 
 export const getAfterKeyForIdentifierType = ({
   afterKeys,
@@ -47,6 +82,46 @@ export const isRiskScoreCalculationComplete = (result: RiskScoresCalculationResp
   Object.keys(result.after_keys.service ?? {}).length === 0;
 
 export const max10DecimalPlaces = (num: number) => Math.round(num * 1e10) / 1e10;
+
+/**
+ * Escapes user-controlled values used inside ESQL double-quoted string literals.
+ * Keep backslash escaping first to avoid double-escaping inserted escapes.
+ */
+export const escapeEsqlStringLiteral = (value: string): string =>
+  value
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/\t/g, '\\t');
+
+export const serializeIdentitySourceFields = (
+  identitySourceFields: IdentitySourceFieldsMap
+): string =>
+  JSON.stringify(
+    Object.fromEntries(
+      Object.entries(identitySourceFields).sort(([left], [right]) => left.localeCompare(right))
+    )
+  );
+
+export const parseIdentitySourceFields = (
+  rawIdentityFields: unknown
+): IdentitySourceFieldsMap | undefined => {
+  if (typeof rawIdentityFields !== 'string' || rawIdentityFields === '') {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(rawIdentityFields) as unknown;
+    if (parsed && typeof parsed === 'object') {
+      return parsed as IdentitySourceFieldsMap;
+    }
+  } catch {
+    // Malformed identity payloads should not fail score processing.
+  }
+
+  return undefined;
+};
 
 export const filterFromRange = (range: CalculateScoresParams['range']): QueryDslQueryContainer => ({
   range: { '@timestamp': { lt: range.end, gte: range.start } },
@@ -168,7 +243,7 @@ export const processScores = async ({
       (c) => c.id_field === identifierField && c.id_value === bucket.key[identifierField]
     );
 
-    return formatForResponse({
+    const record: EntityRiskScoreRecord = formatForResponse({
       bucket,
       criticality,
       identifierField,
@@ -176,5 +251,11 @@ export const processScores = async ({
       includeNewFields: true,
       globalWeight,
     });
+
+    if (bucket.euid_fields !== undefined) {
+      record.euid_fields_raw = serializeIdentitySourceFields(bucket.euid_fields);
+    }
+
+    return record;
   });
 };
