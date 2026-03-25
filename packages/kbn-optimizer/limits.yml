@@ -173,10 +173,10 @@ pageLoadAssetSize:
   share: 58677
   slo: 40437
   snapshotRestore: 22068
-  spaces: 30016
+  spaces: 28871
   stackAlerts: 31499
   stackConnectors: 85421
-  streams: 10000
+  streams: 11422
   streamsApp: 25375
   synthetics: 31571
   telemetry: 25755
