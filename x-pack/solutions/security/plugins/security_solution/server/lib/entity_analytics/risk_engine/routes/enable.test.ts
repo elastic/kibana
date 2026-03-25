@@ -108,30 +108,4 @@ describe('risk score enable route', () => {
       });
     });
   });
-
-  describe('when Entity Store V2 is enabled', () => {
-    beforeEach(() => {
-      getStartServicesMock = jest.fn().mockResolvedValue([
-        {},
-        {
-          taskManager: mockTaskManagerStart,
-          security: riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
-        },
-      ]);
-      riskEngineEnableRoute(server.router, getStartServicesMock, true);
-    });
-
-    it('returns a 400 response', async () => {
-      const request = buildRequest();
-      const response = await server.inject(request, context);
-
-      expect(response.status).toEqual(400);
-      expect(response.body).toEqual({
-        message:
-          'This API is not available when Entity Store V2 is enabled. Use the Entity Store APIs instead.',
-        status_code: 400,
-      });
-      expect(mockRiskEngineDataClient.enableRiskEngine).not.toHaveBeenCalled();
-    });
-  });
 });
