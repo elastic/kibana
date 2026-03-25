@@ -108,8 +108,14 @@ export const getProcessedAlertIds = async ({
       primaryTerm: hit._primary_term,
     };
   } catch (error) {
-    logger.warn(`Failed to get processed alert IDs for case ${caseId}: ${error}`);
-    return null;
+    // Index not found (404) is expected when no alerts have been processed yet
+    const statusCode = (error as { meta?: { statusCode?: number } }).meta?.statusCode;
+    if (statusCode === 404) {
+      logger.debug(`Tracker index ${indexName} not found for case ${caseId}, treating as empty`);
+      return null;
+    }
+    // Re-throw transient errors so callers don't silently lose seq_no/primary_term
+    throw error;
   }
 };
 

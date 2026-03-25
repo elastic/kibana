@@ -73,7 +73,8 @@ export class CaseEntityIndex {
     const candidates = new Set<string>();
 
     for (const entity of alertEntities) {
-      const entityKey = `${entity.typeKey}::${entity.value.toLowerCase()}`;
+      const normalizedTypeKey = this.normalizeTypeKey(entity.typeKey);
+      const entityKey = `${normalizedTypeKey}::${entity.value.toLowerCase()}`;
       const matchingCases = this.entityToCases.get(entityKey);
 
       if (matchingCases) {

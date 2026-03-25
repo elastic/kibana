@@ -90,7 +90,7 @@ export async function enrichAlertsWithEntityRisk({
     const staticRisk = getRiskScoreFromAlert(alert);
     const maxEntityRisk = entityRiskScores.length > 0
       ? Math.max(...entityRiskScores.map((e) => e.riskScore))
-      : 50; // Neutral if no entity risk found
+      : 100; // Preserve original score when no entity risk data is available
 
     // Adjusted = static × (entity_risk / 100)
     // Examples:
@@ -121,9 +121,11 @@ async function queryEntityRisk(
   entityType: 'host' | 'user',
   entityName: string
 ): Promise<EntityRiskScore | null> {
+  // Escape special characters in entityName to prevent KQL injection / malformed queries
+  const escapedName = entityName.replace(/[\\"]/g, '\\$&');
   const result = await client.searchEntities({
     entityTypes: [entityType],
-    filterQuery: `${entityType}.name: "${entityName}"`,
+    filterQuery: `${entityType}.name: "${escapedName}"`,
     page: 1,
     perPage: 1,
     sortField: '@timestamp',

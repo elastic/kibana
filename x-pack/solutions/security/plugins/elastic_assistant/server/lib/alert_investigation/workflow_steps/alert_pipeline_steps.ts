@@ -111,7 +111,7 @@ export const DeduplicateAlertsStepId = 'security.deduplicateAlerts';
 const DedupInputSchema = z.object({
   alert_ids: LiquidArraySchema,
   index_pattern: SafeAlertIndexPattern,
-  similarity_threshold: z.number().default(PIPELINE_LIMITS.JACCARD_SIMILARITY_THRESHOLD),
+  similarity_threshold: z.number().min(0).max(1).default(PIPELINE_LIMITS.JACCARD_SIMILARITY_THRESHOLD),
 });
 
 const DedupOutputSchema = z.object({

@@ -69,9 +69,9 @@ describe('Entity Risk Enrichment - Error Scenarios', () => {
       logger: mockLogger,
     });
 
-    // Should fallback to static risk
+    // Should preserve static risk when entity lookup fails (maxEntityRisk defaults to 100)
     expect(result).toHaveLength(1);
-    expect(result[0].adjustedRiskScore).toBe(75 * 0.5); // Static × neutral (50)
+    expect(result[0].adjustedRiskScore).toBe(75); // Static × (100/100) = 75
     expect(result[0].entityRiskScores).toEqual([]);
 
     // Should log failures
@@ -103,8 +103,8 @@ describe('Entity Risk Enrichment - Error Scenarios', () => {
       logger: mockLogger,
     });
 
-    // Should use neutral risk (50) when entity not found
-    expect(result[0].adjustedRiskScore).toBe(75 * 0.5); // 75 × (50/100) = 37.5
+    // Should preserve static risk when entity not found (maxEntityRisk defaults to 100)
+    expect(result[0].adjustedRiskScore).toBe(75); // 75 × (100/100) = 75
     expect(result[0].entityRiskScores).toEqual([]);
   });
 
@@ -127,8 +127,8 @@ describe('Entity Risk Enrichment - Error Scenarios', () => {
       logger: mockLogger,
     });
 
-    // Should use neutral risk
-    expect(result[0].adjustedRiskScore).toBe(60 * 0.5);
+    // Should preserve static risk when no host/user (maxEntityRisk defaults to 100)
+    expect(result[0].adjustedRiskScore).toBe(60); // 60 × (100/100) = 60
     expect(result[0].entityRiskScores).toEqual([]);
     expect(mockEntityStore.searchEntities).not.toHaveBeenCalled();
   });

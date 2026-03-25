@@ -12,6 +12,9 @@ import { validateEntity } from './entity_validators';
 
 const IPV4_REGEX = /^(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
 
+// Matches valid IPv6 addresses: full, compressed (::), mixed (::ffff:1.2.3.4), etc.
+const IPV6_REGEX = /^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$|^::$|^::1$|^([0-9a-fA-F]{1,4}:){1,6}(25[0-5]|2[0-4]\d|[01]?\d\d?)(\.(25[0-5]|2[0-4]\d|[01]?\d\d?)){3}$/;
+
 const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => {
   const parts = path.split('.');
   let current: unknown = obj;
@@ -24,8 +27,11 @@ const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => 
   return current;
 };
 
-const resolveIpType = (value: string): ObservableTypeKey =>
-  IPV4_REGEX.test(value) ? 'ipv4' : 'ipv6';
+const resolveIpType = (value: string): ObservableTypeKey | null => {
+  if (IPV4_REGEX.test(value)) return 'ipv4';
+  if (IPV6_REGEX.test(value)) return 'ipv6';
+  return null;
+};
 
 const isExcluded = (
   typeKey: ObservableTypeKey,
@@ -92,6 +98,16 @@ export const extractEntitiesFromAlerts = ({
 
         for (const value of values) {
           const typeKey = mapping.detectIpVersion ? resolveIpType(value) : mapping.observableType;
+
+          // If detectIpVersion is set but value isn't a valid IP, skip it
+          if (typeKey == null) {
+            invalidEntitiesFiltered++;
+            logger.debug(
+              () =>
+                `Filtered non-IP value: "${value}" from ${mapping.ecsField} (alert ${alert._id})`
+            );
+            continue;
+          }
 
           // Validate entity before adding (prevents malformed data)
           if (!validateEntity(typeKey, value)) {

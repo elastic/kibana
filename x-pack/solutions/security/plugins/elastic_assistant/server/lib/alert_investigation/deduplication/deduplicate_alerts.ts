@@ -215,11 +215,11 @@ const buildClusters = (
   return { clusters, leaders };
 };
 
-const EMPTY_RESULT: DeduplicationResult = {
+const createEmptyResult = (): DeduplicationResult => ({
   leaders: [],
   clusters: [],
   stats: { totalAlerts: 0, uniqueClusters: 0, duplicatesRemoved: 0, deduplicationRate: 0 },
-};
+});
 
 /**
  * Jaccard-based deduplication (fallback when ELSER unavailable)
@@ -267,7 +267,7 @@ export const deduplicateAlerts = async ({
   similarityThreshold?: number;
 }): Promise<DeduplicationResult> => {
   if (alerts.length === 0) {
-    return EMPTY_RESULT;
+    return createEmptyResult();
   }
 
   const featureMap = buildFeatureMap(alerts);

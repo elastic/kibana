@@ -423,6 +423,14 @@ describe('Workflow Steps - Error Scenarios', () => {
               },
             ],
           }),
+          getTrainedModelsStats: jest.fn().mockResolvedValue({
+            trained_model_stats: [
+              {
+                model_id: '.elser_model_2',
+                deployment_stats: { state: 'started' },
+              },
+            ],
+          }),
           inferTrainedModel: jest.fn().mockRejectedValue(new Error('ML node unavailable')),
         },
       } as unknown as ElasticsearchClient;

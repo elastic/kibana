@@ -220,8 +220,23 @@ describe('processed_alert_tracker', () => {
       );
     });
 
-    it('returns null and warns on search failure', async () => {
-      esClient.search.mockRejectedValue(new Error('index not found'));
+    it('re-throws transient errors to prevent silent data loss', async () => {
+      esClient.search.mockRejectedValue(new Error('cluster unavailable'));
+
+      await expect(
+        getProcessedAlertIds({
+          esClient: esClient as never,
+          spaceId: 'default',
+          caseId: 'case-1',
+          logger: logger as never,
+        })
+      ).rejects.toThrow('cluster unavailable');
+    });
+
+    it('returns null for 404 (index not found)', async () => {
+      const notFoundError = new Error('index_not_found_exception');
+      (notFoundError as any).meta = { statusCode: 404 };
+      esClient.search.mockRejectedValue(notFoundError);
 
       const result = await getProcessedAlertIds({
         esClient: esClient as never,
@@ -231,7 +246,6 @@ describe('processed_alert_tracker', () => {
       });
 
       expect(result).toBeNull();
-      expect(logger.warn).toHaveBeenCalled();
     });
 
     it('handles missing optional array fields gracefully', async () => {

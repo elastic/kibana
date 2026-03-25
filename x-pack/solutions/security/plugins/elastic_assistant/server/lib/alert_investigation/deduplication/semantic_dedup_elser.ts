@@ -41,10 +41,22 @@ export async function isElserAvailable(esClient: ElasticsearchClient): Promise<b
       m.model_id.startsWith('.elser_model_2')
     );
 
-    // Check model exists and is fully defined (deployed)
-    const isDeployed = elserModel != null && elserModel.fully_defined === true;
+    if (elserModel == null || elserModel.fully_defined !== true) {
+      return false;
+    }
 
-    return isDeployed;
+    // Verify the model is actually deployed, not just defined
+    const stats = await esClient.ml.getTrainedModelsStats({
+      model_id: elserModel.model_id,
+    });
+
+    const modelStats = stats.trained_model_stats.find(
+      (s) => s.model_id === elserModel.model_id
+    );
+
+    // Model must have at least one active deployment
+    const deploymentState = modelStats?.deployment_stats?.state;
+    return deploymentState === 'started' || deploymentState === 'fully_allocated';
   } catch (error) {
     // ML API not available (no ML node) or permission error
     return false;
@@ -221,15 +233,14 @@ async function findSimilarAlerts(
       // Skip self
       if (hitAlertId === alertId) continue;
 
-      // Cosine similarity in [0, 2], normalize to [0, 1]
-      const normalizedSimilarity = score / 2;
-
-      if (normalizedSimilarity >= similarityThreshold) {
+      // ES kNN with cosine similarity returns _score = (1 + cosine_sim) / 2, already in [0, 1]
+      if (score >= similarityThreshold) {
         similarAlertIds.push(hitAlertId);
       }
     }
 
     return similarAlertIds;
+
   } catch (error) {
     logger.warn(`kNN search failed for alert ${alertId}: ${error}`);
     return [];

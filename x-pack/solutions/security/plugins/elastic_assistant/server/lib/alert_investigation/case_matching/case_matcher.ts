@@ -296,10 +296,15 @@ export const matchAlertsToCases = async ({
   const avgCandidatesPerAlert =
     alertEntityGroups.size > 0 ? totalCandidatesEvaluated / alertEntityGroups.size : 0;
 
+  const reductionPercent =
+    indexStats.totalCases > 0
+      ? Math.round((1 - avgCandidatesPerAlert / indexStats.totalCases) * 100)
+      : 0;
+
   logger.info(
     `matchAlertsToCases: ${matched.length} matched, ${unmatched.length} unmatched. ` +
       `Evaluated avg ${avgCandidatesPerAlert.toFixed(1)} candidate cases/alert ` +
-      `(vs ${indexStats.totalCases} total - ${Math.round((1 - avgCandidatesPerAlert / indexStats.totalCases) * 100)}% reduction via index)`
+      `(vs ${indexStats.totalCases} total - ${reductionPercent}% reduction via index)`
   );
 
   return {
