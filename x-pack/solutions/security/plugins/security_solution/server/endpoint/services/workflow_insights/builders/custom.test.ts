@@ -11,10 +11,10 @@ import moment from 'moment';
 import type { EndpointMetadataService } from '../../metadata';
 import type { BuildWorkflowInsightParams } from '.';
 import {
-  Category,
-  SourceType,
-  TargetType,
-  ActionType,
+  WorkflowInsightCategory,
+  WorkflowInsightSourceType,
+  WorkflowInsightTargetType,
+  WorkflowInsightActionType,
 } from '../../../../../common/endpoint/types/workflow_insights';
 import { createMockEndpointAppContext } from '../../../mocks';
 import { buildCustomWorkflowInsights } from './custom';
@@ -70,20 +70,20 @@ describe('buildCustomWorkflowInsights', () => {
     expect.objectContaining({
       '@timestamp': expect.any(moment),
       message: 'Policy response failure detected',
-      category: Category.Endpoint,
+      category: WorkflowInsightCategory.enum.endpoint,
       type: 'policy_response_failure',
       source: {
-        type: SourceType.LlmConnector,
+        type: WorkflowInsightSourceType.enum['llm-connector'],
         id: 'connector-id-1',
         data_range_start: expect.any(moment),
         data_range_end: expect.any(moment),
       },
       target: {
-        type: TargetType.Endpoint,
+        type: WorkflowInsightTargetType.enum.endpoint,
         ids: ['endpoint-1', 'endpoint-2'],
       },
       action: {
-        type: ActionType.Refreshed,
+        type: WorkflowInsightActionType.enum.refreshed,
         timestamp: expect.any(moment),
       },
       value: group,

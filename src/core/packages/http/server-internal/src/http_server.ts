@@ -39,7 +39,6 @@ import type {
   OnPreAuthHandler,
   OnPreResponseHandler,
   OnPreRoutingHandler,
-  RouteConfigOptions,
   RouteMethod,
   RouterDeprecatedApiDetails,
   RouterRoute,
@@ -401,7 +400,7 @@ export class HttpServer {
   }
 
   private getAuthOption(
-    authRequired: RouteConfigOptions<any>['authRequired'] | 'minimal' = true
+    authRequired: boolean | 'optional' | 'minimal' = true
   ): undefined | false | { mode: 'required' | 'try' } {
     if (this.authRegistered === false) return undefined;
 
@@ -992,7 +991,7 @@ export class HttpServer {
     const { tags, body = {}, timeout, deprecated } = route.options;
     const { accepts: allow, override, maxBytes, output, parse } = body;
 
-    const authRequired = this.getSecurity(route)?.authc?.enabled ?? route.options.authRequired;
+    const authRequired = this.getSecurity(route)?.authc?.enabled;
 
     const kibanaRouteOptions: KibanaRouteOptions = {
       xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),

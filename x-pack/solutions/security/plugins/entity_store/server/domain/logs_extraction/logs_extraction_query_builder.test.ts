@@ -11,10 +11,11 @@ import {
 } from './logs_extraction_query_builder';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions/entity_schema';
+import { validateQuery } from '@kbn/esql-language';
 
 describe('buildLogsExtractionEsqlQuery', () => {
   Object.values(EntityType.enum).forEach((type) => {
-    it(`generates the expected query for ${type} entity description`, () => {
+    it(`generates the expected query for ${type} entity description`, async () => {
       const query = buildLogsExtractionEsqlQuery({
         indexPatterns: ['test-index-*'],
         latestIndex: 'latest-index',
@@ -24,10 +25,11 @@ describe('buildLogsExtractionEsqlQuery', () => {
         toDateISO: '2022-01-01T23:59:59.999Z',
       });
       expect(query).toMatchSnapshot();
+      await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
     });
   });
 
-  it(`generates the expected query for host with pagination`, () => {
+  it(`generates the expected query for host with pagination`, async () => {
     const query = buildLogsExtractionEsqlQuery({
       indexPatterns: ['test-index-*'],
       latestIndex: 'latest-index',
@@ -41,9 +43,10 @@ describe('buildLogsExtractionEsqlQuery', () => {
       },
     });
     expect(query).toMatchSnapshot();
+    await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 
-  it(`generates the expected query for host with recoveryId`, () => {
+  it(`generates the expected query for host with recoveryId`, async () => {
     const query = buildLogsExtractionEsqlQuery({
       indexPatterns: ['test-index-*'],
       latestIndex: 'latest-index',
@@ -58,6 +61,7 @@ describe('buildLogsExtractionEsqlQuery', () => {
       },
     });
     expect(query).toMatchSnapshot();
+    await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 
   it('inserts whenConditionTrueSetFieldsAfterStats EVAL after LOOKUP and before merge EVAL', () => {
