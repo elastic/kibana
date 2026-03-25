@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { EuiListGroupItemProps } from '@elastic/eui';
 import {
   EuiModal,
@@ -14,11 +14,19 @@ import {
   EuiModalBody,
   EuiModalFooter,
   EuiButton,
+  EuiButtonEmpty,
+  EuiConfirmModal,
   EuiText,
   EuiListGroup,
   EuiLoadingSpinner,
   EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useBoolState } from '../../../../common/hooks/use_bool_state';
+import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
+import { useBulkActionMutation } from '../../api/hooks/use_bulk_action_mutation';
+import { useInvalidateFetchPrebuiltRulesDeprecationReviewQuery } from '../../api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_deprecation_review_query';
 import { RuleLink } from '../../../rule_management_ui/components/rules_table/use_columns';
 import type { DeprecatedRuleForReview } from '../../../../../common/api/detection_engine/prebuilt_rules';
 import * as i18n from './translations';
@@ -34,6 +42,23 @@ export const DeprecatedRulesModal: React.FC<DeprecatedRulesModalProps> = ({
   isLoading,
   onClose,
 }) => {
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
+  const [isConfirmVisible, showConfirm, hideConfirm] = useBoolState();
+  const { mutateAsync: executeBulkAction } = useBulkActionMutation();
+  const invalidateDeprecationReview = useInvalidateFetchPrebuiltRulesDeprecationReviewQuery();
+
+  const handleDeleteAll = useCallback(async () => {
+    hideConfirm();
+    await executeBulkAction({
+      bulkAction: {
+        type: BulkActionTypeEnum.delete,
+        ids: rules.map((rule) => rule.id),
+      },
+    });
+    invalidateDeprecationReview();
+    onClose();
+  }, [executeBulkAction, rules, invalidateDeprecationReview, onClose, hideConfirm]);
+
   const deprecatedRules: EuiListGroupItemProps[] = useMemo(
     () =>
       rules.map((rule) => ({
@@ -44,31 +69,62 @@ export const DeprecatedRulesModal: React.FC<DeprecatedRulesModalProps> = ({
   );
 
   return (
-    <EuiModal
-      onClose={onClose}
-      data-test-subj="deprecated-rules-modal"
-      aria-label={i18n.DEPRECATED_RULES_MODAL_DESCRIPTION}
-    >
-      <EuiModalHeader>
-        <EuiFlexGroup direction="column">
-          <EuiModalHeaderTitle>{i18n.DEPRECATED_RULES_MODAL_TITLE}</EuiModalHeaderTitle>
-          <EuiText size="s">
-            <p>{i18n.DEPRECATED_RULES_MODAL_DESCRIPTION}</p>
-          </EuiText>
-        </EuiFlexGroup>
-      </EuiModalHeader>
-      <EuiModalBody>
-        {isLoading ? (
-          <EuiLoadingSpinner size="m" />
-        ) : (
-          <EuiListGroup flush maxWidth={false} listItems={deprecatedRules} />
-        )}
-      </EuiModalBody>
-      <EuiModalFooter>
-        <EuiButton onClick={onClose} data-test-subj="deprecated-rules-modal-close">
-          {i18n.CLOSE}
-        </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
+    <>
+      <EuiModal
+        onClose={onClose}
+        data-test-subj="deprecated-rules-modal"
+        aria-label={i18n.DEPRECATED_RULES_MODAL_TITLE}
+      >
+        <EuiModalHeader>
+          <EuiFlexGroup direction="column">
+            <EuiModalHeaderTitle>{i18n.DEPRECATED_RULES_MODAL_TITLE}</EuiModalHeaderTitle>
+            <EuiText size="s">
+              <p>{i18n.DEPRECATED_RULES_MODAL_DESCRIPTION(rules.length)}</p>
+            </EuiText>
+          </EuiFlexGroup>
+        </EuiModalHeader>
+        <EuiModalBody>
+          {isLoading ? (
+            <EuiLoadingSpinner size="m" />
+          ) : (
+            <EuiListGroup flush maxWidth={false} listItems={deprecatedRules} />
+          )}
+        </EuiModalBody>
+        <EuiModalFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={onClose} data-test-subj="deprecated-rules-modal-close">
+                {i18n.CLOSE}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                color="danger"
+                onClick={showConfirm}
+                disabled={!canEditRules}
+                data-test-subj="deprecated-rules-modal-delete-all"
+              >
+                {i18n.DELETE_ALL_DEPRECATED_RULES(rules.length)}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiModalFooter>
+      </EuiModal>
+      {isConfirmVisible && (
+        <EuiConfirmModal
+          aria-label={i18n.DELETE_ALL_CONFIRMATION_TITLE(rules.length)}
+          title={i18n.DELETE_ALL_CONFIRMATION_TITLE(rules.length)}
+          onCancel={hideConfirm}
+          onConfirm={handleDeleteAll}
+          confirmButtonText={i18n.DELETE_ALL_DEPRECATED_RULES(rules.length)}
+          cancelButtonText={i18n.CANCEL}
+          buttonColor="danger"
+          defaultFocusedButton="confirm"
+          data-test-subj="deprecated-rules-delete-all-confirm-modal"
+        >
+          <p>{i18n.DELETE_ALL_CONFIRMATION_DESCRIPTION(rules.length)}</p>
+        </EuiConfirmModal>
+      )}
+    </>
   );
 };

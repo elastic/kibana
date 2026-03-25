@@ -58,14 +58,39 @@ export const DEPRECATED_RULES_MODAL_TITLE = i18n.translate(
   }
 );
 
-export const DEPRECATED_RULES_MODAL_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.deprecation.modalDescription',
-  {
+export const DEPRECATED_RULES_MODAL_DESCRIPTION = (count: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.deprecation.modalDescription', {
     defaultMessage:
-      'The following installed rules have been deprecated by Elastic. Navigate to a rule to review and remove it.',
-  }
-);
+      'The {count} installed {count, plural, one {rule} other {rules}} below {count, plural, one {has} other {have}} been deprecated and {count, plural, one {is} other {are}} no longer maintained. Click on a rule name to view the details. If you wish to keep a rule you can duplicate the rule before deletion.',
+    values: { count },
+  });
 
 export const CLOSE = i18n.translate('xpack.securitySolution.detectionEngine.deprecation.close', {
   defaultMessage: 'Close',
+});
+
+export const DELETE_ALL_DEPRECATED_RULES = (count: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.deprecation.deleteAllDeprecatedRules', {
+    defaultMessage: 'Delete {count} deprecated {count, plural, one {rule} other {rules}}',
+    values: { count },
+  });
+
+export const DELETE_ALL_CONFIRMATION_TITLE = (count: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.deprecation.deleteAllConfirmationTitle', {
+    defaultMessage: 'Delete {count} deprecated {count, plural, one {rule} other {rules}}?',
+    values: { count },
+  });
+
+export const DELETE_ALL_CONFIRMATION_DESCRIPTION = (count: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.deprecation.deleteAllConfirmationDescription',
+    {
+      defaultMessage:
+        '{count, plural, one {This rule is} other {These rules are}} deprecated and will no longer receive updates. This action cannot be undone.',
+      values: { count },
+    }
+  );
+
+export const CANCEL = i18n.translate('xpack.securitySolution.detectionEngine.deprecation.cancel', {
+  defaultMessage: 'Cancel',
 });
