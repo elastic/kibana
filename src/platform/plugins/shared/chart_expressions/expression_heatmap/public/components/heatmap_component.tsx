@@ -9,6 +9,7 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo, useState, useCallback, useRef } from 'react';
+import moment from 'moment';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import type {
   ElementClickListener,
@@ -37,6 +38,7 @@ import {
   LegendSizeToPixels,
 } from '@kbn/chart-expressions-common';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import type { CoreSetup } from '@kbn/core/public';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import {
   applyPaletteParams,
@@ -187,6 +189,8 @@ function computeXScale(
       };
     } else if (xScaleType === 'time') {
       // ES|QL queries without interval metadata - compute interval from data
+      // this need to infer the interval from the data table is temporary. Once Elasticsearch returns
+      // the interval metadata for ES|QL queries, we can simplify
       const computedInterval = computeMinIntervalFromData(chartData, xAxisColumn?.id);
       if (computedInterval) {
         return {
@@ -240,6 +244,38 @@ function computeColorRanges(
   return { colors, ranges };
 }
 
+/**
+ * Selects the appropriate date format pattern from dateFormat:scaled based on the interval.
+ * Follows the same logic as date_histogram operation in Lens.
+ * @param intervalMs - The interval in milliseconds
+ * @param uiSettings - The UI settings service
+ * @returns The date format pattern string, or undefined if no pattern can be determined
+ *
+ * (copied from x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/date_histogram.tsx)
+ */
+function getDateFormatPattern(
+  intervalMs: number | undefined,
+  uiSettings: CoreSetup['uiSettings'] | undefined
+): string | undefined {
+  if (!intervalMs || !uiSettings) {
+    return undefined;
+  }
+
+  const rules = uiSettings.get('dateFormat:scaled');
+  // Iterate backwards through rules to find the first matching interval
+  for (let i = rules.length - 1; i >= 0; i--) {
+    const rule = rules[i];
+    if (!Array.isArray(rule) || rule.length !== 2) continue;
+    // Empty string means "any interval below the next threshold"
+    if (!rule[0] || intervalMs >= moment.duration(rule[0]).asMilliseconds()) {
+      return rule[1];
+    }
+  }
+
+  // Fallback to default date format
+  return uiSettings.get('dateFormat');
+}
+
 export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
   ({
     data: table,
@@ -259,6 +295,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     syncCursor,
     renderComplete,
     overrides,
+    uiSettings,
   }) => {
     const chartRef = useRef<Chart>(null);
     const isDarkTheme = useKibanaIsDarkMode();
@@ -340,10 +377,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       : undefined;
     const isTimeBasedSwimLane = xAxisMeta?.type === 'date' && Boolean(dateHistogramMeta?.interval);
 
-    const xValuesFormatter = useMemo(
-      () => formatFactory(xAxisMeta?.params),
-      [formatFactory, xAxisMeta?.params]
-    );
     const yValuesFormatter = useMemo(
       () => formatFactory(yAxisColumn?.meta.params),
       [formatFactory, yAxisColumn?.meta.params]
@@ -391,6 +424,30 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     });
 
     const isEsqlMode = table?.meta?.type === ESQL_TABLE_TYPE;
+
+    const xValuesFormatter = useMemo(() => {
+      // For ES|QL time-based x-axis with computed interval, use scaled date format
+      // Traditional aggregations already handle this in the date histogram operator
+      if (
+        isEsqlMode &&
+        xAxisMeta?.type === 'date' &&
+        xScale.type === ScaleType.Time &&
+        xScale.interval?.unit === 'ms' &&
+        uiSettings
+      ) {
+        const pattern = getDateFormatPattern(xScale.interval.value, uiSettings);
+        if (pattern) {
+          return formatFactory({
+            id: 'date',
+            params: {
+              pattern,
+            },
+          });
+        }
+      }
+
+      return formatFactory(xAxisMeta?.params);
+    }, [formatFactory, xAxisMeta?.params, xAxisMeta?.type, xScale, uiSettings, isEsqlMode]);
 
     const hasTooltipActions = interactive && !isEsqlMode;
 
