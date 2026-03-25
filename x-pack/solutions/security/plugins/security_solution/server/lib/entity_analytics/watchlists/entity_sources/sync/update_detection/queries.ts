@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { EntityType } from '@kbn/entity-store/common';
+import type { EntityType } from '@kbn/entity-store';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import type { AfterKey } from './types';
 
@@ -28,7 +28,7 @@ export const buildEntitiesSearchBody = (
   syncMarker?: string,
   allowedEntityIds?: string[]
 ): Omit<estypes.SearchRequest, 'index'> => {
-  const must = [euid.getEuidDslDocumentsContainsIdFilter(entityType)];
+  const must = [euid.dsl.getEuidDocumentsContainsIdFilter(entityType)];
   if (allowedEntityIds && allowedEntityIds.length > 0) {
     must.push({ terms: { [EUID_RUNTIME_FIELD]: allowedEntityIds } });
   }
@@ -46,7 +46,7 @@ export const buildEntitiesSearchBody = (
     size: 0,
     query: { bool: { must } },
     runtime_mappings: {
-      [EUID_RUNTIME_FIELD]: euid.getEuidPainlessRuntimeMapping(entityType),
+      [EUID_RUNTIME_FIELD]: euid.painless.getEuidRuntimeMapping(entityType),
     },
     aggs: {
       entities: {
