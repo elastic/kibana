@@ -27,35 +27,31 @@ import {
 import { computeRuleId, buildEsqlQueryFromKql } from './helpers/query';
 import type { StoredQueryLink } from './query_client';
 
-const v1Schema = z
-  .object({
-    [ASSET_UUID]: z.string(),
-    [ASSET_ID]: z.string(),
-    [ASSET_TYPE]: z.string(),
-    [STREAM_NAME]: z.string(),
-    [QUERY_KQL_BODY]: z.string().optional(),
-    [QUERY_ESQL_QUERY]: z.string().optional(),
-    [QUERY_TITLE]: z.string().optional(),
-    [QUERY_SEVERITY_SCORE]: z.number().optional(),
-    [RULE_BACKED]: z.boolean().optional(),
-    [RULE_ID]: z.string().optional(),
-  })
-  .passthrough();
+const v1Schema = z.looseObject({
+  [ASSET_UUID]: z.string(),
+  [ASSET_ID]: z.string(),
+  [ASSET_TYPE]: z.string(),
+  [STREAM_NAME]: z.string(),
+  [QUERY_KQL_BODY]: z.string().optional(),
+  [QUERY_ESQL_QUERY]: z.string().optional(),
+  [QUERY_TITLE]: z.string().optional(),
+  [QUERY_SEVERITY_SCORE]: z.number().optional(),
+  [RULE_BACKED]: z.boolean().optional(),
+  [RULE_ID]: z.string().optional(),
+});
 
-const v2Schema = z
-  .object({
-    [ASSET_UUID]: z.string(),
-    [ASSET_ID]: z.string(),
-    [ASSET_TYPE]: z.string(),
-    [STREAM_NAME]: z.string(),
-    [QUERY_KQL_BODY]: z.string().optional(),
-    [QUERY_ESQL_QUERY]: z.string(),
-    [QUERY_TITLE]: z.string().optional(),
-    [QUERY_SEVERITY_SCORE]: z.number().optional(),
-    [RULE_BACKED]: z.boolean(),
-    [RULE_ID]: z.string(),
-  })
-  .passthrough();
+const v2Schema = z.looseObject({
+  [ASSET_UUID]: z.string(),
+  [ASSET_ID]: z.string(),
+  [ASSET_TYPE]: z.string(),
+  [STREAM_NAME]: z.string(),
+  [QUERY_KQL_BODY]: z.string().optional(),
+  [QUERY_ESQL_QUERY]: z.string(),
+  [QUERY_TITLE]: z.string().optional(),
+  [QUERY_SEVERITY_SCORE]: z.number().optional(),
+  [RULE_BACKED]: z.boolean(),
+  [RULE_ID]: z.string(),
+});
 
 function migrateV1ToV2(input: unknown): Record<string, unknown> {
   const migrated = { ...(input as Record<string, unknown>) };
@@ -108,7 +104,7 @@ function migrateV1ToV2(input: unknown): Record<string, unknown> {
   return migrated;
 }
 
-// Type assertion routed through `unknown` because `.passthrough()` adds
+// Type assertion routed through `unknown` because `z.looseObject` adds
 // `{ [k: string]: unknown }` to the Zod output type, which doesn't structurally
 // overlap with `StoredQueryLink`.
 export const queryVersioning = defineVersioning(v1Schema)

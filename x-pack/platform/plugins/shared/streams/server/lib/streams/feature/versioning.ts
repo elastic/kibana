@@ -28,39 +28,35 @@ import type { StoredFeature } from './stored_feature';
 
 const featureStatusValues = ['active', 'stale', 'expired'] as const;
 
-const v1Schema = z
-  .object({
-    [FEATURE_TYPE]: z.string(),
-    [FEATURE_UUID]: z.string(),
-    [FEATURE_DESCRIPTION]: z.string(),
-    [STREAM_NAME]: z.string(),
-    [FEATURE_CONFIDENCE]: z.number(),
-    [FEATURE_STATUS]: z.enum(featureStatusValues),
-    [FEATURE_LAST_SEEN]: z.string(),
-  })
-  .passthrough();
+const v1Schema = z.looseObject({
+  [FEATURE_TYPE]: z.string(),
+  [FEATURE_UUID]: z.string(),
+  [FEATURE_DESCRIPTION]: z.string(),
+  [STREAM_NAME]: z.string(),
+  [FEATURE_CONFIDENCE]: z.number(),
+  [FEATURE_STATUS]: z.enum(featureStatusValues),
+  [FEATURE_LAST_SEEN]: z.string(),
+});
 
-const v2Schema = z
-  .object({
-    [FEATURE_TYPE]: z.string(),
-    [FEATURE_ID]: z.string(),
-    [FEATURE_UUID]: z.string(),
-    [FEATURE_SUBTYPE]: z.string().optional(),
-    [FEATURE_DESCRIPTION]: z.string(),
-    [STREAM_NAME]: z.string(),
-    [FEATURE_PROPERTIES]: z.record(z.string(), z.any()),
-    [FEATURE_CONFIDENCE]: z.number(),
-    [FEATURE_EVIDENCE]: z.array(z.string()).optional(),
-    [FEATURE_STATUS]: z.enum(featureStatusValues),
-    [FEATURE_LAST_SEEN]: z.string(),
-    [FEATURE_TAGS]: z.array(z.string()).optional(),
-    [FEATURE_META]: z.record(z.string(), z.any()).optional(),
-    [FEATURE_EXPIRES_AT]: z.string().optional(),
-    [FEATURE_TITLE]: z.string().optional(),
-  })
-  .passthrough();
+const v2Schema = z.looseObject({
+  [FEATURE_TYPE]: z.string(),
+  [FEATURE_ID]: z.string(),
+  [FEATURE_UUID]: z.string(),
+  [FEATURE_SUBTYPE]: z.string().optional(),
+  [FEATURE_DESCRIPTION]: z.string(),
+  [STREAM_NAME]: z.string(),
+  [FEATURE_PROPERTIES]: z.record(z.string(), z.any()),
+  [FEATURE_CONFIDENCE]: z.number(),
+  [FEATURE_EVIDENCE]: z.array(z.string()).optional(),
+  [FEATURE_STATUS]: z.enum(featureStatusValues),
+  [FEATURE_LAST_SEEN]: z.string(),
+  [FEATURE_TAGS]: z.array(z.string()).optional(),
+  [FEATURE_META]: z.record(z.string(), z.any()).optional(),
+  [FEATURE_EXPIRES_AT]: z.string().optional(),
+  [FEATURE_TITLE]: z.string().optional(),
+});
 
-// Type assertion needed because `.passthrough()` adds `{ [k: string]: unknown }`
+// Type assertion needed because `z.looseObject` adds `{ [k: string]: unknown }`
 // to the Zod output, which doesn't structurally match `StoredFeature`.
 export const featureVersioning: StorageSchemaVersioning<StoredFeature> = defineVersioning(v1Schema)
   .addVersion({

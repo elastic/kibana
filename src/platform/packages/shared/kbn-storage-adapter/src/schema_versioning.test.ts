@@ -175,9 +175,9 @@ describe('StorageSchemaVersioning', () => {
       expect(result).toEqual({ name: 'Hello World', slug: 'hello-world', version: 2 });
     });
 
-    it('preserves extra fields through the migration chain when schemas use passthrough()', async () => {
-      const v1Pass = z.object({ name: z.string() }).passthrough();
-      const v2Pass = z.object({ name: z.string(), added: z.number() }).passthrough();
+    it('preserves extra fields through the migration chain when schemas use looseObject', async () => {
+      const v1Pass = z.looseObject({ name: z.string() });
+      const v2Pass = z.looseObject({ name: z.string(), added: z.number() });
       const passthroughVersioning = defineVersioning(v1Pass)
         .addVersion({ schema: v2Pass, migrate: (prev) => ({ ...prev, added: 42 }) })
         .build();

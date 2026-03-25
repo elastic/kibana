@@ -273,8 +273,8 @@ describe('StorageIndexAdapter', () => {
         },
       } satisfies StorageSettings;
 
-      const v1 = z.object({ foo: z.string() }).passthrough();
-      const v2 = z.object({ foo: z.string(), migratedProp: z.string() }).passthrough();
+      const v1 = z.looseObject({ foo: z.string() });
+      const v2 = z.looseObject({ foo: z.string(), migratedProp: z.string() });
       const versioning = defineVersioning(v1)
         .addVersion({
           schema: v2,
@@ -752,8 +752,8 @@ describe('StorageIndexAdapter', () => {
           document: { name: 'test', active: true },
         });
 
-        const v1Pass = z.object({ name: z.string() }).passthrough();
-        const v2Pass = z.object({ name: z.string(), score: z.number() }).passthrough();
+        const v1Pass = z.looseObject({ name: z.string() });
+        const v2Pass = z.looseObject({ name: z.string(), score: z.number() });
         const versioning = defineVersioning(v1Pass)
           .addVersion({ schema: v2Pass, migrate: (prev) => ({ ...prev, score: 0 }) })
           .build();

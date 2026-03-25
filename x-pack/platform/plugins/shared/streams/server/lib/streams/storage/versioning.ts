@@ -12,15 +12,13 @@ import { migrateOnRead } from './migrate_on_read';
 
 /**
  * Permissive v1 schema that accepts any pre-versioning stream document.
- * Only requires `name` (present in all stream types). `.passthrough()`
+ * Only requires `name` (present in all stream types). `looseObject`
  * preserves the full document so `migrateOnRead` can inspect and transform
  * every field.
  */
-const v1Schema = z
-  .object({
-    name: z.string(),
-  })
-  .passthrough();
+const v1Schema = z.looseObject({
+  name: z.string(),
+});
 
 /**
  * v2 schema validates the post-migration shape: `description` and `updated_at`
@@ -28,15 +26,13 @@ const v1Schema = z
  * `query_streams` fields are opaque (ES mapping has `enabled: false`), so they
  * pass through without structural validation.
  */
-const v2Schema = z
-  .object({
-    name: z.string(),
-    description: z.string(),
-    updated_at: z.string(),
-  })
-  .passthrough();
+const v2Schema = z.looseObject({
+  name: z.string(),
+  description: z.string(),
+  updated_at: z.string(),
+});
 
-// Type assertion routed through `unknown` because `.passthrough()` adds
+// Type assertion routed through `unknown` because `z.looseObject` adds
 // `{ [k: string]: unknown }` to the Zod output type, which doesn't structurally
 // overlap with `Streams.all.Definition`.
 export const streamsVersioning = defineVersioning(v1Schema)

@@ -174,14 +174,14 @@ Without a call to `migrateDocuments()`, the adapter still works correctly — ev
 
 When adding versioning to an existing storage — or adding a new version to an already-versioned one — keep the following in mind.
 
-**Always use `.passthrough()` on every Zod schema in the version chain.** By default, `z.object()` strips keys it doesn't know about during `.parse()`. In production indices you will almost always have documents that carry fields not declared in the Zod schema (opaque blobs stored via `enabled: false` mappings, fields from older or newer code paths, etc.). Without `.passthrough()`, those fields are silently dropped during the on-read migration, causing data loss:
+**Always use `z.looseObject()` instead of `z.object()` for every schema in the version chain.** By default, `z.object()` strips keys it doesn't know about during `.parse()`. In production indices you will almost always have documents that carry fields not declared in the Zod schema (opaque blobs stored via `enabled: false` mappings, fields from older or newer code paths, etc.). Without loose parsing, those fields are silently dropped during the on-read migration, causing data loss:
 
 ```ts
 // BAD — strips any field not listed in the schema
 const v1 = z.object({ name: z.string() });
 
 // GOOD — preserves all fields, validates only the ones you declare
-const v1 = z.object({ name: z.string() }).passthrough();
+const v1 = z.looseObject({ name: z.string() });
 ```
 
 **Make migration functions defensive about fields that may already exist.** After the initial deployment with versioning, the index will contain a mix of legacy documents (no `__version`), documents at older versions, and documents at the current version. Legacy documents are treated as version 1 and run through the full migration chain. If a legacy document already happens to carry a field your migration sets, a naive spread will overwrite the real value with the default:
