@@ -113,14 +113,18 @@ export class StorageSchemaVersioning<TLatest> {
    * and async migrations) followed by `schema.parse`. Corrupt intermediate
    * states surface immediately as zod validation errors.
    *
+   * When `fromVersion` exceeds `latestVersion` (rolling deployment / rollback),
+   * the document is returned as-is without validation. Parsing it against an
+   * older schema would be semantically wrong — the newer shape may have added
+   * or renamed fields — and throwing would make reads fail on nodes that have
+   * not been upgraded yet.
+   *
    * The async boundary between steps also yields to the event loop, preventing
    * long migration chains from starving other work.
    */
   async migrate(doc: unknown, fromVersion: number): Promise<TLatest> {
     if (!Number.isInteger(fromVersion) || fromVersion < 1) {
-      throw new Error(
-        `Invalid source version ${fromVersion}: expected a positive integer`
-      );
+      throw new Error(`Invalid source version ${fromVersion}: expected a positive integer`);
     }
 
     if (fromVersion > this.latestVersion) {
