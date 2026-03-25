@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
@@ -12,17 +14,17 @@ import {
   getWorkflowYaml,
   loadWorkflowsFromConnectorSpec,
   type ProcessedWorkflow,
-} from '../workflow.test_helpers';
+} from './workflow.test_helpers';
 
-const CONNECTOR_NAME = 'fake-salesforce-connector';
-const CONNECTOR_ID = 'fake-salesforce-connector-uuid';
+const CONNECTOR_NAME = 'fake-firecrawl-connector';
+const CONNECTOR_ID = 'fake-firecrawl-connector-uuid';
 
-describe('salesforce workflows', () => {
+describe('firecrawl workflows', () => {
   let fixture: WorkflowRunFixture;
   let workflows: ProcessedWorkflow[];
 
   beforeAll(() => {
-    workflows = loadWorkflowsFromConnectorSpec('.salesforce', {
+    workflows = loadWorkflowsFromConnectorSpec('.firecrawl', {
       connectorName: CONNECTOR_NAME,
     });
   });
@@ -31,7 +33,7 @@ describe('salesforce workflows', () => {
     fixture = new WorkflowRunFixture();
 
     fixture.scopedActionsClientMock.getAll.mockResolvedValue([
-      { id: CONNECTOR_ID, name: CONNECTOR_NAME, actionTypeId: '.salesforce' },
+      { id: CONNECTOR_ID, name: CONNECTOR_NAME, actionTypeId: '.firecrawl' },
     ]);
 
     fixture.scopedActionsClientMock.returnMockedConnectorResult = async ({
@@ -44,44 +46,40 @@ describe('salesforce workflows', () => {
       const subAction = params.subAction as string;
 
       switch (subAction) {
+        case 'scrape':
+          return {
+            status: 'ok',
+            actionId,
+            data: { markdown: '# Example\nContent here', metadata: { title: 'Example' } },
+          };
         case 'search':
           return {
             status: 'ok',
             actionId,
-            data: { searchRecords: [{ Id: '001', Name: 'Acme' }] },
+            data: [{ url: 'https://example.com', markdown: '# Result', metadata: {} }],
           };
-        case 'query':
+        case 'map':
           return {
             status: 'ok',
             actionId,
-            data: { records: [{ Id: '001', Name: 'Acme' }], totalSize: 1, done: true },
+            data: { links: ['https://example.com/p1', 'https://example.com/p2'] },
           };
-        case 'list_records':
+        case 'crawl':
+          return { status: 'ok', actionId, data: { id: 'crawl-job-123', status: 'scraping' } };
+        case 'getCrawlStatus':
           return {
             status: 'ok',
             actionId,
-            data: { records: [{ Id: '001' }], totalSize: 1, done: true },
+            data: { status: 'completed', total: 5, completed: 5, data: [] },
           };
-        case 'get_record':
+        case 'crawlAndWait':
           return {
             status: 'ok',
             actionId,
-            data: { Id: '001', Name: 'Acme Corp', Type: 'Customer' },
-          };
-        case 'download_file':
-          return {
-            status: 'ok',
-            actionId,
-            data: { base64: 'dGVzdA==', contentType: 'application/pdf' },
-          };
-        case 'describe':
-          return {
-            status: 'ok',
-            actionId,
-            data: { name: 'Account', fields: [{ name: 'Id', type: 'id' }] },
+            data: { status: 'completed', total: 3, completed: 3, data: [] },
           };
         default:
-          throw new Error(`Unexpected Salesforce subAction: ${subAction}`);
+          throw new Error(`Unexpected Firecrawl subAction: ${subAction}`);
       }
     };
   });
@@ -98,11 +96,36 @@ describe('salesforce workflows', () => {
     }
   });
 
+  describe('scrape workflow', () => {
+    it('forwards scrape parameters to the connector', async () => {
+      await fixture.runWorkflow({
+        workflowYaml: getWorkflowYaml(workflows, 'scrape'),
+        inputs: { url: 'https://example.com' },
+      });
+
+      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
+
+      expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            subAction: 'scrape',
+            subActionParams: {
+              url: 'https://example.com',
+              onlyMainContent: true,
+              waitFor: 0,
+              maxMarkdownLength: 100000,
+            },
+          }),
+        })
+      );
+    });
+  });
+
   describe('search workflow', () => {
     it('forwards search parameters to the connector', async () => {
       await fixture.runWorkflow({
         workflowYaml: getWorkflowYaml(workflows, 'search'),
-        inputs: { search_term: 'Acme Corp', returning: 'Account,Contact' },
+        inputs: { query: 'kibana plugins', limit: 3 },
       });
 
       expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
@@ -112,9 +135,8 @@ describe('salesforce workflows', () => {
           params: expect.objectContaining({
             subAction: 'search',
             subActionParams: {
-              searchTerm: 'Acme Corp',
-              returning: 'Account,Contact',
-              nextRecordsUrl: undefined,
+              query: 'kibana plugins',
+              limit: 3,
             },
           }),
         })
@@ -122,11 +144,11 @@ describe('salesforce workflows', () => {
     });
   });
 
-  describe('query workflow', () => {
-    it('forwards SOQL query to the connector', async () => {
+  describe('map workflow', () => {
+    it('forwards map parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml(workflows, 'query'),
-        inputs: { soql: 'SELECT Id, Name FROM Account LIMIT 10' },
+        workflowYaml: getWorkflowYaml(workflows, 'map'),
+        inputs: { url: 'https://example.com', search: 'docs' },
       });
 
       expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
@@ -134,10 +156,12 @@ describe('salesforce workflows', () => {
       expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            subAction: 'query',
+            subAction: 'map',
             subActionParams: {
-              soql: 'SELECT Id, Name FROM Account LIMIT 10',
-              nextRecordsUrl: undefined,
+              url: 'https://example.com',
+              search: 'docs',
+              limit: 5000,
+              includeSubdomains: true,
             },
           }),
         })
@@ -145,11 +169,11 @@ describe('salesforce workflows', () => {
     });
   });
 
-  describe('list_records workflow', () => {
-    it('forwards list parameters to the connector', async () => {
+  describe('crawl workflow', () => {
+    it('crawl action starts an async crawl job', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml(workflows, 'list_records'),
-        inputs: { sobject_name: 'Account', limit: 5 },
+        workflowYaml: getWorkflowYaml(workflows, 'crawl'),
+        inputs: { crawl_action: 'crawl', url: 'https://example.com', limit: 10 },
       });
 
       expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
@@ -157,23 +181,22 @@ describe('salesforce workflows', () => {
       expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            subAction: 'list_records',
+            subAction: 'crawl',
             subActionParams: {
-              sobjectName: 'Account',
-              limit: 5,
-              nextRecordsUrl: undefined,
+              url: 'https://example.com',
+              limit: 10,
+              maxDiscoveryDepth: undefined,
+              allowExternalLinks: false,
             },
           }),
         })
       );
     });
-  });
 
-  describe('get_record workflow', () => {
-    it('forwards record lookup to the connector', async () => {
+    it('getCrawlStatus checks an existing crawl job', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml(workflows, 'get_record'),
-        inputs: { sobject_name: 'Account', record_id: '001ABC123' },
+        workflowYaml: getWorkflowYaml(workflows, 'crawl'),
+        inputs: { crawl_action: 'getCrawlStatus', id: 'crawl-job-123' },
       });
 
       expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
@@ -181,22 +204,19 @@ describe('salesforce workflows', () => {
       expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            subAction: 'get_record',
+            subAction: 'getCrawlStatus',
             subActionParams: {
-              sobjectName: 'Account',
-              recordId: '001ABC123',
+              id: 'crawl-job-123',
             },
           }),
         })
       );
     });
-  });
 
-  describe('download_file workflow', () => {
-    it('forwards content version ID to the connector', async () => {
+    it('crawlAndWait runs a synchronous crawl', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml(workflows, 'download_file'),
-        inputs: { content_version_id: '068ABC123' },
+        workflowYaml: getWorkflowYaml(workflows, 'crawl'),
+        inputs: { crawl_action: 'crawlAndWait', url: 'https://example.com' },
       });
 
       expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
@@ -204,31 +224,12 @@ describe('salesforce workflows', () => {
       expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            subAction: 'download_file',
+            subAction: 'crawlAndWait',
             subActionParams: {
-              contentVersionId: '068ABC123',
-            },
-          }),
-        })
-      );
-    });
-  });
-
-  describe('describe workflow', () => {
-    it('forwards sobject name to the connector', async () => {
-      await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml(workflows, 'describe'),
-        inputs: { sobject_name: 'Account' },
-      });
-
-      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
-
-      expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            subAction: 'describe',
-            subActionParams: {
-              sobjectName: 'Account',
+              url: 'https://example.com',
+              limit: 20,
+              maxDiscoveryDepth: undefined,
+              allowExternalLinks: false,
             },
           }),
         })

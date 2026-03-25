@@ -71,6 +71,8 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/core-http-server'
   - '@kbn/test-jest-helpers'
+  - '@kbn/test'
+  - '@kbn/tooling-log'
   - '@kbn/es-errors'
   - '@kbn/core-http-server-mocks'
   - '@kbn/connector-specs'
