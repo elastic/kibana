@@ -12,8 +12,8 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
-import { useHighlightedFieldsPrivilege } from '../../shared/hooks/use_highlighted_fields_privilege';
-import { useRuleDetails } from '../../../rule_details/hooks/use_rule_details';
+import { useHighlightedFieldsPrivilege } from '../hooks/use_highlighted_fields_privilege';
+import { useRuleDetails } from '../../../flyout/rule_details/hooks/use_rule_details';
 import { HighlightedFieldsModal } from './highlighted_fields_modal';
 import {
   HIGHLIGHTED_FIELDS_EDIT_BUTTON_LOADING_TEST_ID,
@@ -88,7 +88,7 @@ export const EditHighlightedFieldsButton: FC<EditHighlightedFieldsButtonProps> =
           data-test-subj={HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID}
         >
           <FormattedMessage
-            id="xpack.securitySolution.flyout.right.investigation.highlightedFields.editHighlightedFieldsButton"
+            id="xpack.securitySolution.flyout.document.investigation.highlightedFields.editHighlightedFieldsButton"
             defaultMessage="+ Add Field"
           />
         </EuiButtonEmpty>

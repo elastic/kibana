@@ -8,26 +8,26 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
-import { DocumentDetailsContext } from '../../shared/context';
-import { TestProviders } from '../../../../common/mock';
+import { DocumentDetailsContext } from '../../../flyout/document_details/shared/context';
+import { TestProviders } from '../../../common/mock';
 import { EditHighlightedFieldsButton } from './highlighted_fields_button';
 import {
   HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID,
   HIGHLIGHTED_FIELDS_MODAL_TEST_ID,
   HIGHLIGHTED_FIELDS_EDIT_BUTTON_LOADING_TEST_ID,
 } from './test_ids';
-import { mockContextValue } from '../../shared/mocks/mock_context';
-import type { RuleResponse } from '../../../../../common/api/detection_engine';
-import { useRuleIndexPattern } from '../../../../detection_engine/rule_creation_ui/pages/form';
-import { useHighlightedFieldsPrivilege } from '../../shared/hooks/use_highlighted_fields_privilege';
-import { useRuleDetails } from '../../../rule_details/hooks/use_rule_details';
+import { mockContextValue } from '../../../flyout/document_details/shared/mocks/mock_context';
+import type { RuleResponse } from '../../../../common/api/detection_engine';
+import { useRuleIndexPattern } from '../../../detection_engine/rule_creation_ui/pages/form';
+import { useHighlightedFieldsPrivilege } from '../hooks/use_highlighted_fields_privilege';
+import { useRuleDetails } from '../../../flyout/rule_details/hooks/use_rule_details';
 
 jest.mock(
-  '../../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message'
+  '../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message'
 );
-jest.mock('../../../../detection_engine/rule_creation_ui/pages/form');
-jest.mock('../../shared/hooks/use_highlighted_fields_privilege');
-jest.mock('../../../rule_details/hooks/use_rule_details');
+jest.mock('../../../detection_engine/rule_creation_ui/pages/form');
+jest.mock('../hooks/use_highlighted_fields_privilege');
+jest.mock('../../../flyout/rule_details/hooks/use_rule_details');
 
 const mockSetIsEditLoading = jest.fn();
 const mockCustomHighlightedFields = ['field1', 'field2'];
