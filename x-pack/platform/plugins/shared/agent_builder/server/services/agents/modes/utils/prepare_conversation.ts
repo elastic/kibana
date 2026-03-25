@@ -6,6 +6,7 @@
  */
 
 import type {
+  CompactionSummary,
   ConversationAction,
   ConversationRound,
   ConverseInput,
@@ -48,6 +49,8 @@ export interface ProcessedConversation {
   attachmentStateManager: AttachmentStateManager;
   /** Presentation configuration for versioned attachments (inline vs summary mode) */
   versionedAttachmentPresentation?: AttachmentPresentation;
+  /** Compaction summary covering older rounds that were replaced by this summary */
+  compactionSummary?: CompactionSummary;
 }
 
 const createFormatContext = (agentContext: AgentHandlerContext): AttachmentFormatContext => {

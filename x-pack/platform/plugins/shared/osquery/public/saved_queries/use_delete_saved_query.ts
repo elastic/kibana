@@ -12,7 +12,7 @@ import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
-import { SAVED_QUERIES_ID } from './constants';
+import { SAVED_QUERIES_ID, SAVED_QUERY_USERS_ID } from './constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
 interface UseDeleteSavedQueryProps {
@@ -42,6 +42,7 @@ export const useDeleteSavedQuery = ({ savedQueryId }: UseDeleteSavedQueryProps) 
       },
       onSuccess: () => {
         queryClient.invalidateQueries([SAVED_QUERIES_ID]);
+        queryClient.invalidateQueries([SAVED_QUERY_USERS_ID]);
         navigateToApp(PLUGIN_ID, { path: pagePathGetters.saved_queries() });
         toasts.addSuccess(
           i18n.translate('xpack.osquery.editSavedQuery.deleteSuccessToastMessageText', {
