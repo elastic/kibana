@@ -17,10 +17,10 @@ import { useCascadeTable, useAdaptedTableRows, type TableProps } from '.';
 describe('table', () => {
   const createHookWrapper = ({
     children,
-    initialData = [],
+    data = [],
     helper: Helper = React.Fragment,
-  }: PropsWithChildren<{ helper?: React.FC<PropsWithChildren>; initialData?: GroupNode[] }>) => (
-    <DataCascadeProvider data={initialData} cascadeGroups={[]}>
+  }: PropsWithChildren<{ helper?: React.FC<PropsWithChildren>; data?: GroupNode[] }>) => (
+    <DataCascadeProvider data={data} cascadeGroups={[]}>
       <Helper>{children}</Helper>
     </DataCascadeProvider>
   );
@@ -62,7 +62,6 @@ describe('table', () => {
             children,
             data,
             helper: TestHelper,
-            initialData: data,
           }),
         initialProps: {
           allowMultipleRowToggle: false,
@@ -88,7 +87,6 @@ describe('table', () => {
               children,
               data,
               helper: TestHelper,
-              initialData: data,
             }),
           initialProps: {
             allowMultipleRowToggle: true,
@@ -120,7 +118,6 @@ describe('table', () => {
               children,
               data,
               helper: TestHelper,
-              initialData: data,
             }),
           initialProps: {
             allowMultipleRowToggle: false,
@@ -158,7 +155,6 @@ describe('table', () => {
               children,
               data,
               helper: TestHelper,
-              initialData: data,
             }),
           initialProps: {
             allowMultipleRowToggle: false,
