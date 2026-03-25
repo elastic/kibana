@@ -18,6 +18,7 @@ import { DatasetDetailPage } from './pages/dataset_detail';
 import { ProposedSkillsList } from './pages/aesop/proposed_skills_list';
 import { ExplorationDashboard } from './pages/aesop/exploration_dashboard';
 import { ExecutionDetailPage } from './pages/aesop/execution_detail';
+import { AesopErrorBoundary } from './pages/aesop/components/aesop_error_boundary';
 
 const appTitleLabel = i18n.translate('xpack.evals.app.title', {
   defaultMessage: 'Evaluations',
@@ -182,9 +183,21 @@ export const EvalsApp: React.FC<{
             <Route path="/datasets/:datasetId" component={DatasetDetailPage} />
             <Route path="/runs/:runId" component={RunDetailPage} />
             {/* AESOP Routes */}
-            <Route exact path="/aesop/skills/proposed" component={ProposedSkillsList} />
-            <Route exact path="/aesop/exploration" component={ExplorationDashboard} />
-            <Route path="/aesop/exploration/:executionId" component={ExecutionDetailPage} />
+            <Route exact path="/aesop/skills/proposed">
+              <AesopErrorBoundary>
+                <ProposedSkillsList />
+              </AesopErrorBoundary>
+            </Route>
+            <Route exact path="/aesop/exploration">
+              <AesopErrorBoundary>
+                <ExplorationDashboard />
+              </AesopErrorBoundary>
+            </Route>
+            <Route path="/aesop/exploration/:executionId">
+              <AesopErrorBoundary>
+                <ExecutionDetailPage />
+              </AesopErrorBoundary>
+            </Route>
           </Routes>
         </div>
       </div>
