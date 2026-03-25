@@ -122,8 +122,8 @@ FROM .alerts-security.alerts-* METADATA _id, _index
           .describe('Time window in hours to search for related alerts (1-168, default 24)'),
       }),
       handler: async ({ alertId, timeWindowHours }, context) => {
-        const id = alertId as string;
-        const hours = timeWindowHours as number;
+        const id = String(alertId);
+        const hours = Number(timeWindowHours);
         try {
           const alertsIndex = `${DEFAULT_ALERTS_INDEX}-${context.spaceId}`;
 
@@ -144,18 +144,18 @@ FROM .alerts-security.alerts-* METADATA _id, _index
             };
           }
 
-          const entities: string[] = [];
-          const hostName = getNestedValue(alertSource, 'host.name');
-          const userName = getNestedValue(alertSource, 'user.name');
-          const sourceIp = getNestedValue(alertSource, 'source.ip');
-          const destIp = getNestedValue(alertSource, 'destination.ip');
+          const hostNames = getNestedValues(alertSource, 'host.name');
+          const userNames = getNestedValues(alertSource, 'user.name');
+          const sourceIps = getNestedValues(alertSource, 'source.ip');
+          const destIps = getNestedValues(alertSource, 'destination.ip');
 
-          if (hostName) entities.push(hostName);
-          if (userName) entities.push(userName);
-          if (sourceIp) entities.push(sourceIp);
-          if (destIp) entities.push(destIp);
+          const hasEntities =
+            hostNames.length > 0 ||
+            userNames.length > 0 ||
+            sourceIps.length > 0 ||
+            destIps.length > 0;
 
-          if (entities.length === 0) {
+          if (!hasEntities) {
             return {
               results: [
                 {
@@ -169,11 +169,11 @@ FROM .alerts-security.alerts-* METADATA _id, _index
             };
           }
 
-          const shouldClauses = [];
-          if (hostName) shouldClauses.push({ term: { 'host.name': hostName } });
-          if (userName) shouldClauses.push({ term: { 'user.name': userName } });
-          if (sourceIp) shouldClauses.push({ term: { 'source.ip': sourceIp } });
-          if (destIp) shouldClauses.push({ term: { 'destination.ip': destIp } });
+          const shouldClauses: Array<{ terms: Record<string, string[]> }> = [];
+          if (hostNames.length > 0) shouldClauses.push({ terms: { 'host.name': hostNames } });
+          if (userNames.length > 0) shouldClauses.push({ terms: { 'user.name': userNames } });
+          if (sourceIps.length > 0) shouldClauses.push({ terms: { 'source.ip': sourceIps } });
+          if (destIps.length > 0) shouldClauses.push({ terms: { 'destination.ip': destIps } });
 
           const searchResult = await context.esClient.asCurrentUser.search({
             index: alertsIndex,
@@ -228,7 +228,12 @@ FROM .alerts-security.alerts-* METADATA _id, _index
                 type: ToolResultType.other,
                 data: {
                   message: `Found ${relatedAlerts.length} related alerts sharing entities with alert ${id}.`,
-                  sourceEntities: { hostName, userName, sourceIp, destIp },
+                  sourceEntities: {
+                    hostNames,
+                    userNames,
+                    sourceIps,
+                    destIps,
+                  },
                   relatedAlerts,
                 },
               },
@@ -253,16 +258,16 @@ FROM .alerts-security.alerts-* METADATA _id, _index
   ],
 });
 
-function getNestedValue(obj: Record<string, unknown>, path: string): string | undefined {
+function getNestedValues(obj: Record<string, unknown>, path: string): string[] {
   const parts = path.split('.');
   let current: unknown = obj;
   for (const part of parts) {
-    if (current == null || typeof current !== 'object') return undefined;
+    if (current == null || typeof current !== 'object') return [];
     current = (current as Record<string, unknown>)[part];
   }
-  if (typeof current === 'string') return current;
-  if (Array.isArray(current) && current.length > 0 && typeof current[0] === 'string') {
-    return current[0];
+  if (typeof current === 'string') return [current];
+  if (Array.isArray(current)) {
+    return current.filter((v): v is string => typeof v === 'string');
   }
-  return undefined;
+  return [];
 }

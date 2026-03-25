@@ -25,6 +25,8 @@ const attackDiscoverySearchSchema = z.object({
 
 export const SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID = securityTool('attack_discovery_search');
 
+const SAFE_ID_PATTERN = /^[a-zA-Z0-9_\-.:]+$/;
+
 export const attackDiscoverySearchTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger
@@ -74,15 +76,39 @@ export const attackDiscoverySearchTool = (
         )}`
       );
 
+      if (!SAFE_ID_PATTERN.test(spaceId)) {
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: { message: `Invalid space ID format: "${spaceId}".` },
+            },
+          ],
+        };
+      }
+
       try {
-        // Build date filter for last 7 days
+        const sanitizedAlertIds = alertIds.filter((id) => SAFE_ID_PATTERN.test(id));
+        if (sanitizedAlertIds.length === 0) {
+          return {
+            results: [
+              {
+                type: ToolResultType.error,
+                data: {
+                  message:
+                    'No valid alert IDs provided. IDs must contain only alphanumeric characters, hyphens, underscores, dots, and colons.',
+                },
+              },
+            ],
+          };
+        }
+
         const now = new Date();
         const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         const dateFilter = `@timestamp >= "${sevenDaysAgo.toISOString()}" AND @timestamp <= "${now.toISOString()}"`;
 
-        // Build alert IDs filter using MV_CONTAINS with OR conditions
-        const alertIdsFilter = alertIds
-          .map((alertId) => `MV_CONTAINS(kibana.alert.attack_discovery.alert_ids,"${alertId}")`)
+        const alertIdsFilter = sanitizedAlertIds
+          .map((id) => `MV_CONTAINS(kibana.alert.attack_discovery.alert_ids,"${id}")`)
           .join(' OR ');
 
         const whereClause = `${dateFilter} AND (${alertIdsFilter})`;

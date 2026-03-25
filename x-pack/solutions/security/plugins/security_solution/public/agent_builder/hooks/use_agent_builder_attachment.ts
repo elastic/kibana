@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
@@ -48,9 +48,17 @@ export const useAgentBuilderAttachment = ({
     AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
     false
   );
+  const hasWarned = useRef(false);
 
   const openAgentBuilderFlyout = useCallback(() => {
     if (!agentBuilder?.openChat) {
+      if (!hasWarned.current) {
+        window.console.warn(
+          'useAgentBuilderAttachment: agentBuilder service or openChat method is not available. ' +
+            'Ensure the agentBuilder plugin is enabled.'
+        );
+        hasWarned.current = true;
+      }
       return;
     }
 

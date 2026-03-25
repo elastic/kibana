@@ -53,7 +53,7 @@ export const registerSkills = async ({
   );
   await agentBuilder.skills.register(getSecurityMlJobsSkill({ getStartServices, logger, ml }));
 
-  agentBuilder.skills.register(threatHuntingSkill);
-  agentBuilder.skills.register(alertAnalysisSkill);
-  agentBuilder.skills.register(detectionEngineeringSkill);
+  await agentBuilder.skills.register(threatHuntingSkill);
+  await agentBuilder.skills.register(alertAnalysisSkill);
+  await agentBuilder.skills.register(detectionEngineeringSkill);
 };

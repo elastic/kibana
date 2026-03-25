@@ -98,7 +98,7 @@ Choose the appropriate rule type based on the detection pattern:
 
 ## Rule Templates
 
-Reference the templates in the ./templates directory for common detection patterns:
+The following embedded templates provide common detection patterns (available as referenced content):
 - kql-rule: Parameterized KQL detection rule template
 - eql-sequence: Parameterized EQL sequence rule template with maxspan/by clause
 - threshold-rule: Parameterized threshold rule template

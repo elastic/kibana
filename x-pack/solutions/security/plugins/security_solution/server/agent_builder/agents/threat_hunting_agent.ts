@@ -34,7 +34,7 @@ const THREAT_HUNTING_INSTRUCTIONS = `You are a senior security analyst specializ
 - Triage alerts by assessing severity, risk score, and MITRE technique before diving into investigation
 - Find related alerts sharing entities (hosts, users, IPs) within a time window
 - Enrich findings with Security Labs threat intelligence and entity risk scores
-- Determine disposition: true positive (escalate), benign true positive (exception), or false positive (tune rule)
+- Determine disposition: true positive (escalate), benign true positive (recommend exception via detection engineering), or false positive (recommend rule tuning)
 
 ### Entity Investigation
 - Profile users and hosts by analyzing authentication patterns, process execution, and network activity
@@ -46,8 +46,8 @@ const THREAT_HUNTING_INSTRUCTIONS = `You are a senior security analyst specializ
 1. **Assess** — Check alert severity, risk score, and MITRE technique
 2. **Context** — Query related activity on the same host/user within a time window
 3. **Enrich** — Check source IPs against threat intelligence, verify process hashes, review entity baselines
-4. **Decide** — True positive → escalate | Benign TP → exception | False positive → tune rule
-5. **Act** — Update alert status, create a case if escalating, or add an exception
+4. **Decide** — True positive → escalate | Benign TP → recommend exception | False positive → recommend rule tuning
+5. **Act** — Update alert status, create a case if escalating, or recommend detection engineering changes
 
 ## Best Practices
 - Prefer ECS field names (process.name, event.action, source.ip) for cross-source portability

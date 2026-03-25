@@ -116,6 +116,32 @@ export function manageRuleExceptionsTool(
     },
     handler: async ({ rule_id: ruleId, name, description, entries }, { request }) => {
       try {
+        if (!setupPlugins.lists) {
+          return {
+            results: [
+              {
+                type: ToolResultType.error,
+                data: {
+                  message: 'Exception lists plugin is not available.',
+                },
+              },
+            ],
+          };
+        }
+
+        if (!/^[a-zA-Z0-9_\-.:]+$/.test(ruleId)) {
+          return {
+            results: [
+              {
+                type: ToolResultType.error,
+                data: {
+                  message: `Invalid rule_id format: "${ruleId}". Only alphanumeric characters, hyphens, underscores, dots, and colons are allowed.`,
+                },
+              },
+            ],
+          };
+        }
+
         const [coreStart, startPlugins] = await core.getStartServices();
 
         const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
@@ -142,19 +168,6 @@ export function manageRuleExceptionsTool(
 
         const rule = rules.data[0];
 
-        if (!setupPlugins.lists) {
-          return {
-            results: [
-              {
-                type: ToolResultType.error,
-                data: {
-                  message: 'Exception lists plugin is not available.',
-                },
-              },
-            ],
-          };
-        }
-
         const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
         const username = coreStart.security.authc.getCurrentUser(request)?.username || 'elastic';
         const exceptionListClient = setupPlugins.lists.getExceptionListClient(
@@ -173,7 +186,8 @@ export function manageRuleExceptionsTool(
             params: rule.params as Record<string, unknown>,
           },
           ruleId,
-          rulesClient as unknown as ExceptionRulesClient
+          rulesClient as unknown as ExceptionRulesClient,
+          logger
         );
 
         const exceptionEntries = entries.map((entry: z.infer<typeof exceptionEntrySchema>) => ({
@@ -242,7 +256,8 @@ async function getOrCreateDefaultExceptionList(
     params: Record<string, unknown>;
   },
   ruleId: string,
-  rulesClient: ExceptionRulesClient
+  rulesClient: ExceptionRulesClient,
+  toolLogger: Logger
 ): Promise<string> {
   const exceptionsList =
     (rule.params.exceptionsList as Array<{ list_id: string; type: string }>) ?? [];
@@ -266,27 +281,37 @@ async function getOrCreateDefaultExceptionList(
     version: 1,
   });
 
-  await rulesClient.update({
-    id: rule.id,
-    data: {
-      name: rule.name,
-      tags: rule.tags,
-      schedule: rule.schedule,
-      actions: rule.actions,
-      params: {
-        ...rule.params,
-        exceptionsList: [
-          ...exceptionsList,
-          {
-            id: listId,
-            list_id: listId,
-            namespace_type: 'single',
-            type: 'rule_default',
-          },
-        ],
+  try {
+    await rulesClient.update({
+      id: rule.id,
+      data: {
+        name: rule.name,
+        tags: rule.tags,
+        schedule: rule.schedule,
+        actions: rule.actions,
+        params: {
+          ...rule.params,
+          exceptionsList: [
+            ...exceptionsList,
+            {
+              id: listId,
+              list_id: listId,
+              namespace_type: 'single',
+              type: 'rule_default',
+            },
+          ],
+        },
       },
-    },
-  });
+    });
+  } catch (updateError) {
+    toolLogger.warn(
+      `Created exception list "${listId}" but failed to attach it to rule "${rule.id}". ` +
+        `Orphaned list may need manual cleanup. Error: ${
+          updateError instanceof Error ? updateError.message : String(updateError)
+        }`
+    );
+    throw updateError;
+  }
 
   return listId;
 }

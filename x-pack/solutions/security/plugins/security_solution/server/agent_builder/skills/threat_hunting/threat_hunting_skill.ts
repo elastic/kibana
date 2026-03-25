@@ -67,7 +67,7 @@ Use this skill when:
 
 ## Query Templates
 
-Reference the query templates in the ./queries directory for common hunting patterns:
+The following embedded query templates provide common hunting patterns (available as referenced content):
 - lateral-movement: Detect lateral movement via remote service creation and suspicious logon types
 - c2-beaconing: Identify C2 beaconing through periodic network connection analysis
 - brute-force: Detect brute force and credential spraying attempts
