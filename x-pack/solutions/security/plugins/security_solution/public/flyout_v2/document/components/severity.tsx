@@ -20,33 +20,6 @@ export const EVENT_SEVERITY = 'event.severity';
 const isSeverity = (x: unknown): x is Severity =>
   x === 'low' || x === 'medium' || x === 'high' || x === 'critical';
 
-export const getDocumentSeverity = (
-  hit: DataTableRecord
-): { fieldName: string | null; severity: string | number | null } => {
-  const alertSeverity = getFieldValue(hit, ALERT_SEVERITY);
-
-  if (typeof alertSeverity === 'string' || typeof alertSeverity === 'number') {
-    return {
-      fieldName: ALERT_SEVERITY,
-      severity: alertSeverity,
-    };
-  }
-
-  const eventSeverity = getFieldValue(hit, EVENT_SEVERITY);
-
-  if (typeof eventSeverity === 'string' || typeof eventSeverity === 'number') {
-    return {
-      fieldName: EVENT_SEVERITY,
-      severity: eventSeverity,
-    };
-  }
-
-  return {
-    fieldName: null,
-    severity: null,
-  };
-};
-
 export interface DocumentSeverityProps {
   /**
    * The document to display
@@ -62,7 +35,21 @@ export const DocumentSeverity = memo(({ hit }: DocumentSeverityProps) => {
 
   const severityToColorMap = useRiskSeverityColors();
 
-  const { severity } = useMemo(() => getDocumentSeverity(hit), [hit]);
+  const severity = useMemo(() => {
+    const alertSeverity = getFieldValue(hit, ALERT_SEVERITY);
+
+    if (typeof alertSeverity === 'string' || typeof alertSeverity === 'number') {
+      return alertSeverity;
+    }
+
+    const eventSeverity = getFieldValue(hit, EVENT_SEVERITY);
+
+    if (typeof eventSeverity === 'string' || typeof eventSeverity === 'number') {
+      return eventSeverity;
+    }
+
+    return null;
+  }, [hit]);
 
   const displayValue = useMemo(() => {
     if (severity == null) {
