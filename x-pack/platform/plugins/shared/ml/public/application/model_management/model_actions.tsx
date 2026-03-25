@@ -157,7 +157,7 @@ export function useModelActions({
             defaultMessage: 'Training data can be viewed when data frame analytics job exists.',
           }
         ),
-        icon: 'visTable',
+        icon: 'table',
         type: 'icon',
         available: (item) => isDFAModelItem(item) && !!item.metadata?.analytics_config?.id,
         enabled: (item) => isDFAModelItem(item) && item.origin_job_exists === true,
@@ -272,7 +272,7 @@ export function useModelActions({
           }
         ),
         'data-test-subj': 'mlModelsTableRowUpdateDeploymentAction',
-        icon: 'documentEdit',
+        icon: 'pencil',
         type: 'icon',
         isPrimary: false,
         available: (item) =>
@@ -403,7 +403,7 @@ export function useModelActions({
           defaultMessage: 'Analyze data drift',
         }),
         'data-test-subj': 'mlModelsAnalyzeDataDriftAction',
-        icon: 'visTagCloud',
+        icon: 'chartTagCloud',
         type: 'icon',
         isPrimary: true,
         available: (item) => {

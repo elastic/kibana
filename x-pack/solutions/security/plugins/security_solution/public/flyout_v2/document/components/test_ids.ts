@@ -7,6 +7,11 @@
 
 import { PREFIX } from '../../../flyout/shared/test_ids';
 
+/* Header */
+
+export const HEADER_TITLE_TEST_ID = `${PREFIX}AlertTitle` as const;
+export const HEADER_TITLE_LINK_TEST_ID = `${PREFIX}AlertTitleLink` as const;
+
 /* About */
 
 const ALERT_DESCRIPTION_TEST_ID = `${PREFIX}AlertDescription` as const;
@@ -46,7 +51,20 @@ export const SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID =
 export const SESSION_VIEW_UPSELL_TEST_ID = `${PREFIX}SessionViewUpsell` as const;
 export const SESSION_VIEW_NO_DATA_TEST_ID = `${PREFIX}SessionViewNoData` as const;
 
-/* Insights */
+export const CORRELATIONS_TEST_ID = `${PREFIX}Correlations` as const;
+export const CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID =
+  `${CORRELATIONS_TEST_ID}SuppressedAlerts` as const;
+export const CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID =
+  `${CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID}TechnicalPreview` as const;
+export const CORRELATIONS_RELATED_CASES_TEST_ID = `${CORRELATIONS_TEST_ID}RelatedCases` as const;
+export const CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID =
+  `${CORRELATIONS_TEST_ID}RelatedAlertsBySession` as const;
+export const CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID =
+  `${CORRELATIONS_TEST_ID}RelatedAlertsBySameSourceEvent` as const;
+export const CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID =
+  `${CORRELATIONS_TEST_ID}RelatedAlertsByAncestry` as const;
+export const CORRELATIONS_RELATED_ATTACKS_TEST_ID =
+  `${CORRELATIONS_TEST_ID}RelatedAttacks` as const;
 
 export const INSIGHTS_THREAT_INTELLIGENCE_TEST_ID = `${PREFIX}InsightsThreatIntelligence` as const;
 export const INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_TEST_ID =
@@ -55,3 +73,8 @@ export const INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_TEST
   `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}EnrichedWithThreatIntelligence` as const;
 
 export const PREVALENCE_TEST_ID = `${PREFIX}InsightsPrevalence` as const;
+
+export const SUMMARY_ROW_LOADING_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Loading`;
+export const SUMMARY_ROW_TEXT_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Text`;
+export const SUMMARY_ROW_VALUE_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Value`;
+export const SUMMARY_ROW_BUTTON_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Button`;
