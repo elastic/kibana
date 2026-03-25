@@ -131,18 +131,14 @@ export const mitreMappingTool = (
 
         const parsedResponse = JSON.parse(jsonMatch[0]);
 
-        if (
-          !parsedResponse.mappings ||
-          !Array.isArray(parsedResponse.mappings)
-        ) {
+        if (!parsedResponse.mappings || !Array.isArray(parsedResponse.mappings)) {
           return {
             results: [
               {
                 tool_result_id: getToolResultId(),
                 type: ToolResultType.error,
                 data: {
-                  message:
-                    'Invalid MITRE mapping response structure: expected { mappings: [...] }',
+                  message: 'Invalid MITRE mapping response structure: expected { mappings: [...] }',
                 },
               },
             ],

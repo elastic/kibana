@@ -119,9 +119,9 @@ describe('SOC Tools Integration', () => {
       expect(result.results[0].data.matches).toHaveLength(3);
 
       // Verify matches come from different sources
-      const providers = (
-        result.results[0].data.matches as Array<Record<string, unknown>>
-      ).map((m) => m.provider);
+      const providers = (result.results[0].data.matches as Array<Record<string, unknown>>).map(
+        (m) => m.provider
+      );
       expect(providers).toContain('AbuseCH');
       expect(providers).toContain('AlienVault OTX');
       expect(providers).toContain('Anomali');
@@ -390,11 +390,26 @@ describe('SOC Tools Integration', () => {
       mockEsClient.asCurrentUser.search.mockResolvedValue({
         hits: {
           hits: [
-            { _id: 'alert-001', _source: { 'kibana.alert.rule.uuid': 'rule-1', 'kibana.alert.rule.name': 'Rule 1' } },
-            { _id: 'alert-002', _source: { 'kibana.alert.rule.uuid': 'rule-1', 'kibana.alert.rule.name': 'Rule 1' } },
-            { _id: 'alert-003', _source: { 'kibana.alert.rule.uuid': 'rule-2', 'kibana.alert.rule.name': 'Rule 2' } },
-            { _id: 'alert-004', _source: { 'kibana.alert.rule.uuid': 'rule-2', 'kibana.alert.rule.name': 'Rule 2' } },
-            { _id: 'alert-005', _source: { 'kibana.alert.rule.uuid': 'rule-3', 'kibana.alert.rule.name': 'Rule 3' } },
+            {
+              _id: 'alert-001',
+              _source: { 'kibana.alert.rule.uuid': 'rule-1', 'kibana.alert.rule.name': 'Rule 1' },
+            },
+            {
+              _id: 'alert-002',
+              _source: { 'kibana.alert.rule.uuid': 'rule-1', 'kibana.alert.rule.name': 'Rule 1' },
+            },
+            {
+              _id: 'alert-003',
+              _source: { 'kibana.alert.rule.uuid': 'rule-2', 'kibana.alert.rule.name': 'Rule 2' },
+            },
+            {
+              _id: 'alert-004',
+              _source: { 'kibana.alert.rule.uuid': 'rule-2', 'kibana.alert.rule.name': 'Rule 2' },
+            },
+            {
+              _id: 'alert-005',
+              _source: { 'kibana.alert.rule.uuid': 'rule-3', 'kibana.alert.rule.name': 'Rule 3' },
+            },
           ],
         },
       } as any);
@@ -414,21 +429,15 @@ describe('SOC Tools Integration', () => {
 
       const bulkCreateCall = mockCasesClient.attachments.bulkCreate.mock.calls[0][0];
       expect(bulkCreateCall.attachments).toHaveLength(5);
-      bulkCreateCall.attachments.forEach(
-        (attachment: Record<string, unknown>, index: number) => {
-          expect(attachment.type).toBe('alert');
-          expect(attachment.alertId).toBe(`alert-00${index + 1}`);
-          expect(attachment.owner).toBe('securitySolution');
-        }
-      );
+      bulkCreateCall.attachments.forEach((attachment: Record<string, unknown>, index: number) => {
+        expect(attachment.type).toBe('alert');
+        expect(attachment.alertId).toBe(`alert-00${index + 1}`);
+        expect(attachment.owner).toBe('securitySolution');
+      });
     });
 
     it('handles error when cases plugin is not available', async () => {
-      mockCore.getStartServices.mockResolvedValue([
-        {} as never,
-        {} as never,
-        {} as never,
-      ]);
+      mockCore.getStartServices.mockResolvedValue([{} as never, {} as never, {} as never]);
 
       const result = (await tool.handler(
         { action: 'get', case_id: 'case-1' },
@@ -744,9 +753,7 @@ describe('SOC Tools Integration', () => {
     });
 
     it('handles ES errors gracefully', async () => {
-      mockEsClient.asCurrentUser.search.mockRejectedValue(
-        new Error('index_not_found_exception')
-      );
+      mockEsClient.asCurrentUser.search.mockRejectedValue(new Error('index_not_found_exception'));
 
       const result = (await tool.handler(
         { entity_type: 'service', identifier: 'svc-api' },

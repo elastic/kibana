@@ -38,16 +38,12 @@ const reportSectionsSchema = z.object({
   recommendations: z
     .string()
     .optional()
-    .describe(
-      'Recommended remediation steps, hardening measures, and follow-up actions'
-    ),
+    .describe('Recommended remediation steps, hardening measures, and follow-up actions'),
 });
 
 const reportGenerateSchema = z.object({
   title: z.string().describe('Title of the incident report'),
-  sections: reportSectionsSchema.describe(
-    'Structured sections of the incident report'
-  ),
+  sections: reportSectionsSchema.describe('Structured sections of the incident report'),
   format: z
     .enum(['markdown', 'json'])
     .optional()

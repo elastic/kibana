@@ -13,9 +13,7 @@ import type { ResponseActionsClient } from '../../endpoint/services/actions/clie
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import type { ActionDetails } from '../../../common/endpoint/types';
 
-const createMockActionDetails = (
-  overrides: Partial<ActionDetails> = {}
-): ActionDetails => ({
+const createMockActionDetails = (overrides: Partial<ActionDetails> = {}): ActionDetails => ({
   id: 'action-123',
   agents: ['endpoint-123'],
   hosts: { 'endpoint-123': { name: 'test-host' } },
@@ -75,8 +73,7 @@ describe('responseActionsTool', () => {
     } as unknown as jest.Mocked<EndpointAppContextService>;
   });
 
-  const getTool = () =>
-    responseActionsTool(mockCore, mockLogger, mockEndpointAppContextService);
+  const getTool = () => responseActionsTool(mockCore, mockLogger, mockEndpointAppContextService);
 
   describe('schema', () => {
     it('validates correct isolate action', () => {
@@ -335,9 +332,7 @@ describe('responseActionsTool', () => {
     });
 
     it('handles response actions client errors', async () => {
-      mockResponseActionsClient.isolate.mockRejectedValue(
-        new Error('Endpoint not found')
-      );
+      mockResponseActionsClient.isolate.mockRejectedValue(new Error('Endpoint not found'));
 
       const tool = getTool();
       const result = (await tool.handler(

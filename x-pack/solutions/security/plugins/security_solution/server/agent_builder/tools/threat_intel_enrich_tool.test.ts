@@ -311,9 +311,7 @@ describe('threatIntelEnrichTool', () => {
     });
 
     it('handles ES errors', async () => {
-      mockEsClient.asCurrentUser.search.mockRejectedValue(
-        new Error('Search index not found')
-      );
+      mockEsClient.asCurrentUser.search.mockRejectedValue(new Error('Search index not found'));
 
       const result = (await tool.handler(
         { ioc_type: 'ip', ioc_value: '1.2.3.4' },

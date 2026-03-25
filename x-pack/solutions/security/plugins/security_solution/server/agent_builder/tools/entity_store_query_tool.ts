@@ -16,9 +16,7 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_c
 import { securityTool } from './constants';
 
 const entityStoreQuerySchema = z.object({
-  entity_type: z
-    .enum(['host', 'user', 'service'])
-    .describe('The type of entity to query'),
+  entity_type: z.enum(['host', 'user', 'service']).describe('The type of entity to query'),
   identifier: z
     .string()
     .min(1)
@@ -30,15 +28,11 @@ const entityStoreQuerySchema = z.object({
     .array(z.string())
     .max(20)
     .optional()
-    .describe(
-      'Specific fields to return. If not provided, returns all available fields.'
-    ),
+    .describe('Specific fields to return. If not provided, returns all available fields.'),
   time_range: z
     .string()
     .optional()
-    .describe(
-      'Time range for entity data (e.g., "7d", "30d"). Defaults to latest snapshot.'
-    ),
+    .describe('Time range for entity data (e.g., "7d", "30d"). Defaults to latest snapshot.'),
   limit: z
     .number()
     .int()
@@ -132,10 +126,7 @@ const queryEntityStoreByName = async ({
   const filterClauses: Array<Record<string, unknown>> = [
     {
       bool: {
-        should: [
-          { term: { 'entity.name': identifier } },
-          { term: { [nameField]: identifier } },
-        ],
+        should: [{ term: { 'entity.name': identifier } }, { term: { [nameField]: identifier } }],
         minimum_should_match: 1,
       },
     },

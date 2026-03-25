@@ -56,11 +56,7 @@ export class AiSocEvalChatClient {
     private readonly connectorId: string
   ) {}
 
-  async converse({
-    messages,
-    conversationId,
-    agentId,
-  }: ConverseParams): Promise<ConverseResponse> {
+  async converse({ messages, conversationId, agentId }: ConverseParams): Promise<ConverseResponse> {
     const callConverseApi = async (): Promise<ConverseResponse> => {
       const response = await this.fetch('/api/agent_builder/converse', {
         method: 'POST',

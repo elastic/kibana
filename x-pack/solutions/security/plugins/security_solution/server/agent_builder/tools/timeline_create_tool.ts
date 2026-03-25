@@ -62,7 +62,9 @@ export const timelineCreateTool = (
       { esClient, spaceId, request, savedObjectsClient }
     ) => {
       logger.debug(
-        `${SECURITY_TIMELINE_CREATE_TOOL_ID} tool called with title: ${title}, eventIds: ${JSON.stringify(eventIds)}`
+        `${SECURITY_TIMELINE_CREATE_TOOL_ID} tool called with title: ${title}, eventIds: ${JSON.stringify(
+          eventIds
+        )}`
       );
 
       try {
@@ -178,7 +180,9 @@ export const timelineCreateTool = (
                 pinned_events: foundIds.length,
                 missing_events: missingIds.length > 0 ? missingIds : undefined,
                 url: timelineUrl,
-                message: `Timeline "${title}" created successfully with ${foundIds.length} pinned events.${
+                message: `Timeline "${title}" created successfully with ${
+                  foundIds.length
+                } pinned events.${
                   missingIds.length > 0
                     ? ` ${missingIds.length} event(s) were not found and were skipped.`
                     : ''

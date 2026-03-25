@@ -284,9 +284,7 @@ describe('caseManageTool', () => {
         )) as ToolHandlerStandardReturn;
 
         expect(result.results[0].type).toBe(ToolResultType.error);
-        expect((result.results[0] as ErrorResult).data.message).toContain(
-          'case_id is required'
-        );
+        expect((result.results[0] as ErrorResult).data.message).toContain('case_id is required');
       });
     });
 
@@ -325,9 +323,7 @@ describe('caseManageTool', () => {
         )) as ToolHandlerStandardReturn;
 
         expect(result.results[0].type).toBe(ToolResultType.error);
-        expect((result.results[0] as ErrorResult).data.message).toContain(
-          'case_id is required'
-        );
+        expect((result.results[0] as ErrorResult).data.message).toContain('case_id is required');
       });
 
       it('requires comment for add_comment', async () => {
@@ -337,9 +333,7 @@ describe('caseManageTool', () => {
         )) as ToolHandlerStandardReturn;
 
         expect(result.results[0].type).toBe(ToolResultType.error);
-        expect((result.results[0] as ErrorResult).data.message).toContain(
-          'comment is required'
-        );
+        expect((result.results[0] as ErrorResult).data.message).toContain('comment is required');
       });
     });
 
@@ -349,8 +343,20 @@ describe('caseManageTool', () => {
         mockEsClient.asCurrentUser.search.mockResolvedValue({
           hits: {
             hits: [
-              { _id: 'alert-1', _source: { 'kibana.alert.rule.uuid': 'rule-1', 'kibana.alert.rule.name': 'Test Rule' } },
-              { _id: 'alert-2', _source: { 'kibana.alert.rule.uuid': 'rule-1', 'kibana.alert.rule.name': 'Test Rule' } },
+              {
+                _id: 'alert-1',
+                _source: {
+                  'kibana.alert.rule.uuid': 'rule-1',
+                  'kibana.alert.rule.name': 'Test Rule',
+                },
+              },
+              {
+                _id: 'alert-2',
+                _source: {
+                  'kibana.alert.rule.uuid': 'rule-1',
+                  'kibana.alert.rule.name': 'Test Rule',
+                },
+              },
             ],
           },
         } as any);
@@ -395,9 +401,7 @@ describe('caseManageTool', () => {
         )) as ToolHandlerStandardReturn;
 
         expect(result.results[0].type).toBe(ToolResultType.error);
-        expect((result.results[0] as ErrorResult).data.message).toContain(
-          'case_id is required'
-        );
+        expect((result.results[0] as ErrorResult).data.message).toContain('case_id is required');
       });
 
       it('requires alert_ids for attach_alerts', async () => {
@@ -407,9 +411,7 @@ describe('caseManageTool', () => {
         )) as ToolHandlerStandardReturn;
 
         expect(result.results[0].type).toBe(ToolResultType.error);
-        expect((result.results[0] as ErrorResult).data.message).toContain(
-          'alert_ids is required'
-        );
+        expect((result.results[0] as ErrorResult).data.message).toContain('alert_ids is required');
       });
 
       it('requires non-empty alert_ids for attach_alerts', async () => {
@@ -419,9 +421,7 @@ describe('caseManageTool', () => {
         )) as ToolHandlerStandardReturn;
 
         expect(result.results[0].type).toBe(ToolResultType.error);
-        expect((result.results[0] as ErrorResult).data.message).toContain(
-          'alert_ids is required'
-        );
+        expect((result.results[0] as ErrorResult).data.message).toContain('alert_ids is required');
       });
     });
 
@@ -458,9 +458,7 @@ describe('caseManageTool', () => {
         )) as ToolHandlerStandardReturn;
 
         expect(result.results[0].type).toBe(ToolResultType.error);
-        expect((result.results[0] as ErrorResult).data.message).toContain(
-          'case_id is required'
-        );
+        expect((result.results[0] as ErrorResult).data.message).toContain('case_id is required');
       });
     });
 
@@ -504,9 +502,7 @@ describe('caseManageTool', () => {
         )) as ToolHandlerStandardReturn;
 
         expect(result.results[0].type).toBe(ToolResultType.error);
-        expect((result.results[0] as ErrorResult).data.message).toContain(
-          'case_id is required'
-        );
+        expect((result.results[0] as ErrorResult).data.message).toContain('case_id is required');
       });
 
       it('requires status for change_status', async () => {
@@ -516,17 +512,13 @@ describe('caseManageTool', () => {
         )) as ToolHandlerStandardReturn;
 
         expect(result.results[0].type).toBe(ToolResultType.error);
-        expect((result.results[0] as ErrorResult).data.message).toContain(
-          'status is required'
-        );
+        expect((result.results[0] as ErrorResult).data.message).toContain('status is required');
       });
     });
 
     describe('error handling', () => {
       it('handles errors from casesClient create', async () => {
-        mockCasesClient.cases.create.mockRejectedValue(
-          new Error('Cases service unavailable')
-        );
+        mockCasesClient.cases.create.mockRejectedValue(new Error('Cases service unavailable'));
 
         const result = (await tool.handler(
           { action: 'create', title: 'Failing Case' },
@@ -561,9 +553,7 @@ describe('caseManageTool', () => {
           version: 'v1',
           status: 'open',
         });
-        mockCasesClient.cases.update.mockRejectedValue(
-          new Error('Conflict: version mismatch')
-        );
+        mockCasesClient.cases.update.mockRejectedValue(new Error('Conflict: version mismatch'));
 
         const result = (await tool.handler(
           { action: 'update', case_id: 'case-1', title: 'Updated' },
@@ -598,11 +588,16 @@ describe('caseManageTool', () => {
       it('handles errors from attachments bulkCreate', async () => {
         // Mock ES search for alert rule info (succeeds, but bulkCreate fails)
         mockEsClient.asCurrentUser.search.mockResolvedValue({
-          hits: { hits: [{ _id: 'alert-1', _source: { 'kibana.alert.rule.uuid': 'rule-1', 'kibana.alert.rule.name': 'Rule' } }] },
+          hits: {
+            hits: [
+              {
+                _id: 'alert-1',
+                _source: { 'kibana.alert.rule.uuid': 'rule-1', 'kibana.alert.rule.name': 'Rule' },
+              },
+            ],
+          },
         } as any);
-        mockCasesClient.attachments.bulkCreate.mockRejectedValue(
-          new Error('Bulk create failed')
-        );
+        mockCasesClient.attachments.bulkCreate.mockRejectedValue(new Error('Bulk create failed'));
 
         const result = (await tool.handler(
           {

@@ -45,9 +45,7 @@ const caseManageSchema = z.object({
     .array(z.string().max(255))
     .max(100)
     .optional()
-    .describe(
-      'Array of alert IDs to attach to the case. Used with the attach_alerts action.'
-    ),
+    .describe('Array of alert IDs to attach to the case. Used with the attach_alerts action.'),
   comment: z
     .string()
     .max(30000)
@@ -56,9 +54,7 @@ const caseManageSchema = z.object({
   status: z
     .enum(['open', 'in-progress', 'closed'])
     .optional()
-    .describe(
-      'The status to set on the case. Used with the change_status action.'
-    ),
+    .describe('The status to set on the case. Used with the change_status action.'),
   severity: z
     .enum(['low', 'medium', 'high', 'critical'])
     .optional()
@@ -378,9 +374,7 @@ export const caseManageTool = (
               attachments: alertAttachments,
             });
 
-            logger.debug(
-              `Successfully attached ${alertIds.length} alerts to case ${caseId}`
-            );
+            logger.debug(`Successfully attached ${alertIds.length} alerts to case ${caseId}`);
 
             return {
               results: [
@@ -485,9 +479,7 @@ export const caseManageTool = (
 
             const statusUpdatedCase = statusUpdatedCases[0];
 
-            logger.debug(
-              `Successfully changed status of case ${caseId} to ${status}`
-            );
+            logger.debug(`Successfully changed status of case ${caseId} to ${status}`);
 
             return {
               results: [

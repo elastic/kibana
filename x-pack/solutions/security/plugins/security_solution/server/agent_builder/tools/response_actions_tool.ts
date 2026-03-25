@@ -88,11 +88,10 @@ export const responseActionsTool = (
           };
         }
 
-        const responseActionsClient =
-          endpointAppContextService.getInternalResponseActionsClient({
-            spaceId,
-            username: 'agent-builder',
-          });
+        const responseActionsClient = endpointAppContextService.getInternalResponseActionsClient({
+          spaceId,
+          username: 'agent-builder',
+        });
 
         const baseRequestBody = {
           endpoint_ids: [endpointId],

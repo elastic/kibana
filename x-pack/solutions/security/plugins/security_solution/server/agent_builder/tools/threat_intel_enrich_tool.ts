@@ -36,11 +36,7 @@ const threatIntelEnrichSchema = z.object({
 export const SECURITY_THREAT_INTEL_ENRICH_TOOL_ID = securityTool('threat_intel_enrich');
 
 /** Threat intel index patterns to search */
-const TI_INDEX_PATTERNS = [
-  '.ds-logs-ti_*',
-  'logs-ti_*-*',
-  'filebeat-*',
-];
+const TI_INDEX_PATTERNS = ['.ds-logs-ti_*', 'logs-ti_*-*', 'filebeat-*'];
 
 /**
  * Builds the appropriate ES query field path based on the IOC type

@@ -106,9 +106,7 @@ describe('mitreMappingTool', () => {
 
   describe('handler', () => {
     it('invokes model and returns parsed mappings', async () => {
-      const mockModelProvider = createMockModelProvider(
-        JSON.stringify(mockMappingsResponse)
-      );
+      const mockModelProvider = createMockModelProvider(JSON.stringify(mockMappingsResponse));
 
       const result = (await tool.handler(
         { indicators: ['lateral movement via PsExec'] },
@@ -165,9 +163,7 @@ describe('mitreMappingTool', () => {
         ],
       };
 
-      const mockModelProvider = createMockModelProvider(
-        JSON.stringify(multiMappingsResponse)
-      );
+      const mockModelProvider = createMockModelProvider(JSON.stringify(multiMappingsResponse));
 
       const result = (await tool.handler(
         {
@@ -188,9 +184,7 @@ describe('mitreMappingTool', () => {
     });
 
     it('passes context to the model when provided', async () => {
-      const mockModelProvider = createMockModelProvider(
-        JSON.stringify(mockMappingsResponse)
-      );
+      const mockModelProvider = createMockModelProvider(JSON.stringify(mockMappingsResponse));
 
       await tool.handler(
         {

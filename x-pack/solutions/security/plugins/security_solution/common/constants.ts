@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import {
   RULES_FEATURE_LATEST,

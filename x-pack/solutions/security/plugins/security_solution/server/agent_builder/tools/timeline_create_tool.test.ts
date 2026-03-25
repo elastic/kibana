@@ -38,7 +38,11 @@ describe('timelineCreateTool', () => {
       },
     } as ReturnType<typeof createTimeline> extends Promise<infer T> ? T : never);
 
-    mockSavePinnedEvents.mockResolvedValue(undefined as unknown as ReturnType<typeof savePinnedEvents> extends Promise<infer T> ? T : never);
+    mockSavePinnedEvents.mockResolvedValue(
+      undefined as unknown as ReturnType<typeof savePinnedEvents> extends Promise<infer T>
+        ? T
+        : never
+    );
   });
 
   describe('schema', () => {
@@ -165,10 +169,7 @@ describe('timelineCreateTool', () => {
         hits: { hits: [{ _id: 'event-1' }, { _id: 'event-2' }] },
       } as any);
 
-      await tool.handler(
-        { title: 'Timeline', event_ids: ['event-1', 'event-2'] },
-        createContext()
-      );
+      await tool.handler({ title: 'Timeline', event_ids: ['event-1', 'event-2'] }, createContext());
 
       expect(mockSavePinnedEvents).toHaveBeenCalledWith(
         expect.anything(), // frameworkRequest
