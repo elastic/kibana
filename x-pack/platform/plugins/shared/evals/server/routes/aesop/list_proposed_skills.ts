@@ -11,6 +11,7 @@ import type { AESOPRouteDependencies } from './register_aesop_routes';
 
 const listProposedSkillsQuerySchema = z.object({
   status: z.enum(['all', 'pending_review', 'passed', 'failed']).optional().default('all'),
+  derived_from: z.enum(['all', 'patterns', 'relationships', 'conversations', 'llm', 'skill_improvement']).optional().default('all'),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   offset: z.coerce.number().int().min(0).default(0),
 });
@@ -40,10 +41,14 @@ export function registerListProposedSkillsRoute({ router, logger }: AESOPRouteDe
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
         try {
-          const { status, limit, offset } = request.query;
+          const { status, derived_from, limit, offset } = request.query;
 
-          // Build query filter based on status
+          // Build query filter based on status and derived_from
           const mustClauses: any[] = [];
+
+          if (derived_from !== 'all') {
+            mustClauses.push({ term: { derived_from } });
+          }
 
           if (status !== 'all') {
             if (status === 'passed' || status === 'failed') {

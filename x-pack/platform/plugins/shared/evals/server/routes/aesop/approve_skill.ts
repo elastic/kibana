@@ -15,6 +15,7 @@ const approveSkillParamsSchema = z.object({
 
 const approveSkillBodySchema = z.object({
   review_notes: z.string().optional(),
+  update_existing: z.boolean().optional().default(false),
 });
 
 // Map skill content keywords to Agent Builder tool IDs
@@ -83,7 +84,7 @@ export function registerApproveSkillRoute({ router, logger }: AESOPRouteDependen
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
         const { skillId } = request.params;
-        const { review_notes } = request.body;
+        const { review_notes, update_existing } = request.body;
 
         try {
           // 1. Load proposed skill
@@ -104,43 +105,77 @@ export function registerApproveSkillRoute({ router, logger }: AESOPRouteDependen
             });
           }
 
-          // 3. Generate a valid skill ID for Agent Builder
-          const agentBuilderSkillId = sanitizeSkillId(`aesop-${skillId}`);
+          // 3. Determine whether to update an existing skill or create a new one
+          const isUpdateExisting = update_existing &&
+            skill.base_skill?.id &&
+            skill.base_skill?.readonly === false;
 
-          // 4. Infer tools from skill content (max 5)
+          // 4. Generate a valid skill ID for Agent Builder
+          const agentBuilderSkillId = isUpdateExisting
+            ? skill.base_skill.id
+            : sanitizeSkillId(`aesop-${skillId}`);
+
+          // 5. Infer tools from skill content (max 5)
           const toolIds = inferTools(skill.markdown || '').slice(0, MAX_TOOLS);
 
           logger.info('[AESOP] Deploying skill to Agent Builder', {
             skill_id: skillId,
             agent_builder_skill_id: agentBuilderSkillId,
+            update_existing: isUpdateExisting,
             tool_ids: toolIds,
           });
 
-          // 5. Create skill in Agent Builder via internal Kibana API
+          // 6. Create or update skill in Agent Builder via internal Kibana API
           const host = request.headers.host || 'localhost:5601';
           const protocol = (request.headers['x-forwarded-proto'] as string) || 'http';
           const kibanaUrl = `${protocol}://${host}`;
 
-          const agentBuilderResponse = await fetch(
-            `${kibanaUrl}/api/agent_builder/skills`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'kbn-xsrf': 'true',
-                'x-elastic-internal-origin': 'kibana',
-                'elastic-api-version': '2023-10-31',
-                Authorization: request.headers.authorization as string,
-              },
-              body: JSON.stringify({
-                id: agentBuilderSkillId,
-                name: sanitizeSkillName(skill.name),
-                description: (skill.description || '').slice(0, 1024),
-                content: skill.markdown || '',
-                tool_ids: toolIds,
-              }),
-            }
-          );
+          let agentBuilderResponse: Response;
+
+          if (isUpdateExisting) {
+            // Update existing user skill via PUT
+            agentBuilderResponse = await fetch(
+              `${kibanaUrl}/api/agent_builder/skills/${agentBuilderSkillId}`,
+              {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'kbn-xsrf': 'true',
+                  'x-elastic-internal-origin': 'kibana',
+                  'elastic-api-version': '2023-10-31',
+                  Authorization: request.headers.authorization as string,
+                },
+                body: JSON.stringify({
+                  name: sanitizeSkillName(skill.name),
+                  description: (skill.description || '').slice(0, 1024),
+                  content: skill.markdown || '',
+                  tool_ids: toolIds,
+                }),
+              }
+            );
+          } else {
+            // Create new skill via POST
+            agentBuilderResponse = await fetch(
+              `${kibanaUrl}/api/agent_builder/skills`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'kbn-xsrf': 'true',
+                  'x-elastic-internal-origin': 'kibana',
+                  'elastic-api-version': '2023-10-31',
+                  Authorization: request.headers.authorization as string,
+                },
+                body: JSON.stringify({
+                  id: agentBuilderSkillId,
+                  name: sanitizeSkillName(skill.name),
+                  description: (skill.description || '').slice(0, 1024),
+                  content: skill.markdown || '',
+                  tool_ids: toolIds,
+                }),
+              }
+            );
+          }
 
           if (!agentBuilderResponse.ok) {
             const errorBody = await agentBuilderResponse.text();
@@ -152,6 +187,7 @@ export function registerApproveSkillRoute({ router, logger }: AESOPRouteDependen
           logger.info('[AESOP] Skill deployed to Agent Builder', {
             skill_id: skillId,
             agent_builder_skill_id: createdSkill.id,
+            update_existing: isUpdateExisting,
             tools: toolIds,
           });
 
@@ -172,6 +208,7 @@ export function registerApproveSkillRoute({ router, logger }: AESOPRouteDependen
                   deployed_at: new Date().toISOString(),
                   agent_builder_skill_id: createdSkill.id,
                   tool_ids: toolIds,
+                  updated_existing: isUpdateExisting || false,
                 },
               },
             },

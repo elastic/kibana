@@ -172,6 +172,13 @@ export function registerRunExplorationRoute({ router, logger }: AESOPRouteDepend
               samplingConfig,
               connectorId,
               actionsClient,
+              authHeaders: {
+                authorization: request.headers.authorization as string,
+                'kbn-xsrf': 'true',
+                'x-elastic-internal-origin': 'kibana',
+                'elastic-api-version': '2023-10-31',
+              },
+              kibanaUrl: `${(request.headers['x-forwarded-proto'] as string) || 'http'}://${request.headers.host || 'localhost:5601'}`,
             }
           );
           executor.execute().catch((err) => {

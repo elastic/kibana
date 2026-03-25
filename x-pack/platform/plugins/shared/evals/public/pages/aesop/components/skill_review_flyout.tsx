@@ -92,9 +92,12 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
 
   // Approve skill mutation
   const approveMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (params?: { updateExisting?: boolean }) => {
       return await api.http.post(`/internal/aesop/skills/${skill.id}/approve`, {
-        body: JSON.stringify({ review_notes: reviewNotes }),
+        body: JSON.stringify({
+          review_notes: reviewNotes,
+          update_existing: params?.updateExisting || false,
+        }),
         version: '1',
       });
     },
@@ -279,6 +282,27 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
+          {/* Skill Improvement info */}
+          {skill.base_skill && (
+            <>
+              <EuiPanel color="accent">
+                <EuiFlexGroup alignItems="center" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="s"><h3>Based on: {skill.base_skill.name}</h3></EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color={skill.base_skill.readonly ? 'default' : 'primary'}>
+                      {skill.base_skill.readonly ? 'Built-in Skill' : 'User Skill'}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="s" />
+                <EuiText size="s">{skill.source?.rationale || 'Improvement proposed based on discovered data patterns.'}</EuiText>
+              </EuiPanel>
+              <EuiSpacer />
+            </>
+          )}
+
           {/* Cross-evaluation warning */}
           {skill.cross_evaluation?.action === 'flagged' && (
             <>
@@ -616,12 +640,32 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                   ),
                 },
                 {
+                  title: 'Derived From',
+                  description: (
+                    <EuiBadge color="hollow">
+                      {skill.derived_from || 'patterns'}
+                    </EuiBadge>
+                  ),
+                },
+                {
                   title: 'Discovered',
                   description: new Date(skill.metadata?.created_at).toLocaleString(),
                 },
                 {
-                  title: 'Indices Explored',
-                  description: skill.metadata?.indices_explored ?? 'N/A',
+                  title: 'Source Indices',
+                  description: (() => {
+                    const indices = skill.source?.source_indices || skill.metadata?.source_indices || [];
+                    if (indices.length === 0) return `${skill.metadata?.indices_explored ?? 0} indices (names not recorded)`;
+                    return (
+                      <EuiFlexGroup gutterSize="xs" wrap>
+                        {indices.map((idx: string) => (
+                          <EuiFlexItem key={idx} grow={false}>
+                            <EuiBadge color="hollow">{idx}</EuiBadge>
+                          </EuiFlexItem>
+                        ))}
+                      </EuiFlexGroup>
+                    );
+                  })(),
                 },
               ]}
             />
@@ -719,6 +763,18 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                       Cancel
                     </EuiButtonEmpty>
                   </EuiFlexItem>
+                  {skill.base_skill && !skill.base_skill.readonly && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        color="success"
+                        onClick={() => approveMutation.mutate({ updateExisting: true })}
+                        disabled={!canApprove}
+                        isLoading={approveMutation.isPending}
+                      >
+                        Update Existing Skill
+                      </EuiButton>
+                    </EuiFlexItem>
+                  )}
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       fill
@@ -727,7 +783,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                       disabled={!canApprove}
                       isLoading={approveMutation.isPending}
                     >
-                      Approve & Deploy to Agent Builder
+                      {skill.base_skill ? 'Create as New Skill' : 'Approve & Deploy to Agent Builder'}
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>

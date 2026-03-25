@@ -51,6 +51,15 @@ const INDEX_MAPPINGS: Record<string, { properties: Record<string, unknown> }> = 
           indices_explored: { type: 'integer' },
         },
       },
+      derived_from: { type: 'keyword' },
+      improvement_type: { type: 'keyword' },
+      base_skill: {
+        properties: {
+          id: { type: 'keyword' },
+          name: { type: 'keyword' },
+          readonly: { type: 'boolean' },
+        },
+      },
       validation: { properties: { status: { type: 'keyword' } } },
       review: { properties: { status: { type: 'keyword' } } },
     },
@@ -87,6 +96,8 @@ interface ExplorationConfig {
   samplingConfig: SamplingConfig;
   connectorId?: string;
   actionsClient?: any;
+  authHeaders?: Record<string, string>; // For calling Kibana APIs (Agent Builder)
+  kibanaUrl?: string; // e.g., 'http://localhost:5601'
 }
 
 interface SchemaInfo {
@@ -122,11 +133,33 @@ interface ProposedSkill {
   description: string;
   confidence: number;
   markdown: string;
+  sourceIndices: string[];
+  derivedFrom?: 'patterns' | 'relationships' | 'conversations' | 'llm' | 'skill_improvement';
+  improvementType: 'new' | 'improvement' | 'customization';
+  baseSkill?: {
+    id: string;
+    name: string;
+    readonly: boolean;
+    originalContent?: string;
+  };
   source: {
     patternId: string;
     patternFrequency: number;
     rationale: string;
   };
+}
+
+interface AgentBuilderSkillSummary {
+  id: string;
+  name: string;
+  description: string;
+  readonly: boolean;
+  tool_ids: string[];
+  referenced_content_count: number;
+}
+
+interface AgentBuilderSkillDetail extends AgentBuilderSkillSummary {
+  content: string;
 }
 
 export class ExplorationWorkflowExecutor {
@@ -214,11 +247,11 @@ export class ExplorationWorkflowExecutor {
    * Helper to calculate cumulative completed steps and progress percentage.
    */
   private progressFor(phaseNumber: 1 | 2 | 3 | 4 | 5, stepInPhase: number, totalStepsInPhase: number) {
-    // Steps per phase: [4, 3, 4, 3, 4] = 18 total
-    const stepsPerPhase = [4, 3, 4, 3, 4];
+    // Steps per phase: [4, 3, 4, 3, 6] = 20 total
+    const stepsPerPhase = [4, 3, 4, 3, 6];
     const completedInPrior = stepsPerPhase.slice(0, phaseNumber - 1).reduce((a, b) => a + b, 0);
     const completedSteps = completedInPrior + stepInPhase;
-    const progressPercentage = Math.round((completedSteps / 18) * 100);
+    const progressPercentage = Math.round((completedSteps / 20) * 100);
     return { completedSteps, progressPercentage };
   }
 
@@ -614,22 +647,37 @@ export class ExplorationWorkflowExecutor {
   // Phase 5: Skill Synthesis
   // ---------------------------------------------------------------------------
   private async phaseSkillSynthesis(): Promise<void> {
-    const { actionsClient, connectorId } = this.config;
+    const { actionsClient, connectorId, authHeaders, kibanaUrl } = this.config;
     const useLLM = actionsClient && connectorId;
+
+    // Analyze existing Agent Builder skills for improvement proposals
+    if (useLLM && authHeaders && kibanaUrl) {
+      await this.updateStep(5, 0, 6, 'Fetching existing Agent Builder skills...');
+      const improvementSkills = await this.analyzeSkillImprovements(
+        actionsClient,
+        connectorId,
+        authHeaders,
+        kibanaUrl
+      );
+      if (improvementSkills.length > 0) {
+        this.logger.info(`[AESOP] Generated ${improvementSkills.length} skill improvement proposals`);
+        this.skills.push(...improvementSkills);
+      }
+    }
 
     if (useLLM) {
       // LLM-powered skill synthesis — generates much higher quality skills
-      await this.updateStep(5, 0, 4, 'Generating skills with LLM...');
+      await this.updateStep(5, useLLM && authHeaders && kibanaUrl ? 2 : 0, 6, 'Generating skills with LLM...');
       await this.synthesizeSkillsWithLLM(actionsClient, connectorId);
     } else {
       // Template-based fallback
-      await this.updateStep(5, 0, 4, 'Matching patterns to skill templates...');
+      await this.updateStep(5, 0, 6, 'Matching patterns to skill templates...');
 
       const topPatterns = this.patterns
         .sort((a, b) => b.confidence * b.frequency - a.confidence * a.frequency)
         .slice(0, 10);
 
-      await this.updateStep(5, 1, 4, 'Generating skill definitions...');
+      await this.updateStep(5, 1, 6, 'Generating skill definitions...');
 
       for (const pattern of topPatterns) {
         const skill = this.synthesizeSkill(pattern);
@@ -646,8 +694,8 @@ export class ExplorationWorkflowExecutor {
       }
     }
 
-    // Step 3: Validate and score
-    await this.updateStep(5, 2, 4, 'Validating and scoring skills...');
+    // Validate and score
+    await this.updateStep(5, 4, 6, 'Validating and scoring skills...');
 
     // Filter out skills that reference backing indices directly.
     // Skills must use data stream / alias names — backing indices are internal
@@ -674,8 +722,8 @@ export class ExplorationWorkflowExecutor {
     this.skills = validatedSkills;
     this.skills.sort((a, b) => b.confidence - a.confidence);
 
-    // Step 4: Store proposed skills
-    await this.updateStep(5, 3, 4, 'Storing proposed skills...');
+    // Store proposed skills
+    await this.updateStep(5, 5, 6, 'Storing proposed skills...');
     await this.ensureIndex(PROPOSED_SKILLS_INDEX);
 
     for (const skill of this.skills) {
@@ -691,10 +739,19 @@ export class ExplorationWorkflowExecutor {
             pattern_id: skill.source.patternId,
             pattern_frequency: skill.source.patternFrequency,
             rationale: skill.source.rationale,
+            source_indices: skill.sourceIndices,
           },
+          derived_from: skill.derivedFrom || 'patterns',
+          improvement_type: skill.improvementType,
+          base_skill: skill.baseSkill ? {
+            id: skill.baseSkill.id,
+            name: skill.baseSkill.name,
+            readonly: skill.baseSkill.readonly,
+          } : undefined,
           metadata: {
             created_at: new Date().toISOString(),
             indices_explored: this.schemas.length,
+            source_indices: skill.sourceIndices,
             exploration_execution_id: this.config.executionId,
             cycle_number: 1,
             discovery_trace_id: this.config.executionId,
@@ -723,7 +780,223 @@ export class ExplorationWorkflowExecutor {
       },
     });
 
-    await this.updateStep(5, 4, 4, 'Skill synthesis complete');
+    await this.updateStep(5, 6, 6, 'Skill synthesis complete');
+  }
+
+  // ---------------------------------------------------------------------------
+  // Skill Improvement Analysis
+  // ---------------------------------------------------------------------------
+
+  private async fetchExistingSkills(
+    authHeaders: Record<string, string>,
+    kibanaUrl: string
+  ): Promise<AgentBuilderSkillSummary[]> {
+    try {
+      const response = await fetch(`${kibanaUrl}/api/agent_builder/skills`, {
+        method: 'GET',
+        headers: {
+          ...authHeaders,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        this.logger.warn(`[AESOP] Failed to fetch Agent Builder skills: ${response.status}`);
+        return [];
+      }
+
+      const data = await response.json();
+      return (data.results || []) as AgentBuilderSkillSummary[];
+    } catch (error) {
+      this.logger.warn(`[AESOP] Error fetching existing skills: ${error instanceof Error ? error.message : String(error)}`);
+      return [];
+    }
+  }
+
+  private async fetchSkillDetail(
+    skillId: string,
+    authHeaders: Record<string, string>,
+    kibanaUrl: string
+  ): Promise<AgentBuilderSkillDetail | null> {
+    try {
+      const response = await fetch(`${kibanaUrl}/api/agent_builder/skills/${skillId}`, {
+        method: 'GET',
+        headers: {
+          ...authHeaders,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        this.logger.debug(`[AESOP] Could not fetch skill detail for ${skillId}: ${response.status}`);
+        return null;
+      }
+
+      return (await response.json()) as AgentBuilderSkillDetail;
+    } catch {
+      return null;
+    }
+  }
+
+  private async analyzeSkillImprovements(
+    actionsClient: any,
+    connectorId: string,
+    authHeaders: Record<string, string>,
+    kibanaUrl: string
+  ): Promise<ProposedSkill[]> {
+    const existingSkills = await this.fetchExistingSkills(authHeaders, kibanaUrl);
+    if (existingSkills.length === 0) {
+      this.logger.info('[AESOP] No existing Agent Builder skills found to analyze');
+      return [];
+    }
+
+    this.logger.info(`[AESOP] Analyzing ${existingSkills.length} existing Agent Builder skills for improvements`);
+    await this.updateStep(5, 1, 6, `Analyzing ${existingSkills.length} existing skills...`);
+
+    const improvementSkills: ProposedSkill[] = [];
+    const context = this.buildLLMContext();
+
+    // Fetch full content for up to 10 skills to keep prompt size manageable
+    const skillsToAnalyze = existingSkills.slice(0, 10);
+    const skillDetails: AgentBuilderSkillDetail[] = [];
+
+    for (const skillSummary of skillsToAnalyze) {
+      const detail = await this.fetchSkillDetail(skillSummary.id, authHeaders, kibanaUrl);
+      if (detail) {
+        skillDetails.push(detail);
+      }
+    }
+
+    if (skillDetails.length === 0) {
+      this.logger.info('[AESOP] No skill details could be fetched');
+      return [];
+    }
+
+    // Build a single LLM prompt that analyzes all skills at once (more efficient)
+    const skillsSummary = skillDetails.map((skill) => {
+      const contentPreview = (skill.content || '').slice(0, 2000);
+      return `### Skill: "${skill.name}" (ID: ${skill.id}, ${skill.readonly ? 'built-in' : 'user-created'})
+Description: ${skill.description}
+Tools: ${skill.tool_ids.join(', ') || 'none'}
+Content:
+${contentPreview}`;
+    }).join('\n\n');
+
+    const prompt = `You are an expert Agent Builder skill analyzer for Elastic Security.
+You are given a list of existing Agent Builder skills and discovery context from the user's actual data.
+Your job is to identify which existing skills could be improved or customized based on the data actually present in the cluster.
+
+## Discovery Context
+${context}
+
+## Existing Skills
+${skillsSummary}
+
+For each skill that could be meaningfully improved, generate an improvement proposal as JSON.
+Only propose improvements when the discovered data provides concrete value — do NOT propose generic improvements.
+
+Each improvement must have:
+- "base_skill_id": the ID of the skill being improved
+- "base_skill_name": the name of the skill being improved
+- "base_skill_readonly": whether the original is built-in
+- "name": improved skill name (can be same or different)
+- "description": what this improvement adds
+- "markdown": complete improved skill content in markdown
+- "confidence": 0.0-1.0 based on how relevant the discovered data is
+- "improvement_rationale": why this improvement matters for this user's data
+- "improvement_type": "improvement" if enhancing existing functionality, "customization" if adapting to specific data patterns
+
+Focus on:
+- Adding index-specific queries using actual discovered index names and fields
+- Incorporating cross-index correlations the skill doesn't currently use
+- Adding environment-specific detection patterns from the discovered data
+- Tailoring generic skills to the user's actual data landscape
+
+Respond with ONLY a JSON array (no markdown fences): [{ "base_skill_id": "...", ... }, ...]
+If no improvements are warranted, return an empty array: []`;
+
+    try {
+      const result = await actionsClient.execute({
+        actionId: connectorId,
+        params: {
+          subAction: 'run',
+          subActionParams: {
+            body: JSON.stringify({
+              messages: [{ role: 'user', content: prompt }],
+              temperature: 0.3,
+            }),
+          },
+        },
+      });
+
+      if (result.status === 'error') {
+        this.logger.warn(`[AESOP] LLM skill improvement analysis failed: ${result.message}`);
+        return [];
+      }
+
+      const rawResponse = this.extractLLMText(result.data);
+      const proposals = this.parseSkillImprovements(rawResponse, skillDetails);
+
+      this.logger.info(`[AESOP] LLM proposed ${proposals.length} skill improvements`);
+      improvementSkills.push(...proposals);
+    } catch (error) {
+      this.logger.warn(`[AESOP] Skill improvement analysis error: ${error instanceof Error ? error.message : String(error)}`);
+    }
+
+    return improvementSkills;
+  }
+
+  private parseSkillImprovements(
+    response: string,
+    skillDetails: AgentBuilderSkillDetail[]
+  ): ProposedSkill[] {
+    try {
+      let cleaned = response;
+      cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/g, '');
+      cleaned = cleaned.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim();
+      if (!cleaned.startsWith('[')) {
+        const match = cleaned.match(/\[[\s\S]*\]/);
+        if (match) cleaned = match[0];
+      }
+
+      const parsed = JSON.parse(cleaned);
+      if (!Array.isArray(parsed)) return [];
+
+      const skillMap = new Map(skillDetails.map((s) => [s.id, s]));
+
+      return parsed
+        .filter((item: any) => item.base_skill_id && skillMap.has(item.base_skill_id))
+        .map((item: any) => {
+          const baseSkill = skillMap.get(item.base_skill_id)!;
+          const patternId = shortHash(`improvement-${item.base_skill_id}-${item.name || ''}`);
+
+          return {
+            skillId: `skill-improve-${patternId}`,
+            name: String(item.name || `Improved: ${baseSkill.name}`),
+            description: String(item.description || ''),
+            confidence: Math.max(0, Math.min(1, Number(item.confidence) || 0.7)),
+            markdown: String(item.markdown || ''),
+            sourceIndices: this.schemas.map((s) => s.indexName),
+            derivedFrom: 'skill_improvement' as const,
+            improvementType: (item.improvement_type === 'customization' ? 'customization' : 'improvement') as 'improvement' | 'customization',
+            baseSkill: {
+              id: baseSkill.id,
+              name: baseSkill.name,
+              readonly: item.base_skill_readonly ?? baseSkill.readonly,
+              originalContent: baseSkill.content,
+            },
+            source: {
+              patternId: `improvement-${patternId}`,
+              patternFrequency: 1,
+              rationale: String(item.improvement_rationale || 'Improvement based on discovered data patterns'),
+            },
+          };
+        })
+        .filter((s: ProposedSkill) => s.markdown.length > 50);
+    } catch (error) {
+      this.logger.error(`[AESOP] Failed to parse skill improvement proposals: ${error instanceof Error ? error.message : String(error)}`);
+      return [];
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -758,6 +1031,9 @@ export class ExplorationWorkflowExecutor {
           pattern.exampleQueries[0] || '',
           '```',
         ].join('\n'),
+        sourceIndices: pattern.sourceIndices,
+        derivedFrom: 'patterns',
+        improvementType: 'new',
         source: {
           patternId: pattern.patternId,
           patternFrequency: pattern.frequency,
@@ -789,6 +1065,9 @@ export class ExplorationWorkflowExecutor {
           pattern.exampleQueries[0] || '',
           '```',
         ].join('\n'),
+        sourceIndices: pattern.sourceIndices,
+        derivedFrom: 'patterns',
+        improvementType: 'new',
         source: {
           patternId: pattern.patternId,
           patternFrequency: pattern.frequency,
@@ -820,6 +1099,9 @@ export class ExplorationWorkflowExecutor {
           pattern.exampleQueries[0] || '',
           '```',
         ].join('\n'),
+        sourceIndices: pattern.sourceIndices,
+        derivedFrom: 'patterns',
+        improvementType: 'new',
         source: {
           patternId: pattern.patternId,
           patternFrequency: pattern.frequency,
@@ -864,6 +1146,9 @@ export class ExplorationWorkflowExecutor {
         `FROM ${resolvedFrom}, ${resolvedTo} | WHERE ${rel.via} IS NOT NULL | STATS count = COUNT(*) BY ${rel.via} | SORT count DESC | LIMIT 20`,
         '```',
       ].join('\n'),
+      sourceIndices: [resolvedFrom, resolvedTo],
+      derivedFrom: 'relationships',
+      improvementType: 'new',
       source: {
         patternId,
         patternFrequency: rel.sharedValueCount,
@@ -896,6 +1181,7 @@ Generate skills as a JSON array. Each skill must have:
 - "confidence": 0.0-1.0 based on data quality
 - "source_pattern": which pattern/relationship inspired this skill
 - "source_rationale": why this skill is useful
+- "source_indices": array of exact index/data stream names this skill queries
 
 IMPORTANT:
 - Use parameterized index patterns (e.g., logs-endpoint.events.file-*) not hardcoded rollover indices
@@ -907,7 +1193,7 @@ IMPORTANT:
 Respond with ONLY a JSON array (no markdown fences): [{ "name": "...", ... }, ...]`;
 
     try {
-      await this.updateStep(5, 1, 4, 'Calling LLM for skill generation...');
+      await this.updateStep(5, 3, 6, 'Calling LLM for skill generation...');
 
       const result = await actionsClient.execute({
         actionId: connectorId,
@@ -989,14 +1275,27 @@ Respond with ONLY a JSON array (no markdown fences): [{ "name": "...", ... }, ..
       const parsed = JSON.parse(cleaned);
       if (!Array.isArray(parsed)) return [];
 
+      const allIndexNames = this.schemas.map((s) => s.indexName);
+
       return parsed.map((item: any) => {
         const patternId = shortHash(item.name || Math.random().toString());
+        // Extract source_indices from LLM response, or infer from markdown content
+        let indices: string[] = Array.isArray(item.source_indices) ? item.source_indices : [];
+        if (indices.length === 0) {
+          // Infer from markdown — find which discovered index names appear in the content
+          const md = String(item.markdown || '').toLowerCase();
+          indices = allIndexNames.filter((idx) => md.includes(idx.toLowerCase()));
+        }
+
         return {
           skillId: `skill-llm-${patternId}`,
           name: String(item.name || 'Untitled Skill'),
           description: String(item.description || ''),
           confidence: Math.max(0, Math.min(1, Number(item.confidence) || 0.8)),
           markdown: String(item.markdown || ''),
+          sourceIndices: indices,
+          derivedFrom: 'llm' as const,
+          improvementType: 'new' as const,
           source: {
             patternId: `llm-${patternId}`,
             patternFrequency: 1,
