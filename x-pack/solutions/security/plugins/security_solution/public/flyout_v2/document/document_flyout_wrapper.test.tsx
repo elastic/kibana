@@ -11,16 +11,26 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { TestProviders } from '../../common/mock';
 import { DocumentFlyoutWrapper } from './document_flyout_wrapper';
 
 jest.mock('@kbn/unified-doc-viewer-plugin/public');
 jest.mock('../../data_view_manager/hooks/use_data_view');
+jest.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 
 const mockDocumentFlyout = jest.fn((props: unknown) => <div data-test-subj="documentFlyoutStub" />);
 jest.mock('.', () => ({
   DocumentFlyout: (props: unknown) => mockDocumentFlyout(props),
 }));
+
+const createAlertHit = (): DataTableRecord =>
+  ({
+    id: '1',
+    raw: {},
+    flattened: { 'event.kind': 'signal' },
+    isAnchor: false,
+  } as DataTableRecord);
 
 const mockDataView = {
   hasMatchedIndices: () => true,
@@ -47,6 +57,7 @@ describe('DocumentFlyoutWrapper', () => {
       dataView: mockDataView,
     });
     (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Loading, null, jest.fn()]);
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
   });
 
   it('fetches clicked document using document id and index', () => {
@@ -68,7 +79,7 @@ describe('DocumentFlyoutWrapper', () => {
 
     const { getByTestId } = renderDocumentFlyoutWrapper();
 
-    expect(getByTestId('analyzer-event-overview-loading')).toBeInTheDocument();
+    expect(getByTestId('document-overview-wrapper-loading')).toBeInTheDocument();
     expect(useEsDocSearch).toHaveBeenCalledWith(
       expect.objectContaining({
         skip: true,
@@ -76,8 +87,38 @@ describe('DocumentFlyoutWrapper', () => {
     );
   });
 
+  it('renders loading while alerts privileges are loading for an alert', () => {
+    const alertHit = createAlertHit();
+    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, alertHit, jest.fn()]);
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: false, loading: true });
+
+    const { getByTestId } = renderDocumentFlyoutWrapper();
+
+    expect(getByTestId('document-overview-wrapper-loading')).toBeInTheDocument();
+  });
+
+  it('does not render loading when alerts privileges are loading but document is not an alert', () => {
+    const nonAlertHit: DataTableRecord = {
+      id: '2',
+      raw: {},
+      flattened: { 'event.kind': 'event' },
+      isAnchor: false,
+    } as DataTableRecord;
+    (useEsDocSearch as jest.Mock).mockReturnValue([
+      ElasticRequestState.Found,
+      nonAlertHit,
+      jest.fn(),
+    ]);
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: false, loading: true });
+
+    const { getByTestId, queryByTestId } = renderDocumentFlyoutWrapper();
+
+    expect(queryByTestId('document-overview-wrapper-loading')).not.toBeInTheDocument();
+    expect(getByTestId('documentFlyoutStub')).toBeInTheDocument();
+  });
+
   it('renders DocumentFlyout when document is found', () => {
-    const hit = { id: '1' } as DataTableRecord;
+    const hit = { id: '1', raw: {}, flattened: { 'event.kind': 'event' } } as DataTableRecord;
     (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, hit, jest.fn()]);
 
     const { getByTestId } = renderDocumentFlyoutWrapper();
@@ -95,7 +136,7 @@ describe('DocumentFlyoutWrapper', () => {
 
     const { getByTestId } = renderDocumentFlyoutWrapper();
 
-    expect(getByTestId('analyzer-event-overview-not-found')).toBeInTheDocument();
+    expect(getByTestId('document-overview-wrapper-not-found')).toBeInTheDocument();
   });
 
   it('renders error state when document fetch fails', () => {
@@ -103,6 +144,17 @@ describe('DocumentFlyoutWrapper', () => {
 
     const { getByTestId } = renderDocumentFlyoutWrapper();
 
-    expect(getByTestId('analyzer-event-overview-fetch-error')).toBeInTheDocument();
+    expect(getByTestId('document-overview-fetch-error')).toBeInTheDocument();
+  });
+
+  it('renders FlyoutMissingAlertsPrivilege when document is an alert and user lacks alerts read privilege', () => {
+    const alertHit = createAlertHit();
+    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, alertHit, jest.fn()]);
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: false, loading: false });
+
+    const { getByTestId, queryByTestId } = renderDocumentFlyoutWrapper();
+
+    expect(getByTestId('noPrivilegesPage')).toBeInTheDocument();
+    expect(queryByTestId('documentFlyoutStub')).not.toBeInTheDocument();
   });
 });

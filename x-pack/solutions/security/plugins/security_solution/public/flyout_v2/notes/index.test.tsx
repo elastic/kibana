@@ -76,6 +76,11 @@ describe('NotesDetails', () => {
     useUserPrivilegesMock.mockReturnValue({
       notesPrivileges: { crud: true },
       timelinePrivileges: { crud: true },
+      rulesPrivileges: {
+        rules: {
+          read: true,
+        },
+      },
     });
     (useTimelineConfig as jest.Mock).mockReturnValue(mockTimelineConfig);
     useIsInSecurityAppMock.mockReturnValue(false);
@@ -188,6 +193,11 @@ describe('NotesDetails', () => {
     useUserPrivilegesMock.mockReturnValue({
       notesPrivileges: { crud: false },
       timelinePrivileges: { crud: false },
+      rulesPrivileges: {
+        rules: {
+          read: true,
+        },
+      },
     });
 
     const { queryByTestId } = renderNotesDetails();

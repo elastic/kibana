@@ -18,6 +18,10 @@ import type { StartServices } from '../../types';
 
 const mockDocumentHeader = jest.fn((_props: unknown) => <div>{'MockDocumentHeader'}</div>);
 
+jest.mock('../../common/components/user_privileges/user_privileges_context', () => ({
+  UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 jest.mock('../../flyout_v2/document/header', () => ({
   Header: (props: unknown) => mockDocumentHeader(props),
 }));
