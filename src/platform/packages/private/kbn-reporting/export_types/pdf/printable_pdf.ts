@@ -88,62 +88,71 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
         const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
         let apmGeneratePdf: { end: () => void } | null | undefined;
 
+        const tracker = getTracker();
+
         const process$: Observable<TaskRunResult> = of(1).pipe(
-          mergeMap(async () => {
-            const uiSettingsClient = await this.getUiSettingsClient(request);
-            return getCustomLogo(uiSettingsClient);
-          }),
-          mergeMap((logo) => {
-            const urls = getFullUrls(this.getServerInfo(), this.config, job);
-
-            const { browserTimezone, layout, title } = job;
-            apmGetAssets?.end();
-
+          mergeMap(() =>
+            withActiveSpan('get-assets', { attributes: { 'span.type': 'setup' } }, async () => {
+              const uiSettingsClient = await this.getUiSettingsClient(request);
+              const logo = await getCustomLogo(uiSettingsClient);
+              const urls = getFullUrls(this.getServerInfo(), this.config, job);
+              const { browserTimezone, layout, title } = job;
+              return { logo, urls, browserTimezone, layout, title };
+            })
+          ),
+          tap(() => apmGetAssets?.end()),
+          mergeMap(({ logo, urls, browserTimezone, layout, title }) => {
             apmGeneratePdf = apmTrans.startSpan('generate-pdf-pipeline', 'execute');
 
-            const tracker = getTracker();
-            tracker.startScreenshots();
+            // "generate-pdf-pipeline" and "generate-pdf" (from withGeneratePdfSpan) cover the same span.
+            // The difference is that the legacy Elastic APM agent only supports 1-deep nested spans.
+            // With OTel this seems like unnecessary duplication, but we keep it for compatibility.
+            return withActiveSpan(
+              'generate-pdf-pipeline',
+              { attributes: { 'span.type': 'execute' } },
+              () =>
+                tracker.withGeneratePdfSpan(() =>
+                  tracker
+                    .withScreenshotsSpan(() =>
+                      this.startDeps.screenshotting!.getScreenshots({
+                        format: 'pdf',
+                        title,
+                        logo,
+                        urls,
+                        request,
+                        browserTimezone,
+                        layout,
+                        taskInstanceFields,
+                        logger,
+                      })
+                    )
+                    .pipe(
+                      tap(({ metrics }) => {
+                        if (metrics.cpu) {
+                          tracker.setCpuUsage(metrics.cpu);
+                        }
+                        if (metrics.memory) {
+                          tracker.setMemoryUsage(metrics.memory);
+                        }
+                      }),
+                      mergeMap(async ({ data: buffer, errors, metrics, renderErrors }) => {
+                        const warnings: string[] = [];
+                        if (errors) {
+                          warnings.push(...errors.map((error) => error.message));
+                        }
+                        if (renderErrors) {
+                          warnings.push(...renderErrors);
+                        }
 
-            return this.startDeps
-              .screenshotting!.getScreenshots({
-                format: 'pdf',
-                title,
-                logo,
-                urls,
-                request,
-                browserTimezone,
-                layout,
-                taskInstanceFields,
-                logger,
-              })
-              .pipe(
-                tap(({ metrics }) => {
-                  if (metrics.cpu) {
-                    tracker.setCpuUsage(metrics.cpu);
-                  }
-                  if (metrics.memory) {
-                    tracker.setMemoryUsage(metrics.memory);
-                  }
-                }),
-                mergeMap(async ({ data: buffer, errors, metrics, renderErrors }) => {
-                  tracker.endScreenshots();
-                  const warnings: string[] = [];
-                  if (errors) {
-                    warnings.push(...errors.map((error) => error.message));
-                  }
-                  if (renderErrors) {
-                    warnings.push(...renderErrors);
-                  }
-
-                  tracker.end();
-
-                  return {
-                    buffer,
-                    metrics,
-                    warnings,
-                  };
-                })
-              );
+                        return {
+                          buffer,
+                          metrics,
+                          warnings,
+                        };
+                      })
+                    )
+                )
+            );
           }),
           tap(({ buffer }) => {
             apmGeneratePdf?.end();
