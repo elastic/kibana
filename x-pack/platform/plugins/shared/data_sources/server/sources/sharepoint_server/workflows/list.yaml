@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.sharepoint-server.list'
-description: 'Browse SharePoint Server resources. REQUIRED: always provide list_action — calling without it will fail. list_action options: "getWeb" — site metadata, no other inputs needed; "getLists" — all lists and document libraries, no other inputs needed; "getListItems" — items in a named list, requires list_title (exact Title from getLists); "getFolderContents" — files and subfolders at a path, requires path (ServerRelativeUrl from getLists or a previous getFolderContents result, starts with /).'
+description: 'List/browse SharePoint Server resources. Always provide list_action. Actions and inputs: getWeb (returns site metadata); getLists (returns all lists and document libraries); getListItems (list_title); getFolderContents (path).'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -9,15 +9,15 @@ inputs:
   - name: list_action
     type: string
     required: true
-    description: "Required. Which action to perform. Choose one: getWeb, getLists, getListItems, getFolderContents."
+    description: "Action to perform. Use getWeb to get site metadata; getLists to discover available lists and document libraries; getListItems to retrieve items from a specific list; getFolderContents to browse files and subfolders in a folder."
   - name: list_title
     type: string
     required: false
-    description: "Required when list_action is 'getListItems'. Exact display name of the list (the Title field from getLists). Example: 'Documents', 'Tasks'."
+    description: "Name of the list (required for getListItems). Use the exact Title from getLists."
   - name: path
     type: string
     required: false
-    description: "Required when list_action is 'getFolderContents'. Server-relative URL of the folder, starts with '/'. Get this from getLists (RootFolder.ServerRelativeUrl) or from a previous getFolderContents result. Example: '/sites/mysite/Shared Documents'."
+    description: "Server-relative URL of the folder (required for getFolderContents). Get this from getLists (RootFolder.ServerRelativeUrl) or a previous getFolderContents result. Starts with '/'."
 steps:
   - name: get-web
     type: sharepoint-server.getWeb
