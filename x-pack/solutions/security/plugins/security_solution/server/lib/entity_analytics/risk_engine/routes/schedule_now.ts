@@ -47,41 +47,42 @@ export const riskEngineScheduleNowRoute = (
 
             const securitySolution = await context.securitySolution;
 
-        securitySolution.getAuditLogger()?.log({
-          message: 'User attempted to schedule the risk engine.',
-          event: {
-            action: RiskEngineAuditActions.RISK_ENGINE_SCHEDULE_NOW,
-            category: AUDIT_CATEGORY.DATABASE,
-            type: AUDIT_TYPE.CHANGE,
-            outcome: AUDIT_OUTCOME.UNKNOWN,
-          },
-        });
-
-        const [_, { taskManager }] = await getStartServices();
-
-        const riskEngineClient = securitySolution.getRiskEngineDataClient();
-
-        if (!taskManager) {
-          return siemResponse.error({
-            statusCode: 400,
-            body: TASK_MANAGER_UNAVAILABLE_ERROR,
-          });
-        }
-
-        try {
-          await riskEngineClient.scheduleNow({ taskManager });
-          const body: RiskEngineScheduleNowResponse = { success: true };
-          return response.ok({ body });
-          } catch (e) {
-            const error = transformError(e);
-
-            return siemResponse.error({
-              statusCode: error.statusCode,
-              body: { message: error.message, full_error: JSON.stringify(e) },
-              bypassErrorFormat: true,
+            securitySolution.getAuditLogger()?.log({
+              message: 'User attempted to schedule the risk engine.',
+              event: {
+                action: RiskEngineAuditActions.RISK_ENGINE_SCHEDULE_NOW,
+                category: AUDIT_CATEGORY.DATABASE,
+                type: AUDIT_TYPE.CHANGE,
+                outcome: AUDIT_OUTCOME.UNKNOWN,
+              },
             });
+
+            const [_, { taskManager }] = await getStartServices();
+
+            const riskEngineClient = securitySolution.getRiskEngineDataClient();
+
+            if (!taskManager) {
+              return siemResponse.error({
+                statusCode: 400,
+                body: TASK_MANAGER_UNAVAILABLE_ERROR,
+              });
+            }
+
+            try {
+              await riskEngineClient.scheduleNow({ taskManager });
+              const body: RiskEngineScheduleNowResponse = { success: true };
+              return response.ok({ body });
+            } catch (e) {
+              const error = transformError(e);
+
+              return siemResponse.error({
+                statusCode: error.statusCode,
+                body: { message: error.message, full_error: JSON.stringify(e) },
+                bypassErrorFormat: true,
+              });
+            }
           }
-        })
+        )
       )
     );
 };

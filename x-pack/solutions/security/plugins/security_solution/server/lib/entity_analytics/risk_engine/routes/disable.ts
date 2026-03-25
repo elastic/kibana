@@ -38,60 +38,64 @@ export const riskEngineDisableRoute = (
         isEntityAnalyticsEntityStoreV2Enabled,
         withRiskEnginePrivilegeCheck(
           getStartServices,
-          async (context, request, response): Promise<IKibanaResponse<DisableRiskEngineResponse>> => {
+          async (
+            context,
+            request,
+            response
+          ): Promise<IKibanaResponse<DisableRiskEngineResponse>> => {
             const siemResponse = buildSiemResponse(response);
 
             const securitySolution = await context.securitySolution;
 
-          securitySolution.getAuditLogger()?.log({
-            message: 'User attempted to disable the risk engine.',
-            event: {
-              action: RiskEngineAuditActions.RISK_ENGINE_DISABLE,
-              category: AUDIT_CATEGORY.DATABASE,
-              type: AUDIT_TYPE.CHANGE,
-              outcome: AUDIT_OUTCOME.UNKNOWN,
-            },
-          });
-
-          const [_, { taskManager }] = await getStartServices();
-
-          const riskEngineClient = securitySolution.getRiskEngineDataClient();
-
-          if (!taskManager) {
             securitySolution.getAuditLogger()?.log({
-              message:
-                'User attempted to disable the risk engine, but the Kibana Task Manager was unavailable',
+              message: 'User attempted to disable the risk engine.',
               event: {
                 action: RiskEngineAuditActions.RISK_ENGINE_DISABLE,
                 category: AUDIT_CATEGORY.DATABASE,
                 type: AUDIT_TYPE.CHANGE,
-                outcome: AUDIT_OUTCOME.FAILURE,
+                outcome: AUDIT_OUTCOME.UNKNOWN,
               },
-              error: {
+            });
+
+            const [_, { taskManager }] = await getStartServices();
+
+            const riskEngineClient = securitySolution.getRiskEngineDataClient();
+
+            if (!taskManager) {
+              securitySolution.getAuditLogger()?.log({
                 message:
                   'User attempted to disable the risk engine, but the Kibana Task Manager was unavailable',
-              },
-            });
+                event: {
+                  action: RiskEngineAuditActions.RISK_ENGINE_DISABLE,
+                  category: AUDIT_CATEGORY.DATABASE,
+                  type: AUDIT_TYPE.CHANGE,
+                  outcome: AUDIT_OUTCOME.FAILURE,
+                },
+                error: {
+                  message:
+                    'User attempted to disable the risk engine, but the Kibana Task Manager was unavailable',
+                },
+              });
 
-            return siemResponse.error({
-              statusCode: 400,
-              body: TASK_MANAGER_UNAVAILABLE_ERROR,
-            });
-          }
+              return siemResponse.error({
+                statusCode: 400,
+                body: TASK_MANAGER_UNAVAILABLE_ERROR,
+              });
+            }
 
-          try {
-            await riskEngineClient.disableRiskEngine({ taskManager });
-            return response.ok({ body: { success: true } });
-          } catch (e) {
-            const error = transformError(e);
-            return siemResponse.error({
-              statusCode: error.statusCode,
-              body: { message: error.message, full_error: JSON.stringify(e) },
-              bypassErrorFormat: true,
-            });
+            try {
+              await riskEngineClient.disableRiskEngine({ taskManager });
+              return response.ok({ body: { success: true } });
+            } catch (e) {
+              const error = transformError(e);
+              return siemResponse.error({
+                statusCode: error.statusCode,
+                body: { message: error.message, full_error: JSON.stringify(e) },
+                bypassErrorFormat: true,
+              });
+            }
           }
-        }
+        )
       )
-    )
-  );
+    );
 };

@@ -46,72 +46,72 @@ export const riskEngineInitRoute = (
 
             const securitySolution = await context.securitySolution;
 
-          securitySolution.getAuditLogger()?.log({
-            message: 'User attempted to initialize the risk engine',
-            event: {
-              action: RiskEngineAuditActions.RISK_ENGINE_INIT,
-              category: AUDIT_CATEGORY.DATABASE,
-              type: AUDIT_TYPE.CHANGE,
-              outcome: AUDIT_OUTCOME.UNKNOWN,
-            },
-          });
-
-          const [_, { taskManager }] = await getStartServices();
-          const riskEngineDataClient = securitySolution.getRiskEngineDataClient();
-          const riskScoreDataClient = securitySolution.getRiskScoreDataClient();
-          const spaceId = securitySolution.getSpaceId();
-
-          try {
-            if (!taskManager) {
-              return siemResponse.error({
-                statusCode: 400,
-                body: TASK_MANAGER_UNAVAILABLE_ERROR,
-              });
-            }
-
-            const initResult = await riskEngineDataClient.init({
-              taskManager,
-              namespace: spaceId,
-              riskScoreDataClient,
+            securitySolution.getAuditLogger()?.log({
+              message: 'User attempted to initialize the risk engine',
+              event: {
+                action: RiskEngineAuditActions.RISK_ENGINE_INIT,
+                category: AUDIT_CATEGORY.DATABASE,
+                type: AUDIT_TYPE.CHANGE,
+                outcome: AUDIT_OUTCOME.UNKNOWN,
+              },
             });
 
-            const result: InitRiskEngineResult = {
-              risk_engine_enabled: initResult.riskEngineEnabled,
-              risk_engine_resources_installed: initResult.riskEngineResourcesInstalled,
-              risk_engine_configuration_created: initResult.riskEngineConfigurationCreated,
-              errors: initResult.errors,
-            };
+            const [_, { taskManager }] = await getStartServices();
+            const riskEngineDataClient = securitySolution.getRiskEngineDataClient();
+            const riskScoreDataClient = securitySolution.getRiskScoreDataClient();
+            const spaceId = securitySolution.getSpaceId();
 
-            if (
-              !initResult.riskEngineEnabled ||
-              !initResult.riskEngineResourcesInstalled ||
-              !initResult.riskEngineConfigurationCreated
-            ) {
-              return siemResponse.error({
-                statusCode: 400,
+            try {
+              if (!taskManager) {
+                return siemResponse.error({
+                  statusCode: 400,
+                  body: TASK_MANAGER_UNAVAILABLE_ERROR,
+                });
+              }
+
+              const initResult = await riskEngineDataClient.init({
+                taskManager,
+                namespace: spaceId,
+                riskScoreDataClient,
+              });
+
+              const result: InitRiskEngineResult = {
+                risk_engine_enabled: initResult.riskEngineEnabled,
+                risk_engine_resources_installed: initResult.riskEngineResourcesInstalled,
+                risk_engine_configuration_created: initResult.riskEngineConfigurationCreated,
+                errors: initResult.errors,
+              };
+
+              if (
+                !initResult.riskEngineEnabled ||
+                !initResult.riskEngineResourcesInstalled ||
+                !initResult.riskEngineConfigurationCreated
+              ) {
+                return siemResponse.error({
+                  statusCode: 400,
+                  body: {
+                    message: result.errors.join('\n'),
+                    full_error: result,
+                  },
+                  bypassErrorFormat: true,
+                });
+              }
+              return response.ok({
                 body: {
-                  message: result.errors.join('\n'),
-                  full_error: result,
+                  result,
                 },
+              });
+            } catch (e) {
+              const error = transformError(e);
+
+              return siemResponse.error({
+                statusCode: error.statusCode,
+                body: { message: error.message, full_error: JSON.stringify(e) },
                 bypassErrorFormat: true,
               });
             }
-            return response.ok({
-              body: {
-                result,
-              },
-            });
-          } catch (e) {
-            const error = transformError(e);
-
-            return siemResponse.error({
-              statusCode: error.statusCode,
-              body: { message: error.message, full_error: JSON.stringify(e) },
-              bypassErrorFormat: true,
-            });
           }
-        }
+        )
       )
-    )
-  );
+    );
 };

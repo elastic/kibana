@@ -36,31 +36,32 @@ export const riskEngineStatusRoute = (
           const siemResponse = buildSiemResponse(response);
 
           const securitySolution = await context.securitySolution;
-        const riskEngineClient = securitySolution.getRiskEngineDataClient();
-        const spaceId = securitySolution.getSpaceId();
-        const [_, { taskManager }] = await getStartServices();
+          const riskEngineClient = securitySolution.getRiskEngineDataClient();
+          const spaceId = securitySolution.getSpaceId();
+          const [_, { taskManager }] = await getStartServices();
 
-        try {
-          const { riskEngineStatus, taskStatus } = await riskEngineClient.getStatus({
-            namespace: spaceId,
-            taskManager,
-          });
+          try {
+            const { riskEngineStatus, taskStatus } = await riskEngineClient.getStatus({
+              namespace: spaceId,
+              taskManager,
+            });
 
-          const body: RiskEngineStatusResponse = {
-            risk_engine_status: riskEngineStatus,
-            risk_engine_task_status: taskStatus,
-          };
+            const body: RiskEngineStatusResponse = {
+              risk_engine_status: riskEngineStatus,
+              risk_engine_task_status: taskStatus,
+            };
 
-          return response.ok({ body });
-        } catch (e) {
-          const error = transformError(e);
+            return response.ok({ body });
+          } catch (e) {
+            const error = transformError(e);
 
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: { message: error.message, full_error: JSON.stringify(e) },
-            bypassErrorFormat: true,
-          });
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: { message: error.message, full_error: JSON.stringify(e) },
+              bypassErrorFormat: true,
+            });
+          }
         }
-      })
+      )
     );
 };
