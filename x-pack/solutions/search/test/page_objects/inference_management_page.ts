@@ -238,6 +238,18 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
       },
     },
 
+    ProviderInferenceEmptyPrompt: {
+      async expectEmptyPromptToBeDisplayed() {
+        await testSubjects.existOrFail('providerInferenceEmptyPrompt');
+        await testSubjects.existOrFail('addEndpointButton');
+        await testSubjects.existOrFail('viewDocumentationLink');
+      },
+
+      async expectEmptyPromptNotToBeDisplayed() {
+        await testSubjects.missingOrFail('providerInferenceEmptyPrompt');
+      },
+    },
+
     AddInferenceFlyout: {
       async expectInferenceEndpointToBeVisible() {
         await testSubjects.click('add-inference-endpoint-header-button');

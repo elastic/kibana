@@ -17,6 +17,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'header',
   ]);
   const searchSpace = getService('searchSpace');
+  const kibanaServer = getService('kibanaServer');
   describe('Inference Management UI', function () {
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
@@ -159,6 +160,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('has embedded dev console', async () => {
       await testHasEmbeddedConsole(pageObjects);
+    });
+
+    describe('with EIS feature flag enabled', () => {
+      before(async () => {
+        await kibanaServer.uiSettings.update({
+          'searchInferenceEndpoints:elasticInferenceServiceEnabled': true,
+        });
+      });
+
+      after(async () => {
+        await kibanaServer.uiSettings.update({
+          'searchInferenceEndpoints:elasticInferenceServiceEnabled': false,
+        });
+      });
+
+      it('still displays non-EIS endpoints when flag is enabled', async () => {
+        await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectHeaderToBeExist();
+        await pageObjects.searchInferenceManagementPage.ProviderInferenceEmptyPrompt.expectEmptyPromptNotToBeDisplayed();
+      });
     });
   });
 }
