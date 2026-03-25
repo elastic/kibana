@@ -9,7 +9,9 @@
 
 import React, { useCallback } from 'react';
 
-import { EuiFlexGroup, EuiSwitch, EuiFormRow } from '@elastic/eui';
+import { EuiFlexGroup, EuiSwitch, EuiFormRow, EuiButtonGroup } from '@elastic/eui';
+
+import type { TimePrecision } from '../types';
 
 import {
   PanelContainer,
@@ -36,6 +38,20 @@ export function SettingsPanel() {
     onSettingsChange({ ...settings, roundRelativeTime: !settings.roundRelativeTime });
   }, [settings, onSettingsChange]);
 
+  const timePrecision = settings.timePrecision;
+  const handleTimePrecisionChange = useCallback(
+    (id: string) => {
+      onSettingsChange({ ...settings, timePrecision: id as TimePrecision });
+    },
+    [settings, onSettingsChange]
+  );
+
+  const timePrecisionOptions = [
+    { id: 'none', label: settingsPanelTexts.timePrecisionNone },
+    { id: 's', label: settingsPanelTexts.timePrecisionSeconds },
+    { id: 'ms', label: settingsPanelTexts.timePrecisionMilliseconds },
+  ];
+
   return (
     <PanelContainer data-test-subj="dateRangePickerSettingsPanel">
       <PanelHeader>
@@ -54,9 +70,27 @@ export function SettingsPanel() {
                   checked={settings.roundRelativeTime}
                   onChange={handleRoundRelativeTimeChange}
                   compressed
-                  data-test-subj="dateRangePickerRoundTimeSwitch"
+                  data-test-subj="dateRangePickerSettingRoundRelativeTime"
                 />
               </EuiFormRow>
+              {timePrecision !== undefined ? (
+                <div>
+                  <EuiFormRow
+                    label={settingsPanelTexts.timePrecisionLabel}
+                    helpText={settingsPanelTexts.timePrecisionDescription}
+                  >
+                    <EuiButtonGroup
+                      legend={settingsPanelTexts.timePrecisionLabel}
+                      options={timePrecisionOptions}
+                      idSelected={timePrecision}
+                      onChange={handleTimePrecisionChange}
+                      buttonSize="compressed"
+                      isFullWidth
+                      data-test-subj="dateRangePickerSettingTimePrecision"
+                    />
+                  </EuiFormRow>
+                </div>
+              ) : null}
             </EuiFlexGroup>
             <EuiFlexGroup gutterSize="m" direction="column">
               <PanelBodySectionInfo

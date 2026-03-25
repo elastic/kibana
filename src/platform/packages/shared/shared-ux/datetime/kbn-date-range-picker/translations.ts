@@ -260,6 +260,26 @@ export const settingsPanelTexts = {
     'sharedUXPackages.dateRangePicker.settingsPanel.roundRelativeTimeDescription',
     { defaultMessage: 'Relative ranges round to the nearest full unit (minute, hour, etc.)' }
   ),
+  timePrecisionLabel: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.timePrecisionLabel',
+    { defaultMessage: 'Time precision' }
+  ),
+  timePrecisionDescription: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.timePrecisionDescription',
+    { defaultMessage: 'Sub-minute precision shown in absolute timestamps' }
+  ),
+  timePrecisionSeconds: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.timePrecisionSeconds',
+    { defaultMessage: 'Seconds' }
+  ),
+  timePrecisionMilliseconds: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.timePrecisionMilliseconds',
+    { defaultMessage: 'Milliseconds' }
+  ),
+  timePrecisionNone: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.timePrecisionNone',
+    { defaultMessage: 'Minutes only' }
+  ),
   timeFormatHeading: i18n.translate(
     'sharedUXPackages.dateRangePicker.settingsPanel.timeFormatHeading',
     { defaultMessage: 'Time format and zone' }
