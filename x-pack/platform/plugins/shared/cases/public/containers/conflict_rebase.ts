@@ -9,7 +9,6 @@ import { isEqual, omit } from 'lodash';
 import type { CaseUI } from './types';
 import type { ServerError } from '../types';
 
-const REBASEABLE_STATUS_CODES = new Set([409]);
 const SYSTEM_MANAGED_CASE_FIELDS = ['comments', 'incrementalId', 'updatedAt', 'version'] as const;
 
 export type CaseWithOptionalComments = Omit<CaseUI, 'comments'> & {
@@ -45,7 +44,7 @@ const getErrorStatusCode = (error: unknown): number | undefined => {
 export const isRetryableCaseConflictError = (error: unknown): boolean => {
   const statusCode = getErrorStatusCode(error);
 
-  return statusCode != null && REBASEABLE_STATUS_CODES.has(statusCode);
+  return statusCode != null && statusCode === 409;
 };
 
 const normalizeCaseForRebase = (theCase: CaseWithOptionalComments) =>
