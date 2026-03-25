@@ -21,7 +21,13 @@ export function AlertEpisodeStatusCell({ status, episodeAction }: AlertEpisodeSt
   const isSnoozed = episodeAction?.lastSnoozeAction === 'snooze';
 
   return (
-    <EuiFlexGroup gutterSize="s" responsive={true} wrap={false} alignItems="center">
+    <EuiFlexGroup
+      gutterSize="s"
+      responsive={true}
+      wrap={false}
+      alignItems="center"
+      data-test-subj="alertEpisodeStatusCell"
+    >
       <EuiFlexItem grow={false}>
         <AlertEpisodeStatusBadge
           status={episodeAction?.lastDeactivateAction === 'deactivate' ? 'inactive' : status}
@@ -29,12 +35,18 @@ export function AlertEpisodeStatusCell({ status, episodeAction }: AlertEpisodeSt
       </EuiFlexItem>
       {isSnoozed && (
         <EuiFlexItem grow={false}>
-          <EuiBadge iconType="bellSlash" />
+          <EuiBadge
+            iconType="bellSlash"
+            data-test-subj="alertEpisodeStatusCellSnoozeIndicator"
+          />
         </EuiFlexItem>
       )}
       {isAcknowledged && (
         <EuiFlexItem grow={false}>
-          <EuiBadge iconType="checkCircle" />
+          <EuiBadge
+            iconType="checkCircle"
+            data-test-subj="alertEpisodeStatusCellAckIndicator"
+          />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

@@ -6,18 +6,20 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { AlertEpisodeStatusCell } from './alert_episode_status_cell';
 
 describe('AlertEpisodeStatusCell', () => {
   it('renders status badge only when no action indicators', () => {
-    const { getByText, container } = render(<AlertEpisodeStatusCell status="active" />);
-    expect(getByText('Active')).toBeInTheDocument();
-    expect(container.querySelector('[data-euiicon-type="bell"]')).not.toBeInTheDocument();
+    render(<AlertEpisodeStatusCell status="active" />);
+    expect(screen.getByText('Active')).toBeInTheDocument();
+    expect(screen.getByTestId('alertEpisodeStatusCell')).toBeInTheDocument();
+    expect(screen.queryByTestId('alertEpisodeStatusCellSnoozeIndicator')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertEpisodeStatusCellAckIndicator')).not.toBeInTheDocument();
   });
 
-  it('renders snoozed bell when last snooze action is snooze', () => {
-    const { container } = render(
+  it('renders snoozed bellSlash badge when last snooze action is snooze', () => {
+    render(
       <AlertEpisodeStatusCell
         status="active"
         episodeAction={{
@@ -27,15 +29,15 @@ describe('AlertEpisodeStatusCell', () => {
           lastAckAction: null,
           lastSnoozeAction: 'snooze',
           lastDeactivateAction: null,
-          tags: null,
+          tags: [],
         }}
       />
     );
-    expect(container.querySelector('[data-euiicon-type="bell"]')).toBeInTheDocument();
+    expect(screen.getByTestId('alertEpisodeStatusCellSnoozeIndicator')).toBeInTheDocument();
   });
 
-  it('renders check icon when acknowledged', () => {
-    const { container } = render(
+  it('renders checkCircle badge when acknowledged', () => {
+    render(
       <AlertEpisodeStatusCell
         status="active"
         episodeAction={{
@@ -45,10 +47,10 @@ describe('AlertEpisodeStatusCell', () => {
           lastAckAction: 'ack',
           lastSnoozeAction: null,
           lastDeactivateAction: null,
-          tags: null,
+          tags: [],
         }}
       />
     );
-    expect(container.querySelector('[data-euiicon-type="checkCircle"]')).toBeInTheDocument();
+    expect(screen.getByTestId('alertEpisodeStatusCellAckIndicator')).toBeInTheDocument();
   });
 });
