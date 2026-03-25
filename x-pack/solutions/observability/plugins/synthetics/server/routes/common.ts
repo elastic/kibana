@@ -35,6 +35,7 @@ const CommonQuerySchema = {
   schedules: StringOrArraySchema,
   status: StringOrArraySchema,
   monitorQueryIds: StringOrArraySchema,
+  configIds: StringOrArraySchema,
   showFromAllSpaces: schema.maybe(schema.boolean()),
   useLogicalAndFor: schema.maybe(
     schema.oneOf([schema.string(), schema.arrayOf(schema.oneOf(UseLogicalAndFieldLiterals))])
@@ -96,6 +97,7 @@ export const getMonitorFilters = async (
     projects,
     schedules,
     monitorQueryIds,
+    configIds,
     locations: queryLocations,
     useLogicalAndFor,
   } = context.request.query;
@@ -109,6 +111,7 @@ export const getMonitorFilters = async (
       projects,
       schedules,
       monitorQueryIds,
+      configIds,
       locations,
     },
     useLogicalAndFor,
