@@ -15,6 +15,7 @@ The event categorization fields work together to identify and group similar even
 - Values of \`event.outcome\` are a very limited set to indicate success or failure. Domain-specific actions, such as deny and allow, that could be considered outcomes are not captured in the \`event.outcome\` field, but rather in the \`event.type\` and/or \`event.action\` fields.
 - Values of \`event.category\`, \`event.type\`, and \`event.outcome\` are consistent across all values of \`event.kind\`.
 - Attempt should be made to populate \`event.category\` and \`event.type\` fields for all the events. Values must be within the constraints of the allowed values. Only if that is not possible, these fields should be left empty with a proper explanation.
+- Attempt should be made to limit event categorization to the 4 fields i.e. \`event.category\`, \`event.type\`, \`event.action\` and \`event.outcome\`.
 
 ## event.category
 Second level in the ECS category hierarchy. Represents the "big buckets" of ECS categories. This field is an array. Closely related to \`event.type\`, which is used as a subcategory.

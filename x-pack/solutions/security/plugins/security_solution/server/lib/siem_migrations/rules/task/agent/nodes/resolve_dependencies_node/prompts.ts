@@ -61,6 +61,11 @@ The custom_rule data model represents the logic and actions of a correlation rul
   - Log Source Types (sensordevicetype): Device types rules might filter on.
 
 
+### General Guidelines
+
+- you must ignore certain attributes which very QRadar specific such as
+
+
 Dependencies can be found in multiple ways. We list down certain guidelines to correctly identify and resolve dependencies.
 
 #### Logic Flattening & Substitution Strategy (CRITICAL)
@@ -98,7 +103,7 @@ QID Map Entry tests check for certain QIDs in the events. QIDs are unique identi
 
 - QID map entry must be called as Event category. Downstream system does not understand QIDs but it understands event categories. Your final output should be "Check if event category is <QID name1>, <QID name2> and <QID name3>". This is extremely important otherwise the downstream system will not understand the output and it will fail.
 - No tools are needed to resolve QIDs. Just QID names are sufficient.
-- Leave a message for downstream system that these "event category" names are only for indication purposes and it is recommended NOT to use them verbatim in the final output.
+- Leave a message for downstream system that these "event category" names are only for indication purposes and it is recommended NOT to use them verbatim (as-is) in the final output.
 
 ### Event or Flow Payload Tests
 

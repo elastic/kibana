@@ -11,8 +11,12 @@ import type { RuleMigrationIntegration } from '../types';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
 
 const INTEGRATION_WEIGHTS = [
-  { ids: ['endpoint'], weight: 1.5 }, // Elastic Defend should be boosted
+  // Elastic Defend should be heavily boosted so that even if it is slighly relevant to the keywords, it should be available for LLM to make a correct choice. Since Defend is a general puporse integration,
+  // LLM chooses it for rules implementing broad detection logic
+  { ids: ['endpoint'], weight: 10 },
 ];
+
+const PATH_PATTERNS_TO_INCLUDE_IN_KB = ['sample_event', 'knowledge_base'];
 
 /**
  * excludes Splunk, QRadar and Elastic Security integrations since automatic migrations
@@ -60,10 +64,43 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
       );
     }
 
+    let packageKnowledgeBase: string = '';
+
+    try {
+      const packageArchive = await this.dependencies.packageService?.asInternalUser.getPackage(
+        pkg.name,
+        pkg.version
+      );
+
+      const allPaths = await packageArchive?.archiveIterator.getPaths();
+      const relevantPaths = allPaths?.filter((path) =>
+        PATH_PATTERNS_TO_INCLUDE_IN_KB.some((includedPath) => path.includes(includedPath))
+      );
+
+      await packageArchive?.archiveIterator.traverseEntries(
+        async (entry) => {
+          if (entry.buffer && relevantPaths?.includes(entry.path)) {
+            const content = entry.buffer.toString('utf8');
+            const fileName = entry.path;
+
+            packageKnowledgeBase = `${packageKnowledgeBase}\n Source : ${fileName} \n\n ${content} \n -------\n `;
+          }
+        },
+        (path) => relevantPaths?.includes(path) ?? false
+      );
+    } catch (error) {
+      this.logger.warn(
+        `Failed to fetch package archive for ${pkg.name}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+
     return {
       title: pkg.title,
       id: pkg.name,
       description: pkg?.description || '',
+      knowledge_base: packageKnowledgeBase,
       data_streams: logsDataStreams.map((stream) => ({
         dataset: stream.dataset,
         index_pattern: `${stream.type}-${stream.dataset}-*`,
