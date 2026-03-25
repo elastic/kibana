@@ -10,5 +10,5 @@
  * External API surface is defined in the root index.ts
  */
 
-export * from './types';
+export type * from './types';
 export * from './utils';
