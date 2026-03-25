@@ -757,12 +757,10 @@ describe('StorageIndexAdapter', () => {
         const versioning = defineVersioning(v1Pass)
           .addVersion({ schema: v2Pass, migrate: (prev) => ({ ...prev, score: 0 }) })
           .build();
-        const passthroughAdapter = new StorageIndexAdapter<typeof versionedStorageSettings, VersionedDoc>(
-          esClient,
-          loggerMock,
-          versionedStorageSettings,
-          { versioning }
-        );
+        const passthroughAdapter = new StorageIndexAdapter<
+          typeof versionedStorageSettings,
+          VersionedDoc
+        >(esClient, loggerMock, versionedStorageSettings, { versioning });
 
         const getResponse = await passthroughAdapter.getClient().get({ id: 'extra' });
         const source = getResponse._source as unknown as Record<string, unknown>;
