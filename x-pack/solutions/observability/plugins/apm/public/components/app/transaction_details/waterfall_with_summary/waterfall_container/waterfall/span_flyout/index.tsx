@@ -155,7 +155,7 @@ export function SpanFlyout({
               <EuiFlexItem grow={false}>
                 <OpenInDiscover
                   dataTestSubj="spanFlyoutViewSpanInDiscoverLink"
-                  variant="button"
+                  variant="emptyButton"
                   indexType="traces"
                   rangeFrom={rangeFrom}
                   rangeTo={rangeTo}

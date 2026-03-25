@@ -451,7 +451,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
         <EuiFlexItem grow={false}>
           <OpenInDiscover
             dataTestSubj="apmFailedCorrelationsViewInDiscoverButton"
-            variant="button"
+            variant="emptyButton"
             indexType="traces"
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
