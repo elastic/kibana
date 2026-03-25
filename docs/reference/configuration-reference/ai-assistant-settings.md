@@ -9,7 +9,7 @@ applies_to:
 
 # Knowledge base artifact settings for AI Assistants [ai-assistant-settings-kb]
 
-These `xpack.productDocBase` settings configure how {{kib}} reaches the artifact repository used to install and update knowledge base artifacts (Elastic product documentation and Security Labs) for the AI assistants. Most deployments use the default base URL of the artifact repository and only need outbound access to Elastic’s CDN. Change these settings when you use a private mirror, local files, a proxy, or otherwise cannot rely on the default host.
+The `xpack.productDocBase` settings configure how {{kib}} reaches the artifact repository used to install and update knowledge base artifacts (Elastic product documentation and Security Labs) for the AI assistants. Most deployments use the default base URL of the artifact repository and only need outbound access to Elastic’s CDN. Change these settings when you use a private mirror, local files, a proxy, or otherwise cannot rely on the default host.
 
 `xpack.productDocBase.artifactRepositoryUrl`
 :   The base URL of the artifact repository that {{kib}} queries to list and download knowledge base artifacts for AI Assistants. Defaults to `https://kibana-knowledge-base-artifacts.elastic.co`, Elastic’s public artifact host. Leave the default when {{kib}} can reach that base URL over the internet. 
@@ -31,4 +31,4 @@ These `xpack.productDocBase` settings configure how {{kib}} reaches the artifact
 
 ## Configuring product documentation for air-gapped environments [configuring-product-doc-for-airgap]
 
-This heading is kept so existing links to `#configuring-product-doc-for-airgap` still resolve. For procedures to host and mirror artifact ZIPs (S3-style bucket, CDN, or local files), see [Host product documentation artifacts for AI assistants](/reference/host-product-documentation-artifacts-ai-assistants.md#configuring-product-doc-for-airgap). Use this page for `xpack.productDocBase` settings only.
+This heading is kept so existing links to `#configuring-product-doc-for-airgap` still resolve.
