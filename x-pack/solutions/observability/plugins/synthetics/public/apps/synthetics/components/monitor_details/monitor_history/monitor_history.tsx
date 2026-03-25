@@ -24,12 +24,16 @@ import { DurationSparklines } from '../monitor_summary/duration_sparklines';
 import { MonitorCompleteSparklines } from '../monitor_summary/monitor_complete_sparklines';
 import { MonitorStatusPanel } from '../monitor_status/monitor_status_panel';
 import { MonitorPendingWrapper } from '../monitor_pending_wrapper';
+import { useMonitorAttachmentConfig } from '../hooks/use_monitor_attachment_config';
 
 const STATS_WIDTH_SINGLE_COLUMN_THRESHOLD = 360; // ✨ determined by trial and error
 
 export const MonitorHistory = () => {
   const [, updateUrlParams] = useUrlParams();
   const { from, to } = useRefreshedRangeFromUrl();
+
+  // Configure the agent builder flyout with the monitor details
+  useMonitorAttachmentConfig();
 
   const { elementRef: statsRef, width: statsWidth } = useDimensions<HTMLDivElement>();
   const statsColumns = statsWidth && statsWidth < STATS_WIDTH_SINGLE_COLUMN_THRESHOLD ? 1 : 2;

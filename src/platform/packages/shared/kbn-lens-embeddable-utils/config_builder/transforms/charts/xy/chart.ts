@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { XYState as XYLensState } from '@kbn/lens-common';
+import type { XYPersistedState } from '@kbn/lens-common';
 import type { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { Writable } from '@kbn/utility-types';
@@ -70,7 +70,7 @@ const orientationDictionary = {
 function convertAxisSettingsToStateFormat(
   axis: XYState['axis']
 ): Pick<
-  XYLensState,
+  XYPersistedState,
   | 'xTitle'
   | 'yTitle'
   | 'yRightTitle'
@@ -148,10 +148,18 @@ type LayerToDataView = Record<string, string>;
 
 export function buildVisualizationState(
   config: XYState,
-  usedDataViews: LayerToDataView
-): XYLensState {
+  usedDataViews: LayerToDataView,
+  annotationGroupReferences: SavedObjectReference[]
+): XYPersistedState {
   const layers = config.layers
-    .map((layer, index) => buildXYLayer(layer, index, usedDataViews[getIdForLayer(layer, index)]))
+    .map((layer, index) =>
+      buildXYLayer(
+        layer,
+        index,
+        usedDataViews[getIdForLayer(layer, index)],
+        annotationGroupReferences
+      )
+    )
     .filter(nonNullable);
   return {
     preferredSeriesType: layers.filter(isLensStateDataLayer)[0]?.seriesType ?? 'bar_stacked',
@@ -164,7 +172,7 @@ export function buildVisualizationState(
 }
 
 export function buildVisualizationAPI(
-  config: XYLensState,
+  config: XYPersistedState,
   layers: Record<string, DataSourceStateLayer>,
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],
@@ -184,13 +192,13 @@ export function buildVisualizationAPI(
     type: 'xy',
     ...convertLegendToAPIFormat(config.legend),
     ...convertFittingToAPIFormat(config),
-    ...convertAxisSettingsToAPIFormat(config),
+    ...convertAxisSettingsToAPIFormat(config, layers),
     ...(decorations ? { decorations } : {}),
     layers: buildXYLayerAPI(config, layers, adHocDataViews, references, internalReferences),
   };
 }
 
-function convertFittingToAPIFormat(config: XYLensState): Pick<XYState, 'fitting'> | {} {
+function convertFittingToAPIFormat(config: XYPersistedState): Pick<XYState, 'fitting'> | {} {
   const fittingOptions = {
     ...(config.fittingFunction ? { type: config.fittingFunction.toLowerCase() } : {}),
     ...(config.emphasizeFitting ? { dotted: config.emphasizeFitting } : {}),
@@ -247,8 +255,25 @@ function convertXExtent(extent: AxisExtentConfig | undefined): {
   return {};
 }
 
-function convertAxisSettingsToAPIFormat(config: XYLensState): Pick<XYState, 'axis'> | {} {
+function convertAxisSettingsToAPIFormat(
+  config: XYPersistedState,
+  layers: Record<string, DataSourceStateLayer>
+): Pick<XYState, 'axis'> | {} {
   const axis: EditableAxisType = {};
+
+  let xAxisScale: string | undefined;
+  const firstLayer = config.layers[0];
+  const dataSourceLayer = layers[firstLayer.layerId];
+  if (isTextBasedLayer(dataSourceLayer) && isLensStateDataLayer(firstLayer)) {
+    const xColumn = dataSourceLayer.columns.find((c) => c.columnId === firstLayer.xAccessor);
+    if (xColumn?.meta?.type === 'date') {
+      xAxisScale = 'temporal';
+    } else if (xColumn?.meta?.type === 'number') {
+      xAxisScale = 'linear';
+    } else {
+      xAxisScale = 'ordinal';
+    }
+  }
 
   const xAxis: XAxisType = stripUndefined({
     title:
@@ -277,6 +302,7 @@ function convertAxisSettingsToAPIFormat(config: XYLensState): Pick<XYState, 'axi
             ([_, value]) => value === config.labelsOrientation?.x
           )?.[0] as 'horizontal' | 'vertical' | 'angled' | undefined)
         : undefined,
+    scale: xAxisScale,
   });
   if (Object.keys(xAxis).length) {
     axis.x = xAxis;
@@ -356,7 +382,7 @@ function convertAxisSettingsToAPIFormat(config: XYLensState): Pick<XYState, 'axi
 }
 
 function buildXYLayerAPI(
-  visualization: XYLensState,
+  visualization: XYPersistedState,
   layers: Record<string, DataSourceStateLayer>,
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],

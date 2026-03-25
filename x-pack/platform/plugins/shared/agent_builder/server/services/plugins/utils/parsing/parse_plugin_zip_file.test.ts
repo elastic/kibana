@@ -226,7 +226,7 @@ describe('parsePluginZipFile', () => {
     });
 
     await expect(parsePluginZipFile(archive)).rejects.toThrow(
-      /Invalid plugin manifest.*"version".*Expected string/
+      /Invalid plugin manifest.*"version".*expected string/
     );
   });
 
@@ -239,7 +239,7 @@ describe('parsePluginZipFile', () => {
     });
 
     await expect(parsePluginZipFile(archive)).rejects.toThrow(
-      /Invalid plugin manifest.*"keywords\.1".*Expected string/
+      /Invalid plugin manifest.*"keywords\.1".*expected string/
     );
   });
 

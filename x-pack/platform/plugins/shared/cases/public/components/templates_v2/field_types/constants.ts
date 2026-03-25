@@ -33,19 +33,26 @@ fields:
     control: INPUT_TEXT
     label: Summary
     type: keyword
+    metadata:
+      default: Default summary text
   - name: effort
     control: INPUT_NUMBER
     label: Effort estimate
     type: integer
+    metadata:
+      default: 1
   - name: details
     control: TEXTAREA
     label: Details
     type: keyword
+    metadata:
+      default: Enter details here...
   - name: priority
     control: SELECT_BASIC
     label: Priority
     type: keyword
     metadata:
+      default: medium
       options:
         - low
         - medium

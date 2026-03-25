@@ -54,6 +54,7 @@ export interface UsageStats {
   'agentBuilder:navEnabled': boolean;
   'agentBuilder:externalMcp': boolean;
   'agentBuilder:experimentalFeatures': boolean;
+  'agentBuilder:connectorsEnabled': boolean;
   'dataSources:enabled': boolean;
   'workflows:ui:enabled': boolean;
   'workflows:aiAgent:enabled': boolean;
@@ -75,7 +76,6 @@ export interface UsageStats {
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer': boolean;
   'securitySolution:excludeColdAndFrozenTiersInPrevalence': boolean;
   'securitySolution:enableVisualizationsInFlyout': boolean;
-  'securitySolution:enableGraphVisualization': boolean;
   'securitySolution:enableAssetInventory': boolean;
   'securitySolution:enableCloudConnector': boolean;
   'securitySolution:suppressionBehaviorOnAlertClosure': string;
@@ -195,4 +195,5 @@ export interface UsageStats {
   'observability:streamsEnableQueryStreams': boolean;
   'observability:streamsEnableWiredStreamViews': boolean;
   'securitySolution:entityStoreEnableV2': boolean;
+  'elasticConsole:enabled': boolean;
 }

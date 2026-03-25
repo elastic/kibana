@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/gen-ai-functional-testing'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/appex-ai-infra'
+  defaultOwner: '@elastic/search-kibana'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/gen-ai-functional-testing'
   description: Moon project for @kbn/gen-ai-functional-testing
   channel: ''
-  owner: '@elastic/appex-ai-infra'
+  owner: '@elastic/search-kibana'
   sourceRoot: src/platform/packages/private/kbn-gen-ai-functional-testing
 dependsOn:
   - '@kbn/config-schema'

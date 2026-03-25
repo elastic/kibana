@@ -15,7 +15,7 @@
       "label": "OsqueryPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/osquery/public/types.ts",
-      "lineNumber": 53,
+      "lineNumber": 55,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -31,7 +31,7 @@
       "label": "OsqueryPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/osquery/public/types.ts",
-      "lineNumber": 55,
+      "lineNumber": 57,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -57,7 +57,7 @@
             " | undefined; }) => React.JSX.Element) | undefined"
           ],
           "path": "x-pack/platform/plugins/shared/osquery/public/types.ts",
-          "lineNumber": 56,
+          "lineNumber": 58,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -75,7 +75,7 @@
             ") => React.JSX.Element"
           ],
           "path": "x-pack/platform/plugins/shared/osquery/public/types.ts",
-          "lineNumber": 57,
+          "lineNumber": 59,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -112,7 +112,7 @@
             ") => React.JSX.Element"
           ],
           "path": "x-pack/platform/plugins/shared/osquery/public/types.ts",
-          "lineNumber": 58,
+          "lineNumber": 60,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -151,7 +151,7 @@
             "<{ label: string; query: string; ecs_mapping: Record<string, unknown>; }, any, undefined>; }) => React.JSX.Element) | undefined"
           ],
           "path": "x-pack/platform/plugins/shared/osquery/public/types.ts",
-          "lineNumber": 59,
+          "lineNumber": 61,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -167,7 +167,7 @@
             "(props: { agentId: string; }) => boolean"
           ],
           "path": "x-pack/platform/plugins/shared/osquery/public/types.ts",
-          "lineNumber": 60,
+          "lineNumber": 62,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -180,7 +180,7 @@
               "label": "props",
               "description": [],
               "path": "x-pack/platform/plugins/shared/osquery/public/types.ts",
-              "lineNumber": 60,
+              "lineNumber": 62,
               "columnNumber": 31,
               "deprecated": false,
               "trackAdoption": false,
@@ -193,7 +193,7 @@
                   "label": "agentId",
                   "description": [],
                   "path": "x-pack/platform/plugins/shared/osquery/public/types.ts",
-                  "lineNumber": 60,
+                  "lineNumber": 62,
                   "columnNumber": 33,
                   "deprecated": false,
                   "trackAdoption": false
@@ -214,7 +214,7 @@
             "() => { loading: boolean; disabled: boolean; permissionDenied: boolean; }"
           ],
           "path": "x-pack/platform/plugins/shared/osquery/public/types.ts",
-          "lineNumber": 61,
+          "lineNumber": 63,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -234,7 +234,7 @@
             ") => React.JSX.Element"
           ],
           "path": "x-pack/platform/plugins/shared/osquery/public/types.ts",
-          "lineNumber": 62,
+          "lineNumber": 64,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -251,7 +251,7 @@
                 "OsqueryResponseActionsParamsFormProps"
               ],
               "path": "x-pack/platform/plugins/shared/osquery/public/shared_components/lazy_osquery_action_params_form.tsx",
-              "lineNumber": 16,
+              "lineNumber": 18,
               "columnNumber": 10,
               "deprecated": false,
               "trackAdoption": false
@@ -277,7 +277,7 @@
             "<object>[]; }; }, Error>"
           ],
           "path": "x-pack/platform/plugins/shared/osquery/public/types.ts",
-          "lineNumber": 63,
+          "lineNumber": 65,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -293,7 +293,7 @@
                 "UseAllLiveQueriesConfig"
               ],
               "path": "x-pack/platform/plugins/shared/osquery/public/types.ts",
-              "lineNumber": 63,
+              "lineNumber": 65,
               "columnNumber": 25,
               "deprecated": false,
               "trackAdoption": false,
@@ -388,7 +388,7 @@
           "() => string[]"
         ],
         "path": "x-pack/platform/plugins/shared/osquery/common/experimental_features.ts",
-        "lineNumber": 70,
+        "lineNumber": 75,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -417,7 +417,7 @@
           "; invalid: string[]; }"
         ],
         "path": "x-pack/platform/plugins/shared/osquery/common/experimental_features.ts",
-        "lineNumber": 41,
+        "lineNumber": 46,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -433,7 +433,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/osquery/common/experimental_features.ts",
-            "lineNumber": 42,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -472,10 +472,10 @@
         "label": "ExperimentalFeatures",
         "description": [],
         "signature": [
-          "{ readonly queryHistoryRework: boolean; }"
+          "{ readonly queryHistoryRework: boolean; readonly unifiedDataTable: boolean; }"
         ],
         "path": "x-pack/platform/plugins/shared/osquery/common/experimental_features.ts",
-        "lineNumber": 25,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -544,7 +544,7 @@
           "\nA list of allowed values that can be used in `xpack.osquery.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly queryHistoryRework: false; }"
+          "{ readonly queryHistoryRework: false; readonly unifiedDataTable: false; }"
         ],
         "path": "x-pack/platform/plugins/shared/osquery/common/experimental_features.ts",
         "lineNumber": 12,

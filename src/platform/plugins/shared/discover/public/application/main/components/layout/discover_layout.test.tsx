@@ -152,6 +152,6 @@ describe('Discover component', () => {
     });
     expect(screen.queryByTestId('discoverErrorCalloutTitle')).toBeInTheDocument();
     expect(screen.queryByTestId('dscPanelsToggleInHistogram')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('dscPanelsToggleInPage')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('dscPanelsToggleInPage')).toBeInTheDocument();
   }, 10000);
 });

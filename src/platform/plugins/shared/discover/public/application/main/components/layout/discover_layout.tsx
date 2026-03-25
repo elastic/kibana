@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiPage,
@@ -57,7 +56,6 @@ import { SavedSearchURLConflictCallout } from '../../../../components/saved_sear
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
-import type { PanelsToggleProps } from '../../../../components/panels_toggle';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
@@ -375,16 +373,6 @@ export function DiscoverLayout() {
     () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
   );
 
-  const panelsToggle: ReactElement<PanelsToggleProps> = useMemo(() => {
-    return (
-      <PanelsToggle
-        sidebarToggleState$={sidebarToggleState$}
-        renderedFor="root"
-        isChartAvailable={undefined}
-      />
-    );
-  }, [sidebarToggleState$]);
-
   const mainDisplay = useMemo(() => {
     if (resultState === 'uninitialized') {
       addLog('[DiscoverLayout] uninitialized triggers data fetching');
@@ -400,7 +388,7 @@ export function DiscoverLayout() {
           onAddFilter={onFilter}
           onFieldEdited={onFieldEdited}
           onDropFieldToTable={onDropFieldToTable}
-          panelsToggle={panelsToggle}
+          sidebarToggleState$={sidebarToggleState$}
         />
         {resultState === 'loading' && <LoadingSpinner />}
       </>
@@ -413,7 +401,7 @@ export function DiscoverLayout() {
     onFilter,
     onFieldEdited,
     onDropFieldToTable,
-    panelsToggle,
+    sidebarToggleState$,
     dataStateContainer,
   ]);
 
@@ -457,6 +445,7 @@ export function DiscoverLayout() {
   return (
     <EuiPage
       className="dscPage" // class is used in tests and other styles
+      data-test-subj="dscPage"
       data-fetch-counter={fetchCounter.current}
       direction="column"
       css={[
@@ -510,14 +499,13 @@ export function DiscoverLayout() {
               <div css={styles.dscPageContentWrapper}>
                 {resultState === 'none' ? (
                   <>
-                    {React.isValidElement(panelsToggle) ? (
-                      <div css={styles.mainPanel}>
-                        {React.cloneElement(panelsToggle, {
-                          renderedFor: 'prompt',
-                          isChartAvailable: false,
-                        })}
-                      </div>
-                    ) : null}
+                    <div css={styles.mainPanel}>
+                      <PanelsToggle
+                        sidebarToggleState$={sidebarToggleState$}
+                        omitChartButton
+                        dataTestSubjSuffix="InPage"
+                      />
+                    </div>
                     {dataState.error ? (
                       <ErrorCallout
                         title={i18n.translate(

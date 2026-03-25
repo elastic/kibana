@@ -12,6 +12,23 @@ steps:
 
   - wait
 
+  - label: ':github: Sync models:* labels'
+    command: .buildkite/scripts/steps/evals/sync_git_labels.sh
+    key: sync-git-labels
+    timeout_in_minutes: 30
+    soft_fail: true
+    env:
+      FTR_EIS_CCM: '1'
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 2
+
   - label: 'Store Cache for build'
     command: .buildkite/scripts/steps/store_cache.sh
     timeout_in_minutes: 10
@@ -54,7 +71,7 @@ steps:
           #
           # NOTE: Use `eis/<modelId>` values (not connector ids) so we can filter purely on the discovered
           # EIS model ids in `target/eis_models.json`.
-          EVAL_MODEL_GROUPS: &weekly_eis_model_groups 'eis/anthropic-claude-4.5-sonnet,eis/anthropic-claude-4.6-opus,eis/google-gemini-3.0-flash,eis/google-gemini-3.0-pro,eis/openai-gpt-5.2,eis/openai-gpt-oss-120b'
+          EVAL_MODEL_GROUPS: &weekly_eis_model_groups 'eis/anthropic-claude-4.6-sonnet,eis/anthropic-claude-4.6-opus,eis/google-gemini-3.0-flash,eis/google-gemini-3.1-pro,eis/openai-gpt-5.2,eis/openai-gpt-oss-120b'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404

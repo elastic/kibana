@@ -12,6 +12,7 @@ import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
 import type { UsageApiSetup, UsageApiStart } from '@kbn/usage-api-plugin/server';
+import type { SearchInferenceEndpointsPluginSetup } from '@kbn/search-inference-endpoints/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -28,6 +29,7 @@ import type {
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 import type { HooksServiceSetup } from '@kbn/agent-builder-server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
 import type { AgentRegistry } from './services/agents';
 import type { AttachmentServiceSetup } from './services/attachments';
@@ -35,6 +37,7 @@ import type { SkillServiceSetup } from './services/skills';
 import type { SkillRegistry } from './services/skills/skill_registry';
 import type { AgentExecutionService } from './services/execution';
 import type { ModelProviderFactoryFn } from './services/runner/model_provider';
+import type { SmlTypeDefinition, SmlIndexAttachmentParams } from './services/sml';
 
 export interface AgentBuilderSetupDependencies {
   cloud?: CloudSetup;
@@ -48,6 +51,7 @@ export interface AgentBuilderSetupDependencies {
   taskManager: TaskManagerSetupContract;
   actions: ActionsPluginSetup;
   home: HomeServerPluginSetup;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
 }
 
 export interface AgentBuilderStartDependencies {
@@ -58,6 +62,7 @@ export interface AgentBuilderStartDependencies {
   spaces?: SpacesPluginStart;
   actions: ActionsPluginStart;
   taskManager: TaskManagerStartContract;
+  security?: SecurityPluginStart;
 }
 
 export interface AttachmentsSetup {
@@ -99,11 +104,6 @@ export interface SkillsStart {
    * Only affects future conversations (existing ones snapshot skills at creation time).
    */
   register: (skill: SkillDefinition) => Promise<void>;
-  /**
-   * Unregister a previously registered skill by ID.
-   * Returns true if the skill was found and removed.
-   */
-  unregister: (skillId: string) => Promise<boolean>;
 }
 
 /**
@@ -158,6 +158,17 @@ export interface ExecutionStart {
 }
 
 /**
+ * SML (Semantic Metadata Layer) setup contract.
+ */
+export interface SmlSetup {
+  /**
+   * Register an SML type definition.
+   * Solutions can register their content types to make them discoverable via SML.
+   */
+  registerType: (definition: SmlTypeDefinition) => void;
+}
+
+/**
  * Setup contract of the agentBuilder plugin.
  */
 export interface AgentBuilderPluginSetup {
@@ -181,6 +192,11 @@ export interface AgentBuilderPluginSetup {
    * Skills setup contract, which can be used to register skills.
    */
   skills: SkillsSetup;
+  /**
+   * SML (Semantic Metadata Layer) setup contract.
+   * Used to register content types for discovery and search.
+   */
+  sml: SmlSetup;
 }
 
 /**
@@ -193,6 +209,17 @@ export interface RuntimeStart {
    * with utilities like `generateEsql` from `@kbn/agent-builder-genai-utils`.
    */
   createModelProvider: ModelProviderFactoryFn;
+}
+
+/**
+ * SML (Semantic Metadata Layer) start contract.
+ */
+export interface SmlStart {
+  /**
+   * Event-driven indexing API. Allows integrations to react to
+   * create/update/delete events and update SML data immediately.
+   */
+  indexAttachment: (params: SmlIndexAttachmentParams) => Promise<void>;
 }
 
 /**
@@ -220,4 +247,9 @@ export interface AgentBuilderPluginStart {
    * outside of the agent builder's built-in tool/agent execution flow.
    */
   runtime: RuntimeStart;
+  /**
+   * SML (Semantic Metadata Layer) service, for event-driven indexing of
+   * discoverable content.
+   */
+  sml: SmlStart;
 }

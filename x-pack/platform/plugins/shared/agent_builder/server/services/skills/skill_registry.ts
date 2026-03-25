@@ -32,11 +32,15 @@ export const createSkillRegistry = ({
   builtinProvider,
   persistedProvider,
   toolRegistry,
+  experimentalFeaturesEnabled,
 }: {
   builtinProvider: ReadonlySkillProvider;
   persistedProvider: WritableSkillProvider;
   toolRegistry: ToolRegistry;
+  experimentalFeaturesEnabled: boolean;
 }): SkillRegistry => {
+  const isVisible = (skill: InternalSkillDefinition): boolean =>
+    !skill.experimental || experimentalFeaturesEnabled;
   const validateToolIds = async (toolIds: string[] | undefined) => {
     if (!toolIds || toolIds.length === 0) {
       return;
@@ -60,43 +64,68 @@ export const createSkillRegistry = ({
 
   return {
     async has(skillId) {
-      return (await builtinProvider.has(skillId)) || (await persistedProvider.has(skillId));
+      const builtinSkill = await builtinProvider.get(skillId);
+      if (builtinSkill) {
+        return isVisible(builtinSkill);
+      }
+      const persistedSkill = await persistedProvider.get(skillId);
+      if (persistedSkill) {
+        return isVisible(persistedSkill);
+      }
+      return false;
     },
 
     async get(skillId) {
       const builtin = await builtinProvider.get(skillId);
       if (builtin) {
-        return builtin;
+        return isVisible(builtin) ? builtin : undefined;
       }
-      return persistedProvider.get(skillId);
+      const persisted = await persistedProvider.get(skillId);
+      if (persisted) {
+        return isVisible(persisted) ? persisted : undefined;
+      }
+      return undefined;
     },
 
     async bulkGet(ids) {
       const builtinResult = await builtinProvider.bulkGet(ids);
+      // Filter out experimental skills from builtin results
+      for (const [id, skill] of builtinResult) {
+        if (!isVisible(skill)) {
+          builtinResult.delete(id);
+        }
+      }
       const remainingIds = ids.filter((id) => !builtinResult.has(id));
       if (remainingIds.length === 0) {
         return builtinResult;
       }
       const persistedResult = await persistedProvider.bulkGet(remainingIds);
       for (const [id, skill] of persistedResult) {
-        builtinResult.set(id, skill);
+        if (isVisible(skill)) {
+          builtinResult.set(id, skill);
+        }
       }
       return builtinResult;
     },
 
     async list(options) {
-      const { type, ...listOptions } = options ?? {};
+      const { type, includePlugins, ...listOptions } = options ?? {};
+      let results: InternalSkillDefinition[];
       if (type === 'built-in') {
-        return builtinProvider.list(listOptions);
+        results = await builtinProvider.list(listOptions);
+      } else if (type === 'persisted') {
+        results = await persistedProvider.list(listOptions);
+      } else {
+        const [builtinSkills, persistedSkills] = await Promise.all([
+          builtinProvider.list(listOptions),
+          persistedProvider.list(listOptions),
+        ]);
+        results = [...builtinSkills, ...persistedSkills];
       }
-      if (type === 'persisted') {
-        return persistedProvider.list(listOptions);
+      if (!includePlugins) {
+        results = results.filter((skill) => !skill.plugin_id);
       }
-      const [builtinSkills, persistedSkills] = await Promise.all([
-        builtinProvider.list(listOptions),
-        persistedProvider.list(listOptions),
-      ]);
-      return [...builtinSkills, ...persistedSkills];
+      return results.filter(isVisible);
     },
 
     async create(params) {

@@ -55,12 +55,11 @@ const useDiscoverUrl = (
 /**
  * Hook to generate URLs for callout links using Kibana's routing.
  *
- * @returns Object containing integration, entity store, and discover URLs, or undefined if getUrlForApp is unavailable
+ * @returns Object containing integration and discover URLs, or undefined if getUrlForApp is unavailable
  */
 export const useCalloutLinks = ():
   | {
       integrationUrl: string;
-      entityStoreUrl: string;
       discoverUrl: string;
     }
   | undefined => {
@@ -80,13 +79,8 @@ export const useCalloutLinks = ():
     INTEGRATIONS_PLUGIN_ID
   )}/detail/cloud_asset_inventory/overview`;
 
-  const entityStoreUrl = getUrlForApp('security', {
-    path: '/entity_analytics_management',
-  });
-
   return {
     integrationUrl,
-    entityStoreUrl,
     discoverUrl,
   };
 };

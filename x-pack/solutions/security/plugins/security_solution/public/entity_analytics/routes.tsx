@@ -16,7 +16,7 @@ import {
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   ENTITY_ANALYTICS_OVERVIEW_PATH,
-  ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
+  ENTITY_ANALYTICS_HOME_PAGE_PATH,
   SecurityPageName,
   ENTITY_ANALYTICS_WATCHLISTS_PATH,
 } from '../../common/constants';
@@ -25,7 +25,7 @@ import { PluginTemplateWrapper } from '../common/components/plugin_template_wrap
 import { EntityAnalyticsLandingPage } from './pages/entity_analytics_landing';
 import { EntityAnalyticsPrivilegedUserMonitoringPage } from './pages/entity_analytics_privileged_user_monitoring_page';
 import { OverviewDashboard } from './pages/entity_analytics_overview_page';
-import { EntityThreatHuntingPage } from './pages/entity_threat_hunting_page';
+import { EntityAnalyticsHomePage } from './pages/entity_analytics_home_page';
 import { EntityAnalyticsWatchlistsManagementPage } from './pages/entity_analytics_watchlists_management_page';
 
 // ---- Management routes ----
@@ -183,27 +183,27 @@ const EntityAnalyticsOverviewContainer: React.FC = React.memo(() => {
 
 EntityAnalyticsOverviewContainer.displayName = 'EntityAnalyticsOverviewContainer';
 
-// ---- Threat hunting routes ----
-const EntityThreatHuntingWrapper = () => (
+// ---- Entity analytics home page routes ----
+const EntityAnalyticsHomePageWrapper = () => (
   <PluginTemplateWrapper>
-    <EntityThreatHuntingPage />
+    <EntityAnalyticsHomePage />
   </PluginTemplateWrapper>
 );
 
-const EntityThreatHuntingContainer: React.FC = React.memo(() => {
+const EntityAnalyticsHomePageContainer: React.FC = React.memo(() => {
   return (
     <Routes>
       <Route
-        path={ENTITY_ANALYTICS_THREAT_HUNTING_PATH}
+        path={ENTITY_ANALYTICS_HOME_PAGE_PATH}
         exact
-        component={EntityThreatHuntingWrapper}
+        component={EntityAnalyticsHomePageWrapper}
       />
       <Route component={NotFoundPage} />
     </Routes>
   );
 });
 
-EntityThreatHuntingContainer.displayName = 'EntityThreatHuntingContainer';
+EntityAnalyticsHomePageContainer.displayName = 'EntityAnalyticsHomePageContainer';
 
 // ---- Route definitions ----
 export const routes = [
@@ -251,10 +251,10 @@ export const routes = [
     ),
   },
   {
-    path: ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
+    path: ENTITY_ANALYTICS_HOME_PAGE_PATH,
     component: withSecurityRoutePageWrapper(
-      EntityThreatHuntingContainer,
-      SecurityPageName.entityAnalyticsThreatHunting
+      EntityAnalyticsHomePageContainer,
+      SecurityPageName.entityAnalyticsHomePage
     ),
   },
 ];

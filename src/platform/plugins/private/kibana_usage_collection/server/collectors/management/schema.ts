@@ -163,10 +163,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'securitySolution:enableGraphVisualization': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'securitySolution:enableAssetInventory': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -536,6 +532,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'agentBuilder:connectorsEnabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'dataSources:enabled': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -786,6 +786,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Switches the Entity Store Engine to v2',
+    },
+  },
+  'elasticConsole:enabled': {
+    type: 'boolean',
+    _meta: {
+      description: 'Non-default value of setting.',
     },
   },
 };

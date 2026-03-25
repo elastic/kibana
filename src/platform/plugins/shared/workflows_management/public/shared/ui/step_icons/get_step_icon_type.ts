@@ -59,6 +59,9 @@ export const getStepIconType = (nodeType: string): IconType => {
     case 'wait':
       iconType = 'clock';
       break;
+    case 'waitForInput':
+      iconType = 'user';
+      break;
     case 'enter-if':
     case 'exit-if':
     case 'enter-condition-branch':
@@ -84,6 +87,15 @@ export const getStepIconType = (nodeType: string): IconType => {
     case 'loop-break':
     case 'loop-continue':
       iconType = 'controls';
+      break;
+    case 'switch':
+    case 'enter-switch':
+    case 'exit-switch':
+    case 'enter-case-branch':
+    case 'exit-case-branch':
+    case 'enter-default-branch':
+    case 'exit-default-branch':
+      iconType = 'productStreamsWired';
       break;
 
     // connectors which use EUI icons

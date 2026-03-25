@@ -83,11 +83,11 @@ export const FirecrawlConnector: ConnectorSpec = {
     id: '.firecrawl',
     displayName: 'Firecrawl',
     description: i18n.translate('core.kibanaConnectorSpecs.firecrawl.metadata.description', {
-      defaultMessage: 'Scrape, search, map, and crawl the web via the Firecrawl API.',
+      defaultMessage: 'Scrape, search, map, and crawl the web via the Firecrawl API',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {
