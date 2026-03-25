@@ -57,11 +57,17 @@ export function registerKibanaFunction({
 
       function getLocalServerUrl() {
         const serverInfo = core.http.getServerInfo();
-        const hostname =
-          serverInfo.hostname === '0.0.0.0' || serverInfo.hostname === '::'
-            ? 'localhost'
-            : serverInfo.hostname;
-        return { hostname, port: serverInfo.port, protocol: serverInfo.protocol };
+        let { hostname } = serverInfo;
+
+        if (hostname === '0.0.0.0' || hostname === '::' || hostname === '::1') {
+          hostname = 'localhost';
+        }
+
+        const host = hostname.includes(':')
+          ? `[${hostname}]:${serverInfo.port}`
+          : `${hostname}:${serverInfo.port}`;
+
+        return { host, protocol: serverInfo.protocol };
       }
 
       function getPathnameWithSpaceId() {
@@ -73,7 +79,7 @@ export function registerKibanaFunction({
 
       const localServer = getLocalServerUrl();
       const nextUrl = {
-        host: `${localServer.hostname}:${localServer.port}`,
+        host: localServer.host,
         protocol: `${localServer.protocol}:`,
         pathname: getPathnameWithSpaceId(),
         query: query ? (query as Record<string, string>) : undefined,
@@ -109,10 +115,11 @@ export function registerKibanaFunction({
       });
 
       // The server certificate may not cover the local hostname, so skip
-      // TLS hostname verification for this loopback self-request.
+      // hostname verification for this loopback self-request while still
+      // validating the certificate chain.
       const httpsAgent =
         localServer.protocol === 'https'
-          ? new https.Agent({ rejectUnauthorized: false })
+          ? new https.Agent({ checkServerIdentity: () => undefined })
           : undefined;
 
       try {
@@ -122,7 +129,7 @@ export function registerKibanaFunction({
           url: format(nextUrl),
           data: body ? JSON.stringify(body) : undefined,
           signal,
-          ...(httpsAgent ? { httpsAgent } : {}),
+          httpsAgent,
         });
         return { content: response.data };
       } catch (e) {

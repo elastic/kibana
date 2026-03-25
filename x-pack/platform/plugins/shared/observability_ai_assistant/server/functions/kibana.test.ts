@@ -164,6 +164,32 @@ describe('kibana tool', () => {
     expect(forwardedRequest.url).toBe('http://localhost:5601/api/status');
   });
 
+  it('maps ::1 hostname to localhost', async () => {
+    const { handler } = registerFunction({
+      serverInfo: { hostname: '::1', port: 5601, protocol: 'http' },
+    });
+
+    await handler({
+      arguments: { method: 'GET', pathname: '/api/status' },
+    });
+
+    const forwardedRequest = mockedAxios.mock.calls[0][0] as AxiosRequestConfig;
+    expect(forwardedRequest.url).toBe('http://localhost:5601/api/status');
+  });
+
+  it('brackets IPv6 literal addresses in the URL', async () => {
+    const { handler } = registerFunction({
+      serverInfo: { hostname: 'fe80::1', port: 5601, protocol: 'http' },
+    });
+
+    await handler({
+      arguments: { method: 'GET', pathname: '/api/status' },
+    });
+
+    const forwardedRequest = mockedAxios.mock.calls[0][0] as AxiosRequestConfig;
+    expect(forwardedRequest.url).toBe('http://[fe80::1]:5601/api/status');
+  });
+
   it('provides httpsAgent when server uses https', async () => {
     const { handler } = registerFunction({
       serverInfo: { hostname: 'localhost', port: 5601, protocol: 'https' },
