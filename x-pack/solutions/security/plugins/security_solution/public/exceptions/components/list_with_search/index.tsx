@@ -113,7 +113,7 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
               onAddExceptionClick={onAddExceptionClick}
               isSearching={viewerStatus === ViewerStatus.SEARCHING}
               isButtonFilled={false}
-              buttonIconType="plusInCircle"
+              buttonIconType="plusCircle"
               canAddException={canAddException}
             />
             <ListExceptionItems

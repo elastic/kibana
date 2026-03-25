@@ -12,6 +12,7 @@ export const FLYOUT_LINK_TEST_ID = `${PREFIX}Link` as const;
 
 export const FLYOUT_ERROR_TEST_ID = `${PREFIX}Error` as const;
 export const FLYOUT_LOADING_TEST_ID = `${PREFIX}Loading` as const;
+export const FLYOUT_MISSING_ALERTS_PRIVILEGE_TEST_ID = `${PREFIX}MissingAlertsPrivilege` as const;
 
 /* Header Navigation */
 
