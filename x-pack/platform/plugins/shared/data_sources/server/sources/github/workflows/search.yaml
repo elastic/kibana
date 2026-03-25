@@ -1,54 +1,102 @@
 version: '1'
 name: 'sources.github.search'
-description: 'Search through GitHub code, repositories, issues, pull requests, and users'
+description: 'Search GitHub by type (code, repositories, issues, pull requests, users). Actions and inputs: search_type (required choice), query (required string using GitHub query syntax), optional order, sort, page, per_page.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: 'manual'
 inputs:
-  - name: tool_name
+  - name: search_type
     type: choice
-    options:
-      - search_code
-      - search_repositories
-      - search_issues
-      - search_pull_requests
-      - search_users
     required: true
-    description: "Name of the search tool to use based on the choices"
+    description: |
+      The type of GitHub search to perform:
+        searchCode - Search for code across repositories (matches file contents, filenames)
+        searchRepositories - Search for repositories by name, description, topic, language
+        searchIssues - Search for issues across repositories (supports order/sort params)
+        searchPullRequests - Search for pull requests across repositories (supports order/sort params)
+        searchUsers - Search for GitHub users by username, name, or email
+    options:
+      - searchCode
+      - searchRepositories
+      - searchIssues
+      - searchPullRequests
+      - searchUsers
   - name: query
     type: string
     required: true
-    description: "The query to search for. Use github query syntax."
+    description: "The search query. Use GitHub query syntax."
   - name: order
     type: string
     default: "desc"
     required: false
-    description: "Sort order. Valid values: asc, desc"
-  - name: page
-    type: number
-    default: 1
-    required: false
-    description: "The page number"
-  - name: per_page
-    type: number
-    default: 10
-    required: false
-    description: "The number of results per page"
+    description: "Sort order. Valid values: asc, desc. Used by searchIssues and searchPullRequests."
   - name: sort
     type: string
     default: "created"
     required: false
-    description: "Sort field. Valid values: comments, reactions, reactions-+1, reactions--1, reactions-smile, reactions-thinking_face, reactions-heart, reactions-tada, interactions, created, updated"
+    description: "Sort field. Valid values: comments, reactions, created, updated, interactions. Used by searchIssues and searchPullRequests."
+  - name: page
+    type: number
+    default: 1
+    required: false
+    description: "Page number for pagination"
+  - name: per_page
+    type: number
+    default: 10
+    required: false
+    description: "Number of results per page"
 steps:
-  - name: search-github
-    type: mcp.callTool
-    connector-id: <%= mcp-stack-connector-id %>
-    with:
-      name: "${{inputs.tool_name}}"
-      arguments:
-        query: "${{inputs.query}}"
-        order: "${{inputs.order}}"
-        page: "${{inputs.page}}"
-        perPage: "${{inputs.per_page}}"
-        sort: "${{inputs.sort}}"
+  - name: route-search
+    type: switch
+    expression: "{{ inputs.search_type }}"
+    cases:
+      - match: searchCode
+        steps:
+          - name: search-code
+            type: github.searchCode
+            connector-id: <%= github-stack-connector-id %>
+            with:
+              query: "${{inputs.query}}"
+              page: ${{inputs.page}}
+              perPage: ${{inputs.per_page}}
+      - match: searchRepositories
+        steps:
+          - name: search-repositories
+            type: github.searchRepositories
+            connector-id: <%= github-stack-connector-id %>
+            with:
+              query: "${{inputs.query}}"
+              page: ${{inputs.page}}
+              perPage: ${{inputs.per_page}}
+      - match: searchIssues
+        steps:
+          - name: search-issues
+            type: github.searchIssues
+            connector-id: <%= github-stack-connector-id %>
+            with:
+              query: "${{inputs.query}}"
+              order: "${{inputs.order}}"
+              sort: "${{inputs.sort}}"
+              page: ${{inputs.page}}
+              perPage: ${{inputs.per_page}}
+      - match: searchPullRequests
+        steps:
+          - name: search-pull-requests
+            type: github.searchPullRequests
+            connector-id: <%= github-stack-connector-id %>
+            with:
+              query: "${{inputs.query}}"
+              order: "${{inputs.order}}"
+              sort: "${{inputs.sort}}"
+              page: ${{inputs.page}}
+              perPage: ${{inputs.per_page}}
+      - match: searchUsers
+        steps:
+          - name: search-users
+            type: github.searchUsers
+            connector-id: <%= github-stack-connector-id %>
+            with:
+              query: "${{inputs.query}}"
+              page: ${{inputs.page}}
+              perPage: ${{inputs.per_page}}

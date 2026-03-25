@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/actions-utils'
   - '@kbn/i18n'
+  - '@kbn/mcp-client'
 tags:
   - shared-common
   - package

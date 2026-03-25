@@ -461,7 +461,7 @@
               "\nCallback fired when the collapse button is toggled.\n\nThe collapsed state's source of truth lives in chrome_service.tsx as a BehaviorSubject\nthat is persisted to localStorage. External consumers rely on this state."
             ],
             "signature": [
-              "(isCollapsed: boolean) => void"
+              "((isCollapsed: boolean) => void) | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
             "lineNumber": 62,
@@ -481,7 +481,7 @@
                 ],
                 "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
                 "lineNumber": 68,
-                "columnNumber": 23,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -882,6 +882,40 @@
         "path": "src/core/packages/chrome/navigation/types.ts",
         "lineNumber": 12,
         "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-navigation",
+        "id": "def-public.COLLAPSED_WIDTH",
+        "type": "number",
+        "tags": [],
+        "label": "COLLAPSED_WIDTH",
+        "description": [],
+        "signature": [
+          "48"
+        ],
+        "path": "src/core/packages/chrome/navigation/src/hooks/use_layout_width.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-navigation",
+        "id": "def-public.EXPANDED_WIDTH",
+        "type": "number",
+        "tags": [],
+        "label": "EXPANDED_WIDTH",
+        "description": [],
+        "signature": [
+          "100"
+        ],
+        "path": "src/core/packages/chrome/navigation/src/hooks/use_layout_width.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

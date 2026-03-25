@@ -195,6 +195,8 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
           rangeTo={rangeTo}
           dataView={dataView}
           serviceName={serviceName}
+          highlightedSpanId={docId}
+          scrollToHighlightedOnMount={docId != null}
           docId={activeDocId}
           docIndex={activeDocIndex}
           activeFlyoutType={activeFlyoutType}
@@ -204,6 +206,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
           onErrorClick={onErrorClick}
           onCloseFlyout={clearActiveFlyout}
           onExitFullScreen={onExitFullScreen}
+          skipNextEventReport={isRestoringRef.current}
         />
       ) : null}
       <ContentFrameworkSection

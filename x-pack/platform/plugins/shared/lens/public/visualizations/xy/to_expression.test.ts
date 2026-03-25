@@ -477,6 +477,38 @@ describe('#toExpression', () => {
     );
   });
 
+  it('should include legend maxLines and maxPixels in the legendConfig AST when set', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: {
+          position: Position.Bottom,
+          isVisible: true,
+          maxLines: 3,
+          maxPixels: 333,
+        },
+        valueLabels: 'hide',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'area',
+            splitAccessors: ['d'],
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    const legendConfig = (expression.chain[0].arguments.legend[0] as Ast).chain[0].arguments;
+    expect(legendConfig.maxLines).toEqual([3]);
+    expect(legendConfig.maxPixels).toEqual([333]);
+  });
+
   it('should ignore legend size for inside legend', () => {
     const expression = xyVisualization.toExpression(
       {
