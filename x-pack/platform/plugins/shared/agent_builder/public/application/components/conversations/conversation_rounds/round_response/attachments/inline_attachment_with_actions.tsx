@@ -27,6 +27,8 @@ interface InlineAttachmentWithActionsProps {
   screenContext?: ScreenContextAttachmentData;
   /** Version number of the attachment being rendered, used for canvas preview comparison */
   version?: number;
+  /** Whether this inline render is showing the latest available attachment version */
+  isLatestVersion?: boolean;
   /**
    * Shared preview state for header actions/badges.
    */
@@ -43,6 +45,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   conversationId,
   screenContext,
   version,
+  isLatestVersion = false,
   previewBadgeState,
 }) => {
   const {
@@ -55,8 +58,8 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   const { updatePersistedConversationId } = usePersistedConversationId({});
 
   const openCanvas = useCallback(() => {
-    openCanvasContext(attachment, isSidebar, version);
-  }, [openCanvasContext, attachment, isSidebar, version]);
+    openCanvasContext(attachment, isSidebar, version, isLatestVersion);
+  }, [openCanvasContext, attachment, isSidebar, version, isLatestVersion]);
 
   const updateOrigin = useCallback(
     async (origin: string) => {
