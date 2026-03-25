@@ -10,12 +10,12 @@ import {
   findGapAutoFillSchedulerLogsParamsSchemaV1,
   gapAutoFillSchedulerLogsRequestQuerySchemaV1,
 } from '../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
-import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
 import type { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../../types';
 import { INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH } from '../../../../../types';
 import { transformRequestV1, transformResponseV1 } from './transforms';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
 
 export const findAutoFillSchedulerLogsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
