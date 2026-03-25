@@ -9,14 +9,9 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('SLO', () => {
-    loadTestFile(require.resolve('./create_slo'));
-    loadTestFile(require.resolve('./delete_slo'));
-    loadTestFile(require.resolve('./get_slo'));
-    loadTestFile(require.resolve('./find_slo'));
+    // SLO create/read/update/delete/find/bulk_delete: Scout (plugins/slo/test/scout/api/tests/).
     loadTestFile(require.resolve('./find_slo_definitions'));
     loadTestFile(require.resolve('./reset_slo'));
-    loadTestFile(require.resolve('./update_slo'));
-    loadTestFile(require.resolve('./bulk_delete'));
     loadTestFile(require.resolve('./repair_slo'));
     loadTestFile(require.resolve('./purge_instances'));
     loadTestFile(require.resolve('./slo_settings'));
