@@ -88,8 +88,9 @@ export class OAuthAuthorizationService {
    * Validates that a connector uses OAuth Authorization Code flow
    * @throws Error if connector doesn't use oauth_authorization_code
    */
-  private validateOAuthConnector(config: OAuthConnectorConfig): void {
+  private validateOAuthConnector(config: OAuthConnectorConfig, authMode?: string): void {
     const isOAuthAuthCode =
+      authMode === 'per-user' ||
       config?.authType === 'oauth_authorization_code' ||
       config?.auth?.type === 'oauth_authorization_code';
 
@@ -112,7 +113,7 @@ export class OAuthAuthorizationService {
     const config = connector.config as OAuthConnectorConfig;
 
     // Validate this is an OAuth connector
-    this.validateOAuthConnector(config);
+    this.validateOAuthConnector(config, connector.authMode);
 
     // Fetch connector with decrypted secrets
     const rawAction =
