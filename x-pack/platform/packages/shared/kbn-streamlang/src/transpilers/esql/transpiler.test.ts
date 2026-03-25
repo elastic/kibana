@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { StreamlangDSL } from '../../../types/streamlang';
 import { transpile } from '.';
 import {
   comprehensiveTestDSL,
@@ -32,5 +33,33 @@ describe('transpile - Streamlang DSL to ES|QL)', () => {
   it('should warn when manual_ingest_pipeline is used', () => {
     const result = transpile(manualIngestPipelineTestDSL);
     expect(result.query).toMatchSnapshot();
+  });
+
+  it('should reject mustache template syntax in json_extract field names', () => {
+    const dsl = {
+      steps: [
+        {
+          action: 'json_extract',
+          field: '{{template_field}}',
+          extractions: [{ selector: 'user_id', target_field: 'user_id' }],
+        },
+      ],
+    } as unknown as StreamlangDSL;
+
+    expect(() => transpile(dsl)).toThrow();
+  });
+
+  it('should reject invalid json_extract selectors', () => {
+    const dsl = {
+      steps: [
+        {
+          action: 'json_extract',
+          field: 'message',
+          extractions: [{ selector: 'a..b', target_field: 'extracted' }],
+        },
+      ],
+    } as unknown as StreamlangDSL;
+
+    expect(() => transpile(dsl)).toThrow('consecutive dots');
   });
 });

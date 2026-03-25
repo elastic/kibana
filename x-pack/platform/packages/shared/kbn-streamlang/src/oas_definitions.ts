@@ -41,11 +41,13 @@ import {
 
 export const streamlangOasDefinitions = {
   // Core condition — recursive schema referenced throughout routing and processing
-  Condition: conditionSchema.meta({ id: 'Condition' }),
+  // .meta({ id: 'Condition' }) is applied at definition time in types/conditions.ts
+  Condition: conditionSchema,
 
   // DSL root and step types
   StreamlangDSL: streamlangDSLSchema.meta({ id: 'StreamlangDSL' }),
-  StreamlangStep: streamlangStepSchema.meta({ id: 'StreamlangStep' }),
+  // .meta({ id: 'StreamlangStep' }) is applied at definition time in types/streamlang.ts
+  StreamlangStep: streamlangStepSchema,
 
   // Union of all processors (useful for $ref in generic processing endpoints)
   StreamlangProcessor: streamlangProcessorSchema.meta({ id: 'StreamlangProcessor' }),
