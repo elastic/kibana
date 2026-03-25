@@ -81,6 +81,11 @@ import type {
   GetRuleExecutionResultsResponse,
 } from './detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
 import type {
+  ReadRuleExecutionResultsRequestParamsInput,
+  ReadRuleExecutionResultsRequestBodyInput,
+  ReadRuleExecutionResultsResponse,
+} from './detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/read_rule_execution_results_route.gen';
+import type {
   RulePreviewRequestQueryInput,
   RulePreviewRequestBodyInput,
   RulePreviewResponse,
@@ -2851,6 +2856,22 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async readRuleExecutionResults(props: ReadRuleExecutionResultsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ReadRuleExecutionResults`);
+    return this.kbnClient
+      .request<ReadRuleExecutionResultsResponse>({
+        path: replaceParams(
+          '/internal/detection_engine/rules/{ruleId}/execution/results',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
    * List all unique tags from all detection rules.
    */
@@ -3856,6 +3877,10 @@ export interface ReadAlertsMigrationStatusProps {
 }
 export interface ReadRuleProps {
   query: ReadRuleRequestQueryInput;
+}
+export interface ReadRuleExecutionResultsProps {
+  params: ReadRuleExecutionResultsRequestParamsInput;
+  body: ReadRuleExecutionResultsRequestBodyInput;
 }
 export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;

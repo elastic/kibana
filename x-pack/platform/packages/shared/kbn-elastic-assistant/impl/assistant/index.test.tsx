@@ -11,7 +11,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { Assistant } from '.';
 import type { IHttpFetchError } from '@kbn/core/public';
 
-import { useLoadConnectors } from '../connectorland/use_load_connectors';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 
 import type { UseQueryResult } from '@kbn/react-query';
 
@@ -37,7 +37,7 @@ import {
   STREAMING_LOCAL_STORAGE_KEY,
 } from '../assistant_context/constants';
 
-jest.mock('../connectorland/use_load_connectors');
+jest.mock('@kbn/inference-connectors');
 jest.mock('../connectorland/connector_setup');
 jest.mock('react-use/lib/useLocalStorage');
 jest.mock('react-use/lib/useSessionStorage');
