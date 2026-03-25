@@ -59,9 +59,6 @@ export const CreateNewIntegrationButton: React.FC = () => {
           panelPaddingSize="none"
           anchorPosition="downRight"
           style={{ display: 'flex', height: '100%' }}
-          aria-label={i18n.translate('xpack.fleet.epmList.createNewIntegrationDropdownAriaLabel', {
-            defaultMessage: 'More integration creation options',
-          })}
           button={
             <EuiButtonIcon
               display="fill"
@@ -69,9 +66,7 @@ export const CreateNewIntegrationButton: React.FC = () => {
               iconType="arrowDown"
               aria-label={i18n.translate(
                 'xpack.fleet.epmList.createNewIntegrationDropdownAriaLabel',
-                {
-                  defaultMessage: 'More integration creation options',
-                }
+                { defaultMessage: 'More integration creation options' }
               )}
               onClick={() => setIsPopoverOpen((prev) => !prev)}
               style={{
