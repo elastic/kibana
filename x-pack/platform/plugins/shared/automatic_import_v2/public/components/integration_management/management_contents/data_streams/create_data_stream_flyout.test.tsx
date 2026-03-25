@@ -38,7 +38,7 @@ jest.mock('../../../../common', () => ({
   useKibana: jest.fn(() => ({
     services: {
       http: {},
-      notifications: { toasts: { addError: jest.fn() } },
+      notifications: { toasts: { addError: jest.fn(), addWarning: jest.fn() } },
     },
   })),
 }));

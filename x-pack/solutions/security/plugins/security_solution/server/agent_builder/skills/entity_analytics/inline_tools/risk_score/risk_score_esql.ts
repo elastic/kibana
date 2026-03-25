@@ -52,7 +52,7 @@ export const riskScoreDynamicInlineToolHandler = async (
     });
 
     const identifierFilter = isEntityStoreV2Enabled
-      ? `'WHERE (${euid.getEuidEsqlDocumentsContainsIdFilter(entityType)})'`
+      ? `'WHERE (${euid.esql.getEuidDocumentsContainsIdFilter(entityType)})'`
       : `'WHERE ${EntityTypeToIdentifierField[entityType as EntityType]} IS NOT NULL'`;
 
     if (indexExists) {
