@@ -64,9 +64,20 @@ export const SetupPage: React.FC = () => {
 
         <EuiSpacer />
 
-        <EuiButton fill onClick={handleSetup} isLoading={isLoading}>
-          Generate credentials
-        </EuiButton>
+        <EuiFlexGroup gutterSize="m" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiButton fill onClick={handleSetup} isLoading={isLoading}>
+              Generate credentials
+            </EuiButton>
+          </EuiFlexItem>
+          {setupData && (
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={() => formRef.current?.submit()} iconType="popout">
+                Connect local agent
+              </EuiButton>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
 
         <EuiSpacer />
 
@@ -129,11 +140,6 @@ export const SetupPage: React.FC = () => {
               <input type="hidden" name="model" value="kibana/default" />
             </form>
             <EuiFlexGroup direction="column" gutterSize="m">
-              <EuiFlexItem grow={false}>
-                <EuiButton onClick={() => formRef.current?.submit()} iconType="popout">
-                  Connect local agent
-                </EuiButton>
-              </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFormRow label="Kibana URL" fullWidth>
                   <EuiFieldText value={setupData.kibanaUrl} readOnly fullWidth />
