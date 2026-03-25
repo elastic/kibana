@@ -18,7 +18,6 @@ export const useUpdateRule = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: ruleKeys.update(),
     mutationFn: ({ id, payload }: { id: string; payload: UpdateRuleData }) =>
       rulesApi.updateRule(id, payload),
     onSuccess: (_data, variables) => {

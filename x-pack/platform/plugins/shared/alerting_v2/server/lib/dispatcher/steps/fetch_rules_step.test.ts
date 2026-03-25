@@ -5,36 +5,30 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { FetchRulesStep } from './fetch_rules_step';
 import type { RulesSavedObjectService } from '../../services/rules_saved_object_service/rules_saved_object_service';
 import { createRulesSavedObjectService } from '../../services/rules_saved_object_service/rules_saved_object_service.mock';
 import { createRuleSoAttributes } from '../../test_utils';
-import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { createAlertEpisode, createDispatcherPipelineState } from '../fixtures/test_utils';
 
 describe('FetchRulesStep', () => {
   let rulesSoService: RulesSavedObjectService;
-  let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockFindByIds: jest.SpyInstance;
 
   beforeEach(() => {
-    ({ rulesSavedObjectService: rulesSoService, mockSavedObjectsClient } =
-      createRulesSavedObjectService());
+    ({ rulesSavedObjectService: rulesSoService, mockFindByIds } = createRulesSavedObjectService());
   });
 
   it('fetches rules for unique rule IDs from active episodes', async () => {
-    mockSavedObjectsClient.bulkGet.mockResolvedValue({
-      saved_objects: [
-        {
-          id: 'r1',
-          type: RULE_SAVED_OBJECT_TYPE,
-          attributes: createRuleSoAttributes({
-            metadata: { name: 'Rule 1', labels: ['production'] },
-          }),
-          references: [],
-        },
-      ],
-    });
+    mockFindByIds.mockResolvedValue([
+      {
+        id: 'r1',
+        attributes: createRuleSoAttributes({
+          metadata: { name: 'Rule 1', labels: ['production'] },
+        }),
+        namespaces: ['default'],
+      },
+    ]);
 
     const step = new FetchRulesStep(rulesSoService);
     const state = createDispatcherPipelineState({
@@ -50,9 +44,8 @@ describe('FetchRulesStep', () => {
     if (result.type !== 'continue') return;
     expect(result.data?.rules?.size).toBe(1);
     expect(result.data?.rules?.get('r1')?.name).toBe('Rule 1');
-    expect(mockSavedObjectsClient.bulkGet).toHaveBeenCalledWith([
-      { type: RULE_SAVED_OBJECT_TYPE, id: 'r1' },
-    ]);
+    expect(result.data?.rules?.get('r1')?.spaceId).toBe('default');
+    expect(mockFindByIds).toHaveBeenCalledWith(['r1']);
   });
 
   it('returns empty map when no active episodes', async () => {
@@ -64,21 +57,48 @@ describe('FetchRulesStep', () => {
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(result.data?.rules?.size).toBe(0);
-    expect(mockSavedObjectsClient.bulkGet).not.toHaveBeenCalled();
+    expect(mockFindByIds).not.toHaveBeenCalled();
   });
 
-  it('skips documents with errors', async () => {
-    mockSavedObjectsClient.bulkGet.mockResolvedValue({
-      saved_objects: [
-        {
-          id: 'r1',
-          type: RULE_SAVED_OBJECT_TYPE,
-          attributes: {},
-          references: [],
-          error: { statusCode: 404, message: 'Not found', error: 'Not Found' },
-        },
+  it('passes unique rule IDs to findAll', async () => {
+    mockFindByIds.mockResolvedValue([
+      {
+        id: 'r1',
+        attributes: createRuleSoAttributes({ metadata: { name: 'Rule 1' } }),
+        namespaces: ['default'],
+      },
+      {
+        id: 'r2',
+        attributes: createRuleSoAttributes({ metadata: { name: 'Rule 2' } }),
+        namespaces: ['default'],
+      },
+    ]);
+
+    const step = new FetchRulesStep(rulesSoService);
+    const state = createDispatcherPipelineState({
+      dispatchable: [
+        createAlertEpisode({ rule_id: 'r1' }),
+        createAlertEpisode({ rule_id: 'r2', episode_id: 'e2' }),
+        createAlertEpisode({ rule_id: 'r1', episode_id: 'e3' }),
       ],
-    } as any);
+    });
+
+    const result = await step.execute(state);
+
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    expect(result.data?.rules?.size).toBe(2);
+    expect(mockFindByIds).toHaveBeenCalledWith(['r1', 'r2']);
+  });
+
+  it('derives spaceId from namespaces for non-default spaces', async () => {
+    mockFindByIds.mockResolvedValue([
+      {
+        id: 'r1',
+        attributes: createRuleSoAttributes({ metadata: { name: 'Rule 1' } }),
+        namespaces: ['my-space'],
+      },
+    ]);
 
     const step = new FetchRulesStep(rulesSoService);
     const state = createDispatcherPipelineState({
@@ -89,6 +109,26 @@ describe('FetchRulesStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.rules?.size).toBe(0);
+    expect(result.data?.rules?.get('r1')?.spaceId).toBe('my-space');
+  });
+
+  it('defaults spaceId to default when namespaces is undefined', async () => {
+    mockFindByIds.mockResolvedValue([
+      {
+        id: 'r1',
+        attributes: createRuleSoAttributes({ metadata: { name: 'Rule 1' } }),
+      },
+    ]);
+
+    const step = new FetchRulesStep(rulesSoService);
+    const state = createDispatcherPipelineState({
+      dispatchable: [createAlertEpisode({ rule_id: 'r1' })],
+    });
+
+    const result = await step.execute(state);
+
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    expect(result.data?.rules?.get('r1')?.spaceId).toBe('default');
   });
 });

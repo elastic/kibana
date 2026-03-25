@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { injectable } from 'inversify';
-import { evaluateKql } from '@kbn/eval-kql';
 import type { MatcherContext } from '@kbn/alerting-v2-schemas';
+import { evaluateKql } from '@kbn/eval-kql';
+import { injectable } from 'inversify';
 import type {
   AlertEpisode,
+  DispatcherPipelineState,
+  DispatcherStep,
+  DispatcherStepOutput,
   MatchedPair,
   NotificationPolicy,
   NotificationPolicyId,
   Rule,
   RuleId,
-  DispatcherStep,
-  DispatcherPipelineState,
-  DispatcherStepOutput,
 } from '../types';
 
 @injectable()
@@ -39,15 +39,22 @@ export function evaluateMatchers(
   policies: ReadonlyMap<NotificationPolicyId, NotificationPolicy>
 ): MatchedPair[] {
   const matched: MatchedPair[] = [];
-  const allPolicies = Array.from(policies.values());
+
+  const policiesBySpace = new Map<string, NotificationPolicy[]>();
+  for (const policy of policies.values()) {
+    const list = policiesBySpace.get(policy.spaceId) ?? [];
+    list.push(policy);
+    policiesBySpace.set(policy.spaceId, list);
+  }
 
   for (const episode of dispatchable) {
     const rule = rules.get(episode.rule_id);
     if (!rule) continue;
 
+    const spacePolicies = policiesBySpace.get(rule.spaceId) ?? [];
     let context: MatcherContext | undefined;
 
-    for (const policy of allPolicies) {
+    for (const policy of spacePolicies) {
       if (!policy.enabled) continue;
       if (policy.snoozedUntil && new Date(policy.snoozedUntil) > new Date()) continue;
 

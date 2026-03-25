@@ -27,7 +27,8 @@ import {
 } from '../../screens/experimental';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/258936
+describe.skip(
   'EXPERIMENTAL - History (queryHistoryRework)',
   {
     tags: ['@ess', '@experimental'],

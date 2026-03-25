@@ -74,6 +74,147 @@ apiTest.describe.skip('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS },
     expect(check.found).toBe(true);
   });
 
+  apiTest('Should list entities without params', async ({ apiClient, esClient }) => {
+    const entityObj: Entity = {
+      entity: {
+        id: 'required-id-list',
+      },
+    };
+
+    const create = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPSERT('generic'), {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: entityObj,
+    });
+    expect(create.statusCode).toBe(200);
+    expect(await countEntitiesByID(esClient, LATEST_INDEX, entityObj.entity.id)).toBe(1);
+
+    const list = await apiClient.get(ENTITY_STORE_ROUTES.CRUD_GET, {
+      headers: defaultHeaders,
+      responseType: 'json',
+    });
+    expect(list.statusCode).toBe(200);
+    expect(list.body.entities).toStrictEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          entity: expect.objectContaining({
+            id: entityObj.entity.id,
+          }),
+        }),
+      ])
+    );
+  });
+
+  apiTest('Should list entities with a DSL filter', async ({ apiClient }) => {
+    const matchEntity: Entity = { entity: { id: 'list-filter-match' } };
+    const noMatchEntity: Entity = { entity: { id: 'list-filter-nomatch' } };
+
+    for (const ent of [matchEntity, noMatchEntity]) {
+      const resp = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPSERT('generic'), {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: ent,
+      });
+      expect(resp.statusCode).toBe(200);
+    }
+
+    const filter = JSON.stringify({ term: { 'entity.id': matchEntity.entity.id } });
+    const list = await apiClient.get(
+      ENTITY_STORE_ROUTES.CRUD_GET + `?filter=${encodeURIComponent(filter)}`,
+      {
+        headers: defaultHeaders,
+        responseType: 'json',
+      }
+    );
+    expect(list.statusCode).toBe(200);
+    expect(list.body.entities).toStrictEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          entity: expect.objectContaining({ id: matchEntity.entity.id }),
+        }),
+      ])
+    );
+    const returnedIds = list.body.entities.map((e: Entity) => e.entity?.id);
+    expect(returnedIds).not.toContain(noMatchEntity.entity.id);
+  });
+
+  apiTest('Should list entities with size param', async ({ apiClient }) => {
+    for (let i = 0; i < 3; i++) {
+      const resp = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPSERT('generic'), {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { entity: { id: `list-size-${i}` } },
+      });
+      expect(resp.statusCode).toBe(200);
+    }
+
+    const list = await apiClient.get(ENTITY_STORE_ROUTES.CRUD_GET + '?size=1', {
+      headers: defaultHeaders,
+      responseType: 'json',
+    });
+    expect(list.statusCode).toBe(200);
+    expect(list.body.entities).toHaveLength(1);
+    expect(list.body.nextSearchAfter).toBeDefined();
+  });
+
+  apiTest('Should paginate with searchAfter', async ({ apiClient }) => {
+    for (let i = 0; i < 2; i++) {
+      const resp = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPSERT('generic'), {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { entity: { id: `list-page-${i}` } },
+      });
+      expect(resp.statusCode).toBe(200);
+    }
+
+    const firstPage = await apiClient.get(ENTITY_STORE_ROUTES.CRUD_GET + '?size=1', {
+      headers: defaultHeaders,
+      responseType: 'json',
+    });
+    expect(firstPage.statusCode).toBe(200);
+    expect(firstPage.body.entities).toHaveLength(1);
+    expect(firstPage.body.nextSearchAfter).toBeDefined();
+
+    const searchAfter = JSON.stringify(firstPage.body.nextSearchAfter);
+    const secondPage = await apiClient.get(
+      ENTITY_STORE_ROUTES.CRUD_GET + `?size=1&searchAfter=${encodeURIComponent(searchAfter)}`,
+      {
+        headers: defaultHeaders,
+        responseType: 'json',
+      }
+    );
+    expect(secondPage.statusCode).toBe(200);
+    expect(secondPage.body.entities).toHaveLength(1);
+
+    const firstId = firstPage.body.entities[0].entity?.id;
+    const secondId = secondPage.body.entities[0].entity?.id;
+    expect(firstId).not.toBe(secondId);
+  });
+
+  apiTest('Should return 400 for invalid filter JSON', async ({ apiClient }) => {
+    const list = await apiClient.get(
+      ENTITY_STORE_ROUTES.CRUD_GET + `?filter=${encodeURIComponent('not-valid-json')}`,
+      {
+        headers: defaultHeaders,
+        responseType: 'json',
+      }
+    );
+    expect(list.statusCode).toBe(400);
+    expect(list.body.message).toContain('Invalid filter');
+  });
+
+  apiTest('Should return 400 for invalid searchAfter JSON', async ({ apiClient }) => {
+    const list = await apiClient.get(
+      ENTITY_STORE_ROUTES.CRUD_GET + `?searchAfter=${encodeURIComponent('{bad')}`,
+      {
+        headers: defaultHeaders,
+        responseType: 'json',
+      }
+    );
+    expect(list.statusCode).toBe(400);
+    expect(list.body.message).toContain('Invalid searchAfter');
+  });
+
   apiTest('Should require a force flag', async ({ apiClient, esClient }) => {
     // Send a field that exists on generic definition but has allowAPIUpdate: false (e.g. entity.name)
     const entityObj: Entity = {

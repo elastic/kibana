@@ -18,7 +18,7 @@ import { INTERNAL_API_HEADERS, RULE_API_PATH, ALERTING_EVENTS_INDEX } from '../f
  *   2. Index documents that match (or don't match) the rule's ES|QL condition
  *   3. Create an alert rule via the API that queries that index
  *   4. Wait for task manager to execute the rule
- *   5. Verify the episode state transitions in .alerting-events
+ *   5. Verify the episode state transitions in .rule-events
  *
  * Episode state machine (basic strategy):
  *   inactive --[breached]--> pending
@@ -80,7 +80,7 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
   });
 
   /**
-   * Polls .alerting-events until the expected number of director-processed events
+   * Polls .rule-events until the expected number of director-processed events
    * (type=alert, episode.status IS NOT NULL) appear for the given rule.
    */
   async function waitForAlertEvents(

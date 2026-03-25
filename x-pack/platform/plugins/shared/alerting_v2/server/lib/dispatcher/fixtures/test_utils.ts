@@ -63,6 +63,7 @@ export function createAlertEpisodeSuppression(
 export function createRule(overrides: Partial<Rule> = {}): Rule {
   return {
     id: 'rule-1',
+    spaceId: 'default',
     name: 'Test rule',
     description: '',
     labels: [],
@@ -78,6 +79,7 @@ export function createNotificationPolicy(
 ): NotificationPolicy {
   return {
     id: 'policy-1',
+    spaceId: 'default',
     name: 'Test policy',
     enabled: true,
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
@@ -99,6 +101,7 @@ export function createNotificationGroup(
 ): NotificationGroup {
   return {
     id: 'group-1',
+    spaceId: 'default',
     ruleId: 'rule-1',
     policyId: 'policy-1',
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],

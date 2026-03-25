@@ -24,7 +24,6 @@ import type {
 } from '../types';
 import { WorkflowsManagementApiToken } from './dispatch_step_tokens';
 
-const DEFAULT_SPACE_ID = 'default';
 const NOTIFICATION_POLICY_TRIGGER = 'notification_policy';
 
 @injectable()
@@ -84,7 +83,7 @@ export class DispatchStep implements DispatcherStep {
     workflowId: string,
     request: KibanaRequest
   ): Promise<void> {
-    const workflow = await this.workflowsManagement.getWorkflow(workflowId, DEFAULT_SPACE_ID);
+    const workflow = await this.workflowsManagement.getWorkflow(workflowId, group.spaceId);
 
     if (!workflow) {
       this.logger.warn({
@@ -124,7 +123,7 @@ export class DispatchStep implements DispatcherStep {
 
     const executionId = await this.workflowsManagement.scheduleWorkflow(
       model,
-      DEFAULT_SPACE_ID,
+      group.spaceId,
       payload,
       request,
       NOTIFICATION_POLICY_TRIGGER

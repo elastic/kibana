@@ -18,7 +18,6 @@ export const useUnsnoozeNotificationPolicy = () => {
   const queryClient = useQueryClient();
 
   return useMutation<NotificationPolicyResponse, Error, string>({
-    mutationKey: notificationPolicyKeys.unsnooze(),
     mutationFn: (id) => notificationPoliciesApi.unsnoozeNotificationPolicy(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: notificationPolicyKeys.lists(), exact: false });

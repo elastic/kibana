@@ -47,6 +47,7 @@ const createExpectedConnector = (id: string): InferenceConnector => ({
     serviceSettings: undefined,
   },
   capabilities: {},
+  isPreconfigured: false,
   isInferenceEndpoint: true,
 });
 
