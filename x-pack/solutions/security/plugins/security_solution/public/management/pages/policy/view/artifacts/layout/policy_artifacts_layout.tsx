@@ -46,6 +46,7 @@ export interface PolicyArtifactsLayoutProps {
   getPolicyArtifactsPath: (policyId: string) => string;
   /** A boolean to check if has write artifact privilege or not */
   canWriteArtifact?: boolean;
+  disableArtifactsByPolicy?: boolean;
   // Artifact specific decorations to display in the cards
   CardDecorator?: React.ComponentType<ArtifactEntryCardDecoratorProps>;
 }
@@ -59,6 +60,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
     getPolicyArtifactsPath,
     canWriteArtifact = false,
     CardDecorator,
+    disableArtifactsByPolicy,
   }) => {
     const exceptionsListApiClient = useMemo(
       () => getExceptionsListApiClient(),
@@ -74,6 +76,9 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
     const [exceptionItemToDelete, setExceptionItemToDelete] = useState<
       ExceptionListItemSchema | undefined
     >();
+
+    const showPolicyAssignment =
+      canCreateArtifactsByPolicy && !disableArtifactsByPolicy && canWriteArtifact;
 
     const labels = useMemo<typeof policyArtifactsPageLabels>(() => {
       return {
@@ -154,7 +159,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
     if (isEmptyState) {
       return (
         <>
-          {canCreateArtifactsByPolicy && urlParams.show === 'list' && (
+          {showPolicyAssignment && urlParams.show === 'list' && (
             <PolicyArtifactsFlyout
               policyItem={policyItem}
               apiClient={exceptionsListApiClient}
@@ -170,7 +175,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
               policyName={policyItem.name}
               listId={exceptionsListApiClient.listId}
               labels={labels}
-              canWriteArtifact={canWriteArtifact}
+              canWriteArtifact={showPolicyAssignment}
               getPolicyArtifactsPath={getPolicyArtifactsPath}
               getArtifactPath={getArtifactPath}
             />
@@ -203,10 +208,10 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             </EuiText>
           </EuiPageHeaderSection>
           <EuiPageHeaderSection>
-            {canCreateArtifactsByPolicy && canWriteArtifact && assignToPolicyButton}
+            {showPolicyAssignment && assignToPolicyButton}
           </EuiPageHeaderSection>
         </EuiPageHeader>
-        {canCreateArtifactsByPolicy && canWriteArtifact && urlParams.show === 'list' && (
+        {showPolicyAssignment && urlParams.show === 'list' && (
           <PolicyArtifactsFlyout
             policyItem={policyItem}
             apiClient={exceptionsListApiClient}
