@@ -164,31 +164,50 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
     [setActiveFlyoutType, setActiveSection, setActiveDocId, setActiveDocIndex]
   );
 
+  // EUI's flyout manager fires onClose with a synthetic MouseEvent('navigation')
+  // for both cascade closes (tab switch unmount) and back-button clicks. We only
+  // want to suppress state clearing during cascade closes — not back-button clicks.
+  //
+  // To distinguish the two: during a cascade close the component is unmounting, so
+  // isMountedRef.current will be false. During a back-button click the component is
+  // still alive, so isMountedRef.current will be true.
+  //
+  // See: https://github.com/elastic/eui/blob/v113.3.0/packages/eui/src/components/flyout/manager/flyout_managed.tsx
+  const isMountedRef = useRef(false);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  const isCascadeClose = useCallback(
+    (event: Event | React.BaseSyntheticEvent) =>
+      event.type === 'navigation' && !isMountedRef.current,
+    []
+  );
+
   const onExitFullScreen = useCallback<NonNullable<EuiFlyoutProps['onClose']>>(
     (event) => {
-      // When the EUI flyout manager cascade-closes flyouts during a Discover
-      // tab switch it fires onClose with a synthetic MouseEvent whose type is
-      // 'navigation'. In that case we must NOT clear the restorable state so
-      // the waterfall can be restored when the user returns to this tab.
-      if (event.type === 'navigation') {
+      if (isCascadeClose(event)) {
         return;
       }
 
       setShowFullScreenWaterfall(false);
       clearActiveFlyout();
     },
-    [setShowFullScreenWaterfall, clearActiveFlyout]
+    [isCascadeClose, setShowFullScreenWaterfall, clearActiveFlyout]
   );
 
   const onCloseFlyout = useCallback<NonNullable<EuiFlyoutProps['onClose']>>(
     (event) => {
-      if (event.type === 'navigation') {
+      if (isCascadeClose(event)) {
         return;
       }
 
       clearActiveFlyout();
     },
-    [clearActiveFlyout]
+    [isCascadeClose, clearActiveFlyout]
   );
 
   const actions = useMemo(
