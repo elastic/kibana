@@ -31,8 +31,8 @@ const mockedResetMonitorBulkAPI = resetMonitorBulkAPI as jest.MockedFunction<
 const healthyMonitor = {
   configId: 'mon-1',
   monitorName: 'Monitor 1',
-  isUnhealthy: false,
-  locations: [
+  isHealthy: true,
+  privateLocations: [
     {
       locationId: 'loc-1',
       locationLabel: 'Location 1',
@@ -45,8 +45,8 @@ const healthyMonitor = {
 const unhealthyMonitor = {
   configId: 'mon-2',
   monitorName: 'Monitor 2',
-  isUnhealthy: true,
-  locations: [
+  isHealthy: false,
+  privateLocations: [
     {
       locationId: 'loc-1',
       locationLabel: 'Location 1',

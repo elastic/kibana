@@ -179,7 +179,7 @@ export class MonitorIntegrationHealthApi {
       return {
         configId: so.id,
         monitorName: so.attributes[ConfigKey.NAME],
-        isUnhealthy: locationStatuses.some((s) => s.status !== LocationHealthStatusValue.Healthy),
+        isHealthy: locationStatuses.every((s) => s.status === LocationHealthStatusValue.Healthy),
         privateLocations: locationStatuses,
       };
     });
@@ -300,7 +300,7 @@ export class MonitorIntegrationHealthApi {
       return {
         configId: so.id,
         monitorName: so.attributes[ConfigKey.NAME],
-        isUnhealthy: locationStatuses.some((ls) => ls.status !== LocationHealthStatusValue.Healthy),
+        isHealthy: locationStatuses.every((ls) => ls.status === LocationHealthStatusValue.Healthy),
         privateLocations: locationStatuses,
       };
     });

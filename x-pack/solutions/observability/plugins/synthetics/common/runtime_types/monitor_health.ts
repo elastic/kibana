@@ -26,7 +26,7 @@ export interface PrivateLocationHealthStatus {
 export interface MonitorHealthStatus {
   configId: string;
   monitorName: string;
-  isUnhealthy: boolean;
+  isHealthy: boolean;
   privateLocations: PrivateLocationHealthStatus[];
 }
 

@@ -220,8 +220,8 @@ describe('MonitorIntegrationHealthApi', () => {
         {
           configId: 'mon-1',
           monitorName: 'Monitor mon-1',
-          isUnhealthy: false,
-          locations: [],
+          isHealthy: true,
+          privateLocations: [],
         },
       ]);
       expect(result.errors).toHaveLength(0);
@@ -249,7 +249,7 @@ describe('MonitorIntegrationHealthApi', () => {
       const locStatus = result.monitors[0].privateLocations[0];
       expect(locStatus.status).toBe(LocationHealthStatusValue.PackageNotInstalled);
       expect(locStatus.reason).toBeDefined();
-      expect(result.monitors[0].isUnhealthy).toBe(true);
+      expect(result.monitors[0].isHealthy).toBe(false);
     });
 
     it('does not mark public-only monitors as unhealthy when package is not installed', async () => {
@@ -265,7 +265,7 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealth(['mon-1']);
 
-      expect(result.monitors[0].isUnhealthy).toBe(false);
+      expect(result.monitors[0].isHealthy).toBe(true);
       expect(result.monitors[0].privateLocations).toHaveLength(0);
     });
 
@@ -320,7 +320,7 @@ describe('MonitorIntegrationHealthApi', () => {
 
       expect(result.monitors).toHaveLength(2);
       for (const monitor of result.monitors) {
-        expect(monitor.isUnhealthy).toBe(true);
+        expect(monitor.isHealthy).toBe(false);
         for (const loc of monitor.privateLocations) {
           expect(loc.status).toBe(LocationHealthStatusValue.PackageNotInstalled);
         }
@@ -352,8 +352,8 @@ describe('MonitorIntegrationHealthApi', () => {
         {
           configId: 'mon-1',
           monitorName: 'Monitor mon-1',
-          isUnhealthy: false,
-          locations: [
+          isHealthy: true,
+          privateLocations: [
             {
               locationId: 'priv-loc-1',
               locationLabel: 'Private Location priv-loc-1',
@@ -387,7 +387,7 @@ describe('MonitorIntegrationHealthApi', () => {
       const locStatus = result.monitors[0].privateLocations[0];
       expect(locStatus.status).toBe(LocationHealthStatusValue.MissingPackagePolicy);
       expect(locStatus.reason).toBeDefined();
-      expect(result.monitors[0].isUnhealthy).toBe(true);
+      expect(result.monitors[0].isHealthy).toBe(false);
     });
   });
 
@@ -409,7 +409,7 @@ describe('MonitorIntegrationHealthApi', () => {
       expect(locStatus.status).toBe(LocationHealthStatusValue.MissingLocation);
       expect(locStatus.locationLabel).toBe('Gone Location');
       expect(locStatus.reason).toBeDefined();
-      expect(result.monitors[0].isUnhealthy).toBe(true);
+      expect(result.monitors[0].isHealthy).toBe(false);
     });
 
     it('falls back to location id when label is missing', async () => {
@@ -449,7 +449,7 @@ describe('MonitorIntegrationHealthApi', () => {
       const locStatus = result.monitors[0].privateLocations[0];
       expect(locStatus.status).toBe(LocationHealthStatusValue.MissingAgentPolicy);
       expect(locStatus.reason).toBeDefined();
-      expect(result.monitors[0].isUnhealthy).toBe(true);
+      expect(result.monitors[0].isHealthy).toBe(false);
     });
 
     it('correctly distinguishes between existing and missing agent policies across locations', async () => {
@@ -509,7 +509,7 @@ describe('MonitorIntegrationHealthApi', () => {
       const locStatus = result.monitors[0].privateLocations[0];
       expect(locStatus.status).toBe(LocationHealthStatusValue.AgentPolicyMismatch);
       expect(locStatus.reason).toBeDefined();
-      expect(result.monitors[0].isUnhealthy).toBe(true);
+      expect(result.monitors[0].isHealthy).toBe(false);
     });
   });
 
@@ -584,13 +584,13 @@ describe('MonitorIntegrationHealthApi', () => {
       expect(mon1.configId).toBe('mon-1');
       expect(mon1.privateLocations[0].status).toBe(LocationHealthStatusValue.Healthy);
       expect(mon1.privateLocations[1].status).toBe(LocationHealthStatusValue.MissingPackagePolicy);
-      expect(mon1.isUnhealthy).toBe(true);
+      expect(mon1.isHealthy).toBe(false);
 
       const mon2 = result.monitors[1];
       expect(mon2.configId).toBe('mon-2');
       expect(mon2.privateLocations[0].status).toBe(LocationHealthStatusValue.Healthy);
       expect(mon2.privateLocations[1].status).toBe(LocationHealthStatusValue.MissingLocation);
-      expect(mon2.isUnhealthy).toBe(true);
+      expect(mon2.isHealthy).toBe(false);
     });
   });
 
@@ -616,7 +616,7 @@ describe('MonitorIntegrationHealthApi', () => {
 
       expect(result.monitors[0].privateLocations[0].status).toBe(LocationHealthStatusValue.Healthy);
       expect(result.monitors[0].privateLocations[0].packagePolicyId).toBe(legacyPolicyId);
-      expect(result.monitors[0].isUnhealthy).toBe(false);
+      expect(result.monitors[0].isHealthy).toBe(true);
     });
 
     it('prefers new-format policy ID when both formats exist', async () => {
