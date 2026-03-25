@@ -15,10 +15,10 @@ import {
   getManualRunRulesSubFeature,
   getRulesManagementSettingsSubFeature,
 } from '../kibana_sub_features';
-import { RULES_FEATURE_ID_V4 } from '../../constants';
 import { addAllSubFeatureReplacements } from '../../utils';
+import { RULES_FEATURE_ID_V4 } from '../../constants';
 
-export const getRulesBaseKibanaSubFeatureIdsV3 = (): RulesSubFeatureId[] => [
+export const getRulesBaseKibanaSubFeatureIdsV1 = (): RulesSubFeatureId[] => [
   RulesSubFeatureId.exceptions,
   RulesSubFeatureId.investigationGuide,
   RulesSubFeatureId.customHighlightedFields,
@@ -31,8 +31,8 @@ export const getRulesBaseKibanaSubFeatureIdsV3 = (): RulesSubFeatureId[] => [
  * Defines all the Security Solution Rules subFeatures available.
  * The order of the subFeatures is the order they will be displayed
  */
-export const getRulesSubFeaturesMapV3 = () => {
-  const subfeaturesList = new Map<RulesSubFeatureId, SubFeatureConfig>([
+export const getRulesSubFeaturesMapV1 = () => {
+  const subFeaturesList = new Map<RulesSubFeatureId, SubFeatureConfig>([
     [RulesSubFeatureId.exceptions, getExceptionsSubFeature()],
     [RulesSubFeatureId.investigationGuide, getInvestigationGuideSubFeature()],
     [RulesSubFeatureId.customHighlightedFields, getCustomHighlightedFieldsSubFeature()],
@@ -41,5 +41,5 @@ export const getRulesSubFeaturesMapV3 = () => {
     [RulesSubFeatureId.rulesManagementSettings, getRulesManagementSettingsSubFeature()],
   ]);
 
-  return addAllSubFeatureReplacements(subfeaturesList, [{ feature: RULES_FEATURE_ID_V4 }]);
+  return addAllSubFeatureReplacements(subFeaturesList, [{ feature: RULES_FEATURE_ID_V4 }]);
 };

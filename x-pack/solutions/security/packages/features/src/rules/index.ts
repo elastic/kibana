@@ -25,13 +25,17 @@ import {
   getRulesSubFeaturesMapV4,
 } from './v4_features/kibana_sub_features';
 import { getRulesV4BaseKibanaFeature } from './v4_features/kibana_features';
+import {
+  getRulesBaseKibanaSubFeatureIdsV1,
+  getRulesSubFeaturesMapV1,
+} from './v1_features/kibana_sub_features';
 
 export const getRulesFeature = (
   params: SecurityFeatureParams
 ): ProductFeatureParams<ProductFeatureRulesKey, RulesSubFeatureId> => ({
   baseKibanaFeature: getRulesBaseKibanaFeature(params),
-  baseKibanaSubFeatureIds: [],
-  subFeaturesMap: new Map(),
+  baseKibanaSubFeatureIds: getRulesBaseKibanaSubFeatureIdsV1(),
+  subFeaturesMap: getRulesSubFeaturesMapV1(),
   productFeatureConfig: rulesDefaultProductFeaturesConfig,
 });
 
