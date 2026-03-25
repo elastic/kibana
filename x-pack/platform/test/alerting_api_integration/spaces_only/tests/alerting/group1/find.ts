@@ -373,7 +373,8 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         expect(response.body).to.eql({
           statusCode: 400,
           error: 'Bad Request',
-          message: '[request query.rule_type_ids]: definition for this key is missing',
+          message:
+            "[request query.rule_type_ids]: Additional properties are not allowed ('rule_type_ids' was unexpected)",
         });
       });
 
@@ -394,7 +395,8 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         expect(response.body).to.eql({
           statusCode: 400,
           error: 'Bad Request',
-          message: '[request query.consumers]: definition for this key is missing',
+          message:
+            "[request query.consumers]: Additional properties are not allowed ('consumers' was unexpected)",
         });
       });
     });

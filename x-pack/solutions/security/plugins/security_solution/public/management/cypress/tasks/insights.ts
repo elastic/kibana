@@ -10,7 +10,7 @@ import type {
 } from '@kbn/actions-plugin/common/routes/connector/response';
 import { DEFEND_INSIGHTS } from '@kbn/elastic-assistant-common';
 import { request } from './common';
-import { ActionType } from '../../../../common/endpoint/types/workflow_insights';
+import { WorkflowInsightActionType } from '../../../../common/endpoint/types/workflow_insights';
 import {
   WORKFLOW_INSIGHTS_ROUTE,
   WORKFLOW_INSIGHTS_UPDATE_ROUTE,
@@ -288,7 +288,7 @@ export const fetchWorkflowInsights = (overrides?: Record<string, unknown>) => {
     method: 'GET',
     url: WORKFLOW_INSIGHTS_ROUTE,
     qs: {
-      actionTypes: JSON.stringify([ActionType.Refreshed]),
+      actionTypes: JSON.stringify([WorkflowInsightActionType.enum.refreshed]),
       targetIds: JSON.stringify(['test']),
     },
     headers: { 'Elastic-Api-Version': '1' },
@@ -302,7 +302,7 @@ export const updateWorkflowInsights = () => {
     url: WORKFLOW_INSIGHTS_UPDATE_ROUTE.replace('{insightId}', 'test'),
     body: JSON.stringify({
       action: {
-        type: ActionType.Remediated,
+        type: WorkflowInsightActionType.enum.remediated,
       },
     }),
     headers: { 'Elastic-Api-Version': '1' },
