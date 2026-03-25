@@ -76,7 +76,7 @@ export interface IndexActionsContextMenuProps {
   // this function is called to "refresh" the indices data after and extension service action that uses a modal
   reloadIndices: () => void;
 
-  // observable API for doc counts already loaded in the index table
+  // observable API for doc counts
   docCountApi?: DocCountApi;
 
   /**
@@ -142,6 +142,17 @@ export const IndexActionsContextMenu = ({
   `;
 
   const onButtonClick = () => {
+    // When opening for a single index, trigger a doc-count fetch if neither the
+    // index data nor the observable cache already has a result. Without this,
+    // isConvertableToLookupIndex returns false until the index list page
+    // populates the count, so the action may appear disabled incorrectly.
+    if (!isPopoverOpen && indexNames.length === 1 && docCountApi) {
+      const indexName = indexNames[0];
+      const selectedIndex = indices.find((index) => index.name === indexName);
+      if (selectedIndex?.documents === undefined && !docCountMap?.[indexName]) {
+        docCountApi.getByName(indexName);
+      }
+    }
     setIsPopoverOpen((prevState) => !prevState);
   };
 
