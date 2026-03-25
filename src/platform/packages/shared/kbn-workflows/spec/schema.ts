@@ -859,7 +859,6 @@ export const WorkflowContextSchema = z.object({
   execution: WorkflowExecutionContextSchema,
   workflow: WorkflowDataContextSchema,
   kibanaUrl: z.string(),
-  inputs: z.record(z.string(), WorkflowInputValueSchema).optional(), // TODO: remove this once
   output: z
     .record(
       z.string(),
@@ -887,7 +886,6 @@ export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
 export const DynamicWorkflowContextSchema = WorkflowContextSchema.extend({
   // overriding record with object to avoid type mismatch when
   // extending with actual inputs, outputs and consts of different types
-  inputs: z.object({}),
   output: z.object({}),
   consts: z.object({}),
   // overriding event with base event schema (spaceId only) so it can be

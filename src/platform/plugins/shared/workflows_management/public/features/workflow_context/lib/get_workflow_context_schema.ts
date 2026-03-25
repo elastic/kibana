@@ -9,22 +9,17 @@
 
 import type { Document } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
-import {
-  BaseEventSchema,
-  DynamicWorkflowContextSchema,
-  EventTimestampSchema,
-  isTriggerType,
-} from '@kbn/workflows';
+import { DynamicWorkflowContextSchema, EventTimestampSchema, isTriggerType } from '@kbn/workflows';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
-import { isManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
-import { z } from '@kbn/zod/v4';
-import { inferZodType } from '../../../../common/lib/zod';
-import { triggerSchemas } from '../../../trigger_schemas';
 import {
   AlertEventSchema,
   isAlertTrigger,
 } from '@kbn/workflows/spec/schema/triggers/alert_trigger_schema';
+import { isManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
+import { z } from '@kbn/zod/v4';
+import { inferZodType } from '../../../../common/lib/zod';
+import { triggerSchemas } from '../../../trigger_schemas';
 
 // Type that accepts both WorkflowYaml (transformed) and raw definition (may have legacy inputs)
 export type WorkflowDefinitionForContext =
@@ -106,16 +101,13 @@ export function getWorkflowContextSchema(
   definition: WorkflowDefinitionForContext,
   yamlDocument?: Document | null
 ): typeof DynamicWorkflowContextSchema {
-  const inputs = extractFieldFromYaml(definition.inputs, yamlDocument, 'inputs');
   const outputs = extractFieldFromYaml(definition.outputs, yamlDocument, 'outputs');
 
-  // const normalizedInputs = normalizeFieldsToJsonSchema(inputs);
   const normalizedOutputs = normalizeFieldsToJsonSchema(outputs);
 
   const eventSchema = buildEventSchemaFromTriggers(definition.triggers ?? []);
 
   return DynamicWorkflowContextSchema.extend({
-    // inputs: buildFieldsZodValidator(normalizedInputs),
     output: buildFieldsZodValidator(normalizedOutputs),
     consts: z.object({
       ...Object.fromEntries(
