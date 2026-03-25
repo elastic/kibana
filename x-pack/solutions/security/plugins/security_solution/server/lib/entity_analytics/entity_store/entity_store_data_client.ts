@@ -106,6 +106,7 @@ import {
   getEntityResetIndexStatus,
   getEntitySnapshotIndexStatus,
 } from './elasticsearch_assets';
+import { installPrebuiltWatchlists } from '../watchlists/install_prebuilt_watchlists';
 import { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import {
   buildEntityDefinitionId,
@@ -505,6 +506,10 @@ export class EntityStoreDataClient {
       // Create reset index required by Snapshot task
       await createEntityResetIndex({ entityType, esClient: this.esClient, namespace });
       this.log(`debug`, entityType, `Created entity reset index`);
+
+              // Initialize prebuilt watchlists
+              await installPrebuiltWatchlists(this.esClient, this.options.soClient, namespace, logger);
+      this.log(`debug`, entityType, `Checked and initialized prebuilt watchlists`);
 
       // we must create and execute the enrich policy before the pipeline is created
       // this is because the pipeline will fail if the enrich index does not exist

@@ -101,5 +101,23 @@ describe(
       cy.get(TIMELINE_ACTION).first().should('be.visible');
       cy.get(TIMELINE_ACTION).first().click();
     });
+
+    it('creates prebuilt watchlists and their indices during initialization', () => {
+      cy.request({
+        method: 'GET',
+        url: `/api/saved_objects/watchlist-config/privileged-user-monitoring-watchlist-id`,
+        headers: { 'kbn-xsrf': 'cypress-creds' },
+        failOnStatusCode: false,
+      }).then((response) => {
+        expect(response.status).to.eq(200);
+        expect(response.body.attributes.managed).to.be.true;
+      });
+
+      cy.task('searchIndex', '.entity-analytics.watchlists.Privileged Users-default').then(
+        (hitsLength) => {
+          expect(hitsLength).to.not.be.null;
+        }
+      );
+    });
   }
 );
