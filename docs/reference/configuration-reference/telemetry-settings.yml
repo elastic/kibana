@@ -17,7 +17,7 @@ groups:
     settings:
 
       - setting: telemetry.optIn
-        id: telemetry-optIn
+        id: telemetry-optin
         description: |
           Set to `false` to stop sending any telemetry data to Elastic. Reporting your cluster statistics helps us improve your user experience.
 
@@ -31,7 +31,7 @@ groups:
 
       - setting: telemetry.allowChangingOptInStatus
         description: |
-          Set to `false` to disallow overwriting the [`telemetry.optIn`](#telemetry-optIn) setting via the [Advanced Settings](/reference/advanced-settings.md) in {{kib}}.
+          Set to `false` to disallow overwriting the [`telemetry.optIn`](#telemetry-optin) setting via the [Advanced Settings](/reference/advanced-settings.md) in {{kib}}.
         datatype: bool
         default: true
         applies_to:

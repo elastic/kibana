@@ -989,7 +989,7 @@ groups:
         note: "By default, enabling `http2` requires a valid `h2c` configuration, meaning that TLS must be enabled via [`server.ssl.enabled`](#server-ssl-enabled) and [`server.ssl.supportedprotocols`](#server-ssl-supportedProtocols), if specified, must contain at least `TLSv1.2` or `TLSv1.3`. Strict validation of the `h2c` setup can be disabled by adding `server.http2.allowUnsecure: true` to the configuration."
 
       - setting: server.shutdownTimeout
-        id: server-shutdownTimeout
+        id: server-shutdowntimeout
         description: |
           Sets the grace period for {{kib}} to attempt to resolve any ongoing HTTP requests after receiving a `SIGTERM`/`SIGINT` signal, and before shutting down. Any new HTTP requests received during this period are rejected, because the incoming socket is closed without further processing.
         datatype: string
@@ -1441,7 +1441,7 @@ groups:
           self: ga
 
       - setting: server.xsrf.disableProtection
-        id: settings-xsrf-disableProtection
+        id: settings-xsrf-disableprotection
         description: |
           Setting this to `true` will completely disable Cross-site request forgery protection in Kibana. This is not recommended.
         datatype: bool
