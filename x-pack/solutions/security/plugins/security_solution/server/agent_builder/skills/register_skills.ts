@@ -13,6 +13,7 @@ import { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting
 import { getEntityAnalyticsSkill } from './entity_analytics';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
 import { getSecurityMlJobsSkill } from './security_ml_jobs';
+import { getThreatHuntingSkill } from './threat_hunting';
 import { getAlertTriageSkill } from './alert_triage';
 import { getInvestigationSkill } from './investigation';
 import { getMitreCoverageSkill } from './mitre_coverage';
@@ -54,6 +55,7 @@ export const registerSkills = async ({
     getEntityAnalyticsSkill({ getStartServices, isEntityStoreV2Enabled, kibanaVersion, logger })
   );
   await agentBuilder.skills.register(getSecurityMlJobsSkill({ getStartServices, logger, ml }));
+  await agentBuilder.skills.register(getThreatHuntingSkill());
 
   // AI SOC skills — gated behind aiSocAgents feature flag
   if (experimentalFeatures.aiSocAgents) {

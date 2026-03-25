@@ -324,7 +324,6 @@ triggers:
 steps:
   - name: hunt
     type: ai.agent
-    agent-id: security.agent
     with:
       schema:
         type: object
@@ -355,7 +354,7 @@ steps:
             description: Areas that were searched during the hunt
         required: [findings, severity, hunt_areas_searched]
       message: >
-        Conduct a proactive threat hunt across the environment.
+        Use the threat-hunting skill to conduct a proactive threat hunt across the environment.
         Look for:
         1. Unusual authentication patterns in the last 7 days
         2. Suspicious process execution chains
