@@ -10,7 +10,7 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import { apiTest, testData } from '../fixtures';
 
-// TODO: run on Elastic Cloud once PR #258866 makes it to prod
+// TODO: run on ECH once PR #258866 makes it to prod
 apiTest.describe(
   'Osquery packs - admin',
   {

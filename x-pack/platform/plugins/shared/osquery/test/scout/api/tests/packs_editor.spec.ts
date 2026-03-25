@@ -10,7 +10,6 @@ import { expect } from '@kbn/scout/api';
 import { apiTest, testData } from '../fixtures';
 
 // TODO: run tests on Elastic Cloud once bug fix #258883 is released
-// Update tags to tags.stateful.classic and tags.serverless.security.complete
 apiTest.describe(
   'Osquery packs - editor',
   { tag: ['@local-stateful-classic', '@local-serverless-security_complete'] },

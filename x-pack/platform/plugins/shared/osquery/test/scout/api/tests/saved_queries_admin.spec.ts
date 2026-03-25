@@ -10,7 +10,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData } from '../fixtures';
 
-// TODO: replace '@local-stateful-classic' with tags.stateful.classic once #258866 is released
+// TODO: run on ECH once #258866 is released
 apiTest.describe(
   'Osquery saved queries - admin',
   { tag: ['@local-stateful-classic', ...tags.serverless.security.complete] },
