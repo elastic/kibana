@@ -113,7 +113,7 @@ describe('getOptionShorthand', () => {
   it('returns the start offset when end is now', () => {
     expect(getOptionShorthand({ start: 'now-15m', end: 'now' })).toBe('-15m');
     expect(getOptionShorthand({ start: 'now-7d', end: 'now' })).toBe('-7d');
-    expect(getOptionShorthand({ start: 'now-1M', end: 'now' })).toBe('-1M');
+    expect(getOptionShorthand({ start: 'now-1M', end: 'now' })).toBe('-1mo');
   });
 
   it('returns the end offset when start is now', () => {

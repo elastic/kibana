@@ -15,7 +15,7 @@ import type {
   InitialFocus,
   AutoRefreshIntervalUnit,
 } from './types';
-import { DATE_RANGE_INPUT_DELIMITER } from './constants';
+import { DATE_RANGE_INPUT_DELIMITER, UNIT_DISPLAY_ABBREV } from './constants';
 import { textToTimeRange } from './parse';
 import { dateMathToRelativeParts, timeRangeToDisplayText } from './format';
 import { MS_PER } from './format/format_duration';
@@ -281,8 +281,9 @@ function boundToRelativeShorthand(bound: string): string | 'now' | null {
   if (!parts) return null;
 
   const sign = parts.isFuture ? '+' : '-';
+  const displayUnit = UNIT_DISPLAY_ABBREV[parts.unit] ?? parts.unit;
   const round = parts.round ? `/${parts.round}` : '';
-  return `${sign}${parts.count}${parts.unit}${round}`;
+  return `${sign}${parts.count}${displayUnit}${round}`;
 }
 
 /**

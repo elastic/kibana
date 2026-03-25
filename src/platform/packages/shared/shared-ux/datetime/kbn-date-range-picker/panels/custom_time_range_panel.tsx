@@ -58,6 +58,7 @@ import {
   DATE_TYPE_NOW,
   DEFAULT_DATE_FORMAT,
   UNIT_SHORT_TO_FULL_MAP,
+  UNIT_DISPLAY_ABBREV,
   DATE_RANGE_INPUT_DELIMITER,
 } from '../constants';
 import { useDateRangePickerPanelNavigation } from '../date_range_picker_panel_navigation';
@@ -517,8 +518,9 @@ function datePartStateToDateString(state: DatePartState): string {
     case DATE_TYPE_RELATIVE: {
       const { count, unit, roundTo } = state.relativeOffset;
       const operator = count >= 0 ? '+' : '-';
+      const displayUnit = UNIT_DISPLAY_ABBREV[unit] ?? unit;
       const round = roundTo ? `/${roundTo}` : '';
-      return `now${operator}${Math.abs(count)}${unit}${round}`;
+      return `now${operator}${Math.abs(count)}${displayUnit}${round}`;
     }
     case DATE_TYPE_ABSOLUTE:
       return state.absoluteText;

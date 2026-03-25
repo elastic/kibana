@@ -40,7 +40,7 @@ exports[`DateRangePicker renders 1`] = `
                 <span
                   class="euiBadge emotion-euiBadge-default"
                   data-test-subj="dateRangePickerDurationBadge"
-                  title="20min"
+                  title="20m"
                 >
                   <span
                     class="euiBadge__content emotion-euiBadge__content"
@@ -48,7 +48,7 @@ exports[`DateRangePicker renders 1`] = `
                     <span
                       class="euiBadge__text emotion-euiBadge__text"
                     >
-                      20min
+                      20m
                     </span>
                   </span>
                 </span>

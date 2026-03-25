@@ -31,6 +31,21 @@ export const DATE_RANGE_INPUT_DELIMITER = '-';
 /** Delimiter used in the display text between start and end (e.g. "Feb 3 → Feb 10") */
 export const DATE_RANGE_DISPLAY_DELIMITER = '→';
 
+/**
+ * Maps date-math units to their display abbreviations.
+ * Most units use the datemath symbol as-is; month uses "mo" instead of "M".
+ */
+export const UNIT_DISPLAY_ABBREV: Record<string, string> = {
+  ms: 'ms',
+  s: 's',
+  m: 'm',
+  h: 'h',
+  d: 'd',
+  w: 'w',
+  M: 'mo',
+  y: 'y',
+};
+
 /** Maps single-character date-math units to their full English names (e.g. "d" → "day") */
 export const UNIT_SHORT_TO_FULL_MAP: Record<string, string> = {
   ms: 'millisecond',

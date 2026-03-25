@@ -138,7 +138,7 @@ describe('textToTimeRange', () => {
       ['-7d/d', 'now-7d/d', 'now'],
       ['500ms', 'now-500ms', 'now'],
       ['7min', 'now-7m', 'now'],
-      ['3mos', 'now-3M', 'now'],
+      ['3mo', 'now-3M', 'now'],
       ['7hrs', 'now-7h', 'now'],
       ['2wks', 'now-2w', 'now'],
       ['1yr', 'now-1y', 'now'],
@@ -376,12 +376,12 @@ describe('textToTimeRange', () => {
       expect(minuteRange.start).toBe('now-3m');
     });
 
-    it('resolves shorthand aliases: min -> m, mos -> M', () => {
+    it('resolves shorthand aliases: min -> m, mo -> M', () => {
       const minRange = textToTimeRange('5min');
       expect(minRange.start).toBe('now-5m');
 
-      const mosRange = textToTimeRange('5mos');
-      expect(mosRange.start).toBe('now-5M');
+      const moRange = textToTimeRange('5mo');
+      expect(moRange.start).toBe('now-5M');
     });
   });
 

@@ -416,7 +416,7 @@ describe('DateRangePickerControl', () => {
     it('renders a duration label when the range is valid', () => {
       renderWithEuiTheme(<DateRangePicker {...defaultProps} defaultValue="last 20 minutes" />);
       const button = screen.getByTestId('dateRangePickerControlButton');
-      const badge = within(button).getByText('20min');
+      const badge = within(button).getByText('20m');
       expect(badge).toBeInTheDocument();
     });
   });
