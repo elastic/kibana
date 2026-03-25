@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { useQueryClient } from '@kbn/react-query';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { EuiCallOut } from '@elastic/eui';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
@@ -42,7 +43,11 @@ import {
   getRiskFromEntityRecord,
 } from '../shared/entity_store_risk_utils';
 import type { Entity } from '../../../../common/api/entity_analytics';
-import { useEntityFromStore, type EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
+import {
+  applyEntityStoreSearchCachePatch,
+  useEntityFromStore,
+  type EntityStoreRecord,
+} from '../shared/hooks/use_entity_from_store';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 import {
   mergeLegacyIdentityWhenStoreEntityMissing,
@@ -86,6 +91,7 @@ export const HostPanel = ({
   entityId,
 }: HostPanelProps) => {
   const { http, uiSettings } = useKibana().services;
+  const queryClient = useQueryClient();
   const euidApi = useEntityStoreEuidApi();
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
@@ -164,6 +170,7 @@ export const HostPanel = ({
   );
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields: documentEntityIdentifiers,
+    entityType: EntityType.host,
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}HOST_NAME_RIGHT`,
@@ -220,10 +227,10 @@ export const HostPanel = ({
         body: updatedRecord as Record<string, unknown>,
         force: true,
       });
-      observedHost.refetchEntityStore?.();
+      applyEntityStoreSearchCachePatch(queryClient, 'host', updatedRecord as EntityStoreRecord);
       calculateEntityRiskScore();
     },
-    [http, observedHost, calculateEntityRiskScore]
+    [http, queryClient, calculateEntityRiskScore]
   );
 
   const openDetailsPanel = useNavigateToHostDetails({
@@ -290,12 +297,12 @@ export const HostPanel = ({
         isPreviewMode={isPreviewMode}
         entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
         criticalityFromEntityStore={
-          entityStoreV2Enabled && observedHost.entityRecord?.asset?.criticality
-            ? observedHost.entityRecord.asset.criticality
+          entityStoreV2Enabled && observedHost.entityRecord
+            ? entityFromStoreResult.entityRecord?.asset?.criticality
             : undefined
         }
         onSaveAssetCriticalityViaEntityStore={
-          entityStoreV2Enabled && observedHost.entityRecord
+          entityStoreV2Enabled && entityFromStoreResult.entityRecord
             ? handleSaveAssetCriticalityViaEntityStore
             : undefined
         }

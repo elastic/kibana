@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { useQueryClient } from '@kbn/react-query';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { EuiCallOut } from '@elastic/eui';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
@@ -39,7 +40,11 @@ import { useNavigateToUserDetails } from './hooks/use_navigate_to_user_details';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { useObservedUser } from './hooks/use_observed_user';
 import type { Entity } from '../../../../common/api/entity_analytics';
-import { useEntityFromStore, type EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
+import {
+  applyEntityStoreSearchCachePatch,
+  useEntityFromStore,
+  type EntityStoreRecord,
+} from '../shared/hooks/use_entity_from_store';
 import {
   buildRiskScoreStateFromEntityRecord,
   getRiskFromEntityRecord,
@@ -85,6 +90,7 @@ export const UserPanel = ({
   entityId: entityIdProp,
 }: UserPanelProps) => {
   const { http, uiSettings } = useKibana().services;
+  const queryClient = useQueryClient();
   const euidApi = useEntityStoreEuidApi();
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
@@ -166,6 +172,7 @@ export const UserPanel = ({
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields: documentEntityIdentifiers,
+    entityType: EntityType.user,
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}USER_NAME_RIGHT`,
@@ -218,10 +225,10 @@ export const UserPanel = ({
         body: updatedRecord as Record<string, unknown>,
         force: true,
       });
-      observedUser.refetchEntityStore?.();
+      applyEntityStoreSearchCachePatch(queryClient, 'user', updatedRecord as EntityStoreRecord);
       calculateEntityRiskScore();
     },
-    [http, observedUser, calculateEntityRiskScore]
+    [http, queryClient, calculateEntityRiskScore]
   );
 
   const openDefaultPanel = useCallback(
@@ -288,17 +295,16 @@ export const UserPanel = ({
         identityFields={documentEntityIdentifiers}
         entityRecord={entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined}
         criticalityFromEntityStore={
-          entityStoreV2Enabled && observedUser.entityRecord?.asset?.criticality
-            ? observedUser.entityRecord.asset.criticality
+          entityStoreV2Enabled && entityFromStoreResult.entityRecord
+            ? entityFromStoreResult.entityRecord?.asset?.criticality
             : undefined
         }
         onSaveAssetCriticalityViaEntityStore={
-          entityStoreV2Enabled && observedUser.entityRecord
+          entityStoreV2Enabled && entityFromStoreResult.entityRecord
             ? handleSaveAssetCriticalityViaEntityStore
             : undefined
         }
-        skipRiskAndCriticality={entityStoreV2Enabled}
-        useEntityStoreV2={entityStoreV2Enabled && observedUser.entityRecord != null}
+        skipRiskAndCriticality={noEntityInStore}
       />
       {!isPreviewMode && assetInventoryEnabled && (
         <UserPanelFooter identityFields={documentEntityIdentifiers} entity={entityFromStore} />

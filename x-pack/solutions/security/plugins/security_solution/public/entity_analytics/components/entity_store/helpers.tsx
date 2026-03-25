@@ -95,6 +95,19 @@ function sanitizeUserForUpsert(user: Record<string, unknown>): NonNullable<UserE
 }
 
 /**
+ * Entity Store upsert schema allows only `event.ingested` (strict). Index/search hits include ECS
+ * fields such as `kind`, `module`, `category`, and `type`, which must be dropped.
+ */
+function sanitizeEventForUpsert(
+  event: Record<string, unknown>
+): NonNullable<UserEntity['event']> | undefined {
+  if (typeof event.ingested !== 'string') {
+    return undefined;
+  }
+  return { ingested: event.ingested };
+}
+
+/**
  * Returns a record that conforms to the Entity Store upsert API schema.
  * List/index documents can include extra fields (e.g. `agent`, `entity.EngineMetadata.UntypedId`).
  * The upsert API uses a strict schema and rejects unknown keys.
@@ -126,6 +139,11 @@ export function sanitizeEntityRecordForUpsert(record: Entity): Entity {
 }
 
 function buildHostEntityForUpsert(entity: EntityField, raw: Record<string, unknown>): HostEntity {
+  const event =
+    raw.event != null && typeof raw.event === 'object'
+      ? sanitizeEventForUpsert(raw.event as Record<string, unknown>)
+      : undefined;
+
   return {
     entity,
     ...(raw.host != null &&
@@ -136,14 +154,16 @@ function buildHostEntityForUpsert(entity: EntityField, raw: Record<string, unkno
       typeof raw.asset === 'object' && {
         asset: raw.asset as HostEntity['asset'],
       }),
-    ...(raw.event != null &&
-      typeof raw.event === 'object' && {
-        event: raw.event as HostEntity['event'],
-      }),
+    ...(event && { event }),
   };
 }
 
 function buildUserEntityForUpsert(entity: EntityField, raw: Record<string, unknown>): UserEntity {
+  const event =
+    raw.event != null && typeof raw.event === 'object'
+      ? sanitizeEventForUpsert(raw.event as Record<string, unknown>)
+      : undefined;
+
   return {
     entity,
     ...(raw.user != null &&
@@ -154,10 +174,7 @@ function buildUserEntityForUpsert(entity: EntityField, raw: Record<string, unkno
       typeof raw.asset === 'object' && {
         asset: raw.asset as UserEntity['asset'],
       }),
-    ...(raw.event != null &&
-      typeof raw.event === 'object' && {
-        event: raw.event as UserEntity['event'],
-      }),
+    ...(event && { event }),
   };
 }
 
@@ -165,6 +182,11 @@ function buildServiceEntityForUpsert(
   entity: EntityField,
   raw: Record<string, unknown>
 ): ServiceEntity {
+  const event =
+    raw.event != null && typeof raw.event === 'object'
+      ? sanitizeEventForUpsert(raw.event as Record<string, unknown>)
+      : undefined;
+
   return {
     entity,
     ...(raw.service != null &&
@@ -175,10 +197,7 @@ function buildServiceEntityForUpsert(
       typeof raw.asset === 'object' && {
         asset: raw.asset as ServiceEntity['asset'],
       }),
-    ...(raw.event != null &&
-      typeof raw.event === 'object' && {
-        event: raw.event as ServiceEntity['event'],
-      }),
+    ...(event && { event }),
   };
 }
 

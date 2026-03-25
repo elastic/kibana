@@ -221,6 +221,7 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
       dispatch(inputsActions.deleteOneQuery({ inputId: InputsModelId.global, id })),
     [dispatch]
   );
+
   const {
     data,
     loading: isLoading,

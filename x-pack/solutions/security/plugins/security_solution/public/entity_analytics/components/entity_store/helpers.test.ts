@@ -227,6 +227,48 @@ describe('helpers', () => {
 
       expect(out.entity.EngineMetadata).toBeUndefined();
     });
+
+    it('strips ECS event fields; keeps only event.ingested for user upsert', () => {
+      const record = {
+        entity: {
+          id: 'user:some-id',
+          name: 'alice',
+          EngineMetadata: { Type: 'Identity' },
+        },
+        user: { name: 'alice', id: ['id-1'] },
+        event: {
+          kind: 'signal',
+          module: 'endpoint',
+          category: ['process'],
+          type: ['info'],
+          ingested: '2026-01-01T12:00:00.000Z',
+        },
+        asset: { criticality: 'low_impact' },
+      } as unknown as Entity;
+
+      const out = sanitizeEntityRecordForUpsert(record);
+
+      expect((out as UserEntity).event).toEqual({ ingested: '2026-01-01T12:00:00.000Z' });
+    });
+
+    it('omits event when the document has only ECS event fields (no ingested)', () => {
+      const record = {
+        entity: {
+          id: 'user:some-id',
+          name: 'alice',
+          EngineMetadata: { Type: 'Identity' },
+        },
+        user: { name: 'alice' },
+        event: {
+          kind: 'signal',
+          module: 'endpoint',
+        },
+      } as unknown as Entity;
+
+      const out = sanitizeEntityRecordForUpsert(record);
+
+      expect(out).not.toHaveProperty('event');
+    });
   });
 
   describe('sourceFieldToText', () => {

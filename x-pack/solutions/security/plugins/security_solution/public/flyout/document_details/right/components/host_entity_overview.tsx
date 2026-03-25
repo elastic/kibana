@@ -75,6 +75,7 @@ import { MisconfigurationsInsight } from '../../shared/components/misconfigurati
 import { VulnerabilitiesInsight } from '../../shared/components/vulnerabilities_insight';
 import { AlertCountInsight } from '../../shared/components/alert_count_insight';
 import { useNavigateToHostDetails } from '../../../entity_details/host_right/hooks/use_navigate_to_host_details';
+import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 
@@ -300,6 +301,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields,
+    entityType: EntityType.host,
     to,
     from,
     queryId: HOST_ENTITY_OVERVIEW_ID,
@@ -397,6 +399,8 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
       )}
       <AlertCountInsight
         identityFields={identityFields}
+        entityType={EntityType.host}
+        queryId={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-${HOST_ENTITY_OVERVIEW_ID}`}
         openDetailsPanel={openDetailsPanel}
         data-test-subj={ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID}
       />

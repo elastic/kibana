@@ -157,7 +157,15 @@ export class CRUDClient {
   // (if an entity with the same EUID already exists) it directly in the LATEST
   // index. This is considered a single synchronous upsert.
   public async upsertEntity(entityType: EntityType, doc: Entity, force: boolean): Promise<void> {
-    const id = getEuidFromObject(entityType, doc);
+    const derivedId = getEuidFromObject(entityType, doc);
+    const fromStoredEntity =
+      doc.entity?.id != null && String(doc.entity.id).trim() !== ''
+        ? String(doc.entity.id)
+        : undefined;
+    // Prefer the canonical id already on the record. Callers (e.g. asset criticality upsert)
+    // often send a strict/sanitized body without event.module or entity.namespace; field
+    // evaluations would then derive a different EUID (e.g. ...@unknown) and create a duplicate.
+    const id = fromStoredEntity ?? derivedId;
     if (id === undefined) {
       throw new BadCRUDRequestError(`Could not derive entity EUID from document`);
     }

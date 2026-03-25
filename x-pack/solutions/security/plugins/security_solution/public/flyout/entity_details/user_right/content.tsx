@@ -46,8 +46,6 @@ interface UserPanelContentProps {
   onSaveAssetCriticalityViaEntityStore?: (updatedRecord: Entity) => Promise<void>;
   /** When true (e.g. entity store v2 enabled but no entity found), hide risk score and asset criticality. */
   skipRiskAndCriticality?: boolean;
-  /** When true, Risk Summary Visualization uses entity store v2 index instead of risk-score.risk-score-*. */
-  useEntityStoreV2?: boolean;
 }
 
 export const UserPanelContent = ({
@@ -64,7 +62,6 @@ export const UserPanelContent = ({
   criticalityFromEntityStore,
   onSaveAssetCriticalityViaEntityStore,
   skipRiskAndCriticality = false,
-  useEntityStoreV2 = false,
 }: UserPanelContentProps) => {
   const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
     'entityDetailsHighlightsEnabled'
@@ -109,6 +106,7 @@ export const UserPanelContent = ({
         identityFields={identityFields}
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
+        entityType={EntityType.user}
       />
       <ObservedDataSection
         identityFields={identityFields}

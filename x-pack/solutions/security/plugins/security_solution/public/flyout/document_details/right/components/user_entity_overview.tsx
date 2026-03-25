@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,7 +30,6 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { useDocumentDetailsContext } from '../../shared/context';
 import type { EntityStoreRecord } from '../../../entity_details/shared/hooks/use_entity_from_store';
-import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { getRiskFromEntityRecord } from '../../../entity_details/shared/entity_store_risk_utils';
 import { PreferenceFormattedDateFromPrimitive } from '../../../../common/components/formatted_date';
 import type { DescriptionList } from '../../../../../common/utility_types';
@@ -69,6 +68,7 @@ import { PreviewLink } from '../../../shared/components/preview_link';
 import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
 import { AlertCountInsight } from '../../shared/components/alert_count_insight';
 import { useNavigateToUserDetails } from '../../../entity_details/user_right/hooks/use_navigate_to_user_details';
+import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
 const USER_ICON = 'user';
@@ -114,7 +114,7 @@ export const USER_PREVIEW_BANNER = {
 export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   userName,
   identityFields,
-  entityRecord: entityRecordProp,
+  entityRecord,
 }) => {
   const { scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
@@ -137,47 +137,14 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
     [from, to]
   );
 
-  // Stabilize identityFields by content so hooks (useRiskScore, useObservedUserDetails, etc.)
-  // don't receive a new reference every render and trigger effect loops (max update depth).
-  const entityIdentifiersStableKey = useMemo(
-    () =>
-      identityFields != null && Object.keys(identityFields).length > 0
-        ? JSON.stringify(
-            Object.fromEntries(
-              Object.entries(identityFields).sort(([a], [b]) => a.localeCompare(b))
-            )
-          )
-        : '',
-    [identityFields]
-  );
-  const entityIdentifiersRef = useRef<{ key: string; value: Record<string, string> }>({
-    key: '',
-    value: {},
-  });
   const stableEntityIdentifiers = useMemo((): Record<string, string> => {
-    if (entityIdentifiersRef.current.key !== entityIdentifiersStableKey) {
-      entityIdentifiersRef.current = {
-        key: entityIdentifiersStableKey,
-        value: identityFields ?? {},
-      };
-    }
-    return entityIdentifiersRef.current.value;
-  }, [entityIdentifiersStableKey, identityFields]);
+    return identityFields ?? {};
+  }, [identityFields]);
 
   const riskScoreFilterQuery = useMemo(
     () => (userName ? (buildUserNamesFilter([userName]) as ESQuery) : undefined),
     [userName]
   );
-
-  const storeUserEntityId = stableEntityIdentifiers['entity.id'];
-
-  const entityFromStore = useEntityFromStore({
-    entityId: storeUserEntityId,
-    identityFields: stableEntityIdentifiers,
-    entityType: 'user',
-    skip: !entityStoreV2Enabled,
-  });
-  const entityRecord = entityRecordProp ?? entityFromStore.entityRecord;
 
   const riskFromEntityRecord = useMemo(
     () => (entityRecord != null ? getRiskFromEntityRecord(entityRecord) : null),
@@ -235,6 +202,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   );
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields: stableEntityIdentifiers,
+    entityType: EntityType.user,
     to,
     from,
     queryId: USER_ENTITY_OVERVIEW_ID,
@@ -252,7 +220,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
     contextID: 'UserEntityOverview',
   });
 
-  const userDetailsForDomain = entityStoreV2Enabled ? entityFromStore.entity : userDetails;
+  const userDetailsForDomain = entityStoreV2Enabled ? entityRecord : userDetails;
   const userDomainValue = useMemo(
     () => getField(getOr([], 'user.domain', userDetailsForDomain)),
     [userDetailsForDomain]
@@ -279,8 +247,10 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
         title: LAST_SEEN,
         description:
           userName != null && userName !== '' ? (
-            entityStoreV2Enabled && entityFromStore.lastSeen ? (
-              <PreferenceFormattedDateFromPrimitive value={entityFromStore.lastSeen} />
+            entityStoreV2Enabled && entityRecord?.entity?.lifecycle?.last_activity ? (
+              <PreferenceFormattedDateFromPrimitive
+                value={entityRecord.entity.lifecycle.last_activity}
+              />
             ) : !entityStoreV2Enabled ? (
               <FirstLastSeen
                 indexPatterns={selectedPatterns}
@@ -296,14 +266,19 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
           ),
       },
     ],
-    [userName, selectedPatterns, entityStoreV2Enabled, entityFromStore.lastSeen]
+    [
+      userName,
+      selectedPatterns,
+      entityStoreV2Enabled,
+      entityRecord?.entity?.lifecycle?.last_activity,
+    ]
   );
 
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
   const isLoading = entityStoreV2Enabled
-    ? entityFromStore.isLoading || (riskFromEntityRecord == null && isRiskScoreLoading)
+    ? riskFromEntityRecord == null && isRiskScoreLoading
     : isUserDetailsLoading || isRiskScoreLoading;
 
   const [userRiskLevel] = useMemo(() => {
@@ -401,6 +376,8 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
       </EuiFlexItem>
       <AlertCountInsight
         identityFields={stableEntityIdentifiers}
+        entityType={EntityType.user}
+        queryId={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-${USER_ENTITY_OVERVIEW_ID}`}
         openDetailsPanel={openDetailsPanel}
         data-test-subj={ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID}
       />

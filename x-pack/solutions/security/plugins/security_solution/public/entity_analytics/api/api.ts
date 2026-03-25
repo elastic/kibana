@@ -7,6 +7,8 @@
 
 import { useMemo } from 'react';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
+import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/common';
+import { ENTITY_STORE_INTERNAL_HTTP_API_VERSION } from '@kbn/entity-store/public';
 import type { EntityDetailsHighlightsResponse } from '../../../common/api/entity_analytics/entity_details/highlights.gen';
 import { ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
 import type {
@@ -120,6 +122,30 @@ export const useEntityAnalyticsRoutes = () => {
     }) =>
       http.fetch<ListEntitiesResponse>(LIST_ENTITIES_URL, {
         version: API_VERSIONS.public.v1,
+        method: 'GET',
+        query: {
+          entity_types: params.entityTypes,
+          sort_field: params.sortField,
+          sort_order: params.sortOrder,
+          page: params.page,
+          per_page: params.perPage,
+          filterQuery: params.filterQuery,
+        },
+        signal,
+      });
+
+    /**
+     * Fetches entities from the Entity Store v2 unified latest index (internal entity_store plugin route).
+     */
+    const fetchEntitiesListV2 = ({
+      signal,
+      params,
+    }: {
+      signal?: AbortSignal;
+      params: FetchEntitiesListParams;
+    }) =>
+      http.fetch<ListEntitiesResponse>(ENTITY_STORE_ROUTES.SEARCH_ENTITIES, {
+        version: ENTITY_STORE_INTERNAL_HTTP_API_VERSION,
         method: 'GET',
         query: {
           entity_types: params.entityTypes,
@@ -552,6 +578,7 @@ export const useEntityAnalyticsRoutes = () => {
       calculateEntityRiskScore,
       cleanUpRiskEngine,
       fetchEntitiesList,
+      fetchEntitiesListV2,
       updateSavedObjectConfiguration,
       listPrivMonMonitoredIndices,
       fetchEntityDetailsHighlights,

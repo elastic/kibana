@@ -18,6 +18,7 @@ export const useNonClosedAlerts = ({
   queryId,
   additionalFilters,
   skip = false,
+  entityType,
 }: {
   identityFields: Record<string, string>;
   to: string;
@@ -25,11 +26,17 @@ export const useNonClosedAlerts = ({
   queryId: string;
   additionalFilters?: ESBoolQuery[];
   skip?: boolean;
+  /**
+   * When Entity Store v2 is on and `identityFields` includes `entity.id`, required so alerts are
+   * filtered using ECS terms resolved from the store (e.g. `user.name`), not a raw `entity.id` term.
+   */
+  entityType?: string;
 }) => {
   const { signalIndexName } = useSignalIndex();
 
   const { items: alertsData } = useAlertsByStatus({
     identityFields,
+    entityType,
     signalIndexName,
     queryId,
     to,

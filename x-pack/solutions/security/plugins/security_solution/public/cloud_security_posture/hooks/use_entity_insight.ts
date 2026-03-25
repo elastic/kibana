@@ -39,6 +39,7 @@ export const useNavigateEntityInsight = ({
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields,
+    entityType: isHostNameField ? 'host' : 'user',
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}${queryIdExtension}`,

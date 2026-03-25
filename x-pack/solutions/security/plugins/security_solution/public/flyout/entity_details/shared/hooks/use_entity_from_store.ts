@@ -6,14 +6,10 @@
  */
 
 import { useMemo } from 'react';
-import { useQuery } from '@kbn/react-query';
+import { useQuery, type QueryClient } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
-import type { EntityType } from '@kbn/entity-store/public';
-import {
-  FF_ENABLE_ENTITY_STORE_V2,
-  searchEntitiesFromEntityStore,
-  useEntityStoreEuidApi,
-} from '@kbn/entity-store/public';
+import type { EntityType, SearchEntitiesFromEntityStoreResponse } from '@kbn/entity-store/public';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type {
   HostEntity,
   UserEntity,
@@ -21,16 +17,54 @@ import type {
 } from '../../../../../common/api/entity_analytics';
 import type { HostItem, UserItem } from '../../../../../common/search_strategy';
 import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
-import { useKibana, useUiSetting } from '../../../../common/lib/kibana';
+import { useUiSetting } from '../../../../common/lib/kibana';
 
-const ENTITY_FROM_STORE_QUERY_KEY = 'ENTITY_FROM_STORE';
+export const ENTITY_FROM_STORE_QUERY_KEY = 'ENTITY_FROM_STORE';
+
+/**
+ * After a successful entity-store upsert, search can still return the previous document briefly
+ * (Elasticsearch NRT / transform timing). Merge the saved record into the cache so the UI updates
+ * immediately instead of refetch overwriting with stale data.
+ */
+export function applyEntityStoreSearchCachePatch(
+  queryClient: QueryClient,
+  entityType: 'user' | 'host' | 'service',
+  updatedRecord: EntityStoreRecord
+): void {
+  const canonicalId = updatedRecord.entity?.id;
+  if (!canonicalId) {
+    return;
+  }
+
+  queryClient.setQueriesData(
+    {
+      predicate: (query) =>
+        Array.isArray(query.queryKey) &&
+        query.queryKey[0] === ENTITY_FROM_STORE_QUERY_KEY &&
+        query.queryKey[1] === entityType,
+    },
+    (previous: SearchEntitiesFromEntityStoreResponse | undefined) => {
+      if (previous?.records?.[0]?.entity?.id !== canonicalId) {
+        return previous;
+      }
+      const [, ...rest] = previous.records;
+      return {
+        ...previous,
+        records: [
+          updatedRecord as SearchEntitiesFromEntityStoreResponse['records'][number],
+          ...rest,
+        ],
+      };
+    }
+  );
+}
 
 const entityIdFilter = (id: string) =>
   JSON.stringify({
     bool: { filter: [{ term: { 'entity.id': id } }] },
   });
 
-function serializeIdentityFieldsForQueryKey(
+export function serializeIdentityFieldsForQueryKey(
   fields: Record<string, string> | null | undefined
 ): string {
   if (fields == null || Object.keys(fields).length === 0) {
@@ -111,11 +145,8 @@ export function useEntityFromStore(
 ): EntityFromStoreResult<HostItem | UserItem> {
   const { entityId, identityFields, entityType, skip } = params;
   const euidApi = useEntityStoreEuidApi();
-  const { fetchEntitiesList } = useEntityAnalyticsRoutes();
+  const { fetchEntitiesList, fetchEntitiesListV2 } = useEntityAnalyticsRoutes();
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
-  const {
-    services: { http },
-  } = useKibana();
 
   const identityDocument = useMemo(() => {
     if (identityFields == null || Object.keys(identityFields).length === 0) {
@@ -132,6 +163,41 @@ export function useEntityFromStore(
     [euidApi?.euid, entityType, identityDocument]
   );
 
+  /**
+   * When EUID cannot build a DSL document from minimal identity (e.g. only `user.name` from the alerts
+   * table), we still need a store query so the request completes and the UI can show "no entity" state.
+   * Otherwise React Query stays in `status: 'loading'` while the query never runs (`enabled` false),
+   * so `isLoading` never clears and flyouts skip the "no corresponding entity" callout.
+   */
+  const identityTermsFilter = useMemo(() => {
+    const entries = Object.entries(identityDocument).filter(
+      ([, value]) => value != null && String(value) !== ''
+    );
+    if (entries.length === 0) {
+      return undefined;
+    }
+    return {
+      bool: {
+        filter: entries.map(([field, value]) => ({ term: { [field]: value } })),
+      },
+    };
+  }, [identityDocument]);
+
+  const storeFilter = documentFilter ?? identityTermsFilter;
+
+  const entityStoreFilterKey = useMemo(() => {
+    if (entityId) {
+      return `id:${entityId}`;
+    }
+    if (documentFilter) {
+      return `euid:${JSON.stringify(documentFilter)}`;
+    }
+    if (identityTermsFilter) {
+      return `terms:${JSON.stringify(identityTermsFilter)}`;
+    }
+    return '';
+  }, [entityId, documentFilter, identityTermsFilter]);
+
   const stableQueryKey = useMemo(
     () => entityId ?? serializeIdentityFieldsForQueryKey(identityFields),
     [entityId, identityFields]
@@ -142,6 +208,7 @@ export function useEntityFromStore(
       ENTITY_FROM_STORE_QUERY_KEY,
       entityType,
       stableQueryKey,
+      entityStoreFilterKey,
       skip,
       entityStoreV2Enabled,
       entityId ?? '',
@@ -151,12 +218,12 @@ export function useEntityFromStore(
         let filterQuery: string | undefined;
         if (entityId) {
           filterQuery = entityIdFilter(entityId);
-        } else if (documentFilter) {
-          filterQuery = JSON.stringify(documentFilter);
+        } else if (storeFilter) {
+          filterQuery = JSON.stringify(storeFilter);
         }
-        return searchEntitiesFromEntityStore(
-          http,
-          {
+        return fetchEntitiesListV2({
+          signal,
+          params: {
             entityTypes: [entityType as EntityType],
             filterQuery,
             page: 1,
@@ -164,20 +231,19 @@ export function useEntityFromStore(
             sortField: '@timestamp',
             sortOrder: 'desc',
           },
-          { signal }
-        );
+        });
       }
       return fetchEntitiesList({
         signal,
         params: {
           entityTypes: [entityType as EntityType],
-          filterQuery: documentFilter ? JSON.stringify(documentFilter) : undefined,
+          filterQuery: storeFilter ? JSON.stringify(storeFilter) : undefined,
           page: 1,
           perPage: 1,
         },
       });
     },
-    enabled: !skip && (Boolean(entityId) || Boolean(documentFilter)),
+    enabled: !skip && (Boolean(entityId) || Boolean(storeFilter)),
   });
 
   const { data, isLoading, error, refetch } = queryResult;
@@ -187,23 +253,30 @@ export function useEntityFromStore(
   const firstSeen = entityField?.lifecycle?.first_seen ?? null;
   const lastSeen = entityField?.lifecycle?.last_activity ?? null;
 
-  let mappedDetails: HostItem | UserItem | null = null;
-  if (record) {
-    if (entityType === 'host' && 'host' in record) {
-      mappedDetails = mapHostEntityToHostItem(record);
-    } else if (entityType === 'user' && 'user' in record) {
-      mappedDetails = mapUserEntityToUserItem(record);
+  const mappedDetails = useMemo((): HostItem | UserItem | null => {
+    if (!record) {
+      return null;
     }
-  }
+    if (entityType === 'host' && 'host' in record) {
+      return mapHostEntityToHostItem(record);
+    }
+    if (entityType === 'user' && 'user' in record) {
+      return mapUserEntityToUserItem(record);
+    }
+    return null;
+  }, [record, entityType]);
 
-  return {
-    entity: mappedDetails,
-    entityRecord: record ?? null,
-    firstSeen,
-    lastSeen,
-    isLoading,
-    error: error as IHttpFetchError | null,
-    inspect: data?.inspect,
-    refetch,
-  };
+  return useMemo(
+    () => ({
+      entity: mappedDetails,
+      entityRecord: record ?? null,
+      firstSeen,
+      lastSeen,
+      isLoading,
+      error: error as IHttpFetchError | null,
+      inspect: data?.inspect,
+      refetch,
+    }),
+    [mappedDetails, record, firstSeen, lastSeen, isLoading, error, data?.inspect, refetch]
+  );
 }

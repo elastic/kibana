@@ -44,6 +44,15 @@ interface AlertCountInsightProps {
    */
   identityFields: Record<string, string>;
   /**
+   * When Entity Store v2 is on and `identityFields` includes `entity.id`, resolves ECS terms
+   * from the store for the alerts query (same as `useAlertsByStatus` / `useNonClosedAlerts`).
+   */
+  entityType?: string;
+  /**
+   * Global query inspector id; use a unique suffix when multiple instances mount (e.g. left + right flyout).
+   */
+  queryId?: string;
+  /**
    * The direction of the flex group.
    */
   direction?: EuiFlexGroupProps['direction'];
@@ -97,6 +106,8 @@ export const getFormattedAlertStats = (
  */
 export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
   identityFields,
+  entityType,
+  queryId = DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
   direction,
   openDetailsPanel,
   'data-test-subj': dataTestSubj,
@@ -107,8 +118,9 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
 
   const { items, isLoading } = useAlertsByStatus({
     identityFields,
+    entityType,
     signalIndexName,
-    queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
+    queryId,
     to,
     from,
   });

@@ -104,6 +104,7 @@ export const HostPanelContent = ({
         identityFields={identityFields}
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
+        entityType={EntityType.host}
       />
       <ObservedDataSection
         observedHost={observedHost}

@@ -7,7 +7,6 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { searchEntitiesFromEntityStore } from '@kbn/entity-store/public';
 import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
 import { useEntitiesListQuery } from './use_entities_list_query';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
@@ -21,11 +20,11 @@ jest.mock('../../../../common/lib/kibana', () => ({
 }));
 jest.mock('@kbn/entity-store/public', () => ({
   FF_ENABLE_ENTITY_STORE_V2: 'securitySolution:entityStoreEnableV2',
-  searchEntitiesFromEntityStore: jest.fn(),
 }));
 
 describe('useEntitiesListQuery', () => {
   const fetchEntitiesListMock = jest.fn();
+  const fetchEntitiesListV2Mock = jest.fn();
   const TestWrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={new QueryClient()}>{children}</QueryClientProvider>
   );
@@ -35,6 +34,7 @@ describe('useEntitiesListQuery', () => {
     (useUiSetting as jest.Mock).mockReturnValue(false);
     (useEntityAnalyticsRoutes as jest.Mock).mockReturnValue({
       fetchEntitiesList: fetchEntitiesListMock,
+      fetchEntitiesListV2: fetchEntitiesListV2Mock,
     });
   });
 
@@ -56,7 +56,7 @@ describe('useEntitiesListQuery', () => {
     });
   });
 
-  it('should call searchEntitiesFromEntityStore when Entity Store v2 is enabled', async () => {
+  it('should call fetchEntitiesListV2 when Entity Store v2 is enabled', async () => {
     (useUiSetting as jest.Mock).mockReturnValue(true);
     const searchParams = {
       entityTypes: ['host'] as EntityType[],
@@ -67,16 +67,15 @@ describe('useEntitiesListQuery', () => {
       filterQuery: '{"match_all":{}}',
     };
     const v2Response = { records: [], total: 0, page: 2, per_page: 20 };
-    (searchEntitiesFromEntityStore as jest.Mock).mockResolvedValueOnce(v2Response);
+    fetchEntitiesListV2Mock.mockResolvedValueOnce(v2Response);
 
     const { result } = renderHook(() => useEntitiesListQuery({ ...searchParams, skip: false }), {
       wrapper: TestWrapper,
     });
 
     await waitFor(() => {
-      expect(searchEntitiesFromEntityStore).toHaveBeenCalledWith(
-        {},
-        {
+      expect(fetchEntitiesListV2Mock).toHaveBeenCalledWith({
+        params: {
           entityTypes: ['host'],
           filterQuery: '{"match_all":{}}',
           page: 2,
@@ -84,8 +83,8 @@ describe('useEntitiesListQuery', () => {
           sortField: '@timestamp',
           sortOrder: 'desc',
         },
-        expect.objectContaining({ signal: expect.any(AbortSignal) })
-      );
+        signal: expect.any(AbortSignal),
+      });
       expect(fetchEntitiesListMock).not.toHaveBeenCalled();
       expect(result.current.data).toEqual(v2Response);
     });
@@ -99,7 +98,7 @@ describe('useEntitiesListQuery', () => {
     });
 
     expect(fetchEntitiesListMock).not.toHaveBeenCalled();
-    expect(searchEntitiesFromEntityStore as jest.Mock).not.toHaveBeenCalled();
+    expect(fetchEntitiesListV2Mock).not.toHaveBeenCalled();
     expect(result.current.data).toBeUndefined();
   });
 });

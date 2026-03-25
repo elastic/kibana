@@ -109,6 +109,7 @@ export const GenericEntityFlyoutContent = ({
         identityFields={identityFields}
         isPreviewMode={false}
         openDetailsPanel={openGenericEntityDetailsPanelByPath}
+        entityType={EntityType.generic}
       />
       <ExpandableSection
         title={

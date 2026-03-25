@@ -244,9 +244,13 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
       ? !!getRiskFromEntityRecord(observedUser.entityRecord)?.calculated_level
       : !!userRiskData?.user?.risk;
 
-  const identityFields = euidApi?.euid.getEntityIdentifiersFromDocument(
-    'user',
-    entityFromStoreResult
+  const identityFields = useMemo(
+    () =>
+      euidApi?.euid.getEntityIdentifiersFromDocument(
+        'user',
+        entityFromStoreResult.entityRecord ?? entityFromStoreResult.entity ?? {}
+      ),
+    [euidApi?.euid, entityFromStoreResult.entityRecord, entityFromStoreResult.entity]
   );
 
   const userIdentityFields = useMemo(() => {
@@ -268,6 +272,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields: userIdentityFields ?? null,
+    entityType: EntityType.user,
     to,
     from,
     queryId: USER_DETAILS_INSIGHTS_ID,
@@ -482,6 +487,8 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
       <EuiFlexGrid responsive={false} columns={3} gutterSize="xl">
         <AlertCountInsight
           identityFields={userIdentityFields ?? {}}
+          entityType={EntityType.user}
+          queryId={`${USER_DETAILS_INSIGHTS_ID}-alerts-by-status`}
           direction="column"
           openDetailsPanel={openDetailsPanel}
           data-test-subj={USER_DETAILS_ALERT_COUNT_TEST_ID}

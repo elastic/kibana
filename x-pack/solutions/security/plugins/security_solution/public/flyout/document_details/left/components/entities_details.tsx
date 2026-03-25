@@ -59,14 +59,31 @@ export const EntitiesDetails: React.FC = () => {
   ) as IdentityFields;
 
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+
+  /**
+   * User EUID extraction applies postAggFilter (e.g. non-IDP path needs host.id), so many ECS docs
+   * with user.name + host.name still get no identifiers while host extraction succeeds. Resolve the
+   * display name from the document and use it for store lookup when EUID returns nothing.
+   */
+  const resolvedUserName = resolveUserDisplayForEntities(userEntityIdentifiers, getFieldsData);
+  const legacyUserIdentityForStore =
+    resolvedUserName != null && resolvedUserName !== ''
+      ? ({ 'user.name': resolvedUserName } as IdentityFields)
+      : undefined;
+
+  const userEntityId = euidApi?.euid.getEuidFromObject('user', dataAsNestedObject);
   const userEntityFromStore = useEntityFromStore({
-    entityId: userEntityIdentifiers?.['entity.id'],
-    identityFields: userEntityIdentifiers ?? undefined,
+    entityId: userEntityId,
+    identityFields: userEntityIdentifiers ?? legacyUserIdentityForStore,
     entityType: 'user',
-    skip: !userEntityIdentifiers || !entityStoreV2Enabled,
+    skip:
+      !entityStoreV2Enabled ||
+      (userEntityIdentifiers == null && legacyUserIdentityForStore == null),
   });
+
+  const hostEntityId = euidApi?.euid.getEuidFromObject('host', dataAsNestedObject);
   const hostEntityFromStore = useEntityFromStore({
-    entityId: hostEntityIdentifiers?.['entity.id'],
+    entityId: hostEntityId,
     identityFields: hostEntityIdentifiers ?? undefined,
     entityType: 'host',
     skip: !hostEntityIdentifiers || !entityStoreV2Enabled,
@@ -76,7 +93,6 @@ export const EntitiesDetails: React.FC = () => {
   const hostNameFromStore =
     hostRecord != null && 'host' in hostRecord ? hostRecord.host?.name : undefined;
 
-  const resolvedUserName = resolveUserDisplayForEntities(userEntityIdentifiers, getFieldsData);
   const resolvedHostName = resolveHostDisplayForEntities(
     hostEntityIdentifiers,
     getFieldsData,
@@ -85,8 +101,8 @@ export const EntitiesDetails: React.FC = () => {
   );
 
   const showUserDetails =
-    userEntityIdentifiers &&
     timestamp &&
+    resolvedUserName != null &&
     (!entityStoreV2Enabled || userEntityFromStore.entityRecord != null);
   const showHostDetails =
     hostEntityIdentifiers &&
@@ -111,8 +127,8 @@ export const EntitiesDetails: React.FC = () => {
               </EuiTitle>
               <EuiSpacer size="s" />
               <UserDetails
-                userName={resolvedUserName as string}
-                entityId={userEntityIdentifiers?.['entity.id']}
+                userName={resolvedUserName}
+                entityId={userEntityFromStore?.entityRecord?.entity?.id}
                 timestamp={timestamp}
                 scopeId={scopeId}
               />
@@ -132,7 +148,7 @@ export const EntitiesDetails: React.FC = () => {
 
               <HostDetails
                 hostName={resolvedHostName}
-                entityId={hostEntityFromStore.entityRecord?.entity?.id}
+                entityId={hostEntityFromStore?.entityRecord?.entity?.id}
                 timestamp={timestamp}
                 scopeId={scopeId}
                 hostEntityFromStoreResult={entityStoreV2Enabled ? hostEntityFromStore : undefined}

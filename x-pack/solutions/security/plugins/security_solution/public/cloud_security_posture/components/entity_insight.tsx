@@ -40,10 +40,13 @@ export const EntityInsight = <T,>({
   identityFields,
   isPreviewMode,
   openDetailsPanel,
+  entityType,
 }: {
   identityFields: IdentityFields;
   isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
+  /** Host or user when the flyout represents that entity; enables v2 alerts resolution by `entity.id`. */
+  entityType?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
   const euidApi = useEntityStoreEuidApi();
@@ -70,6 +73,7 @@ export const EntityInsight = <T,>({
 
   const { hasNonClosedAlerts: showAlertsPreview, filteredAlertsData } = useNonClosedAlerts({
     identityFields,
+    entityType,
     to,
     from,
     queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,

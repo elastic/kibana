@@ -83,6 +83,7 @@ import { MisconfigurationsInsight } from '../../shared/components/misconfigurati
 import { VulnerabilitiesInsight } from '../../shared/components/vulnerabilities_insight';
 import { AlertCountInsight } from '../../shared/components/alert_count_insight';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
+import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import { useNavigateToHostDetails } from '../../../entity_details/host_right/hooks/use_navigate_to_host_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
@@ -212,9 +213,13 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const euidApi = useEntityStoreEuidApi();
 
-  const hostIdentityFieldsForStore = euidApi?.euid.getEntityIdentifiersFromDocument(
-    'host',
-    hostEntityFromStoreResult?.entity
+  const hostIdentityFieldsForStore = useMemo(
+    () =>
+      euidApi?.euid.getEntityIdentifiersFromDocument(
+        'host',
+        hostEntityFromStoreResult?.entityRecord ?? hostEntityFromStoreResult?.entity
+      ),
+    [euidApi?.euid, hostEntityFromStoreResult?.entityRecord, hostEntityFromStoreResult?.entity]
   );
   const observedHost = useObservedHost(
     hostName,
@@ -293,10 +298,12 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields: hostInsightsIdentityFields,
+    entityType: EntityType.host,
     to,
     from,
     queryId: 'HostEntityOverview',
   });
+
   const hostEuidIdentityDoc = observedHost.entityRecord ?? hostInsightsIdentityFields;
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
     buildEuidCspPreviewOptions('host', hostEuidIdentityDoc, euidApi, {
@@ -523,20 +530,22 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
       <EuiHorizontalRule margin="s" />
       <EuiFlexGrid responsive={false} columns={3} gutterSize="xl">
         <AlertCountInsight
-          identityFields={{ 'host.name': hostName }}
+          identityFields={hostInsightsIdentityFields}
+          entityType={EntityType.host}
+          queryId={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-document-details-host-entities`}
           direction="column"
           openDetailsPanel={openDetailsPanel}
           data-test-subj={HOST_DETAILS_ALERT_COUNT_TEST_ID}
         />
         <MisconfigurationsInsight
-          identityFields={{ 'host.name': hostName }}
+          identityFields={hostInsightsIdentityFields}
           direction="column"
           openDetailsPanel={openDetailsPanel}
           data-test-subj={HOST_DETAILS_MISCONFIGURATIONS_TEST_ID}
           telemetryKey={MISCONFIGURATION_INSIGHT_HOST_DETAILS}
         />
         <VulnerabilitiesInsight
-          identityFields={{ 'host.name': hostName }}
+          identityFields={hostInsightsIdentityFields}
           direction="column"
           openDetailsPanel={openDetailsPanel}
           data-test-subj={HOST_DETAILS_VULNERABILITIES_TEST_ID}

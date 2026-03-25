@@ -206,7 +206,7 @@ describe('<EntitiesDetails />', () => {
     expect(queryByTestId(HOST_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('does not render user or host section when entity store v2 is enabled and no entity record exists', () => {
+  it('when fields API omits user.* but ECS slice has user.name, still renders user under entity store v2', () => {
     mockUseUiSetting.mockReturnValue(true);
     mockUseEntityFromStore.mockReturnValue({
       entityRecord: null,
@@ -217,9 +217,44 @@ describe('<EntitiesDetails />', () => {
       error: null,
       refetch: jest.fn(),
     });
-    const { getByText, queryByTestId } = renderEntitiesDetails(mockContextValue);
-    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
-    expect(queryByTestId(USER_TEST_ID)).not.toBeInTheDocument();
+    const contextValue = {
+      ...mockContextValue,
+      getFieldsData: (fieldName: string) => {
+        if (fieldName === '@timestamp') {
+          return ['2022-07-25T08:20:18.966Z'];
+        }
+        if (fieldName === 'host.name') {
+          return ['host1'];
+        }
+        if (fieldName.startsWith('user.')) {
+          return [];
+        }
+        return mockContextValue.getFieldsData(fieldName);
+      },
+      dataAsNestedObject: {
+        ...mockContextValue.dataAsNestedObject,
+        host: { name: ['host1'] },
+        user: { name: ['fields-api-missing-but-ecs-has-user'] },
+      },
+    } as DocumentDetailsContext;
+    const { queryByTestId } = renderEntitiesDetails(contextValue);
+    expect(queryByTestId(USER_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('when entity store v2 is enabled and no entity record exists, still renders user from document when EUID cannot derive user identity', () => {
+    mockUseUiSetting.mockReturnValue(true);
+    mockUseEntityFromStore.mockReturnValue({
+      entityRecord: null,
+      entity: null,
+      firstSeen: null,
+      lastSeen: null,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
+    const { queryByText, queryByTestId } = renderEntitiesDetails(mockContextValue);
+    expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
+    expect(queryByTestId(USER_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(HOST_TEST_ID)).not.toBeInTheDocument();
   });
 });
