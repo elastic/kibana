@@ -192,6 +192,9 @@ export type WaitStep = z.infer<typeof WaitStepSchema>;
 export const WaitForInputStepInputSchema = z
   .object({
     message: z.string().optional().describe('Message displayed to the user when waiting for input'),
+    schema: JsonModelSchema.optional().describe(
+      'JSON Schema describing the expected input payload. Used for validation, autocomplete, and default values in the resume UI'
+    ),
   })
   .optional();
 export const WaitForInputStepSchema = BaseStepSchema.extend({

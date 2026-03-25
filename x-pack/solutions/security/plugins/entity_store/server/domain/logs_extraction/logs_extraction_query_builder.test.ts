@@ -59,6 +59,34 @@ describe('buildLogsExtractionEsqlQuery', () => {
     });
     expect(query).toMatchSnapshot();
   });
+
+  it('inserts whenConditionTrueSetFieldsAfterStats EVAL after LOOKUP and before merge EVAL', () => {
+    const base = getEntityDefinition('host', 'default');
+    const query = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['test-index-*'],
+      latestIndex: 'latest-index',
+      entityDefinition: {
+        ...base,
+        whenConditionTrueSetFieldsAfterStats: [
+          {
+            condition: { field: 'host.name', eq: 'server1' },
+            fields: { 'host.name': { source: 'host.id' } },
+          },
+        ],
+      },
+      docsLimit: 100,
+      fromDateISO: '2022-01-01T00:00:00.000Z',
+      toDateISO: '2022-01-01T23:59:59.999Z',
+    });
+    const statsIdx = query.indexOf('| STATS');
+    const lookupIdx = query.indexOf('LOOKUP JOIN');
+    const afterStatsEvalIdx = query.indexOf('recent.host.name = CASE(');
+    const mergeCoalesceIdx = query.indexOf('entity.name = COALESCE(');
+    expect(statsIdx).toBeGreaterThan(-1);
+    expect(lookupIdx).toBeGreaterThan(statsIdx);
+    expect(afterStatsEvalIdx).toBeGreaterThan(lookupIdx);
+    expect(mergeCoalesceIdx).toBeGreaterThan(afterStatsEvalIdx);
+  });
 });
 
 describe('buildRemainingLogsCountQuery', () => {
