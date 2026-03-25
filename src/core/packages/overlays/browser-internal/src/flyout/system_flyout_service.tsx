@@ -143,13 +143,13 @@ export class SystemFlyoutService {
   /**
    * Cleanup method for when the service is stopped
    */
-  public stop(): void {
-    this.closeAllSystemFlyouts();
-    this.targetDomElement = null;
-  }
-
-  private closeAllSystemFlyouts(): void {
+  public closeAllFlyouts(): void {
     this.activeFlyouts.forEach((flyout) => flyout.close());
     this.activeFlyouts.clear();
+  }
+
+  public stop(): void {
+    this.closeAllFlyouts();
+    this.targetDomElement = null;
   }
 }
