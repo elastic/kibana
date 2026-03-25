@@ -17,7 +17,8 @@ import {
   EXTENDED_TIMEOUT,
 } from '../../fixtures/constants';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/258790
+test.describe.skip(
   'Hosts Page - Search',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {

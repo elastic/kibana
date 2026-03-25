@@ -404,7 +404,7 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
               <EuiButtonEmpty
                 iconSide="right"
                 size="s"
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 onClick={handleCreateCase}
                 data-test-subj="createNewCaseButton"
               >

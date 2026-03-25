@@ -2278,6 +2278,7 @@
       "matchDepNames": [
         "langchain",
         "@langchain/aws",
+        "@langchain/classic",
         "@langchain/core",
         "@langchain/google-common",
         "@langchain/google-genai",
@@ -2455,7 +2456,6 @@
         "@opentelemetry/exporter-trace-otlp-http",
         "@opentelemetry/exporter-trace-otlp-proto",
         "@opentelemetry/instrumentation",
-        "@opentelemetry/instrumentation-hapi",
         "@opentelemetry/instrumentation-http",
         "@opentelemetry/instrumentation-undici",
         "@opentelemetry/otlp-exporter-base",
