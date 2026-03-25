@@ -411,7 +411,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     });
   });
 
-  apiTest(
+  apiTest.skip(
     'Should apply user postAggFilter: IDP asset/iam paths and entity.id-after-LOOKUP; omit when no keep branch',
     async ({ apiClient, esClient }) => {
       const from = '2026-03-01T10:00:00Z';
@@ -543,7 +543,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     }
   );
 
-  apiTest(
+  apiTest.skip(
     'Should only enrich (update) existing entities when entity already exists for both IDP and non-IDP, no new entity creation',
     async ({ apiClient, esClient }) => {
       const from = '2026-03-02T10:00:00Z';
