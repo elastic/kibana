@@ -22,6 +22,7 @@ import { registerUpdateSkillRoute } from './update_skill';
 import { registerImproveSkillRoute } from './improve_skill';
 import { registerUnrejectSkillRoute } from './unreject_skill';
 import { registerRedeploySkillRoute } from './redeploy_skill';
+import { registerGetSkillDetailRoute } from './get_skill_detail';
 
 export interface AESOPRouteDependencies {
   router: IRouter<EvalsRequestHandlerContext>;
@@ -62,6 +63,7 @@ export function registerAESOPRoutes({ router, logger }: AESOPRouteDependencies) 
   registerRejectSkillRoute({ router, logger });
   registerUnrejectSkillRoute({ router, logger });
   registerRedeploySkillRoute({ router, logger });
+  registerGetSkillDetailRoute({ router, logger });
   registerDeployMonitoringDashboardRoute({ router, logger });
   registerDeployAlertingRulesRoute({ router, logger });
 }

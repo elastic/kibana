@@ -22,6 +22,7 @@ import { registerRoutes } from './routes/register_routes';
 import { registerAESOPRoutes } from './routes/aesop/register_aesop_routes';
 import { DatasetService } from './storage/dataset_service';
 import { createAESOPAgents } from './lib/aesop/agents/create_aesop_agents';
+import { ensureAesopILMPolicy } from './lib/aesop/storage/index_lifecycle';
 
 export class EvalsPlugin
   implements
@@ -128,6 +129,17 @@ export class EvalsPlugin
   async start(core: CoreStart, plugins: EvalsStartDependencies): Promise<EvalsPluginStart> {
     this.actionsStart = plugins.actions;
     this.agentBuilderStart = plugins.agentBuilder;
+
+    // ═══════════════════════════════════════════════════════════════
+    // AESOP: Ensure ILM policy exists for all .aesop-* indices
+    // ═══════════════════════════════════════════════════════════════
+    const internalClient = core.elasticsearch.client.asInternalUser;
+    ensureAesopILMPolicy(internalClient, this.logger).catch((err) => {
+      this.logger.warn(
+        `[AESOP] ILM policy setup failed: ${err instanceof Error ? err.message : String(err)}`
+      );
+    });
+
     // ═══════════════════════════════════════════════════════════════
     // AESOP: Auto-create custom agents on plugin start
     // ═══════════════════════════════════════════════════════════════

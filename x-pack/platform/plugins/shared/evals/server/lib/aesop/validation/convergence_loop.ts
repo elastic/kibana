@@ -11,6 +11,7 @@ export interface ConvergenceConfig {
   convergenceDelta: number;
   improve: () => Promise<void>;
   validate: () => Promise<{ score: number; passed: boolean }>;
+  onError?: (error: unknown, iteration: number) => void;
 }
 
 export interface ConvergenceIteration {
@@ -79,7 +80,8 @@ export class ConvergenceLoop {
             consecutivePlateau = 0;
           }
         }
-      } catch {
+      } catch (error) {
+        this.config.onError?.(error, i);
         return {
           finalScore: iterations[iterations.length - 1]?.score ?? 0,
           converged: false,
