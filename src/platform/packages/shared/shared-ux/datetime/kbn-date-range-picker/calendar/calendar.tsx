@@ -7,12 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback, useRef, useMemo, useLayoutEffect } from 'react';
-import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import React, {
+  useState,
+  useCallback,
+  useRef,
+  useMemo,
+  useLayoutEffect,
+  type KeyboardEvent,
+} from 'react';
+import { EuiButtonEmpty, keys } from '@elastic/eui';
 import type { DateRange } from 'react-day-picker';
 
 import { CalendarView } from './calendar_view';
-import { calendarStyles } from './calendar.styles';
+import { useCalendarStyles } from './calendar.styles';
 import { calendarTexts } from '../translations';
 import {
   getScrollDirection,
@@ -48,8 +55,7 @@ interface ScrollAnchor {
 
 /** Infinite-like month calendar using a fixed window with chunked prepend/append. */
 export function Calendar({ range, onRangeChange, firstDayOfWeek }: CalendarProps) {
-  const euiThemeContext = useEuiTheme();
-  const styles = calendarStyles(euiThemeContext);
+  const styles = useCalendarStyles();
 
   const scrollerRef = useRef<HTMLDivElement>(null);
   const pendingCenterIndexRef = useRef<number | null>(null);
@@ -202,6 +208,51 @@ export function Calendar({ range, onRangeChange, firstDayOfWeek }: CalendarProps
     scrollToMonth(TODAY_INDEX);
   }, [scrollToMonth]);
 
+  /**
+   * Capture-phase handler for Page Up/Down month navigation.
+   *
+   * Uses capture because react-day-picker calls `stopPropagation` on those keys in its own
+   * grid handler, so a bubble-phase listener would never fire. Each react-day-picker
+   * instance has a controlled `month` prop and cannot navigate on its own, so
+   * we move focus to the same day number in the adjacent month ourselves.
+   */
+  const onScrollerKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (event.key !== keys.PAGE_DOWN && event.key !== keys.PAGE_UP) return;
+
+      const focused = document.activeElement;
+      if (!(focused instanceof HTMLElement) || !event.currentTarget.contains(focused)) return;
+
+      const monthItem = focused.closest<HTMLElement>('[data-month-index]');
+      if (!monthItem) return;
+
+      const currentIndex = Number(monthItem.dataset.monthIndex);
+      if (Number.isNaN(currentIndex)) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const targetIndex = currentIndex + (event.key === keys.PAGE_DOWN ? 1 : -1);
+
+      // Focus the same day number in the target month; fall back to its first enabled day.
+      const dayText = focused.textContent?.trim() ?? '';
+      const targetMonthItem = event.currentTarget.querySelector<HTMLElement>(
+        `[data-month-index="${targetIndex}"]`
+      );
+
+      if (targetMonthItem) {
+        const buttons = Array.from(
+          targetMonthItem.querySelectorAll<HTMLElement>('button:not([disabled])')
+        );
+        const sameDay = buttons.find((btn) => btn.textContent?.trim() === dayText);
+        (sameDay ?? buttons[0])?.focus();
+      }
+
+      scrollToMonth(targetIndex);
+    },
+    [scrollToMonth]
+  );
+
   useLayoutEffect(() => {
     const scroller = scrollerRef.current;
     if (!scroller) return;
@@ -249,7 +300,11 @@ export function Calendar({ range, onRangeChange, firstDayOfWeek }: CalendarProps
       <div
         ref={scrollerRef}
         css={styles.scroller}
+        role="group"
+        aria-label={calendarTexts.scrollerAriaLabel}
         data-test-subj="calendar-scroller"
+        data-calendar-scroller
+        onKeyDownCapture={onScrollerKeyDown}
         onScroll={handleScroll}
       >
         {monthIndices.map((index) => {
