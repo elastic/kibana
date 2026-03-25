@@ -61,6 +61,7 @@ import {
   DateRangePicker,
   type DateRangePickerSettings,
   type DateRangePickerOnChangeProps,
+  type AutoRefreshSettings,
 } from '@kbn/date-range-picker';
 import { AddFilterPopover } from './add_filter_popover';
 import type { DataViewPickerProps } from '../dataview_picker';
@@ -336,6 +337,23 @@ export const QueryBarTopRow = React.memo(
         roundRelativeTime: true,
       }
     );
+    // SuperDatePicker uses a single `isPaused` boolean (pause = off).
+    // DateRangePicker splits this into two: `isEnabled` (feature on/off via Settings)
+    // and `isPaused` (play/pause toggle while enabled). `isPaused` is local-only
+    // and has no equivalent in the legacy path.
+    const [autoRefresh, setAutoRefresh] = useState<AutoRefreshSettings>(() => ({
+      isEnabled: false,
+      isPaused: false,
+      interval: props.refreshInterval ?? 10000,
+      intervalUnit: 's',
+    }));
+
+    useEffect(() => {
+      if (props.refreshInterval != null) {
+        setAutoRefresh((prev) => ({ ...prev, interval: props.refreshInterval! }));
+      }
+    }, [props.refreshInterval]);
+
     const kibana = useKibana<IUnifiedSearchPluginServices>();
 
     const {
@@ -550,6 +568,47 @@ export const QueryBarTopRow = React.memo(
       setIsDateRangeInvalid(false);
     }, []);
 
+    const propsOnRefreshChange = props.onRefreshChange;
+
+    const onDateRangePickerRefresh = useCallback(() => {
+      if (propsOnRefresh) {
+        propsOnRefresh({ dateRange: dateRangeRef.current });
+      }
+    }, [propsOnRefresh]);
+
+    const dateRangePickerSettingsWithAutoRefresh = useMemo<DateRangePickerSettings>(
+      () =>
+        propsOnRefreshChange
+          ? { ...dateRangePickerSettings, autoRefresh }
+          : dateRangePickerSettings,
+      [dateRangePickerSettings, autoRefresh, propsOnRefreshChange]
+    );
+
+    const onDateRangePickerSettingsChange = useCallback(
+      (next: DateRangePickerSettings) => {
+        const { autoRefresh: nextAutoRefresh, ...rest } = next;
+
+        setDateRangePickerSettings(rest);
+
+        if (nextAutoRefresh) {
+          setAutoRefresh((prev) => {
+            const isEnabledChanged = prev.isEnabled !== nextAutoRefresh.isEnabled;
+            const intervalChanged = prev.interval !== nextAutoRefresh.interval;
+
+            if (isEnabledChanged || intervalChanged) {
+              propsOnRefreshChange?.({
+                isPaused: !nextAutoRefresh.isEnabled,
+                refreshInterval: nextAutoRefresh.interval,
+              });
+            }
+
+            return nextAutoRefresh;
+          });
+        }
+      },
+      [propsOnRefreshChange]
+    );
+
     const onInputSubmit = useCallback(
       (query: Query) => {
         onSubmit({
@@ -719,8 +778,9 @@ export const QueryBarTopRow = React.memo(
             showTimeWindowButtons
             presets={commonlyUsedRanges}
             recent={recentlyUsedRanges}
-            settings={dateRangePickerSettings}
-            onSettingsChange={setDateRangePickerSettings}
+            settings={dateRangePickerSettingsWithAutoRefresh}
+            onSettingsChange={onDateRangePickerSettingsChange}
+            onRefresh={propsOnRefreshChange ? onDateRangePickerRefresh : undefined}
             timeZone={uiSettings.get('dateFormat:tz')}
           />
         );
