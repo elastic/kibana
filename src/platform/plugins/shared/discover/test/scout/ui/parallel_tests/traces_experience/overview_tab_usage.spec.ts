@@ -166,7 +166,7 @@ spaceTest.describe(
           async () => {
             await flyout.traceSummary.waterfallClickArea.click();
             await expect(flyout.waterfallFlyout.container).toBeVisible();
-            await flyout.waterfallFlyout.closeButton.click();
+            await flyout.waterfallFlyout.backButton.click();
             await expect(flyout.waterfallFlyout.container).toBeHidden();
           }
         );
@@ -176,7 +176,7 @@ spaceTest.describe(
           async () => {
             await flyout.traceSummary.fullScreenButton.click();
             await expect(flyout.waterfallFlyout.container).toBeVisible();
-            await flyout.waterfallFlyout.closeButton.click();
+            await flyout.waterfallFlyout.backButton.click();
             await expect(flyout.waterfallFlyout.container).toBeHidden();
           }
         );

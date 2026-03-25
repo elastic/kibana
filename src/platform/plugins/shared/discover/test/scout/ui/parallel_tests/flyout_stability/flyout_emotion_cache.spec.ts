@@ -45,14 +45,10 @@ spaceTest.describe('Flyout system Emotion cache stability', { tag: tags.stateful
         await pageObjects.overlays.openNewsfeedFlyout();
       });
 
-      await spaceTest.step(
-        'close stacked flyouts (EUI scoped history: closing one group does not close others)',
-        async () => {
-          await pageObjects.overlays.closeNewsfeedFlyout();
-          await expect(pageObjects.overlays.docViewerFlyout).toBeVisible();
-          await pageObjects.overlays.closeDocViewerFlyout();
-        }
-      );
+      await spaceTest.step('close the second flyout, triggering a cascade close', async () => {
+        await pageObjects.overlays.closeNewsfeedFlyout();
+        await expect(pageObjects.overlays.docViewerFlyout).toBeHidden();
+      });
 
       await spaceTest.step('open a new flyout after the cascade close', async () => {
         await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
