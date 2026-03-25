@@ -64,7 +64,7 @@ export const createAgentGraph = ({
 
   const shouldContinue = async (state: StateType) => {
     const messages = state.addedMessages;
-    const lastMessage: AIMessage = messages[messages.length - 1];
+    const lastMessage = messages[messages.length - 1] as AIMessage;
     if (lastMessage && lastMessage.tool_calls?.length) {
       return 'tools';
     }
