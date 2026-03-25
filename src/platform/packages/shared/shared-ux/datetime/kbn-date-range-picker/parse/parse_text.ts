@@ -94,7 +94,7 @@ const DEFAULT_CONFIG: ParserConfig = {
     yrs: 'y',
   },
   durationTemplates: {
-    past: ['last {count} {unit}'],
+    past: ['last {count} {unit}', 'past {count} {unit}'],
     future: ['next {count} {unit}'],
   },
   instantTemplates: {
@@ -102,12 +102,42 @@ const DEFAULT_CONFIG: ParserConfig = {
     future: ['{count} {unit} from now', 'in {count} {unit}'],
   },
   absoluteFormats: [
+    // Canonical Kibana (with @ separator)
+    'MMM D, YYYY @ HH:mm:ss.SSS',
+    'MMM D, YYYY @ HH:mm:ss',
+    'MMM D, YYYY @ HH:mm',
+    'MMM D, YYYY @ HH',
+
+    // DateRangePicker default (milliseconds → minutes, with and without comma after day)
+    'MMM D, YYYY, HH:mm:ss.SSS',
+    'MMM D YYYY, HH:mm:ss.SSS',
+    'MMM D, YYYY, HH:mm:ss',
+    'MMM D YYYY, HH:mm:ss',
+    'MMM D, YYYY, HH:mm',
     'MMM D YYYY, HH:mm',
-    'MMM D, HH:mm',
-    'MMM D YYYY',
     'MMM D, YYYY',
+    'MMM D YYYY',
+    'MMM D, HH:mm',
     'MMM D',
+
+    // ISO 8601 date with simple time
+    'YYYY-MM-DD H:mm',
+
+    // US-style (M/D handles 1- and 2-digit month/day)
+    'M/D/YYYY H:mm',
+    'M/D H:mm',
+    'M/D/YYYY',
+    'M/D',
+
+    // RFC 2822 (with/without day-of-week, with/without seconds, with/without numeric offset)
     'ddd, DD MMM YYYY HH:mm:ss ZZ',
+    'ddd, DD MMM YYYY HH:mm ZZ',
+    'DD MMM YYYY HH:mm:ss ZZ',
+    'DD MMM YYYY HH:mm ZZ',
+    'ddd, DD MMM YYYY HH:mm:ss',
+    'ddd, DD MMM YYYY HH:mm',
+    'DD MMM YYYY HH:mm:ss',
+    'DD MMM YYYY HH:mm',
   ],
 };
 
@@ -388,19 +418,18 @@ function dateStringToDate(
   const strict = moment(dateString, formats, true);
   if (strict.isValid()) return strict.toDate();
 
-  if (formats.length && !moment(dateString, moment.ISO_8601, true).isValid()) {
-    const forgiving = moment(dateString, formats);
-    if (forgiving.isValid()) return forgiving.toDate();
-  }
-
-  // Only send ISO dates and datemath expressions to dateMath.parse; other
-  // strings (e.g. "2025-01-01 to") would fall through to moment(string)
-  // without an explicit format, triggering a deprecation warning.
+  // Resolve ISO dates and datemath expressions before forgiving mode, which
+  // can produce false positives with short formats like M/D.
   const isIsoDate = /^\d{4}-\d{2}-\d{2}(T|\s+\d|$)/.test(dateString);
   const isDateMath = dateString === 'now' || /^now[/|+-]/.test(dateString);
   if (isIsoDate || isDateMath) {
     const parsed = dateMath.parse(dateString, options);
     return parsed?.isValid() ? parsed.toDate() : null;
+  }
+
+  if (formats.length) {
+    const forgiving = moment(dateString, formats);
+    if (forgiving.isValid()) return forgiving.toDate();
   }
 
   return null;

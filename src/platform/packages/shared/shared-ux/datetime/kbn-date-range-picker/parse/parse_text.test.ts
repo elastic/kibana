@@ -294,6 +294,123 @@ describe('textToTimeRange', () => {
       expect(textToTimeRange('hello world').isInvalid).toBe(true);
       expect(textToTimeRange('not a date').isInvalid).toBe(true);
     });
+
+    describe('canonical Kibana format (@ separator)', () => {
+      it.each([
+        ['Mar 9, 2025 @ 15:36:07.801', { year: 2025, month: 2, day: 9, hour: 15, minute: 36 }],
+        ['Mar 9, 2025 @ 15:36:07', { year: 2025, month: 2, day: 9, hour: 15, minute: 36 }],
+        ['Mar 9, 2025 @ 15:36', { year: 2025, month: 2, day: 9, hour: 15, minute: 36 }],
+        ['Mar 9, 2025 @ 15', { year: 2025, month: 2, day: 9, hour: 15, minute: 0 }],
+        ['Mar 9, 2025', { year: 2025, month: 2, day: 9, hour: 0, minute: 0 }],
+      ])('parses "%s"', (text, expected) => {
+        const range = textToTimeRange(text);
+
+        expect(range.isInvalid).toBe(false);
+        expect(range.type).toEqual([DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW]);
+
+        const d = range.startDate!;
+        expect(d.getFullYear()).toBe(expected.year);
+        expect(d.getMonth()).toBe(expected.month);
+        expect(d.getDate()).toBe(expected.day);
+        expect(d.getHours()).toBe(expected.hour);
+        expect(d.getMinutes()).toBe(expected.minute);
+      });
+    });
+
+    describe('ISO 8601 date with simple time', () => {
+      it.each([
+        ['2025-02-14 6:00', { year: 2025, month: 1, day: 14, hour: 6, minute: 0 }],
+        ['2025-02-14 14:30', { year: 2025, month: 1, day: 14, hour: 14, minute: 30 }],
+      ])('parses "%s"', (text, expected) => {
+        const range = textToTimeRange(text);
+
+        expect(range.isInvalid).toBe(false);
+
+        const d = range.startDate!;
+        expect(d.getFullYear()).toBe(expected.year);
+        expect(d.getMonth()).toBe(expected.month);
+        expect(d.getDate()).toBe(expected.day);
+        expect(d.getHours()).toBe(expected.hour);
+        expect(d.getMinutes()).toBe(expected.minute);
+      });
+    });
+
+    describe('US-style dates', () => {
+      it.each([
+        ['2/14/2025 6:00', { year: 2025, month: 1, day: 14, hour: 6, minute: 0 }],
+        ['2/14 6:00', { year: 2025, month: 1, day: 14, hour: 6, minute: 0 }],
+        ['2/14/2025', { year: 2025, month: 1, day: 14, hour: 0, minute: 0 }],
+        ['2/14', { year: 2025, month: 1, day: 14, hour: 0, minute: 0 }],
+        ['6/30/2025 23:59', { year: 2025, month: 5, day: 30, hour: 23, minute: 59 }],
+      ])('parses "%s"', (text, expected) => {
+        const range = textToTimeRange(text);
+
+        expect(range.isInvalid).toBe(false);
+        expect(range.type).toEqual([DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW]);
+
+        const d = range.startDate!;
+        expect(d.getFullYear()).toBe(expected.year);
+        expect(d.getMonth()).toBe(expected.month);
+        expect(d.getDate()).toBe(expected.day);
+        expect(d.getHours()).toBe(expected.hour);
+        expect(d.getMinutes()).toBe(expected.minute);
+      });
+    });
+
+    describe('RFC 2822 variants', () => {
+      it.each([
+        ['Sun, 23 Jan 2000 01:23:45 +0000', { year: 2000, month: 0, day: 23 }],
+        ['Sun, 23 Jan 2000 01:23 +0000', { year: 2000, month: 0, day: 23 }],
+        ['23 Jan 2000 01:23:45 +0000', { year: 2000, month: 0, day: 23 }],
+        ['23 Jan 2000 01:23 +0000', { year: 2000, month: 0, day: 23 }],
+        ['Sun, 23 Jan 2000 01:23:45', { year: 2000, month: 0, day: 23 }],
+        ['23 Jan 2000 01:23', { year: 2000, month: 0, day: 23 }],
+      ])('parses "%s"', (text, expected) => {
+        const range = textToTimeRange(text);
+
+        expect(range.isInvalid).toBe(false);
+
+        const d = range.startDate!;
+        expect(d.getFullYear()).toBe(expected.year);
+        expect(d.getMonth()).toBe(expected.month);
+        expect(d.getDate()).toBe(expected.day);
+      });
+
+      it('parses RFC 2822 with timezone abbreviation via forgiving mode', () => {
+        const range = textToTimeRange('Sun, 23 Jan 2000 01:23:45 JST');
+
+        expect(range.isInvalid).toBe(false);
+        expect(range.startDate!.getFullYear()).toBe(2000);
+        expect(range.startDate!.getMonth()).toBe(0);
+        expect(range.startDate!.getDate()).toBe(23);
+      });
+    });
+
+    describe('DateRangePicker default format variants', () => {
+      it.each([
+        ['Mar 17, 2025, 09:43', { year: 2025, month: 2, day: 17, hour: 9, minute: 43 }],
+        ['Mar 17 2025, 09:43', { year: 2025, month: 2, day: 17, hour: 9, minute: 43 }],
+        ['Mar 17, 2025, 09:43:34', { year: 2025, month: 2, day: 17, hour: 9, minute: 43 }],
+        ['Mar 17 2025, 09:43:34', { year: 2025, month: 2, day: 17, hour: 9, minute: 43 }],
+        ['Mar 17, 2025, 09:43:34.667', { year: 2025, month: 2, day: 17, hour: 9, minute: 43 }],
+        ['Mar 17 2025, 09:43:34.667', { year: 2025, month: 2, day: 17, hour: 9, minute: 43 }],
+        ['Mar 17, 2025', { year: 2025, month: 2, day: 17, hour: 0, minute: 0 }],
+        ['Mar 17 2025', { year: 2025, month: 2, day: 17, hour: 0, minute: 0 }],
+        ['Mar 17', { year: 2025, month: 2, day: 17, hour: 0, minute: 0 }],
+      ])('parses "%s"', (text, expected) => {
+        const range = textToTimeRange(text);
+
+        expect(range.isInvalid).toBe(false);
+        expect(range.type).toEqual([DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW]);
+
+        const d = range.startDate!;
+        expect(d.getFullYear()).toBe(expected.year);
+        expect(d.getMonth()).toBe(expected.month);
+        expect(d.getDate()).toBe(expected.day);
+        expect(d.getHours()).toBe(expected.hour);
+        expect(d.getMinutes()).toBe(expected.minute);
+      });
+    });
   });
 
   describe('date offset', () => {
