@@ -167,13 +167,19 @@ export function CalendarPanel() {
   }, [absoluteRange, applyRange, onPresetSave, saveAsPreset]);
 
   const applyButton = (
-    <EuiButton size="s" fill onClick={onApply} disabled={isApplyDisabled}>
+    <EuiButton
+      size="s"
+      fill
+      onClick={onApply}
+      disabled={isApplyDisabled}
+      data-test-subj="dateRangePickerCalendarApplyButton"
+    >
       {calendarPanelTexts.applyButton}
     </EuiButton>
   );
 
   return (
-    <PanelContainer>
+    <PanelContainer data-test-subj="dateRangePickerCalendarPanel">
       <PanelHeader>
         <SubPanelHeading onGoBack={restoreOriginalText}>
           {mainPanelTexts.calendarPanelTitle}
@@ -201,6 +207,7 @@ export function CalendarPanel() {
             label={calendarPanelTexts.saveAsPreset}
             checked={saveAsPreset}
             onChange={() => setSaveAsPreset((prev) => !prev)}
+            data-test-subj="dateRangePickerCalendarSaveCheckbox"
           />
         )}
       </PanelFooter>
