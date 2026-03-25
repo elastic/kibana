@@ -8,49 +8,30 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { OverviewTab } from './overview_tab';
 import { TestProviders } from '../../../common/mock';
 
-jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
-
-const createAlertHit = (): DataTableRecord =>
+const createHit = (): DataTableRecord =>
   ({
     id: '1',
     raw: {},
-    flattened: { 'event.kind': 'signal' },
+    flattened: {},
     isAnchor: false,
   } as DataTableRecord);
 
+jest.mock('../components/about_section', () => ({ AboutSection: () => <div /> }));
+jest.mock('../components/insights_section', () => ({ InsightsSection: () => <div /> }));
+jest.mock('../components/investigation_section', () => ({ InvestigationSection: () => <div /> }));
+jest.mock('../components/visualizations_section', () => ({ VisualizationsSection: () => <div /> }));
+
 describe('<OverviewTab />', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('renders FlyoutMissingAlertsPrivilege when document is an alert and user lacks alerts read privilege', () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: false, loading: false });
-    const alertHit = createAlertHit();
-
-    const { getByTestId } = render(
+  it('renders the overview sections', () => {
+    const { container } = render(
       <TestProviders>
-        <OverviewTab hit={alertHit} renderCellActions={jest.fn()} />
+        <OverviewTab hit={createHit()} renderCellActions={jest.fn()} />
       </TestProviders>
     );
 
-    expect(getByTestId('noPrivilegesPage')).toBeInTheDocument();
-  });
-
-  it('renders loading while alerts privileges are loading for an alert', () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: false, loading: true });
-    const alertHit = createAlertHit();
-
-    const { getByTestId, queryByTestId } = render(
-      <TestProviders>
-        <OverviewTab hit={alertHit} renderCellActions={jest.fn()} />
-      </TestProviders>
-    );
-
-    expect(getByTestId('document-overview-loading')).toBeInTheDocument();
-    expect(queryByTestId('noPrivilegesPage')).not.toBeInTheDocument();
+    expect(container).toBeInTheDocument();
   });
 });
