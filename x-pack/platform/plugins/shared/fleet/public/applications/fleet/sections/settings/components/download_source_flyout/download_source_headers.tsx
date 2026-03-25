@@ -207,7 +207,7 @@ export const DownloadSourceHeaders: React.FunctionComponent<{
         disabled={addKeyValuePairButtonDisabled}
         size="xs"
         flush="left"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={addKeyValuePair}
       >
         <FormattedMessage
