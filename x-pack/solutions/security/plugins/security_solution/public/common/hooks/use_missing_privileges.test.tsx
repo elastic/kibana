@@ -173,6 +173,28 @@ describe('useMissingPrivileges', () => {
         rulesPrivileges: {
           ...getUserPrivilegesMockDefaultValue().rulesPrivileges,
           rules: { edit: false, read: true },
+          exceptions: { edit: false, read: true },
+        },
+        alertsPrivileges: { alerts: { edit: false, read: true, legacyUpdate: false } },
+      })
+    );
+
+    const hookResult = renderHook(() => useMissingPrivileges());
+
+    expect(hookResult.result.current.featurePrivileges).toEqual(
+      expect.arrayContaining([
+        [RULES_FEATURE_ID, ['all']],
+        [ALERTS_FEATURE_ID, ['all']],
+      ])
+    );
+  });
+
+  it('reports no missing feature privileges if user can edit rules and alerts', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue(
+      buildUseUserPrivilegesMockReturn({
+        rulesPrivileges: {
+          ...getUserPrivilegesMockDefaultValue().rulesPrivileges,
+          rules: { edit: false, read: true },
         },
         alertsPrivileges: { alerts: { edit: false, read: true, legacyUpdate: false } },
       })
