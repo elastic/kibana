@@ -7,81 +7,51 @@ an approach, designing mappings, and generating production-ready code.
 ## Package contents
 
 ```
-search_agent_instructions.md    ← source of truth for all instructions (plain markdown)
-search_agent_instructions.ts    ← generated — do not edit directly
-index.ts                        ← exports searchAgentInstructions
-build                           ← regenerates .ts, AGENTS.md + packages zip
-scripts/generate.js             ← reads .md → generates .ts + copies to .elasticsearch-agent/
-install-agent.sh                ← remote installer (AGENTS.md workflow)
-install-cursor.sh               ← remote installer (Cursor rules + skills)
-AGENTS-elasticsearch-append.md  ← appended to the project's AGENTS.md on install
 .elasticsearch-agent/
-  AGENTS.md                     ← generated — do not edit directly
-  skills/recipes/               ← use-case guides (keyword, semantic, hybrid, RAG, etc.)
+  agents/
+    <agent-name>/
+      AGENTS.md             ← source of truth for agent instructions (YAML front matter + body)
+  skills/
+    recipes/                ← use-case guides (keyword, semantic, hybrid, RAG, etc.)
+      <skill-name>/
+        SKILL.md            ← source of truth for each skill (YAML front matter + body)
+src/
+  agents/
+    <agent-name>.ts         ← generated — do not edit directly
+    index.ts                ← generated barrel — do not edit directly
+  skills/
+    <skill_name>.ts         ← generated — do not edit directly
+    index.ts                ← generated barrel — do not edit directly
+index.ts                    ← re-exports everything from src/agents and src/skills
+build                       ← regenerates all TypeScript from the markdown sources
+scripts/generate.js         ← reads AGENTS.md + SKILL.md files → generates .ts
 ```
 
-## Instruction set
+## Exports
 
-The package exports a single instruction set — `searchAgentInstructions` — which is the
-canonical conversational playbook for the Elasticsearch onboarding agent. It covers intent
-discovery, data understanding, approach recommendation, mapping design, code generation,
-testing, and iteration.
+The package exports an agent and a set of skills:
 
-The source of truth is `search_agent_instructions.md`. Running `./build` generates both
-the TypeScript export (`search_agent_instructions.ts`) and the distributable markdown
-(`.elasticsearch-agent/AGENTS.md`) from it.
+- `agents` — array of all agent objects
+- `skills` — array of all skill objects (keyword search, semantic search, hybrid search, RAG, vector database, catalog/e-commerce)
 
-This export is consumed by two runtimes:
-
-### External LLM agents (Cursor, CLI)
-
-`./build` generates `.elasticsearch-agent/AGENTS.md` from the TypeScript source and packages
-it into a zip alongside the recipe skills and the `AGENTS-elasticsearch-append.md` file.
-The install scripts download and unpack this zip into the developer's project.
+Each agent and skill object is generated from its markdown source file, which carries YAML
+front matter (id, name, description, labels, avatar fields) followed by the instruction body.
 
 ### Kibana Agent Builder
 
-The `search_getting_started` plugin registers the agent via `@kbn/agent-builder-server` with
-`replace_default_instructions: true`, providing the full playbook as the system prompt.
-
-## Installation
-
-Two install scripts are provided, each tailored to a different workflow.
-
-### Generic (AGENTS.md-based)
-
-Installs `.elasticsearch-agent/AGENTS.md`, recipe skills, and appends an Elasticsearch
-reference to the project's `AGENTS.md`.
-
-```
-Fetch and run this remote script:
-curl -sSL https://raw.githubusercontent.com/elastic/kibana/releases/install-agent.sh | sh
-Then help me get started with Elasticsearch.
-```
-
-### Cursor-specific
-
-Converts the agent into a Cursor rule (`.cursor/rules/elastic.mdc`) and copies recipe skills
-into `.cursor/skills/`. Does not modify `AGENTS.md`.
-
-```
-Fetch and run this remote script:
-curl -sSL https://raw.githubusercontent.com/elastic/kibana/releases/install-cursor.sh | sh
-Then help me get started with Elasticsearch.
-```
+The `search_getting_started` plugin registers the agent via `@kbn/agent-builder-server`,
+using the exported `agents` & `skills`
 
 ## Development
 
-- `search_agent_instructions.md` is the **source of truth**. Both
-  `search_agent_instructions.ts` and `.elasticsearch-agent/AGENTS.md` are generated — do
-  not edit them directly.
-- Run `./build` to regenerate the TypeScript export and markdown distribution,
-  then package the zip file for usage outside of Kibana.
+- **Agent instructions**: edit `.elasticsearch-agent/agents/<agent-name>/AGENTS.md`
+- **Skill content**: edit the relevant `SKILL.md` under `.elasticsearch-agent/skills/recipes/<skill-name>/`
+- All files under `src/` are generated — **do not edit them directly**
+- Run `./build` to regenerate the TypeScript exports from the markdown sources and reformat with Prettier
+- Updated allow list of agents & skills in `x-pack/platform/packages/shared/agent-builder/agent-builder-server/allow_lists.ts`
 
-Prompt during development (points to PR branch):
 
-```
-Fetch and run this remote script:
-curl -sSL https://raw.githubusercontent.com/wildemat/kibana/search-agent/src/platform/packages/shared/kbn-search-agent/install-agent.sh | sh
-Then help me get started with Elasticsearch.
-```
+## `build` script
+
+1. `node scripts/generate.js` — parses content from each `AGENTS.md` and `SKILL.md`, writes `src/agents/*.ts` and `src/skills/*.ts`, and generates barrel `index.ts` files in each directory
+2. `prettier --write src/agents src/skills` — formats the generated files

@@ -1,2 +1,2 @@
 node scripts/generate.js
-zip -r -FS elastic-agent.zip AGENTS-elasticsearch-append.md .elasticsearch-agent
+node ../../../../../node_modules/.bin/prettier --write src/agents src/skills
