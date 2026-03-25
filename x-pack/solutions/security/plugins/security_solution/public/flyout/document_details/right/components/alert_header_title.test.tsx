@@ -13,7 +13,6 @@ import {
   ASSIGNEES_EMPTY_TEST_ID,
   ASSIGNEES_TEST_ID,
   ASSIGNEES_TITLE_TEST_ID,
-  FLYOUT_ALERT_HEADER_TITLE_TEST_ID,
   NOTES_TITLE_TEST_ID,
   RISK_SCORE_TITLE_TEST_ID,
   RISK_SCORE_VALUE_TEST_ID,
@@ -28,6 +27,7 @@ import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_f
 import { mockSearchHit } from '../../shared/mocks/mock_search_hit';
 import { TestProviders } from '../../../../common/mock';
 import {
+  HEADER_TITLE_TEST_ID,
   HEADER_TIMESTAMP_TEST_ID,
   SEVERITY_VALUE_TEST_ID,
 } from '../../../../flyout_v2/document/components/test_ids';
@@ -55,7 +55,7 @@ const mockContextValue = {
     'kibana.alert.severity': ['low'],
   }),
 } as unknown as DocumentDetailsContext;
-const HEADER_TEXT_TEST_ID = `${FLYOUT_ALERT_HEADER_TITLE_TEST_ID}Text`;
+const HEADER_TEXT_TEST_ID = `${HEADER_TITLE_TEST_ID}Text`;
 
 const renderHeader = (contextValue: DocumentDetailsContext) =>
   render(

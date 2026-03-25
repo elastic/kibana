@@ -20,14 +20,16 @@ import { PreferenceFormattedDate } from '../../../../common/components/formatted
 import {
   ALERT_SUMMARY_PANEL_TEST_ID,
   ASSIGNEES_TITLE_TEST_ID,
-  FLYOUT_ALERT_HEADER_TITLE_TEST_ID,
   RISK_SCORE_TITLE_TEST_ID,
 } from './test_ids';
 import { Assignees } from './assignees';
 import { DocumentSeverity } from '../../../../flyout_v2/document/components/severity';
 import { FlyoutTitle } from '../../../../flyout_v2/shared/components/flyout_title';
 import { getDocumentTitle } from '../../../../flyout_v2/document/utils/get_header_title';
-import { HEADER_TIMESTAMP_TEST_ID } from '../../../../flyout_v2/document/components/test_ids';
+import {
+  HEADER_TITLE_TEST_ID,
+  HEADER_TIMESTAMP_TEST_ID,
+} from '../../../../flyout_v2/document/components/test_ids';
 import { AlertHeaderBlock } from '../../../shared/components/alert_header_block';
 
 // minWidth for each block, allows to switch for a 1 row 4 blocks to 2 rows with 2 block each
@@ -63,14 +65,14 @@ export const AlertHeaderTitle = memo(() => {
             title={title}
             iconType={'warning'}
             isLink
-            data-test-subj={FLYOUT_ALERT_HEADER_TITLE_TEST_ID}
+            data-test-subj={HEADER_TITLE_TEST_ID}
           />
         </EuiLink>
       ) : (
         <FlyoutTitle
           title={title}
           iconType={'warning'}
-          data-test-subj={FLYOUT_ALERT_HEADER_TITLE_TEST_ID}
+          data-test-subj={HEADER_TITLE_TEST_ID}
         />
       ),
     [title, href]

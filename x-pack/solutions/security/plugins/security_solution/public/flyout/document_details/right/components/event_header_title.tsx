@@ -15,8 +15,10 @@ import { PreferenceFormattedDate } from '../../../../common/components/formatted
 import { DocumentSeverity } from '../../../../flyout_v2/document/components/severity';
 import { FlyoutTitle } from '../../../../flyout_v2/shared/components/flyout_title';
 import { getDocumentTitle } from '../../../../flyout_v2/document/utils/get_header_title';
-import { HEADER_TIMESTAMP_TEST_ID } from '../../../../flyout_v2/document/components/test_ids';
-import { FLYOUT_EVENT_HEADER_TITLE_TEST_ID } from './test_ids';
+import {
+  HEADER_EVENT_TITLE_TEST_ID,
+  HEADER_TIMESTAMP_TEST_ID,
+} from '../../../../flyout_v2/document/components/test_ids';
 
 /**
  * Event details flyout right section header
@@ -46,7 +48,7 @@ export const EventHeaderTitle = memo(() => {
       <FlyoutTitle
         title={title}
         iconType={'analyzeEvent'}
-        data-test-subj={FLYOUT_EVENT_HEADER_TITLE_TEST_ID}
+        data-test-subj={HEADER_EVENT_TITLE_TEST_ID}
       />
     </>
   );

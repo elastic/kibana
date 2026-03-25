@@ -8,7 +8,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { DocumentDetailsContext } from '../../shared/context';
-import { FLYOUT_EVENT_HEADER_TITLE_TEST_ID } from './test_ids';
 import { EventHeaderTitle } from './event_header_title';
 import moment from 'moment-timezone';
 import { useDateFormat, useTimeZone } from '../../../../common/lib/kibana';
@@ -16,6 +15,7 @@ import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockSearchHit } from '../../shared/mocks/mock_search_hit';
 import { TestProvidersComponent } from '../../../../common/mock';
 import {
+  HEADER_EVENT_TITLE_TEST_ID,
   HEADER_TIMESTAMP_TEST_ID,
   SEVERITY_VALUE_TEST_ID,
 } from '../../../../flyout_v2/document/components/test_ids';
@@ -36,7 +36,7 @@ const renderHeader = (contextValue: DocumentDetailsContext) =>
     </TestProvidersComponent>
   );
 
-const EVENT_HEADER_TEXT_TEST_ID = `${FLYOUT_EVENT_HEADER_TITLE_TEST_ID}Text`;
+const EVENT_HEADER_TEXT_TEST_ID = `${HEADER_EVENT_TITLE_TEST_ID}Text`;
 const createSearchHit = (fields: Record<string, unknown[]>) => ({
   ...mockSearchHit,
   fields: {
