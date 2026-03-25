@@ -26,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus, isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { ResumeExecutionButton } from './resume_execution_button';
 import { StepExecutionDataView } from './step_execution_data_view';
 import { WorkflowExecutionOverview } from './workflow_execution_overview';
@@ -41,6 +42,7 @@ interface WorkflowStepExecutionDetailsProps {
   isLoadingStepData?: boolean;
   workflowExecutionStatus?: ExecutionStatus;
   resumeMessage?: string;
+  resumeSchema?: JsonModelSchemaType;
   shouldAutoResume?: boolean;
   /** When the step is workflow.execute, the child workflow execution (to link to) */
   childWorkflowExecution?: ChildWorkflowExecutionInfo;
@@ -56,6 +58,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     isLoadingStepData,
     workflowExecutionStatus,
     resumeMessage,
+    resumeSchema,
     shouldAutoResume = false,
     childWorkflowExecution,
     parentWorkflowExecution,
@@ -183,12 +186,11 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           showResumeUI={workflowExecutionStatus === ExecutionStatus.WAITING_FOR_INPUT}
           executionId={workflowExecutionId}
           resumeMessage={resumeMessage}
+          resumeSchema={resumeSchema}
           shouldAutoResume={shouldAutoResume}
         />
       );
     }
-
-    const showResumeUI = isWaitingForInput;
 
     return (
       <EuiPanel
@@ -273,11 +275,12 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                   )}
                   {selectedTabId === 'input' && (
                     <>
-                      {showResumeUI && (
+                      {isWaitingForInput && (
                         <>
                           <ResumeExecutionButton
                             executionId={workflowExecutionId}
                             resumeMessage={resumeMessage}
+                            resumeSchema={resumeSchema}
                             autoOpen={shouldAutoResume}
                           />
                           <EuiSpacer size="m" />
