@@ -32,6 +32,7 @@ import {
   EuiAccordion,
   EuiCode,
   useGeneratedHtmlId,
+  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -370,44 +371,6 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             </EuiFormRow>
           )}
 
-          {isESOutput && (
-            <>
-              <EuiSpacer size="l" />
-              <EuiTitle size="xs">
-                <h4>
-                  <FormattedMessage
-                    id="xpack.fleet.settings.editOutputFlyout.otelExporterConfigTitle"
-                    defaultMessage="OpenTelemetry Exporter Configuration"
-                  />
-                </h4>
-              </EuiTitle>
-              <EuiSpacer size="m" />
-              <EuiFormRow
-                fullWidth
-                label={
-                  <FormattedMessage
-                    id="xpack.fleet.settings.editOutputFlyout.otelExporterConfigLabel"
-                    defaultMessage="Advanced Exporter Parameters"
-                  />
-                }
-                {...inputs.otelExporterConfigInput.formRowProps}
-              >
-                <YamlCodeEditorWithPlaceholder
-                  value={inputs.otelExporterConfigInput.value}
-                  onChange={(value) => inputs.otelExporterConfigInput.setValue(value)}
-                  disabled={inputs.otelExporterConfigInput.props.disabled}
-                  placeholder={i18n.translate(
-                    'xpack.fleet.settings.editOutputFlyout.otelExporterConfigPlaceholder',
-                    {
-                      defaultMessage:
-                        '# YAML settings here will be added to the exporter section of OTel policies.',
-                    }
-                  )}
-                />
-              </EuiFormRow>
-            </>
-          )}
-
           <EuiFormRow fullWidth {...inputs.defaultOutputInput.formRowProps}>
             <EuiSwitch
               {...inputs.defaultOutputInput.props}
@@ -585,6 +548,52 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                 </EuiCallOut>
               </>
             )}
+
+          {isESOutput && (
+            <>
+              <EuiSpacer size="l" />
+              <EuiPanel color="subdued" borderRadius="none" hasShadow={false} paddingSize="m">
+                <EuiTitle size="s">
+                  <h3 id="FleetEditOutputFlyoutOtelExporterConfigTitle">
+                    <FormattedMessage
+                      id="xpack.fleet.settings.editOutputFlyout.otelExporterConfigTitle"
+                      defaultMessage="OpenTelemetry Exporter"
+                    />
+                  </h3>
+                </EuiTitle>
+                <EuiSpacer size="m" />
+                <EuiFormRow
+                  fullWidth
+                  label={
+                    <FormattedMessage
+                      id="xpack.fleet.settings.editOutputFlyout.otelExporterConfigLabel"
+                      defaultMessage="Advanced YAML Configuration"
+                    />
+                  }
+                  helpText={
+                    <FormattedMessage
+                      id="xpack.fleet.settings.editOutputFlyout.otelExporterConfigHelpText"
+                      defaultMessage="Settings added here are merged into the Elasticsearch exporter configuration of any OTel-based agent policy that uses this output."
+                    />
+                  }
+                  {...inputs.otelExporterConfigInput.formRowProps}
+                >
+                  <YamlCodeEditorWithPlaceholder
+                    value={inputs.otelExporterConfigInput.value}
+                    onChange={(value) => inputs.otelExporterConfigInput.setValue(value)}
+                    disabled={inputs.otelExporterConfigInput.props.disabled}
+                    placeholder={i18n.translate(
+                      'xpack.fleet.settings.editOutputFlyout.otelExporterConfigPlaceholder',
+                      {
+                        defaultMessage:
+                          '# YAML settings here will be added to the exporter section of OTel policies.',
+                      }
+                    )}
+                  />
+                </EuiFormRow>
+              </EuiPanel>
+            </>
+          )}
 
           <EuiSpacer size="l" />
           <EuiFormRow

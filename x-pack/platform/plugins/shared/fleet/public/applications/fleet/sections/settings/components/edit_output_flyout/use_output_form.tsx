@@ -214,7 +214,11 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   const allowEdit = output?.allow_edit ?? [];
 
   function isDisabled(
-    field: keyof Output | keyof KafkaOutput | keyof NewRemoteElasticsearchOutput
+    field:
+      | keyof Output
+      | keyof KafkaOutput
+      | keyof NewRemoteElasticsearchOutput
+      | keyof NewElasticsearchOutput
   ) {
     if (!authz.fleet.allSettings) {
       return true;
@@ -1148,22 +1152,23 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     kafkaBrokerTimeoutInput.value,
     kafkaBrokerReachabilityTimeoutInput.value,
     kafkaBrokerAckReliabilityInput.value,
-    logstashEnableSSLInput.value,
     logstashHostsInput.value,
+    logstashEnableSSLInput.value,
     sslCertificateInput.value,
     sslKeyInput.value,
     sslCertificateAuthoritiesInput.value,
     sslKeySecretInput.value,
-    elasticsearchUrlInput.value,
-    presetInput.value,
     serviceTokenInput.value,
     serviceTokenSecretInput.value,
+    elasticsearchUrlInput.value,
+    presetInput.value,
     kibanaAPIKeyInput.value,
     syncIntegrationsInput.value,
-    syncUninstalledIntegrationsInput.value,
     kibanaURLInput.value,
-    caTrustedFingerprintInput.value,
+    syncUninstalledIntegrationsInput.value,
     writeToStreams.value,
+    otelExporterConfigInput.value,
+    caTrustedFingerprintInput.value,
     confirm,
     notifications.toasts,
   ]);
