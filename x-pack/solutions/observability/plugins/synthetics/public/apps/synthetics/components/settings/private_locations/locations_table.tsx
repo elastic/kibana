@@ -35,7 +35,6 @@ import { LOCATION_NAME_LABEL } from './location_form';
 import { setIsPrivateLocationFlyoutVisible } from '../../../state/private_locations/actions';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import { UnhealthyCountBadge } from './unhealthy_count_badge';
-import { RESET_MONITORS_LABEL, ResetLocationMonitors } from './reset_location_monitors';
 import { ResetMonitorModal } from '../../monitors_page/management/monitor_list_table/reset_monitor_modal';
 import { useMonitorIntegrationHealth } from '../../common/hooks/use_monitor_integration_health';
 
@@ -59,7 +58,8 @@ export const PrivateLocationsTable = ({
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [monitorPendingReset, setMonitorPendingReset] = useState<string[]>([]);
-  const { resetMonitors } = useMonitorIntegrationHealth();
+  const { resetMonitors, getUnhealthyMonitorCountForLocation, getUnhealthyConfigIdsForLocation } =
+    useMonitorIntegrationHealth();
 
   const { locationMonitors, loading } = useLocationMonitors();
 
@@ -142,16 +142,18 @@ export const PrivateLocationsTable = ({
         {
           name: RESET_MONITORS_LABEL,
           description: RESET_MONITORS_LABEL,
-          render: (item: ListItem) => {
-            return (
-              <ResetLocationMonitors
-                locationId={item.id}
-                setMonitorPendingReset={setMonitorPendingReset}
-              />
-            );
-          },
+          icon: 'refresh',
+          type: 'icon' as const,
+          color: 'warning',
           isPrimary: false,
           'data-test-subj': 'action-reset',
+          available: (item: ListItem) => getUnhealthyMonitorCountForLocation(item.id) > 0,
+          onClick: (item: ListItem) => {
+            const ids = getUnhealthyConfigIdsForLocation(item.id);
+            if (ids.length > 0) {
+              setMonitorPendingReset(ids);
+            }
+          },
         },
         {
           name: DELETE_LOCATION,
@@ -293,3 +295,10 @@ const ADD_LABEL = i18n.translate('xpack.synthetics.monitorManagement.createLocat
 export const LEARN_MORE = i18n.translate('xpack.synthetics.privateLocations.learnMore.label', {
   defaultMessage: 'Learn more.',
 });
+
+const RESET_MONITORS_LABEL = i18n.translate(
+  'xpack.synthetics.settingsRoute.privateLocations.resetMonitors',
+  {
+    defaultMessage: 'Reset monitors',
+  }
+);
