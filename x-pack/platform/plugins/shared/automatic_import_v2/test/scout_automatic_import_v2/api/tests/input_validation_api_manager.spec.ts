@@ -17,6 +17,10 @@
  * - Raw JSON `__proto__` on PUT is sent as a string body only (avoid client-side prototype hazards).
  * - `originalSource.sourceValue` accepts arbitrary non-empty strings (including “odd” extensions /
  *   path-like names); uploads are not gated on file extension.
+ *
+ * Payload size / abuse guards (see OpenAPI + Zod in `common/model/`): e.g. upload `samples` max
+ * 1000 lines; create `dataStreams` max 50; approve `categories` max 50;
+ * PATCH pipeline string max 10MB and object `processors` max 10000 (validated in `data_stream_routes`).
  */
 
 import { tags } from '@kbn/scout';
@@ -27,6 +31,13 @@ import {
   dataStreamsApiBasePath,
   scoutApiErrorText,
 } from '../fixtures/api_test_constants';
+
+const minimalDataStream = (i: number) => ({
+  dataStreamId: `scout-oversize-ds-${i}`,
+  title: `Stream ${i}`,
+  description: `Description ${i}`,
+  inputTypes: [{ name: 'filestream' as const }],
+});
 
 const VALIDATION_INTEGRATION_ID = 'scout-input-validation-integration';
 const VALIDATION_DS_ID = 'scout-input-validation-ds';
@@ -247,5 +258,35 @@ apiTest.describe(
         expect(scoutApiErrorText(response.body)).toMatch(/unrecognized|Unrecognized/i);
       }
     );
+
+    apiTest('POST .../upload: rejects more than 1000 samples', async ({ apiClient }) => {
+      const response = await apiClient.post(`${dsBasePath}/${VALIDATION_DS_ID}/upload`, {
+        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+        body: {
+          samples: Array.from({ length: 1001 }, (_, i) => `{"line":${i}}`),
+          originalSource: { sourceType: 'file', sourceValue: 'too-many-samples.log' },
+        },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(400);
+      expectZodBadRequest(response.body);
+    });
+
+    apiTest('PUT /integrations: rejects more than 50 data streams', async ({ apiClient }) => {
+      const integrationId = 'scout-oversized-ds-list';
+      const response = await apiClient.put(INTEGRATION_API_BASE_PATH, {
+        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+        body: {
+          connectorId: 'test-connector-placeholder',
+          integrationId,
+          title: 'Oversized dataStreams',
+          description: 'Request body abuse guard',
+          dataStreams: Array.from({ length: 51 }, (_, i) => minimalDataStream(i)),
+        },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(400);
+      expectZodBadRequest(response.body);
+    });
   }
 );

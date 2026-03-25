@@ -5,32 +5,46 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { EuiCallOut, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import React, { memo, useMemo } from 'react';
+import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
+import { getFieldValue } from '@kbn/discover-utils';
+import { EVENT_KIND } from '@kbn/rule-data-utils';
+
+import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { FlyoutLoading } from '../../flyout/shared/components/flyout_loading';
+import { FlyoutMissingAlertsPrivilege } from '../../flyout/shared/components/flyout_missing_alerts_privilege';
 import type { ResolverCellActionRenderer } from '../../resolver/types';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { PageScope } from '../../data_view_manager/constants';
+import { EventKind } from './constants/event_kinds';
 import { DocumentFlyout } from '.';
 
 const DATA_VIEW_ERROR = i18n.translate(
-  'xpack.securitySolution.analyzer.eventOverviewFlyout.dataViewError',
+  'xpack.securitySolution.flyout.document.overviewWrapper.dataViewError',
   {
     defaultMessage: 'Unable to retrieve the data view for analyzer.',
   }
 );
 
 const DOCUMENT_NOT_FOUND = i18n.translate(
-  'xpack.securitySolution.analyzer.eventOverviewFlyout.documentNotFound',
+  'xpack.securitySolution.flyout.document.overviewWrapper.documentNotFound',
   {
     defaultMessage: 'Cannot find document. No documents match that ID.',
   }
 );
 
+const SOMETHING_WENT_WRONG = i18n.translate(
+  'xpack.securitySolution.flyout.document.overviewWrapper.somethingWentWrong',
+  {
+    defaultMessage: 'Something went wrong.',
+  }
+);
+
 const FETCH_ERROR = i18n.translate(
-  'xpack.securitySolution.analyzer.eventOverviewFlyout.fetchError',
+  'xpack.securitySolution.flyout.document.overviewWrapper.fetchError',
   {
     defaultMessage: 'Unable to fetch document details.',
   }
@@ -63,6 +77,7 @@ export const DocumentFlyoutWrapper = memo(
     const isDataViewLoading = status === 'loading' || status === 'pristine';
     const isDataViewInvalid =
       status === 'error' || (status === 'ready' && !dataView.hasMatchedIndices());
+
     const shouldSkipSearch =
       isDataViewLoading || isDataViewInvalid || !documentId || !indexName || !dataView;
 
@@ -73,17 +88,24 @@ export const DocumentFlyoutWrapper = memo(
       skip: shouldSkipSearch,
     });
 
-    if (isDataViewLoading) {
-      return (
-        <EuiPanel hasBorder={false} hasShadow={false}>
-          <EuiCallOut announceOnMount data-test-subj="analyzer-event-overview-loading">
-            <EuiLoadingSpinner size="m" />{' '}
-            {i18n.translate('xpack.securitySolution.analyzer.eventOverviewFlyout.loading', {
-              defaultMessage: 'Loading…',
-            })}
-          </EuiCallOut>
-        </EuiPanel>
-      );
+    const isAlert = useMemo(
+      () => hit && (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+      [hit]
+    );
+
+    const { hasAlertsRead, loading: isAlertsPrivilegesLoading } = useAlertsPrivileges();
+    const missingAlertsPrivilege = isAlert && !isAlertsPrivilegesLoading && !hasAlertsRead;
+
+    if (
+      isDataViewLoading ||
+      (isAlert && isAlertsPrivilegesLoading) ||
+      requestState === ElasticRequestState.Loading
+    ) {
+      return <FlyoutLoading data-test-subj="document-overview-wrapper-loading" />;
+    }
+
+    if (missingAlertsPrivilege) {
+      return <FlyoutMissingAlertsPrivilege />;
     }
 
     if (isDataViewInvalid) {
@@ -93,7 +115,7 @@ export const DocumentFlyoutWrapper = memo(
           color="danger"
           iconType="warning"
           title={DATA_VIEW_ERROR}
-          data-test-subj="analyzer-event-overview-data-view-error"
+          data-test-subj="document-overview-wrapper-data-view-error"
         />
       );
     }
@@ -109,7 +131,7 @@ export const DocumentFlyoutWrapper = memo(
           color="danger"
           iconType="warning"
           title={DOCUMENT_NOT_FOUND}
-          data-test-subj="analyzer-event-overview-not-found"
+          data-test-subj="document-overview-wrapper-not-found"
         />
       );
     }
@@ -121,20 +143,19 @@ export const DocumentFlyoutWrapper = memo(
           color="danger"
           iconType="warning"
           title={FETCH_ERROR}
-          data-test-subj="analyzer-event-overview-fetch-error"
+          data-test-subj="document-overview-fetch-error"
         />
       );
     }
 
     return (
-      <EuiPanel hasBorder={false} hasShadow={false}>
-        <EuiCallOut data-test-subj="analyzer-event-overview-loading">
-          <EuiLoadingSpinner size="m" />{' '}
-          {i18n.translate('xpack.securitySolution.analyzer.eventOverviewFlyout.loadingFallback', {
-            defaultMessage: 'Loading…',
-          })}
-        </EuiCallOut>
-      </EuiPanel>
+      <EuiCallOut
+        announceOnMount
+        color="danger"
+        iconType="warning"
+        title={SOMETHING_WENT_WRONG}
+        data-test-subj="document-overview-something-went-wrong"
+      />
     );
   }
 );

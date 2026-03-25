@@ -27,6 +27,15 @@ export const EntityStoreStatus = z.enum([
   'error',
 ]);
 
+export const API_VERSIONS = {
+  public: {
+    v1: '2023-10-31',
+  },
+  internal: {
+    v2: '2',
+  },
+} as const;
+
 const ENTITY_STORE_BASE_ROUTE = '/internal/security/entity_store';
 
 export const ENTITY_STORE_ROUTES = {

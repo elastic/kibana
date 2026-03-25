@@ -12,7 +12,7 @@ import type { Process, ProcessEvent } from '@kbn/session-view-plugin/common';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import type { SessionViewConfig } from '../../../common/types/session_view';
-import { OverviewTabWrapper } from '../document/tabs/overview_tab_wrapper';
+import { DocumentFlyoutWrapper } from '../document/document_flyout_wrapper';
 import type { ResolverCellActionRenderer } from '../../resolver/types';
 import { PREFIX } from '../../flyout/shared/test_ids';
 import { useUserPrivileges } from '../../common/components/user_privileges';
@@ -79,7 +79,7 @@ export const SessionView: FC<SessionViewProps> = memo(
             store,
             history,
             children: (
-              <OverviewTabWrapper
+              <DocumentFlyoutWrapper
                 documentId={alertId}
                 indexName={alertIndex}
                 renderCellActions={renderCellActions}
