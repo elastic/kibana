@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiLink, EuiPageTemplate } from '@elastic/eui';
+import { EuiButton, EuiLink } from '@elastic/eui';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import {
   ADD_ENDPOINT_LABEL,
@@ -24,32 +25,26 @@ export const ProviderInferenceEmptyPrompt: React.FC<ProviderInferenceEmptyPrompt
   onFlyoutOpen,
 }) => {
   return (
-    <EuiPageTemplate.Section alignment="center" data-test-subj="providerInferenceEmptyPrompt">
-      <EuiEmptyPrompt
-        iconType="plusInCircle"
-        title={<h2>{PROVIDER_INFERENCE_EMPTY_TITLE}</h2>}
-        body={<p>{PROVIDER_INFERENCE_EMPTY_DESCRIPTION}</p>}
-        actions={
-          <EuiButton
-            fill
-            iconType="plusInCircle"
-            onClick={onFlyoutOpen}
-            data-test-subj="addEndpointButton"
-          >
-            {ADD_ENDPOINT_LABEL}
-          </EuiButton>
-        }
-        footer={
-          <EuiLink
-            href={docLinks.createInferenceEndpoint}
-            target="_blank"
-            external
-            data-test-subj="viewDocumentationLink"
-          >
-            {VIEW_DOCUMENTATION_LINK}
-          </EuiLink>
-        }
-      />
-    </EuiPageTemplate.Section>
+    <KibanaPageTemplate.EmptyPrompt
+      data-test-subj="providerInferenceEmptyPrompt"
+      iconType="plusInCircle"
+      title={<h2>{PROVIDER_INFERENCE_EMPTY_TITLE}</h2>}
+      body={<p>{PROVIDER_INFERENCE_EMPTY_DESCRIPTION}</p>}
+      actions={
+        <EuiButton fill onClick={onFlyoutOpen} data-test-subj="addEndpointButton">
+          {ADD_ENDPOINT_LABEL}
+        </EuiButton>
+      }
+      footer={
+        <EuiLink
+          href={docLinks.createInferenceEndpoint}
+          target="_blank"
+          external
+          data-test-subj="viewDocumentationLink"
+        >
+          {VIEW_DOCUMENTATION_LINK}
+        </EuiLink>
+      }
+    />
   );
 };

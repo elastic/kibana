@@ -20,7 +20,7 @@ import { ProviderInferenceEmptyPrompt } from './provider_inference_empty_prompt'
 
 export const InferenceEndpoints: React.FC = () => {
   const { services } = useKibana();
-  const { data, refetch } = useQueryInferenceEndpoints();
+  const { data, isLoading, refetch } = useQueryInferenceEndpoints();
   const [isAddInferenceFlyoutOpen, setIsAddInferenceFlyoutOpen] = useState<boolean>(false);
 
   const isEisEnabled = isElasticInferenceServiceEnabled(services.uiSettings);
@@ -49,7 +49,7 @@ export const InferenceEndpoints: React.FC = () => {
     return endpoints;
   }, [data, isEisEnabled]);
 
-  const showEmptyState = isEisEnabled && inferenceEndpoints.length === 0;
+  const showEmptyState = isEisEnabled && !isLoading && inferenceEndpoints.length === 0;
 
   return (
     <>
