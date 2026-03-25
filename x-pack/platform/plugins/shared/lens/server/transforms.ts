@@ -27,6 +27,7 @@ import { LENS_EMBEDDABLE_TYPE } from '../common/constants';
 import { getTransformIn } from '../common/transforms/transform_in';
 import { getTransformOut } from '../common/transforms/transform_out';
 import type { LensTransforms } from '../common/transforms/types';
+import { BY_REF_SCHEMA_META, BY_VALUE_SCHEMA_META } from '@kbn/presentation-publishing-schemas/src/types';
 
 /**
  * Triggers that Lens visualizations support, derived from visualization definitions:
@@ -83,9 +84,7 @@ const getLensByValuePanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnTyp
       ...getSharedPanelSchema(getDrilldownsSchema),
     },
     {
-      meta: {
-        description: 'Lens by-value embeddable schema',
-      },
+      meta: BY_VALUE_SCHEMA_META,
     }
   );
 
@@ -96,9 +95,7 @@ const getLensByRefPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType)
       ...getSharedPanelSchema(getDrilldownsSchema),
     },
     {
-      meta: {
-        description: 'Lens by-ref embeddable schema',
-      },
+      meta: BY_REF_SCHEMA_META,
     }
   );
 
