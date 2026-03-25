@@ -12,7 +12,7 @@ import {
   ConfigKey,
   LocationHealthStatusValue,
   type EncryptedSyntheticsMonitorAttributes,
-  type LocationHealthStatus,
+  type PrivateLocationHealthStatus,
   type MonitorHealthError,
   type MonitorHealthStatus,
   type MonitorsHealthResponse,
@@ -106,7 +106,7 @@ export class MonitorIntegrationHealthApi {
       //
       // Priority: missing_location > missing_agent_policy > missing_package_policy
       //           > agent_policy_mismatch > healthy
-      const locationStatuses: LocationHealthStatus[] = privateLocations.map((loc) => {
+      const locationStatuses: PrivateLocationHealthStatus[] = privateLocations.map((loc) => {
         const existingPrivateLocation = allPrivateLocationsMap.get(loc.id);
         const newFormatPolicyId = privateLocationAPI.getPolicyId(
           { origin: so.attributes[ConfigKey.MONITOR_SOURCE_TYPE], id: so.id },
@@ -180,7 +180,7 @@ export class MonitorIntegrationHealthApi {
         configId: so.id,
         monitorName: so.attributes[ConfigKey.NAME],
         isUnhealthy: locationStatuses.some((s) => s.status !== LocationHealthStatusValue.Healthy),
-        locations: locationStatuses,
+        privateLocations: locationStatuses,
       };
     });
 
@@ -281,7 +281,7 @@ export class MonitorIntegrationHealthApi {
       const locations = so.attributes[ConfigKey.LOCATIONS] ?? [];
       const privateLocations = locations.filter((loc) => !loc.isServiceManaged);
 
-      const locationStatuses: LocationHealthStatus[] = privateLocations.map((loc) => {
+      const locationStatuses: PrivateLocationHealthStatus[] = privateLocations.map((loc) => {
         const existingPrivateLocation = allPrivateLocationsMap.get(loc.id);
         const expectedPolicyId = privateLocationAPI.getPolicyId(
           { origin: so.attributes[ConfigKey.MONITOR_SOURCE_TYPE], id: so.id },
@@ -301,7 +301,7 @@ export class MonitorIntegrationHealthApi {
         configId: so.id,
         monitorName: so.attributes[ConfigKey.NAME],
         isUnhealthy: locationStatuses.some((ls) => ls.status !== LocationHealthStatusValue.Healthy),
-        locations: locationStatuses,
+        privateLocations: locationStatuses,
       };
     });
   }
@@ -312,7 +312,7 @@ export class MonitorIntegrationHealthApi {
     status: LocationHealthStatusValue,
     packagePolicyId: string,
     agentPolicyId?: string
-  ): LocationHealthStatus {
+  ): PrivateLocationHealthStatus {
     return {
       locationId,
       locationLabel,

@@ -90,7 +90,7 @@ export const useMonitorIntegrationHealth = (
     if (!healthData) return map;
 
     for (const monitor of healthData.monitors) {
-      const locationStatuses: MonitorIntegrationStatus[] = monitor.locations.map((loc) => ({
+      const locationStatuses: MonitorIntegrationStatus[] = monitor.privateLocations.map((loc) => ({
         configId: monitor.configId,
         locationId: loc.locationId,
         locationLabel: loc.locationLabel,

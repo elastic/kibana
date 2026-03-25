@@ -14,7 +14,7 @@ export enum LocationHealthStatusValue {
   PackageNotInstalled = 'package_not_installed',
 }
 
-export interface LocationHealthStatus {
+export interface PrivateLocationHealthStatus {
   locationId: string;
   locationLabel: string;
   status: LocationHealthStatusValue;
@@ -27,7 +27,7 @@ export interface MonitorHealthStatus {
   configId: string;
   monitorName: string;
   isUnhealthy: boolean;
-  locations: LocationHealthStatus[];
+  privateLocations: PrivateLocationHealthStatus[];
 }
 
 export interface MonitorHealthError {

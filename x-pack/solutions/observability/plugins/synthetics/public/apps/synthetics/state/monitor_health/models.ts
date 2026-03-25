@@ -7,7 +7,7 @@
 
 export {
   LocationHealthStatusValue,
-  type LocationHealthStatus,
+  type PrivateLocationHealthStatus,
   type MonitorHealthStatus,
   type MonitorHealthError,
   type MonitorsHealthResponse,
