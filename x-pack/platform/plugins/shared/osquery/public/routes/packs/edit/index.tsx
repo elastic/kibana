@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { WithHeaderLayout } from '../../../components/layouts';
+import { WithHeaderLayout, fullWidthFormContentCss } from '../../../components/layouts';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { PackForm } from '../../../packs/form';
 import { usePack } from '../../../packs/use_pack';
@@ -68,19 +68,24 @@ const EditPackPageComponent = () => {
     copyPackMutation.mutateAsync();
   }, [copyPackMutation]);
 
+  const backLink = useMemo(
+    () => (
+      <EuiButtonEmpty iconType="arrowLeft" {...queryDetailsLinkProps} flush="left" size="xs">
+        <FormattedMessage
+          id="xpack.osquery.editPack.viewPackListTitle"
+          defaultMessage="View {queryName} details"
+          // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+          values={{ queryName: data?.name }}
+        />
+      </EuiButtonEmpty>
+    ),
+    [data?.name, queryDetailsLinkProps]
+  );
+
   const LeftColumn = useMemo(
     () => (
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
-        <EuiFlexItem>
-          <EuiButtonEmpty iconType="arrowLeft" {...queryDetailsLinkProps} flush="left" size="xs">
-            <FormattedMessage
-              id="xpack.osquery.editPack.viewPackListTitle"
-              defaultMessage="View {queryName} details"
-              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-              values={{ queryName: data?.name }}
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
+        <EuiFlexItem>{backLink}</EuiFlexItem>
         <EuiFlexItem>
           <EuiText>
             <h1>
@@ -97,7 +102,7 @@ const EditPackPageComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [data?.name, queryDetailsLinkProps]
+    [backLink, data?.name]
   );
 
   const RightColumn = useMemo(
@@ -147,7 +152,108 @@ const EditPackPageComponent = () => {
 
   const titleProps = useMemo(() => ({ id: confirmModalTitleId }), [confirmModalTitleId]);
 
+  const formContent =
+    !data || data.saved_object_id !== packId ? (
+      <EuiSkeletonText lines={10} />
+    ) : (
+      <PackForm
+        key={packId}
+        editMode={true}
+        defaultValue={data}
+        isReadOnly={isReadOnly}
+        packId={packId}
+      />
+    );
+
+  const deleteModal = isDeleteModalVisible ? (
+    <EuiConfirmModal
+      aria-labelledby={confirmModalTitleId}
+      titleProps={titleProps}
+      title={
+        <FormattedMessage
+          id="xpack.osquery.deletePack.confirmationModal.title"
+          defaultMessage="Are you sure you want to delete this pack?"
+        />
+      }
+      onCancel={handleCloseDeleteConfirmationModal}
+      onConfirm={handleDeleteConfirmClick}
+      confirmButtonDisabled={deletePackMutation.isLoading}
+      cancelButtonText={
+        <FormattedMessage
+          id="xpack.osquery.deletePack.confirmationModal.cancelButtonLabel"
+          defaultMessage="Cancel"
+        />
+      }
+      confirmButtonText={
+        <FormattedMessage
+          id="xpack.osquery.deletePack.confirmationModal.confirmButtonLabel"
+          defaultMessage="Confirm"
+        />
+      }
+      buttonColor="danger"
+      defaultFocusedButton="confirm"
+    >
+      <FormattedMessage
+        id="xpack.osquery.deletePack.confirmationModal.body"
+        defaultMessage="You're about to delete this pack. Are you sure you want to do this?"
+      />
+    </EuiConfirmModal>
+  ) : null;
+
   if (isLoading) return null;
+
+  if (queryHistoryRework) {
+    if (error) {
+      return (
+        <div css={fullWidthFormContentCss}>
+          <EuiSpacer size="l" />
+          {backLink}
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            title={i18n.translate('xpack.osquery.editPack.loadError.title', {
+              defaultMessage: 'Failed to load pack',
+            })}
+            color="danger"
+            iconType="error"
+          >
+            <FormattedMessage
+              id="xpack.osquery.editPack.loadError.body"
+              defaultMessage="The pack could not be loaded. Please try again later."
+            />
+          </EuiCallOut>
+        </div>
+      );
+    }
+
+    return (
+      <div css={fullWidthFormContentCss}>
+        <EuiSpacer size="l" />
+        {backLink}
+        <EuiSpacer size="m" />
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              <h1>
+                <FormattedMessage
+                  id="xpack.osquery.editPack.pageTitle"
+                  defaultMessage="Edit {queryName}"
+                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                  values={{
+                    queryName: data?.name,
+                  }}
+                />
+              </h1>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{RightColumn}</EuiFlexItem>
+        </EuiFlexGroup>
+        {HeaderContent}
+        <EuiSpacer size="l" />
+        {formContent}
+        {deleteModal}
+      </div>
+    );
+  }
 
   if (error) {
     return (
@@ -175,51 +281,8 @@ const EditPackPageComponent = () => {
       rightColumnGrow={false}
       headerChildren={HeaderContent}
     >
-      {!data || data.saved_object_id !== packId ? (
-        <EuiSkeletonText lines={10} />
-      ) : (
-        <PackForm
-          key={packId}
-          editMode={true}
-          defaultValue={data}
-          isReadOnly={isReadOnly}
-          packId={packId}
-        />
-      )}
-      {isDeleteModalVisible ? (
-        <EuiConfirmModal
-          aria-labelledby={confirmModalTitleId}
-          titleProps={titleProps}
-          title={
-            <FormattedMessage
-              id="xpack.osquery.deletePack.confirmationModal.title"
-              defaultMessage="Are you sure you want to delete this pack?"
-            />
-          }
-          onCancel={handleCloseDeleteConfirmationModal}
-          onConfirm={handleDeleteConfirmClick}
-          confirmButtonDisabled={deletePackMutation.isLoading}
-          cancelButtonText={
-            <FormattedMessage
-              id="xpack.osquery.deletePack.confirmationModal.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          }
-          confirmButtonText={
-            <FormattedMessage
-              id="xpack.osquery.deletePack.confirmationModal.confirmButtonLabel"
-              defaultMessage="Confirm"
-            />
-          }
-          buttonColor="danger"
-          defaultFocusedButton="confirm"
-        >
-          <FormattedMessage
-            id="xpack.osquery.deletePack.confirmationModal.body"
-            defaultMessage="You're about to delete this pack. Are you sure you want to do this?"
-          />
-        </EuiConfirmModal>
-      ) : null}
+      {formContent}
+      {deleteModal}
     </WithHeaderLayout>
   );
 };

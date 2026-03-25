@@ -19,6 +19,8 @@ export const COMMON_HEADERS = {
  */
 export const ENTITY_STORE_ROUTES = {
   INSTALL: 'internal/security/entity_store/install',
+  UPDATE: 'internal/security/entity_store',
+  STATUS: 'internal/security/entity_store/status',
   ENTITY_MAINTAINERS_INIT: 'internal/security/entity_store/entity_maintainers/init',
   START: 'internal/security/entity_store/start',
   STOP: 'internal/security/entity_store/stop',
@@ -28,6 +30,7 @@ export const ENTITY_STORE_ROUTES = {
   FORCE_CCS_EXTRACT_TO_UPDATES: (entityType: string) =>
     `internal/security/entity_store/${entityType}/force_ccs_extract_to_updates`,
   FORCE_HISTORY_SNAPSHOT: 'internal/security/entity_store/force_history_snapshot',
+  CRUD_GET: 'internal/security/entity_store/entities',
   CRUD_UPSERT: (entityType: string) => `internal/security/entity_store/entities/${entityType}`,
   CRUD_UPSERT_BULK: 'internal/security/entity_store/entities/bulk',
   CRUD_DELETE: 'internal/security/entity_store/entities/',
@@ -41,6 +44,7 @@ export const ENTITY_STORE_ROUTES = {
     `internal/security/entity_store/entity_maintainers/stop/${id}`,
   ENTITY_MAINTAINERS_RUN: (id: string) =>
     `internal/security/entity_store/entity_maintainers/run/${id}`,
+  CHECK_PRIVILEGES: 'internal/security/entity_store/check_privileges',
 } as const;
 
 export const ENTITY_STORE_TAGS = [...tags.stateful.classic, ...tags.serverless.security.complete];

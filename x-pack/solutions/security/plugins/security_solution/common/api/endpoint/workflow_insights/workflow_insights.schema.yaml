@@ -2,6 +2,33 @@ openapi: 3.0.0
 info:
   title: Workflow Insights API
   version: '1'
+components:
+  schemas:
+    WorkflowInsightType:
+      type: string
+      enum:
+        - incompatible_antivirus
+        - policy_response_failure
+        - custom
+    WorkflowInsightCategory:
+      type: string
+      enum:
+        - endpoint
+    WorkflowInsightSourceType:
+      type: string
+      enum:
+        - llm-connector
+    WorkflowInsightTargetType:
+      type: string
+      enum:
+        - endpoint
+    WorkflowInsightActionType:
+      type: string
+      enum:
+        - refreshed
+        - remediated
+        - suppressed
+        - dismissed
 paths:
   /internal/api/endpoint/workflow_insights:
     get:
@@ -34,28 +61,21 @@ paths:
           schema:
             type: array
             items:
-              type: string
-              enum:
-                - endpoint
+              $ref: '#/components/schemas/WorkflowInsightCategory'
         - name: types
           in: query
           required: false
           schema:
             type: array
             items:
-              type: string
-              enum:
-                - incompatible_antivirus
-                - noisy_process_tree
+              $ref: '#/components/schemas/WorkflowInsightType'
         - name: sourceTypes
           in: query
           required: false
           schema:
             type: array
             items:
-              type: string
-              enum:
-                - llm-connector
+              $ref: '#/components/schemas/WorkflowInsightSourceType'
         - name: sourceIds
           in: query
           required: false
@@ -69,9 +89,7 @@ paths:
           schema:
             type: array
             items:
-              type: string
-              enum:
-                - endpoint
+              $ref: '#/components/schemas/WorkflowInsightTargetType'
         - name: targetIds
           in: query
           required: false
@@ -85,12 +103,7 @@ paths:
           schema:
             type: array
             items:
-              type: string
-              enum:
-                - refreshed
-                - remediated
-                - suppressed
-                - dismissed
+              $ref: '#/components/schemas/WorkflowInsightActionType'
 
       responses:
         '200':
@@ -99,6 +112,38 @@ paths:
             application/json:
               schema:
                 $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
+
+    post:
+      summary: Initiate automatic troubleshooting
+      operationId: CreateWorkflowInsight
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      x-internal: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - insightType
+              properties:
+                insightType:
+                  $ref: '#/components/schemas/WorkflowInsightType'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - executionId
+                properties:
+                  executionId:
+                    type: string
+                  conversationId:
+                    type: string
 
   /internal/api/endpoint/workflow_insights/{insightId}:
     put:
@@ -126,21 +171,14 @@ paths:
                 message:
                   type: string
                 category:
-                  type: string
-                  enum:
-                    - endpoint
+                  $ref: '#/components/schemas/WorkflowInsightCategory'
                 type:
-                  type: string
-                  enum:
-                    - incompatible_antivirus
-                    - noisy_process_tree
+                  $ref: '#/components/schemas/WorkflowInsightType'
                 source:
                   type: object
                   properties:
                     type:
-                      type: string
-                      enum:
-                        - llm-connector
+                      $ref: '#/components/schemas/WorkflowInsightSourceType'
                     id:
                       type: string
                     data_range_start:
@@ -151,9 +189,7 @@ paths:
                   type: object
                   properties:
                     type:
-                      type: string
-                      enum:
-                        - endpoint
+                      $ref: '#/components/schemas/WorkflowInsightTargetType'
                     ids:
                       type: array
                       items:
@@ -162,12 +198,7 @@ paths:
                   type: object
                   properties:
                     type:
-                      type: string
-                      enum:
-                        - refreshed
-                        - remediated
-                        - suppressed
-                        - dismissed
+                      $ref: '#/components/schemas/WorkflowInsightActionType'
                     timestamp:
                       type: string
                 value:
@@ -216,3 +247,47 @@ paths:
             application/json:
               schema:
                 $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
+
+  /internal/api/endpoint/workflow_insights/pending:
+    get:
+      summary: Get pending troubleshooting executions
+      operationId: GetPendingWorkflowInsights
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      x-internal: true
+      parameters:
+        - name: insightType
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/WorkflowInsightType'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - pending
+                properties:
+                  pending:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - executionId
+                        - status
+                        - insightType
+                        - '@timestamp'
+                      properties:
+                        executionId:
+                          type: string
+                        status:
+                          type: string
+                        conversationId:
+                          type: string
+                        insightType:
+                          type: string
+                        '@timestamp':
+                          type: string

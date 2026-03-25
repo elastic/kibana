@@ -19,6 +19,7 @@ describe('convertPersistedSkill', () => {
     tool_ids: [],
     created_at: '2025-01-01T00:00:00.000Z',
     updated_at: '2025-01-02T00:00:00.000Z',
+    referenced_content_count: 0,
     ...overrides,
   });
 
@@ -96,5 +97,19 @@ describe('convertPersistedSkill', () => {
     const result = convertPersistedSkill(skill);
 
     expect(result.referencedContent).toBeUndefined();
+  });
+
+  it('always sets experimental to false', () => {
+    const skill = createMockPersistedSkill();
+    const result = convertPersistedSkill(skill);
+
+    expect(result.experimental).toBe(false);
+  });
+
+  it('sets experimental to false even for plugin-managed skills', () => {
+    const skill = createMockPersistedSkill({ plugin_id: 'my-plugin' });
+    const result = convertPersistedSkill(skill);
+
+    expect(result.experimental).toBe(false);
   });
 });

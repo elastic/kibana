@@ -19,7 +19,7 @@ export const otelDemoDataset: DatasetConfig = {
   id: OTEL_DEMO_NAMESPACE,
   description: 'OpenTelemetry Demo microservices application',
   gcs: { bucket: GCS_BUCKET, basePathPrefix: OTEL_DEMO_GCS_BASE_PATH_PREFIX },
-  featureExtraction: [
+  kiFeatureExtraction: [
     {
       input: {
         scenario_id: 'healthy-baseline',
@@ -378,7 +378,25 @@ export const otelDemoDataset: DatasetConfig = {
       },
     },
   ],
-  queryGeneration: [
+  kiFeatureExclusion: [
+    {
+      input: {
+        scenario_id: 'healthy-baseline',
+        sample_document_count: 20,
+        exclude_count: 4,
+        follow_up_runs: 3,
+      },
+    },
+    {
+      input: {
+        scenario_id: 'healthy-baseline',
+        sample_document_count: 20,
+        exclude_count: 1,
+        follow_up_runs: 3,
+      },
+    },
+  ],
+  kiQueryGeneration: [
     {
       input: {
         scenario_id: 'healthy-baseline',

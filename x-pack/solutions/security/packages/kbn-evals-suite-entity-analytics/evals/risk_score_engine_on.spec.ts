@@ -79,6 +79,7 @@ evaluate.describe(
                 toolCalls: [
                   {
                     id: 'security.entity_analytics.risk_score',
+                    acceptableAlternativeToolIds: ['security.entity_analytics.asset_criticality'],
                     criteria: [
                       `The tool should return the following ESQL query:
                       FROM risk-score.risk-score-latest-default
@@ -108,6 +109,7 @@ evaluate.describe(
                 toolCalls: [
                   {
                     id: 'security.entity_analytics.risk_score',
+                    acceptableAlternativeToolIds: ['security.entity_analytics.asset_criticality'],
                     criteria: [
                       `The tool should return an ESQL query with the following structure:
                       * FROM index: risk-score.risk-score-default
@@ -134,6 +136,7 @@ evaluate.describe(
                 toolCalls: [
                   {
                     id: 'security.entity_analytics.risk_score',
+                    acceptableAlternativeToolIds: ['security.entity_analytics.asset_criticality'],
                     criteria: [
                       `The tool should return the following ESQL query:
                       FROM risk-score.risk-score-latest-default

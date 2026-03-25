@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { DataCatalogPluginSetup } from '@kbn/data-catalog-plugin/server';
+import { figmaDataSource } from './figma';
 import { notionDataSource } from './notion';
 import { githubDataSource } from './github';
 import { googleCalendarDataSource } from './google_calendar';
@@ -12,15 +13,19 @@ import { googleDriveDataSource } from './google_drive';
 import { sharepointOnlineDataSource } from './sharepoint_online';
 import { slackDataSource } from './slack';
 import { jiraDataSource } from './jira-cloud';
+import { gmailDataSource } from './gmail';
 import { firecrawlDataSource } from './firecrawl';
 import { salesforceDataSource } from './salesforce';
 import { zoomDataSource } from './zoom';
 import { zendeskDataSource } from './zendesk';
 import { pagerdutyDataSource } from './pagerduty';
 import { servicenowDataSource } from './servicenow';
+import { amazonS3DataSource } from './amazon_s3';
 import { tavilyDataSource } from './tavily';
+import { microsoftTeamsDataSource } from './microsoft_teams';
 
 export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
+  dataCatalog.register(figmaDataSource);
   dataCatalog.register(notionDataSource);
   dataCatalog.register(githubDataSource);
   dataCatalog.register(googleCalendarDataSource);
@@ -28,11 +33,14 @@ export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(sharepointOnlineDataSource);
   dataCatalog.register(slackDataSource);
   dataCatalog.register(jiraDataSource);
+  dataCatalog.register(gmailDataSource);
   dataCatalog.register(firecrawlDataSource);
   dataCatalog.register(salesforceDataSource);
   dataCatalog.register(zoomDataSource);
   dataCatalog.register(zendeskDataSource);
   dataCatalog.register(servicenowDataSource);
   dataCatalog.register(pagerdutyDataSource);
+  dataCatalog.register(amazonS3DataSource);
   dataCatalog.register(tavilyDataSource);
+  dataCatalog.register(microsoftTeamsDataSource);
 }

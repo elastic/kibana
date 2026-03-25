@@ -62,14 +62,14 @@ export function registerRoutes({
             (params as IoTsParamsObject) ?? t.strict({})
           );
 
-          const data = (await handler({
+          const data = await handler({
             context,
             request,
             logger,
             params: decodedParams,
             plugins,
             getEsCapabilities,
-          })) as any;
+          });
 
           if (data === undefined) {
             return response.noContent();

@@ -8,7 +8,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useBoolean } from '@kbn/react-hooks';
-import type { EuiBasicTableColumn, CriteriaWithPagination } from '@elastic/eui';
+import type { CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiBadge,
   EuiHealth,
@@ -23,6 +23,8 @@ import { i18n } from '@kbn/i18n';
 import { upperFirst } from 'lodash';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamFeaturesApi } from '../../../hooks/use_stream_features_api';
+
+export type FeaturesTableMode = 'active' | 'excluded';
 
 export function getConfidenceColor(confidence: number): string {
   if (confidence >= 70) return 'success';
@@ -50,6 +52,7 @@ interface UseStreamFeaturesTableProps {
   isIdentifyingFeatures: boolean;
   selectedFeature: Feature | null;
   onSelectFeature: (feature: Feature | null) => void;
+  mode: FeaturesTableMode;
 }
 
 export function useStreamFeaturesTable({
@@ -59,16 +62,20 @@ export function useStreamFeaturesTable({
   isIdentifyingFeatures,
   selectedFeature,
   onSelectFeature,
+  mode,
 }: UseStreamFeaturesTableProps) {
   const {
     core: { notifications },
   } = useKibana();
-  const { deleteFeature, deleteFeaturesInBulk } = useStreamFeaturesApi(definition);
+  const { deleteFeature, deleteFeaturesInBulk, excludeFeaturesInBulk, restoreFeaturesInBulk } =
+    useStreamFeaturesApi(definition);
 
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
   const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>([]);
   const [isBulkDeleteModalVisible, { on: showBulkDeleteModal, off: hideBulkDeleteModal }] =
     useBoolean(false);
+
+  // --- Delete (shared by both modes) ---
 
   const [{ loading: isDeleting }, handleDeleteFeature] = useAsyncFn(async () => {
     if (!selectedFeature) return;
@@ -128,6 +135,126 @@ export function useStreamFeaturesTable({
     hideBulkDeleteModal,
   ]);
 
+  // --- Exclude (active mode only) ---
+
+  const [{ loading: isExcluding }, handleExcludeFeature] = useAsyncFn(async () => {
+    if (!selectedFeature) return;
+
+    try {
+      await excludeFeaturesInBulk([selectedFeature.uuid]);
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.streams.streamFeaturesTable.excludeSuccess.title', {
+          defaultMessage: 'Feature excluded',
+        }),
+        text: i18n.translate('xpack.streams.streamFeaturesTable.excludeSuccess.text', {
+          defaultMessage: 'The feature has been successfully excluded.',
+        }),
+      });
+      onSelectFeature(null);
+      refreshFeatures();
+    } catch (error) {
+      notifications.toasts.addError(error instanceof Error ? error : new Error(String(error)), {
+        title: i18n.translate('xpack.streams.streamFeaturesTable.excludeError.title', {
+          defaultMessage: 'Failed to exclude feature',
+        }),
+      });
+    }
+  }, [
+    selectedFeature,
+    excludeFeaturesInBulk,
+    refreshFeatures,
+    notifications.toasts,
+    onSelectFeature,
+  ]);
+
+  const [{ loading: isBulkExcluding }, handleBulkExclude] = useAsyncFn(async () => {
+    if (selectedFeatures.length === 0) return;
+
+    try {
+      await excludeFeaturesInBulk(selectedFeatures.map(({ uuid }) => uuid));
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.streams.streamFeaturesTable.bulkExcludeSuccess.title', {
+          defaultMessage: '{count, plural, one {Feature excluded} other {Features excluded}}',
+          values: { count: selectedFeatures.length },
+        }),
+        text: i18n.translate('xpack.streams.streamFeaturesTable.bulkExcludeSuccess.text', {
+          defaultMessage:
+            '{count, plural, one {The feature has} other {# features have}} been successfully excluded.',
+          values: { count: selectedFeatures.length },
+        }),
+      });
+      setSelectedFeatures([]);
+      refreshFeatures();
+    } catch (error) {
+      notifications.toasts.addError(error instanceof Error ? error : new Error(String(error)), {
+        title: i18n.translate('xpack.streams.streamFeaturesTable.bulkExcludeError.title', {
+          defaultMessage: 'Failed to exclude features',
+        }),
+      });
+    }
+  }, [selectedFeatures, excludeFeaturesInBulk, refreshFeatures, notifications.toasts]);
+
+  // --- Restore (excluded mode only) ---
+
+  const [{ loading: isRestoring }, handleRestoreFeature] = useAsyncFn(async () => {
+    if (!selectedFeature) return;
+
+    try {
+      await restoreFeaturesInBulk([selectedFeature.uuid]);
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.streams.streamFeaturesTable.restoreSuccess.title', {
+          defaultMessage: 'Feature restored',
+        }),
+        text: i18n.translate('xpack.streams.streamFeaturesTable.restoreSuccess.text', {
+          defaultMessage: 'The feature has been successfully restored.',
+        }),
+      });
+      onSelectFeature(null);
+      refreshFeatures();
+    } catch (error) {
+      notifications.toasts.addError(error instanceof Error ? error : new Error(String(error)), {
+        title: i18n.translate('xpack.streams.streamFeaturesTable.restoreError.title', {
+          defaultMessage: 'Failed to restore feature',
+        }),
+      });
+    }
+  }, [
+    selectedFeature,
+    restoreFeaturesInBulk,
+    refreshFeatures,
+    notifications.toasts,
+    onSelectFeature,
+  ]);
+
+  const [{ loading: isBulkRestoring }, handleBulkRestore] = useAsyncFn(async () => {
+    if (selectedFeatures.length === 0) return;
+
+    try {
+      await restoreFeaturesInBulk(selectedFeatures.map(({ uuid }) => uuid));
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.streams.streamFeaturesTable.bulkRestoreSuccess.title', {
+          defaultMessage: '{count, plural, one {Feature restored} other {Features restored}}',
+          values: { count: selectedFeatures.length },
+        }),
+        text: i18n.translate('xpack.streams.streamFeaturesTable.bulkRestoreSuccess.text', {
+          defaultMessage:
+            '{count, plural, one {The feature has} other {# features have}} been successfully restored.',
+          values: { count: selectedFeatures.length },
+        }),
+      });
+      setSelectedFeatures([]);
+      refreshFeatures();
+    } catch (error) {
+      notifications.toasts.addError(error instanceof Error ? error : new Error(String(error)), {
+        title: i18n.translate('xpack.streams.streamFeaturesTable.bulkRestoreError.title', {
+          defaultMessage: 'Failed to restore features',
+        }),
+      });
+    }
+  }, [selectedFeatures, restoreFeaturesInBulk, refreshFeatures, notifications.toasts]);
+
+  // --- Shared ---
+
   const clearSelection = useCallback(() => {
     setSelectedFeatures([]);
   }, []);
@@ -138,13 +265,13 @@ export function useStreamFeaturesTable({
     }
   }, []);
 
-  const columns: Array<EuiBasicTableColumn<Feature>> = useMemo(
+  const columns = useMemo(
     () => [
       {
         field: 'details',
         name: '',
         width: '40px',
-        render: (_, feature: Feature) => (
+        render: (_: unknown, feature: Feature) => (
           <EuiButtonIcon
             data-test-subj="streamsAppFeatureDetailsButton"
             iconType="expand"
@@ -197,60 +324,123 @@ export function useStreamFeaturesTable({
     [isIdentifyingFeatures, onSelectFeature]
   );
 
+  const bulkActions = useMemo(() => {
+    if (mode === 'active') {
+      return [
+        {
+          label: EXCLUDE_SELECTED,
+          iconType: 'eyeClosed',
+          color: 'warning' as const,
+          isLoading: isBulkExcluding,
+          onClick: handleBulkExclude,
+        },
+        {
+          label: DELETE_SELECTED,
+          iconType: 'trash',
+          color: 'danger' as const,
+          isLoading: isBulkDeleting,
+          onClick: showBulkDeleteModal,
+        },
+      ];
+    }
+    return [
+      {
+        label: RESTORE_SELECTED,
+        iconType: 'eye',
+        color: 'primary' as const,
+        isLoading: isBulkRestoring,
+        onClick: handleBulkRestore,
+      },
+      {
+        label: DELETE_SELECTED,
+        iconType: 'trash',
+        color: 'danger' as const,
+        isLoading: isBulkDeleting,
+        onClick: showBulkDeleteModal,
+      },
+    ];
+  }, [
+    mode,
+    isBulkExcluding,
+    handleBulkExclude,
+    isBulkRestoring,
+    handleBulkRestore,
+    isBulkDeleting,
+    showBulkDeleteModal,
+  ]);
+
+  const flyoutActions = useMemo(() => {
+    if (mode === 'active') {
+      return {
+        onDelete: handleDeleteFeature,
+        isDeleting,
+        onExclude: handleExcludeFeature,
+        isExcluding,
+      };
+    }
+    return {
+      onDelete: handleDeleteFeature,
+      isDeleting,
+      onRestore: handleRestoreFeature,
+      isRestoring,
+    };
+  }, [
+    mode,
+    handleDeleteFeature,
+    isDeleting,
+    handleExcludeFeature,
+    isExcluding,
+    handleRestoreFeature,
+    isRestoring,
+  ]);
+
   return {
-    // State
     pagination,
     selectedFeatures,
     setSelectedFeatures,
     isBulkDeleteModalVisible,
     isIdentifyingFeatures,
-    // Actions
     showBulkDeleteModal,
     hideBulkDeleteModal,
-    handleDeleteFeature,
     handleBulkDelete,
+    isBulkDeleting,
     clearSelection,
     handleTableChange,
-    // Loading states
-    isDeleting,
-    isBulkDeleting,
-    // Table config
     columns,
-    items: features,
     noItemsMessage: NO_FEATURES_MESSAGE,
+    bulkActions,
+    flyoutActions,
+    label: mode === 'active' ? FEATURES_LABEL : EXCLUDED_FEATURES_LABEL,
   };
 }
 
 const FEATURE_COLUMN_HEADER_LABEL = i18n.translate(
   'xpack.streams.streamFeaturesTable.columns.featureColumnHeader',
-  {
-    defaultMessage: 'Feature',
-  }
+  { defaultMessage: 'Feature' }
 );
 
 const TYPE_COLUMN_HEADER_LABEL = i18n.translate(
   'xpack.streams.streamFeaturesTable.columns.typeColumnHeader',
-  {
-    defaultMessage: 'Type',
-  }
+  { defaultMessage: 'Type' }
 );
 
 const CONFIDENCE_COLUMN_HEADER_LABEL = i18n.translate(
   'xpack.streams.streamFeaturesTable.columns.confidenceColumnHeader',
-  {
-    defaultMessage: 'Confidence',
-  }
+  { defaultMessage: 'Confidence' }
 );
 
 export const FEATURES_LABEL = i18n.translate('xpack.streams.streamFeaturesTable.tableTitle', {
   defaultMessage: 'Features',
 });
 
+const EXCLUDED_FEATURES_LABEL = i18n.translate(
+  'xpack.streams.streamFeaturesTable.excludedTableTitle',
+  { defaultMessage: 'Excluded features' }
+);
+
 export const TABLE_CAPTION_LABEL = i18n.translate(
   'xpack.streams.streamFeaturesTable.tableCaption',
-  {
-    defaultMessage: 'List of features',
-  }
+  { defaultMessage: 'List of features' }
 );
 
 export const CLEAR_SELECTION = i18n.translate(
@@ -258,11 +448,19 @@ export const CLEAR_SELECTION = i18n.translate(
   { defaultMessage: 'Clear selection' }
 );
 
-export const DELETE_SELECTED = i18n.translate(
+const DELETE_SELECTED = i18n.translate(
   'xpack.streams.streamFeaturesTable.columns.actions.deleteSelection',
-  {
-    defaultMessage: 'Delete selected',
-  }
+  { defaultMessage: 'Delete selected' }
+);
+
+const EXCLUDE_SELECTED = i18n.translate(
+  'xpack.streams.streamFeaturesTable.columns.actions.excludeSelection',
+  { defaultMessage: 'Exclude selected' }
+);
+
+const RESTORE_SELECTED = i18n.translate(
+  'xpack.streams.streamFeaturesTable.columns.actions.restoreSelection',
+  { defaultMessage: 'Restore selected' }
 );
 
 const VIEW_DETAILS_ARIA_LABEL = i18n.translate(

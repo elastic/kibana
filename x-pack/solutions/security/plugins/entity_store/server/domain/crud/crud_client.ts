@@ -9,16 +9,18 @@ import type { Logger } from '@kbn/logging';
 import type {
   BulkOperationContainer,
   BulkUpdateAction,
+  QueryDslQueryContainer,
   Result,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import type { EntityType } from '../../../common';
 import { getEuidFromObject } from '../../../common/domain/euid';
-import { getLatestEntitiesIndexName } from '../asset_manager/latest_index';
+import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
 import { BadCRUDRequestError, EntityNotFoundError } from '../errors';
 import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
 import { hashEuid, validateAndTransformDocForUpsert } from './utils';
+import { runWithSpan } from '../../telemetry/traces';
 
 const RETRY_ON_CONFLICT = 3;
 
@@ -26,6 +28,17 @@ interface CRUDClientDependencies {
   logger: Logger;
   esClient: ElasticsearchClient;
   namespace: string;
+}
+
+export interface ListEntitiesParams {
+  filter?: QueryDslQueryContainer;
+  size?: number;
+  searchAfter?: Array<string | number>;
+}
+
+export interface ListEntitiesResult {
+  entities: Entity[];
+  nextSearchAfter?: Array<string | number>;
 }
 
 export interface BulkObject {
@@ -54,6 +67,90 @@ export class CRUDClient {
     this.logger = deps.logger;
     this.esClient = deps.esClient;
     this.namespace = deps.namespace;
+    this.initWithTracing();
+  }
+
+  private initWithTracing(): void {
+    const namespace = this.namespace;
+
+    const baseUpsertEntity = this.upsertEntity.bind(this);
+    const tracedUpsertEntity = (
+      entityType: EntityType,
+      doc: Entity,
+      force: boolean
+    ): Promise<void> =>
+      runWithSpan({
+        name: 'entityStore.crud.upsert_entity',
+        namespace,
+        attributes: {
+          'entity_store.crud.operation': 'upsert_entity',
+          'entity_store.entity.type': entityType,
+          'entity_store.force': force,
+        },
+        cb: () => baseUpsertEntity(entityType, doc, force),
+      });
+
+    Object.defineProperty(this, 'upsertEntity', {
+      value: tracedUpsertEntity,
+      configurable: true,
+      writable: true,
+    });
+
+    const baseUpsertEntitiesBulk = this.upsertEntitiesBulk.bind(this);
+    const tracedUpsertEntitiesBulk = (
+      params: UpsertEntitiesBulkParams
+    ): Promise<BulkObjectResponse[]> =>
+      runWithSpan({
+        name: 'entityStore.crud.upsert_entities_bulk',
+        namespace,
+        attributes: {
+          'entity_store.crud.operation': 'upsert_entities_bulk',
+          'entity_store.objects.count': params.objects.length,
+          'entity_store.force': params.force ?? false,
+        },
+        cb: () => baseUpsertEntitiesBulk(params),
+      });
+
+    Object.defineProperty(this, 'upsertEntitiesBulk', {
+      value: tracedUpsertEntitiesBulk,
+      configurable: true,
+      writable: true,
+    });
+
+    const baseDeleteEntity = this.deleteEntity.bind(this);
+    const tracedDeleteEntity = (id: string): Promise<void> =>
+      runWithSpan({
+        name: 'entityStore.crud.delete_entity',
+        namespace,
+        attributes: {
+          'entity_store.crud.operation': 'delete_entity',
+          'entity_store.entity.id': id,
+        },
+        cb: () => baseDeleteEntity(id),
+      });
+
+    Object.defineProperty(this, 'deleteEntity', {
+      value: tracedDeleteEntity,
+      configurable: true,
+      writable: true,
+    });
+
+    const baseListEntities = this.listEntities.bind(this);
+    const tracedListEntities = (params?: ListEntitiesParams): Promise<ListEntitiesResult> =>
+      runWithSpan({
+        name: 'entityStore.crud.list_entities',
+        namespace,
+        attributes: {
+          'entity_store.crud.operation': 'list_entities',
+        },
+        cb: () => baseListEntities(params),
+      });
+
+    Object.defineProperty(this, 'listEntities', {
+      value: tracedListEntities,
+      configurable: true,
+      writable: true,
+    });
   }
 
   // upsertEntity takes a single entity and tries to either create or update
@@ -149,5 +246,33 @@ export class CRUDClient {
       }
       throw error;
     }
+  }
+
+  // listEntities searches the LATEST index for all entities.
+  // An optional DSL filter can be provided and is applied as an additional
+  // filter clause on the search query, e.g. to scope results by additional
+  // field conditions. Supports size and searchAfter for pagination.
+  public async listEntities(params?: ListEntitiesParams): Promise<ListEntitiesResult> {
+    this.logger.debug('Listing entities');
+
+    const { filter, size, searchAfter } = params ?? {};
+
+    const query: QueryDslQueryContainer = filter
+      ? { bool: { filter: [filter] } }
+      : { match_all: {} };
+
+    const resp = await this.esClient.search<Entity>({
+      index: getLatestEntitiesIndexName(this.namespace),
+      query,
+      size,
+      sort: [{ _id: 'asc' }],
+      search_after: searchAfter,
+    });
+
+    const hits = resp.hits.hits;
+    const entities = hits.map((hit) => hit._source as Entity);
+    const lastHit = hits[hits.length - 1];
+
+    return { entities, nextSearchAfter: lastHit?.sort as Array<string | number> | undefined };
   }
 }

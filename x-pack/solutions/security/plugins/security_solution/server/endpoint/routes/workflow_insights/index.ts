@@ -7,9 +7,13 @@
 
 import { registerUpdateInsightsRoute } from './update_insight';
 import { registerGetInsightsRoute } from './get_insights';
+import { registerCreateInsightsRoute } from './create_insights';
+import { registerGetPendingRoute } from './get_pending';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import type { ConfigType } from '../../..';
 import type { EndpointAppContext } from '../../types';
+
+export const AUTOMATIC_TROUBLESHOOTING_TAG = 'automatic-troubleshooting';
 
 export const registerWorkflowInsightsRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -18,4 +22,6 @@ export const registerWorkflowInsightsRoutes = (
 ) => {
   registerGetInsightsRoute(router, endpointContext);
   registerUpdateInsightsRoute(router, endpointContext);
+  registerCreateInsightsRoute(router, endpointContext);
+  registerGetPendingRoute(router, endpointContext);
 };

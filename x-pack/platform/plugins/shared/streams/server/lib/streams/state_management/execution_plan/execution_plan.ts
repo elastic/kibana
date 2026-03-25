@@ -243,9 +243,6 @@ export class ExecutionPlan {
         ...upsert_dot_streams_document,
         ...delete_dot_streams_document,
       ]);
-
-      // Upsert ES|QL views after the stream documents are created
-      await this.upsertEsqlViews(upsert_esql_view);
     } catch (error) {
       if (error instanceof StatusError) {
         throw error;
@@ -253,6 +250,21 @@ export class ExecutionPlan {
       throw new FailedToExecuteElasticsearchActionsError(
         `Failed to execute Elasticsearch actions: ${getErrorMessage(error)}`
       );
+    }
+
+    // Upsert ES|QL views after the stream documents are created.
+    // This is best-effort: if the ES|QL views API is unavailable (e.g. older
+    // Elasticsearch versions or serverless), we log a warning instead of
+    // failing the whole operation.
+    const viewsToUpsert = this.actionsByType.upsert_esql_view;
+    if (viewsToUpsert.length > 0) {
+      await this.upsertEsqlViews(viewsToUpsert).catch((error) => {
+        this.dependencies.logger.warn(
+          `Failed to upsert ES|QL views. The ES|QL views API may not be available in this Elasticsearch version: ${getErrorMessage(
+            error
+          )}`
+        );
+      });
     }
   }
 

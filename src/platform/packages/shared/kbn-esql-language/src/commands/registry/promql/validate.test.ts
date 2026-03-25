@@ -89,6 +89,22 @@ describe('PROMQL Validation', () => {
       promqlExpectErrors('PROMQL step=5m start=?_tstart end=?_tend', ['[PROMQL] Missing query']);
     });
 
+    test('param as entire query', () => {
+      promqlExpectErrors('PROMQL ?my_query', []);
+    });
+
+    test('parenthesized param as entire query', () => {
+      promqlExpectErrors('PROMQL (?my_query)', []);
+    });
+
+    test('assigned param as entire query', () => {
+      promqlExpectErrors('PROMQL col0 = ?my_query', []);
+    });
+
+    test('assigned parenthesized param as entire query', () => {
+      promqlExpectErrors('PROMQL col0 = (?my_query)', []);
+    });
+
     test('named query with parens', () => {
       promqlExpectErrors(
         'PROMQL step=5m start=?_tstart end=?_tend col0=(rate(counterIntegerField[5m]))',
