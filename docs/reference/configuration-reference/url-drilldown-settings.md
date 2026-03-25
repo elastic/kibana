@@ -9,6 +9,8 @@ applies_to:
 
 # URL drilldown settings in {{kib}} [url-drilldown-settings-kb]
 
+:::{settings} /reference/configuration-reference/url-drilldown-settings.yml
+:::
 
 Configure the URL drilldown settings in your `kibana.yml` configuration file.
 

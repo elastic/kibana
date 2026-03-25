@@ -7,6 +7,9 @@ applies_to:
 
 # Sharing settings in {{kib}} [share-settings-kb]
 
+:::{settings} /reference/configuration-reference/share-settings.yml
+:::
+
 Configure sharing settings in your `kibana.yml` configuration file.
 These settings allow you to customize the behavior of URL sharing in {{kib}}.
 

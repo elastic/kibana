@@ -9,6 +9,9 @@ applies_to:
 
 # Task Manager settings in {{kib}} [task-manager-settings-kb]
 
+:::{settings} /reference/configuration-reference/task-manager-settings.yml
+:::
+
 Task Manager runs background tasks by polling for work on an interval. You can configure its behavior to tune for performance and throughput.
 
 ## Task Manager settings [task-manager-settings]

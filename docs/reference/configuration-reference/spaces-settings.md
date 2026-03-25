@@ -9,6 +9,8 @@ applies_to:
 
 # Spaces settings in {{kib}} [spaces-settings-kb]
 
+:::{settings} /reference/configuration-reference/spaces-settings.yml
+:::
 
 By default, spaces is enabled in {{kib}}. To secure spaces, [enable security](/reference/configuration-reference/security-settings.md).
 

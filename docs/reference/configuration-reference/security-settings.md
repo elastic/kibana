@@ -10,6 +10,8 @@ applies_to:
 
 # Security settings in {{kib}} [security-settings-kb]
 
+:::{settings} /reference/configuration-reference/security-settings.yml
+:::
 
 You do not need to configure any additional settings to use the {{security-features}} in {{kib}}. They are enabled by default.
 

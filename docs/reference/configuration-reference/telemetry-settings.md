@@ -9,6 +9,8 @@ applies_to:
 
 # Telemetry settings in {{kib}} [telemetry-settings-kbn]
 
+:::{settings} /reference/configuration-reference/telemetry-settings.yml
+:::
 
 Usage Collection (also known as Telemetry) is enabled by default. This allows us to learn what our users are most interested in, so we can improve our products and services.
 

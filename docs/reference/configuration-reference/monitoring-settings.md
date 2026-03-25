@@ -10,6 +10,9 @@ applies_to:
 
 # Monitoring settings in {{kib}} [monitoring-settings-kb]
 
+:::{settings} /reference/configuration-reference/monitoring-settings.yml
+:::
+
 By default, **{{stack-monitor-app}}** is enabled, but data collection is disabled. When you first start {{kib}} monitoring, you are prompted to enable data collection. If you are using {{stack-security-features}}, you must be signed in as a user with the `cluster:manage` privilege to enable data collection. The built-in `superuser` role has this privilege and the built-in `elastic` user has this role.
 
 You can adjust how monitoring data is collected from {{kib}} and displayed in {{kib}} by configuring settings in the `kibana.yml` file. There are also `monitoring.ui.elasticsearch.*` settings, which support the same values as [{{kib}} configuration settings](/reference/configuration-reference/general-settings.md).

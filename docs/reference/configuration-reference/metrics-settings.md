@@ -9,6 +9,8 @@ applies_to:
 
 # Metrics settings in {{kib}} [infrastructure-ui-settings-kb]
 
+:::{settings} /reference/configuration-reference/metrics-settings.yml
+:::
 
 You do not need to configure any settings to use the Metrics app in {{kib}}. It is enabled by default.
 
