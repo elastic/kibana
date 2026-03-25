@@ -6,10 +6,8 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 import { platformCoreTools } from '@kbn/agent-builder-common';
-import { searchAgentInstructions } from '@kbn/search-agent';
-import { SEARCH_AGENT_ID } from '../../common/constants';
+import { skills, agents } from '@kbn/search-agent';
 import type { SearchGettingStartedSetupDependencies } from '../types';
 
 const SEARCH_AGENT_TOOL_IDS = [
@@ -29,20 +27,31 @@ export const registerSearchAgent = ({
   plugins: SearchGettingStartedSetupDependencies;
   logger: Logger;
 }) => {
-  const definition: BuiltInAgentDefinition = {
-    id: SEARCH_AGENT_ID,
-    name: 'Elasticsearch Onboarding Agent',
-    description:
-      'Guides developers from intent to a working search experience with Elasticsearch — recommending approaches, designing mappings, and generating production-ready code.',
-    avatar_icon: 'logoElasticsearch',
-    labels: ['search'],
-    // TODO: register the skills with agent builder when they release that feature
-    configuration: {
-      replace_default_instructions: true,
-      instructions: searchAgentInstructions,
-      tools: [{ tool_ids: SEARCH_AGENT_TOOL_IDS }],
-    },
-  };
-  plugins.agentBuilder?.agents.register(definition);
-  logger.debug('Successfully registered search agent in agent-builder');
+  if (!plugins.agentBuilder) {
+    return;
+  }
+  const { agentBuilder } = plugins;
+  const skillIds = [];
+  for (const skill of skills) {
+    const id = `search.${skill.id}`;
+    agentBuilder.skills.register({
+      ...skill,
+      id,
+      basePath: 'skills/search',
+    });
+    skillIds.push(id);
+    logger.debug(`Successfully registered ${id} skill in agent-builder`);
+  }
+  for (const agent of agents) {
+    agentBuilder.agents.register({
+      ...agent,
+      configuration: {
+        ...agent.configuration,
+        replace_default_instructions: true,
+        skill_ids: skillIds,
+        tools: [{ tool_ids: SEARCH_AGENT_TOOL_IDS }],
+      },
+    });
+    logger.debug(`Successfully registered ${agent.id} agent in agent-builder`);
+  }
 };

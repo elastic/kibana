@@ -18,9 +18,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { elasticsearchOnboardingAgent } from '@kbn/search-agent';
 
 import { useKibana } from '../../hooks/use_kibana';
-import { SEARCH_AGENT_ID } from '../../../common/constants';
 import { SearchGettingStartedSectionHeading } from '../section_heading';
 import { PromptModal } from './prompt_modal';
 import { USE_CASE_OPTIONS, type UseCaseId } from './constants';
@@ -67,7 +67,7 @@ export const AgentInstallSection = () => {
   const handleOpenInAgentBuilder = useCallback(() => {
     closePopover();
     services.agentBuilder?.openChat({
-      agentId: SEARCH_AGENT_ID,
+      agentId: elasticsearchOnboardingAgent.id,
       initialMessage: buildPrompt(selectedUseCase, 'agent-builder'),
       autoSendInitialMessage: false,
       newConversation: true,
@@ -130,6 +130,7 @@ export const AgentInstallSection = () => {
             panelPaddingSize="none"
             anchorPosition="downLeft"
             data-test-subj="agentInstallLaunchPopover"
+            aria-label={'TODO - write a real label'}
           >
             <EuiContextMenuPanel
               data-test-subj="agentInstallLaunchMenu"
