@@ -104,7 +104,13 @@ export const DefaultParams = z.object({
 
 export type RunScriptOsConfigValues = z.infer<typeof RunScriptOsConfigValues>;
 export const RunScriptOsConfigValues = z.object({
+  /**
+   * The ID of the script to run (from the Kibana Script library)
+   */
   scriptId: z.string().optional(),
+  /**
+   * The arguments to pass to the script (if any)
+   */
   scriptInput: z.string().optional(),
   /**
    * Specify the timeout in seconds for the script execution
@@ -113,10 +119,8 @@ export const RunScriptOsConfigValues = z.object({
 });
 
 /**
-  * > warn
-> This functionality is currently not available
-
-  */
+ * Run a script on the Elastic Defend host that triggered the alert.
+ */
 export type RunscriptParams = z.infer<typeof RunscriptParams>;
 export const RunscriptParams = z.object({
   command: z.literal('runscript'),

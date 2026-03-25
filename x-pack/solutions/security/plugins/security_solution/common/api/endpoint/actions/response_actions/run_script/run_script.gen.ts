@@ -21,6 +21,21 @@ import {
   BaseActionSchema,
 } from '../../../model/schema/common.gen';
 
+/**
+ * Parameters for Run Script response action against Elastic Defend agent type.
+ */
+export type EndpointRunScriptParameters = z.infer<typeof EndpointRunScriptParameters>;
+export const EndpointRunScriptParameters = z.object({
+  /**
+   * The script ID from the scripts library that will be executed.
+   */
+  scriptId: z.string().min(1),
+  /**
+   * The input parameter arguments (if any) for the script that will be executed.
+   */
+  scriptInput: z.string().min(1).optional(),
+});
+
 export type RawScriptParameters = z.infer<typeof RawScriptParameters>;
 export const RawScriptParameters = z.object({
   /**
@@ -103,10 +118,11 @@ export type RunScriptRouteRequestBody = z.infer<typeof RunScriptRouteRequestBody
 export const RunScriptRouteRequestBody = BaseActionSchema.merge(
   z.object({
     /**
-      * One of the following set of parameters must be provided
+      * One of the following set of parameters must be provided for the `agentType` that is specified.
 
       */
     parameters: z.union([
+      EndpointRunScriptParameters,
       RawScriptParameters,
       HostPathScriptParameters,
       CloudFileScriptParameters,
