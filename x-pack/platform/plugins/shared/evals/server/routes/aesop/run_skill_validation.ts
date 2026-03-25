@@ -117,6 +117,15 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
                   logger,
                 });
               },
+              onError: (error, iteration) => {
+                logger.error(
+                  `[AESOP] Convergence loop error at iteration ${iteration}`,
+                  {
+                    error: error instanceof Error ? error.message : String(error),
+                    skill_id: skillId,
+                  }
+                );
+              },
             });
 
             // Fire-and-forget the convergence loop
@@ -190,7 +199,11 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
               id: skillId,
               body: { doc: { validation: { status: 'pending' } } },
             })
-            .catch(() => {});
+            .catch((revertErr) => {
+              logger.warn(
+                `[AESOP] Failed to revert skill status after validation setup failure: ${revertErr instanceof Error ? revertErr.message : String(revertErr)}`
+              );
+            });
 
           return response.customError({
             statusCode: 500,
@@ -326,7 +339,11 @@ async function runLLMValidation({
         },
         refresh: 'wait_for',
       })
-      .catch(() => {});
+      .catch((markFailedErr) => {
+        logger.warn(
+          `[AESOP] Failed to mark skill as failed: ${markFailedErr instanceof Error ? markFailedErr.message : String(markFailedErr)}`
+        );
+      });
   }
 }
 

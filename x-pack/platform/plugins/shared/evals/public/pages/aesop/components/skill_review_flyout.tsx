@@ -53,15 +53,14 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
   const [editedDescription, setEditedDescription] = useState(initialSkill.description);
   const [editedMarkdown, setEditedMarkdown] = useState(initialSkill.markdown || '');
 
-  // Poll for skill updates while validating
+  // Poll for skill updates while validating (single-document endpoint avoids N+1)
   const { data: polledSkill } = useQuery({
     queryKey: ['aesop', 'skill-detail', initialSkill.id],
     queryFn: async () => {
-      const response = await api.http.get('/internal/aesop/skills/proposed', {
-        query: { status: 'all', limit: 100 },
+      const response = await api.http.get(`/internal/aesop/skills/${initialSkill.id}`, {
         version: '1',
-      }) as { skills: any[] };
-      return response.skills.find((s: any) => s.id === initialSkill.id) || initialSkill;
+      });
+      return response;
     },
     initialData: initialSkill,
     refetchInterval: (data) => {

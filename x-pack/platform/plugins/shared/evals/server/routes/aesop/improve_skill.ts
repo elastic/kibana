@@ -372,7 +372,11 @@ async function autoValidateImprovedSkill({
         },
         refresh: 'wait_for',
       })
-      .catch(() => {});
+      .catch((markFailedErr) => {
+        logger.warn(
+          `[AESOP] Failed to mark skill as failed after auto-validation: ${markFailedErr instanceof Error ? markFailedErr.message : String(markFailedErr)}`
+        );
+      });
   }
 }
 

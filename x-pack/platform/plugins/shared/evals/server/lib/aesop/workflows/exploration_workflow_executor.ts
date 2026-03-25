@@ -1521,6 +1521,7 @@ Respond with ONLY a JSON array (no markdown fences): [{ "name": "...", ... }, ..
             number_of_shards: 1,
             number_of_replicas: 0,
             'index.hidden': true,
+            'index.lifecycle.name': 'aesop-lifecycle',
           },
           mappings: INDEX_MAPPINGS[indexName],
         });

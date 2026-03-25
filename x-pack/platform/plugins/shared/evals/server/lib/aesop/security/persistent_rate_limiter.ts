@@ -121,7 +121,12 @@ export class PersistentRateLimiter {
       if (!exists) {
         await this.esClient.indices.create({
           index: RATE_LIMITS_INDEX,
-          settings: { number_of_shards: 1, number_of_replicas: 0, 'index.hidden': true },
+          settings: {
+            number_of_shards: 1,
+            number_of_replicas: 0,
+            'index.hidden': true,
+            'index.lifecycle.name': 'aesop-lifecycle',
+          },
           mappings: {
             properties: {
               count: { type: 'integer' },

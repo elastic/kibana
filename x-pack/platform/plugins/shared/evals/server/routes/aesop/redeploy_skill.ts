@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
 import type { AESOPRouteDependencies } from './register_aesop_routes';
+import { sanitizeSkillMarkdown } from '../../lib/aesop/security/input_sanitization';
 
 const redeploySkillParamsSchema = z.object({
   skillId: z.string().min(1),
@@ -96,12 +97,19 @@ export function registerRedeploySkillRoute({ router, logger }: AESOPRouteDepende
             await skillRegistry.delete(agentBuilderSkillId);
           }
 
+          // Sanitize content before deploying to Agent Builder
+          const sanitizedContent = sanitizeSkillMarkdown(skill.markdown || '');
+          const sanitizedDescription = sanitizeSkillMarkdown(skill.description || '').slice(
+            0,
+            1024
+          );
+
           // Create the skill
           await skillRegistry.create({
             id: agentBuilderSkillId,
             name: sanitizeSkillName(skill.name),
-            description: (skill.description || '').slice(0, 1024),
-            content: skill.markdown || '',
+            description: sanitizedDescription,
+            content: sanitizedContent,
             tool_ids: toolIds,
           });
 
