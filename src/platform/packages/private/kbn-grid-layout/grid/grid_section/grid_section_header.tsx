@@ -273,7 +273,10 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
            */
           !editTitleOpen && (
             <>
-              <EuiFlexItem grow={false} css={styles.visibleOnlyWhenCollapsed}>
+              <EuiFlexItem
+                grow={false}
+                css={readOnly ? styles.visibleOnlyWhenCollapsed : undefined}
+              >
                 <EuiText
                   color="subdued"
                   size="s"
