@@ -38,37 +38,37 @@ describe('Event Logger', () => {
   });
 
   it('creates logs for the events and includes durations and event payload data', () => {
-    const screenshottingEnd = eventLogger.startTransaction(Transactions.SCREENSHOTTING);
-    const openUrlEnd = eventLogger.logScreenshottingEvent(
-      'open the url to the Kibana application',
-      Actions.OPEN_URL,
-      'wait'
-    );
-    openUrlEnd();
-    const getElementPositionsEnd = eventLogger.logScreenshottingEvent(
-      'scan the page to find the boundaries of visualization elements',
-      Actions.GET_ELEMENT_POSITION_DATA,
-      'wait'
-    );
-    getElementPositionsEnd();
-    screenshottingEnd({
-      labels: {
+    eventLogger.withTransaction(Transactions.SCREENSHOTTING, (setScreenshottingLabels) => {
+      const openUrlEnd = eventLogger.logScreenshottingEvent(
+        'open the url to the Kibana application',
+        Actions.OPEN_URL,
+        'wait'
+      );
+      openUrlEnd();
+      const getElementPositionsEnd = eventLogger.logScreenshottingEvent(
+        'scan the page to find the boundaries of visualization elements',
+        Actions.GET_ELEMENT_POSITION_DATA,
+        'wait'
+      );
+      getElementPositionsEnd();
+      setScreenshottingLabels({
         cpu: 12,
         cpu_percentage: 0,
         memory: 450789,
         memory_mb: 449,
         byte_length: 14000,
-      },
+      });
     });
 
-    const pdfEnd = eventLogger.startTransaction(Transactions.PDF);
-    const addImageEnd = eventLogger.logPdfEvent(
-      'add image to the PDF file',
-      Actions.ADD_IMAGE,
-      'output'
-    );
-    addImageEnd();
-    pdfEnd({ labels: { pdf_pages: 1, byte_length_pdf: 6666 } });
+    eventLogger.withTransaction(Transactions.PDF, (setPdfLabels) => {
+      const addImageEnd = eventLogger.logPdfEvent(
+        'add image to the PDF file',
+        Actions.ADD_IMAGE,
+        'output'
+      );
+      addImageEnd();
+      setPdfLabels({ pdf_pages: 1, byte_length_pdf: 6666 });
+    });
 
     const logs = logSpy.mock.calls.map(([message, data]) => ({
       message,
@@ -215,9 +215,10 @@ describe('Event Logger', () => {
   });
 
   it('creates helpful error logs', () => {
-    eventLogger.startTransaction(Transactions.SCREENSHOTTING);
-    eventLogger.logScreenshottingEvent('opening the url', Actions.OPEN_URL, 'wait');
-    eventLogger.error(new Error('Something erroneous happened'), Transactions.SCREENSHOTTING);
+    eventLogger.withTransaction(Transactions.SCREENSHOTTING, () => {
+      eventLogger.logScreenshottingEvent('opening the url', Actions.OPEN_URL, 'wait');
+      eventLogger.error(new Error('Something erroneous happened'), Transactions.SCREENSHOTTING);
+    });
 
     const logData = logSpy.mock.calls.map(([message, data]) => ({
       message,
