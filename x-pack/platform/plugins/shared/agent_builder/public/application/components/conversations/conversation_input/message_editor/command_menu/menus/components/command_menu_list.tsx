@@ -77,9 +77,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
     const scrollActiveIntoView = useCallback((index: number) => {
       const items = containerRef.current?.querySelectorAll('.euiSelectableListItem');
       const item = items?.[index];
-      if (item) {
-        item.scrollIntoView({ block: 'nearest' });
-      }
+      item?.scrollIntoView?.({ block: 'nearest' });
     }, []);
 
     const selectableOptions: EuiSelectableOption[] = useMemo(
