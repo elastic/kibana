@@ -72,8 +72,8 @@ Lowest level in the ECS category hierarchy. Denotes whether the event represents
 - Not all events will have an associated outcome. Generally not populated for metric events, events with event.type:info, or events for which an outcome does not make logical sense.
 
 Allowed values:
-- failure: Event describes a failed result. Example: file AND access AND outcome:failure
-- success: Event describes a successful result. Example: file AND create AND outcome:success
+- failure: Event describes a failed result. Example: event.category :file AND event.type:access AND event.outcome:failure
+- success: Event describes a successful result. Example: event.category:file AND event.type: creation AND event.outcome:success
 - unknown: Event describes only an attempt for which the result is unknown from the event producer's perspective. Should not be used when an outcome doesn't make logical sense; in such cases event.outcome should not be populated.
 
 ## Examples
