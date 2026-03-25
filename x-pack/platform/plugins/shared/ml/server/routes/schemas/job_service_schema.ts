@@ -52,7 +52,7 @@ export const populationChartSchema = {
 };
 
 export const forceStartDatafeedSchema = schema.object({
-  datafeedIds: schema.arrayOf(schema.string()),
+  datafeedIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   start: schema.maybe(schema.number()),
   end: schema.maybe(schema.number()),
 });
