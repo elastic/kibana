@@ -342,6 +342,9 @@ export const OutputSchema = schema.oneOf([
   schema.object({ ...KafkaSchema }, { meta: { id: 'output_kafka' } }),
 ]);
 
+// Separate schema for create operations: uses distinct meta IDs so OAS codegen
+// emits named $ref components instead of inline anyOf members, which the
+// Terraform provider requires to distinguish create vs read types.
 export const NewOutputSchema = schema.oneOf([
   schema.object({ ...ElasticSearchSchema }, { meta: { id: 'new_output_elasticsearch' } }),
   schema.object(
