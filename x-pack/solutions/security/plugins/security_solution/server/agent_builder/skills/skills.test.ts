@@ -75,7 +75,7 @@ describe('Security Skills', () => {
     });
 
     it('has total tool count under 7 limit (3 registry + 1 inline = 4)', async () => {
-      const registryTools = alertAnalysisSkill.getRegistryTools!();
+      const registryTools = await alertAnalysisSkill.getRegistryTools!();
       const inlineTools = await alertAnalysisSkill.getInlineTools!();
       expect(registryTools.length + inlineTools.length).toBeLessThanOrEqual(7);
     });

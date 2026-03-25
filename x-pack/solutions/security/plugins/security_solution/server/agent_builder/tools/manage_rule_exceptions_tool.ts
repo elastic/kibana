@@ -5,18 +5,30 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type {
-  SecuritySolutionPluginStart,
-  SecuritySolutionPluginStartDependencies,
   SecuritySolutionPluginSetupDependencies,
+  SecuritySolutionPluginCoreSetupDependencies,
 } from '../../plugin_contract';
 import { securityTool } from './constants';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
+
+interface ExceptionRulesClient {
+  update: (args: {
+    id: string;
+    data: {
+      name: string;
+      tags: string[];
+      schedule: { interval: string };
+      actions: unknown[];
+      params: Record<string, unknown>;
+    };
+  }) => Promise<unknown>;
+}
 
 export const SECURITY_MANAGE_RULE_EXCEPTIONS_TOOL_ID = securityTool('manage_rule_exceptions');
 
@@ -61,7 +73,13 @@ const exceptionEntrySchema = z.discriminatedUnion('type', [
 ]);
 
 const manageRuleExceptionsSchema = z.object({
-  rule_id: z.string().describe('The rule_id of the detection rule to add the exception to'),
+  rule_id: z
+    .string()
+    .regex(
+      /^[a-zA-Z0-9_\-.:]+$/,
+      'rule_id must contain only alphanumeric characters, hyphens, underscores, dots, and colons'
+    )
+    .describe('The rule_id of the detection rule to add the exception to'),
   name: z.string().describe('Human-readable name for this exception item'),
   description: z.string().describe('Why this exception is being created'),
   entries: z
@@ -73,7 +91,7 @@ const manageRuleExceptionsSchema = z.object({
 });
 
 export function manageRuleExceptionsTool(
-  core: CoreSetup<SecuritySolutionPluginStartDependencies, SecuritySolutionPluginStart>,
+  core: SecuritySolutionPluginCoreSetupDependencies,
   setupPlugins: Pick<SecuritySolutionPluginSetupDependencies, 'lists'>,
   logger: Logger
 ): StaticToolRegistration<typeof manageRuleExceptionsSchema> {
@@ -146,12 +164,21 @@ export function manageRuleExceptionsTool(
 
         const exceptionListId = await getOrCreateDefaultExceptionList(
           exceptionListClient,
-          rule,
+          {
+            id: rule.id,
+            name: rule.name,
+            tags: rule.tags,
+            schedule: rule.schedule,
+            actions: rule.actions as unknown[],
+            params: rule.params as Record<string, unknown>,
+          },
           ruleId,
-          rulesClient
+          rulesClient as unknown as ExceptionRulesClient
         );
 
-        const exceptionEntries = entries.map((entry) => ({ ...entry }));
+        const exceptionEntries = entries.map((entry: z.infer<typeof exceptionEntrySchema>) => ({
+          ...entry,
+        }));
 
         const createdItem = await exceptionListClient.createExceptionListItem({
           listId: exceptionListId,
@@ -183,13 +210,14 @@ export function manageRuleExceptionsTool(
           ],
         };
       } catch (error) {
-        logger.error(`Manage rule exceptions tool failed: ${error.message}`, error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logger.error(`Manage rule exceptions tool failed: ${errorMessage}`, error);
         return {
           results: [
             {
               type: ToolResultType.error,
               data: {
-                message: `Failed to create exception: ${error.message}`,
+                message: `Failed to create exception: ${errorMessage}`,
               },
             },
           ],
@@ -214,18 +242,7 @@ async function getOrCreateDefaultExceptionList(
     params: Record<string, unknown>;
   },
   ruleId: string,
-  rulesClient: {
-    update: (args: {
-      id: string;
-      data: {
-        name: string;
-        tags: string[];
-        schedule: { interval: string };
-        actions: unknown[];
-        params: Record<string, unknown>;
-      };
-    }) => Promise<unknown>;
-  }
+  rulesClient: ExceptionRulesClient
 ): Promise<string> {
   const exceptionsList =
     (rule.params.exceptionsList as Array<{ list_id: string; type: string }>) ?? [];

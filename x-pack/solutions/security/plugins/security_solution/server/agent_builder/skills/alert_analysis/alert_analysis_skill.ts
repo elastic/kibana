@@ -8,7 +8,7 @@
 import { ToolType } from '@kbn/agent-builder-common/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import {
   SECURITY_ALERTS_TOOL_ID,
   SECURITY_LABS_SEARCH_TOOL_ID,
@@ -122,12 +122,14 @@ FROM .alerts-security.alerts-* METADATA _id, _index
           .describe('Time window in hours to search for related alerts (1-168, default 24)'),
       }),
       handler: async ({ alertId, timeWindowHours }, context) => {
+        const id = alertId as string;
+        const hours = timeWindowHours as number;
         try {
           const alertsIndex = `${DEFAULT_ALERTS_INDEX}-${context.spaceId}`;
 
           const alertResult = await context.esClient.asCurrentUser.get({
             index: alertsIndex,
-            id: alertId,
+            id,
           });
 
           const alertSource = alertResult._source as Record<string, unknown> | undefined;
@@ -136,7 +138,7 @@ FROM .alerts-security.alerts-* METADATA _id, _index
               results: [
                 {
                   type: ToolResultType.error,
-                  data: { message: `Alert ${alertId} not found or has no source data.` },
+                  data: { message: `Alert ${id} not found or has no source data.` },
                 },
               ],
             };
@@ -182,14 +184,14 @@ FROM .alerts-security.alerts-* METADATA _id, _index
                   {
                     range: {
                       '@timestamp': {
-                        gte: `now-${timeWindowHours}h`,
+                        gte: `now-${hours}h`,
                       },
                     },
                   },
                 ],
                 should: shouldClauses,
                 minimum_should_match: 1,
-                must_not: [{ ids: { values: [alertId] } }],
+                must_not: [{ ids: { values: [id] } }],
               },
             },
             sort: [{ '@timestamp': 'desc' }],
@@ -225,7 +227,7 @@ FROM .alerts-security.alerts-* METADATA _id, _index
               {
                 type: ToolResultType.other,
                 data: {
-                  message: `Found ${relatedAlerts.length} related alerts sharing entities with alert ${alertId}.`,
+                  message: `Found ${relatedAlerts.length} related alerts sharing entities with alert ${id}.`,
                   sourceEntities: { hostName, userName, sourceIp, destIp },
                   relatedAlerts,
                 },
@@ -238,7 +240,9 @@ FROM .alerts-security.alerts-* METADATA _id, _index
               {
                 type: ToolResultType.error,
                 data: {
-                  message: `Failed to find related alerts: ${error.message}`,
+                  message: `Failed to find related alerts: ${
+                    error instanceof Error ? error.message : String(error)
+                  }`,
                 },
               },
             ],

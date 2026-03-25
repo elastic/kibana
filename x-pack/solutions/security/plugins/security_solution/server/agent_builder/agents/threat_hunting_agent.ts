@@ -8,6 +8,7 @@
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { THREAT_HUNTING_AGENT_ID } from '../../../common/constants';
 import {
   SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
@@ -84,11 +85,18 @@ export const createThreatHuntingAgent = (
     avatar_icon: 'logoSecurity',
     name: 'Threat Hunting Agent',
     description:
-      'Agent specialized in security alert analysis and entity analysis tasks, including alert investigation, entity investigation and security documentation.',
+      'Agent specialized in threat hunting, alert triage, and entity investigation within Elastic Security — formulates hypotheses, runs ES|QL queries, triages alerts, and profiles entity risk.',
     labels: ['security'],
     availability: {
       cacheMode: 'space',
-      handler: async ({ request }) => {
+      handler: async ({ request, uiSettings }) => {
+        if ((await uiSettings.get(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)) === true) {
+          return {
+            status: 'unavailable',
+            reason:
+              'Skills are enabled, which takes precedence over threat hunting agent availability',
+          };
+        }
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },

@@ -57,7 +57,7 @@ describe('attackDiscoverySearchTool', () => {
 
       const result = tool.schema.safeParse(invalidInput);
 
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
     });
   });
 

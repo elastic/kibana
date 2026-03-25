@@ -167,6 +167,20 @@ evaluate.describe('Security Skills - Alert Analysis', () => {
                 expectedOnlyToolId: 'security.security_labs_search',
               },
             },
+            {
+              input: {
+                question: 'What is the current risk score for host DC01? Has it changed recently?',
+              },
+              output: {
+                expected:
+                  'I will look up the entity risk score for host DC01 to assess its current risk level and any recent changes in risk indicators.',
+              },
+              metadata: {
+                query_intent: 'Risk Assessment',
+                expectedSkill: 'alert-analysis',
+                expectedOnlyToolId: 'security.entity_risk_score',
+              },
+            },
           ],
         },
       });
@@ -227,6 +241,51 @@ evaluate.describe('Security Skills - Detection Engineering', () => {
                 query_intent: 'Coverage Analysis',
                 expectedSkill: 'detection-engineering',
                 expectedOnlyToolId: 'security.attack_discovery_search',
+              },
+            },
+          ],
+        },
+      });
+    }
+  );
+});
+
+evaluate.describe('Security Skills - Cross-Skill Workflows', () => {
+  evaluate(
+    'queries spanning multiple security concerns activate the most relevant skill',
+    async ({ evaluateDataset }) => {
+      await evaluateDataset({
+        dataset: {
+          name: 'agent builder: security-cross-skill-routing',
+          description:
+            'Validates that ambiguous queries spanning multiple security domains are routed to the most relevant skill',
+          examples: [
+            {
+              input: {
+                question:
+                  'I found suspicious PowerShell activity on host DC01 during a hunt. Create a detection rule to catch this pattern going forward.',
+              },
+              output: {
+                expected:
+                  'I will create a detection rule based on the suspicious PowerShell pattern you identified during your threat hunt, using the detection engineering workflow.',
+              },
+              metadata: {
+                query_intent: 'Rule Creation from Hunt',
+                expectedSkill: 'detection-engineering',
+              },
+            },
+            {
+              input: {
+                question:
+                  'Check the entity risk score for user admin@corp.local and look for any alerts associated with this account in the last 48 hours.',
+              },
+              output: {
+                expected:
+                  "I will retrieve the entity risk score for admin@corp.local and search for associated alerts to build a comprehensive picture of this account's risk profile.",
+              },
+              metadata: {
+                query_intent: 'Risk Assessment with Alerts',
+                expectedSkill: 'alert-analysis',
               },
             },
           ],

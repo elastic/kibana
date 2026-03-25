@@ -7,6 +7,8 @@
 
 import { useCallback } from 'react';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { THREAT_HUNTING_AGENT_ID } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana/use_kibana';
 
@@ -42,32 +44,33 @@ export const useAgentBuilderAttachment = ({
   attachmentPrompt,
 }: UseAgentBuilderAttachmentParams): UseAgentBuilderAttachmentResult => {
   const { agentBuilder } = useKibana().services;
+  const skillsEnabled = useUiSetting<boolean>(
+    AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+    false
+  );
 
   const openAgentBuilderFlyout = useCallback(() => {
     if (!agentBuilder?.openChat) {
       return;
     }
 
-    // Create a unique ID for the attachment
     const attachmentId = `${attachmentType}-${Date.now()}`;
 
-    // Create the UiAttachment object
     const attachment: AttachmentInput = {
       id: attachmentId,
       type: attachmentType,
       data: attachmentData,
     };
 
-    // Open the chat with attachment and prefilled message
     agentBuilder.openChat({
       autoSendInitialMessage: false,
       newConversation: true,
       initialMessage: attachmentPrompt,
       attachments: [attachment],
       sessionTag: 'security',
-      agentId: THREAT_HUNTING_AGENT_ID,
+      ...(skillsEnabled ? {} : { agentId: THREAT_HUNTING_AGENT_ID }),
     });
-  }, [attachmentType, attachmentData, attachmentPrompt, agentBuilder]);
+  }, [attachmentType, attachmentData, attachmentPrompt, agentBuilder, skillsEnabled]);
 
   return {
     openAgentBuilderFlyout,
