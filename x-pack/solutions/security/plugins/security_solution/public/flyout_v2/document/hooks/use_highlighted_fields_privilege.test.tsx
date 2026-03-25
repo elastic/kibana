@@ -8,25 +8,25 @@
 import { renderHook } from '@testing-library/react';
 import { useHighlightedFieldsPrivilege } from './use_highlighted_fields_privilege';
 import type { UseHighlightedFieldsPrivilegeParams } from './use_highlighted_fields_privilege';
-import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message';
-import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
-import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
-import type { RuleResponse } from '../../../../../common/api/detection_engine';
+import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message';
+import { hasMlLicense } from '../../../../common/machine_learning/has_ml_license';
+import { hasMlAdminPermissions } from '../../../../common/machine_learning/has_ml_admin_permissions';
+import type { RuleResponse } from '../../../../common/api/detection_engine';
 import {
   LACK_OF_KIBANA_RULES_FEATURE_PRIVILEGES,
   ML_RULES_DISABLED_MESSAGE,
-} from '../../../../detection_engine/common/translations';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { getUserPrivilegesMockDefaultValue } from '../../../../common/components/user_privileges/__mocks__';
+} from '../../../detection_engine/common/translations';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { getUserPrivilegesMockDefaultValue } from '../../../common/components/user_privileges/__mocks__';
 
-jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities');
+jest.mock('../../../common/components/ml/hooks/use_ml_capabilities');
 jest.mock(
-  '../../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message'
+  '../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message'
 );
-jest.mock('../../../../../common/machine_learning/has_ml_license');
-jest.mock('../../../../../common/machine_learning/has_ml_admin_permissions');
-jest.mock('../../../../detections/components/user_info');
-jest.mock('../../../../common/components/user_privileges');
+jest.mock('../../../../common/machine_learning/has_ml_license');
+jest.mock('../../../../common/machine_learning/has_ml_admin_permissions');
+jest.mock('../../../detections/components/user_info');
+jest.mock('../../../common/components/user_privileges');
 
 const defaultProps = {
   rule: {} as RuleResponse,

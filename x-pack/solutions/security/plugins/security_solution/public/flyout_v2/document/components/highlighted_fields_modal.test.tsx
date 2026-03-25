@@ -9,13 +9,13 @@ import React from 'react';
 import { fireEvent, render, act } from '@testing-library/react';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
-import { TestProviders } from '../../../../common/mock';
-import { DocumentDetailsContext } from '../../shared/context';
-import { mockContextValue } from '../../shared/mocks/mock_context';
-import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message';
-import { useRuleIndexPattern } from '../../../../detection_engine/rule_creation_ui/pages/form';
+import { TestProviders } from '../../../common/mock';
+import { DocumentDetailsContext } from '../../../flyout/document_details/shared/context';
+import { mockContextValue } from '../../../flyout/document_details/shared/mocks/mock_context';
+import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message';
+import { useRuleIndexPattern } from '../../../detection_engine/rule_creation_ui/pages/form';
 import { HighlightedFieldsModal } from './highlighted_fields_modal';
-import type { RuleResponse, RuleUpdateProps } from '../../../../../common/api/detection_engine';
+import type { RuleResponse, RuleUpdateProps } from '../../../../common/api/detection_engine';
 import {
   HIGHLIGHTED_FIELDS_MODAL_CANCEL_BUTTON_TEST_ID,
   HIGHLIGHTED_FIELDS_MODAL_CUSTOM_FIELDS_TEST_ID,
@@ -23,19 +23,19 @@ import {
   HIGHLIGHTED_FIELDS_MODAL_TEST_ID,
   HIGHLIGHTED_FIELDS_MODAL_DEFAULT_FIELDS_TEST_ID,
 } from './test_ids';
-import { useUpdateRule } from '../../../../detection_engine/rule_management/logic/use_update_rule';
-import { useHighlightedFields } from '../../../../flyout_v2/document/hooks/use_highlighted_fields';
+import { useUpdateRule } from '../../../detection_engine/rule_management/logic/use_update_rule';
+import { useHighlightedFields } from '../hooks/use_highlighted_fields';
 
 jest.mock(
-  '../../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message'
+  '../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message'
 );
-jest.mock('../../../../detection_engine/rule_creation_ui/pages/form');
-jest.mock('../../../../detection_engine/rule_management/logic/use_update_rule');
-jest.mock('../../../../flyout_v2/document/hooks/use_highlighted_fields');
-jest.mock('../../../rule_details/hooks/use_rule_details');
+jest.mock('../../../detection_engine/rule_creation_ui/pages/form');
+jest.mock('../../../detection_engine/rule_management/logic/use_update_rule');
+jest.mock('../hooks/use_highlighted_fields');
+jest.mock('../../../flyout/rule_details/hooks/use_rule_details');
 
 const mockAddSuccess = jest.fn();
-jest.mock('../../../../common/hooks/use_app_toasts', () => ({
+jest.mock('../../../common/hooks/use_app_toasts', () => ({
   useAppToasts: () => ({
     addSuccess: mockAddSuccess,
   }),
