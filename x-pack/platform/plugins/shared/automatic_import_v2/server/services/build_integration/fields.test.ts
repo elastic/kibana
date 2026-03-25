@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
+import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server';
+import { fieldsMetadataPluginServerMock } from '@kbn/fields-metadata-plugin/server/mocks';
 import { generateFieldMappings, mergeSamples } from './fields';
 
 const KNOWN_ECS_FIELDS = new Set([
@@ -25,7 +26,7 @@ const KNOWN_ECS_FIELDS = new Set([
 
 const createMockFieldsMetadataClient = (): jest.Mocked<IFieldsMetadataClient> => {
   const mock: jest.Mocked<IFieldsMetadataClient> = {
-    getByName: jest.fn(),
+    ...fieldsMetadataPluginServerMock.createFieldsMetadataClientMock(),
     find: jest.fn().mockImplementation(({ fieldNames, source }) => {
       const matchedFields: Record<string, { name: string; source: string }> = {};
       if (source?.includes('ecs') && fieldNames) {
