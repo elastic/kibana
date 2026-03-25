@@ -12,6 +12,7 @@ import type { RefObject } from 'react';
 import type {
   TimeRange,
   TimeRangeBoundsOption,
+  TimeRangeTransformOptions,
   InitialFocus,
   AutoRefreshIntervalUnit,
 } from './types';
@@ -186,12 +187,15 @@ export function resolveInitialFocus(
  * Uses the existing label when present, otherwise generates one using the same
  * pipeline as the control button: build text → parse → format.
  */
-export function getOptionDisplayLabel(option: TimeRangeBoundsOption): string {
+export function getOptionDisplayLabel(
+  option: TimeRangeBoundsOption,
+  options?: Pick<TimeRangeTransformOptions, 'timePrecision'>
+): string {
   if (option.label) return option.label;
 
   const text = `${option.start} ${DATE_RANGE_INPUT_DELIMITER} ${option.end}`;
   const timeRange = textToTimeRange(text);
-  return timeRangeToDisplayText(timeRange);
+  return timeRangeToDisplayText(timeRange, options);
 }
 
 /**

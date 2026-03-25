@@ -104,7 +104,7 @@ describe('getOptionDisplayLabel', () => {
 
   it('generates a label from absolute bounds when no label is provided', () => {
     expect(getOptionDisplayLabel({ start: '2025-01-01', end: '2025-01-31' })).toBe(
-      'Jan 1 2025, 00:00 → Jan 31 2025, 00:00'
+      'Jan 1, 2025, 00:00:00 → Jan 31, 2025, 00:00:00'
     );
   });
 });

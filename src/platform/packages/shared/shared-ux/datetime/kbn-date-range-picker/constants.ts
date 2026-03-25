@@ -16,14 +16,14 @@ export const DATE_TYPE_RELATIVE = 'RELATIVE' as const;
 /** Date type representing the current moment ("now") */
 export const DATE_TYPE_NOW = 'NOW' as const;
 
-/** Default Moment.js format for displaying dates (e.g. "Feb 3 2025, 14:30") */
-export const DEFAULT_DATE_FORMAT = 'MMM D YYYY, HH:mm';
+/** Default Moment.js format for displaying dates at full precision (e.g. "Feb 3, 2025, 14:30:07.801") */
+export const DEFAULT_DATE_FORMAT = 'MMM D, YYYY, HH:mm:ss.SSS';
 
-/** Time-only format, used when start and end fall on the same day (e.g. "14:30") */
-export const FORMAT_TIME_ONLY = 'HH:mm';
+/** Time-only format at full precision, used when start and end fall on the same day */
+export const DEFAULT_DATE_FORMAT_TIME_ONLY = 'HH:mm:ss.SSS';
 
-/** Date format without year, used when start and end fall in the same year (e.g. "Feb 3, 14:30") */
-export const FORMAT_NO_YEAR = 'MMM D, HH:mm';
+/** Date format without year at full precision, used when start and end fall in the same year */
+export const DEFAULT_DATE_FORMAT_NO_YEAR = 'MMM D, HH:mm:ss.SSS';
 
 /** Delimiter between start and end when the user types a range (e.g. "now-1d - now") */
 export const DATE_RANGE_INPUT_DELIMITER = '-';

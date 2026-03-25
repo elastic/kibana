@@ -52,7 +52,8 @@ interface OptionsListProps {
 
 /** Renders a list of time range options as selectable `PanelListItem` entries. */
 const OptionsList = ({ options, showShorthand, showExtraActions }: OptionsListProps) => {
-  const { applyRange, onPresetDelete } = useDateRangePickerContext();
+  const { applyRange, onPresetDelete, settings } = useDateRangePickerContext();
+  const timePrecision = settings.timePrecision ?? 's';
   const euiThemeContext = useEuiTheme();
   const styles = mainPanelStyles(euiThemeContext);
 
@@ -68,7 +69,10 @@ const OptionsList = ({ options, showShorthand, showExtraActions }: OptionsListPr
       {options.map((option, index) => (
         <PanelListItem
           key={`${option.start}-${option.end}-${index}`}
-          data-test-subj={toTestSubj('dateRangePickerPresetItem', getOptionDisplayLabel(option))}
+          data-test-subj={toTestSubj(
+            'dateRangePickerPresetItem',
+            getOptionDisplayLabel(option, { timePrecision })
+          )}
           onClick={() => handleSelect(option)}
           suffix={showShorthand ? getOptionShorthand(option) ?? undefined : undefined}
           extraActions={
@@ -84,7 +88,7 @@ const OptionsList = ({ options, showShorthand, showExtraActions }: OptionsListPr
             ) : undefined
           }
         >
-          {getOptionDisplayLabel(option)}
+          {getOptionDisplayLabel(option, { timePrecision })}
         </PanelListItem>
       ))}
     </ul>

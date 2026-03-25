@@ -230,12 +230,12 @@ describe('CustomTimeRangePanel', () => {
     });
 
     it('does not reset the panel when the input becomes partial or unparseable', () => {
-      // '2025-01-01 to now' → start=ABSOLUTE "Jan 1 2025, 00:00", end=NOW.
+      // '2025-01-01 to now' → start=ABSOLUTE "Jan 1, 2025, 00:00:00.000", end=NOW.
       renderCustomTimeRangePanel({ defaultValue: '2025-01-01 to now' });
       openCustomPanel();
 
       const startAbsInput = within(getStartFieldset()).getByLabelText('Start date absolute date');
-      expect(startAbsInput).toHaveValue('Jan 1 2025, 00:00');
+      expect(startAbsInput).toHaveValue('Jan 1, 2025, 00:00:00.000');
 
       // Simulate the user clearing/partially typing in the main input.
       fireEvent.change(screen.getByLabelText('Set picker text'), {
@@ -243,7 +243,7 @@ describe('CustomTimeRangePanel', () => {
       });
 
       // Panel state must not have been clobbered by a fallback timestamp.
-      expect(startAbsInput).toHaveValue('Jan 1 2025, 00:00');
+      expect(startAbsInput).toHaveValue('Jan 1, 2025, 00:00:00.000');
       expect(
         within(getEndFieldset()).getByText(customTimeRangePanelTexts.nowEndHelpText)
       ).toBeInTheDocument();

@@ -187,12 +187,13 @@ export function DateRangePickerProvider({
       textToTimeRange(text, { presets, dateFormat, roundRelativeTime: settings.roundRelativeTime }),
     [text, presets, dateFormat, settings.roundRelativeTime]
   );
+  const timePrecision = settings.timePrecision ?? 's';
   const displayText = useMemo(
-    () => timeRangeToDisplayText(timeRange, { dateFormat }),
-    [dateFormat, timeRange]
+    () => timeRangeToDisplayText(timeRange, { dateFormat, timePrecision }),
+    [dateFormat, timeRange, timePrecision]
   );
   const displayFullFormattedText = useMemo(
-    () => timeRangeToFullFormattedText(timeRange, { dateFormat }),
+    () => timeRangeToFullFormattedText(timeRange, { dateFormat, timePrecision: 'ms' }),
     [timeRange, dateFormat]
   );
   const duration =
