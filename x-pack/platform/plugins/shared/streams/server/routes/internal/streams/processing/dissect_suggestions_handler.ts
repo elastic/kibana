@@ -7,18 +7,27 @@
 
 import { z } from '@kbn/zod/v4';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { ReviewDissectFieldsPrompt } from '@kbn/dissect-heuristics';
+import {
+  ReviewDissectFieldsPrompt,
+  getReviewFields as getDissectReviewFields,
+  getDissectProcessorWithReview,
+} from '@kbn/dissect-heuristics';
+import type { DissectProcessor } from '@kbn/streamlang';
 import type { InferenceClient, ToolOptionsOfPrompt } from '@kbn/inference-common';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { ToolCallsOfToolOptions } from '@kbn/inference-common/src/chat_complete/tools_of';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import type { StreamsClient } from '../../../../lib/streams/client';
+import type { IPatternExtractionService } from '../../../../lib/pattern_extraction/pattern_extraction_service';
 import {
   determineOtelFieldNameUsage,
   callInferenceWithPrompt,
   fetchFieldMetadata,
   normalizeFieldName,
 } from './common_processing_helpers';
+
+const MAX_REVIEW_MESSAGES = 10;
+const NUM_REVIEW_EXAMPLES = 10;
 
 export interface ProcessingDissectSuggestionsParams {
   path: {
@@ -28,13 +37,6 @@ export interface ProcessingDissectSuggestionsParams {
     connector_id: string;
     field_name: string;
     sample_messages: string[];
-    review_fields: Record<
-      string,
-      {
-        example_values: string[];
-        position: number;
-      }
-    >;
   };
 }
 
@@ -44,6 +46,7 @@ export interface ProcessingDissectSuggestionsHandlerDeps {
   scopedClusterClient: IScopedClusterClient;
   streamsClient: StreamsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
+  patternExtractionService: IPatternExtractionService;
   signal: AbortSignal;
   logger: Logger;
 }
@@ -54,13 +57,6 @@ export const processingDissectSuggestionsSchema = z.object({
     connector_id: z.string(),
     field_name: z.string(),
     sample_messages: z.array(z.string()),
-    review_fields: z.record(
-      z.string(),
-      z.object({
-        example_values: z.array(z.string()),
-        position: z.number(),
-      })
-    ),
   }),
 }) satisfies z.Schema<ProcessingDissectSuggestionsParams>;
 
@@ -73,19 +69,116 @@ export const handleProcessingDissectSuggestions = async ({
   inferenceClient,
   streamsClient,
   fieldsMetadataClient,
+  patternExtractionService,
   signal,
   logger,
-}: ProcessingDissectSuggestionsHandlerDeps) => {
+}: ProcessingDissectSuggestionsHandlerDeps): Promise<DissectProcessor | null> => {
+  const { name: streamName } = params.path;
+  const { connector_id: connectorId } = params.body;
+
+  logger.debug(
+    `Starting extraction (stream=${streamName} messages=${params.body.sample_messages.length} connectorId=${connectorId})`
+  );
+
+  const { dissectPattern, largestGroupMessages } =
+    await patternExtractionService.extractDissectPattern(params.body.sample_messages);
+
+  logger.debug(
+    `Extraction complete (stream=${streamName} astNodes=${dissectPattern.ast.nodes.length}` +
+      ` fields=${dissectPattern.fields.length} largestGroupMessages=${largestGroupMessages.length})`
+  );
+
+  if (!dissectPattern.ast.nodes.length) {
+    logger.debug(`Empty AST, returning null (stream=${streamName})`);
+    return null;
+  }
+
+  const reviewFields = getDissectReviewFields(dissectPattern, NUM_REVIEW_EXAMPLES);
+  logger.debug(
+    `LLM review request (stream=${streamName} fields=${
+      Object.keys(reviewFields).length
+    } positions=${Object.values(reviewFields)
+      .map((f) => f.position)
+      .join(',')})`
+  );
+
+  const reviewResult = await reviewDissectFields({
+    streamName,
+    connectorId,
+    fieldName: params.body.field_name,
+    sampleMessages: largestGroupMessages.slice(0, MAX_REVIEW_MESSAGES),
+    reviewFields,
+    inferenceClient,
+    streamsClient,
+    fieldsMetadataClient,
+    signal,
+  });
+
+  logger.debug(
+    `LLM review result (stream=${streamName} log_source=${reviewResult.log_source} fields=${
+      reviewResult.fields.length
+    } fieldNames=${reviewResult.fields.map((f: { ecs_field: string }) => f.ecs_field).join(',')})`
+  );
+
+  const result = getDissectProcessorWithReview(
+    dissectPattern,
+    reviewResult,
+    params.body.field_name
+  );
+
+  if (!result.pattern || result.pattern.trim().length === 0) {
+    logger.debug(`Empty pattern after review, returning null (stream=${streamName})`);
+    return null;
+  }
+
+  const processor: DissectProcessor = {
+    action: 'dissect',
+    from: params.body.field_name,
+    pattern: result.pattern,
+    append_separator: result.processor.dissect.append_separator,
+    description: result.description,
+  };
+
+  logger.debug(
+    `Assembled processor (stream=${streamName} patternLength=${
+      processor.pattern.length
+    } appendSeparator=${processor.append_separator ?? 'none'})`
+  );
+
+  return processor;
+};
+
+export async function reviewDissectFields({
+  streamName,
+  connectorId,
+  fieldName,
+  sampleMessages,
+  reviewFields,
+  inferenceClient,
+  streamsClient,
+  fieldsMetadataClient,
+  signal,
+}: {
+  streamName: string;
+  connectorId: string;
+  fieldName: string;
+  sampleMessages: string[];
+  reviewFields: Record<string, { example_values: string[]; position: number }>;
+  inferenceClient: InferenceClient;
+  streamsClient: StreamsClient;
+  fieldsMetadataClient: IFieldsMetadataClient;
+  signal: AbortSignal;
+}) {
   // Determine if we should use OTEL field names
-  const useOtelFieldNames = await determineOtelFieldNameUsage(streamsClient, params.path.name);
+  const useOtelFieldNames = await determineOtelFieldNameUsage(streamsClient, streamName);
 
   // Call LLM inference to review fields
   const reviewResult = await callInferenceWithPrompt(
     inferenceClient,
-    params.body.connector_id,
+    connectorId,
     ReviewDissectFieldsPrompt,
-    params.body.sample_messages,
-    params.body.review_fields,
+    sampleMessages,
+    reviewFields,
     signal
   );
 
@@ -97,14 +190,9 @@ export const handleProcessingDissectSuggestions = async ({
 
   return {
     log_source: reviewResult.log_source,
-    fields: mapFields(
-      reviewResult.fields,
-      fieldMetadata,
-      useOtelFieldNames,
-      params.body.field_name
-    ),
+    fields: mapFields(reviewResult.fields, fieldMetadata, useOtelFieldNames, fieldName),
   };
-};
+}
 
 export function mapFields(
   reviewResults: FieldReviewResults,

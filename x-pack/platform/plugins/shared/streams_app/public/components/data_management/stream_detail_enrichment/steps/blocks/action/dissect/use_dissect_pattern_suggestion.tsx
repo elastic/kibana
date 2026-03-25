@@ -6,7 +6,6 @@
  */
 
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import { assembleDissectProcessor } from '@kbn/dissect-heuristics';
 import { lastValueFrom } from 'rxjs';
 import type { useAbortController } from '@kbn/react-hooks';
 import { useFetchErrorToast } from '../../../../../../../hooks/use_fetch_error_toast';
@@ -42,7 +41,7 @@ export function useDissectPatternSuggestion(
   return useAsyncFn(
     async (params: DissectPatternSuggestionParams | null) => {
       if (params === null) {
-        return Promise.resolve(undefined); // Reset to initial value
+        return Promise.resolve(undefined);
       }
 
       // Prepare samples by running partial simulation if needed
@@ -64,37 +63,24 @@ export function useDissectPatternSuggestion(
       });
 
       try {
-        const dissectResult = await assembleDissectProcessor({
-          from: params.fieldName,
-          messages,
-          reviewFn: async (reviewFields, sampleMessages) => {
-            const reviewResult = await lastValueFrom(
-              streamsRepositoryClient.stream(
-                'POST /internal/streams/{name}/processing/_suggestions/dissect',
-                {
-                  signal: abortController.signal,
-                  params: {
-                    path: { name: params.streamName },
-                    body: {
-                      connector_id: params.connectorId,
-                      field_name: params.fieldName,
-                      sample_messages: sampleMessages,
-                      review_fields: reviewFields,
-                    },
-                  },
-                }
-              )
-            );
-
-            if (reviewResult.dissectProcessor === null) {
-              throw new NoSuggestionsError();
+        const { dissectProcessor } = await lastValueFrom(
+          streamsRepositoryClient.stream(
+            'POST /internal/streams/{name}/processing/_suggestions/dissect',
+            {
+              signal: abortController.signal,
+              params: {
+                path: { name: params.streamName },
+                body: {
+                  connector_id: params.connectorId,
+                  field_name: params.fieldName,
+                  sample_messages: messages,
+                },
+              },
             }
+          )
+        );
 
-            return reviewResult.dissectProcessor;
-          },
-        });
-
-        if (!dissectResult) {
+        if (!dissectProcessor) {
           throw new NoSuggestionsError();
         }
 
@@ -109,7 +95,7 @@ export function useDissectPatternSuggestion(
                 processing: {
                   steps: [
                     {
-                      ...dissectResult,
+                      ...dissectProcessor,
                       customIdentifier: SUGGESTED_DISSECT_PROCESSOR_ID,
                     },
                   ],
@@ -125,13 +111,13 @@ export function useDissectPatternSuggestion(
         finishTrackingAndReport(1, [parsedRate]);
 
         return {
-          dissectProcessor: dissectResult,
+          dissectProcessor,
           simulationResult,
         };
       } catch (error) {
         finishTrackingAndReport(0, [0]);
         if (!isNoSuggestionsError(error)) {
-          showFetchErrorToast(error);
+          showFetchErrorToast(error as Error);
         }
         throw error;
       }
