@@ -97,11 +97,11 @@ export const comprehensiveTagcloudWithAdHocDataView = {
     min: 35,
     max: 58,
   },
+  caption: { visible: false },
   metric: {
     operation: 'sum',
     field: 'bytes',
     empty_as_null: true,
-    caption: { visible: false },
   },
   tag_by: {
     operation: 'terms',
@@ -160,11 +160,11 @@ export const comprehensiveTagcloudWithDataView = {
     min: 35,
     max: 58,
   },
+  caption: { visible: false },
   metric: {
     operation: 'sum',
     field: 'bytes',
     empty_as_null: true,
-    caption: { visible: false },
   },
   tag_by: {
     operation: 'terms',
@@ -223,10 +223,10 @@ export const comprehensiveEsqlTagcloud = {
     min: 35,
     max: 58,
   },
+  caption: { visible: false },
   metric: {
     operation: 'value',
     column: 'bytes',
-    caption: { visible: false },
   },
   tag_by: {
     operation: 'value',
