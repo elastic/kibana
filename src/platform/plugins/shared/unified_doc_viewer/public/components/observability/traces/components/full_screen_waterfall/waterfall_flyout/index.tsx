@@ -31,9 +31,9 @@ import { getUnifiedDocViewerServices } from '../../../../../../plugin';
 import type { FlyoutContentId } from '../../../common/constants';
 
 const tabIds = {
-  OVERVIEW: 'unifiedDocViewerTracesSpanFlyoutOverview',
-  TABLE: 'unifiedDocViewerTracesSpanFlyoutTable',
-  JSON: 'unifiedDocViewerTracesSpanFlyoutJson',
+  OVERVIEW: 'unifiedDocViewerTracesDocDetailFlyoutOverview',
+  TABLE: 'unifiedDocViewerTracesDocDetailFlyoutTable',
+  JSON: 'unifiedDocViewerTracesDocDetailFlyoutJson',
 };
 
 const tabs = [
