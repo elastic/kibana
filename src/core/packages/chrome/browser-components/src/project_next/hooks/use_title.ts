@@ -7,24 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo } from 'react';
 import { useObservable } from '@kbn/use-observable';
-import { useChromeService } from '@kbn/core-chrome-browser-context';
+import { useChromeComponentsDeps } from '../../context';
 import { useProjectHeader } from './use_project_header';
-
-function extractFirstTitleSegment(fullTitle: string): string {
-  return fullTitle.split(' - ')[0]?.trim() || fullTitle;
-}
 
 /**
  * Returns the display title for the Chrome-Next project header.
- * Fallback chain: explicit `config.title` -> first segment of doc title -> 'Unknown'.
+ * Fallback chain: explicit `config.title` -> current app title -> 'Unknown'.
  */
 export function useTitle(): string {
   const config = useProjectHeader();
-  const chrome = useChromeService();
-  const docTitle$ = useMemo(() => chrome.docTitle.title$, [chrome]);
-  const fullDocTitle = useObservable(docTitle$, document.title);
-
-  return config?.title ?? extractFirstTitleSegment(fullDocTitle) ?? 'Unknown';
+  const { application } = useChromeComponentsDeps();
+  const appTitle = useObservable(application.currentAppTitle$, undefined);
+  return config?.title ?? appTitle ?? 'Unknown';
 }

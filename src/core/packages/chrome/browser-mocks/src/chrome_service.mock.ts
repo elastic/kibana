@@ -39,7 +39,6 @@ const createStartContractMock = () => {
       get$: jest.fn().mockReturnValue(new BehaviorSubject([])),
     }),
     docTitle: lazyObject({
-      title$: new BehaviorSubject('') as any,
       change: jest.fn(),
       reset: jest.fn(),
     }),

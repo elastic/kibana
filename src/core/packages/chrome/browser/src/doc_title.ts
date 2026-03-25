@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable } from 'rxjs';
-
 /**
  * APIs for accessing and updating the document title.
  *
@@ -27,11 +25,6 @@ import type { Observable } from 'rxjs';
  * @public
  * */
 export interface ChromeDocTitle {
-  /**
-   * Observable of the current rendered document title (e.g. `"Discover - Kibana"`).
-   * Emits whenever `change()` or `reset()` is called.
-   */
-  title$: Observable<string>;
   /**
    * Changes the current document title.
    *

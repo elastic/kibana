@@ -45,7 +45,7 @@ export const useReportTopBarHeight = (): ((node: HTMLElement | null) => void) =>
         const entry = entries[0];
         if (!entry) return;
 
-        const height = Math.round(entry.borderBoxSize[0]?.blockSize ?? entry.contentRect.height);
+        const height = Math.round(entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height);
         if (height !== lastHeightRef.current) {
           lastHeightRef.current = height;
           updateLayout({ applicationTopBarHeight: height });
