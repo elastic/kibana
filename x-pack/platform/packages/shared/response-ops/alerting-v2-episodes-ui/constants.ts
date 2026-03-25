@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export const ALERT_EVENTS_DATA_STREAM = '.alerting-events';
+export const ALERT_EVENTS_DATA_STREAM = '.rule-events';
 export const LAST_EPISODE_TIMESTAMP_ESQL_VARIABLE = 'lastEpisodeTimestamp';
 export const PAGE_SIZE_ESQL_VARIABLE = 'pageSize';

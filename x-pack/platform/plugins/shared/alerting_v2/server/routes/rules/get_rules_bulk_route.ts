@@ -18,7 +18,7 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
 
 const getRulesBulkQuerySchema = schema.object({
-  ids: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1000 })),
+  ids: schema.maybe(schema.oneOf([schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1000 }), schema.string()])),
 });
 
 @injectable()
@@ -46,7 +46,8 @@ export class BulkGetRulesRoute {
 
   async handle() {
     try {
-      const ids = this.request.query.ids ?? [];
+      const idsParam = this.request.query.ids ?? [];
+      const ids = Array.isArray(idsParam) ? idsParam : [idsParam];
       const items = await this.rulesClient.getRules(ids);
       return this.response.ok({
         body: {

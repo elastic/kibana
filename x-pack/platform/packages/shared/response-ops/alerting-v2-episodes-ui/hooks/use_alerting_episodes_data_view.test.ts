@@ -19,11 +19,11 @@ const mockGetEsqlDataView = jest.mocked(getEsqlDataView);
 const http = httpServiceMock.createSetupContract();
 const { dataViews } = dataPluginMock.createStartContract();
 
-const mockDefaultQuery = 'FROM .alerting-events | WHERE type == "alert"';
+const mockDefaultQuery = 'FROM .rule-events | WHERE type == "alert"';
 
 jest.mock('../utils/build_episodes_esql_query', () => ({
   buildEpisodesBaseQuery: jest.fn().mockReturnValue({
-    print: jest.fn().mockReturnValue('FROM .alerting-events | WHERE type == "alert"'),
+    print: jest.fn().mockReturnValue('FROM .rule-events | WHERE type == "alert"'),
   }),
 }));
 
