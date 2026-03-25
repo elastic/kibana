@@ -133,7 +133,7 @@ describe('CoreApp', () => {
   });
 
   describe('`/status` route', () => {
-    it('is registered with `authRequired: false` is the status page is anonymous', async () => {
+    it('is registered with security.authc disabled when the status page is anonymous', async () => {
       internalCoreSetup.status.isStatusPageAnonymous.mockReturnValue(true);
       await coreApp.setup(internalCoreSetup, emptyPlugins());
 
@@ -156,7 +156,7 @@ describe('CoreApp', () => {
       );
     });
 
-    it('is registered with `authRequired: true` is the status page is not anonymous', async () => {
+    it('is registered with security.authc enabled when the status page is not anonymous', async () => {
       internalCoreSetup.status.isStatusPageAnonymous.mockReturnValue(false);
       await coreApp.setup(internalCoreSetup, emptyPlugins());
 
