@@ -261,7 +261,7 @@ function convertAxisSettingsToAPIFormat(
 ): Pick<XYState, 'axis'> | {} {
   const axis: EditableAxisType = {};
 
-  let xAxisScale: string | undefined;
+  let xAxisScale: XAxisType['scale'];
   const firstLayer = config.layers[0];
   const dataSourceLayer = layers[firstLayer.layerId];
   if (isTextBasedLayer(dataSourceLayer) && isLensStateDataLayer(firstLayer)) {
@@ -279,7 +279,7 @@ function convertAxisSettingsToAPIFormat(
     title:
       config.xTitle || config.axisTitlesVisibilitySettings?.x != null
         ? stripUndefined({
-            value: config.xTitle,
+            text: config.xTitle,
             visible:
               config.axisTitlesVisibilitySettings?.x != null
                 ? config.axisTitlesVisibilitySettings.x
@@ -303,7 +303,7 @@ function convertAxisSettingsToAPIFormat(
           )?.[0] as 'horizontal' | 'vertical' | 'angled' | undefined)
         : undefined,
     scale: xAxisScale,
-  });
+  } satisfies XAxisType);
   if (Object.keys(xAxis).length) {
     axis.x = xAxis;
   }
@@ -312,7 +312,7 @@ function convertAxisSettingsToAPIFormat(
     title:
       config.yTitle || config.axisTitlesVisibilitySettings?.yLeft != null
         ? stripUndefined({
-            value: config.yTitle,
+            text: config.yTitle,
             visible:
               config.axisTitlesVisibilitySettings?.yLeft != null
                 ? config.axisTitlesVisibilitySettings.yLeft
@@ -335,7 +335,7 @@ function convertAxisSettingsToAPIFormat(
             ([_, value]) => value === config.labelsOrientation?.yLeft
           )?.[0] as 'horizontal' | 'vertical' | 'angled' | undefined)
         : undefined,
-  });
+  } satisfies YAxisType);
   if (Object.keys(leftAxis).length) {
     axis.left = leftAxis;
   }
@@ -344,7 +344,7 @@ function convertAxisSettingsToAPIFormat(
     title:
       config.yRightTitle || config.axisTitlesVisibilitySettings?.yRight != null
         ? stripUndefined({
-            value: config.yRightTitle,
+            text: config.yRightTitle,
             visible:
               config.axisTitlesVisibilitySettings?.yRight != null
                 ? config.axisTitlesVisibilitySettings.yRight

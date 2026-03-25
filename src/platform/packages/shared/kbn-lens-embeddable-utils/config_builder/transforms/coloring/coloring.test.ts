@@ -884,7 +884,7 @@ describe('Color util transforms', () => {
           { type: 'from_palette', index: 2, palette: 'no_default' },
         ],
         sort: 'asc',
-        unassignedColor: { type: 'from_palette', palette: SEMANTIC_PALETTE, index: 2 },
+        unassigned: { type: 'from_palette', palette: SEMANTIC_PALETTE, index: 2 },
       };
 
       const lensState = fromColorMappingAPIToLensState(originalColorMapping);

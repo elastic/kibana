@@ -14,9 +14,12 @@ import type {
   ColorByValueAbsolute,
   ColorByValueStep,
   ColorByValueType,
+  ColorMappingCategoricalType,
   ColorMappingColorDefType,
+  ColorMappingGradientType,
   ColorMappingType,
   StaticColorType,
+  UnassignedColorType,
 } from '../../schema/color';
 import type { SerializableValueType } from '../../schema/serializedValue';
 
@@ -274,12 +277,12 @@ function isLensStateCategoricalConfigColorMapping(
 
 function fromUnassignedColorLensStateToAPI(
   color: ColorMapping.CategoricalColor | ColorMapping.ColorCode | ColorMapping.LoopColor | undefined
-): { unassignedColor: Extract<ColorMappingColorDefType, { type: 'color_code' }> } | {} {
+): UnassignedColorType | undefined {
   if (!color || color.type === 'loop') {
-    return {};
+    return undefined;
   }
-  const unassignedColor = fromColorLensStateToAPI(color);
-  return { unassignedColor };
+  const unassigned = fromColorLensStateToAPI(color);
+  return unassigned;
 }
 
 export function fromColorMappingLensStateToAPI(
@@ -291,15 +294,13 @@ export function fromColorMappingLensStateToAPI(
       mode: 'categorical',
       palette: `${LEGACY_PALETTE_PREFIX}${legacyPalette.name}`,
       mapping: [],
-    };
+    } satisfies ColorMappingCategoricalType;
   }
   if (!colorMapping) {
     return;
   }
 
-  const unassignedColor = fromUnassignedColorLensStateToAPI(
-    colorMapping.specialAssignments[0]?.color
-  );
+  const unassigned = fromUnassignedColorLensStateToAPI(colorMapping.specialAssignments[0]?.color);
   if (isLensStateCategoricalConfigColorMapping(colorMapping)) {
     return {
       mode: 'categorical',
@@ -310,8 +311,8 @@ export function fromColorMappingLensStateToAPI(
           color: fromColorLensStateToAPI(color),
         };
       }),
-      ...unassignedColor,
-    };
+      ...(unassigned ? { unassigned } : {}),
+    } satisfies ColorMappingCategoricalType;
   }
 
   // because of early return above, we know it is a gradient at this point so casting is safe
@@ -328,8 +329,8 @@ export function fromColorMappingLensStateToAPI(
     }),
     sort: (colorMapping.colorMode as ColorMapping.GradientColorMode).sort,
     gradient: colorMode.steps.map((color) => fromColorLensStateToAPI(color)),
-    ...unassignedColor,
-  };
+    ...(unassigned ? { unassigned } : {}),
+  } satisfies ColorMappingGradientType;
 }
 
 function fromColorDefAPIToLensState(
