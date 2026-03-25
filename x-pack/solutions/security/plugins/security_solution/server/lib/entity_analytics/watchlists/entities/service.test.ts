@@ -50,4 +50,48 @@ describe('Watchlist entities service', () => {
 
     expect(esClient.search).toHaveBeenCalledTimes(2);
   });
+
+  it('returns correlation map and entity IDs for index sources', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: { entity: { id: 'user:jdoe', type: 'user' }, user: { name: 'jdoe' } },
+              _index: '1',
+            },
+            {
+              _source: {
+                entity: { id: 'host:server-1', type: 'host' },
+                host: { name: 'server-1' },
+              },
+              _index: '2',
+            },
+          ],
+        },
+      } as never)
+      .mockResolvedValueOnce({
+        hits: { hits: [] },
+      } as never);
+
+    const service = createWatchlistEntitiesService({
+      esClient,
+      namespace: 'default',
+    });
+
+    const result = await service.listEntityStoreEntities({
+      type: 'index',
+      field: 'user.name',
+    });
+
+    expect(result.entityIdsByType.user).toEqual(['user:jdoe']);
+    expect(result.entityIdsByType.host).toEqual(['host:server-1']);
+    expect(result.correlationMap.get('jdoe')).toEqual({
+      euid: 'user:jdoe',
+      entityType: 'user',
+    });
+    // host doesn't have user.name so it should not be in correlation map
+    expect(result.correlationMap.has('server-1')).toBe(false);
+  });
 });
