@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { useCpsPickerAccess, ProjectRoutingAccess } from '@kbn/cps-utils';
+import { useRouteBasedCpsPickerAccess, ProjectRoutingAccess } from '@kbn/cps-utils';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../app/types';
@@ -15,7 +15,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 
 export const CoverageOverviewPage = () => {
   const { application, cps } = useKibana().services;
-  useCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
+  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
 
   return (
     <>
