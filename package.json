@@ -243,6 +243,7 @@
     "@kbn/as-code-filters-constants": "link:src/platform/packages/shared/as-code/filters-constants",
     "@kbn/as-code-filters-schema": "link:src/platform/packages/shared/as-code/filters-schema",
     "@kbn/as-code-filters-transforms": "link:src/platform/packages/shared/as-code/filters-transforms",
+    "@kbn/as-code-shared-schemas": "link:src/platform/packages/shared/as-code/shared-schemas",
     "@kbn/audit-log-plugin": "link:x-pack/platform/test/security_api_integration/plugins/audit_log",
     "@kbn/automatic-import-plugin": "link:x-pack/platform/plugins/shared/automatic_import",
     "@kbn/automatic-import-v2-plugin": "link:x-pack/platform/plugins/shared/automatic_import_v2",
