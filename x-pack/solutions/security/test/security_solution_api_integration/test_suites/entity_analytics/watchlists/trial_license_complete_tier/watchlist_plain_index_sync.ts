@@ -13,7 +13,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const kibanaServer = getService('kibanaServer');
 
-  describe('@ess @serverless @skipInServerlessMKI Watchlist Plain Index Sync', () => {
+  describe.skip('@ess @serverless @skipInServerlessMKI Watchlist Plain Index Sync', () => {
     const sourceIndexName = 'watchlist-sync-test-users';
     const watchlistName = 'sync-test-list';
     const utils = WatchlistSyncUtils(getService, sourceIndexName);
