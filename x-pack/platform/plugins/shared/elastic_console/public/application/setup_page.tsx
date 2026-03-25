@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiCallOut,
@@ -33,9 +33,9 @@ interface SetupResponse {
 export const SetupPage: React.FC = () => {
   const { services } = useKibana<CoreStart>();
   const [setupData, setSetupData] = useState<SetupResponse | null>(null);
-  const [configUrl, setConfigUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const handleSetup = useCallback(async () => {
     setIsLoading(true);
@@ -44,46 +44,6 @@ export const SetupPage: React.FC = () => {
     try {
       const data = await services.http.post<SetupResponse>('/internal/elastic_console/setup');
       setSetupData(data);
-
-      const url = new URL(`${LOCAL_AGENT_URL}/config`);
-      url.searchParams.set('elasticsearch_url', data.elasticsearchUrl);
-      url.searchParams.set('kibana_url', data.kibanaUrl);
-      url.searchParams.set('api_key', data.apiKeyEncoded);
-      url.searchParams.set(
-        'provider',
-        JSON.stringify({
-          kibana: {
-            name: 'Kibana LLM Gateway',
-            id: 'kibana',
-            npm: '@ai-sdk/openai-compatible',
-            env: [],
-            models: {
-              default: {
-                id: 'default',
-                name: 'Default Connector',
-                attachment: false,
-                reasoning: false,
-                temperature: true,
-                tool_call: true,
-                release_date: '2025-01-01',
-                cost: { input: 0, output: 0 },
-                limit: { context: 128000, output: 8192 },
-              },
-            },
-            options: {
-              baseURL: `${data.kibanaUrl}/internal/elastic_console/v1`,
-              apiKey: 'ignored',
-              headers: {
-                Authorization: `ApiKey ${data.apiKeyEncoded}`,
-                'x-elastic-internal-origin': 'kibana',
-                'kbn-xsrf': 'true',
-              },
-            },
-          },
-        })
-      );
-      url.searchParams.set('model', 'kibana/default');
-      setConfigUrl(url.toString());
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create setup credentials');
     } finally {
@@ -119,11 +79,58 @@ export const SetupPage: React.FC = () => {
           </>
         )}
 
-        {setupData && configUrl && (
+        {setupData && (
           <>
+            {/* Hidden form for POST-based navigation — keeps credentials out of browser history */}
+            <form
+              ref={formRef}
+              method="POST"
+              action={`${LOCAL_AGENT_URL}/config`}
+              target="_blank"
+              style={{ display: 'none' }}
+            >
+              <input type="hidden" name="elasticsearch_url" value={setupData.elasticsearchUrl} />
+              <input type="hidden" name="kibana_url" value={setupData.kibanaUrl} />
+              <input type="hidden" name="api_key" value={setupData.apiKeyEncoded} />
+              <input
+                type="hidden"
+                name="provider"
+                value={JSON.stringify({
+                  kibana: {
+                    name: 'Kibana LLM Gateway',
+                    id: 'kibana',
+                    npm: '@ai-sdk/openai-compatible',
+                    env: [],
+                    models: {
+                      default: {
+                        id: 'default',
+                        name: 'Default Connector',
+                        attachment: false,
+                        reasoning: false,
+                        temperature: true,
+                        tool_call: true,
+                        release_date: '2025-01-01',
+                        cost: { input: 0, output: 0 },
+                        limit: { context: 128000, output: 8192 },
+                      },
+                    },
+                    options: {
+                      baseURL: `${setupData.kibanaUrl}/internal/elastic_console/v1`,
+                      apiKey: 'ignored',
+                      headers: {
+                        Authorization: `ApiKey ${setupData.apiKeyEncoded}`,
+                        'x-elastic-internal-origin': 'kibana',
+                        'kbn-xsrf': 'true',
+                      },
+                    },
+                  },
+                })}
+              />
+              <input type="hidden" name="model" value="kibana/default" />
+            </form>
             <EuiFlexGroup direction="column" gutterSize="m">
               <EuiFlexItem grow={false}>
-                <EuiButton href={configUrl} target="_blank" iconType="popout">
+                <EuiButton onClick={() => formRef.current?.submit()} iconType="popout">
                   Connect local agent
                 </EuiButton>
               </EuiFlexItem>
