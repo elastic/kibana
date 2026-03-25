@@ -9,14 +9,17 @@ import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-pl
 import React, { createContext, memo, useContext, useMemo } from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { useEventDetails } from './hooks/use_event_details';
 import { FlyoutError } from '../../shared/components/flyout_error';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
+import { FlyoutMissingAlertsPrivilege } from '../../shared/components/flyout_missing_alerts_privilege';
 import type { SearchHit } from '../../../../common/search_strategy';
 import { useBasicDataFromDetailsData } from './hooks/use_basic_data_from_details_data';
 import type { DocumentDetailsProps } from './types';
 import type { GetFieldsData } from './hooks/use_get_fields_data';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
+import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 export interface DocumentDetailsContext {
   /**
@@ -99,6 +102,8 @@ export const DocumentDetailsProvider = memo(
     isPreviewMode,
     children,
   }: DocumentDetailsProviderProps) => {
+    const { hasAlertsRead } = useAlertsPrivileges();
+    const missingAlertsPrivilege = !hasAlertsRead && indexName?.includes(DEFAULT_ALERTS_INDEX);
     const {
       browserFields,
       dataAsNestedObject,
@@ -107,7 +112,7 @@ export const DocumentDetailsProvider = memo(
       loading,
       refetchFlyoutData,
       searchHit,
-    } = useEventDetails({ eventId: id, indexName });
+    } = useEventDetails({ eventId: id, indexName, skip: missingAlertsPrivilege });
 
     const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
     const { rule: maybeRule } = useRuleWithFallback(ruleId);
@@ -156,6 +161,10 @@ export const DocumentDetailsProvider = memo(
 
     if (loading) {
       return <FlyoutLoading />;
+    }
+
+    if (missingAlertsPrivilege) {
+      return <FlyoutMissingAlertsPrivilege />;
     }
 
     if (!contextValue) {
