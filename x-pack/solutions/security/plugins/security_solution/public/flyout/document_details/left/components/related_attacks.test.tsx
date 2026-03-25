@@ -101,6 +101,11 @@ describe('<RelatedAttacks />', () => {
       params: {
         attackId: 'attack-id-1',
         indexName: 'index',
+        banner: {
+          backgroundColor: 'warning',
+          textColor: 'warning',
+          title: 'Preview attack details',
+        },
       },
     });
     expect(
