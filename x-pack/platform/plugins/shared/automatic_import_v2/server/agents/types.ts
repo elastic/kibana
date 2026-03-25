@@ -27,4 +27,5 @@ export interface AutomaticImportAgentParams {
   instructions?: string;
   model: InferenceChatModel;
   subagents: SubAgent[];
+  samples?: string[];
 }

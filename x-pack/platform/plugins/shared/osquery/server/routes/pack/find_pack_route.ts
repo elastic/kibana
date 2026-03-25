@@ -74,7 +74,7 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           sortOrder: request.query.sortOrder ?? 'desc',
           ...(request.query.search && {
             search: request.query.search,
-            searchFields: ['name'],
+            searchFields: ['name', 'description'],
           }),
           ...(filters.length && { filter: filters.join(' AND ') }),
         });
