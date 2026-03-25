@@ -219,10 +219,13 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
 
   // Validation trigger mutation
   const validateMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (params?: { autoConverge?: boolean }) => {
       setIsValidating(true);
       return await api.http.post(`/internal/aesop/skills/${skill.id}/validate`, {
-        body: JSON.stringify({ connector_id: selectedConnectorId }),
+        body: JSON.stringify({
+          connector_id: selectedConnectorId,
+          auto_converge: params?.autoConverge || false,
+        }),
         version: '1',
       });
     },
@@ -379,13 +382,28 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                 >
                   <p>Current validation status: {skill.validation?.status || 'pending'}</p>
                   <EuiSpacer size="s" />
-                  <EuiButton
-                    size="s"
-                    onClick={() => validateMutation.mutate()}
-                    disabled={!selectedConnectorId}
-                  >
-                    {skill.validation?.status === 'failed' ? 'Re-run Validation' : 'Run Validation'}
-                  </EuiButton>
+                  <EuiFlexGroup gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        size="s"
+                        onClick={() => validateMutation.mutate()}
+                        disabled={!selectedConnectorId}
+                      >
+                        {skill.validation?.status === 'failed' ? 'Re-run Validation' : 'Run Validation'}
+                      </EuiButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        size="s"
+                        fill
+                        iconType="sparkles"
+                        onClick={() => validateMutation.mutate({ autoConverge: true })}
+                        disabled={!selectedConnectorId}
+                      >
+                        Validate & Auto-Improve
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiCallOut>
               ) : (
                 <EuiCallOut
@@ -435,6 +453,20 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
+                {skill.validation?.iterations?.length > 1 && (
+                  <>
+                    <EuiSpacer size="s" />
+                    <EuiFlexGroup gutterSize="xs" wrap>
+                      {skill.validation.iterations.map((iter: any, i: number) => (
+                        <EuiFlexItem key={i} grow={false}>
+                          <EuiBadge color={iter.score >= 0.85 ? 'success' : 'default'}>
+                            #{iter.iteration}: {(iter.score * 100).toFixed(0)}%
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      ))}
+                    </EuiFlexGroup>
+                  </>
+                )}
               </EuiPanel>
               <EuiSpacer size="s" />
 
