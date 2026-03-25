@@ -14,24 +14,24 @@ import {
   HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID,
 } from './test_ids';
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
-import { TestProviders } from '../../../../common/mock';
-import { useGetAgentStatus } from '../../../../management/hooks/agents/use_get_agent_status';
-import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
+import { TestProviders } from '../../../common/mock';
+import { useGetAgentStatus } from '../../../management/hooks/agents/use_get_agent_status';
+import { mockFlyoutApi } from '../../../flyout/document_details/shared/mocks/mock_flyout_context';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { HostPreviewPanelKey } from '../../../entity_details/host_right';
-import { HOST_PREVIEW_BANNER } from './host_entity_overview';
-import { UserPreviewPanelKey } from '../../../entity_details/user_right';
-import { USER_PREVIEW_BANNER } from './user_entity_overview';
-import { NETWORK_PREVIEW_BANNER, NetworkPreviewPanelKey } from '../../../network_details';
-import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
+import { HostPreviewPanelKey } from '../../../flyout/entity_details/host_right';
+import { HOST_PREVIEW_BANNER } from '../../../flyout/document_details/right/components/host_entity_overview';
+import { UserPreviewPanelKey } from '../../../flyout/entity_details/user_right';
+import { USER_PREVIEW_BANNER } from '../../../flyout/document_details/right/components/user_entity_overview';
+import { NETWORK_PREVIEW_BANNER, NetworkPreviewPanelKey } from '../../../flyout/network_details';
+import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 
-jest.mock('../../../../management/hooks');
-jest.mock('../../../../management/hooks/agents/use_get_agent_status');
+jest.mock('../../../management/hooks');
+jest.mock('../../../management/hooks/agents/use_get_agent_status');
 
 jest.mock('@kbn/expandable-flyout');
 
 const mockedTelemetry = createTelemetryServiceMock();
-jest.mock('../../../../common/lib/kibana', () => {
+jest.mock('../../../common/lib/kibana', () => {
   return {
     useKibana: () => ({
       services: {
