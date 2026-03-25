@@ -40,8 +40,8 @@ describe('alertAnalysisSkill', () => {
       expect(tools).toHaveLength(3);
     });
 
-    it('returns one inline tool', () => {
-      const inlineTools = alertAnalysisSkill.getInlineTools?.();
+    it('returns one inline tool', async () => {
+      const inlineTools = await alertAnalysisSkill.getInlineTools?.();
       expect(inlineTools).toBeDefined();
       expect(inlineTools).toHaveLength(1);
       expect(inlineTools![0].id).toBe('security.alert-analysis.get-related-alerts');
@@ -53,9 +53,9 @@ describe('alertAnalysisSkill', () => {
 
     let tool: BuiltinSkillBoundedTool;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       jest.clearAllMocks();
-      const inlineTools = alertAnalysisSkill.getInlineTools?.();
+      const inlineTools = await alertAnalysisSkill.getInlineTools?.();
       tool = inlineTools![0] as BuiltinSkillBoundedTool;
     });
 
