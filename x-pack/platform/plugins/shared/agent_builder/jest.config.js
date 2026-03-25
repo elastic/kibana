@@ -14,9 +14,6 @@ module.exports = {
     '<rootDir>/x-pack/platform/plugins/shared/agent_builder/common',
   ],
   setupFiles: [],
-  testPathIgnorePatterns: [
-    '<rootDir>/x-pack/platform/plugins/shared/agent_builder/.*/integration_tests/',
-  ],
   collectCoverage: true,
   collectCoverageFrom: [
     '<rootDir>/x-pack/platform/plugins/shared/agent_builder/{public,server,common}/**/*.{js,ts,tsx}',
