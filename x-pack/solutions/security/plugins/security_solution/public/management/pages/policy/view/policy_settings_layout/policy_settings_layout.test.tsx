@@ -64,7 +64,8 @@ describe('When rendering PolicySettingsLayout', () => {
     cleanup();
   });
 
-  describe('and user has Edit permissions', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/254544
+  describe.skip('and user has Edit permissions', () => {
     const clickSave = async (andConfirm: boolean = true, ensureApiIsCalled: boolean = true) => {
       const { getByTestId } = renderResult;
 

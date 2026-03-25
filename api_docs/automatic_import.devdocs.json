@@ -310,7 +310,7 @@
           "\nProcessor item for the Elasticsearch processor."
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/processor_attributes.gen.ts",
-        "lineNumber": 93,
+        "lineNumber": 96,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -327,7 +327,7 @@
               "ESProcessorOptions"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/processor_attributes.gen.ts",
-            "lineNumber": 97,
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -679,7 +679,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/cel_input_attributes.gen.ts",
-        "lineNumber": 22,
+        "lineNumber": 23,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -696,7 +696,7 @@
           "any"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/cel_input_attributes.gen.ts",
-        "lineNumber": 26,
+        "lineNumber": 27,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -715,7 +715,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/cel_input_attributes.gen.ts",
-        "lineNumber": 62,
+        "lineNumber": 63,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -732,7 +732,7 @@
           "any"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/cel_input_attributes.gen.ts",
-        "lineNumber": 66,
+        "lineNumber": 67,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -901,7 +901,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 168,
+        "lineNumber": 169,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -918,7 +918,7 @@
           "any"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 172,
+        "lineNumber": 173,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -937,7 +937,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 70,
+        "lineNumber": 71,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -954,7 +954,7 @@
           "any"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 74,
+        "lineNumber": 75,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1063,7 +1063,7 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/processor_attributes.gen.ts",
-        "lineNumber": 102,
+        "lineNumber": 105,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1082,7 +1082,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 145,
+        "lineNumber": 146,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1099,7 +1099,7 @@
           "any"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 149,
+        "lineNumber": 150,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1118,7 +1118,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 211,
+        "lineNumber": 212,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1135,7 +1135,7 @@
           "any"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 215,
+        "lineNumber": 216,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1168,7 +1168,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 238,
+        "lineNumber": 239,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1185,7 +1185,7 @@
           "any"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 242,
+        "lineNumber": 243,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1204,7 +1204,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 118,
+        "lineNumber": 119,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1221,7 +1221,7 @@
           "any"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 122,
+        "lineNumber": 123,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1339,7 +1339,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 94,
+        "lineNumber": 95,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1356,7 +1356,7 @@
           "any"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 98,
+        "lineNumber": 99,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1375,7 +1375,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 76,
+        "lineNumber": 77,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1392,7 +1392,7 @@
           "any"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/model/common_attributes.gen.ts",
-        "lineNumber": 80,
+        "lineNumber": 81,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
