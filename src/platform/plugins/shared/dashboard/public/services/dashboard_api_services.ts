@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardBackupService } from './dashboard_backup_service';
+import {
+  type DashboardBackupService,
+  createDashboardBackupService,
+} from './dashboard_backup_service';
 import { spacesService } from './kibana_services';
 
 let backupService: DashboardBackupService | undefined;
+let servicesAvailablePromise: Promise<undefined> | undefined;
 
 export const getDashboardBackupService = () => {
   if (!backupService)
@@ -25,8 +29,9 @@ export const getDashboardBackupService = () => {
  */
 export const initializeDashboardApiServices = async () => {
   if (backupService) return;
-  const newBackupService = await (
-    await import('./dashboard_backup_service')
-  ).createDashboardBackupService(spacesService);
-  backupService = newBackupService;
+  if (servicesAvailablePromise) return servicesAvailablePromise;
+  servicesAvailablePromise = (async () => {
+    backupService = await createDashboardBackupService(spacesService);
+  })();
+  return servicesAvailablePromise;
 };
