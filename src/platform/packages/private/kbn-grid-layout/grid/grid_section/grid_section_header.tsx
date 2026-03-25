@@ -133,7 +133,9 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
 
     /**
      * This subscription is responsible for handling the drag + drop styles for
-     * re-ordering grid rows and also collapsing the section when the drag starts (if it isn't already collapsed) or toggling the collapsed state when the drag finishes without any movement (i.e. a click)
+     * re-ordering grid rows and also collapsing the section when the drag starts
+     *  (if it isn't already collapsed) or toggling the collapsed state when
+     * the drag finishes without any movement (i.e. a click)
      */
 
     const sectionInteractionSubscription = dragState$.subscribe(({ type, event }) => {
