@@ -21,7 +21,8 @@ apiTest.describe(
     const createdPackIds: string[] = [];
 
     apiTest.beforeAll(async ({ samlAuth }) => {
-      // use cookie-based authentication
+      // TODO: investigate why this test only passes with cookie-based authentication while similar
+      // tests (saved_queries_admin.spec.ts) pass with API key-based authentication
       adminCredentials = await samlAuth.asInteractiveUser('admin');
     });
 
