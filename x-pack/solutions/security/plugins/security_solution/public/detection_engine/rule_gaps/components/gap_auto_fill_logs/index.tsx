@@ -122,7 +122,7 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
 
   const enabled = scheduler?.enabled;
   const color = enabled ? 'success' : 'hollow';
-  const iconType = enabled ? 'checkInCircleFilled' : 'minusInCircle';
+  const iconType = enabled ? 'checkCircleFill' : 'minusCircle';
 
   const getStatusLabel = (status: string | undefined) => {
     if (!status) return '';
@@ -214,7 +214,7 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
               <EuiButtonIcon
                 onClick={toggleViewLogs}
                 aria-label={isExpanded ? 'Collapse' : 'Expand'}
-                iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+                iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
               />
             </EuiFlexGroup>
           );

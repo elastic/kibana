@@ -382,6 +382,7 @@ async function processGrokPatterns({
             path: { name: streamName },
             body: {
               connector_id: connectorId,
+              field_name: fieldName,
               sample_messages: messages,
               review_fields: reviewFields,
             },
@@ -504,6 +505,7 @@ async function processDissectPattern({
             path: { name: streamName },
             body: {
               connector_id: connectorId,
+              field_name: fieldName,
               sample_messages: sampleMessages,
               review_fields: reviewFields,
             },

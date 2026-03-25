@@ -16,6 +16,7 @@ import { registerMemoryTools } from './tools/register_memory_tools';
 import { registerMemoryContextHook } from './hooks/memory/register_memory_context_hook';
 import { registerMemoryLearningHook } from './hooks/memory/register_memory_learning_hook';
 import { registerSigeventsMemoryHook } from './hooks/memory/register_sigevents_memory_hook';
+import { streamExplorationSkill } from './skills/stream_exploration_skill';
 
 export const registerStreamsAgentBuilder = ({
   agentBuilder,
@@ -64,4 +65,6 @@ export const registerStreamsAgentBuilder = ({
     logger,
     getMemoryServices,
   });
+
+  agentBuilder.skills.register(streamExplorationSkill);
 };
