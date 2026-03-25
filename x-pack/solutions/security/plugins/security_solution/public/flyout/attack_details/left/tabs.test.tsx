@@ -9,7 +9,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { insightsTab, notesTab } from './tabs';
-import { INSIGHTS_TAB_TEST_ID, NOTES_TAB_TEST_ID } from '../constants/test_ids';
+import { INSIGHTS_TAB_TEST_ID } from '../constants/test_ids';
+import { NOTES_DETAILS_TEST_ID } from '../../../flyout_v2/notes/test_ids';
 
 jest.mock('./tabs/insights_tab', () => ({
   InsightsTab: () => <div data-test-subj="insights-tab-content">{'Insights tab'}</div>,
@@ -47,7 +48,7 @@ describe('tabs', () => {
     });
 
     it('has the correct data-test-subj', () => {
-      expect(notesTab['data-test-subj']).toBe(NOTES_TAB_TEST_ID);
+      expect(notesTab['data-test-subj']).toBe(NOTES_DETAILS_TEST_ID);
     });
 
     it('renders name as "Notes"', () => {
