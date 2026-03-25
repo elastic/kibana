@@ -13,6 +13,7 @@ import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTE_SECURITY } from '../utils/route_security';
+import { WorkflowManagementAuditLog } from '../utils/workflow_audit_logging';
 import { withLicenseCheck } from '../utils/with_license_check';
 
 export function registerTestStepRoute({ router, api, spaces }: RouteDependencies) {
@@ -62,8 +63,14 @@ export function registerTestStepRoute({ router, api, spaces }: RouteDependencies
             spaceId,
             request
           );
+          await WorkflowManagementAuditLog.logWorkflowStepTest(context, {
+            stepId: request.body.stepId,
+            workflowExecutionId,
+            workflowId: request.body.workflowId,
+          });
           return response.ok({ body: { workflowExecutionId } });
         } catch (error) {
+          await WorkflowManagementAuditLog.logWorkflowStepTestFailed(context, error);
           return handleRouteError(response, error);
         }
       })

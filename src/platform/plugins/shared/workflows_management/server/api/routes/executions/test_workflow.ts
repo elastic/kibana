@@ -14,6 +14,7 @@ import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTE_SECURITY } from '../utils/route_security';
+import { WorkflowManagementAuditLog } from '../utils/workflow_audit_logging';
 import { withLicenseCheck } from '../utils/with_license_check';
 
 export function registerTestWorkflowRoute({ router, api, logger, spaces }: RouteDependencies) {
@@ -84,8 +85,14 @@ export function registerTestWorkflowRoute({ router, api, logger, spaces }: Route
             request,
           });
 
+          await WorkflowManagementAuditLog.logWorkflowTest(context, {
+            workflowExecutionId,
+            workflowId,
+          });
+
           return response.ok({ body: { workflowExecutionId } });
         } catch (error) {
+          await WorkflowManagementAuditLog.logWorkflowTestFailed(context, error);
           return handleRouteError(response, error);
         }
       })

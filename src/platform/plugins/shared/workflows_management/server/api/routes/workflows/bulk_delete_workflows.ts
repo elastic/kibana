@@ -13,6 +13,7 @@ import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_DELETE_SECURITY } from '../utils/route_security';
+import { WorkflowManagementAuditLog } from '../utils/workflow_audit_logging';
 import { withLicenseCheck } from '../utils/with_license_check';
 
 const MAX_BULK_DELETE_BATCH_SIZE = 1000;
@@ -55,8 +56,14 @@ export function registerBulkDeleteWorkflowsRoute({ router, api, spaces }: RouteD
           const { ids } = request.body;
           const spaceId = spaces.getSpaceId(request);
           const result = await api.deleteWorkflows(ids, spaceId, request);
+          await WorkflowManagementAuditLog.logBulkWorkflowDeleteSummary(context, {
+            total: result.total,
+            deleted: result.deleted,
+            failureCount: result.failures.length,
+          });
           return response.ok({ body: result });
         } catch (error) {
+          await WorkflowManagementAuditLog.logBulkWorkflowDeleteFailed(context, error);
           return handleRouteError(response, error);
         }
       })

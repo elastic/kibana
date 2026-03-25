@@ -13,6 +13,7 @@ import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
 import { idParamSchema } from '../utils/schemas';
+import { WorkflowManagementAuditLog } from '../utils/workflow_audit_logging';
 import { withLicenseCheck } from '../utils/with_license_check';
 
 export function registerGetWorkflowRoute({ router, api, spaces }: RouteDependencies) {
@@ -48,8 +49,13 @@ export function registerGetWorkflowRoute({ router, api, spaces }: RouteDependenc
           if (!workflow) {
             return response.notFound({ body: { message: 'Workflow not found' } });
           }
+          await WorkflowManagementAuditLog.logWorkflowAccessed(context, { id });
           return response.ok({ body: workflow });
         } catch (error) {
+          await WorkflowManagementAuditLog.logWorkflowAccessFailed(context, {
+            id: request.params.id,
+            error,
+          });
           return handleRouteError(response, error);
         }
       })

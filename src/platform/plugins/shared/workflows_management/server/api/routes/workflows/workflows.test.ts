@@ -33,6 +33,17 @@ const createLicensingContext = () => ({
       type: 'enterprise',
     },
   }),
+  core: Promise.resolve({
+    security: {
+      audit: {
+        logger: {
+          enabled: false,
+          log: jest.fn(),
+          includeSavedObjectNames: false,
+        },
+      },
+    },
+  }),
 });
 
 describe('Workflow routes', () => {

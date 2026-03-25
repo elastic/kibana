@@ -14,6 +14,7 @@ import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTION_CANCEL_SECURITY } from '../utils/route_security';
 import { executionIdParamSchema } from '../utils/schemas';
 import { withLicenseCheck } from '../utils/with_license_check';
+import { WorkflowManagementAuditLog } from '../utils/workflow_audit_logging';
 
 export function registerCancelExecutionRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
@@ -45,8 +46,13 @@ export function registerCancelExecutionRoute({ router, api, spaces }: RouteDepen
           const { executionId } = request.params;
           const spaceId = spaces.getSpaceId(request);
           await api.cancelWorkflowExecution(executionId, spaceId);
+          await WorkflowManagementAuditLog.logExecutionCanceled(context, { executionId });
           return response.ok();
         } catch (error) {
+          await WorkflowManagementAuditLog.logExecutionCancelFailed(context, {
+            executionId: request.params.executionId,
+            error,
+          });
           return handleRouteError(response, error, { checkNotFound: true });
         }
       })

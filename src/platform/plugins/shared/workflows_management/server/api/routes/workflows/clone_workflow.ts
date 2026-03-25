@@ -13,6 +13,7 @@ import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_CREATE_SECURITY } from '../utils/route_security';
 import { idParamSchema } from '../utils/schemas';
+import { WorkflowManagementAuditLog } from '../utils/workflow_audit_logging';
 import { withLicenseCheck } from '../utils/with_license_check';
 
 export function registerCloneWorkflowRoute({ router, api, spaces }: RouteDependencies) {
@@ -49,8 +50,16 @@ export function registerCloneWorkflowRoute({ router, api, spaces }: RouteDepende
             return response.notFound();
           }
           const createdWorkflow = await api.cloneWorkflow(workflow, spaceId, request);
+          await WorkflowManagementAuditLog.logWorkflowCloned(context, {
+            sourceId: id,
+            newId: createdWorkflow.id,
+          });
           return response.ok({ body: createdWorkflow });
         } catch (error) {
+          await WorkflowManagementAuditLog.logWorkflowCloneFailed(context, {
+            sourceId: request.params.id,
+            error,
+          });
           return handleRouteError(response, error);
         }
       })

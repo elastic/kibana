@@ -13,6 +13,7 @@ import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
+import { WorkflowManagementAuditLog } from '../utils/workflow_audit_logging';
 import { withLicenseCheck } from '../utils/with_license_check';
 
 export function registerMgetWorkflowsRoute({ router, api, spaces }: RouteDependencies) {
@@ -65,8 +66,13 @@ export function registerMgetWorkflowsRoute({ router, api, spaces }: RouteDepende
           const spaceId = spaces.getSpaceId(request);
           const { ids, source } = request.body;
           const workflows = await api.getWorkflowsSourceByIds(ids, spaceId, source);
+          await WorkflowManagementAuditLog.logWorkflowMget(context, {
+            requestedCount: ids.length,
+            returnedCount: workflows.length,
+          });
           return response.ok({ body: workflows });
         } catch (error) {
+          await WorkflowManagementAuditLog.logWorkflowMgetFailed(context, error);
           return handleRouteError(response, error);
         }
       })

@@ -13,6 +13,7 @@ import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_CREATE_SECURITY } from '../utils/route_security';
+import { WorkflowManagementAuditLog } from '../utils/workflow_audit_logging';
 import { withLicenseCheck } from '../utils/with_license_check';
 
 export function registerCreateWorkflowRoute({ router, api, spaces }: RouteDependencies) {
@@ -45,8 +46,12 @@ export function registerCreateWorkflowRoute({ router, api, spaces }: RouteDepend
         try {
           const spaceId = spaces.getSpaceId(request);
           const createdWorkflow = await api.createWorkflow(request.body, spaceId, request);
+          await WorkflowManagementAuditLog.logWorkflowCreated(context, {
+            id: createdWorkflow.id,
+          });
           return response.ok({ body: createdWorkflow });
         } catch (error) {
+          await WorkflowManagementAuditLog.logWorkflowCreateFailed(context, error);
           return handleRouteError(response, error);
         }
       })

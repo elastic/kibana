@@ -27,6 +27,17 @@ describe('Execution Routes', () => {
         type: 'enterprise',
       },
     }),
+    core: Promise.resolve({
+      security: {
+        audit: {
+          logger: {
+            enabled: false,
+            log: jest.fn(),
+            includeSavedObjectNames: false,
+          },
+        },
+      },
+    }),
   };
 
   const mockResponse = {

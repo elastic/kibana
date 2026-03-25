@@ -13,6 +13,7 @@ import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_DELETE_SECURITY } from '../utils/route_security';
 import { idParamSchema } from '../utils/schemas';
+import { WorkflowManagementAuditLog } from '../utils/workflow_audit_logging';
 import { withLicenseCheck } from '../utils/with_license_check';
 
 export function registerDeleteWorkflowRoute({ router, api, spaces }: RouteDependencies) {
@@ -45,8 +46,13 @@ export function registerDeleteWorkflowRoute({ router, api, spaces }: RouteDepend
           const { id } = request.params;
           const spaceId = spaces.getSpaceId(request);
           await api.deleteWorkflows([id], spaceId, request);
+          await WorkflowManagementAuditLog.logWorkflowDeleted(context, { id });
           return response.ok();
         } catch (error) {
+          await WorkflowManagementAuditLog.logWorkflowDeleteFailed(context, {
+            id: request.params.id,
+            error,
+          });
           return handleRouteError(response, error);
         }
       })

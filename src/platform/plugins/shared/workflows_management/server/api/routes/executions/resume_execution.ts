@@ -15,6 +15,7 @@ import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTION_RESUME_SECURITY } from '../utils/route_security';
 import { executionIdParamSchema } from '../utils/schemas';
 import { withLicenseCheck } from '../utils/with_license_check';
+import { WorkflowManagementAuditLog } from '../utils/workflow_audit_logging';
 
 export function registerResumeExecutionRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
@@ -54,6 +55,8 @@ export function registerResumeExecutionRoute({ router, api, spaces }: RouteDepen
 
           await api.resumeWorkflowExecution(executionId, spaceId, input, request);
 
+          await WorkflowManagementAuditLog.logExecutionResumed(context, { executionId });
+
           return response.ok({
             body: {
               success: true,
@@ -62,6 +65,10 @@ export function registerResumeExecutionRoute({ router, api, spaces }: RouteDepen
             },
           });
         } catch (error) {
+          await WorkflowManagementAuditLog.logExecutionResumeFailed(context, {
+            executionId: request.params.executionId,
+            error,
+          });
           return handleRouteError(response, error, { checkNotFound: true });
         }
       })

@@ -16,6 +16,7 @@ import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTE_SECURITY } from '../utils/route_security';
 import { idParamSchema } from '../utils/schemas';
+import { WorkflowManagementAuditLog } from '../utils/workflow_audit_logging';
 import { withLicenseCheck } from '../utils/with_license_check';
 
 export function registerRunWorkflowRoute({ router, api, logger, spaces }: RouteDependencies) {
@@ -102,8 +103,16 @@ export function registerRunWorkflowRoute({ router, api, logger, spaces }: RouteD
             undefined,
             metadata
           );
+          await WorkflowManagementAuditLog.logWorkflowRun(context, {
+            workflowId: id,
+            executionId: workflowExecutionId,
+          });
           return response.ok({ body: { workflowExecutionId } });
         } catch (error) {
+          await WorkflowManagementAuditLog.logWorkflowRunFailed(context, {
+            workflowId: request.params.id,
+            error,
+          });
           return handleRouteError(response, error);
         }
       })
