@@ -16,7 +16,12 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { NAME_REGEX_PATTERN } from '../../../../../../common/constants';
+import {
+  MAX_DESCRIPTION_LENGTH,
+  MAX_NAME_LENGTH,
+  MAX_TITLE_LENGTH,
+  NAME_REGEX_PATTERN,
+} from '../../../../../../common/constants';
 import type { InputType } from '../../../../../../common';
 import { useActions, type State } from '../../state';
 import type { IntegrationSettings } from '../../types';
@@ -186,7 +191,8 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                     data-test-subj="nameInput"
                     value={name}
                     onChange={onChange.name}
-                    isInvalid={invalidFields.name}
+                    maxLength={MAX_NAME_LENGTH}
+                    isInvalid={!!nameInputError || invalidFields.name}
                     isLoading={isLoadingPackageNames}
                     disabled={isLoadingPackageNames}
                   />
@@ -207,6 +213,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                     data-test-subj="dataStreamTitleInput"
                     value={integrationSettings?.dataStreamTitle ?? ''}
                     onChange={onChange.dataStreamTitle}
+                    maxLength={MAX_TITLE_LENGTH}
                   />
                 </EuiFormRow>
                 <EuiFormRow label={i18n.DATA_STREAM_DESCRIPTION_LABEL}>
@@ -215,6 +222,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                     data-test-subj="dataStreamDescriptionInput"
                     value={integrationSettings?.dataStreamDescription ?? ''}
                     onChange={onChange.dataStreamDescription}
+                    maxLength={MAX_DESCRIPTION_LENGTH}
                   />
                 </EuiFormRow>
                 <EuiFormRow
@@ -228,6 +236,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                     data-test-subj="dataStreamNameInput"
                     value={dataStreamName}
                     onChange={onChange.dataStreamName}
+                    maxLength={MAX_NAME_LENGTH}
                     isInvalid={invalidFields.dataStreamName}
                   />
                 </EuiFormRow>
