@@ -38,6 +38,8 @@ export const attachmentPanelSchema = z.object({
   config: z.record(z.string(), z.unknown()),
   /** Layout: width/height and position in dashboard grid units. */
   grid: panelGridSchema,
+  /** The visualization attachment ID this panel was resolved from */
+  sourceAttachmentId: z.string().optional(),
 });
 
 /**

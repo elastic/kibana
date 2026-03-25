@@ -93,7 +93,6 @@ After a successful call:
 - Use \`data.dashboardAttachment.id\` as \`dashboardAttachmentId\` when updating that dashboard later.
 - Never invent \`dashboardAttachmentId\`, \`uid\`, or \`sectionId\`. Reuse the values returned by prior tool results.
 
-
 ${dashboardCompositionPrompt}
 
 ${gridLayoutPrompt}
