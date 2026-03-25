@@ -103,6 +103,7 @@ Object {
     "strictTransportSecurity": null,
     "xContentTypeOptions": "nosniff",
   },
+  "serverTiming": false,
   "shutdownTimeout": "PT30S",
   "socketTimeout": 120000,
   "ssl": Object {

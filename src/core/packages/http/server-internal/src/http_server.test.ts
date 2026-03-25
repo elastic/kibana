@@ -2251,7 +2251,9 @@ test('includes Server-Timing header with custom events', async () => {
     }
   );
 
-  const { registerRouter, server: innerServer } = await server.setup({ config$ });
+  const { registerRouter, server: innerServer } = await server.setup({
+    config$: of({ ...config, serverTiming: true }),
+  });
   registerRouter(router);
   await server.start();
 
@@ -2260,7 +2262,37 @@ test('includes Server-Timing header with custom events', async () => {
   // Verify Server-Timing header exists and contains expected metrics
   expect(response.headers['server-timing']).toBeDefined();
   const headerValue = response.headers['server-timing'];
-  expect(headerValue).toMatch(/apptotal;dur=[\d.]+;desc="Application Server Processing Time"/);
+  expect(headerValue).toMatch(
+    /apptotal;dur=[\d.]+;desc="Application Server Processing Time \(Total\)"/
+  );
   expect(headerValue).toMatch(/test-operation;dur=[\d.]+;desc="Test operation"/);
   expect(headerValue).toContain('manual-metric;dur=42.50;desc="Manual measurement"');
+});
+
+test('does not set Server-Timing header when serverTiming is disabled', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext, routerOptions);
+  router.get(
+    {
+      path: '/',
+      validate: false,
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+    },
+    (context, req, res) => {
+      return res.ok({ body: 'ok' });
+    }
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup({
+    config$: of({ ...config, serverTiming: false }),
+  });
+  registerRouter(router);
+  await server.start();
+
+  const response = await supertest(innerServer.listener).get('/foo/').expect(200);
+
+  expect(response.headers['server-timing']).toBeUndefined();
 });

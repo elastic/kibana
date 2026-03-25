@@ -575,18 +575,24 @@ export class HttpServer {
         return responseToolkit.continue;
       }
 
-      // Add Server-Timing header with total request time and custom events
-      const appState = request.app as KibanaRequestState;
-      const startTime = appState.startTime;
-      const totalTime = performance.now() - startTime;
-      const customEvents = appState.timingState?.events ?? [];
-      const serverTimingValue = this.formatServerTimingHeader(totalTime, customEvents);
+      // Only add Server-Timing header if enabled in config (dev mode by default)
+      if (this.config?.serverTiming) {
+        const appState = request.app as KibanaRequestState;
+        const startTime = appState.startTime;
+        const totalTime = performance.now() - startTime;
+        const customEvents = appState.timingState?.events ?? [];
+        const serverTimingValue = this.formatServerTimingHeader(totalTime, customEvents);
+
+        if (isBoom(request.response)) {
+          request.response.output.headers['Server-Timing'] = serverTimingValue;
+        } else {
+          request.response.header('Server-Timing', serverTimingValue);
+        }
+      }
 
       if (isBoom(request.response)) {
         stop();
-        request.response.output.headers['Server-Timing'] = serverTimingValue;
       } else {
-        request.response.header('Server-Timing', serverTimingValue);
         request.response.events.once('finish', () => {
           stop();
         });
