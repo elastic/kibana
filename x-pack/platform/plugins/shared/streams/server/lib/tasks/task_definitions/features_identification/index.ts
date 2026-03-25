@@ -97,6 +97,7 @@ class FeatureAccumulator {
 
 export interface IterationTelemetry {
   iteration: number;
+  state: 'success' | 'failure';
   docsCount: number;
   featuresNew: number;
   featuresUpdated: number;
@@ -178,25 +179,53 @@ export async function identifyStreamFeatures({
     );
 
     const iterationStart = Date.now();
-    const {
-      features: rawFeatures,
-      tokensUsed,
-      ignoredFeatures,
-    } = await identifyFeatures({
-      streamName,
-      sampleDocuments: batch,
-      excludedFeatures: excludedSummaries,
-      inferenceClient,
-      systemPrompt,
-      logger,
-      signal,
-      previouslyIdentifiedFeatures: previousFeatures.map((f) => ({
-        id: f.id,
-        type: f.type,
-        subtype: f.subtype,
-        properties: f.properties,
-      })),
-    });
+    let rawFeatures: BaseFeature[];
+    let tokensUsed: ChatCompletionTokenCount;
+    let ignoredFeatures: IgnoredFeature[];
+
+    try {
+      ({
+        features: rawFeatures,
+        tokensUsed,
+        ignoredFeatures,
+      } = await identifyFeatures({
+        streamName,
+        sampleDocuments: batch,
+        excludedFeatures: excludedSummaries,
+        inferenceClient,
+        systemPrompt,
+        logger,
+        signal,
+        previouslyIdentifiedFeatures: previousFeatures.map((f) => ({
+          id: f.id,
+          type: f.type,
+          subtype: f.subtype,
+          properties: f.properties,
+        })),
+      }));
+    } catch (error) {
+      const emptyTokens: ChatCompletionTokenCount = {
+        prompt: 0,
+        completion: 0,
+        total: 0,
+        cached: 0,
+      };
+      await onIterationComplete?.(
+        {
+          iteration: i + 1,
+          state: 'failure',
+          docsCount: batch.length,
+          featuresNew: 0,
+          featuresUpdated: 0,
+          durationMs: Date.now() - iterationStart,
+          tokensUsed: emptyTokens,
+          ignoredFeaturesCount: 0,
+          codeIgnoredCount: 0,
+        },
+        []
+      );
+      throw error;
+    }
 
     totalTokensUsed = sumTokens(totalTokensUsed, tokensUsed);
 
@@ -220,6 +249,7 @@ export async function identifyStreamFeatures({
 
     const iterationEntry: IterationTelemetry = {
       iteration: i + 1,
+      state: 'success',
       docsCount: batch.length,
       featuresNew: newFeatures.length,
       featuresUpdated: updatedFeatures.length,
@@ -390,7 +420,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                         iteration: it.iteration,
                         stream_name: streamName,
                         stream_type: streamType,
-                        state: 'success',
+                        state: it.state,
                         docs_count: it.docsCount,
                         features_new: it.featuresNew,
                         features_updated: it.featuresUpdated,
