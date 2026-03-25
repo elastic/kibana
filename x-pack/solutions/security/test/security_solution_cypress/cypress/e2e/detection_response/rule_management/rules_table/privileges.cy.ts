@@ -47,7 +47,7 @@ import { assertSuccessToast } from '../../../../screens/common/toast';
 const usersToCreate = [rulesAllUser, rulesReadUser, rulesNoneUser];
 const rolesToCreate = [rulesAll, rulesRead, rulesNone];
 
-// As part of the rules RBAC effort, we have created these tests with roles that only have the new rules feature 'securitySolutionVX' enabled in order to test
+// As part of the rules RBAC effort, we have created these tests with roles that only have the new rules feature 'securitySolutionRulesVX' enabled in order to test
 // the features that said roles should have access to. Notice that the roles created are very minimal and only contain the new rules feature.
 
 describe('Rules table - privileges', { tags: ['@ess'] }, () => {

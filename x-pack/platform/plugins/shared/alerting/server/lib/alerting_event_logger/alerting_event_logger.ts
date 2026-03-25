@@ -6,6 +6,7 @@
  */
 
 import * as uuid from 'uuid';
+import { set } from '@kbn/safer-lodash-set';
 import type { IEvent, IEventLogger, InternalFields } from '@kbn/event-log-plugin/server';
 import { millisToNanos, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -13,7 +14,11 @@ import { EVENT_LOG_ACTIONS } from '../../plugin';
 import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { TaskRunnerTimings } from '../../task_runner/task_runner_timer';
-import type { AlertInstanceState, RuleExecutionStatus } from '../../types';
+import type {
+  AlertInstanceState,
+  ConsumerExecutionMetrics,
+  RuleExecutionStatus,
+} from '../../types';
 import { createAlertEventLogRecordObject } from '../create_alert_event_log_record_object';
 import type { RuleRunMetrics } from '../rule_run_metrics_store';
 import { Gap } from '../rule_gaps/gap';
@@ -24,6 +29,7 @@ const Millis2Nanos = 1000 * 1000;
 
 export interface RuleContext {
   id: string;
+  uuid?: string;
   type: UntypedNormalizedRuleType;
   consumer?: string;
   name?: string;
@@ -58,6 +64,7 @@ interface DoneOpts {
   timings?: TaskRunnerTimings;
   status?: RuleExecutionStatus;
   metrics?: RuleRunMetrics | null;
+  consumerMetrics?: Partial<ConsumerExecutionMetrics> | null;
   backfill?: BackfillOpts;
 }
 
@@ -214,12 +221,14 @@ export class AlertingEventLogger {
   public addOrUpdateRuleData({
     name,
     id,
+    uuid: ruleUuid,
     consumer,
     type,
     revision,
   }: {
     name?: string;
     id?: string;
+    uuid?: string;
     consumer?: string;
     revision?: number;
     type?: UntypedNormalizedRuleType;
@@ -234,6 +243,10 @@ export class AlertingEventLogger {
         id,
         type,
       };
+    }
+
+    if (ruleUuid) {
+      this.ruleData.uuid = ruleUuid;
     }
 
     if (name) {
@@ -266,6 +279,7 @@ export class AlertingEventLogger {
     updateEventWithRuleData(this.event, {
       ruleName: name,
       ruleId: id,
+      ruleUuid,
       ruleType: type,
       consumer,
       revision,
@@ -345,7 +359,7 @@ export class AlertingEventLogger {
     );
   }
 
-  public done({ status, metrics, timings, backfill }: DoneOpts) {
+  public done({ status, metrics, consumerMetrics, timings, backfill }: DoneOpts) {
     if (!this.isInitialized || !this.event || !this.context) {
       throw new Error('AlertingEventLogger not initialized');
     }
@@ -383,6 +397,10 @@ export class AlertingEventLogger {
 
     if (metrics) {
       updateEvent(this.event, { metrics });
+    }
+
+    if (consumerMetrics) {
+      updateEvent(this.event, { consumerMetrics });
     }
 
     if (timings) {
@@ -607,6 +625,7 @@ interface UpdateEventOpts {
   status?: string;
   reason?: string;
   metrics?: RuleRunMetrics;
+  consumerMetrics?: Partial<ConsumerExecutionMetrics>;
   timings?: TaskRunnerTimings;
   backfill?: BackfillOpts;
   maintenanceWindowIds?: string[];
@@ -615,6 +634,7 @@ interface UpdateEventOpts {
 interface UpdateRuleOpts {
   ruleName?: string;
   ruleId?: string;
+  ruleUuid?: string;
   consumer?: string;
   ruleType?: UntypedNormalizedRuleType;
   revision?: number;
@@ -622,7 +642,7 @@ interface UpdateRuleOpts {
 }
 
 export function updateEventWithRuleData(event: IEvent, opts: UpdateRuleOpts) {
-  const { ruleName, ruleId, consumer, ruleType, revision, savedObjects } = opts;
+  const { ruleName, ruleId, ruleUuid, consumer, ruleType, revision, savedObjects } = opts;
   if (!event) {
     throw new Error('Cannot update event because it is not initialized.');
   }
@@ -638,6 +658,13 @@ export function updateEventWithRuleData(event: IEvent, opts: UpdateRuleOpts) {
     event.rule = {
       ...event.rule,
       id: ruleId,
+    };
+  }
+
+  if (ruleUuid) {
+    event.rule = {
+      ...event.rule,
+      uuid: ruleUuid,
     };
   }
 
@@ -673,7 +700,8 @@ export function updateEventWithRuleData(event: IEvent, opts: UpdateRuleOpts) {
     }
   }
 
-  if (revision) {
+  // revision is a non-negative integer. We'd like to capture 0 as well.
+  if (revision !== undefined) {
     event.kibana = event.kibana || {};
     event.kibana.alert = event.kibana.alert || {};
     event.kibana.alert.rule = event.kibana.alert.rule || {};
@@ -700,6 +728,7 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
     status,
     reason,
     metrics,
+    consumerMetrics,
     timings,
     alertingOutcome,
     backfill,
@@ -762,6 +791,19 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
       es_search_duration_ms: metrics.esSearchDurationMs ? metrics.esSearchDurationMs : 0,
       total_search_duration_ms: metrics.totalSearchDurationMs ? metrics.totalSearchDurationMs : 0,
     };
+  }
+
+  if (consumerMetrics) {
+    set(event, 'kibana.alert.rule.execution.metrics', {
+      ...event.kibana?.alert?.rule?.execution?.metrics,
+      alerts_candidate_count: consumerMetrics.alerts_candidate_count,
+      alerts_suppressed_count: consumerMetrics.alerts_suppressed_count,
+      frozen_indices_queried_count: consumerMetrics.frozen_indices_queried_count,
+      total_indexing_duration_ms: consumerMetrics.total_indexing_duration_ms,
+      total_enrichment_duration_ms: consumerMetrics.total_enrichment_duration_ms,
+      execution_gap_duration_s: consumerMetrics.gap_duration_s,
+      gap_range: consumerMetrics.gap_range,
+    });
   }
 
   if (backfill) {
