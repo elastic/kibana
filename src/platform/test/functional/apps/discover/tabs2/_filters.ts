@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Submit the query and verify it returns results
       await esql.submitEsqlEditorQuery();
       await discover.waitUntilTabIsLoaded();
-      expect(await discover.hasNoResults()).to.be(false);
+      expect(await discover.getHitCount()).to.be('1,813');
 
       // switch back to data view mode so the next test starts in classic mode
       await discover.selectDataViewMode({ discardModal: true });
