@@ -11,7 +11,7 @@ import { EuiHighlight, useEuiTheme } from '@elastic/eui';
 import { useSmlSearch } from '../../../../../../../hooks/sml/use_sml_search';
 import type { CommandMenuComponentProps, CommandMenuHandle } from '../../types';
 import { CommandId } from '../../types';
-import { getSmlCommandMenuHighlightNeedles } from '../../../../../../../../../common/sml_search_highlight_segments';
+import { getSmlMenuHighlightSearchStrings } from '../../utils/sml_command_menu_highlight';
 import { CommandMenuList } from '../components/command_menu_list';
 import type { CommandMenuListOption } from '../components/command_menu_list';
 
@@ -19,10 +19,7 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
   ({ query, onSelect }, ref) => {
     const { euiTheme } = useEuiTheme();
     const { results, isLoading } = useSmlSearch(query);
-    const { titleSearch, typeSearch } = useMemo(
-      () => getSmlCommandMenuHighlightNeedles(query),
-      [query]
-    );
+    const { type, title } = useMemo(() => getSmlMenuHighlightSearchStrings(query), [query]);
 
     const options: CommandMenuListOption[] = useMemo(
       () =>
@@ -45,20 +42,20 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
                     font-weight: ${euiTheme.font.weight.medium};
                   `}
                 >
-                  <EuiHighlight strict={false} search={typeSearch}>
+                  <EuiHighlight strict={false} search={type}>
                     {typeLabel}
                   </EuiHighlight>
                 </span>
                 <span>/</span>
 
-                <EuiHighlight strict={false} search={titleSearch}>
+                <EuiHighlight strict={false} search={title}>
                   {titlePlain}
                 </EuiHighlight>
               </span>
             ),
           };
         }),
-      [euiTheme.font.weight.medium, results, titleSearch, typeSearch]
+      [euiTheme.font.weight.medium, results, title, type]
     );
 
     const resultByKey = useMemo(() => new Map(results.map((r) => [r.chunk_id, r])), [results]);
