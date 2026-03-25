@@ -252,6 +252,11 @@ export class TimePickerPageObject extends FtrService {
     };
   }
 
+  public async getShowDatesButtonText() {
+    const button = await this.testSubjects.find('dateRangePickerControlButton');
+    return await button.getVisibleText();
+  }
+
   public async getTimeDurationForSharing() {
     return await this.testSubjects.getAttribute(
       'dataSharedTimefilterDuration',
