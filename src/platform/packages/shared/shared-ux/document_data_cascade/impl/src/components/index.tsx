@@ -16,11 +16,7 @@ export type { GroupNode, LeafNode, DataCascadeImplProps as DataCascadeProps, Dat
 export type { DataCascadeUISnapshot } from '../lib/core/api';
 export { DataCascadeRow, DataCascadeRowCell } from './data_cascade_impl';
 
-export type {
-  DataCascadeRowProps,
-  DataCascadeRowCellProps,
-  CascadeRowCellNestedVirtualizationAnchorProps,
-} from './data_cascade_impl';
+export type { DataCascadeRowProps, DataCascadeRowCellProps } from './data_cascade_impl';
 
 type DataCascadeProviderProps = ComponentProps<typeof DataCascadeProvider>;
 
