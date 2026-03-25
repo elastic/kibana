@@ -139,30 +139,29 @@ export function MaybeViewTraceLink({
         <FullTraceButton isDisabled />
       </EuiToolTip>
     );
-
-    // the user is viewing a zoomed in version of the trace. Link to the full trace
-  } else {
-    return (
-      <TransactionDetailLink
-        transactionName={rootTransactionInfo.name}
-        href={link('/services/{serviceName}/transactions/view', {
-          path: { serviceName: rootTransactionInfo.serviceName },
-          query: {
-            ...query,
-            latencyAggregationType,
-            traceId: rootTransactionInfo.traceId,
-            transactionId: rootTransactionInfo.id,
-            transactionName: rootTransactionInfo.name,
-            transactionType: rootTransactionInfo.transactionType,
-            comparisonEnabled: defaultComparisonEnabled,
-            offset,
-            environment: nextEnvironment,
-            serviceGroup: '',
-          },
-        })}
-      >
-        <FullTraceButton />
-      </TransactionDetailLink>
-    );
   }
+
+  // the user is viewing a zoomed in version of the trace. Link to the full trace
+  return (
+    <TransactionDetailLink
+      transactionName={rootTransactionInfo.name}
+      href={link('/services/{serviceName}/transactions/view', {
+        path: { serviceName: rootTransactionInfo.serviceName },
+        query: {
+          ...query,
+          latencyAggregationType,
+          traceId: rootTransactionInfo.traceId,
+          transactionId: rootTransactionInfo.id,
+          transactionName: rootTransactionInfo.name,
+          transactionType: rootTransactionInfo.transactionType,
+          comparisonEnabled: defaultComparisonEnabled,
+          offset,
+          environment: nextEnvironment,
+          serviceGroup: '',
+        },
+      })}
+    >
+      <FullTraceButton />
+    </TransactionDetailLink>
+  );
 }

@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 import type { ActionButton, AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
-import type { DashboardAttachmentOrigin } from '@kbn/dashboard-agent-common';
 import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UseEuiTheme } from '@elastic/eui';
@@ -54,29 +53,34 @@ const dashboardCanvasContentStyles = {
 };
 
 export const DashboardCanvasContent = ({
+  isSidebar,
   attachment,
   registerActionButtons,
   updateOrigin,
+  closeCanvas,
+  openSidebarConversation,
   dashboardLocator,
   searchBarComponent: SearchBar,
   checkSavedDashboardExist,
 }: AttachmentRenderProps<DashboardAttachment> & {
   registerActionButtons: (buttons: ActionButton[]) => void;
-  updateOrigin: (origin: DashboardAttachmentOrigin) => Promise<unknown>;
+  updateOrigin: (origin: string) => Promise<unknown>;
+  closeCanvas: () => void;
   dashboardLocator?: DashboardRendererProps['locator'];
+  openSidebarConversation?: () => void;
   searchBarComponent: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
 }) => {
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
   const styles = useMemoCss(dashboardCanvasContentStyles);
-  const linkedSavedObjectId = attachment.origin?.savedObjectId;
+  const attachmentOrigin = attachment.origin;
   const [savedObjectStatus, setSavedObjectStatus] = useState<SavedObjectStatus>({
     status: 'idle',
   });
 
   useEffect(
     function checkSavedObjectExists() {
-      if (!linkedSavedObjectId) {
+      if (!attachmentOrigin) {
         setSavedObjectStatus({ status: 'resolved', exists: false });
         return;
       }
@@ -84,7 +88,7 @@ export const DashboardCanvasContent = ({
       let canceled = false;
       setSavedObjectStatus({ status: 'loading' });
 
-      checkSavedDashboardExist(linkedSavedObjectId)
+      checkSavedDashboardExist(attachmentOrigin)
         .then((exists) => {
           if (!canceled) {
             setSavedObjectStatus({ status: 'resolved', exists });
@@ -100,7 +104,7 @@ export const DashboardCanvasContent = ({
         canceled = true;
       };
     },
-    [linkedSavedObjectId, checkSavedDashboardExist]
+    [attachmentOrigin, checkSavedDashboardExist]
   );
 
   const dashboardState = useMemo(() => getStateFromAttachment(attachment), [attachment]);
@@ -121,10 +125,13 @@ export const DashboardCanvasContent = ({
     dashboardApi,
     registerActionButtons,
     updateOrigin,
+    closeCanvas,
+    openSidebarConversation,
     timeRange,
     dashboardState,
-    linkedSavedObjectId,
+    attachmentOrigin,
     checkSavedDashboardExist,
+    isSidebar,
   });
 
   return (
@@ -154,24 +161,26 @@ export const DashboardCanvasContent = ({
         />
       </div>
       <div css={styles.renderer}>
-        <DashboardRenderer
-          getCreationOptions={getCreationOptions}
-          showPlainSpinner
-          locator={dashboardLocator}
-          savedObjectId={
-            savedObjectStatus.status === 'resolved' && savedObjectStatus.exists
-              ? linkedSavedObjectId
-              : undefined
-          }
-          onApiAvailable={(api) => {
-            api.setViewMode('view');
-            const initialTimeRange = api.timeRange$.value;
-            if (initialTimeRange) {
-              api.setTimeRange(initialTimeRange);
+        {savedObjectStatus.status !== 'resolved' ? null : (
+          <DashboardRenderer
+            getCreationOptions={getCreationOptions}
+            showPlainSpinner
+            locator={dashboardLocator}
+            savedObjectId={
+              savedObjectStatus.status === 'resolved' && savedObjectStatus.exists
+                ? attachmentOrigin
+                : undefined
             }
-            setDashboardApi(api);
-          }}
-        />
+            onApiAvailable={(api) => {
+              api.setViewMode('view');
+              const initialTimeRange = api.timeRange$.value;
+              if (initialTimeRange) {
+                api.setTimeRange(initialTimeRange);
+              }
+              setDashboardApi(api);
+            }}
+          />
+        )}
       </div>
     </div>
   );

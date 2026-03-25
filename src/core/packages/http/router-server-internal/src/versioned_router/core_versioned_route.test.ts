@@ -667,6 +667,7 @@ describe('Versioned route', () => {
       },
       authc: {
         enabled: 'optional',
+        reason: 'some reason',
       },
     };
     const securityConfig2: RouteSecurity = {
@@ -813,6 +814,7 @@ describe('Versioned route', () => {
       },
       authc: {
         enabled: 'optional',
+        reason: 'some reason',
       },
     };
 
@@ -863,6 +865,7 @@ describe('Versioned route', () => {
       },
       authc: {
         enabled: 'optional',
+        reason: 'some reason',
       },
     };
 
@@ -888,7 +891,7 @@ describe('Versioned route', () => {
     // @ts-expect-error for test purpose
     const security = route.getSecurity({ headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' } });
 
-    expect(security.authc).toEqual({ enabled: 'optional' });
+    expect(security.authc).toEqual({ enabled: 'optional', reason: 'some reason' });
 
     expect(security.authz).toEqual({ requiredPrivileges: ['foo', 'bar'] });
   });

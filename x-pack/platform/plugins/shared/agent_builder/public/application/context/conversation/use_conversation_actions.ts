@@ -15,8 +15,14 @@ import type {
   ToolCallProgress,
   ToolCallStep,
   Conversation,
+  CompactionStep,
 } from '@kbn/agent-builder-common';
-import { isToolCallStep, ConversationRoundStatus } from '@kbn/agent-builder-common';
+import {
+  isToolCallStep,
+  isCompactionStep,
+  ConversationRoundStatus,
+  ConversationRoundStepType,
+} from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
@@ -70,6 +76,14 @@ export interface ConversationActions {
   }: {
     conversationId: string;
     title: string;
+  }) => void;
+  addCompactionStep: ({ tokenCountBefore }: { tokenCountBefore: number }) => void;
+  setCompactionStepComplete: ({
+    tokenCountAfter,
+    summarizedRoundCount,
+  }: {
+    tokenCountAfter: number;
+    summarizedRoundCount: number;
   }) => void;
   deleteConversation: (id: string) => Promise<void>;
   renameConversation: (id: string, title: string) => Promise<void>;
@@ -215,6 +229,32 @@ const createConversationActions = ({
         const step = round.steps.filter(isToolCallStep).find((s) => s.tool_call_id === toolCallId);
         if (step) {
           step.results = results;
+        }
+      });
+    },
+    addCompactionStep: ({ tokenCountBefore }: { tokenCountBefore: number }) => {
+      setCurrentRound((round) => {
+        const step: CompactionStep = {
+          type: ConversationRoundStepType.compaction,
+          summarized_round_count: 0,
+          token_count_before: tokenCountBefore,
+          token_count_after: 0,
+        };
+        round.steps.push(step);
+      });
+    },
+    setCompactionStepComplete: ({
+      tokenCountAfter,
+      summarizedRoundCount,
+    }: {
+      tokenCountAfter: number;
+      summarizedRoundCount: number;
+    }) => {
+      setCurrentRound((round) => {
+        const step = round.steps.find(isCompactionStep);
+        if (step) {
+          step.token_count_after = tokenCountAfter;
+          step.summarized_round_count = summarizedRoundCount;
         }
       });
     },

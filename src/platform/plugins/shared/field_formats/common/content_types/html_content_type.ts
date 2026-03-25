@@ -9,7 +9,7 @@
 
 import { escape, isFunction } from 'lodash';
 import type { IFieldFormat, HtmlContextTypeConvert, FieldFormatsContentType } from '../types';
-import { getHighlightHtml } from '../utils';
+import { getHighlightHtml, checkForMissingValueHtml } from '../utils';
 
 export const HTML_CONTEXT_TYPE: FieldFormatsContentType = 'html';
 
@@ -18,6 +18,11 @@ const getConvertFn = (
   convert?: HtmlContextTypeConvert
 ): HtmlContextTypeConvert => {
   const fallbackHtml: HtmlContextTypeConvert = (value, options = {}) => {
+    const missing = checkForMissingValueHtml(value);
+    if (missing) {
+      return missing;
+    }
+
     const { field, hit } = options;
     const formatted = escape(format.convert(value, 'text'));
 

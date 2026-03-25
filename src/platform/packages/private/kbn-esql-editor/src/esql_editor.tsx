@@ -77,6 +77,8 @@ import {
   filterDuplicatedWarnings,
   filterOutWarningsOverlappingWithErrors,
   getEditorOverwrites,
+  shouldAutoTriggerSuggestions,
+  trackSuggestionPopupState,
   getToggleCommentLines,
   onKeyDownResizeHandler,
   onMouseDownResizeHandler,
@@ -158,6 +160,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const editorModelUriRef = useRef<string | undefined>(undefined);
   const containerRef = useRef<HTMLElement>(null);
   const suppressSuggestionsRef = useRef(false);
+  const isSuggestionPopupOpenRef = useRef(false);
 
   const editorCommandDisposables = useRef(
     new WeakMap<monaco.editor.IStandaloneCodeEditor, monaco.IDisposable[]>()
@@ -372,12 +375,18 @@ const ESQLEditorInternal = function ESQLEditor({
   const onPrettifyQuery = useCallback(() => {
     const qs = editorRef.current?.getValue();
     if (qs) {
-      const prettyCode = prettifyQuery(qs);
+      const editor = editorRef.current;
+      const layoutInfo = editor?.getLayoutInfo();
+      const widthForWrap = layoutInfo?.contentWidth ?? measuredEditorWidth;
+      const charWidth =
+        editor?.getOption(monaco.editor.EditorOption.fontInfo).typicalHalfwidthCharacterWidth ?? 8;
+      const lineWidthChars = widthForWrap > 0 ? Math.floor(widthForWrap / charWidth) : undefined;
+      const prettyCode = prettifyQuery(qs, lineWidthChars);
       if (qs !== prettyCode) {
         onQueryUpdate(prettyCode);
       }
     }
-  }, [onQueryUpdate]);
+  }, [onQueryUpdate, measuredEditorWidth]);
 
   const onCommentLine = useCallback(() => {
     const currentSelection = editorRef?.current?.getSelection();
@@ -465,7 +474,7 @@ const ESQLEditorInternal = function ESQLEditor({
     const { current: editor } = editorRef;
     const { current: model } = editorModel;
 
-    if (!editor || !model) {
+    if (!editor || !model || isSuggestionPopupOpenRef.current) {
       return;
     }
 
@@ -476,10 +485,9 @@ const ESQLEditorInternal = function ESQLEditor({
 
     const { lineNumber, column } = position;
     const lineContent = model.getLineContent(lineNumber);
-    const spaceHasBeenTyped = column > 1 && lineContent[column - 2] === ' ';
-    const inlineCastHasBeenTyped = lineContent.substring(0, column - 1).endsWith('::');
+    const lineContentBeforeCursor = lineContent.substring(0, column - 1);
 
-    if (spaceHasBeenTyped || inlineCastHasBeenTyped) {
+    if (shouldAutoTriggerSuggestions(lineContentBeforeCursor)) {
       triggerSuggestions();
     }
   }, [triggerSuggestions]);
@@ -977,6 +985,8 @@ const ESQLEditorInternal = function ESQLEditor({
     return ESQLLang.getInlineCompletionsProvider?.(esqlCallbacks);
   }, [esqlCallbacks]);
 
+  const documentHighlightProvider = useMemo(() => ESQLLang.getDocumentHighlightProvider?.(), []);
+
   const codeEditorHoverProvider = useMemo(
     () => ({
       provideHover: (
@@ -1176,6 +1186,7 @@ const ESQLEditorInternal = function ESQLEditor({
                 hoverProvider={codeEditorHoverProvider}
                 signatureProvider={signatureProvider}
                 inlineCompletionsProvider={inlineCompletionsProvider}
+                documentHighlightProvider={documentHighlightProvider}
                 onChange={onQueryUpdate}
                 editorDidMount={async (editor) => {
                   // Track editor init time once per mount
@@ -1250,6 +1261,8 @@ const ESQLEditorInternal = function ESQLEditor({
 
                     isFirstFocusRef.current = false;
                   });
+
+                  trackSuggestionPopupState(editor, isSuggestionPopupOpenRef);
 
                   // on CMD/CTRL + / comment out the entire line
                   editor.addCommand(
