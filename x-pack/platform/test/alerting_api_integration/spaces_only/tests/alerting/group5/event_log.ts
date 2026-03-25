@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import expect from '@kbn/expect';
-import { get } from 'lodash';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { IValidatedEvent, IValidatedEventInternalDocInfo } from '@kbn/event-log-plugin/server';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
@@ -25,7 +23,7 @@ import {
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { TEST_CACHE_EXPIRATION_TIME } from '../create_test_data';
 import { runSoon } from '../../helpers';
-import { InstanceActions, validateEvent } from '../validate_event';
+import { validateEvent } from '../validate_event';
 
 export default function eventLogTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
