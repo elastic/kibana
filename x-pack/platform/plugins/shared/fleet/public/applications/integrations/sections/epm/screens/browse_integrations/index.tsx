@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { useLocation, useHistory } from 'react-router-dom';
+import useObservable from 'react-use/lib/useObservable';
 
 import { css } from '@emotion/react';
 
@@ -31,10 +32,34 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
 }) => {
   useBreadcrumbs('integrations_all');
 
-  const { automaticImportVTwo, application } = useStartServices();
+  const { automaticImportVTwo, application, licensing } = useStartServices();
   const { pathname, search } = useLocation();
   const history = useHistory();
   const euiTheme = useEuiTheme();
+  const license = useObservable(licensing.license$);
+  /** `null` until license is known; then whether Enterprise (or trial) allows manage integrations. */
+  const licenseAllowsManageView = useMemo((): boolean | null => {
+    if (license == null) {
+      return null;
+    }
+    return Boolean(license.isAvailable && license.isActive && license.hasAtLeast('enterprise'));
+  }, [license]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(search);
+    if (params.get('view') !== 'manage') {
+      return;
+    }
+    if (licenseAllowsManageView === null) {
+      return;
+    }
+    if (licenseAllowsManageView) {
+      return;
+    }
+    params.delete('view');
+    const qs = params.toString();
+    history.replace({ pathname, search: qs ? `?${qs}` : '' });
+  }, [search, pathname, history, licenseAllowsManageView]);
 
   const automaticImportCapabilities = (
     application.capabilities as Record<string, { view?: boolean } | undefined>
@@ -54,8 +79,12 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
   const hasCreatedIntegrations = integrations.length > 0;
   const isManageIntegrationsView = useMemo(() => {
     const params = new URLSearchParams(search);
-    return canReadAutomaticImportIntegrations && params.get('view') === 'manage';
-  }, [canReadAutomaticImportIntegrations, search]);
+    return (
+      canReadAutomaticImportIntegrations &&
+      params.get('view') === 'manage' &&
+      licenseAllowsManageView === true
+    );
+  }, [canReadAutomaticImportIntegrations, search, licenseAllowsManageView]);
 
   const manageIntegrationsHref = useMemo(() => {
     const params = new URLSearchParams(search);
