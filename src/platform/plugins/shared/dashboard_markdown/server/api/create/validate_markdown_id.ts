@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
-import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
-import { markdownAttributesSchema } from '../../markdown_saved_object/schema/v1';
+export const MARKDOWN_ID_REGEX = /^[a-z0-9_\-]+$/; // lowercase letters, numbers, hyphens, and underscores
 
-export const readResponseBodySchema = schema.object({
-  id: schema.string(),
-  data: markdownAttributesSchema,
-  meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
-});
+export const validateMarkdownId = (value: string): boolean =>
+  !!value && MARKDOWN_ID_REGEX.test(value);
