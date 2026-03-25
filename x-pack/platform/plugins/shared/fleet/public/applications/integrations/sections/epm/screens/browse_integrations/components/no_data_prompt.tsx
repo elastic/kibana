@@ -7,15 +7,46 @@
 
 import React, { useMemo } from 'react';
 
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiToolTip } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import useObservable from 'react-use/lib/useObservable';
 
-import { useLink } from '../../../../../../../hooks';
+import { useLink, useStartServices } from '../../../../../../../hooks';
 
 export const NoDataPrompt: React.FC = () => {
   const { getHref } = useLink();
+  const { licensing } = useStartServices();
+  const license = useObservable(licensing.license$);
   const href = useMemo(() => getHref('integration_create'), [getHref]);
+
+  const hasEnterpriseLicense = useMemo(
+    () => Boolean(license?.isAvailable && license?.isActive && license?.hasAtLeast('enterprise')),
+    [license]
+  );
+
+  const enterpriseLicenseTooltip = (
+    <FormattedMessage
+      id="xpack.fleet.integrations.noDataPromptEnterpriseLicenseTooltip"
+      defaultMessage="Creating integrations requires an Enterprise license."
+    />
+  );
+
+  const createButton = hasEnterpriseLicense ? (
+    <EuiButton fill href={href}>
+      <FormattedMessage
+        id="xpack.fleet.integrations.noDataPromptCreateButton"
+        defaultMessage="Create integration"
+      />
+    </EuiButton>
+  ) : (
+    <EuiButton fill disabled>
+      <FormattedMessage
+        id="xpack.fleet.integrations.noDataPromptCreateButton"
+        defaultMessage="Create integration"
+      />
+    </EuiButton>
+  );
 
   return (
     <EuiEmptyPrompt
@@ -39,12 +70,11 @@ You can also create an integration tailored to your needs."
               values={{ br: <br /> }}
             />
           </p>
-          <EuiButton fill href={href}>
-            <FormattedMessage
-              id="xpack.fleet.integrations.noDataPromptCreateButton"
-              defaultMessage="Create integration"
-            />
-          </EuiButton>
+          {!hasEnterpriseLicense ? (
+            <EuiToolTip content={enterpriseLicenseTooltip}>{createButton}</EuiToolTip>
+          ) : (
+            createButton
+          )}
         </>
       }
     />
