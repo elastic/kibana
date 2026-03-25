@@ -38,7 +38,6 @@ export const FLYOUT_EVENT_HEADER_TITLE_TEST_ID = `${PREFIX}EventTitle` as const;
 export const ALERT_SUMMARY_PANEL_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AlertSumaryPanel` as const;
 export const STATUS_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}StatusTitle` as const;
 export const STATUS_BUTTON_TEST_ID = 'rule-status-badge' as const;
-export const SEVERITY_VALUE_TEST_ID = 'severity' as const;
 export const RISK_SCORE_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}RiskScoreTitle` as const;
 export const RISK_SCORE_VALUE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}RiskScoreValue` as const;
 export const SHARE_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}ShareButton` as const;

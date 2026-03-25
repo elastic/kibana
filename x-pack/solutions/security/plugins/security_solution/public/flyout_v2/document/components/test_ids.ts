@@ -11,6 +11,8 @@ import { PREFIX } from '../../../flyout/shared/test_ids';
 
 export const HEADER_TITLE_TEST_ID = `${PREFIX}AlertTitle` as const;
 export const HEADER_TITLE_LINK_TEST_ID = `${PREFIX}AlertTitleLink` as const;
+export const HEADER_TIMESTAMP_TEST_ID = `${PREFIX}Timestamp` as const;
+export const SEVERITY_VALUE_TEST_ID = 'severity' as const;
 
 /* About */
 

@@ -17,7 +17,6 @@ import {
   NOTES_TITLE_TEST_ID,
   RISK_SCORE_TITLE_TEST_ID,
   RISK_SCORE_VALUE_TEST_ID,
-  SEVERITY_VALUE_TEST_ID,
   STATUS_BUTTON_TEST_ID,
   STATUS_TITLE_TEST_ID,
 } from './test_ids';
@@ -26,7 +25,12 @@ import moment from 'moment-timezone';
 import { useDateFormat, useTimeZone } from '../../../../common/lib/kibana';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
+import { mockSearchHit } from '../../shared/mocks/mock_search_hit';
 import { TestProviders } from '../../../../common/mock';
+import {
+  HEADER_TIMESTAMP_TEST_ID,
+  SEVERITY_VALUE_TEST_ID,
+} from '../../../../flyout_v2/document/components/test_ids';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -34,9 +38,22 @@ moment.suppressDeprecationWarnings = true;
 moment.tz.setDefault('UTC');
 
 const dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
+const createSearchHit = (fields: Record<string, unknown[]>) => ({
+  ...mockSearchHit,
+  fields: {
+    ...mockSearchHit.fields,
+    ...fields,
+  },
+});
+
 const mockContextValue = {
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
   getFieldsData: jest.fn().mockImplementation(mockGetFieldsData),
+  searchHit: createSearchHit({
+    'event.kind': ['signal'],
+    'kibana.alert.rule.name': ['rule-name'],
+    'kibana.alert.severity': ['low'],
+  }),
 } as unknown as DocumentDetailsContext;
 const HEADER_TEXT_TEST_ID = `${FLYOUT_ALERT_HEADER_TITLE_TEST_ID}Text`;
 
@@ -60,6 +77,7 @@ describe('<AlertHeaderTitle />', () => {
 
     expect(getByTestId(HEADER_TEXT_TEST_ID)).toHaveTextContent('rule-name');
     expect(getByTestId(SEVERITY_VALUE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(HEADER_TIMESTAMP_TEST_ID)).toHaveTextContent('Jan 1, 2020 @ 00:00:00.000');
     expect(getByTestId(ALERT_SUMMARY_PANEL_TEST_ID)).toBeInTheDocument();
 
     expect(getByTestId(STATUS_TITLE_TEST_ID)).toHaveTextContent('Status');

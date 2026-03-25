@@ -32,6 +32,18 @@ jest.mock('./components/header_title', () => ({
   ),
 }));
 
+jest.mock('./components/severity', () => ({
+  DocumentSeverity: ({ hit }: { hit: DataTableRecord }) => (
+    <div data-test-subj="mockDocumentSeverity" data-hit-id={hit.id} />
+  ),
+}));
+
+jest.mock('../../common/components/formatted_date', () => ({
+  PreferenceFormattedDate: ({ value }: { value: Date }) => (
+    <div data-test-subj="mockPreferenceFormattedDate">{value.toISOString()}</div>
+  ),
+}));
+
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
     id: '1',
@@ -44,6 +56,7 @@ const alertHit = createMockHit({
   'event.kind': 'signal',
   'kibana.alert.rule.name': 'Test Rule',
   'kibana.alert.rule.uuid': 'test-rule-id',
+  '@timestamp': '2023-01-01T00:00:00.000Z',
 });
 
 const eventHit = createMockHit({
@@ -58,6 +71,20 @@ const renderHeader = (props: Parameters<typeof Header>[0]) =>
   );
 
 describe('<DocumentHeader />', () => {
+  it('should pass the hit to the severity component', () => {
+    const { getByTestId } = renderHeader({ hit: alertHit });
+
+    expect(getByTestId('mockDocumentSeverity')).toHaveAttribute('data-hit-id', '1');
+  });
+
+  it('should render the inline timestamp when present', () => {
+    const { getByTestId } = renderHeader({ hit: alertHit });
+
+    expect(getByTestId('mockPreferenceFormattedDate')).toHaveTextContent(
+      '2023-01-01T00:00:00.000Z'
+    );
+  });
+
   it('should pass the hit to the header title', () => {
     const { getByTestId } = renderHeader({ hit: alertHit });
 

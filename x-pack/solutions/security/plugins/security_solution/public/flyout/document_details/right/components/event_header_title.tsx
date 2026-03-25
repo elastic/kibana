@@ -7,40 +7,41 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { FlyoutTitle } from '../../../../flyout_v2/shared/components/flyout_title';
-import { DocumentSeverity } from './severity';
-import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
+import { getFieldValue } from '@kbn/discover-utils';
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
+import { DocumentSeverity } from '../../../../flyout_v2/document/components/severity';
+import { FlyoutTitle } from '../../../../flyout_v2/shared/components/flyout_title';
+import { getDocumentTitle } from '../../../../flyout_v2/document/utils/get_header_title';
+import { HEADER_TIMESTAMP_TEST_ID } from '../../../../flyout_v2/document/components/test_ids';
 import { FLYOUT_EVENT_HEADER_TITLE_TEST_ID } from './test_ids';
-import { getEventTitle } from '../../../../flyout_v2/document/utils/get_header_title';
-import { getField } from '../../shared/utils';
 
 /**
  * Event details flyout right section header
  */
 export const EventHeaderTitle = memo(() => {
-  const { dataFormattedForFieldBrowser, getFieldsData } = useDocumentDetailsContext();
-  const { timestamp } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
-
-  const eventKind = getField(getFieldsData('event.kind'));
-  const eventCategory = getField(getFieldsData('event.category'));
-
-  const title = useMemo(
-    () =>
-      getEventTitle(
-        eventKind,
-        eventCategory,
-        (field) => getField(getFieldsData(field)) ?? undefined
-      ),
-    [eventKind, eventCategory, getFieldsData]
-  );
+  const { searchHit } = useDocumentDetailsContext();
+  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
+  const title = useMemo(() => getDocumentTitle(hit), [hit]);
+  const timestamp = useMemo(() => {
+    const value = getFieldValue(hit, TIMESTAMP);
+    return typeof value === 'string' ? value : null;
+  }, [hit]);
+  const timestampDate = useMemo(() => (timestamp ? new Date(timestamp) : null), [timestamp]);
 
   return (
     <>
-      <DocumentSeverity getFieldsData={getFieldsData} />
-      <EuiSpacer size="m" />
-      {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
+      <DocumentSeverity hit={hit} />
+      {timestampDate && (
+        <>
+          <EuiSpacer size="m" />
+          <span data-test-subj={HEADER_TIMESTAMP_TEST_ID}>
+            <PreferenceFormattedDate value={timestampDate} />
+          </span>
+        </>
+      )}
       <EuiSpacer size="xs" />
       <FlyoutTitle
         title={title}
