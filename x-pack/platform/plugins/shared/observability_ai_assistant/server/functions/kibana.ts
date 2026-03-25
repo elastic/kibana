@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import https from 'https';
 import axios from 'axios';
 import { format } from 'url';
 import { pickBy } from 'lodash';
@@ -54,15 +55,13 @@ export function registerKibanaFunction({
       const requestUrl = request.rewrittenUrl || request.url;
       const core = await resources.plugins.core.start();
 
-      function getParsedPublicBaseUrl() {
-        const { publicBaseUrl } = core.http.basePath;
-        if (!publicBaseUrl) {
-          const errorMessage = `Cannot invoke Kibana tool: "server.publicBaseUrl" must be configured in kibana.yml`;
-          logger.error(errorMessage);
-          throw new Error(errorMessage);
-        }
-        const parsedBaseUrl = new URL(publicBaseUrl);
-        return parsedBaseUrl;
+      function getLocalServerUrl() {
+        const serverInfo = core.http.getServerInfo();
+        const hostname =
+          serverInfo.hostname === '0.0.0.0' || serverInfo.hostname === '::'
+            ? 'localhost'
+            : serverInfo.hostname;
+        return { hostname, port: serverInfo.port, protocol: serverInfo.protocol };
       }
 
       function getPathnameWithSpaceId() {
@@ -72,10 +71,10 @@ export function registerKibanaFunction({
         return pathnameWithSpaceId;
       }
 
-      const parsedPublicBaseUrl = getParsedPublicBaseUrl();
+      const localServer = getLocalServerUrl();
       const nextUrl = {
-        host: parsedPublicBaseUrl.host,
-        protocol: parsedPublicBaseUrl.protocol,
+        host: `${localServer.hostname}:${localServer.port}`,
+        protocol: `${localServer.protocol}:`,
         pathname: getPathnameWithSpaceId(),
         query: query ? (query as Record<string, string>) : undefined,
       };
@@ -109,6 +108,13 @@ export function registerKibanaFunction({
         );
       });
 
+      // The server certificate may not cover the local hostname, so skip
+      // TLS hostname verification for this loopback self-request.
+      const httpsAgent =
+        localServer.protocol === 'https'
+          ? new https.Agent({ rejectUnauthorized: false })
+          : undefined;
+
       try {
         const response = await axios({
           method,
@@ -116,6 +122,7 @@ export function registerKibanaFunction({
           url: format(nextUrl),
           data: body ? JSON.stringify(body) : undefined,
           signal,
+          ...(httpsAgent ? { httpsAgent } : {}),
         });
         return { content: response.data };
       } catch (e) {

@@ -14,7 +14,7 @@ jest.mock('axios');
 const mockedAxios = jest.mocked(axios);
 
 function registerFunction(overrides: {
-  publicBaseUrl?: string;
+  serverInfo?: { hostname: string; port: number; protocol: 'http' | 'https' };
   requestUrl?: URL;
   rewrittenUrl?: URL;
   headers?: Record<string, string>;
@@ -23,10 +23,14 @@ function registerFunction(overrides: {
   const coreStart = {
     http: {
       basePath: {
-        publicBaseUrl: overrides.publicBaseUrl ?? 'https://kibana.example.com:5601',
         serverBasePath: '',
         get: jest.fn(),
       },
+      getServerInfo: jest
+        .fn()
+        .mockReturnValue(
+          overrides.serverInfo ?? { hostname: 'localhost', port: 5601, protocol: 'http' }
+        ),
     },
   };
 
@@ -67,7 +71,7 @@ describe('kibana tool', () => {
     mockedAxios.mockResolvedValue({ data: { ok: true } });
   });
 
-  it('forwards requests to the configured publicBaseUrl host only', async () => {
+  it('forwards requests to the local server address, ignoring user-supplied headers', async () => {
     const { handler } = registerFunction({
       headers: {
         host: 'malicious-host:9200',
@@ -86,7 +90,7 @@ describe('kibana tool', () => {
 
     const forwardedRequest = mockedAxios.mock.calls[0][0] as AxiosRequestConfig;
     expect(forwardedRequest.url).toBe(
-      'https://kibana.example.com:5601/api/saved_objects/_find?type=dashboard'
+      'http://localhost:5601/api/saved_objects/_find?type=dashboard'
     );
     expect(forwardedRequest.url).not.toContain('malicious-host');
   });
@@ -108,7 +112,7 @@ describe('kibana tool', () => {
 
     expect(mockedAxios).toHaveBeenCalledWith(
       expect.objectContaining({
-        url: 'https://kibana.example.com:5601/s/my-space/api/apm/agent_keys',
+        url: 'http://localhost:5601/s/my-space/api/apm/agent_keys',
         data: JSON.stringify({ foo: 'bar' }),
       })
     );
@@ -134,20 +138,56 @@ describe('kibana tool', () => {
     expect(forwardedRequest.headers).not.toHaveProperty('x-forwarded-user');
   });
 
-  it('throws when server.publicBaseUrl is not configured', async () => {
-    const { handler, coreStart } = registerFunction({});
-    coreStart.http.basePath.publicBaseUrl = undefined as any;
+  it('maps 0.0.0.0 hostname to localhost', async () => {
+    const { handler } = registerFunction({
+      serverInfo: { hostname: '0.0.0.0', port: 5601, protocol: 'http' },
+    });
 
-    await expect(
-      handler({
-        arguments: {
-          method: 'GET',
-          pathname: '/api/saved_objects/_find',
-          query: { type: 'dashboard' },
-        },
-      })
-    ).rejects.toThrow(
-      'Cannot invoke Kibana tool: "server.publicBaseUrl" must be configured in kibana.yml'
-    );
+    await handler({
+      arguments: { method: 'GET', pathname: '/api/status' },
+    });
+
+    const forwardedRequest = mockedAxios.mock.calls[0][0] as AxiosRequestConfig;
+    expect(forwardedRequest.url).toBe('http://localhost:5601/api/status');
+  });
+
+  it('maps :: hostname to localhost', async () => {
+    const { handler } = registerFunction({
+      serverInfo: { hostname: '::', port: 5601, protocol: 'http' },
+    });
+
+    await handler({
+      arguments: { method: 'GET', pathname: '/api/status' },
+    });
+
+    const forwardedRequest = mockedAxios.mock.calls[0][0] as AxiosRequestConfig;
+    expect(forwardedRequest.url).toBe('http://localhost:5601/api/status');
+  });
+
+  it('provides httpsAgent when server uses https', async () => {
+    const { handler } = registerFunction({
+      serverInfo: { hostname: 'localhost', port: 5601, protocol: 'https' },
+    });
+
+    await handler({
+      arguments: { method: 'GET', pathname: '/api/status' },
+    });
+
+    const forwardedRequest = mockedAxios.mock.calls[0][0] as AxiosRequestConfig;
+    expect(forwardedRequest.url).toBe('https://localhost:5601/api/status');
+    expect(forwardedRequest.httpsAgent).toBeDefined();
+  });
+
+  it('does not provide httpsAgent when server uses http', async () => {
+    const { handler } = registerFunction({
+      serverInfo: { hostname: 'localhost', port: 5601, protocol: 'http' },
+    });
+
+    await handler({
+      arguments: { method: 'GET', pathname: '/api/status' },
+    });
+
+    const forwardedRequest = mockedAxios.mock.calls[0][0] as AxiosRequestConfig;
+    expect(forwardedRequest.httpsAgent).toBeUndefined();
   });
 });
