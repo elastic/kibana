@@ -40,7 +40,11 @@ export const InferenceEndpoints: React.FC = () => {
   const inferenceEndpoints = useMemo(() => {
     const endpoints = data || [];
     if (isEisEnabled) {
-      return endpoints.filter((ep) => ep.service !== ServiceProviderKeys.elastic);
+      const elasticProviders = new Set<string>([
+        ServiceProviderKeys.elastic,
+        ServiceProviderKeys.elasticsearch,
+      ]);
+      return endpoints.filter((ep) => !elasticProviders.has(ep.service));
     }
     return endpoints;
   }, [data, isEisEnabled]);
