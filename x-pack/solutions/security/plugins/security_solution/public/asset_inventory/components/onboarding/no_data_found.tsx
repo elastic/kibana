@@ -90,7 +90,7 @@ export const NoDataFound = () => {
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     size="s"
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     href={addIntegrationPath}
                     isDisabled={isLoading}
                   >

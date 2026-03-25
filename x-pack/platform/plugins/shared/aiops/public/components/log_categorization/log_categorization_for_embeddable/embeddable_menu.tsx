@@ -60,7 +60,7 @@ export const EmbeddableMenu: FC<Props> = ({
       <EuiButtonIcon
         data-test-subj="aiopsEmbeddableMenuOptionsButton"
         size="s"
-        iconType="controlsHorizontal"
+        iconType="controls"
         onClick={() => togglePopover()}
         // @ts-expect-error - subdued does work
         color="subdued"
