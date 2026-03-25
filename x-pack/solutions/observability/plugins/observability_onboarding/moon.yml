@@ -53,6 +53,9 @@ dependsOn:
   - '@kbn/react-kibana-mount'
   - '@kbn/react-query'
   - '@kbn/core-security-server'
+  - '@kbn/scout-oblt'
+  - '@kbn/scout-synthtrace'
+  - '@kbn/synthtrace-client'
   - '@kbn/streams-plugin'
   - '@kbn/data-views-plugin'
 tags:
@@ -68,6 +71,7 @@ fileGroups:
     - public/**/*.json
     - server/**/*
     - e2e/**/*
+    - test/scout/**/*
     - '!target/**/*'
 tasks:
   jest:
