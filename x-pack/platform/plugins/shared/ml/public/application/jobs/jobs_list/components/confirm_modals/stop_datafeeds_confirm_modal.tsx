@@ -88,7 +88,7 @@ export const StopDatafeedsConfirmModal: FC<Props> = ({
     const title = (
       <FormattedMessage
         id="xpack.ml.jobsList.stopDatafeedsModal.stopDatafeedsTitle"
-        defaultMessage="Stop {jobsCount, plural, one {{jobId}} other {# jobs}}?"
+        defaultMessage="Stop datafeed for {jobsCount, plural, one {{jobId}} other {# jobs}}?"
         values={{
           jobsCount: jobIds.length,
           jobId: jobIds[0],
@@ -137,7 +137,7 @@ export const StopDatafeedsConfirmModal: FC<Props> = ({
             >
               <FormattedMessage
                 id="xpack.ml.jobsList.stopDatafeedsConfirmModal.stopButtonLabel"
-                defaultMessage="Stop {jobsCount, plural, one {job} other {jobs}}"
+                defaultMessage="Stop {jobsCount, plural, one {datafeed} other {datafeeds}}"
                 values={{
                   jobsCount: jobIds.length,
                 }}
