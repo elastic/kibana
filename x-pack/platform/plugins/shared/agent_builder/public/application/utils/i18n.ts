@@ -1425,6 +1425,144 @@ export const labels = {
       ),
     },
   },
+  agentOverview: {
+    autoIncludeEnabledToast: i18n.translate(
+      'xpack.agentBuilder.overview.autoInclude.enabledToast',
+      {
+        defaultMessage: 'Built-in capabilities enabled',
+      }
+    ),
+    autoIncludeDisabledToast: i18n.translate(
+      'xpack.agentBuilder.overview.autoInclude.disabledToast',
+      {
+        defaultMessage: 'Built-in capabilities disabled',
+      }
+    ),
+    autoIncludeErrorToast: i18n.translate('xpack.agentBuilder.overview.autoInclude.errorToast', {
+      defaultMessage: 'Unable to update capabilities setting',
+    }),
+    instructionsSavedToast: i18n.translate('xpack.agentBuilder.overview.instructions.savedToast', {
+      defaultMessage: 'Instructions saved',
+    }),
+    instructionsErrorToast: i18n.translate('xpack.agentBuilder.overview.instructions.errorToast', {
+      defaultMessage: 'Unable to save instructions',
+    }),
+    docsLink: i18n.translate('xpack.agentBuilder.overview.docsLink', {
+      defaultMessage: 'Docs',
+    }),
+    editDetailsButton: i18n.translate('xpack.agentBuilder.overview.editDetailsButton', {
+      defaultMessage: 'Edit details',
+    }),
+    capabilitiesTitle: i18n.translate('xpack.agentBuilder.overview.capabilities.title', {
+      defaultMessage: 'Capabilities',
+    }),
+    capabilitiesDescription: i18n.translate(
+      'xpack.agentBuilder.overview.capabilities.description',
+      {
+        defaultMessage: 'Manage the capabilities this agent uses to perform tasks and activities.',
+      }
+    ),
+    skillsDescription: i18n.translate(
+      'xpack.agentBuilder.overview.capabilities.skillsDescription',
+      {
+        defaultMessage: 'Combine prompts and tools into reusable logic your agent can invoke.',
+      }
+    ),
+    addSkill: i18n.translate('xpack.agentBuilder.overview.capabilities.addSkill', {
+      defaultMessage: 'Add a skill',
+    }),
+    customizeSkills: i18n.translate('xpack.agentBuilder.overview.capabilities.customizeSkills', {
+      defaultMessage: 'Customize',
+    }),
+    pluginsDescription: i18n.translate(
+      'xpack.agentBuilder.overview.capabilities.pluginsDescription',
+      {
+        defaultMessage:
+          'Add packaged sets of skills from external sources to quickly extend your agent.',
+      }
+    ),
+    addPlugin: i18n.translate('xpack.agentBuilder.overview.capabilities.addPlugin', {
+      defaultMessage: 'Add a plugin',
+    }),
+    customizePlugins: i18n.translate('xpack.agentBuilder.overview.capabilities.customizePlugins', {
+      defaultMessage: 'Customize',
+    }),
+    connectorsDescription: i18n.translate(
+      'xpack.agentBuilder.overview.capabilities.connectorsDescription',
+      {
+        defaultMessage: 'Connect external services to give your agent access to data and actions.',
+      }
+    ),
+    addConnector: i18n.translate('xpack.agentBuilder.overview.capabilities.addConnector', {
+      defaultMessage: 'Add a connector',
+    }),
+    settingsTitle: i18n.translate('xpack.agentBuilder.overview.settings.title', {
+      defaultMessage: 'Settings',
+    }),
+    settingsDescription: i18n.translate('xpack.agentBuilder.overview.settings.description', {
+      defaultMessage: 'Configure how this agent behaves and how its capabilities are managed.',
+    }),
+    autoIncludeTitle: i18n.translate('xpack.agentBuilder.overview.settings.autoIncludeTitle', {
+      defaultMessage: 'Include built-in capabilities automatically',
+    }),
+    autoIncludeDescription: i18n.translate(
+      'xpack.agentBuilder.overview.settings.autoIncludeDescription',
+      {
+        defaultMessage:
+          'Automatically include all current and future Elastic-built skills, plugins, and tools. Turn off to manage them manually.',
+      }
+    ),
+    autoIncludeLabel: i18n.translate('xpack.agentBuilder.overview.settings.autoIncludeLabel', {
+      defaultMessage: 'Include built-in capabilities automatically',
+    }),
+    instructionsTitle: i18n.translate('xpack.agentBuilder.overview.settings.instructionsTitle', {
+      defaultMessage: 'Use custom instructions',
+    }),
+    instructionsDescription: i18n.translate(
+      'xpack.agentBuilder.overview.settings.instructionsDescription',
+      {
+        defaultMessage:
+          'Define how the agent should behave, what it should prioritize, and any rules it should follow when responding.',
+      }
+    ),
+    instructionsPlaceholder: i18n.translate(
+      'xpack.agentBuilder.overview.settings.instructionsPlaceholder',
+      {
+        defaultMessage: 'No custom instructions.',
+      }
+    ),
+    saveInstructionsButton: i18n.translate(
+      'xpack.agentBuilder.overview.settings.saveInstructionsButton',
+      {
+        defaultMessage: 'Save instructions',
+      }
+    ),
+    byAuthor: (author: string) =>
+      i18n.translate('xpack.agentBuilder.overview.byAuthor', {
+        defaultMessage: 'By {author}',
+        values: { author },
+      }),
+    agentId: (id: string) =>
+      i18n.translate('xpack.agentBuilder.overview.agentId', {
+        defaultMessage: 'ID {id}',
+        values: { id },
+      }),
+    skillsLabel: (count: number) =>
+      i18n.translate('xpack.agentBuilder.overview.capabilities.skills', {
+        defaultMessage: '{count, plural, one {Skill} other {Skills}}',
+        values: { count },
+      }),
+    pluginsLabel: (count: number) =>
+      i18n.translate('xpack.agentBuilder.overview.capabilities.plugins', {
+        defaultMessage: '{count, plural, one {Plugin} other {Plugins}}',
+        values: { count },
+      }),
+    connectorsLabel: (count: number) =>
+      i18n.translate('xpack.agentBuilder.overview.capabilities.connectors', {
+        defaultMessage: '{count, plural, one {Connector} other {Connectors}}',
+        values: { count },
+      }),
+  },
   navigationAbort: {
     title: i18n.translate('xpack.agentBuilder.navigationAbort.title', {
       defaultMessage: 'Abort chat request?',

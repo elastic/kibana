@@ -6,14 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
@@ -63,13 +56,9 @@ export const CapabilityRow: React.FC<CapabilityRowProps> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {onAction ? (
-          <EuiButtonEmpty
-            size="s"
-            onClick={onAction}
-            data-test-subj={`capabilityRow-${label}-action`}
-          >
+          <EuiButton size="s" onClick={onAction} data-test-subj={`capabilityRow-${label}-action`}>
             {actionLabel}
-          </EuiButtonEmpty>
+          </EuiButton>
         ) : (
           <EuiText size="s" color="subdued">
             <EuiIcon type="lock" size="s" aria-hidden={true} />

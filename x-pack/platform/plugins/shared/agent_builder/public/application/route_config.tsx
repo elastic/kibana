@@ -10,11 +10,14 @@ import { matchPath } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
 import { RouteDisplay } from './components/common/route_display';
-import { AgentSkills } from './components/agents/skills/agent_skills';
 import { AgentBuilderConversationsPage } from './pages/conversations';
 import { AgentBuilderAgentsPage } from './pages/agents';
 import { AgentBuilderAgentsCreate } from './pages/agent_create';
 import { AgentBuilderAgentsEdit } from './pages/agent_edit';
+import { AgentBuilderAgentOverviewPage } from './pages/agent_overview';
+import { AgentBuilderAgentSkillsPage } from './pages/agent_skills';
+import { AgentBuilderAgentPluginsPage } from './pages/agent_plugins';
+import { AgentBuilderAgentToolsPage } from './pages/agent_tools';
 import { AgentBuilderToolsPage } from './pages/tools';
 import { AgentBuilderToolCreatePage } from './pages/tool_create';
 import { AgentBuilderToolDetailsPage } from './pages/tool_details';
@@ -25,9 +28,6 @@ import { AgentBuilderSkillDetailsPage } from './pages/skill_details';
 import { AgentBuilderPluginsPage } from './pages/plugins';
 import { AgentBuilderPluginDetailsPage } from './pages/plugin_details';
 import { AgentBuilderConnectorsPage } from './pages/connectors';
-import { AgentPlugins } from './components/agents/plugins/agent_plugins';
-import { AgentTools } from './components/agents/tools/agent_tools';
-import { AgentOverview } from './components/agents/overview/agent_overview';
 
 export type SidebarView = 'conversation' | 'agentSettings' | 'manage';
 
@@ -89,7 +89,7 @@ export const agentRoutes: RouteDefinition[] = [
     navSection: navSections.about,
     navIcon: 'sparkles',
     isAgentDisplayName: true,
-    element: <AgentOverview />,
+    element: <AgentBuilderAgentOverviewPage />,
   },
   {
     path: '/agents/:agentId/skills',
@@ -97,7 +97,7 @@ export const agentRoutes: RouteDefinition[] = [
     navLabel: navLabels.skills,
     navIcon: 'bolt',
     navSection: navSections.capabilities,
-    element: <AgentSkills />,
+    element: <AgentBuilderAgentSkillsPage />,
   },
   {
     path: '/agents/:agentId/plugins',
@@ -105,7 +105,7 @@ export const agentRoutes: RouteDefinition[] = [
     navLabel: navLabels.plugins,
     navIcon: 'package',
     navSection: navSections.capabilities,
-    element: <AgentPlugins />,
+    element: <AgentBuilderAgentPluginsPage />,
   },
   {
     path: '/agents/:agentId/connectors',
@@ -122,7 +122,7 @@ export const agentRoutes: RouteDefinition[] = [
     navLabel: navLabels.tools,
     navIcon: 'wrench',
     navSection: navSections.advanced,
-    element: <AgentTools />,
+    element: <AgentBuilderAgentToolsPage />,
   },
   // Catch-all for agent root - must be last
   {
@@ -252,7 +252,7 @@ export const getAgentSettingsNavItems = (agentId: string): SidebarNavItem[] => {
         (route.navLabel ?? route.isAgentDisplayName) && route.sidebarView === 'agentSettings'
     )
     .map((route) => ({
-      label: route.navLabel!,
+      label: route.navLabel ?? '',
       path: route.path.replace(':agentId', agentId),
       icon: route.navIcon,
       section: route.navSection,
