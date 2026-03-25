@@ -11,6 +11,7 @@
     "scripts/**/*",
     "scripts/**/*.json",
     "server/**/*",
+    "test/scout/**/*",
     "../../../../../typings/**/*",
     // ECS and Osquery schema files
     "public/common/schemas/*/*.json"
