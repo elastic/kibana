@@ -56,6 +56,21 @@ const NODE_NAMES = {
  */
 const DANGEROUS_HTTP_METHODS = new Set(['post', 'put', 'delete']);
 
+/**
+ * POST paths that are read-only and do not require user confirmation.
+ */
+const SAFE_POST_PATH_PATTERNS: readonly RegExp[] = [
+  /\/_search$/, // POST /_search, POST /{index}/_search
+  /\/_msearch$/, // POST /_msearch, POST /{index}/_msearch
+  /\/_count$/, // POST /_count, POST /{index}/_count
+  /\/_eql\/search$/, // POST /{index}/_eql/search
+  /^\/_esql$/, // POST /_esql
+  /\/_mget$/, // POST /_mget, POST /{index}/_mget
+];
+
+const isSafePostOperation = (path: string): boolean =>
+  SAFE_POST_PATH_PATTERNS.some((pattern) => pattern.test(path));
+
 const StateAnnotation = Annotation.Root({
   // inputs
   nlQuery: Annotation<string>(),
@@ -80,11 +95,14 @@ const isDangerousOperation = (response: BaseMessage, openApiToolSet: OpenAPITool
     return false;
   }
 
-  const methods = toolCalls
-    .map((t) => openApiToolSet.getToolOperation(t.toolName)?.method.toLowerCase())
-    .filter(Boolean) as string[];
-
-  return methods.some((method) => DANGEROUS_HTTP_METHODS.has(method));
+  return toolCalls.some((t) => {
+    const operation = openApiToolSet.getToolOperation(t.toolName);
+    if (!operation) return false;
+    const method = operation.method.toLowerCase();
+    if (!DANGEROUS_HTTP_METHODS.has(method)) return false;
+    if (method === 'post' && isSafePostOperation(operation.path)) return false;
+    return true;
+  });
 };
 
 /**
