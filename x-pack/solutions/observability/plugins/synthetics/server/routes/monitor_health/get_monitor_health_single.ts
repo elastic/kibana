@@ -28,13 +28,13 @@ export const getMonitorHealthRoute: SyntheticsRestApiRouteFactory = () => ({
 
       if (!error || error.statusCode === 404) {
         return routeContext.response.notFound({
-          body: { message: error?.error ?? `Monitor ${monitorId} not found` },
+          body: { message: error?.message ?? `Monitor ${monitorId} not found` },
         });
       }
 
       return routeContext.response.customError({
         statusCode: 500,
-        body: { message: error.error },
+        body: { message: error.message },
       });
     }
 

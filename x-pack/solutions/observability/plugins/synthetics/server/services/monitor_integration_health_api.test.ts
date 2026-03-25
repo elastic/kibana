@@ -170,8 +170,8 @@ describe('MonitorIntegrationHealthApi', () => {
 
       expect(result.monitors).toHaveLength(0);
       expect(result.errors).toEqual([
-        { configId: 'mon-1', error: 'Saved object not found' },
-        { configId: 'mon-2', error: 'Saved object not found' },
+        { configId: 'mon-1', message: 'Saved object not found' },
+        { configId: 'mon-2', message: 'Saved object not found' },
       ]);
     });
 
@@ -188,7 +188,7 @@ describe('MonitorIntegrationHealthApi', () => {
 
       expect(result.monitors).toHaveLength(1);
       expect(result.monitors[0].configId).toBe('mon-1');
-      expect(result.errors).toEqual([{ configId: 'mon-2', error: 'Not found' }]);
+      expect(result.errors).toEqual([{ configId: 'mon-2', message: 'Not found' }]);
     });
 
     it('provides a default error message when rejection has no message', async () => {
@@ -200,7 +200,7 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealth(['mon-1']);
 
-      expect(result.errors).toEqual([{ configId: 'mon-1', error: 'Failed to fetch monitor' }]);
+      expect(result.errors).toEqual([{ configId: 'mon-1', message: 'Failed to fetch monitor' }]);
     });
   });
 

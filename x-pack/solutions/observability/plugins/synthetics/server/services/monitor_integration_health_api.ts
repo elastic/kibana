@@ -199,7 +199,7 @@ export class MonitorIntegrationHealthApi {
         const reason = result.reason;
         errors.push({
           configId: monitorIds[i],
-          error: reason?.message ?? 'Failed to fetch monitor',
+          message: reason?.message ?? 'Failed to fetch monitor',
           ...(SavedObjectsErrorHelpers.isNotFoundError(reason) ? { statusCode: 404 } : {}),
         });
       }
