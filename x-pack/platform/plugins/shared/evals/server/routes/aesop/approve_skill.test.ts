@@ -5,252 +5,209 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type { EvalsRequestHandlerContext } from '../../types';
-import { registerApproveSkillRoute } from './approve_skill';
-import type { IRouter } from '@kbn/core/server';
+import { httpServerMock, loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import {
+  registerApproveSkillRoute,
+  sanitizeSkillId,
+  sanitizeSkillName,
+  inferTools,
+} from './approve_skill';
 
-describe('AESOP Approve Skill Route', () => {
-  let mockRouter: jest.Mocked<IRouter<EvalsRequestHandlerContext>>;
-  let mockContext: jest.Mocked<EvalsRequestHandlerContext>;
+describe('approve_skill helpers', () => {
+  describe('sanitizeSkillId', () => {
+    it('converts to lowercase and replaces invalid chars with hyphens', () => {
+      expect(sanitizeSkillId('My Skill Name')).toBe('my-skill-name');
+    });
+
+    it('collapses consecutive hyphens', () => {
+      expect(sanitizeSkillId('foo---bar')).toBe('foo-bar');
+    });
+
+    it('truncates to 64 characters', () => {
+      const longInput = 'a'.repeat(100);
+      const result = sanitizeSkillId(longInput);
+      expect(result.length).toBeLessThanOrEqual(64);
+    });
+
+    it('strips leading and trailing non-alphanumeric characters', () => {
+      expect(sanitizeSkillId('-leading-trailing-')).toBe('leading-trailing');
+    });
+
+    it('returns aesop- prefixed fallback when result does not match regex', () => {
+      // An input that produces an empty string after sanitization
+      const result = sanitizeSkillId('---');
+      expect(result).toMatch(/^aesop-/);
+    });
+
+    it('handles empty string input', () => {
+      const result = sanitizeSkillId('');
+      expect(result).toMatch(/^aesop-/);
+    });
+
+    it('preserves valid lowercase alphanumeric IDs', () => {
+      expect(sanitizeSkillId('valid-id-123')).toBe('valid-id-123');
+    });
+
+    it('handles underscores as valid characters', () => {
+      expect(sanitizeSkillId('skill_name_123')).toBe('skill_name_123');
+    });
+  });
+
+  describe('sanitizeSkillName', () => {
+    it('removes special characters but keeps spaces, hyphens, and underscores', () => {
+      expect(sanitizeSkillName('My Skill (v2)!')).toBe('My Skill v2');
+    });
+
+    it('truncates to 64 characters', () => {
+      const longName = 'A'.repeat(100);
+      const result = sanitizeSkillName(longName);
+      expect(result.length).toBeLessThanOrEqual(64);
+    });
+
+    it('strips leading and trailing non-alphanumeric characters', () => {
+      expect(sanitizeSkillName(' -name- ')).toBe('name');
+    });
+
+    it('returns fallback "AESOP Skill" for names that fail regex validation', () => {
+      const result = sanitizeSkillName('!!!');
+      expect(result).toBe('AESOP Skill');
+    });
+
+    it('preserves valid names', () => {
+      expect(sanitizeSkillName('Alert Investigation Skill')).toBe('Alert Investigation Skill');
+    });
+
+    it('handles empty string', () => {
+      const result = sanitizeSkillName('');
+      expect(result).toBe('AESOP Skill');
+    });
+  });
+
+  describe('inferTools', () => {
+    it('infers execute_esql from ES|QL content', () => {
+      const markdown = 'Use ES|QL query to find suspicious processes';
+      const tools = inferTools(markdown);
+      expect(tools).toContain('platform.core.execute_esql');
+    });
+
+    it('infers generate_esql from query content', () => {
+      const markdown = 'Generate a query for endpoint events';
+      const tools = inferTools(markdown);
+      expect(tools).toContain('platform.core.generate_esql');
+    });
+
+    it('infers create_visualization from visualization content', () => {
+      const markdown = 'Create a visualization showing alert trends';
+      const tools = inferTools(markdown);
+      expect(tools).toContain('platform.core.create_visualization');
+    });
+
+    it('infers detection rule tool from alert/detection content', () => {
+      const markdown = 'Create a detection rule for privilege escalation';
+      const tools = inferTools(markdown);
+      expect(tools).toContain('security.create_detection_rule');
+    });
+
+    it('returns empty array for content without tool keywords', () => {
+      const markdown = 'This is a plain text skill with no special keywords';
+      const tools = inferTools(markdown);
+      expect(tools).toHaveLength(0);
+    });
+
+    it('handles empty/undefined markdown', () => {
+      expect(inferTools('')).toHaveLength(0);
+      expect(inferTools(undefined as any)).toHaveLength(0);
+    });
+
+    it('deduplicates tools', () => {
+      const markdown = 'Use esql and ES|QL to query data with esql';
+      const tools = inferTools(markdown);
+      // Both 'esql' keywords map to execute_esql and generate_esql, but each should appear once
+      const uniqueTools = new Set(tools);
+      expect(tools.length).toBe(uniqueTools.size);
+    });
+
+    it('is case-insensitive', () => {
+      const markdown = 'Use ESQL to build a DASHBOARD with VISUALIZATION';
+      const tools = inferTools(markdown);
+      expect(tools).toContain('platform.core.execute_esql');
+      expect(tools).toContain('platform.core.create_visualization');
+    });
+  });
+});
+
+describe('POST /internal/aesop/skills/{skillId}/approve', () => {
+  let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
   let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
-  let mockAgentBuilderClient: any;
-  let routeHandler: any;
+  let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
+  let routeHandler: Function;
+  let mockRouter: any;
+  let mockSkillRegistry: any;
 
-  beforeEach(() => {
-    mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-
-    mockAgentBuilderClient = {
-      createSkill: jest.fn().mockResolvedValue({
-        id: 'ab-skill-123',
-        name: 'Test Skill',
-      }),
-    };
-
-    mockContext = {
-      core: {
+  const createMockContext = () =>
+    ({
+      core: Promise.resolve({
         elasticsearch: {
           client: {
             asCurrentUser: mockEsClient,
           },
         },
-        savedObjects: {} as any,
-      },
-      evals: {
-        datasetService: {} as any,
-      },
-      agentBuilder: {
-        getClient: jest.fn().mockResolvedValue(mockAgentBuilderClient),
-      } as any,
-      logger: {
-        info: jest.fn(),
-        error: jest.fn(),
-        warn: jest.fn(),
-        debug: jest.fn(),
-      } as any,
-    } as any;
+      }),
+      evals: Promise.resolve({
+        getAgentBuilderStart: () => ({
+          skills: {
+            getRegistry: jest.fn().mockResolvedValue(mockSkillRegistry),
+          },
+        }),
+      }),
+    }) as any;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    mockLogger = loggingSystemMock.createLogger();
+    mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    mockResponse = httpServerMock.createResponseFactory();
+    mockSkillRegistry = {
+      create: jest.fn().mockResolvedValue({ id: 'aesop-skill-123' }),
+      update: jest.fn().mockResolvedValue({ id: 'existing-skill-id' }),
+    };
 
     mockRouter = {
       versioned: {
-        post: jest.fn().mockReturnThis(),
+        post: jest.fn().mockReturnValue({
+          addVersion: jest.fn((_config: any, handler: Function) => {
+            routeHandler = handler;
+          }),
+        }),
       },
     } as any;
 
-    const mockAddVersion = jest.fn((config) => {
-      routeHandler = config;
-    });
-
-    mockRouter.versioned.post.mockReturnValue({
-      addVersion: mockAddVersion,
-    });
-
-    registerApproveSkillRoute(mockRouter);
+    registerApproveSkillRoute({ router: mockRouter, logger: mockLogger });
   });
 
-  it('should register POST route for /internal/aesop/skills/{skillId}/approve', () => {
-    expect(mockRouter.versioned.post).toHaveBeenCalledWith(
-      expect.objectContaining({
-        path: '/internal/aesop/skills/{skillId}/approve',
-        access: 'internal',
-      })
-    );
-  });
-
-  it('should validate skillId parameter', () => {
-    const [[routeConfig]] = mockRouter.versioned.post.mock.calls;
-    expect(routeConfig.path).toContain('{skillId}');
-  });
-
-  describe('successful approval', () => {
-    beforeEach(() => {
-      mockEsClient.get.mockResolvedValue({
-        _source: {
-          name: 'Alert Investigation Skill',
-          description: 'Helps investigate security alerts',
-          markdown: '# Alert Investigation\n\nInstructions...',
-          tools: ['search_alerts', 'get_alert_details'],
-          validation: {
-            status: 'passed',
-            final_score: 0.92,
-          },
-          source: {
-            pattern_frequency: 15,
-          },
-          metadata: {
-            discovery_trace_id: 'trace-123',
-          },
-        },
-      } as any);
-
-      mockEsClient.update.mockResolvedValue({} as any);
-    });
-
-    it('should load proposed skill from ES', async () => {
-      const mockRequest = httpServerMock.createKibanaRequest({
-        params: { skillId: 'skill-123' },
-        body: { review_notes: 'Looks good!' },
-        auth: { credentials: { username: 'test-user' } },
-      });
-
-      await routeHandler(mockContext, mockRequest, httpServerMock.createResponseFactory());
-
-      expect(mockEsClient.get).toHaveBeenCalledWith({
-        index: '.aesop-proposed-skills',
-        id: 'skill-123',
-      });
-    });
-
-    it('should deploy skill to Agent Builder', async () => {
-      const mockRequest = httpServerMock.createKibanaRequest({
-        params: { skillId: 'skill-123' },
-        body: { review_notes: 'Looks good!' },
-        auth: { credentials: { username: 'test-user' } },
-      });
-
-      await routeHandler(mockContext, mockRequest, httpServerMock.createResponseFactory());
-
-      expect(mockAgentBuilderClient.createSkill).toHaveBeenCalledWith({
-        name: 'Alert Investigation Skill',
-        description: 'Helps investigate security alerts',
-        content: '# Alert Investigation\n\nInstructions...',
-        tools: ['search_alerts', 'get_alert_details'],
-        labels: ['aesop-generated', 'auto-discovered'],
-        metadata: expect.objectContaining({
-          source: 'aesop',
-          aesop_skill_id: 'skill-123',
-          discovery_trace_id: 'trace-123',
-          eval_score: 0.92,
-          pattern_frequency: 15,
-          approved_at: expect.any(String),
-        }),
-      });
-    });
-
-    it('should update skill document with approval', async () => {
-      const mockRequest = httpServerMock.createKibanaRequest({
-        params: { skillId: 'skill-123' },
-        body: { review_notes: 'Approved for production' },
-        auth: { credentials: { username: 'reviewer@elastic.co' } },
-      });
-
-      await routeHandler(mockContext, mockRequest, httpServerMock.createResponseFactory());
-
-      expect(mockEsClient.update).toHaveBeenCalledWith({
-        index: '.aesop-proposed-skills',
-        id: 'skill-123',
-        body: {
-          doc: {
-            review: {
-              status: 'approved',
-              reviewed_by: 'reviewer@elastic.co',
-              reviewed_at: expect.any(String),
-              review_notes: 'Approved for production',
-            },
-            deployment: {
-              deployed: true,
-              agent_builder_skill_id: 'ab-skill-123',
-              deployed_at: expect.any(String),
+  describe('route registration', () => {
+    it('should register POST route for /internal/aesop/skills/{skillId}/approve', () => {
+      expect(mockRouter.versioned.post).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/internal/aesop/skills/{skillId}/approve',
+          access: 'internal',
+          security: {
+            authz: {
+              requiredPrivileges: ['evals'],
             },
           },
-        },
-      });
-    });
-
-    it('should return success response with Agent Builder skill ID', async () => {
-      const mockRequest = httpServerMock.createKibanaRequest({
-        params: { skillId: 'skill-123' },
-        body: {},
-        auth: { credentials: { username: 'test-user' } },
-      });
-      const mockResponse = httpServerMock.createResponseFactory();
-
-      await routeHandler(mockContext, mockRequest, mockResponse);
-
-      expect(mockResponse.ok).toHaveBeenCalledWith({
-        body: {
-          success: true,
-          message: 'Skill approved and deployed to Agent Builder',
-          agent_builder_skill_id: 'ab-skill-123',
-        },
-      });
-    });
-
-    it('should log approval workflow', async () => {
-      const mockRequest = httpServerMock.createKibanaRequest({
-        params: { skillId: 'skill-123' },
-        body: {},
-        auth: { credentials: { username: 'test-user' } },
-      });
-
-      await routeHandler(mockContext, mockRequest, httpServerMock.createResponseFactory());
-
-      expect(mockContext.logger.info).toHaveBeenCalledWith(
-        '[AESOP] Deploying skill to Agent Builder',
-        { skill_id: 'skill-123' }
-      );
-
-      expect(mockContext.logger.info).toHaveBeenCalledWith(
-        '[AESOP] Skill deployed to Agent Builder',
-        {
-          aesop_skill_id: 'skill-123',
-          agent_builder_skill_id: 'ab-skill-123',
-        }
+        })
       );
     });
   });
 
-  describe('validation errors', () => {
-    it('should reject if skill not found', async () => {
-      mockEsClient.get.mockRejectedValue({
-        meta: { statusCode: 404 },
-        message: 'not found',
-      });
-
-      const mockRequest = httpServerMock.createKibanaRequest({
-        params: { skillId: 'nonexistent-skill' },
-        body: {},
-      });
-      const mockResponse = httpServerMock.createResponseFactory();
-
-      await routeHandler(mockContext, mockRequest, mockResponse);
-
-      expect(mockResponse.customError).toHaveBeenCalledWith({
-        statusCode: 500,
-        body: expect.objectContaining({
-          message: expect.stringContaining('Failed to approve skill'),
-        }),
-      });
-    });
-
-    it('should reject if skill validation not passed', async () => {
+  describe('validation gate', () => {
+    it('should reject if skill validation status is not "passed"', async () => {
       mockEsClient.get.mockResolvedValue({
         _source: {
           name: 'Failed Skill',
-          validation: {
-            status: 'failed',
-            final_score: 0.65,
-          },
+          validation: { status: 'failed' },
         },
       } as any);
 
@@ -258,9 +215,8 @@ describe('AESOP Approve Skill Route', () => {
         params: { skillId: 'skill-123' },
         body: {},
       });
-      const mockResponse = httpServerMock.createResponseFactory();
 
-      await routeHandler(mockContext, mockRequest, mockResponse);
+      await routeHandler(createMockContext(), mockRequest, mockResponse);
 
       expect(mockResponse.badRequest).toHaveBeenCalledWith({
         body: {
@@ -269,13 +225,11 @@ describe('AESOP Approve Skill Route', () => {
       });
     });
 
-    it('should reject if skill validation pending', async () => {
+    it('should reject if skill validation status is "pending"', async () => {
       mockEsClient.get.mockResolvedValue({
         _source: {
           name: 'Pending Skill',
-          validation: {
-            status: 'pending',
-          },
+          validation: { status: 'pending' },
         },
       } as any);
 
@@ -283,207 +237,144 @@ describe('AESOP Approve Skill Route', () => {
         params: { skillId: 'skill-123' },
         body: {},
       });
-      const mockResponse = httpServerMock.createResponseFactory();
 
-      await routeHandler(mockContext, mockRequest, mockResponse);
+      await routeHandler(createMockContext(), mockRequest, mockResponse);
 
-      expect(mockResponse.badRequest).toHaveBeenCalled();
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+        body: {
+          message: expect.stringContaining('Current status: pending'),
+        },
+      });
     });
-  });
 
-  describe('Agent Builder integration', () => {
-    beforeEach(() => {
+    it('should reject if validation is undefined', async () => {
       mockEsClient.get.mockResolvedValue({
         _source: {
-          name: 'Test Skill',
-          description: 'Test',
-          markdown: '# Test',
-          tools: [],
-          validation: { status: 'passed', final_score: 0.9 },
-          source: { pattern_frequency: 10 },
-          metadata: { discovery_trace_id: 'trace-1' },
+          name: 'No Validation Skill',
         },
       } as any);
-    });
-
-    it('should handle Agent Builder client creation failure', async () => {
-      mockContext.agentBuilder.getClient.mockRejectedValue(
-        new Error('Agent Builder not configured')
-      );
 
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { skillId: 'skill-123' },
         body: {},
       });
-      const mockResponse = httpServerMock.createResponseFactory();
 
-      await routeHandler(mockContext, mockRequest, mockResponse);
+      await routeHandler(createMockContext(), mockRequest, mockResponse);
 
-      expect(mockResponse.customError).toHaveBeenCalled();
-      expect(mockContext.logger.error).toHaveBeenCalledWith(
-        '[AESOP] Failed to approve skill',
-        expect.any(Object)
-      );
-    });
-
-    it('should handle Agent Builder skill creation failure', async () => {
-      mockAgentBuilderClient.createSkill.mockRejectedValue(
-        new Error('Skill name already exists')
-      );
-
-      const mockRequest = httpServerMock.createKibanaRequest({
-        params: { skillId: 'skill-123' },
-        body: {},
-      });
-      const mockResponse = httpServerMock.createResponseFactory();
-
-      await routeHandler(mockContext, mockRequest, mockResponse);
-
-      expect(mockResponse.customError).toHaveBeenCalledWith({
-        statusCode: 500,
-        body: expect.objectContaining({
-          message: expect.stringContaining('Skill name already exists'),
-        }),
-      });
-    });
-
-    it('should pass all required fields to Agent Builder', async () => {
-      const mockRequest = httpServerMock.createKibanaRequest({
-        params: { skillId: 'skill-123' },
-        body: {},
-      });
-
-      await routeHandler(mockContext, mockRequest, httpServerMock.createResponseFactory());
-
-      const createSkillCall = mockAgentBuilderClient.createSkill.mock.calls[0][0];
-      expect(createSkillCall).toMatchObject({
-        name: expect.any(String),
-        description: expect.any(String),
-        content: expect.any(String),
-        tools: expect.any(Array),
-        labels: expect.arrayContaining(['aesop-generated', 'auto-discovered']),
-        metadata: expect.objectContaining({
-          source: 'aesop',
-          aesop_skill_id: 'skill-123',
-        }),
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+        body: {
+          message: expect.stringContaining('Current status: pending'),
+        },
       });
     });
   });
 
-  describe('error recovery', () => {
+  describe('successful approval', () => {
     beforeEach(() => {
       mockEsClient.get.mockResolvedValue({
         _source: {
-          name: 'Test Skill',
-          description: 'Test',
-          markdown: '# Test',
-          tools: [],
-          validation: { status: 'passed', final_score: 0.9 },
-          source: { pattern_frequency: 10 },
-          metadata: { discovery_trace_id: 'trace-1' },
+          name: 'Alert Investigation',
+          description: 'Investigates security alerts using ES|QL queries',
+          markdown: '# Alert Investigation\n\nUse ES|QL query to find suspicious processes',
+          validation: { status: 'passed', final_score: 0.92 },
         },
       } as any);
       mockEsClient.update.mockResolvedValue({} as any);
     });
 
-    it('should handle ES update failure after successful deployment', async () => {
-      mockEsClient.update.mockRejectedValue(new Error('ES connection lost'));
-
+    it('should create skill in Agent Builder with sanitized fields', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { skillId: 'skill-123' },
-        body: {},
-      });
-      const mockResponse = httpServerMock.createResponseFactory();
-
-      await routeHandler(mockContext, mockRequest, mockResponse);
-
-      // Should still fail even though deployment succeeded
-      expect(mockResponse.customError).toHaveBeenCalled();
-    });
-
-    it('should log detailed error information', async () => {
-      mockAgentBuilderClient.createSkill.mockRejectedValue(
-        new Error('Network timeout')
-      );
-
-      const mockRequest = httpServerMock.createKibanaRequest({
-        params: { skillId: 'skill-123' },
-        body: {},
+        body: { review_notes: 'Looks good' },
+        auth: { credentials: { username: 'test-user' } },
       });
 
-      await routeHandler(mockContext, mockRequest, httpServerMock.createResponseFactory());
+      await routeHandler(createMockContext(), mockRequest, mockResponse);
 
-      expect(mockContext.logger.error).toHaveBeenCalledWith(
-        '[AESOP] Failed to approve skill',
+      expect(mockSkillRegistry.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          error: expect.any(Error),
-          skill_id: 'skill-123',
+          name: 'Alert Investigation',
+          description: expect.any(String),
+          content: expect.any(String),
+          tool_ids: expect.any(Array),
         })
       );
     });
-  });
 
-  describe('security', () => {
-    it('should require evals privilege', () => {
-      const [[routeConfig]] = mockRouter.versioned.post.mock.calls;
-
-      expect(routeConfig.security).toEqual({
-        authz: {
-          requiredPrivileges: ['evals'],
-        },
-      });
-    });
-
-    it('should track reviewer username', async () => {
-      mockEsClient.get.mockResolvedValue({
-        _source: {
-          name: 'Test',
-          validation: { status: 'passed', final_score: 0.9 },
-          source: { pattern_frequency: 10 },
-          metadata: {},
-        },
-      } as any);
-      mockEsClient.update.mockResolvedValue({} as any);
-
+    it('should infer tools from skill markdown content', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { skillId: 'skill-123' },
         body: {},
-        auth: { credentials: { username: 'security-lead@elastic.co' } },
+        auth: { credentials: { username: 'test-user' } },
       });
 
-      await routeHandler(mockContext, mockRequest, httpServerMock.createResponseFactory());
+      await routeHandler(createMockContext(), mockRequest, mockResponse);
+
+      const createCall = mockSkillRegistry.create.mock.calls[0][0];
+      // The markdown contains "ES|QL query" so it should infer esql tools
+      expect(createCall.tool_ids).toContain('platform.core.execute_esql');
+    });
+
+    it('should update skill document with approval and deployment info', async () => {
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { skillId: 'skill-123' },
+        body: { review_notes: 'Approved for production' },
+      });
+
+      await routeHandler(createMockContext(), mockRequest, mockResponse);
 
       expect(mockEsClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
+          index: '.aesop-proposed-skills',
+          id: 'skill-123',
           body: {
-            doc: expect.objectContaining({
+            doc: {
               review: expect.objectContaining({
-                reviewed_by: 'security-lead@elastic.co',
+                status: 'approved',
+                reviewed_at: expect.any(String),
+                review_notes: 'Approved for production',
               }),
-            }),
+              deployment: expect.objectContaining({
+                deployed: true,
+                deployed_at: expect.any(String),
+                agent_builder_skill_id: 'aesop-skill-123',
+                tool_ids: expect.any(Array),
+                updated_existing: false,
+              }),
+            },
           },
+          refresh: 'wait_for',
         })
       );
     });
 
-    it('should default to unknown if username not available', async () => {
-      mockEsClient.get.mockResolvedValue({
-        _source: {
-          name: 'Test',
-          validation: { status: 'passed', final_score: 0.9 },
-          source: { pattern_frequency: 10 },
-          metadata: {},
-        },
-      } as any);
-      mockEsClient.update.mockResolvedValue({} as any);
+    it('should return success response with agent_builder_skill_id', async () => {
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { skillId: 'skill-123' },
+        body: {},
+        auth: { credentials: { username: 'test-user' } },
+      });
 
+      await routeHandler(createMockContext(), mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: expect.objectContaining({
+          success: true,
+          skill_id: 'skill-123',
+          agent_builder_skill_id: 'aesop-skill-123',
+          tool_ids: expect.any(Array),
+        }),
+      });
+    });
+
+    it('should default reviewed_by to "unknown" when username is not available', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { skillId: 'skill-123' },
         body: {},
         auth: {},
       });
 
-      await routeHandler(mockContext, mockRequest, httpServerMock.createResponseFactory());
+      await routeHandler(createMockContext(), mockRequest, mockResponse);
 
       expect(mockEsClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -494,6 +385,110 @@ describe('AESOP Approve Skill Route', () => {
               }),
             }),
           },
+        })
+      );
+    });
+  });
+
+  describe('update existing skill', () => {
+    it('should update existing skill when update_existing is true and base_skill is writable', async () => {
+      mockEsClient.get.mockResolvedValue({
+        _source: {
+          name: 'Updated Skill',
+          description: 'Updated description',
+          markdown: '# Updated',
+          validation: { status: 'passed' },
+          base_skill: { id: 'existing-skill-id', readonly: false },
+        },
+      } as any);
+      mockEsClient.update.mockResolvedValue({} as any);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { skillId: 'skill-123' },
+        body: { update_existing: true },
+        auth: { credentials: { username: 'test-user' } },
+      });
+
+      await routeHandler(createMockContext(), mockRequest, mockResponse);
+
+      expect(mockSkillRegistry.update).toHaveBeenCalledWith(
+        'existing-skill-id',
+        expect.objectContaining({
+          name: 'Updated Skill',
+        })
+      );
+      expect(mockSkillRegistry.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('error handling', () => {
+    it('should return 500 when ES get fails (skill not found)', async () => {
+      mockEsClient.get.mockRejectedValue(new Error('document_missing_exception'));
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { skillId: 'nonexistent' },
+        body: {},
+      });
+
+      await routeHandler(createMockContext(), mockRequest, mockResponse);
+
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: {
+          message: expect.stringContaining('Failed to approve skill'),
+        },
+      });
+    });
+
+    it('should return 500 when Agent Builder is not available', async () => {
+      mockEsClient.get.mockResolvedValue({
+        _source: {
+          name: 'Test',
+          validation: { status: 'passed' },
+          markdown: '',
+        },
+      } as any);
+
+      const contextWithNoAgentBuilder = {
+        core: Promise.resolve({
+          elasticsearch: { client: { asCurrentUser: mockEsClient } },
+        }),
+        evals: Promise.resolve({
+          getAgentBuilderStart: () => undefined,
+        }),
+      } as any;
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { skillId: 'skill-123' },
+        body: {},
+        auth: { credentials: { username: 'test-user' } },
+      });
+
+      await routeHandler(contextWithNoAgentBuilder, mockRequest, mockResponse);
+
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: {
+          message: expect.stringContaining('Agent Builder plugin not available'),
+        },
+      });
+    });
+
+    it('should log error details on failure', async () => {
+      mockEsClient.get.mockRejectedValue(new Error('Connection refused'));
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { skillId: 'skill-123' },
+        body: {},
+      });
+
+      await routeHandler(createMockContext(), mockRequest, mockResponse);
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        '[AESOP] Failed to approve skill',
+        expect.objectContaining({
+          error: 'Connection refused',
+          skill_id: 'skill-123',
         })
       );
     });
