@@ -65,7 +65,7 @@ export const ScriptingHelpFlyout: React.FC<ScriptingHelpFlyoutProps> = ({
       data-test-subj="scriptedFieldsHelpFlyout"
       aria-label={i18n.translate(
         'indexPatternManagement.fieldEditor.scriptingHelpFlyout.ariaLabel',
-        { defaultMessage: 'Scripting help' }
+        { defaultMessage: 'Help' }
       )}
     >
       <EuiFlyoutBody>
