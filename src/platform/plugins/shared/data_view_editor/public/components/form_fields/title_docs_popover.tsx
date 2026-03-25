@@ -43,7 +43,7 @@ export const TitleDocsPopover: React.FC = () => {
       panelPaddingSize="none"
       anchorPosition="upRight"
       aria-label={i18n.translate('indexPatternEditor.titleDocsPopover.ariaLabel', {
-        defaultMessage: 'Index pattern',
+        defaultMessage: 'Index pattern examples',
       })}
       closePopover={() => setIsOpen(false)}
     >
