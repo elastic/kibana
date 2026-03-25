@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo, memo } from 'react';
+import React, { useMemo, memo, useCallback } from 'react';
 import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
-import { useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { getAgentIcon } from '@kbn/custom-icons';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -23,6 +23,7 @@ import {
   SERVICE_NODE_CIRCLE_SIZE,
 } from '../../../../common/service_map/constants';
 import { NodeLabel } from './node_label';
+import { useServiceMapExpand } from './service_map_expand_context';
 
 type ServiceNodeType = Node<ServiceNodeData, 'service'>;
 
@@ -30,6 +31,7 @@ export const ServiceNode = memo(
   ({ data, selected, sourcePosition, targetPosition }: NodeProps<ServiceNodeType>) => {
     const { euiTheme, colorMode } = useEuiTheme();
     const isDarkMode = colorMode === 'DARK';
+    const expandContext = useServiceMapExpand();
 
     const borderColor = useMemo(() => {
       if (data.serviceAnomalyStats?.healthStatus) {
@@ -94,10 +96,35 @@ export const ServiceNode = memo(
       return parts.join('. ');
     }, [data.label, data.agentName, data.serviceAnomalyStats?.healthStatus]);
 
+    const isExpanded = expandContext?.expandedServiceIds.has(data.id) ?? false;
+    const hasConnections = expandContext?.serviceIdsWithConnections.has(data.id) ?? false;
+    const showExpandCollapse = expandContext && hasConnections;
+    const handleExpandClick = useCallback(
+      (e: React.MouseEvent) => {
+        e.stopPropagation();
+        expandContext?.onExpandService(data.id);
+      },
+      [data.id, expandContext]
+    );
+    const handleCollapseClick = useCallback(
+      (e: React.MouseEvent) => {
+        e.stopPropagation();
+        expandContext?.onCollapseService(data.id);
+      },
+      [data.id, expandContext]
+    );
+
     const containerStyles = css`
       position: relative;
       width: ${SERVICE_NODE_CIRCLE_SIZE}px;
       height: ${SERVICE_NODE_CIRCLE_SIZE}px;
+    `;
+
+    const expandCollapseBadgeStyles = css`
+      position: absolute;
+      top: -${euiTheme.size.xs};
+      right: -${euiTheme.size.xs};
+      z-index: ${Number(euiTheme.levels.content) + 1};
     `;
 
     const handleStyles = css`
@@ -146,6 +173,74 @@ export const ServiceNode = memo(
       >
         <EuiFlexItem grow={false} css={containerStyles}>
           <Handle type="target" position={targetPosition ?? Position.Left} css={handleStyles} />
+          {showExpandCollapse && (
+            <div css={expandCollapseBadgeStyles}>
+              {isExpanded ? (
+                <button
+                  type="button"
+                  onClick={handleCollapseClick}
+                  aria-label={i18n.translate(
+                    'xpack.apm.serviceMap.serviceNode.collapseConnections',
+                    { defaultMessage: 'Collapse connections for this service' }
+                  )}
+                  data-test-subj={`serviceMapExpandCollapse-collapse-${data.id}`}
+                  css={css`
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: ${euiTheme.size.m};
+                    height: ${euiTheme.size.m};
+                    padding: 0;
+                    border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
+                    border-radius: ${euiTheme.border.radius.small};
+                    background: ${euiTheme.colors.backgroundBasePlain};
+                    cursor: pointer;
+                    color: ${euiTheme.colors.text};
+                    &:hover {
+                      background: ${euiTheme.colors.backgroundBaseSubdued};
+                    }
+                    &:focus-visible {
+                      outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
+                      outline-offset: 2px;
+                    }
+                  `}
+                >
+                  <EuiIcon type="minus" size="s" aria-hidden="true" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleExpandClick}
+                  aria-label={i18n.translate('xpack.apm.serviceMap.serviceNode.expandConnections', {
+                    defaultMessage: 'Expand connections for this service',
+                  })}
+                  data-test-subj={`serviceMapExpandCollapse-expand-${data.id}`}
+                  css={css`
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: ${euiTheme.size.m};
+                    height: ${euiTheme.size.m};
+                    padding: 0;
+                    border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
+                    border-radius: ${euiTheme.border.radius.small};
+                    background: ${euiTheme.colors.backgroundBasePlain};
+                    cursor: pointer;
+                    color: ${euiTheme.colors.text};
+                    &:hover {
+                      background: ${euiTheme.colors.backgroundBaseSubdued};
+                    }
+                    &:focus-visible {
+                      outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
+                      outline-offset: 2px;
+                    }
+                  `}
+                >
+                  <EuiIcon type="plus" size="s" aria-hidden="true" />
+                </button>
+              )}
+            </div>
+          )}
           <div
             css={circleStyles}
             role="button"

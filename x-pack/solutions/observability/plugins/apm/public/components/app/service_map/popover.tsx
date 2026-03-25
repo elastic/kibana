@@ -18,7 +18,11 @@ import {
   CENTER_ANIMATION_DURATION_MS,
 } from './constants';
 import type { Environment } from '../../../../common/environment_rt';
-import { PopoverContent, type ServiceMapSelection } from './popover/popover_content';
+import {
+  PopoverContent,
+  type PopoverContentProps,
+  type ServiceMapSelection,
+} from './popover/popover_content';
 import type { ServiceMapNode, ServiceMapEdge } from '../../../../common/service_map';
 import { DiagnosticFlyout } from './diagnostic_tool/diagnostic_flyout';
 
@@ -107,7 +111,7 @@ function getNodePopoverPosition(
   };
 }
 
-interface MapPopoverProps {
+export interface MapPopoverProps {
   selectedNode: ServiceMapNode | null;
   selectedEdge: ServiceMapEdge | null;
   focusedServiceName?: string;
@@ -116,6 +120,8 @@ interface MapPopoverProps {
   start: string;
   end: string;
   onClose: () => void;
+  /** When provided, used instead of default PopoverContent (e.g. embeddable context). */
+  renderPopoverContent?: (props: PopoverContentProps) => React.ReactNode;
 }
 
 export function MapPopover({
@@ -127,6 +133,7 @@ export function MapPopover({
   start,
   end,
   onClose,
+  renderPopoverContent,
 }: MapPopoverProps) {
   const { euiTheme } = useEuiTheme();
   const popoverRef = useRef<EuiPopover>(null);
@@ -225,16 +232,29 @@ export function MapPopover({
           'aria-modal': 'false',
         }}
       >
-        <PopoverContent
-          selectedNode={selectedNode}
-          selectedEdge={selectedEdge}
-          environment={environment}
-          kuery={kuery}
-          start={start}
-          end={end}
-          onFocusClick={onFocusClick}
-          onOpenDiagnostic={handleOpenDiagnostic}
-        />
+        {renderPopoverContent ? (
+          renderPopoverContent({
+            selectedNode,
+            selectedEdge,
+            environment,
+            kuery,
+            start,
+            end,
+            onFocusClick,
+            onOpenDiagnostic: handleOpenDiagnostic,
+          })
+        ) : (
+          <PopoverContent
+            selectedNode={selectedNode}
+            selectedEdge={selectedEdge}
+            environment={environment}
+            kuery={kuery}
+            start={start}
+            end={end}
+            onFocusClick={onFocusClick}
+            onOpenDiagnostic={handleOpenDiagnostic}
+          />
+        )}
       </EuiPopover>
       {diagnosticFlyoutSelection && (
         <>
