@@ -27,9 +27,27 @@ describe('AttachmentStateManager', () => {
   const mockContext = { request: {} as any, spaceId: 'default' };
 
   let resolvedByRefPayload: Record<string, unknown> = { value: 'resolved-1' };
+  let isStaleResult: boolean = false;
+  let resolvedStalePayload: Record<string, unknown> | undefined = { fresh: true };
 
   const getTypeDefinition = (type: string): AttachmentTypeDefinition | undefined => {
     switch (type) {
+      case 'staleable':
+        return {
+          id: 'staleable',
+          validate: (input: unknown) => ({ valid: true, data: input as any }),
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+          resolve: async (_origin: string) => resolvedStalePayload,
+          isStale: async () => isStaleResult,
+        } as any;
+      case 'staleable_no_resolve':
+        return {
+          id: 'staleable_no_resolve',
+          validate: (input: unknown) => ({ valid: true, data: input as any }),
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+          isStale: async () => true,
+          // no resolve
+        } as any;
       case 'text':
         return {
           id: 'text',
@@ -576,7 +594,7 @@ describe('AttachmentStateManager', () => {
         {
           id: 'by-ref-1',
           type: 'by_ref',
-          origin: { ref: 'a' },
+          origin: 'a',
         },
         undefined,
         mockContext
@@ -585,7 +603,7 @@ describe('AttachmentStateManager', () => {
       // Content should be the resolved payload
       expect(attachment.versions[0].data).toEqual({ value: 'resolved-1' });
       // Origin should be stored on the attachment
-      expect(attachment.origin).toEqual({ ref: 'a' });
+      expect(attachment.origin).toEqual('a');
       expect(attachment.current_version).toBe(1);
     });
 
@@ -594,7 +612,7 @@ describe('AttachmentStateManager', () => {
         {
           id: 'by-ref-2',
           type: 'by_ref',
-          origin: { ref: 'a' },
+          origin: 'a',
         },
         undefined,
         mockContext
@@ -615,7 +633,7 @@ describe('AttachmentStateManager', () => {
         manager.add({
           id: 'by-ref-3',
           type: 'by_ref',
-          origin: { ref: 'a' },
+          origin: 'a',
         })
       ).rejects.toThrow('Resolve context is required');
     });
@@ -634,11 +652,11 @@ describe('AttachmentStateManager', () => {
         id: 'both-1',
         type: 'by_ref',
         data: { ref: 'custom-data' },
-        origin: { ref: 'original-source' },
+        origin: 'original-source',
       });
 
       expect(attachment.versions[0].data).toEqual({ ref: 'custom-data' });
-      expect(attachment.origin).toEqual({ ref: 'original-source' });
+      expect(attachment.origin).toEqual('original-source');
     });
   });
 
@@ -767,6 +785,200 @@ describe('AttachmentStateManager', () => {
       manager.clearAccessTracking();
 
       expect(manager.getAccessedRefs()).toHaveLength(0);
+    });
+  });
+
+  describe('evaluateStalenessForActiveAttachments()', () => {
+    beforeEach(() => {
+      isStaleResult = false;
+      resolvedStalePayload = { fresh: true };
+    });
+
+    it('returns is_stale: false for attachments without origin', async () => {
+      await manager.add({ id: 'att-1', type: 'text', data: { content: 'hello' } });
+
+      const results = await manager.evaluateStalenessForActiveAttachments(mockContext);
+
+      expect(results).toHaveLength(1);
+      expect(results[0]).toEqual({ id: 'att-1', is_stale: false });
+    });
+
+    it('returns is_stale: false when isStale returns false', async () => {
+      isStaleResult = false;
+      await manager.add(
+        { id: 'att-1', type: 'staleable', origin: 'origin-a' },
+        undefined,
+        mockContext
+      );
+
+      const results = await manager.evaluateStalenessForActiveAttachments(mockContext);
+
+      expect(results).toHaveLength(1);
+      expect(results[0]).toEqual({ id: 'att-1', is_stale: false });
+    });
+
+    it('returns stale result with resolved data when isStale returns true', async () => {
+      isStaleResult = true;
+      resolvedStalePayload = { updated: 'data' };
+      await manager.add(
+        { id: 'att-1', type: 'staleable', origin: 'origin-a' },
+        undefined,
+        mockContext
+      );
+
+      const results = await manager.evaluateStalenessForActiveAttachments(mockContext);
+
+      expect(results).toHaveLength(1);
+      expect(results[0]).toMatchObject({
+        id: 'att-1',
+        is_stale: true,
+        type: 'staleable',
+        origin: 'origin-a',
+        data: { updated: 'data' },
+      });
+    });
+
+    it('returns is_stale: false when isStale is true but resolve returns undefined', async () => {
+      // Add with data so the initial add succeeds, then set origin manually
+      await manager.add({ id: 'att-1', type: 'staleable', data: { content: 'x' } as any });
+      await manager.updateOrigin('att-1', 'origin-a');
+
+      // Now configure: isStale=true but resolve returns undefined
+      isStaleResult = true;
+      resolvedStalePayload = undefined;
+
+      const results = await manager.evaluateStalenessForActiveAttachments(mockContext);
+
+      expect(results[0]).toEqual({ id: 'att-1', is_stale: false });
+    });
+
+    it('returns is_stale: false when type has no resolve function', async () => {
+      await manager.add(
+        { id: 'att-1', type: 'staleable_no_resolve', data: { content: 'x' } as any },
+        undefined
+      );
+      // Manually set origin since we added with data (no resolve call)
+      await manager.updateOrigin('att-1', 'origin-a');
+
+      const results = await manager.evaluateStalenessForActiveAttachments(mockContext);
+
+      expect(results[0]).toEqual({ id: 'att-1', is_stale: false });
+    });
+
+    it('skips deleted attachments', async () => {
+      isStaleResult = true;
+      resolvedStalePayload = { updated: 'data' };
+      await manager.add(
+        { id: 'att-1', type: 'staleable', origin: 'origin-a' },
+        undefined,
+        mockContext
+      );
+      manager.delete('att-1');
+
+      const results = await manager.evaluateStalenessForActiveAttachments(mockContext);
+
+      expect(results).toHaveLength(0);
+    });
+
+    it('handles mix of stale and fresh attachments', async () => {
+      resolvedStalePayload = { new: 'content' };
+
+      // Add both with data; set origin manually so add() never calls resolve
+      await manager.add({ id: 'att-fresh', type: 'staleable', data: { content: 'x' } as any });
+      await manager.updateOrigin('att-fresh', 'origin-fresh');
+
+      await manager.add({ id: 'att-stale', type: 'staleable', data: { content: 'x' } as any });
+      await manager.updateOrigin('att-stale', 'origin-stale');
+
+      await manager.add({ id: 'att-plain', type: 'text', data: { content: 'plain' } });
+
+      // Use a per-attachment isStale: only 'att-stale' is stale
+      const customManager = createAttachmentStateManager(manager.getAll(), {
+        getTypeDefinition: (type) => {
+          if (type === 'staleable') {
+            return {
+              id: 'staleable',
+              validate: (input: unknown) => ({ valid: true, data: input as any }),
+              format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+              resolve: async () => resolvedStalePayload,
+              isStale: async (attachment: any) => attachment.id === 'att-stale',
+            } as any;
+          }
+          return getTypeDefinition(type);
+        },
+      });
+
+      const results = await customManager.evaluateStalenessForActiveAttachments(mockContext);
+
+      expect(results).toHaveLength(3);
+      expect(results.find((r) => r.id === 'att-fresh')?.is_stale).toBe(false);
+      expect(results.find((r) => r.id === 'att-stale')?.is_stale).toBe(true);
+      expect(results.find((r) => r.id === 'att-plain')?.is_stale).toBe(false);
+    });
+
+    it('returns per-attachment error when isStale throws and still evaluates other attachments', async () => {
+      await manager.add({ id: 'att-ok', type: 'staleable', data: { content: 'x' } as any });
+      await manager.updateOrigin('att-ok', 'origin-ok');
+
+      await manager.add({ id: 'att-bad', type: 'staleable', data: { content: 'x' } as any });
+      await manager.updateOrigin('att-bad', 'origin-bad');
+
+      const customManager = createAttachmentStateManager(manager.getAll(), {
+        getTypeDefinition: (type) => {
+          if (type === 'staleable') {
+            return {
+              id: 'staleable',
+              validate: (input: unknown) => ({ valid: true, data: input as any }),
+              format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+              resolve: async () => ({ ok: true }),
+              isStale: async (attachment: any) => {
+                if (attachment.id === 'att-bad') {
+                  throw new Error('stale check failed');
+                }
+                return false;
+              },
+            } as any;
+          }
+          return getTypeDefinition(type);
+        },
+      });
+
+      const results = await customManager.evaluateStalenessForActiveAttachments(mockContext);
+
+      expect(results).toHaveLength(2);
+      expect(results.find((r) => r.id === 'att-ok')).toEqual({ id: 'att-ok', is_stale: false });
+      expect(results.find((r) => r.id === 'att-bad')).toEqual({
+        id: 'att-bad',
+        is_stale: false,
+        error: 'stale check failed',
+      });
+    });
+  });
+
+  describe('updateOrigin()', () => {
+    it('sets origin and origin_snapshot_at on an existing attachment', async () => {
+      await manager.add({ id: 'att-1', type: 'text', data: { content: 'test' } });
+
+      const result = await manager.updateOrigin('att-1', 'new-origin');
+      const record = manager.getAttachmentRecord('att-1');
+
+      expect(result).toBe(true);
+      expect(record?.origin).toBe('new-origin');
+      expect(record?.origin_snapshot_at).toBeDefined();
+    });
+
+    it('returns false for non-existent attachment', async () => {
+      const result = await manager.updateOrigin('non-existent', 'origin');
+      expect(result).toBe(false);
+    });
+
+    it('returns false for deleted attachment', async () => {
+      await manager.add({ id: 'att-1', type: 'text', data: { content: 'test' } });
+      manager.delete('att-1');
+
+      const result = await manager.updateOrigin('att-1', 'new-origin');
+
+      expect(result).toBe(false);
     });
   });
 

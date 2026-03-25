@@ -27,6 +27,7 @@ import type {
   ModelProvider,
   HooksServiceStart,
 } from '@kbn/agent-builder-server';
+import type { WritableSkillsStore } from '@kbn/agent-builder-server/runner';
 import type {
   ScopedRunnerRunToolsParams,
   ScopedRunnerRunInternalToolParams,
@@ -48,6 +49,7 @@ import { runTool, runInternalTool } from './run_tool';
 import { runAgent } from './run_agent';
 import { createStore } from './store';
 import type { SkillServiceStart } from '../skills';
+import type { PluginsServiceStart } from '../plugins/plugin_service';
 
 export interface CreateScopedRunnerDeps {
   // core services
@@ -79,8 +81,10 @@ export interface CreateScopedRunnerDeps {
   abortSignal?: AbortSignal;
   // context-aware deps
   resultStore: WritableToolResultStore;
+  skillsStore: WritableSkillsStore;
   attachmentStateManager: AttachmentStateManager;
   skillServiceStart: SkillServiceStart;
+  pluginsServiceStart: PluginsServiceStart;
   toolManager: ToolManager;
   filestore: IFileStore;
 }
@@ -90,6 +94,7 @@ export type CreateRunnerDeps = Omit<
   | 'request'
   | 'defaultConnectorId'
   | 'resultStore'
+  | 'skillsStore'
   | 'attachmentStateManager'
   | 'modelProvider'
   | 'promptManager'
@@ -180,11 +185,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     promptState?: PromptStorageState;
     abortSignal?: AbortSignal;
   }): Promise<ScopedRunner> => {
-    // Create skill registry (single entry point for all skill access)
-    const skillRegistry = await runnerDeps.skillServiceStart.getRegistry({ request });
-    const allSkills = await skillRegistry.list();
-
-    const { resultStore, filestore } = createStore({ conversation, skills: allSkills });
+    const { resultStore, filestore, skillsStore } = createStore({ conversation });
 
     const attachmentStateManager = createAttachmentStateManager(conversation?.attachments ?? [], {
       getTypeDefinition: runnerDeps.attachmentsService.getTypeDefinition,
@@ -202,6 +203,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       defaultConnectorId,
       abortSignal,
       resultStore,
+      skillsStore,
       attachmentStateManager,
       stateManager,
       promptManager,

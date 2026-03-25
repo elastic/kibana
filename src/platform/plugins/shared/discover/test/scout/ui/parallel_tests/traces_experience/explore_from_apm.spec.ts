@@ -33,8 +33,7 @@ async function expectTracesExperienceEnabled(
   await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
 }
 
-// Failing: See https://github.com/elastic/kibana/issues/257977
-spaceTest.describe.skip(
+spaceTest.describe(
   'Traces in Discover - Explore from APM',
   {
     tag: [...tags.stateful.all, ...tags.serverless.observability.complete],
@@ -255,13 +254,19 @@ spaceTest.describe.skip(
     );
 
     spaceTest(
-      'Transaction Detail - Waterfall size warning "view in Discover" link opens traces experience',
-      async ({ page, pageObjects }) => {
+      'Transaction Detail - Legacy waterfall size warning "view in Discover" link opens traces experience',
+      async ({ page, pageObjects, scoutSpace }) => {
         const transactionDetailParams = {
           ...APM_TIME_RANGE,
           transactionName: RICH_TRACE.TRANSACTION_NAME,
           transactionType: 'request',
         };
+
+        await spaceTest.step('disable unified waterfall to use legacy waterfall', async () => {
+          await scoutSpace.uiSettings.set({
+            'observability:apmUseUnifiedTraceWaterfall': false,
+          });
+        });
 
         await spaceTest.step('intercept trace API to force exceedsMax condition', async () => {
           await page.route('**/internal/apm/traces/**', async (route) => {
@@ -285,6 +290,51 @@ spaceTest.describe.skip(
           'warning "view in Discover" link opens traces experience',
           async () => {
             await page.testSubj.locator('apmWaterfallSizeWarningDiscoverLink').click();
+            await expectTracesExperienceEnabled(pageObjects);
+            await page.unrouteAll({ behavior: 'wait' });
+            await scoutSpace.uiSettings.unset('observability:apmUseUnifiedTraceWaterfall');
+          }
+        );
+      }
+    );
+
+    spaceTest(
+      'Transaction Detail - Unified waterfall size warning "view in Discover" link opens traces experience',
+      async ({ page, pageObjects }) => {
+        const transactionDetailParams = {
+          ...APM_TIME_RANGE,
+          transactionName: RICH_TRACE.TRANSACTION_NAME,
+          transactionType: 'request',
+        };
+
+        await spaceTest.step(
+          'intercept unified trace API to force exceedsMax condition',
+          async () => {
+            await page.route('**/internal/apm/unified_traces/**', async (route) => {
+              const response = await route.fetch();
+              const body = await response.json();
+              await route.fulfill({
+                response,
+                json: { ...body, traceDocsTotal: body.maxTraceItems + 1 },
+              });
+            });
+          }
+        );
+
+        await spaceTest.step('navigate to APM transaction detail', async () => {
+          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
+            params: transactionDetailParams,
+          });
+        });
+
+        await spaceTest.step('unified waterfall size warning is visible', async () => {
+          await expect(page.testSubj.locator('waterfallSizeWarning')).toBeVisible();
+        });
+
+        await spaceTest.step(
+          'warning "view in Discover" link opens traces experience',
+          async () => {
+            await page.testSubj.locator('waterfallSizeWarningDiscoverLink').click();
             await expectTracesExperienceEnabled(pageObjects);
             await page.unrouteAll({ behavior: 'wait' });
           }

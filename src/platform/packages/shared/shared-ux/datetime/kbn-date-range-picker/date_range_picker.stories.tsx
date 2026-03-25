@@ -10,24 +10,23 @@
 import React, { useCallback, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
+import { fn } from '@storybook/test';
 
 import {
   DateRangePicker,
   type DateRangePickerProps,
   type DateRangePickerOnChangeProps,
 } from './date_range_picker';
-import type { TimeRangeBoundsOption } from './types';
+import type { DateRangePickerSettings, TimeRangeBoundsOption } from './types';
 
 const meta: Meta<DateRangePickerProps> = {
   title: 'Date Time/DateRangePicker',
   component: DateRangePicker,
-  argTypes: {
-    onChange: { action: 'onChange' },
-    onInputChange: { action: 'onInputChange' },
-  },
   args: {
     onChange: action('onChange'),
     onInputChange: action('onInputChange'),
+    onSettingsChange: action('onSettingsChange'),
+    settings: { roundRelativeTime: true },
   },
 };
 
@@ -48,6 +47,7 @@ export const Playground: Story = {
       { start: 'now-3M', end: 'now', label: 'Last 3 months' },
       { start: 'now-1y', end: 'now', label: 'Last 1 year' },
     ],
+    timeZone: 'Europe/Amsterdam',
   },
   render: (args) => <StatefulDateRangePicker {...args} />,
 };
@@ -60,8 +60,24 @@ export const Presets: Story = {
       { start: 'now-1h', end: 'now', label: 'Last 1 hour' },
       { start: 'now/d', end: 'now/d', label: 'Today' },
     ],
+    timeZone: 'Europe/Amsterdam',
     onPresetSave: action('onPresetSave'),
     onPresetDelete: action('onPresetDelete'),
+  },
+  render: (args) => <StatefulDateRangePicker {...args} />,
+};
+
+/** `onRefresh` + `settings.autoRefresh`: Settings refresh row, input append when `isEnabled`, timer when unpaused. */
+export const AutoRefresh: Story = {
+  args: {
+    defaultValue: 'last 15 minutes',
+    settings: {
+      roundRelativeTime: true,
+      autoRefresh: { isEnabled: true, isPaused: false, interval: 10_000 },
+    },
+    showTimeWindowButtons: true,
+    timeZone: 'Europe/Amsterdam',
+    onRefresh: fn(),
   },
   render: (args) => <StatefulDateRangePicker {...args} />,
 };
@@ -72,6 +88,7 @@ function StatefulDateRangePicker(props: DateRangePickerProps) {
   const [invalid, setInvalid] = useState<boolean>(false);
   const [recents, setRecents] = useState<TimeRangeBoundsOption[]>([]);
   const [presets, setPresets] = useState<TimeRangeBoundsOption[]>(props.presets ?? []);
+  const [settings, setSettings] = useState<DateRangePickerSettings>(props.settings);
   const { onChange, onPresetSave, onPresetDelete, onInputChange, ...rest } = props;
 
   const handleOnChange = (args: DateRangePickerOnChangeProps) => {
@@ -126,6 +143,8 @@ function StatefulDateRangePicker(props: DateRangePickerProps) {
       onInputChange={handleInputChange}
       onPresetSave={onPresetSave ? handlePresetSave : undefined}
       onPresetDelete={onPresetDelete ? handlePresetDelete : undefined}
+      settings={settings}
+      onSettingsChange={setSettings}
     />
   );
 }

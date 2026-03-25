@@ -193,7 +193,7 @@ export function TableSortSelect({
 
   const button = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       isSelected={isPopoverOpen}
       onClick={togglePopOver}
