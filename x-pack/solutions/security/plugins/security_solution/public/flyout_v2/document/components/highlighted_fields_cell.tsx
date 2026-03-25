@@ -10,18 +10,18 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getAgentTypeForAgentIdField } from '../../../../common/lib/endpoint/utils/get_agent_type_for_agent_id_field';
-import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
-import { AgentStatus } from '../../../../common/components/endpoint/agents/agent_status';
-import { AGENT_STATUS_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
+import { getAgentTypeForAgentIdField } from '../../../common/lib/endpoint/utils/get_agent_type_for_agent_id_field';
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
+import { AgentStatus } from '../../../common/components/endpoint/agents/agent_status';
+import { AGENT_STATUS_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import {
   HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID,
   HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID,
   HIGHLIGHTED_FIELDS_CELL_TEST_ID,
   HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID,
 } from './test_ids';
-import { isFlyoutLink } from '../../../shared/utils/link_utils';
-import { PreviewLink } from '../../../shared/components/preview_link';
+import { isFlyoutLink } from '../../../flyout/shared/utils/link_utils';
+import { PreviewLink } from '../../../flyout/shared/components/preview_link';
 
 const EMPTY_ARRAY: string[] = [];
 
