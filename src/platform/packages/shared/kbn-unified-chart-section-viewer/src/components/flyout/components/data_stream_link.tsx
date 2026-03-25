@@ -16,8 +16,8 @@ interface DataStreamLinkProps {
 }
 
 /**
- * Presentational component that renders a data stream name as a navigable link
- * or plain text. URL resolution and permission gating are delegated to the
+ * Renders a data stream name as a navigable link or plain text.
+ * URL resolution and permission gating are delegated to the
  * `getStreamUrl` callback provided by the consumer.
  */
 export const DataStreamLink = ({ dataStream, getStreamUrl }: DataStreamLinkProps) => {

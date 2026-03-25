@@ -62,6 +62,11 @@ spaceTest.describe(
           await expect(descriptionList).toContainText(testData.DATA_VIEW_NAME);
         });
 
+        await spaceTest.step('data stream name renders as plain text (no link)', async () => {
+          await expect(page.getByTestId('metricsDataStreamText')).toBeVisible();
+          await expect(page.getByTestId('metricsDataStreamLink')).toHaveCount(0);
+        });
+
         await spaceTest.step('Overview tab has no a11y violations', async () => {
           const { violations } = await page.checkA11y({
             include: ['[data-test-subj="metricsExperienceFlyoutOverviewTabContent"]'],
