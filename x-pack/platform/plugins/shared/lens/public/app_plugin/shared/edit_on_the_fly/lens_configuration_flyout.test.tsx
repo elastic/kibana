@@ -163,6 +163,7 @@ describe('LensEditConfigurationFlyout', () => {
           <LensEditConfigurationFlyout
             attributes={lensAttributes}
             updatePanelState={jest.fn()}
+            updateSuggestion={jest.fn()}
             coreStart={mockCoreStart}
             startDependencies={startDependencies}
             closeFlyout={jest.fn()}
@@ -226,14 +227,14 @@ describe('LensEditConfigurationFlyout', () => {
     expect(closeFlyoutSpy).toHaveBeenCalled();
   });
 
-  it('should call the updatePanelState callback if cancel button is clicked', async () => {
-    const updatePanelStateSpy = jest.fn();
+  it('should call the updateSuggestion callback if cancel button is clicked', async () => {
+    const updateSuggestionSpy = jest.fn();
     await renderConfigFlyout({
-      updatePanelState: updatePanelStateSpy,
+      updateSuggestion: updateSuggestionSpy,
     });
     expect(screen.getByTestId('lns-layerPanel-0')).toBeInTheDocument();
     await userEvent.click(screen.getByTestId('cancelFlyoutButton'));
-    expect(updatePanelStateSpy).toHaveBeenCalled();
+    expect(updateSuggestionSpy).toHaveBeenCalledWith(lensAttributes);
   });
 
   it('should call the updateByRefInput callback with savedObjectId and previous attributes if cancel button is clicked and savedObjectId exists', async () => {
@@ -280,19 +281,21 @@ describe('LensEditConfigurationFlyout', () => {
       { esql: 'from index1 | limit 10' }
     );
     await userEvent.click(screen.getByTestId('applyFlyoutButton'));
-    expect(onApplyCbSpy).toHaveBeenCalledWith({
-      title: 'test',
-      visualizationType: 'testVis',
-      state: {
-        datasourceStates: { formBased: mockFormBasedState },
-        visualization: {},
+    expect(onApplyCbSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'test',
+        visualizationType: 'testVis',
+        state: {
+          datasourceStates: { formBased: mockFormBasedState },
+          visualization: {},
+          filters: [],
+          query: { esql: 'from index1 | limit 10' },
+        },
         filters: [],
         query: { esql: 'from index1 | limit 10' },
-      },
-      filters: [],
-      query: { esql: 'from index1 | limit 10' },
-      references: [],
-    });
+        references: expect.any(Array),
+      })
+    );
   });
 
   it('should not display the editor if query is not text based', async () => {

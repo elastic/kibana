@@ -58,7 +58,7 @@ export function LensEditConfigurationFlyout({
   attributes,
   coreStart,
   startDependencies,
-  updatePanelState,
+  updatePanelState: _updatePanelState,
   updateSuggestion,
   setCurrentAttributes,
   closeFlyout,
@@ -110,12 +110,22 @@ export function LensEditConfigurationFlyout({
   const attributesChanged = useMemo<boolean>(() => {
     if (isNewPanel) return true;
 
+    const previousAttrs = previousAttributes.current;
+    const previousDatasourceId = getActiveDatasourceIdFromDoc(previousAttrs) as LensDatasourceId;
+
+    if (previousDatasourceId == null || datasourceId == null) {
+      return true;
+    }
+
+    if (previousDatasourceId !== datasourceId) {
+      return true;
+    }
+
     const datasource = datasourceMap[datasourceId];
 
     const rawState = datasourceStates[datasourceId].state;
     const currentPersistable = rawState ? datasource.getPersistableState(rawState) : null;
 
-    const previousAttrs = previousAttributes.current;
     const previousDsState = previousAttrs.state.datasourceStates[datasourceId];
     // Only textBased stores private state (e.g. indexPatternRefs) in attributes; normalize to persistable for comparison.
     // formBased attributes are already persistable and getPersistableState expects private state.
@@ -175,25 +185,8 @@ export function LensEditConfigurationFlyout({
   const onCancel = useCallback(() => {
     const previousAttrs = previousAttributes.current;
     if (attributesChanged) {
-      // Use the datasourceId from the previous attributes, not the current one
-      // This is important when canceling after a datasource conversion (e.g., formBased -> textBased)
-      const previousDatasourceId = getActiveDatasourceIdFromDoc(previousAttrs) as LensDatasourceId;
-      if (previousAttrs.visualizationType === visualization.activeId) {
-        const currentDatasourceState = datasourceMap[previousDatasourceId].injectReferencesToLayers
-          ? datasourceMap[previousDatasourceId]?.injectReferencesToLayers?.(
-              previousAttrs.state.datasourceStates[previousDatasourceId],
-              previousAttrs.references
-            )
-          : previousAttrs.state.datasourceStates[previousDatasourceId];
-        updatePanelState?.(
-          currentDatasourceState,
-          previousAttrs.state.visualization,
-          undefined,
-          previousDatasourceId
-        );
-      } else {
-        updateSuggestion?.(previousAttrs);
-      }
+      // Full snapshot avoids inconsistent mergeToNewDoc (ES|QL query + form datasource) from updatePanelState
+      updateSuggestion?.(previousAttrs);
       if (savedObjectId) {
         updateByRefInput?.(savedObjectId, previousAttrs);
       }
@@ -205,10 +198,7 @@ export function LensEditConfigurationFlyout({
   }, [
     attributesChanged,
     closeFlyout,
-    visualization.activeId,
     savedObjectId,
-    datasourceMap,
-    updatePanelState,
     updateSuggestion,
     updateByRefInput,
     onCancelCallback,
@@ -362,14 +352,14 @@ export function LensEditConfigurationFlyout({
     setIsInlineFlyoutVisible
   );
 
-  const onKeyDown = (e: KeyboardEvent) => {
-    if (e.key === keys.ESCAPE) {
-      closeFlyout?.();
-      setIsInlineFlyoutVisible(false);
-      // Remove the user's preferred chart type from sessionStorage
-      deleteUserChartTypeFromSessionStorage();
-    }
-  };
+  const onKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === keys.ESCAPE) {
+        onCancel();
+      }
+    },
+    [onCancel]
+  );
 
   const layerIds = useMemo(() => {
     return activeVisualization && visualization.state

@@ -56,7 +56,7 @@ async function sha256(str: string) {
  * @param options.allowNoIndex - Whether to allow creating a DataView for non-existent indices
  * @param options.skipFetchFields - Whether to skip fetching fields for performance reasons
  * @param options.createNewInstanceEvenIfCachedOneAvailable - Forces creation of a new instance by clearing the cached DataView instance and cached time field lookup for the query
- * @param options.id - Explicit DataView ID. When provided, this ID is used as-is instead of generating one via SHA-256. Useful when the caller already knows the ID (e.g. from a persisted ad-hoc DataView spec) and wants the DataViewService cache to be populated under that exact key.
+ * @param options.id - Explicit DataView ID for ES|QL ad-hoc specs. When provided, this ID is used as-is unless it resolves to a persisted saved data view via `dataViews.get`, in which case a hash id is used instead to avoid replacing the saved cache entry.
  * @param options.idPrefix - Custom prefix for the DataView ID (defaults to 'esql'). Use a different prefix to avoid cache collisions between consumers.
  * @param http - Optional HTTP service for fetching time field information. If not provided, no time field detection is performed
  *
@@ -103,8 +103,23 @@ export async function getESQLAdHocDataview({
 
   const indexPattern = getIndexPatternFromESQLQuery(query);
   const prefix = options?.idPrefix ?? 'esql';
+
+  // Do not use options.id when it refers to a persisted saved data view: dataViews.create would
+  // store an ES|QL ad-hoc instance under that id and replace the cache (isPersisted becomes false).
+  let explicitId = options?.id;
+  if (explicitId && typeof dataViewsService.get === 'function') {
+    try {
+      const resolved = await dataViewsService.get(explicitId);
+      if (resolved && typeof resolved.isPersisted === 'function' && resolved.isPersisted()) {
+        explicitId = undefined;
+      }
+    } catch {
+      // id not loadable (true ad-hoc) — keep explicitId
+    }
+  }
+
   const dataViewId =
-    options?.id ??
+    explicitId ??
     (await sha256(
       timeFieldName ? `${prefix}-${indexPattern}-${timeFieldName}` : `${prefix}-${indexPattern}`
     ));

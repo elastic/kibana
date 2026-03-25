@@ -12,10 +12,10 @@ import { extractReferencesFromState } from '../../../utils';
 import { useEditorFrameService } from '../../../editor_frame_service/editor_frame_service_context';
 
 export const useCurrentAttributes = ({
-  textBasedMode,
   initialAttributes,
 }: {
   initialAttributes?: TypedLensSerializedState['attributes'];
+  /** Unused; kept so callers can pass through without breaking. References use extractReferencesFromState in form and text modes. */
   textBasedMode?: boolean;
 }) => {
   const { visualizationMap, datasourceMap } = useEditorFrameService();
@@ -38,18 +38,18 @@ export const useCurrentAttributes = ({
         return [id, dsState];
       })
     );
-    // as ES|QL queries are using adHoc dataviews, we don't want to pass references
+    const activeDatasources = Object.keys(datasourceStates).reduce(
+      (acc, id) => ({
+        ...acc,
+        [id]: datasourceMap[id],
+      }),
+      {}
+    );
     const references =
-      !textBasedMode && visualization.state
+      visualization.state && activeVisualization
         ? extractReferencesFromState({
             activeDatasourceId,
-            activeDatasources: Object.keys(datasourceStates).reduce(
-              (acc, id) => ({
-                ...acc,
-                [id]: datasourceMap[id],
-              }),
-              {}
-            ),
+            activeDatasources,
             datasourceStates,
             visualizationState: visualization.state,
             activeVisualization,
@@ -67,15 +67,7 @@ export const useCurrentAttributes = ({
       visualizationType: activeVisualization.id,
     };
     return attrs;
-  }, [
-    activeDatasourceId,
-    activeVisualization,
-    datasourceMap,
-    datasourceStates,
-    initialAttributes,
-    textBasedMode,
-    visualization.state,
-  ]);
+  }, [activeDatasourceId, activeVisualization, datasourceMap, datasourceStates, initialAttributes, visualization.state]);
 
   return currentAttributes;
 };

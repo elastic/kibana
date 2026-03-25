@@ -118,9 +118,11 @@ export function ESQLEditor({
   const currentAttributesRef = useRef(currentAttributes);
   currentAttributesRef.current = currentAttributes;
 
+  // Only use `state.adHocDataViews` when it has entries; `{}` is truthy but yields [] and forces a temp ad-hoc data view.
+  const stateAdHoc = attributes?.state.adHocDataViews;
   const adHocDataViews =
-    attributes && attributes.state.adHocDataViews
-      ? Object.values(attributes.state.adHocDataViews)
+    stateAdHoc && Object.keys(stateAdHoc).length > 0
+      ? Object.values(stateAdHoc)
       : Object.values(framePublicAPI.dataViews.indexPatterns).map((index) => index.spec);
 
   const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
@@ -157,6 +159,9 @@ export function ESQLEditor({
 
   const runQuery = useCallback(
     async (q: AggregateQuery, abortController?: AbortController, shouldUpdateAttrs?: boolean) => {
+      const textState = currentAttributesRef.current?.state?.datasourceStates?.textBased;
+      const preferredSavedDataViewId = textState?.layers?.[layerId]?.index;
+
       const attrs = await getSuggestions(
         q,
         data,
@@ -170,7 +175,8 @@ export function ESQLEditor({
         setDataGridAttrs,
         esqlVariables,
         shouldUpdateAttrs,
-        currentAttributesRef.current
+        currentAttributesRef.current,
+        preferredSavedDataViewId
       );
       if (attrs) {
         setCurrentAttributes?.(attrs);
@@ -189,6 +195,7 @@ export function ESQLEditor({
       visualizationMap,
       adHocDataViews,
       esqlVariables,
+      layerId,
       setCurrentAttributes,
       updateSuggestion,
     ]

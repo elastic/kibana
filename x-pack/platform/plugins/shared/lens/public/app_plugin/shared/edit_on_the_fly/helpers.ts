@@ -62,24 +62,82 @@ export const getGridAttrs = async (
   http: CoreStart['http'],
   uiSettings: IUiSettingsClient,
   abortController?: AbortController,
-  esqlVariables: ESQLControlVariable[] = []
+  esqlVariables: ESQLControlVariable[] = [],
+  preferredSavedDataViewId?: string
 ): Promise<ESQLDataGridAttrs> => {
   const indexPattern = getIndexPatternFromESQLQuery(query.esql);
-  const dataViewSpec = adHocDataViews.find((adHoc) => {
-    return adHoc.title === indexPattern;
-  });
 
-  // Fall back to getESQLAdHocDataview when the spec has no timeFieldName,
-  // which detects the time field via HTTP (with a promise cache to avoid
-  // redundant requests).
-  const dataView = dataViewSpec?.timeFieldName
-    ? await data.dataViews.create(dataViewSpec)
-    : await getESQLAdHocDataview({
+  let dataView: DataView | undefined;
+
+  // When the text-based layer already references a saved data view (e.g. form → ES|QL conversion),
+  // use it when the FROM clause still targets that data view's index pattern. Otherwise
+  // getESQLAdHocDataview creates a temporary ES|QL data view and getLensAttributesFromSuggestion
+  // persists it in state.adHocDataViews, which marks the chart as "Temporary" in the picker.
+  if (preferredSavedDataViewId) {
+    try {
+      const candidate = await data.dataViews.get(preferredSavedDataViewId);
+      if (
+        candidate &&
+        typeof candidate.isPersisted === 'function' &&
+        candidate.isPersisted() &&
+        candidate.title === indexPattern
+      ) {
+        dataView = candidate;
+      }
+    } catch {
+      // ignore — fall back to ad-hoc resolution below
+    }
+  }
+
+  if (!dataView) {
+    const dataViewSpec = adHocDataViews.find((adHoc) => {
+      return adHoc.title === indexPattern;
+    });
+
+    if (dataViewSpec?.timeFieldName) {
+      dataView = await data.dataViews.create(dataViewSpec);
+    } else if (dataViewSpec?.id) {
+      // Spec from the frame often carries the saved data view id but may omit timeFieldName.
+      // Load the persisted instance directly instead of creating an ES|QL ad-hoc view with that id.
+      try {
+        const bySpecId = await data.dataViews.get(dataViewSpec.id);
+        if (
+          bySpecId &&
+          typeof bySpecId.isPersisted === 'function' &&
+          bySpecId.isPersisted() &&
+          bySpecId.title === indexPattern
+        ) {
+          dataView = bySpecId;
+        }
+      } catch {
+        // ignore — fall through to getESQLAdHocDataview
+      }
+    }
+
+    if (!dataView) {
+      // Never pass a saved data view id into getESQLAdHocDataview: it calls dataViews.create with
+      // type ESQL_TYPE and that id, which replaces the in-memory DataView cache entry so
+      // isPersisted() becomes false for the same id (top nav / picker then shows "Temporary").
+      let esqlOptionalId: string | undefined = dataViewSpec?.id;
+      if (dataViewSpec?.id) {
+        try {
+          const existingForId = await data.dataViews.get(dataViewSpec.id);
+          if (existingForId && typeof existingForId.isPersisted === 'function' && existingForId.isPersisted()) {
+            esqlOptionalId = undefined;
+          }
+        } catch {
+          // keep esqlOptionalId for true ad-hoc specs whose id is not a saved object
+        }
+      }
+
+      dataView = await getESQLAdHocDataview({
         dataViewsService: data.dataViews,
         query: query.esql,
-        options: { skipFetchFields: true, id: dataViewSpec?.id },
+        options: { skipFetchFields: true, id: esqlOptionalId },
         http,
       });
+    }
+  }
 
   const filter = getDSLFilter(data.query, uiSettings, dataView.timeFieldName);
   const timezone = uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
@@ -123,7 +181,8 @@ export const getSuggestions = async (
   setDataGridAttrs?: (attrs: ESQLDataGridAttrs) => void,
   esqlVariables: ESQLControlVariable[] = [],
   shouldUpdateAttrs = true,
-  preferredVisAttributes?: TypedLensSerializedState['attributes']
+  preferredVisAttributes?: TypedLensSerializedState['attributes'],
+  preferredSavedDataViewId?: string
 ) => {
   try {
     const { dataView, columns, rows } = await getGridAttrs(
@@ -133,7 +192,8 @@ export const getSuggestions = async (
       http,
       uiSettings,
       abortController,
-      esqlVariables
+      esqlVariables,
+      preferredSavedDataViewId
     );
     const updatedWithVariablesColumns = esqlVariables.length
       ? mapVariableToColumn(query.esql, esqlVariables, columns)

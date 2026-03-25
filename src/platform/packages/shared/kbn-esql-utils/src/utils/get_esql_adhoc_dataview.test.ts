@@ -93,6 +93,26 @@ describe('getESQLAdHocDataview', () => {
 
       expect(result.id).toBe('explicit-id');
     });
+
+    it('should ignore options.id when it resolves to a persisted saved data view', async () => {
+      const dataViewsWithGet = {
+        ...createMockDataViewsService(),
+        get: jest.fn().mockResolvedValue({
+          isPersisted: () => true,
+          toSpec: () => ({ id: 'saved-so-id', title: 'logs-*' }),
+        }),
+      } as unknown as DataViewsPublicPluginStart;
+
+      await getESQLAdHocDataview({
+        dataViewsService: dataViewsWithGet,
+        query: uniqueQuery(),
+        options: { id: 'saved-so-id' },
+      });
+
+      const createArg = (dataViewsWithGet.create as jest.Mock).mock.calls[0][0];
+      expect(createArg.id).not.toBe('saved-so-id');
+      expect(createArg.id.length).toBe(64);
+    });
   });
 
   describe('DataView spec', () => {

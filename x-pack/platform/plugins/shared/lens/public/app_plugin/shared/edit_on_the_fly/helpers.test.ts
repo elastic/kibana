@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { getESQLResults, formatESQLColumns, getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -198,6 +199,15 @@ describe('Lens inline editing helpers', () => {
       get: jest.fn(),
     } as unknown as IUiSettingsClient;
 
+    beforeEach(() => {
+      dataViews.get.mockImplementation(() =>
+        Promise.resolve({
+          title: '',
+          fields: [],
+        } as unknown as DataView)
+      );
+    });
+
     it('returns the columns if the array is not empty in the response', async () => {
       mockFetchData.mockImplementation(() => {
         return {
@@ -286,6 +296,90 @@ describe('Lens inline editing helpers', () => {
       expect(dataViews.create).not.toHaveBeenCalled();
     });
 
+    it('uses persisted data view from matching spec id when timeFieldName is missing', async () => {
+      mockFetchData.mockImplementation(() => ({
+        response: { columns: queryResponseColumns, values: [] },
+      }));
+      mockGetESQLAdHocDataview.mockClear();
+      dataViews.create.mockClear();
+
+      const persisted = {
+        id: 'saved-pattern-id',
+        title: 'index1',
+        timeFieldName: '@timestamp',
+        isPersisted: () => true,
+      } as unknown as DataView;
+      dataViews.get.mockResolvedValue(persisted);
+
+      const specWithoutTimeField = [
+        {
+          id: 'saved-pattern-id',
+          title: 'index1',
+          sourceFilters: [],
+          fieldFormats: {},
+          runtimeFieldMap: {},
+          fieldAttrs: {},
+          allowNoIndex: false,
+          name: 'index1',
+        },
+      ];
+
+      const gridAttributes = await getGridAttrs(
+        query,
+        specWithoutTimeField,
+        startDependencies.data,
+        startDependencies.http,
+        uiSettingsMock
+      );
+
+      expect(dataViews.get).toHaveBeenCalledWith('saved-pattern-id');
+      expect(mockGetESQLAdHocDataview).not.toHaveBeenCalled();
+      expect(dataViews.create).not.toHaveBeenCalled();
+      expect(gridAttributes.dataView).toBe(persisted);
+    });
+
+    it('does not pass persisted data view id to getESQLAdHocDataview (avoids cache clobber)', async () => {
+      mockFetchData.mockImplementation(() => ({
+        response: { columns: queryResponseColumns, values: [] },
+      }));
+      mockGetESQLAdHocDataview.mockResolvedValue({
+        timeFieldName: '@timestamp',
+      });
+
+      const specWithSavedId = [
+        {
+          id: 'saved-pattern-id',
+          title: 'index1',
+          sourceFilters: [],
+          fieldFormats: {},
+          runtimeFieldMap: {},
+          fieldAttrs: {},
+          allowNoIndex: false,
+          name: 'index1',
+        },
+      ];
+
+      dataViews.get.mockResolvedValue({
+        id: 'saved-pattern-id',
+        title: 'different-index',
+        isPersisted: () => true,
+      } as unknown as DataView);
+
+      await getGridAttrs(
+        query,
+        specWithSavedId,
+        startDependencies.data,
+        startDependencies.http,
+        uiSettingsMock
+      );
+
+      expect(mockGetESQLAdHocDataview).toHaveBeenCalledWith(
+        expect.objectContaining({
+          options: { skipFetchFields: true, id: undefined },
+        })
+      );
+    });
+
     it('falls back to getESQLAdHocDataview with id undefined when no spec matches', async () => {
       mockFetchData.mockImplementation(() => ({
         response: { columns: queryResponseColumns, values: [] },
@@ -321,6 +415,38 @@ describe('Lens inline editing helpers', () => {
         expect.objectContaining({ timeFieldName: '@timestamp' })
       );
       expect(mockGetESQLAdHocDataview).not.toHaveBeenCalled();
+    });
+
+    it('uses persisted data view from preferredSavedDataViewId when FROM matches title', async () => {
+      mockFetchData.mockImplementation(() => ({
+        response: { columns: queryResponseColumns, values: [] },
+      }));
+      mockGetESQLAdHocDataview.mockClear();
+      dataViews.create.mockClear();
+
+      const persisted = {
+        id: 'saved-dv-id',
+        title: 'index1',
+        timeFieldName: '@timestamp',
+        isPersisted: () => true,
+      } as unknown as DataView;
+      dataViews.get.mockResolvedValue(persisted);
+
+      const gridAttributes = await getGridAttrs(
+        query,
+        [],
+        startDependencies.data,
+        startDependencies.http,
+        uiSettingsMock,
+        undefined,
+        [],
+        'saved-dv-id'
+      );
+
+      expect(dataViews.get).toHaveBeenCalledWith('saved-dv-id');
+      expect(mockGetESQLAdHocDataview).not.toHaveBeenCalled();
+      expect(dataViews.create).not.toHaveBeenCalled();
+      expect(gridAttributes.dataView).toBe(persisted);
     });
   });
 });

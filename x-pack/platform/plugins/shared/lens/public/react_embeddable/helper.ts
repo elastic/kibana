@@ -252,9 +252,15 @@ export function transformToApiConfig(state: StrippedLensState): LensSerializedAP
     visualizationType: attributes.visualizationType ?? LENS_UNKNOWN_VIS,
   });
 
+  // toAPIFormat returns chart API shape + filters/query; it does not carry Lens internal
+  // index-pattern references (see filtersAndQueryToApiFormat). Without merging them back,
+  // dashboard serializeState loses datasource refs — especially for ES|QL / text-based charts.
   return {
     ...state,
-    attributes: apiConfigAttributes,
+    attributes: {
+      ...apiConfigAttributes,
+      references: attributes.references ?? [],
+    },
   };
 }
 

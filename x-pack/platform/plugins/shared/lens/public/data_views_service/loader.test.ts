@@ -466,13 +466,46 @@ describe('loader', () => {
           query: 'FROM logs-*',
           options: {
             skipFetchFields: true,
-            id: 'dv1',
             createNewInstanceEvenIfCachedOneAvailable: true,
           },
           http: mockHttp,
         })
       );
+      expect(mockGetESQLAdHocDataview.mock.calls[0][0].options).not.toHaveProperty('id');
       expect(result.dv1).toEqual({ id: 'dv1', title: 'logs-*', timeFieldName: '@timestamp' });
+    });
+
+    it('should hydrate from persisted data view toSpec when layer.index is a saved id with timeFieldName', async () => {
+      const adHocDataViews: Record<string, DataViewSpec> = {};
+      const textBasedState = {
+        layers: {
+          layer1: { columns: [], index: 'saved-dv', query: { esql: 'FROM logs-*' } },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      const dataViewsWithGet = mockDataViewsService() as unknown as DataViewsContract;
+      dataViewsWithGet.get = jest.fn().mockResolvedValue({
+        isPersisted: () => true,
+        toSpec: () => ({
+          id: 'saved-dv',
+          title: 'logs-*',
+          timeFieldName: '@timestamp',
+        }),
+      });
+
+      const result = await ensureESQLTimeFieldOnAdHocDataViews({
+        adHocDataViews,
+        textBasedState,
+        dataViewsService: dataViewsWithGet,
+        http: mockHttp,
+      });
+
+      expect(mockGetESQLAdHocDataview).not.toHaveBeenCalled();
+      expect(result['saved-dv']).toEqual({
+        id: 'saved-dv',
+        title: 'logs-*',
+        timeFieldName: '@timestamp',
+      });
     });
 
     it('should use freshDataView.id as the key when layer.index is falsy', async () => {
@@ -530,6 +563,7 @@ describe('loader', () => {
       expect(mockGetESQLAdHocDataview).toHaveBeenCalledWith(
         expect.objectContaining({ query: 'FROM metrics-*' })
       );
+      expect(mockGetESQLAdHocDataview.mock.calls[0][0].options).not.toHaveProperty('id');
       expect(result.dv1).toEqual(adHocDataViews.dv1);
       expect(result.dv2.timeFieldName).toBe('@timestamp');
     });
