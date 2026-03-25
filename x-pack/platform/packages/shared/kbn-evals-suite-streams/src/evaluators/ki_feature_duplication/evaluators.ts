@@ -35,7 +35,7 @@ export const createSemanticUniquenessEvaluator = ({
     const allKIs = runs.flatMap((run) => run.features);
 
     if (runs.length === 0 || allKIs.length === 0) {
-      return { score: 1, explanation: 'No features to evaluate' };
+      return { score: null, explanation: 'Inconclusive: no features to evaluate' };
     }
 
     const kisUniqueById = uniqBy(allKIs, (ki) => ki.id.toLowerCase());
@@ -132,7 +132,10 @@ export const createIdConsistencyEvaluator = ({
     const allFeatures = runs.flatMap((run) => run.features);
 
     if (runs.length <= 1 || allFeatures.length === 0) {
-      return { score: 1, explanation: 'Not enough runs to evaluate id consistency' };
+      return {
+        score: null,
+        explanation: 'Inconclusive: not enough runs to evaluate id consistency',
+      };
     }
 
     const featuresById = new Map<string, BaseFeature[]>();
@@ -150,8 +153,8 @@ export const createIdConsistencyEvaluator = ({
 
     if (multiOccurrenceEntries.length === 0) {
       return {
-        score: 1,
-        explanation: 'No id appears in more than one run; id consistency cannot be assessed',
+        score: null,
+        explanation: 'Inconclusive: no id appears in more than one run',
       };
     }
 
@@ -236,14 +239,14 @@ export const createIdConsistencyEvaluator = ({
  * ids don't share the same fingerprint (type + subtype + properties).
  * Score = 1 - (missed_duplicates / unique_by_id).
  */
-export const kiDuplicationEvaluator = {
-  name: 'ki_duplication',
+export const kiFeatureDuplicationEvaluator = {
+  name: 'ki_feature_duplication',
   kind: 'CODE' as const,
   evaluate: async ({ output }: { output: { runs?: Array<{ features: BaseFeature[] }> } }) => {
     const allKIs = output.runs?.flatMap((run) => run.features) || [];
 
     if (allKIs.length === 0) {
-      return { score: 1, explanation: 'No KIs to evaluate' };
+      return { score: null, explanation: 'Inconclusive: no features to evaluate' };
     }
 
     const uniqueById = uniqBy(allKIs, (ki) => ki.id.toLowerCase());

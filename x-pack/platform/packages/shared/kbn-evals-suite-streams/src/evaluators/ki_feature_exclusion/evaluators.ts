@@ -38,8 +38,15 @@ export const createExcludeSemanticEvaluator = ({
   evaluate: async ({
     output,
   }: {
-    output: ExcludeExperimentOutput & { traceId: string | null };
+    output: (ExcludeExperimentOutput & { traceId: string | null }) | null;
   }) => {
+    if (!output) {
+      return {
+        score: null,
+        explanation: 'Inconclusive: experiment produced no output',
+      };
+    }
+
     const { initialFeatures, excludedFeatures, followUpRuns } = output;
 
     if (excludedFeatures.length === 0) {
@@ -51,7 +58,7 @@ export const createExcludeSemanticEvaluator = ({
     }
 
     if (followUpRuns.length === 0) {
-      return { score: 1, explanation: 'Nothing to evaluate' };
+      return { score: null, explanation: 'Inconclusive: no follow-up runs to evaluate' };
     }
 
     const allFollowUpFeatures = followUpRuns.flatMap((run) => run.rawFeatures);

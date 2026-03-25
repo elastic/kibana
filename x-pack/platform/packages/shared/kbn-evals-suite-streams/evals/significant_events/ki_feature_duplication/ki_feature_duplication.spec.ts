@@ -18,7 +18,7 @@ import { evaluate } from '../../../src/evaluate';
 import { KI_FEATURE_DUPLICATION_DATASETS } from './ki_feature_duplication_datasets';
 import { indexSynthtraceScenario } from '../../synthtrace_helpers';
 import {
-  kiDuplicationEvaluator,
+  kiFeatureDuplicationEvaluator,
   createSemanticUniquenessEvaluator,
   createIdConsistencyEvaluator,
 } from '../../../src/evaluators/ki_feature_duplication/evaluators';
@@ -136,7 +136,7 @@ evaluate.describe('KI feature duplication (harness)', () => {
               },
             },
             [
-              kiDuplicationEvaluator,
+              kiFeatureDuplicationEvaluator,
               createSemanticUniquenessEvaluator({ inferenceClient: evaluatorInferenceClient }),
               createIdConsistencyEvaluator({ inferenceClient: evaluatorInferenceClient }),
               evaluators.traceBasedEvaluators.inputTokens,
