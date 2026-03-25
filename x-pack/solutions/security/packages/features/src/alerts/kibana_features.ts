@@ -1,0 +1,74 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import { i18n } from '@kbn/i18n';
+import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import {
+  ALERTS_API_ALL,
+  ALERTS_API_READ,
+  APP_ID,
+  LEGACY_NOTIFICATIONS_ID,
+  ALERTS_FEATURE_ID,
+  SERVER_APP_ID,
+  ALERTS_UI_READ,
+  ALERTS_UI_EDIT,
+  INITIALIZE_SECURITY_SOLUTION,
+  USERS_API_READ,
+} from '../constants';
+import { type BaseKibanaFeatureConfig } from '../types';
+
+const alertingFeatures = [LEGACY_NOTIFICATIONS_ID, ...SECURITY_SOLUTION_RULE_TYPE_IDS].map(
+  (ruleTypeId) => ({
+    ruleTypeId,
+    consumers: [SERVER_APP_ID],
+  })
+);
+
+export const getAlertsBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
+  id: ALERTS_FEATURE_ID,
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionRolesAlertsTitle',
+    {
+      defaultMessage: 'Alerts',
+    }
+  ),
+  order: 1100,
+  category: DEFAULT_APP_CATEGORIES.security,
+  app: [ALERTS_FEATURE_ID, 'kibana', 'securitySolution'],
+  catalogue: [APP_ID],
+  alerting: alertingFeatures,
+  privileges: {
+    all: {
+      app: ['securitySolution', ALERTS_FEATURE_ID, 'kibana'],
+      catalogue: [APP_ID],
+      savedObject: {
+        all: [],
+        read: [DATA_VIEW_SAVED_OBJECT_TYPE],
+      },
+      alerting: {
+        alert: { all: alertingFeatures },
+      },
+      ui: [ALERTS_UI_READ, ALERTS_UI_EDIT],
+      api: ['rac', INITIALIZE_SECURITY_SOLUTION, ALERTS_API_ALL, ALERTS_API_READ, USERS_API_READ],
+    },
+    read: {
+      app: [ALERTS_FEATURE_ID, 'kibana', 'securitySolution'],
+      catalogue: [APP_ID],
+      savedObject: {
+        all: [],
+        read: [DATA_VIEW_SAVED_OBJECT_TYPE],
+      },
+      alerting: {
+        alert: { read: alertingFeatures },
+      },
+      ui: [ALERTS_UI_READ],
+      api: ['rac', INITIALIZE_SECURITY_SOLUTION, ALERTS_API_READ, USERS_API_READ],
+    },
+  },
+});

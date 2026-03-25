@@ -34,6 +34,14 @@ export class WorkflowTemplatingEngine {
         return value;
       }
     });
+
+    // register entries filter that converts an object into an array of {key, value} pairs
+    this.engine.registerFilter('entries', (value: unknown): unknown => {
+      if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+        return value;
+      }
+      return Object.entries(value).map(([k, v]) => ({ key: k, value: v }));
+    });
   }
 
   public render<T>(obj: T, context: Record<string, unknown>): T {
