@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
 import type { AESOPRouteDependencies } from './register_aesop_routes';
+import type { ProposedSkillDocument } from '../../lib/aesop/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import {
@@ -103,8 +104,7 @@ export function registerRejectSkillRoute({ router, logger }: AESOPRouteDependenc
             throw error;
           }
 
-          // TODO: Replace with a proper ProposedSkill type when moving beyond spike
-          const skill = skillDoc._source as any;
+          const skill = skillDoc._source as ProposedSkillDocument;
 
           // 2. Validate skill is not already deployed
           if (skill.deployment?.deployed) {

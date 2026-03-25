@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
 import type { AESOPRouteDependencies } from './register_aesop_routes';
+import type { ProposedSkillDocument } from '../../lib/aesop/types';
 import { sanitizeSkillMarkdown } from '../../lib/aesop/security/input_sanitization';
 
 const redeploySkillParamsSchema = z.object({
@@ -74,7 +75,7 @@ export function registerRedeploySkillRoute({ router, logger }: AESOPRouteDepende
             id: skillId,
           });
 
-          const skill = skillDoc._source as any;
+          const skill = skillDoc._source as ProposedSkillDocument;
           const agentBuilderSkillId = skill.deployment?.agent_builder_skill_id || `aesop-${skillId}`;
           const toolIds = inferTools(skill.markdown || '').slice(0, MAX_TOOLS);
 
