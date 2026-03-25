@@ -14,6 +14,7 @@ import { sharepointOnlineDataSource } from './sharepoint_online';
 import { slackDataSource } from './slack';
 import { jiraDataSource } from './jira-cloud';
 import { azureBlobDataSource } from './azure_blob';
+import { confluenceCloudDataSource } from './confluence_cloud';
 import { gmailDataSource } from './gmail';
 import { firecrawlDataSource } from './firecrawl';
 import { salesforceDataSource } from './salesforce';
@@ -35,6 +36,7 @@ export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(slackDataSource);
   dataCatalog.register(jiraDataSource);
   dataCatalog.register(azureBlobDataSource);
+  dataCatalog.register(confluenceCloudDataSource);
   dataCatalog.register(gmailDataSource);
   dataCatalog.register(firecrawlDataSource);
   dataCatalog.register(salesforceDataSource);
