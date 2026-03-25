@@ -13,15 +13,16 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import type {
   RunStepCommand,
   RunWorkflowResponseDto,
+  UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowListDto,
 } from '@kbn/workflows';
-import { useRunWorkflow } from '@kbn/workflows-ui';
-import type { WorkflowPreview } from '../../../../common/lib/export';
-import { rewriteWorkflowReferences } from '../../../../common/lib/export';
+import type { BulkCreateWorkflowsResponse } from '@kbn/workflows-ui';
+import { useRunWorkflow, useWorkflowsApi } from '@kbn/workflows-ui';
+import { rewriteWorkflowReferences } from '../../../common/lib/export/rewrite_workflow_references';
+import type { WorkflowPreview } from '../../../common/lib/export/workflow_preview';
 import { parseImportFile } from '../../../features/import_workflows/lib/parse_import_file';
 import type { WorkflowTriggerTab } from '../../../features/run_workflow/ui/types';
-import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 
 type HttpError = IHttpFetchError<ResponseErrorBody>;
@@ -50,7 +51,6 @@ export interface PreflightImportResult {
 export interface ImportWorkflowsResult {
   created: WorkflowDetailDto[];
   failed: Array<{ index: number; id: string; error: string }>;
-  parseErrors: string[];
 }
 
 export interface ImportWorkflowsParams {
@@ -69,16 +69,17 @@ interface OptimisticContext {
 
 export function useWorkflowActions() {
   const queryClient = useQueryClient();
-  const { http } = useKibana().services;
+  const api = useWorkflowsApi();
   const telemetry = useTelemetry();
 
-  const updateWorkflow = useMutation<void, HttpError, UpdateWorkflowParams, OptimisticContext>({
+  const updateWorkflow = useMutation<
+    UpdatedWorkflowResponseDto,
+    HttpError,
+    UpdateWorkflowParams,
+    OptimisticContext
+  >({
     mutationKey: ['PUT', 'workflows', 'id'],
-    mutationFn: ({ id, workflow }: UpdateWorkflowParams) => {
-      return http.put<void>(`/api/workflows/${id}`, {
-        body: JSON.stringify(workflow),
-      });
-    },
+    mutationFn: async ({ id, workflow }: UpdateWorkflowParams) => api.updateWorkflow(id, workflow),
     // Optimistic update: immediately update UI before server responds
     onMutate: async ({ id, workflow }) => {
       // Cancel any outgoing refetches to avoid overwriting optimistic update
@@ -181,11 +182,7 @@ export function useWorkflowActions() {
 
   const deleteWorkflows = useMutation<void, HttpError, { ids: string[] }, OptimisticContext>({
     mutationKey: ['DELETE', 'workflows'],
-    mutationFn: ({ ids }: { ids: string[] }) => {
-      return http.delete(`/api/workflows`, {
-        body: JSON.stringify({ ids }),
-      });
-    },
+    mutationFn: ({ ids }: { ids: string[] }) => api.bulkDeleteWorkflows(ids),
     // Optimistic update: immediately remove workflows from UI before server responds
     onMutate: async ({ ids }) => {
       // Cancel any outgoing refetches to avoid overwriting optimistic update
@@ -288,11 +285,7 @@ export function useWorkflowActions() {
 
   const runIndividualStep = useMutation<RunWorkflowResponseDto, HttpError, RunStepCommand>({
     mutationKey: ['POST', 'workflows', 'stepId', 'run'],
-    mutationFn: ({ stepId, contextOverride, workflowYaml, workflowId }) => {
-      return http.post(`/api/workflows/testStep`, {
-        body: JSON.stringify({ stepId, contextOverride, workflowYaml, workflowId }),
-      });
-    },
+    mutationFn: (params: RunStepCommand) => api.testStep(params),
     onSuccess: ({ workflowExecutionId }, variables) => {
       // Report telemetry for successful step test run
       telemetry.reportWorkflowStepTestRunInitiated({
@@ -318,9 +311,7 @@ export function useWorkflowActions() {
 
   const cloneWorkflow = useMutation<WorkflowDetailDto, HttpError, { id: string }>({
     mutationKey: ['POST', 'workflows', 'id', 'clone'],
-    mutationFn: ({ id }: { id: string }) => {
-      return http.post<WorkflowDetailDto>(`/api/workflows/${id}/clone`);
-    },
+    mutationFn: ({ id }: { id: string }) => api.cloneWorkflow(id),
     onSuccess: (clonedWorkflow, variables) => {
       // Report telemetry for successful clone
       telemetry.reportWorkflowCloned({
@@ -350,12 +341,13 @@ export function useWorkflowActions() {
 
       let conflicts: PreflightImportResult['conflicts'] = [];
       if (clientResult.workflowIds.length > 0) {
-        const conflictResponse = await http.post<{
-          conflicts: Array<{ id: string; existingName: string }>;
-        }>('/api/workflows/_check-conflicts', {
-          body: JSON.stringify({ ids: clientResult.workflowIds }),
+        const conflictResponse = await api.mgetWorkflows({
+          ids: clientResult.workflowIds,
+          source: ['name'],
         });
-        conflicts = conflictResponse.conflicts;
+        conflicts = conflictResponse
+          .map((w) => ({ id: w.id, existingName: w.name }))
+          .filter((w): w is { id: string; existingName: string } => w.existingName !== undefined);
       }
 
       return {
@@ -369,7 +361,11 @@ export function useWorkflowActions() {
     },
   });
 
-  const importWorkflows = useMutation<ImportWorkflowsResult, HttpError, ImportWorkflowsParams>({
+  const importWorkflows = useMutation<
+    BulkCreateWorkflowsResponse,
+    HttpError,
+    ImportWorkflowsParams
+  >({
     mutationKey: ['POST', 'workflows', '_bulk_create'],
     mutationFn: ({ workflows, overwrite, generateNewIds }) => {
       let processedWorkflows = workflows;
@@ -391,15 +387,7 @@ export function useWorkflowActions() {
         });
       }
 
-      const query: Record<string, boolean> = {};
-      if (overwrite) {
-        query.overwrite = true;
-      }
-
-      return http.post<ImportWorkflowsResult>('/api/workflows/_bulk_create', {
-        body: JSON.stringify({ workflows: processedWorkflows }),
-        query,
-      });
+      return api.bulkCreateWorkflows({ workflows: processedWorkflows, overwrite });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workflows'] });

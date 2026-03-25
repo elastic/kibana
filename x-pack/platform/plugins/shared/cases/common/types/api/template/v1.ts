@@ -48,6 +48,7 @@ export const TemplatesFindRequestSchema = z.object({
   author: z.optional(z.array(z.string())).default([]),
   owner: z.optional(z.array(z.string())).default([]),
   isDeleted: z.optional(z.boolean()).default(false),
+  isEnabled: z.optional(z.boolean()),
 });
 
 export type TemplatesFindRequest = z.infer<typeof TemplatesFindRequestSchema>;

@@ -35,21 +35,35 @@ const noMatchesLabel = i18n.translate(
 export interface CommandMenuListOption {
   readonly key: string;
   /**
-   * Plain string for accessibility and default label; use `renderLabel` for rich rows (e.g. SML type/title + highlight).
+   * Plain string for accessibility and default label; use `renderLabel` for rich rows.
    */
   readonly label: string;
   readonly renderLabel?: React.ReactNode;
 }
 
+/** After EuiSelectableList merges `option.data` into the option, `renderOption` receives this shape. */
+type CommandMenuListSelectableRow = EuiSelectableOption &
+  Partial<Pick<CommandMenuListOption, 'renderLabel'>>;
+
 interface CommandMenuListProps {
   readonly options: readonly CommandMenuListOption[];
   readonly isLoading: boolean;
   readonly onSelect: (option: CommandMenuListOption) => void;
+  readonly width?: number;
   readonly 'data-test-subj'?: string;
 }
 
 export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProps>(
-  ({ options, isLoading, onSelect, 'data-test-subj': dataTestSubj = 'commandMenuList' }, ref) => {
+  (
+    {
+      options,
+      isLoading,
+      onSelect,
+      width: menuWidth = MENU_WIDTH,
+      'data-test-subj': dataTestSubj = 'commandMenuList',
+    },
+    ref
+  ) => {
     const { euiTheme } = useEuiTheme();
     const [activeIndex, setActiveIndex] = useState(0);
 
@@ -62,12 +76,10 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
         options.map((option) => ({
           label: option.label,
           key: option.key,
-          data: option.renderLabel ? { commandMenuRenderLabel: option.renderLabel } : undefined,
+          data: option.renderLabel != null ? { renderLabel: option.renderLabel } : undefined,
         })),
       [options]
     );
-
-    const hasCustomRender = options.some((o) => o.renderLabel != null);
 
     useImperativeHandle(ref, () => ({
       isKeyDownEventHandled: (event: React.KeyboardEvent): boolean => {
@@ -87,8 +99,13 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
       },
     }));
 
+    const renderOption = (option: EuiSelectableOption) => {
+      const row = option as CommandMenuListSelectableRow;
+      return row.renderLabel ?? row.label;
+    };
+
     const containerStyles = css`
-      width: ${MENU_WIDTH}px;
+      width: ${menuWidth}px;
       /* EuiHighlight uses EuiMark (<mark>); clear fill so list row background stays distinct */
       mark {
         background-color: transparent;
@@ -107,7 +124,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
           justifyContent="center"
           alignItems="center"
           css={css`
-            width: ${MENU_WIDTH}px;
+            width: ${menuWidth}px;
             padding: ${euiTheme.size.m};
           `}
           data-test-subj={`${dataTestSubj}-loading`}
@@ -131,26 +148,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
         <EuiSelectable
           options={selectableOptions}
           singleSelection
-          searchable={false}
-          isPreFiltered
-          renderOption={
-            hasCustomRender
-              ? (option) => {
-                  // EuiSelectable merges `option.data` onto the object passed to `renderOption`
-                  // (see EuiSelectableList), so `commandMenuRenderLabel` is top-level, not under `data`.
-                  const merged = option as {
-                    label: string;
-                    data?: { commandMenuRenderLabel?: React.ReactNode };
-                    commandMenuRenderLabel?: React.ReactNode;
-                  };
-                  return (
-                    merged.commandMenuRenderLabel ??
-                    merged.data?.commandMenuRenderLabel ??
-                    merged.label
-                  );
-                }
-              : undefined
-          }
+          renderOption={renderOption}
           listProps={{
             showIcons: false,
             bordered: false,
