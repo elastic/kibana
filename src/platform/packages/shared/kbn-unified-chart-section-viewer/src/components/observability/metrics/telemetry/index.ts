@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AnalyticsServiceSetup } from '@kbn/core/public';
-import { registerMetricsEbtEvents } from '../components/observability/metrics/telemetry';
-
-export const registerUnifiedChartSectionViewerEbtEvents = (analytics: AnalyticsServiceSetup) => {
-  registerMetricsEbtEvents(analytics);
-};
+export * from './constants';
+export * from './metrics_ebt_events';
+export * from './accumulate_metrics_row_telemetry';

@@ -14,9 +14,7 @@ import {
   type UnifiedChartSectionViewerTelemetry,
 } from '../analytics/report_unified_chart_section_viewer_data_summary';
 
-const noopTelemetry = createUnifiedChartSectionViewerTelemetry(undefined);
-
-const EventBasedTelemetryContext = createContext<UnifiedChartSectionViewerTelemetry>(noopTelemetry);
+const EventBasedTelemetryContext = createContext<UnifiedChartSectionViewerTelemetry | null>(null);
 
 export interface EventBasedTelemetryProviderProps {
   analytics?: AnalyticsServiceStart;
@@ -36,5 +34,10 @@ export const EventBasedTelemetryProvider = ({
   );
 };
 
-export const useTelemetry = (): UnifiedChartSectionViewerTelemetry =>
-  useContext(EventBasedTelemetryContext);
+export const useTelemetry = (): UnifiedChartSectionViewerTelemetry => {
+  const ctx = useContext(EventBasedTelemetryContext);
+  if (!ctx) {
+    throw new Error('useTelemetry must be used within an EventBasedTelemetryProvider');
+  }
+  return ctx;
+};

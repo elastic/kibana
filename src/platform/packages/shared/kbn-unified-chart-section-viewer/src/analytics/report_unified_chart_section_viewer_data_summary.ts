@@ -9,7 +9,7 @@
 
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import type { MetricsTelemetry } from '../types';
-import { METRICS_INFO_EVENT_TYPE } from './constants';
+import { METRICS_INFO_EVENT_TYPE } from '../components/observability/metrics/telemetry';
 
 export interface UnifiedChartSectionViewerTelemetry {
   trackMetricsInfo: (telemetryPayload: MetricsTelemetry) => void;

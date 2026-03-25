@@ -17,7 +17,7 @@ import type {
 
 import { toArray } from './to_array';
 import { ALLOWED_METRIC_TYPES } from '../../../../common/constants';
-import { accumulateMetricsRowTelemetry } from './accumulate_metrics_row_telemetry';
+import { accumulateMetricsRowTelemetry } from '../telemetry';
 
 const ALLOWED_METRIC_TYPES_SET = new Set(ALLOWED_METRIC_TYPES);
 

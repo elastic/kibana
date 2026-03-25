@@ -9,7 +9,7 @@
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { accumulateMetricsRowTelemetry } from './accumulate_metrics_row_telemetry';
-import { createInitialMetricsTelemetry } from './parse_metrics_response_with_telemetry';
+import { createInitialMetricsTelemetry } from '../utils/parse_metrics_response_with_telemetry';
 
 describe('accumulateMetricsRowTelemetry', () => {
   it('does not change telemetry when all arrays are empty', () => {

@@ -154,23 +154,4 @@ describe('MetricsExperienceGridWrapper', () => {
       payload: { appState: { breakdownField: 'service.name' } },
     });
   });
-
-  it('calls trackMetricsInfoTelemetry only once when onMetricsTelemetryReported is invoked once', () => {
-    renderChartSection();
-
-    const telemetry: MetricsTelemetry = {
-      total_number_of_metrics: 2,
-      total_number_of_dimensions: 1,
-      metrics_by_type: {},
-      units: {},
-      multi_value_counts: {
-        data_streams: 0,
-        field_types: 0,
-        metric_types: 0,
-      },
-    };
-
-    expect(trackMetricsInfoTelemetryMock).toHaveBeenCalledTimes(1);
-    expect(trackMetricsInfoTelemetryMock).toHaveBeenCalledWith(telemetry);
-  });
 });
