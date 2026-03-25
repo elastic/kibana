@@ -42,6 +42,7 @@ import {
   mapPackageReleaseToIntegrationCardRelease,
   getPolicyTemplateInputDefinition,
   registryInputAllowsDynamicSignalTypes,
+  isInputOnlyPolicyTemplate,
 } from '../../../../../../../../../common/services';
 
 import type {
@@ -133,6 +134,9 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     const dynamicSignalTypes = useMemo(() => {
       const inputType = packageInputStream.input;
       return (packageInfo?.policy_templates ?? []).some((template) => {
+        if (isInputOnlyPolicyTemplate(template) && template.input !== inputType) {
+          return false;
+        }
         const inputDef = getPolicyTemplateInputDefinition(template, inputType);
         return inputDef ? registryInputAllowsDynamicSignalTypes(inputDef) : false;
       });

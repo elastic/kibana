@@ -588,6 +588,58 @@ describe('PackagePolicyInputStreamConfig', () => {
       });
     });
 
+    it('should show Data Stream Type selector for httpjson when another input-only template has dynamic_signal_types', async () => {
+      const multiTemplatePackageInfo: PackageInfo = {
+        ...mockPackageInfo,
+        type: 'input',
+        policy_templates: [
+          {
+            name: 'otel_template',
+            title: 'OTel Template',
+            description: 'OpenTelemetry template',
+            input: 'otelcol',
+            template_path: 'otel.yml.hbs',
+            dynamic_signal_types: true,
+            vars: [],
+          },
+          {
+            name: 'httpjson_template',
+            title: 'HTTP JSON',
+            description: 'HTTP JSON input',
+            input: 'httpjson',
+            type: 'logs',
+            template_path: 'httpjson.yml.hbs',
+            vars: [],
+          },
+        ],
+      } as unknown as PackageInfo;
+
+      const httpjsonStream: RegistryStreamWithDataStream = {
+        ...mockOtelInputStream,
+        input: 'httpjson',
+        title: 'Collect via HTTP JSON',
+      };
+
+      const httpjsonPolicyInputStream: NewPackagePolicyInputStream = {
+        ...mockOtelPolicyInputStream,
+        id: 'httpjson-stream-1',
+        data_stream: {
+          type: 'logs',
+          dataset: 'combined_pkg.httpjson',
+        },
+      };
+
+      render(httpjsonStream, httpjsonPolicyInputStream, multiTemplatePackageInfo);
+
+      const advancedButton = renderResult.getByText('Advanced options');
+      fireEvent.click(advancedButton);
+
+      await waitFor(() => {
+        expect(renderResult.getByText('Data Stream Type')).toBeInTheDocument();
+        expect(renderResult.getByTestId('packagePolicyDataStreamType')).toBeInTheDocument();
+      });
+    });
+
     it('should show all signal type options (logs, metrics, traces)', async () => {
       const packageInfoWithDynamicTypes: PackageInfo = {
         ...mockPackageInfo,
