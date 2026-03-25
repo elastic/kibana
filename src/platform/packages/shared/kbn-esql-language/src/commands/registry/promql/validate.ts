@@ -14,9 +14,14 @@ import type {
   ESQLAstPromqlCommand,
   ESQLLocation,
   ESQLMessage,
-} from '../../../types';
-import { Walker } from '../../../ast';
-import { isIdentifier, isList, isSource } from '../../../ast/is';
+} from '@elastic/esql/types';
+import { isIdentifier, isList, isSource, Walker } from '@elastic/esql';
+import type {
+  PromQLBinaryExpression,
+  PromQLFunction,
+  PromQLLabelName,
+  PromQLSelector,
+} from '@elastic/esql';
 import type { ICommandContext } from '../types';
 import { getMessageFromId } from '../../definitions/utils';
 import {
@@ -34,12 +39,6 @@ import {
   getPromqlMatchingSignatures,
   getPromqlSignatureMismatch,
 } from '../../definitions/utils/validation/function';
-import type {
-  PromQLBinaryExpression,
-  PromQLFunction,
-  PromQLLabelName,
-  PromQLSelector,
-} from '../../../embedded_languages/promql/types';
 import {
   getUsedPromqlParamNames,
   IDENTIFIER_PATTERN,
@@ -219,6 +218,10 @@ function hasValidQuery(command: ESQLAstPromqlCommand): boolean {
     return false;
   }
 
+  if (isPromqlParamAssignmentQuery(query)) {
+    return false;
+  }
+
   if (query.type === 'parens' || query.type === 'function') {
     return true;
   }
@@ -229,7 +232,7 @@ function hasValidQuery(command: ESQLAstPromqlCommand): boolean {
     return false;
   }
 
-  const expression = query.expression;
+  const expression = query.type === 'query' ? query.expression : undefined;
 
   if (
     query.incomplete &&
@@ -240,6 +243,16 @@ function hasValidQuery(command: ESQLAstPromqlCommand): boolean {
   }
 
   return true;
+}
+
+function isPromqlParamAssignmentQuery(query: NonNullable<ESQLAstPromqlCommand['query']>): boolean {
+  if (query.type !== 'function' || query.subtype !== 'binary-expression' || query.name !== '=') {
+    return false;
+  }
+
+  const [leftArg] = query.args;
+
+  return isIdentifier(leftArg) && isPromqlParamName(leftArg.name.toLowerCase());
 }
 
 /** Validates index sources with precise locations for each source in the list.*/

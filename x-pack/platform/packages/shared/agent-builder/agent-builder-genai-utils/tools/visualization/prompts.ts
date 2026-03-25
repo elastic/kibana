@@ -45,6 +45,11 @@ ${
 
 ${additionalInstructions}
 
+TITLE RULES:
+- Omit the 'title' field when the chart already displays the information within itself (e.g. metric, gauge, tagcloud, waffle charts show their value and label directly).
+- When a title is needed, make it self-explanatory and exhaustive so that axis titles become unnecessary.
+- NEVER duplicate information across the chart title, axis titles, and metric labels.
+
 Your task is to generate a ${chartType} visualization configuration based on the following information:
 
 <user_query>
@@ -60,9 +65,26 @@ IMPORTANT: Return ONLY the JSON configuration wrapped in a markdown code block l
 }
 \`\`\`
 
-${additionalContext}`,
+${additionalContext ?? ''}`,
     ],
     // Human message required for Bedrock to work properly
     ['human', 'Generate the visualization configuration.'],
   ];
 };
+
+export const esqlAdditionalInstructions = `
+
+## Human-readable column aliases
+
+Use human-readable column aliases in STATS/EVAL (e.g. \`Unique Visitors\` not \`unique_visitors\`). Wrap multi-word aliases in backticks.
+
+## Time Bucketing
+
+For time series charts, use the \`BUCKET\` function to create "auto" buckets that automatically scale with the time range.
+Always use \`BUCKET(@timestamp, 75, ?_tstart, ?_tend)\` instead of hardcoded intervals like
+\`DATE_TRUNC(1 hour, @timestamp)\`:
+
+FROM logs | STATS count = COUNT() BY bucket = BUCKET(@timestamp, 75, ?_tstart, ?_tend)
+
+When generating or passing "esql" for time-based XY charts, prefer this pattern (adjust the aggregation and timestamp field as needed) so the chart responds correctly to the dashboard or lens time range.
+`;

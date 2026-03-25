@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  hasUnsupportedFunctions,
+  UNSUPPORTED_FUNCTIONS,
+} from '../../../../../common/task/util/has_unsupported_function';
 import { cleanMarkdown, generateAssistantComment } from '../../../../../common/task/util/comments';
 import type { GraphNode, ModelWithTools } from '../../types';
 import { QRADAR_DEPENDENCIES_RESOLVE_PROMPT } from './prompts';
@@ -17,6 +21,20 @@ export const getResolveDepsNode = ({ model }: GetCreateResolveDepsNodeParams): G
   return async (state) => {
     const modelWithTools = model;
     const query = state.original_rule.query;
+    const currentMessages = state.messages;
+
+    const isUnsupported = hasUnsupportedFunctions([query, ...currentMessages].join('\n'));
+
+    if (isUnsupported) {
+      const unsupportedComment = `This rule cannot be translated to a Custom Rule because current rule logic contains one of the unsupported functions: \n \n  - ${UNSUPPORTED_FUNCTIONS.join(
+        '\n  - '
+      )}`;
+
+      return {
+        nl_query: undefined,
+        comments: [generateAssistantComment(unsupportedComment)],
+      };
+    }
 
     const resolveMessage = await QRADAR_DEPENDENCIES_RESOLVE_PROMPT.formatMessages({
       title: state.original_rule.title,

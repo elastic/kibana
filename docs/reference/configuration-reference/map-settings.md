@@ -48,17 +48,17 @@ applies_to:
 `map.regionmap.layers[].url` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Mandatory. The location of the geojson file as provided by a webserver.
 
-`tilemap.options.attribution` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:   Adds the map attribution string.
+`map.tilemap.options.attribution` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   Sets the map attribution string. Attribtuion must be a list of links, delimited by `\|`.  For example: `"[attribution 1](https://www.attribution1)\|[attribution 2](https://www.attribution2)"`
 
-`tilemap.options.maxZoom` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`map.tilemap.options.maxZoom` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Sets the maximum zoom level.
 
-`tilemap.options.minZoom` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`map.tilemap.options.minZoom` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Sets the minimum zoom level.
 
-`tilemap.options.subdomains` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:   Provides an array of subdomains used by the tile service. Specify the position of the subdomain the URL with the token `{{s}}`.
+`map.tilemap.options.subdomains` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   Provides an array of subdomains used by the tile service. Specify the position of the subdomain the URL with the token `{s}`.
 
-`tilemap.url` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:   Lists the URL to the tileservice that Kibana uses to display map tiles in tilemap visualizations.
+`map.tilemap.url` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   Sets the URL to the tileservice that Kibana uses to display map tiles in tilemap visualizations.

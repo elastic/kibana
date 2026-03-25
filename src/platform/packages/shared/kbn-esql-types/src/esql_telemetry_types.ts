@@ -49,4 +49,5 @@ export interface TelemetryLatencyProps {
   queryLines: number; // Query length in lines.
   sessionId: string; // Editor mount session id.
   isInitialLoad?: boolean; // True for the first sampled event of each metric.
+  callbacksDuration?: number; // Duration spent running callbacks during the execution.
 }

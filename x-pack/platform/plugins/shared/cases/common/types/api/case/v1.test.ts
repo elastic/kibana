@@ -6,6 +6,7 @@
  */
 
 import {
+  CASE_EXTENDED_FIELDS,
   MAX_CATEGORY_FILTER_LENGTH,
   MAX_TAGS_FILTER_LENGTH,
   MAX_ASSIGNEES_FILTER_LENGTH,
@@ -326,6 +327,38 @@ describe('CasePostRequestRt', () => {
     const { customFields, ...rest } = defaultRequest;
 
     expect(PathReporter.report(CasePostRequestRt.decode(rest))).toContain('No errors!');
+  });
+
+  it('accepts optional template and extended_fields', () => {
+    const request = {
+      ...defaultRequest,
+      template: { id: 'template-id', version: 1 },
+      [CASE_EXTENDED_FIELDS]: { field1: 'foo' },
+    };
+
+    const query = CasePostRequestRt.decode(request);
+
+    expect(query).toStrictEqual({
+      _tag: 'Right',
+      right: request,
+    });
+  });
+
+  it('removes unknown attributes from template', () => {
+    const request = {
+      ...defaultRequest,
+      template: { id: 'template-id', version: 1, foo: 'bar' },
+    };
+
+    const query = CasePostRequestRt.decode(request);
+
+    expect(query).toStrictEqual({
+      _tag: 'Right',
+      right: {
+        ...defaultRequest,
+        template: { id: 'template-id', version: 1 },
+      },
+    });
   });
 
   it(`throws an error when a text customFields is longer than ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}`, () => {

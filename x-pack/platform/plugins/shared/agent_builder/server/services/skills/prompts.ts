@@ -6,8 +6,8 @@
  */
 
 import type { IFileStore } from '@kbn/agent-builder-server/runner';
-import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils';
 import { isSkillFileEntry } from '../runner/store/volumes/skills/utils';
+import type { SkillFileEntry } from '../runner/store/volumes/skills/types';
 
 export const getSkillsInstructions = async ({
   filesystem,
@@ -19,35 +19,25 @@ export const getSkillsInstructions = async ({
     .filter(isSkillFileEntry)
     .toSorted((a, b) => a.path.localeCompare(b.path));
 
-  const skillPrompt =
-    skillsFileEntries.length === 0
-      ? [
-          '## SKILLS',
-          'Load a skill to get detailed instructions for a specific task. No skills are currently available.',
-        ].join('\n')
-      : [
-          '## SKILLS',
-          [
-            'Before using any general-purpose tool or model knowledge, you MUST first check the available skills below.',
-            'If ANY skill description matches or is relevant to the user query, you MUST load it by calling `filestore.read` with the skill path BEFORE calling any other tool.',
-            'Skills provide specialized knowledge, domain-specific instructions, and access to inline tools that produce more accurate results than general-purpose alternatives.',
-            'Skipping a relevant skill and going directly to general tools (e.g., search, execute_esql) is a protocol violation.',
-            'Only the skills listed here are available:',
-          ].join(' '),
-          generateXmlTree({
-            tagName: 'available_skills',
-            children: skillsFileEntries.map((skillFileEntry) => ({
-              tagName: 'skill',
-              attributes: {
-                path: skillFileEntry.path,
-              },
-              children: [
-                { tagName: 'name', children: [skillFileEntry.metadata.skill_name] },
-                { tagName: 'description', children: [skillFileEntry.metadata.skill_description] },
-              ],
-            })),
-          }),
-        ].join('\n');
+  const skillToLine = (entry: SkillFileEntry) => {
+    return `- ${entry.metadata.skill_name} (${entry.path}): ${entry.metadata.skill_description}`;
+  };
 
-  return skillPrompt;
+  if (skillsFileEntries.length === 0) {
+    return [
+      '## SKILLS',
+      'Load a skill to get detailed instructions for a specific task. No skills are currently available.',
+    ].join('\n');
+  }
+
+  return [
+    '## SKILLS',
+    [
+      'Before using any general-purpose tool or model knowledge, you MUST first check the available skills below.',
+      'If ANY skill description matches or is relevant to the user query, you MUST load it by calling `filestore.read` with the skill path BEFORE calling any other tool.',
+      'Skills provide specialized knowledge, domain-specific instructions, and access to inline tools that produce more accurate results than general-purpose alternatives.',
+      'Skipping a relevant skill and going directly to general tools (e.g., search, execute_esql) is a protocol violation.',
+    ].join(' '),
+    ...skillsFileEntries.map(skillToLine),
+  ].join('\n');
 };

@@ -19,6 +19,9 @@ export { inlineSuggest } from './inline_suggestions/inline_suggest';
 // Autocomplete function
 export { suggest } from './autocomplete/autocomplete';
 
+// Document highlight function
+export { getDocumentHighlightItems } from './document_highlight';
+
 // Validation function
 export { validateQuery } from './validation/validation';
 export type { ValidationOptions } from './validation/types';

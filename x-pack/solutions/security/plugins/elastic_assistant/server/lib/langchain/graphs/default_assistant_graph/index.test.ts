@@ -25,7 +25,6 @@ import { HumanMessage } from '@langchain/core/messages';
 
 jest.mock('./graph');
 jest.mock('./helpers');
-jest.mock('langchain/agents');
 jest.mock('@kbn/langchain/server/tracers/apm');
 jest.mock('@kbn/langchain/server/tracers/telemetry');
 jest.mock('@kbn/security-ai-prompts');

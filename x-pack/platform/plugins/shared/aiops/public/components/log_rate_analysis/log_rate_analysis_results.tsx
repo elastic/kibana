@@ -100,7 +100,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   barColorOverride,
   barHighlightColorOverride,
 }) => {
-  const { analytics, http, embeddingOrigin } = useAiopsAppContext();
+  const { analytics, http, embeddingOrigin, cps } = useAiopsAppContext();
   const { dataView } = useDataSource();
 
   const dispatch = useAppDispatch();
@@ -268,6 +268,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
           : getSwappedWindowParameters(chartWindowParameters)),
         overrides,
         sampleProbability,
+        projectRouting: cps?.cpsManager?.getProjectRouting(),
       },
       headers: { [AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin },
     };
@@ -282,6 +283,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     sampleProbability,
     overrides,
     embeddingOrigin,
+    cps,
   ]);
 
   useEffect(() => {
@@ -364,7 +366,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
               >
                 <EuiButtonIcon
                   data-test-subj="aiopsLogRateAnalysisOptionsButton"
-                  iconType="controlsHorizontal"
+                  iconType="controls"
                   onClick={onEmbeddableOptionsClickHandler}
                   aria-label={i18n.translate('xpack.aiops.logRateAnalysis.optionsButtonAriaLabel', {
                     defaultMessage: 'Analysis options',
@@ -439,12 +441,12 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         <EuiEmptyPrompt
           data-test-subj="aiopsNoResultsFoundEmptyPrompt"
           title={
-            <h2>
+            <h3>
               <FormattedMessage
                 id="xpack.aiops.logRateAnalysis.page.noResultsPromptTitle"
                 defaultMessage="The analysis did not return any results."
               />
-            </h2>
+            </h3>
           }
           titleSize="xs"
           body={

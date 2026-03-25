@@ -47,6 +47,9 @@ const requestQueryParams = { drop_null_columns: true };
 
 describe('performEsqlRequest', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const asyncQueryMock = esClient.esql.asyncQuery as unknown as jest.Mock;
+  const asyncQueryGetMock = esClient.esql.asyncQueryGet as unknown as jest.Mock;
+  const asyncQueryDeleteMock = esClient.esql.asyncQueryDelete as unknown as jest.Mock;
   const shouldStopExecution: jest.Mock = jest.fn();
   shouldStopExecution.mockReturnValue(false);
 
@@ -63,7 +66,7 @@ describe('performEsqlRequest', () => {
       values,
     };
 
-    esClient.transport.request.mockResolvedValueOnce(mockResponse);
+    asyncQueryMock.mockResolvedValueOnce(mockResponse);
 
     const result = await performEsqlRequest({
       esClient,
@@ -73,17 +76,13 @@ describe('performEsqlRequest', () => {
     });
 
     expect(result).toEqual(mockResponse);
-    expect(esClient.transport.request).toHaveBeenCalledTimes(2);
-    expect(esClient.transport.request).toHaveBeenCalledWith({
-      method: 'POST',
-      path: '/_query/async',
-      body: requestBody,
-      querystring: requestQueryParams,
+    expect(asyncQueryMock).toHaveBeenCalledTimes(1);
+    expect(asyncQueryMock).toHaveBeenCalledWith({
+      ...requestBody,
+      ...requestQueryParams,
     });
-    expect(esClient.transport.request).toHaveBeenCalledWith({
-      method: 'DELETE',
-      path: '/_query/async/QUERY-ID',
-    });
+    expect(asyncQueryDeleteMock).toHaveBeenCalledTimes(1);
+    expect(asyncQueryDeleteMock).toHaveBeenCalledWith({ id: 'QUERY-ID' });
   });
 
   it('polls until the query is completed', async () => {
@@ -101,9 +100,8 @@ describe('performEsqlRequest', () => {
       values,
     };
 
-    esClient.transport.request
-      .mockResolvedValueOnce(mockSubmitResponse)
-      .mockResolvedValueOnce(mockPollResponse);
+    asyncQueryMock.mockResolvedValueOnce(mockSubmitResponse);
+    asyncQueryGetMock.mockResolvedValueOnce(mockPollResponse);
 
     const waitForPerformEsql = performEsqlRequest({
       esClient,
@@ -117,21 +115,15 @@ describe('performEsqlRequest', () => {
     const result = await waitForPerformEsql;
 
     expect(result).toEqual(mockPollResponse);
-    expect(esClient.transport.request).toHaveBeenCalledTimes(3);
-    expect(esClient.transport.request).toHaveBeenNthCalledWith(1, {
-      method: 'POST',
-      path: '/_query/async',
-      body: requestBody,
-      querystring: requestQueryParams,
+    expect(asyncQueryMock).toHaveBeenCalledTimes(1);
+    expect(asyncQueryMock).toHaveBeenCalledWith({
+      ...requestBody,
+      ...requestQueryParams,
     });
-    expect(esClient.transport.request).toHaveBeenNthCalledWith(2, {
-      method: 'GET',
-      path: '/_query/async/QUERY-ID',
-    });
-    expect(esClient.transport.request).toHaveBeenCalledWith({
-      method: 'DELETE',
-      path: '/_query/async/QUERY-ID',
-    });
+    expect(asyncQueryGetMock).toHaveBeenCalledTimes(1);
+    expect(asyncQueryGetMock).toHaveBeenCalledWith({ id: 'QUERY-ID' });
+    expect(asyncQueryDeleteMock).toHaveBeenCalledTimes(1);
+    expect(asyncQueryDeleteMock).toHaveBeenCalledWith({ id: 'QUERY-ID' });
   });
 
   it('throws an error if execution is cancelled', async () => {
@@ -142,7 +134,8 @@ describe('performEsqlRequest', () => {
       values: [],
     };
 
-    esClient.transport.request.mockResolvedValue(mockSubmitResponse);
+    asyncQueryMock.mockResolvedValue(mockSubmitResponse);
+    asyncQueryGetMock.mockResolvedValue(mockSubmitResponse);
     shouldStopExecution.mockReturnValue(true);
 
     const waitForPerformEsql = performEsqlRequest({
@@ -167,9 +160,8 @@ describe('performEsqlRequest', () => {
       values: [],
     };
 
-    esClient.transport.request
-      .mockResolvedValueOnce(mockSubmitResponse)
-      .mockRejectedValueOnce(new Error('Test error'));
+    asyncQueryMock.mockResolvedValueOnce(mockSubmitResponse);
+    asyncQueryGetMock.mockRejectedValueOnce(new Error('Test error'));
 
     const waitForPerformEsql = performEsqlRequest({
       esClient,
@@ -183,10 +175,7 @@ describe('performEsqlRequest', () => {
     await jest.advanceTimersByTimeAsync(15000);
     await waitForPerformEsql;
 
-    expect(esClient.transport.request).toHaveBeenCalledWith({
-      method: 'DELETE',
-      path: '/_query/async/QUERY-ID',
-    });
+    expect(asyncQueryDeleteMock).toHaveBeenCalledWith({ id: 'QUERY-ID' });
 
     expect.assertions(2);
   });

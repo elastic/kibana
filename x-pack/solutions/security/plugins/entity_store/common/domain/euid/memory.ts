@@ -6,8 +6,17 @@
  */
 
 import type { EntityType, EuidAttribute } from '../definitions/entity_schema';
+import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
-import { getDocument, getFieldValue, isEuidField } from './commons';
+import {
+  applyWhenConditionTrueSetFields,
+  documentPassesCalculatedIdentityPipelineGate,
+  getDocument,
+  getEffectiveEuidRanking,
+  getFieldValue,
+  isEuidField,
+} from './commons';
+import { applyFieldEvaluations } from './field_evaluations';
 
 /**
  * Constructs an entity id from the provided entity type and document.
@@ -35,21 +44,54 @@ export function getEuidFromObject(entityType: EntityType, doc: any) {
 
   doc = getDocument(doc);
   const { identityField } = getEntityDefinitionWithoutId(entityType);
-  const composedId = getComposedFieldValues(doc, identityField.euidFields);
+
+  if (isSingleFieldIdentity(identityField)) {
+    const value = getFieldValue(doc, identityField.singleField);
+    if (value === undefined) {
+      return undefined;
+    }
+    if (identityField.skipTypePrepend) {
+      return value;
+    }
+    return `${entityType}:${value}`;
+  }
+
+  if (identityField.fieldEvaluations?.length) {
+    const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
+    doc = { ...doc, ...evaluated };
+  }
+  const entityDefinition = getEntityDefinitionWithoutId(entityType);
+  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
+    applyWhenConditionTrueSetFields(doc, entityDefinition.whenConditionTrueSetFieldsPreAgg);
+  }
+  if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
+    applyWhenConditionTrueSetFields(doc, entityDefinition.whenConditionTrueSetFieldsAfterStats);
+  }
+
+  if (!documentPassesCalculatedIdentityPipelineGate(doc, entityDefinition)) {
+    return undefined;
+  }
+
+  const effectiveRanking = getEffectiveEuidRanking(doc, identityField);
+  const composedId = getComposedFieldValues(doc, effectiveRanking);
   if (composedId.length === 0) {
     return undefined;
   }
 
-  return `${entityType}:${composedId.join('')}`;
+  const rawId = composedId.join('');
+  if (identityField.skipTypePrepend) {
+    return rawId;
+  }
+  return `${entityType}:${rawId}`;
 }
 
 function getComposedFieldValues(doc: any, euidFields: EuidAttribute[][]): string[] {
-  for (const composedFields of euidFields) {
-    const composedFieldValues = composedFields.map((attr) => {
+  for (const composition of euidFields) {
+    const composedFieldValues = composition.map((attr) => {
       if (isEuidField(attr)) {
         return getFieldValue(doc, attr.field);
       }
-      return attr.separator;
+      return attr.sep;
     });
 
     if (composedFieldValues.every((value) => value !== undefined)) {
