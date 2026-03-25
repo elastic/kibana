@@ -66,7 +66,7 @@ steps:
         else:
           - name: set-items-or-folder-result
             type: if
-            condition: "${{ inputs.list_action == 'getListItems' }}"
+            condition: "${{ inputs.list_action == 'getListItems' and inputs.list_title }}"
             steps:
               - name: set-get-list-items-output
                 type: data.set
