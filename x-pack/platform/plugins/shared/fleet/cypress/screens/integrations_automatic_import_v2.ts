@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export const CREATE_INTEGRATION_V2_PAGE = '/app/automaticImportVTwo';
+
 export const CONNECTOR_BEDROCK = 'actionType-.bedrock';
 export const CONNECTOR_OPENAI = 'actionType-.gen-ai';
 export const CONNECTOR_GEMINI = 'actionType-.gemini';
