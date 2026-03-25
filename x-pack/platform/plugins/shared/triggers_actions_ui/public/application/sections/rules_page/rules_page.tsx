@@ -43,6 +43,7 @@ const RulesPage = () => {
     http,
     notifications: { toasts },
     ruleTypeRegistry,
+    cps,
   } = useKibana().services;
   const setBreadcrumbs = useSetBreadcrumbs();
 
@@ -218,6 +219,7 @@ const RulesPage = () => {
           toasts={toasts}
           registeredRuleTypes={ruleTypeRegistry.list()}
           filteredRuleTypes={[]}
+          cps={cps}
         />
       )}
     </>
