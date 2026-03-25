@@ -284,20 +284,17 @@ export const persistLeads = async (
   executionId: string,
   pLogger: Logger
 ): Promise<void> => {
-  if (leads.length === 0) {
-    pLogger.debug('[LeadGeneration] No leads to persist, skipping write');
-    return;
-  }
-
   const indexName = getLeadsIndexName(spaceId, mode);
 
   try {
-    const bulkBody = leads.flatMap((lead) => [
-      { index: { _index: indexName, _id: lead.id } },
-      lead,
-    ]);
-    await esClient.bulk({ body: bulkBody, refresh: 'wait_for' });
-    pLogger.debug(`[LeadGeneration] Persisted ${leads.length} leads to "${indexName}"`);
+    if (leads.length > 0) {
+      const bulkBody = leads.flatMap((lead) => [
+        { index: { _index: indexName, _id: lead.id } },
+        lead,
+      ]);
+      await esClient.bulk({ body: bulkBody, refresh: 'wait_for' });
+      pLogger.debug(`[LeadGeneration] Persisted ${leads.length} leads to "${indexName}"`);
+    }
 
     await esClient.deleteByQuery({
       index: indexName,
