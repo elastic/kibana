@@ -1,5 +1,6 @@
 env:
   KBN_EVALS: '1'
+  KBN_EVALS_WEEKLY: '1'
 steps:
   - label: '👨‍🔧 Pre-Build'
     command: .buildkite/scripts/lifecycle/pre_build.sh
@@ -10,6 +11,23 @@ steps:
       machineType: n2-standard-2
 
   - wait
+
+  - label: ':github: Sync models:* labels'
+    command: .buildkite/scripts/steps/evals/sync_git_labels.sh
+    key: sync-git-labels
+    timeout_in_minutes: 30
+    soft_fail: true
+    env:
+      FTR_EIS_CCM: '1'
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 2
 
   - label: 'Store Cache for build'
     command: .buildkite/scripts/steps/store_cache.sh
@@ -220,7 +238,7 @@ steps:
             - exit_status: '-1'
               limit: 3
 
-      - label: 'Evals: Entity Anlaytics'
+      - label: 'Evals: Entity Analytics'
         key: kbn-evals-weekly-entity-analytics
         command: bash .buildkite/scripts/steps/evals/run_suite.sh
         env:

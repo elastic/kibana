@@ -16,8 +16,9 @@ import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../shared/components/expandable_section';
 import { PREFIX } from '../../../flyout/shared/test_ids';
 import { AnalyzerPreviewContainer } from './analyzer_preview_container';
+import { SessionPreviewContainer } from './session_preview_container';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
-import { AnalyzerGraph } from '../../analyzer/analyzer_graph';
+import { AnalyzerGraph } from '../../analyzer';
 import type { ResolverCellActionRenderer } from '../../../resolver/types';
 
 export const VISUALIZATION_SECTION_TEST_ID = `${PREFIX}Visualizations` as const;
@@ -75,6 +76,7 @@ export const VisualizationsSection = memo(
         }
       );
     }, [history, hit, overlays, renderCellActions, services, store]);
+    const onShowSessionView = useCallback(() => {}, []);
 
     return (
       <ExpandableSection
@@ -85,6 +87,12 @@ export const VisualizationsSection = memo(
         sectionId={LOCAL_STORAGE_SECTION_KEY}
         title={VISUALIZATION_SECTION_TITLE}
       >
+        <SessionPreviewContainer
+          hit={hit}
+          onShowSessionView={onShowSessionView}
+          disableNavigation={true}
+          showIcon={false}
+        />
         <AnalyzerPreviewContainer
           hit={hit}
           onShowAnalyzer={onShowAnalyzer}

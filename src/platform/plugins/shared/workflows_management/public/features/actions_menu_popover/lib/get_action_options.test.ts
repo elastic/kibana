@@ -67,15 +67,14 @@ describe('getActionOptions', () => {
   it('should return all base action groups', () => {
     const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
 
-    expect(result).toHaveLength(8);
+    expect(result).toHaveLength(7);
     expect(result[0].id).toBe('triggers');
     expect(result[1].id).toBe('elasticsearch');
     expect(result[2].id).toBe('kibana');
     expect(result[3].id).toBe('ai');
     expect(result[4].id).toBe('data');
     expect(result[5].id).toBe('external');
-    expect(result[6].id).toBe('http');
-    expect(result[7].id).toBe('flowControl');
+    expect(result[6].id).toBe('flowControl');
   });
 
   it('should include trigger options', () => {
@@ -95,9 +94,10 @@ describe('getActionOptions', () => {
 
     expect(flowControlGroup).toBeDefined();
     if (flowControlGroup && 'options' in flowControlGroup) {
-      expect(flowControlGroup.options).toHaveLength(6);
+      expect(flowControlGroup.options).toHaveLength(7);
       expect(flowControlGroup.options.map((opt) => opt.id)).toEqual([
         'if',
+        'switch',
         'foreach',
         'while',
         'wait',

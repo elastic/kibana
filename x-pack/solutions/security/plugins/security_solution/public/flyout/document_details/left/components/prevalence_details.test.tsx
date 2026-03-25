@@ -27,9 +27,10 @@ import {
   PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
   PREVALENCE_DETAILS_UPSELL_TEST_ID,
 } from './test_ids';
-import { usePrevalence } from '../../shared/hooks/use_prevalence';
+import { usePrevalence } from '../../../../flyout_v2/document/hooks/use_prevalence';
 import { TestProviders } from '../../../../common/mock';
 import { licenseService } from '../../../../common/hooks/use_license';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { HostPreviewPanelKey } from '../../../entity_details/host_right';
@@ -61,7 +62,7 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../shared/hooks/use_prevalence');
+jest.mock('../../../../flyout_v2/document/hooks/use_prevalence');
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -86,10 +87,9 @@ jest.mock('../../../../common/hooks/use_license', () => {
 const NO_DATA_MESSAGE = 'No prevalence data available.';
 
 const panelContextValue = {
+  ...mockContextValue,
   eventId: 'event id',
   indexName: 'indexName',
-  browserFields: {},
-  dataFormattedForFieldBrowser: [],
   scopeId: 'scopeId',
 } as unknown as DocumentDetailsContext;
 

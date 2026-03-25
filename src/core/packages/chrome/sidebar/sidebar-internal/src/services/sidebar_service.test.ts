@@ -252,21 +252,41 @@ describe('SidebarService (integration)', () => {
   });
 
   describe('width', () => {
-    it('clamps width to min and max based on viewport', () => {
+    const originalWindowWidth = window.innerWidth;
+
+    const setWindowWidth = (width: number) => {
+      Object.defineProperty(window, 'innerWidth', {
+        configurable: true,
+        value: width,
+        writable: true,
+      });
+    };
+
+    afterEach(() => {
+      setWindowWidth(originalWindowWidth);
+    });
+
+    it('defaults to 30% of the viewport, clamped to the minimum width', () => {
+      setWindowWidth(1000);
+
       const service = createService();
       registerApp(service, { appId: APP_ID_A });
 
-      const WINDOW_WIDTH = 1000;
+      const start = service.start();
+
+      expect(start.getWidth()).toBe(320);
+    });
+
+    it('clamps width to min and max based on viewport', () => {
+      setWindowWidth(1000);
+
+      const service = createService();
+      registerApp(service, { appId: APP_ID_A });
+
       const MIN_WIDTH = 320;
-      const MAX_WIDTH = Math.floor(WINDOW_WIDTH * 0.5);
+      const MAX_WIDTH = Math.floor(1000 * 0.5);
       const TOO_SMALL_WIDTH = 100;
       const TOO_LARGE_WIDTH = 999;
-
-      Object.defineProperty(window, 'innerWidth', {
-        configurable: true,
-        value: WINDOW_WIDTH,
-        writable: true,
-      });
 
       const start = service.start();
 
@@ -275,6 +295,19 @@ describe('SidebarService (integration)', () => {
 
       start.setWidth(TOO_LARGE_WIDTH);
       expect(start.getWidth()).toBe(MAX_WIDTH);
+    });
+
+    it('uses the minimum width as the maximum on small viewports', () => {
+      setWindowWidth(500);
+
+      const service = createService();
+      registerApp(service, { appId: APP_ID_A });
+
+      const start = service.start();
+
+      start.setWidth(999);
+
+      expect(start.getWidth()).toBe(320);
     });
   });
 

@@ -62,7 +62,8 @@ const createFormatContext = (agentContext: AgentHandlerContext): AttachmentForma
  **/
 const mergeInputAttachmentsIntoAttachmentState = async (
   attachmentStateManager: AttachmentStateManager,
-  inputs: AttachmentInput[]
+  inputs: AttachmentInput[],
+  options?: { updateOriginSnapshot?: boolean }
 ) => {
   if (inputs.length === 0) return;
 
@@ -87,6 +88,13 @@ const mergeInputAttachmentsIntoAttachmentState = async (
           },
           ATTACHMENT_REF_ACTOR.user
         );
+        if (options?.updateOriginSnapshot && existing.origin !== undefined) {
+          await attachmentStateManager.updateOrigin(
+            input.id,
+            existing.origin,
+            ATTACHMENT_REF_ACTOR.user
+          );
+        }
         continue;
       }
     }
@@ -179,7 +187,9 @@ export const prepareConversation = async ({
 
   await mergeInputAttachmentsIntoAttachmentState(attachmentStateManager, previousAttachments);
   attachmentStateManager.clearAccessTracking();
-  await mergeInputAttachmentsIntoAttachmentState(attachmentStateManager, nextInputAttachments);
+  await mergeInputAttachmentsIntoAttachmentState(attachmentStateManager, nextInputAttachments, {
+    updateOriginSnapshot: true,
+  });
 
   const strippedNextInput: ConverseInput = { ...effectiveNextInput, attachments: [] };
   const processedNextInput = await prepareRoundInput({

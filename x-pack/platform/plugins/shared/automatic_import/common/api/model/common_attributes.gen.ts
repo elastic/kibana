@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { ESProcessorItem } from './processor_attributes.gen';
 import { CelInput } from './cel_input_attributes.gen';

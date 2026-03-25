@@ -14,24 +14,31 @@ export type {
   EsqlAttachment,
   VisualizationAttachment,
 } from './attachments';
+
+export type {
+  StaleAttachment,
+  FreshAttachment,
+  AttachmentStaleCheckResult,
+  FreshAttachmentStalenessCheckError,
+} from './stale_check';
+export { isFreshAttachmentStalenessCheckError } from './stale_check';
 export {
   AttachmentType,
   textAttachmentDataSchema,
   esqlAttachmentDataSchema,
   screenContextAttachmentDataSchema,
   visualizationAttachmentDataSchema,
-  visualizationOriginDataSchema,
   type TextAttachmentData,
   type ScreenContextAttachmentData,
-  type ScreenContextTimeRange,
+  type TimeRange,
   screenContextTimeRangeSchema,
   type EsqlAttachmentData,
   type VisualizationAttachmentData,
-  type VisualizationOriginData,
 } from './attachment_types';
 
 export type {
   VersionedAttachment,
+  VersionedAttachmentWithOrigin,
   AttachmentVersion,
   AttachmentVersionRef,
   AttachmentRefOperation,
@@ -56,6 +63,7 @@ export {
   parseVersionId,
   isAttachmentActive,
   getActiveAttachments,
+  isVersionedAttachmentWithOrigin,
   hashContent,
   estimateTokens,
 } from './versioned_attachment';

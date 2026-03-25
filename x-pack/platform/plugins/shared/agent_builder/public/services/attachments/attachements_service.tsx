@@ -12,6 +12,7 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser';
 import { publicApiPath } from '../../../common/constants';
+import type { CheckStaleAttachmentsResponse } from '../../../common/http_api/attachments';
 
 /**
  * Internal service for managing attachment UI definitions and API operations.
@@ -76,13 +77,22 @@ export class AttachmentsService {
   async updateOrigin(
     conversationId: string,
     attachmentId: string,
-    origin: unknown
+    origin: string
   ): Promise<UpdateOriginResponse> {
     return await this.http.put<UpdateOriginResponse>(
       `${publicApiPath}/conversations/${conversationId}/attachments/${attachmentId}/origin`,
       {
         body: JSON.stringify({ origin }),
       }
+    );
+  }
+
+  /**
+   * Checks all conversation attachments for staleness against their origin snapshots.
+   */
+  async checkStale(conversationId: string): Promise<CheckStaleAttachmentsResponse> {
+    return await this.http.get<CheckStaleAttachmentsResponse>(
+      `${publicApiPath}/conversations/${conversationId}/attachments/stale`
     );
   }
 }

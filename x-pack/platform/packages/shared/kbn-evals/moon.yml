@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/some-dev-log'
   - '@kbn/inference-tracing'
   - '@kbn/repo-info'
+  - '@kbn/kbn-client'
   - '@kbn/test'
   - '@kbn/inference-prompt-utils'
   - '@kbn/tracing-utils'
@@ -44,6 +45,7 @@ tags:
 fileGroups:
   src:
     - '**/*.ts'
+    - '**/*.json'
     - '!target/**/*'
 tasks:
   jest:

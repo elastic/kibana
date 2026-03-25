@@ -11,8 +11,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { i18n } from '@kbn/i18n';
 
+import { LeftPanelInsightsTab } from '../../left';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
-import { InsightsSummaryRow } from './insights_summary_row';
+import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
+import { InsightsSummaryRow } from '../../../../flyout_v2/document/components/insights_summary_row';
 import {
   CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID,
   CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID,
@@ -44,6 +46,11 @@ export const SuppressedAlerts: React.VFC<SuppressedAlertsProps> = ({
   alertSuppressionCount,
   ruleType,
 }) => {
+  const goToCorrelationsTab = useNavigateToLeftPanel({
+    tab: LeftPanelInsightsTab,
+    subTab: CORRELATIONS_TAB_ID,
+  });
+
   const text = useMemo(
     () => (
       <FormattedMessage
@@ -61,7 +68,7 @@ export const SuppressedAlerts: React.VFC<SuppressedAlertsProps> = ({
         <InsightsSummaryRow
           text={text}
           value={alertSuppressionCount}
-          expandedSubTab={CORRELATIONS_TAB_ID}
+          onShowDetails={goToCorrelationsTab}
           data-test-subj={CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID}
           key={`correlation-row-suppressed-alerts`}
         />

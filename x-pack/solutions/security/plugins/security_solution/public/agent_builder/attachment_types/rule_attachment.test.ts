@@ -6,10 +6,16 @@
  */
 
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { RULES_FEATURE_ID_V2 } from '@kbn/security-solution-features/constants';
 import { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
-import { createRuleAttachmentDefinition, isOnRuleFormPage } from './rule_attachment';
+import {
+  createRuleAttachmentDefinition,
+  isOnRuleFormPage,
+  registerRuleAttachment,
+} from './rule_attachment';
+import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 
 const validRule = {
   name: 'Test Rule',
@@ -24,6 +30,10 @@ const makeAttachment = (ruleJson: string, label?: string) => ({
   type: 'security.rule',
   data: { text: ruleJson, ...(label ? { attachmentLabel: label } : {}) },
 });
+const mockAddAttachmentType = jest.fn();
+const mockAttachments: AttachmentServiceStartContract = {
+  addAttachmentType: mockAddAttachmentType,
+} as unknown as AttachmentServiceStartContract;
 
 const makeApplication = (canEdit: boolean) =>
   ({
@@ -75,6 +85,62 @@ describe('createRuleAttachmentDefinition', () => {
 
   afterAll(() => {
     (window as { location: unknown }).location = originalLocation;
+  });
+
+  describe('registerRuleAttachment', () => {
+    it('registers only the rule attachment type', () => {
+      const application = makeApplication(true);
+      registerRuleAttachment({
+        attachments: mockAttachments,
+        application,
+        aiRuleCreation,
+      });
+
+      expect(mockAddAttachmentType).toHaveBeenCalledTimes(1);
+      expect(mockAddAttachmentType).toHaveBeenCalledWith(
+        SecurityAgentBuilderAttachments.rule,
+        expect.any(Object)
+      );
+    });
+
+    it('registers rule attachment type with correct config', () => {
+      const application = makeApplication(true);
+      registerRuleAttachment({
+        attachments: mockAttachments,
+        application,
+        aiRuleCreation,
+      });
+
+      const ruleCall = mockAddAttachmentType.mock.calls.find(
+        (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.rule
+      );
+      expect(ruleCall).toBeDefined();
+
+      const config = ruleCall![1];
+      expect(config.getIcon()).toBe('securityApp');
+      expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Security Rule');
+    });
+
+    it('returns attachmentLabel when provided in alert attachment data', () => {
+      const application = makeApplication(true);
+      registerRuleAttachment({
+        attachments: mockAttachments,
+        application,
+        aiRuleCreation,
+      });
+
+      const ruleCall = mockAddAttachmentType.mock.calls.find(
+        (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.rule
+      );
+      const config = ruleCall![1];
+
+      const attachment = {
+        id: 'test',
+        type: SecurityAgentBuilderAttachments.rule,
+        data: { text: '{}', attachmentLabel: 'My Test Security Rule' },
+      };
+      expect(config.getLabel(attachment)).toBe('My Test Security Rule');
+    });
   });
 
   describe('getActionButtons', () => {

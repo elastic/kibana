@@ -23,7 +23,7 @@ import type {
   PostValidationMetadata,
 } from '@kbn/core-http-server';
 import { isConfigSchema } from '@kbn/config-schema';
-import { isZod } from '@kbn/zod';
+import { isZod } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import type { DeepPartial } from '@kbn/utility-types';
 import type { Request } from '@hapi/hapi';

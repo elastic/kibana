@@ -46,8 +46,7 @@ apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => 
       responseType: 'json',
     });
 
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.spaces).toStrictEqual(['default']);
+    expect(response).toHaveStatusCode(201);
     expect(response.body.data.title).toStrictEqual(title);
   });
 
@@ -66,7 +65,7 @@ apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => 
       responseType: 'json',
     });
 
-    expect(response).toHaveStatusCode(200);
+    expect(response).toHaveStatusCode(201);
     expect(response.body.id).toBe(id);
   });
 
@@ -86,8 +85,7 @@ apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => 
       responseType: 'json',
     });
 
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.spaces).toStrictEqual([spaceId]);
+    expect(response).toHaveStatusCode(201);
   });
 
   apiTest('return error if provided id already exists', async ({ apiClient }) => {

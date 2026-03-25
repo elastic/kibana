@@ -10,17 +10,16 @@
 import { ToolType } from '@kbn/agent-builder-common';
 import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
 import { z } from '@kbn/zod/v4';
+import { workflowTools } from '../../../common/agent_builder/constants';
 import type { AgentBuilderPluginSetupContract } from '../../types';
 import type { WorkflowsManagementApi } from '../../workflows_management/workflows_management_api';
-
-export const LIST_WORKFLOWS_TOOL_ID = 'platform.workflows.list_workflows';
 
 export function registerListWorkflowsTool(
   agentBuilder: AgentBuilderPluginSetupContract,
   api: WorkflowsManagementApi
 ): void {
   agentBuilder.tools.register({
-    id: LIST_WORKFLOWS_TOOL_ID,
+    id: workflowTools.listWorkflows,
     type: ToolType.builtin,
     description: `List workflows in the user's environment.
 

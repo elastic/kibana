@@ -8,6 +8,7 @@
 import React from 'react';
 import { fireEvent, render, act } from '@testing-library/react';
 import type { DataViewFieldBase } from '@kbn/es-query';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { TestProviders } from '../../../../common/mock';
 import { DocumentDetailsContext } from '../../shared/context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
@@ -15,7 +16,6 @@ import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../../detect
 import { useRuleIndexPattern } from '../../../../detection_engine/rule_creation_ui/pages/form';
 import { HighlightedFieldsModal } from './highlighted_fields_modal';
 import type { RuleResponse, RuleUpdateProps } from '../../../../../common/api/detection_engine';
-import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import {
   HIGHLIGHTED_FIELDS_MODAL_CANCEL_BUTTON_TEST_ID,
   HIGHLIGHTED_FIELDS_MODAL_CUSTOM_FIELDS_TEST_ID,
@@ -24,14 +24,14 @@ import {
   HIGHLIGHTED_FIELDS_MODAL_DEFAULT_FIELDS_TEST_ID,
 } from './test_ids';
 import { useUpdateRule } from '../../../../detection_engine/rule_management/logic/use_update_rule';
-import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
+import { useHighlightedFields } from '../../../../flyout_v2/document/hooks/use_highlighted_fields';
 
 jest.mock(
   '../../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message'
 );
 jest.mock('../../../../detection_engine/rule_creation_ui/pages/form');
 jest.mock('../../../../detection_engine/rule_management/logic/use_update_rule');
-jest.mock('../../shared/hooks/use_highlighted_fields');
+jest.mock('../../../../flyout_v2/document/hooks/use_highlighted_fields');
 jest.mock('../../../rule_details/hooks/use_rule_details');
 
 const mockAddSuccess = jest.fn();
@@ -50,7 +50,7 @@ const mockRule = { id: '123', name: 'test rule' } as RuleResponse;
 const defaultProps = {
   rule: mockRule,
   customHighlightedFields: [] as string[],
-  dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
+  hit: buildDataTableRecord(mockContextValue.searchHit as EsHitRecord),
   setIsEditLoading: mockSetIsEditLoading,
   setIsModalVisible: mockSetIsModalVisible,
 };

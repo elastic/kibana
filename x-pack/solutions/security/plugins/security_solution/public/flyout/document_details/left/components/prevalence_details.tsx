@@ -24,14 +24,15 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
-import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
+import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/constants/local_storage';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { InvestigateInTimelineButton } from '../../../../common/components/event_details/investigate_in_timeline_button';
-import type { PrevalenceData } from '../../shared/hooks/use_prevalence';
-import { usePrevalence } from '../../shared/hooks/use_prevalence';
+import type { PrevalenceData } from '../../../../flyout_v2/document/hooks/use_prevalence';
+import { usePrevalence } from '../../../../flyout_v2/document/hooks/use_prevalence';
 import {
   PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID,
   PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_TEST_ID,
@@ -362,8 +363,9 @@ export const PrevalenceDetails: React.FC = () => {
     EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE
   );
 
-  const { dataFormattedForFieldBrowser, investigationFields, scopeId } =
-    useDocumentDetailsContext();
+  const { investigationFields, scopeId, searchHit } = useDocumentDetailsContext();
+
+  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
   const {
     timelinePrivileges: { read: canUseTimeline },
@@ -419,7 +421,7 @@ export const PrevalenceDetails: React.FC = () => {
   }, []);
 
   const { loading, error, data } = usePrevalence({
-    dataFormattedForFieldBrowser,
+    hit,
     investigationFields,
     interval: {
       from: start,

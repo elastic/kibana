@@ -55,8 +55,9 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
   pathway,
   ...props
 }) => {
-  const { services } = useKibana();
-  const { aiRuleCreation } = services;
+  const {
+    services: { aiRuleCreation },
+  } = useKibana();
   const {
     defineStepData,
     aboutStepData,

@@ -24,9 +24,6 @@ import type {
   IScopedClusterClient,
   ElasticsearchClientConfig,
   AsScopedOptions,
-  OriginOnlyRouting,
-  SpaceNPRERouting,
-  AllProjectsRouting,
 } from '@kbn/core-elasticsearch-server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
@@ -47,14 +44,26 @@ import type { AgentFactoryProvider } from './agent_manager';
 
 const noop = () => undefined;
 
+interface CommonFactoryRoutingOpts {
+  logger: Logger;
+}
+
+interface SpaceFactoryRoutingOpts extends CommonFactoryRoutingOpts {
+  projectRouting: 'space';
+  request: ScopeableUrlRequest;
+}
+
+/**
+ * Discriminated union of routing options passed to {@link OnRequestHandlerFactory}.
+ * Each variant carries exactly the data needed for that routing mode.
+ * @internal
+ */
+export type FactoryRoutingOpts = CommonFactoryRoutingOpts | SpaceFactoryRoutingOpts;
 /**
  * A factory that produces an {@link OnRequestHandler}, which can be bound to a request context.
  * @internal
  */
-export type OnRequestHandlerFactory = (opts: {
-  projectRouting: 'origin-only' | 'all' | ScopeableUrlRequest;
-  logger: Logger;
-}) => OnRequestHandler;
+export type OnRequestHandlerFactory = (opts: FactoryRoutingOpts) => OnRequestHandler;
 
 /** @internal **/
 export class ClusterClient implements ICustomClusterClient {
@@ -103,10 +112,7 @@ export class ClusterClient implements ICustomClusterClient {
     this.getUnauthorizedErrorHandler = getUnauthorizedErrorHandler;
     this.onRequestHandlerFactory = onRequestHandlerFactory;
 
-    const internalUserOnRequest = onRequestHandlerFactory({
-      projectRouting: 'origin-only',
-      logger,
-    });
+    const internalUserOnRequest = onRequestHandlerFactory({ logger });
 
     this.asInternalUser = configureClient(config, {
       logger,
@@ -127,25 +133,19 @@ export class ClusterClient implements ICustomClusterClient {
     });
   }
 
-  asScoped(request: ScopeableUrlRequest, opts: SpaceNPRERouting): IScopedClusterClient;
-  asScoped(
-    request: ScopeableRequest,
-    opts?: OriginOnlyRouting | AllProjectsRouting
-  ): IScopedClusterClient;
-  asScoped(request: ScopeableRequest, opts: AsScopedOptions = { projectRouting: 'origin-only' }) {
+  asScoped(request: ScopeableRequest): IScopedClusterClient;
+  asScoped(request: ScopeableUrlRequest, opts: AsScopedOptions): IScopedClusterClient;
+  asScoped(request: ScopeableUrlRequest, opts?: AsScopedOptions): IScopedClusterClient {
     const createScopedClient = () => {
       const scopedHeaders = this.getScopedHeaders(request);
-      const { projectRouting } = opts;
-
+      const factoryOpts: FactoryRoutingOpts = opts
+        ? { ...opts, logger: this.logger, request }
+        : { logger: this.logger };
       const transportClass = createTransport({
         scoped: true,
         getExecutionContext: this.getExecutionContext,
         getUnauthorizedErrorHandler: this.createInternalErrorHandlerAccessor(request),
-        onRequest: this.onRequestHandlerFactory({
-          projectRouting:
-            projectRouting === 'space' ? (request as ScopeableUrlRequest) : projectRouting,
-          logger: this.logger,
-        }),
+        onRequest: this.onRequestHandlerFactory(factoryOpts),
         logger: this.logger,
       });
 
