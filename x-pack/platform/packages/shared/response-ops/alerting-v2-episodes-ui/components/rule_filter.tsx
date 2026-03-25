@@ -45,6 +45,7 @@ export const RuleFilter: React.FC<RuleFilterProps> = ({
   }, [searchRules, debouncedSearch]);
 
   const effectiveOptions = useMemo(() => {
+    if (!search.trim()) return ruleOptions;
     if (debouncedSearch.trim() && searchResults.length > 0) {
       const selectedIds = selectedRuleId ? new Set([selectedRuleId]) : new Set<string>();
       const selectedFromInitial = ruleOptions.filter((o) => selectedIds.has(o.value));
@@ -52,7 +53,6 @@ export const RuleFilter: React.FC<RuleFilterProps> = ({
       const missingSelected = selectedFromInitial.filter((o) => !resultIds.has(o.value));
       return [...missingSelected, ...searchResults];
     }
-    if (!search.trim()) return ruleOptions;
     const q = search.toLowerCase();
     return ruleOptions.filter((o) => o.label.toLowerCase().includes(q));
   }, [debouncedSearch, searchResults, ruleOptions, selectedRuleId, search]);
