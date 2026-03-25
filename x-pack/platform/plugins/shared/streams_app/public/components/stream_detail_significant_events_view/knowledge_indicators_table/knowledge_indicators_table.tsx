@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { useKnowledgeIndicatorsBulkDelete } from '../hooks/use_knowledge_indicators_bulk_delete';
 import { KnowledgeIndicatorActionsCell } from '../knowledge_indicator_actions_cell';
@@ -105,6 +105,19 @@ export function KnowledgeIndicatorsTable({
       return (knowledgeIndicator.query.title ?? '').toLowerCase().includes(normalizedSearchTerm);
     });
   }, [knowledgeIndicators, searchTerm, selectedTypes, statusFilter]);
+
+  useEffect(() => {
+    setPagination((currentPagination) => {
+      if (currentPagination.pageIndex === 0) {
+        return currentPagination;
+      }
+
+      return {
+        ...currentPagination,
+        pageIndex: 0,
+      };
+    });
+  }, [searchTerm, selectedTypes, statusFilter]);
 
   const isSelectionActionsDisabled = selectedKnowledgeIndicators.length === 0;
 

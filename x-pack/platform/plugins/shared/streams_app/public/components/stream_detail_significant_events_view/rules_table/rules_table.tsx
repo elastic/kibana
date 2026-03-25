@@ -124,7 +124,12 @@ export function RulesTable({
             return null;
           }
 
-          return formatLastOccurredAt(occurrencesByQueryId[item.query.id]);
+          const occurrences = occurrencesByQueryId[item.query.id];
+          if (!occurrences) {
+            return null;
+          }
+
+          return formatLastOccurredAt(occurrences);
         },
       },
       {

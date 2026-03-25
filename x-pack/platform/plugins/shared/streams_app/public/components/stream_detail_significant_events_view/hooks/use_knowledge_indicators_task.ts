@@ -13,8 +13,6 @@ import { useOnboardingApi } from '../../../hooks/use_onboarding_api';
 import { getFormattedError } from '../../../util/errors';
 import { useKibana } from '../../../hooks/use_kibana';
 
-const TASK_STATUS_QUERY_KEY = ['knowledgeIndicatorsTaskStatus'] as const;
-
 interface Props {
   streamName: string;
   onComplete: (
@@ -54,10 +52,15 @@ export function useKnowledgeIndicatorsTask({ streamName, onComplete }: Props) {
   });
 
   useEffect(() => {
-    getOnboardingTaskStatus(streamName).then((taskState) => {
-      setKnowledgeIndicatorsTaskState(taskState);
-      previousTaskStatusRef.current = taskState.status;
-    });
+    getOnboardingTaskStatus(streamName)
+      .then((taskState) => {
+        setKnowledgeIndicatorsTaskState(taskState);
+        previousTaskStatusRef.current = taskState.status;
+      })
+      .catch(() => {
+        setKnowledgeIndicatorsTaskState({ status: TaskStatus.NotStarted });
+        previousTaskStatusRef.current = TaskStatus.NotStarted;
+      });
     /**
      * Explicitly running this hook only once to get the initial
      * task state
@@ -112,7 +115,7 @@ export function useKnowledgeIndicatorsTask({ streamName, onComplete }: Props) {
   };
 
   useQuery<TaskResult<OnboardingResult>, Error>({
-    queryKey: TASK_STATUS_QUERY_KEY,
+    queryKey: ['knowledgeIndicatorsTaskStatus', streamName],
     queryFn: fetchStatus,
     enabled: isPending && !scheduleTaskMutation.isLoading && !cancelTaskMutation.isLoading,
     refetchInterval: 2000,
