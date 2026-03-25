@@ -16,7 +16,9 @@ import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/u
 const resumeWorkflowExecutionSchema = z.object({
   executionId: z
     .string()
-    .describe('ID of the workflow execution (execution_id) that is waiting for input.'),
+    .describe(
+      'The executionId of the workflow execution that is waiting for input. Use the executionId value returned by the status tool.'
+    ),
   input: z
     .record(z.string(), z.unknown())
     .describe(
@@ -40,7 +42,7 @@ export const resumeWorkflowExecutionTool = ({
     Use this tool when a workflow execution returned with status "waiting_for_input".
     The execution's "waiting_input" field describes what input is expected (message and optional schema).
 
-    Provide the execution_id and the required input object to resume the workflow.
+    Provide the executionId and the required input object to resume the workflow.
     After resuming, use ${platformCoreTools.getWorkflowExecutionStatus} to check whether the workflow completed or paused again (e.g. inside a loop).
     `),
     schema: resumeWorkflowExecutionSchema,
