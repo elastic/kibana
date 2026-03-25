@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Chart,
   BarSeries,
@@ -16,20 +16,71 @@ import {
   LIGHT_THEME,
   DARK_THEME,
 } from '@elastic/charts';
+import { useApp } from '@modelcontextprotocol/ext-apps/react';
 import '@elastic/charts/dist/theme_light.css';
 
-const MOCK_DATA = [
-  { category: 'Logs', count: 120 },
-  { category: 'Metrics', count: 85 },
-  { category: 'Traces', count: 64 },
-  { category: 'Alerts', count: 42 },
-  { category: 'Events', count: 97 },
-];
+interface DataPoint {
+  timestamp: number;
+  date: string;
+  count: number;
+}
 
 const isDarkMode =
   window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
 
 export const App = () => {
+  const [chartData, setChartData] = useState<DataPoint[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  const { isConnected, error: connectionError } = useApp({
+    appInfo: { name: 'Chart MCP App', version: '1.0.0' },
+    capabilities: {},
+    onAppCreated: (app) => {
+      app.ontoolresult = (result) => {
+        if (result.isError) {
+          const text = result.content?.find((c) => c.type === 'text');
+          setError(text && 'text' in text ? text.text : 'Unknown error');
+          return;
+        }
+
+        const structured = result.structuredContent as { chartData?: DataPoint[] } | undefined;
+        if (structured?.chartData) {
+          setChartData(structured.chartData);
+        }
+      };
+    },
+  });
+
+  if (connectionError) {
+    return (
+      <div style={{ padding: '1rem', textAlign: 'center' }}>
+        <strong>Connection error:</strong> {connectionError.message}
+      </div>
+    );
+  }
+
+  if (!isConnected) {
+    return (
+      <div style={{ padding: '1rem', textAlign: 'center' }}>Connecting…</div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ padding: '1rem', textAlign: 'center', color: '#c00' }}>
+        <strong>Error:</strong> {error}
+      </div>
+    );
+  }
+
+  if (chartData.length === 0) {
+    return (
+      <div style={{ padding: '1rem', textAlign: 'center' }}>
+        Waiting for data…
+      </div>
+    );
+  }
+
   return (
     <div style={{ padding: '1rem' }}>
       <h1
@@ -40,7 +91,7 @@ export const App = () => {
           textAlign: 'center',
         }}
       >
-        Elastic Charts – MCP App
+        kibana_sample_data_logs — requests over time
       </h1>
       <div style={{ height: 300 }}>
         <Chart>
@@ -49,15 +100,23 @@ export const App = () => {
             theme={{ background: { color: 'transparent' } }}
             baseTheme={isDarkMode ? DARK_THEME : LIGHT_THEME}
           />
-          <Axis id="bottom" position={Position.Bottom} title="Category" />
+          <Axis
+            id="bottom"
+            position={Position.Bottom}
+            title="Date"
+            tickFormat={(d) => {
+              const date = new Date(d);
+              return `${date.getMonth() + 1}/${date.getDate()}`;
+            }}
+          />
           <Axis id="left" position={Position.Left} title="Count" />
           <BarSeries
-            id="mock-data"
-            xScaleType={ScaleType.Ordinal}
+            id="logs-over-time"
+            xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
-            xAccessor="category"
+            xAccessor="timestamp"
             yAccessors={['count']}
-            data={MOCK_DATA}
+            data={chartData}
           />
         </Chart>
       </div>

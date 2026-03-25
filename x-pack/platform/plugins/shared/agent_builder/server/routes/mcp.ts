@@ -144,7 +144,9 @@ To learn more, refer to the [MCP documentation](https://www.elastic.co/docs/expl
 
           // Register MCP App tools (tools with interactive UI)
           registerHelloMcpApp(server);
-          registerChartMcpApp(server);
+
+          const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+          registerChartMcpApp(server, esClient);
 
           request.events.aborted$.subscribe(async () => {
             await transport?.close().catch((error) => {

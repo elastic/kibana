@@ -9,6 +9,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 const RESOURCE_URI = 'ui://chart-mcp-app/mcp-app.html';
 const RESOURCE_MIME_TYPE = 'text/html;profile=mcp-app';
@@ -35,26 +36,86 @@ const loadBuiltHtml = (): string => {
   }
 };
 
+interface DateHistogramBucket {
+  key: number;
+  key_as_string: string;
+  doc_count: number;
+}
+
+/**
+ * Queries kibana_sample_data_logs for a date histogram aggregation
+ * and returns the buckets as chart-ready data.
+ */
+const fetchDateHistogram = async (esClient: ElasticsearchClient) => {
+  const response = await esClient.search({
+    index: 'kibana_sample_data_logs',
+    size: 0,
+    body: {
+      aggs: {
+        logs_over_time: {
+          date_histogram: {
+            field: '@timestamp',
+            calendar_interval: 'day',
+          },
+        },
+      },
+    },
+  });
+
+  const buckets = (
+    (response.aggregations?.logs_over_time as { buckets?: DateHistogramBucket[] })?.buckets ?? []
+  );
+
+  return buckets.map((bucket) => ({
+    timestamp: bucket.key,
+    date: bucket.key_as_string,
+    count: bucket.doc_count,
+  }));
+};
+
 /**
  * Registers the "chart_mcp_app" MCP App tool and its associated HTML resource
  * on the given MCP server instance.
  *
- * The tool renders a bar chart using Elastic Charts with mock data.
+ * The tool queries kibana_sample_data_logs for a date histogram and passes
+ * the data to the iframe via structuredContent.
  */
-export const registerChartMcpApp = (server: McpServer) => {
+export const registerChartMcpApp = (server: McpServer, esClient: ElasticsearchClient) => {
   const html = loadBuiltHtml();
 
   server.registerTool('chart_mcp_app', {
     title: 'Chart MCP App',
-    description: 'Displays a bar chart built with Elastic Charts and mock data.',
+    description:
+      'Displays a date histogram bar chart of kibana_sample_data_logs using Elastic Charts.',
     _meta: {
       ui: { resourceUri: RESOURCE_URI },
       'ui/resourceUri': RESOURCE_URI,
     },
   }, async () => {
-    return {
-      content: [{ type: 'text' as const, text: 'Bar chart rendered with Elastic Charts (mock data).' }],
-    };
+    try {
+      const chartData = await fetchDateHistogram(esClient);
+
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: `Date histogram chart with ${chartData.length} data points from kibana_sample_data_logs.`,
+          },
+        ],
+        structuredContent: { chartData },
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: `Failed to fetch chart data: ${message}. Make sure kibana_sample_data_logs is loaded.`,
+          },
+        ],
+        isError: true,
+      };
+    }
   });
 
   server.registerResource(
