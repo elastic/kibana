@@ -69,8 +69,7 @@ jest.mock('../../../../customizations', () => ({
 
 const mockGetRecommendedFieldsAccessor = jest.fn();
 
-jest.mock('../../../../context_awareness', () => ({
-  ...jest.requireActual('../../../../context_awareness'),
+jest.mock('../../../../context_awareness/hooks/use_profile_accessor', () => ({
   useProfileAccessor: jest.fn((accessorId: string) => {
     if (accessorId === 'getRecommendedFields') {
       return mockGetRecommendedFieldsAccessor;
