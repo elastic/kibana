@@ -20,7 +20,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
-import { last, mapValues, padStart } from 'lodash';
+import { isEmpty, last, mapValues, omit, padStart } from 'lodash';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import type { TransportRequestOptions } from '@elastic/transport';
@@ -531,7 +531,7 @@ export class StorageIndexAdapter<
   private clean: StorageClientClean = async (): Promise<StorageClientCleanResponse> => {
     this.initPromise = undefined;
     const allIndices = await this.getExistingIndices();
-    const hasIndices = Object.keys(allIndices).length > 0;
+    const hasIndices = !isEmpty(allIndices);
     // Delete all indices
     await Promise.all(
       Object.keys(allIndices).map((index) =>
@@ -675,7 +675,7 @@ export class StorageIndexAdapter<
 
     if (this.options.versioning) {
       const docVersion = source[VERSION_FIELD] as number | undefined;
-      const { [VERSION_FIELD]: _, ...docWithoutVersion } = source;
+      const docWithoutVersion = omit(source, VERSION_FIELD);
 
       return docVersion !== undefined
         ? this.options.versioning.migrate(docWithoutVersion, docVersion)
@@ -772,7 +772,7 @@ export class StorageIndexAdapter<
 
       this.logger.debug(`Migrated ${migrated} documents so far (${failed} failed)`);
 
-      searchAfter = hits.at(-1)!.sort as FieldValue[] | undefined;
+      searchAfter = last(hits)!.sort as FieldValue[] | undefined;
     }
 
     if (migrated > 0) {

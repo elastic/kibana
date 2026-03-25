@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { uniq } from 'lodash';
 import { z } from '@kbn/zod/v4';
 
 /**
@@ -65,7 +66,7 @@ function collectPaths(node: JsonSchemaNode, prefix: string = ''): string[] {
 export function getSchemaPaths(schema: z.ZodType): string[] | null {
   try {
     const jsonSchema = z.toJSONSchema(schema) as JsonSchemaNode;
-    const paths = [...new Set(collectPaths(jsonSchema))];
+    const paths = uniq(collectPaths(jsonSchema));
     return paths.length > 0 ? paths : null;
   } catch {
     return null;
