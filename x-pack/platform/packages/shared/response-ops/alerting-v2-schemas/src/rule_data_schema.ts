@@ -292,7 +292,7 @@ export const findRulesResponseSchema = z
 /** Bulk operation response schema. */
 export const bulkOperationResponseSchema = z
   .object({
-    rules: z.array(ruleResponseSchema).describe('The rules that were successfully processed.'),
+    rules: z.array(ruleResponseSchema).describe('The rules that the operation was applied to.'),
     errors: z
       .array(
         z.object({
