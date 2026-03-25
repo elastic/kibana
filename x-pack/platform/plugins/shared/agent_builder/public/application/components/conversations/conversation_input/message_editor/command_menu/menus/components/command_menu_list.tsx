@@ -83,6 +83,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
     };
     const handleSetActive = (next: (index: number) => number) => {
       const nextIndex = next(activeIndexRef.current);
+      activeIndexRef.current = nextIndex;
       setActiveIndex(nextIndex);
       scrollIndexIntoView(nextIndex);
     };
