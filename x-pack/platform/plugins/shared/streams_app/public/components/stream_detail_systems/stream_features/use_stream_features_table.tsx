@@ -448,7 +448,7 @@ export const CLEAR_SELECTION = i18n.translate(
   { defaultMessage: 'Clear selection' }
 );
 
-const DELETE_SELECTED = i18n.translate(
+export const DELETE_SELECTED = i18n.translate(
   'xpack.streams.streamFeaturesTable.columns.actions.deleteSelection',
   { defaultMessage: 'Delete selected' }
 );

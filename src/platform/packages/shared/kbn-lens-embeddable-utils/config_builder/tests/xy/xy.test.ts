@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { XYState as XYLensState } from '@kbn/lens-common';
+import type { XYVisualizationState } from '@kbn/lens-common';
 import { xyStateSchema } from '../../schema/charts/xy';
 import type { LensAttributes } from '../../types';
 import { validateAPIConverter, validateConverter } from '../validate';
@@ -23,7 +23,7 @@ import {
   xyWithFormulaRefColumnsAndRankByTermsBucketOperationAttributes,
 } from './basicXY.mock';
 import { dualReferenceLineXY, referenceLineXY } from './referenceLines.mock';
-import { annotationXY } from './annotations.mock';
+import { annotationXY, byRefAnnotationXY } from './annotations.mock';
 import {
   esqlChart,
   esqlChartWithBreakdownColorMapping,
@@ -36,8 +36,8 @@ function setSeriesType(attributes: LensAttributes, seriesType: 'bar' | 'line' | 
     state: {
       ...attributes.state,
       visualization: {
-        ...(attributes.state.visualization as XYLensState),
-        layers: (attributes.state.visualization as XYLensState).layers.map((layer) => {
+        ...(attributes.state.visualization as XYVisualizationState),
+        layers: (attributes.state.visualization as XYVisualizationState).layers.map((layer) => {
           if (!layer.layerType || layer.layerType === 'data') {
             return {
               ...layer,
@@ -108,6 +108,12 @@ describe('XY', () => {
       for (const type of ['bar', 'line', 'area'] as const) {
         it(`should work for an annotation with a ${type} chart`, () => {
           validateConverter(setSeriesType(annotationXY, type), xyStateSchema);
+        });
+      }
+
+      for (const type of ['bar', 'line', 'area'] as const) {
+        it(`should work for a by-reference annotation with a ${type} chart`, () => {
+          validateConverter(setSeriesType(byRefAnnotationXY, type), xyStateSchema);
         });
       }
     });
@@ -515,6 +521,29 @@ describe('XY', () => {
 
     it('should correctly transform with custom position legend - bug 248611', () => {
       validateAPIConverter(apiXYWithNoTitleAndCustomOutsideLegend, xyStateSchema);
+    });
+
+    it('should convert API with by-reference annotation layer', () => {
+      validateAPIConverter(
+        {
+          type: 'xy',
+          title: 'Chart with by-ref annotation',
+          layers: [
+            {
+              dataset: { type: 'dataView', id: 'myDataView' },
+              type: 'line',
+              ignore_global_filters: false,
+              sampling: 1,
+              y: [{ operation: 'count', empty_as_null: false }],
+            },
+            {
+              type: 'annotation_group',
+              group_id: 'my-library-annotation-group',
+            },
+          ],
+        },
+        xyStateSchema
+      );
     });
 
     describe('XY axis scale support (text-based)', () => {

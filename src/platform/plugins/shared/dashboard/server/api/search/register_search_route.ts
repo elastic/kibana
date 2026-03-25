@@ -31,6 +31,10 @@ export function registerSearchRoute(router: VersionedRouter<RequestHandlerContex
         response: {
           200: {
             body: () => searchResponseBodySchema,
+            description: 'Indicates the search is successful and the dashboards are retrieved',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
           },
         },
       },
@@ -41,10 +45,10 @@ export function registerSearchRoute(router: VersionedRouter<RequestHandlerContex
         result = await search(ctx, req.query);
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
+          return res.forbidden({ body: { message: e.message } });
         }
 
-        return res.badRequest();
+        return res.badRequest({ body: { message: e.message } });
       }
 
       return res.ok({ body: result });
