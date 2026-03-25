@@ -9,41 +9,40 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
-import type { CompactionLogEntry } from './types';
+import type { MemoryQuestion } from './types';
 
-export const compactionLogIndexName = chatSystemIndex('memcompaction');
+export const questionsIndexName = chatSystemIndex('memquestions');
 
 const storageSettings = {
-  name: compactionLogIndexName,
+  name: questionsIndexName,
   schema: {
     properties: {
       id: types.keyword({}),
-      operation: types.keyword({}),
-      affected_entries: types.keyword({}),
-      summary: types.text({}),
+      question: types.text({}),
+      category: types.keyword({}),
+      related_entries: types.keyword({}),
+      context: types.text({}),
+      status: types.keyword({}),
+      answer: types.text({}),
       space: types.keyword({}),
       created_at: types.date({}),
       created_by: types.keyword({}),
-      source_conversation_id: types.keyword({}),
     },
   },
 } satisfies IndexStorageSettings;
 
-export type CompactionLogStorageSettings = typeof storageSettings;
+export type QuestionsStorageSettings = typeof storageSettings;
 
-export type CompactionLogStorage = StorageIndexAdapter<
-  CompactionLogStorageSettings,
-  CompactionLogEntry
->;
+export type QuestionsStorage = StorageIndexAdapter<QuestionsStorageSettings, MemoryQuestion>;
 
-export const createCompactionLogStorage = ({
+export const createQuestionsStorage = ({
   logger,
   esClient,
 }: {
   logger: Logger;
   esClient: ElasticsearchClient;
-}): CompactionLogStorage => {
-  return new StorageIndexAdapter<CompactionLogStorageSettings, CompactionLogEntry>(
+}): QuestionsStorage => {
+  return new StorageIndexAdapter<QuestionsStorageSettings, MemoryQuestion>(
     esClient,
     logger,
     storageSettings

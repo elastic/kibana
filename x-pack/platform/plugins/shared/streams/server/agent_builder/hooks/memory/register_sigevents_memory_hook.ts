@@ -8,16 +8,10 @@
 import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-server';
 import { platformStreamsSigEventsTools } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { Logger } from '@kbn/logging';
 import type { AfterToolCallHookContext } from '@kbn/agent-builder-server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server/types';
-import type { MemoryHookServices } from './types';
+import type { RegisterMemoryHooksDeps } from './types';
 import { sigeventsSynthesisPrompt } from './sigevents_synthesis_prompt';
-
-export interface RegisterSigeventsMemoryHookDeps {
-  logger: Logger;
-  getMemoryServices: () => MemoryHookServices;
-}
 
 /**
  * Registers a non-blocking afterToolCall hook that synthesizes knowledge indicators
@@ -25,7 +19,7 @@ export interface RegisterSigeventsMemoryHookDeps {
  */
 export const registerSigeventsMemoryHook = (
   agentBuilder: AgentBuilderPluginSetup,
-  deps: RegisterSigeventsMemoryHookDeps
+  deps: RegisterMemoryHooksDeps
 ): void => {
   const logger = deps.logger.get('sigeventsMemory');
 
@@ -35,6 +29,10 @@ export const registerSigeventsMemoryHook = (
       [HookLifecycle.afterToolCall]: {
         mode: HookExecutionMode.nonBlocking,
         handler: async (context: AfterToolCallHookContext): Promise<void> => {
+          if (!(await deps.isMemoryEnabled())) {
+            return;
+          }
+
           if (context.toolId !== platformStreamsSigEventsTools.searchKnowledgeIndicators) {
             return;
           }

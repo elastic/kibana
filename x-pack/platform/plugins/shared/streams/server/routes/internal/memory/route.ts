@@ -12,10 +12,10 @@ import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import type {
   MemoryEntry,
+  MemoryQuestion,
   MemoryTreeNode,
   MemorySearchResult,
   MemoryVersionRecord,
-  CompactionLogEntry,
 } from '../../../lib/memory';
 import { MemoryServiceImpl } from '../../../lib/memory';
 import type { StreamsServer } from '../../../types';
@@ -363,34 +363,6 @@ const rollbackRoute = createServerRoute({
   },
 });
 
-const compactionLogRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/memory/compaction-log',
-  options: {
-    access: 'internal',
-    summary: 'Get memory compaction log',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    query: z.object({
-      size: z.coerce.number().min(1).max(100).optional(),
-    }),
-  }),
-  handler: async ({ params, request, server, logger }): Promise<{ log: CompactionLogEntry[] }> => {
-    const memory = getMemoryService(server, logger);
-    const spaceId = DEFAULT_SPACE_ID;
-
-    const log = await memory.getCompactionLog({
-      space: spaceId,
-      size: params.query.size,
-    });
-    return { log };
-  },
-});
-
 const recentChangesRoute = createServerRoute({
   endpoint: 'GET /internal/streams/memory/recent-changes',
   options: {
@@ -427,6 +399,95 @@ const recentChangesRoute = createServerRoute({
   },
 });
 
+const getQuestionsRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/memory/questions',
+  options: {
+    access: 'internal',
+    summary: 'Get open memory questions',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    query: z
+      .object({
+        size: z.coerce.number().min(1).max(100).optional(),
+      })
+      .optional()
+      .default({}),
+  }),
+  handler: async ({
+    params,
+    request,
+    server,
+    logger,
+  }): Promise<{ questions: MemoryQuestion[] }> => {
+    const memory = getMemoryService(server, logger);
+    const spaceId = DEFAULT_SPACE_ID;
+
+    const questions = await memory.getOpenQuestions({
+      space: spaceId,
+      size: params.query?.size,
+    });
+    return { questions };
+  },
+});
+
+const answerQuestionRoute = createServerRoute({
+  endpoint: 'PUT /internal/streams/memory/questions/{id}/answer',
+  options: {
+    access: 'internal',
+    summary: 'Answer an open memory question',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({ id: z.string() }),
+    body: z.object({ answer: z.string() }),
+  }),
+  handler: async ({ params, request, server, logger }): Promise<MemoryQuestion> => {
+    const memory = getMemoryService(server, logger);
+    const spaceId = DEFAULT_SPACE_ID;
+
+    return memory.answerQuestion({
+      id: params.path.id,
+      answer: params.body.answer,
+      space: spaceId,
+    });
+  },
+});
+
+const dismissQuestionRoute = createServerRoute({
+  endpoint: 'PUT /internal/streams/memory/questions/{id}/dismiss',
+  options: {
+    access: 'internal',
+    summary: 'Dismiss an open memory question',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({ id: z.string() }),
+  }),
+  handler: async ({ params, request, server, logger }): Promise<{ dismissed: boolean }> => {
+    const memory = getMemoryService(server, logger);
+    const spaceId = DEFAULT_SPACE_ID;
+
+    await memory.dismissQuestion({
+      id: params.path.id,
+      space: spaceId,
+    });
+    return { dismissed: true };
+  },
+});
+
 export const internalMemoryRoutes = {
   ...createEntryRoute,
   ...getEntryRoute,
@@ -439,6 +500,8 @@ export const internalMemoryRoutes = {
   ...getHistoryRoute,
   ...getVersionRoute,
   ...rollbackRoute,
-  ...compactionLogRoute,
   ...recentChangesRoute,
+  ...getQuestionsRoute,
+  ...answerQuestionRoute,
+  ...dismissQuestionRoute,
 };

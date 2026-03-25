@@ -32,9 +32,7 @@ export const memoryToolIds = [
 /**
  * Creates all memory tools with the given options.
  */
-export const createMemoryTools = (
-  options: MemoryToolsOptions
-): Array<BuiltinToolDefinition<Record<string, unknown>>> => {
+export const createMemoryTools = (options: MemoryToolsOptions): BuiltinToolDefinition[] => {
   return [
     createMemorySearchTool(options),
     createMemoryReadTool(options),

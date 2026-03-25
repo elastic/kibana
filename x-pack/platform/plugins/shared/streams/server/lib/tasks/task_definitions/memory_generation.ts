@@ -142,9 +142,7 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
                   return getDeleteTaskRunResult();
                 }
 
-                taskLogger.error(
-                  `Task ${runContext.taskInstance.id} failed: ${errorMessage}`
-                );
+                taskLogger.error(`Task ${runContext.taskInstance.id} failed: ${errorMessage}`);
 
                 await taskClient.fail<MemoryGenerationTaskParams>(
                   _task,

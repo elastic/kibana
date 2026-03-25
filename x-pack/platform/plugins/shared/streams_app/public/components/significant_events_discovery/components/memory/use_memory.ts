@@ -7,7 +7,13 @@
 
 import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../../../../hooks/use_kibana';
-import type { MemoryEntry, MemoryTreeNode, MemorySearchResult, MemoryVersionRecord } from './types';
+import type {
+  MemoryEntry,
+  MemoryQuestion,
+  MemoryTreeNode,
+  MemorySearchResult,
+  MemoryVersionRecord,
+} from './types';
 
 const MEMORY_BASE = '/internal/streams/memory';
 
@@ -17,9 +23,9 @@ const memoryKeys = {
   search: (query: string) => ['memory', 'search', query] as const,
   byId: (id: string) => ['memory', 'entry', id] as const,
   history: (entryId: string) => ['memory', 'history', entryId] as const,
-  version: (entryId: string, version: number) =>
-    ['memory', 'version', entryId, version] as const,
+  version: (entryId: string, version: number) => ['memory', 'version', entryId, version] as const,
   recentChanges: ['memory', 'recent-changes'] as const,
+  questions: ['memory', 'questions'] as const,
 };
 
 export const useMemoryTree = () => {
@@ -68,9 +74,7 @@ export const useMemoryVersion = (entryId?: string, version?: number) => {
   return useQuery({
     queryKey: memoryKeys.version(entryId!, version!),
     queryFn: () =>
-      core.http.get<MemoryVersionRecord>(
-        `${MEMORY_BASE}/entries/${entryId}/history/${version}`
-      ),
+      core.http.get<MemoryVersionRecord>(`${MEMORY_BASE}/entries/${entryId}/history/${version}`),
     enabled: !!entryId && version !== undefined,
   });
 };
@@ -81,6 +85,14 @@ export const useRecentChanges = () => {
     queryKey: memoryKeys.recentChanges,
     queryFn: () =>
       core.http.get<{ changes: MemoryVersionRecord[] }>(`${MEMORY_BASE}/recent-changes`),
+  });
+};
+
+export const useOpenQuestions = () => {
+  const { core } = useKibana();
+  return useQuery({
+    queryKey: memoryKeys.questions,
+    queryFn: () => core.http.get<{ questions: MemoryQuestion[] }>(`${MEMORY_BASE}/questions`),
   });
 };
 
@@ -131,5 +143,19 @@ export const useMemoryMutations = () => {
     onSuccess: invalidateMemory,
   });
 
-  return { createEntry, updateEntry, deleteEntry, rollbackEntry };
+  const answerQuestion = useMutation({
+    mutationFn: ({ id, answer }: { id: string; answer: string }) =>
+      core.http.put<MemoryQuestion>(`${MEMORY_BASE}/questions/${id}/answer`, {
+        body: JSON.stringify({ answer }),
+      }),
+    onSuccess: invalidateMemory,
+  });
+
+  const dismissQuestion = useMutation({
+    mutationFn: (id: string) =>
+      core.http.put<{ dismissed: boolean }>(`${MEMORY_BASE}/questions/${id}/dismiss`),
+    onSuccess: invalidateMemory,
+  });
+
+  return { createEntry, updateEntry, deleteEntry, rollbackEntry, answerQuestion, dismissQuestion };
 };

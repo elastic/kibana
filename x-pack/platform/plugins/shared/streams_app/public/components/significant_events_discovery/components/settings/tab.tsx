@@ -21,6 +21,7 @@ import {
   EuiPanel,
   EuiSelect,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTextArea,
 } from '@elastic/eui';
@@ -78,6 +79,7 @@ export const SettingsTab = () => {
   const [ruleGeneration, setRuleGeneration] = useState<string>('');
   const [discovery, setDiscovery] = useState<string>('');
   const [indexPatterns, setIndexPatterns] = useState<string>('');
+  const [useMemory, setUseMemory] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<Error | null>(null);
 
@@ -88,6 +90,7 @@ export const SettingsTab = () => {
     setRuleGeneration(toFormValue(v.connectorIdRuleGeneration));
     setDiscovery(toFormValue(v.connectorIdDiscovery));
     setIndexPatterns(v.indexPatterns || DEFAULT_INDEX_PATTERNS);
+    setUseMemory(v.useMemory ?? false);
   }, [settingsFetch.value]);
 
   const hasChanges = useMemo(() => {
@@ -97,9 +100,17 @@ export const SettingsTab = () => {
       knowledgeIndicatorExtraction !== toFormValue(v.connectorIdKnowledgeIndicatorExtraction) ||
       ruleGeneration !== toFormValue(v.connectorIdRuleGeneration) ||
       discovery !== toFormValue(v.connectorIdDiscovery) ||
-      indexPatterns !== (v.indexPatterns || DEFAULT_INDEX_PATTERNS)
+      indexPatterns !== (v.indexPatterns || DEFAULT_INDEX_PATTERNS) ||
+      useMemory !== (v.useMemory ?? false)
     );
-  }, [settingsFetch.value, knowledgeIndicatorExtraction, ruleGeneration, discovery, indexPatterns]);
+  }, [
+    settingsFetch.value,
+    knowledgeIndicatorExtraction,
+    ruleGeneration,
+    discovery,
+    indexPatterns,
+    useMemory,
+  ]);
 
   const handleCancel = useCallback(() => {
     if (!settingsFetch.value) return;
@@ -108,6 +119,7 @@ export const SettingsTab = () => {
     setRuleGeneration(toFormValue(v.connectorIdRuleGeneration));
     setDiscovery(toFormValue(v.connectorIdDiscovery));
     setIndexPatterns(v.indexPatterns || DEFAULT_INDEX_PATTERNS);
+    setUseMemory(v.useMemory ?? false);
     setSaveError(null);
   }, [settingsFetch.value]);
 
@@ -125,6 +137,7 @@ export const SettingsTab = () => {
               connectorIdRuleGeneration: ruleGeneration,
               connectorIdDiscovery: discovery,
               indexPatterns,
+              useMemory,
             },
           },
         }
@@ -142,6 +155,7 @@ export const SettingsTab = () => {
     ruleGeneration,
     discovery,
     indexPatterns,
+    useMemory,
     settingsFetch,
   ]);
 
@@ -370,6 +384,61 @@ export const SettingsTab = () => {
                   />
                 </EuiFormRow>
               </EuiForm>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiPanel>
+
+      <EuiSpacer />
+
+      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
+        <EuiPanel hasShadow={false} color="subdued">
+          <EuiText size="s">
+            <h3>
+              {i18n.translate(
+                'xpack.streams.significantEventsDiscovery.settings.memorySectionTitle',
+                { defaultMessage: 'Memory' }
+              )}
+            </h3>
+          </EuiText>
+        </EuiPanel>
+        <EuiPanel hasShadow={false} hasBorder={false}>
+          <EuiFlexGroup alignItems="flexStart" gutterSize="l">
+            <EuiFlexItem grow={2}>
+              <EuiFlexGroup direction="column" gutterSize="xs">
+                <EuiFlexItem>
+                  <EuiText size="m">
+                    <h4>
+                      {i18n.translate(
+                        'xpack.streams.significantEventsDiscovery.settings.useMemoryLabel',
+                        { defaultMessage: 'Use memory' }
+                      )}
+                    </h4>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText color="subdued" size="s">
+                    {i18n.translate(
+                      'xpack.streams.significantEventsDiscovery.settings.useMemoryDescription',
+                      {
+                        defaultMessage:
+                          'Enable a shared, wiki-style knowledge base that agents can read from and write to. When enabled, agents automatically learn and remember information across conversations.',
+                      }
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={5}>
+              <EuiSwitch
+                data-test-subj="streams-settings-use-memory"
+                label={i18n.translate(
+                  'xpack.streams.significantEventsDiscovery.settings.useMemoryToggleLabel',
+                  { defaultMessage: 'Enable memory' }
+                )}
+                checked={useMemory}
+                onChange={(e) => setUseMemory(e.target.checked)}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>

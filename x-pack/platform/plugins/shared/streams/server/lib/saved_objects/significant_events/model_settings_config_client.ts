@@ -21,6 +21,7 @@ export interface ModelSettings {
   connectorIdRuleGeneration?: string;
   connectorIdDiscovery?: string;
   indexPatterns?: string;
+  useMemory?: boolean;
 }
 
 export interface ModelSettingsConfigClient {
@@ -61,6 +62,7 @@ export class ModelSettingsConfigClientImpl implements ModelSettingsConfigClient 
         connectorIdRuleGeneration: undefined,
         connectorIdDiscovery: undefined,
         indexPatterns: undefined,
+        useMemory: undefined,
       };
     }
 
@@ -72,6 +74,7 @@ export class ModelSettingsConfigClientImpl implements ModelSettingsConfigClient 
       connectorIdRuleGeneration: toOptional(attributes.connectorIdRuleGeneration),
       connectorIdDiscovery: toOptional(attributes.connectorIdDiscovery),
       indexPatterns: toOptional(attributes.indexPatterns),
+      useMemory: attributes.useMemory ?? false,
     };
   }
 

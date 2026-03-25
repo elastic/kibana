@@ -8,12 +8,14 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { useUnbackedQueriesCount } from '../../hooks/use_unbacked_queries_count';
+import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
+import { useKibana } from '../../hooks/use_kibana';
 import { FeedbackButton } from '../feedback_button';
 import { RedirectTo } from '../redirect_to';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
@@ -44,12 +46,27 @@ export function SignificantEventsDiscoveryPage() {
   } = useStreamsAppParams('/_discovery/{tab}');
 
   const router = useStreamsAppRouter();
+  const {
+    dependencies: {
+      start: { streams },
+    },
+  } = useKibana();
 
   const {
     features: { significantEventsDiscovery },
   } = useStreamsPrivileges();
   const { euiTheme } = useEuiTheme();
   const { count: unbackedQueriesCount, refetch } = useUnbackedQueriesCount();
+
+  const settingsFetch = useStreamsAppFetch(
+    async ({ signal }) =>
+      streams.streamsRepositoryClient.fetch('GET /internal/streams/_significant_events/settings', {
+        signal,
+      }),
+    [streams.streamsRepositoryClient]
+  );
+
+  const isMemoryEnabled = settingsFetch.value?.useMemory ?? false;
 
   useStreamsAppBreadcrumbs(() => {
     return [
@@ -61,6 +78,76 @@ export function SignificantEventsDiscoveryPage() {
       },
     ];
   }, []);
+
+  const tabs = useMemo(() => {
+    const baseTabs = [
+      {
+        id: 'streams',
+        label: i18n.translate('xpack.streams.significantEventsDiscovery.streamsTab', {
+          defaultMessage: 'Streams',
+        }),
+        href: router.link('/_discovery/{tab}', { path: { tab: 'streams' } }),
+        isSelected: tab === 'streams',
+      },
+      {
+        id: 'knowledge_indicators',
+        label: i18n.translate('xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTab', {
+          defaultMessage: 'Knowledge Indicators',
+        }),
+        href: router.link('/_discovery/{tab}', { path: { tab: 'knowledge_indicators' } }),
+        isSelected: tab === 'knowledge_indicators',
+      },
+      {
+        id: 'queries',
+        label: (
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
+            <EuiFlexItem grow={false}>
+              {i18n.translate('xpack.streams.significantEventsDiscovery.queriesTab', {
+                defaultMessage: 'Queries',
+              })}
+            </EuiFlexItem>
+            {unbackedQueriesCount > 0 && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="accent">{unbackedQueriesCount}</EuiBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        ),
+        href: router.link('/_discovery/{tab}', { path: { tab: 'queries' } }),
+        isSelected: tab === 'queries',
+      },
+      {
+        id: 'significant_events',
+        label: i18n.translate('xpack.streams.significantEventsDiscovery.significantEventsTab', {
+          defaultMessage: 'Significant Events',
+        }),
+        href: router.link('/_discovery/{tab}', { path: { tab: 'significant_events' } }),
+        isSelected: tab === 'significant_events',
+      },
+    ];
+
+    if (isMemoryEnabled) {
+      baseTabs.push({
+        id: 'memory',
+        label: i18n.translate('xpack.streams.significantEventsDiscovery.memoryTab', {
+          defaultMessage: 'Memory',
+        }),
+        href: router.link('/_discovery/{tab}', { path: { tab: 'memory' } }),
+        isSelected: tab === 'memory',
+      });
+    }
+
+    baseTabs.push({
+      id: 'settings',
+      label: i18n.translate('xpack.streams.significantEventsDiscovery.settingsTab', {
+        defaultMessage: 'Settings',
+      }),
+      href: router.link('/_discovery/{tab}', { path: { tab: 'settings' } }),
+      isSelected: tab === 'settings',
+    });
+
+    return baseTabs;
+  }, [tab, router, unbackedQueriesCount, isMemoryEnabled]);
 
   if (significantEventsDiscovery === undefined) {
     // Waiting to load license
@@ -74,68 +161,6 @@ export function SignificantEventsDiscoveryPage() {
   if (!isValidDiscoveryTab(tab)) {
     return <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />;
   }
-
-  const tabs = [
-    {
-      id: 'streams',
-      label: i18n.translate('xpack.streams.significantEventsDiscovery.streamsTab', {
-        defaultMessage: 'Streams',
-      }),
-      href: router.link('/_discovery/{tab}', { path: { tab: 'streams' } }),
-      isSelected: tab === 'streams',
-    },
-    {
-      id: 'knowledge_indicators',
-      label: i18n.translate('xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTab', {
-        defaultMessage: 'Knowledge Indicators',
-      }),
-      href: router.link('/_discovery/{tab}', { path: { tab: 'knowledge_indicators' } }),
-      isSelected: tab === 'knowledge_indicators',
-    },
-    {
-      id: 'queries',
-      label: (
-        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
-          <EuiFlexItem grow={false}>
-            {i18n.translate('xpack.streams.significantEventsDiscovery.queriesTab', {
-              defaultMessage: 'Queries',
-            })}
-          </EuiFlexItem>
-          {unbackedQueriesCount > 0 && (
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="accent">{unbackedQueriesCount}</EuiBadge>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      ),
-      href: router.link('/_discovery/{tab}', { path: { tab: 'queries' } }),
-      isSelected: tab === 'queries',
-    },
-    {
-      id: 'significant_events',
-      label: i18n.translate('xpack.streams.significantEventsDiscovery.significantEventsTab', {
-        defaultMessage: 'Significant Events',
-      }),
-      href: router.link('/_discovery/{tab}', { path: { tab: 'significant_events' } }),
-      isSelected: tab === 'significant_events',
-    },
-    {
-      id: 'memory',
-      label: i18n.translate('xpack.streams.significantEventsDiscovery.memoryTab', {
-        defaultMessage: 'Memory',
-      }),
-      href: router.link('/_discovery/{tab}', { path: { tab: 'memory' } }),
-      isSelected: tab === 'memory',
-    },
-    {
-      id: 'settings',
-      label: i18n.translate('xpack.streams.significantEventsDiscovery.settingsTab', {
-        defaultMessage: 'Settings',
-      }),
-      href: router.link('/_discovery/{tab}', { path: { tab: 'settings' } }),
-      isSelected: tab === 'settings',
-    },
-  ];
 
   return (
     <>
@@ -168,7 +193,7 @@ export function SignificantEventsDiscoveryPage() {
         {tab === 'knowledge_indicators' && <FeaturesTable />}
         {tab === 'queries' && <QueriesTable />}
         {tab === 'significant_events' && <InsightsTab />}
-        {tab === 'memory' && <MemoryTab />}
+        {tab === 'memory' && isMemoryEnabled && <MemoryTab />}
         {tab === 'settings' && <SettingsTab />}
       </StreamsAppPageTemplate.Body>
     </>

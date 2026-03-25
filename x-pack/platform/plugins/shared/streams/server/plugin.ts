@@ -204,6 +204,14 @@ export class StreamsPlugin
         server: this.server,
         logger: this.logger,
         getSpaces: () => this.spacesStart,
+        getModelSettingsClient: () => {
+          try {
+            const soClient = this.server!.core.savedObjects.createInternalRepository();
+            return modelSettingsConfigService.getClient({ soClient });
+          } catch {
+            return undefined;
+          }
+        },
       });
     }
 
@@ -213,7 +221,7 @@ export class StreamsPlugin
       getScopedClients,
       logger: this.logger,
       telemetry: telemetryClient,
-      getInternalEsClient: () => this.server.core.elasticsearch.client.asInternalUser,
+      getInternalEsClient: () => this.server!.core.elasticsearch.client.asInternalUser,
     });
 
     plugins.features.registerKibanaFeature({

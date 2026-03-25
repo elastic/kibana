@@ -11,8 +11,10 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiConfirmModal,
   EuiFieldSearch,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -22,6 +24,7 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiMarkdownFormat,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTextArea,
@@ -32,11 +35,7 @@ import {
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import {
-  CODE_EDITOR_DEFAULT_THEME_ID,
-  defaultThemesResolvers,
-  monaco,
-} from '@kbn/monaco';
+import { CODE_EDITOR_DEFAULT_THEME_ID, defaultThemesResolvers, monaco } from '@kbn/monaco';
 import {
   useMemoryTree,
   useMemorySearch,
@@ -45,8 +44,9 @@ import {
   useMemoryVersion,
   useMemoryMutations,
   useRecentChanges,
+  useOpenQuestions,
 } from './use_memory';
-import type { MemoryTreeNode, MemoryVersionRecord } from './types';
+import type { MemoryQuestion, MemoryTreeNode, MemoryVersionRecord } from './types';
 
 export function MemoryTab() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -57,7 +57,10 @@ export function MemoryTab() {
   const { data: searchData, isLoading: isSearchLoading } = useMemorySearch(searchQuery);
 
   const { data: recentChangesData, isLoading: isRecentChangesLoading } = useRecentChanges();
+  const { data: questionsData } = useOpenQuestions();
+  const { answerQuestion, dismissQuestion } = useMemoryMutations();
 
+  const openQuestions = questionsData?.questions ?? [];
   const isSearchActive = searchQuery.length >= 2;
 
   const treeItems = useMemo(() => {
@@ -70,146 +73,144 @@ export function MemoryTab() {
     setShowHistory(false);
   }, []);
 
-  const recentChangesColumns: Array<EuiBasicTableColumn<MemoryVersionRecord>> = useMemo(
-    () => [
-      {
-        field: 'title',
-        name: i18n.translate('xpack.streams.memory.recentChanges.titleColumn', {
-          defaultMessage: 'Title',
-        }),
-        truncateText: true,
-      },
-      {
-        field: 'change_type',
-        name: i18n.translate('xpack.streams.memory.recentChanges.changeColumn', {
-          defaultMessage: 'Change',
-        }),
-        width: '80px',
-        render: (changeType: string) => <EuiBadge>{changeType}</EuiBadge>,
-      },
-      {
-        field: 'change_summary',
-        name: i18n.translate('xpack.streams.memory.recentChanges.summaryColumn', {
-          defaultMessage: 'Summary',
-        }),
-        truncateText: true,
-      },
-      {
-        field: 'created_at',
-        name: i18n.translate('xpack.streams.memory.recentChanges.dateColumn', {
-          defaultMessage: 'Date',
-        }),
-        width: '140px',
-        render: (date: string) => new Date(date).toLocaleString(),
-      },
-    ],
-    []
-  );
-
   return (
     <>
-      <EuiFieldSearch
-        placeholder={i18n.translate('xpack.streams.memory.searchPlaceholder', {
-          defaultMessage: 'Search memory entries...',
-        })}
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        isClearable
-        fullWidth
-        data-test-subj="streamsMemorySearch"
-      />
-      <EuiSpacer size="m" />
-
-      {!isSearchActive && (
+      {openQuestions.length > 0 && (
         <>
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.streams.memory.recentChanges.title', {
-                defaultMessage: 'Recent Changes',
-              })}
-            </h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          {isRecentChangesLoading ? (
-            <EuiLoadingSpinner size="l" />
-          ) : (
-            <div
-              style={{
-                height: '200px',
-                overflowY: 'scroll',
-                flexBasis: '200px',
-                flexShrink: 0,
-              }}
-            >
-              <EuiBasicTable
-                items={recentChangesData?.changes ?? []}
-                columns={recentChangesColumns}
-                tableCaption={i18n.translate('xpack.streams.memory.recentChanges.tableCaption', {
-                  defaultMessage: 'Recent memory changes',
-                })}
-                rowProps={(record) => ({
-                  onClick: () => setSelectedEntryId(record.entry_id),
-                  style: { cursor: 'pointer' },
-                })}
-                data-test-subj="streamsMemoryRecentChangesTable"
-              />
-            </div>
-          )}
-          <EuiSpacer size="l" />
+          <EuiCallOut
+            title={i18n.translate('xpack.streams.memory.questions.calloutTitle', {
+              defaultMessage:
+                '{count} open {count, plural, one {question} other {questions}} about memory',
+              values: { count: openQuestions.length },
+            })}
+            iconType="questionInCircle"
+            color="primary"
+          >
+            <EuiFlexGroup direction="column" gutterSize="m">
+              {openQuestions.map((q) => (
+                <QuestionCard
+                  key={q.id}
+                  question={q}
+                  onAnswer={(answer) => answerQuestion.mutate({ id: q.id, answer })}
+                  onDismiss={() => dismissQuestion.mutate(q.id)}
+                  onSelectEntry={setSelectedEntryId}
+                />
+              ))}
+            </EuiFlexGroup>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
         </>
       )}
 
-      {isSearchActive ? (
-        isSearchLoading ? (
-          <EuiLoadingSpinner size="l" />
-        ) : (
-          <EuiFlexGroup direction="column" gutterSize="s">
-            {searchData?.results.map((result) => (
-              <EuiFlexItem key={result.id}>
-                <EuiFlexGroup direction="column" gutterSize="xs">
-                  <EuiFlexItem>
-                    <EuiLink onClick={() => setSelectedEntryId(result.id)}>
-                      <strong>{result.title}</strong>
-                    </EuiLink>
+      <EuiFlexGroup gutterSize="l">
+        {/* Left column: search + tree/search results */}
+        <EuiFlexItem grow={2}>
+          <EuiFieldSearch
+            placeholder={i18n.translate('xpack.streams.memory.searchPlaceholder', {
+              defaultMessage: 'Search memory entries...',
+            })}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            isClearable
+            fullWidth
+            data-test-subj="streamsMemorySearch"
+          />
+          <EuiSpacer size="m" />
+
+          {isSearchActive ? (
+            isSearchLoading ? (
+              <EuiLoadingSpinner size="l" />
+            ) : (
+              <EuiFlexGroup direction="column" gutterSize="s">
+                {searchData?.results.map((result) => (
+                  <EuiFlexItem key={result.id}>
+                    <EuiFlexGroup direction="column" gutterSize="xs">
+                      <EuiFlexItem>
+                        <EuiLink onClick={() => setSelectedEntryId(result.id)}>
+                          <strong>{result.title}</strong>
+                        </EuiLink>
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiText size="xs" color="subdued">
+                          {result.path}
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiText size="s">{result.snippet}</EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiText size="xs" color="subdued">
-                      {result.path}
-                    </EuiText>
+                ))}
+                {searchData?.results.length === 0 && (
+                  <EuiText color="subdued">
+                    {i18n.translate('xpack.streams.memory.noResults', {
+                      defaultMessage: 'No memory entries found.',
+                    })}
+                  </EuiText>
+                )}
+              </EuiFlexGroup>
+            )
+          ) : isTreeLoading ? (
+            <EuiLoadingSpinner size="l" />
+          ) : treeItems.length > 0 ? (
+            <EuiTreeView
+              items={treeItems}
+              expandByDefault
+              aria-label={i18n.translate('xpack.streams.memory.treeAriaLabel', {
+                defaultMessage: 'Memory entries tree',
+              })}
+            />
+          ) : (
+            <EuiText color="subdued">
+              {i18n.translate('xpack.streams.memory.empty', {
+                defaultMessage:
+                  'No memory entries yet. Agents will automatically create entries as they learn, or you can create entries manually.',
+              })}
+            </EuiText>
+          )}
+        </EuiFlexItem>
+
+        {/* Right column: recent changes timeline */}
+        {!isSearchActive && (
+          <EuiFlexItem grow={1}>
+            <EuiTitle size="xs">
+              <h3>
+                {i18n.translate('xpack.streams.memory.recentChanges.title', {
+                  defaultMessage: 'Recent Changes',
+                })}
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            {isRecentChangesLoading ? (
+              <EuiLoadingSpinner size="l" />
+            ) : (recentChangesData?.changes ?? []).length > 0 ? (
+              <EuiFlexGroup
+                direction="column"
+                gutterSize="s"
+                className={css`
+                  max-height: 600px;
+                  overflow-y: auto;
+                `}
+              >
+                {(recentChangesData?.changes ?? []).map((change) => (
+                  <EuiFlexItem key={change.id} grow={false}>
+                    <RecentChangeItem
+                      change={change}
+                      onClick={() => setSelectedEntryId(change.entry_id)}
+                    />
                   </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiText size="s">{result.snippet}</EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            ))}
-            {searchData?.results.length === 0 && (
-              <EuiText color="subdued">
-                {i18n.translate('xpack.streams.memory.noResults', {
-                  defaultMessage: 'No memory entries found.',
+                ))}
+              </EuiFlexGroup>
+            ) : (
+              <EuiText size="s" color="subdued">
+                {i18n.translate('xpack.streams.memory.recentChanges.empty', {
+                  defaultMessage: 'No recent changes.',
                 })}
               </EuiText>
             )}
-          </EuiFlexGroup>
-        )
-      ) : isTreeLoading ? (
-        <EuiLoadingSpinner size="l" />
-      ) : treeItems.length > 0 ? (
-        <EuiTreeView
-          items={treeItems}
-          expandByDefault
-          aria-label={i18n.translate('xpack.streams.memory.treeAriaLabel', {
-            defaultMessage: 'Memory entries tree',
-          })}
-        />
-      ) : (
-        <EuiText color="subdued">
-          {i18n.translate('xpack.streams.memory.empty', {
-            defaultMessage:
-              'No memory entries yet. Agents will automatically create entries as they learn, or you can create entries manually.',
-          })}
-        </EuiText>
-      )}
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
 
       {selectedEntryId && !showHistory && (
         <EntryFlyout
@@ -574,9 +575,7 @@ function HistoryFlyout({
               })}
               rowProps={(record) => ({
                 onClick: () =>
-                  setSelectedVersion(
-                    selectedVersion === record.version ? null : record.version
-                  ),
+                  setSelectedVersion(selectedVersion === record.version ? null : record.version),
                 style: {
                   cursor: 'pointer',
                   ...(selectedVersion === record.version
@@ -689,5 +688,212 @@ function MemoryDiffViewer({
         height: 400px;
       `}
     />
+  );
+}
+
+const changeTypeIcons: Record<string, string> = {
+  create: 'plusInCircle',
+  update: 'pencil',
+  delete: 'trash',
+  move: 'sortRight',
+};
+
+const changeTypeColors: Record<string, 'success' | 'primary' | 'danger' | 'warning'> = {
+  create: 'success',
+  update: 'primary',
+  delete: 'danger',
+  move: 'warning',
+};
+
+const formatRelativeTime = (dateString: string): string => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMinutes = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMinutes < 1) return 'just now';
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString();
+};
+
+function RecentChangeItem({
+  change,
+  onClick,
+}: {
+  change: MemoryVersionRecord;
+  onClick: () => void;
+}) {
+  return (
+    <EuiPanel
+      paddingSize="s"
+      hasBorder
+      hasShadow={false}
+      onClick={onClick}
+      className={css`
+        cursor: pointer;
+        &:hover {
+          background-color: rgba(0, 119, 204, 0.05);
+        }
+      `}
+    >
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiBadge
+            color={changeTypeColors[change.change_type] ?? 'default'}
+            iconType={changeTypeIcons[change.change_type] ?? 'dot'}
+          >
+            {change.change_type}
+          </EuiBadge>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText size="xs">
+            <strong>{change.title}</strong>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {formatRelativeTime(change.created_at)}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {change.change_summary && (
+        <EuiText size="xs" color="subdued">
+          {change.change_summary}
+        </EuiText>
+      )}
+    </EuiPanel>
+  );
+}
+
+function QuestionCard({
+  question,
+  onAnswer,
+  onDismiss,
+  onSelectEntry,
+}: {
+  question: MemoryQuestion;
+  onAnswer: (answer: string) => void;
+  onDismiss: () => void;
+  onSelectEntry: (id: string) => void;
+}) {
+  const [answerText, setAnswerText] = useState('');
+  const [showAnswerInput, setShowAnswerInput] = useState(false);
+
+  const handleSubmitAnswer = useCallback(() => {
+    if (answerText.trim()) {
+      onAnswer(answerText.trim());
+      setAnswerText('');
+      setShowAnswerInput(false);
+    }
+  }, [answerText, onAnswer]);
+
+  return (
+    <EuiFlexItem>
+      <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
+        <EuiFlexGroup direction="column" gutterSize="xs">
+          <EuiFlexItem>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiBadge color={question.category === 'quality' ? 'warning' : 'primary'}>
+                  {question.category === 'quality'
+                    ? i18n.translate('xpack.streams.memory.questions.qualityBadge', {
+                        defaultMessage: 'Quality',
+                      })
+                    : i18n.translate('xpack.streams.memory.questions.gapBadge', {
+                        defaultMessage: 'Gap',
+                      })}
+                </EuiBadge>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="s">
+                  <strong>{question.question}</strong>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          {question.context && (
+            <EuiFlexItem>
+              <EuiText size="xs" color="subdued">
+                {question.context}
+              </EuiText>
+            </EuiFlexItem>
+          )}
+          {question.related_entries.length > 0 && (
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="xs" wrap>
+                {question.related_entries.map((entryId) => (
+                  <EuiFlexItem key={entryId} grow={false}>
+                    <EuiLink onClick={() => onSelectEntry(entryId)}>
+                      <EuiText size="xs">{entryId}</EuiText>
+                    </EuiLink>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+          {showAnswerInput ? (
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem>
+                  <EuiFieldText
+                    value={answerText}
+                    onChange={(e) => setAnswerText(e.target.value)}
+                    placeholder={i18n.translate(
+                      'xpack.streams.memory.questions.answerPlaceholder',
+                      { defaultMessage: 'Type your answer...' }
+                    )}
+                    fullWidth
+                    compressed
+                    data-test-subj="streamsMemoryQuestionAnswerInput"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    size="s"
+                    fill
+                    onClick={handleSubmitAnswer}
+                    disabled={!answerText.trim()}
+                  >
+                    {i18n.translate('xpack.streams.memory.questions.submitAnswer', {
+                      defaultMessage: 'Submit',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty size="s" onClick={() => setShowAnswerInput(false)}>
+                    {i18n.translate('xpack.streams.memory.questions.cancelAnswer', {
+                      defaultMessage: 'Cancel',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          ) : (
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButton size="s" onClick={() => setShowAnswerInput(true)}>
+                    {i18n.translate('xpack.streams.memory.questions.answerButton', {
+                      defaultMessage: 'Answer',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty size="s" onClick={onDismiss}>
+                    {i18n.translate('xpack.streams.memory.questions.dismissButton', {
+                      defaultMessage: 'Dismiss',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiPanel>
+    </EuiFlexItem>
   );
 }

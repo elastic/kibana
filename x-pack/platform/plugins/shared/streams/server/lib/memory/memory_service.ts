@@ -13,20 +13,20 @@ import type { MemoryStorage } from './storage';
 import { createMemoryStorage } from './storage';
 import type { MemoryHistoryStorage } from './history_storage';
 import { createMemoryHistoryStorage } from './history_storage';
-import type { CompactionLogStorage } from './compaction_log_storage';
-import { createCompactionLogStorage } from './compaction_log_storage';
+import type { QuestionsStorage } from './questions_storage';
+import { createQuestionsStorage } from './questions_storage';
 import { createSpaceDslFilter } from './space_filter';
 import type {
   MemoryEntry,
   MemoryVersionRecord,
   MemoryChangeType,
-  CompactionLogEntry,
+  MemoryQuestion,
   MemoryTreeNode,
   MemorySearchResult,
   CreateMemoryParams,
   UpdateMemoryParams,
   SearchMemoryParams,
-  CompactMemoryParams,
+  CreateQuestionParams,
   MemoryService,
 } from './types';
 
@@ -40,9 +40,9 @@ interface HistoryDocument {
   _source: MemoryVersionRecord;
 }
 
-interface CompactionDocument {
+interface QuestionDocument {
   _id: string;
-  _source: CompactionLogEntry;
+  _source: MemoryQuestion;
 }
 
 const getParentPath = (path: string): string => {
@@ -53,12 +53,12 @@ const getParentPath = (path: string): string => {
 export class MemoryServiceImpl implements MemoryService {
   private readonly storage: MemoryStorage;
   private readonly historyStorage: MemoryHistoryStorage;
-  private readonly compactionStorage: CompactionLogStorage;
+  private readonly questionsStorage: QuestionsStorage;
 
   constructor({ logger, esClient }: { logger: Logger; esClient: ElasticsearchClient }) {
     this.storage = createMemoryStorage({ logger, esClient });
     this.historyStorage = createMemoryHistoryStorage({ logger, esClient });
-    this.compactionStorage = createCompactionLogStorage({ logger, esClient });
+    this.questionsStorage = createQuestionsStorage({ logger, esClient });
   }
 
   async create(params: CreateMemoryParams): Promise<MemoryEntry> {
@@ -405,43 +405,91 @@ export class MemoryServiceImpl implements MemoryService {
     return response.hits.hits.map((hit) => (hit as HistoryDocument)._source);
   }
 
-  async compact(params: CompactMemoryParams): Promise<void> {
-    const { entryIds, operation, summary, space, user, conversationId } = params;
-    const now = new Date().toISOString();
+  // ── Questions ──
 
-    const logEntry: CompactionLogEntry = {
+  async createQuestion(params: CreateQuestionParams): Promise<MemoryQuestion> {
+    const { question, category, relatedEntries, context, space, user } = params;
+    const now = new Date().toISOString();
+    const questionEntry: MemoryQuestion = {
       id: uuidV4(),
-      operation,
-      affected_entries: entryIds,
-      summary,
+      question,
+      category,
+      related_entries: relatedEntries,
+      context,
+      status: 'open',
       space,
       created_at: now,
       created_by: user,
-      ...(conversationId && { source_conversation_id: conversationId }),
     };
 
-    await this.compactionStorage.getClient().index({ document: logEntry });
+    await this.questionsStorage.getClient().index({ document: questionEntry });
+    return questionEntry;
   }
 
-  async getCompactionLog({
+  async getOpenQuestions({
     space,
-    size = 50,
+    size = 20,
   }: {
     space: string;
     size?: number;
-  }): Promise<CompactionLogEntry[]> {
-    const response = await this.compactionStorage.getClient().search({
+  }): Promise<MemoryQuestion[]> {
+    const response = await this.questionsStorage.getClient().search({
       track_total_hits: false,
       query: {
         bool: {
-          filter: [createSpaceDslFilter(space)],
+          filter: [createSpaceDslFilter(space), { term: { status: 'open' } }],
         },
       },
       size,
       sort: [{ created_at: { order: 'desc' } }],
     });
 
-    return response.hits.hits.map((hit) => (hit as CompactionDocument)._source);
+    return response.hits.hits.map((hit) => (hit as QuestionDocument)._source);
+  }
+
+  async answerQuestion({
+    id,
+    answer,
+    space,
+  }: {
+    id: string;
+    answer: string;
+    space: string;
+  }): Promise<MemoryQuestion> {
+    const doc = await this._getQuestionById(id, space);
+    if (!doc) {
+      throw notFound(`Question with id '${id}' not found`);
+    }
+
+    const updated: MemoryQuestion = {
+      ...doc._source,
+      status: 'answered',
+      answer,
+    };
+
+    await this.questionsStorage.getClient().index({
+      id: doc._id,
+      document: updated,
+    });
+
+    return updated;
+  }
+
+  async dismissQuestion({ id, space }: { id: string; space: string }): Promise<void> {
+    const doc = await this._getQuestionById(id, space);
+    if (!doc) {
+      throw notFound(`Question with id '${id}' not found`);
+    }
+
+    const updated: MemoryQuestion = {
+      ...doc._source,
+      status: 'dismissed',
+    };
+
+    await this.questionsStorage.getClient().index({
+      id: doc._id,
+      document: updated,
+    });
   }
 
   // ── Private helpers ──
@@ -478,6 +526,23 @@ export class MemoryServiceImpl implements MemoryService {
       return undefined;
     }
     return response.hits.hits[0] as MemoryDocument;
+  }
+
+  private async _getQuestionById(id: string, space: string): Promise<QuestionDocument | undefined> {
+    const response = await this.questionsStorage.getClient().search({
+      track_total_hits: false,
+      size: 1,
+      terminate_after: 1,
+      query: {
+        bool: {
+          filter: [createSpaceDslFilter(space), { term: { id } }],
+        },
+      },
+    });
+    if (response.hits.hits.length === 0) {
+      return undefined;
+    }
+    return response.hits.hits[0] as QuestionDocument;
   }
 
   private async _writeHistory(

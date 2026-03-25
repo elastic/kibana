@@ -22,4 +22,5 @@ export interface MemoryHookServices {
 export interface RegisterMemoryHooksDeps {
   logger: Logger;
   getMemoryServices: () => MemoryHookServices;
+  isMemoryEnabled: () => Promise<boolean>;
 }

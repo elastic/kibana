@@ -58,7 +58,6 @@ export class AgentBuilderPlugin
   private trackingService?: TrackingService;
   private analyticsService?: AnalyticsService;
   private home: HomeServerPluginSetup | null = null;
-  private coreStart?: CoreStart;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
@@ -253,7 +252,6 @@ export class AgentBuilderPlugin
     coreStart: CoreStart,
     { inference, spaces, actions, taskManager }: AgentBuilderStartDependencies
   ): AgentBuilderPluginStart {
-    this.coreStart = coreStart;
     const { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
     const startServices = this.serviceManager.startServices({

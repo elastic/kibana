@@ -11,18 +11,12 @@ import {
   type BeforeAgentHookContext,
   type HookHandlerResult,
 } from '@kbn/agent-builder-server';
-import type { Logger } from '@kbn/logging';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server/types';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
-import type { MemoryHookServices } from './types';
+import type { RegisterMemoryHooksDeps } from './types';
 
 const MAX_INJECTED_ENTRIES = 5;
 const MAX_CONTENT_LENGTH = 2000;
-
-export interface RegisterMemoryContextHookDeps {
-  logger: Logger;
-  getMemoryServices: () => MemoryHookServices;
-}
 
 /**
  * Registers a blocking beforeAgent hook that searches memory for entries
@@ -30,7 +24,7 @@ export interface RegisterMemoryContextHookDeps {
  */
 export const registerMemoryContextHook = (
   agentBuilder: AgentBuilderPluginSetup,
-  deps: RegisterMemoryContextHookDeps
+  deps: RegisterMemoryHooksDeps
 ): void => {
   const logger = deps.logger.get('memoryContext');
 
@@ -43,6 +37,10 @@ export const registerMemoryContextHook = (
         handler: async (
           context: BeforeAgentHookContext
         ): Promise<void | HookHandlerResult<typeof HookLifecycle.beforeAgent>> => {
+          if (!(await deps.isMemoryEnabled())) {
+            return;
+          }
+
           const userMessage = context.nextInput.message;
           if (!userMessage || userMessage.trim().length < 3) {
             return;

@@ -9,14 +9,15 @@ export type {
   MemoryEntry,
   MemoryVersionRecord,
   MemoryChangeType,
-  CompactionLogEntry,
-  CompactionOperation,
+  MemoryQuestion,
+  MemoryQuestionCategory,
+  MemoryQuestionStatus,
   MemoryTreeNode,
   MemorySearchResult,
   CreateMemoryParams,
   UpdateMemoryParams,
   SearchMemoryParams,
-  CompactMemoryParams,
+  CreateQuestionParams,
   MemoryService,
 } from './types';
 

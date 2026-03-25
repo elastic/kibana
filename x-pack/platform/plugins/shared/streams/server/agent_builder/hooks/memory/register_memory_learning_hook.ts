@@ -7,18 +7,11 @@
 
 import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-server';
 import type { AfterToolCallHookContext } from '@kbn/agent-builder-server';
-import type { Logger } from '@kbn/logging';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server/types';
-import type { MemoryHookServices } from './types';
+import type { RegisterMemoryHooksDeps } from './types';
 
 /** Number of tool calls between learning reflections. */
 const DEFAULT_LEARNING_INTERVAL = 5;
-
-export interface RegisterMemoryLearningHookDeps {
-  logger: Logger;
-  getMemoryServices: () => MemoryHookServices;
-  learningInterval?: number;
-}
 
 // Track round counts per conversation to know when to trigger learning.
 const roundCounters = new Map<string, number>();
@@ -29,7 +22,7 @@ const roundCounters = new Map<string, number>();
  */
 export const registerMemoryLearningHook = (
   agentBuilder: AgentBuilderPluginSetup,
-  deps: RegisterMemoryLearningHookDeps
+  deps: RegisterMemoryHooksDeps & { learningInterval?: number }
 ): void => {
   const logger = deps.logger.get('memoryLearning');
   const interval = deps.learningInterval ?? DEFAULT_LEARNING_INTERVAL;
@@ -40,6 +33,10 @@ export const registerMemoryLearningHook = (
       [HookLifecycle.afterToolCall]: {
         mode: HookExecutionMode.nonBlocking,
         handler: async (context: AfterToolCallHookContext): Promise<void> => {
+          if (!(await deps.isMemoryEnabled())) {
+            return;
+          }
+
           const conversationKey =
             context.toolHandlerContext.runContext.stack.find((e) => e.type === 'agent')
               ?.conversationId ?? context.toolHandlerContext.runContext.runId;
