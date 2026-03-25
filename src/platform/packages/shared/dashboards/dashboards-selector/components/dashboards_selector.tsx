@@ -36,7 +36,7 @@ async function searchDashboards(
         resolve(dashboards);
       },
       search: {
-        search,
+        query: search,
         per_page: perPage,
       },
       trigger: { id: 'searchDashboards' },
