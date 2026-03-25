@@ -12,7 +12,7 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { css } from '@emotion/react';
 
-import { useBreadcrumbs, useStartServices } from '../../../../hooks';
+import { useBreadcrumbs, useLicense, useStartServices } from '../../../../hooks';
 import { NoEprCallout } from '../../components/no_epr_callout';
 import { categoryExists } from '../home';
 
@@ -32,17 +32,18 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
 }) => {
   useBreadcrumbs('integrations_all');
 
-  const { automaticImportVTwo, application, licensing } = useStartServices();
+  const { automaticImportVTwo, application } = useStartServices();
+  const licenseService = useLicense();
+  const license = useObservable(licenseService.getLicenseInformation$()!);
   const { pathname, search } = useLocation();
   const history = useHistory();
   const euiTheme = useEuiTheme();
-  const license = useObservable(licensing.license$);
   const licenseAllowsManageView = useMemo((): boolean | null => {
     if (license == null) {
       return null;
     }
-    return Boolean(license.isAvailable && license.isActive && license.hasAtLeast('enterprise'));
-  }, [license]);
+    return Boolean(licenseService.isEnterprise());
+  }, [license, licenseService]);
 
   useEffect(() => {
     const params = new URLSearchParams(search);

@@ -13,13 +13,10 @@ import {
   EuiLink,
   EuiPanel,
   EuiText,
-  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import useObservable from 'react-use/lib/useObservable';
-import { MINIMUM_LICENSE_TYPE } from '../../../common/constants';
 import { AIV2TelemetryEventType } from '../../../common/telemetry/types';
 import { useKibana } from '../../common/hooks/use_kibana';
 import type { Services } from '../../services/types';
@@ -97,22 +94,9 @@ const useStyles = (euiTheme: ReturnType<typeof useEuiTheme>['euiTheme']) => ({
 export const CreateIntegrationSideCardButton = React.memo(() => {
   const services = useKibana().services as ServicesWithOptionalAIV2;
   const { getUrlForApp, navigateToUrl } = services.application;
-  const { licensing } = services;
-  const license = useObservable(licensing.license$);
   const telemetry = services.automaticImportVTwo?.telemetry ?? services.telemetry;
   const { euiTheme } = useEuiTheme();
   const styles = useStyles(euiTheme);
-
-  const hasEnterpriseLicense = Boolean(
-    license?.isAvailable && license?.isActive && license?.hasAtLeast(MINIMUM_LICENSE_TYPE)
-  );
-
-  const enterpriseLicenseTooltip = (
-    <FormattedMessage
-      id="xpack.automaticImportV2.createIntegration.enterpriseLicenseTooltip"
-      defaultMessage="Creating or uploading integrations requires an Enterprise license."
-    />
-  );
 
   const createHref = useMemo(
     () => getUrlForApp('integrations', { path: '/create' }),
@@ -125,7 +109,7 @@ export const CreateIntegrationSideCardButton = React.memo(() => {
   );
 
   const navigateToCreate = useCallback(
-    (ev: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+    (ev: React.MouseEvent<HTMLAnchorElement>) => {
       ev.preventDefault();
       navigateToUrl(createHref);
     },
@@ -133,49 +117,12 @@ export const CreateIntegrationSideCardButton = React.memo(() => {
   );
 
   const navigateToUpload = useCallback(
-    (ev: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+    (ev: React.MouseEvent<HTMLAnchorElement>) => {
       ev.preventDefault();
       telemetry?.reportEvent(AIV2TelemetryEventType.UploadIntegrationClicked, {});
       navigateToUrl(uploadHref);
     },
     [uploadHref, navigateToUrl, telemetry]
-  );
-
-  const uploadPackageLink = (
-    <EuiLink
-      color={hasEnterpriseLicense ? 'primary' : 'subdued'}
-      data-test-subj="uploadIntegrationPackageLink"
-      {...(hasEnterpriseLicense
-        ? { href: uploadHref, onClick: navigateToUpload }
-        : { disabled: true })}
-    >
-      <FormattedMessage
-        id="xpack.automaticImportV2.createIntegrationUploadLink"
-        defaultMessage="upload an integration package"
-      />
-    </EuiLink>
-  );
-
-  const createIntegrationButton = (
-    <EuiButton
-      color="primary"
-      size="s"
-      iconType="plusCircle"
-      iconSide="left"
-      fullWidth
-      data-test-subj="createNewIntegrationLink"
-      css={styles.ctaButton}
-      {...(hasEnterpriseLicense
-        ? { href: createHref, onClick: navigateToCreate }
-        : { disabled: true })}
-    >
-      <span css={styles.ctaButtonText}>
-        <FormattedMessage
-          id="xpack.automaticImportV2.createIntegrationButton"
-          defaultMessage="Create integration"
-        />
-      </span>
-    </EuiButton>
   );
 
   return (
@@ -204,12 +151,18 @@ export const CreateIntegrationSideCardButton = React.memo(() => {
                   id="xpack.automaticImportV2.createIntegrationDescription"
                   defaultMessage="Use AI to create a new one or {uploadLink}"
                   values={{
-                    uploadLink: !hasEnterpriseLicense ? (
-                      <EuiToolTip content={enterpriseLicenseTooltip} display="inlineBlock">
-                        {uploadPackageLink}
-                      </EuiToolTip>
-                    ) : (
-                      uploadPackageLink
+                    uploadLink: (
+                      // eslint-disable-next-line @elastic/eui/href-or-on-click -- onClick for SPA navigation; href for open in new tab
+                      <EuiLink
+                        href={uploadHref}
+                        onClick={navigateToUpload}
+                        data-test-subj="uploadIntegrationPackageLink"
+                      >
+                        <FormattedMessage
+                          id="xpack.automaticImportV2.createIntegrationUploadLink"
+                          defaultMessage="upload an integration package"
+                        />
+                      </EuiLink>
                     ),
                   }}
                 />
@@ -217,11 +170,25 @@ export const CreateIntegrationSideCardButton = React.memo(() => {
             </EuiFlexItem>
           </EuiFlexGroup>
 
-          {!hasEnterpriseLicense ? (
-            <EuiToolTip content={enterpriseLicenseTooltip}>{createIntegrationButton}</EuiToolTip>
-          ) : (
-            createIntegrationButton
-          )}
+          {/* eslint-disable-next-line @elastic/eui/href-or-on-click -- onClick for SPA navigation; href for open in new tab */}
+          <EuiButton
+            color="primary"
+            size="s"
+            iconType="plusCircle"
+            iconSide="left"
+            fullWidth
+            href={createHref}
+            onClick={navigateToCreate}
+            data-test-subj="createNewIntegrationLink"
+            css={styles.ctaButton}
+          >
+            <span css={styles.ctaButtonText}>
+              <FormattedMessage
+                id="xpack.automaticImportV2.createIntegrationButton"
+                defaultMessage="Create integration"
+              />
+            </span>
+          </EuiButton>
         </EuiFlexGroup>
       </EuiPanel>
     </EuiFlexGroup>
