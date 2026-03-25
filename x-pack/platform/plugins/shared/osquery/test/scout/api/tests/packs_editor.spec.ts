@@ -152,7 +152,7 @@ apiTest.describe(
       expect(readResponse).toHaveStatusCode(404);
     });
 
-    apiTest('finds packs with search and enabled filters', async ({ apiClient }) => {
+    apiTest('finds packs with search, enabled, and createdBy filters', async ({ apiClient }) => {
       const uniquePrefix = `findtest-${Date.now()}`;
       let createdByUser: string | undefined;
 
@@ -173,37 +173,71 @@ apiTest.describe(
 
       expect(createdByUser).toBeDefined();
 
-      const searchResponse = await apiClient.get(
-        `${testData.API_PATHS.OSQUERY_PACKS}?search=${encodeURIComponent(uniquePrefix)}`,
-        {
-          headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
-          responseType: 'json',
-        }
-      );
-      expect(searchResponse).toHaveStatusCode(200);
-      expect(searchResponse.body.total).toBe(2);
+      await apiTest.step('filters by search term', async () => {
+        const searchResponse = await apiClient.get(
+          `${testData.API_PATHS.OSQUERY_PACKS}?search=${encodeURIComponent(uniquePrefix)}`,
+          {
+            headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+            responseType: 'json',
+          }
+        );
+        expect(searchResponse).toHaveStatusCode(200);
+        expect(searchResponse.body.total).toBe(2);
+      });
 
-      const noMatchResponse = await apiClient.get(
-        `${testData.API_PATHS.OSQUERY_PACKS}?search=zzzznonexistent999`,
-        {
-          headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
-          responseType: 'json',
-        }
-      );
-      expect(noMatchResponse).toHaveStatusCode(200);
-      expect(noMatchResponse.body.total).toBe(0);
+      await apiTest.step('returns empty results for non-matching search', async () => {
+        const noMatchResponse = await apiClient.get(
+          `${testData.API_PATHS.OSQUERY_PACKS}?search=zzzznonexistent999`,
+          {
+            headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+            responseType: 'json',
+          }
+        );
+        expect(noMatchResponse).toHaveStatusCode(200);
+        expect(noMatchResponse.body.total).toBe(0);
+      });
 
-      const createdByResponse = await apiClient.get(
-        `${testData.API_PATHS.OSQUERY_PACKS}?search=${encodeURIComponent(
-          uniquePrefix
-        )}&createdBy=${encodeURIComponent(createdByUser!)}`,
-        {
-          headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
-          responseType: 'json',
-        }
-      );
-      expect(createdByResponse).toHaveStatusCode(200);
-      expect(createdByResponse.body.total).toBe(2);
+      await apiTest.step('filters by enabled status', async () => {
+        const enabledResponse = await apiClient.get(
+          `${testData.API_PATHS.OSQUERY_PACKS}?search=${encodeURIComponent(
+            uniquePrefix
+          )}&enabled=true`,
+          {
+            headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+            responseType: 'json',
+          }
+        );
+        expect(enabledResponse).toHaveStatusCode(200);
+        expect(enabledResponse.body.total).toBe(1);
+        expect(enabledResponse.body.data[0].name).toContain('alpha');
+
+        const disabledResponse = await apiClient.get(
+          `${testData.API_PATHS.OSQUERY_PACKS}?search=${encodeURIComponent(
+            uniquePrefix
+          )}&enabled=false`,
+          {
+            headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+            responseType: 'json',
+          }
+        );
+        expect(disabledResponse).toHaveStatusCode(200);
+        expect(disabledResponse.body.total).toBe(1);
+        expect(disabledResponse.body.data[0].name).toContain('beta');
+      });
+
+      await apiTest.step('filters by createdBy', async () => {
+        const createdByResponse = await apiClient.get(
+          `${testData.API_PATHS.OSQUERY_PACKS}?search=${encodeURIComponent(
+            uniquePrefix
+          )}&createdBy=${encodeURIComponent(createdByUser!)}`,
+          {
+            headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+            responseType: 'json',
+          }
+        );
+        expect(createdByResponse).toHaveStatusCode(200);
+        expect(createdByResponse.body.total).toBe(2);
+      });
     });
   }
 );
