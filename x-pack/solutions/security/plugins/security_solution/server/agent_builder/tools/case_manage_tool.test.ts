@@ -345,6 +345,16 @@ describe('caseManageTool', () => {
 
     describe('attach_alerts action', () => {
       it('attaches alerts via bulkCreate', async () => {
+        // Mock ES search for alert rule info
+        mockEsClient.asCurrentUser.search.mockResolvedValue({
+          hits: {
+            hits: [
+              { _id: 'alert-1', _source: { 'kibana.alert.rule.uuid': 'rule-1', 'kibana.alert.rule.name': 'Test Rule' } },
+              { _id: 'alert-2', _source: { 'kibana.alert.rule.uuid': 'rule-1', 'kibana.alert.rule.name': 'Test Rule' } },
+            ],
+          },
+        } as any);
+
         const result = (await tool.handler(
           {
             action: 'attach_alerts',
@@ -586,6 +596,10 @@ describe('caseManageTool', () => {
       });
 
       it('handles errors from attachments bulkCreate', async () => {
+        // Mock ES search for alert rule info (succeeds, but bulkCreate fails)
+        mockEsClient.asCurrentUser.search.mockResolvedValue({
+          hits: { hits: [{ _id: 'alert-1', _source: { 'kibana.alert.rule.uuid': 'rule-1', 'kibana.alert.rule.name': 'Rule' } }] },
+        } as any);
         mockCasesClient.attachments.bulkCreate.mockRejectedValue(
           new Error('Bulk create failed')
         );
