@@ -1643,7 +1643,7 @@ Object {
                 "where": Object {
                   "allOf": Array [
                     Object {
-                      "$ref": "#/definitions/__schema1",
+                      "$ref": "#/definitions/Condition",
                     },
                   ],
                   "description": "Conditional expression controlling whether this processor runs",
@@ -3050,7 +3050,7 @@ Object {
                   "where": Object {
                     "allOf": Array [
                       Object {
-                        "$ref": "#/definitions/__schema1",
+                        "$ref": "#/definitions/Condition",
                       },
                     ],
                     "description": "Conditional expression controlling whether this processor runs",

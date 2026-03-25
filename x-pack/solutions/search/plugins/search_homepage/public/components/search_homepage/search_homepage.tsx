@@ -10,7 +10,7 @@ import React, { useEffect, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { SearchHomepageVersionBadge } from '@kbn/search-shared-ui';
+import { KibanaVersionBadge } from '@kbn/search-shared-ui';
 import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
 import { useGetLicenseInfo } from '../../hooks/use_get_license_info';
 import { useKibana } from '../../hooks/use_kibana';
@@ -94,7 +94,7 @@ export const SearchHomepagePage = () => {
         <EuiFlexGroup>
           <BasicMetricBadges />
           <EuiFlexItem grow={false}>
-            <SearchHomepageVersionBadge
+            <KibanaVersionBadge
               docLink={
                 cloud?.isServerlessEnabled
                   ? docLinks.serverlessReleaseNotes
