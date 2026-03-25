@@ -52,11 +52,11 @@
   },
   {
     "name": "synthetics",
-    "version": "1.6.0"
+    "version": "1.6.1"
   },
   {
     "name": "security_detection_engine",
-    "version": "9.3.5"
+    "version": "9.3.6"
   },
   {
     "name": "security_ai_prompts",

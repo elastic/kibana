@@ -15,7 +15,7 @@ spaceTest.describe(
   'GenAI Settings - Agent Nav Button without Agent Builder Privileges',
   {
     tag: [
-      ...tags.stateful.classic,
+      '@local-stateful-classic',
       ...tags.serverless.observability.complete,
       ...tags.serverless.security.complete,
       ...tags.serverless.search,
