@@ -51,6 +51,7 @@ export type MetricUnit =
   | `{${string}}`; // otel special units of count
 
 export type TelemetryUnitKey = MetricUnit | 'none';
+export type NullableMetricUnit = MetricUnit | null;
 
 export interface MetricsESQLResponse {
   metric_name: string;
@@ -64,7 +65,7 @@ export interface MetricsESQLResponse {
 export interface ParsedMetricItem {
   metricName: string;
   dataStream: string;
-  readonly units: MetricUnit[];
+  readonly units: NullableMetricUnit[];
   readonly metricTypes: MappingTimeSeriesMetricType[];
   readonly fieldTypes: ES_FIELD_TYPES[];
   readonly dimensionFields: Dimension[];
@@ -87,20 +88,18 @@ export interface ParsedMetrics {
   allDimensions: Dimension[];
 }
 
-export interface MetricsInfo {
+export interface MetricsInfo extends ParsedMetrics {
   loading: boolean;
   error: Error | null;
-  metricItems: ParsedMetricItem[];
-  allDimensions: Dimension[];
 }
 
-export type ParsedMetricsWithTelemetry = ParsedMetrics & {
+export interface ParsedMetricsWithTelemetry extends ParsedMetrics {
   telemetry: MetricsTelemetry;
-};
+}
 
 export interface Metric {
   readonly dataStreams: string[];
-  readonly units: (MetricUnit | null)[];
+  readonly units: NullableMetricUnit[];
   readonly metricTypes: MappingTimeSeriesMetricType[];
   readonly fieldTypes: ES_FIELD_TYPES[];
 }

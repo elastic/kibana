@@ -49,7 +49,7 @@ describe('accumulateMetricsRowTelemetry', () => {
 
     accumulateMetricsRowTelemetry(telemetry, {
       dataStreams: ['metrics-system.cpu-default'],
-      units: [null, 'percent'],
+      units: [null, null, 'percent'],
       metricTypes: ['gauge'],
       fieldTypes: [ES_FIELD_TYPES.DOUBLE],
     });
@@ -58,7 +58,7 @@ describe('accumulateMetricsRowTelemetry', () => {
       total_number_of_metrics: 0,
       total_number_of_dimensions: 0,
       metrics_by_type: { gauge: 1 },
-      units: { none: 1, percent: 1 },
+      units: { none: 2, percent: 1 },
       multi_value_counts: { data_streams: 0, field_types: 0, metric_types: 0 },
     });
   });
