@@ -11,6 +11,7 @@ export * from './actions';
 export * from './data_generator';
 export * from './telemetry';
 export * from './event_log';
+export * from './health';
 export * from './machine_learning';
 
 export * from './binary_to_string';

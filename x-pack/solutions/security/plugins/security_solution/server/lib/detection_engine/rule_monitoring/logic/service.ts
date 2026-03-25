@@ -87,21 +87,12 @@ export const createRuleMonitoringService = (
       const internalSavedObjectsClient = new SavedObjectsClient(internalSavedObjectsRepository);
       const internalSavedObjectsImporter = savedObjects.createImporter(internalSavedObjectsClient);
 
-      const ruleSpacesClient = createRuleSpacesClient(
-        currentSpaceId,
-        internalSavedObjectsClient,
-        logger
-      );
+      const ruleSpacesClient = createRuleSpacesClient(currentSpaceId, internalSavedObjectsClient);
       const ruleObjectsHealthClient = createRuleObjectsHealthClient(
         rulesClient,
-        internalSavedObjectsClient,
-        logger
+        internalSavedObjectsClient
       );
-      const eventLogHealthClient = createEventLogHealthClient(
-        eventLogClient,
-        ruleSpacesClient,
-        logger
-      );
+      const eventLogHealthClient = createEventLogHealthClient(eventLogClient, ruleSpacesClient);
 
       return createDetectionEngineHealthClient(
         ruleSpacesClient,

@@ -7,8 +7,10 @@
 
 import type {
   AggregatedMetric,
+  ClusterHealthOverviewStats,
   HealthOverviewStats,
   HealthOverviewState,
+  SpaceHealthOverviewStats,
   TotalEnabledDisabled,
 } from './health_stats';
 
@@ -68,6 +70,28 @@ const getEmptyHealthOverviewStats = (): HealthOverviewStats => {
   };
 };
 
+const getEmptyTopRules = () => ({
+  by_execution_duration_ms: [],
+  by_schedule_delay_ms: [],
+  by_search_duration_ms: [],
+  by_indexing_duration_ms: [],
+  by_enrichment_duration_ms: [],
+});
+
+const getEmptySpaceHealthOverviewStats = (): SpaceHealthOverviewStats => {
+  return {
+    ...getEmptyHealthOverviewStats(),
+    top_rules: getEmptyTopRules(),
+  };
+};
+
+const getEmptyClusterHealthOverviewStats = (): ClusterHealthOverviewStats => {
+  return {
+    ...getEmptyHealthOverviewStats(),
+    top_rules: getEmptyTopRules(),
+  };
+};
+
 const getZeroAggregatedMetric = (): AggregatedMetric<number> => {
   return {
     percentiles: {
@@ -82,4 +106,6 @@ const getZeroAggregatedMetric = (): AggregatedMetric<number> => {
 export const healthStatsMock = {
   getEmptyHealthOverviewState,
   getEmptyHealthOverviewStats,
+  getEmptySpaceHealthOverviewStats,
+  getEmptyClusterHealthOverviewStats,
 };

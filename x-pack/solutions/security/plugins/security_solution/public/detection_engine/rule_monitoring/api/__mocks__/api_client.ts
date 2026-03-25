@@ -97,6 +97,7 @@ export const api: jest.Mocked<IRuleMonitoringApiClient> = {
           to: new Date().toISOString(),
           duration: 'PT24H',
         },
+        num_of_top_rules: 10,
       },
       health: {
         state_at_the_moment: {
@@ -144,6 +145,13 @@ export const api: jest.Mocked<IRuleMonitoringApiClient> = {
           search_duration_ms: { percentiles: { '50': 200, '95': 400 } },
           indexing_duration_ms: { percentiles: { '50': 50, '95': 100 } },
           frozen_indices_queried_max_count: 0,
+          top_rules: {
+            by_execution_duration_ms: [],
+            by_schedule_delay_ms: [],
+            by_search_duration_ms: [],
+            by_indexing_duration_ms: [],
+            by_enrichment_duration_ms: [],
+          },
         },
         history_over_interval: {
           buckets: [
@@ -177,6 +185,13 @@ export const api: jest.Mocked<IRuleMonitoringApiClient> = {
                 search_duration_ms: { percentiles: { '50': 210, '95': 410 } },
                 indexing_duration_ms: { percentiles: { '50': 55, '95': 105 } },
                 frozen_indices_queried_max_count: 0,
+                top_rules: {
+                  by_execution_duration_ms: [],
+                  by_schedule_delay_ms: [],
+                  by_search_duration_ms: [],
+                  by_indexing_duration_ms: [],
+                  by_enrichment_duration_ms: [],
+                },
               },
             },
           ],
