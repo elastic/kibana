@@ -70,8 +70,8 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
       isYAxisLabelVisible: layer.axes?.y?.labels?.visible ?? true,
       isYAxisTitleVisible: layer.axes?.y?.title?.visible ?? false,
       ...stripUndefined<HeatmapGridConfigResult>({
-        xTitle: layer.axes?.x?.title?.value,
-        yTitle: layer.axes?.y?.title?.value,
+        xTitle: layer.axes?.x?.title?.text,
+        yTitle: layer.axes?.y?.title?.text,
         xAxisLabelRotation,
         xSortPredicate: layer.axes?.x?.sort,
         ySortPredicate: layer.axes?.y?.sort,

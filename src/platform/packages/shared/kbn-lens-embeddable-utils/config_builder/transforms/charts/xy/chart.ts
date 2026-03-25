@@ -123,9 +123,9 @@ function convertAxisSettingsToStateFormat(
           yLeft: orientationDictionary[axis?.left?.label_orientation ?? 'horizontal'],
           yRight: orientationDictionary[axis?.right?.label_orientation ?? 'horizontal'],
         };
-  const xTitle = axis?.x?.title?.value;
-  const yTitle = axis?.left?.title?.value;
-  const yRightTitle = axis?.right?.title?.value;
+  const xTitle = axis?.x?.title?.text;
+  const yTitle = axis?.left?.title?.text;
+  const yRightTitle = axis?.right?.title?.text;
   const yLeftScale = axis?.left?.scale;
   const yRightScale = axis?.right?.scale;
   return stripUndefined({
