@@ -6,17 +6,13 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import {
-  ALERT_DEDUPLICATION_TOOL_ID,
-} from '../../tools/alert_deduplication_tool';
-import {
-  ENTITY_EXTRACTION_TOOL_ID,
-} from '../../tools/entity_extraction_tool';
-import {
-  CASE_MATCHING_TOOL_ID,
-} from '../../tools/case_matching_tool';
 import { SECURITY_ALERTS_TOOL_ID } from '../../tools/alerts_tool';
-import { RUN_INVESTIGATION_PIPELINE_TOOL_ID } from '../../tools/run_investigation_pipeline_tool';
+import {
+  getAlertDeduplicationInlineTool,
+  getEntityExtractionInlineTool,
+  getCaseMatchingInlineTool,
+  getRunPipelineInlineTool,
+} from './inline_tools';
 
 const skillContent = `
 # Alert Investigation Pipeline Skill
@@ -163,12 +159,13 @@ export const getAlertInvestigationSkill = () =>
       '(deduplicate, extract entities, match cases individually). ' +
       'Use when an analyst wants to investigate, triage, run the pipeline, or process alerts.',
     content: skillContent,
-    getInlineTools: () => [],
+    getInlineTools: () => [
+      getAlertDeduplicationInlineTool(),
+      getEntityExtractionInlineTool(),
+      getCaseMatchingInlineTool(),
+      getRunPipelineInlineTool(),
+    ],
     getRegistryTools: () => [
-      RUN_INVESTIGATION_PIPELINE_TOOL_ID,
-      SECURITY_ALERTS_TOOL_ID,
-      ALERT_DEDUPLICATION_TOOL_ID,
-      ENTITY_EXTRACTION_TOOL_ID,
-      CASE_MATCHING_TOOL_ID,
+      SECURITY_ALERTS_TOOL_ID, // globally registered — needed for alert search/fetch
     ],
   });

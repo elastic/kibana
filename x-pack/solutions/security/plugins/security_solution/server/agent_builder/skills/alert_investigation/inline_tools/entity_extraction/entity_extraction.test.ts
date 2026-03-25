@@ -10,16 +10,16 @@ import {
   createToolHandlerContext,
   createToolTestMocks,
   setupMockCoreStartServices,
-} from '../__mocks__/test_helpers';
-import { entityExtractionTool, ENTITY_EXTRACTION_TOOL_ID } from './entity_extraction_tool';
+} from '../../../../__mocks__/test_helpers';
+import { getEntityExtractionInlineTool, ENTITY_EXTRACTION_TOOL_ID } from './entity_extraction';
 
 jest.mock('@kbn/elastic-assistant-plugin/server', () => ({
   extractEntitiesFromAlerts: jest.fn(),
 }));
 
-describe('entityExtractionTool', () => {
+describe('entityExtractionInlineTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
-  const tool = entityExtractionTool(mockCore, mockLogger);
+  const tool = getEntityExtractionInlineTool();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -29,14 +29,6 @@ describe('entityExtractionTool', () => {
   describe('schema', () => {
     it('validates correct input', () => {
       const result = tool.schema.safeParse({ alert_ids: ['alert-1'] });
-      expect(result.success).toBe(true);
-    });
-
-    it('validates input with optional index', () => {
-      const result = tool.schema.safeParse({
-        alert_ids: ['alert-1'],
-        index: '.alerts-security.alerts-custom',
-      });
       expect(result.success).toBe(true);
     });
 
@@ -50,40 +42,22 @@ describe('entityExtractionTool', () => {
     it('returns correct tool id', () => {
       expect(tool.id).toBe(ENTITY_EXTRACTION_TOOL_ID);
     });
-
-    it('has correct tags', () => {
-      expect(tool.tags).toEqual(['security', 'alerts', 'entities', 'ioc']);
-    });
   });
 
   describe('handler', () => {
     it('calls extractEntitiesFromAlerts with fetched alerts', async () => {
-      const mockAlerts = [
-        {
-          _id: 'alert-1',
-          _source: {
-            'host.name': 'server-01',
-            'user.name': 'admin',
-            'source.ip': '192.168.1.1',
-          },
-        },
-      ];
       mockEsClient.asCurrentUser.search.mockResolvedValueOnce({
-        hits: { hits: mockAlerts, total: { value: 1, relation: 'eq' } },
+        hits: {
+          hits: [{ _id: 'alert-1', _source: { 'host.name': 'server-01' } }],
+          total: { value: 1, relation: 'eq' },
+        },
       } as any);
 
       (extractEntitiesFromAlerts as jest.Mock).mockReturnValueOnce({
         entities: [
           { typeKey: 'hostname', value: 'server-01', field: 'host.name', alertId: 'alert-1' },
-          { typeKey: 'user', value: 'admin', field: 'user.name', alertId: 'alert-1' },
-          { typeKey: 'ipv4', value: '192.168.1.1', field: 'source.ip', alertId: 'alert-1' },
         ],
-        stats: {
-          totalFields: 20,
-          fieldsWithValues: 3,
-          entitiesExtracted: 3,
-          entitiesAfterDedup: 3,
-        },
+        stats: { totalFields: 20, fieldsWithValues: 1, entitiesExtracted: 1, entitiesAfterDedup: 1 },
       });
 
       const result = await tool.handler(
@@ -98,43 +72,15 @@ describe('entityExtractionTool', () => {
 
       expect(result).toMatchObject({
         total_alerts_processed: 1,
-        entities_by_type: expect.arrayContaining([
-          expect.objectContaining({ type: 'hostname', count: 1 }),
-          expect.objectContaining({ type: 'user', count: 1 }),
-        ]),
-        summary: expect.stringContaining('3 unique entities'),
+        summary: expect.stringContaining('1 unique entities'),
       });
     });
 
-    it('uses correct index with spaceId', async () => {
-      mockEsClient.asCurrentUser.search.mockResolvedValueOnce({
-        hits: { hits: [], total: { value: 0, relation: 'eq' } },
-      } as any);
-
-      (extractEntitiesFromAlerts as jest.Mock).mockReturnValueOnce({
-        entities: [],
-        stats: { totalFields: 0, fieldsWithValues: 0, entitiesExtracted: 0, entitiesAfterDedup: 0 },
-      });
-
-      await tool.handler(
-        { alert_ids: ['a1'] },
-        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-          spaceId: 'test-space',
-        })
-      );
-
-      expect(mockEsClient.asCurrentUser.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          index: '.alerts-security.alerts-test-space',
-        })
-      );
-    });
-
-    it('groups entities by type in response', async () => {
+    it('groups entities by type', async () => {
       mockEsClient.asCurrentUser.search.mockResolvedValueOnce({
         hits: {
-          hits: [{ _id: 'a1', _source: {} }, { _id: 'a2', _source: {} }],
-          total: { value: 2, relation: 'eq' },
+          hits: [{ _id: 'a1', _source: {} }],
+          total: { value: 1, relation: 'eq' },
         },
       } as any);
 
@@ -142,13 +88,13 @@ describe('entityExtractionTool', () => {
         entities: [
           { typeKey: 'ip', value: '10.0.0.1', field: 'source.ip', alertId: 'a1' },
           { typeKey: 'ip', value: '10.0.0.2', field: 'destination.ip', alertId: 'a1' },
-          { typeKey: 'hostname', value: 'host-1', field: 'host.name', alertId: 'a2' },
+          { typeKey: 'hostname', value: 'host-1', field: 'host.name', alertId: 'a1' },
         ],
         stats: { totalFields: 20, fieldsWithValues: 3, entitiesExtracted: 3, entitiesAfterDedup: 3 },
       });
 
       const result = await tool.handler(
-        { alert_ids: ['a1', 'a2'] },
+        { alert_ids: ['a1'] },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 

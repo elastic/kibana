@@ -7,15 +7,10 @@
 
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { Logger } from '@kbn/logging';
-import {
-  deduplicateAlerts,
-  extractEntitiesFromAlerts,
-} from '@kbn/elastic-assistant-plugin/server';
-import { securityTool } from './constants';
-import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
-import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
+import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import { deduplicateAlerts, extractEntitiesFromAlerts } from '@kbn/elastic-assistant-plugin/server';
+
+export const RUN_INVESTIGATION_PIPELINE_TOOL_ID = 'security.run_investigation_pipeline';
 
 const runPipelineSchema = z.object({
   max_alerts: z
@@ -54,25 +49,15 @@ const runPipelineSchema = z.object({
     .describe('Alerts index to process. Defaults to .alerts-security.alerts-<spaceId>'),
 });
 
-export const RUN_INVESTIGATION_PIPELINE_TOOL_ID = securityTool('run_investigation_pipeline');
-
-export const runInvestigationPipelineTool = (
-  core: SecuritySolutionPluginCoreSetupDependencies,
-  logger: Logger
-): BuiltinToolDefinition<typeof runPipelineSchema> => ({
+export const getRunPipelineInlineTool = (): SkillBoundedTool => ({
   id: RUN_INVESTIGATION_PIPELINE_TOOL_ID,
   type: ToolType.builtin,
+  schema: runPipelineSchema,
   description:
     'Run the full Alert Investigation Pipeline end-to-end: fetch unprocessed alerts, ' +
     'deduplicate, extract entities, and produce a structured triage report. ' +
     'Use when an analyst asks "run the pipeline", "process unreviewed alerts", ' +
     '"triage all open alerts", or "what alerts need attention?".',
-  schema: runPipelineSchema,
-  availability: {
-    cacheMode: 'space',
-    handler: async ({ request }) =>
-      getAgentBuilderResourceAvailability({ core, request, logger }),
-  },
   handler: async (
     {
       max_alerts: maxAlerts = 100,
@@ -81,7 +66,7 @@ export const runInvestigationPipelineTool = (
       dry_run: dryRun = false,
       index,
     },
-    { esClient, spaceId }
+    { esClient, spaceId, logger }
   ) => {
     const alertsIndex = index ?? `.alerts-security.alerts-${spaceId}`;
     const startTime = Date.now();
@@ -90,7 +75,6 @@ export const runInvestigationPipelineTool = (
       `Running investigation pipeline: max=${maxAlerts}, lookback=${lookbackMinutes}min, threshold=${threshold}, dryRun=${dryRun}`
     );
 
-    // Stage 1: Fetch unprocessed alerts
     const now = new Date();
     const lookbackTime = new Date(now.getTime() - lookbackMinutes * 60 * 1000);
 
@@ -134,7 +118,6 @@ export const runInvestigationPipelineTool = (
       };
     }
 
-    // Stage 2: Deduplicate
     const dedupResult = await deduplicateAlerts({
       alerts,
       esClient: esClient.asCurrentUser,
@@ -142,13 +125,11 @@ export const runInvestigationPipelineTool = (
       similarityThreshold: threshold,
     });
 
-    // Stage 3: Extract entities from leaders only
     const extractionResult = extractEntitiesFromAlerts({
       alerts: dedupResult.leaders,
       logger,
     });
 
-    // Build entity breakdown
     const entityBreakdown: Record<string, string[]> = {};
     for (const entity of extractionResult.entities) {
       if (!entityBreakdown[entity.typeKey]) {
@@ -165,12 +146,8 @@ export const runInvestigationPipelineTool = (
       status: dryRun ? 'dry_run_complete' : 'complete',
       dry_run: dryRun,
       duration_ms: durationMs,
-
-      // Stage 1: Fetch results
       alerts_fetched: alerts.length,
       lookback_minutes: lookbackMinutes,
-
-      // Stage 2: Dedup results
       duplicates_found: dedupResult.stats.duplicatesRemoved,
       unique_alerts: dedupResult.stats.uniqueClusters,
       deduplication_rate: `${(dedupResult.stats.deduplicationRate * 100).toFixed(1)}%`,
@@ -180,12 +157,8 @@ export const runInvestigationPipelineTool = (
           leader: c.leaderId,
           duplicates: c.memberIds.length,
         })),
-
-      // Stage 3: Entity extraction results
       entities_extracted: extractionResult.stats.entitiesAfterDedup,
       entity_breakdown: entityBreakdown,
-
-      // Summary
       summary:
         `Processed ${alerts.length} alerts in ${durationMs}ms. ` +
         `Found ${dedupResult.stats.duplicatesRemoved} duplicates (${(dedupResult.stats.deduplicationRate * 100).toFixed(1)}% dedup rate), ` +
@@ -194,5 +167,4 @@ export const runInvestigationPipelineTool = (
         (dryRun ? ' (DRY RUN - no changes made)' : ''),
     };
   },
-  tags: ['security', 'alerts', 'pipeline', 'investigation'],
 });

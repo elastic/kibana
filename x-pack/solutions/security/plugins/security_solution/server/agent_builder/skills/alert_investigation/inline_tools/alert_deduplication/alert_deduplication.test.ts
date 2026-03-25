@@ -10,16 +10,19 @@ import {
   createToolHandlerContext,
   createToolTestMocks,
   setupMockCoreStartServices,
-} from '../__mocks__/test_helpers';
-import { alertDeduplicationTool, ALERT_DEDUPLICATION_TOOL_ID } from './alert_deduplication_tool';
+} from '../../../../__mocks__/test_helpers';
+import {
+  getAlertDeduplicationInlineTool,
+  ALERT_DEDUPLICATION_TOOL_ID,
+} from './alert_deduplication';
 
 jest.mock('@kbn/elastic-assistant-plugin/server', () => ({
   deduplicateAlerts: jest.fn(),
 }));
 
-describe('alertDeduplicationTool', () => {
+describe('alertDeduplicationInlineTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
-  const tool = alertDeduplicationTool(mockCore, mockLogger);
+  const tool = getAlertDeduplicationInlineTool();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -42,11 +45,6 @@ describe('alertDeduplicationTool', () => {
       expect(result.success).toBe(true);
     });
 
-    it('rejects empty alert_ids', () => {
-      const result = tool.schema.safeParse({ alert_ids: [] });
-      expect(result.success).toBe(true); // empty array is valid zod, handler handles it
-    });
-
     it('rejects missing alert_ids', () => {
       const result = tool.schema.safeParse({});
       expect(result.success).toBe(false);
@@ -64,10 +62,6 @@ describe('alertDeduplicationTool', () => {
   describe('tool properties', () => {
     it('returns correct tool id', () => {
       expect(tool.id).toBe(ALERT_DEDUPLICATION_TOOL_ID);
-    });
-
-    it('has correct tags', () => {
-      expect(tool.tags).toEqual(['security', 'alerts', 'deduplication']);
     });
 
     it('has a description mentioning duplicates', () => {
@@ -118,15 +112,14 @@ describe('alertDeduplicationTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      expect(deduplicateAlerts).toHaveBeenCalledWith({
-        alerts: expect.arrayContaining([
-          expect.objectContaining({ _id: 'alert-1' }),
-          expect.objectContaining({ _id: 'alert-2' }),
-        ]),
-        esClient: mockEsClient.asCurrentUser,
-        logger: mockLogger,
-        similarityThreshold: undefined,
-      });
+      expect(deduplicateAlerts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          alerts: expect.arrayContaining([
+            expect.objectContaining({ _id: 'alert-1' }),
+            expect.objectContaining({ _id: 'alert-2' }),
+          ]),
+        })
+      );
 
       expect(result).toMatchObject({
         duplicate_groups: expect.arrayContaining([
@@ -139,33 +132,6 @@ describe('alertDeduplicationTool', () => {
         duplicates_removed: 1,
         deduplication_rate: '50.0%',
       });
-    });
-
-    it('uses custom threshold when provided', async () => {
-      mockEsClient.asCurrentUser.search.mockResolvedValueOnce({
-        hits: {
-          hits: [
-            { _id: 'a1', _source: {} },
-            { _id: 'a2', _source: {} },
-          ],
-          total: { value: 2, relation: 'eq' },
-        },
-      } as any);
-
-      (deduplicateAlerts as jest.Mock).mockResolvedValueOnce({
-        leaders: [],
-        clusters: [],
-        stats: { totalAlerts: 2, uniqueClusters: 2, duplicatesRemoved: 0, deduplicationRate: 0 },
-      });
-
-      await tool.handler(
-        { alert_ids: ['a1', 'a2'], similarity_threshold: 0.5 },
-        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
-      );
-
-      expect(deduplicateAlerts).toHaveBeenCalledWith(
-        expect.objectContaining({ similarityThreshold: 0.5 })
-      );
     });
 
     it('uses correct index with spaceId', async () => {

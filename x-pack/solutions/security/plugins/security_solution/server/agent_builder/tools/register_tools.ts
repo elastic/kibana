@@ -13,10 +13,6 @@ import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
 import { entityRiskScoreTool, getEntityTool, searchEntitiesTool } from './entity_analytics';
 import { alertsTool } from './alerts_tool';
 import { createDetectionRuleTool } from './create_detection_rule_tool';
-import { alertDeduplicationTool } from './alert_deduplication_tool';
-import { entityExtractionTool } from './entity_extraction_tool';
-import { caseMatchingTool } from './case_matching_tool';
-import { runInvestigationPipelineTool } from './run_investigation_pipeline_tool';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
 /**
@@ -35,10 +31,4 @@ export const registerTools = async (
   agentBuilder.tools.register(alertsTool(core, logger));
   agentBuilder.tools.register(getEntityTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
-
-  // Alert Investigation Pipeline tools
-  agentBuilder.tools.register(alertDeduplicationTool(core, logger));
-  agentBuilder.tools.register(entityExtractionTool(core, logger));
-  agentBuilder.tools.register(caseMatchingTool(core, logger));
-  agentBuilder.tools.register(runInvestigationPipelineTool(core, logger));
 };

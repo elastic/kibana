@@ -7,12 +7,10 @@
 
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { Logger } from '@kbn/logging';
+import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { deduplicateAlerts } from '@kbn/elastic-assistant-plugin/server';
-import { securityTool } from './constants';
-import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
-import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
+
+export const ALERT_DEDUPLICATION_TOOL_ID = 'security.alert_deduplication';
 
 const alertDeduplicationSchema = z.object({
   alert_ids: z
@@ -34,28 +32,18 @@ const alertDeduplicationSchema = z.object({
     .describe('Alerts index to fetch from. Defaults to .alerts-security.alerts-<spaceId>'),
 });
 
-export const ALERT_DEDUPLICATION_TOOL_ID = securityTool('alert_deduplication');
-
-export const alertDeduplicationTool = (
-  core: SecuritySolutionPluginCoreSetupDependencies,
-  logger: Logger
-): BuiltinToolDefinition<typeof alertDeduplicationSchema> => ({
+export const getAlertDeduplicationInlineTool = (): SkillBoundedTool => ({
   id: ALERT_DEDUPLICATION_TOOL_ID,
   type: ToolType.builtin,
+  schema: alertDeduplicationSchema,
   description:
     'Find duplicate or similar security alerts using semantic similarity analysis. ' +
     'Compares alerts by rule name, host, user, process, network, and file attributes. ' +
     'Use when an analyst asks "are these alerts the same?", "find duplicate alerts", ' +
     'or "which of these alerts are related?".',
-  schema: alertDeduplicationSchema,
-  availability: {
-    cacheMode: 'space',
-    handler: async ({ request }) =>
-      getAgentBuilderResourceAvailability({ core, request, logger }),
-  },
   handler: async (
     { alert_ids: alertIds, similarity_threshold: threshold, index },
-    { esClient, spaceId }
+    { esClient, spaceId, logger }
   ) => {
     const alertsIndex = index ?? `.alerts-security.alerts-${spaceId}`;
 
@@ -63,7 +51,6 @@ export const alertDeduplicationTool = (
       `alert_deduplication tool called with ${alertIds.length} alerts, threshold: ${threshold ?? 0.85}`
     );
 
-    // Fetch alerts from ES
     const alertsResponse = await esClient.asCurrentUser.search({
       index: alertsIndex,
       body: {
@@ -85,7 +72,6 @@ export const alertDeduplicationTool = (
       };
     }
 
-    // Use the shared deduplication algorithm from elastic_assistant
     const result = await deduplicateAlerts({
       alerts,
       esClient: esClient.asCurrentUser,
@@ -110,5 +96,4 @@ export const alertDeduplicationTool = (
           : `No duplicates found among ${alerts.length} alerts at threshold ${threshold ?? 0.85}.`,
     };
   },
-  tags: ['security', 'alerts', 'deduplication'],
 });

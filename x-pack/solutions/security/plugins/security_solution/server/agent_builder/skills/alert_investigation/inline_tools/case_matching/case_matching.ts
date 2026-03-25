@@ -7,15 +7,10 @@
 
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { Logger } from '@kbn/logging';
-import {
-  extractEntitiesFromAlerts,
-  matchAlertsToCases,
-} from '@kbn/elastic-assistant-plugin/server';
-import { securityTool } from './constants';
-import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
-import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
+import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import { extractEntitiesFromAlerts } from '@kbn/elastic-assistant-plugin/server';
+
+export const CASE_MATCHING_TOOL_ID = 'security.case_matching';
 
 const caseMatchingSchema = z.object({
   alert_ids: z
@@ -35,33 +30,25 @@ const caseMatchingSchema = z.object({
     .describe('Alerts index to fetch from. Defaults to .alerts-security.alerts-<spaceId>'),
 });
 
-export const CASE_MATCHING_TOOL_ID = securityTool('case_matching');
-
-export const caseMatchingTool = (
-  core: SecuritySolutionPluginCoreSetupDependencies,
-  logger: Logger
-): BuiltinToolDefinition<typeof caseMatchingSchema> => ({
+export const getCaseMatchingInlineTool = (): SkillBoundedTool => ({
   id: CASE_MATCHING_TOOL_ID,
   type: ToolType.builtin,
+  schema: caseMatchingSchema,
   description:
     'Find the best matching existing case for security alerts based on shared entities ' +
     '(hosts, users, IPs, processes, file hashes). Scores each open case by entity overlap. ' +
     'Use when an analyst asks "which case should this alert go to?", "find related cases", ' +
     'or "does this alert belong to an existing investigation?".',
-  schema: caseMatchingSchema,
-  availability: {
-    cacheMode: 'space',
-    handler: async ({ request }) =>
-      getAgentBuilderResourceAvailability({ core, request, logger }),
-  },
-  handler: async ({ alert_ids: alertIds, match_threshold: threshold, index }, { esClient, spaceId }) => {
+  handler: async (
+    { alert_ids: alertIds, match_threshold: threshold, index },
+    { esClient, spaceId, logger }
+  ) => {
     const alertsIndex = index ?? `.alerts-security.alerts-${spaceId}`;
 
     logger.debug(
       `case_matching tool called with ${alertIds.length} alerts, threshold: ${threshold ?? 0.3}`
     );
 
-    // Step 1: Fetch alerts from ES
     const alertsResponse = await esClient.asCurrentUser.search({
       index: alertsIndex,
       body: {
@@ -75,10 +62,8 @@ export const caseMatchingTool = (
       _source: hit._source as Record<string, unknown>,
     }));
 
-    // Step 2: Extract entities using shared logic
     const extractionResult = extractEntitiesFromAlerts({ alerts, logger });
 
-    // Step 3: Build entity summary for the response
     const entitiesByType = new Map<string, Set<string>>();
     for (const entity of extractionResult.entities) {
       if (!entitiesByType.has(entity.typeKey)) {
@@ -91,9 +76,6 @@ export const caseMatchingTool = (
       [...entitiesByType.entries()].map(([k, v]) => [k, [...v]])
     );
 
-    // Note: Full case matching requires Cases plugin access (KibanaRequest + CasesServerStart)
-    // which isn't available in Agent Builder tool context.
-    // The tool provides entity extraction and summary; the skill orchestrates the full flow.
     return {
       alert_entities: entitySummary,
       total_entities: extractionResult.stats.entitiesAfterDedup,
@@ -106,5 +88,4 @@ export const caseMatchingTool = (
       summary: `Extracted entities from ${alerts.length} alerts: ${[...entitiesByType.entries()].map(([type, values]) => `${values.size} ${type}(s)`).join(', ')}.`,
     };
   },
-  tags: ['security', 'alerts', 'cases', 'matching'],
 });

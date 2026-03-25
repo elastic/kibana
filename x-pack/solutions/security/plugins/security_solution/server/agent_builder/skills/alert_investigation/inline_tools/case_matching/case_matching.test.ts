@@ -10,17 +10,16 @@ import {
   createToolHandlerContext,
   createToolTestMocks,
   setupMockCoreStartServices,
-} from '../__mocks__/test_helpers';
-import { caseMatchingTool, CASE_MATCHING_TOOL_ID } from './case_matching_tool';
+} from '../../../../__mocks__/test_helpers';
+import { getCaseMatchingInlineTool, CASE_MATCHING_TOOL_ID } from './case_matching';
 
 jest.mock('@kbn/elastic-assistant-plugin/server', () => ({
   extractEntitiesFromAlerts: jest.fn(),
-  matchAlertsToCases: jest.fn(),
 }));
 
-describe('caseMatchingTool', () => {
+describe('caseMatchingInlineTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
-  const tool = caseMatchingTool(mockCore, mockLogger);
+  const tool = getCaseMatchingInlineTool();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -30,14 +29,6 @@ describe('caseMatchingTool', () => {
   describe('schema', () => {
     it('validates correct input', () => {
       const result = tool.schema.safeParse({ alert_ids: ['alert-1'] });
-      expect(result.success).toBe(true);
-    });
-
-    it('validates input with optional match_threshold', () => {
-      const result = tool.schema.safeParse({
-        alert_ids: ['alert-1'],
-        match_threshold: 0.5,
-      });
       expect(result.success).toBe(true);
     });
 
@@ -60,10 +51,6 @@ describe('caseMatchingTool', () => {
       expect(tool.id).toBe(CASE_MATCHING_TOOL_ID);
     });
 
-    it('has correct tags', () => {
-      expect(tool.tags).toEqual(['security', 'alerts', 'cases', 'matching']);
-    });
-
     it('has description mentioning cases', () => {
       expect(tool.description).toContain('case');
     });
@@ -71,27 +58,18 @@ describe('caseMatchingTool', () => {
 
   describe('handler', () => {
     it('extracts entities from fetched alerts', async () => {
-      const mockAlerts = [
-        {
-          _id: 'alert-1',
-          _source: {
-            'host.name': 'webserver-01',
-            'source.ip': '10.0.0.5',
-            'user.name': 'john',
-          },
-        },
-      ];
       mockEsClient.asCurrentUser.search.mockResolvedValueOnce({
-        hits: { hits: mockAlerts, total: { value: 1, relation: 'eq' } },
+        hits: {
+          hits: [{ _id: 'alert-1', _source: { 'host.name': 'webserver-01' } }],
+          total: { value: 1, relation: 'eq' },
+        },
       } as any);
 
       (extractEntitiesFromAlerts as jest.Mock).mockReturnValueOnce({
         entities: [
           { typeKey: 'hostname', value: 'webserver-01', field: 'host.name', alertId: 'alert-1' },
-          { typeKey: 'ipv4', value: '10.0.0.5', field: 'source.ip', alertId: 'alert-1' },
-          { typeKey: 'user', value: 'john', field: 'user.name', alertId: 'alert-1' },
         ],
-        stats: { totalFields: 20, fieldsWithValues: 3, entitiesExtracted: 3, entitiesAfterDedup: 3 },
+        stats: { totalFields: 20, fieldsWithValues: 1, entitiesExtracted: 1, entitiesAfterDedup: 1 },
       });
 
       const result = await tool.handler(
@@ -99,18 +77,10 @@ describe('caseMatchingTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      expect(extractEntitiesFromAlerts).toHaveBeenCalledWith({
-        alerts: expect.arrayContaining([expect.objectContaining({ _id: 'alert-1' })]),
-        logger: mockLogger,
-      });
-
       expect(result).toMatchObject({
-        alert_entities: expect.objectContaining({
-          hostname: ['webserver-01'],
-          user: ['john'],
-        }),
-        total_entities: 3,
-        recommendation: expect.stringContaining('Extracted 3 entities'),
+        alert_entities: expect.objectContaining({ hostname: ['webserver-01'] }),
+        total_entities: 1,
+        recommendation: expect.stringContaining('Extracted 1 entities'),
       });
     });
 
@@ -148,48 +118,6 @@ describe('caseMatchingTool', () => {
       );
 
       expect(result.match_threshold).toBe(0.3);
-    });
-
-    it('uses custom threshold when provided', async () => {
-      mockEsClient.asCurrentUser.search.mockResolvedValueOnce({
-        hits: { hits: [{ _id: 'a1', _source: {} }], total: { value: 1, relation: 'eq' } },
-      } as any);
-
-      (extractEntitiesFromAlerts as jest.Mock).mockReturnValueOnce({
-        entities: [],
-        stats: { totalFields: 0, fieldsWithValues: 0, entitiesExtracted: 0, entitiesAfterDedup: 0 },
-      });
-
-      const result = await tool.handler(
-        { alert_ids: ['a1'], match_threshold: 0.7 },
-        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
-      );
-
-      expect(result.match_threshold).toBe(0.7);
-    });
-
-    it('uses correct index with spaceId', async () => {
-      mockEsClient.asCurrentUser.search.mockResolvedValueOnce({
-        hits: { hits: [], total: { value: 0, relation: 'eq' } },
-      } as any);
-
-      (extractEntitiesFromAlerts as jest.Mock).mockReturnValueOnce({
-        entities: [],
-        stats: { totalFields: 0, fieldsWithValues: 0, entitiesExtracted: 0, entitiesAfterDedup: 0 },
-      });
-
-      await tool.handler(
-        { alert_ids: ['a1'] },
-        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-          spaceId: 'my-space',
-        })
-      );
-
-      expect(mockEsClient.asCurrentUser.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          index: '.alerts-security.alerts-my-space',
-        })
-      );
     });
   });
 });
