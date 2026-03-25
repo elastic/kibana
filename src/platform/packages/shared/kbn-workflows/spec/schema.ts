@@ -698,7 +698,7 @@ const WorkflowSchemaBase = z.object({
   settings: WorkflowSettingsSchema.optional(),
   enabled: z.boolean().default(true),
   tags: z.array(z.string()).optional(),
-  inputs: WorkflowInputSchema.optional(),
+  inputs: WorkflowInputSchema.optional(), // TODO: remove this once
   outputs: z.union([JsonModelSchema, z.array(WorkflowOutputSchema)]).optional(),
   consts: WorkflowConstsSchema.optional(),
   steps: z.array(StepSchema).min(1),
@@ -825,35 +825,6 @@ export const WorkflowDataContextSchema = z.object({
 });
 export type WorkflowDataContext = z.infer<typeof WorkflowDataContextSchema>;
 
-// Note: AlertSchema from '@kbn/alerts-as-data-utils' uses io-ts runtime types, not Zod.
-// Once a Zod-compatible version is available, we should import and use it instead.
-export const AlertSchema = z.object({
-  _id: z.string(),
-  _index: z.string(),
-  kibana: z.object({
-    alert: z.any(),
-  }),
-  '@timestamp': z.string(),
-});
-
-export const RuleSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  tags: z.array(z.string()),
-  consumer: z.string(),
-  producer: z.string(),
-  ruleTypeId: z.string(),
-});
-
-/**
- * Alert-specific event properties. Only present when the workflow has an alert trigger.
- */
-export const AlertEventPropsSchema = z.object({
-  alerts: z.array(z.union([AlertSchema, z.any()])),
-  rule: RuleSchema,
-  params: z.any(),
-});
-
 /**
  * Base fields present on every trigger event (injected by the platform).
  * Custom trigger event schemas are merged on top of this for workflow context and autocomplete.
@@ -870,15 +841,6 @@ export const EventTimestampSchema = z.object({
   timestamp: z.string().describe('Time when the event was received (ISO 8601).'),
 });
 
-/**
- * Full event schema (used for runtime validation of alert-triggered workflows).
- * For autocomplete, use getEventSchemaForTriggers() to get a trigger-aware schema.
- */
-export const AlertEventSchema = z.object({
-  ...BaseEventSchema.shape,
-  ...AlertEventPropsSchema.shape,
-});
-
 // Recursive type for workflow inputs that supports nested objects from JSON Schema
 const WorkflowInputValueSchema: z.ZodType<unknown> = z.lazy(() =>
   z.union([
@@ -893,11 +855,11 @@ const WorkflowInputValueSchema: z.ZodType<unknown> = z.lazy(() =>
 );
 
 export const WorkflowContextSchema = z.object({
-  event: AlertEventSchema.optional(),
+  event: z.unknown().optional(),
   execution: WorkflowExecutionContextSchema,
   workflow: WorkflowDataContextSchema,
   kibanaUrl: z.string(),
-  inputs: z.record(z.string(), WorkflowInputValueSchema).optional(),
+  inputs: z.record(z.string(), WorkflowInputValueSchema).optional(), // TODO: remove this once
   output: z
     .record(
       z.string(),

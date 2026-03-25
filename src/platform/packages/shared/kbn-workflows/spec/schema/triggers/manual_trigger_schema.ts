@@ -48,23 +48,32 @@ export const WorkflowInputArraySchema = WorkflowInputBaseSchema.extend({
   default: z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]).optional(),
 });
 
-export const WorkflowInputSchema = z.union([
+export const FlatInputSchema = z.union([
   WorkflowInputStringSchema,
   WorkflowInputNumberSchema,
   WorkflowInputBooleanSchema,
   WorkflowInputChoiceSchema,
   WorkflowInputArraySchema,
 ]);
-export type LegacyWorkflowInput = z.infer<typeof WorkflowInputSchema>;
+export type FlatInput = z.infer<typeof FlatInputSchema>;
+
+export const WorkflowInputSchema = z.union([
+  // New JSON Schema format
+  JsonModelSchema,
+  // Legacy array format (for backward compatibility)
+  z.array(FlatInputSchema),
+]);
 
 export const ManualTriggerSchema = z.object({
   type: z.literal('manual'),
-  inputs: z
-    .union([
-      // New JSON Schema format
-      JsonModelSchema,
-      // Legacy array format (for backward compatibility)
-      z.array(WorkflowInputSchema),
-    ])
-    .optional(),
+  inputs: WorkflowInputSchema.optional(),
 });
+export type ManualTrigger = z.infer<typeof ManualTriggerSchema>;
+
+export const ManualTriggerEventSchema = z.object({
+  inputs: z.unknown().optional(),
+});
+export type ManualTriggerEvent = z.infer<typeof ManualTriggerEventSchema>;
+
+export const isManualTrigger = (trigger: { type?: string }): trigger is ManualTrigger =>
+  trigger.type === 'manual';
