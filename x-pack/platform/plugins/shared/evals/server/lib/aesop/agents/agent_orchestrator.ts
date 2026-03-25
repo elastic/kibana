@@ -15,6 +15,8 @@ export interface AgentOrchestrationConfig {
   connectorId: string;
   logger: Logger;
   timeoutMs?: number;
+  executionId?: string; // For tagging conversations
+  onProgress?: (phase: string, step: number, totalSteps: number, message: string) => Promise<void>;
 }
 
 export class AgentOrchestrator {
@@ -29,13 +31,25 @@ export class AgentOrchestrator {
 
     logger.info(`[AESOP] Executing agent: ${agentId}`);
 
+    // Tag conversations with AESOP execution ID for debugging/traceability
+    const conversationTag = this.config.executionId
+      ? `aesop-${agentId}-${this.config.executionId}`
+      : undefined;
+
     const { executionId, events$ } = await agentBuilderStart.execution.executeAgent({
       request,
       params: {
         agentId,
         connectorId,
-        storeConversation: false,
+        storeConversation: !!conversationTag,
+        conversationId: conversationTag,
+        autoCreateConversationWithId: !!conversationTag,
         nextInput: { message },
+      },
+      metadata: {
+        source: 'aesop',
+        aesop_execution_id: this.config.executionId || '',
+        agent_role: agentId,
       },
     });
 
@@ -90,8 +104,10 @@ export class AgentOrchestrator {
   }): Promise<any[]> {
     const { logger } = this.config;
 
+    const progress = this.config.onProgress || (async () => {});
+
     // Phase 1-2: Schema Explorer
-    logger.info('[AESOP] Agent pipeline Phase 1-2: Schema Explorer');
+    await progress('Schema Discovery', 1, 3, 'Agent exploring index schemas with tools...');
     const schemaResponse = await this.executeAgent(
       'aesop.schema-explorer',
       `Explore and profile these indices: ${context.indexNames.join(', ')}. Focus on security-relevant data for a ${context.analystRole}.`
@@ -103,7 +119,7 @@ export class AgentOrchestrator {
     }
 
     // Phase 3-4: Pattern Miner
-    logger.info('[AESOP] Agent pipeline Phase 3-4: Pattern Miner');
+    await progress('Pattern Mining', 2, 3, 'Agent mining patterns with ES|QL queries...');
     const patternResponse = await this.executeAgent(
       'aesop.pattern-miner',
       `Find automation-worthy patterns in this data. Schema context:\n${schemaResponse}`
@@ -115,7 +131,7 @@ export class AgentOrchestrator {
     }
 
     // Phase 5: Skill Generator
-    logger.info('[AESOP] Agent pipeline Phase 5: Skill Generator');
+    await progress('Skill Generation', 3, 3, 'Agent generating skills from discovered patterns...');
     const skillResponse = await this.executeAgent(
       'aesop.skill-generator',
       `Generate Agent Builder skills from these patterns and schemas.\n\nSchemas:\n${schemaResponse}\n\nPatterns:\n${patternResponse}`
