@@ -20,13 +20,14 @@ export const bulkGetSchemas = {
     {
       contentTypeId: schema.string(),
       version: versionSchema,
-      ids: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+      ids: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 100 }),
       options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     },
     { unknowns: 'forbid' }
   ),
   out: schema.object(
     {
+      // codeql[js/kibana/unbounded-array-in-schema] output schema — server controls the response size
       hits: schema.arrayOf(getResultSchema),
       meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     },
