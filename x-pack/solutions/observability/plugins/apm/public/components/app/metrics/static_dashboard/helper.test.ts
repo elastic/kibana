@@ -15,6 +15,7 @@ describe('APM metrics static dashboard helpers', () => {
       id: 'id-1',
       title: 'test-data-view:metrics*,metrics*',
       getIndexPattern: () => 'test-data-view:metrics*,metrics*',
+      isTSDBMode: () => false,
     } as unknown as DataView;
 
     it('returns undefined when dashboard file does not exist', async () => {
@@ -35,7 +36,7 @@ describe('APM metrics static dashboard helpers', () => {
         .map((p) => p.config?.query?.esql)
         .find(Boolean);
 
-      expect(esqlQuery).toContain('from test-data-view:metrics*,metrics*');
+      expect(esqlQuery).toMatch(/from test-data-view:metrics\*,metrics\*/i);
     });
 
     it('replaces placeholders in JSON with index pattern values from apm indices', async () => {
@@ -52,7 +53,7 @@ describe('APM metrics static dashboard helpers', () => {
         .map((p) => p.config?.query?.esql)
         .find(Boolean);
 
-      expect(esqlQuery).toContain('from test-apm-indices:metrics*,metrics*');
+      expect(esqlQuery).toMatch(/from test-apm-indices:metrics\*,metrics\*/i);
     });
   });
 

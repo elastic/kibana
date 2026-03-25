@@ -71,11 +71,14 @@ export async function convertSavedDashboardToPanels(
     return undefined;
   }
 
+  const esqlSourceCommand = dataView.isTSDBMode() ? 'TS' : 'FROM';
+
   // Convert the Dashboard into a string
   const dashboardString = JSON.stringify(unreplacedDashboardJSON);
   // Replace indexPattern placeholder
   const dashboardStringWithReplacements = Mustache.render(dashboardString, {
     indexPattern: apmIndices?.metric ?? dataView.getIndexPattern(),
+    esqlSourceCommand,
   });
   // Convert to JSON object
   const dashboardJSON = JSON.parse(dashboardStringWithReplacements);
