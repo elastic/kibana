@@ -37,7 +37,6 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
   const history = useHistory();
   const euiTheme = useEuiTheme();
   const license = useObservable(licensing.license$);
-  /** `null` until license is known; then whether Enterprise (or trial) allows manage integrations. */
   const licenseAllowsManageView = useMemo((): boolean | null => {
     if (license == null) {
       return null;
