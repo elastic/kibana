@@ -25,9 +25,12 @@ const baseWorkflowExecutionSchema: RootSchema<{
   workflowExecutionId: string;
   workflowId: string;
   spaceId: string;
-  triggerType: 'manual' | 'scheduled' | 'alert';
+  triggerType: 'manual' | 'scheduled' | 'alert' | 'workflow-step';
   isTestRun: boolean;
   ruleId?: string;
+  compositionDepth?: number;
+  parentWorkflowId?: string;
+  parentWorkflowInvocation?: 'sync' | 'async';
 }> = {
   workflowExecutionId: {
     type: 'keyword',
@@ -53,7 +56,8 @@ const baseWorkflowExecutionSchema: RootSchema<{
   triggerType: {
     type: 'keyword',
     _meta: {
-      description: 'How the workflow was triggered: manual, scheduled, or alert',
+      description:
+        'How the workflow was triggered: manual, scheduled, alert, or workflow-step for sub-workflows',
       optional: false,
     },
   },
@@ -69,6 +73,30 @@ const baseWorkflowExecutionSchema: RootSchema<{
     _meta: {
       description:
         'The alert rule ID if triggered by alert. Only present when triggerType is alert.',
+      optional: true,
+    },
+  },
+  compositionDepth: {
+    type: 'integer',
+    _meta: {
+      description:
+        'Cross-workflow nesting depth for sub-workflow executions (1 = direct child). Only present for sub-workflow executions.',
+      optional: true,
+    },
+  },
+  parentWorkflowId: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The workflow ID of the parent workflow that invoked this sub-workflow. Only present for sub-workflow executions.',
+      optional: true,
+    },
+  },
+  parentWorkflowInvocation: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Whether the parent started this sub-workflow with workflow.execute (sync) or workflow.executeAsync (async). Only present for sub-workflow executions.',
       optional: true,
     },
   },

@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 
 import { AssigneesBadge } from './assignees_badge';
 import { UNKNOWN_USER_PROFILE_NAME } from '../../../../../common/components/user_profiles/translations';
+import { TestProviders } from '../../../../../common/mock/test_providers';
 
 const mockUseBulkGetUserProfiles = jest.fn();
 
@@ -17,68 +18,87 @@ jest.mock('../../../../../common/components/user_profiles/use_bulk_get_user_prof
   useBulkGetUserProfiles: () => mockUseBulkGetUserProfiles(),
 }));
 
+jest.mock('@kbn/user-profile-components', () => ({
+  UserAvatar: () => <div data-test-subj="user-avatar" />,
+}));
+
 describe('AssigneesBadge', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseBulkGetUserProfiles.mockReturnValue({
       data: [
-        { uid: '1', user: { username: 'user1', email: 'user1@example.com' } },
-        { uid: '2', user: { username: 'user2', email: 'user2@example.com' } },
+        { uid: '1', user: { username: 'user1', email: 'user1@example.com' }, data: {} },
+        { uid: '2', user: { username: 'user2', email: 'user2@example.com' }, data: {} },
       ],
     });
   });
 
   it('renders correctly with given assignees count', () => {
     const assignees = ['1', '2'];
-    const { getByText } = render(<AssigneesBadge assignees={assignees} />);
+    const { getByTestId } = render(
+      <TestProviders>
+        <AssigneesBadge assignees={assignees} />
+      </TestProviders>
+    );
 
-    // Check if the badge with the correct number of assignees is rendered
-    expect(getByText('2')).toBeInTheDocument();
+    expect(getByTestId('attack-assignees-badgeDisplayPopoverButton')).toHaveTextContent('2');
   });
 
   it('renders nothing when assignees array is empty', () => {
-    const { container } = render(<AssigneesBadge assignees={[]} />);
+    const { container } = render(
+      <TestProviders>
+        <AssigneesBadge assignees={[]} />
+      </TestProviders>
+    );
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('displays tooltip with title and correct assignees list on hover', async () => {
+  it('displays popover with title and correct assignees list on click', async () => {
     const assignees = ['1', '2'];
-    const { getByText, findByText } = render(<AssigneesBadge assignees={assignees} />);
+    const { getByTestId, findByText } = render(
+      <TestProviders>
+        <AssigneesBadge assignees={assignees} />
+      </TestProviders>
+    );
 
-    const badge = getByText('2');
-    fireEvent.mouseOver(badge);
+    getByTestId('attack-assignees-badgeDisplayPopoverButton').click();
 
-    // Check tooltip title
+    // Check popover title
     expect(await findByText('Assignees')).toBeInTheDocument();
 
-    // Check tooltip items
-    // First user has an email, so we expect the email to be shown over username
+    // First user has an email, so email is shown over username
     expect(await findByText('user1@example.com')).toBeInTheDocument();
     expect(await findByText('user2@example.com')).toBeInTheDocument();
   });
 
   it('falls back to username if email is missing', async () => {
     mockUseBulkGetUserProfiles.mockReturnValue({
-      data: [{ uid: '3', user: { username: 'user3_no_email' } }],
+      data: [{ uid: '3', user: { username: 'user3_no_email' }, data: {} }],
     });
     const assignees = ['3'];
-    const { getByText, findByText } = render(<AssigneesBadge assignees={assignees} />);
+    const { getByTestId, findByText } = render(
+      <TestProviders>
+        <AssigneesBadge assignees={assignees} />
+      </TestProviders>
+    );
 
-    const badge = getByText('1');
-    fireEvent.mouseOver(badge);
+    getByTestId('attack-assignees-badgeDisplayPopoverButton').click();
 
     expect(await findByText('user3_no_email')).toBeInTheDocument();
   });
 
   it('falls back to UNKNOWN_USER_PROFILE_NAME if user info is unavailable', async () => {
     mockUseBulkGetUserProfiles.mockReturnValue({
-      data: [undefined],
+      data: undefined,
     });
     const assignees = ['unknown_id'];
-    const { getByText, findByText } = render(<AssigneesBadge assignees={assignees} />);
+    const { getByTestId, findByText } = render(
+      <TestProviders>
+        <AssigneesBadge assignees={assignees} />
+      </TestProviders>
+    );
 
-    const badge = getByText('1');
-    fireEvent.mouseOver(badge);
+    getByTestId('attack-assignees-badgeDisplayPopoverButton').click();
 
     expect(await findByText(UNKNOWN_USER_PROFILE_NAME)).toBeInTheDocument();
   });
