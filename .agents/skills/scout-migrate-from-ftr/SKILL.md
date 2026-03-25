@@ -37,6 +37,7 @@ Migrate FTR tests to Scout by deciding whether a test should be UI or API, mappi
 - UI tests: tags are **required** (validated at runtime).
 - `parallel_tests/`: ingest via `parallel_tests/global.setup.ts` + `globalSetupHook` (don't use `esArchiver` in spec files).
 - Use the correct Scout package for the test location (`@kbn/scout` vs `@kbn/scout-security`/`@kbn/scout-oblt`/`@kbn/scout-search`) and import `expect` from `/ui` or `/api`.
+- **TypeScript layout for Scout tests** (pick one; see **Where Scout tests are typechecked** under step 6): either fold `test/scout/**/*` into the **plugin root** `tsconfig.json` and add Scout `kbn_references` (like `discover_enhanced`), or keep **dedicated** `test/scout/{ui,api}/tsconfig.json` files. Only the latter forbids relative imports into `server/` / `public/`.
 - Replace FTR config nesting / per-suite server args with `uiSettings` / `scoutSpace.uiSettings` and (when needed) `apiServices.core.settings(...)`.
 - Auth/roles are fixture-driven: `browserAuth` (UI), `requestAuth` (API key), `samlAuth` (cookie / `cookieHeader`), plus custom roles. Avoid FTR-style role mutation. For Scout **API** tests, see **Scout API auth (`cookieHeader` vs API key)** under step 4.
 
@@ -169,7 +170,34 @@ export const apiTest = mergeTests(baseApiTest, synthtraceFixture);
 
 Specs then receive worker fixtures such as **`logsSynthtraceEsClient`** (`index` / `clean`) for `@kbn/synthtrace-client` generators (`log`, `timerange`, etc.).
 
-In `test/scout*/api/tsconfig.json`, add **`kbn_references`**: `@kbn/scout-oblt` (or `@kbn/scout`), **`@kbn/scout-synthtrace`**, **`@kbn/synthtrace-client`** (add `@kbn/synthtrace` only if types require it). UI-only synthtrace patterns that use `mergeTests` + `synthtraceFixture` in UI fixtures follow the same **`@kbn/scout-synthtrace`** import.
+Add the same Scout **`kbn_references`** on **whichever `tsconfig.json` includes the Scout API files**: either the **plugin root** `tsconfig.json` or `test/scout*/api/tsconfig.json`. Typical API set: `@kbn/scout-oblt` (or `@kbn/scout`), **`@kbn/scout-synthtrace`**, **`@kbn/synthtrace-client`** (add `@kbn/synthtrace` only if types require it). UI-only synthtrace: same **`@kbn/scout-synthtrace`** import in fixtures.
+
+#### Where Scout tests are typechecked (choose one)
+
+**Pattern A — plugin `tsconfig` includes Scout (recommended when tests import `server/` or `common/`)**
+
+- Extend the plugin **`tsconfig.json`** with e.g. **`test/scout/**/*`** (or **`test/**/*`** like `discover_enhanced`).
+- Add solution Scout packages to **`kbn_references`** on that same file (e.g. **`@kbn/scout-oblt`**; for API + synthtrace also **`@kbn/scout-synthtrace`**, **`@kbn/synthtrace-client`**). Platform-only tests use **`@kbn/scout`** instead of `scouting-oblt` where appropriate.
+- **Do not** add `test/scout/ui/tsconfig.json` or `test/scout/api/tsconfig.json`; `yarn kbn bootstrap` should not list separate Scout tsconfigs for this plugin.
+- **Relative imports** from specs/fixtures into **`server/`** or **`common/`** are valid: tests share one TS program with the plugin (same `rootDir` / `include` story as FTR-style colocated tests).
+
+**Pattern B — dedicated `test/scout/{ ui, api }/tsconfig.json`**
+
+- Keeps the **plugin** `type_check` graph smaller; matches many existing modules (e.g. SLO, `data_views` API, infra Scout UI).
+- The Scout folder is its **own** composite project with `rootDir` under `test/scout/...` only.
+- **Do not** use relative imports that reach **`../../../../server/...`** or **`public/...`** from those specs—the importer’s project will try to own `server/**/*.ts` and CI **`check_types`** will explode with **`TS6059` / `TS6307`** (see `tsc --listFilesOnly`).
+- **Do instead:** constants in **`fixtures/constants.ts`** (with a “must match …” comment), **`@kbn/*`** imports covered by that project’s `kbn_references`, or **`common/`** modules that typecheck inside the Scout project.
+
+**Choosing:** Prefer **Pattern A** when migrating FTR tests that already imported registration constants or server helpers. Prefer **Pattern B** when you want minimal plugin compile cost and can keep imports boundary-safe.
+
+#### Scout API imports and TypeScript project boundaries (Pattern B only)
+
+If the module uses **Pattern B**, treat the Scout API directory as isolated:
+
+- Avoid relative imports into plugin **`server/`** / **`public/`** just to reuse a string constant—use **`api/fixtures/constants.ts`** or move the constant to **`common/`** if both prod and tests should share it.
+- Prefer **`@kbn/scout*`** / **`@kbn/synthtrace-client`** per that folder’s **`kbn_references`**.
+
+**FTR migration tip:** FTR often imported server files because tests sat in the plugin program. **Pattern A** preserves that. **Pattern B** matches “thin” e2e deps—duplicate small literals or use fixtures when adding `server/` to the Scout `tsconfig` graph is wrong.
 
 ### 7) Extract component/unit tests where possible
 
@@ -190,6 +218,7 @@ In `test/scout*/api/tsconfig.json`, add **`kbn_references`**: `@kbn/scout-oblt` 
 
 ### 9) Verify and run tests locally
 
+- **Typecheck:** For **Pattern A**, run **`node scripts/type_check --project <plugin-root>/tsconfig.json`**. For **Pattern B**, run **`node scripts/type_check --project <plugin>/test/scout/api/tsconfig.json`** (and UI project if present). Use full **`node scripts/type_check`** when shared types changed broadly. Huge **`TS6059` / `TS6307`** counts under a **Scout-only** project usually mean **Pattern B** + forbidden **`server/`** relatives—switch to **Pattern A** or fix imports (step 6).
 - Use `node scripts/scout.js run-tests --arch stateful --domain classic --testFiles <path>` and
   `node scripts/scout.js run-tests --arch serverless --domain observability_complete --testFiles <path>` (adjust serverless domain).
 - If the tests are under `test/scout_<configSet>/...`, `run-tests` auto-detects the server config set from the Playwright config path.
@@ -212,7 +241,7 @@ In `test/scout*/api/tsconfig.json`, add **`kbn_references`**: `@kbn/scout-oblt` 
 - Parallel UI: isolate per-space state via `spaceTest` + `scoutSpace`; avoid hardcoded saved object IDs and make names unique (often suffix with `scoutSpace.id`).
 - Use `globalSetupHook` in `parallel_tests/global.setup.ts` to ingest shared data once.
 - Use `page.addInitScript(...)` before navigation to set localStorage/cookies (skip tours/onboarding).
-- When FTR used rison-encoded query params, replicate with `@kbn/rison` and add it to `test/scout*/ui/tsconfig.json` `kbn_references`.
+- When FTR used rison-encoded query params, replicate with `@kbn/rison` and add **`@kbn/rison`** to **`kbn_references`** on the `tsconfig.json` that includes the Scout UI files (plugin root under **Pattern A**, or `test/scout/ui/tsconfig.json` under **Pattern B**).
 - Add stable `data-test-subj` attributes when selectors are unstable.
 - Centralize deep links + page-ready waits in page objects.
 
@@ -233,3 +262,5 @@ In `test/scout*/api/tsconfig.json`, add **`kbn_references`**: `@kbn/scout-oblt` 
 - Packing too many `test(...)` blocks into a single spec file. Keep specs focused: 4–5 short scenarios or 2–3 long scenarios per file. Oversized specs create bottlenecks in parallel execution.
 - Using **`requestAuth.getApiKey('admin')`** for **internal** routes whose handlers **create nested API keys**—often **HTTP 500**; use **`samlAuth.asInteractiveUser`** and merge **`cookieHeader`** (see step 4).
 - Using **`getApiKeyForCustomRole`** for FTR parity on **scoped saved-object / RBAC** assertions that used **cookie + custom role**—prefer **`samlAuth.asInteractiveUser(customRoleDescriptor)`** + **`cookieHeader`** so outcomes match FTR (e.g. **404** vs **200**).
+- **Pattern B** + relative imports from `test/scout*/api/` into **`server/`** / **`public/`** (e.g. `server/saved_objects/...`). Fix by **Pattern A** (`test/scout/**/*` in the plugin `tsconfig` + Scout `kbn_references`) or duplicate constants in **`api/fixtures/constants.ts`** (step 6).
+- **Pattern A** but forgetting to add **`test/scout/**/*`** to **`include`** or omitting **`@kbn/scout-oblt`** / synthtrace **`kbn_references`**—Scout files won’t typecheck in **`check_types`**.
