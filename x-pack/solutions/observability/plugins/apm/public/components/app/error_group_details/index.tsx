@@ -241,11 +241,21 @@ export function ErrorGroupDetails() {
         <EuiFlexItem grow={3}>
           <EuiPanel hasBorder={true}>
             <ErrorDistribution
-              fetchStatus={errorDistributionStatus}
-              distribution={errorDistributionData}
               title={i18n.translate('xpack.apm.errorGroupDetails.occurrencesChartLabel', {
                 defaultMessage: 'Error occurrences',
               })}
+              fetchStatus={errorDistributionStatus}
+              distribution={errorDistributionData}
+              discoverParams={{
+                rangeFrom,
+                rangeTo,
+                queryParams: {
+                  kuery,
+                  serviceName,
+                  errorGroupId: groupId,
+                  sortDirection: 'DESC',
+                },
+              }}
             />
           </EuiPanel>
         </EuiFlexItem>

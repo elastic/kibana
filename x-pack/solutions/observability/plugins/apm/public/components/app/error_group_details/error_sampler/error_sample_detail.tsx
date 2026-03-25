@@ -53,7 +53,6 @@ import { ErrorSampleContextualInsight } from './error_sample_contextual_insight'
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import { buildUrl } from '../../../../utils/build_url';
-import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentLabel,
@@ -99,10 +98,7 @@ export function ErrorSampleDetails({
 
   const router = useApmRouter();
 
-  const {
-    query,
-    path: { groupId },
-  } = useAnyOfApmParams(
+  const { query } = useAnyOfApmParams(
     '/services/{serviceName}/errors/{groupId}',
     '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}',
     '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}'
@@ -213,21 +209,6 @@ export function ErrorSampleDetails({
         {externalContextMenuItems.value?.length ? (
           <ErrorUiActionsContextMenu items={externalContextMenuItems.value} />
         ) : undefined}
-        <EuiFlexItem grow={false}>
-          <OpenInDiscover
-            dataTestSubj="errorGroupDetailsOpenErrorInDiscoverButton"
-            variant="button"
-            indexType="error"
-            rangeFrom={rangeFrom}
-            rangeTo={rangeTo}
-            queryParams={{
-              kuery,
-              serviceName: error?.service?.name,
-              errorGroupId: groupId,
-              sortDirection: 'DESC',
-            }}
-          />
-        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
       {isLoading ? (
