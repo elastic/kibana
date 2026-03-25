@@ -35,11 +35,11 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
     margin,
     showAccordion,
     onClick,
-    highlightedTraceId,
+    highlightedSpanId,
     criticalPathSegmentsById,
     showCriticalPath,
   } = useTraceWaterfallContext();
-  const isHighlighted = highlightedTraceId === item.id;
+  const isHighlighted = highlightedSpanId === item.id;
   const widthPercent = (item.duration / duration) * 100;
   const leftPercent = ((item.offset + item.skew) / duration) * 100;
   const hasToggle = showAccordion && childrenCount > 0;
@@ -90,7 +90,7 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
           padding: 6px 0;
           ${isHighlighted ? `background-color: ${euiTheme.colors.lightestShade};` : undefined}
           ${
-            !highlightedTraceId &&
+            !!onClick &&
             ` &:hover {
             background-color: ${euiTheme.colors.lightestShade};
           }`

@@ -30,6 +30,7 @@ describe('getConnectorById', () => {
     type: InferenceConnectorType.OpenAI,
     config: {},
     isInferenceEndpoint: false,
+    isPreconfigured: false,
     capabilities: {},
     ...parts,
   });
@@ -85,10 +86,38 @@ describe('getConnectorById', () => {
     expect(result).toEqual(expected);
   });
 
+  it('resolves a stack connector ID to its superseding inference endpoint', async () => {
+    const inferenceEndpoint = createMockInferenceConnector({
+      connectorId: 'my-inference-id',
+      name: 'My EIS Endpoint',
+      type: InferenceConnectorType.Inference,
+      isInferenceEndpoint: true,
+    });
+    // The filtered list only contains the endpoint, not the stack connector
+    getConnectorListMock.mockResolvedValue([inferenceEndpoint]);
+
+    const actionsClient = await actions.getActionsClientWithRequest(request);
+    (actionsClient.getAll as jest.Mock).mockResolvedValue([
+      {
+        id: connectorId,
+        actionTypeId: InferenceConnectorType.Inference,
+        name: 'My Stack Connector',
+        config: { inferenceId: 'my-inference-id' },
+        isPreconfigured: true,
+      },
+    ]);
+
+    const result = await getConnectorById({ actions, request, connectorId, esClient, logger });
+
+    expect(result).toEqual(inferenceEndpoint);
+  });
+
   it('throws if no connector matches the id', async () => {
     getConnectorListMock.mockResolvedValue([
       createMockInferenceConnector({ connectorId: 'other' }),
     ]);
+    const actionsClient = await actions.getActionsClientWithRequest(request);
+    (actionsClient.getAll as jest.Mock).mockResolvedValue([]);
 
     await expect(
       getConnectorById({ actions, request, connectorId, esClient, logger })
@@ -97,6 +126,8 @@ describe('getConnectorById', () => {
 
   it('throws if the connector list is empty', async () => {
     getConnectorListMock.mockResolvedValue([]);
+    const actionsClient = await actions.getActionsClientWithRequest(request);
+    (actionsClient.getAll as jest.Mock).mockResolvedValue([]);
 
     await expect(
       getConnectorById({ actions, request, connectorId, esClient, logger })
