@@ -62,28 +62,28 @@ export function registerSignificantEventsInferenceFeatures(
     {
       featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
       featureName: i18n.translate('xpack.streams.inferenceFeature.kiExtractionName', {
-        defaultMessage: 'Streams Significant Events — Knowledge Indicator extraction',
+        defaultMessage: 'Knowledge Indicator extraction',
       }),
       featureDescription: i18n.translate('xpack.streams.inferenceFeature.kiExtractionDescription', {
-        defaultMessage: 'Model used to extract knowledge indicators.',
+        defaultMessage: 'Model used to extract Knowledge Indicators.',
       }),
     },
     {
       featureId: STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
       featureName: i18n.translate('xpack.streams.inferenceFeature.kiQueryGenerationName', {
-        defaultMessage: 'Streams Significant Events — Knowledge Indicator query generation',
+        defaultMessage: 'Knowledge Indicator Query generation',
       }),
       featureDescription: i18n.translate(
         'xpack.streams.inferenceFeature.kiQueryGenerationDescription',
         {
-          defaultMessage: 'Model used for Knowledge Indicator query generation.',
+          defaultMessage: 'Model used for Knowledge Indicator Query generation.',
         }
       ),
     },
     {
       featureId: STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
       featureName: i18n.translate('xpack.streams.inferenceFeature.discoveryName', {
-        defaultMessage: 'Streams Significant Events — Discovery',
+        defaultMessage: 'Discovery',
       }),
       featureDescription: i18n.translate('xpack.streams.inferenceFeature.discoveryDescription', {
         defaultMessage: 'Model used during Discovery and Significant Event generation.',
