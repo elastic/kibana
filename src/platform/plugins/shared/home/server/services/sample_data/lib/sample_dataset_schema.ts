@@ -92,7 +92,7 @@ export const sampleDataSchema = schema.object({
         version: schema.maybe(schema.any()),
       },
       { unknowns: 'allow' }
-    ),
+    )
   ),
   // codeql[js/kibana/unbounded-array-in-schema] internal registration schema — not route input
   dataIndices: schema.arrayOf(dataIndexSchema),
