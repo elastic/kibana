@@ -12,14 +12,14 @@ import { registerTranslationsRoute } from './translations';
 
 export const registerRoutes = ({
   router,
-  locale,
+  pluginPaths,
   isDist,
-  translationHash,
+  defaultLocale,
 }: {
   router: IRouter;
-  locale: string;
+  pluginPaths: string[];
   isDist: boolean;
-  translationHash: string;
+  defaultLocale: string;
 }) => {
-  registerTranslationsRoute({ router, locale, isDist, translationHash });
+  registerTranslationsRoute({ router, pluginPaths, isDist, defaultLocale });
 };
