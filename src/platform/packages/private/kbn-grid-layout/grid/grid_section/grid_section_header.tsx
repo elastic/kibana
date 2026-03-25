@@ -30,6 +30,7 @@ export interface GridSectionHeaderProps {
 
 export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderProps) => {
   const collapseButtonRef = useRef<HTMLButtonElement | null>(null);
+  const lastTouchStartTimeRef = useRef<number>(0);
 
   const { gridLayoutStateManager } = useGridLayoutContext();
   const startDrag = useGridLayoutSectionEvents({ sectionId });
@@ -93,6 +94,24 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
       startDrag(e);
     },
     [startDrag]
+  );
+
+  const handleSectionMouseDown = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      // Touch gestures can generate a subsequent synthetic mouse event (notably in mobile emulation),
+      // which would start a second interaction and cause the "click" toggle to run twice.
+      if (Date.now() - lastTouchStartTimeRef.current < 700) return;
+      handleSectionDragStart(e);
+    },
+    [handleSectionDragStart]
+  );
+
+  const handleSectionTouchStart = useCallback(
+    (e: React.TouchEvent<HTMLElement>) => {
+      lastTouchStartTimeRef.current = Date.now();
+      handleSectionDragStart(e);
+    },
+    [handleSectionDragStart]
   );
 
   useEffect(() => {
@@ -254,8 +273,8 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
         ref={(element: HTMLDivElement | null) => {
           gridLayoutStateManager.headerRefs.current[sectionId] = element;
         }}
-        onMouseDown={readOnly ? undefined : handleSectionDragStart}
-        onTouchStart={readOnly ? undefined : handleSectionDragStart}
+        onMouseDown={readOnly ? undefined : handleSectionMouseDown}
+        onTouchStart={readOnly ? undefined : handleSectionTouchStart}
         onClick={readOnly ? handleHeaderClick : undefined}
       >
         <GridSectionTitle
