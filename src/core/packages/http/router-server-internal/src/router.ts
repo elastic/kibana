@@ -30,7 +30,7 @@ import type {
 } from '@kbn/core-http-server';
 import type { RouteSecurityGetter } from '@kbn/core-http-server';
 import type { Env } from '@kbn/config';
-import { context, defaultTextMapGetter, propagation } from '@opentelemetry/api';
+import { withActiveSpan } from '@kbn/tracing-utils';
 import { CoreVersionedRouter } from './versioned_router';
 import type { CoreKibanaRequest } from './request';
 import { getProtocolFromRequest } from './request';
@@ -186,17 +186,8 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     this.routes.push({
       ...route,
       handler: async (request, responseToolkit) => {
-        /**
-         * Read incoming traceparent headers and create a new context with the traceparent set.
-         * This allows OpenTelemetry spans created in the next context to re-use the traceparent
-         * headers (and thus belonging to the same trace). It does not interfere with Elastic APM,
-         * and is temporary until we fully migrate to [OpenTelemetry
-         * tracing](https://github.com/elastic/kibana/issues/220914).
-         */
-        const ctx = propagation.extract(context.active(), request.headers, defaultTextMapGetter);
-        return context.with(
-          ctx,
-          async () => await this.handle({ request, responseToolkit, handler: route.handler })
+        return withActiveSpan('route handler', () =>
+          this.handle({ request, responseToolkit, handler: route.handler })
         );
       },
     });

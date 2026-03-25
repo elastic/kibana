@@ -9,6 +9,7 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../fixtures';
 import { RULE_NAMES } from '../../../fixtures/generators';
+import { getRuleIdByName } from '../../../fixtures/helpers';
 import { SHORTER_TIMEOUT } from '../../../fixtures/constants';
 
 test.describe(
@@ -18,6 +19,13 @@ test.describe(
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       await pageObjects.rulesPage.goto();
+    });
+
+    test.afterEach(async ({ apiServices }) => {
+      const ruleId = await getRuleIdByName(apiServices, RULE_NAMES.FIRST_RULE_TEST);
+      if (ruleId) {
+        await apiServices.alerting.rules.enable(ruleId);
+      }
     });
 
     test('should see the Rules Table container', async ({ pageObjects }) => {
@@ -62,17 +70,25 @@ test.describe(
       await expect(pageObjects.rulesPage.editRuleFlyout).toBeHidden({ timeout: SHORTER_TIMEOUT });
     });
 
-    test('changes the rule status to "disabled"', async ({ pageObjects }) => {
-      await expect(pageObjects.rulesPage.rulesTable).toBeVisible();
+    test('changes the rule status to "disabled"', async ({ apiServices, pageObjects, page }) => {
+      const ruleId = await getRuleIdByName(apiServices, RULE_NAMES.FIRST_RULE_TEST);
+      expect(ruleId, `Rule "${RULE_NAMES.FIRST_RULE_TEST}" not found`).toBeDefined();
+      await apiServices.alerting.rules.enable(ruleId!);
 
-      await pageObjects.rulesPage.clickRuleStatusDropDownMenu(RULE_NAMES.FIRST_RULE_TEST);
-      await pageObjects.rulesPage.clickDisableFromDropDownMenu();
+      // Reload the page so the UI reflects the freshly enabled state.
+      await page.reload();
+      await pageObjects.rulesPage.expectRuleToBeEnabled(RULE_NAMES.FIRST_RULE_TEST);
 
-      await expect(pageObjects.rulesPage.confirmModalButton).toBeVisible();
-      await pageObjects.rulesPage.confirmModalButton.click();
+      await test.step('disable the rule via the status dropdown', async () => {
+        await expect(pageObjects.rulesPage.rulesTable).toBeVisible();
+        await pageObjects.rulesPage.clickRuleStatusDropDownMenu(RULE_NAMES.FIRST_RULE_TEST);
+        await pageObjects.rulesPage.clickDisableFromDropDownMenu();
 
-      // Wait for the rule status to change
-      await pageObjects.rulesPage.expectRuleToBeDisabled(RULE_NAMES.FIRST_RULE_TEST);
+        await expect(pageObjects.rulesPage.confirmModalButton).toBeVisible();
+        await pageObjects.rulesPage.confirmModalButton.click();
+
+        await pageObjects.rulesPage.expectRuleToBeDisabled(RULE_NAMES.FIRST_RULE_TEST);
+      });
     });
   }
 );
