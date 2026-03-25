@@ -5,6 +5,12 @@
  * 2.0.
  */
 
-export * from './management';
-export * from './sync';
-export * as WatchlistDataSources from './data_source';
+import type { EntityType } from '@kbn/entity-store/common';
+
+export interface WatchlistBulkEntity {
+  euid: string;
+  type: EntityType;
+  name?: string;
+  sourceId: string;
+  existingEntityId?: string;
+}
