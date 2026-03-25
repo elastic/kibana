@@ -54,7 +54,7 @@ export const getCellClassName = (
   classNames({
     'lnsTableCell--multiline': fitRowToContent,
     'lnsTableCell--colored': isColored,
-    [`lnsTableCell--${alignment}`]: true,
+    ...(alignment ? { [`lnsTableCell--${alignment}`]: true } : {}),
   });
 
 export const getRenderMode = (
