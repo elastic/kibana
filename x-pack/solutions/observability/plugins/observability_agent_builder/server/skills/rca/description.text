@@ -1,0 +1,25 @@
+Performs root cause analysis (RCA) for incidents, outages, errors, and service degradations.
+
+Use when a user asks why something is broken, failing, erroring, crashing, or slow; when they report an alert firing, an SLA breach, or users complaining about errors; when they want to understand what happened during an outage or performance regression; when they see anomalies or spikes in logs or metrics; or when they need to trace a cascading failure across services.
+
+Trigger phrases:
+- "why is X failing"
+- "what caused the outage"
+- "there are errors in Y"
+- "something is wrong"
+- "alert fired"
+- "root cause"
+- "incident"
+- "service is down"
+- "high error rate"
+- "latency spike"
+- "connection refused"
+- "OOM"
+- "timeout"
+- "crash"
+- "what happened at 3pm"
+- "users are getting 500s"
+- "investigate"
+- "postmortem"
+
+Do NOT use for generic log queries or analytics (e.g. "show me logs", "how many requests today", "list events").

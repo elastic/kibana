@@ -30,7 +30,6 @@ import { SearchBar } from '../../shared/search_bar/search_bar';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { ApmServicesTable } from './service_list/apm_services_table';
 import { getAvailableFields, orderServiceItems } from './service_list/order_service_items';
-import { TracesInDiscoverCallout } from './traces_in_discover_callout';
 import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 
 type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/services'>;
@@ -305,7 +304,6 @@ export function ServiceInventory() {
     <>
       <SearchBar showTimeComparison />
       <EuiFlexGroup direction="column" gutterSize="m">
-        <TracesInDiscoverCallout />
         {displayMlCallout && mlCallout}
         <EuiFlexItem>
           <ApmServicesTable
