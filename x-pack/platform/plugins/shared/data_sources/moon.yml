@@ -50,6 +50,8 @@ dependsOn:
   - '@kbn/task-manager-plugin'
   - '@kbn/workflows'
   - '@kbn/workflows-execution-engine'
+  - '@kbn/tooling-log'
+  - '@kbn/test'
   - '@kbn/workflows-extensions'
 tags:
   - plugin
