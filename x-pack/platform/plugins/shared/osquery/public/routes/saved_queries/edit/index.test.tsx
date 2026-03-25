@@ -69,18 +69,16 @@ jest.mock('../../../saved_queries/use_copy_saved_query', () => ({
 }));
 
 jest.mock('./form', () => ({
-  EditSavedQueryForm: (props: { onDirtyStateChange?: (isDirty: boolean) => void }) => {
-    return (
-      <div data-test-subj="edit-saved-query-form">
-        <button data-test-subj="make-form-dirty" onClick={() => props.onDirtyStateChange?.(true)}>
-          Make form dirty
-        </button>
-        <button data-test-subj="make-form-clean" onClick={() => props.onDirtyStateChange?.(false)}>
-          Make form clean
-        </button>
-      </div>
-    );
-  },
+  EditSavedQueryForm: (props: { onDirtyStateChange?: (isDirty: boolean) => void }) => (
+    <div data-test-subj="edit-saved-query-form">
+      <button data-test-subj="make-form-dirty" onClick={() => props.onDirtyStateChange?.(true)}>
+        Make form dirty
+      </button>
+      <button data-test-subj="make-form-clean" onClick={() => props.onDirtyStateChange?.(false)}>
+        Make form clean
+      </button>
+    </div>
+  ),
 }));
 
 jest.mock('../../../components/layouts', () => ({
