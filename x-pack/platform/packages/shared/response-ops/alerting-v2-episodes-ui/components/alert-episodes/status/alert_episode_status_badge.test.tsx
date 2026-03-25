@@ -6,42 +6,42 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { AlertEpisodeStatusBadge } from './alert_episode_status_badge';
 
 describe('AlertEpisodeStatusBadge', () => {
   it('renders an inactive badge', () => {
-    const { getByText } = render(<AlertEpisodeStatusBadge status="inactive" />);
-    const badge = getByText('Inactive');
+    render(<AlertEpisodeStatusBadge status="inactive" />);
+    const badge = screen.getByText('Inactive');
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveAttribute('class', expect.stringContaining('euiBadge'));
   });
 
   it('renders a pending badge', () => {
-    const { getByText } = render(<AlertEpisodeStatusBadge status="pending" />);
-    const badge = getByText('Pending');
+    render(<AlertEpisodeStatusBadge status="pending" />);
+    const badge = screen.getByText('Pending');
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveAttribute('class', expect.stringContaining('euiBadge'));
   });
 
   it('renders an active badge', () => {
-    const { getByText } = render(<AlertEpisodeStatusBadge status="active" />);
-    const badge = getByText('Active');
+    render(<AlertEpisodeStatusBadge status="active" />);
+    const badge = screen.getByText('Active');
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveAttribute('class', expect.stringContaining('euiBadge'));
   });
 
   it('renders a recovering badge', () => {
-    const { getByText } = render(<AlertEpisodeStatusBadge status="recovering" />);
-    const badge = getByText('Recovering');
+    render(<AlertEpisodeStatusBadge status="recovering" />);
+    const badge = screen.getByText('Recovering');
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveAttribute('class', expect.stringContaining('euiBadge'));
   });
 
   it('renders an unknown badge for unrecognized status', () => {
     // @ts-expect-error unknown status string
-    const { getByText } = render(<AlertEpisodeStatusBadge status="unknown-status" />);
-    const badge = getByText('Unknown');
+    render(<AlertEpisodeStatusBadge status="unknown-status" />);
+    const badge = screen.getByText('Unknown');
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveAttribute('class', expect.stringContaining('euiBadge'));
   });
