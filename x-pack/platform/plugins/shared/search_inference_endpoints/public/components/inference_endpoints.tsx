@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 
 import { useQueryInferenceEndpoints } from '../hooks/use_inference_endpoints';
@@ -49,11 +49,15 @@ export const InferenceEndpoints: React.FC = () => {
     return endpoints;
   }, [data, isEisEnabled]);
 
-  const showEmptyState = isEisEnabled && !isLoading && inferenceEndpoints.length === 0;
+  const showEmptyState = isEisEnabled && inferenceEndpoints.length === 0;
 
   return (
     <>
-      {showEmptyState ? (
+      {isLoading ? (
+        <EuiPageTemplate.Section alignment="center">
+          <EuiLoadingSpinner size="l" />
+        </EuiPageTemplate.Section>
+      ) : showEmptyState ? (
         <ProviderInferenceEmptyPrompt onFlyoutOpen={onFlyoutOpen} />
       ) : (
         <>
