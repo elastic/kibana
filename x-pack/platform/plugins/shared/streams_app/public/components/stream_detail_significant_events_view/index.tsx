@@ -5,27 +5,54 @@
  * 2.0.
  */
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
-import type { Streams } from '@kbn/streams-schema';
-import React, { useMemo, useState } from 'react';
-import { useFetchDiscoveryQueries } from '../../hooks/use_fetch_discovery_queries';
+import { useQueryClient } from '@kbn/react-query';
+import {
+  TaskStatus,
+  type OnboardingResult,
+  type Streams,
+  type TaskResult,
+} from '@kbn/streams-schema';
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  DISCOVERY_QUERIES_QUERY_KEY,
+  useFetchDiscoveryQueries,
+} from '../../hooks/use_fetch_discovery_queries';
+import { useKibana } from '../../hooks/use_kibana';
 import { LoadingPanel } from '../loading_panel';
 import { EmptyState } from './empty_state';
 import { useFetchKnowledgeIndicators } from './hooks/use_knowledge_indicators_data';
+import { useKnowledgeIndicatorsTask } from './hooks/use_knowledge_indicators_task';
 import { KnowledgeIndicatorRulesSelector } from './knowledge_indicator_rules_selector';
 import { KnowledgeIndicatorsStatusFilter } from './knowledge_indicators_status_filter';
 import { KnowledgeIndicatorsTypeFilter } from './knowledge_indicators_type_filter';
 import { RulesTable } from './rules_table';
 import { SignificantEventsTable } from './significant_events_table';
 
+const SEARCH_DEBOUNCE_MS = 300;
+
 interface Props {
   definition: Streams.all.GetResponse;
 }
 
 export function StreamDetailSignificantEventsView({ definition }: Props) {
+  const {
+    core: {
+      notifications: { toasts },
+    },
+  } = useKibana();
+  const queryClient = useQueryClient();
   const [tableSearchValue, setTableSearchValue] = useState('');
   const debouncedTableSearchValue = useDebouncedValue(tableSearchValue, SEARCH_DEBOUNCE_MS);
   const [knowledgeIndicatorStatusFilter, setKnowledgeIndicatorStatusFilter] = useState<
@@ -57,6 +84,44 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     isLoading: isKnowledgeIndicatorsLoading,
     isEmpty,
   } = useFetchKnowledgeIndicators({ definition });
+  const onKnowledgeIndicatorsTaskComplete = useCallback(
+    (
+      completedTaskState: Extract<TaskResult<OnboardingResult>, { status: TaskStatus.Completed }>
+    ) => {
+      const queriesTaskResult = completedTaskState.queriesTaskResult;
+      const generatedKnowledgeIndicatorsCount =
+        queriesTaskResult?.status === TaskStatus.Completed ? queriesTaskResult.queries.length : 0;
+
+      toasts.addSuccess({
+        title: i18n.translate(
+          'xpack.streams.significantEventsTable.generateMoreSuccessToastTitle',
+          {
+            defaultMessage:
+              '{count, plural, one {Generated # knowledge indicator} other {Generated # knowledge indicators}}',
+            values: {
+              count: generatedKnowledgeIndicatorsCount,
+            },
+          }
+        ),
+      });
+
+      void Promise.all([
+        queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
+        queryClient.invalidateQueries({ queryKey: ['features', definition.stream.name] }),
+      ]);
+    },
+    [definition.stream.name, queryClient, toasts]
+  );
+
+  const {
+    isPending: isKnowledgeIndicatorsGenerationPending,
+    knowledgeIndicatorsTaskState,
+    scheduleKnowledgeIndicatorsTask,
+    cancelKnowledgeIndicatorsTask,
+  } = useKnowledgeIndicatorsTask({
+    streamName: definition.stream.name,
+    onComplete: onKnowledgeIndicatorsTaskComplete,
+  });
 
   const ruleQueries = useMemo(
     () => (rulesQueriesFetchState.data?.queries ?? []).filter((queryRow) => queryRow.rule_backed),
@@ -74,6 +139,8 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     () => typeFilterOptions.some((option) => option.key === 'rule' && option.checked === 'on'),
     [typeFilterOptions]
   );
+  const isKnowledgeIndicatorsGenerationCanceling =
+    knowledgeIndicatorsTaskState?.status === TaskStatus.BeingCanceled;
 
   if (isKnowledgeIndicatorsLoading || (isRulesSelected && rulesQueriesFetchState.isLoading)) {
     return <LoadingPanel size="xxl" />;
@@ -134,12 +201,49 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                   />
                 </EuiFlexItem>
               ) : null}
+              {!isRulesSelected ? (
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                    {isKnowledgeIndicatorsGenerationPending ? (
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          aria-label={CANCEL_GENERATION_BUTTON_ARIA_LABEL}
+                          iconType="stop"
+                          onClick={cancelKnowledgeIndicatorsTask}
+                        />
+                      </EuiFlexItem>
+                    ) : null}
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        color="primary"
+                        isLoading={isKnowledgeIndicatorsGenerationPending}
+                        isDisabled={
+                          knowledgeIndicatorsTaskState === null ||
+                          isKnowledgeIndicatorsGenerationPending
+                        }
+                        onClick={scheduleKnowledgeIndicatorsTask}
+                      >
+                        {isKnowledgeIndicatorsGenerationPending
+                          ? isKnowledgeIndicatorsGenerationCanceling
+                            ? CANCELING_BUTTON_LABEL
+                            : GENERATING_BUTTON_LABEL
+                          : GENERATE_MORE_BUTTON_LABEL}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
             <EuiSpacer size="m" />
             {isRulesSelected ? (
-              <RulesTable rules={ruleQueries} searchTerm={debouncedTableSearchValue} />
+              <RulesTable
+                definition={definition.stream}
+                rules={ruleQueries}
+                searchTerm={debouncedTableSearchValue}
+              />
             ) : (
               <SignificantEventsTable
+                definition={definition.stream}
                 knowledgeIndicators={knowledgeIndicators}
                 occurrencesByQueryId={occurrencesByQueryId}
                 searchTerm={debouncedTableSearchValue}
@@ -182,4 +286,30 @@ const SIGNIFICANT_EVENTS_SEARCH_ARIA_LABEL = i18n.translate(
   }
 );
 
-const SEARCH_DEBOUNCE_MS = 300;
+const GENERATE_MORE_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.generateMoreButtonLabel',
+  {
+    defaultMessage: 'Generate more',
+  }
+);
+
+const GENERATING_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.generatingButtonLabel',
+  {
+    defaultMessage: 'Generating',
+  }
+);
+
+const CANCELING_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.cancelingButtonLabel',
+  {
+    defaultMessage: 'Canceling',
+  }
+);
+
+const CANCEL_GENERATION_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.cancelGenerationButtonAriaLabel',
+  {
+    defaultMessage: 'Cancel generation',
+  }
+);

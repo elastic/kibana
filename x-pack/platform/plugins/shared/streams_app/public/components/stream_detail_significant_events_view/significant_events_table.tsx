@@ -17,13 +17,16 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { Streams } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
+import { useKnowledgeIndicatorsBulkDelete } from './hooks/use_knowledge_indicators_bulk_delete';
 import { SparkPlot } from '../spark_plot';
 import { TableTitle } from '../stream_detail_systems/table_title';
 
 interface SignificantEventsTableProps {
+  definition: Streams.all.Definition;
   knowledgeIndicators: KnowledgeIndicator[];
   occurrencesByQueryId: Record<string, Array<{ x: number; y: number }>>;
   searchTerm: string;
@@ -40,6 +43,7 @@ const getKnowledgeIndicatorItemId = (knowledgeIndicator: KnowledgeIndicator) => 
 };
 
 export function SignificantEventsTable({
+  definition,
   knowledgeIndicators,
   occurrencesByQueryId,
   searchTerm,
@@ -50,6 +54,10 @@ export function SignificantEventsTable({
     KnowledgeIndicator[]
   >([]);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 });
+  const { deleteKnowledgeIndicatorsInBulk, isDeleting } = useKnowledgeIndicatorsBulkDelete({
+    definition,
+    onSuccess: () => setSelectedKnowledgeIndicators([]),
+  });
 
   const filteredKnowledgeIndicators = useMemo(() => {
     const normalizedSearchTerm = searchTerm.trim().toLowerCase();
@@ -197,8 +205,11 @@ export function SignificantEventsTable({
             color="danger"
             size="xs"
             aria-label={SIGNIFICANT_EVENTS_TABLE_DELETE_BULK_ACTION_LABEL}
-            isDisabled={isSelectionActionsDisabled}
-            onClick={() => {}}
+            isLoading={isDeleting}
+            isDisabled={isSelectionActionsDisabled || isDeleting}
+            onClick={() => {
+              void deleteKnowledgeIndicatorsInBulk(selectedKnowledgeIndicators);
+            }}
           >
             {SIGNIFICANT_EVENTS_TABLE_DELETE_BULK_ACTION_LABEL}
           </EuiButtonEmpty>
@@ -285,7 +296,7 @@ const SIGNIFICANT_EVENTS_TABLE_CLEAR_SELECTION_LABEL = i18n.translate(
 const SIGNIFICANT_EVENTS_TABLE_DELETE_BULK_ACTION_LABEL = i18n.translate(
   'xpack.streams.significantEventsTable.deleteBulkActionLabel',
   {
-    defaultMessage: 'Delete',
+    defaultMessage: 'Delete selected',
   }
 );
 
