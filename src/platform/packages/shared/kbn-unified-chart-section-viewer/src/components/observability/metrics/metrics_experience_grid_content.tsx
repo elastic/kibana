@@ -165,6 +165,7 @@ export const MetricsExperienceGridContent = ({
           searchTerm={searchTerm}
           whereStatements={whereStatements}
           getUserMessages={getUserMessages}
+          useM4Downsampling
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

@@ -23,6 +23,7 @@ interface UseChartLayersParams {
   color?: string;
   seriesType?: LensSeriesLayer['seriesType'];
   customFunction?: string;
+  targetBuckets?: number;
 }
 
 /**
@@ -31,6 +32,7 @@ interface UseChartLayersParams {
  * @param dimensions - An array of dimension fields to break down the series by.
  * @param metric - The metric field to be visualized.
  * @param color - The color to apply to the series.
+ * @param targetBuckets - The desired number of time buckets.
  * @returns An array of LensSeriesLayer configurations.
  */
 export const useChartLayers = ({
@@ -39,6 +41,7 @@ export const useChartLayers = ({
   color,
   seriesType,
   customFunction,
+  targetBuckets,
 }: UseChartLayersParams): LensSeriesLayer[] => {
   return useMemo((): LensSeriesLayer[] => {
     const type = firstNonNullable(metricItem.fieldTypes);
@@ -62,7 +65,7 @@ export const useChartLayers = ({
         type: 'series',
         seriesType: seriesType || hasDimensions ? 'line' : 'area',
         xAxis: {
-          field: createTimeBucketAggregation({}),
+          field: createTimeBucketAggregation({ targetBuckets }),
           type: 'dateHistogram',
         },
         yAxis: [
@@ -86,5 +89,6 @@ export const useChartLayers = ({
     metricItem.metricName,
     metricItem.units,
     seriesType,
+    targetBuckets,
   ]);
 };
