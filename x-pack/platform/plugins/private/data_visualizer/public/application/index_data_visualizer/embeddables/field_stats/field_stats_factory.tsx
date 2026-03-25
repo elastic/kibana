@@ -406,7 +406,7 @@ export const getFieldStatsChartEmbeddableFactory = (
                     </h3>
                   }
                   color="warning"
-                  iconType="alert"
+                  iconType="warning"
                 />
               </EuiFlexItem>
             );

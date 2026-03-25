@@ -133,6 +133,29 @@ export enum TabInitializationStatus {
   Error = 'Error',
 }
 
+export const DEFAULT_PROFILE_STATE_FIELDS = [
+  'columns',
+  'rowHeight',
+  'breakdownField',
+  'hideChart',
+] as const;
+
+export type DefaultProfileStateField = (typeof DEFAULT_PROFILE_STATE_FIELDS)[number];
+
+type NonEmptyDefaultProfileStateFields = [DefaultProfileStateField, ...DefaultProfileStateField[]];
+
+export type DefaultProfileStateFields = 'all' | 'none' | NonEmptyDefaultProfileStateFields;
+
+export type ProfileStateSnapshot = Partial<Pick<DiscoverAppState, DefaultProfileStateField>>;
+
+export type ProfileStateSnapshotsByProfileId = Record<string, ProfileStateSnapshot | undefined>;
+
+export interface DefaultProfileState {
+  resetId: string;
+  fieldsToReset: DefaultProfileStateFields;
+  snapshotsByProfileId: ProfileStateSnapshotsByProfileId;
+}
+
 export interface TabState extends TabItem {
   initializationState:
     | { initializationStatus: Exclude<TabInitializationStatus, TabInitializationStatus.Error> }
@@ -161,13 +184,7 @@ export interface TabState extends TabItem {
   isDataViewLoading: boolean;
   dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saving of the Discover Session
-  resetDefaultProfileState: {
-    resetId: string;
-    columns: boolean;
-    rowHeight: boolean;
-    breakdownField: boolean;
-    hideChart: boolean;
-  };
+  defaultProfileState: DefaultProfileState;
   uiState: {
     esqlEditor?: Partial<ESQLEditorRestorableState>;
     dataGrid?: Partial<UnifiedDataTableRestorableState>;
