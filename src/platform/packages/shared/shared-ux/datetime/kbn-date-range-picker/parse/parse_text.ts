@@ -261,7 +261,8 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
   // (1) Preset label match
   const preset = matchPreset(trimmed, presets);
   if (preset) {
-    return buildRange(text, preset.start, preset.end, formats, true);
+    const roundedStart = applyStartBoundRounding(preset.start, roundRelativeTime);
+    return buildRange(text, roundedStart, preset.end, formats, true);
   }
 
   // (2) Named range ("today", "yesterday", "this week", ...)

@@ -598,11 +598,11 @@ describe('textToTimeRange', () => {
         expect(range.end).toBe('now/d');
       });
 
-      it('does not affect preset matches', () => {
+      it('applies rounding to preset matches', () => {
         const presets = [{ label: 'Last 15 Minutes', start: 'now-15m', end: 'now' }];
         const range = textToTimeRange('Last 15 Minutes', { presets, roundRelativeTime: true });
 
-        expect(range.start).toBe('now-15m');
+        expect(range.start).toBe('now-15m/m');
         expect(range.end).toBe('now');
       });
 

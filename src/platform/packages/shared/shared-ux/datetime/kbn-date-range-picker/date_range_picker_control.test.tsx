@@ -421,6 +421,33 @@ describe('DateRangePickerControl', () => {
     });
   });
 
+  describe('roundRelativeTime', () => {
+    it('applies rounding to the start date when selecting a preset', async () => {
+      const onChange = jest.fn();
+      renderWithEuiTheme(
+        <DateRangePicker
+          defaultValue="last 20 minutes"
+          onChange={onChange}
+          settings={{ roundRelativeTime: true }}
+          onSettingsChange={() => {}}
+          presets={[{ start: 'now-15m', end: 'now', label: 'Last 15 minutes' }]}
+        />
+      );
+
+      const input = openEditing();
+      fireEvent.keyDown(input, { key: 'ArrowDown' });
+
+      const preset = screen.getByTestId('dateRangePickerPresetItem-Last_15_minutes');
+      fireEvent.click(within(preset).getByRole('button'));
+
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(onChange).toHaveBeenCalledWith(
+        expect.objectContaining({ start: 'now-15m/m', end: 'now' })
+      );
+      await waitForPopoverClose();
+    });
+  });
+
   describe('auto-refresh', () => {
     const onRefresh = jest.fn();
 

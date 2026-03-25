@@ -272,7 +272,11 @@ export function DateRangePickerProvider({
       if (range) {
         const rangeText =
           textOverride ?? `${range.start} ${DATE_RANGE_INPUT_DELIMITER} ${range.end}`;
-        rangeToApply = textToTimeRange(rangeText);
+        rangeToApply = textToTimeRange(rangeText, {
+          presets,
+          dateFormat,
+          roundRelativeTime: settings.roundRelativeTime,
+        });
         setText(rangeText);
       } else {
         rangeToApply = timeRange;
@@ -288,7 +292,7 @@ export function DateRangePickerProvider({
       } satisfies DateRangePickerOnChangeProps);
       setIsEditing(false);
     },
-    [onChange, timeRange]
+    [onChange, timeRange, presets, dateFormat, settings.roundRelativeTime]
   );
 
   const contextValue = useMemo<DateRangePickerInternalContextValue>(
