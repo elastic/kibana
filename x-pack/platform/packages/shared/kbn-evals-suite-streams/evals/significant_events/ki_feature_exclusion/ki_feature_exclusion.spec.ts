@@ -102,7 +102,7 @@ evaluate.describe(
             await executorClient.runExperiment(
               {
                 dataset: {
-                  name: `sigevents: exclude: ${scenario.input.scenario_id} (${dataset.id}, exclude ${scenario.input.exclude_count})`,
+                  name: `sigevents: KI feature exclusion: ${scenario.input.scenario_id} (${dataset.id}, exclude ${scenario.input.exclude_count})`,
                   description: `[${dataset.id}] Exclude ${scenario.input.exclude_count} feature(s) from ${scenario.input.scenario_id}, verify exclusion across ${scenario.input.follow_up_runs} follow-up runs`,
                   examples: [{ input: scenario.input }],
                 },
