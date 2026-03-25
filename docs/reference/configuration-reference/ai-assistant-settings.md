@@ -20,7 +20,7 @@ The `xpack.productDocBase` settings configure how {{kib}} reaches the artifact r
 
     Data type: `string`
 
-`xpack.productDocBase.artifactRepositoryProxyUrl` {applies_to}`stack: ga 9.4`
+`xpack.productDocBase.artifactRepositoryProxyUrl` {applies_to}`self: ga 9.4+`
 :   HTTP or HTTPS URL of a proxy server that {{kib}} uses only for traffic to the base URL in `xpack.productDocBase.artifactRepositoryUrl` when that value is an `http` or `https` URL. It applies to the same outbound requests {{kib}} uses to list available artifacts and download ZIP files from that remote base URL. Unset by default. When unset, {{kib}} sends those requests directly to the host named in `xpack.productDocBase.artifactRepositoryUrl` with no proxy.
 
     Set this when outbound connections from {{kib}} to the artifact repository base URL (Elastic’s CDN, a private mirror, or an internal endpoint) must go through your network’s HTTP or HTTPS proxy.
