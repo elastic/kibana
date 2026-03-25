@@ -15,7 +15,6 @@ interface SelectTasksByCapacityOpts {
   tasks: ConcreteTaskInstance[];
   batches: TaskClaimingBatches;
 }
-
 // given a list of tasks and capacity info, select the tasks that meet capacity
 export function selectTasksByCapacity({
   definitions,
