@@ -20,6 +20,13 @@ export const PLUGIN_TITLE = i18n.translate(
   }
 );
 
+export const PROVIDER_INFERENCE_TITLE = i18n.translate(
+  'xpack.searchInferenceEndpoints.providerInferenceTitle',
+  {
+    defaultMessage: 'Provider Inference',
+  }
+);
+
 export const MODEL_SETTINGS_SECTION_TITLE = i18n.translate(
   'xpack.searchInferenceEndpoints.modelSettingsTitle',
   {
