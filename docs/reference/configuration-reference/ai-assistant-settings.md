@@ -16,7 +16,7 @@ The `xpack.productDocBase` settings configure how {{kib}} reaches the artifact r
 
     If the default host is unreachable or not permitted, set `xpack.productDocBase.artifactRepositoryUrl` to the HTTP or HTTPS base URL of a repository you operate that mirrors Elastic’s artifacts, for example, a private mirror or internal endpoint in a restricted or isolated network.
 
-    {applies_to}`stack: ga 9.1+` To read artifacts from a directory on the filesystem of the host where {{kib}} runs, use a `file://` base URL (for example `file:///path/to/artifacts`). This is practical in self-managed environments where you control that host and can place the artifact files there. For {{ech}} and similar managed offerings, you typically cannot use the {{kib}} host’s filesystem as your artifact store. You must use an HTTP or HTTPS base URL for your private mirror, internal S3, or CDN that serves the same kind of listing and ZIP files as Elastic’s public artifact repo.
+    {applies_to}`self: ga 9.1+` To read artifacts from a directory on the filesystem of the host where {{kib}} runs, use a `file://` base URL (for example `file:///path/to/artifacts`). This is practical in self-managed environments where you control that host and can place the artifact files there. For {{ech}} and similar managed offerings, you typically cannot use the {{kib}} host’s filesystem as your artifact store. You must use an HTTP or HTTPS base URL for your private mirror, internal S3, or CDN that serves the same kind of listing and ZIP files as Elastic’s public artifact repo.
 
     Data type: `string`
 
