@@ -9,7 +9,7 @@ import { httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { agentPolicyService } from '../../services';
 import { getFleetServerPolicies } from '../../services/fleet_server';
 
-import type { FleetRequestHandlerContext } from '../../types';
+import type { AgentPolicy, FleetRequestHandlerContext } from '../../types';
 import { GetEnrollmentSettingsResponseSchema } from '../../types';
 import { xpackMocks } from '../../mocks';
 
@@ -193,21 +193,25 @@ describe('EnrollmentSettingsHandler utils', () => {
 
   describe('getFleetServerOrAgentPolicies', () => {
     it('returns only fleet server policies if there are any when no agent policy ID is provided', async () => {
-      (getFleetServerPolicies as jest.Mock).mockResolvedValueOnce(mockFleetServerPolicies);
       const { fleetServerPolicies, scopedAgentPolicy } = await getFleetServerOrAgentPolicies(
-        mockSoClient
+        mockSoClient,
+        undefined,
+        mockFleetServerPolicies as AgentPolicy[]
       );
       expect(fleetServerPolicies).toEqual(mockFleetServerPolicies);
       expect(scopedAgentPolicy).toBeUndefined();
+      expect(getFleetServerPolicies).not.toHaveBeenCalled();
     });
 
     it('returns no fleet server policies when there are none and no agent policy ID is provided', async () => {
-      (getFleetServerPolicies as jest.Mock).mockResolvedValueOnce([]);
       const { fleetServerPolicies, scopedAgentPolicy } = await getFleetServerOrAgentPolicies(
-        mockSoClient
+        mockSoClient,
+        undefined,
+        []
       );
       expect(fleetServerPolicies).toEqual([]);
       expect(scopedAgentPolicy).toBeUndefined();
+      expect(getFleetServerPolicies).not.toHaveBeenCalled();
     });
 
     it('returns fleet server policy when specified agent policy ID is a fleet server policy', async () => {
@@ -286,6 +290,7 @@ describe('EnrollmentSettingsHandler utils', () => {
       beforeEach(() => {
         context = xpackMocks.createRequestHandlerContext() as unknown as FleetRequestHandlerContext;
         response = httpServerMock.createResponseFactory();
+        jest.clearAllMocks();
       });
 
       it('should return valid enrollment settings', async () => {
@@ -338,15 +343,11 @@ describe('EnrollmentSettingsHandler utils', () => {
             },
             policies: [
               {
-                download_source_id: 'source-2',
-                fleet_server_host_id: undefined,
                 has_fleet_server: true,
                 id: 'fs-policy-1',
                 is_default_fleet_server: true,
                 is_managed: true,
                 name: 'FS Policy 1',
-                space_ids: undefined,
-                data_output_id: undefined,
               },
             ],
           },
