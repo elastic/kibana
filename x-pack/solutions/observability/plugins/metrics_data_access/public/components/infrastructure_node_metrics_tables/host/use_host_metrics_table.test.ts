@@ -81,7 +81,7 @@ describe('useHostMetricsTable hook', () => {
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         metricsExplorerOptions: expect.objectContaining({
-          kuery: `event.dataset: "hostmetricsreceiver.otel" AND (${kuery})`,
+          kuery: `(data_stream.dataset: "hostmetricsreceiver.otel" OR event.dataset: "hostmetricsreceiver.otel") AND (${kuery})`,
           metrics: expect.arrayContaining([
             expect.objectContaining({ field: SEMCONV_SYSTEM_CPU_LOGICAL_COUNT }),
             expect.objectContaining({ field: SEMCONV_SYSTEM_CPU_UTILIZATION }),
@@ -91,6 +91,49 @@ describe('useHostMetricsTable hook', () => {
         }),
       })
     );
+  });
+
+  it('should transform OTel rows into populated host metrics', () => {
+    const kuery = `host.name: "gke-edge-oblt-pool-1-9a60016d-lgg9"`;
+
+    useInfrastructureNodeMetricsMock.mockReturnValue({
+      isLoading: true,
+      data: { state: 'empty-indices' },
+      metricIndices: 'test-index',
+    });
+
+    renderHook(() =>
+      useHostMetricsTable({
+        timerange: { from: 'now-30d', to: 'now' },
+        kuery,
+        metricsClient: createMetricsClientMock({}),
+        isOtel: true,
+      })
+    );
+
+    const [firstCallArgs] = useInfrastructureNodeMetricsMock.mock.calls;
+    const transform = firstCallArgs?.[0]?.transform;
+    expect(transform).toBeDefined();
+
+    const row = transform({
+      id: 'otel-host-1',
+      rows: [
+        {
+          metric_0: 8,
+          metric_1: 0.42,
+          metric_2: 16_000_000_000,
+          metric_3: 0.25,
+        },
+      ],
+    });
+
+    expect(row).toEqual({
+      name: 'otel-host-1',
+      cpuCount: 8,
+      averageCpuUsagePercent: 42,
+      totalMemoryMegabytes: 16000,
+      averageMemoryUsagePercent: 25,
+    });
   });
 
   it('should call useInfrastructureNodeMetrics with ECS metrics when isOtel is false', () => {

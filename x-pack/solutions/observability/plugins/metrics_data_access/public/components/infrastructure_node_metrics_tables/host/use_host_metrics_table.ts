@@ -60,7 +60,8 @@ type HostMetricsFieldsOtel =
   | typeof SEMCONV_SYSTEM_MEMORY_UTILIZATION;
 
 const hostsMetricsQueryConfigOtel: MetricsQueryOptions<HostMetricsFieldsOtel> = {
-  sourceFilter: 'event.dataset: "hostmetricsreceiver.otel"',
+  sourceFilter:
+    '(data_stream.dataset: "hostmetricsreceiver.otel" OR event.dataset: "hostmetricsreceiver.otel")',
   groupByField: 'host.name',
   metricsMap: {
     [SEMCONV_SYSTEM_CPU_LOGICAL_COUNT]: {
@@ -83,6 +84,8 @@ const hostsMetricsQueryConfigOtel: MetricsQueryOptions<HostMetricsFieldsOtel> = 
 };
 export const metricByField = createMetricByFieldLookup(hostsMetricsQueryConfig.metricsMap);
 const unpackMetric = makeUnpackMetric(metricByField);
+const metricByFieldOtel = createMetricByFieldLookup(hostsMetricsQueryConfigOtel.metricsMap);
+const unpackMetricOtel = makeUnpackMetric(metricByFieldOtel);
 
 export interface HostNodeMetricsRow {
   name: string;
@@ -113,10 +116,16 @@ export function useHostMetricsTable({
     () => metricsToApiOptions(hostsMetricsQueryConfigOtel, kuery),
     [kuery]
   );
+
+  const transform = useMemo(
+    () => (series: MetricsExplorerSeries) => seriesToHostNodeMetricsRow(series, isOtel),
+    [isOtel]
+  );
+
   const { data, isLoading, metricIndices } = useInfrastructureNodeMetrics<HostNodeMetricsRow>({
     metricsExplorerOptions: isOtel ? hostMetricsOptionsOtel : hostMetricsOptions,
     timerange,
-    transform: seriesToHostNodeMetricsRow,
+    transform,
     sortState,
     currentPageIndex,
     metricsClient,
@@ -133,14 +142,17 @@ export function useHostMetricsTable({
   };
 }
 
-function seriesToHostNodeMetricsRow(series: MetricsExplorerSeries): HostNodeMetricsRow {
+function seriesToHostNodeMetricsRow(
+  series: MetricsExplorerSeries,
+  isOtel?: boolean
+): HostNodeMetricsRow {
   if (series.rows.length === 0) {
     return rowWithoutMetrics(series.id);
   }
 
   return {
     name: series.id,
-    ...calculateMetricAverages(series.rows),
+    ...calculateMetricAverages(series.rows, isOtel),
   };
 }
 
@@ -154,13 +166,13 @@ function rowWithoutMetrics(name: string) {
   };
 }
 
-function calculateMetricAverages(rows: MetricsExplorerRow[]) {
+function calculateMetricAverages(rows: MetricsExplorerRow[], isOtel?: boolean) {
   const {
     cpuCountValues,
     averageCpuUsagePercentValues,
     totalMemoryMegabytesValues,
     averageMemoryUsagePercentValues,
-  } = collectMetricValues(rows);
+  } = collectMetricValues(rows, isOtel);
 
   let cpuCount = null;
   if (cpuCountValues.length !== 0) {
@@ -192,7 +204,7 @@ function calculateMetricAverages(rows: MetricsExplorerRow[]) {
   };
 }
 
-function collectMetricValues(rows: MetricsExplorerRow[]) {
+function collectMetricValues(rows: MetricsExplorerRow[], isOtel?: boolean) {
   const cpuCountValues: number[] = [];
   const averageCpuUsagePercentValues: number[] = [];
   const totalMemoryMegabytesValues: number[] = [];
@@ -200,7 +212,7 @@ function collectMetricValues(rows: MetricsExplorerRow[]) {
 
   rows.forEach((row) => {
     const { cpuCount, averageCpuUsagePercent, totalMemoryMegabytes, averageMemoryUsagePercent } =
-      unpackMetrics(row);
+      unpackMetrics(row, isOtel);
 
     if (cpuCount !== null) {
       cpuCountValues.push(cpuCount);
@@ -227,7 +239,19 @@ function collectMetricValues(rows: MetricsExplorerRow[]) {
   };
 }
 
-function unpackMetrics(row: MetricsExplorerRow): Omit<HostNodeMetricsRow, 'name'> {
+function unpackMetrics(
+  row: MetricsExplorerRow,
+  isOtel?: boolean
+): Omit<HostNodeMetricsRow, 'name'> {
+  if (isOtel) {
+    return {
+      cpuCount: unpackMetricOtel(row, SEMCONV_SYSTEM_CPU_LOGICAL_COUNT),
+      averageCpuUsagePercent: unpackMetricOtel(row, SEMCONV_SYSTEM_CPU_UTILIZATION),
+      totalMemoryMegabytes: unpackMetricOtel(row, SEMCONV_SYSTEM_MEMORY_LIMIT),
+      averageMemoryUsagePercent: unpackMetricOtel(row, SEMCONV_SYSTEM_MEMORY_UTILIZATION),
+    };
+  }
+
   return {
     cpuCount: unpackMetric(row, SYSTEM_CPU_CORES),
     averageCpuUsagePercent: unpackMetric(row, SYSTEM_CPU_TOTAL_NORM_PCT),
