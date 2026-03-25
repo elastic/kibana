@@ -10,6 +10,7 @@ import { buildRouteValidationWithZod } from '@kbn/evals-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { AESOPRouteDependencies } from './register_aesop_routes';
+import type { ProposedSkillDocument } from '../../lib/aesop/types';
 
 const improveSkillParamsSchema = z.object({
   skillId: z.string().min(1),
@@ -54,8 +55,7 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
             id: skillId,
           });
 
-          // TODO: Replace with a proper ProposedSkill type when moving beyond spike
-          const skill = skillDoc._source as any;
+          const skill = skillDoc._source as ProposedSkillDocument;
 
           if (!skill.validation?.llm_feedback) {
             return response.badRequest({
@@ -188,7 +188,7 @@ export function registerImproveSkillRoute({ router, logger }: AESOPRouteDependen
     );
 }
 
-function buildImprovementPrompt(skill: any): string {
+function buildImprovementPrompt(skill: ProposedSkillDocument): string {
   return `Improve this Agent Builder skill based on the validation feedback below.
 
 ## Current Skill

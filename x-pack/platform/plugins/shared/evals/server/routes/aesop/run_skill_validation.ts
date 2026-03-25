@@ -10,6 +10,7 @@ import { buildRouteValidationWithZod } from '@kbn/evals-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { AESOPRouteDependencies } from './register_aesop_routes';
+import type { ProposedSkillDocument } from '../../lib/aesop/types';
 
 const runSkillValidationParamsSchema = z.object({
   skillId: z.string(),
@@ -56,8 +57,7 @@ export function registerRunSkillValidationRoute({ router, logger }: AESOPRouteDe
             id: skillId,
           });
 
-          // TODO: Replace with a proper ProposedSkill type when moving beyond spike
-          const skill = skillDoc._source as any;
+          const skill = skillDoc._source as ProposedSkillDocument;
 
           logger.info('[AESOP] Starting LLM-based skill validation', {
             skill_id: skillId,
@@ -228,7 +228,7 @@ async function runLLMValidation({
   actionsClient: { execute: (opts: Record<string, unknown>) => Promise<Record<string, unknown>> };
   connectorId: string;
   skillId: string;
-  skill: Record<string, any>;
+  skill: ProposedSkillDocument;
   logger: Logger;
 }) {
   const startTime = Date.now();
@@ -347,7 +347,7 @@ async function runLLMValidation({
   }
 }
 
-function buildValidationPrompt(skill: any): string {
+function buildValidationPrompt(skill: ProposedSkillDocument): string {
   return `Evaluate this proposed Agent Builder skill for a Security Operations platform:
 
 ## Skill Name
@@ -485,7 +485,7 @@ async function runLLMValidationAndGetScore({
   actionsClient: { execute: (opts: Record<string, unknown>) => Promise<Record<string, unknown>> };
   connectorId: string;
   skillId: string;
-  skill: Record<string, any>;
+  skill: ProposedSkillDocument;
   logger: Logger;
 }): Promise<{ score: number; passed: boolean }> {
   // Re-read the skill in case it was improved since the loop started
@@ -493,7 +493,7 @@ async function runLLMValidationAndGetScore({
     index: '.aesop-proposed-skills',
     id: skillId,
   });
-  const currentSkill = skillDoc._source as Record<string, any>;
+  const currentSkill = skillDoc._source as ProposedSkillDocument;
 
   const systemPrompt =
     'You are an expert skill evaluator for a security operations platform. ' +
@@ -585,7 +585,7 @@ async function runLLMImprovement({
     index: '.aesop-proposed-skills',
     id: skillId,
   });
-  const skill = skillDoc._source as Record<string, any>;
+  const skill = skillDoc._source as ProposedSkillDocument;
 
   if (!skill.validation?.llm_feedback) {
     logger.warn('[AESOP] No validation feedback available for improvement, skipping', {

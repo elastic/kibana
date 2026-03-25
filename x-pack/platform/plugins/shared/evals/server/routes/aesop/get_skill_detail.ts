@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 import { buildRouteValidationWithZod } from '@kbn/evals-common';
 import type { AESOPRouteDependencies } from './register_aesop_routes';
+import type { ProposedSkillDocument } from '../../lib/aesop/types';
 
 const getSkillDetailParamsSchema = z.object({
   skillId: z.string().min(1),
@@ -39,7 +40,7 @@ export function registerGetSkillDetailRoute({ router, logger }: AESOPRouteDepend
         const { skillId } = request.params;
 
         try {
-          const doc = await esClient.get({
+          const doc = await esClient.get<ProposedSkillDocument>({
             index: '.aesop-proposed-skills',
             id: skillId,
           });
