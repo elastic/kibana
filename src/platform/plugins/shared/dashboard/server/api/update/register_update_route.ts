@@ -14,7 +14,7 @@ import { getRouteConfig } from '../get_route_config';
 import { getUpdateRequestBodySchema, getUpdateResponseBodySchema } from './schemas';
 import { update } from './update';
 import { allowUnmappedKeysSchema, getDashboardStateSchema } from '../dashboard_state_schemas';
-import type { DashboardApiRequestHandlerContext } from '../../request_handler_context';
+import type { DashboardApiRequestHandlerContext } from '../request_handler_context';
 
 export function registerUpdateRoute(
   router: VersionedRouter<DashboardApiRequestHandlerContext>,

@@ -14,7 +14,7 @@ import type { DashboardUpdateRequestBody, DashboardUpdateResponseBody } from './
 import { transformDashboardIn } from '../transforms';
 import { getDashboardCRUResponseBody } from '../saved_object_utils';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
-import type { DashboardApiRequestHandlerContext } from '../../request_handler_context';
+import type { DashboardApiRequestHandlerContext } from '../request_handler_context';
 
 export async function update(
   requestCtx: DashboardApiRequestHandlerContext,

@@ -17,7 +17,7 @@ import {
 } from './schemas';
 import { create } from './create';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
-import type { DashboardApiRequestHandlerContext } from '../../request_handler_context';
+import type { DashboardApiRequestHandlerContext } from '../request_handler_context';
 
 export function registerCreateRoute(
   router: VersionedRouter<DashboardApiRequestHandlerContext>,

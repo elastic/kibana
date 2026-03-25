@@ -11,7 +11,7 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import { schema } from '@kbn/config-schema';
 import { getRouteConfig } from '../get_route_config';
 import { deleteDashboard } from './delete';
-import type { DashboardApiRequestHandlerContext } from '../../request_handler_context';
+import type { DashboardApiRequestHandlerContext } from '../request_handler_context';
 
 export function registerDeleteRoute(router: VersionedRouter<DashboardApiRequestHandlerContext>) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(false);

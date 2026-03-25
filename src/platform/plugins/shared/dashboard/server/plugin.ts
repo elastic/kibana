@@ -50,7 +50,7 @@ import { setKibanaServices } from './kibana_services';
 import { scanDashboards } from './scan_dashboards';
 import { registerDashboardDrilldown } from './dashboard_drilldown/register_dashboard_drilldown';
 import { getDashboardStateSchema } from './api/dashboard_state_schemas';
-import { registerDashboardApiRouteHandlerContext } from './request_handler_context';
+import { registerDashboardApiRouteHandlerContext } from './api/request_handler_context';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;

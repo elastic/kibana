@@ -14,7 +14,7 @@ import { getRouteConfig } from '../get_route_config';
 import { getReadResponseBodySchema } from './schemas';
 import { read } from './read';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
-import type { DashboardApiRequestHandlerContext } from '../../request_handler_context';
+import type { DashboardApiRequestHandlerContext } from '../request_handler_context';
 
 export function registerReadRoute(
   router: VersionedRouter<DashboardApiRequestHandlerContext>,

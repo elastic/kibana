@@ -11,7 +11,7 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import { getRouteConfig } from '../get_route_config';
 import { searchRequestBodySchema, searchResponseBodySchema } from './schemas';
 import { search } from './search';
-import type { DashboardApiRequestHandlerContext } from '../../request_handler_context';
+import type { DashboardApiRequestHandlerContext } from '../request_handler_context';
 
 export function registerSearchRoute(router: VersionedRouter<DashboardApiRequestHandlerContext>) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(false);

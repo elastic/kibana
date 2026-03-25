@@ -14,7 +14,7 @@ import type { DashboardState } from './types';
 import { transformDashboardOut } from './transforms';
 import type { getDashboardStateSchema } from './dashboard_state_schemas';
 import { stripUnmappedKeys } from './scope_tooling';
-import type { DashboardApiRequestHandlerContext } from '../request_handler_context';
+import type { DashboardApiRequestHandlerContext } from './request_handler_context';
 import { counterNames } from './telemetry/increment_external_counter';
 
 export function getDashboardMeta(

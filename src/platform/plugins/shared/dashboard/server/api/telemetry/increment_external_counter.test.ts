@@ -10,7 +10,7 @@
 import type { IKibanaResponse } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
-import { createDashboardApiTelemetryFacade } from '../../request_handler_context';
+import { createDashboardApiTelemetryFacade } from '../request_handler_context';
 
 describe('dashboard api telemetry - ctx.dashboardApi.telemetry facade', () => {
   const usageCollection = usageCollectionPluginMock.createSetupContract();

@@ -14,7 +14,7 @@ import type {
   KibanaRequest,
 } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { isDashboardUiRequest } from './api/telemetry/is_dashboard_ui_request';
+import { isDashboardUiRequest } from './telemetry/is_dashboard_ui_request';
 
 export interface DashboardApiTelemetryFacade {
   incrementExternal: (response: IKibanaResponse, incrementBy?: number) => void;
