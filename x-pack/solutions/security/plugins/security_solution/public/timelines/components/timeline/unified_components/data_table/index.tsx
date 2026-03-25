@@ -57,7 +57,7 @@ import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { DocumentEventTypes } from '../../../../../common/lib/telemetry/types';
 import { getTimelineRowTypeIndicator } from './get_row_indicator';
 import { isAttackDiscoveryRow } from './is_attack_discovery_row';
-import { OverviewTab } from '../../../../../flyout_v2/document/tabs/overview_tab';
+import { DocumentFlyout } from '../../../../../flyout_v2/document';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
 
 const DataGridMemoized = React.memo(UnifiedDataTable);
@@ -191,7 +191,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
               services,
               store,
               history,
-              children: <OverviewTab hit={hit} renderCellActions={analyzerCellActionRenderer} />,
+              children: <DocumentFlyout hit={hit} renderCellActions={analyzerCellActionRenderer} />,
             }),
             {
               ownFocus: false,
