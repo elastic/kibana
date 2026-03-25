@@ -20,6 +20,7 @@ const querySchema = z.object({
   filter: z.string().optional(),
   size: z.coerce.number().int().positive().optional(),
   searchAfter: z.string().optional(),
+  source: z.array(z.string()).optional(),
 });
 
 const parseJsonParam = <T>(raw: string | undefined, label: string): T | undefined => {
@@ -55,9 +56,15 @@ export function registerCRUDGet(router: EntityStorePluginRouter) {
 
         logger.debug('CRUD Get api called');
 
-        const filter = req.query.filter
-          ? toElasticsearchQuery(fromKueryExpression(req.query.filter))
-          : undefined;
+        let filter;
+        try {
+          filter = req.query.filter
+            ? toElasticsearchQuery(fromKueryExpression(req.query.filter))
+            : undefined;
+        } catch (error) {
+          return res.badRequest({ body: `Invalid filter: ${error.message}` });
+        }
+
         try {
           const listParams: ListEntitiesParams = {
             filter,
@@ -66,12 +73,13 @@ export function registerCRUDGet(router: EntityStorePluginRouter) {
               req.query.searchAfter,
               'searchAfter'
             ),
+            source: req.query.source,
           };
 
           const { entities, nextSearchAfter } = await crudClient.listEntities(listParams);
           return res.ok({ body: { entities, nextSearchAfter } });
         } catch (error) {
-          if (error instanceof BadCRUDRequestError || error instanceof KQLSyntaxError) {
+          if (error instanceof BadCRUDRequestError) {
             return res.badRequest({ body: error });
           }
 

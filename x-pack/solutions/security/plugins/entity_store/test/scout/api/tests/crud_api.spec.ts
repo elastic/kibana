@@ -530,7 +530,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(apiNotFound.body.statusCode).toBe(404);
   });
 
-  apiTest.skip('Should list entities without params', async ({ apiClient, esClient }) => {
+  apiTest('Should list entities without params', async ({ apiClient, esClient }) => {
     const entityObj: Entity = {
       entity: {
         id: 'required-id-list',
@@ -561,7 +561,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     );
   });
 
-  apiTest.skip('Should list entities with a DSL filter', async ({ apiClient }) => {
+  apiTest('Should list entities with a DSL filter', async ({ apiClient }) => {
     const matchEntity: Entity = { entity: { id: 'list-filter-match' } };
     const noMatchEntity: Entity = { entity: { id: 'list-filter-nomatch' } };
 
@@ -574,9 +574,9 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       expect(resp.statusCode).toBe(200);
     }
 
-    const filter = JSON.stringify({ term: { 'entity.id': matchEntity.entity!.id! } });
+    const kqlFilter = `entity.id: ${matchEntity.entity!.id!}`;
     const list = await apiClient.get(
-      ENTITY_STORE_ROUTES.CRUD_GET + `?filter=${encodeURIComponent(filter)}`,
+      ENTITY_STORE_ROUTES.CRUD_GET + `?filter=${encodeURIComponent(kqlFilter)}`,
       {
         headers: defaultHeaders,
         responseType: 'json',
@@ -594,7 +594,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(returnedIds).not.toContain(noMatchEntity.entity!.id!);
   });
 
-  apiTest.skip('Should list entities with size param', async ({ apiClient }) => {
+  apiTest('Should list entities with size param', async ({ apiClient }) => {
     for (let i = 0; i < 3; i++) {
       const resp = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
         headers: defaultHeaders,
@@ -613,7 +613,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(list.body.nextSearchAfter).toBeDefined();
   });
 
-  apiTest.skip('Should paginate with searchAfter', async ({ apiClient }) => {
+  apiTest('Should paginate with searchAfter', async ({ apiClient }) => {
     for (let i = 0; i < 2; i++) {
       const resp = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
         headers: defaultHeaders,
@@ -647,9 +647,9 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(firstId).not.toBe(secondId);
   });
 
-  apiTest.skip('Should return 400 for invalid filter JSON', async ({ apiClient }) => {
+  apiTest('testtest Should return 400 for invalid kql', async ({ apiClient }) => {
     const list = await apiClient.get(
-      ENTITY_STORE_ROUTES.CRUD_GET + `?filter=${encodeURIComponent('not-valid-json')}`,
+      ENTITY_STORE_ROUTES.CRUD_GET + `?filter=${encodeURIComponent('entity.id:')}`,
       {
         headers: defaultHeaders,
         responseType: 'json',
@@ -659,7 +659,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(list.body.message).toContain('Invalid filter');
   });
 
-  apiTest.skip('Should return 400 for invalid searchAfter JSON', async ({ apiClient }) => {
+  apiTest('Should return 400 for invalid searchAfter JSON', async ({ apiClient }) => {
     const list = await apiClient.get(
       ENTITY_STORE_ROUTES.CRUD_GET + `?searchAfter=${encodeURIComponent('{bad')}`,
       {
