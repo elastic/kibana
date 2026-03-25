@@ -8,11 +8,11 @@
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import type { SignificantEventQueryRow } from '../../../../hooks/use_fetch_discovery_queries';
+import type { KnowledgeIndicator } from '@kbn/streams-ai';
 
 interface RuleActionsCellProps {
-  rule: SignificantEventQueryRow;
-  onDeleteRequest: (rule: SignificantEventQueryRow) => void;
+  rule: KnowledgeIndicator;
+  onDeleteRequest: (rule: KnowledgeIndicator) => void;
   isDisabled?: boolean;
 }
 

@@ -53,8 +53,20 @@ export function useFetchKnowledgeIndicators({ definition }: UseKnowledgeIndicato
     excludedFeatures.length === 0 &&
     (queriesFetchState.data?.queries.length ?? 0) === 0;
 
+  const occurrencesByQueryId = useMemo(
+    () =>
+      Object.fromEntries(
+        (queriesFetchState.data?.queries ?? []).map((queryRow) => [
+          queryRow.query.id,
+          queryRow.occurrences,
+        ])
+      ),
+    [queriesFetchState.data?.queries]
+  );
+
   return {
     knowledgeIndicators,
+    occurrencesByQueryId,
     isLoading,
     isEmpty,
   };

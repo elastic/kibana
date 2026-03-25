@@ -24,16 +24,15 @@ import {
   type Streams,
   type TaskResult,
 } from '@kbn/streams-schema';
+import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  DISCOVERY_QUERIES_QUERY_KEY,
-  useFetchDiscoveryQueries,
-} from '../../hooks/use_fetch_discovery_queries';
+import { DISCOVERY_QUERIES_QUERY_KEY } from '../../hooks/use_fetch_discovery_queries';
 import { useKibana } from '../../hooks/use_kibana';
 import { LoadingPanel } from '../loading_panel';
 import { EmptyState } from './empty_state';
 import { useFetchKnowledgeIndicators } from './hooks/use_knowledge_indicators_data';
 import { KnowledgeIndicatorsTable } from './knowledge_indicators_table';
+import { KnowledgeIndicatorDetailsFlyout } from './knowledge_indicator_details_flyout';
 import { useKnowledgeIndicatorsTask } from './hooks/use_knowledge_indicators_task';
 import { KnowledgeIndicatorRulesSelector } from './knowledge_indicator_rules_selector';
 import { KnowledgeIndicatorsStatusFilter } from './knowledge_indicators_status_filter';
@@ -58,6 +57,8 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const [knowledgeIndicatorStatusFilter, setKnowledgeIndicatorStatusFilter] = useState<
     'active' | 'excluded'
   >('active');
+  const [selectedKnowledgeIndicator, setSelectedKnowledgeIndicator] =
+    useState<KnowledgeIndicator | null>(null);
   const [selectedKnowledgeIndicatorTypes, setSelectedKnowledgeIndicatorTypes] = useState<string[]>(
     []
   );
@@ -72,15 +73,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       label: RULES_FILTER_LABEL,
     },
   ]);
-  const rulesQueriesFetchState = useFetchDiscoveryQueries({
-    name: definition.stream.name,
-    query: '',
-    page: 1,
-    perPage: 1000,
-    status: ['active'],
-  });
   const {
     knowledgeIndicators,
+    occurrencesByQueryId,
     isLoading: isKnowledgeIndicatorsLoading,
     isEmpty,
   } = useFetchKnowledgeIndicators({ definition });
@@ -123,16 +118,13 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     onComplete: onKnowledgeIndicatorsTaskComplete,
   });
 
-  const ruleQueries = useMemo(
-    () => (rulesQueriesFetchState.data?.queries ?? []).filter((queryRow) => queryRow.rule_backed),
-    [rulesQueriesFetchState.data?.queries]
-  );
-  const occurrencesByQueryId = useMemo(
+  const ruleKnowledgeIndicators = useMemo(
     () =>
-      Object.fromEntries(
-        ruleQueries.map((ruleQuery) => [ruleQuery.query.id, ruleQuery.occurrences] as const)
+      knowledgeIndicators.filter(
+        (knowledgeIndicator) =>
+          knowledgeIndicator.kind === 'query' && knowledgeIndicator.rule.backed
       ),
-    [ruleQueries]
+    [knowledgeIndicators]
   );
 
   const isRulesSelected = useMemo(
@@ -142,7 +134,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const isKnowledgeIndicatorsGenerationCanceling =
     knowledgeIndicatorsTaskState?.status === TaskStatus.BeingCanceled;
 
-  if (isKnowledgeIndicatorsLoading || (isRulesSelected && rulesQueriesFetchState.isLoading)) {
+  if (isKnowledgeIndicatorsLoading) {
     return <LoadingPanel size="xxl" />;
   }
 
@@ -238,8 +230,10 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
             {isRulesSelected ? (
               <RulesTable
                 definition={definition.stream}
-                rules={ruleQueries}
+                rules={ruleKnowledgeIndicators}
+                occurrencesByQueryId={occurrencesByQueryId}
                 searchTerm={debouncedTableSearchValue}
+                onViewDetails={setSelectedKnowledgeIndicator}
               />
             ) : (
               <KnowledgeIndicatorsTable
@@ -249,11 +243,19 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                 searchTerm={debouncedTableSearchValue}
                 selectedTypes={selectedKnowledgeIndicatorTypes}
                 statusFilter={knowledgeIndicatorStatusFilter}
+                onViewDetails={setSelectedKnowledgeIndicator}
               />
             )}
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {selectedKnowledgeIndicator ? (
+        <KnowledgeIndicatorDetailsFlyout
+          knowledgeIndicator={selectedKnowledgeIndicator}
+          occurrencesByQueryId={occurrencesByQueryId}
+          onClose={() => setSelectedKnowledgeIndicator(null)}
+        />
+      ) : null}
     </>
   );
 }

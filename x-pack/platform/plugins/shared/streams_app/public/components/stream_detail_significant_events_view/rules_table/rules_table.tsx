@@ -8,6 +8,7 @@
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   type CriteriaWithPagination,
+  EuiButtonIcon,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,26 +18,34 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
+import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useQueriesBulkDelete } from '../hooks/use_queries_bulk_delete';
 import { RuleActionsCell } from './rule_actions_cell';
-import { DeleteRulesModal } from './delete_rules_modal';
+import { DeleteTableItemsModal } from '../delete_table_items_modal';
 import { SeverityBadge } from '../../significant_events_discovery/components/severity_badge/severity_badge';
 import { SparkPlot } from '../../spark_plot';
 import { formatLastOccurredAt } from '../../significant_events_discovery/components/queries_table/utils';
 import { TableTitle } from '../../stream_detail_systems/table_title';
-import type { SignificantEventQueryRow } from '../../../hooks/use_fetch_discovery_queries';
 
 interface RulesTableProps {
   definition: Streams.all.Definition;
-  rules: SignificantEventQueryRow[];
+  rules: KnowledgeIndicator[];
+  occurrencesByQueryId: Record<string, Array<{ x: number; y: number }>>;
   searchTerm: string;
+  onViewDetails: (knowledgeIndicator: KnowledgeIndicator) => void;
 }
 
-export function RulesTable({ definition, rules, searchTerm }: RulesTableProps) {
-  const [selectedRules, setSelectedRules] = useState<SignificantEventQueryRow[]>([]);
+export function RulesTable({
+  definition,
+  rules,
+  occurrencesByQueryId,
+  searchTerm,
+  onViewDetails,
+}: RulesTableProps) {
+  const [selectedRules, setSelectedRules] = useState<KnowledgeIndicator[]>([]);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
-  const [rulesToDelete, setRulesToDelete] = useState<SignificantEventQueryRow[]>([]);
+  const [rulesToDelete, setRulesToDelete] = useState<KnowledgeIndicator[]>([]);
   const { deleteRulesInBulk, isDeleting } = useQueriesBulkDelete({
     definition,
     onSuccess: () => {
@@ -53,68 +62,104 @@ export function RulesTable({ definition, rules, searchTerm }: RulesTableProps) {
     }
 
     return rules.filter((rule) => {
+      if (rule.kind !== 'query') {
+        return false;
+      }
+
       const title = (rule.query.title ?? '').toLowerCase();
       return title.includes(normalizedSearchTerm);
     });
   }, [rules, searchTerm]);
   const isSelectionActionsDisabled = selectedRules.length === 0;
 
-  const handleTableChange = useCallback(
-    ({ page }: CriteriaWithPagination<SignificantEventQueryRow>) => {
-      if (!page) {
-        return;
-      }
+  const handleTableChange = useCallback(({ page }: CriteriaWithPagination<KnowledgeIndicator>) => {
+    if (!page) {
+      return;
+    }
 
-      setPagination({
-        pageIndex: page.index,
-        pageSize: page.size,
-      });
-    },
-    []
-  );
+    setPagination({
+      pageIndex: page.index,
+      pageSize: page.size,
+    });
+  }, []);
 
-  const columns = useMemo<Array<EuiBasicTableColumn<SignificantEventQueryRow>>>(
+  const columns = useMemo<Array<EuiBasicTableColumn<KnowledgeIndicator>>>(
     () => [
       {
         name: RULES_TABLE_RULES_COLUMN_LABEL,
-        render: (item: SignificantEventQueryRow) => item.query.title || item.query.id,
+        render: (item: KnowledgeIndicator) => {
+          if (item.kind !== 'query') {
+            return null;
+          }
+
+          return (
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="expand"
+                  aria-label={VIEW_DETAILS_ARIA_LABEL}
+                  onClick={() => onViewDetails(item)}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <span>{item.query.title || item.query.id}</span>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        },
       },
       {
         name: RULES_TABLE_SEVERITY_COLUMN_LABEL,
         align: 'left',
         width: '120px',
-        render: (item: SignificantEventQueryRow) => (
-          <SeverityBadge score={item.query.severity_score} />
-        ),
+        render: (item: KnowledgeIndicator) =>
+          item.kind === 'query' ? <SeverityBadge score={item.query.severity_score} /> : null,
       },
       {
         name: RULES_TABLE_LAST_OCCURRED_COLUMN_LABEL,
         align: 'left',
         width: '220px',
-        render: (item: SignificantEventQueryRow) => formatLastOccurredAt(item.occurrences),
+        render: (item: KnowledgeIndicator) => {
+          if (item.kind !== 'query') {
+            return null;
+          }
+
+          return formatLastOccurredAt(occurrencesByQueryId[item.query.id]);
+        },
       },
       {
         name: RULES_TABLE_EVENTS_COLUMN_LABEL,
         width: '160px',
         align: 'center',
-        render: (item: SignificantEventQueryRow) => (
-          <SparkPlot
-            id={`rules-events-${item.query.id}`}
-            name={RULES_TABLE_OCCURRENCES_TOOLTIP_NAME}
-            type="bar"
-            timeseries={item.occurrences}
-            annotations={[]}
-            compressed
-            hideAxis
-            height={32}
-          />
-        ),
+        render: (item: KnowledgeIndicator) => {
+          if (item.kind !== 'query') {
+            return null;
+          }
+
+          const occurrences = occurrencesByQueryId[item.query.id];
+          if (!occurrences) {
+            return null;
+          }
+
+          return (
+            <SparkPlot
+              id={`rules-events-${item.query.id}`}
+              name={RULES_TABLE_OCCURRENCES_TOOLTIP_NAME}
+              type="bar"
+              timeseries={occurrences}
+              annotations={[]}
+              compressed
+              hideAxis
+              height={32}
+            />
+          );
+        },
       },
       {
         name: RULES_TABLE_ACTIONS_COLUMN_LABEL,
         width: '80px',
         align: 'right',
-        render: (item: SignificantEventQueryRow) => (
+        render: (item: KnowledgeIndicator) => (
           <RuleActionsCell
             rule={item}
             isDisabled={isDeleting}
@@ -123,7 +168,7 @@ export function RulesTable({ definition, rules, searchTerm }: RulesTableProps) {
         ),
       },
     ],
-    [isDeleting]
+    [isDeleting, occurrencesByQueryId, onViewDetails]
   );
 
   return (
@@ -166,9 +211,9 @@ export function RulesTable({ definition, rules, searchTerm }: RulesTableProps) {
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
-      <EuiInMemoryTable<SignificantEventQueryRow>
+      <EuiInMemoryTable<KnowledgeIndicator>
         items={filteredRules}
-        itemId={(item) => item.query.id}
+        itemId={(item) => (item.kind === 'query' ? item.query.id : item.feature.uuid)}
         columns={columns}
         selection={{
           selected: selectedRules,
@@ -185,11 +230,14 @@ export function RulesTable({ definition, rules, searchTerm }: RulesTableProps) {
         })}
       />
       {rulesToDelete.length > 0 ? (
-        <DeleteRulesModal
-          rules={rulesToDelete}
+        <DeleteTableItemsModal
+          title={DELETE_RULES_MODAL_TITLE(rulesToDelete.length)}
+          items={rulesToDelete}
           onCancel={() => setRulesToDelete([])}
           onConfirm={() => {
-            void deleteRulesInBulk(rulesToDelete.map((item) => item.query.id));
+            void deleteRulesInBulk(
+              rulesToDelete.filter((item) => item.kind === 'query').map((item) => item.query.id)
+            );
           }}
           isLoading={isDeleting}
         />
@@ -256,4 +304,15 @@ const RULES_TABLE_DELETE_BULK_ACTION_LABEL = i18n.translate(
 
 const RULES_TABLE_LABEL = i18n.translate('xpack.streams.rulesTable.label', {
   defaultMessage: 'Rules',
+});
+
+const DELETE_RULES_MODAL_TITLE = (count: number) =>
+  i18n.translate('xpack.streams.deleteRulesModal.title', {
+    defaultMessage:
+      'Are you sure you want to delete {count, plural, one {this rule} other {these rules}}?',
+    values: { count },
+  });
+
+const VIEW_DETAILS_ARIA_LABEL = i18n.translate('xpack.streams.rulesTable.viewDetailsAriaLabel', {
+  defaultMessage: 'View details',
 });

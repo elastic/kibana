@@ -9,6 +9,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   type CriteriaWithPagination,
   EuiBadge,
+  EuiButtonIcon,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,7 +24,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { useKnowledgeIndicatorsBulkDelete } from '../hooks/use_knowledge_indicators_bulk_delete';
 import { KnowledgeIndicatorActionsCell } from '../knowledge_indicator_actions_cell';
-import { DeleteKnowledgeIndicatorsModal } from './delete_knowledge_indicators_modal';
+import { DeleteTableItemsModal } from '../delete_table_items_modal';
 import { SparkPlot } from '../../spark_plot';
 import { TableTitle } from '../../stream_detail_systems/table_title';
 
@@ -34,6 +35,7 @@ interface KnowledgeIndicatorsTableProps {
   searchTerm: string;
   selectedTypes: string[];
   statusFilter: 'active' | 'excluded';
+  onViewDetails: (knowledgeIndicator: KnowledgeIndicator) => void;
 }
 
 const getKnowledgeIndicatorItemId = (knowledgeIndicator: KnowledgeIndicator) => {
@@ -51,6 +53,7 @@ export function KnowledgeIndicatorsTable({
   searchTerm,
   selectedTypes,
   statusFilter,
+  onViewDetails,
 }: KnowledgeIndicatorsTableProps) {
   const [selectedKnowledgeIndicators, setSelectedKnowledgeIndicators] = useState<
     KnowledgeIndicator[]
@@ -121,11 +124,42 @@ export function KnowledgeIndicatorsTable({
       {
         name: SIGNIFICANT_EVENTS_TABLE_TITLE_COLUMN_LABEL,
         render: (knowledgeIndicator: KnowledgeIndicator) => {
+          const title =
+            knowledgeIndicator.kind === 'feature'
+              ? knowledgeIndicator.feature.title ?? knowledgeIndicator.feature.id
+              : knowledgeIndicator.query.title ?? knowledgeIndicator.query.id;
+
           if (knowledgeIndicator.kind === 'feature') {
-            return knowledgeIndicator.feature.title ?? knowledgeIndicator.feature.id;
+            return (
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    iconType="expand"
+                    aria-label={VIEW_DETAILS_ARIA_LABEL}
+                    onClick={() => onViewDetails(knowledgeIndicator)}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <span>{title}</span>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            );
           }
 
-          return knowledgeIndicator.query.title ?? knowledgeIndicator.query.id;
+          return (
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="expand"
+                  aria-label={VIEW_DETAILS_ARIA_LABEL}
+                  onClick={() => onViewDetails(knowledgeIndicator)}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <span>{title}</span>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
         },
       },
       {
@@ -189,7 +223,7 @@ export function KnowledgeIndicatorsTable({
         ),
       },
     ],
-    [definition, occurrencesByQueryId]
+    [definition, occurrencesByQueryId, onViewDetails]
   );
 
   return (
@@ -249,8 +283,9 @@ export function KnowledgeIndicatorsTable({
         tableCaption={SIGNIFICANT_EVENTS_TABLE_CAPTION}
       />
       {knowledgeIndicatorsToDelete.length > 0 ? (
-        <DeleteKnowledgeIndicatorsModal
-          knowledgeIndicators={knowledgeIndicatorsToDelete}
+        <DeleteTableItemsModal
+          title={DELETE_KNOWLEDGE_INDICATORS_MODAL_TITLE(knowledgeIndicatorsToDelete.length)}
+          items={knowledgeIndicatorsToDelete}
           onCancel={() => setKnowledgeIndicatorsToDelete([])}
           onConfirm={() => {
             void deleteKnowledgeIndicatorsInBulk(knowledgeIndicatorsToDelete);
@@ -331,3 +366,17 @@ const SIGNIFICANT_EVENTS_TABLE_LABEL = i18n.translate(
     defaultMessage: 'Knowledge indicators',
   }
 );
+
+const VIEW_DETAILS_ARIA_LABEL = i18n.translate(
+  'xpack.streams.knowledgeIndicatorsTable.viewDetailsAriaLabel',
+  {
+    defaultMessage: 'View details',
+  }
+);
+
+const DELETE_KNOWLEDGE_INDICATORS_MODAL_TITLE = (count: number) =>
+  i18n.translate('xpack.streams.deleteKnowledgeIndicatorsModal.title', {
+    defaultMessage:
+      'Are you sure you want to delete {count, plural, one {this knowledge indicator} other {these knowledge indicators}}?',
+    values: { count },
+  });
