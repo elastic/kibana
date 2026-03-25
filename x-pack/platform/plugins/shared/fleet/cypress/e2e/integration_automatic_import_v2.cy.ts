@@ -49,7 +49,6 @@ describe('Add Integration - Automatic Import V2', () => {
       }).as('loadConnectors');
 
       cy.visit(CREATE_INTEGRATION_V2_PAGE);
-      cy.wait('@loadConnectors');
 
       cy.getBySel(CONNECTOR_SELECTOR_LOADING).should('not.exist');
       cy.getBySel(CONNECTOR_SELECTOR)
@@ -64,7 +63,6 @@ describe('Add Integration - Automatic Import V2', () => {
       }).as('loadConnectors');
 
       cy.visit(CREATE_INTEGRATION_V2_PAGE);
-      cy.wait('@loadConnectors');
 
       cy.getBySel(CONNECTOR_SELECTOR_LOADING).should('not.exist');
       cy.getBySel(ADD_NEW_CONNECTOR_BUTTON).should('be.visible');
