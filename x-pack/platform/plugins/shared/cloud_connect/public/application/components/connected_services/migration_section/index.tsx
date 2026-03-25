@@ -122,6 +122,7 @@ export const MigrationSection: React.FC = () => {
           <EuiFlexItem
             key={index}
             css={css`
+              ${index === 0 && 'margin-left: 0 !important;'}
               @media (min-width: ${euiTheme.breakpoint.m}px) {
                 & + & {
                   position: relative;
