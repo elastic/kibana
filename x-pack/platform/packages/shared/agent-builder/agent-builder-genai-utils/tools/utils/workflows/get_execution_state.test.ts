@@ -248,7 +248,7 @@ describe('getExecutionState', () => {
       expect(state?.waiting_input?.message).toBe('Approve item');
     });
 
-    it('returns empty waiting_input when no waiting step is found', async () => {
+    it('omits waiting_input entirely when no waiting step is found', async () => {
       const workflowApi = createWorkflowApi();
       workflowApi.getWorkflowExecution = jest.fn().mockResolvedValue({
         status: ExecutionStatus.WAITING_FOR_INPUT,
@@ -267,7 +267,7 @@ describe('getExecutionState', () => {
         workflowApi,
       });
 
-      expect(state?.waiting_input).toEqual({});
+      expect(state?.waiting_input).toBeUndefined();
     });
   });
 });

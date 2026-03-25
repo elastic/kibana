@@ -121,22 +121,19 @@ export const getExecutionState = async ({
       (s) => s.status === ExecutionStatus.WAITING_FOR_INPUT
     );
 
-    const waitContext: WaitingInputContext = {};
-
     if (waitingStep) {
       const stepConfig = findWaitForInputStepConfig(
         execution.workflowDefinition,
         waitingStep.stepId
       );
-      if (stepConfig?.message) {
-        waitContext.message = stepConfig.message;
-      }
-      if (stepConfig?.schema) {
-        waitContext.schema = stepConfig.schema;
+      const waitContext: WaitingInputContext = {
+        ...(stepConfig?.message && { message: stepConfig.message }),
+        ...(stepConfig?.schema && { schema: stepConfig.schema }),
+      };
+      if (waitContext.message !== undefined || waitContext.schema !== undefined) {
+        state.waiting_input = waitContext;
       }
     }
-
-    state.waiting_input = waitContext;
   }
 
   return state;
