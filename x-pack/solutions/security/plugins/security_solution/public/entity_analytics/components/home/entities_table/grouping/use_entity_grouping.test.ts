@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ESBoolQuery } from '../../../../../../common/typed_json';
 import { ENTITY_FIELDS, ENTITY_GROUPING_OPTIONS } from '../constants';
 import { buildResolutionGroupingQuery, getAggregationsByGroupField } from './use_entity_grouping';
 
@@ -18,7 +19,10 @@ describe('buildResolutionGroupingQuery', () => {
   it('produces a runtime field that emits resolved_to for aliases, entity.id for targets', () => {
     const result = buildResolutionGroupingQuery(defaultParams);
 
-    const scriptSource = result.runtime_mappings?.groupByField?.script?.source as string;
+    const script = result.runtime_mappings?.groupByField?.script;
+    const scriptSource = (
+      typeof script === 'object' && script !== null && 'source' in script ? script.source : script
+    ) as string;
     expect(scriptSource).toContain(ENTITY_FIELDS.RESOLVED_TO);
     expect(scriptSource).toContain(ENTITY_FIELDS.ENTITY_ID);
   });
@@ -84,10 +88,10 @@ describe('buildResolutionGroupingQuery', () => {
   });
 
   it('includes all provided filters in query.bool.filter', () => {
-    const filters = [
-      { bool: { filter: [{ term: { field1: 'value1' } }] } },
-      { bool: { filter: [{ term: { field2: 'value2' } }] } },
-      { bool: { filter: [{ term: { field3: 'value3' } }] } },
+    const filters: ESBoolQuery[] = [
+      { bool: { must: [], must_not: [], should: [], filter: [{ term: { field1: 'value1' } }] } },
+      { bool: { must: [], must_not: [], should: [], filter: [{ term: { field2: 'value2' } }] } },
+      { bool: { must: [], must_not: [], should: [], filter: [{ term: { field3: 'value3' } }] } },
     ];
 
     const result = buildResolutionGroupingQuery({
