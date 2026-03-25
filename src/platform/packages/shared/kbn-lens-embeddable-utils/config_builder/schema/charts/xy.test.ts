@@ -8,7 +8,7 @@
  */
 
 import type { DatasetTypeESQL } from '../dataset';
-import type { XYState } from './xy';
+import type { XYState, XYStateESQL } from './xy';
 import { statisticsOptionsSize, statisticsSchema, xyStateSchema } from './xy';
 
 describe('XY', () => {
@@ -596,10 +596,10 @@ describe('XY', () => {
               },
               y: [{ operation: 'count', empty_as_null: false }],
             },
-            // @ts-expect-error - mixing not allowed
             {
               type: 'annotations',
               ignore_global_filters: false,
+              // @ts-expect-error - mixing not allowed
               dataset: {
                 type: 'esql',
                 query:
@@ -619,7 +619,7 @@ describe('XY', () => {
               ],
             },
           ],
-        } satisfies XYState)
+        } satisfies XYState | XYStateESQL)
       ).toThrow();
     });
   });
