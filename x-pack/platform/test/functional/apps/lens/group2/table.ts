@@ -239,7 +239,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('lnsPalettePanel_dynamicColoring_reverseColors');
       await lens.waitForVisualization();
       const styleObj = await lens.getDatatableCellStyle(1, 1);
-      expect(styleObj['background-color']).to.be('rgb(200, 222, 255)');
+      expect(styleObj['background-color']).to.be('rgb(207, 225, 255)');
       // should also set text color when in cell mode
       expect(styleObj.color).to.be('rgb(7, 16, 31)');
       await lens.closePalettePanel();
