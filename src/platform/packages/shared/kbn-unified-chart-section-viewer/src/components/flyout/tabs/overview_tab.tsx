@@ -16,13 +16,18 @@ import {
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiBadge,
 } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FieldNameWithIcon } from '@kbn/react-field';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import useWindowSize from 'react-use/lib/useWindowSize';
-import { TabTitleAndDescription } from '../components';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { UnifiedHistogramServices } from '@kbn/unified-histogram/types';
+import { getUnitLabel } from '../../../common/utils';
+import { TabTitleAndDescription, MetricTypeBadge, BadgeGroup, DataStreamLink } from '../components';
+import { useStreamsNavigation } from '../hooks/use_streams_navigation';
 import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from '../utils';
 import type { Dimension, ParsedMetricItem } from '../../../types';
 import { OverviewTabMetadata } from './overview_tab_metadata';
@@ -30,12 +35,14 @@ import { OverviewTabMetadata } from './overview_tab_metadata';
 interface OverviewTabProps {
   metricItem: ParsedMetricItem;
   description?: string;
+  services: UnifiedHistogramServices;
 }
 
 const DEFAULT_PAGINATION_SIZE = 20;
 
-export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
+export const OverviewTab = ({ metricItem, description, services }: OverviewTabProps) => {
   const { euiTheme } = useEuiTheme();
+  const { getStreamUrl } = useStreamsNavigation(services);
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_PAGINATION_SIZE);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
@@ -54,6 +61,84 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
   const paginatedDimensions = sortedDimensions.slice(
     activePage * pageSize,
     (activePage + 1) * pageSize
+  );
+
+  // Helper function to create description list items
+  const createDescriptionListItem = useCallback(
+    (title: string, value: React.ReactNode, dataTestSubj?: string) => ({
+      label: (
+        <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj={dataTestSubj}>
+          <EuiFlexItem
+            grow={false}
+            css={css`
+              min-width: ${euiTheme.base * 11.25}px;
+            `}
+          >
+            <EuiText size="xs">
+              <strong>{title}</strong>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{value}</EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+    }),
+    [euiTheme.base]
+  );
+
+  // Create description list items
+  const descriptionListItems = useMemo(
+    () => [
+      createDescriptionListItem(
+        i18n.translate('metricsExperience.overviewTab.strong.dataStreamLabel', {
+          defaultMessage: 'Data stream',
+        }),
+        <DataStreamLink dataStream={metricItem.dataStream} getStreamUrl={getStreamUrl} />
+      ),
+      createDescriptionListItem(
+        i18n.translate('metricsExperience.overviewTab.strong.fieldTypeLabel', {
+          defaultMessage: 'Field type',
+        }),
+        <BadgeGroup
+          items={metricItem.fieldTypes}
+          isNoValue={(fieldType) => fieldType === ES_FIELD_TYPES.NULL}
+          renderItem={(fieldType, index) => (
+            <EuiBadge key={`${fieldType}-${index}`}>{fieldType}</EuiBadge>
+          )}
+        />
+      ),
+      createDescriptionListItem(
+        i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
+          defaultMessage: 'Metric unit',
+        }),
+        <BadgeGroup
+          items={metricItem.units}
+          renderItem={(unit, index) => (
+            <EuiBadge key={`${unit}-${index}`}>{getUnitLabel({ unit })}</EuiBadge>
+          )}
+        />,
+        'metricsExperienceFlyoutOverviewTabMetricUnitLabel'
+      ),
+      createDescriptionListItem(
+        i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
+          defaultMessage: 'Metric type',
+        }),
+        <BadgeGroup
+          items={metricItem.metricTypes}
+          renderItem={(metricType, index) => (
+            <MetricTypeBadge key={`${metricType}-${index}`} instrument={metricType} />
+          )}
+        />,
+        'metricsExperienceFlyoutOverviewTabMetricTypeLabel'
+      ),
+    ],
+    [
+      metricItem.dataStream,
+      metricItem.fieldTypes,
+      metricItem.metricTypes,
+      metricItem.units,
+      getStreamUrl,
+      createDescriptionListItem,
+    ]
   );
 
   useWindowSize(); // trigger re-render on window resize to recalculate the container height

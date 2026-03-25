@@ -78,7 +78,7 @@ export const MetricFlyoutBody = ({
     <>
       <EuiTabs size="s">{renderTabs()}</EuiTabs>
       {selectedTabId === tabIds.OVERVIEW && (
-        <OverviewTab metricItem={metricItem} description={description} />
+        <OverviewTab metricItem={metricItem} description={description} services={services} />
       )}
       {selectedTabId === tabIds.ESQL_QUERY && (
         <EsqlQueryTab esqlQuery={esqlQuery} metricItem={metricItem} />
