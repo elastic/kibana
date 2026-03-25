@@ -84,18 +84,15 @@ export const IntegrationManagement = React.memo(() => {
   const { integration, isLoading, isError } = useGetIntegrationById(integrationId);
   const { reportCancelButtonClicked } = useTelemetry();
 
-  const navigateToManage = useCallback(() => {
-    application.navigateToApp(INTEGRATIONS_APP_ID, { path: INTEGRATIONS_MANAGE_PATH });
-  }, [application]);
+  const integrationsHomeHref = useMemo(
+    () => application.getUrlForApp(INTEGRATIONS_APP_ID),
+    [application]
+  );
 
   const handlePaywallCancel = useCallback(() => {
     reportCancelButtonClicked();
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      navigateToManage();
-    }
-  }, [navigateToManage, reportCancelButtonClicked]);
+    application.navigateToUrl(integrationsHomeHref);
+  }, [application, integrationsHomeHref, reportCancelButtonClicked]);
 
   const initialFormData = useMemo(() => {
     if (!integration) return undefined;

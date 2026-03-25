@@ -56,11 +56,7 @@ export const CreateIntegrationUpload = React.memo(() => {
 
   const handlePaywallCancel = useCallback(() => {
     reportCancelButtonClicked();
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      application.navigateToUrl(integrationsHref);
-    }
+    application.navigateToUrl(integrationsHref);
   }, [application, integrationsHref, reportCancelButtonClicked]);
 
   const onClose = useCallback(() => {

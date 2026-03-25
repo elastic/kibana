@@ -10,5 +10,4 @@ import type { LicenseType } from '@kbn/licensing-types';
 export const PLUGIN_ID = 'automaticImportVTwo';
 export const PLUGIN_NAME = 'Automatic Import V2';
 
-/** Same minimum as automatic_import (v1). */
 export const MINIMUM_LICENSE_TYPE: LicenseType = 'enterprise';
