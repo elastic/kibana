@@ -96,11 +96,7 @@ describe('extractWorkflowMetadata (execution engine)', () => {
       hasAlertTriggers: false,
       triggerCount: 1,
     });
-    expect(
-      extractWorkflowMetadata(
-        baseWorkflow({ triggers: [{ type: 'alert' }] })
-      )
-    ).toMatchObject({
+    expect(extractWorkflowMetadata(baseWorkflow({ triggers: [{ type: 'alert' }] }))).toMatchObject({
       hasScheduledTriggers: false,
       hasAlertTriggers: true,
       triggerCount: 1,
