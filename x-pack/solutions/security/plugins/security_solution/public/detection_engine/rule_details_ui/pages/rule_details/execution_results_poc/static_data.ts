@@ -234,7 +234,7 @@ const executions: UnifiedExecutionResult[] = [
 ];
 
 export const mockResponse: ReadRuleExecutionResultsResponse = {
-  executions,
+  data: executions,
   total: executions.length,
   page: 1,
   per_page: 20,

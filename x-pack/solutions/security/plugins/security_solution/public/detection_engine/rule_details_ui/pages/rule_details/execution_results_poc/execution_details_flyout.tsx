@@ -91,21 +91,26 @@ export const ExecutionDetailsFlyout: React.FC<ExecutionDetailsFlyoutProps> = ({
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="m" id={flyoutTitleId}>
-              <h2>{i18n.FLYOUT_TITLE(item.execution_uuid.slice(0, 8))}</h2>
+              <h2>{i18n.FLYOUT_TITLE(item.execution_uuid?.slice(0, 8) ?? '—')}</h2>
             </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiCopy textToCopy={item.execution_uuid} beforeMessage={i18n.FLYOUT_COPY_EXECUTION_ID}>
-              {(copy) => (
-                <EuiButtonIcon
-                  onClick={copy}
-                  iconType="copy"
-                  color="text"
-                  aria-label={i18n.FLYOUT_COPY_EXECUTION_ID}
-                />
-              )}
-            </EuiCopy>
-          </EuiFlexItem>
+          {item.execution_uuid != null && (
+            <EuiFlexItem grow={false}>
+              <EuiCopy
+                textToCopy={item.execution_uuid}
+                beforeMessage={i18n.FLYOUT_COPY_EXECUTION_ID}
+              >
+                {(copy) => (
+                  <EuiButtonIcon
+                    onClick={copy}
+                    iconType="copy"
+                    color="text"
+                    aria-label={i18n.FLYOUT_COPY_EXECUTION_ID}
+                  />
+                )}
+              </EuiCopy>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <EuiText color="subdued" size="s">
           <FormattedDate value={item.execution_start} fieldName="execution_start" />
@@ -307,7 +312,11 @@ export const ExecutionDetailsFlyout: React.FC<ExecutionDetailsFlyoutProps> = ({
                 <FieldLabel label={i18n.COLUMN_DURATION} tooltip={i18n.COLUMN_DURATION_TOOLTIP} />
                 <EuiSpacer size="xs" />
                 <EuiText size="s">
-                  <RuleDurationFormat duration={item.execution_duration_ms} />
+                  {item.execution_duration_ms != null ? (
+                    <RuleDurationFormat duration={item.execution_duration_ms} />
+                  ) : (
+                    '—'
+                  )}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
