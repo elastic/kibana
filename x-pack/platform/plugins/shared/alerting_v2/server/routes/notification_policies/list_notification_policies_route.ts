@@ -29,7 +29,10 @@ const listNotificationPoliciesQuerySchema = z.object({
   search: z.string().optional(),
   destinationType: z.string().optional(),
   createdBy: z.string().optional(),
-  enabled: z.coerce.boolean().optional(),
+  enabled: z
+    .enum(['true', 'false'])
+    .transform((v) => v === 'true')
+    .optional(),
   sortField: sortFieldSchema.optional(),
   sortOrder: z.enum(['asc', 'desc']).optional(),
 });
