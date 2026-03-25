@@ -21,7 +21,7 @@ import {
   initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 
-import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
+import { DEFAULT_TIME_SLIDER_STATE, TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -55,10 +55,13 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
     type: TIME_SLIDER_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
+
       const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
         initTimeRangeSubscription(parentApi);
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
-      const isAnchored$ = new BehaviorSubject<boolean | undefined>(state.is_anchored);
+      const isAnchored$ = new BehaviorSubject<TimeSliderControlState['is_anchored']>(
+        state.is_anchored
+      );
       const isPopoverOpen$ = new BehaviorSubject(false);
       const hasTimeSliceSelection$ = new BehaviorSubject<boolean>(Boolean(timeslice$));
 
@@ -68,8 +71,8 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
       );
 
       function getTimesliceSyncedWithTimeRangePercentage(
-        startPercentage: number,
-        endPercentage: number
+        startPercentage: TimeSliderControlState['start_percentage_of_time_range'],
+        endPercentage: TimeSliderControlState['end_percentage_of_time_range']
       ): [number, number] {
         const { stepSize, timeRange, timeRangeBounds } = timeRangeMeta$.value;
         const from = timeRangeBounds[FROM_INDEX] + startPercentage * timeRange;
@@ -81,16 +84,9 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
       }
 
       function syncTimesliceWithTimeRangePercentage(
-        startPercentage: number | undefined,
-        endPercentage: number | undefined
+        startPercentage: TimeSliderControlState['start_percentage_of_time_range'],
+        endPercentage: TimeSliderControlState['end_percentage_of_time_range']
       ) {
-        if (startPercentage === undefined || endPercentage === undefined) {
-          if (timeslice$.value !== undefined) {
-            timeslice$.next(undefined);
-          }
-          return;
-        }
-
         const { timeRange, timeRangeBounds } = timeRangeMeta$.value;
 
         const from = timeRangeBounds[FROM_INDEX] + startPercentage * timeRange;
@@ -104,22 +100,15 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
         const { start_percentage_of_time_range, end_percentage_of_time_range } =
           timeRangePercentage.getLatestState();
 
-        if (
-          start_percentage_of_time_range !== undefined &&
-          end_percentage_of_time_range !== undefined
-        ) {
-          timeslice$.next(
-            getTimesliceSyncedWithTimeRangePercentage(
-              start_percentage_of_time_range,
-              end_percentage_of_time_range
-            )
-          );
-        } else {
-          timeslice$.next(undefined);
-        }
+        timeslice$.next(
+          getTimesliceSyncedWithTimeRangePercentage(
+            start_percentage_of_time_range,
+            end_percentage_of_time_range
+          )
+        );
       }
 
-      function setIsAnchored(isAnchored: boolean | undefined) {
+      function setIsAnchored(isAnchored: TimeSliderControlState['is_anchored']) {
         isAnchored$.next(isAnchored);
       }
 
@@ -237,7 +226,7 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
       function serializeState() {
         return {
           ...timeRangePercentage.getLatestState(),
-          isAnchored: isAnchored$.value,
+          is_anchored: isAnchored$.value,
         };
       }
 
@@ -253,12 +242,12 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
           return {
             ...timeRangePercentageComparators,
             width: 'skip',
-            is_anchored: 'skip',
+            is_anchored: 'referenceEquality',
           };
         },
         onReset: (lastSaved) => {
           timeRangePercentage.reinitializeState(lastSaved);
-          setIsAnchored(lastSaved?.is_anchored);
+          setIsAnchored(lastSaved?.is_anchored ?? DEFAULT_TIME_SLIDER_STATE.is_anchored);
         },
       });
 
