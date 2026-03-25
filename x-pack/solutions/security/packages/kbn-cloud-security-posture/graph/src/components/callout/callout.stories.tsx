@@ -13,7 +13,6 @@ import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 
 const mockLinks = {
   integrationUrl: '/app/integrations/browse/security/asset_inventory',
-  entityStoreUrl: '/app/security/entity_analytics_entity_store',
   discoverUrl: '/app/discover',
 };
 
@@ -25,23 +24,9 @@ export default {
 
 const onDismiss = action('onDismiss');
 
-export const MissingAllRequirements: StoryObj<CalloutProps> = {
-  args: {
-    ...getCalloutConfig('missingAllRequirements', mockLinks),
-    onDismiss,
-  },
-};
-
 export const UninstalledIntegration: StoryObj<CalloutProps> = {
   args: {
     ...getCalloutConfig('uninstalledIntegration', mockLinks),
-    onDismiss,
-  },
-};
-
-export const DisabledEntityStore: StoryObj<CalloutProps> = {
-  args: {
-    ...getCalloutConfig('disabledEntityStore', mockLinks),
     onDismiss,
   },
 };

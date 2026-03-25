@@ -73,6 +73,10 @@ export const calendarTexts = {
   todayButton: i18n.translate('sharedUXPackages.dateRangePicker.calendar.todayButton', {
     defaultMessage: 'Today',
   }),
+  scrollerAriaLabel: i18n.translate('sharedUXPackages.dateRangePicker.calendar.scrollerAriaLabel', {
+    defaultMessage:
+      'Calendar, use arrow keys to navigate days. Press Page Up/Down to navigate months.',
+  }),
 };
 
 export const calendarPanelTexts = {

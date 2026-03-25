@@ -717,9 +717,9 @@ const annotationManualRange = schema.object(
 );
 
 /**
- * Annotation layer containing query-based, point, and range annotations
+ * Annotation layer containing query-based, point, and range annotations (by-value)
  */
-const annotationLayerSchema = schema.object(
+const annotationLayerByValueSchema = schema.object(
   {
     ...ignoringGlobalFiltersSchemaRaw,
     ...datasetSchema,
@@ -734,6 +734,34 @@ const annotationLayerSchema = schema.object(
       id: 'xyAnnotationLayerNoESQL',
       title: 'Annotation Layer (DSL)',
       description: 'Layer containing annotations (query-based, points, and ranges)',
+    },
+  }
+);
+
+/**
+ * By-reference annotation layer that links to a library annotation group
+ */
+const annotationByRefLayerSchema = schema.object(
+  {
+    type: schema.literal('annotation_group'),
+    group_id: schema.string({
+      meta: { description: 'ID of the linked annotation group from the library' },
+    }),
+  },
+  {
+    meta: {
+      id: 'xyAnnotationByRefLayer',
+      description: 'Reference to a library annotation group',
+    },
+  }
+);
+
+const annotationLayerSchema = schema.oneOf(
+  [annotationLayerByValueSchema, annotationByRefLayerSchema],
+  {
+    meta: {
+      id: 'xyAnnotationLayer',
+      description: 'Annotation layer which can be defined by-value or by-reference',
     },
   }
 );
@@ -798,6 +826,8 @@ export type ReferenceLineLayerTypeESQL = TypeOf<typeof referenceLineLayerSchemaE
 export type ReferenceLineLayerTypeNoESQL = TypeOf<typeof referenceLineLayerSchemaNoESQL>;
 export type ReferenceLineLayerType = ReferenceLineLayerTypeNoESQL | ReferenceLineLayerTypeESQL;
 export type AnnotationLayerType = TypeOf<typeof annotationLayerSchema>;
+export type AnnotationLayerByRefType = TypeOf<typeof annotationByRefLayerSchema>;
+export type AnnotationLayerByValueType = TypeOf<typeof annotationLayerByValueSchema>;
 export type LayerTypeESQL = DataLayerTypeESQL | ReferenceLineLayerTypeESQL;
 export type LayerTypeNoESQL =
   | DataLayerTypeNoESQL
