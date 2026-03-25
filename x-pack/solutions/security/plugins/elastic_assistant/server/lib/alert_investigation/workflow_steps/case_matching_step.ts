@@ -36,6 +36,14 @@ const CaseMatchingOutputSchema = z.object({
   alerts_attached: z.number(),
   affected_case_ids: z.array(z.string()),
   alert_ids_by_case: z.record(z.string(), z.array(z.string())),
+  alert_groups: z.array(
+    z.object({
+      group_id: z.string(),
+      alert_ids: z.array(z.string()),
+      primary_host: z.string(),
+      primary_user: z.string(),
+    })
+  ),
 });
 
 export const caseMatchingStep = createServerStepDefinition({
@@ -112,28 +120,57 @@ export const caseMatchingStep = createServerStepDefinition({
       }
     }
 
-    // Build alert_ids_by_case (using group IDs as pseudo-case IDs)
+    // Track primary host/user per group for case titles
+    const groupContext = new Map<string, { hosts: Set<string>; users: Set<string> }>();
+    for (const entity of entities) {
+      const alertGroup = alertToGroup.get(entity.alert_id);
+      if (!alertGroup) continue;
+      if (!groupContext.has(alertGroup)) {
+        groupContext.set(alertGroup, { hosts: new Set(), users: new Set() });
+      }
+      const ctx = groupContext.get(alertGroup)!;
+      if (entity.type_key === 'hostname') ctx.hosts.add(entity.value);
+      if (entity.type_key === 'user') ctx.users.add(entity.value);
+    }
+
+    // Build outputs
     const alertIdsByCase: Record<string, string[]> = {};
     const affectedCaseIds: string[] = [];
+    const alertGroups: Array<{
+      group_id: string;
+      alert_ids: string[];
+      primary_host: string;
+      primary_user: string;
+    }> = [];
 
     for (const [groupId, alertSet] of groupAlerts) {
       if (alertSet.size > 0) {
-        alertIdsByCase[groupId] = [...alertSet];
+        const ids = [...alertSet];
+        alertIdsByCase[groupId] = ids;
         affectedCaseIds.push(groupId);
+
+        const ctx = groupContext.get(groupId);
+        alertGroups.push({
+          group_id: groupId,
+          alert_ids: ids,
+          primary_host: ctx?.hosts.values().next().value ?? 'unknown',
+          primary_user: ctx?.users.values().next().value ?? 'unknown',
+        });
       }
     }
 
     context.logger.info(
-      `Case matching: ${leaderAlertIds.length} alerts grouped into ${affectedCaseIds.length} case groups from ${entities.length} entities`
+      `Case matching: ${leaderAlertIds.length} alerts grouped into ${alertGroups.length} case groups from ${entities.length} entities`
     );
 
     return {
       output: {
-        cases_matched: 0, // No actual case matching without Cases API
-        cases_created: affectedCaseIds.length,
+        cases_matched: 0,
+        cases_created: alertGroups.length,
         alerts_attached: leaderAlertIds.length,
         affected_case_ids: affectedCaseIds,
         alert_ids_by_case: alertIdsByCase,
+        alert_groups: alertGroups,
       },
     };
   },
