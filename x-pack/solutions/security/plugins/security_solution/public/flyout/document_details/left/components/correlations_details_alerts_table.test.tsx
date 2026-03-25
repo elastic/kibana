@@ -14,6 +14,7 @@ import {
   type CorrelationsCustomTableColumn,
 } from './correlations_details_alerts_table';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
@@ -22,8 +23,24 @@ import { RulePreviewPanelKey, RULE_PREVIEW_BANNER } from '../../../rule_details/
 import { TableId } from '@kbn/securitysolution-data-table';
 
 jest.mock('../hooks/use_paginated_alerts');
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+
+const useAlertsPrivilegesMock = useAlertsPrivileges as jest.Mock;
 
 jest.mock('@kbn/expandable-flyout');
+
+jest.mock('../../../../common/components/user_privileges', () => ({
+  useUserPrivileges: () => ({
+    timelinePrivileges: {
+      read: true,
+    },
+    rulesPrivileges: {
+      rules: {
+        read: true,
+      },
+    },
+  }),
+}));
 
 const TEST_ID = 'TEST';
 const alertIds = ['id1', 'id2', 'id3'];
@@ -51,6 +68,9 @@ const renderCorrelationsTable = ({
 
 describe('CorrelationsDetailsAlertsTable', () => {
   beforeEach(() => {
+    useAlertsPrivilegesMock.mockReturnValue({
+      hasAlertsRead: true,
+    });
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     jest.mocked(usePaginatedAlerts).mockReturnValue({
       setPagination: jest.fn(),

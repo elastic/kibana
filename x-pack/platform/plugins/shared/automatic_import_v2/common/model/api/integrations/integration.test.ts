@@ -116,6 +116,15 @@ describe('integration schemas', () => {
       const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
       expectParseError(result);
     });
+
+    it('rejects more than 50 categories', () => {
+      const payload = {
+        ...validPayload,
+        categories: Array.from({ length: 51 }, (_, i) => `cat-${i}`),
+      };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+    });
   });
 
   describe('CreateAutoImportIntegrationRequestBody', () => {
@@ -187,6 +196,21 @@ describe('integration schemas', () => {
 
       const result = CreateAutoImportIntegrationRequestBody.safeParse(payload);
       expectParseSuccess(result);
+    });
+
+    it('rejects more than 50 data streams', () => {
+      const payload = {
+        ...validPayload,
+        dataStreams: Array.from({ length: 51 }, (_, i) =>
+          createValidDataStream({
+            dataStreamId: `ds-${i}`,
+            title: `stream-${i}`,
+          })
+        ),
+      };
+
+      const result = CreateAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
     });
 
     it('accepts integration without logo', () => {
@@ -912,6 +936,43 @@ describe('integration schemas', () => {
       expectParseSuccess(result);
 
       expect(result.data).toEqual(payload);
+    });
+
+    it('rejects more than 50 data streams in update', () => {
+      const payload = {
+        dataStreams: Array.from({ length: 51 }, (_, i) => ({
+          description: `ds ${i}`,
+        })),
+      };
+
+      const result = UpdateAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+    });
+
+    it('rejects more than 1000 raw samples on a data stream update', () => {
+      const payload = {
+        dataStreams: [
+          {
+            rawSamples: Array.from({ length: 1001 }, (_, i) => `s${i}`),
+          },
+        ],
+      };
+
+      const result = UpdateAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+    });
+
+    it('rejects more than 100 input types on a data stream update', () => {
+      const payload = {
+        dataStreams: [
+          {
+            inputTypes: Array.from({ length: 101 }, () => ({ name: 'filestream' as const })),
+          },
+        ],
+      };
+
+      const result = UpdateAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
     });
 
     it('accepts combined updates', () => {

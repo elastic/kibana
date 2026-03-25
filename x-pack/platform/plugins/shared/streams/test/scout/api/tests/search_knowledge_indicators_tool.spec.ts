@@ -38,10 +38,10 @@ import {
 } from '../../../../server/lib/streams/assets/fields';
 import { getQueryLinkUuid } from '../../../../server/lib/streams/assets/query/query_client';
 
-const TOOL_ID = 'platform.streams.sig_events.search_knowledge_indicators';
+const TOOL_ID = 'platform.streams.sig_events.search_kis';
 
 apiTest.describe(
-  'search_knowledge_indicators tool',
+  'search_kis tool',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     const rootStream = 'logs.otel';

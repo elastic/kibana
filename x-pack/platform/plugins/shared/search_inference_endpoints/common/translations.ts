@@ -165,3 +165,49 @@ export const RESOURCE_BASED_BILLING_DESCRIPTION = i18n.translate(
     defaultMessage: 'Runs on ML Nodes (resource-based billing)',
   }
 );
+
+export const SETTINGS_TITLE = i18n.translate('xpack.searchInferenceEndpoints.settings.title', {
+  defaultMessage: 'Settings',
+});
+
+export const SETTINGS_SAVE_BUTTON = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.saveButton',
+  {
+    defaultMessage: 'Save settings',
+  }
+);
+
+export const SETTINGS_RESET_DEFAULTS = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.resetDefaults',
+  {
+    defaultMessage: 'Reset all to defaults',
+  }
+);
+
+export const SETTINGS_ASSIGNED_MODELS = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.assignedModels',
+  {
+    defaultMessage: 'Assigned models',
+  }
+);
+
+export const SETTINGS_DEFAULT_BADGE = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultBadge',
+  {
+    defaultMessage: 'Default',
+  }
+);
+
+export const SETTINGS_NO_FEATURES_TITLE = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.noFeatures.title',
+  {
+    defaultMessage: 'No features registered',
+  }
+);
+
+export const SETTINGS_NO_FEATURES_DESCRIPTION = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.noFeatures.description',
+  {
+    defaultMessage: 'No features have been registered for inference settings in this project.',
+  }
+);

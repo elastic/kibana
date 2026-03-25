@@ -30,7 +30,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover in space', () => {
     afterEach(async () => await clean());
-    describe('Storing search sessions in space', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/253914
+    describe.skip('Storing search sessions in space', () => {
       before(async () => await load(['all']));
 
       it('Saves and restores a session', async () => {
