@@ -244,19 +244,19 @@ async function processScenario(
   log.info('[1/8] Enabling ES native logs stream...');
   await enableLogsNativeStream(esClient, log, logsIndex);
 
-  // Step 2 — Deploy the demo app. deployDemo internally enables Kibana
-  // Streams (wired definitions, pipelines) and waits for pods to be ready.
-  log.info('[2/8] Deploying demo app...');
-  await deployDemo({ demoType, log, logsIndex });
-  log.info('[2/8] Deployment complete');
-
-  // Step 3 — Configure significant events and the connector. Must run after
-  // deployDemo (Step 2) which enables Kibana Streams and its settings APIs.
-  log.info('[3/8] Configuring significant events...');
-  await enableSignificantEvents(config, log);
-  await configureModelSelectionSettings(config, log, connectorId);
-
   try {
+    // Step 2 — Deploy the demo app. deployDemo internally enables Kibana
+    // Streams (wired definitions, pipelines) and waits for pods to be ready.
+    log.info('[2/8] Deploying demo app...');
+    await deployDemo({ demoType, log, logsIndex });
+    log.info('[2/8] Deployment complete');
+
+    // Step 3 — Configure significant events and the connector. Must run after
+    // deployDemo (Step 2) which enables Kibana Streams and its settings APIs.
+    log.info('[3/8] Configuring significant events...');
+    await enableSignificantEvents(config, log);
+    await configureModelSelectionSettings(config, log, connectorId);
+
     // Step 4 — Accumulate baseline traffic
     log.info('[4/8] Accumulating baseline traffic...');
     await sleep(baselineWaitMs, log, 'baseline traffic');
