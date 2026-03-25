@@ -5,12 +5,10 @@
  * 2.0.
  */
 import type { DataCatalogPluginSetup } from '@kbn/data-catalog-plugin/server';
-import { confluenceCloudDataSource } from './confluence_cloud';
 import { pagerdutyDataSource } from './pagerduty';
 import { tavilyDataSource } from './tavily';
 
 export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
-  dataCatalog.register(confluenceCloudDataSource);
   dataCatalog.register(pagerdutyDataSource);
   dataCatalog.register(tavilyDataSource);
 }
