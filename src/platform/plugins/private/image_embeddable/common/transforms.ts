@@ -41,7 +41,7 @@ export function getTransformOut(
       (state: ImageEmbeddableState) => transformDrilldownsOut(state, panelReferences),
       // snake case last as snake casing may effect other transforms
       // BWC transforms may be looking for original camel cased keys
-      convertCamelCasedKeysToSnakeCase,
+      convertCamelCasedKeysToSnakeCase
     );
     return transformsFlow(storedState as ImageEmbeddableState);
   };

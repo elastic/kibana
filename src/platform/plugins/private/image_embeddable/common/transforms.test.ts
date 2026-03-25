@@ -79,11 +79,13 @@ describe('Image embeddable transformOut', () => {
 
   it('passes through snake_case state without changes', () => {
     const current = {
-      drilldowns: [{
-        label: 'some drilldown',
-        type: 'test',
-        trigger: 'some_trigger',
-      }],
+      drilldowns: [
+        {
+          label: 'some drilldown',
+          type: 'test',
+          trigger: 'some_trigger',
+        },
+      ],
       image_config: {
         src: {
           type: 'file',
