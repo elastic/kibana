@@ -800,13 +800,45 @@ describe('discover responsive sidebar', function () {
       EXTENDED_TIMEOUT
     );
 
-    it('should allow to toggle sidebar', async function () {
-      const { user } = await renderComponent(props);
-      expect(screen.getByTestId('fieldList')).toBeInTheDocument();
-      await user.click(screen.getByTestId('unifiedFieldListSidebar__toggle-collapse'));
-      expect(screen.queryByTestId('fieldList')).not.toBeInTheDocument();
-      await user.click(screen.getByTestId('unifiedFieldListSidebar__toggle-expand'));
-      expect(screen.getByTestId('fieldList')).toBeInTheDocument();
+    it('should sync sidebar toggle state', async function () {
+      const expandedSidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
+        isCollapsed: true,
+        toggle: () => {},
+      });
+
+      const { result: expandedRender } = await renderComponent({
+        ...props,
+        sidebarToggleState$: expandedSidebarToggleState$,
+      });
+
+      await waitFor(() => {
+        expect(expandedSidebarToggleState$.value.isCollapsed).toBe(false);
+        expect(expandedSidebarToggleState$.value.toggle).toBeDefined();
+      });
+
+      expandedRender.unmount();
+
+      const collapsedSidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
+        isCollapsed: false,
+        toggle: () => {},
+      });
+
+      await renderComponent(
+        {
+          ...props,
+          sidebarToggleState$: collapsedSidebarToggleState$,
+        },
+        {
+          fieldListUiState: {
+            isCollapsed: true,
+          },
+        }
+      );
+
+      await waitFor(() => {
+        expect(collapsedSidebarToggleState$.value.isCollapsed).toBe(true);
+        expect(collapsedSidebarToggleState$.value.toggle).toBeDefined();
+      });
     });
   });
 
