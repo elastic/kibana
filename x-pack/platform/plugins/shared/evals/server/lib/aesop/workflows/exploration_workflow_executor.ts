@@ -98,7 +98,7 @@ interface ExplorationConfig {
   samplingConfig: SamplingConfig;
   connectorId?: string;
   actionsClient?: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   getSkillRegistry?: () => Promise<any | undefined>;
 }
 
@@ -257,7 +257,11 @@ export class ExplorationWorkflowExecutor {
   /**
    * Helper to calculate cumulative completed steps and progress percentage.
    */
-  private progressFor(phaseNumber: 1 | 2 | 3 | 4 | 5, stepInPhase: number, totalStepsInPhase: number) {
+  private progressFor(
+    phaseNumber: 1 | 2 | 3 | 4 | 5,
+    stepInPhase: number,
+    totalStepsInPhase: number
+  ) {
     // Steps per phase: [4, 3, 4, 3, 6] = 20 total
     const stepsPerPhase = [4, 3, 4, 3, 6];
     const completedInPrior = stepsPerPhase.slice(0, phaseNumber - 1).reduce((a, b) => a + b, 0);
@@ -314,11 +318,27 @@ export class ExplorationWorkflowExecutor {
     // Step 2: Identify key fields
     await this.updateStep(1, 1, 4, 'Identifying key fields...');
     const securityFields = [
-      '@timestamp', 'event.action', 'event.category', 'event.kind', 'event.outcome',
-      'host.name', 'host.ip', 'source.ip', 'destination.ip', 'user.name',
-      'process.name', 'process.pid', 'file.path', 'url.full',
-      'rule.name', 'rule.id', 'agent.name', 'observer.name',
-      'threat.indicator.type', 'kibana.alert.severity', 'kibana.alert.rule.name',
+      '@timestamp',
+      'event.action',
+      'event.category',
+      'event.kind',
+      'event.outcome',
+      'host.name',
+      'host.ip',
+      'source.ip',
+      'destination.ip',
+      'user.name',
+      'process.name',
+      'process.pid',
+      'file.path',
+      'url.full',
+      'rule.name',
+      'rule.id',
+      'agent.name',
+      'observer.name',
+      'threat.indicator.type',
+      'kibana.alert.severity',
+      'kibana.alert.rule.name',
     ];
 
     for (const idx of topIndices) {
@@ -368,10 +388,12 @@ export class ExplorationWorkflowExecutor {
     await this.updateStep(2, 0, 3, 'Analyzing field distributions...');
 
     for (const schema of this.schemas) {
-      const categorizableFields = schema.keyFields.filter((f) => {
-        const type = schema.mappings[f];
-        return type === 'keyword' || type === 'ip' || type === 'boolean';
-      }).slice(0, 5);
+      const categorizableFields = schema.keyFields
+        .filter((f) => {
+          const type = schema.mappings[f];
+          return type === 'keyword' || type === 'ip' || type === 'boolean';
+        })
+        .slice(0, 5);
 
       for (const field of categorizableFields) {
         try {
@@ -625,7 +647,10 @@ export class ExplorationWorkflowExecutor {
     // Deduplicate by pattern name
     const uniquePatterns = new Map<string, PatternInfo>();
     for (const p of this.patterns) {
-      if (!uniquePatterns.has(p.patternName) || p.frequency > (uniquePatterns.get(p.patternName)?.frequency ?? 0)) {
+      if (
+        !uniquePatterns.has(p.patternName) ||
+        p.frequency > (uniquePatterns.get(p.patternName)?.frequency ?? 0)
+      ) {
         uniquePatterns.set(p.patternName, p);
       }
     }
@@ -664,19 +689,23 @@ export class ExplorationWorkflowExecutor {
     // Analyze existing Agent Builder skills for improvement proposals
     if (useLLM && getSkillRegistry) {
       await this.updateStep(5, 0, 6, 'Fetching existing Agent Builder skills...');
-      const improvementSkills = await this.analyzeSkillImprovements(
-        actionsClient,
-        connectorId
-      );
+      const improvementSkills = await this.analyzeSkillImprovements(actionsClient, connectorId);
       if (improvementSkills.length > 0) {
-        this.logger.info(`[AESOP] Generated ${improvementSkills.length} skill improvement proposals`);
+        this.logger.info(
+          `[AESOP] Generated ${improvementSkills.length} skill improvement proposals`
+        );
         this.skills.push(...improvementSkills);
       }
     }
 
     if (useLLM) {
       // LLM-powered skill synthesis — generates much higher quality skills
-      await this.updateStep(5, useLLM && getSkillRegistry ? 2 : 0, 6, 'Generating skills with LLM...');
+      await this.updateStep(
+        5,
+        useLLM && getSkillRegistry ? 2 : 0,
+        6,
+        'Generating skills with LLM...'
+      );
       await this.synthesizeSkillsWithLLM(actionsClient, connectorId);
     } else {
       // Template-based fallback
@@ -718,13 +747,13 @@ export class ExplorationWorkflowExecutor {
         const suggestions = validation.issues
           .map((issue) => {
             const suggestion = suggestCorrectIndexName(issue.match);
-            return suggestion
-              ? `"${issue.match}" → use "${suggestion}" instead`
-              : issue.message;
+            return suggestion ? `"${issue.match}" → use "${suggestion}" instead` : issue.message;
           })
           .join('; ');
 
-        this.logger.warn(`[AESOP] Skill rejected during synthesis: "${skill.name}". ${suggestions}`);
+        this.logger.warn(
+          `[AESOP] Skill rejected during synthesis: "${skill.name}". ${suggestions}`
+        );
       }
     }
 
@@ -778,11 +807,13 @@ export class ExplorationWorkflowExecutor {
           },
           derived_from: skill.derivedFrom || 'patterns',
           improvement_type: skill.improvementType,
-          base_skill: skill.baseSkill ? {
-            id: skill.baseSkill.id,
-            name: skill.baseSkill.name,
-            readonly: skill.baseSkill.readonly,
-          } : undefined,
+          base_skill: skill.baseSkill
+            ? {
+                id: skill.baseSkill.id,
+                name: skill.baseSkill.name,
+                readonly: skill.baseSkill.readonly,
+              }
+            : undefined,
           metadata: {
             created_at: new Date().toISOString(),
             indices_explored: this.schemas.length,
@@ -837,14 +868,16 @@ export class ExplorationWorkflowExecutor {
         referenced_content_count: s.referenced_content_count ?? 0,
       }));
     } catch (error) {
-      this.logger.warn(`[AESOP] Error fetching existing skills: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.warn(
+        `[AESOP] Error fetching existing skills: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
       return [];
     }
   }
 
-  private async fetchSkillDetail(
-    skillId: string
-  ): Promise<AgentBuilderSkillDetail | null> {
+  private async fetchSkillDetail(skillId: string): Promise<AgentBuilderSkillDetail | null> {
     try {
       const registry = await this.config.getSkillRegistry?.();
       if (!registry) return null;
@@ -879,7 +912,9 @@ export class ExplorationWorkflowExecutor {
       return [];
     }
 
-    this.logger.info(`[AESOP] Analyzing ${existingSkills.length} existing Agent Builder skills for improvements`);
+    this.logger.info(
+      `[AESOP] Analyzing ${existingSkills.length} existing Agent Builder skills for improvements`
+    );
     await this.updateStep(5, 1, 6, `Analyzing ${existingSkills.length} existing skills...`);
 
     const improvementSkills: ProposedSkill[] = [];
@@ -902,14 +937,18 @@ export class ExplorationWorkflowExecutor {
     }
 
     // Build a single LLM prompt that analyzes all skills at once (more efficient)
-    const skillsSummary = skillDetails.map((skill) => {
-      const contentPreview = (skill.content || '').slice(0, 2000);
-      return `### Skill: "${skill.name}" (ID: ${skill.id}, ${skill.readonly ? 'built-in' : 'user-created'})
+    const skillsSummary = skillDetails
+      .map((skill) => {
+        const contentPreview = (skill.content || '').slice(0, 2000);
+        return `### Skill: "${skill.name}" (ID: ${skill.id}, ${
+          skill.readonly ? 'built-in' : 'user-created'
+        })
 Description: ${skill.description}
 Tools: ${skill.tool_ids.join(', ') || 'none'}
 Content:
 ${contentPreview}`;
-    }).join('\n\n');
+      })
+      .join('\n\n');
 
     const prompt = `You are an expert Agent Builder skill analyzer for Elastic Security.
 You are given a list of existing Agent Builder skills and discovery context from the user's actual data.
@@ -969,7 +1008,11 @@ If no improvements are warranted, return an empty array: []`;
       this.logger.info(`[AESOP] LLM proposed ${proposals.length} skill improvements`);
       improvementSkills.push(...proposals);
     } catch (error) {
-      this.logger.warn(`[AESOP] Skill improvement analysis error: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.warn(
+        `[AESOP] Skill improvement analysis error: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
 
     return improvementSkills;
@@ -982,7 +1025,10 @@ If no improvements are warranted, return an empty array: []`;
     try {
       let cleaned = response;
       cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/g, '');
-      cleaned = cleaned.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim();
+      cleaned = cleaned
+        .replace(/```json?\s*/g, '')
+        .replace(/```\s*/g, '')
+        .trim();
       if (!cleaned.startsWith('[')) {
         const match = cleaned.match(/\[[\s\S]*\]/);
         if (match) cleaned = match[0];
@@ -1007,7 +1053,9 @@ If no improvements are warranted, return an empty array: []`;
             markdown: String(item.markdown || ''),
             sourceIndices: this.schemas.map((s) => s.indexName),
             derivedFrom: 'skill_improvement' as const,
-            improvementType: (item.improvement_type === 'customization' ? 'customization' : 'improvement') as 'improvement' | 'customization',
+            improvementType: (item.improvement_type === 'customization'
+              ? 'customization'
+              : 'improvement') as 'improvement' | 'customization',
             baseSkill: {
               id: baseSkill.id,
               name: baseSkill.name,
@@ -1017,13 +1065,19 @@ If no improvements are warranted, return an empty array: []`;
             source: {
               patternId: `improvement-${patternId}`,
               patternFrequency: 1,
-              rationale: String(item.improvement_rationale || 'Improvement based on discovered data patterns'),
+              rationale: String(
+                item.improvement_rationale || 'Improvement based on discovered data patterns'
+              ),
             },
           };
         })
         .filter((s: ProposedSkill) => s.markdown.length > 50);
     } catch (error) {
-      this.logger.error(`[AESOP] Failed to parse skill improvement proposals: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.error(
+        `[AESOP] Failed to parse skill improvement proposals: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
       return [];
     }
   }
@@ -1156,14 +1210,18 @@ If no improvements are warranted, return an empty array: []`;
     return {
       skillId: `skill-${patternId}`,
       name: `Correlate: ${shortFrom} + ${shortTo}`,
-      description: `Cross-index correlation between ${resolvedFrom} and ${resolvedTo} via shared field "${rel.via}" (${rel.sharedValueCount} shared values, ${Math.round(rel.confidence * 100)}% confidence).`,
+      description: `Cross-index correlation between ${resolvedFrom} and ${resolvedTo} via shared field "${
+        rel.via
+      }" (${rel.sharedValueCount} shared values, ${Math.round(rel.confidence * 100)}% confidence).`,
       confidence: rel.confidence * 0.9,
       markdown: [
         `# Cross-Index Correlation: ${shortFrom} + ${shortTo}`,
         '',
         `## Purpose`,
         `Correlate events across ${resolvedFrom} and ${resolvedTo} using the shared field \`${rel.via}\`.`,
-        `Found ${rel.sharedValueCount} overlapping values with ${Math.round(rel.confidence * 100)}% confidence.`,
+        `Found ${rel.sharedValueCount} overlapping values with ${Math.round(
+          rel.confidence * 100
+        )}% confidence.`,
         '',
         `## Investigation Steps`,
         `1. Query both indices for a given \`${rel.via}\` value`,
@@ -1238,7 +1296,9 @@ Respond with ONLY a JSON array (no markdown fences): [{ "name": "...", ... }, ..
       });
 
       if (result.status === 'error') {
-        this.logger.warn(`[AESOP] LLM skill synthesis failed, falling back to templates: ${result.message}`);
+        this.logger.warn(
+          `[AESOP] LLM skill synthesis failed, falling back to templates: ${result.message}`
+        );
         return this.fallbackToTemplates();
       }
 
@@ -1248,7 +1308,11 @@ Respond with ONLY a JSON array (no markdown fences): [{ "name": "...", ... }, ..
       this.logger.info(`[AESOP] LLM generated ${skills.length} skills`);
       this.skills.push(...skills);
     } catch (error) {
-      this.logger.warn(`[AESOP] LLM skill synthesis error, falling back to templates: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.warn(
+        `[AESOP] LLM skill synthesis error, falling back to templates: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
       return this.fallbackToTemplates();
     }
   }
@@ -1266,12 +1330,20 @@ Respond with ONLY a JSON array (no markdown fences): [{ "name": "...", ... }, ..
     for (const rel of this.relationships.slice(0, 10)) {
       const from = suggestCorrectIndexName(rel.from) ?? rel.from;
       const to = suggestCorrectIndexName(rel.to) ?? rel.to;
-      sections.push(`- ${from} <-> ${to} via "${rel.via}" (${rel.sharedValueCount} shared values, ${Math.round(rel.confidence * 100)}% confidence)`);
+      sections.push(
+        `- ${from} <-> ${to} via "${rel.via}" (${rel.sharedValueCount} shared values, ${Math.round(
+          rel.confidence * 100
+        )}% confidence)`
+      );
     }
 
     sections.push('\n## Discovered Patterns');
     for (const pattern of this.patterns.slice(0, 10)) {
-      sections.push(`- ${pattern.patternName} (freq: ${pattern.frequency}, confidence: ${Math.round(pattern.confidence * 100)}%)`);
+      sections.push(
+        `- ${pattern.patternName} (freq: ${pattern.frequency}, confidence: ${Math.round(
+          pattern.confidence * 100
+        )}%)`
+      );
       if (pattern.exampleQueries[0]) {
         sections.push(`  Query: ${pattern.exampleQueries[0]}`);
       }
@@ -1314,7 +1386,8 @@ Respond with ONLY a JSON array (no markdown fences): [{ "name": "...", ... }, ..
     if (data?.choices?.[0]?.message?.content) return data.choices[0].message.content;
     if (data?.completion) return data.completion;
     if (data?.content?.[0]?.text) return data.content[0].text;
-    if (data?.candidates?.[0]?.content?.parts?.[0]?.text) return data.candidates[0].content.parts[0].text;
+    if (data?.candidates?.[0]?.content?.parts?.[0]?.text)
+      return data.candidates[0].content.parts[0].text;
     return JSON.stringify(data);
   }
 
@@ -1322,7 +1395,10 @@ Respond with ONLY a JSON array (no markdown fences): [{ "name": "...", ... }, ..
     try {
       let cleaned = response;
       cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/g, '');
-      cleaned = cleaned.replace(/```json?\s*/g, '').replace(/```\s*/g, '').trim();
+      cleaned = cleaned
+        .replace(/```json?\s*/g, '')
+        .replace(/```\s*/g, '')
+        .trim();
       if (!cleaned.startsWith('[')) {
         const match = cleaned.match(/\[[\s\S]*\]/);
         if (match) cleaned = match[0];
@@ -1333,34 +1409,42 @@ Respond with ONLY a JSON array (no markdown fences): [{ "name": "...", ... }, ..
 
       const allIndexNames = this.schemas.map((s) => s.indexName);
 
-      return parsed.map((item: any) => {
-        const patternId = shortHash(item.name || Math.random().toString());
-        // Extract source_indices from LLM response, or infer from markdown content
-        let indices: string[] = Array.isArray(item.source_indices) ? item.source_indices : [];
-        if (indices.length === 0) {
-          // Infer from markdown — find which discovered index names appear in the content
-          const md = String(item.markdown || '').toLowerCase();
-          indices = allIndexNames.filter((idx) => md.includes(idx.toLowerCase()));
-        }
+      return parsed
+        .map((item: any) => {
+          const patternId = shortHash(item.name || Math.random().toString());
+          // Extract source_indices from LLM response, or infer from markdown content
+          let indices: string[] = Array.isArray(item.source_indices) ? item.source_indices : [];
+          if (indices.length === 0) {
+            // Infer from markdown — find which discovered index names appear in the content
+            const md = String(item.markdown || '').toLowerCase();
+            indices = allIndexNames.filter((idx) => md.includes(idx.toLowerCase()));
+          }
 
-        return {
-          skillId: `skill-llm-${patternId}`,
-          name: String(item.name || 'Untitled Skill'),
-          description: String(item.description || ''),
-          confidence: Math.max(0, Math.min(1, Number(item.confidence) || 0.8)),
-          markdown: String(item.markdown || ''),
-          sourceIndices: indices,
-          derivedFrom: 'llm' as const,
-          improvementType: 'new' as const,
-          source: {
-            patternId: `llm-${patternId}`,
-            patternFrequency: 1,
-            rationale: String(item.source_rationale || item.rationale || 'Generated by LLM from discovery context'),
-          },
-        };
-      }).filter((s: ProposedSkill) => s.markdown.length > 50);
+          return {
+            skillId: `skill-llm-${patternId}`,
+            name: String(item.name || 'Untitled Skill'),
+            description: String(item.description || ''),
+            confidence: Math.max(0, Math.min(1, Number(item.confidence) || 0.8)),
+            markdown: String(item.markdown || ''),
+            sourceIndices: indices,
+            derivedFrom: 'llm' as const,
+            improvementType: 'new' as const,
+            source: {
+              patternId: `llm-${patternId}`,
+              patternFrequency: 1,
+              rationale: String(
+                item.source_rationale || item.rationale || 'Generated by LLM from discovery context'
+              ),
+            },
+          };
+        })
+        .filter((s: ProposedSkill) => s.markdown.length > 50);
     } catch (error) {
-      this.logger.error(`[AESOP] Failed to parse LLM skills response: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.error(
+        `[AESOP] Failed to parse LLM skills response: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
       return [];
     }
   }
@@ -1386,7 +1470,8 @@ Respond with ONLY a JSON array (no markdown fences): [{ "name": "...", ... }, ..
   // ---------------------------------------------------------------------------
 
   private async storeExecutionConfig(): Promise<void> {
-    const { executionId, userId, indices, analystRole, roleDescription, samplingConfig } = this.config;
+    const { executionId, userId, indices, analystRole, roleDescription, samplingConfig } =
+      this.config;
 
     await this.esClient.update({
       index: '.aesop-workflow-executions',
@@ -1396,17 +1481,19 @@ Respond with ONLY a JSON array (no markdown fences): [{ "name": "...", ... }, ..
           agent_role: roleDescription,
           scoped_indices: indices.slice(0, 10).map((i) => i.name),
           exploration_depth: samplingConfig.estimatedDocsSampled,
-          min_pattern_frequency: samplingConfig.depthLevel === 'deep' ? 10 : samplingConfig.depthLevel === 'standard' ? 50 : 100,
+          min_pattern_frequency:
+            samplingConfig.depthLevel === 'deep'
+              ? 10
+              : samplingConfig.depthLevel === 'standard'
+              ? 50
+              : 100,
         },
         user_id: userId,
       },
     });
   }
 
-  private flattenMappings(
-    properties: Record<string, any>,
-    prefix = ''
-  ): Record<string, string> {
+  private flattenMappings(properties: Record<string, any>, prefix = ''): Record<string, string> {
     const result: Record<string, string> = {};
 
     for (const [key, value] of Object.entries(properties)) {
