@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FunctionComponent } from 'react';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { EuiConfirmModal, EuiSpacer, EuiText, EuiCallOut, useGeneratedHtmlId } from '@elastic/eui';
 
 import type { OnJsonEditorUpdateHandler } from '../../../../../shared_imports';
@@ -75,6 +75,14 @@ export const ModalProvider: FunctionComponent<Props> = ({ onDone, children }) =>
   const [isValidJson, setIsValidJson] = useState(true);
   const [error, setError] = useState<Error | undefined>();
   const [editorContent, setEditorContent] = useState(defaultValueRaw);
+
+  useEffect(() => {
+    if (!isModalVisible) return;
+
+    setEditorContent(defaultValueRaw);
+    setIsValidJson(isValidXJson(defaultValueRaw));
+    setError(undefined);
+  }, [isModalVisible]);
 
   const onJsonUpdate: OnJsonEditorUpdateHandler = useCallback((jsonUpdateData) => {
     setEditorContent(jsonUpdateData.data.raw);

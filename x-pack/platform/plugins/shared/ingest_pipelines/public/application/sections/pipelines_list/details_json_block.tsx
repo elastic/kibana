@@ -26,12 +26,13 @@ export const PipelineDetailsJsonBlock: FunctionComponent<Props> = ({ json }) => 
   const jsonString = expandLiteralStrings(JSON.stringify(json, null, 2));
   // Replace all newline characters with empty spaces
   const formattedString = jsonString.replace(/\\n/g, ' ');
+  const formattedStringLength = formattedString.length;
 
   return (
     <EuiCodeBlock
       paddingSize="s"
       language="json"
-      overflowHeight={json.length > 0 ? 300 : undefined}
+      overflowHeight={formattedStringLength > 0 ? 300 : undefined}
       isCopyable
       key={uuid.current}
       data-test-subj="jsonCodeBlock"
