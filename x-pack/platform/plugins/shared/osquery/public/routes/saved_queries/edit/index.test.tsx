@@ -67,11 +67,8 @@ jest.mock('../../../saved_queries/use_copy_saved_query', () => ({
   })),
 }));
 
-let capturedOnDirtyStateChange: ((isDirty: boolean) => void) | undefined;
-
 jest.mock('./form', () => ({
   EditSavedQueryForm: (props: { onDirtyStateChange?: (isDirty: boolean) => void }) => {
-    capturedOnDirtyStateChange = props.onDirtyStateChange;
     return (
       <div data-test-subj="edit-saved-query-form">
         <button data-test-subj="make-form-dirty" onClick={() => props.onDirtyStateChange?.(true)}>
@@ -133,7 +130,6 @@ const setupKibana = (overrides: Record<string, unknown> = {}) => {
 describe('EditSavedQueryPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    capturedOnDirtyStateChange = undefined;
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     setupKibana();
     mockMutateAsync.mockResolvedValue(undefined);
