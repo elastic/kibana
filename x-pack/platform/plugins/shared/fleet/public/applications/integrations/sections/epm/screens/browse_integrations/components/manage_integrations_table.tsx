@@ -761,7 +761,9 @@ export const ManageIntegrationsTable: React.FC<{
       incremental: true,
       placeholder: 'Search integrations',
     },
-    toolsRight: [filterButtons],
+    toolsRight: [
+      <React.Fragment key="manageIntegrationsSearchTools">{filterButtons}</React.Fragment>,
+    ],
   };
 
   const countText = (

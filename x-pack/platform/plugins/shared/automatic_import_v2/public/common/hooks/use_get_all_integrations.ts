@@ -6,7 +6,10 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import type { AllIntegrationsResponseIntegration } from '../../../common';
+import type {
+  AllIntegrationsResponseIntegration,
+  GetAllAutoImportIntegrationsResponse,
+} from '../../../common';
 import { getAllIntegrations } from '../lib/api';
 import { useKibana } from './use_kibana';
 
@@ -26,11 +29,17 @@ export function useGetAllIntegrations(): UseGetAllIntegrationsResult {
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['all-integrations'],
-    queryFn: async () => {
-      return getAllIntegrations({ http });
+    queryFn: async (): Promise<GetAllAutoImportIntegrationsResponse> => {
+      try {
+        return await getAllIntegrations({ http });
+      } catch {
+        return [];
+      }
     },
     refetchInterval: 30 * 1000,
     refetchOnWindowFocus: true,
+    retryOnMount: false,
+    retry: false,
   });
 
   return {

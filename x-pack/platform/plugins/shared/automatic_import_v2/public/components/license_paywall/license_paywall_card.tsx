@@ -41,9 +41,9 @@ export const LicensePaywallCard = React.memo(() => {
         <EuiFlexGroup className="lockedCardDescription" direction="column" justifyContent="center">
           <EuiFlexItem>
             <EuiSpacer size="s" />
-            <EuiText>
+            <EuiText component="div">
               <h4>
-                <EuiTextColor color="subdued">
+                <EuiTextColor color="subdued" component="span">
                   {paywallI18n.ENTERPRISE_LICENSE_UPGRADE_TITLE}
                 </EuiTextColor>
               </h4>
