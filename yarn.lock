@@ -7328,10 +7328,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/inference-common@link:x-pack/platform/packages/packages/private/kbn-inference-common":
-  version "0.0.0"
-  uid ""
-
 "@kbn/inference-common@link:x-pack/platform/packages/shared/ai-infra/inference-common":
   version "0.0.0"
   uid ""
@@ -8553,10 +8549,6 @@
   uid ""
 
 "@kbn/scout-security@link:x-pack/solutions/security/packages/kbn-scout-security":
-  version "0.0.0"
-  uid ""
-
-"@kbn/scout@link:packages/kbn-scout":
   version "0.0.0"
   uid ""
 
