@@ -25,6 +25,9 @@ import type {
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
+
+import type { estypes } from '@elastic/elasticsearch';
+
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
@@ -1893,7 +1896,7 @@ class AgentPolicyService {
 
           if (bulkResponse.errors) {
             const erroredDocuments = bulkResponse.items.reduce((acc, item, idx) => {
-              const value: BulkResponseItem | undefined = item.index;
+              const value: estypes.BulkResponseItem | undefined = item.index;
               if (!value || !value.error) {
                 return acc;
               }
@@ -1905,7 +1908,7 @@ class AgentPolicyService {
                 revisionIdx: policy?.revision_idx,
               });
               return acc;
-            }, [] as Array<{ bulkItem: BulkResponseItem; policyId?: string; revisionIdx?: number }>);
+            }, [] as Array<{ bulkItem: estypes.BulkResponseItem; policyId?: string; revisionIdx?: number }>);
 
             const errorMessage = `Failed to deploy ${
               erroredDocuments.length
