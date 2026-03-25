@@ -12,8 +12,9 @@ import { RISK_ENGINE_CLEANUP_URL, APP_ID, API_VERSIONS } from '../../../../../co
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskEngineAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
-import { ENTITY_ANALYTICS_V2_MODE_API_ERROR, TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
+import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
 import type { CleanUpRiskEngineResponse } from '../../../../../common/api/entity_analytics';
+import { withEntityStoreV2Disabled } from './utils';
 
 export const riskEngineCleanupRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -32,18 +33,13 @@ export const riskEngineCleanupRoute = (
     })
     .addVersion(
       { version: API_VERSIONS.public.v1, validate: {} },
-      withRiskEnginePrivilegeCheck(
-        getStartServices,
-        async (context, request, response): Promise<IKibanaResponse<CleanUpRiskEngineResponse>> => {
-          const siemResponse = buildSiemResponse(response);
-          const securitySolution = await context.securitySolution;
-
-          if (isEntityAnalyticsEntityStoreV2Enabled) {
-            return siemResponse.error({
-              statusCode: 400,
-              body: ENTITY_ANALYTICS_V2_MODE_API_ERROR,
-            });
-          }
+      withEntityStoreV2Disabled(
+        isEntityAnalyticsEntityStoreV2Enabled,
+        withRiskEnginePrivilegeCheck(
+          getStartServices,
+          async (context, request, response): Promise<IKibanaResponse<CleanUpRiskEngineResponse>> => {
+            const siemResponse = buildSiemResponse(response);
+            const securitySolution = await context.securitySolution;
 
           const [_, { taskManager }] = await getStartServices();
           const riskEngineClient = securitySolution.getRiskEngineDataClient();
@@ -110,5 +106,6 @@ export const riskEngineCleanupRoute = (
           }
         }
       )
-    );
+    )
+  );
 };

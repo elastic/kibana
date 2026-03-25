@@ -11,7 +11,7 @@ import type { IKibanaResponse } from '@kbn/core-http-server';
 import type { RiskEngineStatusResponse } from '../../../../../common/api/entity_analytics';
 import { RISK_ENGINE_STATUS_URL, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import { ENTITY_ANALYTICS_V2_MODE_API_ERROR } from './translations';
+import { withEntityStoreV2Disabled } from './utils';
 
 export const riskEngineStatusRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -30,17 +30,12 @@ export const riskEngineStatusRoute = (
     })
     .addVersion(
       { version: '1', validate: {} },
-      async (context, request, response): Promise<IKibanaResponse<RiskEngineStatusResponse>> => {
-        const siemResponse = buildSiemResponse(response);
+      withEntityStoreV2Disabled(
+        isEntityAnalyticsEntityStoreV2Enabled,
+        async (context, request, response): Promise<IKibanaResponse<RiskEngineStatusResponse>> => {
+          const siemResponse = buildSiemResponse(response);
 
-        if (isEntityAnalyticsEntityStoreV2Enabled) {
-          return siemResponse.error({
-            statusCode: 400,
-            body: ENTITY_ANALYTICS_V2_MODE_API_ERROR,
-          });
-        }
-
-        const securitySolution = await context.securitySolution;
+          const securitySolution = await context.securitySolution;
         const riskEngineClient = securitySolution.getRiskEngineDataClient();
         const spaceId = securitySolution.getSpaceId();
         const [_, { taskManager }] = await getStartServices();
@@ -66,6 +61,6 @@ export const riskEngineStatusRoute = (
             bypassErrorFormat: true,
           });
         }
-      }
+      })
     );
 };
