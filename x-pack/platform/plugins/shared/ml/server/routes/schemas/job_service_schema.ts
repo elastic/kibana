@@ -52,7 +52,7 @@ export const populationChartSchema = {
 };
 
 export const forceStartDatafeedSchema = schema.object({
-  datafeedIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
+  datafeedIds: schema.arrayOf(schema.string()),
   start: schema.maybe(schema.number()),
   end: schema.maybe(schema.number()),
 });
@@ -72,7 +72,7 @@ export const deleteJobsSchema = schema.object({
 });
 
 export const stopDatafeedsSchema = schema.object({
-  datafeedIds: schema.arrayOf(schema.string()),
+  datafeedIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   closeJobs: schema.maybe(schema.boolean()),
 });
 
