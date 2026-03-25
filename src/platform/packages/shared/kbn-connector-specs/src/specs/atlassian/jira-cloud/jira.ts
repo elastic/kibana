@@ -43,6 +43,14 @@ export const JiraConnector: ConnectorSpec = {
           },
         },
       },
+      {
+        type: 'oauth_authorization_code',
+        defaults: {
+          authorizationUrl: 'https://auth.atlassian.com/authorize',
+          tokenUrl: 'https://auth.atlassian.com/oauth/token',
+          scope: 'read:jira-work read:jira-user offline_access',
+        },
+      },
     ],
   },
   schema: z.object({

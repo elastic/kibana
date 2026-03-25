@@ -512,6 +512,14 @@ export const Slack: ConnectorSpec = {
             },
           ] as const)
         : []),
+      {
+        type: 'oauth_authorization_code',
+        defaults: {
+          authorizationUrl: 'https://slack.com/oauth/v2/authorize',
+          tokenUrl: 'https://slack.com/api/oauth.v2.access',
+          scope: 'channels:read chat:write search:read',
+        },
+      },
     ],
   },
 

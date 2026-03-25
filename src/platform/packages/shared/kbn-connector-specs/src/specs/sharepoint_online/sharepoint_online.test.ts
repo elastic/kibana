@@ -110,6 +110,30 @@ describe('SharepointOnline', () => {
     jest.clearAllMocks();
   });
 
+  describe('auth', () => {
+    it('supports oauth_client_credentials auth', () => {
+      const types = (SharepointOnline.auth?.types as Array<string | { type: string }>).map((t) =>
+        typeof t === 'string' ? t : t.type
+      );
+      expect(types).toContain('oauth_client_credentials');
+    });
+
+    it('supports oauth_authorization_code with correct Microsoft defaults', () => {
+      const oauthType = (
+        SharepointOnline.auth?.types as Array<
+          string | { type: string; defaults?: Record<string, unknown> }
+        >
+      ).find((t) => typeof t === 'object' && t.type === 'oauth_authorization_code');
+      expect(oauthType).toBeDefined();
+      expect(oauthType).toMatchObject({
+        type: 'oauth_authorization_code',
+        defaults: {
+          scope: 'Sites.Read.All Files.Read.All offline_access',
+        },
+      });
+    });
+  });
+
   describe('getAllSites action', () => {
     it('should list all sites', async () => {
       const mockResponse = {
