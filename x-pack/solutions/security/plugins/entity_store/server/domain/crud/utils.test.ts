@@ -14,7 +14,7 @@ import {
 } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import { BadCRUDRequestError } from '../errors';
-import { hashEuid, validateAndTransformDocForUpsert, validateDocIdentification } from './utils';
+import { hashEuid, validateAndTransformDoc, validateDocIdentification } from './utils';
 
 jest.mock('../../../common/domain/definitions/registry', () => ({
   ...jest.requireActual('../../../common/domain/definitions/registry'),
@@ -92,12 +92,12 @@ describe('crud_client utils', () => {
     });
   });
 
-  describe('validateAndTransformDocForUpsert', () => {
+  describe('validateAndTransformDoc', () => {
     it('returns ValidatedDoc with id and transformed doc', () => {
       mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
 
       const doc: Entity = { entity: { id: 'entity-generic' } };
-      const result = validateAndTransformDocForUpsert('generic', 'default', doc, undefined, true);
+      const result = validateAndTransformDoc('update', 'generic', 'default', doc, undefined, true);
 
       expect(result.id).toBe('entity-generic');
       expect(result.doc).toEqual(
@@ -113,7 +113,7 @@ describe('crud_client utils', () => {
 
       const doc: Entity = { entity: { id: 'doc-id' }, host: { name: 'some-host' } };
       expect(() =>
-        validateAndTransformDocForUpsert('generic', 'default', doc, 'generated-id', true)
+        validateAndTransformDoc('update', 'generic', 'default', doc, 'generated-id', true)
       ).toThrow(
         new BadCRUDRequestError('Supplied ID doc-id does not match generated EUID generated-id')
       );
@@ -123,7 +123,7 @@ describe('crud_client utils', () => {
       mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
 
       const doc: Entity = { entity: { id: 'same-id' }, host: { name: 'some-host' } };
-      const result = validateAndTransformDocForUpsert('generic', 'default', doc, 'same-id', true);
+      const result = validateAndTransformDoc('update', 'generic', 'default', doc, 'same-id', true);
 
       expect(result.id).toBe('same-id');
     });
@@ -132,7 +132,8 @@ describe('crud_client utils', () => {
       mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
 
       const doc = { host: { name: 'some-host' } } as Entity;
-      const result = validateAndTransformDocForUpsert(
+      const result = validateAndTransformDoc(
+        'update',
         'generic',
         'default',
         doc,
@@ -148,7 +149,7 @@ describe('crud_client utils', () => {
       mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
 
       const doc: Entity = { entity: { id: 'doc-id' } };
-      const result = validateAndTransformDocForUpsert('generic', 'default', doc, undefined, true);
+      const result = validateAndTransformDoc('update', 'generic', 'default', doc, undefined, true);
 
       expect(result.id).toBe('doc-id');
     });
@@ -160,7 +161,7 @@ describe('crud_client utils', () => {
         entity: { id: 'entity-host' },
         host: { name: 'original-host-name' },
       };
-      const result = validateAndTransformDocForUpsert('host', 'default', doc, undefined, false);
+      const result = validateAndTransformDoc('update', 'host', 'default', doc, undefined, false);
 
       expect(result.doc['@timestamp']).toEqual(expect.any(String));
       expect(result.doc).not.toHaveProperty('entity');
@@ -168,13 +169,58 @@ describe('crud_client utils', () => {
       expect(result.doc).toHaveProperty('host.name', 'original-host-name');
     });
 
-    it('sets type.name from entity.id when not present', () => {
-      mockGetEntityDefinition.mockReturnValue(createDefinition('host', []));
+    describe('name defaulting on create vs update', () => {
+      it('defaults type.name from entity.id on create when name is not present', () => {
+        mockGetEntityDefinition.mockReturnValue(createDefinition('host', []));
 
-      const doc: Entity = { entity: { id: 'entity-host' } };
-      const result = validateAndTransformDocForUpsert('host', 'default', doc, undefined, true);
+        const doc: Entity = { entity: { id: 'entity-host' } };
+        const result = validateAndTransformDoc('create', 'host', 'default', doc, undefined, true);
 
-      expect(result.doc).toHaveProperty('host.name', 'entity-host');
+        expect(result.doc).toHaveProperty('host.name', 'entity-host');
+      });
+
+      it('does not default type.name on update when name is not present', () => {
+        mockGetEntityDefinition.mockReturnValue(createDefinition('host', []));
+
+        const doc: Entity = { entity: { id: 'entity-host' } };
+        const result = validateAndTransformDoc('update', 'host', 'default', doc, undefined, true);
+
+        expect(result.doc).not.toHaveProperty('host.name');
+      });
+
+      it('preserves existing name on both create and update', () => {
+        mockGetEntityDefinition.mockReturnValue(
+          createDefinition('host', [createField('host.name')])
+        );
+
+        const createDoc: Entity = {
+          entity: { id: 'entity-host' },
+          host: { name: 'explicit-name' },
+        };
+        const createResult = validateAndTransformDoc(
+          'create',
+          'host',
+          'default',
+          createDoc,
+          undefined,
+          false
+        );
+        expect(createResult.doc).toHaveProperty('host.name', 'explicit-name');
+
+        const updateDoc: Entity = {
+          entity: { id: 'entity-host' },
+          host: { name: 'explicit-name' },
+        };
+        const updateResult = validateAndTransformDoc(
+          'update',
+          'host',
+          'default',
+          updateDoc,
+          undefined,
+          false
+        );
+        expect(updateResult.doc).toHaveProperty('host.name', 'explicit-name');
+      });
     });
 
     it('ignores identity source fields from validation', () => {
@@ -186,7 +232,7 @@ describe('crud_client utils', () => {
       };
 
       expect(() =>
-        validateAndTransformDocForUpsert('host', 'default', doc, undefined, false)
+        validateAndTransformDoc('update', 'host', 'default', doc, undefined, false)
       ).not.toThrow();
     });
 
@@ -203,7 +249,7 @@ describe('crud_client utils', () => {
           },
         },
       } as Entity;
-      const result = validateAndTransformDocForUpsert('generic', 'default', doc, undefined, false);
+      const result = validateAndTransformDoc('update', 'generic', 'default', doc, undefined, false);
 
       expect(result.doc).toHaveProperty('entity.attributes.watchlists', [
         'privileged_watchlist_id',
@@ -221,7 +267,7 @@ describe('crud_client utils', () => {
       };
 
       expect(() =>
-        validateAndTransformDocForUpsert('generic', 'default', doc, undefined, false)
+        validateAndTransformDoc('update', 'generic', 'default', doc, undefined, false)
       ).toThrow(
         new BadCRUDRequestError(
           'The following attributes are not allowed to be updated: [entity.attributes.managed]'
@@ -242,7 +288,7 @@ describe('crud_client utils', () => {
       };
 
       expect(() =>
-        validateAndTransformDocForUpsert('generic', 'default', doc, undefined, false)
+        validateAndTransformDoc('update', 'generic', 'default', doc, undefined, false)
       ).toThrow(
         new BadCRUDRequestError(
           'The following attributes are not allowed to be updated without forcing it (?force=true): entity.attributes.managed'
@@ -263,8 +309,71 @@ describe('crud_client utils', () => {
       };
 
       expect(() =>
-        validateAndTransformDocForUpsert('generic', 'default', doc, undefined, true)
+        validateAndTransformDoc('update', 'generic', 'default', doc, undefined, true)
       ).not.toThrow();
+    });
+
+    describe('generic vs typed entity transform', () => {
+      it('keeps entity at root level for generic type', () => {
+        mockGetEntityDefinition.mockReturnValue(createDefinition('generic', []));
+
+        const doc: Entity = { entity: { id: 'gen-1', type: 'custom' } };
+        const result = validateAndTransformDoc(
+          'create',
+          'generic',
+          'default',
+          doc,
+          undefined,
+          true
+        );
+
+        expect(result.doc).toHaveProperty('entity.id', 'gen-1');
+        expect(result.doc).toHaveProperty('entity.type', 'custom');
+        expect(result.doc).toHaveProperty('@timestamp');
+      });
+
+      it('nests entity under type key and removes root entity for typed entities', () => {
+        mockGetEntityDefinition.mockReturnValue(
+          createDefinition('host', [createField('host.name')])
+        );
+
+        const doc: Entity = {
+          entity: { id: 'host-1', type: 'Host' },
+          host: { name: 'my-host' },
+        };
+        const result = validateAndTransformDoc(
+          'update',
+          'host',
+          'default',
+          doc,
+          undefined,
+          true
+        );
+
+        expect(result.doc).not.toHaveProperty('entity');
+        expect(result.doc).toHaveProperty('host.entity.id', 'host-1');
+        expect(result.doc).toHaveProperty('host.entity.type', 'Host');
+        expect(result.doc).toHaveProperty('host.name', 'my-host');
+        expect(result.doc).toHaveProperty('@timestamp');
+      });
+
+      it('creates the type object when not present in typed entity', () => {
+        mockGetEntityDefinition.mockReturnValue(createDefinition('service', []));
+
+        const doc: Entity = { entity: { id: 'svc-1' } };
+        const result = validateAndTransformDoc(
+          'create',
+          'service',
+          'default',
+          doc,
+          undefined,
+          true
+        );
+
+        expect(result.doc).not.toHaveProperty('entity');
+        expect(result.doc).toHaveProperty('service.entity.id', 'svc-1');
+        expect(result.doc).toHaveProperty('service.name', 'svc-1');
+      });
     });
 
     describe('flattened documents', () => {
@@ -281,7 +390,8 @@ describe('crud_client utils', () => {
             },
           },
         };
-        const result = validateAndTransformDocForUpsert(
+        const result = validateAndTransformDoc(
+          'update',
           'generic',
           'default',
           doc,
@@ -305,7 +415,14 @@ describe('crud_client utils', () => {
           entity: { id: 'host:flat-host' },
           host: { name: 'flat-host' },
         };
-        const result = validateAndTransformDocForUpsert('host', 'default', doc, undefined, false);
+        const result = validateAndTransformDoc(
+          'update',
+          'host',
+          'default',
+          doc,
+          undefined,
+          false
+        );
 
         expect(result.id).toBe('host:flat-host');
         expect(result.doc).not.toHaveProperty('entity');
