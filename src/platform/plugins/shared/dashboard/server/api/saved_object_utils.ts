@@ -15,7 +15,6 @@ import { transformDashboardOut } from './transforms';
 import type { getDashboardStateSchema } from './dashboard_state_schemas';
 import { stripUnmappedKeys } from './scope_tooling';
 import type { DashboardApiRequestHandlerContext } from './request_handler_context';
-import { counterNames } from './telemetry/increment_external_counter';
 
 export function getDashboardMeta(
   savedObject:
@@ -55,21 +54,11 @@ export async function getDashboardCRUResponseBody(
       isDashboardAppRequest
     );
     if (!isDashboardAppRequest && operation === 'read') {
-      const {
-        data: scopedDashboardState,
-        warnings: scopeWarnings,
-        droppedPanels,
-      } = stripUnmappedKeys(dashboardState as Partial<DashboardState>);
+      const { data: scopedDashboardState, warnings: scopeWarnings } = stripUnmappedKeys(
+        dashboardState as Partial<DashboardState>
+      );
       dashboardState = scopedDashboardState;
       warnings = scopeWarnings;
-      if (droppedPanels) {
-        const { dashboardApi } = await requestCtx.resolve(['dashboardApi']);
-        dashboardApi.telemetry.incrementExternalByType({
-          totalCounterName: counterNames.externalReadStrippedPanelsTotal(),
-          byTypeCounterName: counterNames.externalReadStrippedPanelsByType,
-          byType: droppedPanels.byType,
-        });
-      }
     }
 
     // Route does not apply defaults to response

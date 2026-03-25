@@ -21,7 +21,7 @@ function getHeaderValue(headers: RequestHeaders, headerName: string): string | u
   return undefined;
 }
 
-export function parseXKbnContext(headers: RequestHeaders): KibanaExecutionContext | undefined {
+function parseXKbnContext(headers: RequestHeaders): KibanaExecutionContext | undefined {
   const raw = getHeaderValue(headers, X_KBN_CONTEXT_HEADER);
   if (!raw) return undefined;
   try {

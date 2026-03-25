@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isDashboardUiRequest, parseXKbnContext } from './is_dashboard_ui_request';
+import { isDashboardUiRequest } from './is_dashboard_ui_request';
 
 describe('dashboard api telemetry - isDashboardUiRequest', () => {
   it('returns true for Dashboard app execution context', () => {
@@ -25,9 +25,5 @@ describe('dashboard api telemetry - isDashboardUiRequest', () => {
   it('returns false when header is missing or malformed', () => {
     expect(isDashboardUiRequest({})).toBe(false);
     expect(isDashboardUiRequest({ 'x-kbn-context': '%E0%A4%A' })).toBe(false);
-  });
-
-  it('parseXKbnContext returns undefined for malformed header', () => {
-    expect(parseXKbnContext({ 'x-kbn-context': '%E0%A4%A' })).toBeUndefined();
   });
 });
