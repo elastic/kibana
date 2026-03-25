@@ -7,7 +7,12 @@ triggers:
   - type: 'manual'
 inputs:
   - name: list_action
-    type: string
+    type: choice
+    options:
+      - "getWeb"
+      - "getLists"
+      - "getListItems"
+      - "getFolderContents"
     required: true
     description: "Action to perform. Use getWeb to get site metadata; getLists to discover available lists and document libraries; getListItems to retrieve items from a specific list; getFolderContents to browse files and subfolders in a folder."
   - name: list_title
