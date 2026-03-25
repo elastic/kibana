@@ -117,7 +117,7 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
               max-width: 186px;
             `}
             data-test-subj={`options-filter-popover-button-${id}`}
-            iconType={buttonIconType || 'arrowDown'}
+            iconType={buttonIconType || 'chevronSingleDown'}
             onClick={toggleIsPopoverOpen}
             isSelected={isPopoverOpen}
             numFilters={showActiveOptionsNumber ? options.length : undefined}

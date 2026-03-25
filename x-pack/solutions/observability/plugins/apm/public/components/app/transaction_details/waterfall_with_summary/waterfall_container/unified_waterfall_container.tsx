@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { Error } from '@kbn/apm-types';
 import type { History } from 'history';
 import React from 'react';
@@ -25,6 +24,9 @@ interface Props {
   showCriticalPath: boolean;
   onShowCriticalPathChange: (value: boolean) => void;
   entryTransactionId?: string;
+  traceDocsTotal?: number;
+  maxTraceItems?: number;
+  discoverHref?: string;
 }
 
 const toggleFlyout = ({
@@ -55,6 +57,9 @@ export function UnifiedWaterfallContainer({
   showCriticalPath,
   onShowCriticalPathChange,
   entryTransactionId,
+  traceDocsTotal,
+  maxTraceItems,
+  discoverHref,
 }: Props) {
   const history = useHistory();
   const handleErrorClick = useErrorClickHandler(traceItems);
@@ -68,28 +73,27 @@ export function UnifiedWaterfallContainer({
   };
 
   return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem>
-        <TraceWaterfall
-          traceItems={traceItems}
-          errors={errors}
-          onClick={handleNodeClick}
-          onErrorClick={handleErrorClick}
-          serviceName={serviceName}
-          showLegend
-          showCriticalPathControl
-          agentMarks={agentMarks}
-          showCriticalPath={showCriticalPath}
-          onShowCriticalPathChange={onShowCriticalPathChange}
-          entryTransactionId={entryTransactionId}
-        >
-          <UnifiedWaterfallFlyout
-            waterfallItemId={waterfallItemId}
-            traceItems={traceItems}
-            toggleFlyout={toggleFlyout}
-          />
-        </TraceWaterfall>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <TraceWaterfall
+      traceItems={traceItems}
+      errors={errors}
+      onClick={handleNodeClick}
+      onErrorClick={handleErrorClick}
+      serviceName={serviceName}
+      showLegend
+      showCriticalPathControl
+      agentMarks={agentMarks}
+      showCriticalPath={showCriticalPath}
+      onShowCriticalPathChange={onShowCriticalPathChange}
+      entryTransactionId={entryTransactionId}
+      traceDocsTotal={traceDocsTotal}
+      maxTraceItems={maxTraceItems}
+      discoverHref={discoverHref}
+    >
+      <UnifiedWaterfallFlyout
+        waterfallItemId={waterfallItemId}
+        traceItems={traceItems}
+        toggleFlyout={toggleFlyout}
+      />
+    </TraceWaterfall>
   );
 }

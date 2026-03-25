@@ -125,6 +125,56 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    describe('users route', () => {
+      const usersPrefix = `users-query-${Date.now()}`;
+      const savedObjectIds: string[] = [];
+
+      before(async () => {
+        for (const suffix of ['one', 'two']) {
+          const response = await createSavedQuery(`${usersPrefix}-${suffix}`).expect(200);
+          savedObjectIds.push(response.body.data.saved_object_id);
+        }
+      });
+
+      after(async () => {
+        for (const soId of savedObjectIds) {
+          await deleteSavedQuery(soId);
+        }
+      });
+
+      it('returns unique users with profile UIDs', async () => {
+        const response = await supertest
+          .get('/internal/osquery/saved_queries/users')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
+          .expect(200);
+
+        expect(response.body.data).to.be.an(Array);
+        expect(response.body.data.length).to.be.greaterThan(0);
+
+        const users = response.body.data.map((c: { created_by: string }) => c.created_by);
+        expect(users).to.contain('elastic');
+
+        // Verify uniqueness
+        const uniqueUsers = [...new Set(users)];
+        expect(uniqueUsers.length).to.be(users.length);
+      });
+
+      it('includes created_by_profile_uid when available', async () => {
+        const response = await supertest
+          .get('/internal/osquery/saved_queries/users')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
+          .expect(200);
+
+        const elastic = response.body.data.find(
+          (c: { created_by: string }) => c.created_by === 'elastic'
+        );
+        expect(elastic).to.be.ok();
+        expect(elastic).to.have.property('created_by');
+      });
+    });
+
     describe('find with search and createdBy params', () => {
       const uniquePrefix = `findtest-${Date.now()}`;
       const queryIds: string[] = [];
@@ -173,6 +223,20 @@ export default function ({ getService }: FtrProviderContext) {
       it('returns empty results for non-matching createdBy', async () => {
         const response = await findSavedQueriesWithParams('createdBy=nonexistentuser').expect(200);
         expect(response.body.total).to.be(0);
+      });
+    });
+
+    describe('404 for non-existent resources', () => {
+      it('returns 404 when reading a non-existent saved query', async () => {
+        await getSavedQuery('non-existent-id').expect(404);
+      });
+
+      it('returns 404 when updating a non-existent saved query', async () => {
+        await updateSavedQuery('non-existent-id', 'updated-name').expect(404);
+      });
+
+      it('returns 404 when deleting a non-existent saved query', async () => {
+        await deleteSavedQuery('non-existent-id').expect(404);
       });
     });
   });

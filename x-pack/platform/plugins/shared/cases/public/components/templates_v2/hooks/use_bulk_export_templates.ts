@@ -8,7 +8,7 @@
 import { useMutation } from '@kbn/react-query';
 import { bulkExportTemplates } from '../api/api';
 import { casesMutationsKeys } from '../../../containers/constants';
-import * as i18n from '../../templates/translations';
+import * as i18n from '../translations';
 import type { ServerError } from '../../../types';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import type { BulkExportTemplatesResponse } from '../types';

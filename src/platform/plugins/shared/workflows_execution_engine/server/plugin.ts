@@ -57,11 +57,11 @@ import { generateExecutionTaskScope } from './utils';
 import { buildWorkflowContext } from './workflow_context_manager/build_workflow_context';
 import type { ContextDependencies } from './workflow_context_manager/types';
 import { WorkflowEventLoggerService } from './workflow_event_logger';
-import { WORKFLOW_RESUME_TASK_TYPE } from './workflow_task_manager/types';
 import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
+import { WORKFLOW_RESUME_TASK_TYPE } from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 import { createIndexes } from '../common';
 
@@ -893,6 +893,8 @@ export class WorkflowsExecutionEnginePlugin
       resumeWorkflowExecution,
       isEventDrivenExecutionEnabled: this.isEventDrivenExecutionEnabled.bind(this),
       isLogTriggerEventsEnabled: this.isLogTriggerEventsEnabled.bind(this),
+      getMaxEventChainDepth: this.getMaxEventChainDepth.bind(this),
+      getMaxWorkflowDepth: this.getMaxWorkflowDepth.bind(this),
     };
   }
 
@@ -904,6 +906,14 @@ export class WorkflowsExecutionEnginePlugin
 
   private isLogTriggerEventsEnabled(): boolean {
     return this.config?.eventDriven?.logEvents ?? true;
+  }
+
+  private getMaxEventChainDepth(): number {
+    return this.config?.eventDriven?.maxChainDepth ?? 10;
+  }
+
+  private getMaxWorkflowDepth(): number {
+    return this.config?.maxWorkflowDepth ?? 10;
   }
 
   private async initialize(coreStart: CoreStart): Promise<void> {
