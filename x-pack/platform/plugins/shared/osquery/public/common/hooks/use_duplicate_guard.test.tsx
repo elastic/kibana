@@ -12,7 +12,9 @@ import { EuiProvider } from '@elastic/eui';
 
 import { useDuplicateGuard } from './use_duplicate_guard';
 
-const createMockCopyMutation = (overrides: Partial<{ mutateAsync: () => Promise<unknown>; isLoading: boolean }> = {}) => ({
+const createMockCopyMutation = (
+  overrides: Partial<{ mutateAsync: () => Promise<unknown>; isLoading: boolean }> = {}
+) => ({
   mutateAsync: jest.fn().mockResolvedValue(undefined),
   isLoading: false,
   ...overrides,

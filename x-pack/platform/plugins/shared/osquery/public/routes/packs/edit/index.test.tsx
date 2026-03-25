@@ -11,7 +11,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { EuiProvider } from '@elastic/eui';
 
-import { EditPackPage } from './index';
+import { EditPackPage } from '.';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -39,6 +39,7 @@ let capturedOnDirtyStateChange: ((isDirty: boolean) => void) | undefined;
 jest.mock('../../../packs/form', () => ({
   PackForm: ({ onDirtyStateChange }: { onDirtyStateChange?: (isDirty: boolean) => void }) => {
     capturedOnDirtyStateChange = onDirtyStateChange;
+
     return <div data-testid="pack-form">Mock PackForm</div>;
   },
 }));

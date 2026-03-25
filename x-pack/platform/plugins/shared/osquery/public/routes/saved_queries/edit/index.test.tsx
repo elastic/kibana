@@ -30,6 +30,7 @@ jest.mock('../../../common/lib/kibana', () => ({
   useKibana: () => mockUseKibana(),
   useRouterNavigate: (path: string) => {
     mockUseRouterNavigate(path);
+
     return { onClick: jest.fn(), href: path };
   },
 }));
