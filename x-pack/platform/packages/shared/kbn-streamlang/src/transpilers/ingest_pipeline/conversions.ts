@@ -24,6 +24,7 @@ import type { IngestPipelineTranspilationOptions } from '.';
 import { processJoinProcessor } from './processors/join_processor';
 import { processConcatProcessor } from './processors/concat_processor';
 import { processSortProcessor } from './processors/sort_processor';
+import { processJsonExtractProcessor } from './processors/json_extract_processor';
 
 export function convertStreamlangDSLActionsToIngestPipelineProcessors(
   actionSteps: StreamlangProcessorDefinition[],
@@ -98,6 +99,14 @@ export function convertStreamlangDSLActionsToIngestPipelineProcessors(
       return processSortProcessor(
         processorWithCompiledConditions as Parameters<typeof processSortProcessor>[0]
       );
+    }
+
+    if (action === 'json_extract') {
+      return [
+        processJsonExtractProcessor(
+          processorWithCompiledConditions as Parameters<typeof processJsonExtractProcessor>[0]
+        ),
+      ];
     }
 
     return applyPreProcessing(action, processorWithCompiledConditions as IngestPipelineProcessor);
