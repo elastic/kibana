@@ -354,7 +354,7 @@ export async function pickTestGroupRunOrder() {
     ? globby.sync(getJestConfigGlobs(['**/jest.config.js', '!**/__fixtures__/**']), {
         cwd: process.cwd(),
         absolute: false,
-        ignore: DISABLED_JEST_CONFIGS,
+        ignore: [...DISABLED_JEST_CONFIGS, '**/node_modules/**'],
       })
     : [];
 
@@ -362,7 +362,7 @@ export async function pickTestGroupRunOrder() {
     ? globby.sync(getJestConfigGlobs(['**/jest.integration.config.js', '!**/__fixtures__/**']), {
         cwd: process.cwd(),
         absolute: false,
-        ignore: DISABLED_JEST_CONFIGS,
+        ignore: [...DISABLED_JEST_CONFIGS, '**/node_modules/**'],
       })
     : [];
 
