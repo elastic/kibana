@@ -142,10 +142,7 @@ const setupTest = async ({
   return { ...props, tabId };
 };
 
-// Testing buildEsqlFetchSubscribe through the state container
-// since the logic is pretty intertwined with the state management
-// FLAKY: https://github.com/elastic/kibana/issues/258030
-describe.skip('buildEsqlFetchSubscribe', () => {
+describe('buildEsqlFetchSubscribe', () => {
   test('an ES|QL query should change state when loading and finished', async () => {
     const { replaceUrlState, dataState, tabId } = await setupTest();
 
