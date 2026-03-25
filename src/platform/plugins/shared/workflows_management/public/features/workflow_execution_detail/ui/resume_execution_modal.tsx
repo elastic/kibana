@@ -26,6 +26,7 @@ import { CodeEditor, monaco } from '@kbn/code-editor';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { z } from '@kbn/zod/v4';
+import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 import {
   useWorkflowsMonacoTheme,
   WORKFLOWS_MONACO_EDITOR_THEME,
@@ -36,12 +37,14 @@ const SCHEMA_URI = 'inmemory://schemas/resume-execution-json-editor-schema';
 
 export interface ResumeExecutionModalProps {
   resumeMessage?: string;
+  initialcontextOverride?: ContextOverrideData;
   onSubmit?: (params: { stepInputs: Record<string, unknown> }) => void;
   onClose: () => void;
 }
 
 export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
   resumeMessage,
+  initialcontextOverride,
   onSubmit,
   onClose,
 }) => {
@@ -49,18 +52,32 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
   useWorkflowsMonacoTheme();
   const modalTitleId = useGeneratedHtmlId();
 
-  const [inputsJson, setInputsJson] = useState<string>('{}');
-
-  const isJsonValid = useMemo(() => {
+  const [inputsJson, setInputsJson] = useState<string>(
+    initialcontextOverride?.stepContext != null
+      ? JSON.stringify(initialcontextOverride.stepContext, null, 2)
+      : '{}'
+  );
+  const isResumePayloadValid = useMemo(() => {
     try {
-      JSON.parse(inputsJson);
-      return true;
+      const parsed: unknown = JSON.parse(inputsJson);
+      const schema = initialcontextOverride?.schema;
+      if (schema) {
+        return schema.safeParse(parsed).success;
+      } else {
+        return true;
+      }
     } catch {
       return false;
     }
-  }, [inputsJson]);
+  }, [inputsJson, initialcontextOverride?.schema]);
 
-  const jsonSchema = useMemo(() => z.toJSONSchema(DEFAULT_SCHEMA, { target: 'draft-7' }), []);
+  const jsonSchema = useMemo(() => {
+    if (initialcontextOverride?.rawJsonSchema) {
+      return initialcontextOverride.rawJsonSchema;
+    }
+    const schema = initialcontextOverride?.schema ?? DEFAULT_SCHEMA;
+    return z.toJSONSchema(schema, { target: 'draft-7' });
+  }, [initialcontextOverride?.rawJsonSchema, initialcontextOverride?.schema]);
 
   const mountedOnce = useRef(false);
   const handleMount = useCallback(
@@ -162,7 +179,7 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
       <EuiModalFooter>
         <EuiButton
           onClick={handleSubmit}
-          disabled={!isJsonValid}
+          disabled={!isResumePayloadValid}
           color="warning"
           iconType="check"
           size="s"
