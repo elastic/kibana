@@ -8,7 +8,7 @@
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 interface UseDuplicateGuardParams {
   copyMutation: { mutateAsync: () => Promise<unknown>; isLoading: boolean };
@@ -16,6 +16,7 @@ interface UseDuplicateGuardParams {
 }
 
 export const useDuplicateGuard = ({ copyMutation, resourceType }: UseDuplicateGuardParams) => {
+  const formattedMessageValues = useMemo(() => ({ resourceType }), [resourceType]);
   const [isDuplicateModalVisible, setIsDuplicateModalVisible] = useState(false);
   const [isFormDirty, setIsFormDirty] = useState(false);
 
@@ -59,7 +60,7 @@ export const useDuplicateGuard = ({ copyMutation, resourceType }: UseDuplicateGu
       <FormattedMessage
         id="xpack.osquery.duplicateConfirmation.body"
         defaultMessage="Your unsaved changes will be lost. The duplicate will be based on the last saved version of this {resourceType}."
-        values={{ resourceType }}
+        values={formattedMessageValues}
       />
     </EuiConfirmModal>
   ) : null;
