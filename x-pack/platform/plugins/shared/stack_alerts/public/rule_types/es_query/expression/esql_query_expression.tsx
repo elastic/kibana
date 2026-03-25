@@ -20,7 +20,11 @@ import {
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { getFields } from '@kbn/triggers-actions-ui-plugin/public';
 import { ESQLLangEditor } from '@kbn/esql/public';
-import { getESQLAdHocDataview, getESQLResults } from '@kbn/esql-utils';
+import {
+  getESQLAdHocDataview,
+  getESQLResults,
+  getProjectRoutingFromEsqlQuery,
+} from '@kbn/esql-utils';
 import { type AggregateQuery } from '@kbn/es-query';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
@@ -274,7 +278,8 @@ export const EsqlQueryExpression: React.FC<
             http,
           });
           const indexPattern: string = esqlDataView.getIndexPattern();
-          const currentEsFields = await getFields(http, [indexPattern]);
+          const projectRouting = getProjectRoutingFromEsqlQuery(queryObj.esql);
+          const currentEsFields = await getFields(http, [indexPattern], projectRouting);
           const newTimeFieldOptions = getTimeFieldOptions(currentEsFields);
           const timestampField = esqlDataView.timeFieldName;
           return { newTimeFieldOptions, timestampField };

@@ -64,10 +64,12 @@ jest.mock('@kbn/esql-utils', () => {
       .fn()
       .mockResolvedValue({ timeFieldName: '@timestamp', getIndexPattern: jest.fn() }),
     formatESQLColumns: jest.fn().mockReturnValue([]),
+    getProjectRoutingFromEsqlQuery: jest.fn().mockReturnValue(undefined),
   };
 });
 
 const { getFields } = jest.requireMock('@kbn/triggers-actions-ui-plugin/public');
+const { getProjectRoutingFromEsqlQuery } = jest.requireMock('@kbn/esql-utils');
 
 const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
   <I18nProvider>{children}</I18nProvider>
@@ -134,6 +136,77 @@ describe('EsqlQueryRuleTypeExpression', () => {
 
     const timeFieldText = await screen.findByText('event.ingested');
     expect(timeFieldText).toBeInTheDocument();
+  });
+
+  test('should pass projectRouting to getFields when query contains SET project_routing', async () => {
+    const mockProjectRouting = '_alias:my-project-id';
+    getProjectRoutingFromEsqlQuery.mockReturnValue(mockProjectRouting);
+
+    await act(async () => {
+      render(
+        <EsqlQueryExpression
+          unifiedSearch={unifiedSearchMock}
+          ruleInterval="1m"
+          ruleThrottle="1m"
+          alertNotifyWhen="onThrottleInterval"
+          ruleParams={{
+            ...defaultEsqlQueryExpressionParams,
+            esqlQuery: {
+              esql: `SET project_routing="${mockProjectRouting}"; FROM cps*`,
+            },
+          }}
+          setRuleParams={() => {}}
+          setRuleProperty={() => {}}
+          errors={{ esqlQuery: [], timeField: [], timeWindowSize: [], groupBy: [] }}
+          data={dataMock}
+          dataViews={dataViewMock}
+          defaultActionGroupId=""
+          actionGroups={[]}
+          charts={chartsStartMock}
+          onChangeMetaData={() => {}}
+        />,
+        {
+          wrapper: AppWrapper,
+        }
+      );
+    });
+
+    await waitFor(() => expect(getFields).toHaveBeenCalled());
+    expect(getFields.mock.calls[0][2]).toBe(mockProjectRouting);
+  });
+
+  test('should pass undefined projectRouting to getFields when query has no SET project_routing', async () => {
+    getProjectRoutingFromEsqlQuery.mockReturnValue(undefined);
+
+    await act(async () => {
+      render(
+        <EsqlQueryExpression
+          unifiedSearch={unifiedSearchMock}
+          ruleInterval="1m"
+          ruleThrottle="1m"
+          alertNotifyWhen="onThrottleInterval"
+          ruleParams={{
+            ...defaultEsqlQueryExpressionParams,
+            esqlQuery: { esql: 'FROM my_index' },
+          }}
+          setRuleParams={() => {}}
+          setRuleProperty={() => {}}
+          errors={{ esqlQuery: [], timeField: [], timeWindowSize: [], groupBy: [] }}
+          data={dataMock}
+          dataViews={dataViewMock}
+          defaultActionGroupId=""
+          actionGroups={[]}
+          charts={chartsStartMock}
+          onChangeMetaData={() => {}}
+        />,
+        {
+          wrapper: AppWrapper,
+        }
+      );
+    });
+
+    await waitFor(() => expect(getFields).toHaveBeenCalled());
+    expect(getFields.mock.calls[0][2]).toBeUndefined();
   });
 
   it('should render EsqlQueryRuleTypeExpression with expected components', () => {
