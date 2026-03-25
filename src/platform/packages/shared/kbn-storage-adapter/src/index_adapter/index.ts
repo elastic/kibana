@@ -662,8 +662,8 @@ export class StorageIndexAdapter<
     if (!this.options.versioning) {
       return document;
     }
-    this.options.versioning.latestSchema.parse(document);
-    return { ...document, [VERSION_FIELD]: this.options.versioning.latestVersion };
+    const parsed = this.options.versioning.latestSchema.parse(document);
+    return { ...parsed, [VERSION_FIELD]: this.options.versioning.latestVersion };
   }
 
   private maybeMigrateSource = async (_source: unknown): Promise<TApplicationType> => {
@@ -758,17 +758,16 @@ export class StorageIndexAdapter<
         })
       );
 
-      if (bulkResponse.errors) {
-        const failedItems = bulkResponse.items.filter((item) => Object.values(item)[0]?.error);
-        const batchFailed = failedItems.length;
+      const batchFailed = bulkResponse.items.filter((item) => Object.values(item)[0]?.error).length;
+
+      if (batchFailed > 0) {
         failed += batchFailed;
-        migrated += hits.length - batchFailed;
         this.logger.warn(
           `Bulk migration encountered ${batchFailed} errors in batch of ${hits.length}`
         );
-      } else {
-        migrated += hits.length;
       }
+
+      migrated += bulkResponse.items.length - batchFailed;
 
       this.logger.debug(`Migrated ${migrated} documents so far (${failed} failed)`);
 

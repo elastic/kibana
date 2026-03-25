@@ -76,6 +76,7 @@ export const featureVersioning: StorageSchemaVersioning<StoredFeature> = defineV
       migrated[FEATURE_ID] = source[FEATURE_UUID];
       migrated[FEATURE_SUBTYPE] = source['feature.name'];
       migrated[FEATURE_PROPERTIES] = source['feature.value'];
+      // Literal dot-in-key field names from the legacy schema, not nested object paths
       delete migrated['feature.name'];
       delete migrated['feature.value'];
 

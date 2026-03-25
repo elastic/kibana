@@ -59,7 +59,7 @@ function collectPaths(node: JsonSchemaNode, prefix: string = ''): string[] {
 /**
  * Extracts all property paths from a Zod schema as flattened dotted strings
  * (e.g. `['name', 'metadata.createdAt']`). Handles all Zod wrapper types
- * by delegating to `z.toJSONSchema()`.
+ * by delegating to `z.toJSONSchema()` (requires `@kbn/zod/v4`).
  *
  * Returns `null` when the schema has no object properties (e.g. `z.string()`).
  */
