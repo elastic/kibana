@@ -44,37 +44,47 @@ export const parseYarnLock = (content: string, focus?: string[]): Record<string,
 
     const header = lines[0].replace(/:$/, '').trim();
     const headerEntries = header.split(', ').map(trimQuotes);
-    const name = headerEntries[0].split(/(?!^)@/)[0];
 
-    if (focusSet !== null && !focusSet.has(name)) {
+    // Group header entries by package name to handle aliased packages
+    // where yarn merges entries with different names into one block
+    const entriesByName = new Map<string, string[]>();
+    for (const entry of headerEntries) {
+      const entryName = entry.split(/(?!^)@/)[0];
+      const entryVersion = entry.substring(entryName.length + 1);
+      if (!entriesByName.has(entryName)) {
+        entriesByName.set(entryName, []);
+      }
+      entriesByName.get(entryName)!.push(entryVersion);
+    }
+
+    if (focusSet !== null && ![...entriesByName.keys()].some((n) => focusSet.has(n))) {
       continue;
     }
 
-    const requestedVersions = headerEntries.map((entry) => entry.substring(name.length + 1));
-
-    const packageInfo: PackageInfo = {
-      name,
-      requestedVersions,
-    };
+    // Parse the block body once (shared across all aliased names)
+    let resolvedVersion: string | undefined;
+    let resolvedUrl: string | undefined;
+    let integrity: string | undefined;
+    let dependencies: { [key: string]: string } | undefined;
 
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i].trim();
       const [key, value] = line.split(/\s+/, 2).map(trimQuotes);
       if (key === 'version') {
-        packageInfo.resolvedVersion = value;
+        resolvedVersion = value;
       } else if (key === 'resolved') {
-        packageInfo.resolvedUrl = value;
+        resolvedUrl = value;
       } else if (key === 'integrity') {
-        packageInfo.integrity = value;
+        integrity = value;
       } else if (key === 'dependencies:' || key === 'optionalDependencies:') {
         let depCount = 0;
         if (focusSet === null) {
-          packageInfo.dependencies = packageInfo.dependencies || {};
+          dependencies = dependencies || {};
           for (let j = i + 1; j < lines.length; j++) {
             const depLine = lines[j];
             if (!/^\s{4,}\S/.test(depLine)) break;
             const [depKey, depVersion] = splitDependencyLine(depLine);
-            packageInfo.dependencies![depKey] = depVersion;
+            dependencies![depKey] = depVersion;
             depCount++;
           }
         } else {
@@ -87,18 +97,33 @@ export const parseYarnLock = (content: string, focus?: string[]): Record<string,
       }
     }
 
-    if (!packageInfo.resolvedVersion) {
-      console.warn(`No resolved version found for package ${name}. Skipping.`);
+    if (!resolvedVersion) {
+      console.warn(
+        `No resolved version found for package ${[...entriesByName.keys()].join(', ')}. Skipping.`
+      );
       continue;
     }
-    const entryKey = makeKey(name, packageInfo.resolvedVersion!);
-    if (!packages[entryKey]) {
-      packages[entryKey] = packageInfo;
-    } else {
-      const existing = packages[entryKey];
-      existing.requestedVersions = Array.from(
-        new Set([...existing.requestedVersions, ...packageInfo.requestedVersions])
-      ).sort();
+
+    // Create a PackageInfo for each unique name in the header
+    for (const [entryName, requestedVersions] of entriesByName) {
+      const packageInfo: PackageInfo = {
+        name: entryName,
+        requestedVersions,
+        resolvedVersion,
+        resolvedUrl,
+        integrity,
+        dependencies,
+      };
+
+      const entryKey = makeKey(entryName, resolvedVersion);
+      if (!packages[entryKey]) {
+        packages[entryKey] = packageInfo;
+      } else {
+        const existing = packages[entryKey];
+        existing.requestedVersions = Array.from(
+          new Set([...existing.requestedVersions, ...packageInfo.requestedVersions])
+        ).sort();
+      }
     }
   }
   return packages;

@@ -72,4 +72,42 @@ shared@~1.2.0:
       },
     });
   });
+
+  it('handles aliased packages where yarn merges different names into one header', () => {
+    const lockfile = `
+"@scope/alias@npm:@scope/alias@2.0.1", "real-pkg@1 - 2", "real-pkg@npm:@scope/alias@2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@scope/alias/-/alias-2.0.1.tgz#abc123"
+  integrity sha512-fake==
+
+consumer@^1.0.0:
+  version "1.0.0"
+  dependencies:
+    real-pkg "1 - 2"
+`;
+
+    const result = parseYarnLock(lockfile);
+
+    expect(result['@scope/alias@2.0.1']).toEqual({
+      name: '@scope/alias',
+      requestedVersions: ['npm:@scope/alias@2.0.1'],
+      resolvedVersion: '2.0.1',
+      resolvedUrl: 'https://registry.yarnpkg.com/@scope/alias/-/alias-2.0.1.tgz#abc123',
+      integrity: 'sha512-fake==',
+      dependencies: undefined,
+    });
+
+    expect(result['real-pkg@2.0.1']).toEqual({
+      name: 'real-pkg',
+      requestedVersions: ['1 - 2', 'npm:@scope/alias@2.0.1'],
+      resolvedVersion: '2.0.1',
+      resolvedUrl: 'https://registry.yarnpkg.com/@scope/alias/-/alias-2.0.1.tgz#abc123',
+      integrity: 'sha512-fake==',
+      dependencies: undefined,
+    });
+
+    expect(result['consumer@1.0.0']).toMatchObject({
+      dependencies: { 'real-pkg': '1 - 2' },
+    });
+  });
 });
