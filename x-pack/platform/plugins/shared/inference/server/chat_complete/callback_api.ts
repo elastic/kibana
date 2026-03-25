@@ -328,6 +328,34 @@ function resolveAndCreatePipeline({
               logger,
             });
             const connector = executor.getConnector();
+
+            if (connector.isInferenceEndpoint) {
+              const inferenceId = connector.connectorId;
+              const endpointMeta = await resolveInferenceEndpoint({
+                inferenceId,
+                esClient,
+              });
+              const endpointExecutor = createInferenceEndpointExecutor({
+                inferenceId,
+                esClient,
+              });
+
+              return {
+                callbackContext: {
+                  model: endpointMeta.modelId ? { id: endpointMeta.modelId } : undefined,
+                },
+                getSpanModel: (modelName) =>
+                  endpointMeta.provider
+                    ? ({
+                        id: modelName ?? endpointMeta.modelId,
+                        provider: endpointMeta.provider,
+                      } as SpanModel)
+                    : undefined,
+                chatComplete: (options) =>
+                  inferenceEndpointAdapter.chatComplete({ ...options, executor: endpointExecutor }),
+              };
+            }
+
             const connectorType = connector.type;
             const inferenceAdapter = getInferenceAdapter(connectorType);
 
