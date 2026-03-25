@@ -8,98 +8,151 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
+import userEvent from '@testing-library/user-event';
 import type { ActionBarProps } from './action_bar';
 import { ActionBar } from './action_bar';
-import { findTestSubject } from '@elastic/eui/lib/test';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from '../../services/constants';
 import { SurrDocType } from '../../services/context';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 
 describe('Test Discover Context ActionBar for successor | predecessor records', () => {
   [SurrDocType.SUCCESSORS, SurrDocType.PREDECESSORS].forEach((type) => {
-    const onChangeCount = jest.fn();
-    const props = {
-      defaultStepSize: 5,
-      docCount: 20,
-      docCountAvailable: 0,
-      isDisabled: false,
-      isLoading: false,
-      onChangeCount,
-      type,
-    } as ActionBarProps;
-    const wrapper = mountWithIntl(
-      <DiscoverTestProvider>
-        <ActionBar {...props} />
-      </DiscoverTestProvider>
-    );
+    const getForm = (element: HTMLElement) => {
+      const form = element.closest('form');
 
-    const input = findTestSubject(wrapper, `${type}CountPicker`);
-    const btn = findTestSubject(wrapper, `${type}LoadMoreButton`);
+      if (!(form instanceof HTMLFormElement)) {
+        throw new Error('Expected count picker to be rendered inside a form');
+      }
 
-    test(`${type}: Load button click`, () => {
-      btn.simulate('click');
+      return form;
+    };
+
+    const renderComponent = (propsOverride: Partial<ActionBarProps> = {}) => {
+      const onChangeCount = jest.fn();
+      const props: ActionBarProps = {
+        defaultStepSize: 5,
+        docCount: 20,
+        docCountAvailable: 0,
+        isDisabled: false,
+        isLoading: false,
+        onChangeCount,
+        type,
+        ...propsOverride,
+      };
+
+      renderWithKibanaRenderContext(
+        <DiscoverTestProvider>
+          <ActionBar {...props} />
+        </DiscoverTestProvider>
+      );
+
+      return {
+        onChangeCount,
+        input: screen.getByTestId(`${type}CountPicker`),
+        button: screen.getByTestId(`${type}LoadMoreButton`),
+      };
+    };
+
+    test(`${type}: Load button click`, async () => {
+      const user = userEvent.setup();
+      const { button, onChangeCount } = renderComponent();
+
+      await user.click(button);
       expect(onChangeCount).toHaveBeenCalledWith(type, 25);
     });
 
-    test(`${type}: Load button click doesnt submit when MAX_CONTEXT_SIZE was reached`, () => {
+    test(`${type}: Load button click doesnt submit when MAX_CONTEXT_SIZE was reached`, async () => {
+      const user = userEvent.setup();
+      const { button, input, onChangeCount } = renderComponent();
+
+      await user.clear(input);
+      await user.type(input, String(MAX_CONTEXT_SIZE));
+      await user.tab();
+
+      expect(onChangeCount).toHaveBeenCalledWith(type, MAX_CONTEXT_SIZE);
       onChangeCount.mockClear();
-      input.simulate('change', { target: { valueAsNumber: MAX_CONTEXT_SIZE } });
-      btn.simulate('click');
+
+      await user.click(button);
       expect(onChangeCount).toHaveBeenCalledTimes(0);
     });
 
-    test(`${type}: Count input change submits on blur`, () => {
-      input.simulate('change', { target: { valueAsNumber: 123 } });
-      input.simulate('blur');
+    test(`${type}: Count input change submits on blur`, async () => {
+      const user = userEvent.setup();
+      const { input, onChangeCount } = renderComponent();
+
+      await user.clear(input);
+      await user.type(input, '123');
+      await user.tab();
       expect(onChangeCount).toHaveBeenCalledWith(type, 123);
     });
 
-    test(`${type}: Count input change submits on return`, () => {
-      input.simulate('change', { target: { valueAsNumber: 124 } });
-      input.simulate('submit');
+    test(`${type}: Count input change submits on return`, async () => {
+      const user = userEvent.setup();
+      const { input, onChangeCount } = renderComponent();
+
+      await user.clear(input);
+      await user.type(input, '124');
+
+      getForm(input).requestSubmit();
+
       expect(onChangeCount).toHaveBeenCalledWith(type, 124);
     });
 
-    test(`${type}: Count input doesnt submits values higher than MAX_CONTEXT_SIZE `, () => {
-      onChangeCount.mockClear();
-      input.simulate('change', { target: { valueAsNumber: MAX_CONTEXT_SIZE + 1 } });
-      input.simulate('submit');
+    test(`${type}: Count input doesnt submits values higher than MAX_CONTEXT_SIZE `, async () => {
+      const user = userEvent.setup();
+      const { input, onChangeCount } = renderComponent();
+
+      await user.clear(input);
+      await user.type(input, String(MAX_CONTEXT_SIZE + 1));
+
+      getForm(input).requestSubmit();
+
       expect(onChangeCount).toHaveBeenCalledTimes(0);
     });
 
-    test(`${type}: Count input doesnt submits values lower than MIN_CONTEXT_SIZE `, () => {
-      onChangeCount.mockClear();
-      input.simulate('change', { target: { valueAsNumber: MIN_CONTEXT_SIZE - 1 } });
-      input.simulate('submit');
+    test(`${type}: Count input doesnt submits values lower than MIN_CONTEXT_SIZE `, async () => {
+      const user = userEvent.setup();
+      const { input, onChangeCount } = renderComponent();
+
+      await user.clear(input);
+      await user.type(input, String(MIN_CONTEXT_SIZE - 1));
+
+      getForm(input).requestSubmit();
+
       expect(onChangeCount).toHaveBeenCalledTimes(0);
     });
 
     test(`${type}: Warning about limitation of additional records`, () => {
+      renderComponent();
+
       if (type === SurrDocType.PREDECESSORS) {
-        expect(findTestSubject(wrapper, 'predecessorsWarningMsg').text()).toBe(
+        expect(screen.getByTestId('predecessorsWarningMsg')).toHaveTextContent(
           'No documents newer than the anchor could be found.'
         );
       } else {
-        expect(findTestSubject(wrapper, 'successorsWarningMsg').text()).toBe(
+        expect(screen.getByTestId('successorsWarningMsg')).toHaveTextContent(
           'No documents older than the anchor could be found.'
         );
       }
     });
 
-    test(`${type}: Load button disabled when defaultStepSize is 0`, () => {
-      const wrapperWhenZeroStep = mountWithIntl(
-        <DiscoverTestProvider>
-          <ActionBar {...props} defaultStepSize={0} />
-        </DiscoverTestProvider>
-      );
-      const inputWhenZeroStep = findTestSubject(wrapperWhenZeroStep, `${type}CountPicker`);
-      const btnWhenZeroStep = findTestSubject(wrapperWhenZeroStep, `${type}LoadMoreButton`);
-      expect(btnWhenZeroStep.props().disabled).toBe(true);
-      btnWhenZeroStep.simulate('click');
+    test(`${type}: Load button disabled when defaultStepSize is 0`, async () => {
+      const user = userEvent.setup();
+      const { input, button, onChangeCount } = renderComponent({ defaultStepSize: 0 });
+
+      expect(button).toBeDisabled();
+      await user.click(button);
       expect(onChangeCount).toHaveBeenCalledTimes(0);
-      inputWhenZeroStep.simulate('change', { target: { valueAsNumber: 3 } });
-      btnWhenZeroStep.simulate('click');
+      await user.clear(input);
+      await user.type(input, '3');
+      await user.tab();
+
+      expect(onChangeCount).toHaveBeenCalledWith(type, 3);
+      onChangeCount.mockClear();
+
+      await user.click(button);
       expect(onChangeCount).toHaveBeenCalledTimes(1);
     });
   });
