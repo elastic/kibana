@@ -54,7 +54,7 @@ jest.mock('../../../detections/containers/detection_engine/lists/use_lists_confi
 }));
 
 jest.mock('@kbn/cps-utils', () => ({
-  useCpsPickerAccess: jest.fn(),
+  useRouteBasedCpsPickerAccess: jest.fn(),
   ProjectRoutingAccess: { READONLY: 'readonly' },
 }));
 

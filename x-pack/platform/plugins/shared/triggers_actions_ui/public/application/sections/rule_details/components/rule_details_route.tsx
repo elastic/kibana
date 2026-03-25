@@ -10,7 +10,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import type { ToastsApi } from '@kbn/core/public';
 import { EuiSpacer } from '@elastic/eui';
-import { ProjectRoutingAccess, useCpsPickerAccess } from '@kbn/cps-utils';
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import type { RuleType, ActionType, ResolvedRule } from '../../../../types';
 import { RuleDetailsWithApi as RuleDetails } from './rule_details';
 import { throwIfAbsent, throwIfIsntContained } from '../../../lib/value_validators';
@@ -91,7 +91,7 @@ export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = 
     loadData();
   }, [ruleId, http, loadActionTypes, loadRuleTypes, resolveRule, toasts, refreshToken]);
 
-  useCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
+  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
 
   useEffect(() => {
     if (rule) {

@@ -19,7 +19,7 @@ import {
 import React, { memo, useCallback, useRef, useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { ProjectRoutingAccess, useCpsPickerAccess } from '@kbn/cps-utils';
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { EndpointExceptionsMovedCallout } from '../../../../exceptions/components/endpoint_exceptions_moved_callout';
@@ -126,7 +126,7 @@ const CreateRulePageComponent: React.FC<{
 }> = ({ rule, sendToAgentChat, backComponent }) => {
   const { application, triggersActionsUi, cps } = useKibana().services;
   const { navigateToApp } = application;
-  useCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
+  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
