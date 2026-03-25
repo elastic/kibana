@@ -20,6 +20,7 @@ export const siemReadinessLinks: LinkItem = {
     }),
   ],
   hideTimeline: true,
+  isBeta: true,
   id: SecurityPageName.siemReadiness,
   path: SIEM_READINESS_PATH,
   title: SIEM_READINESS,
