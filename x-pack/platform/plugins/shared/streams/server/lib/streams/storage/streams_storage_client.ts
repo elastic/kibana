@@ -21,11 +21,13 @@ const streamsStorageSettings = {
   schema: {
     properties: {
       name: types.keyword(),
+      type: types.keyword(),
       description: types.text(),
       updated_at: types.date(),
       ingest: types.object({ enabled: false }),
       query: types.object({ enabled: false }),
       query_streams: types.object({ enabled: false }),
+      field_descriptions: types.object({ enabled: false }),
     },
   },
 } satisfies StorageSettings;

@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import {
   PackageName,
@@ -35,7 +35,7 @@ export const EcsMappingRequestBody = z.object({
   rawSamples: RawSamples,
   samplesFormat: SamplesFormat,
   mapping: Mapping.optional(),
-  additionalProcessors: z.array(ESProcessorItem).optional(),
+  additionalProcessors: z.array(ESProcessorItem).max(200).optional(),
   connectorId: Connector,
   langSmithOptions: LangSmithOptions.optional(),
 });

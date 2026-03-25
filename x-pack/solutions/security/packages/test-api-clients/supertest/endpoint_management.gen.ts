@@ -29,6 +29,13 @@ import type {
   CreateUpdateProtectionUpdatesNoteRequestBodyInput,
   GetProtectionUpdatesNoteRequestParamsInput,
 } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
+import type {
+  CreateWorkflowInsightRequestBodyInput,
+  GetPendingWorkflowInsightsRequestQueryInput,
+  GetWorkflowInsightsRequestQueryInput,
+  UpdateWorkflowInsightRequestParamsInput,
+  UpdateWorkflowInsightRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/endpoint/workflow_insights/workflow_insights.gen';
 import type { EndpointExecuteActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/execute/execute.gen';
 import type { EndpointFileDownloadRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/file_download/file_download.gen';
 import type { EndpointFileInfoRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/file_info/file_info.gen';
@@ -47,11 +54,6 @@ import type {
   GetEndpointSuggestionsRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/endpoint/suggestions/get_suggestions.gen';
 import type { GetPolicyResponseRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/policy/policy_response.gen';
-import type {
-  GetWorkflowInsightsRequestQueryInput,
-  UpdateWorkflowInsightRequestParamsInput,
-  UpdateWorkflowInsightRequestBodyInput,
-} from '@kbn/security-solution-plugin/common/api/endpoint/workflow_insights/workflow_insights.gen';
 import type { RunScriptActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/run_script/run_script.gen';
 
 import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
@@ -82,6 +84,14 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       )
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  createWorkflowInsight(props: CreateWorkflowInsightProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/internal/api/endpoint/workflow_insights', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
@@ -279,6 +289,17 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  getPendingWorkflowInsights(
+    props: GetPendingWorkflowInsightsProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .get(getRouteUrlForSpace('/internal/api/endpoint/workflow_insights/pending', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
   getPolicyResponse(props: GetPolicyResponseProps, kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/api/endpoint/policy_response', kibanaSpace))
@@ -339,11 +360,11 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
 
   return {
     ...securitySolutionApiServiceFactory(supertestService),
-    withUser: (user: { username: string; password: string }) => {
+    withUser: (user: { username: string; password?: string }) => {
       const kbnUrl = formatUrl({ ...config.get('servers.kibana'), auth: false });
 
       return securitySolutionApiServiceFactory(
-        supertest_.agent(kbnUrl).auth(user.username, user.password)
+        supertest_.agent(kbnUrl).auth(user.username, user.password ?? 'changeme')
       );
     },
   };
@@ -355,6 +376,9 @@ export interface CancelActionProps {
 export interface CreateUpdateProtectionUpdatesNoteProps {
   params: CreateUpdateProtectionUpdatesNoteRequestParamsInput;
   body: CreateUpdateProtectionUpdatesNoteRequestBodyInput;
+}
+export interface CreateWorkflowInsightProps {
+  body: CreateWorkflowInsightRequestBodyInput;
 }
 export interface EndpointExecuteActionProps {
   body: EndpointExecuteActionRequestBodyInput;
@@ -398,6 +422,9 @@ export interface GetEndpointMetadataListProps {
 export interface GetEndpointSuggestionsProps {
   params: GetEndpointSuggestionsRequestParamsInput;
   body: GetEndpointSuggestionsRequestBodyInput;
+}
+export interface GetPendingWorkflowInsightsProps {
+  query: GetPendingWorkflowInsightsRequestQueryInput;
 }
 export interface GetPolicyResponseProps {
   query: GetPolicyResponseRequestQueryInput;

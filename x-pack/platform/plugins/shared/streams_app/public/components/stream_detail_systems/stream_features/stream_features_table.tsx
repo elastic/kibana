@@ -16,16 +16,15 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import type { Feature, Streams } from '@kbn/streams-schema';
-import { TableTitle } from '../table_title';
 import { FeatureDetailsFlyout } from './feature_details_flyout';
 import { DeleteFeatureModal } from './delete_feature_modal';
 import {
   useStreamFeaturesTable,
-  FEATURES_LABEL,
   TABLE_CAPTION_LABEL,
   CLEAR_SELECTION,
-  DELETE_SELECTED,
+  type FeaturesTableMode,
 } from './use_stream_features_table';
+import { TableTitle } from '../table_title';
 
 interface StreamFeaturesTableProps {
   definition: Streams.all.Definition;
@@ -35,6 +34,7 @@ interface StreamFeaturesTableProps {
   isIdentifyingFeatures: boolean;
   selectedFeature: Feature | null;
   onSelectFeature: (feature: Feature | null) => void;
+  mode: FeaturesTableMode;
 }
 
 export function StreamFeaturesTable({
@@ -45,6 +45,7 @@ export function StreamFeaturesTable({
   isIdentifyingFeatures,
   selectedFeature,
   onSelectFeature,
+  mode,
 }: StreamFeaturesTableProps) {
   const {
     pagination,
@@ -52,17 +53,16 @@ export function StreamFeaturesTable({
     setSelectedFeatures,
     isBulkDeleteModalVisible,
     isIdentifyingFeatures: isTableDisabled,
-    showBulkDeleteModal,
     hideBulkDeleteModal,
-    handleDeleteFeature,
     handleBulkDelete,
+    isBulkDeleting,
     clearSelection,
     handleTableChange,
-    isDeleting,
-    isBulkDeleting,
     columns,
-    items,
     noItemsMessage,
+    bulkActions,
+    flyoutActions,
+    label,
   } = useStreamFeaturesTable({
     definition,
     features,
@@ -70,6 +70,7 @@ export function StreamFeaturesTable({
     isIdentifyingFeatures,
     selectedFeature,
     onSelectFeature,
+    mode,
   });
 
   const handleCloseFlyout = useCallback(() => {
@@ -87,7 +88,7 @@ export function StreamFeaturesTable({
             pageIndex={pagination.pageIndex}
             pageSize={pagination.pageSize}
             total={features.length}
-            label={FEATURES_LABEL}
+            label={label}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -101,26 +102,28 @@ export function StreamFeaturesTable({
             {CLEAR_SELECTION}
           </EuiButtonEmpty>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            isLoading={isBulkDeleting}
-            size="xs"
-            iconType="trash"
-            color="danger"
-            aria-label={DELETE_SELECTED}
-            isDisabled={isSelectionActionsDisabled}
-            onClick={showBulkDeleteModal}
-          >
-            {DELETE_SELECTED}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
+        {bulkActions.map((action) => (
+          <EuiFlexItem grow={false} key={action.label}>
+            <EuiButtonEmpty
+              isLoading={action.isLoading}
+              size="xs"
+              iconType={action.iconType}
+              color={action.color}
+              aria-label={action.label}
+              isDisabled={isSelectionActionsDisabled}
+              onClick={action.onClick}
+            >
+              {action.label}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        ))}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
       <EuiInMemoryTable
         loading={isLoadingFeatures}
         tableCaption={TABLE_CAPTION_LABEL}
-        items={items}
+        items={features}
         itemId="uuid"
         columns={columns}
         noItemsMessage={noItemsMessage}
@@ -140,8 +143,12 @@ export function StreamFeaturesTable({
         <FeatureDetailsFlyout
           feature={selectedFeature}
           onClose={handleCloseFlyout}
-          onDelete={handleDeleteFeature}
-          isDeleting={isDeleting}
+          onDelete={flyoutActions.onDelete}
+          isDeleting={flyoutActions.isDeleting}
+          onExclude={flyoutActions.onExclude}
+          isExcluding={flyoutActions.isExcluding}
+          onRestore={flyoutActions.onRestore}
+          isRestoring={flyoutActions.isRestoring}
         />
       )}
       {isBulkDeleteModalVisible && selectedFeatures.length > 0 && (

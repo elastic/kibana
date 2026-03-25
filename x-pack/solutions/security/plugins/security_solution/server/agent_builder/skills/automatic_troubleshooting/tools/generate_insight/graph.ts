@@ -6,12 +6,14 @@
  */
 
 import type { ScopedModel, ToolHandlerResult } from '@kbn/agent-builder-server';
-import type { DefendInsights } from '@kbn/elastic-assistant-common';
 import { StateGraph, Annotation } from '@langchain/langgraph';
 import { z } from '@kbn/zod/v4';
 import { ToolResultType } from '@kbn/agent-builder-common/tools';
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
 
+import {
+  WorkflowInsightType,
+  type DefendInsights,
+} from '../../../../../../common/endpoint/types/workflow_insights';
 import { securityWorkflowInsightsService } from '../../../../../endpoint/services';
 import { getDefendInsightsOutputSchema } from './schemas';
 import { getPrompts } from './prompts';
@@ -21,7 +23,7 @@ const GENERATE_INSIGHT_NODE_NAME = 'generateInsights';
 const CREATE_WORKFLOW_INSIGHTS_NODE_NAME = 'createWorkflowInsights';
 
 const StateAnnotation = Annotation.Root({
-  insightType: Annotation<DefendInsightType>(),
+  insightType: Annotation<WorkflowInsightType>(),
   insights: Annotation<DefendInsights>(),
   error: Annotation<string>(),
   results: Annotation<ToolHandlerResult[]>({
@@ -45,16 +47,18 @@ export const createGenerateInsightGraph = ({
   endpointIds: string[];
   data: unknown[];
 }) => {
-  async function categorizeInsightType(): Promise<{ insightType: DefendInsightType }> {
+  async function categorizeInsightType(): Promise<{ insightType: WorkflowInsightType }> {
     const output = await model.chatModel.withStructuredOutput(
-      z.object({ insightType: DefendInsightType.default(DefendInsightType.enum.custom) })
+      z.object({ insightType: WorkflowInsightType.default(WorkflowInsightType.enum.custom) })
     ).invoke(`
-Categorize the following problem description into one of the following Defend Insight Types: ${DefendInsightType}. If no good match exists, use 'custom'.
+Categorize the following problem description into one of the following Defend Insight Types: ${WorkflowInsightType.options.join(
+      ', '
+    )}. If no good match exists, use 'custom'.
 
 ## Problem Description:
 ${problemDescription}
     `);
-    return { insightType: output.insightType || DefendInsightType.enum.custom };
+    return { insightType: output.insightType || WorkflowInsightType.enum.custom };
   }
 
   async function generateInsights({ insightType }: StateType): Promise<{

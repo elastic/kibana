@@ -9,6 +9,7 @@ export { addRoundCompleteEvent } from './add_round_complete_event';
 export { extractRound } from './extract_round';
 export { convertPreviousRounds } from './to_langchain_messages';
 export { prepareConversation } from './prepare_conversation';
+export { selectSkills } from './select_skills';
 export { selectTools } from './select_tools';
 export { getPendingRound } from './prompts';
 export { evictInternalEvents } from './evict_internal_events';
@@ -24,5 +25,5 @@ export {
   createResultTransformer,
   type ToolCallResultTransformer,
   type CreateResultTransformerOptions,
-  FILE_REFERENCE_TOKEN_THRESHOLD,
+  FS_TOOL_CALL_TOKEN_THRESHOLD,
 } from './create_result_transformer';
