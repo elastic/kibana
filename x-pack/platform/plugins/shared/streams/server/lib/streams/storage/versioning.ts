@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { StorageSchemaVersioning } from '@kbn/storage-adapter';
+import { defineVersioning, type StorageSchemaVersioning } from '@kbn/storage-adapter';
 import type { Streams } from '@kbn/streams-schema';
 import { migrateOnRead } from './migrate_on_read';
 
@@ -36,11 +36,13 @@ const v2Schema = z
   })
   .passthrough();
 
-export const streamsVersioning = new StorageSchemaVersioning<Streams.all.Definition>([
-  { version: 1, schema: v1Schema },
-  {
-    version: 2,
+// Type assertion routed through `unknown` because `.passthrough()` adds
+// `{ [k: string]: unknown }` to the Zod output type, which doesn't structurally
+// overlap with `Streams.all.Definition`.
+export const streamsVersioning = defineVersioning(v1Schema)
+  .addVersion({
     schema: v2Schema,
-    migrate: (input) => migrateOnRead(input as Record<string, unknown>),
-  },
-]);
+    migrate: (input) =>
+      migrateOnRead(input as Record<string, unknown>) as unknown as z.input<typeof v2Schema>,
+  })
+  .build() as unknown as StorageSchemaVersioning<Streams.all.Definition>;

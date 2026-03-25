@@ -171,6 +171,10 @@ export class StorageIndexAdapter<
 
     const schemaPaths = getSchemaPaths(versioning.latestSchema);
     if (!schemaPaths) {
+      this.logger.warn(
+        'Could not extract property paths from versioning schema (e.g. due to transforms). ' +
+          'Mapping validation has been skipped.'
+      );
       return;
     }
 
@@ -424,25 +428,25 @@ export class StorageIndexAdapter<
     )) as unknown as ReturnType<StorageClientSearch<TApplicationType>>;
   };
 
-  private index: StorageClientIndex<TApplicationType> = async ({
-    id,
-    refresh = 'wait_for',
-    document: userDocument,
-    ...request
-  }, transportOptions): Promise<StorageClientIndexResponse> => {
+  private index: StorageClientIndex<TApplicationType> = async (
+    { id, refresh = 'wait_for', document: userDocument, ...request },
+    transportOptions
+  ): Promise<StorageClientIndexResponse> => {
     const document = this.prepareDocumentForWrite(userDocument as Record<string, unknown>);
 
     const attemptIndex = async (): Promise<IndexResponse> => {
       const indexResponse = await wrapEsCall(
-        this.esClient.index({
-          ...request,
-          document,
-          id,
-          refresh,
-          index: this.getWriteTarget(),
-          require_alias: true,
-        }, 
-        ...optionalTransportArgs(transportOptions))
+        this.esClient.index(
+          {
+            ...request,
+            document,
+            id,
+            refresh,
+            index: this.getWriteTarget(),
+            require_alias: true,
+          },
+          ...optionalTransportArgs(transportOptions)
+        )
       );
 
       return indexResponse;
@@ -525,6 +529,7 @@ export class StorageIndexAdapter<
   };
 
   private clean: StorageClientClean = async (): Promise<StorageClientCleanResponse> => {
+    this.initPromise = undefined;
     const allIndices = await this.getExistingIndices();
     const hasIndices = Object.keys(allIndices).length > 0;
     // Delete all indices
@@ -643,7 +648,7 @@ export class StorageIndexAdapter<
       _id: hit._id!,
       _index: hit._index,
       found: true,
-      _source: await this.maybeMigrateSource(hit._source),
+      _source: hit._source as TApplicationType,
       _ignored: hit._ignored,
       _primary_term: hit._primary_term,
       _routing: hit._routing,
@@ -690,7 +695,7 @@ export class StorageIndexAdapter<
     options?: StorageClientMigrateDocumentsOptions
   ): Promise<StorageClientMigrateDocumentsResponse> => {
     if (!this.options.versioning) {
-      return { migrated: 0, total: 0 };
+      return { migrated: 0, failed: 0, total: 0 };
     }
 
     const { versioning } = this.options;
@@ -699,10 +704,11 @@ export class StorageIndexAdapter<
 
     const writeIndex = await this.getCurrentWriteIndex();
     if (!writeIndex) {
-      return { migrated: 0, total: 0 };
+      return { migrated: 0, failed: 0, total: 0 };
     }
 
     let migrated = 0;
+    let failed = 0;
     let total = 0;
     const batchSize = options?.batchSize ?? 1000;
     let searchAfter: FieldValue[] | undefined;
@@ -754,13 +760,17 @@ export class StorageIndexAdapter<
 
       if (bulkResponse.errors) {
         const failedItems = bulkResponse.items.filter((item) => Object.values(item)[0]?.error);
+        const batchFailed = failedItems.length;
+        failed += batchFailed;
+        migrated += hits.length - batchFailed;
         this.logger.warn(
-          `Bulk migration encountered ${failedItems.length} errors in batch of ${hits.length}`
+          `Bulk migration encountered ${batchFailed} errors in batch of ${hits.length}`
         );
+      } else {
+        migrated += hits.length;
       }
-      migrated += hits.length;
 
-      this.logger.debug(`Migrated ${migrated} documents so far`);
+      this.logger.debug(`Migrated ${migrated} documents so far (${failed} failed)`);
 
       searchAfter = hits.at(-1)!.sort as FieldValue[] | undefined;
     }
@@ -773,7 +783,7 @@ export class StorageIndexAdapter<
       );
     }
 
-    return { migrated, total };
+    return { migrated, failed, total };
   };
 
   getClient(): InternalIStorageClient<TApplicationType> {

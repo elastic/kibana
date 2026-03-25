@@ -117,10 +117,14 @@ export class StorageSchemaVersioning<TLatest> {
    * long migration chains from starving other work.
    */
   async migrate(doc: unknown, fromVersion: number): Promise<TLatest> {
-    if (!Number.isInteger(fromVersion) || fromVersion < 1 || fromVersion > this.latestVersion) {
+    if (!Number.isInteger(fromVersion) || fromVersion < 1) {
       throw new Error(
-        `Invalid source version ${fromVersion}: expected an integer between 1 and ${this.latestVersion}`
+        `Invalid source version ${fromVersion}: expected a positive integer`
       );
+    }
+
+    if (fromVersion > this.latestVersion) {
+      return doc as TLatest;
     }
 
     let current: unknown = this.definitions[fromVersion - 1].schema.parse(doc);

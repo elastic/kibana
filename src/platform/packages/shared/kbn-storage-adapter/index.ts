@@ -144,6 +144,7 @@ export type StorageClientExistsIndex = () => Promise<boolean>;
 
 export interface StorageClientMigrateDocumentsResponse {
   migrated: number;
+  failed: number;
   total: number;
 }
 

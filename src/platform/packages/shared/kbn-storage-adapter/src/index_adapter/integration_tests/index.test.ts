@@ -660,7 +660,7 @@ describe('StorageIndexAdapter', () => {
     });
 
     describe('legacy document compatibility', () => {
-      it('treats documents without __version as v1 and migrates through the chain', async () => {
+      it('treats documents without __version as v1 and migrates on get', async () => {
         const plainAdapter = new StorageIndexAdapter(
           esClient,
           loggerMock,
@@ -678,6 +678,97 @@ describe('StorageIndexAdapter', () => {
 
         const getResponse = await versionedAdapter.getClient().get({ id: 'legacy1' });
         expect(getResponse._source).toEqual({ name: 'old', score: 0 });
+      });
+
+      it('treats documents without __version as v1 and migrates on search', async () => {
+        const plainAdapter = new StorageIndexAdapter(
+          esClient,
+          loggerMock,
+          versionedStorageSettings
+        );
+        await plainAdapter.getClient().index({ id: 'legacy-s', document: { name: 'searched' } });
+
+        const versioning = defineVersioning(v1Schema)
+          .addVersion({ schema: v2Schema, migrate: (prev) => ({ ...prev, score: 0 }) })
+          .build();
+        const versionedAdapter = new StorageIndexAdapter<
+          typeof versionedStorageSettings,
+          VersionedDoc
+        >(esClient, loggerMock, versionedStorageSettings, { versioning });
+
+        const searchResponse = await versionedAdapter.getClient().search({
+          track_total_hits: true,
+          size: 10,
+          query: { match_all: {} },
+        });
+
+        expect(searchResponse.hits.hits[0]._source).toEqual({ name: 'searched', score: 0 });
+      });
+
+      it('correctly handles a mix of legacy and versioned documents in a single search', async () => {
+        const plainAdapter = new StorageIndexAdapter(
+          esClient,
+          loggerMock,
+          versionedStorageSettings
+        );
+        await plainAdapter.getClient().index({
+          id: 'legacy',
+          document: { name: 'legacy-doc' },
+        });
+
+        const v2Versioning = defineVersioning(v1Schema)
+          .addVersion({ schema: v2Schema, migrate: (prev) => ({ ...prev, score: 0 }) })
+          .build();
+        const v2Adapter = new StorageIndexAdapter<typeof versionedStorageSettings, VersionedDoc>(
+          esClient,
+          loggerMock,
+          versionedStorageSettings,
+          { versioning: v2Versioning }
+        );
+        await v2Adapter.getClient().index({
+          id: 'versioned',
+          document: { name: 'versioned-doc', score: 42 },
+        });
+
+        const searchResponse = await v2Adapter.getClient().search({
+          track_total_hits: true,
+          size: 10,
+          query: { match_all: {} },
+        });
+
+        const sources = searchResponse.hits.hits.map((h) => h._source);
+        expect(sources).toContainEqual({ name: 'legacy-doc', score: 0 });
+        expect(sources).toContainEqual({ name: 'versioned-doc', score: 42 });
+      });
+
+      it('preserves extra fields through migration when schemas use passthrough()', async () => {
+        const plainAdapter = new StorageIndexAdapter(
+          esClient,
+          loggerMock,
+          versionedStorageSettings
+        );
+        await plainAdapter.getClient().index({
+          id: 'extra',
+          document: { name: 'test', active: true },
+        });
+
+        const v1Pass = z.object({ name: z.string() }).passthrough();
+        const v2Pass = z.object({ name: z.string(), score: z.number() }).passthrough();
+        const versioning = defineVersioning(v1Pass)
+          .addVersion({ schema: v2Pass, migrate: (prev) => ({ ...prev, score: 0 }) })
+          .build();
+        const adapter = new StorageIndexAdapter<typeof versionedStorageSettings, VersionedDoc>(
+          esClient,
+          loggerMock,
+          versionedStorageSettings,
+          { versioning }
+        );
+
+        const getResponse = await adapter.getClient().get({ id: 'extra' });
+        const source = getResponse._source as unknown as Record<string, unknown>;
+        expect(source.name).toBe('test');
+        expect(source.score).toBe(0);
+        expect(source.active).toBe(true);
       });
     });
 
@@ -706,7 +797,7 @@ describe('StorageIndexAdapter', () => {
         const v2Client = v2Adapter.getClient();
 
         const result = await v2Client.migrateDocuments();
-        expect(result).toEqual({ migrated: 2, total: 2 });
+        expect(result).toEqual({ migrated: 2, failed: 0, total: 2 });
 
         const rawDocs = await esClient.search({
           index: VERSIONED_INDEX,
@@ -720,6 +811,84 @@ describe('StorageIndexAdapter', () => {
         }
       });
 
+      it('migrates truly legacy (unversioned) documents', async () => {
+        const plainAdapter = new StorageIndexAdapter(
+          esClient,
+          loggerMock,
+          versionedStorageSettings
+        );
+        const plainClient = plainAdapter.getClient();
+        await plainClient.index({ id: 'legacy1', document: { name: 'alice' } });
+        await plainClient.index({ id: 'legacy2', document: { name: 'bob' } });
+
+        const v2Versioning = defineVersioning(v1Schema)
+          .addVersion({ schema: v2Schema, migrate: (prev) => ({ ...prev, score: 5 }) })
+          .build();
+        const v2Adapter = new StorageIndexAdapter<typeof versionedStorageSettings, VersionedDoc>(
+          esClient,
+          loggerMock,
+          versionedStorageSettings,
+          { versioning: v2Versioning }
+        );
+
+        const result = await v2Adapter.getClient().migrateDocuments();
+        expect(result).toEqual({ migrated: 2, failed: 0, total: 2 });
+
+        const rawDocs = await esClient.search({
+          index: VERSIONED_INDEX,
+          size: 10,
+          query: { match_all: {} },
+        });
+        for (const hit of rawDocs.hits.hits) {
+          const source = hit._source as Record<string, unknown>;
+          expect(source[VERSION_FIELD]).toBe(2);
+          expect(source.score).toBe(5);
+        }
+      });
+
+      it('migrates outdated docs but skips already-current docs', async () => {
+        const v2Versioning = defineVersioning(v1Schema)
+          .addVersion({ schema: v2Schema, migrate: (prev) => ({ ...prev, score: 10 }) })
+          .build();
+        const v2Adapter = new StorageIndexAdapter<typeof versionedStorageSettings, VersionedDoc>(
+          esClient,
+          loggerMock,
+          versionedStorageSettings,
+          { versioning: v2Versioning }
+        );
+        const v2Client = v2Adapter.getClient();
+
+        await v2Client.index({ id: 'current', document: { name: 'up-to-date', score: 99 } });
+
+        const plainAdapter = new StorageIndexAdapter(
+          esClient,
+          loggerMock,
+          versionedStorageSettings
+        );
+        await plainAdapter.getClient().index({ id: 'legacy', document: { name: 'outdated' } });
+
+        const result = await v2Client.migrateDocuments();
+        expect(result).toEqual({ migrated: 1, failed: 0, total: 1 });
+
+        const rawDocs = await esClient.search({
+          index: VERSIONED_INDEX,
+          size: 10,
+          sort: [{ _id: 'asc' as const }],
+          query: { match_all: {} },
+        });
+        const sources = rawDocs.hits.hits.map(
+          (hit) => hit._source as Record<string, unknown>
+        );
+
+        const currentDoc = sources.find((s) => s.name === 'up-to-date')!;
+        expect(currentDoc.score).toBe(99);
+        expect(currentDoc[VERSION_FIELD]).toBe(2);
+
+        const migratedDoc = sources.find((s) => s.name === 'outdated')!;
+        expect(migratedDoc.score).toBe(10);
+        expect(migratedDoc[VERSION_FIELD]).toBe(2);
+      });
+
       it('returns zero when no documents need migration', async () => {
         const versioning = defineVersioning(v1Schema).build();
         const versionedAdapter = new StorageIndexAdapter<
@@ -731,7 +900,7 @@ describe('StorageIndexAdapter', () => {
         await versionedClient.index({ id: 'doc1', document: { name: 'current' } });
 
         const result = await versionedClient.migrateDocuments();
-        expect(result).toEqual({ migrated: 0, total: 0 });
+        expect(result).toEqual({ migrated: 0, failed: 0, total: 0 });
       });
 
       it('returns zero when no index exists', async () => {
@@ -742,7 +911,7 @@ describe('StorageIndexAdapter', () => {
         >(esClient, loggerMock, versionedStorageSettings, { versioning });
 
         const result = await versionedAdapter.getClient().migrateDocuments();
-        expect(result).toEqual({ migrated: 0, total: 0 });
+        expect(result).toEqual({ migrated: 0, failed: 0, total: 0 });
       });
 
       it('is a no-op when versioning is not configured', async () => {
@@ -753,7 +922,7 @@ describe('StorageIndexAdapter', () => {
         );
 
         const result = await plainAdapter.getClient().migrateDocuments();
-        expect(result).toEqual({ migrated: 0, total: 0 });
+        expect(result).toEqual({ migrated: 0, failed: 0, total: 0 });
       });
     });
 

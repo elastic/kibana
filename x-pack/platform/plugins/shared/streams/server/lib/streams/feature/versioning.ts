@@ -60,6 +60,8 @@ const v2Schema = z
   })
   .passthrough();
 
+// Type assertion needed because `.passthrough()` adds `{ [k: string]: unknown }`
+// to the Zod output, which doesn't structurally match `StoredFeature`.
 export const featureVersioning: StorageSchemaVersioning<StoredFeature> = defineVersioning(v1Schema)
   .addVersion({
     schema: v2Schema,
@@ -67,7 +69,7 @@ export const featureVersioning: StorageSchemaVersioning<StoredFeature> = defineV
       const source = prev as Record<string, unknown>;
 
       if (FEATURE_ID in source) {
-        return source as Record<string, unknown> & { [K in keyof StoredFeature]: StoredFeature[K] };
+        return source;
       }
 
       const migrated = { ...source };
@@ -77,7 +79,7 @@ export const featureVersioning: StorageSchemaVersioning<StoredFeature> = defineV
       delete migrated['feature.name'];
       delete migrated['feature.value'];
 
-      return migrated as Record<string, unknown> & { [K in keyof StoredFeature]: StoredFeature[K] };
+      return migrated;
     },
   })
   .build() as StorageSchemaVersioning<StoredFeature>;

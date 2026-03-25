@@ -144,7 +144,7 @@ When versioning is enabled, every document written through `index()` or `bulk()`
 When a document is returned from `search()` or `get()`, the adapter inspects the `__version` field:
 
 - **Versioned documents**: migrated through the version chain from their persisted version to the latest, with Zod validation at every intermediate step. The `__version` field is stripped before returning.
-- **Legacy documents** (no `__version` field): if a `migrateSource` callback is provided, it runs first. Otherwise the document is treated as version 1 and migrated through the full chain.
+- **Legacy documents** (no `__version` field): treated as version 1 and migrated through the full chain.
 
 #### Bulk migration
 
@@ -153,7 +153,7 @@ For migrating existing documents in-place (e.g. during a startup routine), the c
 ```ts
 const client = adapter.getClient();
 const result = await client.migrateDocuments({ batchSize: 500 });
-// result: { migrated: 1234, total: 1234 }
+// result: { migrated: 1234, failed: 0, total: 1234 }
 ```
 
 This uses `search_after` pagination, concurrent per-batch migrations, and a single refresh at the end for efficiency.

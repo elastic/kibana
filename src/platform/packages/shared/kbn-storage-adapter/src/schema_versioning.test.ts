@@ -82,7 +82,7 @@ describe('StorageSchemaVersioning', () => {
       })
       .build();
 
-    it('validates and returns the document when already at the latest version', async () => {
+    it('returns the document as-is when already at the latest version', async () => {
       const doc = { foo: 'hello', bar: 10, baz: true };
       await expect(versioning.migrate(doc, 3)).resolves.toEqual(doc);
     });
@@ -114,14 +114,19 @@ describe('StorageSchemaVersioning', () => {
 
     it('throws on invalid fromVersion values', async () => {
       await expect(versioning.migrate({}, 0)).rejects.toThrow(
-        'Invalid source version 0: expected an integer between 1 and 3'
+        'Invalid source version 0: expected a positive integer'
       );
-      await expect(versioning.migrate({}, 4)).rejects.toThrow(
-        'Invalid source version 4: expected an integer between 1 and 3'
+      await expect(versioning.migrate({}, -1)).rejects.toThrow(
+        'Invalid source version -1: expected a positive integer'
       );
       await expect(versioning.migrate({}, 1.5)).rejects.toThrow(
-        'Invalid source version 1.5: expected an integer between 1 and 3'
+        'Invalid source version 1.5: expected a positive integer'
       );
+    });
+
+    it('returns the document as-is when fromVersion exceeds the latest (rollback safety)', async () => {
+      const doc = { foo: 'hello', bar: 10, baz: true, extra: 'future' };
+      await expect(versioning.migrate(doc, 5)).resolves.toEqual(doc);
     });
 
     it('works with a single-version chain (no migrations)', async () => {
@@ -168,6 +173,20 @@ describe('StorageSchemaVersioning', () => {
 
       const result = await asyncVersioning.migrate({ name: 'Hello World' }, 1);
       expect(result).toEqual({ name: 'Hello World', slug: 'hello-world', version: 2 });
+    });
+
+    it('preserves extra fields through the migration chain when schemas use passthrough()', async () => {
+      const v1Pass = z.object({ name: z.string() }).passthrough();
+      const v2Pass = z.object({ name: z.string(), added: z.number() }).passthrough();
+      const passthroughVersioning = defineVersioning(v1Pass)
+        .addVersion({ schema: v2Pass, migrate: (prev) => ({ ...prev, added: 42 }) })
+        .build();
+
+      const result = await passthroughVersioning.migrate(
+        { name: 'test', extra: 'field', nested: { a: 1 } },
+        1
+      );
+      expect(result).toEqual({ name: 'test', extra: 'field', nested: { a: 1 }, added: 42 });
     });
 
     it('supports mixed sync and async migrate functions', async () => {
