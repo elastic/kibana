@@ -74,7 +74,7 @@ export const StatusFilter: React.FC<StatusFilterProps> = ({
       button={
         <EuiFilterButton
           data-test-subj={`${testSubjPrefix}.statusBtn`}
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={togglePopover}
           isSelected={isOpen}
           numFilters={activeCount}
