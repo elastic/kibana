@@ -261,12 +261,16 @@ export const tagProcessedAlertsStep = createServerStepDefinition({
     const esClient = context.contextManager.getScopedEsClient();
     const { alert_ids: alertIds, index_pattern: indexPattern } = context.input;
 
-    if (alertIds.length === 0) {
+    const validIds = alertIds.filter((id: string) => id && id.length > 0);
+
+    if (validIds.length === 0) {
       return { output: { tagged_count: 0 } };
     }
 
-    const body = alertIds.flatMap((id) => [
-      { update: { _id: id, _index: indexPattern } },
+    context.logger.info(`Tagging ${validIds.length} alerts as processed`);
+
+    const body = validIds.flatMap((id: string) => [
+      { update: { _id: id } },
       {
         doc: {
           kibana: {
@@ -276,11 +280,11 @@ export const tagProcessedAlertsStep = createServerStepDefinition({
       },
     ]);
 
-    const result = await esClient.bulk({ operations: body, refresh: 'wait_for' });
+    const result = await esClient.bulk({ index: indexPattern, operations: body, refresh: 'wait_for' });
 
     if (result.errors) {
       const failures = result.items.filter((item) => item.update?.error);
-      const failureRate = failures.length / alertIds.length;
+      const failureRate = failures.length / validIds.length;
 
       // Log first 5 failures with details
       for (const failure of failures.slice(0, 5)) {
