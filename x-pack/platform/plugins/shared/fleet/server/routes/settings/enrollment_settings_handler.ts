@@ -8,6 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { omit, pick } from 'lodash';
 
 import { FLEET_SERVER_PACKAGE } from '../../../common/constants';
 
@@ -15,6 +16,9 @@ import type {
   GetEnrollmentSettingsResponse,
   AgentPolicy,
   EnrollmentSettingsFleetServerPolicy,
+  FleetProxy,
+  Output,
+  DownloadSource,
 } from '../../../common/types';
 import type { FleetRequestHandler, GetEnrollmentSettingsRequestSchema } from '../../types';
 import { agentPolicyService, appContextService, downloadSourceService } from '../../services';
@@ -62,10 +66,13 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
   // Get download source
   // ignore errors if the download source is not found
   try {
-    settingsResponse.download_source = await getDownloadSource(
+    const downloadSource = await getDownloadSource(
       soClient,
       scopedAgentPolicy.download_source_id ?? undefined
     );
+    settingsResponse.download_source = downloadSource
+      ? sanitizeEnrollmentDownloadSource(downloadSource)
+      : undefined;
   } catch (e) {
     settingsResponse.download_source = undefined;
   }
@@ -74,10 +81,8 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
   // ignore errors if the download source proxy is not found
   try {
     if (settingsResponse.download_source?.proxy_id) {
-      settingsResponse.download_source_proxy = await getFleetProxy(
-        soClient,
-        settingsResponse.download_source.proxy_id
-      );
+      const proxy = await getFleetProxy(soClient, settingsResponse.download_source.proxy_id);
+      settingsResponse.download_source_proxy = sanitizeEnrollmentProxy(proxy);
     }
   } catch (e) {
     settingsResponse.download_source_proxy = undefined;
@@ -86,10 +91,8 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
   // Get associated fleet server host, or default one if it doesn't exist
   // `getFleetServerHostsForAgentPolicy` errors if there is no default, so catch it
   try {
-    settingsResponse.fleet_server.host = await getFleetServerHostsForAgentPolicy(
-      soClient,
-      scopedAgentPolicy
-    );
+    const fleetServerHost = await getFleetServerHostsForAgentPolicy(soClient, scopedAgentPolicy);
+    settingsResponse.fleet_server.host = fleetServerHost;
   } catch (e) {
     settingsResponse.fleet_server.host = undefined;
   }
@@ -98,10 +101,8 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
   // ignore errors if the proxy is not found
   try {
     if (settingsResponse.fleet_server.host?.proxy_id) {
-      settingsResponse.fleet_server.host_proxy = await getFleetProxy(
-        soClient,
-        settingsResponse.fleet_server.host.proxy_id
-      );
+      const proxy = await getFleetProxy(soClient, settingsResponse.fleet_server.host.proxy_id);
+      settingsResponse.fleet_server.host_proxy = sanitizeEnrollmentProxy(proxy);
     }
   } catch (e) {
     settingsResponse.fleet_server.host_proxy = undefined;
@@ -112,12 +113,10 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
     if (settingsResponse.fleet_server.policies.length > 0) {
       const dataOutput = await getDataOutputForAgentPolicy(soClient, scopedAgentPolicy);
       if (dataOutput.type === 'elasticsearch' && dataOutput.hosts?.[0]) {
-        settingsResponse.fleet_server.es_output = dataOutput;
+        settingsResponse.fleet_server.es_output = sanitizeEnrollmentOutput(dataOutput);
         if (dataOutput.proxy_id) {
-          settingsResponse.fleet_server.es_output_proxy = await getFleetProxy(
-            soClient,
-            dataOutput.proxy_id
-          );
+          const proxy = await getFleetProxy(soClient, dataOutput.proxy_id);
+          settingsResponse.fleet_server.es_output_proxy = sanitizeEnrollmentProxy(proxy);
         }
       }
     }
@@ -176,10 +175,37 @@ export const getFleetServerOrAgentPolicies = async (
 export const getDownloadSource = async (
   soClient: SavedObjectsClientContract,
   downloadSourceId?: string
-): Promise<Promise<GetEnrollmentSettingsResponse['download_source']>> => {
+): Promise<GetEnrollmentSettingsResponse['download_source'] | undefined> => {
   const sources = await downloadSourceService.list(soClient);
   const foundSource = downloadSourceId
     ? sources.items.find((s) => s.id === downloadSourceId)
     : undefined;
   return foundSource || sources.items.find((s) => s.is_default);
 };
+
+function sanitizeEnrollmentProxy(
+  proxy: FleetProxy
+): NonNullable<GetEnrollmentSettingsResponse['download_source_proxy']> {
+  return pick(proxy, ['id', 'name', 'url']);
+}
+
+function sanitizeEnrollmentOutput(output: Output): Output {
+  return {
+    ...omit(output, ['secrets']),
+    ssl: output.ssl ? omit(output.ssl, ['key']) : output.ssl,
+    ...(output.type === 'kafka'
+      ? {
+          password: undefined,
+        }
+      : {}),
+    ...(output.type === 'remote_elasticsearch'
+      ? {
+          service_token: undefined,
+        }
+      : {}),
+  };
+}
+
+function sanitizeEnrollmentDownloadSource(downloadSource: DownloadSource): DownloadSource {
+  return pick(downloadSource, ['id', 'name', 'host', 'is_default', 'proxy_id']);
+}

@@ -24,12 +24,13 @@ dependsOn:
   - '@kbn/esql-validation-autocomplete'
   - '@kbn/esql-types'
 tags:
-  - is-webpack-built
+  - shared-common
   - package
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - is-webpack-built
 fileGroups:
   src:
     - src/**/*
