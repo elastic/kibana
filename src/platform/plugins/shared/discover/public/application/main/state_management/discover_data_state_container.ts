@@ -39,7 +39,7 @@ import { validateTimeRange } from './utils/validate_time_range';
 import { fetchAll, type CommonFetchParams, fetchMoreDocuments } from '../data_fetching/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
-import { getDefaultProfileState } from './utils/get_default_profile_state';
+import { getDefaultProfileState, getProfileStateSnapshot } from './utils/default_profile_state';
 import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
 import { internalStateActions, selectTabRuntimeState } from './redux';
 import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
@@ -196,6 +196,15 @@ export function getDataStateContainer({
   };
 
   /**
+   * Allows skipping any fetches that would occur from state updates in the callback
+   */
+  const withSkipNextFetch = async (callback: () => Promise<void>) => {
+    disableNextFetchOnStateChange$.next(true);
+    await callback();
+    disableNextFetchOnStateChange$.next(false);
+  };
+
+  /**
    * The observables the UI (aka React component) subscribes to get notified about
    * the changes in the data fetching process (high level: fetching started, data was received)
    */
@@ -269,7 +278,7 @@ export function getDataStateContainer({
           const tabState = getCurrentTab();
           const {
             id: currentTabId,
-            resetDefaultProfileState,
+            defaultProfileState,
             dataRequestParams,
             appState,
             globalState,
@@ -354,7 +363,7 @@ export function getDataStateContainer({
             })
           );
 
-          await scopedProfilesManager.resolveDataSourceProfile(
+          const { didProfileChange } = await scopedProfilesManager.resolveDataSourceProfile(
             {
               dataSource: getCurrentTab().appState.dataSource,
               dataView: currentDataView$.getValue(),
@@ -363,20 +372,59 @@ export function getDataStateContainer({
             resetFetchChart$
           );
 
+          let shouldApplyDefaultProfileState = true;
+
+          // If the data source profile changed, we may need to restore previous profile state
+          if (didProfileChange) {
+            const profileId = scopedProfilesManager.getContexts().dataSourceContext.profileId;
+            const profileStateSnapshot =
+              getCurrentTab().defaultProfileState.snapshotsByProfileId[profileId];
+            const profileStateUpdate = getProfileStateSnapshot(
+              profileStateSnapshot ?? {},
+              defaultProfileState.fieldsToReset
+            );
+            const hasProfileStateUpdate =
+              profileStateUpdate && Object.keys(profileStateUpdate).length > 0;
+
+            // Only apply the default profile state if we have no profile state to restore
+            shouldApplyDefaultProfileState = !hasProfileStateUpdate;
+
+            if (hasProfileStateUpdate) {
+              await withSkipNextFetch(() =>
+                internalState.dispatch(
+                  injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
+                    appState: profileStateUpdate,
+                  })
+                )
+              );
+            } else {
+              // If there is no profile state yet, sync a snapshot of the current
+              // state so it can be restored when switching back to this profile
+              internalState.dispatch(
+                injectCurrentTab(internalStateActions.syncProfileStateSnapshot)({})
+              );
+            }
+          }
+
           const dataView = currentDataView$.getValue();
-          const defaultProfileState = dataView
-            ? getDefaultProfileState({ scopedProfilesManager, resetDefaultProfileState, dataView })
-            : undefined;
-          const preFetchStateUpdate = defaultProfileState?.getPreFetchState();
+          const resolvedDefaultProfileState =
+            shouldApplyDefaultProfileState && dataView
+              ? getDefaultProfileState({
+                  scopedProfilesManager,
+                  defaultProfileState,
+                  dataView,
+                })
+              : undefined;
+          const preFetchStateUpdate = resolvedDefaultProfileState?.getPreFetchState();
 
           if (preFetchStateUpdate) {
-            disableNextFetchOnStateChange$.next(true);
-            await internalState.dispatch(
-              injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
-                appState: preFetchStateUpdate,
-              })
+            await withSkipNextFetch(() =>
+              internalState.dispatch(
+                injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
+                  appState: preFetchStateUpdate,
+                })
+              )
             );
-            disableNextFetchOnStateChange$.next(false);
           }
 
           abortController = new AbortController();
@@ -453,15 +501,15 @@ export function getDataStateContainer({
                 );
               }
 
-              const { resetDefaultProfileState: currentResetDefaultProfileState } = getCurrentTab();
+              const { defaultProfileState: currentDefaultProfileState } = getCurrentTab();
 
-              if (currentResetDefaultProfileState.resetId !== resetDefaultProfileState.resetId) {
+              if (currentDefaultProfileState.resetId !== defaultProfileState.resetId) {
                 return;
               }
 
               const { esqlQueryColumns } = dataSubjects.documents$.getValue();
               const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
-              const postFetchStateUpdate = defaultProfileState?.getPostFetchState({
+              const postFetchStateUpdate = resolvedDefaultProfileState?.getPostFetchState({
                 defaultColumns,
                 esqlQueryColumns,
               });
@@ -474,16 +522,11 @@ export function getDataStateContainer({
                 );
               }
 
-              // Clear the default profile state flags after the data fetching
+              // Clear the profile state field-reset flags after data fetching
               // is done so refetches don't reset the state again
               internalState.dispatch(
-                injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-                  resetDefaultProfileState: {
-                    columns: false,
-                    rowHeight: false,
-                    breakdownField: false,
-                    hideChart: false,
-                  },
+                injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
+                  fieldsToReset: 'none',
                 })
               );
             },
