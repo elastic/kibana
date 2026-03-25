@@ -70,7 +70,7 @@ export const ExportSourceFlyout = ({ closeFlyout }: { closeFlyout: () => void })
         <EuiTitle>
           <h2>
             <FormattedMessage
-              id="share.export.flyoutTitle"
+              id="dashboard.exportSource.flyoutTitle"
               defaultMessage="Export {objectType} as {type}"
               values={{
                 objectType: objectTypeAlias ?? objectType.toLocaleLowerCase(),

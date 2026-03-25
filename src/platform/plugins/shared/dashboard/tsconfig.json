@@ -116,7 +116,6 @@
     "@kbn/scout",
     "@kbn/cps-utils",
     "@kbn/try-in-console",
-    "@kbn/core-http-router-server-mocks",
   ],
   "exclude": ["target/**/*"]
 }
