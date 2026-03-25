@@ -15,7 +15,7 @@ export const asCodeIdSchema = schema.maybe(
   schema.string({
     meta: {
       description:
-        'A unique identifier for the markdown panel. Must contain only lowercase letters, numbers, hyphens, and underscores.',
+        'A unique identifier. Must contain only lowercase letters, numbers, hyphens, and underscores.',
     },
     validate: (value) => {
       if (!isValidId(value)) {
