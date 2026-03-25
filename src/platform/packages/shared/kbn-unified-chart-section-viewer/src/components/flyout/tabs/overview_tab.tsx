@@ -91,6 +91,18 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
           </EuiText>
         ),
       },
+      {
+        title: title(
+          i18n.translate('metricsExperience.overviewTab.strong.fieldTypeLabel', {
+            defaultMessage: 'Field type',
+          })
+        ),
+        description: (
+          <div>
+            <EuiBadge>{metricItem.fieldTypes?.[0] ?? ''}</EuiBadge>
+          </div>
+        ),
+      },
     ];
     rows.push({
       title: title(
