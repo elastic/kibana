@@ -21,6 +21,7 @@ import { SettingsPageObject } from './settings_page';
 import { SharePageObject } from './share_page';
 import { LoginPageObject } from './login_page';
 import { TimePickerPageObject } from './time_picker';
+import { LegacyTimePickerPageObject } from './legacy_time_picker';
 import { TimelionPageObject } from './timelion_page';
 import { VisualBuilderPageObject } from './visual_builder_page';
 import { VisualizePageObject } from './visualize_page';
@@ -67,6 +68,7 @@ export const pageObjects = {
   login: LoginPageObject,
   timelion: TimelionPageObject,
   timePicker: TimePickerPageObject,
+  legacyTimePicker: LegacyTimePickerPageObject,
   visualBuilder: VisualBuilderPageObject,
   visualize: VisualizePageObject,
   visEditor: VisualizeEditorPageObject,
