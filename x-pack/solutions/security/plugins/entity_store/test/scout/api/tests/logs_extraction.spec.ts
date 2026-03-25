@@ -59,7 +59,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
   });
 
   apiTest('Should extract properly extract host', async ({ apiClient, esClient }) => {
-    const expectedResultCount = 19;
+    const expectedResultCount = 20;
 
     const extractionResponse = await apiClient.post(
       ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('host'),
@@ -110,7 +110,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     expect(extractionResponse.statusCode).toBe(200);
     expect(extractionResponse.body.success).toBe(true);
     expect(extractionResponse.body.pages).toBe(1);
-    expect(extractionResponse.body.count).toBe(24);
+    expect(extractionResponse.body.count).toBe(25);
 
     const entities = await esClient.search({
       index: '.entities.v2.latest.security_default',
@@ -125,7 +125,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       size: 1000, // a lot just to be sure we are not capping it
     });
 
-    expect(entities.hits.hits).toHaveLength(24);
+    expect(entities.hits.hits).toHaveLength(25);
     // it's deterministic because of the MD5 id
     // manually checking object until we have a snapshot matcher
     expect(entities.hits.hits).toMatchObject(expectedUserEntities);
