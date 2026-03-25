@@ -10,8 +10,8 @@ import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { AttackDetailsLeftPanel } from '.';
 import { AttackDetailsProvider } from '../context';
-import { NOTES_TAB_TEST_ID } from '../constants/test_ids';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { NOTES_DETAILS_TEST_ID } from '../../../flyout_v2/notes/test_ids';
 
 jest.mock('../../shared/components/flyout_header', () => ({
   FlyoutHeader: ({ children }: { children: React.ReactNode }) => (
@@ -66,7 +66,7 @@ jest.mock('@kbn/expandable-flyout', () => ({
   }),
 }));
 
-jest.mock('../../shared/components/notes_details_content', () => ({
+jest.mock('../../../flyout_v2/notes/components/notes_details_content', () => ({
   NotesDetailsContent: () => (
     <div data-test-subj="attack-details-flyout-left-notes-tab-content">{'Notes content'}</div>
   ),
@@ -116,7 +116,7 @@ describe('AttackDetailsLeftPanel', () => {
     renderLeftPanel();
 
     expect(screen.getByText('Notes')).toBeInTheDocument();
-    expect(screen.getByTestId(NOTES_TAB_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(NOTES_DETAILS_TEST_ID)).toBeInTheDocument();
   });
 
   it('hides Notes tab when user lacks notes read privilege', () => {
@@ -127,6 +127,6 @@ describe('AttackDetailsLeftPanel', () => {
     renderLeftPanel();
 
     expect(screen.queryByText('Notes')).not.toBeInTheDocument();
-    expect(screen.queryByTestId(NOTES_TAB_TEST_ID)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(NOTES_DETAILS_TEST_ID)).not.toBeInTheDocument();
   });
 });
