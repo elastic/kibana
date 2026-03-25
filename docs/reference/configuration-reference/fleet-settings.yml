@@ -11,7 +11,7 @@ page_description: |
 
   Go to the [{{fleet}}](docs-content://reference/fleet/index.md) docs for more information about {{fleet}}.
 
-note: 'In {{ecloud}}, {{fleet}} flags are already configured.
+note: 'In {{ecloud}}, {{fleet}} flags are already configured.'
 
 groups:
   - group: General {{fleet}} settings
