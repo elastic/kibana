@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HttpStart } from '@kbn/core/public';
 import type { DownloadableContent } from '@kbn/share-plugin/public';
 import { downloadFileAs } from '@kbn/share-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
+import type { WorkflowApi } from '@kbn/workflows-ui';
 import { extractReferencedWorkflowIds } from './export/extract_workflow_references';
 import { stringifyWorkflowDefinition } from '../../../common/lib/yaml';
 
@@ -62,7 +62,7 @@ export const exportSingleWorkflow = (workflow: WorkflowListItemDto): void => {
  */
 export const exportWorkflows = async (
   workflows: WorkflowListItemDto[],
-  http: HttpStart
+  api: WorkflowApi
 ): Promise<number> => {
   const exportable = workflows.filter((w): w is WithDefinition => w.definition !== null);
   if (exportable.length === 0) {
@@ -75,9 +75,7 @@ export const exportWorkflows = async (
   }
 
   const ids = exportable.map((w) => w.id);
-  const blob: Blob = await http.post('/api/workflows/_export', {
-    body: JSON.stringify({ ids }),
-  });
+  const blob = await api.exportWorkflows({ ids });
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const filename = `workflows_export_${timestamp}.zip`;

@@ -170,11 +170,26 @@ Using an incorrect type ID will produce a validation error — verify the ID fir
 ### Liquid Templating
 
 Use Liquid syntax for dynamic values:
-- \`{{ steps.step_name.output.field }}\` - Reference step outputs
+- \`{{ steps.step_name.output.field }}\` - Reference step outputs (ONLY \`output\` is accessible — NEVER \`steps.<name>.with.*\` or \`steps.<name>.<input_param>\`). Use \`${workflowTools.getStepDefinitions}\` with \`includeOutputSummary\` to learn what a step's output contains.
 - \`{{ inputs.input_name }}\` - Reference workflow inputs
 - \`{{ consts.constant_name }}\` - Reference constants
 - \`{{ foreach.item }}\` - Current item in a foreach loop
-- \`{{ event }}\` - Trigger event data (for alert triggers)
+- \`{{ event }}\` - Trigger event data (available for all trigger types)
+
+**IMPORTANT — event variable path:** The trigger event is accessed via \`{{ event }}\` directly — NEVER \`{{ triggers.event }}\`, \`{{ trigger.event }}\`, or \`{{ triggers.event.* }}\`. The \`triggers\` block only configures which triggers activate the workflow; it does NOT contain runtime event data.
+
+**Alert trigger event structure** (available when \`triggers\` includes \`type: alert\`):
+- \`{{ event.alerts }}\` - Array of alert objects that fired
+- \`{{ event.alerts[0]._id }}\` - Alert ID
+- \`{{ event.alerts[0]._index }}\` - Alert index
+- \`{{ event.alerts[0].kibana.alert }}\` - Alert details
+- \`{{ event.alerts[0]["@timestamp"] }}\` - Alert timestamp
+- \`{{ event.rule.id }}\` - Rule ID
+- \`{{ event.rule.name }}\` - Rule name
+- \`{{ event.rule.tags }}\` - Rule tags
+- \`{{ event.spaceId }}\` - Space where the event was emitted
+
+Use \`${workflowTools.getTriggerDefinitions}\` to get the full event context schema for any trigger type.
 
 Useful filters:
 - \`| json\` - Convert to JSON string
@@ -201,6 +216,7 @@ When fixing validation errors:
 3. If a step type does NOT exist: tell the user and list similar alternatives from the included step definitions
 4. Use edit tools to fix the issues, then check the \`validation\` field in the edit tool response to confirm the fix
 5. NEVER guess or replace a step type with something unrelated
+6. **After fixing an error, scan the entire YAML for other occurrences of the same mistake.** For example, if you fix \`triggers.event\` → \`event\` in one place, check all other Liquid expressions for the same incorrect pattern and fix them all in one pass
 
 ### Proposing Changes (Edit Tools)
 
