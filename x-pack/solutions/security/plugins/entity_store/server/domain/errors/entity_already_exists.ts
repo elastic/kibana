@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-export {
-  CRUDClient,
-  type EntityUpdateClient,
-  type BulkObject,
-  type BulkObjectResponse,
-} from './crud_client';
+export class EntityAlreadyExistsError extends Error {
+  constructor(id: string) {
+    super(`Entity ID '${id}' already exists`);
+  }
+}
