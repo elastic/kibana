@@ -273,7 +273,7 @@ export const GcpCredentialsFormAgentless = ({
                 data-test-subj="launchGoogleCloudShellAgentlessButton"
                 target="_blank"
                 iconSide="left"
-                iconType="launch"
+                iconType="rocket"
                 href={cloudShellUrl}
               >
                 <FormattedMessage

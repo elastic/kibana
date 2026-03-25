@@ -17,6 +17,7 @@ describe('templatesUrlStateSerializer', () => {
       perPage: 10,
       sortField: 'name',
       sortOrder: 'asc',
+      isDeleted: false,
     });
   });
 
@@ -83,5 +84,23 @@ describe('templatesUrlStateSerializer', () => {
 
     expect(result.page).toBe(5);
     expect(result.perPage).toBe(25);
+  });
+
+  it('preserves isEnabled when true', () => {
+    const result = templatesUrlStateSerializer({
+      ...DEFAULT_QUERY_PARAMS,
+      isEnabled: true,
+    });
+
+    expect(result.isEnabled).toBe(true);
+  });
+
+  it('preserves isEnabled when false', () => {
+    const result = templatesUrlStateSerializer({
+      ...DEFAULT_QUERY_PARAMS,
+      isEnabled: false,
+    });
+
+    expect(result.isEnabled).toBe(false);
   });
 });
