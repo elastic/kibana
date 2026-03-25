@@ -13,14 +13,16 @@
  * import { euid, type EntityType } from '@kbn/entity-store/common/library';
  */
 
-export type { EntityStoreStatus, EntityType, IdentitySourceFields, Entity } from './constants';
+export type { IdentitySourceFields, Entity } from './constants';
+export type { EntityStoreStatus, EntityType } from './domain/definitions/entity_schema';
+export { ALL_ENTITY_TYPES } from './domain/definitions/entity_schema';
 export {
   PLUGIN_ID,
   PLUGIN_NAME,
   FF_ENABLE_ENTITY_STORE_V2,
+  API_VERSIONS,
   ENTITY_STORE_ROUTES,
   getErrorMessage,
-  ALL_ENTITY_TYPES,
 } from './constants';
 
 export type { NonEcsTimelineDataRow } from './domain/euid/non_ecs_timeline_data';

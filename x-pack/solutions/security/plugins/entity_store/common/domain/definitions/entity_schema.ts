@@ -11,6 +11,15 @@ import { z } from '@kbn/zod/v4';
 export type EntityType = z.infer<typeof EntityType>;
 export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
 
+export type EntityStoreStatus = z.infer<typeof EntityStoreStatus>;
+export const EntityStoreStatus = z.enum([
+  'not_installed',
+  'installing',
+  'running',
+  'stopped',
+  'error',
+]);
+
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 
 const mappingSchema = z.any();

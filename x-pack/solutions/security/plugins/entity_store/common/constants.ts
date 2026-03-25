@@ -15,19 +15,14 @@ export const PLUGIN_NAME = 'Entity Store';
 
 export const FF_ENABLE_ENTITY_STORE_V2 = 'securitySolution:entityStoreEnableV2';
 
-/** Runtime values mirror the former z.enum shape (`EntityStoreStatus.enum.running`). */
-export const EntityStoreStatus = {
-  enum: {
-    not_installed: 'not_installed',
-    installing: 'installing',
-    running: 'running',
-    stopped: 'stopped',
-    error: 'error',
+export const API_VERSIONS = {
+  public: {
+    v1: '2023-10-31',
+  },
+  internal: {
+    v2: '2',
   },
 } as const;
-
-export type EntityStoreStatus =
-  (typeof EntityStoreStatus.enum)[keyof typeof EntityStoreStatus.enum];
 
 const ENTITY_STORE_BASE_ROUTE = '/internal/security/entity_store';
 
@@ -66,19 +61,7 @@ export const getErrorMessage = (error: unknown): string => {
   return String(error);
 };
 
-/** Runtime values mirror the former z.enum shape (`EntityType.enum.host`). */
-export const EntityType = {
-  enum: {
-    user: 'user',
-    host: 'host',
-    service: 'service',
-    generic: 'generic',
-  },
-} as const;
-
-export type EntityType = (typeof EntityType.enum)[keyof typeof EntityType.enum];
-
-export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
+// Entity types (slim definitions; for EUID translation use common/euid_helpers)
 export interface IdentitySourceFields {
   /** Fields that participate in identity (EUID composition). */
   requiresOneOf: string[];

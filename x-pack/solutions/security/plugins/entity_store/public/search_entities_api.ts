@@ -6,11 +6,9 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import { ENTITY_STORE_ROUTES, type Entity, type EntityType } from '../common/constants';
-
-/** Version header for internal entity_store HTTP APIs (see server/routes/constants API_VERSIONS.internal.v2). */
-export const ENTITY_STORE_INTERNAL_HTTP_API_VERSION = '2';
-
+import { ENTITY_STORE_ROUTES } from '../common/constants';
+import type { Entity, EntityType } from '../common';
+import { API_VERSIONS } from '../common/constants';
 export interface SearchEntitiesFromEntityStoreParams {
   entityTypes: EntityType[];
   filterQuery?: string;
@@ -38,7 +36,7 @@ export async function searchEntitiesFromEntityStore(
   options?: { signal?: AbortSignal }
 ): Promise<SearchEntitiesFromEntityStoreResponse> {
   return http.fetch<SearchEntitiesFromEntityStoreResponse>(ENTITY_STORE_ROUTES.SEARCH_ENTITIES, {
-    version: ENTITY_STORE_INTERNAL_HTTP_API_VERSION,
+    version: API_VERSIONS.internal.v2,
     method: 'GET',
     query: {
       entity_types: params.entityTypes,

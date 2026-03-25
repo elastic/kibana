@@ -11,13 +11,11 @@ export { useInstallEntityStoreV2 } from './hooks/useInstallEntityStoreV2';
 export { EntityStoreEuidApiProvider, useEntityStoreEuidApi } from './euid_api_context';
 export type { EntityStoreEuidApi, NonEcsTimelineDataRow } from './euid_api_context';
 
-export { FF_ENABLE_ENTITY_STORE_V2, ALL_ENTITY_TYPES } from '../common/constants';
-export type { EntityType, IdentitySourceFields } from '../common/constants';
+export { FF_ENABLE_ENTITY_STORE_V2 } from '../common/constants';
+export { ALL_ENTITY_TYPES } from '../common';
+export type { IdentitySourceFields } from '../common';
 
-export {
-  searchEntitiesFromEntityStore,
-  ENTITY_STORE_INTERNAL_HTTP_API_VERSION,
-} from './search_entities_api';
+export { searchEntitiesFromEntityStore } from './search_entities_api';
 export type {
   SearchEntitiesFromEntityStoreParams,
   SearchEntitiesFromEntityStoreResponse,

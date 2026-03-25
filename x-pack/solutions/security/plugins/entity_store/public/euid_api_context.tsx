@@ -8,7 +8,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { NonEcsTimelineDataRow } from '../common/domain/euid/non_ecs_timeline_data';
-import type { EntityType, IdentitySourceFields } from '../common/constants';
+import type { IdentitySourceFields } from '../common/constants';
+import type { EntityType } from '../common/domain/definitions/entity_schema';
 
 export type { NonEcsTimelineDataRow };
 

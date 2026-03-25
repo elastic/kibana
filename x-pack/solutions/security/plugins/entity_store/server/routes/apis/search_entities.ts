@@ -9,7 +9,8 @@ import { ArrayFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers/v
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { ENTITY_STORE_ROUTES } from '../../../common';
-import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
+import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
+import { API_VERSIONS } from '../../../common/constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { searchEntitiesV2 } from '../../domain/search_entities/search_entities';

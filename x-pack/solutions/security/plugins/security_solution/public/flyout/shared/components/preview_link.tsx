@@ -7,12 +7,14 @@
 import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiLink } from '@elastic/eui';
+import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 import { useKibana, useUiSetting } from '../../../common/lib/kibana';
 import { FLYOUT_PREVIEW_LINK_TEST_ID } from './test_ids';
 import { DocumentEventTypes } from '../../../common/lib/telemetry';
 import { getPreviewPanelParams } from '../utils/link_utils';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import type { IdentityFields } from '../../document_details/shared/utils';
 import { useEntityFromStore } from '../../entity_details/shared/hooks/use_entity_from_store';
 import {
@@ -77,6 +79,8 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
 }) => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const { telemetry } = useKibana().services;
+  const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
+  const shouldShowLink = field === ALERT_RULE_NAME ? canReadRules : true;
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
   const resolutionIdentifiers: IdentityFields = useMemo(
@@ -141,7 +145,7 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
     }
   }, [scopeId, telemetry, openPreviewPanel, previewParams]);
 
-  return previewParams ? (
+  return shouldShowLink && previewParams ? (
     <EuiLink onClick={onClick} data-test-subj={dataTestSubj}>
       {children ?? value}
     </EuiLink>

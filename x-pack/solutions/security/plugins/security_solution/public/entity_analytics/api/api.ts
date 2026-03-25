@@ -7,8 +7,10 @@
 
 import { useMemo } from 'react';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
-import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/common';
-import { ENTITY_STORE_INTERNAL_HTTP_API_VERSION } from '@kbn/entity-store/public';
+import {
+  API_VERSIONS as ENTITY_STORE_API_VERSIONS,
+  ENTITY_STORE_ROUTES,
+} from '@kbn/entity-store/common';
 import type { EntityDetailsHighlightsResponse } from '../../../common/api/entity_analytics/entity_details/highlights.gen';
 import { ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
 import type {
@@ -145,7 +147,7 @@ export const useEntityAnalyticsRoutes = () => {
       params: FetchEntitiesListParams;
     }) =>
       http.fetch<ListEntitiesResponse>(ENTITY_STORE_ROUTES.SEARCH_ENTITIES, {
-        version: ENTITY_STORE_INTERNAL_HTTP_API_VERSION,
+        version: ENTITY_STORE_API_VERSIONS.internal.v2,
         method: 'GET',
         query: {
           entity_types: params.entityTypes,
@@ -239,6 +241,15 @@ export const useEntityAnalyticsRoutes = () => {
     const fetchEntityStorePrivileges = () =>
       http.fetch<EntityAnalyticsPrivileges>(ENTITY_STORE_INTERNAL_PRIVILEGES_URL, {
         version: '1',
+        method: 'GET',
+      });
+
+    /**
+     * Get Entity Store v2 privileges
+     */
+    const fetchEntityStoreV2Privileges = () =>
+      http.fetch<EntityAnalyticsPrivileges>(ENTITY_STORE_ROUTES.CHECK_PRIVILEGES, {
+        version: ENTITY_STORE_API_VERSIONS.internal.v2,
         method: 'GET',
       });
 
@@ -556,6 +567,7 @@ export const useEntityAnalyticsRoutes = () => {
       fetchRiskEnginePrivileges,
       fetchAssetCriticalityPrivileges,
       fetchEntityStorePrivileges,
+      fetchEntityStoreV2Privileges,
       searchPrivMonIndices,
       createPrivMonImportIndex,
       createAssetCriticality,

@@ -6,8 +6,9 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import { ENTITY_STORE_ROUTES, type EntityType } from '../common/constants';
-import { ENTITY_STORE_INTERNAL_HTTP_API_VERSION } from './search_entities_api';
+import { ENTITY_STORE_ROUTES } from '../common/constants';
+import type { EntityType } from '../common/domain/definitions/entity_schema';
+import { API_VERSIONS } from '../common/constants';
 
 export interface UpsertEntityInEntityStoreParams {
   entityType: EntityType;
@@ -31,7 +32,7 @@ export async function upsertEntityInEntityStore(
 ): Promise<void> {
   const path = ENTITY_STORE_ROUTES.CRUD_UPSERT.replace('{entityType}', params.entityType);
   await http.fetch<{ ok: boolean }>(path, {
-    version: ENTITY_STORE_INTERNAL_HTTP_API_VERSION,
+    version: API_VERSIONS.internal.v2,
     method: 'PUT',
     body: JSON.stringify(params.body),
     query: params.force !== undefined ? { force: params.force ? 'true' : 'false' } : undefined,
