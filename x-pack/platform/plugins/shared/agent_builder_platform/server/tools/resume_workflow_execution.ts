@@ -49,23 +49,29 @@ export const resumeWorkflowExecutionTool = ({
     handler: async ({ executionId, input }, { spaceId, request }) => {
       try {
         await workflowApi.resumeWorkflowExecution(executionId, spaceId, input, request);
-
-        const execution = await getExecutionState({ executionId, spaceId, workflowApi });
-
-        return {
-          results: [
-            otherResult({
-              resumed: true,
-              execution: execution ?? { execution_id: executionId, status: 'unknown' },
-            }),
-          ],
-        };
       } catch (e) {
         const message = e instanceof Error ? e.message : String(e);
         return {
           results: [errorResult(`Failed to resume workflow execution: ${message}`)],
         };
       }
+
+      // Failure here is non-fatal & the resume already happened so the LLM must not retry it
+      let execution: Awaited<ReturnType<typeof getExecutionState>>;
+      try {
+        execution = await getExecutionState({ executionId, spaceId, workflowApi });
+      } catch {
+        execution = null;
+      }
+
+      return {
+        results: [
+          otherResult({
+            resumed: true,
+            execution: execution ?? { execution_id: executionId, status: 'unknown' },
+          }),
+        ],
+      };
     },
     tags: [],
   };

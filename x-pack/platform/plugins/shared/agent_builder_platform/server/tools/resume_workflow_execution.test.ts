@@ -112,6 +112,30 @@ describe('resumeWorkflowExecutionTool', () => {
     });
   });
 
+  it('should return resumed: true with fallback when state fetch throws after a successful resume', async () => {
+    const wm = createWorkflowsManagement();
+    const tool = resumeWorkflowExecutionTool({ workflowsManagement: wm as any });
+    getExecutionState.mockRejectedValue(new Error('timeout'));
+
+    const result = await tool.handler(
+      { executionId: 'exec-1', input: { approved: true } },
+      mockContext as any
+    );
+
+    // Resume succeeded — must not surface an error that would cause the LLM to retry.
+    expect(result).toEqual({
+      results: [
+        {
+          type: 'other',
+          data: {
+            resumed: true,
+            execution: { execution_id: 'exec-1', status: 'unknown' },
+          },
+        },
+      ],
+    });
+  });
+
   it('should handle null execution state after resume', async () => {
     const wm = createWorkflowsManagement();
     const tool = resumeWorkflowExecutionTool({ workflowsManagement: wm as any });
