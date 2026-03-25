@@ -58,6 +58,7 @@ export function registerGetExplorationHistoryRoute({ router, logger }: AESOPRout
                 error_message: source.error_message,
                 agent_role: source.config?.agent_role || 'unknown',
                 indices_discovered: source.metrics?.indices_explored ?? source.config?.scoped_indices?.length ?? 0,
+                scoped_indices: source.config?.scoped_indices || [],
                 relationships_found: source.metrics?.relationships_discovered ?? 0,
                 patterns_identified: source.metrics?.patterns_found ?? 0,
                 skills_proposed: source.metrics?.skills_generated ?? 0,

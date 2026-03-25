@@ -27,7 +27,7 @@ import {
   EuiCallOut,
   EuiSuperSelect,
 } from '@elastic/eui';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useHistory } from 'react-router-dom';
 import { useEvalsApi } from '../../hooks/use_evals_api';
 import { useLLMConnectors } from '../../hooks/use_llm_connectors';
@@ -54,6 +54,12 @@ interface ProposedSkill {
     status: 'pending_review' | 'approved' | 'rejected';
     reviewed_by?: string;
   };
+  improvement_type?: 'new' | 'improvement' | 'customization';
+  base_skill?: {
+    id: string;
+    name: string;
+    readonly: boolean;
+  };
   cross_evaluation?: {
     triggered_by_rejection: string;
     action: 'auto_rejected' | 'flagged';
@@ -65,9 +71,11 @@ interface ProposedSkill {
 
 export const ProposedSkillsList = () => {
   const api = useEvalsApi();
+  const queryClient = useQueryClient();
   const history = useHistory();
   const [selectedSkill, setSelectedSkill] = useState<ProposedSkill | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending_review'>('pending_review');
+  const [derivedFromFilter, setDerivedFromFilter] = useState<string>('all');
   const [discoveryConnectorId, setDiscoveryConnectorId] = useState<string>('');
   const { data: connectors } = useLLMConnectors();
 
@@ -83,10 +91,10 @@ export const ProposedSkillsList = () => {
 
   // Fetch proposed skills
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['aesop', 'proposed-skills', statusFilter],
+    queryKey: ['aesop', 'proposed-skills', statusFilter, derivedFromFilter],
     queryFn: async () => {
       const response = await api.http.get('/internal/aesop/skills/proposed', {
-        query: { status: statusFilter },
+        query: { status: statusFilter, derived_from: derivedFromFilter },
         version: '1',
       });
       return response as { skills: ProposedSkill[]; total: number };
@@ -121,8 +129,10 @@ export const ProposedSkillsList = () => {
       });
     },
     onSuccess: () => {
+      // Immediately refetch history to pick up the new "running" execution
+      queryClient.invalidateQueries({ queryKey: ['aesop', 'exploration-history'] });
       api.notifications.toasts.addSuccess(
-        'Skill discovery started with LLM — higher quality skills will appear when exploration completes'
+        'Skill discovery started — skills will appear when exploration completes'
       );
     },
     onError: (err: Error) => {
@@ -140,6 +150,14 @@ export const ProposedSkillsList = () => {
       render: (name: string, skill: ProposedSkill) => (
         <EuiText size="s">
           <strong>{name}</strong>
+          {skill.base_skill && (
+            <>
+              <br />
+              <EuiBadge color="accent" iconType="wrench">
+                Improves: {skill.base_skill.name}
+              </EuiBadge>
+            </>
+          )}
           <br />
           <small style={{ color: '#69707D' }}>{skill.description}</small>
         </EuiText>
@@ -294,11 +312,20 @@ export const ProposedSkillsList = () => {
                         />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiStat
-                          title={lastExploration.indices_discovered || 0}
-                          description="Indices Explored"
-                          titleSize="xs"
-                        />
+                        <EuiToolTip
+                          position="bottom"
+                          content={
+                            lastExploration.scoped_indices?.length > 0
+                              ? lastExploration.scoped_indices.join('\n')
+                              : 'Index names not available'
+                          }
+                        >
+                          <EuiStat
+                            title={lastExploration.indices_discovered || 0}
+                            description="Indices Explored"
+                            titleSize="xs"
+                          />
+                        </EuiToolTip>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiStat
@@ -373,6 +400,21 @@ export const ProposedSkillsList = () => {
               >
                 All Skills
               </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} style={{ borderLeft: '1px solid #D3DAE6', paddingLeft: 8 }}>
+              <EuiFlexGroup gutterSize="xs">
+                {(['all', 'llm', 'conversations', 'patterns', 'relationships', 'skill_improvement'] as const).map((source) => (
+                  <EuiFlexItem key={source} grow={false}>
+                    <EuiBadge
+                      color={derivedFromFilter === source ? 'primary' : 'hollow'}
+                      onClick={() => setDerivedFromFilter(source)}
+                      onClickAriaLabel={`Filter by ${source}`}
+                    >
+                      {source === 'all' ? 'All Sources' : source}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
 
