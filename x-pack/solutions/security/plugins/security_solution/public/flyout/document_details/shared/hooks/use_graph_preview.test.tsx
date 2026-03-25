@@ -17,9 +17,9 @@ import { useHasGraphVisualizationLicense } from '../../../../common/hooks/use_ha
 jest.mock('../../../../common/hooks/use_has_graph_visualization_license');
 const mockUseHasGraphVisualizationLicense = useHasGraphVisualizationLicense as jest.Mock;
 
-jest.mock('@kbn/kibana-react-plugin/public');
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-const mockUseUiSetting = useUiSetting$ as jest.Mock;
+jest.mock('../../../../entity_analytics/components/entity_store/hooks/use_entity_store');
+import { useEntityStoreStatus } from '../../../../entity_analytics/components/entity_store/hooks/use_entity_store';
+const mockUseEntityStoreStatus = useEntityStoreStatus as jest.Mock;
 
 const alertMockGetFieldsData: GetFieldsData = (field: string) => {
   if (field === 'kibana.alert.uuid') {
@@ -60,8 +60,8 @@ describe('useGraphPreview', () => {
     jest.clearAllMocks();
     // Default mock: graph visualization feature is available
     mockUseHasGraphVisualizationLicense.mockReturnValue(true);
-    // Default mock: UI setting is enabled
-    mockUseUiSetting.mockReturnValue([true, jest.fn()]);
+    // Default mock: entity store is running
+    mockUseEntityStoreStatus.mockReturnValue({ data: { status: 'running' } });
   });
 
   it(`should return false when missing actor and target`, () => {
@@ -96,6 +96,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: false,
+      hasGraphData: false,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: [],
@@ -118,6 +119,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: false,
+      hasGraphData: false,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['userActorId'],
@@ -155,6 +157,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: false,
+      hasGraphData: false,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: [],
@@ -192,6 +195,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: false,
+      hasGraphData: false,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['userActorId'],
@@ -225,6 +229,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: false,
+      hasGraphData: false,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: [],
       actorIds: ['userActorId'],
@@ -258,6 +263,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: false,
+      hasGraphData: false,
       timestamp: null,
       eventIds: ['eventId'],
       actorIds: ['userActorId'],
@@ -283,6 +289,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: true,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['userActorId'],
@@ -324,6 +331,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: true,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['id1', 'id2'],
       actorIds: ['userActorId1', 'userActorId2'],
@@ -349,6 +357,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: true,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['userActorId'],
@@ -388,6 +397,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: true,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['id1', 'id2'],
       actorIds: ['userActorId1', 'userActorId2'],
@@ -427,6 +437,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: true,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['userActorId'],
@@ -466,6 +477,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: true,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['hostActorId'],
@@ -505,6 +517,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: true,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['serviceActorId'],
@@ -544,6 +557,7 @@ describe('useGraphPreview', () => {
 
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: true,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['entityActorId'],
@@ -572,6 +586,7 @@ describe('useGraphPreview', () => {
     expect(hookResult.result.current.shouldShowGraph).toBe(false);
     expect(hookResult.result.current).toStrictEqual({
       shouldShowGraph: false,
+      hasGraphData: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
       actorIds: ['userActorId'],
@@ -581,8 +596,8 @@ describe('useGraphPreview', () => {
     });
   });
 
-  it('should return false for shouldShowGraph when UI setting is disabled', () => {
-    mockUseUiSetting.mockReturnValue([false, jest.fn()]);
+  it('should return false for shouldShowGraph when entity store is not running', () => {
+    mockUseEntityStoreStatus.mockReturnValue({ data: { status: 'not_installed' } });
 
     const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
       initialProps: {

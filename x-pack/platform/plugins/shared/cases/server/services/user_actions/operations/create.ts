@@ -6,7 +6,7 @@
  */
 
 import type { SavedObject, SavedObjectsBulkResponse } from '@kbn/core/server';
-import { get, isEmpty } from 'lodash';
+import { get, isEmpty, pickBy } from 'lodash';
 import type {
   CaseAssignees,
   CaseCustomField,
@@ -48,6 +48,7 @@ import {
   isCaseSettings,
   isCustomFieldsArray,
   isStringArray,
+  isExtendedFields,
 } from '../type_guards';
 import type { IndexRefresh } from '../../types';
 import { UserActionAuditLogger } from '../audit_logger';
@@ -147,6 +148,8 @@ export class UserActionPersister {
         originalValue,
         newValue,
       });
+    } else if (field === UserActionTypes.extended_fields && isExtendedFields(newValue)) {
+      return this.buildExtendedFieldsUserActions(params);
     } else if (isUserActionType(field) && newValue !== undefined) {
       const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes[field]);
       const fieldUserAction = userActionBuilder?.build({
@@ -160,6 +163,29 @@ export class UserActionPersister {
     }
 
     return [];
+  }
+
+  private buildExtendedFieldsUserActions(params: GetUserActionItemByDifference): UserActionEvent[] {
+    const { originalValue, newValue, caseId, owner, user } = params;
+    // Only record the fields that actually changed, not the full merged object.
+    const oldFields = isExtendedFields(originalValue) ? originalValue : {};
+    const changedFields = pickBy(
+      isExtendedFields(newValue) ? newValue : {},
+      (value, key) => oldFields[key] !== value
+    );
+
+    if (Object.keys(changedFields).length === 0) {
+      return [];
+    }
+
+    const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes.extended_fields);
+    const fieldUserAction = userActionBuilder?.build({
+      caseId,
+      owner,
+      user,
+      payload: { extended_fields: changedFields },
+    });
+    return fieldUserAction ? [fieldUserAction] : [];
   }
 
   private buildAssigneesUserActions(params: TypedUserActionDiffedItems<CaseUserProfile>) {

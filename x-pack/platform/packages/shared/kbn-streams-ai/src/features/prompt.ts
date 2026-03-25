@@ -132,6 +132,33 @@ const featuresSchema = {
         ],
       },
     },
+    ignored_features: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          feature_id: {
+            type: 'string',
+            description: 'The id of the new feature that matched an excluded one.',
+          },
+          feature_title: {
+            type: 'string',
+            description: 'The title of the matched new feature.',
+          },
+          excluded_feature_id: {
+            type: 'string',
+            description: 'The id of the excluded feature it matched.',
+          },
+          reason: {
+            type: 'string',
+            description: 'Why this feature matches the excluded one.',
+          },
+        },
+        required: ['feature_id', 'feature_title', 'excluded_feature_id', 'reason'],
+      },
+      description:
+        'Features not generated because they match an excluded feature. Empty array if no excluded features were provided or no matches found.',
+    },
   },
   required: ['features'],
 } as const;
@@ -141,6 +168,7 @@ export function createIdentifyFeaturesPrompt({ systemPrompt }: { systemPrompt: s
     name: 'identify_features',
     input: z.object({
       sample_documents: z.string(),
+      excluded_features: z.string(),
     }),
   })
     .version({

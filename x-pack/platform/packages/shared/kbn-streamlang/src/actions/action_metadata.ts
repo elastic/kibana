@@ -808,6 +808,52 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     ],
   },
 
+  json_extract: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.jsonExtract.name', {
+      defaultMessage: 'JSON Extract',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.jsonExtract.description', {
+      defaultMessage: 'Extract values from JSON strings using JSONPath-like selectors',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.jsonExtract.usage', {
+      defaultMessage:
+        'Provide a `field` containing the JSON string and an array of `extractions` with `selector` (JSONPath-like path) and `target_field` pairs to extract specific values.',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.jsonExtract.examples.simple', {
+          defaultMessage: 'Extract a simple top-level field',
+        }),
+        yaml: `- action: json_extract
+  field: message
+  extractions:
+    - selector: user_id
+      target_field: user.id`,
+      },
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.jsonExtract.examples.nested', {
+          defaultMessage: 'Extract nested values using dot notation',
+        }),
+        yaml: `- action: json_extract
+  field: message
+  extractions:
+    - selector: "$.metadata.client.ip"
+      target_field: client_ip
+    - selector: "items[0].name"
+      target_field: first_item_name`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.jsonExtract.tips.selector', {
+        defaultMessage:
+          "Selectors support dot notation (user.name), bracket notation (['user']['name']), and array indices (items[0])",
+      }),
+      i18n.translate('xpack.streamlang.actionMetadata.jsonExtract.tips.root', {
+        defaultMessage: 'The $ root selector is optional and can be omitted',
+      }),
+    ],
+  },
+
   manual_ingest_pipeline: {
     name: i18n.translate('xpack.streamlang.actionMetadata.manualIngestPipeline.name', {
       defaultMessage: 'Manual Ingest Pipeline',
