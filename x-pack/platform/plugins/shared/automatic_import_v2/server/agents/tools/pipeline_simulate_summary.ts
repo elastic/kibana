@@ -79,7 +79,9 @@ export async function runLightweightIngestSimulateSummary(
     lines.push(`ALL ${totalSamples} samples succeeded (100%).`);
   } else {
     lines.push(
-      `${successfulCount}/${totalSamples} succeeded (${successRate.toFixed(1)}%), ${failedCount} failed.`
+      `${successfulCount}/${totalSamples} succeeded (${successRate.toFixed(
+        1
+      )}%), ${failedCount} failed.`
     );
   }
 
@@ -116,7 +118,11 @@ export async function runLightweightIngestSimulateSummary(
     const display = Object.fromEntries(
       Object.entries(mergedFields).map(([k, vs]) => [k, vs.length === 1 ? vs[0] : vs])
     );
-    lines.push('', 'All fields seen across samples (with example values):', JSON.stringify(display));
+    lines.push(
+      '',
+      'All fields seen across samples (with example values):',
+      JSON.stringify(display)
+    );
   }
 
   if (failedCount > 0) {
@@ -132,7 +138,10 @@ export async function runLightweightIngestSimulateSummary(
     }
   }
 
-  lines.push('', 'Note: This is ingest simulation only — ECS/category checks are in validate_pipeline.');
+  lines.push(
+    '',
+    'Note: This is ingest simulation only — ECS/category checks are in validate_pipeline.'
+  );
 
   return lines.join('\n');
 }

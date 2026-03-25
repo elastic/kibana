@@ -14,6 +14,7 @@ import { z } from '@kbn/zod/v4';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { TASK_TOOL_DESCRIPTION } from '../prompts';
 import { AutomaticImportAgentState } from '../state';
+import type { AutomaticImportAgentStateType } from '../state';
 import type { SubAgent } from '../types';
 import {
   BOILERPLATE_PROCESSOR_COUNT,
@@ -39,8 +40,7 @@ type ContextBuilder = (
 ) => string;
 
 const hasPipelineProcessors = (state: AutomaticImportAgentStateType): boolean =>
-  Array.isArray(state.current_pipeline?.processors) &&
-  state.current_pipeline.processors.length > 0;
+  Array.isArray(state.current_pipeline?.processors) && state.current_pipeline.processors.length > 0;
 
 const wrapTask = (taskDescription: string, ...extraBlocks: string[]): string =>
   ['<task>', taskDescription, '</task>', ...extraBlocks].join('\n');
@@ -234,14 +234,14 @@ export const createTaskTool = (params: TaskToolParams) => {
 
   return tool(
     async (input: { description: string; subagent_name: string }, config: ToolRunnableConfig) => {
-      const toolCallId = config?.toolCall?.id as string;
+      const toolCallId = config?.toolCall?.id ?? '';
       const subAgent = agentsMap.get(input.subagent_name);
 
       const taskDescription = injectPipelineState(input.description, input.subagent_name, samples);
 
-      let parentState: z.infer<typeof AutomaticImportAgentState> | undefined;
+      let parentState: AutomaticImportAgentStateType | undefined;
       try {
-        parentState = getCurrentTaskInput<z.infer<typeof AutomaticImportAgentState>>();
+        parentState = getCurrentTaskInput<AutomaticImportAgentStateType>();
       } catch {
         // Parent state unavailable — sub-agent starts with defaults
       }

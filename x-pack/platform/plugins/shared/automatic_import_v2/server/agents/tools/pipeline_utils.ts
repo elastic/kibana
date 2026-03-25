@@ -90,7 +90,7 @@ export const stripBoilerplateFields = (
 
 export interface SimulationResults {
   failedSamples: FailedSample[];
-  successfulDocuments: Array<estypes.IngestDocumentSimulation['doc']>;
+  successfulDocuments: Array<Record<string, unknown>>;
   successfulCount: number;
 }
 
@@ -98,10 +98,7 @@ export interface SimulationResults {
  * Flattens a nested document into dot-notation key → primitive-value pairs.
  * Arrays are kept as-is (not recursed into) so array values are preserved.
  */
-export const flattenDoc = (
-  obj: Record<string, unknown>,
-  prefix = ''
-): Record<string, unknown> => {
+export const flattenDoc = (obj: Record<string, unknown>, prefix = ''): Record<string, unknown> => {
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(obj)) {
     const path = prefix ? `${prefix}.${key}` : key;
@@ -119,7 +116,7 @@ export const processSimulationResults = (
   samples: string[]
 ): SimulationResults => {
   const failedSamples: FailedSample[] = [];
-  const successfulDocuments: Array<estypes.IngestDocumentSimulation['doc']> = [];
+  const successfulDocuments: Array<Record<string, unknown>> = [];
   let successfulCount = 0;
 
   response.docs.forEach((doc, index) => {

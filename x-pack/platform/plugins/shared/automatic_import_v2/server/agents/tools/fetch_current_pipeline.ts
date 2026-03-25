@@ -58,7 +58,7 @@ export function fetchCurrentPipelineTool(): DynamicStructuredTool {
                   has_pipeline: false,
                   message: 'No current pipeline available in state.',
                 }),
-                tool_call_id: config?.toolCall?.id as string,
+                tool_call_id: config?.toolCall?.id ?? '',
               }),
             ],
           },
@@ -91,7 +91,7 @@ export function fetchCurrentPipelineTool(): DynamicStructuredTool {
           messages: [
             new ToolMessage({
               content: JSON.stringify(result),
-              tool_call_id: config?.toolCall?.id as string,
+              tool_call_id: config?.toolCall?.id ?? '',
             }),
           ],
         },

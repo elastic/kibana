@@ -104,7 +104,7 @@ export function ingestPipelineValidatorTool(options: ValidatorToolOptions): Dyna
       _runManager?: CallbackManagerForToolRun,
       config?: ToolRunnableConfig
     ) => {
-      const toolCallId = config?.toolCall?.id as string;
+      const toolCallId = config?.toolCall?.id ?? '';
       const state = getCurrentTaskInput<AutomaticImportAgentStateType>();
       const currentPipeline = state.current_pipeline;
 

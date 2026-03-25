@@ -327,15 +327,6 @@ export class TaskManagerService {
           `Data stream ${dataStreamId} marked as failed for integration ${integrationId}`
         );
       } catch (updateError) {
-        this.reportDataStreamCreationComplete({
-          integrationId,
-          integrationName,
-          dataStreamId,
-          dataStreamName,
-          durationMs: Date.now() - startTime,
-          success: false,
-          errorMessage,
-        });
         this.logger.error(
           `Failed to mark data stream ${dataStreamId} as failed: ${JSON.stringify(updateError)}`
         );
@@ -347,7 +338,8 @@ export class TaskManagerService {
         dataStreamId,
         dataStreamName,
         durationMs: Date.now() - startTime,
-        success: true,
+        success: false,
+        errorMessage,
       });
 
       if (isUnrecoverableByStatus(error))

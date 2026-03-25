@@ -60,6 +60,13 @@ const applyOperations = (
     const insertAfterMap = new Map<number, unknown[]>();
     for (const { index: idx, processors: procs = [] } of operations) {
       const label = `insert@${idx}`;
+      if (idx < -1) {
+        warnings.push(
+          `${label}: negative index ${idx} is not supported; only -1 (prepend) is allowed. Skipped.`
+        );
+        applied.push(`${label}: skipped (unsupported negative index)`);
+        continue;
+      }
       if (procs.length === 0) {
         applied.push(`${label}: skipped (no processors provided)`);
         continue;
@@ -211,7 +218,7 @@ export function modifyPipelineTool(options: ModifyPipelineToolOptions): DynamicS
         processors: updatedProcessors,
         applied,
         warnings,
-      } = applyOperations(currentPipeline.processors, input.operations as Operation[]);
+      } = applyOperations(processors, input.operations as Operation[]);
 
       const updatedPipeline = {
         ...currentPipeline,
@@ -258,7 +265,7 @@ export function modifyPipelineTool(options: ModifyPipelineToolOptions): DynamicS
           messages: [
             new ToolMessage({
               content: response,
-              tool_call_id: config?.toolCall?.id as string,
+              tool_call_id: config?.toolCall?.id ?? '',
             }),
           ],
         },

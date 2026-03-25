@@ -42,7 +42,7 @@ export const createSubmitTool = (config: CreateSubmitToolConfig): DynamicStructu
           messages: [
             new ToolMessage({
               content: `${config.contentLabel} stored. Summary: ${input.summary}`,
-              tool_call_id: toolConfig?.toolCall?.id as string,
+              tool_call_id: toolConfig?.toolCall?.id ?? '',
             }),
           ],
         },
