@@ -105,6 +105,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Streams
   'streams-exploration',
+  'sig-events-memory',
 
   // Platform – Workflows
   'workflow-authoring',
