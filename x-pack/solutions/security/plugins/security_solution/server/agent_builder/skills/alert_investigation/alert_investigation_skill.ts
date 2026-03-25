@@ -16,6 +16,7 @@ import {
   CASE_MATCHING_TOOL_ID,
 } from '../../tools/case_matching_tool';
 import { SECURITY_ALERTS_TOOL_ID } from '../../tools/alerts_tool';
+import { RUN_INVESTIGATION_PIPELINE_TOOL_ID } from '../../tools/run_investigation_pipeline_tool';
 
 const skillContent = `
 # Alert Investigation Pipeline Skill
@@ -31,10 +32,29 @@ Use this skill when:
 - An analyst wants to determine if alerts are duplicates, extract IOCs, and find related cases
 - An analyst asks "what should I do with these alerts?"
 - Building an investigation timeline from raw alerts
+- An analyst asks to "run the pipeline", "process all open alerts", or "triage unreviewed alerts"
 
-## Investigation Workflow
+## Quick Mode: Run Full Pipeline
 
-Follow these steps IN ORDER for a complete investigation:
+If the analyst wants to process ALL unprocessed alerts at once (not specific alert IDs), use
+\`security.run_investigation_pipeline\` which runs the complete E2E pipeline in one call:
+
+\`\`\`
+security.run_investigation_pipeline({
+  max_alerts: 100,        // How many alerts to process
+  lookback_minutes: 15,   // How far back to look
+  dry_run: true           // Preview without changes
+})
+\`\`\`
+
+This fetches unprocessed alerts, deduplicates, extracts entities, and returns a full report.
+Use this when the analyst says "run the pipeline" or "what alerts need attention?"
+
+For investigating SPECIFIC alerts (by ID), use the step-by-step workflow below instead.
+
+## Step-by-Step Workflow
+
+Follow these steps IN ORDER for investigating specific alerts:
 
 ### Step 1: Fetch Alerts
 Use \`security.alerts\` to retrieve the alerts the analyst wants to investigate.
@@ -138,12 +158,14 @@ export const getAlertInvestigationSkill = () =>
     name: 'alert-investigation',
     basePath: 'skills/security/alert-investigation',
     description:
-      'Orchestrate a multi-step security alert investigation: deduplicate alerts, extract entities/IOCs, ' +
-      'find related cases, assess risk, and provide structured triage recommendations. ' +
-      'Use when an analyst wants to investigate, triage, or process a batch of security alerts.',
+      'Run the full Alert Investigation Pipeline or orchestrate individual investigation steps. ' +
+      'Supports both quick mode (process all open alerts in one call) and step-by-step mode ' +
+      '(deduplicate, extract entities, match cases individually). ' +
+      'Use when an analyst wants to investigate, triage, run the pipeline, or process alerts.',
     content: skillContent,
     getInlineTools: () => [],
     getRegistryTools: () => [
+      RUN_INVESTIGATION_PIPELINE_TOOL_ID,
       SECURITY_ALERTS_TOOL_ID,
       ALERT_DEDUPLICATION_TOOL_ID,
       ENTITY_EXTRACTION_TOOL_ID,
