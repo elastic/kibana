@@ -7,19 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  DocViewer,
-  type DocViewerProps,
-  type DocViewerApi,
-  type DocViewerRestorableState,
-  DocViewsRegistry,
-  ElasticRequestState,
-  FieldName,
-  registerDocViewerAnalyticsEvents,
-  type UseDocViewerSpanLogViewedEventParams,
-  type UseDocViewerTabViewedEventParams,
-  type UseDocViewerViewedEventParams,
-  useDocViewerSpanLogViewedEvent,
-  useDocViewerTabViewedEvent,
-  useDocViewerViewedEvent,
-} from './src';
+import { createRestorableStateProvider } from '@kbn/restorable-state';
+import type { DocViewerRestorableState } from '../../types';
+
+export const { withRestorableState, useRestorableState } =
+  createRestorableStateProvider<DocViewerRestorableState>();
