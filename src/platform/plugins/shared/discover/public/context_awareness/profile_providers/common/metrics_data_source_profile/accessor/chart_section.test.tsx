@@ -30,7 +30,6 @@ import {
   useInternalStateDispatch,
 } from '../../../../../application/main/state_management/redux';
 import { useScopedServices } from '../../../../../components/scoped_services_provider/scoped_services_provider';
-import type { MetricsTelemetry } from '@kbn/unified-chart-section-viewer';
 
 type UnifiedGridProps = ChartSectionProps & {
   actions: ChartSectionConfigurationExtensionParams['actions'];
