@@ -322,11 +322,14 @@ describe('Endpoint Authz service', () => {
     );
 
     it.each`
-      privilege              | expectedResult | roles                      | description
-      ${'canReadAdminData'}  | ${true}        | ${['superuser', 'role-2']} | ${'user has superuser role'}
-      ${'canWriteAdminData'} | ${true}        | ${['superuser', 'role-2']} | ${'user has superuser role'}
-      ${'canReadAdminData'}  | ${false}       | ${['role-2']}              | ${'user does NOT have superuser role'}
-      ${'canWriteAdminData'} | ${false}       | ${['role-2']}              | ${'user does NOT superuser role'}
+      privilege                                | expectedResult | roles                      | description
+      ${'canReadAdminData'}                    | ${true}        | ${['superuser', 'role-2']} | ${'user has superuser role'}
+      ${'canWriteAdminData'}                   | ${true}        | ${['superuser', 'role-2']} | ${'user has superuser role'}
+      ${'canOptInPerPolicyEndpointExceptions'} | ${true}        | ${['superuser', 'role-2']} | ${'user has superuser role'}
+      ${'canOptInPerPolicyEndpointExceptions'} | ${true}        | ${['admin', 'role-2']}     | ${'user has admin role'}
+      ${'canReadAdminData'}                    | ${false}       | ${['role-2']}              | ${'user does NOT have superuser role'}
+      ${'canWriteAdminData'}                   | ${false}       | ${['role-2']}              | ${'user does NOT superuser role'}
+      ${'canOptInPerPolicyEndpointExceptions'} | ${false}       | ${['role-2']}              | ${'user does NOT have superuser role'}
     `(
       'should set `$privilege` to `$expectedResult` when $description',
       ({ privilege, expectedResult, roles }) => {
@@ -385,6 +388,7 @@ describe('Endpoint Authz service', () => {
         canReadEventFilters: false,
         canReadEndpointExceptions: false,
         canWriteEndpointExceptions: false,
+        canOptInPerPolicyEndpointExceptions: false,
         canReadAdminData: false,
         canWriteAdminData: false,
         canReadScriptsLibrary: false,

@@ -57,6 +57,7 @@ describe('When on the endpoint exceptions page', () => {
         mockUserPrivileges.mockReturnValue({
           endpointPrivileges: getEndpointAuthzInitialStateMock({
             canWriteEndpointExceptions: true,
+            canOptInPerPolicyEndpointExceptions: false,
           }),
         });
       });
@@ -77,6 +78,7 @@ describe('When on the endpoint exceptions page', () => {
         mockUserPrivileges.mockReturnValue({
           endpointPrivileges: getEndpointAuthzInitialStateMock({
             canWriteEndpointExceptions: false,
+            canOptInPerPolicyEndpointExceptions: false,
           }),
         });
       });
@@ -123,6 +125,7 @@ describe('When on the endpoint exceptions page', () => {
       mockUserPrivileges.mockReturnValue({
         endpointPrivileges: getEndpointAuthzInitialStateMock({
           canWriteEndpointExceptions: true,
+          canOptInPerPolicyEndpointExceptions: true,
         }),
       });
     });
@@ -181,6 +184,43 @@ describe('When on the endpoint exceptions page', () => {
 
           await waitFor(() => expect(optInGetMock).toHaveBeenCalled());
           expect(renderResult.queryByTestId(CALLOUT)).not.toBeInTheDocument();
+        });
+      });
+
+      describe('RBAC', () => {
+        it('should show the update details button if user has superuser role', async () => {
+          mockUserPrivileges.mockReturnValue({
+            endpointPrivileges: getEndpointAuthzInitialStateMock({
+              canWriteEndpointExceptions: true,
+              canOptInPerPolicyEndpointExceptions: true,
+            }),
+          });
+
+          render();
+
+          await waitFor(() => {
+            expect(renderResult.queryByTestId(CALLOUT)).toBeInTheDocument();
+            expect(renderResult.queryByTestId(UPDATE_DETAILS_BTN)).toBeInTheDocument();
+          });
+        });
+
+        it('should show "Contact your admin" if user does not have superuser role', async () => {
+          mockUserPrivileges.mockReturnValue({
+            endpointPrivileges: getEndpointAuthzInitialStateMock({
+              canWriteEndpointExceptions: true,
+              canOptInPerPolicyEndpointExceptions: false,
+            }),
+          });
+
+          render();
+
+          await waitFor(() => {
+            expect(renderResult.queryByTestId(CALLOUT)).toBeInTheDocument();
+            expect(
+              renderResult.queryByText(/Contact your administrator to update details/)
+            ).toBeInTheDocument();
+            expect(renderResult.queryByTestId(UPDATE_DETAILS_BTN)).not.toBeInTheDocument();
+          });
         });
       });
 

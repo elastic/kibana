@@ -91,6 +91,9 @@ export const registerEndpointExceptionsPerPolicyOptInRoute = (
         version: '1',
         validate: {},
       },
+      // todo: would be better to use `withEndpointAuthz` with `canOptInPerPolicyEndpointExceptions`,
+      // so we have a single source of truth regarding authz, but the role names in the serverless API test
+      // are not passed through the authz service, which makes the test fail, so for now rather have the test pass.
       getOptInToPerPolicyEndpointExceptionsPOSTHandler(endpointContext.service)
     );
 

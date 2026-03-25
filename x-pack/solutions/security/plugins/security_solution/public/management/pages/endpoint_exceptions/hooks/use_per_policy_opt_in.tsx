@@ -7,6 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { EndpointExceptionsPerPolicyOptInCallout } from '../view/components/per_policy_opt_in_callout';
 import { EndpointExceptionsPerPolicyOptInModal } from '../view/components/per_policy_opt_in_modal';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
@@ -23,6 +24,7 @@ export const usePerPolicyOptIn = (): {
 } => {
   const { sessionStorage } = useKibana().services;
   const toasts = useToasts();
+  const { canOptInPerPolicyEndpointExceptions } = useUserPrivileges().endpointPrivileges;
 
   const { mutate, isLoading } = useSendEndpointExceptionsPerPolicyOptIn();
   const { data: isPerPolicyOptIn } = useGetEndpointExceptionsPerPolicyOptIn();
@@ -81,6 +83,7 @@ export const usePerPolicyOptIn = (): {
       <EndpointExceptionsPerPolicyOptInCallout
         onDismiss={handleOnDismissCallout}
         onClickUpdateDetails={handleOnClickUpdateDetails}
+        canOptIn={canOptInPerPolicyEndpointExceptions}
       />
     ) : null,
 

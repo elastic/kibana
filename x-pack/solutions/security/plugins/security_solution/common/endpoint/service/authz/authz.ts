@@ -67,6 +67,7 @@ export const calculateEndpointAuthz = (
 ): EndpointAuthz => {
   const hasAuth = hasAuthFactory(fleetAuthz, productFeaturesService);
   const hasSuperuserRole = userRoles.includes('superuser');
+  const hasAdminRole = userRoles.includes('admin');
 
   const isPlatinumPlusLicense = licenseService.isPlatinumPlus();
   const isEnterpriseLicense = licenseService.isEnterprise();
@@ -102,6 +103,7 @@ export const calculateEndpointAuthz = (
 
   const canReadEndpointExceptions = hasAuth('showEndpointExceptions');
   const canWriteEndpointExceptions = hasAuth('crudEndpointExceptions');
+  const canOptInPerPolicyEndpointExceptions = hasSuperuserRole || hasAdminRole;
 
   const canManageGlobalArtifacts = hasAuth('writeGlobalArtifacts');
 
@@ -180,6 +182,7 @@ export const calculateEndpointAuthz = (
     canReadEventFilters,
     canReadEndpointExceptions,
     canWriteEndpointExceptions,
+    canOptInPerPolicyEndpointExceptions,
     canManageGlobalArtifacts,
 
     // ---------------------------------------------------------
@@ -255,6 +258,7 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canReadEventFilters: false,
     canReadEndpointExceptions: false,
     canWriteEndpointExceptions: false,
+    canOptInPerPolicyEndpointExceptions: false,
     canManageGlobalArtifacts: false,
     canReadWorkflowInsights: false,
     canWriteWorkflowInsights: false,

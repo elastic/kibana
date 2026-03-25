@@ -8,14 +8,16 @@
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface EndpointExceptionsPerPolicyOptInCalloutProps {
   onDismiss: () => void;
   onClickUpdateDetails: () => void;
+  canOptIn: boolean;
 }
 
 export const EndpointExceptionsPerPolicyOptInCallout: React.FC<EndpointExceptionsPerPolicyOptInCalloutProps> =
-  memo(({ onDismiss, onClickUpdateDetails }) => {
+  memo(({ onDismiss, onClickUpdateDetails, canOptIn }) => {
     return (
       <EuiCallOut
         title={i18n.translate(
@@ -29,42 +31,49 @@ export const EndpointExceptionsPerPolicyOptInCallout: React.FC<EndpointException
         onDismiss={onDismiss}
         data-test-subj="endpointExceptionsPerPolicyOptInCallout"
       >
-        {i18n.translate(
-          'xpack.securitySolution.endpointExceptions.perPolicyOptInCalloutDescription',
-          {
-            defaultMessage:
-              'Endpoint exceptions can now be applied on a per-policy basis. Update existing Endpoint Exceptions to the policy-based model.',
-          }
-        )}
+        <FormattedMessage
+          id="xpack.securitySolution.endpointExceptions.perPolicyOptInCalloutDescription"
+          defaultMessage="Endpoint exceptions can now be applied on a per-policy basis. Update existing Endpoint Exceptions to the policy-based model."
+        />
 
         <EuiSpacer size="m" />
 
-        <EuiFlexGroup>
-          <EuiButton
-            color="primary"
-            fill
-            size="s"
-            onClick={onClickUpdateDetails}
-            data-test-subj="updateDetailsEndpointExceptionsPerPolicyOptInButton"
-          >
-            {i18n.translate('xpack.securitySolution.endpointExceptions.perPolicyOptInCalloutCta', {
-              defaultMessage: 'Update details',
-            })}
-          </EuiButton>
+        {canOptIn ? (
+          <EuiFlexGroup>
+            <EuiButton
+              color="primary"
+              fill
+              size="s"
+              onClick={onClickUpdateDetails}
+              data-test-subj="updateDetailsEndpointExceptionsPerPolicyOptInButton"
+            >
+              {i18n.translate(
+                'xpack.securitySolution.endpointExceptions.perPolicyOptInCalloutCta',
+                {
+                  defaultMessage: 'Update details',
+                }
+              )}
+            </EuiButton>
 
-          <EuiButton
-            color="primary"
-            size="s"
-            data-test-subj="learnMoreEndpointExceptionsPerPolicyOptInButton"
-          >
-            {i18n.translate(
-              'xpack.securitySolution.endpointExceptions.perPolicyOptInCalloutLearnMore',
-              {
-                defaultMessage: 'Learn more', // TODO: Update with actual link to docs once available
-              }
-            )}
-          </EuiButton>
-        </EuiFlexGroup>
+            <EuiButton
+              color="primary"
+              size="s"
+              data-test-subj="learnMoreEndpointExceptionsPerPolicyOptInButton"
+            >
+              {i18n.translate(
+                'xpack.securitySolution.endpointExceptions.perPolicyOptInCalloutLearnMore',
+                {
+                  defaultMessage: 'Learn more', // TODO: Update with actual link to docs once available
+                }
+              )}
+            </EuiButton>
+          </EuiFlexGroup>
+        ) : (
+          <FormattedMessage
+            id="xpack.securitySolution.endpointExceptions.perPolicyOptInCalloutNoPermission"
+            defaultMessage="Contact your administrator to update details."
+          />
+        )}
       </EuiCallOut>
     );
   });

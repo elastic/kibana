@@ -22,6 +22,7 @@ describe('EndpointExceptionsPerPolicyOptInCallout', () => {
     props = {
       onDismiss: jest.fn(),
       onClickUpdateDetails: jest.fn(),
+      canOptIn: true,
     };
 
     const mockedContext = createAppRootMockRenderer();
@@ -36,6 +37,33 @@ describe('EndpointExceptionsPerPolicyOptInCallout', () => {
 
     expect(props.onDismiss).not.toHaveBeenCalled();
     expect(props.onClickUpdateDetails).not.toHaveBeenCalled();
+  });
+
+  it('displays the update details button when user has permissions', () => {
+    props.canOptIn = true;
+
+    render();
+
+    const updateDetailsButton = renderResult.getByTestId(
+      'updateDetailsEndpointExceptionsPerPolicyOptInButton'
+    );
+    expect(updateDetailsButton).toBeInTheDocument();
+  });
+
+  it('displays the contact admin message when user does not have permissions', () => {
+    props.canOptIn = false;
+
+    render();
+
+    const noPermissionMessage = renderResult.getByText(
+      'Contact your administrator to update details.'
+    );
+    expect(noPermissionMessage).toBeInTheDocument();
+
+    const updateDetailsButton = renderResult.getByTestId(
+      'updateDetailsEndpointExceptionsPerPolicyOptInButton'
+    );
+    expect(updateDetailsButton).not.toBeInTheDocument();
   });
 
   it('calls onClickUpdateDetails when update details button is clicked', () => {
