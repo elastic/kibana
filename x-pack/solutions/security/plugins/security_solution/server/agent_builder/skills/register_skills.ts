@@ -13,6 +13,7 @@ import { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting
 import { getEntityAnalyticsSkill } from './entity_analytics';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
 import { getSecurityMlJobsSkill } from './security_ml_jobs';
+import { getAlertInvestigationSkill } from './alert_investigation/alert_investigation_skill';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
@@ -51,4 +52,7 @@ export const registerSkills = async ({
   await agentBuilder.skills.register(
     getSecurityMlJobsSkill({ getStartServices, isEntityStoreV2Enabled, logger, ml })
   );
+
+  // Alert Investigation Pipeline skill
+  await agentBuilder.skills.register(getAlertInvestigationSkill());
 };
