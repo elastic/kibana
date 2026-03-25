@@ -277,12 +277,15 @@ export const EsqlQueryExpression: React.FC<
             http,
           });
           const indexPattern: string = esqlDataView.getIndexPattern();
+
           const fieldSpecs = await dataViews.getFieldsForWildcard({
             pattern: indexPattern,
             allowNoIndex: true,
             projectRouting: getProjectRoutingFromEsqlQuery(queryObj.esql),
           });
-          const currentEsFields = convertFieldSpecToFieldOption(fieldSpecs);
+
+          const currentEsFields = convertFieldSpecToFieldOption(fieldSpecs, false);
+
           const newTimeFieldOptions = getTimeFieldOptions(currentEsFields);
           const timestampField = esqlDataView.timeFieldName;
           return { newTimeFieldOptions, timestampField };
