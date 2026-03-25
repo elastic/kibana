@@ -73,7 +73,7 @@ export const responseActionsTool = (
         // Validate that process actions include a PID
         if (
           (action === 'kill_process' || action === 'suspend_process') &&
-          !parameters?.process_pid
+          parameters?.process_pid === undefined
         ) {
           return {
             results: [

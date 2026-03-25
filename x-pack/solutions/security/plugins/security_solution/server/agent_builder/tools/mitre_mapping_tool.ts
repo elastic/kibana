@@ -99,10 +99,19 @@ export const mitreMappingTool = (
           { role: 'user', content: userMessage },
         ]);
 
-        const responseText =
-          typeof response.content === 'string'
-            ? response.content
-            : JSON.stringify(response.content);
+        let responseText: string;
+        if (typeof response.content === 'string') {
+          responseText = response.content;
+        } else if (Array.isArray(response.content)) {
+          // Extract text from content block arrays (e.g., [{ type: 'text', text: '...' }])
+          const textBlock = response.content.find(
+            (block): block is { type: string; text: string } =>
+              typeof block === 'object' && block !== null && 'text' in block
+          );
+          responseText = textBlock?.text ?? JSON.stringify(response.content);
+        } else {
+          responseText = JSON.stringify(response.content);
+        }
 
         // Extract JSON from the response, handling potential markdown code blocks
         const jsonMatch = responseText.match(/\{[\s\S]*\}/);

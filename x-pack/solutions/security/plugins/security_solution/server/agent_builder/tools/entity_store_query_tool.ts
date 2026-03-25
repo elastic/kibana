@@ -74,22 +74,26 @@ const queryEntityStoreForWildcard = async ({
   entityType,
   limit = 10,
   fields,
+  timeRange,
 }: {
   esClient: ElasticsearchClient;
   index: string;
   entityType: string;
   limit: number;
   fields?: string[];
+  timeRange?: string;
 }): Promise<Array<Record<string, unknown>>> => {
+  const query = timeRange
+    ? { bool: { filter: [{ range: { '@timestamp': { gte: `now-${timeRange}` } } }] } }
+    : { match_all: {} };
+
   const response = await esClient.search<Record<string, unknown>>({
     index,
     ignore_unavailable: true,
     allow_no_indices: true,
     size: limit,
     _source: fields ?? true,
-    query: {
-      match_all: {},
-    },
+    query,
     sort: [
       {
         'entity.risk.calculated_score_norm': {
@@ -114,14 +118,32 @@ const queryEntityStoreByName = async ({
   entityType,
   identifier,
   fields,
+  timeRange,
 }: {
   esClient: ElasticsearchClient;
   index: string;
   entityType: string;
   identifier: string;
   fields?: string[];
+  timeRange?: string;
 }): Promise<Array<Record<string, unknown>>> => {
   const nameField = getEntityNameField(entityType);
+
+  const filterClauses: Array<Record<string, unknown>> = [
+    {
+      bool: {
+        should: [
+          { term: { 'entity.name': identifier } },
+          { term: { [nameField]: identifier } },
+        ],
+        minimum_should_match: 1,
+      },
+    },
+  ];
+
+  if (timeRange) {
+    filterClauses.push({ range: { '@timestamp': { gte: `now-${timeRange}` } } });
+  }
 
   const response = await esClient.search<Record<string, unknown>>({
     index,
@@ -131,11 +153,7 @@ const queryEntityStoreByName = async ({
     _source: fields ?? true,
     query: {
       bool: {
-        should: [
-          { term: { 'entity.name': identifier } },
-          { term: { [nameField]: identifier } },
-        ],
-        minimum_should_match: 1,
+        filter: filterClauses,
       },
     },
   });
@@ -172,9 +190,9 @@ export const entityStoreQueryTool = (
             const [coreStart] = await core.getStartServices();
             const esClient = coreStart.elasticsearch.client.asInternalUser;
 
-            // Check if at least one entity store index exists
+            // Check if at least one entity store index exists for this space
             const indexExists = await esClient.indices.exists({
-              index: '.entities.v1.latest.security_*',
+              index: getEntityStoreIndexName('*', spaceId),
             });
 
             if (indexExists) {
@@ -217,6 +235,7 @@ export const entityStoreQueryTool = (
             entityType,
             limit,
             fields,
+            timeRange,
           });
 
           if (entities.length === 0) {
@@ -255,6 +274,7 @@ export const entityStoreQueryTool = (
           entityType,
           identifier,
           fields,
+          timeRange,
         });
 
         if (entities.length === 0) {

@@ -386,6 +386,18 @@ describe('SOC Tools Integration', () => {
     });
 
     it('attaches multiple alerts to a case', async () => {
+      // Mock ES search for alert rule info (called before bulkCreate)
+      mockEsClient.asCurrentUser.search.mockResolvedValue({
+        hits: {
+          hits: [
+            { _id: 'alert-001', _source: { 'kibana.alert.rule.uuid': 'rule-1', 'kibana.alert.rule.name': 'Rule 1' } },
+            { _id: 'alert-002', _source: { 'kibana.alert.rule.uuid': 'rule-1', 'kibana.alert.rule.name': 'Rule 1' } },
+            { _id: 'alert-003', _source: { 'kibana.alert.rule.uuid': 'rule-2', 'kibana.alert.rule.name': 'Rule 2' } },
+            { _id: 'alert-004', _source: { 'kibana.alert.rule.uuid': 'rule-2', 'kibana.alert.rule.name': 'Rule 2' } },
+            { _id: 'alert-005', _source: { 'kibana.alert.rule.uuid': 'rule-3', 'kibana.alert.rule.name': 'Rule 3' } },
+          ],
+        },
+      } as any);
       mockCasesClient.attachments.bulkCreate.mockResolvedValue({});
 
       const result = (await tool.handler(
