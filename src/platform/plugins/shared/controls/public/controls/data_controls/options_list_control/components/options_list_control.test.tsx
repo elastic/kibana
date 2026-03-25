@@ -58,6 +58,23 @@ describe('Options list control', () => {
     expect(existsOption).toHaveTextContent('DOES NOT Exist');
   });
 
+  test('appends -loading to data-test-subj while data is loading', () => {
+    const contextMock = getOptionsListContextMock();
+    contextMock.componentApi.uuid = 'loadingTest';
+    contextMock.componentApi.setDataLoading(true);
+    const control = mountComponent(contextMock);
+    expect(control.getByTestId('optionsList-control-loadingTest-loading')).toBeInTheDocument();
+  });
+
+  test('omits -loading from data-test-subj when data is not loading', () => {
+    const contextMock = getOptionsListContextMock();
+    contextMock.componentApi.uuid = 'loadedTest';
+    contextMock.componentApi.setDataLoading(false);
+    const control = mountComponent(contextMock);
+    expect(control.queryByTestId('optionsList-control-loadedTest-loading')).not.toBeInTheDocument();
+    expect(control.getByTestId('optionsList-control-loadedTest')).toBeInTheDocument();
+  });
+
   describe('renders proper delimiter', () => {
     test('keyword field', async () => {
       const contextMock = getOptionsListContextMock();

@@ -215,7 +215,7 @@ export const OptionsListControl = ({
       aria-label={label}
       aria-expanded={isPopoverOpen}
       aria-controls={popoverId}
-      data-test-subj={`optionsList-control-${componentApi.uuid}`}
+      data-test-subj={`optionsList-control-${componentApi.uuid}${loading ? '-loading' : ''}`}
     >
       {Boolean(selectedOptionsCount) && (
         <EuiNotificationBadge color="success">{selectedOptionsCount}</EuiNotificationBadge>
