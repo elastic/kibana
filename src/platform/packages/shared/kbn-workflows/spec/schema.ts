@@ -11,6 +11,7 @@ import { z } from '@kbn/zod/v4';
 import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
 import { JsonModelSchema } from './schema/common/json_model_schema';
 import { TriggerSchema } from './schema/triggers';
+import { WorkflowInputSchema } from './schema/triggers/manual_trigger_schema';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
@@ -622,53 +623,6 @@ export const WorkflowFailStepSchema = BaseStepSchema.extend({
 }).extend(StepWithIfConditionSchema.shape);
 export type WorkflowFailStep = z.infer<typeof WorkflowFailStepSchema>;
 
-/* --- Inputs --- */
-export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
-
-const WorkflowInputBaseSchema = z.object({
-  name: z.string(),
-  description: z.string().optional(),
-  default: z.any().optional(),
-  required: z.boolean().optional(),
-});
-
-export const WorkflowInputStringSchema = WorkflowInputBaseSchema.extend({
-  type: z.literal('string'),
-  default: z.string().optional(),
-});
-
-export const WorkflowInputNumberSchema = WorkflowInputBaseSchema.extend({
-  type: z.literal('number'),
-  default: z.number().optional(),
-});
-
-export const WorkflowInputBooleanSchema = WorkflowInputBaseSchema.extend({
-  type: z.literal('boolean'),
-  default: z.boolean().optional(),
-});
-
-export const WorkflowInputChoiceSchema = WorkflowInputBaseSchema.extend({
-  type: z.literal('choice'),
-  default: z.string().optional(),
-  options: z.array(z.string()),
-});
-
-export const WorkflowInputArraySchema = WorkflowInputBaseSchema.extend({
-  type: z.literal('array'),
-  minItems: z.number().int().nonnegative().optional(),
-  maxItems: z.number().int().nonnegative().optional(),
-  default: z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]).optional(),
-});
-
-export const WorkflowInputSchema = z.union([
-  WorkflowInputStringSchema,
-  WorkflowInputNumberSchema,
-  WorkflowInputBooleanSchema,
-  WorkflowInputChoiceSchema,
-  WorkflowInputArraySchema,
-]);
-export type LegacyWorkflowInput = z.infer<typeof WorkflowInputSchema>;
-
 /* --- Outputs --- */
 // Outputs use the same format as inputs (name, type, required, etc.); default is ignored at runtime for outputs.
 export const WorkflowOutputSchema = WorkflowInputSchema;
@@ -744,14 +698,7 @@ const WorkflowSchemaBase = z.object({
   settings: WorkflowSettingsSchema.optional(),
   enabled: z.boolean().default(true),
   tags: z.array(z.string()).optional(),
-  inputs: z
-    .union([
-      // New JSON Schema format
-      JsonModelSchema,
-      // Legacy array format (for backward compatibility)
-      z.array(WorkflowInputSchema),
-    ])
-    .optional(),
+  inputs: WorkflowInputSchema.optional(),
   outputs: z.union([JsonModelSchema, z.array(WorkflowOutputSchema)]).optional(),
   consts: WorkflowConstsSchema.optional(),
   steps: z.array(StepSchema).min(1),

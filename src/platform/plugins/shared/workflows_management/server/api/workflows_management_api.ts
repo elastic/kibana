@@ -42,7 +42,8 @@ import type {
 } from './workflows_management_service';
 import { WorkflowValidationError } from '../../common/lib/errors';
 import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml';
-
+import { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import { MANUAL_TRIGGER_ID } from '@kbn/workflows-extensions/common';
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event' | 'manual';
   size: number;
@@ -121,7 +122,8 @@ export interface TestWorkflowParams {
 export class WorkflowsManagementApi {
   constructor(
     private readonly workflowsService: WorkflowsService,
-    private readonly getWorkflowsExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>
+    private readonly getWorkflowsExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>,
+    private readonly getWorkflowsExtensions: () => Promise<WorkflowsExtensionsServerPluginStart>
   ) {}
 
   public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {
@@ -243,6 +245,17 @@ export class WorkflowsManagementApi {
       context.metadata = metadata;
     }
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    const workflowsExtensions = await this.getWorkflowsExtensions();
+
+    await workflowsExtensions.emitEvent({
+      triggerId: MANUAL_TRIGGER_ID,
+      spaceId,
+      payload: {
+        inputs: manualInputs,
+      },
+      request,
+    });
+
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(
       workflow,
       context,

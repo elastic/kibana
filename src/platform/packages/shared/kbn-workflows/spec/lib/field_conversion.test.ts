@@ -14,8 +14,8 @@ import {
   convertLegacyFieldsToJsonSchema,
   normalizeFieldsToJsonSchema,
 } from './field_conversion';
-import type { WorkflowInputSchema } from '../schema';
 import type { JsonModelSchemaType } from '../schema/common/json_model_schema';
+import type { WorkflowInputSchema } from '../schema/triggers/manual_trigger_schema';
 
 describe('convertLegacyFieldsToJsonSchema', () => {
   it('should convert array of legacy inputs to JSON Schema object format', () => {
