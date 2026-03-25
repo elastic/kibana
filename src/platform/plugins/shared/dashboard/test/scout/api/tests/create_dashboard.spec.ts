@@ -54,7 +54,7 @@ apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => 
 
   apiTest('can create a dashboard with a specific id', async ({ apiClient }) => {
     const title = `foo-${Date.now()}-${Math.random()}`;
-    const id = `bar-${Date.now()}-${Math.random()}`;
+    const id = `bar-${Date.now()}}`;
 
     const response = await apiClient.post(`${DASHBOARD_API_PATH}/${id}`, {
       headers: {
