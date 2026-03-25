@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/esql-validation-autocomplete'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-esql'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/esql-validation-autocomplete'
+  title: '@kbn/esql-validation-autocomplete'
   description: Moon project for @kbn/esql-validation-autocomplete
   channel: ''
   owner: '@elastic/kibana-esql'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-esql-validation-autocomplete
+  sourceRoot: src/platform/packages/shared/kbn-esql-validation-autocomplete
 dependsOn:
   - '@kbn/esql-ast'
   - '@kbn/esql-types'
@@ -38,14 +37,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/scout'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-qa'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/scout'
+  title: '@kbn/scout'
   description: Moon project for @kbn/scout
   channel: ''
   owner: '@elastic/appex-qa'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-scout
+  sourceRoot: src/platform/packages/shared/kbn-scout
 dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/dev-cli-runner'
@@ -26,6 +25,7 @@ dependsOn:
   - '@kbn/repo-packages'
   - '@kbn/es'
   - '@kbn/dev-proc-runner'
+  - '@kbn/kbn-client'
   - '@kbn/test'
   - '@kbn/es-archiver'
   - '@kbn/dev-utils'
@@ -35,8 +35,6 @@ dependsOn:
   - '@kbn/scout-reporting'
   - '@kbn/zod'
   - '@kbn/core-http-common'
-  - '@kbn/streams-schema'
-  - '@kbn/streamlang'
   - '@kbn/axe-config'
   - '@kbn/peggy'
   - '@kbn/apm-synthtrace'
@@ -54,14 +52,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

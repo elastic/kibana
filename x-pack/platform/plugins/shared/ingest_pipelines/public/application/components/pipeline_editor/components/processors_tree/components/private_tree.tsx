@@ -21,6 +21,9 @@ import { DropZoneButton } from '.';
 import { TreeNode } from '.';
 import { calculateItemHeight } from '../utils';
 import type { OnActionHandler, ProcessorInfo } from '../processors_tree';
+import { getProcessorDescriptor } from '../../shared';
+import { i18nTexts } from '../../pipeline_processors_editor_item/i18n_texts';
+import { processorsTreeI18nTexts } from '../i18n_texts';
 
 export interface PrivateProps {
   processors: ProcessorInternal[];
@@ -28,6 +31,7 @@ export interface PrivateProps {
   onAction: OnActionHandler;
   level: number;
   movingProcessor?: ProcessorInfo;
+  movingProcessorLabel?: string;
   // Only passed into the top level list
   windowScrollerRef?: MutableRefObject<WindowScroller | null>;
   listRef?: MutableRefObject<List | null>;
@@ -64,11 +68,14 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
   processors,
   selector,
   movingProcessor,
+  movingProcessorLabel,
   onAction,
   level,
   windowScrollerRef,
   listRef,
 }) => {
+  const sectionLabel = processorsTreeI18nTexts.getSectionLabelForSelector(selector);
+
   const selectors: string[][] = useMemo(() => {
     return processors.map((_, idx) => selector.concat(String(idx)));
   }, [processors, selector]);
@@ -83,6 +90,41 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
     processor: ProcessorInternal;
   }) => {
     const stringifiedSelector = selectorToDataTestSubject(info.selector);
+    const targetProcessorLabel = getProcessorDescriptor(processor.type)?.label ?? processor.type;
+    const movingLabel = movingProcessorLabel;
+    const moveBeforeLabel =
+      movingLabel && movingProcessor
+        ? i18nTexts.dropZoneMoveBeforeLabel({
+            movingProcessor: movingLabel,
+            targetProcessor: targetProcessorLabel,
+            section: sectionLabel,
+          })
+        : undefined;
+    const cannotMoveBeforeLabel =
+      movingLabel && movingProcessor
+        ? i18nTexts.dropZoneCannotMoveBeforeLabel({
+            movingProcessor: movingLabel,
+            targetProcessor: targetProcessorLabel,
+            section: sectionLabel,
+          })
+        : undefined;
+
+    const moveAfterLabel =
+      movingLabel && movingProcessor
+        ? i18nTexts.dropZoneMoveAfterLabel({
+            movingProcessor: movingLabel,
+            targetProcessor: targetProcessorLabel,
+            section: sectionLabel,
+          })
+        : undefined;
+    const cannotMoveAfterLabel =
+      movingLabel && movingProcessor
+        ? i18nTexts.dropZoneCannotMoveAfterLabel({
+            movingProcessor: movingLabel,
+            targetProcessor: targetProcessorLabel,
+            section: sectionLabel,
+          })
+        : undefined;
     return (
       <>
         {idx === 0 ? (
@@ -100,6 +142,8 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
             }}
             isVisible={Boolean(movingProcessor)}
             isDisabled={!movingProcessor || isDropZoneAboveDisabled(info, movingProcessor)}
+            availableAriaLabel={moveBeforeLabel}
+            unavailableAriaLabel={cannotMoveBeforeLabel}
           />
         ) : undefined}
         <TreeNode
@@ -108,12 +152,15 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
           processorInfo={info}
           onAction={onAction}
           movingProcessor={movingProcessor}
+          movingProcessorLabel={movingProcessorLabel}
         />
         <DropZoneButton
           compressed={level === 1 && idx + 1 === processors.length}
           data-test-subj={`dropButtonBelow-${stringifiedSelector}`}
           isVisible={Boolean(movingProcessor)}
           isDisabled={!movingProcessor || isDropZoneBelowDisabled(info, movingProcessor)}
+          availableAriaLabel={moveAfterLabel}
+          unavailableAriaLabel={cannotMoveAfterLabel}
           onClick={(event) => {
             event.preventDefault();
             onAction({

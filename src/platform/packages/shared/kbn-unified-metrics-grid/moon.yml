@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/unified-metrics-grid'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-presentation-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/unified-metrics-grid'
+  title: '@kbn/unified-metrics-grid'
   description: Moon project for @kbn/unified-metrics-grid
   channel: ''
   owner: '@elastic/obs-presentation-team'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-unified-metrics-grid
+  sourceRoot: src/platform/packages/shared/kbn-unified-metrics-grid
 dependsOn:
   - '@kbn/field-types'
   - '@kbn/unified-histogram'
@@ -55,14 +54,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

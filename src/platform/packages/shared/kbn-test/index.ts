@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { KbnClientRequesterError } from './src/kbn_client/kbn_client_requester_error';
-
 // @internal
 export { startServersCli, startServers } from './src/functional_tests/start_servers';
 
@@ -74,7 +72,7 @@ export { runJest } from './src/jest/run';
 
 export * from './src/kbn_archiver_cli';
 
-export * from './src/kbn_client';
+export * from '@kbn/kbn-client';
 
 export * from './src/find_test_plugin_paths';
 
