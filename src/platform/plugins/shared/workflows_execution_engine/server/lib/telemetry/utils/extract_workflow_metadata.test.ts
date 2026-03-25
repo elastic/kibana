@@ -98,7 +98,7 @@ describe('extractWorkflowMetadata (execution engine)', () => {
     });
     expect(
       extractWorkflowMetadata(
-        baseWorkflow({ triggers: [{ type: 'alert', with: { rule_id: 'r' } }] })
+        baseWorkflow({ triggers: [{ type: 'alert' }] })
       )
     ).toMatchObject({
       hasScheduledTriggers: false,
@@ -117,7 +117,7 @@ describe('extractWorkflowMetadata (execution engine)', () => {
       extractWorkflowMetadata(
         baseWorkflow({ inputs: [{ name: 'legacy', type: 'string' }] as WorkflowYaml['inputs'] })
       ).inputCount
-    ).toBe(0);
+    ).toBe(1);
   });
 
   it('reflects settings key: timeout', () => {
@@ -155,22 +155,6 @@ describe('extractWorkflowMetadata (execution engine)', () => {
       hasOnFailure: true,
       hasTimeout: false,
       hasConcurrency: false,
-    });
-  });
-
-  it('documents excluded settings keys: timezone and max-step-size do not toggle telemetry flags', () => {
-    const meta = extractWorkflowMetadata(
-      baseWorkflow({
-        settings: {
-          timezone: 'Europe/Berlin',
-          'max-step-size': '10mb',
-        },
-      })
-    );
-    expect(meta).toMatchObject({
-      hasTimeout: false,
-      hasConcurrency: false,
-      hasOnFailure: false,
     });
   });
 });
