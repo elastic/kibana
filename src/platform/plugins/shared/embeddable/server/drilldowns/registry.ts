@@ -44,6 +44,8 @@ export function getDrilldownRegistry() {
             drilldownSetup.supportedTriggers.includes(trigger)
           );
         })
+        // sort to ensure consistent order in OAS documenation
+        .sort(([aType], [bType]) => aType.localeCompare(bType))
         .map(([type, drilldownSetup]) =>
           drilldownSetup.schema.extends(
             {
@@ -52,6 +54,8 @@ export function getDrilldownRegistry() {
                 drilldownSetup.supportedTriggers
                   // narrow drilldown triggers to only those that intersect with supported triggers
                   .filter((trigger) => supportedTriggers.includes(trigger))
+                  // sort to ensure consistent order in OAS documenation
+                  .sort()
                   .map((trigger) => schema.literal(trigger)) as [Type<string>]
               ),
               type: schema.literal(type),
