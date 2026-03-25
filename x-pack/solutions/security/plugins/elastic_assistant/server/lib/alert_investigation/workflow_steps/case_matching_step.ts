@@ -8,18 +8,25 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { LiquidArraySchema } from './workflow_schema_helpers';
 
 export const CaseMatchingStepId = 'security.matchAndAttachAlertsToCases';
 
 const CaseMatchingInputSchema = z.object({
-  entities: z.array(
-    z.object({
-      type_key: z.string(),
-      value: z.string(),
-      alert_id: z.string(),
-    })
-  ),
-  leader_alert_ids: z.array(z.string()),
+  entities: z
+    .union([
+      z.array(z.object({ type_key: z.string(), value: z.string(), alert_id: z.string() })),
+      z.string(),
+    ])
+    .transform((val) => {
+      if (Array.isArray(val)) return val;
+      try {
+        return JSON.parse(val);
+      } catch {
+        return [];
+      }
+    }),
+  leader_alert_ids: LiquidArraySchema,
   index_pattern: z.string().default('.alerts-security.alerts-default'),
 });
 

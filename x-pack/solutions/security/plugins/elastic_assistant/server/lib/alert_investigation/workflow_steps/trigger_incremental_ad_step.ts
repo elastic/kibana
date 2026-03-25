@@ -8,12 +8,13 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { LiquidArraySchema, LiquidRecordSchema } from './workflow_schema_helpers';
 
 export const TriggerIncrementalAdStepId = 'security.triggerIncrementalAd';
 
 const TriggerAdInputSchema = z.object({
-  affected_case_ids: z.array(z.string()),
-  alert_ids_by_case: z.record(z.string(), z.array(z.string())),
+  affected_case_ids: LiquidArraySchema,
+  alert_ids_by_case: LiquidRecordSchema,
   min_new_alerts: z.number().default(2),
 });
 
