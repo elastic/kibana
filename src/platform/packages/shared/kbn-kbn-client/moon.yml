@@ -11,7 +11,7 @@ toolchain:
   default: node
 language: typescript
 project:
-  name:  '@kbn/kbn-client'
+  name: '@kbn/kbn-client'
   description: Moon project for @kbn/kbn-client
   channel: ''
   owner: '@elastic/kibana-operations'
@@ -34,4 +34,16 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks: {}
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
