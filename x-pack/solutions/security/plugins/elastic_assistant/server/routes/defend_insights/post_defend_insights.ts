@@ -147,6 +147,8 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             insightType,
             endpointIds,
             actionsClient,
+            getInferenceConnectorById: (id) =>
+              assistantContext.inference.getConnectorById(id, request),
             anonymizationFields,
             apiConfig,
             connectorTimeout: CONNECTOR_TIMEOUT,

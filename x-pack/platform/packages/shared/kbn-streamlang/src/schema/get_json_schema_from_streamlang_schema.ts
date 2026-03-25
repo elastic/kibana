@@ -252,19 +252,43 @@ function enhanceStreamlangSchemaForEditor(
     return opt && typeof opt === 'object' && Array.isArray(opt.anyOf) && !props?.condition;
   }) as Record<string, unknown> | undefined;
 
-  const conditionBlockSchema = stepOptions.find((option: unknown) => {
-    const opt = option as Record<string, unknown>;
-    const props = opt?.properties as Record<string, unknown> | undefined;
-    return opt && typeof opt === 'object' && props?.condition;
-  }) as Record<string, unknown> | undefined;
-
-  if (!actionUnionSchema || !conditionBlockSchema) {
+  if (!actionUnionSchema) {
     return;
   }
 
-  // Enhance action steps with metadata and aggregated action enum
+  // Enhance action steps with metadata and aggregated action enum.
+  // This also applies the stream-type filter (e.g. removing manual_ingest_pipeline
+  // for wired streams). Must run before the conditionBlockSchema check so that the
+  // filter always takes effect, even when the condition block is a $ref rather than
+  // an inline object (e.g. when streamlangStepSchema has .meta({ id }) and Zod v4
+  // emits a $ref instead of inlining the schema).
   if (Array.isArray(actionUnionSchema.anyOf)) {
     enhanceActionSchema(actionUnionSchema, streamType);
+  }
+
+  // Find the condition block — it may be an inline object (properties.condition) or a
+  // $ref that resolves to one (when streamlangConditionBlockSchema is a named component).
+  const conditionBlockRef = stepOptions.find((option: unknown) => {
+    const opt = option as Record<string, unknown>;
+    const props = opt?.properties as Record<string, unknown> | undefined;
+    if (props?.condition) {
+      return true;
+    }
+    if (typeof opt?.$ref === 'string') {
+      const resolved = resolveJsonPointer(schema, opt.$ref) as Record<string, unknown> | undefined;
+      return !!(resolved?.properties as Record<string, unknown> | undefined)?.condition;
+    }
+    return false;
+  }) as Record<string, unknown> | undefined;
+
+  // Resolve $ref to get the actual condition block schema object for mutation
+  const conditionBlockSchema =
+    conditionBlockRef && typeof conditionBlockRef.$ref === 'string'
+      ? (resolveJsonPointer(schema, conditionBlockRef.$ref) as Record<string, unknown> | undefined)
+      : conditionBlockRef;
+
+  if (!conditionBlockSchema) {
+    return;
   }
 
   // Enhance condition blocks with metadata and flattened condition property
