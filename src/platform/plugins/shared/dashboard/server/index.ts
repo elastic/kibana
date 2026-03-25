@@ -54,7 +54,7 @@ export type {
   DashboardCreateRequestBody,
   DashboardCreateResponseBody,
   DashboardReadResponseBody,
-  DashboardSearchRequestBody,
+  DashboardSearchRequestParams,
   DashboardSearchResponseBody,
   DashboardUpdateResponseBody,
   GridData,

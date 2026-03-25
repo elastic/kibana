@@ -785,7 +785,7 @@
           "\nWrite the up-to-date transformed documents to the index, overwriting any\ndocuments that are still on their outdated version."
         ],
         "signature": [
-          "({ client, index, operations, refresh, useAliasToPreventAutoCreate, }: ",
+          "({ client, index, operations, refresh, useAliasToPreventAutoCreate, timeout, }: ",
           "BulkOverwriteTransformedDocumentsParams",
           ") => ",
           "TaskEither",
@@ -797,10 +797,12 @@
           "IndexNotFound",
           " | ",
           "RequestEntityTooLargeException",
+          " | ",
+          "UnavailableShardsException",
           ", \"bulk_index_succeeded\">"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/bulk_overwrite_transformed_documents.ts",
-        "lineNumber": 42,
+        "lineNumber": 56,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -810,13 +812,13 @@
             "id": "def-server.bulkOverwriteTransformedDocuments.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n    client,\n    index,\n    operations,\n    refresh = false,\n    useAliasToPreventAutoCreate = false,\n  }",
+            "label": "{\n    client,\n    index,\n    operations,\n    refresh = false,\n    useAliasToPreventAutoCreate = false,\n    timeout = DEFAULT_TIMEOUT,\n  }",
             "description": [],
             "signature": [
               "BulkOverwriteTransformedDocumentsParams"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/bulk_overwrite_transformed_documents.ts",
-            "lineNumber": 43,
+            "lineNumber": 57,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -1269,7 +1271,7 @@
           " | undefined) => boolean"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/es_errors.ts",
-        "lineNumber": 31,
+        "lineNumber": 35,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1286,7 +1288,7 @@
               " | undefined"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/es_errors.ts",
-            "lineNumber": 31,
+            "lineNumber": 35,
             "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
@@ -2390,7 +2392,7 @@
         "label": "EsResponseTooLargeError",
         "description": [],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/index.ts",
-        "lineNumber": 164,
+        "lineNumber": 169,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2406,7 +2408,7 @@
               "\"es_response_too_large\""
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/index.ts",
-            "lineNumber": 165,
+            "lineNumber": 170,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2419,7 +2421,7 @@
             "label": "contentLength",
             "description": [],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/index.ts",
-            "lineNumber": 166,
+            "lineNumber": 171,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

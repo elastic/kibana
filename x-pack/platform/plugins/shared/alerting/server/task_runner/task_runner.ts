@@ -574,6 +574,11 @@ export class TaskRunner<
         name: runRuleParams.rule.name,
         consumer: runRuleParams.rule.consumer,
         revision: runRuleParams.rule.revision,
+        uuid:
+          this.ruleType.solution === 'security' &&
+          typeof runRuleParams.rule.params.ruleId === 'string'
+            ? runRuleParams.rule.params.ruleId
+            : undefined,
       });
 
       // Set rule monitoring data
@@ -581,7 +586,7 @@ export class TaskRunner<
 
       // Clear gap range that was persisted in the rule SO
       if (this.ruleMonitoring.getMonitoring()?.run?.last_run?.metrics?.gap_range) {
-        this.ruleMonitoring.getLastRunMetricsSetters().setLastRunMetricsGapRange(null);
+        this.ruleMonitoring.getSetters().clearGapRange();
       }
       (async () => {
         try {
@@ -608,89 +613,108 @@ export class TaskRunner<
     schedule: Result<IntervalSchedule, Error>;
     runRuleResult: Result<RunRuleResult, Error>;
   }) {
-    const { executionStatus: execStatus, executionMetrics: execMetrics } =
-      await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessRuleRun, async () => {
-        const {
-          params: { alertId: ruleId },
-          startedAt,
-          schedule: taskSchedule,
-        } = this.taskInstance;
+    const result = await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessRuleRun, async () => {
+      const {
+        params: { alertId: ruleId },
+        startedAt,
+        schedule: taskSchedule,
+      } = this.taskInstance;
 
-        let nextRun: string | null = null;
-        if (isOk(schedule)) {
-          nextRun = getNextRun({ startDate: startedAt, interval: schedule.value.interval });
-        } else if (taskSchedule) {
-          // rules cannot use rrule for scheduling yet
-          nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
-        }
+      let nextRun: string | null = null;
+      if (isOk(schedule)) {
+        nextRun = getNextRun({ startDate: startedAt, interval: schedule.value.interval });
+      } else if (taskSchedule) {
+        // rules cannot use rrule for scheduling yet
+        nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
+      }
 
-        const { executionStatus, executionMetrics, lastRun, outcome } = processRunResults({
-          logger: this.logger,
-          logPrefix: `${this.ruleType.id}:${ruleId}`,
-          result: this.ruleResult,
-          runDate: this.runDate,
-          runRuleResult,
-        });
-
-        if (apm.currentTransaction) {
-          apm.currentTransaction.setOutcome(outcome);
-        }
-
-        // set start and duration based on event log
-        const { start, duration } = this.alertingEventLogger.getStartAndDuration();
-        if (null != start) {
-          executionStatus.lastExecutionDate = start;
-        }
-        if (null != duration) {
-          executionStatus.lastDuration = nanosToMillis(duration);
-        }
-
-        // if executionStatus indicates an error, fill in fields in
-        this.ruleMonitoring.addHistory({
-          duration: executionStatus.lastDuration,
-          hasError: executionStatus.error != null,
-          runDate: this.runDate,
-        });
-
-        const gap = this.ruleMonitoring.getMonitoring()?.run?.last_run?.metrics?.gap_range;
-        if (gap) {
-          this.alertingEventLogger.reportGap({
-            gap,
-          });
-        }
-
-        if (!this.cancelled) {
-          this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
-          if (outcome === 'failure') {
-            this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_FAILURES);
-          }
-          if (this.logger.isLevelEnabled('debug')) {
-            this.logger.debug(
-              `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - ${JSON.stringify(
-                executionStatus
-              )} - ${JSON.stringify(lastRun)}`
-            );
-          }
-
-          await this.updateRuleSavedObjectPostRun(ruleId, {
-            executionStatus: ruleExecutionStatusToRaw(executionStatus),
-            nextRun,
-            lastRun: lastRunToRaw(lastRun),
-            monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
-          });
-        }
-
-        if (startedAt) {
-          // Capture how long it took for the rule to run after being claimed
-          this.timer.setDuration(TaskRunnerTimerSpan.TotalRunDuration, startedAt);
-        }
-
-        return { executionStatus, executionMetrics };
+      const { executionStatus, executionMetrics, lastRun, outcome } = processRunResults({
+        logger: this.logger,
+        logPrefix: `${this.ruleType.id}:${ruleId}`,
+        result: this.ruleResult,
+        runDate: this.runDate,
+        runRuleResult,
       });
 
+      if (apm.currentTransaction) {
+        apm.currentTransaction.setOutcome(outcome);
+        apm.setCustomContext({
+          execution_outcome: {
+            ...this.ruleMonitoring.getExecutorMetrics(),
+            error: executionStatus.error,
+            warning: executionStatus.warning,
+          },
+        });
+      }
+
+      // set start and duration based on event log
+      const { start, duration } = this.alertingEventLogger.getStartAndDuration();
+      if (null != start) {
+        executionStatus.lastExecutionDate = start;
+      }
+      if (null != duration) {
+        executionStatus.lastDuration = nanosToMillis(duration);
+      }
+
+      // if executionStatus indicates an error, fill in fields in
+      this.ruleMonitoring.addHistory({
+        duration: executionStatus.lastDuration,
+        hasError: executionStatus.error != null,
+        runDate: this.runDate,
+      });
+
+      // In case of non-success outcome framework calculated metrics could be incomplete
+      // Instead of including numbers without clear interpretation omit them
+      if (executionMetrics && lastRun.outcome === 'succeeded') {
+        this.ruleMonitoring.addFrameworkMetrics({
+          total_search_duration_ms: executionMetrics.totalSearchDurationMs,
+        });
+      }
+
+      const gap = this.ruleMonitoring.getMonitoring()?.run?.last_run?.metrics?.gap_range;
+      if (gap) {
+        this.alertingEventLogger.reportGap({
+          gap,
+        });
+      }
+
+      if (!this.cancelled) {
+        this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
+        if (outcome === 'failure') {
+          this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_FAILURES);
+        }
+        if (this.logger.isLevelEnabled('debug')) {
+          this.logger.debug(
+            `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - ${JSON.stringify(
+              executionStatus
+            )} - ${JSON.stringify(lastRun)}`
+          );
+        }
+
+        await this.updateRuleSavedObjectPostRun(ruleId, {
+          executionStatus: ruleExecutionStatusToRaw(executionStatus),
+          nextRun,
+          lastRun: lastRunToRaw(lastRun),
+          monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
+        });
+      }
+
+      if (startedAt) {
+        // Capture how long it took for the rule to run after being claimed
+        this.timer.setDuration(TaskRunnerTimerSpan.TotalRunDuration, startedAt);
+      }
+
+      return {
+        executionStatus,
+        executionMetrics,
+        consumerExecutionMetrics: this.ruleMonitoring.getExecutorMetrics(),
+      };
+    });
+
     this.alertingEventLogger.done({
-      status: execStatus,
-      metrics: execMetrics,
+      status: result.executionStatus,
+      metrics: result.executionMetrics,
+      consumerMetrics: result.consumerExecutionMetrics,
       timings: this.timer.toJson(),
     });
   }

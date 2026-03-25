@@ -7,32 +7,46 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SavedObjectReference } from '@kbn/core/server';
+import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '@kbn/event-annotation-common';
+import type { AvailableReferenceLineIcon } from '@kbn/expression-xy-plugin/common';
 import type {
   FormBasedLayer,
   SeriesType,
   TextBasedLayer,
   XYAnnotationLayerConfig,
+  XYByValueAnnotationLayerConfig,
   XYDataLayerConfig,
+  XYPersistedAnnotationLayerConfig,
   XYReferenceLineLayerConfig,
   YConfig,
 } from '@kbn/lens-common';
-import { AvailableReferenceLineIcons } from '@kbn/lens-common';
-import type { SavedObjectReference } from '@kbn/core/server';
-import type { AvailableReferenceLineIcon } from '@kbn/expression-xy-plugin/common';
-import { isRangeAnnotationConfig, isQueryAnnotationConfig } from '@kbn/event-annotation-common';
-import { isEsqlTableTypeDataset } from '../../../utils';
-import type { DatasetType } from '../../../schema/dataset';
-import { LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE } from '../../../schema/constants';
-import type { LensApiStaticValueOperation } from '../../../schema/metric_ops';
+import {
+  AvailableReferenceLineIcons,
+  isPersistedByReferenceAnnotationsLayer,
+  isPersistedLinkedByValueAnnotationsLayer,
+} from '@kbn/lens-common';
 import type {
-  DataLayerType,
-  ReferenceLineLayerType,
+  AnnotationLayerByValueType,
   AnnotationLayerType,
+  DataLayerType,
   DataLayerTypeESQL,
   DataLayerTypeNoESQL,
+  ReferenceLineLayerType,
   ReferenceLineLayerTypeESQL,
   ReferenceLineLayerTypeNoESQL,
 } from '../../../schema/charts/xy';
+import { LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE } from '../../../schema/constants';
+import type { DatasetType } from '../../../schema/dataset';
+import type { LensApiStaticValueOperation } from '../../../schema/metric_ops';
+import { isEsqlTableTypeDataset } from '../../../utils';
+import { fromColorMappingLensStateToAPI, fromStaticColorLensStateToAPI } from '../../coloring';
+import { getValueApiColumn } from '../../columns/esql_column';
+import {
+  isAPIColumnOfBucketType,
+  isAPIColumnOfReferenceType,
+  isAPIColumnOfType,
+} from '../../columns/utils';
 import {
   buildDatasetState,
   generateApiLayer,
@@ -43,13 +57,6 @@ import {
   operationFromColumn,
 } from '../../utils';
 import { stripUndefined } from '../utils';
-import { getValueApiColumn } from '../../columns/esql_column';
-import { fromColorMappingLensStateToAPI, fromStaticColorLensStateToAPI } from '../../coloring';
-import {
-  isAPIColumnOfBucketType,
-  isAPIColumnOfReferenceType,
-  isAPIColumnOfType,
-} from '../../columns/utils';
 
 function convertDataLayerToAPI(
   visualization: XYDataLayerConfig,
@@ -362,8 +369,11 @@ function findAnnotationDataView(layerId: string, references: SavedObjectReferenc
 }
 
 function getTextConfigurationForQueryAnnotation(
-  annotation: XYAnnotationLayerConfig['annotations'][number]
-): Pick<Extract<AnnotationLayerType['events'][number], { type: 'query' }>, 'text' | 'label'> {
+  annotation: XYByValueAnnotationLayerConfig['annotations'][number]
+): Pick<
+  Extract<AnnotationLayerByValueType['events'][number], { type: 'query' }>,
+  'text' | 'label'
+> {
   const textConfig = {
     ...('label' in annotation && annotation.label ? { label: annotation.label } : {}),
   };
@@ -383,33 +393,58 @@ function getTextConfigurationForQueryAnnotation(
 }
 
 export function buildAPIAnnotationsLayer(
-  visualization: XYAnnotationLayerConfig,
+  layer: XYPersistedAnnotationLayerConfig | XYAnnotationLayerConfig,
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
 ): AnnotationLayerType {
+  if (
+    isPersistedByReferenceAnnotationsLayer(layer) ||
+    isPersistedLinkedByValueAnnotationsLayer(layer)
+  ) {
+    const annotationGroupId = references?.find(({ name }) => name === layer.annotationGroupRef)?.id;
+    if (!annotationGroupId) {
+      throw new Error('XY visualization: library annotation group ID reference is missing');
+    }
+
+    return {
+      type: 'annotation_group',
+      group_id: annotationGroupId,
+    };
+  }
+
+  const indexPatternId =
+    'indexPatternId' in layer
+      ? layer.indexPatternId
+      : findAnnotationDataView(layer.layerId, references);
+
+  if (!indexPatternId) {
+    // shouldn't happen unless data is corrupt
+    throw new Error('XY visualization: cannot find data view ID for annotation layer.');
+  }
+
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const ignore_global_filters =
-    visualization.ignoreGlobalFilters ?? LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE;
-  const adHocDataView = adHocDataViews[visualization.layerId];
-  const referencedDataView = findAnnotationDataView(visualization.layerId, references);
+    layer.ignoreGlobalFilters ?? LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE;
+  const adHocDataView = adHocDataViews[layer.layerId];
+  const referencedDataView = findAnnotationDataView(layer.layerId, references);
   const dataset = (
-    isDataViewSpec(adHocDataView) && adHocDataView?.id === visualization.indexPatternId
+    isDataViewSpec(adHocDataView) && adHocDataView?.id === indexPatternId
       ? {
           type: 'index',
-          index: visualization.indexPatternId,
+          index: indexPatternId,
           time_field: adHocDataView.timeFieldName!,
         }
       : {
           type: 'dataView',
-          id: referencedDataView ?? visualization.indexPatternId,
+          id: referencedDataView ?? indexPatternId,
         }
   ) satisfies Extract<DatasetType, { type: 'index' | 'dataView' }>;
   return {
     type: 'annotations',
     dataset,
     ignore_global_filters,
-    events: visualization.annotations.map((annotation) => {
+    events: layer.annotations.map((annotation) => {
       if (isQueryAnnotationConfig(annotation)) {
         return {
           type: 'query',

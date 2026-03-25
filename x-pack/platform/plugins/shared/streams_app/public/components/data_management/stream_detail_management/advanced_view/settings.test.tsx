@@ -41,6 +41,7 @@ describe('Settings', () => {
 
   const defaultDefinition = createMockWiredStreamDefinition({
     stream: {
+      type: 'wired',
       name: 'logs.test',
       description: '',
       updated_at: '2024-01-01T00:00:00.000Z',

@@ -1,0 +1,200 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type {
+  QueryDslQueryContainer,
+  Refresh,
+  SortCombinations,
+} from '@elastic/elasticsearch/lib/api/types';
+
+/**
+ * Represents a single document in the change history.
+ */
+export interface ChangeHistoryDocument {
+  /** ISO8601 timestamp when the target object was changed (successful write confirmed). */
+  '@timestamp': string;
+
+  ecs: {
+    /** The version of ECS used (9.3.0) */
+    version: '9.3.0';
+  };
+
+  user: {
+    /** Unique profile identifier used by auth realm (@see https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/user-profiles) */
+    id?: string;
+    /** Current login name for user that generated the change. */
+    name: string;
+  };
+
+  event: {
+    /** Unique identifier for the event. Always set by the client as UUID v7. */
+    id: string;
+    /** Kibana module that the event belongs to. (e.g. `security`, etc.) */
+    module: string;
+    /** Name of the dataset that the event belongs to (e.g. `alerting-rules`, etc.) */
+    dataset: string;
+    /** Human readable action performed by the user (`rule_create`, `rule_update`, `rule_delete`, etc.). For audit log examples (@see https://www.elastic.co/docs/reference/kibana/kibana-audit-events#xpack-security-ecs-audit-logging) */
+    action: string;
+    /** ECS Categorization of the event performed (`creation`, `change`, `deletion`) */
+    type: 'change' | 'creation' | 'deletion';
+    /** User-provided reason for the change. */
+    reason?: string;
+    /** ISO8601 timestamp of the event creation time. */
+    created?: string;
+  };
+
+  transaction?: {
+    /** ID shared between events in the same transaction. */
+    id: string;
+  };
+
+  object: {
+    /** Unique id of the target entity in kibana. */
+    id: string;
+    /** Type of the target entity in kibana. Allows tracking multiple entity types in same stream. */
+    type: string;
+    /** ES backing index where this entity was stored. */
+    index?: string;
+    /** SHA256 hash of the entity.raw to identify changes in the payload. */
+    hash: string;
+    /** Version identifier used for ordering. Increases with each version. */
+    sequence?: number;
+    /** The diff (if available) */
+    diff?: {
+      /** Calculation used to produce this diff (ie `default`, `rfc6092`) */
+      type: ChangeHistoryDiff['type'];
+      /** List of field names that changed. With full paths. */
+      fields: string[];
+      /** Previous state for changed fields. */
+      before: Record<string, unknown>;
+    };
+    fields: {
+      /** Full paths of fields stored as hashes (sensitive fields or blob binaries). */
+      hashed: string[];
+    };
+    /** Full snapshot after the change. */
+    snapshot: Record<string, unknown>;
+  };
+
+  /** Optional list of tags for the event. */
+  tags?: string[];
+
+  /** Optional metadata about the event. Information that does not form part of the diff or ECS schema. */
+  metadata?: Record<string, unknown>;
+
+  kibana?: {
+    // /** Kibana space ID that the change event belongs to. (ie `default` etc) */
+    space_ids: string;
+  };
+
+  service: {
+    type: 'kibana';
+    /** Version of kibana that the event belongs to. */
+    version: string;
+  };
+}
+
+export interface ObjectChange {
+  /** ISO8601 `@timestamp` when this change was confirmed. */
+  timestamp?: string;
+  /** The `object.type`. Allows multiple object types per data stream. */
+  objectType: string;
+  /** The `object.id`. Uniquely identifies this object in Kibana within its `type` */
+  objectId: string;
+  /** ES backing `_index` where this object was stored. */
+  index?: string;
+  /** A sequentially increasing version for ordering changes. Please avoid ES _seq_no or _version as these are not reliable */
+  sequence?: number;
+  /** Raw version of the object. Before changes. If available. */
+  before?: Record<string, any>;
+  /** Raw copy of the object after changes (ie the `object.snapshot`). */
+  after: Record<string, any>;
+}
+
+export interface LogChangeHistoryOptions {
+  /** Action performed by the user (`rule_create`, `rule_update`, `rule_delete`, etc.). Some Audit log examples (@see https://www.elastic.co/docs/reference/kibana/kibana-audit-events#xpack-security-ecs-audit-logging) */
+  action: string;
+  /** Current login name for user that generated the change. */
+  username: string;
+  /** Unique profile identifier used by auth realm (@see https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/user-profiles) */
+  userProfileId?: string;
+  /** Kibana space that the event belongs to. (ie `default` etc). */
+  spaceId: string;
+  /** ID shared between events that take place together (ie in the same transaction). */
+  correlationId?: string;
+  /**
+   * Direct overrides for the change document (`tags`, `metadata`, and selected `event` fields).
+   * `event.id` is always generated by the client and cannot be supplied here.
+   */
+  data?: Partial<Pick<ChangeHistoryDocument, 'event' | 'tags' | 'metadata'>>;
+  /** List of fields to ignore in change calculation */
+  fieldsToIgnore?: ChangeHistoryFieldsToIgnore;
+  /** List of fields to hash in the saved change history (secret keys, PII, base64 etc) */
+  fieldsToHash?: ChangeHistoryFieldsToHash;
+  /** Optional indicator to force an ES refresh after changes (affects performance) */
+  refresh?: Refresh;
+}
+
+export interface GetChangeHistoryOptions {
+  additionalFilters?: QueryDslQueryContainer[];
+  sort?: SortCombinations[];
+  from?: number;
+  size?: number;
+}
+
+/**
+ * Result from a history query.
+ */
+export interface GetHistoryResult {
+  total: number;
+  items: ChangeHistoryDocument[];
+}
+
+/**
+ * Fields excluded from diff calculation
+ */
+export interface ChangeHistoryFieldsToIgnore {
+  [Key: string]: boolean | ChangeHistoryFieldsToIgnore;
+}
+
+/**
+ * Fields hashed due to sensitive nature (PII, Secret keys, etc) or being very large (base64 blob)
+ */
+export interface ChangeHistoryFieldsToHash {
+  [Key: string]: boolean | ChangeHistoryFieldsToHash;
+}
+
+/**
+ * Input for the diff calculation
+ */
+export interface ChangeHistoryDiffOptions {
+  a?: Record<string, any>;
+  b?: Record<string, any>;
+  fieldsToIgnore?: ChangeHistoryFieldsToIgnore;
+}
+
+/**
+ * Output of the diff calculation
+ */
+export interface ChangeHistoryDiff {
+  stats: {
+    total: number;
+    additions: number;
+    deletions: number;
+    updates: number;
+  };
+  /** The type of diff calculation (ie `default`, `rfc6902` etc) */
+  type: 'default';
+  /** The list of fields that changed, using full paths */
+  fields: Array<string>;
+  /** The list of fields that were ignored, using full paths */
+  ignored: Array<string>;
+  /** A partial copy of the original object, including only fields that changed */
+  before: Record<string, any>;
+  /** A partial copy of the modified object, including only fields that changed */
+  after: Record<string, any>;
+}

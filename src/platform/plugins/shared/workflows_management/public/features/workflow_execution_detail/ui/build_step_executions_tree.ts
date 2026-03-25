@@ -92,7 +92,8 @@ export function flattenStackFrames(stackFrames: StackFrame[]): string[] {
 export function buildStepExecutionsTree(
   stepExecutions: WorkflowStepExecutionDto[],
   executionContext?: Record<string, any>,
-  executionStatus?: ExecutionStatus
+  executionStatus?: ExecutionStatus,
+  triggeredBy?: string
 ): StepExecutionTreeItem[] {
   const root = {};
   const stepExecutionsMap: Map<string, WorkflowStepExecutionDto> = new Map();
@@ -206,6 +207,23 @@ export function buildStepExecutionsTree(
         children: [],
       });
     }
+  }
+
+  // When execution failed/skipped before any steps ran and no trigger pseudo-step
+  // was created from context, create one from triggeredBy so the invocation type is visible
+  const hasTriggerPseudo = pseudoSteps.some(
+    (s) => s.stepType === '__trigger' || s.stepType === '__inputs'
+  );
+  if (!hasTriggerPseudo && triggeredBy) {
+    pseudoSteps.push({
+      stepId: triggeredBy === 'manual' ? 'Inputs' : 'Event',
+      stepType: triggeredBy === 'manual' ? '__inputs' : '__trigger',
+      executionIndex: 0,
+      stepExecutionId: triggeredBy === 'manual' ? '__pseudo_inputs__' : '__pseudo_trigger__',
+      status: executionStatus ?? ExecutionStatus.COMPLETED,
+      isTriggerPseudoStep: true,
+      children: [],
+    });
   }
 
   return [...pseudoSteps, ...regularSteps];

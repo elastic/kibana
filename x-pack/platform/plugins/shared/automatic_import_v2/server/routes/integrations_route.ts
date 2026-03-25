@@ -17,6 +17,7 @@ import type {
   IntegrationResponse,
 } from '../../common';
 import {
+  AIV2TelemetryEventType,
   ApproveAutoImportIntegrationRequestBody,
   ApproveAutoImportIntegrationRequestParams,
   CreateAutoImportIntegrationRequestBody,
@@ -200,6 +201,7 @@ const createIntegrationRoute = (
                     esClient,
                     connectorId,
                     langSmithOptions,
+                    integrationName: title,
                   },
                   request
                 )
@@ -248,7 +250,8 @@ const approveIntegrationRoute = (
       },
       async (context, request, response) => {
         try {
-          const { automaticImportService, getCurrentUser } = await context.automaticImportv2;
+          const { automaticImportService, getCurrentUser, reportTelemetryEvent } =
+            await context.automaticImportv2;
           const authenticatedUser = await getCurrentUser();
 
           const { integration_id: integrationId } = request.params;
@@ -261,12 +264,30 @@ const approveIntegrationRoute = (
             categories,
           });
 
+          try {
+            const integration = await automaticImportService.getIntegrationById(integrationId);
+            const dataStreams = await automaticImportService.getAllDataStreams(integrationId);
+
+            dataStreams.forEach((ds) => {
+              reportTelemetryEvent(AIV2TelemetryEventType.IntegrationInstalled, {
+                sessionId: request.headers['x-session-id'] || 'unknown',
+                integrationName: integration.title,
+                version,
+                dataStreamCount: dataStreams.length,
+                dataStreamName: ds.title,
+              });
+            });
+          } catch (telemetryError) {
+            logger.warn(`Failed to report telemetry: ${telemetryError}`);
+          }
+
           return response.ok({ body: { message: 'Integration approved successfully' } });
         } catch (err) {
           logger.error(`approveIntegrationRoute: Caught error: ${err}`);
           const automaticImportResponse = buildAutomaticImportResponse(response);
+          const statusCode = SavedObjectsErrorHelpers.isNotFoundError(err) ? 404 : 500;
           return automaticImportResponse.error({
-            statusCode: 500,
+            statusCode,
             body: err,
           });
         }
