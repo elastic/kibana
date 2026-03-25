@@ -13,11 +13,11 @@ import {
   SAVE_TIMELINE_BUTTON_TEST_ID,
 } from './test_ids';
 import { AttachToActiveTimeline } from './attach_to_active_timeline';
-import { createMockStore, mockGlobalState, TestProviders } from '../../../../common/mock';
-import { TimelineId } from '../../../../../common/types';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
+import { TimelineId } from '../../../../common/types';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
-jest.mock('../../../../common/components/user_privileges');
+jest.mock('../../../common/components/user_privileges');
 
 const mockSetAttachToTimeline = jest.fn();
 

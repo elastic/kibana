@@ -7,16 +7,14 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import type { TimelineModel } from '../../../..';
-import type { State } from '../../../../common/store';
-import { timelineSelectors } from '../../../../timelines/store';
-import { TimelineId } from '../../../../../common/types';
-import { TimelineStatusEnum } from '../../../../../common/api/timeline';
-import { pinEvent } from '../../../../timelines/store/actions';
-import { Flyouts } from '../constants/flyouts';
-import { useWhichFlyout } from './use_which_flyout';
-import { AttachToActiveTimeline } from '../../left/components/attach_to_active_timeline';
-import type { NotesDetailsContentTimelineConfig } from '../../../shared/components/notes_details_content';
+import type { TimelineModel } from '../../..';
+import type { State } from '../../../common/store';
+import { timelineSelectors } from '../../../timelines/store';
+import { TimelineId } from '../../../../common/types';
+import { TimelineStatusEnum } from '../../../../common/api/timeline';
+import { pinEvent } from '../../../timelines/store/actions';
+import { AttachToActiveTimeline } from '../components/attach_to_active_timeline';
+import type { NotesDetailsContentTimelineConfig } from '../components/notes_details_content';
 
 /**
  * Builds the `timelineConfig` object required by `NotesDetailsContent` when the document is
@@ -24,12 +22,11 @@ import type { NotesDetailsContentTimelineConfig } from '../../../shared/componen
  * Timeline flyout, which disables "attach to timeline" behavior in the notes panel.
  */
 export const useTimelineConfig = (
-  documentId: string
+  documentId: string,
+  isTimelineFlyout: boolean
 ): NotesDetailsContentTimelineConfig | undefined => {
   const dispatch = useDispatch();
   const [attachToTimeline, setAttachToTimeline] = useState<boolean>(true);
-
-  const isTimelineFlyout = useWhichFlyout() === Flyouts.timeline;
 
   const timeline: TimelineModel = useSelector((state: State) =>
     timelineSelectors.selectTimelineById(state, TimelineId.active)

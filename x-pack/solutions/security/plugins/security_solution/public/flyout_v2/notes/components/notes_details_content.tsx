@@ -9,13 +9,7 @@ import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  buildDataTableRecord,
-  type DataTableRecord,
-  type EsHitRecord,
-  getFieldValue,
-} from '@kbn/discover-utils';
-import type { SearchHit } from '../../../../common/search_strategy';
+import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { AddNote } from '../../../notes/components/add_note';
 import { DeleteConfirmModal } from '../../../notes/components/delete_confirm_modal';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
@@ -32,10 +26,10 @@ import {
   selectNotesTablePendingDeleteIds,
 } from '../../../notes/store/notes.slice';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { AlertDataContext } from '../../../flyout_v2/investigation_guide/components/investigation_guide_view';
+import { AlertDataContext } from '../../investigation_guide/components/investigation_guide_view';
 
 export const FETCH_NOTES_ERROR = i18n.translate(
-  'xpack.securitySolution.flyout.left.notes.fetchNotesErrorLabel',
+  'xpack.securitySolution.flyout.notes.fetchNotesErrorLabel',
   {
     defaultMessage: 'Error fetching notes',
   }
@@ -43,7 +37,7 @@ export const FETCH_NOTES_ERROR = i18n.translate(
 export type NotesDocumentType = 'attack' | 'alert' | 'event';
 
 export const NO_NOTES = (documentType: NotesDocumentType) =>
-  i18n.translate('xpack.securitySolution.flyout.left.notes.noNotesLabel', {
+  i18n.translate('xpack.securitySolution.flyout.notes.noNotesLabel', {
     defaultMessage: 'No notes have been created for this {value}.',
     values: { value: documentType },
   });
@@ -60,17 +54,17 @@ export interface NotesDetailsContentTimelineConfig {
 
 export interface NotesDetailsContentProps {
   /**
-   * Document id used to fetch and associate notes (e.g. eventId or attackId).
+   * Document record used to fetch and associate notes and to derive the document type.
    */
-  documentId: string;
-  /**
-   * Raw search hit used to derive isAlert and provide AlertDataContext.
-   */
-  searchHit: SearchHit;
+  hit: DataTableRecord;
   /**
    * When provided, enables "Attach to current Timeline" behavior and passes timelineId/onNoteAdd to AddNote.
    */
   timelineConfig?: NotesDetailsContentTimelineConfig;
+  /**
+   * When true, hides the "open in timeline" icon on each note row.
+   */
+  hideTimelineIcon: boolean;
 }
 
 /**
@@ -78,7 +72,8 @@ export interface NotesDetailsContentProps {
  * Used by both document details and attack details flyout left panels.
  */
 export const NotesDetailsContent = memo(
-  ({ documentId, searchHit, timelineConfig }: NotesDetailsContentProps) => {
+  ({ hit, timelineConfig, hideTimelineIcon }: NotesDetailsContentProps) => {
+    const documentId = hit.raw._id ?? '';
     const { addError: addErrorToast } = useAppToasts();
     const dispatch = useDispatch();
     const { notesPrivileges } = useUserPrivileges();
@@ -107,11 +102,6 @@ export const NotesDetailsContent = memo(
         });
       }
     }, [addErrorToast, fetchError, fetchStatus]);
-
-    const hit: DataTableRecord = useMemo(
-      () => buildDataTableRecord(searchHit as unknown as EsHitRecord),
-      [searchHit]
-    );
 
     const documentType = useMemo((): NotesDocumentType => {
       const flattened = hit?.flattened ?? {};
@@ -151,7 +141,7 @@ export const NotesDetailsContent = memo(
         {fetchStatus === ReqStatus.Succeeded && notes.length === 0 ? (
           <>{noNotesMessage}</>
         ) : (
-          <NotesList notes={notes} options={{ hideFlyoutIcon: true }} />
+          <NotesList notes={notes} options={{ hideFlyoutIcon: true, hideTimelineIcon }} />
         )}
         {canCreateNotes && (
           <>

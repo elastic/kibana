@@ -7,16 +7,12 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react';
-import { createMockStore, mockGlobalState, TestProviders } from '../../../../common/mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import { useTimelineConfig } from './use_timeline_config';
-import { useWhichFlyout } from './use_which_flyout';
-import { Flyouts } from '../constants/flyouts';
-import { TimelineId } from '../../../../../common/types';
-import { TimelineStatusEnum } from '../../../../../common/api/timeline';
-import { pinEvent } from '../../../../timelines/store/actions';
-import type { State } from '../../../../common/store';
-
-jest.mock('./use_which_flyout');
+import { TimelineId } from '../../../../common/types';
+import { TimelineStatusEnum } from '../../../../common/api/timeline';
+import { pinEvent } from '../../../timelines/store/actions';
+import type { State } from '../../../common/store';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -64,28 +60,21 @@ const mockGlobalStateWithUnsavedTimeline: State = {
 
 const renderUseTimelineConfig = (
   eventId = EVENT_ID,
+  isTimelineFlyout = true,
   store = createMockStore(mockGlobalStateWithSavedTimeline)
 ) =>
-  renderHook(() => useTimelineConfig(eventId), {
+  renderHook(() => useTimelineConfig(eventId, isTimelineFlyout), {
     wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
   });
 
 describe('useTimelineConfig', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useWhichFlyout as jest.Mock).mockReturnValue(Flyouts.timeline);
   });
 
   describe('when not in the timeline flyout', () => {
-    it('returns undefined when flyout is securitySolution', () => {
-      (useWhichFlyout as jest.Mock).mockReturnValue(Flyouts.securitySolution);
-      const { result } = renderUseTimelineConfig();
-      expect(result.current).toBeUndefined();
-    });
-
-    it('returns undefined when no flyout is open', () => {
-      (useWhichFlyout as jest.Mock).mockReturnValue(null);
-      const { result } = renderUseTimelineConfig();
+    it('returns undefined when isTimelineFlyout is false', () => {
+      const { result } = renderUseTimelineConfig(EVENT_ID, false);
       expect(result.current).toBeUndefined();
     });
   });
@@ -108,7 +97,7 @@ describe('useTimelineConfig', () => {
 
     it('returns isTimelineSaved false when timeline is not saved', () => {
       const store = createMockStore(mockGlobalStateWithUnsavedTimeline);
-      const { result } = renderUseTimelineConfig(EVENT_ID, store);
+      const { result } = renderUseTimelineConfig(EVENT_ID, true, store);
       expect(result.current?.isTimelineSaved).toBe(false);
     });
 
@@ -150,14 +139,14 @@ describe('useTimelineConfig', () => {
             },
           },
         });
-        const { result } = renderUseTimelineConfig(EVENT_ID, storeWithPinnedEvent);
+        const { result } = renderUseTimelineConfig(EVENT_ID, true, storeWithPinnedEvent);
         result.current?.onNoteAddInTimeline();
         expect(mockDispatch).not.toHaveBeenCalled();
       });
 
       it('does not dispatch pinEvent when timelineSavedObjectId is empty', () => {
         const store = createMockStore(mockGlobalStateWithUnsavedTimeline);
-        const { result } = renderUseTimelineConfig(EVENT_ID, store);
+        const { result } = renderUseTimelineConfig(EVENT_ID, true, store);
         result.current?.onNoteAddInTimeline();
         expect(mockDispatch).not.toHaveBeenCalled();
       });

@@ -9,20 +9,26 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
-import { uniqBy } from 'lodash';
-import type { DiscoverAppState } from '../redux';
+import { pick, uniqBy } from 'lodash';
+import {
+  type DiscoverAppState,
+  DEFAULT_PROFILE_STATE_FIELDS,
+  type DefaultProfileStateField,
+  type DefaultProfileStateFields,
+  type ProfileStateSnapshot,
+  type TabState,
+} from '../redux';
 import type { DefaultAppStateColumn, ScopedProfilesManager } from '../../../../context_awareness';
 import { getMergedAccessor } from '../../../../context_awareness';
 import type { DataDocumentsMsg } from '../discover_data_state_container';
-import type { TabState } from '../redux';
 
 export const getDefaultProfileState = ({
   scopedProfilesManager,
-  resetDefaultProfileState,
+  defaultProfileState,
   dataView,
 }: {
   scopedProfilesManager: ScopedProfilesManager;
-  resetDefaultProfileState: TabState['resetDefaultProfileState'];
+  defaultProfileState: TabState['defaultProfileState'];
   dataView: DataView;
 }) => {
   const defaultState = getDefaultState(scopedProfilesManager, dataView);
@@ -37,14 +43,17 @@ export const getDefaultProfileState = ({
       const stateUpdate: DiscoverAppState = {};
 
       if (
-        resetDefaultProfileState.breakdownField &&
+        shouldResetDefaultProfileField(defaultProfileState, 'breakdownField') &&
         defaultState.breakdownField !== undefined &&
         dataView.fields.getByName(defaultState.breakdownField)
       ) {
         stateUpdate.breakdownField = defaultState.breakdownField;
       }
 
-      if (resetDefaultProfileState.hideChart && defaultState.hideChart !== undefined) {
+      if (
+        shouldResetDefaultProfileField(defaultProfileState, 'hideChart') &&
+        defaultState.hideChart !== undefined
+      ) {
         stateUpdate.hideChart = defaultState.hideChart;
       }
 
@@ -65,7 +74,7 @@ export const getDefaultProfileState = ({
     }) => {
       const stateUpdate: DiscoverAppState = {};
 
-      if (resetDefaultProfileState.columns) {
+      if (shouldResetDefaultProfileField(defaultProfileState, 'columns')) {
         const mappedDefaultColumns = defaultColumns.map((name) => ({ name }));
         const isValidColumn = getIsValidColumn(dataView, esqlQueryColumns);
         const validColumns = uniqBy(
@@ -89,13 +98,47 @@ export const getDefaultProfileState = ({
         }
       }
 
-      if (resetDefaultProfileState.rowHeight && defaultState.rowHeight !== undefined) {
+      if (
+        shouldResetDefaultProfileField(defaultProfileState, 'rowHeight') &&
+        defaultState.rowHeight !== undefined
+      ) {
         stateUpdate.rowHeight = defaultState.rowHeight;
       }
 
       return Object.keys(stateUpdate).length ? stateUpdate : undefined;
     },
   };
+};
+
+export const getProfileStateSnapshot = (
+  appState: TabState['appState'],
+  fieldsToReset: TabState['defaultProfileState']['fieldsToReset']
+): ProfileStateSnapshot | undefined => {
+  if (fieldsToReset === 'none') {
+    return undefined;
+  }
+
+  const profileStateFields = fieldsToReset === 'all' ? DEFAULT_PROFILE_STATE_FIELDS : fieldsToReset;
+
+  return pick(appState, profileStateFields);
+};
+
+export const getFieldsToReset = (
+  shouldResetByField: Record<DefaultProfileStateField, boolean>
+): DefaultProfileStateFields => {
+  const fields = DEFAULT_PROFILE_STATE_FIELDS.filter((field) => shouldResetByField[field]);
+
+  if (fields.length === 0) {
+    return 'none';
+  }
+
+  if (fields.length === DEFAULT_PROFILE_STATE_FIELDS.length) {
+    return 'all';
+  }
+
+  const [firstField, ...restFields] = fields;
+
+  return [firstField, ...restFields];
 };
 
 const getDefaultState = (scopedProfilesManager: ScopedProfilesManager, dataView: DataView) => {
@@ -107,6 +150,14 @@ const getDefaultState = (scopedProfilesManager: ScopedProfilesManager, dataView:
 
   return getDefaultAppState({ dataView });
 };
+
+const shouldResetDefaultProfileField = (
+  defaultProfileState: TabState['defaultProfileState'],
+  field: DefaultProfileStateField
+) =>
+  defaultProfileState.fieldsToReset === 'all' ||
+  (defaultProfileState.fieldsToReset !== 'none' &&
+    defaultProfileState.fieldsToReset.includes(field));
 
 const getIsValidColumn =
   (dataView: DataView, esqlQueryColumns: DataDocumentsMsg['esqlQueryColumns']) =>

@@ -10,45 +10,45 @@ import { EuiCallOut, EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiText } from '@el
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useSelector } from 'react-redux';
-import { TimelineStatusEnum } from '../../../../../common/api/timeline';
-import type { State } from '../../../../common/store';
-import { TimelineId } from '../../../../../common/types';
-import { SaveTimelineButton } from '../../../../timelines/components/modal/actions/save_timeline_button';
+import { TimelineStatusEnum } from '../../../../common/api/timeline';
+import type { State } from '../../../common/store';
+import { TimelineId } from '../../../../common/types';
+import { SaveTimelineButton } from '../../../timelines/components/modal/actions/save_timeline_button';
 import {
   ATTACH_TO_TIMELINE_CALLOUT_TEST_ID,
   ATTACH_TO_TIMELINE_CHECKBOX_TEST_ID,
   SAVE_TIMELINE_BUTTON_TEST_ID,
 } from './test_ids';
-import { timelineSelectors } from '../../../../timelines/store';
+import { timelineSelectors } from '../../../timelines/store';
 
 const timelineCheckBoxId = 'xpack.securitySolution.flyout.notes.attachToTimeline.checkboxId';
 
 export const ATTACH_TO_TIMELINE_CALLOUT_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.left.notes.attachToTimeline.calloutTitle',
+  'xpack.securitySolution.flyout.notes.attachToTimeline.calloutTitle',
   {
     defaultMessage: 'Attach to current Timeline',
   }
 );
 export const SAVED_TIMELINE_CALLOUT_CONTENT = i18n.translate(
-  'xpack.securitySolution.flyout.left.notes.attachToTimeline.calloutContent',
+  'xpack.securitySolution.flyout.notes.attachToTimeline.calloutContent',
   {
     defaultMessage: 'Also attach this note to the current Timeline.',
   }
 );
 export const UNSAVED_TIMELINE_CALLOUT_CONTENT = i18n.translate(
-  'xpack.securitySolution.flyout.left.notes.attachToTimeline.calloutContent',
+  'xpack.securitySolution.flyout.notes.attachToTimeline.calloutContent',
   {
     defaultMessage: 'You must save the current Timeline before attaching notes to it.',
   }
 );
 export const ATTACH_TO_TIMELINE_CHECKBOX = i18n.translate(
-  'xpack.securitySolution.flyout.left.notes.attachToTimeline.checkboxLabel',
+  'xpack.securitySolution.flyout.notes.attachToTimeline.checkboxLabel',
   {
     defaultMessage: 'Attach to current Timeline',
   }
 );
 export const SAVE_TIMELINE_BUTTON = i18n.translate(
-  'xpack.securitySolution.flyout.left.notes.attachToTimeline.savedTimelineButtonLabel',
+  'xpack.securitySolution.flyout.notes.attachToTimeline.savedTimelineButtonLabel',
   {
     defaultMessage: 'Save current Timeline',
   }

@@ -7,30 +7,32 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { DocumentDetailsContext } from '../../shared/context';
-import { createMockStore, mockGlobalState, TestProviders } from '../../../../common/mock';
-import { FETCH_NOTES_ERROR, NO_NOTES, NotesDetails } from './notes_details';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
+import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
+import { FETCH_NOTES_ERROR, NO_NOTES, NotesDetails } from '.';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 import {
   ADD_NOTE_BUTTON_TEST_ID,
   NOTES_LOADING_TEST_ID,
-} from '../../../../notes/components/test_ids';
+  OPEN_TIMELINE_BUTTON_TEST_ID,
+} from '../../notes/components/test_ids';
 import {
   ATTACH_TO_TIMELINE_CALLOUT_TEST_ID,
   ATTACH_TO_TIMELINE_CHECKBOX_TEST_ID,
-} from './test_ids';
-import { ReqStatus } from '../../../../notes';
-import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
-import { useTimelineConfig } from '../../shared/hooks/use_timeline_config';
+} from './components/test_ids';
+import { ReqStatus } from '../../notes';
+import { useTimelineConfig } from './hooks/use_timeline_config';
+import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 
-jest.mock('../../shared/hooks/use_timeline_config');
-jest.mock('../../shared/hooks/use_basic_data_from_details_data');
+jest.mock('./hooks/use_timeline_config');
+jest.mock('../../common/hooks/is_in_security_app');
+const useIsInSecurityAppMock = useIsInSecurityApp as jest.Mock;
 
-jest.mock('../../../../common/components/user_privileges');
+jest.mock('../../common/components/user_privileges');
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
 const mockAddError = jest.fn();
-jest.mock('../../../../common/hooks/use_app_toasts', () => ({
+jest.mock('../../common/hooks/use_app_toasts', () => ({
   useAppToasts: () => ({
     addError: mockAddError,
   }),
@@ -44,12 +46,6 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
-
-const panelContextValue = {
-  eventId: 'event id',
-  dataFormattedForFieldBrowser: [],
-  searchHit: { _index: 'test', _id: 'test-id' },
-} as unknown as DocumentDetailsContext;
 
 const mockTimelineConfig = {
   timelineSavedObjectId: 'savedObjectId',
@@ -65,12 +61,12 @@ const mockTimelineConfig = {
 };
 
 const mockStore = createMockStore(mockGlobalState);
-const renderNotesDetails = () =>
+const mockHit = buildDataTableRecord({ _index: 'test', _id: 'test-id' } as EsHitRecord);
+
+const renderNotesDetails = (isTimelineFlyout = true) =>
   render(
     <TestProviders store={mockStore}>
-      <DocumentDetailsContext.Provider value={panelContextValue}>
-        <NotesDetails />
-      </DocumentDetailsContext.Provider>
+      <NotesDetails hit={mockHit} isTimelineFlyout={isTimelineFlyout} />
     </TestProviders>
   );
 
@@ -80,9 +76,14 @@ describe('NotesDetails', () => {
     useUserPrivilegesMock.mockReturnValue({
       notesPrivileges: { crud: true },
       timelinePrivileges: { crud: true },
+      rulesPrivileges: {
+        rules: {
+          read: true,
+        },
+      },
     });
     (useTimelineConfig as jest.Mock).mockReturnValue(mockTimelineConfig);
-    (useBasicDataFromDetailsData as jest.Mock).mockReturnValue({ isAlert: true });
+    useIsInSecurityAppMock.mockReturnValue(false);
   });
 
   it('should fetch notes for the document id', () => {
@@ -104,9 +105,7 @@ describe('NotesDetails', () => {
 
     const { getByTestId } = render(
       <TestProviders store={store}>
-        <DocumentDetailsContext.Provider value={panelContextValue}>
-          <NotesDetails />
-        </DocumentDetailsContext.Provider>
+        <NotesDetails hit={mockHit} isTimelineFlyout={true} />
       </TestProviders>
     );
 
@@ -125,22 +124,17 @@ describe('NotesDetails', () => {
       },
     });
 
-    const contextValue = {
-      ...panelContextValue,
-      searchHit: {
-        _index: 'test',
-        _id: 'test-id',
-        fields: {
-          'kibana.alert.rule.uuid': ['rule-uuid'],
-        },
+    const alertHit = buildDataTableRecord({
+      _index: 'test',
+      _id: 'test-id',
+      fields: {
+        'kibana.alert.rule.uuid': ['rule-uuid'],
       },
-    } as unknown as DocumentDetailsContext;
+    } as EsHitRecord);
 
     const { getByText } = render(
       <TestProviders store={store}>
-        <DocumentDetailsContext.Provider value={contextValue}>
-          <NotesDetails />
-        </DocumentDetailsContext.Provider>
+        <NotesDetails hit={alertHit} isTimelineFlyout={true} />
       </TestProviders>
     );
 
@@ -158,13 +152,10 @@ describe('NotesDetails', () => {
         },
       },
     });
-    (useBasicDataFromDetailsData as jest.Mock).mockReturnValue({ isAlert: false });
 
     const { getByText } = render(
       <TestProviders store={store}>
-        <DocumentDetailsContext.Provider value={panelContextValue}>
-          <NotesDetails />
-        </DocumentDetailsContext.Provider>
+        <NotesDetails hit={mockHit} isTimelineFlyout={true} />
       </TestProviders>
     );
 
@@ -189,9 +180,7 @@ describe('NotesDetails', () => {
 
     render(
       <TestProviders store={store}>
-        <DocumentDetailsContext.Provider value={panelContextValue}>
-          <NotesDetails />
-        </DocumentDetailsContext.Provider>
+        <NotesDetails hit={mockHit} isTimelineFlyout={true} />
       </TestProviders>
     );
 
@@ -204,6 +193,11 @@ describe('NotesDetails', () => {
     useUserPrivilegesMock.mockReturnValue({
       notesPrivileges: { crud: false },
       timelinePrivileges: { crud: false },
+      rulesPrivileges: {
+        rules: {
+          read: true,
+        },
+      },
     });
 
     const { queryByTestId } = renderNotesDetails();
@@ -221,5 +215,66 @@ describe('NotesDetails', () => {
     expect(getByTestId(ADD_NOTE_BUTTON_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(ATTACH_TO_TIMELINE_CALLOUT_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(ATTACH_TO_TIMELINE_CHECKBOX_TEST_ID)).not.toBeInTheDocument();
+  });
+});
+
+describe('NotesDetails hideTimelineIcon prop', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useUserPrivilegesMock.mockReturnValue({
+      notesPrivileges: { crud: true, read: true },
+      timelinePrivileges: { crud: true, read: true },
+    });
+    (useTimelineConfig as jest.Mock).mockReturnValue(undefined);
+  });
+
+  const getNotesStoreWithTimelineNote = () =>
+    createMockStore({
+      ...mockGlobalState,
+      notes: {
+        ...mockGlobalState.notes,
+        entities: {
+          'note-1': {
+            eventId: 'test-id',
+            noteId: 'note-1',
+            note: 'note-1',
+            timelineId: 'timeline-1',
+            created: 1663882629000,
+            createdBy: 'elastic',
+            updated: 1663882629000,
+            updatedBy: 'elastic',
+            version: 'version',
+          },
+        },
+        ids: ['note-1'],
+        status: {
+          ...mockGlobalState.notes.status,
+          fetchNotesByDocumentIds: ReqStatus.Succeeded,
+        },
+      },
+    });
+
+  it('should show timeline icon when in security app', () => {
+    useIsInSecurityAppMock.mockReturnValue(true);
+
+    const { getByTestId } = render(
+      <TestProviders store={getNotesStoreWithTimelineNote()}>
+        <NotesDetails hit={mockHit} isTimelineFlyout={false} />
+      </TestProviders>
+    );
+
+    expect(getByTestId(`${OPEN_TIMELINE_BUTTON_TEST_ID}-0`)).toBeInTheDocument();
+  });
+
+  it('should hide timeline icon when not in security app', () => {
+    useIsInSecurityAppMock.mockReturnValue(false);
+
+    const { queryByTestId } = render(
+      <TestProviders store={getNotesStoreWithTimelineNote()}>
+        <NotesDetails hit={mockHit} isTimelineFlyout={false} />
+      </TestProviders>
+    );
+
+    expect(queryByTestId(`${OPEN_TIMELINE_BUTTON_TEST_ID}-0`)).not.toBeInTheDocument();
   });
 });

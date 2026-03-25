@@ -7,13 +7,17 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
-import { NotesDetailsContent, FETCH_NOTES_ERROR, NO_NOTES } from './notes_details_content';
+import { FETCH_NOTES_ERROR, NO_NOTES, NotesDetailsContent } from './notes_details_content';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { ADD_NOTE_BUTTON_TEST_ID, NOTES_LOADING_TEST_ID } from '../../../notes/components/test_ids';
+import {
+  ADD_NOTE_BUTTON_TEST_ID,
+  NOTES_LOADING_TEST_ID,
+  OPEN_TIMELINE_BUTTON_TEST_ID,
+} from '../../../notes/components/test_ids';
 import { ReqStatus } from '../../../notes';
 import type { State } from '../../../common/store';
-import type { SearchHit } from '../../../../common/search_strategy';
 
 jest.mock('../../../common/components/user_privileges');
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
@@ -34,14 +38,11 @@ jest.mock('react-redux', () => {
   };
 });
 
-const defaultSearchHit: SearchHit = {
-  _index: 'test',
-  _id: 'doc-123',
-};
+const defaultHit = buildDataTableRecord({ _index: 'test', _id: 'doc-123' } as EsHitRecord);
 
 const defaultProps = {
-  documentId: 'doc-123',
-  searchHit: defaultSearchHit,
+  hit: defaultHit,
+  hideTimelineIcon: false,
 };
 
 const renderNotesDetailsContent = (
@@ -101,13 +102,13 @@ describe('NotesDetailsContent', () => {
       },
     };
 
-    const searchHitWithAlert: SearchHit = {
+    const alertHit = buildDataTableRecord({
       _index: 'test',
       _id: 'doc-123',
       fields: { 'kibana.alert.rule.uuid': ['rule-uuid'] },
-    };
+    } as EsHitRecord);
 
-    const { getByText } = renderNotesDetailsContent({ searchHit: searchHitWithAlert }, storeState);
+    const { getByText } = renderNotesDetailsContent({ hit: alertHit }, storeState);
 
     expect(getByText(NO_NOTES('alert'))).toBeInTheDocument();
   });
@@ -141,19 +142,16 @@ describe('NotesDetailsContent', () => {
       },
     };
 
-    const searchHitWithAttackDiscovery: SearchHit = {
+    const attackHit = buildDataTableRecord({
       _index: 'test',
       _id: 'doc-123',
       fields: {
         'kibana.alert.rule.uuid': ['rule-uuid'],
         'kibana.alert.attack_discovery.alert_ids': ['alert-1'],
       },
-    };
+    } as EsHitRecord);
 
-    const { getByText } = renderNotesDetailsContent(
-      { searchHit: searchHitWithAttackDiscovery },
-      storeState
-    );
+    const { getByText } = renderNotesDetailsContent({ hit: attackHit }, storeState);
 
     expect(getByText(NO_NOTES('attack'))).toBeInTheDocument();
   });
@@ -245,5 +243,49 @@ describe('NotesDetailsContent', () => {
     const { getByTestId } = renderNotesDetailsContent({ timelineConfig }, storeState);
 
     expect(getByTestId('attach-to-timeline-element')).toBeInTheDocument();
+  });
+});
+
+describe('NotesDetailsContent hideTimelineIcon prop', () => {
+  const succeededStore: State = {
+    ...mockGlobalState,
+    notes: {
+      ...mockGlobalState.notes,
+      entities: {
+        'note-1': {
+          eventId: 'doc-123',
+          noteId: 'note-1',
+          note: 'note-1',
+          timelineId: 'timeline-1',
+          created: 1663882629000,
+          createdBy: 'elastic',
+          updated: 1663882629000,
+          updatedBy: 'elastic',
+          version: 'version',
+        },
+      },
+      ids: ['note-1'],
+      status: {
+        ...mockGlobalState.notes.status,
+        fetchNotesByDocumentIds: ReqStatus.Succeeded,
+      },
+    },
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useUserPrivilegesMock.mockReturnValue(defaultUserPrivileges);
+  });
+
+  it('should pass hideTimelineIcon=true to NotesList when prop is true', () => {
+    const { queryByTestId } = renderNotesDetailsContent({ hideTimelineIcon: true }, succeededStore);
+
+    expect(queryByTestId(`${OPEN_TIMELINE_BUTTON_TEST_ID}-0`)).not.toBeInTheDocument();
+  });
+
+  it('should pass hideTimelineIcon=false to NotesList when prop is false', () => {
+    const { getByTestId } = renderNotesDetailsContent({ hideTimelineIcon: false }, succeededStore);
+
+    expect(getByTestId(`${OPEN_TIMELINE_BUTTON_TEST_ID}-0`)).toBeInTheDocument();
   });
 });
