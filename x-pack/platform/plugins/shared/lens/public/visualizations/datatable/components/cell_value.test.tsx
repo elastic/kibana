@@ -23,7 +23,7 @@ describe('datatable cell renderer', () => {
   const cellColorFnMock = jest.fn().mockReturnValue(innerCellColorFnMock);
   const setCellProps = jest.fn();
 
-  const table: Datatable = {
+  const baseTable: Datatable = {
     type: 'datatable',
     columns: [
       {
@@ -36,15 +36,21 @@ describe('datatable cell renderer', () => {
     ],
     rows: [{ a: 123 }],
   };
-  const CellRenderer = createGridCell(
-    {
-      a: { convert: (x) => `formatted ${x}` } as FieldFormat,
-    },
-    { columns: [], sortingColumnId: '', sortingDirection: 'none' },
-    DataContext,
-    false,
-    cellColorFnMock
-  );
+
+  const makeTable = (
+    rows: Datatable['rows'],
+    columns: Datatable['columns'] = baseTable.columns
+  ) => ({
+    ...baseTable,
+    columns,
+    rows,
+  });
+
+  const defaultFormatter = { convert: (x: unknown) => `formatted ${x}` } as FieldFormat;
+  const defaultFormatters = { a: defaultFormatter } as Record<string, FieldFormat>;
+
+  const defaultAlignments = new Map<string, 'left' | 'right' | 'center'>([['a', 'right']]);
+  const defaultMinMaxByColumnId = new Map([['a', { min: 12, max: 155 }]]);
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -56,8 +62,8 @@ describe('datatable cell renderer', () => {
       return (
         <DataContext.Provider
           value={{
-            table,
-            alignments: new Map([['a', 'right']]),
+            table: baseTable,
+            alignments: defaultAlignments,
             ...wrapperProps,
           }}
         >
@@ -65,220 +71,186 @@ describe('datatable cell renderer', () => {
         </DataContext.Provider>
       );
     };
-  const renderCellRenderer = () => {
-    const rtlRender = render(
+  const makeDatatableArgs = (overrides: Partial<DatatableArgs> = {}): DatatableArgs => ({
+    title: 'myData',
+    columns: [
+      {
+        columnId: 'a',
+        type: 'lens_datatable_column',
+        ...overrides.columns?.[0],
+      },
+    ],
+    sortingColumnId: '',
+    sortingDirection: 'none',
+    rowHeightLines: 1,
+    ...overrides,
+  });
+
+  type ColumnConfig = Parameters<typeof createGridCell>[1];
+
+  const makeCellRenderer = ({
+    columnConfig,
+    formatters = defaultFormatters,
+    isDarkMode = false,
+    fitRowToContent,
+  }: {
+    columnConfig: ColumnConfig;
+    formatters?: Record<string, FieldFormat>;
+    isDarkMode?: boolean;
+    fitRowToContent?: boolean;
+  }) =>
+    createGridCell(
+      formatters,
+      columnConfig,
+      DataContext,
+      isDarkMode,
+      cellColorFnMock,
+      fitRowToContent
+    );
+
+  const renderCell = ({
+    cellRenderer: CellRenderer,
+    columnId = 'a',
+    rowIndex = 0,
+    colIndex = 0,
+    isExpanded = false,
+    context = {},
+  }: {
+    cellRenderer: ReturnType<typeof createGridCell>;
+    columnId?: string;
+    rowIndex?: number;
+    colIndex?: number;
+    isExpanded?: boolean;
+    context?: Partial<DataContextType>;
+  }) =>
+    render(
       <CellRenderer
-        rowIndex={0}
-        colIndex={0}
-        columnId="a"
+        rowIndex={rowIndex}
+        colIndex={colIndex}
+        columnId={columnId}
         setCellProps={setCellProps}
         isExpandable={false}
         isDetails={false}
-        isExpanded={false}
+        isExpanded={isExpanded}
       />,
-      { wrapper: DataContextProviderWrapper() }
+      {
+        wrapper: DataContextProviderWrapper({
+          table: baseTable,
+          minMaxByColumnId: defaultMinMaxByColumnId,
+          ...context,
+        }),
+      }
     );
-    return { ...rtlRender };
-  };
 
-  it('renders formatted value', () => {
-    renderCellRenderer();
-    expect(screen.getByText('formatted 123')).toHaveTextContent('formatted 123');
+  describe('rendering', () => {
+    it('renders formatted value', () => {
+      const cellRenderer = makeCellRenderer({
+        columnConfig: { columns: [], sortingColumnId: '', sortingDirection: 'none' },
+      });
+      renderCell({ cellRenderer });
+      expect(screen.getByText('formatted 123')).toHaveTextContent('formatted 123');
+    });
+
+    it('set class with text alignment', () => {
+      const cellRenderer = makeCellRenderer({
+        columnConfig: { columns: [], sortingColumnId: '', sortingDirection: 'none' },
+      });
+      renderCell({ cellRenderer });
+      expect(screen.getByText('formatted 123')).toHaveClass('lnsTableCell--right');
+    });
+
+    it('does not set multiline class for regular height tables', () => {
+      const cellRenderer = makeCellRenderer({
+        columnConfig: { columns: [], sortingColumnId: '', sortingDirection: 'none' },
+      });
+      renderCell({ cellRenderer });
+      expect(screen.getByText('formatted 123')).not.toHaveClass('lnsTableCell--multiline');
+    });
+
+    it('set multiline class for auto height tables', () => {
+      const cellRenderer = makeCellRenderer({
+        columnConfig: { columns: [], sortingColumnId: '', sortingDirection: 'none' },
+        fitRowToContent: true,
+      });
+      renderCell({ cellRenderer });
+      expect(screen.getByText('formatted 123')).toHaveClass('lnsTableCell--multiline');
+    });
   });
 
-  it('set class with text alignment', () => {
-    renderCellRenderer();
-    expect(screen.getByText('formatted 123')).toHaveClass('lnsTableCell--right');
-  });
+  describe('one-click filter', () => {
+    it('renders as button if oneClickFilter is set', () => {
+      const cellRenderer = makeCellRenderer({
+        columnConfig: {
+          columns: [{ columnId: 'a', type: 'lens_datatable_column', oneClickFilter: true }],
+          sortingColumnId: '',
+          sortingDirection: 'none',
+        },
+        fitRowToContent: true,
+      });
+      renderCell({ cellRenderer, context: { handleFilterClick: () => {} } });
+      expect(screen.getByRole('button')).toHaveTextContent('formatted 123');
+    });
 
-  it('does not set multiline class for regular height tables', () => {
-    renderCellRenderer();
-    expect(screen.getByText('formatted 123')).not.toHaveClass('lnsTableCell--multiline');
-  });
+    it('passes the correct colIndex to handleFilterClick for a non-first column', async () => {
+      const handleFilterClick = jest.fn();
+      const cellRenderer = makeCellRenderer({
+        columnConfig: {
+          columns: [
+            { columnId: 'a', type: 'lens_datatable_column' },
+            { columnId: 'b', type: 'lens_datatable_column', oneClickFilter: true },
+          ],
+          sortingColumnId: '',
+          sortingDirection: 'none',
+        },
+        formatters: {
+          a: { convert: (x) => `formatted ${x}` } as FieldFormat,
+          b: { convert: (x) => `formatted ${x}` } as FieldFormat,
+        },
+      });
 
-  it('set multiline class for auto height tables', () => {
-    const MultiLineCellRenderer = createGridCell(
-      {
-        a: { convert: (x) => `formatted ${x}` } as FieldFormat,
-      },
-      { columns: [], sortingColumnId: '', sortingDirection: 'none' },
-      DataContext,
-      false,
-      cellColorFnMock,
-      true
-    );
-    render(
-      <MultiLineCellRenderer
-        rowIndex={0}
-        colIndex={0}
-        columnId="a"
-        setCellProps={setCellProps}
-        isExpandable={false}
-        isDetails={false}
-        isExpanded={false}
-      />,
-      { wrapper: DataContextProviderWrapper() }
-    );
+      const multiColTable = makeTable(
+        [{ a: 123, b: 456 }],
+        [...baseTable.columns, { id: 'b', name: 'b', meta: { type: 'number' } }]
+      );
 
-    expect(screen.getByText('formatted 123')).toHaveClass('lnsTableCell--multiline');
-  });
+      renderCell({
+        cellRenderer,
+        columnId: 'b',
+        colIndex: 1,
+        context: { handleFilterClick, table: multiColTable },
+      });
 
-  it('renders as button if oneClickFilter is set', () => {
-    const MultiLineCellRenderer = createGridCell(
-      {
-        a: { convert: (x) => `formatted ${x}` } as FieldFormat,
-      },
-      {
-        columns: [
-          {
-            columnId: 'a',
-            type: 'lens_datatable_column',
-            oneClickFilter: true,
-          },
-        ],
-        sortingColumnId: '',
-        sortingDirection: 'none',
-      },
-      DataContext,
-      false,
-      cellColorFnMock,
-      true
-    );
-    render(
-      <MultiLineCellRenderer
-        rowIndex={0}
-        colIndex={0}
-        columnId="a"
-        setCellProps={setCellProps}
-        isExpandable={false}
-        isDetails={false}
-        isExpanded={false}
-      />,
-      { wrapper: DataContextProviderWrapper({ handleFilterClick: () => {} }) }
-    );
-    expect(screen.getByRole('button')).toHaveTextContent('formatted 123');
-  });
-
-  it('should pass the correct colIndex to handleFilterClick for a non-first column', async () => {
-    const handleFilterClick = jest.fn();
-    const MultiColumnCellRenderer = createGridCell(
-      {
-        a: { convert: (x) => `formatted ${x}` } as FieldFormat,
-        b: { convert: (x) => `formatted ${x}` } as FieldFormat,
-      },
-      {
-        columns: [
-          { columnId: 'a', type: 'lens_datatable_column' },
-          { columnId: 'b', type: 'lens_datatable_column', oneClickFilter: true },
-        ],
-        sortingColumnId: '',
-        sortingDirection: 'none',
-      },
-      DataContext,
-      false,
-      cellColorFnMock
-    );
-
-    const multiColTable: Datatable = {
-      ...table,
-      columns: [...table.columns, { id: 'b', name: 'b', meta: { type: 'number' } }],
-      rows: [{ a: 123, b: 456 }],
-    };
-
-    render(
-      <MultiColumnCellRenderer
-        rowIndex={0}
-        colIndex={1}
-        columnId="b"
-        setCellProps={setCellProps}
-        isExpandable={false}
-        isDetails={false}
-        isExpanded={false}
-      />,
-      { wrapper: DataContextProviderWrapper({ handleFilterClick, table: multiColTable }) }
-    );
-
-    await userEvent.click(screen.getByRole('button'));
-    expect(handleFilterClick).toHaveBeenCalledWith('b', 456, 1, 0);
+      await userEvent.click(screen.getByRole('button'));
+      expect(handleFilterClick).toHaveBeenCalledWith('b', 456, 1, 0);
+    });
   });
 
   describe('dynamic coloring', () => {
-    function getCellRenderer(columnConfig: DatatableArgs) {
-      return createGridCell(
-        {
-          a: { convert: (x) => `formatted ${x}` } as FieldFormat,
-        },
-        columnConfig,
-        DataContext,
-        false,
-        cellColorFnMock
-      );
-    }
-    function getColumnConfiguration(): DatatableArgs {
-      return {
-        title: 'myData',
-        columns: [
-          {
-            columnId: 'a',
-            colorMode: 'none',
-            palette: {
-              type: 'palette',
-              name: 'custom',
-              params: {
-                colors: ['#aaa', '#bbb', '#ccc', '#ddd', '#eee'],
-                gradient: false,
-                stops: [20, 40, 60, 80, 100],
-                range: 'percent',
-                rangeMin: 0,
-                rangeMax: 100,
-              },
-            },
-            type: 'lens_datatable_column',
-          },
-        ],
-        sortingColumnId: '',
-        sortingDirection: 'none',
-        rowHeightLines: 1,
-      };
-    }
+    const getCellRendererWithPalette = (columnConfig: DatatableArgs) =>
+      makeCellRenderer({ columnConfig, formatters: defaultFormatters });
 
-    function renderCellComponent(
-      columnConfig = getColumnConfiguration(),
+    const renderPaletteCell = (
+      columnConfig: DatatableArgs = makeDatatableArgs(),
       context: Partial<DataContextType> = {}
-    ) {
-      const CellRendererWithPalette = getCellRenderer(columnConfig);
-
-      const rtlRender = render(
-        <CellRendererWithPalette
-          rowIndex={0}
-          colIndex={0}
-          columnId={columnConfig.columns[0].columnId}
-          setCellProps={setCellProps}
-          isExpandable={false}
-          isDetails={false}
-          isExpanded={false}
-        />,
-        {
-          wrapper: DataContextProviderWrapper({
-            table,
-            minMaxByColumnId: new Map([['a', { min: 12, max: 155 }]]),
-            ...context,
-          }),
-        }
-      );
-      return { ...rtlRender };
-    }
+    ) => {
+      const cellRenderer = getCellRendererWithPalette(columnConfig);
+      return renderCell({
+        cellRenderer,
+        columnId: columnConfig.columns[0].columnId,
+        context: { ...context },
+      });
+    };
 
     it('ignores coloring when colorMode is set to "none"', () => {
-      renderCellComponent();
+      renderPaletteCell();
       expect(setCellProps).not.toHaveBeenCalled();
     });
 
     it('should set the coloring of the cell when enabled', () => {
-      const columnConfig = getColumnConfiguration();
+      const columnConfig = makeDatatableArgs();
       columnConfig.columns[0].colorMode = 'cell';
 
-      renderCellComponent(columnConfig, {});
+      renderPaletteCell(columnConfig, {});
 
       expect(setCellProps).toHaveBeenCalledWith({
         style: expect.objectContaining({ backgroundColor: 'blue' }),
@@ -287,16 +259,16 @@ describe('datatable cell renderer', () => {
 
     it('should call getCellColor with full columnId of transpose column', () => {
       const columnId = getTransposeId('test', 'a');
-      const columnConfig = getColumnConfiguration();
+      const columnConfig = makeDatatableArgs();
       columnConfig.columns[0].colorMode = 'cell';
       columnConfig.columns[0].columnId = columnId;
 
-      renderCellComponent(columnConfig, {
+      renderPaletteCell(columnConfig, {
         table: {
-          ...table,
+          ...baseTable,
           columns: [
             {
-              ...table.columns[0],
+              ...baseTable.columns[0],
               id: columnId,
             },
           ],
@@ -308,10 +280,10 @@ describe('datatable cell renderer', () => {
     });
 
     it('should set the coloring of the text when enabled', () => {
-      const columnConfig = getColumnConfiguration();
+      const columnConfig = makeDatatableArgs();
       columnConfig.columns[0].colorMode = 'text';
 
-      renderCellComponent(columnConfig, {});
+      renderPaletteCell(columnConfig, {});
 
       expect(setCellProps).toHaveBeenCalledWith({
         style: expect.objectContaining({ color: 'blue' }),
@@ -319,11 +291,11 @@ describe('datatable cell renderer', () => {
     });
 
     it('should render badge when enabled', () => {
-      const columnConfig = getColumnConfiguration();
+      const columnConfig = makeDatatableArgs();
       columnConfig.columns[0].colorMode = 'badge';
 
       setCellProps.mockClear();
-      renderCellComponent(columnConfig, {});
+      renderPaletteCell(columnConfig, {});
 
       expect(screen.getByText('formatted 123')).toBeInTheDocument();
       expect(screen.getByTestId('lnsTableCellContentBadge')).toBeInTheDocument();
@@ -331,30 +303,66 @@ describe('datatable cell renderer', () => {
     });
 
     it('should not render badge for null values', () => {
-      const columnConfig = getColumnConfiguration();
+      const columnConfig = makeDatatableArgs();
       columnConfig.columns[0].colorMode = 'badge';
 
       setCellProps.mockClear();
-      renderCellComponent(columnConfig, {
+      renderPaletteCell(columnConfig, {
         table: {
-          ...table,
+          ...baseTable,
           rows: [{ a: null }],
         },
       });
 
       expect(screen.queryByTestId('lnsTableCellContentBadge')).not.toBeInTheDocument();
       expect(setCellProps).not.toHaveBeenCalled();
-      expect(screen.getByText('formatted null').className).toMatch(/euiTextColor-subdued/);
+      expect(screen.getByText('formatted null')).toBeInTheDocument();
+      expect(screen.getByTestId('lnsTableCellContent')).not.toHaveClass('lnsTableCell--colored');
     });
 
+    it.each(['badge', 'cell', 'text'] as const)(
+      'should render null as subdued placeholder regardless of colorMode (%s)',
+      (colorMode) => {
+        const columnConfig = makeDatatableArgs();
+        columnConfig.columns[0].colorMode = colorMode;
+
+        const cellRenderer = makeCellRenderer({
+          columnConfig,
+          formatters: {
+            a: {
+              convert: (x: unknown, contentType?: string) => {
+                if (x == null) {
+                  return contentType === 'html'
+                    ? '<span class="ffString__emptyValue">(null)</span>'
+                    : '(null)';
+                }
+                return `formatted ${x}`;
+              },
+            } as FieldFormat,
+          },
+        });
+
+        setCellProps.mockClear();
+
+        renderCell({
+          cellRenderer,
+          context: { table: makeTable([{ a: null }]) },
+        });
+
+        expect(screen.getByText('(null)')).toHaveClass('ffString__emptyValue');
+        expect(setCellProps).not.toHaveBeenCalled();
+        expect(screen.queryByTestId('lnsTableCellContentBadge')).not.toBeInTheDocument();
+      }
+    );
+
     it('should treat missing bucket token as non-colorable', () => {
-      const columnConfig = getColumnConfiguration();
+      const columnConfig = makeDatatableArgs();
       columnConfig.columns[0].colorMode = 'cell';
       setCellProps.mockClear();
 
-      renderCellComponent(columnConfig, {
+      renderPaletteCell(columnConfig, {
         table: {
-          ...table,
+          ...baseTable,
           rows: [{ a: MISSING_TOKEN }],
         },
       });
@@ -364,13 +372,13 @@ describe('datatable cell renderer', () => {
     });
 
     it('should not mark empty values as colored when colorMode is text', () => {
-      const columnConfig = getColumnConfiguration();
+      const columnConfig = makeDatatableArgs();
       columnConfig.columns[0].colorMode = 'text';
       setCellProps.mockClear();
 
-      renderCellComponent(columnConfig, {
+      renderPaletteCell(columnConfig, {
         table: {
-          ...table,
+          ...baseTable,
           rows: [{ a: '' }],
         },
       });
@@ -380,30 +388,31 @@ describe('datatable cell renderer', () => {
     });
 
     it('should not render badge for blank values', () => {
-      const columnConfig = getColumnConfiguration();
+      const columnConfig = makeDatatableArgs();
       columnConfig.columns[0].colorMode = 'badge';
 
       setCellProps.mockClear();
-      renderCellComponent(columnConfig, {
+      renderPaletteCell(columnConfig, {
         table: {
-          ...table,
+          ...baseTable,
           rows: [{ a: '' }],
         },
       });
 
       expect(screen.queryByTestId('lnsTableCellContentBadge')).not.toBeInTheDocument();
       expect(setCellProps).not.toHaveBeenCalled();
-      expect(screen.getByText(/^formatted\s*$/).className).toMatch(/euiTextColor-subdued/);
+      expect(screen.getByText(/^formatted\s*$/)).toBeInTheDocument();
+      expect(screen.getByTestId('lnsTableCellContent')).not.toHaveClass('lnsTableCell--colored');
     });
 
     it('should not render badge for NaN values', () => {
-      const columnConfig = getColumnConfiguration();
+      const columnConfig = makeDatatableArgs();
       columnConfig.columns[0].colorMode = 'badge';
 
       setCellProps.mockClear();
-      renderCellComponent(columnConfig, {
+      renderPaletteCell(columnConfig, {
         table: {
-          ...table,
+          ...baseTable,
           rows: [{ a: Number.NaN }],
         },
       });
@@ -411,18 +420,47 @@ describe('datatable cell renderer', () => {
       expect(screen.getByText('formatted NaN')).toBeInTheDocument();
       expect(screen.queryByTestId('lnsTableCellContentBadge')).not.toBeInTheDocument();
       expect(setCellProps).not.toHaveBeenCalled();
-      expect(screen.getByText('formatted NaN').className).toMatch(/euiTextColor-subdued/);
+      expect(screen.getByTestId('lnsTableCellContent')).not.toHaveClass('lnsTableCell--colored');
+    });
+
+    it('should fall back to html placeholder when text formatting is empty in badge mode', () => {
+      const columnConfig = makeDatatableArgs();
+      columnConfig.columns[0].colorMode = 'badge';
+
+      const badgeCellRenderer = makeCellRenderer({
+        columnConfig,
+        formatters: {
+          a: {
+            convert: (x: unknown, contentType?: string) => {
+              if (typeof x === 'number' && Number.isNaN(x)) {
+                return contentType === 'text'
+                  ? ''
+                  : '<span class="ffString__emptyValue">(null)</span>';
+              }
+              return `formatted ${x}`;
+            },
+          } as FieldFormat,
+        },
+      });
+
+      renderCell({
+        cellRenderer: badgeCellRenderer,
+        context: { table: makeTable([{ a: Number.NaN }]) },
+      });
+
+      expect(screen.getByText('(null)')).toBeInTheDocument();
+      expect(screen.queryByTestId('lnsTableCellContentBadge')).not.toBeInTheDocument();
     });
 
     it('should render a link for null values in badge mode when oneClickFilter is enabled', async () => {
       const handleFilterClick = jest.fn();
-      const columnConfig = getColumnConfiguration();
+      const columnConfig = makeDatatableArgs();
       columnConfig.columns[0].colorMode = 'badge';
       columnConfig.columns[0].oneClickFilter = true;
 
-      renderCellComponent(columnConfig, {
+      renderPaletteCell(columnConfig, {
         handleFilterClick,
-        table: { ...table, rows: [{ a: null }] },
+        table: makeTable([{ a: null }]),
       });
 
       expect(screen.queryByTestId('lnsTableCellContentBadge')).not.toBeInTheDocument();
@@ -432,11 +470,11 @@ describe('datatable cell renderer', () => {
 
     it('should invoke handleFilterClick when badge with oneClickFilter is clicked', async () => {
       const handleFilterClick = jest.fn();
-      const columnConfig = getColumnConfiguration();
+      const columnConfig = makeDatatableArgs();
       columnConfig.columns[0].colorMode = 'badge';
       columnConfig.columns[0].oneClickFilter = true;
 
-      renderCellComponent(columnConfig, { handleFilterClick });
+      renderPaletteCell(columnConfig, { handleFilterClick });
 
       await userEvent.click(screen.getByText('formatted 123'));
       expect(handleFilterClick).toHaveBeenCalledWith('a', 123, 0, 0);
@@ -445,36 +483,36 @@ describe('datatable cell renderer', () => {
     it('should not color the cell when color function returns null', () => {
       setCellProps.mockClear();
       innerCellColorFnMock.mockReturnValueOnce(null);
-      const columnConfig = getColumnConfiguration();
+      const columnConfig = makeDatatableArgs();
       columnConfig.columns[0].colorMode = 'cell';
 
-      renderCellComponent(columnConfig, {});
+      renderPaletteCell(columnConfig, {});
 
       expect(setCellProps).not.toHaveBeenCalled();
     });
 
     it('should not color the cell when color function returns empty string', () => {
       innerCellColorFnMock.mockReturnValueOnce('');
-      const columnConfig = getColumnConfiguration();
+      const columnConfig = makeDatatableArgs();
       columnConfig.columns[0].colorMode = 'cell';
 
-      renderCellComponent(columnConfig, {});
+      renderPaletteCell(columnConfig, {});
 
       expect(setCellProps).not.toHaveBeenCalled();
     });
 
     it('should clear previously applied cell styles when value becomes null', () => {
-      const columnConfig = getColumnConfiguration();
+      const columnConfig = makeDatatableArgs();
       columnConfig.columns[0].colorMode = 'cell';
       innerCellColorFnMock.mockReturnValue('blue');
 
-      const CellRendererWithPalette = getCellRenderer(columnConfig);
-      let currentTable: Datatable = { ...table, rows: [{ a: 123 }] };
+      const CellRenderer = getCellRendererWithPalette(columnConfig);
+      let currentTable: Datatable = makeTable([{ a: 123 }]);
       const wrapper = ({ children }: { children: React.ReactNode }) => (
         <DataContext.Provider
           value={{
             table: currentTable,
-            alignments: new Map([['a', 'right']]),
+            alignments: defaultAlignments,
           }}
         >
           {children}
@@ -482,7 +520,7 @@ describe('datatable cell renderer', () => {
       );
 
       const { rerender } = render(
-        <CellRendererWithPalette
+        <CellRenderer
           rowIndex={0}
           colIndex={0}
           columnId="a"
@@ -499,9 +537,9 @@ describe('datatable cell renderer', () => {
       });
 
       setCellProps.mockClear();
-      currentTable = { ...table, rows: [{ a: null }] };
+      currentTable = makeTable([{ a: null }]);
       rerender(
-        <CellRendererWithPalette
+        <CellRenderer
           rowIndex={0}
           colIndex={0}
           columnId="a"
@@ -518,10 +556,10 @@ describe('datatable cell renderer', () => {
     });
 
     it('should clean up cell coloring on unmount to prevent stale styles', () => {
-      const columnConfig = getColumnConfiguration();
+      const columnConfig = makeDatatableArgs();
       columnConfig.columns[0].colorMode = 'cell';
 
-      const { unmount } = renderCellComponent(columnConfig);
+      const { unmount } = renderPaletteCell(columnConfig);
 
       expect(setCellProps).toHaveBeenCalledWith({
         style: expect.objectContaining({ backgroundColor: 'blue' }),
@@ -536,27 +574,15 @@ describe('datatable cell renderer', () => {
     });
 
     it('should not clean up cell styles when the cell is expanded', () => {
-      const columnConfig = getColumnConfiguration();
+      const columnConfig = makeDatatableArgs();
       columnConfig.columns[0].colorMode = 'cell';
-      const CellRendererWithPalette = getCellRenderer(columnConfig);
+      const cellRenderer = getCellRendererWithPalette(columnConfig);
 
-      const { unmount } = render(
-        <CellRendererWithPalette
-          rowIndex={0}
-          colIndex={0}
-          columnId="a"
-          setCellProps={setCellProps}
-          isExpandable={false}
-          isDetails={false}
-          isExpanded={true}
-        />,
-        {
-          wrapper: DataContextProviderWrapper({
-            table,
-            minMaxByColumnId: new Map([['a', { min: 12, max: 155 }]]),
-          }),
-        }
-      );
+      const { unmount } = renderCell({
+        cellRenderer,
+        isExpanded: true,
+        context: { table: baseTable, minMaxByColumnId: defaultMinMaxByColumnId },
+      });
 
       setCellProps.mockClear();
       unmount();
@@ -565,7 +591,7 @@ describe('datatable cell renderer', () => {
     });
   });
 
-  describe('one click filter with background color', () => {
+  describe('one-click filter with background color', () => {
     const handleFilterClick = jest.fn();
 
     const renderThemedCellRenderer = (
@@ -574,15 +600,11 @@ describe('datatable cell renderer', () => {
       backgroundColor: string | null
     ) => {
       innerCellColorFnMock.mockReturnValue(backgroundColor);
-      const CellRendererWithColor = createGridCell(
-        {
-          a: { convert: (x) => `formatted ${x}` } as FieldFormat,
-        },
+      const CellRendererWithColor = makeCellRenderer({
         columnConfig,
-        DataContext,
         isDarkMode,
-        cellColorFnMock
-      );
+        formatters: defaultFormatters,
+      });
 
       render(
         <EuiThemeProvider colorMode={isDarkMode ? 'dark' : 'light'}>
@@ -599,7 +621,7 @@ describe('datatable cell renderer', () => {
         {
           wrapper: DataContextProviderWrapper({
             handleFilterClick,
-            table,
+            table: baseTable,
           }),
         }
       );

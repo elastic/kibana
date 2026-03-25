@@ -51,7 +51,8 @@ export const createGridCell = (
     const { oneClickFilter, colorMode = 'none', palette, colorMapping } = currentColumnConfig ?? {};
 
     const isClickable = Boolean(oneClickFilter && handleFilterClick);
-    const renderMode = getRenderMode(colorMode, isClickable);
+    const isNonColorable = isNonColorableValue(rawValue);
+    const renderMode = getRenderMode(colorMode, isClickable, isNonColorable);
 
     // Badge and link modes need plain text; html mode uses the formatter's html output.
     const contentFormat = renderMode !== 'html' ? 'text' : 'html';
@@ -114,7 +115,6 @@ export const createGridCell = (
         return (
           <BadgeCell
             label={content}
-            rawValue={rawValue}
             badgeColor={badgeColor}
             isClickable={isClickable}
             onClick={onFilter}

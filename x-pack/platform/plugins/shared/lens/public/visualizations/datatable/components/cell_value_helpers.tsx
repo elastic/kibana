@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiLink, EuiTextColor } from '@elastic/eui';
+import { EuiBadge, EuiLink } from '@elastic/eui';
 import classNames from 'classnames';
 import type { PaletteOutput } from '@kbn/coloring';
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
@@ -57,8 +57,12 @@ export const getCellClassName = (
     [`lnsTableCell--${alignment}`]: true,
   });
 
-export const getRenderMode = (colorMode: string, isClickable: boolean): RenderMode => {
-  if (colorMode === 'badge') return 'badge';
+export const getRenderMode = (
+  colorMode: string,
+  isClickable: boolean,
+  isNonColorable: boolean
+): RenderMode => {
+  if (colorMode === 'badge' && !isNonColorable) return 'badge';
   if (isClickable) return 'link';
   return 'html';
 };
@@ -164,7 +168,6 @@ export const LinkCell = ({
 
 export interface BadgeCellProps {
   label: string;
-  rawValue: RawValue;
   badgeColor: string | null;
   isClickable: boolean;
   onClick: () => void;
@@ -175,7 +178,6 @@ export interface BadgeCellProps {
 
 export const BadgeCell = ({
   label,
-  rawValue,
   badgeColor,
   isClickable,
   onClick,
@@ -184,24 +186,6 @@ export const BadgeCell = ({
   fitRowToContent,
 }: BadgeCellProps) => {
   const cellClassName = getCellClassName(alignment, fitRowToContent);
-
-  // Null, empty, or NaN values don't get a badge — fall back to text or link.
-  if (isNonColorableValue(rawValue)) {
-    return (
-      <div data-test-subj="lnsTableCellContent" className={cellClassName}>
-        <EuiTextColor color="subdued">
-          {isClickable ? (
-            <EuiLink onClick={onClick} style={{ color: 'inherit' }}>
-              {label}
-            </EuiLink>
-          ) : (
-            label
-          )}
-        </EuiTextColor>
-      </div>
-    );
-  }
-
   const badgeTextColor = badgeColor ? getContrastColor(badgeColor, isDarkMode) : undefined;
   const clickProps = isClickable ? { onClick, onClickAriaLabel: getBadgeLabel(label) } : {};
 
