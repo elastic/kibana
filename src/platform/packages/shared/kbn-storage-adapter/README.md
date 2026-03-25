@@ -156,7 +156,7 @@ const result = await client.migrateDocuments({ batchSize: 500 });
 // result: { migrated: 1234, failed: 0, total: 1234 }
 ```
 
-This uses `search_after` pagination, concurrent per-batch migrations, and a single refresh at the end for efficiency.
+This uses a Point-in-Time (PIT) with `search_after` pagination, concurrent per-batch migrations, and a single refresh at the end for efficiency.
 
 #### When to run bulk migration
 

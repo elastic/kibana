@@ -873,7 +873,6 @@ describe('StorageIndexAdapter', () => {
         const rawDocs = await esClient.search({
           index: VERSIONED_INDEX,
           size: 10,
-          sort: [{ _id: 'asc' as const }],
           query: { match_all: {} },
         });
         const sources = rawDocs.hits.hits.map((hit) => hit._source as Record<string, unknown>);

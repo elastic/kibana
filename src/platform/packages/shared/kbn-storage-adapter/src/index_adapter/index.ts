@@ -711,67 +711,83 @@ export class StorageIndexAdapter<
     let failed = 0;
     let total = 0;
     const batchSize = options?.batchSize ?? 1000;
-    let searchAfter: FieldValue[] | undefined;
 
-    while (true) {
-      const response = await wrapEsCall(
-        this.esClient.search({
-          index: this.getSearchIndexPattern(),
-          size: batchSize,
-          sort: [{ _id: 'asc' as const }],
-          track_total_hits: false,
-          ...(searchAfter ? { search_after: searchAfter } : {}),
-          query: {
-            bool: {
-              should: [
-                { bool: { must_not: [{ exists: { field: VERSION_FIELD } }] } },
-                { range: { [VERSION_FIELD]: { lt: versioning.latestVersion } } },
-              ],
-              minimum_should_match: 1,
+    const { id: pitId } = await wrapEsCall(
+      this.esClient.openPointInTime({
+        index: this.getSearchIndexPattern(),
+        keep_alive: '5m',
+      })
+    );
+
+    try {
+      let searchAfter: FieldValue[] | undefined;
+
+      while (true) {
+        const response = await wrapEsCall(
+          this.esClient.search({
+            size: batchSize,
+            sort: [{ _shard_doc: 'asc' as const }],
+            track_total_hits: false,
+            pit: { id: pitId, keep_alive: '5m' },
+            ...(searchAfter ? { search_after: searchAfter } : {}),
+            query: {
+              bool: {
+                should: [
+                  { bool: { must_not: [{ exists: { field: VERSION_FIELD } }] } },
+                  { range: { [VERSION_FIELD]: { lt: versioning.latestVersion } } },
+                ],
+                minimum_should_match: 1,
+              },
             },
-          },
-        })
-      );
-
-      const hits = response.hits.hits;
-      if (hits.length === 0) break;
-
-      total += hits.length;
-
-      const migratedDocs = await Promise.all(
-        hits.map(async (hit) => ({
-          _id: hit._id!,
-          _index: hit._index,
-          doc: await this.maybeMigrateSource(hit._source),
-        }))
-      );
-
-      const operations = migratedDocs.flatMap<BulkOperationContainer>(({ _id, _index, doc }) => [
-        { index: { _id, _index } },
-        { ...(doc as Record<string, unknown>), [VERSION_FIELD]: versioning.latestVersion } as {},
-      ]);
-
-      const bulkResponse = await wrapEsCall(
-        this.esClient.bulk({
-          operations,
-          refresh: false,
-        })
-      );
-
-      const batchFailed = bulkResponse.items.filter((item) => Object.values(item)[0]?.error).length;
-
-      if (batchFailed > 0) {
-        failed += batchFailed;
-        this.logger.warn(
-          `Bulk migration encountered ${batchFailed} errors in batch of ${hits.length}`
+          })
         );
+
+        const hits = response.hits.hits;
+        if (hits.length === 0) break;
+
+        total += hits.length;
+
+        const migratedDocs = await Promise.all(
+          hits.map(async (hit) => ({
+            _id: hit._id!,
+            _index: hit._index,
+            doc: await this.maybeMigrateSource(hit._source),
+          }))
+        );
+
+        const operations = migratedDocs.flatMap<BulkOperationContainer>(({ _id, _index, doc }) => [
+          { index: { _id, _index } },
+          { ...(doc as Record<string, unknown>), [VERSION_FIELD]: versioning.latestVersion } as {},
+        ]);
+
+        const bulkResponse = await wrapEsCall(
+          this.esClient.bulk({
+            operations,
+            refresh: false,
+          })
+        );
+
+        const batchFailed = bulkResponse.items.filter(
+          (item) => Object.values(item)[0]?.error
+        ).length;
+
+        if (batchFailed > 0) {
+          failed += batchFailed;
+          this.logger.warn(
+            `Bulk migration encountered ${batchFailed} errors in batch of ${hits.length}`
+          );
+        }
+
+        migrated += bulkResponse.items.length - batchFailed;
+
+        this.logger.debug(`Migrated ${migrated} documents so far (${failed} failed)`);
+
+        searchAfter = last(hits)!.sort as FieldValue[] | undefined;
       }
-
-      migrated += bulkResponse.items.length - batchFailed;
-
-      this.logger.debug(`Migrated ${migrated} documents so far (${failed} failed)`);
-
-      searchAfter = last(hits)!.sort as FieldValue[] | undefined;
+    } finally {
+      await this.esClient.closePointInTime({ id: pitId }).catch((err) => {
+        this.logger.warn(`Failed to close point in time: ${err.message}`);
+      });
     }
 
     if (migrated > 0) {
