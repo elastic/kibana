@@ -22,6 +22,7 @@ import React, {
 
 import { useGeneratedHtmlId } from '@elastic/eui';
 
+import { useAutoRefresh } from './hooks/use_auto_refresh';
 import type {
   TimeRangeBounds,
   TimeRangeBoundsOption,
@@ -120,6 +121,12 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
    * Displayed informally in the panel footer.
    */
   timeZone?: string;
+  /** Seconds until the next auto-refresh. While paused, this value is frozen at the last countdown value. `null` when auto-refresh is disabled or the interval is invalid. */
+  autoRefreshSecondsRemaining: number | null;
+  /** Toggles `settings.autoRefresh.isPaused` (play/pause on the input append). No-op when `settings.autoRefresh` is not set. */
+  toggleAutoRefresh: () => void;
+  /** Whether an `onRefresh` callback was provided; used to gate auto-refresh UI without exposing the function. */
+  hasAutoRefresh: boolean;
 }
 
 const DateRangePickerContext = createContext<DateRangePickerInternalContextValue | null>(null);
@@ -161,6 +168,7 @@ export function DateRangePickerProvider({
   settings = { roundRelativeTime: true },
   onSettingsChange,
   timeZone,
+  onRefresh,
 }: PropsWithChildren<DateRangePickerProps>) {
   const inputRef = useRef<HTMLInputElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -174,7 +182,7 @@ export function DateRangePickerProvider({
   const timeRange: TimeRange = useMemo(
     () =>
       textToTimeRange(text, { presets, dateFormat, roundRelativeTime: settings.roundRelativeTime }),
-    [text, presets, dateFormat, settings]
+    [text, presets, dateFormat, settings.roundRelativeTime]
   );
   const displayText = useMemo(
     () => timeRangeToDisplayText(timeRange, { dateFormat }),
@@ -225,6 +233,32 @@ export function DateRangePickerProvider({
     },
     [text, value]
   );
+
+  const hasAutoRefresh = !!onRefresh;
+
+  const refreshTimerPaused =
+    !onRefresh ||
+    !settings.autoRefresh ||
+    !settings.autoRefresh.isEnabled ||
+    settings.autoRefresh.isPaused;
+
+  const { secondsRemaining: autoRefreshSecondsRemaining } = useAutoRefresh({
+    isPaused: refreshTimerPaused,
+    intervalMs: settings.autoRefresh?.isEnabled ? settings.autoRefresh.interval : 0,
+    onRefresh,
+  });
+
+  const toggleAutoRefresh = useCallback(() => {
+    if (!settings.autoRefresh) return;
+
+    onSettingsChange({
+      ...settings,
+      autoRefresh: {
+        ...settings.autoRefresh,
+        isPaused: !settings.autoRefresh.isPaused,
+      },
+    });
+  }, [settings, onSettingsChange]);
 
   /** Apply a range: parse it, call `onChange`, and exit editing mode. */
   const applyRange = useCallback(
@@ -284,6 +318,9 @@ export function DateRangePickerProvider({
       settings,
       onSettingsChange,
       timeZone,
+      autoRefreshSecondsRemaining,
+      toggleAutoRefresh,
+      hasAutoRefresh,
     }),
     [
       text,
@@ -311,6 +348,9 @@ export function DateRangePickerProvider({
       settings,
       onSettingsChange,
       timeZone,
+      autoRefreshSecondsRemaining,
+      toggleAutoRefresh,
+      hasAutoRefresh,
     ]
   );
 

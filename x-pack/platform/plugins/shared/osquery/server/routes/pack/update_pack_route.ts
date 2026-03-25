@@ -27,7 +27,7 @@ import {
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
-import type { IRouter } from '@kbn/core/server';
+import { type IRouter, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
@@ -122,10 +122,21 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           shards = {},
         } = request.body;
 
-        const currentPackSO = await spaceScopedClient.get<PackSavedObject>(
-          packSavedObjectType,
-          request.params.id
-        );
+        let currentPackSO;
+        try {
+          currentPackSO = await spaceScopedClient.get<PackSavedObject>(
+            packSavedObjectType,
+            request.params.id
+          );
+        } catch (err) {
+          if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+            return response.notFound({
+              body: { message: `Pack ${request.params.id} not found` },
+            });
+          }
+
+          throw err;
+        }
 
         const existingScheduleIds = keyBy(
           (currentPackSO.attributes.queries ?? []).filter(

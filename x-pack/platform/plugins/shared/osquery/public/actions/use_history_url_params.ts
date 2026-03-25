@@ -9,9 +9,16 @@ import { useMemo, useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
 import type { SourceFilter } from '../../common/api/unified_history/types';
-import { DEFAULT_START_DATE, DEFAULT_END_DATE } from './components/history_filters';
+
+export const DEFAULT_START_DATE = 'now-24h';
+export const DEFAULT_END_DATE = 'now';
 
 const VALID_SOURCES: readonly SourceFilter[] = ['live', 'rule', 'scheduled'];
+
+export type SortDirection = 'asc' | 'desc';
+
+const VALID_SORT_DIRECTIONS: readonly SortDirection[] = ['asc', 'desc'];
+const DEFAULT_SORT_DIRECTION: SortDirection = 'desc';
 
 export interface HistoryUrlFilters {
   q: string;
@@ -21,6 +28,7 @@ export interface HistoryUrlFilters {
   start: string;
   end: string;
   pageSize: number | undefined;
+  sortDirection: SortDirection;
 }
 
 const DEFAULTS: Omit<HistoryUrlFilters, 'pageSize'> = {
@@ -30,6 +38,7 @@ const DEFAULTS: Omit<HistoryUrlFilters, 'pageSize'> = {
   tags: [],
   start: DEFAULT_START_DATE,
   end: DEFAULT_END_DATE,
+  sortDirection: DEFAULT_SORT_DIRECTION,
 };
 
 const parseCommaSeparated = (value: string | string[] | null | undefined): string[] => {
@@ -53,6 +62,14 @@ const parsePageSize = (value: string | string[] | null | undefined): number | un
   return Number.isFinite(num) && num > 0 ? num : undefined;
 };
 
+const parseSortDirection = (value: string | string[] | null | undefined): SortDirection => {
+  const raw = Array.isArray(value) ? value[0] : value;
+
+  return raw && VALID_SORT_DIRECTIONS.includes(raw as SortDirection)
+    ? (raw as SortDirection)
+    : DEFAULT_SORT_DIRECTION;
+};
+
 const parseString = (value: string | string[] | null | undefined): string => {
   if (!value) return '';
 
@@ -70,6 +87,7 @@ export const parseHistoryUrlParams = (search: string): HistoryUrlFilters => {
     start: parseString(params.start) || DEFAULTS.start,
     end: parseString(params.end) || DEFAULTS.end,
     pageSize: parsePageSize(params.pageSize),
+    sortDirection: parseSortDirection(params.sortDirection),
   };
 };
 
@@ -83,6 +101,8 @@ export const serializeHistoryUrlParams = (
   start: filters.start !== DEFAULTS.start ? filters.start : undefined,
   end: filters.end !== DEFAULTS.end ? filters.end : undefined,
   pageSize: filters.pageSize != null ? String(filters.pageSize) : undefined,
+  sortDirection:
+    filters.sortDirection !== DEFAULT_SORT_DIRECTION ? filters.sortDirection : undefined,
 });
 
 export const useHistoryUrlParams = () => {

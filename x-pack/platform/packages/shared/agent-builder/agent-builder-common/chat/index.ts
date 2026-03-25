@@ -21,11 +21,18 @@ export {
   type ConversationRoundStep,
   type ReasoningStepData,
   type ReasoningStep,
+  type CompactionStepData,
+  type CompactionStep,
   type ToolCallProgress,
   type RoundModelUsageStats,
+  type CompactionSummary,
+  type CompactionStructuredData,
+  type CompactionToolCallSummary,
+  type CompactionEntity,
   ConversationRoundStepType,
   isToolCallStep,
   isReasoningStep,
+  isCompactionStep,
 } from './conversation';
 export {
   ChatEventType,
@@ -74,5 +81,11 @@ export {
   isConversationUpdatedEvent,
   isConversationIdSetEvent,
   isPromptRequestEvent,
+  type CompactionStartedEvent,
+  type CompactionStartedEventData,
+  type CompactionCompletedEvent,
+  type CompactionCompletedEventData,
+  isCompactionStartedEvent,
+  isCompactionCompletedEvent,
 } from './events';
 export type { RoundState } from './round_state';
