@@ -144,6 +144,8 @@ export interface DateRangePickerProps {
    * @link https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
    */
   timeZone?: string;
+  /** Fires at the end of each auto-refresh interval while `settings.autoRefresh` exists, is enabled and timer is unpaused. */
+  onRefresh?: () => void;
 }
 
 export interface DateRangePickerOnChangeProps extends TimeRangeBounds {
