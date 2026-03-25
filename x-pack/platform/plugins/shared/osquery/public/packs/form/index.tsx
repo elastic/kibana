@@ -18,7 +18,7 @@ import {
   EuiHorizontalRule,
   EuiAccordion,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
 import { FormProvider, useForm as useHookForm } from 'react-hook-form';
@@ -52,6 +52,7 @@ interface PackFormProps {
   editMode?: boolean;
   isReadOnly?: boolean;
   packId?: string;
+  onDirtyStateChange?: (isDirty: boolean) => void;
 }
 
 const PackFormComponent: React.FC<PackFormProps> = ({
@@ -59,6 +60,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   editMode = false,
   isReadOnly = false,
   packId,
+  onDirtyStateChange,
 }) => {
   const [shardsToggleState, setShardsToggleState] =
     useState<EuiAccordionProps['forceState']>('closed');
@@ -123,9 +125,16 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     handleSubmit,
     watch,
     trigger,
-    formState: { isSubmitting },
+    formState: { isSubmitting, isDirty },
   } = hooksForm;
   const { policy_ids: policyIds, shards } = watch();
+
+  const onDirtyStateChangeRef = useRef(onDirtyStateChange);
+  onDirtyStateChangeRef.current = onDirtyStateChange;
+
+  useEffect(() => {
+    onDirtyStateChangeRef.current?.(isDirty);
+  }, [isDirty]);
 
   const getShards = useCallback(() => {
     if (packType === 'global') {
