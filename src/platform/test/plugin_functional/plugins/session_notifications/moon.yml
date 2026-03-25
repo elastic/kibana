@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/session-notifications-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/session-notifications-plugin'
+  title: '@kbn/session-notifications-plugin'
   description: Moon project for @kbn/session-notifications-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/platform/test/plugin_functional/plugins/session_notifications
+  sourceRoot: src/platform/test/plugin_functional/plugins/session_notifications
 dependsOn:
   - '@kbn/core'
   - '@kbn/navigation-plugin'

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/uptime-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-ux-management-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/uptime-plugin'
+  title: '@kbn/uptime-plugin'
   description: Moon project for @kbn/uptime-plugin
   channel: ''
   owner: '@elastic/obs-ux-management-team'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/plugins/uptime
+  sourceRoot: x-pack/solutions/observability/plugins/uptime
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
@@ -103,14 +102,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
