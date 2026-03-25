@@ -150,7 +150,11 @@ export class JobsListUI extends Component {
         render: (item) => (
           <EuiButtonIcon
             onClick={() => this.toggleRow(item)}
-            iconType={this.state.itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
+            iconType={
+              this.state.itemIdToExpandedRowMap[item.id]
+                ? 'chevronSingleDown'
+                : 'chevronSingleRight'
+            }
             aria-label={
               this.state.itemIdToExpandedRowMap[item.id]
                 ? i18n.translate('xpack.ml.jobsList.collapseJobDetailsAriaLabel', {
