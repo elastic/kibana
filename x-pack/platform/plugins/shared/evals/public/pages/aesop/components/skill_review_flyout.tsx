@@ -603,7 +603,12 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                     <EuiButtonEmpty
                       size="s"
                       iconType="pencil"
-                      onClick={() => setIsEditing(true)}
+                      onClick={() => {
+                        setEditedName(skill.name);
+                        setEditedDescription(skill.description);
+                        setEditedMarkdown(skill.markdown || '');
+                        setIsEditing(true);
+                      }}
                       aria-label="Edit skill content"
                     >
                       Edit

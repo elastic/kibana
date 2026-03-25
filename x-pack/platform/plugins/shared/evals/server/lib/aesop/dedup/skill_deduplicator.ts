@@ -192,6 +192,7 @@ export class SkillDeduplicator {
             removedIds.add(skills[j].id);
           } else {
             removedIds.add(skills[i].id);
+            break; // Stop comparing — this skill is already removed
           }
         }
       }

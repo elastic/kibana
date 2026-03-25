@@ -573,7 +573,7 @@ export class ExplorationWorkflowExecutor {
               rationale: `Alert rule "${bucket.key}" fired ${bucket.doc_count} times in the last 7 days. Automating triage for this rule could save analyst time.`,
               sourceIndices: [schema.indexName],
               exampleQueries: [
-                `FROM ${schema.indexName} | WHERE kibana.alert.rule.name == "${bucket.key}" | SORT @timestamp DESC | LIMIT 20`,
+                `FROM ${schema.indexName} | WHERE kibana.alert.rule.name == "${escapeEsqlString(bucket.key)}" | SORT @timestamp DESC | LIMIT 20`,
               ],
             });
           }
@@ -590,7 +590,7 @@ export class ExplorationWorkflowExecutor {
               rationale: `Event action "${bucket.key}" occurs ${bucket.doc_count} times per week. Understanding this pattern helps build proactive detection.`,
               sourceIndices: [schema.indexName],
               exampleQueries: [
-                `FROM ${schema.indexName} | WHERE event.action == "${bucket.key}" | STATS count = COUNT(*) BY host.name | SORT count DESC`,
+                `FROM ${schema.indexName} | WHERE event.action == "${escapeEsqlString(bucket.key)}" | STATS count = COUNT(*) BY host.name | SORT count DESC`,
               ],
             });
           }
@@ -630,7 +630,7 @@ export class ExplorationWorkflowExecutor {
               rationale: `Data source "${bucket.key}" generates ${bucket.doc_count} events/week. A skill to monitor and correlate events from this source would improve coverage.`,
               sourceIndices: [schema.indexName],
               exampleQueries: [
-                `FROM ${schema.indexName} | WHERE event.dataset == "${bucket.key}" | STATS count = COUNT(*) BY @timestamp = BUCKET(@timestamp, 1 hour)`,
+                `FROM ${schema.indexName} | WHERE event.dataset == "${escapeEsqlString(bucket.key)}" | STATS count = COUNT(*) BY @timestamp = BUCKET(@timestamp, 1 hour)`,
               ],
             });
           }
@@ -1049,7 +1049,7 @@ If no improvements are warranted, return an empty array: []`;
             skillId: `skill-improve-${patternId}`,
             name: String(item.name || `Improved: ${baseSkill.name}`),
             description: String(item.description || ''),
-            confidence: Math.max(0, Math.min(1, Number(item.confidence) || 0.7)),
+            confidence: item.confidence != null ? Math.max(0, Math.min(1, Number(item.confidence))) : 0.7,
             markdown: String(item.markdown || ''),
             sourceIndices: this.schemas.map((s) => s.indexName),
             derivedFrom: 'skill_improvement' as const,
@@ -1382,6 +1382,7 @@ Respond with ONLY a JSON array (no markdown fences): [{ "name": "...", ... }, ..
   }
 
   private extractLLMText(data: any): string {
+    if (data == null) return '';
     if (typeof data === 'string') return data;
     if (data?.choices?.[0]?.message?.content) return data.choices[0].message.content;
     if (data?.completion) return data.completion;
@@ -1538,4 +1539,8 @@ Respond with ONLY a JSON array (no markdown fences): [{ "name": "...", ... }, ..
 
 function shortHash(input: string): string {
   return crypto.createHash('sha256').update(input).digest('hex').slice(0, 12);
+}
+
+function escapeEsqlString(value: string): string {
+  return value.replace(/"/g, '\\"');
 }
