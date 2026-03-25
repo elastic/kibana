@@ -9,9 +9,8 @@
 
 import AdmZip from 'adm-zip';
 import YAML from 'yaml';
-
-import { WORKFLOW_EXPORT_VERSION } from '../../../common/lib/export';
-import type { WorkflowExportEntry, WorkflowExportManifest } from '../../../common/lib/export';
+import type { WorkflowExportEntry, WorkflowExportManifest } from '../../../common/lib/import';
+import { WORKFLOW_EXPORT_VERSION } from '../../../common/lib/import';
 
 const MANIFEST_FILENAME = 'manifest.yml';
 

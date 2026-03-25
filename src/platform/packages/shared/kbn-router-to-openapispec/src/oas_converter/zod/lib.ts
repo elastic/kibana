@@ -937,6 +937,13 @@ export const convert = (schema: z.ZodTypeAny) => {
           return;
         }
 
+        // Zod v4's toJSONSchema() writes the .meta({ id }) value as a plain
+        // `id` property on the JSON schema node. OAS 3.0 Schema Objects do not
+        // allow `id`, so we strip it unconditionally here and track the
+        // component name via our own COMPONENT_ID_MARKER instead.
+        // See https://github.com/colinhacks/zod/issues/5731
+        delete (js as any).id;
+
         // Inject stable OAS component name and optional OAS extensions for
         // schemas that declare .meta({ id }) / .meta({ openapi: { ... } }).
         // Picked up by extractDefsToShared (for $defs entries) and

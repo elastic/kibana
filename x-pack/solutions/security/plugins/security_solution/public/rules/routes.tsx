@@ -51,16 +51,19 @@ import { useKibana, useUiSetting$ } from '../common/lib/kibana/kibana_react';
 interface Features {
   deHealthUIEnabled: boolean;
   ruleHealthUIEnabled: boolean;
+  endpointExceptionsTabEnabled: boolean;
 }
 
 const getRulesSubRoutes = (
   capabilities: Capabilities,
-  { deHealthUIEnabled, ruleHealthUIEnabled }: Features
+  { deHealthUIEnabled, ruleHealthUIEnabled, endpointExceptionsTabEnabled }: Features
 ) => [
   ...(hasCapabilities(capabilities, RULES_UI_READ_PRIVILEGE) // regular detection rules are enabled
     ? [
         {
-          path: `/rules/id/:detailName/:tabName(${RuleDetailTabs.overview}|${RuleDetailTabs.alerts}|${RuleDetailTabs.exceptions}|${RuleDetailTabs.endpointExceptions}|${RuleDetailTabs.executionResults}|${RuleDetailTabs.executionEvents})`,
+          path: endpointExceptionsTabEnabled
+            ? `/rules/id/:detailName/:tabName(${RuleDetailTabs.overview}|${RuleDetailTabs.alerts}|${RuleDetailTabs.exceptions}|${RuleDetailTabs.endpointExceptions}|${RuleDetailTabs.executionResults}|${RuleDetailTabs.executionEvents})`
+            : `/rules/id/:detailName/:tabName(${RuleDetailTabs.overview}|${RuleDetailTabs.alerts}|${RuleDetailTabs.exceptions}|${RuleDetailTabs.executionResults}|${RuleDetailTabs.executionEvents})`,
           main: RuleDetailsPage,
           exact: true,
         },
@@ -130,16 +133,21 @@ const RulesContainerComponent: React.FC = () => {
   const [deHealthUIAdvancedSetting] = useUiSetting$<boolean>(ENABLE_DE_HEALTH_UI_SETTING, false);
   const deHealthUIEnabled = deHealthUiFFEnabled && deHealthUIAdvancedSetting;
   const ruleHealthUIEnabled = ruleHealthUiFFEnabled && deHealthUIAdvancedSetting;
+  const isEndpointExceptionsMovedFFEnabled = useIsExperimentalFeatureEnabled(
+    'endpointExceptionsMovedUnderManagement'
+  );
 
   const subRoutes = useMemo(() => {
-    return getRulesSubRoutes(capabilities, { deHealthUIEnabled, ruleHealthUIEnabled }).map(
-      (route) => (
-        <Route key={`rules-route-${route.path}`} path={route.path} exact={route?.exact ?? false}>
-          <route.main />
-        </Route>
-      )
-    );
-  }, [capabilities, deHealthUIEnabled, ruleHealthUIEnabled]);
+    return getRulesSubRoutes(capabilities, {
+      deHealthUIEnabled,
+      ruleHealthUIEnabled,
+      endpointExceptionsTabEnabled: !isEndpointExceptionsMovedFFEnabled,
+    }).map((route) => (
+      <Route key={`rules-route-${route.path}`} path={route.path} exact={route?.exact ?? false}>
+        <route.main />
+      </Route>
+    ));
+  }, [capabilities, deHealthUIEnabled, ruleHealthUIEnabled, isEndpointExceptionsMovedFFEnabled]);
 
   return (
     <PluginTemplateWrapper>

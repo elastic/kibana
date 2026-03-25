@@ -126,8 +126,10 @@ describe('Automated Resolution', () => {
 
       const step1Query = mockEsClient.search.mock.calls[0][0] as any;
       const filters = step1Query.query.bool.filter;
-      const hasTimestampFilter = filters.some((f: any) => f.range && f.range['@timestamp']);
-      expect(hasTimestampFilter).toBe(false);
+      const hasLastSeenFilter = filters.some(
+        (f: any) => f.range && f.range['entity.lifecycle.last_seen']
+      );
+      expect(hasLastSeenFilter).toBe(false);
     });
 
     it('should include timestamp range filter for incremental scan', async () => {
@@ -153,9 +155,11 @@ describe('Automated Resolution', () => {
 
       const step1Query = mockEsClient.search.mock.calls[0][0] as any;
       const filters = step1Query.query.bool.filter;
-      const timestampFilter = filters.find((f: any) => f.range && f.range['@timestamp']);
-      expect(timestampFilter).toEqual({
-        range: { '@timestamp': { gt: '2026-03-09T00:00:00Z' } },
+      const lastSeenFilter = filters.find(
+        (f: any) => f.range && f.range['entity.lifecycle.last_seen']
+      );
+      expect(lastSeenFilter).toEqual({
+        range: { 'entity.lifecycle.last_seen': { gt: '2026-03-09T00:00:00Z' } },
       });
     });
 

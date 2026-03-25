@@ -121,11 +121,11 @@ paths:
             $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
       requestBody:
         required: true
-        additionalProperties: false
         content:
           application/json:
             schema:
               type: object
+              additionalProperties: false
               required:
                 - originalSource
               properties:

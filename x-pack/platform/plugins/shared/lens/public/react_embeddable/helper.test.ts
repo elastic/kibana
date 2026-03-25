@@ -43,7 +43,7 @@ describe('Embeddable helpers', () => {
 
     it('should wrap Lens doc/attributes into component state shape', async () => {
       const services = getServices();
-      const runtimeState = await deserializeState(services, defaultDoc);
+      const runtimeState = await deserializeState(services, { attributes: defaultDoc });
       expect(runtimeState).toEqual(
         expect.objectContaining({
           attributes: { ...defaultDoc, references: defaultDoc.references },
@@ -54,7 +54,7 @@ describe('Embeddable helpers', () => {
     it('load a by-ref doc from the attribute service', async () => {
       const services = getServices();
       await deserializeState(services, {
-        savedObjectId: '123',
+        ref_id: '123',
       });
 
       expect(services.attributeService.loadFromLibrary).toHaveBeenCalledWith('123');
@@ -66,7 +66,7 @@ describe('Embeddable helpers', () => {
         .fn()
         .mockRejectedValueOnce(new Error('not found'));
       const runtimeState = await deserializeState(services, {
-        savedObjectId: '123',
+        ref_id: '123',
       });
       // check the visualizationType set to null for empty state
       expect(runtimeState.attributes.visualizationType).toBeNull();

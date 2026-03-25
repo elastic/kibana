@@ -377,10 +377,11 @@ const textSlotStyles = css({
 export function useEsqlDataCascadeRowHeaderComponents(
   editorQueryMeta: ESQLStatsQueryMeta,
   selectedColumns: string[],
-  togglePopover: ReturnType<typeof useEsqlDataCascadeRowActionHelpers>['togglePopover']
+  togglePopover: ReturnType<typeof useEsqlDataCascadeRowActionHelpers>['togglePopover'],
+  columnTypes: Map<string, 'number' | 'array'>
 ) {
-  const namedColumnsFromQuery = useMemo(() => {
-    return editorQueryMeta.appliedFunctions.map(({ identifier }) => identifier);
+  const aggregateColumnIdentifiers = useMemo(() => {
+    return new Set(editorQueryMeta.appliedFunctions.map(({ identifier }) => identifier));
   }, [editorQueryMeta.appliedFunctions]);
 
   /**
@@ -424,8 +425,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
     ({ rowData }) =>
       selectedColumns
         .map((selectedColumn) => {
-          // only allow aggregation columns to be rendered in the meta part of the row header
-          if (namedColumnsFromQuery.indexOf(selectedColumn) < 0) {
+          if (!aggregateColumnIdentifiers.has(selectedColumn)) {
             return null;
           }
 
@@ -443,25 +443,34 @@ export function useEsqlDataCascadeRowHeaderComponents(
                   ),
                   badge: () => {
                     const aggregatedValue = rowData.aggregatedValues[selectedColumn];
+                    const isArrayType =
+                      Array.isArray(aggregatedValue) ||
+                      (aggregatedValue === undefined &&
+                        columnTypes.get(selectedColumn) === 'array');
+
+                    if (isArrayType) {
+                      return (
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge color="hollow" css={textSlotStyles}>
+                            {Array.isArray(aggregatedValue)
+                              ? aggregatedValue
+                                  .map(
+                                    (value) =>
+                                      value ||
+                                      i18n.translate('discover.dataCascade.row.action.noValue', {
+                                        defaultMessage: '(blank)',
+                                      })
+                                  )
+                                  .join(', ')
+                              : '-'}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      );
+                    }
 
                     return (
                       <EuiFlexItem grow={false}>
-                        {typeof aggregatedValue === 'number' ? (
-                          <NumberBadge value={aggregatedValue} shortenAtExpSize={3} />
-                        ) : (
-                          <EuiBadge color="hollow" css={textSlotStyles}>
-                            {aggregatedValue
-                              .map((value) => {
-                                return (
-                                  value ||
-                                  i18n.translate('discover.dataCascade.row.action.noValue', {
-                                    defaultMessage: '(blank)',
-                                  })
-                                );
-                              })
-                              .join(', ')}
-                          </EuiBadge>
-                        )}
+                        <NumberBadge value={Number(aggregatedValue)} shortenAtExpSize={3} />
                       </EuiFlexItem>
                     );
                   },
@@ -471,7 +480,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
           );
         })
         .filter(Boolean),
-    [namedColumnsFromQuery, selectedColumns]
+    [aggregateColumnIdentifiers, columnTypes, selectedColumns]
   );
 
   const rowActions = useCallback<

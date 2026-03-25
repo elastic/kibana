@@ -12,6 +12,7 @@ import type { monaco } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import { z } from '@kbn/zod/v4';
+import { getStabilityNote } from '../get_stability_note';
 
 /**
  * Get the shape of a Zod object schema (unwrap optional so we can read .shape).
@@ -208,6 +209,8 @@ function buildTriggerHoverFromDefinition(
   triggerType: string
 ): monaco.IMarkdownString {
   const lines: string[] = [];
+  lines.push(getStabilityNote());
+  lines.push('');
   lines.push(
     i18n.translate('workflows.triggerHover.workflowTriggerLabel', {
       defaultMessage: '**Workflow Trigger**: `{title}`',

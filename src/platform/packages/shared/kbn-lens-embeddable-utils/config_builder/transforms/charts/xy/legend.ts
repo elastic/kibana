@@ -117,7 +117,7 @@ export function convertLegendToStateFormat(legend: XYState['legend']): {
         }
       : {
           position: legend?.position ?? DEFAULT_LEGEND_POSITON,
-          legendSize: legend?.size ? getLegendSize(legend.size) : LegendSize.AUTO,
+          legendSize: legend?.size ? getLegendSize(legend.size) : undefined,
           ...(legend?.layout === 'list' ? { layout: LegendLayout.List } : {}),
         }),
   };

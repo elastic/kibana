@@ -10,13 +10,7 @@
 import { z } from '@kbn/zod/v4';
 import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
 import { JsonModelSchema } from './schema/common/json_model_schema';
-import {
-  SCHEDULED_INTERVAL_ERROR,
-  SCHEDULED_INTERVAL_PATTERN,
-} from './schema/triggers/scheduled_trigger_schema';
-import { timezoneNames } from './schema/triggers/timezone_names';
-
-export { SCHEDULED_INTERVAL_ERROR, SCHEDULED_INTERVAL_PATTERN };
+import { TriggerSchema } from './schema/triggers';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
@@ -111,85 +105,6 @@ export function getWorkflowSettingsSchema(stepSchema: z.ZodType, loose: boolean 
 
   return schema;
 }
-
-/* --- Triggers --- */
-export const AlertRuleTriggerSchema = z.object({
-  type: z.literal('alert'),
-  with: z
-    .union([z.object({ rule_id: z.string().min(1) }), z.object({ rule_name: z.string().min(1) })])
-    .optional(),
-});
-
-export const ScheduledTriggerSchema = z.object({
-  type: z.literal('scheduled'),
-  with: z.union([
-    z.object({
-      every: z.string().regex(SCHEDULED_INTERVAL_PATTERN, SCHEDULED_INTERVAL_ERROR),
-    }),
-    z.object({
-      rrule: z.object({
-        freq: z.enum(['DAILY', 'WEEKLY', 'MONTHLY']),
-        interval: z.number().int().positive(),
-        tzid: z
-          .enum(timezoneNames as [string, ...string[]])
-          .optional()
-          .default('UTC'),
-        dtstart: z.string().optional(),
-        byhour: z.array(z.number().int().min(0).max(23)).optional(),
-        byminute: z.array(z.number().int().min(0).max(59)).optional(),
-        byweekday: z.array(z.enum(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'])).optional(),
-        bymonthday: z.array(z.number().int().min(1).max(31)).optional(),
-      }),
-    }),
-  ]),
-});
-
-export const ManualTriggerSchema = z.object({
-  type: z.literal('manual'),
-});
-
-export const TriggerSchema = z.discriminatedUnion('type', [
-  AlertRuleTriggerSchema,
-  ScheduledTriggerSchema,
-  ManualTriggerSchema,
-]);
-
-/** Schema for the `on` block of custom triggers (KQL condition to filter when the workflow runs). */
-const CustomTriggerOnSchema = z
-  .object({
-    condition: z.string().optional(),
-  })
-  .optional();
-
-/**
- * Returns a trigger schema that includes built-in types plus optional registered trigger ids.
- * Used by the YAML editor so custom trigger types (e.g. example.custom_trigger) pass validation.
- * Custom triggers allow an `on.condition` clause for KQL filtering.
- */
-export function getTriggerSchema(customTriggerIds: string[] = []): z.ZodType {
-  if (customTriggerIds.length === 0) {
-    return TriggerSchema;
-  }
-  const customSchemas = customTriggerIds.map((id) =>
-    z.object({
-      type: z.literal(id),
-      on: CustomTriggerOnSchema,
-    })
-  );
-  return z.discriminatedUnion('type', [
-    AlertRuleTriggerSchema,
-    ScheduledTriggerSchema,
-    ManualTriggerSchema,
-    ...customSchemas,
-  ]);
-}
-
-export const TriggerTypes = [
-  AlertRuleTriggerSchema.shape.type.value,
-  ScheduledTriggerSchema.shape.type.value,
-  ManualTriggerSchema.shape.type.value,
-];
-export type TriggerType = (typeof TriggerTypes)[number];
 
 /* --- Steps --- */
 export const TimeoutPropSchema = z.object({
