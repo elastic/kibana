@@ -4,6 +4,7 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
 <Fragment>
   <EuiPopover
     anchorPosition="leftUp"
+    aria-label="Layer actions"
     button={
       <Memo(Connect(TOCEntryButton))
         displayName="layer 1"
@@ -118,6 +119,7 @@ exports[`TOCEntryActionsPopover should disable Edit features when edit mode acti
 <Fragment>
   <EuiPopover
     anchorPosition="leftUp"
+    aria-label="Layer actions"
     button={
       <Memo(Connect(TOCEntryButton))
         displayName="layer 1"
@@ -232,6 +234,7 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
 <Fragment>
   <EuiPopover
     anchorPosition="leftUp"
+    aria-label="Layer actions"
     button={
       <Memo(Connect(TOCEntryButton))
         displayName="layer 1"
@@ -346,6 +349,7 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
 <Fragment>
   <EuiPopover
     anchorPosition="leftUp"
+    aria-label="Layer actions"
     button={
       <Memo(Connect(TOCEntryButton))
         displayName="layer 1"
@@ -461,6 +465,7 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
 <Fragment>
   <EuiPopover
     anchorPosition="leftUp"
+    aria-label="Layer actions"
     button={
       <Memo(Connect(TOCEntryButton))
         displayName="layer 1"
@@ -544,6 +549,7 @@ exports[`TOCEntryActionsPopover should show "show this layer only" action when t
 <Fragment>
   <EuiPopover
     anchorPosition="leftUp"
+    aria-label="Layer actions"
     button={
       <Memo(Connect(TOCEntryButton))
         displayName="layer 1"
