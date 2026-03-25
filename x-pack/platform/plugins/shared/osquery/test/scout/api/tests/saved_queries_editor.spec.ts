@@ -123,6 +123,40 @@ apiTest.describe(
       expect(readResponse).toHaveStatusCode(404);
     });
 
+    apiTest('returns 404 when reading a non-existent saved query', async ({ apiClient }) => {
+      const response = await apiClient.get(
+        `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}/non-existent-id`,
+        {
+          headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+          responseType: 'json',
+        }
+      );
+      expect(response).toHaveStatusCode(404);
+    });
+
+    apiTest('returns 404 when updating a non-existent saved query', async ({ apiClient }) => {
+      const response = await apiClient.put(
+        `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}/non-existent-id`,
+        {
+          headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+          body: { id: 'updated-name', query: 'select 2;', interval: 3600 },
+          responseType: 'json',
+        }
+      );
+      expect(response).toHaveStatusCode(404);
+    });
+
+    apiTest('returns 404 when deleting a non-existent saved query', async ({ apiClient }) => {
+      const response = await apiClient.delete(
+        `${testData.API_PATHS.OSQUERY_SAVED_QUERIES}/non-existent-id`,
+        {
+          headers: { ...testData.COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+          responseType: 'json',
+        }
+      );
+      expect(response).toHaveStatusCode(404);
+    });
+
     apiTest('filters by search term and createdBy', async ({ apiClient }) => {
       const uniquePrefix = `findtest-${Date.now()}`;
       let createdByUser: string | undefined;
