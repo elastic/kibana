@@ -380,6 +380,19 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
     };
   }
 
+  async deleteThread(threadId: string): Promise<void> {
+    await this.client.deleteByQuery({
+      index: this.checkpointIndex,
+      query: { term: { thread_id: threadId } },
+      refresh: true,
+    });
+    await this.client.deleteByQuery({
+      index: this.checkpointWritesIndex,
+      query: { term: { thread_id: threadId } },
+      refresh: true,
+    });
+  }
+
   /**
    * Saves intermediate writes associated with a checkpoint to Elastic Search.
    */
