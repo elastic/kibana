@@ -12,6 +12,7 @@ export type { ChromeComponentsDeps } from './src/context';
 
 export { ClassicHeader } from './src/classic';
 export { ProjectHeader } from './src/project';
+export { ProjectNextHeader } from './src/project_next';
 export { GridLayoutProjectSideNav } from './src/project/sidenav/grid_layout_sidenav';
 export { Sidebar } from './src/sidebar';
 export { AppMenuBar } from './src/project/app_menu';

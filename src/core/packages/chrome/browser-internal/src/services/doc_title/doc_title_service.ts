@@ -27,16 +27,15 @@ const titleSeparator = ' - ';
 export class DocTitleService {
   private document?: { title: string };
   private baseTitle?: string;
-  private titleSubject = new ReplaySubject<string>(1);
+  private readonly titleSubject = new ReplaySubject<string>(1);
+  private readonly title$ = this.titleSubject.asObservable().pipe(distinctUntilChanged());
 
   public setup({ document }: SetupDeps): InternalChromeDocTitleSetup {
     this.document = document;
     this.baseTitle = document.title;
     this.titleSubject.next(this.baseTitle);
 
-    return {
-      title$: this.titleSubject.asObservable().pipe(distinctUntilChanged()),
-    };
+    return { title$: this.title$ };
   }
 
   public start(): ChromeDocTitle {
@@ -45,6 +44,7 @@ export class DocTitleService {
     }
 
     return {
+      title$: this.title$,
       change: (title: string | string[]) => {
         this.applyTitle(title);
       },
