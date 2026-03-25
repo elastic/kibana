@@ -33,12 +33,12 @@ import { useKibana } from '../../hooks/use_kibana';
 import { LoadingPanel } from '../loading_panel';
 import { EmptyState } from './empty_state';
 import { useFetchKnowledgeIndicators } from './hooks/use_knowledge_indicators_data';
+import { KnowledgeIndicatorsTable } from './knowledge_indicators_table';
 import { useKnowledgeIndicatorsTask } from './hooks/use_knowledge_indicators_task';
 import { KnowledgeIndicatorRulesSelector } from './knowledge_indicator_rules_selector';
 import { KnowledgeIndicatorsStatusFilter } from './knowledge_indicators_status_filter';
 import { KnowledgeIndicatorsTypeFilter } from './knowledge_indicators_type_filter';
 import { RulesTable } from './rules_table';
-import { SignificantEventsTable } from './significant_events_table';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -242,7 +242,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                 searchTerm={debouncedTableSearchValue}
               />
             ) : (
-              <SignificantEventsTable
+              <KnowledgeIndicatorsTable
                 definition={definition.stream}
                 knowledgeIndicators={knowledgeIndicators}
                 occurrencesByQueryId={occurrencesByQueryId}

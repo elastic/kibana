@@ -21,11 +21,13 @@ import type { Streams } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { useKnowledgeIndicatorsBulkDelete } from './hooks/use_knowledge_indicators_bulk_delete';
-import { SparkPlot } from '../spark_plot';
-import { TableTitle } from '../stream_detail_systems/table_title';
+import { useKnowledgeIndicatorsBulkDelete } from '../hooks/use_knowledge_indicators_bulk_delete';
+import { KnowledgeIndicatorActionsCell } from '../knowledge_indicator_actions_cell';
+import { DeleteKnowledgeIndicatorsModal } from './delete_knowledge_indicators_modal';
+import { SparkPlot } from '../../spark_plot';
+import { TableTitle } from '../../stream_detail_systems/table_title';
 
-interface SignificantEventsTableProps {
+interface KnowledgeIndicatorsTableProps {
   definition: Streams.all.Definition;
   knowledgeIndicators: KnowledgeIndicator[];
   occurrencesByQueryId: Record<string, Array<{ x: number; y: number }>>;
@@ -42,21 +44,27 @@ const getKnowledgeIndicatorItemId = (knowledgeIndicator: KnowledgeIndicator) => 
   return `query:${knowledgeIndicator.query.id}`;
 };
 
-export function SignificantEventsTable({
+export function KnowledgeIndicatorsTable({
   definition,
   knowledgeIndicators,
   occurrencesByQueryId,
   searchTerm,
   selectedTypes,
   statusFilter,
-}: SignificantEventsTableProps) {
+}: KnowledgeIndicatorsTableProps) {
   const [selectedKnowledgeIndicators, setSelectedKnowledgeIndicators] = useState<
     KnowledgeIndicator[]
   >([]);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 });
+  const [knowledgeIndicatorsToDelete, setKnowledgeIndicatorsToDelete] = useState<
+    KnowledgeIndicator[]
+  >([]);
   const { deleteKnowledgeIndicatorsInBulk, isDeleting } = useKnowledgeIndicatorsBulkDelete({
     definition,
-    onSuccess: () => setSelectedKnowledgeIndicators([]),
+    onSuccess: () => {
+      setSelectedKnowledgeIndicators([]);
+      setKnowledgeIndicatorsToDelete([]);
+    },
   });
 
   const filteredKnowledgeIndicators = useMemo(() => {
@@ -170,11 +178,18 @@ export function SignificantEventsTable({
       },
       {
         name: SIGNIFICANT_EVENTS_TABLE_ACTIONS_COLUMN_LABEL,
-        width: '120px',
-        render: () => null,
+        width: '80px',
+        align: 'right',
+        render: (knowledgeIndicator: KnowledgeIndicator) => (
+          <KnowledgeIndicatorActionsCell
+            definition={definition}
+            knowledgeIndicator={knowledgeIndicator}
+            onDeleteRequest={(item) => setKnowledgeIndicatorsToDelete([item])}
+          />
+        ),
       },
     ],
-    [occurrencesByQueryId]
+    [definition, occurrencesByQueryId]
   );
 
   return (
@@ -208,7 +223,7 @@ export function SignificantEventsTable({
             isLoading={isDeleting}
             isDisabled={isSelectionActionsDisabled || isDeleting}
             onClick={() => {
-              void deleteKnowledgeIndicatorsInBulk(selectedKnowledgeIndicators);
+              setKnowledgeIndicatorsToDelete(selectedKnowledgeIndicators);
             }}
           >
             {SIGNIFICANT_EVENTS_TABLE_DELETE_BULK_ACTION_LABEL}
@@ -233,6 +248,16 @@ export function SignificantEventsTable({
         onTableChange={handleTableChange}
         tableCaption={SIGNIFICANT_EVENTS_TABLE_CAPTION}
       />
+      {knowledgeIndicatorsToDelete.length > 0 ? (
+        <DeleteKnowledgeIndicatorsModal
+          knowledgeIndicators={knowledgeIndicatorsToDelete}
+          onCancel={() => setKnowledgeIndicatorsToDelete([])}
+          onConfirm={() => {
+            void deleteKnowledgeIndicatorsInBulk(knowledgeIndicatorsToDelete);
+          }}
+          isLoading={isDeleting}
+        />
+      ) : null}
     </>
   );
 }

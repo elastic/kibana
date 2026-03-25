@@ -63,8 +63,8 @@ export function KnowledgeIndicatorsStatusFilter({
     <EuiFilterGroup>
       <EuiFilterButton
         numFilters={statusFilterCounts.active}
-        numActiveFilters={statusFilterCounts.active}
-        hasActiveFilters={statusFilterCounts.active > 0}
+        numActiveFilters={statusFilter === 'active' ? statusFilterCounts.active : 0}
+        hasActiveFilters={statusFilter === 'active'}
         isSelected={statusFilter === 'active'}
         onClick={() => onStatusFilterChange('active')}
       >
@@ -72,8 +72,8 @@ export function KnowledgeIndicatorsStatusFilter({
       </EuiFilterButton>
       <EuiFilterButton
         numFilters={statusFilterCounts.excluded}
-        numActiveFilters={statusFilterCounts.excluded}
-        hasActiveFilters={statusFilterCounts.excluded > 0}
+        numActiveFilters={statusFilter === 'excluded' ? statusFilterCounts.excluded : 0}
+        hasActiveFilters={statusFilter === 'excluded'}
         isSelected={statusFilter === 'excluded'}
         onClick={() => onStatusFilterChange('excluded')}
       >

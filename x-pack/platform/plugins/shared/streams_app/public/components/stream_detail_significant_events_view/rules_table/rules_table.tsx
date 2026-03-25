@@ -18,12 +18,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useQueriesBulkDelete } from './hooks/use_queries_bulk_delete';
-import { SeverityBadge } from '../significant_events_discovery/components/severity_badge/severity_badge';
-import { SparkPlot } from '../spark_plot';
-import { formatLastOccurredAt } from '../significant_events_discovery/components/queries_table/utils';
-import { TableTitle } from '../stream_detail_systems/table_title';
-import type { SignificantEventQueryRow } from '../../hooks/use_fetch_discovery_queries';
+import { useQueriesBulkDelete } from '../hooks/use_queries_bulk_delete';
+import { RuleActionsCell } from './rule_actions_cell';
+import { DeleteRulesModal } from './delete_rules_modal';
+import { SeverityBadge } from '../../significant_events_discovery/components/severity_badge/severity_badge';
+import { SparkPlot } from '../../spark_plot';
+import { formatLastOccurredAt } from '../../significant_events_discovery/components/queries_table/utils';
+import { TableTitle } from '../../stream_detail_systems/table_title';
+import type { SignificantEventQueryRow } from '../../../hooks/use_fetch_discovery_queries';
 
 interface RulesTableProps {
   definition: Streams.all.Definition;
@@ -34,9 +36,13 @@ interface RulesTableProps {
 export function RulesTable({ definition, rules, searchTerm }: RulesTableProps) {
   const [selectedRules, setSelectedRules] = useState<SignificantEventQueryRow[]>([]);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+  const [rulesToDelete, setRulesToDelete] = useState<SignificantEventQueryRow[]>([]);
   const { deleteRulesInBulk, isDeleting } = useQueriesBulkDelete({
     definition,
-    onSuccess: () => setSelectedRules([]),
+    onSuccess: () => {
+      setSelectedRules([]);
+      setRulesToDelete([]);
+    },
   });
 
   const filteredRules = useMemo(() => {
@@ -106,11 +112,18 @@ export function RulesTable({ definition, rules, searchTerm }: RulesTableProps) {
       },
       {
         name: RULES_TABLE_ACTIONS_COLUMN_LABEL,
-        width: '120px',
-        render: () => null,
+        width: '80px',
+        align: 'right',
+        render: (item: SignificantEventQueryRow) => (
+          <RuleActionsCell
+            rule={item}
+            isDisabled={isDeleting}
+            onDeleteRequest={(rule) => setRulesToDelete([rule])}
+          />
+        ),
       },
     ],
-    []
+    [isDeleting]
   );
 
   return (
@@ -144,7 +157,7 @@ export function RulesTable({ definition, rules, searchTerm }: RulesTableProps) {
             isLoading={isDeleting}
             isDisabled={isSelectionActionsDisabled || isDeleting}
             onClick={() => {
-              void deleteRulesInBulk(selectedRules.map((item) => item.query.id));
+              setRulesToDelete(selectedRules);
             }}
           >
             {RULES_TABLE_DELETE_BULK_ACTION_LABEL}
@@ -171,6 +184,16 @@ export function RulesTable({ definition, rules, searchTerm }: RulesTableProps) {
           defaultMessage: 'Rules',
         })}
       />
+      {rulesToDelete.length > 0 ? (
+        <DeleteRulesModal
+          rules={rulesToDelete}
+          onCancel={() => setRulesToDelete([])}
+          onConfirm={() => {
+            void deleteRulesInBulk(rulesToDelete.map((item) => item.query.id));
+          }}
+          isLoading={isDeleting}
+        />
+      ) : null}
     </>
   );
 }
