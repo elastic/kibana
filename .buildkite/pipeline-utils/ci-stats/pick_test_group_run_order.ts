@@ -608,7 +608,7 @@ export async function pickTestGroupRunOrder() {
       : [],
   ].flat();
 
-   // Register cancelable child keys before uploading so a concurrent gate failure
+  // Register cancelable child keys before uploading so a concurrent gate failure
   // can discover and short-circuit these jobs immediately.
   if (unit.count > 0) {
     bk.setMetadata('cancel_on_gate_failure:jest', 'true');
