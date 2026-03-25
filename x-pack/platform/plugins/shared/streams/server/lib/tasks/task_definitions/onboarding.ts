@@ -67,10 +67,7 @@ async function areFeaturesUpToDate({
     IdentifyFeaturesResult
   >(featuresTaskId);
 
-  if (
-    featuresTask.status === TaskStatus.InProgress ||
-    featuresTask.status === TaskStatus.NotStarted
-  ) {
+  if (featuresTask.status !== TaskStatus.Completed) {
     return false;
   }
 
