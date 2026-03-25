@@ -18,6 +18,8 @@ interface StreamFeaturesApi {
   cancelFeaturesIdentificationTask: () => Promise<void>;
   deleteFeature: (uuid: string) => Promise<void>;
   deleteFeaturesInBulk: (uuids: string[]) => Promise<void>;
+  excludeFeaturesInBulk: (uuids: string[]) => Promise<void>;
+  restoreFeaturesInBulk: (uuids: string[]) => Promise<void>;
 }
 
 export function useStreamFeaturesApi(definition: Streams.all.Definition): StreamFeaturesApi {
@@ -81,6 +83,28 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
             path: { name: definition.name },
             body: {
               operations: uuids.map((id) => ({ delete: { id } })),
+            },
+          },
+        });
+      },
+      excludeFeaturesInBulk: async (uuids: string[]) => {
+        await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {
+          signal,
+          params: {
+            path: { name: definition.name },
+            body: {
+              operations: uuids.map((id) => ({ exclude: { id } })),
+            },
+          },
+        });
+      },
+      restoreFeaturesInBulk: async (uuids: string[]) => {
+        await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {
+          signal,
+          params: {
+            path: { name: definition.name },
+            body: {
+              operations: uuids.map((id) => ({ restore: { id } })),
             },
           },
         });

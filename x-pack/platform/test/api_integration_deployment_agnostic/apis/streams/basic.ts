@@ -70,25 +70,40 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/256797
+  // Failing: See https://github.com/elastic/kibana/issues/258810
   describe.skip('Basic functionality', () => {
     async function getWiredStatus() {
       const response = await viewerApiClient.fetch('GET /api/streams/_status').expect(200);
       return response.body;
     }
 
+    // Tracks whether the ES|QL views API is available in the current test environment.
+    // The API is only available in stateful (non-serverless) Elasticsearch and only in
+    // recent-enough versions. When unavailable, view-specific assertions are skipped.
+    let viewsApiAvailable = false;
+
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       viewerApiClient = await createStreamsRepositoryViewerClient(roleScopedSupertest);
       if (!isServerless) {
-        await kibanaServer.uiSettings.update({
-          [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: true,
-        });
+        // Probe whether the ES|QL views API exists. A 404 means the endpoint
+        // exists but the view resource was not found – i.e. the API is available.
+        // Any other error (e.g. 400/405) indicates the API is not yet supported.
+        viewsApiAvailable = await esClient.transport
+          .request({ method: 'GET', path: '/_query/view/__kibana_probe__' })
+          .then(() => true)
+          .catch((err: { statusCode?: number }) => err?.statusCode === 404);
+
+        if (viewsApiAvailable) {
+          await kibanaServer.uiSettings.update({
+            [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: true,
+          });
+        }
       }
     });
 
     after(async () => {
-      if (!isServerless) {
+      if (!isServerless && viewsApiAvailable) {
         await kibanaServer.uiSettings.update({
           [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: false,
         });
@@ -127,9 +142,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(typeof parsed.privileges.create_snapshot_repository).to.eql('boolean');
         });
 
-        // ES|QL views API is not available in serverless
+        // ES|QL views API is not available in all environments
         if (!isServerless) {
           it('creates ES|QL views for wired root streams', async () => {
+            if (!viewsApiAvailable) return;
             for (const streamName of ['logs.otel', 'logs.ecs']) {
               const response = await esClient.transport.request<{
                 views: Array<{ name: string; query: string }>;
@@ -220,9 +236,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             expect(wiredStatus['logs.ecs']).to.eql(false);
           });
 
-          // ES|QL views API is not available in serverless
+          // ES|QL views API is not available in all environments
           if (!isServerless) {
             it('removes ES|QL views for wired root streams', async () => {
+              if (!viewsApiAvailable) return;
               for (const streamName of ['logs.otel', 'logs.ecs']) {
                 await esClient.transport
                   .request<{ views: Array<{ name: string; query: string }> }>({
@@ -320,9 +337,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response).to.have.property('acknowledged', true);
       });
 
-      // ES|QL views API is not available in serverless
+      // ES|QL views API is not available in all environments
       if (!isServerless) {
         it(`creates ES|QL view $.${rootStream}.nginx for the forked child stream`, async () => {
+          if (!viewsApiAvailable) return;
           const childStreamName = `${rootStream}.nginx`;
           const response = await esClient.transport.request<{
             views: Array<{ name: string; query: string }>;
@@ -336,6 +354,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it(`updates parent $.${rootStream} view to reference the forked child's view`, async () => {
+          if (!viewsApiAvailable) return;
           const response = await esClient.transport.request<{
             views: Array<{ name: string; query: string }>;
           }>({
@@ -507,6 +526,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, `${rootStream}.nginx`, {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
@@ -663,6 +683,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, `${rootStream}.apache`, {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
@@ -851,6 +872,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
@@ -875,6 +897,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             ...body,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 ...body.stream.ingest,
@@ -897,6 +920,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
@@ -1024,6 +1048,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, `${rootStream}.one`, {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },
@@ -1038,6 +1063,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, `${rootStream}.one.two.three`, {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },
@@ -1100,6 +1126,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, parentStream, {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: parentBefore.stream.description,
               ingest: {
                 ...parentBefore.stream.ingest,
@@ -1124,6 +1151,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, childStream, {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: childBefore.stream.description,
               ingest: {
                 ...childBefore.stream.ingest,
@@ -1162,6 +1190,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, parentStream, {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: parentForUpdate.stream.description,
               ingest: {
                 ...parentForUpdate.stream.ingest,
@@ -1210,6 +1239,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               ...emptyAssets,
               stream: {
+                type: 'wired',
                 description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
@@ -1233,6 +1263,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
@@ -1251,6 +1282,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const validStreamBody: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },

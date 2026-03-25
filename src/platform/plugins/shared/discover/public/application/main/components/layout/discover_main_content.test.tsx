@@ -98,19 +98,11 @@ const mountComponent = async ({
     columns: [],
     viewMode,
     onAddFilter: jest.fn(),
+    sidebarToggleState$: new BehaviorSubject<SidebarToggleState>({
+      isCollapsed: false,
+      toggle: jest.fn(),
+    }),
     isChartAvailable,
-    panelsToggle: (
-      <PanelsToggle
-        sidebarToggleState$={
-          new BehaviorSubject<SidebarToggleState>({
-            isCollapsed: true,
-            toggle: () => {},
-          })
-        }
-        isChartAvailable={undefined}
-        renderedFor="root"
-      />
-    ),
   };
 
   const component = mountWithIntl(
@@ -143,24 +135,21 @@ describe('Discover main content component', () => {
       expect(component.find(DocumentViewModeToggle).exists()).toBe(true);
     });
 
-    it('should include PanelsToggle when chart is available', async () => {
+    it('should not include inline PanelsToggle when chart is available and visible', async () => {
       const component = await mountComponent({ isChartAvailable: true });
-      expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(true);
-      expect(component.find(PanelsToggle).prop('renderedFor')).toBe('tabs');
+      expect(component.find(PanelsToggle).exists()).toBe(false);
       expect(component.find(EuiHorizontalRule).exists()).toBe(true);
     });
 
     it('should include PanelsToggle when chart is available and hidden', async () => {
       const component = await mountComponent({ isChartAvailable: true, hideChart: true });
-      expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(true);
-      expect(component.find(PanelsToggle).prop('renderedFor')).toBe('tabs');
+      expect(component.find(PanelsToggle).prop('omitChartButton')).toBe(false);
       expect(component.find(EuiHorizontalRule).exists()).toBe(false);
     });
 
     it('should include PanelsToggle when chart is not available', async () => {
       const component = await mountComponent({ isChartAvailable: false });
-      expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(false);
-      expect(component.find(PanelsToggle).prop('renderedFor')).toBe('tabs');
+      expect(component.find(PanelsToggle).prop('omitChartButton')).toBe(true);
       expect(component.find(EuiHorizontalRule).exists()).toBe(false);
     });
   });

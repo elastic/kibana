@@ -5,8 +5,18 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectsResolveResponse } from '@kbn/core/server';
-import type { AttachmentTotals, Case, CaseAttributes, User } from '../../../common/types/domain';
+import type {
+  SavedObject,
+  SavedObjectsFindResponse,
+  SavedObjectsResolveResponse,
+} from '@kbn/core/server';
+import type {
+  AttachmentAttributes,
+  AttachmentTotals,
+  Case,
+  CaseAttributes,
+  User,
+} from '../../../common/types/domain';
 import type {
   AllCategoriesFindRequest,
   AllReportersFindRequest,
@@ -219,13 +229,13 @@ export const get = async (
       );
     }
 
-    const theComments = await caseService.getAllCaseComments({
+    const theComments = (await caseService.getAllCaseComments({
       id,
       options: {
         sortField: 'created_at',
         sortOrder: 'asc',
       },
-    });
+    })) as SavedObjectsFindResponse<AttachmentAttributes>;
 
     const res = flattenCaseSavedObject({
       savedObject: theCase,
@@ -283,13 +293,13 @@ export const resolve = async (
       });
     }
 
-    const theComments = await caseService.getAllCaseComments({
+    const theComments = (await caseService.getAllCaseComments({
       id: resolvedSavedObject.id,
       options: {
         sortField: 'created_at',
         sortOrder: 'asc',
       },
-    });
+    })) as SavedObjectsFindResponse<AttachmentAttributes>;
 
     const res = {
       ...resolveData,

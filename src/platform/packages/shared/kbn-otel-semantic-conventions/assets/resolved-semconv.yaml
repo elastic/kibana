@@ -1193,6 +1193,10 @@ groups:
               value: execute_tool
               brief: Execute a tool
               stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
+              stability: development
         brief: The name of the operation being performed.
         requirement_level: required
         note: |
@@ -1419,6 +1423,10 @@ groups:
             - id: execute_tool
               value: execute_tool
               brief: Execute a tool
+              stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
               stability: development
         brief: The name of the operation being performed.
         requirement_level: required
@@ -2110,6 +2118,10 @@ groups:
             - id: execute_tool
               value: execute_tool
               brief: Execute a tool
+              stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
               stability: development
         brief: The name of the operation being performed.
         requirement_level: required
@@ -6221,7 +6233,7 @@ groups:
         examples:
           - a3bf90e006b2
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
       - name: container.label
         type: template[string]
         brief: |
@@ -6341,7 +6353,7 @@ groups:
         examples:
           - gcr.io/opentelemetry/operator
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
       - name: container.image.repo_digests
         type: string[]
         brief: |
@@ -6352,7 +6364,7 @@ groups:
         requirement_level: recommended
         note: |
           [Docker](https://docs.docker.com/reference/api/engine/version/v1.52/#tag/Image/operation/ImageInspect) and [CRI](https://github.com/kubernetes/cri-api/blob/c75ef5b473bbe2d0a4fc92f82235efd665ea8e9f/pkg/apis/runtime/v1/api.proto#L1237-L1238) report those under the `RepoDigests` field.
-        stability: beta
+        stability: release_candidate
       - name: container.image.tags
         type: string[]
         brief: |
@@ -6361,7 +6373,7 @@ groups:
           - - v1.27.1
             - 3.5.7-0
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
     name: container.image
     lineage:
       provenance:
@@ -7598,7 +7610,7 @@ groups:
         examples:
           - opentelemetry-cluster
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.cluster.uid
         type: string
@@ -7630,7 +7642,7 @@ groups:
 
           Therefore, UIDs between clusters should be extremely unlikely to
           conflict.
-        stability: beta
+        stability: release_candidate
         role: identifying
     name: k8s.cluster
     lineage:
@@ -7671,14 +7683,14 @@ groups:
         examples:
           - redis
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
         role: identifying
       - name: k8s.container.restart_count
         type: int
         brief: |
           Number of times the container was restarted. This attribute can be used to identify a particular container (running or stopped) within a container spec.
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.container.status.last_terminated_reason
         type: string
@@ -7746,7 +7758,7 @@ groups:
             `k8s.cronjob.annotation.retries` attribute with value `"4"`.
           - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.cronjob.annotation.data` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.cronjob.label
         type: template[string]
@@ -7763,7 +7775,7 @@ groups:
             `k8s.cronjob.label.type` attribute with value `"weekly"`.
           - A label `automated` with empty string value SHOULD be recorded as
             the `k8s.cronjob.label.automated` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.cronjob.name
         type: string
@@ -7772,7 +7784,7 @@ groups:
         examples:
           - opentelemetry
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.cronjob.uid
         type: string
@@ -7781,7 +7793,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
         role: identifying
     name: k8s.cronjob
     lineage:
@@ -7851,7 +7863,7 @@ groups:
             as the `k8s.daemonset.annotation.replicas` attribute with value `"1"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.daemonset.annotation.data` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.daemonset.label
         type: template[string]
@@ -7869,7 +7881,7 @@ groups:
             as the `k8s.daemonset.label.app` attribute with value `"guestbook"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.daemonset.label.injected` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.daemonset.name
         type: string
@@ -7878,7 +7890,7 @@ groups:
         examples:
           - opentelemetry
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.daemonset.uid
         type: string
@@ -7887,7 +7899,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
         role: identifying
     name: k8s.daemonset
     lineage:
@@ -7957,7 +7969,7 @@ groups:
             as the `k8s.deployment.annotation.replicas` attribute with value `"1"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.deployment.annotation.data` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.deployment.label
         type: template[string]
@@ -7975,7 +7987,7 @@ groups:
             as the `k8s.deployment.label.app` attribute with value `"guestbook"`.
           - A label `injected` with empty string value SHOULD be recorded as
             the `k8s.deployment.label.injected` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.deployment.name
         type: string
@@ -7984,7 +7996,7 @@ groups:
         examples:
           - opentelemetry
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.deployment.uid
         type: string
@@ -7993,7 +8005,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
         role: identifying
     name: k8s.deployment
     lineage:
@@ -8179,7 +8191,7 @@ groups:
             as the `k8s.job.annotation.number` attribute with value `"1"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.job.annotation.data` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.job.label
         type: template[string]
@@ -8197,7 +8209,7 @@ groups:
             as the `k8s.job.label.jobtype` attribute with value `"ci"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.job.label.automated` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.job.name
         type: string
@@ -8206,7 +8218,7 @@ groups:
         examples:
           - opentelemetry
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.job.uid
         type: string
@@ -8215,7 +8227,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
         role: identifying
     name: k8s.job
     lineage:
@@ -8285,7 +8297,7 @@ groups:
             as the `k8s.namespace.annotation.ttl` attribute with value `"0"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.namespace.annotation.data` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.namespace.label
         type: template[string]
@@ -8303,7 +8315,7 @@ groups:
             as the `k8s.namespace.label.kubernetes.io/metadata.name` attribute with value `"default"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.namespace.label.data` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.namespace.name
         type: string
@@ -8312,7 +8324,7 @@ groups:
         examples:
           - default
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
         role: identifying
     name: k8s.namespace
     lineage:
@@ -8371,7 +8383,7 @@ groups:
             the `k8s.node.annotation.node.alpha.kubernetes.io/ttl` attribute with value `"0"`.
           - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.node.annotation.data` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.node.label
         type: template[string]
@@ -8388,7 +8400,7 @@ groups:
             as the `k8s.node.label.kubernetes.io/arch` attribute with value `"arm64"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.node.label.data` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.node.name
         type: string
@@ -8397,7 +8409,7 @@ groups:
         examples:
           - node-1
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.node.uid
         type: string
@@ -8406,7 +8418,7 @@ groups:
         examples:
           - 1eb3a0c6-0477-4080-a9cb-0cb7db65c6a2
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
         role: identifying
     name: k8s.node
     lineage:
@@ -8478,7 +8490,7 @@ groups:
             the `k8s.pod.annotation.mycompany.io/arch` attribute with value `"x64"`.
           - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.pod.annotation.data` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.pod.hostname
         type: string
@@ -8494,7 +8506,7 @@ groups:
 
           This attribute aligns with the `hostname` field of the
           [K8s PodSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#podspec-v1-core).
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.pod.ip
         type: string
@@ -8506,7 +8518,7 @@ groups:
         note: |
           This attribute aligns with the `podIP` field of the
           [K8s PodStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#podstatus-v1-core).
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.pod.label
         type: template[string]
@@ -8526,7 +8538,7 @@ groups:
             the `k8s.pod.label.mycompany.io/arch` attribute with value `"x64"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.pod.label.data` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.pod.name
         type: string
@@ -8535,7 +8547,7 @@ groups:
         examples:
           - opentelemetry-pod-autoconf
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.pod.start_time
         type: string
@@ -8551,7 +8563,7 @@ groups:
           This attribute aligns with the `startTime` field of the
           [K8s PodStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#podstatus-v1-core),
           in ISO 8601 (RFC 3339 compatible) format.
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.pod.uid
         type: string
@@ -8560,7 +8572,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
         role: identifying
     name: k8s.pod
     lineage:
@@ -8660,7 +8672,7 @@ groups:
             as the `k8s.replicaset.annotation.replicas` attribute with value `"0"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.replicaset.annotation.data` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.replicaset.label
         type: template[string]
@@ -8678,7 +8690,7 @@ groups:
             as the `k8s.replicaset.label.app` attribute with value `"guestbook"`.
           - A label `injected` with empty string value SHOULD be recorded as
             the `k8s.replicaset.label.injected` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.replicaset.name
         type: string
@@ -8687,7 +8699,7 @@ groups:
         examples:
           - opentelemetry
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.replicaset.uid
         type: string
@@ -8696,7 +8708,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
         role: identifying
     name: k8s.replicaset
     lineage:
@@ -9094,7 +9106,7 @@ groups:
             as the `k8s.statefulset.annotation.replicas` attribute with value `"1"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.statefulset.annotation.data` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.statefulset.label
         type: template[string]
@@ -9112,7 +9124,7 @@ groups:
             as the `k8s.statefulset.label.app` attribute with value `"guestbook"`.
           - A label `injected` with empty string value SHOULD be recorded as
             the `k8s.statefulset.label.injected` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.statefulset.name
         type: string
@@ -9121,7 +9133,7 @@ groups:
         examples:
           - opentelemetry
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
         role: descriptive
       - name: k8s.statefulset.uid
         type: string
@@ -9130,7 +9142,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
         role: identifying
     name: k8s.statefulset
     lineage:
@@ -9444,8 +9456,7 @@ groups:
           Length of the process.command_args array
         examples:
           - 4
-        requirement_level:
-          conditionally_required: See [Selecting process attributes](/docs/resource/process.md#selecting-process-attributes) for details.
+        requirement_level: opt_in
         note: |
           This field can be useful for querying or performing bucket analysis on how many arguments were provided to start a process. More arguments may be an indication of suspicious activity.
         stability: development
@@ -9456,8 +9467,7 @@ groups:
           The command used to launch the process (i.e. the command name). On Linux based systems, can be set to the zeroth string in `proc/[pid]/cmdline`. On Windows, can be set to the first parameter extracted from `GetCommandLineW`.
         examples:
           - cmd/otelcol
-        requirement_level:
-          conditionally_required: See [Selecting process attributes](/docs/resource/process.md#selecting-process-attributes) for details.
+        requirement_level: recommended
         stability: development
         role: descriptive
       - name: process.command_args
@@ -9467,8 +9477,7 @@ groups:
         examples:
           - - cmd/otecol
             - '--config=config.yaml'
-        requirement_level:
-          conditionally_required: See [Selecting process attributes](/docs/resource/process.md#selecting-process-attributes) for details.
+        requirement_level: opt_in
         stability: development
         role: descriptive
       - name: process.command_line
@@ -9477,8 +9486,7 @@ groups:
           The full command used to launch the process as a single string representing the full command. On Windows, can be set to the result of `GetCommandLineW`. Do not set this if you have to assemble it just for monitoring; use `process.command_args` instead. SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data.
         examples:
           - C:\cmd\otecol --config="my directory\config.yaml"
-        requirement_level:
-          conditionally_required: See [Selecting process attributes](/docs/resource/process.md#selecting-process-attributes) for details.
+        requirement_level: opt_in
         stability: development
         role: descriptive
       - name: process.creation.time
@@ -9487,7 +9495,7 @@ groups:
           The date and time the process was created, in ISO 8601 format.
         examples:
           - 2023-11-21T09:25:34.853Z
-        requirement_level: recommended
+        requirement_level: required
         stability: development
         role: identifying
       - name: process.executable.name
@@ -9496,8 +9504,7 @@ groups:
           The name of the process executable. On Linux based systems, this SHOULD be set to the base name of the target of `/proc/[pid]/exe`. On Windows, this SHOULD be set to the base name of `GetProcessImageFileNameW`.
         examples:
           - otelcol
-        requirement_level:
-          conditionally_required: See [Selecting process attributes](/docs/resource/process.md#selecting-process-attributes) for details.
+        requirement_level: opt_in
         stability: development
         role: descriptive
       - name: process.executable.path
@@ -9506,15 +9513,14 @@ groups:
           The full path to the process executable. On Linux based systems, can be set to the target of `proc/[pid]/exe`. On Windows, can be set to the result of `GetProcessImageFileNameW`.
         examples:
           - /usr/bin/cmd/otelcol
-        requirement_level:
-          conditionally_required: See [Selecting process attributes](/docs/resource/process.md#selecting-process-attributes) for details.
+        requirement_level: opt_in
         stability: development
         role: descriptive
       - name: process.interactive
         type: boolean
         brief: |
           Whether the process is connected to an interactive shell.
-        requirement_level: recommended
+        requirement_level: opt_in
         stability: development
         role: descriptive
       - name: process.linux.cgroup
@@ -9523,7 +9529,7 @@ groups:
         examples:
           - 1:name=systemd:/user.slice/user-1000.slice/session-3.scope
           - 0::/user.slice/user-1000.slice/user@1000.service/tmux-spawn-0267755b-4639-4a27-90ed-f19f88e53748.scope
-        requirement_level: recommended
+        requirement_level: opt_in
         note: |
           Control groups (cgroups) are a kernel feature used to organize and manage process resources. This attribute provides the path(s) to the cgroup(s) associated with the process, which should match the contents of the [/proc/\[PID\]/cgroup](https://man7.org/linux/man-pages/man7/cgroups.7.html) file.
         stability: development
@@ -9543,7 +9549,7 @@ groups:
           Parent Process identifier (PPID).
         examples:
           - 111
-        requirement_level: recommended
+        requirement_level: opt_in
         stability: development
         role: descriptive
       - name: process.pid
@@ -9552,7 +9558,7 @@ groups:
           Process identifier (PID).
         examples:
           - 1234
-        requirement_level: recommended
+        requirement_level: required
         stability: development
         role: identifying
       - name: process.title
@@ -9563,7 +9569,7 @@ groups:
           - cat /etc/hostname
           - xfce4-session
           - bash
-        requirement_level: recommended
+        requirement_level: opt_in
         note: |
           In many Unix-like systems, process title (proctitle), is the string that represents the name or command line of a running process, displayed by system monitoring tools like ps, top, and htop.
         stability: development
@@ -9574,7 +9580,7 @@ groups:
           The working directory of the process.
         examples:
           - /root
-        requirement_level: recommended
+        requirement_level: opt_in
         stability: development
         role: descriptive
     name: process
@@ -9629,9 +9635,9 @@ groups:
             - brief
             - examples
             - note
-            - requirement_level
             - stability
           locally_overridden_fields:
+            - requirement_level
             - role
         process.executable.name:
           source_group: registry.process
@@ -9658,9 +9664,9 @@ groups:
           inherited_fields:
             - brief
             - note
-            - requirement_level
             - stability
           locally_overridden_fields:
+            - requirement_level
             - role
         process.linux.cgroup:
           source_group: registry.process.linux
@@ -9668,9 +9674,9 @@ groups:
             - brief
             - examples
             - note
-            - requirement_level
             - stability
           locally_overridden_fields:
+            - requirement_level
             - role
         process.owner:
           source_group: registry.process
@@ -9678,9 +9684,9 @@ groups:
             - brief
             - examples
             - note
-            - requirement_level
             - stability
           locally_overridden_fields:
+            - requirement_level
             - role
         process.parent_pid:
           source_group: registry.process
@@ -9688,9 +9694,9 @@ groups:
             - brief
             - examples
             - note
-            - requirement_level
             - stability
           locally_overridden_fields:
+            - requirement_level
             - role
         process.pid:
           source_group: registry.process
@@ -9698,9 +9704,9 @@ groups:
             - brief
             - examples
             - note
-            - requirement_level
             - stability
           locally_overridden_fields:
+            - requirement_level
             - role
         process.title:
           source_group: registry.process
@@ -9708,9 +9714,9 @@ groups:
             - brief
             - examples
             - note
-            - requirement_level
             - stability
           locally_overridden_fields:
+            - requirement_level
             - role
         process.working_directory:
           source_group: registry.process
@@ -9718,9 +9724,9 @@ groups:
             - brief
             - examples
             - note
-            - requirement_level
             - stability
           locally_overridden_fields:
+            - requirement_level
             - role
   - id: entity.process.runtime
     type: entity
@@ -11222,6 +11228,79 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+  - id: event.faas.invocation.exception
+    type: event
+    brief: |
+      This event represents an exception that occurred during FaaS function invocation, such as application errors, internal failures, or other exceptions that prevent the function from completing successfully.
+    note: |
+      This event SHOULD be recorded when an exception occurs during FaaS function invocation.
+      Instrumentations SHOULD set the severity to ERROR (severity number 17) when recording this event.
+      Instrumentations MAY provide a configuration option to populate exception events with the attributes captured on the corresponding FaaS span.
+    stability: development
+    attributes:
+      - name: exception.message
+        type: string
+        brief: The exception message.
+        examples:
+          - Division by zero
+          - Can't convert 'int' object to str implicitly
+        requirement_level:
+          conditionally_required: Required if `exception.type` is not set, recommended otherwise.
+        note: |
+          > [!WARNING]
+          >
+          > This attribute may contain sensitive information.
+        stability: stable
+      - name: exception.stacktrace
+        type: string
+        brief: |
+          A stacktrace as a string in the natural representation for the language runtime. The representation is to be determined and documented by each language SIG.
+        examples: |
+          Exception in thread "main" java.lang.RuntimeException: Test exception\n at com.example.GenerateTrace.methodB(GenerateTrace.java:13)\n at com.example.GenerateTrace.methodA(GenerateTrace.java:9)\n at com.example.GenerateTrace.main(GenerateTrace.java:5)
+        requirement_level: recommended
+        stability: stable
+      - name: exception.type
+        type: string
+        brief: |
+          The type of the exception (its fully-qualified class name, if applicable). The dynamic type of the exception should be preferred over the static type in languages that support it.
+        examples:
+          - java.net.ConnectException
+          - OSError
+        requirement_level:
+          conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        stability: stable
+    name: faas.invocation.exception
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/faas/events.yaml
+      attributes:
+        exception.message:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        exception.stacktrace:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+        exception.type:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
   - id: event.feature_flag.evaluation
     type: event
     brief: |
@@ -12099,6 +12178,10 @@ groups:
               value: execute_tool
               brief: Execute a tool
               stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
+              stability: development
         brief: The name of the operation being performed.
         requirement_level: required
         note: |
@@ -12649,6 +12732,79 @@ groups:
             - stability
           locally_overridden_fields:
             - brief
+            - requirement_level
+  - id: event.gen_ai.client.operation.exception
+    type: event
+    brief: |
+      This event represents an exception that occurred during a Generative AI client operation, such as API errors, rate limiting, model errors, timeouts, or other errors that prevent the operation from completing successfully.
+    note: |
+      This event SHOULD be recorded when an exception occurs during Generative AI client operations.
+      Instrumentations SHOULD set the severity to WARN (severity number 13) when recording this event.
+      Instrumentations MAY provide a configuration option to populate exception events with the attributes captured on the corresponding Generative AI client span.
+    stability: development
+    attributes:
+      - name: exception.message
+        type: string
+        brief: The exception message.
+        examples:
+          - Division by zero
+          - Can't convert 'int' object to str implicitly
+        requirement_level:
+          conditionally_required: Required if `exception.type` is not set, recommended otherwise.
+        note: |
+          > [!WARNING]
+          >
+          > This attribute may contain sensitive information.
+        stability: stable
+      - name: exception.stacktrace
+        type: string
+        brief: |
+          A stacktrace as a string in the natural representation for the language runtime. The representation is to be determined and documented by each language SIG.
+        examples: |
+          Exception in thread "main" java.lang.RuntimeException: Test exception\n at com.example.GenerateTrace.methodB(GenerateTrace.java:13)\n at com.example.GenerateTrace.methodA(GenerateTrace.java:9)\n at com.example.GenerateTrace.main(GenerateTrace.java:5)
+        requirement_level: recommended
+        stability: stable
+      - name: exception.type
+        type: string
+        brief: |
+          The type of the exception (its fully-qualified class name, if applicable). The dynamic type of the exception should be preferred over the static type in languages that support it.
+        examples:
+          - java.net.ConnectException
+          - OSError
+        requirement_level:
+          conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        stability: stable
+    name: gen_ai.client.operation.exception
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/gen-ai/events.yaml
+      attributes:
+        exception.message:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        exception.stacktrace:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+        exception.type:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
             - requirement_level
   - id: event.gen_ai.evaluation.result
     type: event
@@ -14827,6 +14983,10 @@ groups:
               value: execute_tool
               brief: Execute a tool
               stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
+              stability: development
         brief: The name of the GenAI operation being performed.
         examples:
           - execute_tool
@@ -15234,6 +15394,10 @@ groups:
             - id: execute_tool
               value: execute_tool
               brief: Execute a tool
+              stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
               stability: development
         brief: The name of the GenAI operation being performed.
         examples:
@@ -19243,6 +19407,10 @@ groups:
               value: execute_tool
               brief: Execute a tool
               stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
+              stability: development
         brief: The name of the operation being performed.
         requirement_level: required
         note: |
@@ -19493,6 +19661,10 @@ groups:
             - id: execute_tool
               value: execute_tool
               brief: Execute a tool
+              stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
               stability: development
         brief: The name of the operation being performed.
         requirement_level: required
@@ -29505,6 +29677,10 @@ groups:
               value: execute_tool
               brief: Execute a tool
               stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
+              stability: development
         brief: The name of the operation being performed.
         requirement_level: required
         note: |
@@ -29753,6 +29929,10 @@ groups:
               value: execute_tool
               brief: Execute a tool
               stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
+              stability: development
         brief: The name of the operation being performed.
         requirement_level: required
         note: |
@@ -29991,6 +30171,10 @@ groups:
               value: execute_tool
               brief: Execute a tool
               stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
+              stability: development
         brief: The name of the operation being performed.
         requirement_level: required
         note: |
@@ -30226,6 +30410,10 @@ groups:
             - id: execute_tool
               value: execute_tool
               brief: Execute a tool
+              stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
               stability: development
         brief: The name of the operation being performed.
         requirement_level: required
@@ -30519,6 +30707,10 @@ groups:
               value: execute_tool
               brief: Execute a tool
               stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
+              stability: development
         brief: The name of the operation being performed.
         requirement_level: required
         note: |
@@ -30764,6 +30956,10 @@ groups:
               value: execute_tool
               brief: Execute a tool
               stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
+              stability: development
         brief: The name of the operation being performed.
         requirement_level: required
         note: |
@@ -30999,6 +31195,10 @@ groups:
             - id: execute_tool
               value: execute_tool
               brief: Execute a tool
+              stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
               stability: development
         brief: The name of the operation being performed.
         requirement_level: required
@@ -41249,7 +41449,7 @@ groups:
           - redis
         requirement_level:
           conditionally_required: if and only if k8s.hpa.metric.type is ContainerResource.
-        stability: beta
+        stability: release_candidate
       - name: k8s.hpa.metric.type
         type: string
         brief: |
@@ -41307,7 +41507,7 @@ groups:
           - redis
         requirement_level:
           conditionally_required: if and only if k8s.hpa.metric.type is ContainerResource
-        stability: beta
+        stability: release_candidate
       - name: k8s.hpa.metric.type
         type: string
         brief: |
@@ -41365,7 +41565,7 @@ groups:
           - redis
         requirement_level:
           conditionally_required: if and only if k8s.hpa.metric.type is ContainerResource
-        stability: beta
+        stability: release_candidate
       - name: k8s.hpa.metric.type
         type: string
         brief: |
@@ -45779,6 +45979,10 @@ groups:
               value: execute_tool
               brief: Execute a tool
               stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
+              stability: development
         brief: The name of the GenAI operation being performed.
         examples:
           - execute_tool
@@ -46467,6 +46671,10 @@ groups:
             - id: execute_tool
               value: execute_tool
               brief: Execute a tool
+              stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
               stability: development
         brief: The name of the GenAI operation being performed.
         examples:
@@ -53851,7 +54059,7 @@ groups:
               value: involuntary
               stability: development
         brief: Specifies whether the context switches for this data point were voluntary or involuntary.
-        requirement_level: recommended
+        requirement_level: required
         stability: development
     metric_name: process.context_switches
     instrument: counter
@@ -53866,8 +54074,9 @@ groups:
           inherited_fields:
             - brief
             - note
-            - requirement_level
             - stability
+          locally_overridden_fields:
+            - requirement_level
     entity_associations:
       - process
     annotations:
@@ -53875,7 +54084,7 @@ groups:
         metric_value_type: int
   - id: metric.process.cpu.time
     type: metric
-    brief: Total CPU seconds broken down by different states.
+    brief: Total CPU seconds broken down by different CPU modes.
     stability: development
     attributes:
       - name: cpu.mode
@@ -53914,12 +54123,13 @@ groups:
               brief: Kernel
               stability: development
         brief: |
-          A process SHOULD be characterized _either_ by data points with no `mode` labels, _or only_ data points with `mode` labels.
+          The CPU mode for this data point.
         examples:
           - user
           - system
-        requirement_level: recommended
-        note: 'Following states SHOULD be used: `user`, `system`, `wait`'
+        requirement_level: required
+        note: |
+          The following values for `cpu.mode` SHOULD be used: `user`, `system`, `wait` Other modes SHOULD NOT be used unless a particular platform mandates a unique set of modes.
         stability: development
     metric_name: process.cpu.time
     instrument: counter
@@ -53933,11 +54143,11 @@ groups:
           source_group: registry.cpu
           inherited_fields:
             - examples
-            - requirement_level
             - stability
           locally_overridden_fields:
             - brief
             - note
+            - requirement_level
     entity_associations:
       - process
     annotations:
@@ -53984,12 +54194,13 @@ groups:
               brief: Kernel
               stability: development
         brief: |
-          A process SHOULD be characterized _either_ by data points with no `mode` labels, _or only_ data points with `mode` labels.
+          The CPU mode for this data point.
         examples:
           - user
           - system
-        requirement_level: recommended
-        note: 'Following states SHOULD be used: `user`, `system`, `wait`'
+        requirement_level: required
+        note: |
+          The following values for `cpu.mode` SHOULD be used: `user`, `system`, `wait` Other modes SHOULD NOT be used unless a particular platform mandates a unique set of modes.
         stability: development
     metric_name: process.cpu.utilization
     instrument: gauge
@@ -54003,11 +54214,11 @@ groups:
           source_group: registry.cpu
           inherited_fields:
             - examples
-            - requirement_level
             - stability
           locally_overridden_fields:
             - brief
             - note
+            - requirement_level
     entity_associations:
       - process
     annotations:
@@ -54030,7 +54241,7 @@ groups:
         brief: The disk IO operation direction.
         examples:
           - read
-        requirement_level: recommended
+        requirement_level: required
         stability: development
     metric_name: process.disk.io
     instrument: counter
@@ -54046,8 +54257,9 @@ groups:
             - brief
             - examples
             - note
-            - requirement_level
             - stability
+          locally_overridden_fields:
+            - requirement_level
     entity_associations:
       - process
     annotations:
@@ -54102,7 +54314,7 @@ groups:
         brief: The network IO operation direction.
         examples:
           - transmit
-        requirement_level: recommended
+        requirement_level: required
         stability: development
     metric_name: process.network.io
     instrument: counter
@@ -54118,8 +54330,9 @@ groups:
             - brief
             - examples
             - note
-            - requirement_level
             - stability
+          locally_overridden_fields:
+            - requirement_level
     entity_associations:
       - process
     annotations:
@@ -54156,7 +54369,8 @@ groups:
             - id: minor
               value: minor
               stability: development
-        brief: The paging fault type
+        brief: |
+          The type of paging fault. Value MUST be either `major` or `minor`. If the metric is reported without this attribute, it should be the sum of major and minor page faults.
         examples:
           - minor
         requirement_level: recommended
@@ -54172,11 +54386,12 @@ groups:
         system.paging.fault.type:
           source_group: registry.system.paging
           inherited_fields:
-            - brief
             - examples
             - note
-            - requirement_level
             - stability
+          locally_overridden_fields:
+            - brief
+            - requirement_level
     entity_associations:
       - process
     annotations:
@@ -63297,7 +63512,7 @@ groups:
       - name: aws.lambda.resource_mapping.id
         type: string
         brief: |
-          The UUID of the [AWS Lambda EvenSource Mapping](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-eventsourcemapping.html). An event source is mapped to a lambda function. It's contents are read by Lambda and used to trigger a function. This isn't available in the lambda execution context or the lambda runtime environtment. This is going to be populated by the AWS SDK for each language when that UUID is present. Some of these operations are Create/Delete/Get/List/Update EventSourceMapping.
+          The UUID of the [AWS Lambda EvenSource Mapping](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-eventsourcemapping.html). An event source is mapped to a lambda function. It's contents are read by Lambda and used to trigger a function. This isn't available in the lambda execution context or the lambda runtime environment. This is going to be populated by the AWS SDK for each language when that UUID is present. Some of these operations are Create/Delete/Get/List/Update EventSourceMapping.
         examples:
           - 587ad24b-03b9-4413-8202-bbd56b36e5b7
         requirement_level: recommended
@@ -64880,7 +65095,7 @@ groups:
         examples:
           - a3bf90e006b2
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
       - name: container.image.id
         type: string
         brief: |
@@ -64900,7 +65115,7 @@ groups:
         examples:
           - gcr.io/opentelemetry/operator
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
       - name: container.image.repo_digests
         type: string[]
         brief: |
@@ -64911,7 +65126,7 @@ groups:
         requirement_level: recommended
         note: |
           [Docker](https://docs.docker.com/reference/api/engine/version/v1.52/#tag/Image/operation/ImageInspect) and [CRI](https://github.com/kubernetes/cri-api/blob/c75ef5b473bbe2d0a4fc92f82235efd665ea8e9f/pkg/apis/runtime/v1/api.proto#L1237-L1238) report those under the `RepoDigests` field.
-        stability: beta
+        stability: release_candidate
       - name: container.image.tags
         type: string[]
         brief: |
@@ -64920,7 +65135,7 @@ groups:
           - - v1.27.1
             - 3.5.7-0
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
       - name: container.label
         type: template[string]
         brief: |
@@ -67988,6 +68203,10 @@ groups:
               value: execute_tool
               brief: Execute a tool
               stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
+              stability: development
         brief: The name of the operation being performed.
         requirement_level: recommended
         note: |
@@ -68525,6 +68744,16 @@ groups:
         examples:
           - 180
         requirement_level: recommended
+        stability: development
+      - name: gen_ai.workflow.name
+        type: string
+        brief: Human-readable name of the GenAI workflow provided by the application.
+        examples:
+          - multi_agent_rag
+          - customer_support_pipeline
+        requirement_level: recommended
+        note: |
+          This attribute can be populated in different frameworks eg: name of the first chain in LangChain OR name of the crew in CrewAI.
         stability: development
     lineage:
       provenance:
@@ -70212,7 +70441,7 @@ groups:
         examples:
           - opentelemetry-cluster
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
       - name: k8s.cluster.uid
         type: string
         brief: |
@@ -70243,7 +70472,7 @@ groups:
 
           Therefore, UIDs between clusters should be extremely unlikely to
           conflict.
-        stability: beta
+        stability: release_candidate
       - name: k8s.container.name
         type: string
         brief: |
@@ -70251,13 +70480,13 @@ groups:
         examples:
           - redis
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
       - name: k8s.container.restart_count
         type: int
         brief: |
           Number of times the container was restarted. This attribute can be used to identify a particular container (running or stopped) within a container spec.
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
       - name: k8s.container.status.last_terminated_reason
         type: string
         brief: |
@@ -70358,7 +70587,7 @@ groups:
             `k8s.cronjob.annotation.retries` attribute with value `"4"`.
           - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.cronjob.annotation.data` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
       - name: k8s.cronjob.label
         type: template[string]
         brief: |
@@ -70374,7 +70603,7 @@ groups:
             `k8s.cronjob.label.type` attribute with value `"weekly"`.
           - A label `automated` with empty string value SHOULD be recorded as
             the `k8s.cronjob.label.automated` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
       - name: k8s.cronjob.name
         type: string
         brief: |
@@ -70382,7 +70611,7 @@ groups:
         examples:
           - opentelemetry
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
       - name: k8s.cronjob.uid
         type: string
         brief: |
@@ -70390,7 +70619,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
       - name: k8s.daemonset.annotation
         type: template[string]
         brief: |
@@ -70407,7 +70636,7 @@ groups:
             as the `k8s.daemonset.annotation.replicas` attribute with value `"1"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.daemonset.annotation.data` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
       - name: k8s.daemonset.label
         type: template[string]
         brief: |
@@ -70424,7 +70653,7 @@ groups:
             as the `k8s.daemonset.label.app` attribute with value `"guestbook"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.daemonset.label.injected` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
       - name: k8s.daemonset.name
         type: string
         brief: |
@@ -70432,7 +70661,7 @@ groups:
         examples:
           - opentelemetry
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
       - name: k8s.daemonset.uid
         type: string
         brief: |
@@ -70440,7 +70669,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
       - name: k8s.deployment.annotation
         type: template[string]
         brief: |
@@ -70457,7 +70686,7 @@ groups:
             as the `k8s.deployment.annotation.replicas` attribute with value `"1"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.deployment.annotation.data` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
       - name: k8s.deployment.label
         type: template[string]
         brief: |
@@ -70474,7 +70703,7 @@ groups:
             as the `k8s.deployment.label.app` attribute with value `"guestbook"`.
           - A label `injected` with empty string value SHOULD be recorded as
             the `k8s.deployment.label.injected` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
       - name: k8s.deployment.name
         type: string
         brief: |
@@ -70482,7 +70711,7 @@ groups:
         examples:
           - opentelemetry
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
       - name: k8s.deployment.uid
         type: string
         brief: |
@@ -70490,7 +70719,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
       - name: k8s.hpa.metric.type
         type: string
         brief: |
@@ -70575,7 +70804,7 @@ groups:
             as the `k8s.job.annotation.number` attribute with value `"1"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.job.annotation.data` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
       - name: k8s.job.label
         type: template[string]
         brief: |
@@ -70592,7 +70821,7 @@ groups:
             as the `k8s.job.label.jobtype` attribute with value `"ci"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.job.label.automated` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
       - name: k8s.job.name
         type: string
         brief: |
@@ -70600,7 +70829,7 @@ groups:
         examples:
           - opentelemetry
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
       - name: k8s.job.uid
         type: string
         brief: |
@@ -70608,7 +70837,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
       - name: k8s.namespace.annotation
         type: template[string]
         brief: |
@@ -70625,7 +70854,7 @@ groups:
             as the `k8s.namespace.annotation.ttl` attribute with value `"0"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.namespace.annotation.data` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
       - name: k8s.namespace.label
         type: template[string]
         brief: |
@@ -70642,7 +70871,7 @@ groups:
             as the `k8s.namespace.label.kubernetes.io/metadata.name` attribute with value `"default"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.namespace.label.data` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
       - name: k8s.namespace.name
         type: string
         brief: |
@@ -70650,7 +70879,7 @@ groups:
         examples:
           - default
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
       - name: k8s.namespace.phase
         type:
           members:
@@ -70687,7 +70916,7 @@ groups:
             the `k8s.node.annotation.node.alpha.kubernetes.io/ttl` attribute with value `"0"`.
           - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.node.annotation.data` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
       - name: k8s.node.condition.status
         type:
           members:
@@ -70766,7 +70995,7 @@ groups:
             as the `k8s.node.label.kubernetes.io/arch` attribute with value `"arm64"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.node.label.data` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
       - name: k8s.node.name
         type: string
         brief: |
@@ -70774,7 +71003,7 @@ groups:
         examples:
           - node-1
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
       - name: k8s.node.uid
         type: string
         brief: |
@@ -70782,7 +71011,7 @@ groups:
         examples:
           - 1eb3a0c6-0477-4080-a9cb-0cb7db65c6a2
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
       - name: k8s.pod.annotation
         type: template[string]
         brief: |
@@ -70801,7 +71030,7 @@ groups:
             the `k8s.pod.annotation.mycompany.io/arch` attribute with value `"x64"`.
           - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.pod.annotation.data` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
       - name: k8s.pod.hostname
         type: string
         brief: |
@@ -70816,7 +71045,7 @@ groups:
 
           This attribute aligns with the `hostname` field of the
           [K8s PodSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#podspec-v1-core).
-        stability: beta
+        stability: release_candidate
       - name: k8s.pod.ip
         type: string
         brief: |
@@ -70827,7 +71056,7 @@ groups:
         note: |
           This attribute aligns with the `podIP` field of the
           [K8s PodStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#podstatus-v1-core).
-        stability: beta
+        stability: release_candidate
       - name: k8s.pod.label
         type: template[string]
         brief: |
@@ -70846,7 +71075,7 @@ groups:
             the `k8s.pod.label.mycompany.io/arch` attribute with value `"x64"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.pod.label.data` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
       - name: k8s.pod.name
         type: string
         brief: |
@@ -70854,7 +71083,7 @@ groups:
         examples:
           - opentelemetry-pod-autoconf
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
       - name: k8s.pod.start_time
         type: string
         brief: |
@@ -70869,7 +71098,7 @@ groups:
           This attribute aligns with the `startTime` field of the
           [K8s PodStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#podstatus-v1-core),
           in ISO 8601 (RFC 3339 compatible) format.
-        stability: beta
+        stability: release_candidate
       - name: k8s.pod.status.phase
         type:
           members:
@@ -70944,7 +71173,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
       - name: k8s.replicaset.annotation
         type: template[string]
         brief: |
@@ -70961,7 +71190,7 @@ groups:
             as the `k8s.replicaset.annotation.replicas` attribute with value `"0"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.replicaset.annotation.data` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
       - name: k8s.replicaset.label
         type: template[string]
         brief: |
@@ -70978,7 +71207,7 @@ groups:
             as the `k8s.replicaset.label.app` attribute with value `"guestbook"`.
           - A label `injected` with empty string value SHOULD be recorded as
             the `k8s.replicaset.label.injected` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
       - name: k8s.replicaset.name
         type: string
         brief: |
@@ -70986,7 +71215,7 @@ groups:
         examples:
           - opentelemetry
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
       - name: k8s.replicaset.uid
         type: string
         brief: |
@@ -70994,7 +71223,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
       - name: k8s.replicationcontroller.name
         type: string
         brief: |
@@ -71256,7 +71485,7 @@ groups:
             as the `k8s.statefulset.annotation.replicas` attribute with value `"1"`.
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.statefulset.annotation.data` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
       - name: k8s.statefulset.label
         type: template[string]
         brief: |
@@ -71273,7 +71502,7 @@ groups:
             as the `k8s.statefulset.label.app` attribute with value `"guestbook"`.
           - A label `injected` with empty string value SHOULD be recorded as
             the `k8s.statefulset.label.injected` attribute with value `""`.
-        stability: beta
+        stability: release_candidate
       - name: k8s.statefulset.name
         type: string
         brief: |
@@ -71281,7 +71510,7 @@ groups:
         examples:
           - opentelemetry
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
       - name: k8s.statefulset.uid
         type: string
         brief: |
@@ -71289,7 +71518,7 @@ groups:
         examples:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
-        stability: beta
+        stability: release_candidate
       - name: k8s.storageclass.name
         type: string
         brief: |
@@ -73422,7 +73651,7 @@ groups:
         requirement_level: recommended
         note: |
           This attribute SHOULD be used by non-OTLP exporters when destination does not support `EventName` or equivalent field. This attribute MAY be used by applications using existing logging libraries so that it can be used to set the `EventName` field by Collector or SDK components.
-        stability: development
+        stability: stable
     lineage:
       provenance:
         registry_id: main
@@ -77236,6 +77465,10 @@ groups:
               value: execute_tool
               brief: Execute a tool
               stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
+              stability: development
         brief: The name of the operation being performed.
         requirement_level: required
         note: |
@@ -77940,6 +78173,10 @@ groups:
             - id: execute_tool
               value: execute_tool
               brief: Execute a tool
+              stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
               stability: development
         brief: The name of the operation being performed.
         requirement_level: required
@@ -78825,7 +79062,7 @@ groups:
       - name: aws.lambda.resource_mapping.id
         type: string
         brief: |
-          The UUID of the [AWS Lambda EvenSource Mapping](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-eventsourcemapping.html). An event source is mapped to a lambda function. It's contents are read by Lambda and used to trigger a function. This isn't available in the lambda execution context or the lambda runtime environtment. This is going to be populated by the AWS SDK for each language when that UUID is present. Some of these operations are Create/Delete/Get/List/Update EventSourceMapping.
+          The UUID of the [AWS Lambda EvenSource Mapping](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-eventsourcemapping.html). An event source is mapped to a lambda function. It's contents are read by Lambda and used to trigger a function. This isn't available in the lambda execution context or the lambda runtime environment. This is going to be populated by the AWS SDK for each language when that UUID is present. Some of these operations are Create/Delete/Get/List/Update EventSourceMapping.
         examples:
           - 587ad24b-03b9-4413-8202-bbd56b36e5b7
         requirement_level: recommended
@@ -79305,6 +79542,10 @@ groups:
             - id: execute_tool
               value: execute_tool
               brief: Execute a tool
+              stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
               stability: development
         brief: The name of the operation being performed.
         requirement_level: required
@@ -80508,7 +80749,7 @@ groups:
     note: |
       For all pipeline runs, a span with kind `SERVER` SHOULD be created corresponding to the execution of the pipeline run.
 
-      **Span name** MUST follow the overall [guidelines for span names](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.43.0/specification/trace/api.md#span).
+      **Span name** MUST follow the overall [guidelines for span names](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.55.0/specification/trace/api.md#span).
 
       The span name SHOULD be `{action} {pipeline}` if there is a (low-cardinality) pipeline name available.
       If the pipeline name is not available or is likely to have high cardinality, then the span name SHOULD be `{action}`.
@@ -89674,6 +89915,10 @@ groups:
               value: execute_tool
               brief: Execute a tool
               stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
+              stability: development
         brief: The name of the operation being performed.
         requirement_level: required
         sampling_relevant: true
@@ -90012,6 +90257,10 @@ groups:
               value: execute_tool
               brief: Execute a tool
               stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
+              stability: development
         brief: The name of the operation being performed.
         requirement_level: required
         sampling_relevant: true
@@ -90131,6 +90380,13 @@ groups:
         note: |
           The name of the GenAI model a request is being made to. If the model is supplied by a vendor, then the value must be the exact name of the model requested. If the model is a fine-tuned custom model, the value should have a more specific name than the base model that's been fine-tuned.
         stability: development
+      - name: gen_ai.response.model
+        type: string
+        brief: The name of the model that generated the response.
+        examples:
+          - gpt-4-0613
+        requirement_level: recommended
+        stability: development
       - name: gen_ai.usage.input_tokens
         type: int
         brief: The number of tokens used in the GenAI input (prompt).
@@ -90229,6 +90485,15 @@ groups:
             - note
             - requirement_level
             - sampling_relevant
+        gen_ai.response.model:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         gen_ai.usage.input_tokens:
           source_group: registry.gen_ai
           inherited_fields:
@@ -90333,6 +90598,10 @@ groups:
             - id: execute_tool
               value: execute_tool
               brief: Execute a tool
+              stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
               stability: development
         brief: The name of the operation being performed.
         requirement_level: required
@@ -90503,7 +90772,7 @@ groups:
     note: |
       **Span name** SHOULD be `{gen_ai.operation.name} {gen_ai.request.model}`.
       Semantic conventions for individual GenAI systems and frameworks MAY specify different span name format
-      and MUST follow the overall [guidelines for span names](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.37.0/specification/trace/api.md#span).
+      and MUST follow the overall [guidelines for span names](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.55.0/specification/trace/api.md#span).
 
       **Span kind** SHOULD be `CLIENT` and MAY be set to `INTERNAL` on spans representing
       call to models running in the same process. It's RECOMMENDED to use `CLIENT` kind
@@ -90645,6 +90914,10 @@ groups:
             - id: execute_tool
               value: execute_tool
               brief: Execute a tool
+              stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
               stability: development
         brief: The name of the operation being performed.
         requirement_level: required
@@ -91525,6 +91798,10 @@ groups:
               value: execute_tool
               brief: Execute a tool
               stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
+              stability: development
         brief: The name of the operation being performed.
         requirement_level: required
         sampling_relevant: true
@@ -92231,6 +92508,249 @@ groups:
             - brief
             - requirement_level
             - sampling_relevant
+  - id: span.gen_ai.invoke_workflow.internal
+    type: span
+    brief: |
+      Represents an operation that executes a coordinated process composed of multiple agents or other operations involving generative AI.
+    note: |
+      The `gen_ai.operation.name` SHOULD be `invoke_workflow`.
+      **Span name** SHOULD be `invoke_workflow {gen_ai.workflow.name}`.
+
+      This span SHOULD be reported by the instrumentations when they can
+      reliably determine that invocation is a workflow (i.e. groups several agent
+      invocations) and SHOULD NOT be reported by instrumentations that
+      can't distinguish it `invoke_workflow` from `invoke_agent`.
+      eg: Some frameworks like ADK have workflow agents that orchestrate other agents
+      and report `invoke_agent` spans, so `invoke_workflow` SHOULD NOT be reported by such instrumentations.
+      Conversely, frameworks like CrewAI have a distinct concept of crew (similar to workflow)
+      that is separate from individual agents, so they SHOULD report `invoke_workflow` spans.
+    stability: development
+    attributes:
+      - name: error.type
+        type:
+          members:
+            - id: other
+              value: _OTHER
+              brief: |
+                A fallback error value to be used when the instrumentation doesn't define a custom value.
+              stability: stable
+        brief: |
+          Describes a class of error the operation ended with.
+        examples:
+          - timeout
+          - java.net.UnknownHostException
+          - server_certificate_invalid
+          - '500'
+        requirement_level:
+          conditionally_required: if the operation ended in an error
+        note: |
+          The `error.type` SHOULD match the error code returned by the Generative AI provider or the client library,
+          the canonical name of exception that occurred, or another low-cardinality error identifier.
+          Instrumentations SHOULD document the list of errors they report.
+        stability: stable
+      - name: gen_ai.input.messages
+        type: any
+        brief: |
+          The chat history provided to the model as an input.
+        examples:
+          - |
+            [
+              {
+                "role": "user",
+                "parts": [
+                  {
+                    "type": "text",
+                    "content": "Weather in Paris?"
+                  }
+                ]
+              },
+              {
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "tool_call",
+                    "id": "call_VSPygqKTWdrhaFErNvMV18Yl",
+                    "name": "get_weather",
+                    "arguments": {
+                      "location": "Paris"
+                    }
+                  }
+                ]
+              },
+              {
+                "role": "tool",
+                "parts": [
+                  {
+                    "type": "tool_call_response",
+                    "id": " call_VSPygqKTWdrhaFErNvMV18Yl",
+                    "result": "rainy, 57°F"
+                  }
+                ]
+              }
+            ]
+        requirement_level: opt_in
+        note: |
+          Instrumentations MUST follow [Input messages JSON schema](/docs/gen-ai/gen-ai-input-messages.json).
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
+
+          Messages MUST be provided in the order they were sent to the model.
+          Instrumentations MAY provide a way for users to filter or truncate
+          input messages.
+
+          > [!Warning]
+          > This attribute is likely to contain sensitive information including user/PII data.
+
+          See [Recording content on attributes](/docs/gen-ai/gen-ai-spans.md#recording-content-on-attributes)
+          section for more details.
+        stability: development
+      - name: gen_ai.operation.name
+        type:
+          members:
+            - id: chat
+              value: chat
+              brief: Chat completion operation such as [OpenAI Chat API](https://platform.openai.com/docs/api-reference/chat)
+              stability: development
+            - id: generate_content
+              value: generate_content
+              brief: Multimodal content generation operation such as [Gemini Generate Content](https://ai.google.dev/api/generate-content)
+              stability: development
+            - id: text_completion
+              value: text_completion
+              brief: Text completions operation such as [OpenAI Completions API (Legacy)](https://platform.openai.com/docs/api-reference/completions)
+              stability: development
+            - id: embeddings
+              value: embeddings
+              brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
+              stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
+              stability: development
+            - id: create_agent
+              value: create_agent
+              brief: Create GenAI agent
+              stability: development
+            - id: invoke_agent
+              value: invoke_agent
+              brief: Invoke GenAI agent
+              stability: development
+            - id: execute_tool
+              value: execute_tool
+              brief: Execute a tool
+              stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
+              stability: development
+        brief: The name of the operation being performed.
+        requirement_level: required
+        sampling_relevant: true
+        note: |
+          If one of the predefined values applies, but specific system uses a different name it's RECOMMENDED to document it in the semantic conventions for specific GenAI system and use system-specific name in the instrumentation. If a different name is not documented, instrumentation libraries SHOULD use applicable predefined value.
+        stability: development
+      - name: gen_ai.output.messages
+        type: any
+        brief: Messages returned by the model where each message represents a specific model response (choice, candidate).
+        examples:
+          - |
+            [
+              {
+                "role": "assistant",
+                "parts": [
+                  {
+                    "type": "text",
+                    "content": "The weather in Paris is currently rainy with a temperature of 57°F."
+                  }
+                ],
+                "finish_reason": "stop"
+              }
+            ]
+        requirement_level: opt_in
+        note: |
+          Instrumentations MUST follow [Output messages JSON schema](/docs/gen-ai/gen-ai-output-messages.json)
+
+          Each message represents a single output choice/candidate generated by
+          the model. Each message corresponds to exactly one generation
+          (choice/candidate) and vice versa - one choice cannot be split across
+          multiple messages or one message cannot contain parts from multiple choices.
+
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
+
+          Instrumentations MAY provide a way for users to filter or truncate
+          output messages.
+
+          > [!Warning]
+          > This attribute is likely to contain sensitive information including user/PII data.
+
+          See [Recording content on attributes](/docs/gen-ai/gen-ai-spans.md#recording-content-on-attributes)
+          section for more details.
+        stability: development
+      - name: gen_ai.workflow.name
+        type: string
+        brief: Human-readable name of the GenAI workflow provided by the application.
+        examples:
+          - multi_agent_rag
+          - customer_support_pipeline
+        requirement_level:
+          conditionally_required: when available
+        note: |
+          This attribute can be populated in different frameworks eg: name of the first chain in LangChain OR name of the crew in CrewAI.
+        stability: development
+    span_kind: internal
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/gen-ai/spans.yaml
+      attributes:
+        error.type:
+          source_group: registry.error
+          inherited_fields:
+            - brief
+            - examples
+            - stability
+          locally_overridden_fields:
+            - note
+            - requirement_level
+        gen_ai.input.messages:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.operation.name:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - sampling_relevant
+        gen_ai.output.messages:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.workflow.name:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
   - id: span.gen_ai.retrieval.client
     type: span
     brief: |
@@ -92305,6 +92825,10 @@ groups:
             - id: execute_tool
               value: execute_tool
               brief: Execute a tool
+              stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
               stability: development
         brief: The name of the operation being performed.
         requirement_level: required
@@ -94131,6 +94655,10 @@ groups:
               value: execute_tool
               brief: Execute a tool
               stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
+              stability: development
         brief: The name of the GenAI operation being performed.
         examples:
           - execute_tool
@@ -94739,6 +95267,10 @@ groups:
               value: execute_tool
               brief: Execute a tool
               stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
+              stability: development
         brief: The name of the GenAI operation being performed.
         examples:
           - execute_tool
@@ -95302,6 +95834,10 @@ groups:
             - id: execute_tool
               value: execute_tool
               brief: Execute a tool
+              stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
               stability: development
         brief: The name of the operation being performed.
         requirement_level: required
@@ -100196,6 +100732,10 @@ groups:
             - id: execute_tool
               value: execute_tool
               brief: Execute a tool
+              stability: development
+            - id: invoke_workflow
+              value: invoke_workflow
+              brief: Invoke GenAI workflow
               stability: development
         brief: The name of the GenAI operation being performed.
         examples:

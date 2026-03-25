@@ -8,7 +8,6 @@
 import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod';
 import type { AutomaticImportV2PluginRequestHandlerContext } from '../types';
 import { buildAutomaticImportResponse } from './utils';
 import { AUTOMATIC_IMPORT_API_PRIVILEGES } from '../feature';
@@ -18,6 +17,7 @@ import {
   ReanalyzeDataStreamRequestParams,
   ReanalyzeDataStreamRequestBody,
   UploadSamplesToDataStreamRequestBody,
+  UpdateDataStreamPipelineRequestBody,
 } from '../../common';
 
 const isSecurityExceptionError = (err: unknown): boolean => {
@@ -45,12 +45,6 @@ export const registerDataStreamRoutes = (
   getDataStreamResultsRoute(router, logger);
   reanalyzeDataStreamRoute(router, logger);
 };
-
-const UpdateDataStreamPipelineRequestBody = z
-  .object({
-    ingest_pipeline: z.union([z.string(), z.record(z.unknown())]),
-  })
-  .strict();
 
 const uploadSamplesRoute = (
   router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
@@ -123,8 +117,7 @@ const uploadSamplesRoute = (
             dataStreamId,
             rawSamples,
             originalSource,
-            authenticatedUser: currentUser,
-            esClient,
+            createdBy: currentUser.username,
           });
           return response.ok({ body: result });
         } catch (err) {
@@ -172,8 +165,7 @@ const deleteDataStreamRoute = (
           const automaticImportv2 = await context.automaticImportv2;
           const automaticImportService = automaticImportv2.automaticImportService;
           const { integration_id: integrationId, data_stream_id: dataStreamId } = request.params;
-          const esClient = automaticImportv2.esClient;
-          await automaticImportService.deleteDataStream(integrationId, dataStreamId, esClient);
+          await automaticImportService.deleteDataStream(integrationId, dataStreamId);
           return response.ok();
         } catch (err) {
           logger.error(`deleteDataStreamRoute: Caught error:`, err);
@@ -221,7 +213,7 @@ const updateDataStreamPipelineRoute = (
             integrationId,
             dataStreamId,
             ingestPipeline,
-            esClient: automaticImportv2.esClient,
+            internalEsClient: automaticImportv2.internalEsClient,
             fieldsMetadataClient: automaticImportv2.fieldsMetadataClient,
           });
 

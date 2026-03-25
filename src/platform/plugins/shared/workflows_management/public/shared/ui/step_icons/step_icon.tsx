@@ -8,7 +8,7 @@
  */
 
 import type { EuiIconProps, IconType } from '@elastic/eui';
-import { EuiBeacon, EuiIcon, EuiLoadingSpinner, EuiToken, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner, EuiToken, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { Suspense } from 'react';
 import type { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
@@ -40,7 +40,14 @@ export const StepIcon = React.memo(
       return <EuiLoadingSpinner size="m" />;
     }
     if (executionStatus === ExecutionStatus.WAITING_FOR_INPUT) {
-      return <EuiBeacon size={14} color="warning" />;
+      return (
+        <EuiIcon
+          type="hourglass"
+          size="m"
+          color={getExecutionStatusColors(euiTheme, executionStatus).color}
+          aria-hidden={true}
+        />
+      );
     }
 
     let iconType: IconType;

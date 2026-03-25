@@ -35,6 +35,7 @@ export const NOTES_FEATURE_ID = 'securitySolutionNotes' as const;
 export const SERVER_APP_ID = 'siem' as const;
 export const SECURITY_FEATURE_ID = SECURITY_FEATURE_ID_V5;
 export const RULES_FEATURE_ID = RULES_FEATURE_LATEST;
+export { ALERTS_FEATURE_ID } from '@kbn/security-solution-features/constants';
 export const APP_NAME = 'Security' as const;
 export const APP_ICON_SOLUTION = 'logoSecurity' as const;
 export const APP_PATH = `/app/security` as const;
@@ -154,7 +155,7 @@ export const ENTITY_ANALYTICS_LANDING_PATH = '/entity_analytics_landing' as cons
 export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH =
   '/entity_analytics_privileged_user_monitoring' as const;
 export const ENTITY_ANALYTICS_OVERVIEW_PATH = `/entity_analytics_overview` as const;
-export const ENTITY_ANALYTICS_THREAT_HUNTING_PATH = '/entity_analytics_threat_hunting' as const;
+export const ENTITY_ANALYTICS_HOME_PAGE_PATH = '/entity_analytics_home_page' as const;
 export const ENTITY_ANALYTICS_WATCHLISTS_PATH = '/entity_analytics_watchlists' as const;
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
@@ -265,10 +266,6 @@ export const INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION =
 
 /** The default value for the included data stream namespaces setting (empty = no filter) */
 export const DATA_STREAM_NAMESPACES_DEFAULT_SETTING: string[] = [];
-
-/** This Kibana Advanced Setting allows users to enable/disable the Graph Visualizations for alerts and events */
-export const ENABLE_GRAPH_VISUALIZATION_SETTING =
-  'securitySolution:enableGraphVisualization' as const;
 
 /** This Kibana Advanced Setting allows users to enable/disable the Asset Inventory feature */
 export const ENABLE_ASSET_INVENTORY_SETTING = 'securitySolution:enableAssetInventory' as const;

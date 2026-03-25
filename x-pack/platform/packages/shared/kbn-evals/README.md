@@ -178,16 +178,32 @@ Eval suites can be triggered in PR CI by adding GitHub labels:
 
 Evals support optional PR labels for selecting which connector projects to run and (separately) which connector should be used for LLM-as-a-judge evaluators:
 
-- **Model selection**:
-  - `models:all` to opt into **all** available connector projects (LiteLLM + EIS)
+- **Model selection** (required — evals are skipped if no `models:*` label is present):
   - `models:<model-group>` to select one or more model groups
     - LiteLLM model groups typically look like `llm-gateway/<model>`
     - EIS model groups are expressed as `eis/<modelId>` (e.g. `models:eis/gpt-4.1`)
+  - `models:weekly-eis-models` — curated alias that expands to the same EIS model set used by the weekly evals pipeline
 - **Judge override**:
   - `models:judge:<connector-id>` to override the connector id used for LLM-as-a-judge evaluators in CI.
     This takes precedence over the Vault `evaluationConnectorId` fallback (env var overrides still apply in local runs).
 
-#### CI ops: create/update model + judge labels
+Model group aliases (like `models:weekly-eis-models`) are defined in `MODEL_GROUP_ALIASES` in `.buildkite/pipelines/evals/eval_pipeline.ts`.
+
+#### Automated label sync
+
+The `models:*` and `models:judge:*` labels are automatically synced from LiteLLM and EIS model discovery:
+
+- **Weekly**: The weekly LLM evals pipeline includes a label sync step that runs alongside the build.
+- **On demand**: Add the `ci:sync-model-labels` label to any PR to trigger label sync in PR CI.
+
+The sync step:
+1. Discovers available models from both **LiteLLM** (`GET /v1/models`) and **EIS** (via `discover_eis_models.js`)
+2. Creates/updates labels for all discovered models
+3. Marks stale labels as deprecated (renamed from `models:*` to `deprecated:models:*`)
+
+Deprecated labels are kept for historical record — they remain visible on past PRs. The `deprecated:` prefix moves them out of the `models:` autocomplete namespace so they don't clutter label suggestions.
+
+#### CI ops: create/update model + judge labels manually
 
 The helper script `scripts/create_models_labels.sh` is idempotent (safe to re-run) and supports targeting a specific repo.
 
@@ -195,6 +211,12 @@ Update **all** model + judge labels (LiteLLM + EIS) using default discovery sour
 
 ```bash
 ./scripts/create_models_labels.sh --repo elastic/kibana --update-all-labels
+```
+
+To also deprecate stale labels in one step:
+
+```bash
+./scripts/create_models_labels.sh --repo elastic/kibana --update-all-labels --prune
 ```
 
 If you need to run only a subset:

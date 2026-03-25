@@ -86,6 +86,7 @@ describe('Data stream routes - upload samples', () => {
           dataStreamId: 'ds-1',
           rawSamples: ['line1', 'line2'],
           originalSource: { sourceType: 'file', sourceValue: 'app.log' },
+          createdBy: 'test-user',
         })
       );
       expect(mockResponse.ok).toHaveBeenCalled();
@@ -135,6 +136,7 @@ describe('Data stream routes - upload samples', () => {
           dataStreamId: 'ds-1',
           rawSamples: ['log line one', 'log line two'],
           originalSource: { sourceType: 'index', sourceValue: 'logs-*' },
+          createdBy: 'test-user',
         })
       );
       expect(mockResponse.ok).toHaveBeenCalled();
@@ -189,6 +191,7 @@ describe('Data stream routes - upload samples', () => {
       expect(mockAddSamplesToDataStream).toHaveBeenCalledWith(
         expect.objectContaining({
           rawSamples: ['valid'],
+          createdBy: 'test-user',
         })
       );
       expect(mockResponse.ok).toHaveBeenCalled();

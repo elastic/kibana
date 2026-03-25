@@ -63,7 +63,7 @@
           "[], CompletionInterceptStep]; onFinish: (evt: InterceptCompletionEvent) => void; onDismiss?: ((evt: InterceptDismissalEvent) => void) | undefined; }"
         ],
         "path": "x-pack/platform/plugins/private/intercepts/public/prompter/service/intercept_dialog_api.ts",
-        "lineNumber": 69,
+        "lineNumber": 72,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

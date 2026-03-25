@@ -9,7 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
+import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
@@ -169,10 +169,9 @@ export const pieStateSchemaESQL = schema.object(
     ...datasetEsqlTableSchema,
     ...pieStateSharedSchema,
     metrics: schema.arrayOf(
-      esqlColumnOperationWithLabelAndFormatSchema.extends(
-        partitionStatePrimaryMetricOptionsSchema,
-        { meta: { description: 'ES|QL column reference for primary metric' } }
-      ),
+      esqlColumnWithFormatSchema.extends(partitionStatePrimaryMetricOptionsSchema, {
+        meta: { description: 'ES|QL column reference for primary metric' },
+      }),
       {
         minSize: 1,
         maxSize: 100,
@@ -180,7 +179,7 @@ export const pieStateSchemaESQL = schema.object(
       }
     ),
     group_by: schema.maybe(
-      schema.arrayOf(esqlColumnSchema.extends(partitionStateBreakdownByOptionsSchema), {
+      schema.arrayOf(esqlColumnWithFormatSchema.extends(partitionStateBreakdownByOptionsSchema), {
         minSize: 1,
         maxSize: 100,
         meta: { description: 'Array of breakdown dimensions (minimum 1)' },

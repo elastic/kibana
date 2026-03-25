@@ -13,10 +13,12 @@ import type { YamlValidationResult } from '../../features/validate_workflow_yaml
 import {
   workflowEventNames,
   WorkflowExecutionEventTypes,
+  WorkflowImportExportEventTypes,
   WorkflowLifecycleEventTypes,
   WorkflowUIEventTypes,
   WorkflowValidationEventTypes,
 } from '../lib/telemetry/events/workflows';
+import type { WorkflowExportReferenceResolution } from '../lib/telemetry/events/workflows/import_export/types';
 import type {
   WorkflowEditorType,
   WorkflowTelemetryOrigin,
@@ -474,6 +476,72 @@ export class WorkflowsBaseTelemetry {
       workflowId,
       tab,
       ...(editorType && { editorType }),
+    });
+  };
+
+  // Import/Export actions
+
+  /**
+   * Reports a workflow export attempt.
+   */
+  reportWorkflowExported = (params: {
+    workflowCount: number;
+    format: 'yaml' | 'zip';
+    referenceResolution: WorkflowExportReferenceResolution;
+    error?: Error;
+  }) => {
+    const { workflowCount, format, referenceResolution, error } = params;
+    this.telemetryService.reportEvent(WorkflowImportExportEventTypes.WorkflowExported, {
+      eventName: workflowEventNames[WorkflowImportExportEventTypes.WorkflowExported],
+      workflowCount,
+      format,
+      referenceResolution,
+      ...this.getBaseResultParams(error),
+    });
+  };
+
+  /**
+   * Reports a workflow import attempt.
+   */
+  reportWorkflowImported = (params: {
+    workflowCount: number;
+    format: 'yaml' | 'zip';
+    conflictResolution: 'generateNewIds' | 'overwrite';
+    hasConflicts: boolean;
+    successCount: number;
+    failedCount: number;
+    minStepCount: number;
+    maxStepCount: number;
+    minTriggerCount: number;
+    maxTriggerCount: number;
+    error?: Error;
+  }) => {
+    const {
+      workflowCount,
+      format,
+      conflictResolution,
+      hasConflicts,
+      successCount,
+      failedCount,
+      minStepCount,
+      maxStepCount,
+      minTriggerCount,
+      maxTriggerCount,
+      error,
+    } = params;
+    this.telemetryService.reportEvent(WorkflowImportExportEventTypes.WorkflowImported, {
+      eventName: workflowEventNames[WorkflowImportExportEventTypes.WorkflowImported],
+      workflowCount,
+      format,
+      conflictResolution,
+      hasConflicts,
+      successCount,
+      failedCount,
+      minStepCount,
+      maxStepCount,
+      minTriggerCount,
+      maxTriggerCount,
+      ...this.getBaseResultParams(error),
     });
   };
 }

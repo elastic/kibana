@@ -7,17 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css } from '@emotion/react';
+import { css, type SerializedStyles } from '@emotion/react';
 import { type UseEuiTheme, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { useMemo } from 'react';
 import type { AiButtonVariant } from './types';
-import type {
-  AiButtonGradientOptions,
-  AiButtonGradientStyles,
-  AiGradientColors,
-  ResolvedVariantStyles,
-  SvgAiGradient,
-} from './gradient_types';
+
+/** Options for the AI button gradient hooks. */
+export interface AiButtonGradientOptions {
+  readonly variant?: AiButtonVariant;
+  readonly iconOnly?: boolean;
+}
+
+/** Computed gradient styles for an AI button. */
+export interface AiButtonGradientStyles {
+  readonly buttonCss: SerializedStyles;
+  readonly labelCss: SerializedStyles;
+}
+
+/** Start and end colors for a linear gradient. */
+export interface AiGradientColors {
+  readonly startColor: string;
+  readonly endColor: string;
+}
+
+/** SVG gradient for the AI button icon. */
+export interface SvgAiGradient {
+  readonly iconGradientCss?: SerializedStyles;
+  readonly gradientId: string;
+  readonly colors: AiGradientColors;
+}
 
 const DIAGONAL_GRADIENT_START_PERCENT = 2.98;
 const DIAGONAL_GRADIENT_END_PERCENT = 66.24;
@@ -79,7 +97,12 @@ const getLabelColors = (colors: UseEuiTheme['euiTheme']['colors']): AiGradientCo
   endColor: colors.textAssistance,
 });
 
-const gradientLabelCss = (cssGradient: string, hoverGradient?: string) => css`
+const gradientLabelCss = (
+  euiTheme: UseEuiTheme['euiTheme'],
+  cssGradient: string,
+  hoverGradient?: string
+) => css`
+  padding: 0 ${euiTheme.size.xs};
   display: inline-block;
   background: ${cssGradient} !important;
   background-clip: text !important;
@@ -95,18 +118,31 @@ const gradientLabelCss = (cssGradient: string, hoverGradient?: string) => css`
         -webkit-background-clip: text !important;
       }`
     : ''}
+  button:disabled & {
+    color: ${euiTheme.colors.textDisabled} !important;
+    background: none !important;
+    -webkit-text-fill-color: ${euiTheme.colors.textDisabled} !important;
+  }
 `;
 
-const plainLabelCss = (color: string) => css`
+const plainLabelCss = (euiTheme: UseEuiTheme['euiTheme'], color: string) => css`
+  padding: 0 ${euiTheme.size.xs};
   background: none !important;
   background-clip: initial !important;
   -webkit-background-clip: initial !important;
   color: ${color} !important;
   -webkit-text-fill-color: currentColor !important;
+  button:disabled & {
+    color: ${euiTheme.colors.textDisabled} !important;
+    -webkit-text-fill-color: ${euiTheme.colors.textDisabled} !important;
+  }
 `;
 
 // Uses ::after so it doesn't collide with EUI's ::before interaction overlay.
-const outlinedBorderGradientCss = (borderGradient: string) => css`
+const outlinedBorderGradientCss = (
+  borderGradient: string,
+  euiTheme: UseEuiTheme['euiTheme']
+) => css`
   position: relative;
   border: none;
   isolation: isolate;
@@ -124,13 +160,17 @@ const outlinedBorderGradientCss = (borderGradient: string) => css`
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
   }
+
+  &:disabled::after {
+    background: ${euiTheme.colors.backgroundBaseDisabled} !important;
+  }
 `;
 
 const resolveVariantStyles = (
   variant: AiButtonVariant,
   euiTheme: UseEuiTheme['euiTheme'],
   buttonGradientAngle: number
-): ResolvedVariantStyles => {
+) => {
   const {
     colors,
     components: {
@@ -155,7 +195,7 @@ const resolveVariantStyles = (
         buttonBackground: 'transparent',
         hoverBackground: hoverGradient,
         labelColor: defaultLabelColor,
-        labelCss: gradientLabelCss(labelGradient),
+        labelCss: gradientLabelCss(euiTheme, labelGradient),
       };
 
     case 'outlined':
@@ -172,7 +212,7 @@ const resolveVariantStyles = (
           }
         ),
         labelColor: defaultLabelColor,
-        labelCss: gradientLabelCss(labelGradient),
+        labelCss: gradientLabelCss(euiTheme, labelGradient),
       };
 
     case 'accent': {
@@ -188,7 +228,7 @@ const resolveVariantStyles = (
         buttonBackground: accentBackground,
         hoverBackground: `${hoverGradient}, ${accentBackground}`,
         labelColor: colors.textInverse,
-        labelCss: plainLabelCss(colors.textInverse),
+        labelCss: plainLabelCss(euiTheme, colors.textInverse),
       };
     }
 
@@ -205,7 +245,7 @@ const resolveVariantStyles = (
         buttonBackground: baseBackground,
         hoverBackground: `${hoverGradient}, ${baseBackground}`,
         labelColor: defaultLabelColor,
-        labelCss: gradientLabelCss(labelGradient, `${hoverGradient}, ${labelGradient}`),
+        labelCss: gradientLabelCss(euiTheme, labelGradient, `${hoverGradient}, ${labelGradient}`),
       };
     }
   }
@@ -226,7 +266,7 @@ export const useAiButtonGradientStyles = ({
       background: ${buttonBackground} !important;
       border-radius: ${euiTheme.border.radius.medium};
       color: ${labelColor} !important;
-      ${borderGradient ? outlinedBorderGradientCss(borderGradient) : ''}
+      ${borderGradient ? outlinedBorderGradientCss(borderGradient, euiTheme) : ''}
 
       &:hover:not(:disabled),
       &:focus-visible:not(:disabled) {
@@ -234,6 +274,18 @@ export const useAiButtonGradientStyles = ({
         /* EUI applies hover/active via an opaque ::before overlay
            (euiButtonInteractionStyles in global_styling/mixins/_button).
            Neutralising it so our custom gradient background is visible. */
+        &::before {
+          background-color: transparent !important;
+        }
+      }
+      &:disabled {
+        background: ${variant === 'empty' || variant === 'outlined'
+          ? 'transparent'
+          : euiTheme.colors.backgroundBaseDisabled} !important;
+
+        color: ${euiTheme.colors.textDisabled} !important;
+        -webkit-text-fill-color: ${euiTheme.colors.textDisabled} !important;
+
         &::before {
           background-color: transparent !important;
         }
@@ -257,6 +309,11 @@ export const useSvgAiGradient = ({ variant }: AiButtonGradientOptions = {}): Svg
             & .euiIcon,
             & .euiIcon [fill]:not([fill='none']) {
               fill: ${gradientUrl} !important;
+            }
+            &&:disabled .euiIcon,
+            &&:disabled .euiIcon [fill]:not([fill='none']) {
+              fill: ${euiTheme.colors.textDisabled} !important;
+              color: ${euiTheme.colors.textDisabled} !important;
             }
           `
         : undefined;
