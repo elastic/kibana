@@ -147,9 +147,3 @@ export const RESPONSE_NO_DATA_TEST_ID = `${RESPONSE_TEST_ID}NoData` as const;
 
 export const INVESTIGATION_GUIDE_TEST_ID = `${PREFIX}InvestigationGuide` as const;
 export const INVESTIGATION_GUIDE_LOADING_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Loading` as const;
-
-/* Notes */
-
-export const ATTACH_TO_TIMELINE_CALLOUT_TEST_ID = `${PREFIX}AttachToTimelineCallout` as const;
-export const ATTACH_TO_TIMELINE_CHECKBOX_TEST_ID = `${PREFIX}AttachToTimelineCheckbox` as const;
-export const SAVE_TIMELINE_BUTTON_TEST_ID = `${PREFIX}SaveTimelineButton` as const;

@@ -406,7 +406,7 @@ export const SharedLists = React.memo(() => {
     <EuiButtonEmpty
       size="xs"
       color="text"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={onRowSizeButtonClick}
     >
@@ -490,7 +490,7 @@ export const SharedLists = React.memo(() => {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiButtonIcon
-                    iconType="popout"
+                    iconType="external"
                     aria-label="go-to-rules"
                     color="primary"
                     onClick={() =>
@@ -517,7 +517,7 @@ export const SharedLists = React.memo(() => {
                   buttonRef={(node: HTMLButtonElement | null) => {
                     createButtonRef.current = node;
                   }}
-                  iconType={'arrowDown'}
+                  iconType="chevronSingleDown"
                   onClick={onCreateButtonClick}
                 >
                   {i18n.CREATE_BUTTON}
@@ -555,7 +555,7 @@ export const SharedLists = React.memo(() => {
           (canEditExceptions || canWriteEndpointExceptions) && (
             <EuiButton
               data-test-subj="importSharedExceptionList"
-              iconType={'importAction'}
+              iconType={'download'}
               onClick={() => setDisplayImportListFlyout(true)}
             >
               {i18n.IMPORT_EXCEPTION_LIST_BUTTON}
