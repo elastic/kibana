@@ -481,7 +481,7 @@ describe('EditOutputFlyout', () => {
     });
   });
 
-  describe('OpenTelemetry Exporter Configuration section', () => {
+  describe('OpenTelemetry Exporter section', () => {
     it('should show the OTel exporter configuration section for ES output', async () => {
       const { utils } = renderFlyout({
         type: 'elasticsearch',
@@ -491,11 +491,11 @@ describe('EditOutputFlyout', () => {
         is_default_monitoring: false,
       });
 
-      expect(utils.queryByText('OpenTelemetry Exporter Configuration')).not.toBeNull();
-      expect(utils.queryByLabelText('Advanced Exporter Parameters')).not.toBeNull();
+      expect(utils.queryByText('OpenTelemetry Exporter')).not.toBeNull();
+      expect(utils.queryByLabelText('Advanced YAML Configuration')).not.toBeNull();
     });
 
-    it('should not show the OTel exporter configuration section for logstash output', async () => {
+    it('should not show the OTel exporter section for logstash output', async () => {
       const { utils } = renderFlyout({
         type: 'logstash',
         name: 'logstash output',
@@ -504,11 +504,11 @@ describe('EditOutputFlyout', () => {
         is_default_monitoring: false,
       });
 
-      expect(utils.queryByText('OpenTelemetry Exporter Configuration')).toBeNull();
-      expect(utils.queryByLabelText('Advanced Exporter Parameters')).toBeNull();
+      expect(utils.queryByText('OpenTelemetry Exporter')).toBeNull();
+      expect(utils.queryByLabelText('Advanced YAML Configuration')).toBeNull();
     });
 
-    it('should not show the OTel exporter configuration section for kafka output', async () => {
+    it('should not show the OTel exporter section for kafka output', async () => {
       const { utils } = renderFlyout({
         type: 'kafka',
         name: 'kafka output',
@@ -517,11 +517,11 @@ describe('EditOutputFlyout', () => {
         is_default_monitoring: false,
       });
 
-      expect(utils.queryByText('OpenTelemetry Exporter Configuration')).toBeNull();
-      expect(utils.queryByLabelText('Advanced Exporter Parameters')).toBeNull();
+      expect(utils.queryByText('OpenTelemetry Exportern')).toBeNull();
+      expect(utils.queryByLabelText('Advanced YAML Configuration')).toBeNull();
     });
 
-    it('should not show the OTel exporter configuration section for remote ES output', async () => {
+    it('should not show the OTel exporter section for remote ES output', async () => {
       jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
       jest
         .spyOn(ExperimentalFeaturesService, 'get')
@@ -535,8 +535,8 @@ describe('EditOutputFlyout', () => {
         is_default_monitoring: false,
       });
 
-      expect(utils.queryByText('OpenTelemetry Exporter Configuration')).toBeNull();
-      expect(utils.queryByLabelText('Advanced Exporter Parameters')).toBeNull();
+      expect(utils.queryByText('OpenTelemetry Exporter')).toBeNull();
+      expect(utils.queryByLabelText('Advanced YAML Configuration')).toBeNull();
     });
 
     it('should include otel_exporter_config_yaml in the save payload when creating an ES output', async () => {
