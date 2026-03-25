@@ -64,7 +64,7 @@ const heatmapSharedStateSchema = {
   ),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
-  axis: schema.maybe(
+  axes: schema.maybe(
     schema.object(
       {
         x: schema.maybe(
