@@ -6,6 +6,7 @@
  */
 
 import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
+import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import {
   ATTACK_DISCOVERY_API_ACTION_ALL,
   ATTACK_DISCOVERY_API_ACTION_UPDATE_ATTACK_DISCOVERY_SCHEDULE,
@@ -35,6 +36,7 @@ export const disableAttackDiscoverySchedulesRoute = (
           requiredPrivileges: [
             ATTACK_DISCOVERY_API_ACTION_ALL,
             ATTACK_DISCOVERY_API_ACTION_UPDATE_ATTACK_DISCOVERY_SCHEDULE,
+            ALERTS_API_READ,
           ],
         },
       },
