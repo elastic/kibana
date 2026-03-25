@@ -46,7 +46,8 @@ import {
 
 import type { TaskStore, SearchOpts } from '../task_store';
 import { isOk, asOk } from '../lib/result_type';
-import { selectTasksByCapacity, getTaskCost } from './lib/task_selector_by_capacity';
+import { selectTasksByCapacity } from './lib/task_selector_by_capacity';
+import { getTaskCost } from './lib/get_task_cost';
 import type { TaskPartitioner } from '../lib/task_partitioner';
 import { getRetryAt } from '../lib/get_retry_at';
 

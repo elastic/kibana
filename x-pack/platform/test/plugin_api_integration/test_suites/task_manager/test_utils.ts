@@ -55,7 +55,7 @@ export function currentTasks<State = unknown, Params = unknown>(
   return supertest
     .get('/api/sample_tasks')
     .expect(200)
-    .then((response) => response.body);
+    .then((response: any) => response.body);
 }
 
 export async function historyDocs({
@@ -85,5 +85,5 @@ export async function historyDocs({
         },
       },
     })
-    .then((result) => (result as unknown as SearchResults).hits.hits);
+    .then((result: any) => (result as unknown as SearchResults).hits.hits);
 }

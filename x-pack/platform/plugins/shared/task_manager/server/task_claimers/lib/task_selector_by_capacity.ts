@@ -6,7 +6,6 @@
  */
 
 import type { ConcreteTaskInstance } from '../../task';
-import { getTaskCostFromInstance, TaskCost } from '../../task';
 import type { TaskClaimingBatches } from '../../queries/task_claiming';
 import { isLimited } from '../../queries/task_claiming';
 import { sharedConcurrencyTaskTypes, type TaskTypeDictionary } from '../../task_type_dictionary';
@@ -15,12 +14,6 @@ interface SelectTasksByCapacityOpts {
   definitions: TaskTypeDictionary;
   tasks: ConcreteTaskInstance[];
   batches: TaskClaimingBatches;
-}
-
-//  Effective cost for this task (instance override, then definition, then Normal).
-export function getTaskCost(task: ConcreteTaskInstance, definitions: TaskTypeDictionary): number {
-  const instanceCost = getTaskCostFromInstance(task.cost);
-  return instanceCost ?? definitions.get(task.taskType)?.cost ?? TaskCost.Normal;
 }
 
 // given a list of tasks and capacity info, select the tasks that meet capacity
