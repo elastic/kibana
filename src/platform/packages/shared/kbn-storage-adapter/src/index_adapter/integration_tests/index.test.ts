@@ -757,14 +757,14 @@ describe('StorageIndexAdapter', () => {
         const versioning = defineVersioning(v1Pass)
           .addVersion({ schema: v2Pass, migrate: (prev) => ({ ...prev, score: 0 }) })
           .build();
-        const adapter = new StorageIndexAdapter<typeof versionedStorageSettings, VersionedDoc>(
+        const passthroughAdapter = new StorageIndexAdapter<typeof versionedStorageSettings, VersionedDoc>(
           esClient,
           loggerMock,
           versionedStorageSettings,
           { versioning }
         );
 
-        const getResponse = await adapter.getClient().get({ id: 'extra' });
+        const getResponse = await passthroughAdapter.getClient().get({ id: 'extra' });
         const source = getResponse._source as unknown as Record<string, unknown>;
         expect(source.name).toBe('test');
         expect(source.score).toBe(0);
@@ -876,9 +876,7 @@ describe('StorageIndexAdapter', () => {
           sort: [{ _id: 'asc' as const }],
           query: { match_all: {} },
         });
-        const sources = rawDocs.hits.hits.map(
-          (hit) => hit._source as Record<string, unknown>
-        );
+        const sources = rawDocs.hits.hits.map((hit) => hit._source as Record<string, unknown>);
 
         const currentDoc = sources.find((s) => s.name === 'up-to-date')!;
         expect(currentDoc.score).toBe(99);
