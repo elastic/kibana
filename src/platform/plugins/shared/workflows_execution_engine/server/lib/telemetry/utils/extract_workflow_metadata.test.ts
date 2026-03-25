@@ -103,17 +103,12 @@ describe('extractWorkflowMetadata (execution engine)', () => {
     });
   });
 
-  it('reflects root field: inputs (JSON Schema properties only)', () => {
+  it('reflects root field: inputs (JSON Schema properties)', () => {
     const jsonSchemaInputs = {
       type: 'object' as const,
       properties: { a: { type: 'string' as const }, b: { type: 'number' as const } },
     } as WorkflowYaml['inputs'];
     expect(extractWorkflowMetadata(baseWorkflow({ inputs: jsonSchemaInputs })).inputCount).toBe(2);
-    expect(
-      extractWorkflowMetadata(
-        baseWorkflow({ inputs: [{ name: 'legacy', type: 'string' }] as WorkflowYaml['inputs'] })
-      ).inputCount
-    ).toBe(1);
   });
 
   it('reflects settings key: timeout', () => {
