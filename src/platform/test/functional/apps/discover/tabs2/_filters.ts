@@ -30,6 +30,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(query).to.contain('`extension.raw` : "css"');
       expect(await filterBar.getFilterCount()).to.be(0);
 
+      // Submit the query and verify it returns results
+      await esql.submitEsqlEditorQuery();
+      await discover.waitUntilTabIsLoaded();
+      expect(await discover.hasNoResults()).to.be(false);
+
       // switch back to data view mode so the next test starts in classic mode
       await discover.selectDataViewMode({ discardModal: true });
       await discover.waitUntilTabIsLoaded();
