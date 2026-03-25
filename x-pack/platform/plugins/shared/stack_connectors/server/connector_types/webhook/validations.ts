@@ -12,7 +12,7 @@ import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/a
 
 import { ADDITIONAL_FIELD_CONFIG_ERROR } from './translations';
 import { AuthType, SSLCertType } from '../../../common/auth/constants';
-import { ConnectorTypeConfigType } from './types';
+import type { ConnectorTypeConfigType } from './types';
 
 function validateUrl(configuredUrl: string) {
   try {
