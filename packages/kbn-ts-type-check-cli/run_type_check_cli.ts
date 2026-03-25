@@ -91,6 +91,7 @@ async function createTypeCheckConfigs(
 async function detectLocalChanges(): Promise<string[]> {
   const { stdout } = await execa(
     'git',
+    // Some CI environments change these files dynamically, like FIPS but it shouldn't invalidate the cache
     ['status', '--porcelain', '--', '.', ':!:config/node.options', ':!config/kibana.yml'],
     {
       cwd: REPO_ROOT,
