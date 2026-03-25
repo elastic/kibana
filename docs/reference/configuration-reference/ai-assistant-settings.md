@@ -4,7 +4,7 @@ mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/ai-assistant-settings-kb.html
 applies_to:
   deployment:
-    stack: ga
+    self: ga
 ---
 
 # Knowledge base artifact settings for AI Assistants [ai-assistant-settings-kb]
