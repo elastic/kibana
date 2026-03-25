@@ -63,6 +63,7 @@ export const createWatchlistEntitiesService = ({
       const response = await esClient.search<EntityStoreEntity>({
         index: getLatestEntitiesIndexName(namespace),
         size: 1000,
+        sort: ['_doc'],
         search_after: searchAfter,
         query,
       });
