@@ -18,9 +18,12 @@ interface Props {
   onComplete: (
     completedTaskState: Extract<TaskResult<OnboardingResult>, { status: TaskStatus.Completed }>
   ) => void;
+  onError: (
+    failedTaskState: Extract<TaskResult<OnboardingResult>, { status: TaskStatus.Failed }>
+  ) => void;
 }
 
-export function useKnowledgeIndicatorsTask({ streamName, onComplete }: Props) {
+export function useKnowledgeIndicatorsTask({ streamName, onComplete, onError }: Props) {
   const previousTaskStatusRef = useRef<TaskStatus | null>(null);
   const [knowledgeIndicatorsTaskState, setKnowledgeIndicatorsTaskState] =
     useState<TaskResult<OnboardingResult> | null>(null);
@@ -107,6 +110,14 @@ export function useKnowledgeIndicatorsTask({ streamName, onComplete }: Props) {
       taskState.status === TaskStatus.Completed
     ) {
       onComplete(taskState);
+    }
+
+    if (
+      previousTaskStatusRef.current !== null &&
+      previousTaskStatusRef.current !== TaskStatus.Failed &&
+      taskState.status === TaskStatus.Failed
+    ) {
+      onError(taskState);
     }
 
     previousTaskStatusRef.current = taskState.status;

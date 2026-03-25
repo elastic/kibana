@@ -108,6 +108,16 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     [definition.stream.name, queryClient, toasts]
   );
 
+  const onKnowledgeIndicatorsTaskError = useCallback(
+    (failedTaskState: Extract<TaskResult<OnboardingResult>, { status: TaskStatus.Failed }>) => {
+      toasts.addDanger({
+        title: KNOWLEDGE_INDICATORS_TASK_FAILED_TOAST_TITLE,
+        text: failedTaskState.error,
+      });
+    },
+    [toasts]
+  );
+
   const {
     isPending: isKnowledgeIndicatorsGenerationPending,
     knowledgeIndicatorsTaskState,
@@ -116,6 +126,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   } = useKnowledgeIndicatorsTask({
     streamName: definition.stream.name,
     onComplete: onKnowledgeIndicatorsTaskComplete,
+    onError: onKnowledgeIndicatorsTaskError,
   });
 
   const ruleKnowledgeIndicators = useMemo(
@@ -133,13 +144,23 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   );
   const isKnowledgeIndicatorsGenerationCanceling =
     knowledgeIndicatorsTaskState?.status === TaskStatus.BeingCanceled;
+  const isGenerateButtonDisabled =
+    knowledgeIndicatorsTaskState === null || isKnowledgeIndicatorsGenerationPending;
 
   if (isKnowledgeIndicatorsLoading) {
     return <LoadingPanel size="xxl" />;
   }
 
   if (isEmpty) {
-    return <EmptyState onManualEntryClick={() => {}} onGenerateSuggestionsClick={() => {}} />;
+    return (
+      <EmptyState
+        isGenerating={isKnowledgeIndicatorsGenerationPending}
+        isCanceling={isKnowledgeIndicatorsGenerationCanceling}
+        isGenerateDisabled={isGenerateButtonDisabled}
+        onGenerateSuggestionsClick={scheduleKnowledgeIndicatorsTask}
+        onCancelGenerationClick={cancelKnowledgeIndicatorsTask}
+      />
+    );
   }
 
   return (
@@ -195,34 +216,13 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
               ) : null}
               {!isRulesSelected ? (
                 <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                    {isKnowledgeIndicatorsGenerationPending ? (
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          aria-label={CANCEL_GENERATION_BUTTON_ARIA_LABEL}
-                          iconType="stop"
-                          onClick={cancelKnowledgeIndicatorsTask}
-                        />
-                      </EuiFlexItem>
-                    ) : null}
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        color="primary"
-                        isLoading={isKnowledgeIndicatorsGenerationPending}
-                        isDisabled={
-                          knowledgeIndicatorsTaskState === null ||
-                          isKnowledgeIndicatorsGenerationPending
-                        }
-                        onClick={scheduleKnowledgeIndicatorsTask}
-                      >
-                        {isKnowledgeIndicatorsGenerationPending
-                          ? isKnowledgeIndicatorsGenerationCanceling
-                            ? CANCELING_BUTTON_LABEL
-                            : GENERATING_BUTTON_LABEL
-                          : GENERATE_MORE_BUTTON_LABEL}
-                      </EuiButton>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  <KnowledgeIndicatorsGenerationControls
+                    isGenerating={isKnowledgeIndicatorsGenerationPending}
+                    isCanceling={isKnowledgeIndicatorsGenerationCanceling}
+                    isGenerateDisabled={isGenerateButtonDisabled}
+                    onGenerateSuggestionsClick={scheduleKnowledgeIndicatorsTask}
+                    onCancelGenerationClick={cancelKnowledgeIndicatorsTask}
+                  />
                 </EuiFlexItem>
               ) : null}
             </EuiFlexGroup>
@@ -257,6 +257,48 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
         />
       ) : null}
     </>
+  );
+}
+
+function KnowledgeIndicatorsGenerationControls({
+  isGenerating,
+  isCanceling,
+  isGenerateDisabled,
+  onGenerateSuggestionsClick,
+  onCancelGenerationClick,
+}: {
+  isGenerating: boolean;
+  isCanceling: boolean;
+  isGenerateDisabled: boolean;
+  onGenerateSuggestionsClick: () => void;
+  onCancelGenerationClick: () => void;
+}) {
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      {isGenerating ? (
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            aria-label={CANCEL_GENERATION_BUTTON_ARIA_LABEL}
+            iconType="stop"
+            onClick={onCancelGenerationClick}
+          />
+        </EuiFlexItem>
+      ) : null}
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          color="primary"
+          isLoading={isGenerating}
+          isDisabled={isGenerateDisabled}
+          onClick={onGenerateSuggestionsClick}
+        >
+          {isGenerating
+            ? isCanceling
+              ? CANCELING_BUTTON_LABEL
+              : GENERATING_BUTTON_LABEL
+            : GENERATE_MORE_BUTTON_LABEL}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 
@@ -313,5 +355,12 @@ const CANCEL_GENERATION_BUTTON_ARIA_LABEL = i18n.translate(
   'xpack.streams.significantEventsTable.cancelGenerationButtonAriaLabel',
   {
     defaultMessage: 'Cancel generation',
+  }
+);
+
+const KNOWLEDGE_INDICATORS_TASK_FAILED_TOAST_TITLE = i18n.translate(
+  'xpack.streams.significantEventsTable.knowledgeIndicatorsTaskFailedToastTitle',
+  {
+    defaultMessage: 'Failed to generate knowledge indicators',
   }
 );
