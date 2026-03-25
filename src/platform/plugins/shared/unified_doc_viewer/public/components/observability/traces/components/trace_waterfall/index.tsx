@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiDelayRender } from '@elastic/eui';
+import { EuiDelayRender, type EuiFlyoutProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
@@ -164,10 +164,32 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
     [setActiveFlyoutType, setActiveSection, setActiveDocId, setActiveDocIndex]
   );
 
-  const onExitFullScreen = useCallback(() => {
-    setShowFullScreenWaterfall(false);
-    clearActiveFlyout();
-  }, [setShowFullScreenWaterfall, clearActiveFlyout]);
+  const onExitFullScreen = useCallback<NonNullable<EuiFlyoutProps['onClose']>>(
+    (event) => {
+      // When the EUI flyout manager cascade-closes flyouts during a Discover
+      // tab switch it fires onClose with a synthetic MouseEvent whose type is
+      // 'navigation'. In that case we must NOT clear the restorable state so
+      // the waterfall can be restored when the user returns to this tab.
+      if (event.type === 'navigation') {
+        return;
+      }
+
+      setShowFullScreenWaterfall(false);
+      clearActiveFlyout();
+    },
+    [setShowFullScreenWaterfall, clearActiveFlyout]
+  );
+
+  const onCloseFlyout = useCallback<NonNullable<EuiFlyoutProps['onClose']>>(
+    (event) => {
+      if (event.type === 'navigation') {
+        return;
+      }
+
+      clearActiveFlyout();
+    },
+    [clearActiveFlyout]
+  );
 
   const actions = useMemo(
     () => [
@@ -195,7 +217,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
           rangeTo={rangeTo}
           dataView={dataView}
           serviceName={serviceName}
-          highlightedSpanId={docId}
+          highlightedSpanId={activeDocId ?? docId}
           scrollToHighlightedOnMount={docId != null}
           docId={activeDocId}
           docIndex={activeDocIndex}
@@ -204,7 +226,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
           skipOpenAnimation={isRestoringRef.current}
           onNodeClick={onNodeClick}
           onErrorClick={onErrorClick}
-          onCloseFlyout={clearActiveFlyout}
+          onCloseFlyout={onCloseFlyout}
           onExitFullScreen={onExitFullScreen}
           skipNextEventReport={isRestoringRef.current}
         />
