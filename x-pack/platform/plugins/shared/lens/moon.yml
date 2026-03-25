@@ -148,6 +148,8 @@ dependsOn:
   - '@kbn/cps-utils'
   - '@kbn/controls-constants'
   - '@kbn/presentation-publishing-schemas'
+  - '@kbn/calculate-auto'
+  - '@kbn/esql-language'
 tags:
   - plugin
   - prod
