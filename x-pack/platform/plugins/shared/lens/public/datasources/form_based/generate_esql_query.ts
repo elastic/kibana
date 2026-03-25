@@ -281,7 +281,8 @@ export function generateEsqlQuery(
       : fullStatsMetricExpression;
 
     // Key must match the STATS output column name: alias if set, else the bare expression.
-    const esAggsIdMapKey = statsColumnAlias ?? fullStatsMetricExpression;
+    // Use the same truthy check as statsMetricFragment so empty string roles map to the bare expression.
+    const esAggsIdMapKey = statsColumnAlias ? statsColumnAlias : fullStatsMetricExpression;
 
     esAggsIdMap[esAggsIdMapKey] = createEsAggsIdMapEntry({
       col,
