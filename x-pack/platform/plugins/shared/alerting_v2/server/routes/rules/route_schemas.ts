@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod/v4';
 
 /**
  * Shared path params schema for routes that accept a single rule ID.
  */
-export const ruleIdParamsSchema = schema.object({
-  id: schema.string({ meta: { description: 'The identifier for the rule.' } }),
+export const ruleIdParamsSchema = z.object({
+  id: z.string().describe('The identifier for the rule.'),
 });

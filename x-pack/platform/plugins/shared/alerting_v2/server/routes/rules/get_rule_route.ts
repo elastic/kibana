@@ -9,8 +9,9 @@ import Boom from '@hapi/boom';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request, Response } from '@kbn/core-di-server';
-import type { TypeOf } from '@kbn/config-schema';
 import type { RouteSecurity } from '@kbn/core-http-server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import type { z } from '@kbn/zod/v4';
 import { ruleResponseSchema } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
@@ -34,7 +35,7 @@ export class GetRuleRoute {
   } as const;
   static validate = {
     request: {
-      params: ruleIdParamsSchema,
+      params: buildRouteValidationWithZod(ruleIdParamsSchema),
     },
     response: {
       200: {
@@ -49,7 +50,7 @@ export class GetRuleRoute {
 
   constructor(
     @inject(Request)
-    private readonly request: KibanaRequest<TypeOf<typeof ruleIdParamsSchema>, unknown, unknown>,
+    private readonly request: KibanaRequest<z.infer<typeof ruleIdParamsSchema>, unknown, unknown>,
     @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {}

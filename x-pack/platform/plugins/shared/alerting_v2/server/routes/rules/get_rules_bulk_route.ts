@@ -6,24 +6,23 @@
  */
 
 import Boom from '@hapi/boom';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request, Response } from '@kbn/core-di-server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { z } from '@kbn/zod/v4';
 import { findRulesResponseSchema } from '@kbn/alerting-v2-schemas';
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
 
-const getRulesBulkQuerySchema = schema.object({
-  ids: schema.maybe(
-    schema.arrayOf(schema.string({ meta: { description: 'A rule identifier.' } }), {
-      minSize: 1,
-      maxSize: 1000,
-      meta: { description: 'A list of rule identifiers to retrieve.' },
-    })
-  ),
+const getRulesBulkQuerySchema = z.object({
+  ids: z
+    .array(z.string().describe('A rule identifier.'))
+    .min(1)
+    .max(1000)
+    .optional()
+    .describe('A list of rule identifiers to retrieve.'),
 });
 
 @injectable()
@@ -42,7 +41,7 @@ export class BulkGetRulesRoute {
   } as const;
   static validate = {
     request: {
-      query: getRulesBulkQuerySchema,
+      query: buildRouteValidationWithZod(getRulesBulkQuerySchema),
     },
     response: {
       200: {
@@ -57,7 +56,7 @@ export class BulkGetRulesRoute {
 
   constructor(
     @inject(Request)
-    private readonly request: KibanaRequest<unknown, TypeOf<typeof getRulesBulkQuerySchema>>,
+    private readonly request: KibanaRequest<unknown, z.infer<typeof getRulesBulkQuerySchema>>,
     @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {}

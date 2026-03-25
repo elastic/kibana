@@ -9,8 +9,9 @@ import Boom from '@hapi/boom';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request, Response } from '@kbn/core-di-server';
-import type { TypeOf } from '@kbn/config-schema';
 import type { RouteSecurity } from '@kbn/core-http-server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import type { z } from '@kbn/zod/v4';
 
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -33,7 +34,7 @@ export class DeleteRuleRoute {
   } as const;
   static validate = {
     request: {
-      params: ruleIdParamsSchema,
+      params: buildRouteValidationWithZod(ruleIdParamsSchema),
     },
     response: {
       204: {
@@ -48,7 +49,7 @@ export class DeleteRuleRoute {
   constructor(
     @inject(Request)
     private readonly request: KibanaRequest<
-      TypeOf<typeof ruleIdParamsSchema>,
+      z.infer<typeof ruleIdParamsSchema>,
       unknown,
       unknown,
       'delete'
