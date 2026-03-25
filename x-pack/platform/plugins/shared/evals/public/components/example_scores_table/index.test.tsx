@@ -250,7 +250,7 @@ describe('ExampleScoresTable', () => {
     });
     fireEvent.click(viewTraceButton);
 
-    expect(onTraceClick).toHaveBeenCalledWith('eval-trace-abc123');
+    expect(onTraceClick).toHaveBeenCalledWith('eval-trace-abc123', 'example-with-eval-trace');
   });
 
   it('does not render accordion when no details are available', () => {

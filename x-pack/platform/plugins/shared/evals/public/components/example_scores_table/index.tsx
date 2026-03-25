@@ -363,7 +363,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
                 key={getScoreKey(scoreDoc, row.exampleId)}
                 score={scoreDoc}
                 exampleId={row.exampleId}
-                onTraceClick={onTraceClick}
+                onTraceClick={(traceId) => onTraceClick(traceId, row.exampleId)}
               />
             ))}
           </div>
