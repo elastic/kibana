@@ -27,6 +27,7 @@ import {
   useChromeStyle,
   useIsChromeVisible,
   useSidebarWidth,
+  useSideNavWidth,
 } from '@kbn/core-chrome-browser-hooks';
 import { useGlobalFooter, useHasHeaderBanner } from '@kbn/core-chrome-browser-hooks/internal';
 import { GridLayoutGlobalStyles } from './grid_global_app_style';
@@ -88,10 +89,12 @@ export class GridLayout implements LayoutService {
       const hasAppMenu = useHasAppMenu();
       const footer = useGlobalFooter();
       const sidebarWidth = useSidebarWidth();
+      const navigationWidth = useSideNavWidth();
 
       const layoutConfig = {
         ...layoutConfigs[chromeStyle],
         sidebarWidth,
+        navigationWidth,
       };
 
       // Assign main layout parts first

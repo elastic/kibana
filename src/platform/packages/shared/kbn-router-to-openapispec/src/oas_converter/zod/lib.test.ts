@@ -692,6 +692,83 @@ describe('zod v4', () => {
       expect(outputStr).not.toContain('x-kbn-oas-extensions');
     });
 
+    test('maps openapi availability to x-state for inline fields', () => {
+      const body = z4.object({
+        name: z4.string().meta({
+          openapi: {
+            availability: {
+              stability: 'stable',
+              since: '9.4.0',
+            },
+          },
+        }),
+      });
+
+      const result = convert(body as any);
+
+      expect(result.schema).toMatchObject({
+        type: 'object',
+        properties: {
+          name: {
+            type: 'string',
+            'x-state': 'Generally available; added in 9.4.0',
+          },
+        },
+      });
+
+      const outputStr = JSON.stringify(result);
+      expect(outputStr).not.toContain('x-kbn-oas-extensions');
+      expect(outputStr).not.toContain('"availability"');
+    });
+
+    test('maps openapi availability to x-state for component schemas', () => {
+      const tag = z4.object({ id: z4.string(), label: z4.string() }).meta({
+        id: 'TagWithAvailability',
+        openapi: {
+          availability: {
+            stability: 'beta',
+            since: '9.4.0',
+          },
+        },
+      });
+
+      const result = convert(tag as any);
+
+      expect(result.shared.TagWithAvailability).toMatchObject({
+        type: 'object',
+        'x-state': 'Beta; added in 9.4.0',
+      });
+
+      const outputStr = JSON.stringify(result);
+      expect(outputStr).not.toContain('x-kbn-oas-extensions');
+      expect(outputStr).not.toContain('"availability"');
+    });
+
+    test('omits availability since from x-state in serverless mode', () => {
+      const body = z4.object({
+        name: z4.string().meta({
+          openapi: {
+            availability: {
+              stability: 'stable',
+              since: '9.4.0',
+            },
+          },
+        }),
+      });
+
+      const result = convert(body as any, { env: { serverless: true } });
+
+      expect(result.schema).toMatchObject({
+        type: 'object',
+        properties: {
+          name: {
+            type: 'string',
+            'x-state': 'Generally available',
+          },
+        },
+      });
+    });
+
     describe('z4.discriminatedUnion auto-discriminator', () => {
       test('auto-emits discriminator with mapping when all variants have meta({ id })', () => {
         const wired = z4.object({ type: z4.literal('wired'), name: z4.string() }).meta({

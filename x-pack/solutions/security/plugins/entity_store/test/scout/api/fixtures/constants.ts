@@ -30,6 +30,7 @@ export const ENTITY_STORE_ROUTES = {
   FORCE_CCS_EXTRACT_TO_UPDATES: (entityType: string) =>
     `internal/security/entity_store/${entityType}/force_ccs_extract_to_updates`,
   FORCE_HISTORY_SNAPSHOT: 'internal/security/entity_store/force_history_snapshot',
+  CRUD_GET: 'internal/security/entity_store/entities',
   CRUD_UPSERT: (entityType: string) => `internal/security/entity_store/entities/${entityType}`,
   CRUD_UPSERT_BULK: 'internal/security/entity_store/entities/bulk',
   CRUD_DELETE: 'internal/security/entity_store/entities/',

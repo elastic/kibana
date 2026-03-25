@@ -8,8 +8,9 @@
 function createRuleMonitoringServiceMock() {
   return jest.fn().mockImplementation(() => {
     return {
+      addFrameworkMetrics: jest.fn(),
       addHistory: jest.fn(),
-      getLastRunMetricsSetters: jest.fn(),
+      getSetters: jest.fn(),
       getMonitoring: jest.fn(),
       setLastRunMetricsDuration: jest.fn(),
       setMonitoring: jest.fn(),
@@ -20,12 +21,9 @@ function createRuleMonitoringServiceMock() {
 function createPublicRuleMonitoringServiceMock() {
   return jest.fn().mockImplementation(() => {
     return {
-      setLastRunMetricsGapDurationS: jest.fn(),
-      setLastRunMetricsTotalAlertsCreated: jest.fn(),
-      setLastRunMetricsTotalAlertsDetected: jest.fn(),
-      setLastRunMetricsTotalIndexingDurationMs: jest.fn(),
-      setLastRunMetricsTotalSearchDurationMs: jest.fn(),
-      setLastRunMetricsGapRange: jest.fn(),
+      setMetric: jest.fn(),
+      setMetrics: jest.fn(),
+      clearGapRange: jest.fn(),
     };
   });
 }
