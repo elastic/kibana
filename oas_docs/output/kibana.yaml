@@ -67505,6 +67505,10 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                field_descriptions:
+                  additionalProperties:
+                    type: string
+                  type: object
                 query:
                   additionalProperties: false
                   type: object
@@ -80475,6 +80479,10 @@ components:
           properties:
             description:
               type: string
+            field_descriptions:
+              additionalProperties:
+                type: string
+              type: object
             query:
               additionalProperties: false
               type: object
