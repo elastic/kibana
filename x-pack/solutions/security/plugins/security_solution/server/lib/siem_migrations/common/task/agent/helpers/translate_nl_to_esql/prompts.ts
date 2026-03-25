@@ -48,6 +48,8 @@ Esql Query:
 
 ## Translation Summary
 
+Detailed summary of translations should be included here with following areas covered.
+
 ### What was Translated
 
 Explain here in detail which parts of the Natural Language query were successfully translated into ESQL, and how. If there are any specific ESQL commands or syntax that were used to achieve the translation, explain that as well.
@@ -55,6 +57,10 @@ Explain here in detail which parts of the Natural Language query were successful
 ### What could not be Translated
 
 Explain here in detail which parts of the Natural Language query could not be translated into ESQL, and why. If there are any specific limitations or challenges that prevented the translation, explain that as well.
+
+### Recommendations
+
+Include any recommendations that user can follow to improve the query coverage.
 
 </example_output>
 `,
@@ -73,7 +79,6 @@ Explain here in detail which parts of the Natural Language query could not be tr
 
 export const NL_TO_ESQL_INDEX_PATTERN_PROMPT = ChatPromptTemplate.fromMessages<{
   index_pattern: string;
-  fields_metadata: string;
   documentation?: string;
 }>([
   [
@@ -84,7 +89,6 @@ export const NL_TO_ESQL_INDEX_PATTERN_PROMPT = ChatPromptTemplate.fromMessages<{
     Below you also find the documentation which contain some sample events which index may contain. Use that information as well to guide your translation.
 
     Index Pattern: {index_pattern}
-    Fields Metadata: {fields_metadata}
     Documentation: {documentation}
 `,
   ],
