@@ -206,7 +206,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
     createRuleset({
       rulesetId,
       forceWrite: true,
-      rules,
+      rules: unfilteredRules,
     });
   };
 

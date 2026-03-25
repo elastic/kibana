@@ -12,8 +12,7 @@ import {
   CONTROL_WIDTH_LARGE,
   CONTROL_WIDTH_MEDIUM,
   CONTROL_WIDTH_SMALL,
-  DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROL_WIDTH,
+  DEFAULT_PINNED_CONTROL_STATE,
   ESQL_CONTROL,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
@@ -30,20 +29,18 @@ export const controlWidthSchema = schema.oneOf(
     schema.literal(CONTROL_WIDTH_LARGE),
   ],
   {
-    defaultValue: DEFAULT_CONTROL_WIDTH,
+    defaultValue: DEFAULT_PINNED_CONTROL_STATE.width as typeof CONTROL_WIDTH_MEDIUM,
     meta: { description: 'Minimum width of the control panel in the control group.' },
   }
 );
 
 export const pinnedControlSchema = schema.object({
   uid: schema.maybe(schema.string({ meta: { description: 'The unique ID of the control' } })),
-  width: schema.maybe(controlWidthSchema),
-  grow: schema.maybe(
-    schema.boolean({
-      defaultValue: DEFAULT_CONTROL_GROW,
-      meta: { description: 'Expand width of the control panel to fit available space.' },
-    })
-  ),
+  width: controlWidthSchema,
+  grow: schema.boolean({
+    defaultValue: DEFAULT_PINNED_CONTROL_STATE.grow,
+    meta: { description: 'Expand width of the control panel to fit available space.' },
+  }),
 });
 
 export const controlsGroupSchema = schema.arrayOf(

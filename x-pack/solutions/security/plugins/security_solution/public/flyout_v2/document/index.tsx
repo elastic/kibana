@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { ResolverCellActionRenderer } from '../../resolver/types';
+import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { Header } from './header';
 import { OverviewTab } from './tabs/overview_tab';
 
@@ -21,7 +21,7 @@ export interface DocumentFlyoutProps {
   /**
    * Cell action renderer for the analyzer
    */
-  renderCellActions: ResolverCellActionRenderer;
+  renderCellActions: CellActionRenderer;
 }
 
 /**

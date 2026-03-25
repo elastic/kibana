@@ -20,7 +20,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { analyzerCellActionRenderer } from '../../../../flyout_v2/analyzer/components/cell_actions';
+import { cellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
@@ -210,7 +210,7 @@ export const AnalyzeGraph: FC = () => {
         indices={selectedPatterns}
         shouldUpdate={shouldUpdate}
         filters={filters}
-        renderCellActions={analyzerCellActionRenderer}
+        renderCellActions={cellActionRenderer}
       />
     </div>
   );
