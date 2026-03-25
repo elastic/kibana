@@ -31,6 +31,10 @@ export class OverlaysPage {
       .locator('[data-test-subj="euiFlyoutCloseButton"]');
   }
 
+  public get docViewerFlyoutCloseButton() {
+    return this.docViewerFlyout.locator('[data-test-subj="euiFlyoutCloseButton"]');
+  }
+
   public async openNewsfeedFlyout() {
     await this.newsfeedButton.click();
     await expect(this.newsfeedFlyout).toBeVisible();
@@ -39,5 +43,10 @@ export class OverlaysPage {
   public async closeNewsfeedFlyout() {
     await this.newsfeedFlyoutCloseButton.click();
     await expect(this.newsfeedFlyout).toBeHidden();
+  }
+
+  public async closeDocViewerFlyout() {
+    await this.docViewerFlyoutCloseButton.click();
+    await expect(this.docViewerFlyout).toBeHidden();
   }
 }

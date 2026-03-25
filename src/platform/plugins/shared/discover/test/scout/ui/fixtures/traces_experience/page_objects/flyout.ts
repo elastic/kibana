@@ -50,7 +50,10 @@ export interface TracesFlyout {
 
   readonly waterfallFlyout: {
     readonly container: Locator;
+    /** Present when managed flyout history has entries (e.g. after opening a nested doc flyout). */
     readonly backButton: Locator;
+    /** Always present on managed flyouts; use to dismiss the timeline when Back is hidden (EUI 114+ scoped history). */
+    readonly closeButton: Locator;
     getWaterfallItem(name: string): {
       readonly row: Locator;
       readonly content: Locator;
@@ -132,6 +135,7 @@ export function createTracesFlyout(page: ScoutPage): TracesFlyout {
       return {
         container: timelineFlyout,
         backButton: timelineFlyout.locator('[data-test-subj="euiFlyoutMenuBackButton"]'),
+        closeButton: timelineFlyout.locator('[data-test-subj="euiFlyoutCloseButton"]'),
         getWaterfallItem(name: string) {
           const row = timelineFlyout
             .locator('[data-test-subj="traceItemRowWrapper"]')
