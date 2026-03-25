@@ -114,8 +114,8 @@ const translateSingleFilter = (filter: Filter, negate: boolean): string | null =
 };
 
 const wrapWithNot = (expression: string | null, negate: boolean): string | null => {
-  if (expression === null) {
-    return null;
+  if (expression === null || expression === '') {
+    return expression;
   }
   return negate ? `NOT (${expression})` : expression;
 };
@@ -239,7 +239,7 @@ const translateQueryStringFilter = (filter: QueryStringFilter): string | null =>
     return null;
   }
 
-  return `QSTR("""${queryString}""")`;
+  return `QSTR(${escapeStringValue(queryString)})`;
 };
 
 const escapeFieldName = (fieldName: string): string => {

@@ -347,7 +347,7 @@ describe('convertFiltersToESQLExpression', () => {
         query: { query_string: { query: 'status:error' } },
       };
       const result = convertFiltersToESQLExpression([filter]);
-      expect(result.esqlExpression).toBe('QSTR("""status:error""")');
+      expect(result.esqlExpression).toBe('QSTR("status:error")');
     });
 
     it('should handle negated query_string filter', () => {
@@ -356,7 +356,7 @@ describe('convertFiltersToESQLExpression', () => {
         query: { query_string: { query: 'status:error' } },
       };
       const result = convertFiltersToESQLExpression([filter]);
-      expect(result.esqlExpression).toBe('NOT (QSTR("""status:error"""))');
+      expect(result.esqlExpression).toBe('NOT (QSTR("status:error"))');
     });
   });
 
