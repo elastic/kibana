@@ -146,7 +146,8 @@ export const ExecutionResultsPocTable: React.FC<ExecutionResultsPocTableProps> =
           tooltipContent={i18n.COLUMN_DURATION_TOOLTIP}
         />
       ),
-      render: (value: number) => <RuleDurationFormat duration={value} />,
+      render: (value: number | null) =>
+        value != null ? <RuleDurationFormat duration={value} /> : <span>{'—'}</span>,
       width: '10%',
     },
     {
@@ -214,7 +215,7 @@ export const ExecutionResultsPocTable: React.FC<ExecutionResultsPocTableProps> =
 
   const items = useMemo(() => {
     const startIndex = pageIndex * pageSize;
-    return mockResponse.executions.slice(startIndex, startIndex + pageSize);
+    return mockResponse.data.slice(startIndex, startIndex + pageSize);
   }, [pageIndex, pageSize]);
 
   return (
