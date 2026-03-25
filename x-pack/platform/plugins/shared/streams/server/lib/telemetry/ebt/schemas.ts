@@ -314,6 +314,24 @@ const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps
       description: 'The state of the features identification task (success, failure, or canceled)',
     },
   },
+  filters_capped: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the filters were capped',
+    },
+  },
+  total_filters: {
+    type: 'long',
+    _meta: {
+      description: 'The total number of filters available in features',
+    },
+  },
+  has_filtered_documents: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the sample query found documents after filters were applied',
+    },
+  },
 };
 
 export {

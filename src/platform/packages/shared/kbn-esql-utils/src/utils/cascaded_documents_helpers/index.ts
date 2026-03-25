@@ -253,10 +253,11 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
 
   Object.values(summarizedStatsCommand.aggregates).forEach((aggregate) => {
     const aggregateFieldDefinition = getFieldDefinitionFromArg(aggregate.arg);
+    const aggregationName =
+      (aggregateFieldDefinition as ESQLFunction).operator?.name ?? aggregateFieldDefinition.text;
     appliedFunctions.push({
       identifier: removeBackticks(aggregate.field), // we remove backticks to have a clean identifier that gets displayed in the UI
-      aggregation:
-        (aggregateFieldDefinition as ESQLFunction).operator?.name ?? aggregateFieldDefinition.text,
+      aggregation: aggregationName,
     });
   });
 

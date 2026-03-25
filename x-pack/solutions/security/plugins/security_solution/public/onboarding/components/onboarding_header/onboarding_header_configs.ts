@@ -5,6 +5,7 @@
  * 2.0.
  */
 import {
+  ALERTS_UI_DETECTIONS_PRIVILEGE,
   RULES_UI_DETECTIONS_PRIVILEGE,
   RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
@@ -22,7 +23,7 @@ export const defaultHeaderConfig: HeaderConfig = {
   getTitle: i18n.ONBOARDING_PAGE_TITLE,
   subTitle: i18n.ONBOARDING_PAGE_SUBTITLE,
   description: i18n.ONBOARDING_PAGE_DESCRIPTION,
-  capabilitiesRequired: [RULES_UI_DETECTIONS_PRIVILEGE],
+  capabilitiesRequired: [RULES_UI_DETECTIONS_PRIVILEGE, ALERTS_UI_DETECTIONS_PRIVILEGE],
 };
 
 export const headerConfig: HeaderConfig[] = [
