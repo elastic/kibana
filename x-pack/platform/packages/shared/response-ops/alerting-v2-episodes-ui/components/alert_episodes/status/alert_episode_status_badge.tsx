@@ -10,17 +10,17 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-plugin/server/resources/alert_events';
 
-export interface AlertingEpisodeStatusBadgeProps {
+export interface AlertEpisodeStatusBadgeProps {
   status: AlertEpisodeStatus;
 }
 
 /**
  * Renders a badge indicating the status of an alerting episode.
  */
-export const AlertingEpisodeStatusBadge = ({ status }: AlertingEpisodeStatusBadgeProps) => {
+export const AlertEpisodeStatusBadge = ({ status }: AlertEpisodeStatusBadgeProps) => {
   if (status === 'inactive') {
     return (
-      <EuiBadge color="success" iconType="checkCircleFill">
+      <EuiBadge color="success">
         {i18n.translate('xpack.alertingV2EpisodesUi.inactiveStatusBadgeLabel', {
           defaultMessage: 'Inactive',
         })}
@@ -29,7 +29,7 @@ export const AlertingEpisodeStatusBadge = ({ status }: AlertingEpisodeStatusBadg
   }
   if (status === 'pending') {
     return (
-      <EuiBadge color="warning" iconType="contrastFill">
+      <EuiBadge color="warning">
         {i18n.translate('xpack.alertingV2EpisodesUi.pendingStatusBadgeLabel', {
           defaultMessage: 'Pending',
         })}
@@ -38,7 +38,7 @@ export const AlertingEpisodeStatusBadge = ({ status }: AlertingEpisodeStatusBadg
   }
   if (status === 'active') {
     return (
-      <EuiBadge color="danger" iconType="warningFill">
+      <EuiBadge color="danger">
         {i18n.translate('xpack.alertingV2EpisodesUi.activeStatusBadgeLabel', {
           defaultMessage: 'Active',
         })}
@@ -47,7 +47,7 @@ export const AlertingEpisodeStatusBadge = ({ status }: AlertingEpisodeStatusBadg
   }
   if (status === 'recovering') {
     return (
-      <EuiBadge color="primary" iconType="undo">
+      <EuiBadge color="primary">
         {i18n.translate('xpack.alertingV2EpisodesUi.recoveringStatusBadgeLabel', {
           defaultMessage: 'Recovering',
         })}
@@ -55,7 +55,7 @@ export const AlertingEpisodeStatusBadge = ({ status }: AlertingEpisodeStatusBadg
     );
   }
   return (
-    <EuiBadge color="hollow" iconType="question">
+    <EuiBadge color="hollow">
       {i18n.translate('xpack.alertingV2EpisodesUi.unknownStatusBadgeLabel', {
         defaultMessage: 'Unknown',
       })}

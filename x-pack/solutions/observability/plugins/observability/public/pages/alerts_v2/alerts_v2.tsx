@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiCode,
   EuiFlexGroup,
@@ -29,28 +30,50 @@ import { css } from '@emotion/react';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-plugin/server/resources/alert_events';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
 import { pagesToDatatableRecords } from '@kbn/alerting-v2-episodes-ui/utils/pages_to_datatable_records';
-import { AlertingEpisodeStatusBadge } from '@kbn/alerting-v2-episodes-ui/components/alerting_episode_status_badge';
-import { AlertingEpisodeTags } from '@kbn/alerting-v2-episodes-ui/components/alerting_episode_tags';
-import { AcknowledgeActionButton } from '@kbn/alerting-v2-episodes-ui/components/acknowledge_action_button';
-import { SnoozeActionButton } from '@kbn/alerting-v2-episodes-ui/components/snooze_action_button';
-import { DeactivateActionButton } from '@kbn/alerting-v2-episodes-ui/components/deactivate_action_button';
 import { useAlertingRulesIndex } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_index';
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
+import { AlertEpisodeStatusCell } from '@kbn/alerting-v2-episodes-ui/components/alert_episodes/status/alert_episode_status_cell';
+import { AlertEpisodeActionsCell } from '@kbn/alerting-v2-episodes-ui/components/alert_episodes/actions/alert_episode_actions_cell';
+import { AlertEpisodeTags } from '@kbn/alerting-v2-episodes-ui/components/alert_episodes/actions/alert_episode_tags';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 
 const PAGE_SIZE = 50;
 
-/** Narrow columns so `rule.id` / time keep flexible width */
 const ALERTS_V2_TABLE_SETTINGS: UnifiedDataTableSettings = {
   columns: {
     duration: { width: 100 },
-    'episode.status': { width: 128 },
-    state: { width: 280 },
-    notify: { width: 80 },
+    actions: { width: 320 },
+    'episode.status': { width: 220 },
   },
 };
+
+const getTableCss = (euiTheme: EuiThemeComputed) => css`
+  height: 100%;
+  border-radius: ${euiTheme.border.radius.medium};
+  border: ${euiTheme.border.thin};
+  overflow: hidden;
+
+  & .unifiedDataTable__cellValue {
+    font-family: unset;
+  }
+
+  & .euiDataGridRowCell__content {
+    display: flex;
+    align-items: center;
+  }
+
+  & .euiDataGridRowCell[data-gridcell-column-id='select'] .euiDataGridRowCell__content {
+    align-items: center;
+    justify-content: flex-start;
+    height: 100%;
+  }
+
+  & .euiDataGridRowCell[data-gridcell-column-id='actions'] .euiDataGridRowCell__content {
+    justify-content: flex-end;
+  }
+`;
 
 function EmptyToolbar() {
   return <></>;
@@ -63,13 +86,12 @@ export function AlertsV2Page() {
 
   const [sort] = useState<SortOrder[]>([['@timestamp', 'desc']]);
   const [columns, setColumns] = useState<string[]>([
+    'episode.status',
     '@timestamp',
     'rule.id',
-    'episode.status',
-    'notify',
     'duration',
     'tags',
-    'state',
+    'actions',
   ]);
   const [rowHeight, setRowHeight] = useState(2);
 
@@ -161,16 +183,7 @@ export function AlertsV2Page() {
               <UnifiedDataTable
                 ariaLabelledBy="alertingEpisodesTableAriaLabel"
                 settings={ALERTS_V2_TABLE_SETTINGS}
-                css={css`
-                  height: 100%;
-                  border-radius: ${euiTheme.border.radius.medium};
-                  border: ${euiTheme.border.thin};
-                  overflow: hidden;
-
-                  & .unifiedDataTable__cellValue {
-                    font-family: unset;
-                  }
-                `}
+                css={getTableCss(euiTheme)}
                 gridStyleOverride={{
                   stripes: false,
                   cellPadding: 'l',
@@ -183,19 +196,10 @@ export function AlertsV2Page() {
                 canDragAndDropColumns
                 showTimeCol={!!dataView.timeFieldName}
                 customGridColumnsConfiguration={{
-                  state: ({ column }) => ({
+                  actions: ({ column }) => ({
                     ...column,
-                    displayAsText: i18n.translate(
-                      'xpack.observability.alertsV2.columns.currentState',
-                      {
-                        defaultMessage: 'Current state',
-                      }
-                    ),
-                  }),
-                  notify: ({ column }) => ({
-                    ...column,
-                    displayAsText: i18n.translate('xpack.observability.alertsV2.columns.notify', {
-                      defaultMessage: 'Notify',
+                    displayAsText: i18n.translate('xpack.observability.alertsV2.columns.actions', {
+                      defaultMessage: 'Actions',
                     }),
                   }),
                   tags: ({ column }) => ({
@@ -208,40 +212,21 @@ export function AlertsV2Page() {
                 externalCustomRenderers={{
                   'episode.status': (props) => {
                     const status = props.row.flattened[props.columnId] as AlertEpisodeStatus;
-                    return <AlertingEpisodeStatusBadge status={status} />;
-                  },
-                  state: (props) => {
                     const episodeId = props.row.flattened['episode.id'] as string;
                     const episodeAction = actionsMap.get(episodeId);
-                    return (
-                      <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
-                        <EuiFlexItem grow={false}>
-                          <DeactivateActionButton
-                            lastDeactivateAction={episodeAction?.last_deactivate_action ?? null}
-                          />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <AcknowledgeActionButton
-                            lastAckAction={episodeAction?.last_ack_action ?? null}
-                          />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    );
+
+                    return <AlertEpisodeStatusCell status={status} episodeAction={episodeAction} />;
                   },
-                  notify: (props) => {
+                  actions: (props) => {
                     const episodeId = props.row.flattened['episode.id'] as string;
                     const episodeAction = actionsMap.get(episodeId);
-                    return (
-                      <SnoozeActionButton
-                        lastSnoozeAction={episodeAction?.last_snooze_action ?? null}
-                      />
-                    );
+                    return <AlertEpisodeActionsCell episodeAction={episodeAction} />;
                   },
                   tags: (props) => {
                     const episodeId = props.row.flattened['episode.id'] as string;
                     const episodeAction = actionsMap.get(episodeId);
 
-                    return <AlertingEpisodeTags tags={episodeAction?.tags} />;
+                    return <AlertEpisodeTags tags={episodeAction?.tags ?? []} />;
                   },
                   'rule.id': (props) => {
                     if (!Object.keys(rulesIndex).length && isLoadingRules) {

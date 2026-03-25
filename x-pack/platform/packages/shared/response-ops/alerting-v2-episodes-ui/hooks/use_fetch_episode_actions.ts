@@ -11,14 +11,14 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { EpisodeAction } from '../types/episode_action';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 
-const ALERT_ACTIONS_DATA_STREAM = '.alerting-actions';
+const ALERT_ACTIONS_DATA_STREAM = '.alert-actions';
 
 const escapeEsqlString = (value: string): string =>
   value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
-const tagsFromRow = (value: unknown): string[] | null => {
+const tagsFromRow = (value: unknown): string[] => {
   if (value == null) {
-    return null;
+    return [];
   }
   if (typeof value === 'string') {
     return [value];
@@ -26,7 +26,7 @@ const tagsFromRow = (value: unknown): string[] | null => {
   if (Array.isArray(value)) {
     return value as string[];
   }
-  return null;
+  return [];
 };
 
 const buildBulkGetAlertActionsQuery = (episodeIds: string[]): string => {
@@ -65,12 +65,12 @@ export const useFetchEpisodeActions = ({ episodeIds, services }: UseFetchEpisode
 
       return result.rows.map(
         (row): EpisodeAction => ({
-          episode_id: row.episode_id as string,
-          rule_id: (row.rule_id as string) ?? null,
-          group_hash: (row.group_hash as string) ?? null,
-          last_ack_action: (row.last_ack_action as string) ?? null,
-          last_deactivate_action: (row.last_deactivate_action as string) ?? null,
-          last_snooze_action: (row.last_snooze_action as string) ?? null,
+          episodeId: row.episode_id as string,
+          ruleId: (row.rule_id as string) ?? null,
+          groupHash: (row.group_hash as string) ?? null,
+          lastAckAction: (row.last_ack_action as string) ?? null,
+          lastDeactivateAction: (row.last_deactivate_action as string) ?? null,
+          lastSnoozeAction: (row.last_snooze_action as string) ?? null,
           tags: tagsFromRow(row.tags),
         })
       );
@@ -83,11 +83,11 @@ export const useFetchEpisodeActions = ({ episodeIds, services }: UseFetchEpisode
     const map = new Map<string, EpisodeAction>();
     if (data) {
       for (const action of data) {
-        map.set(action.episode_id, action);
+        map.set(action.episodeId, action);
       }
     }
     return map;
   }, [data]);
 
-  return { data: data ?? [], actionsMap, isLoading };
+  return { actionsMap, isLoading };
 };

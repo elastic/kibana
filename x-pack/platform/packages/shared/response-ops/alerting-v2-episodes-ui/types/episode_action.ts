@@ -6,11 +6,11 @@
  */
 
 export interface EpisodeAction {
-  episode_id: string;
-  rule_id: string | null;
-  group_hash: string | null;
-  last_ack_action: string | null;
-  last_deactivate_action: string | null;
-  last_snooze_action: string | null;
-  tags: string[] | null;
+  episodeId: string;
+  ruleId: string | null;
+  groupHash: string | null;
+  lastAckAction: string | null;
+  lastDeactivateAction: string | null;
+  lastSnoozeAction: string | null;
+  tags: string[];
 }

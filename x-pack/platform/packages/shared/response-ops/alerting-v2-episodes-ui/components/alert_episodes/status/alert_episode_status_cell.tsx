@@ -1,0 +1,42 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { AlertEpisodeStatus } from '@kbn/alerting-v2-plugin/server/resources/alert_events';
+import type { EpisodeAction } from '../../../types/episode_action';
+import { AlertEpisodeStatusBadge } from './alert_episode_status_badge';
+
+export interface AlertEpisodeStatusCellProps {
+  status: AlertEpisodeStatus;
+  episodeAction?: EpisodeAction;
+}
+
+export function AlertEpisodeStatusCell({ status, episodeAction }: AlertEpisodeStatusCellProps) {
+  const isAcknowledged = episodeAction?.lastAckAction === 'ack';
+  const isSnoozed = episodeAction?.lastSnoozeAction === 'snooze';
+
+  return (
+    <EuiFlexGroup gutterSize="s" responsive={true} wrap={false} alignItems="center">
+      <EuiFlexItem grow={false}>
+        <AlertEpisodeStatusBadge
+          status={episodeAction?.lastDeactivateAction === 'deactivate' ? 'inactive' : status}
+        />
+      </EuiFlexItem>
+      {isSnoozed && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge iconType="bellSlash" />
+        </EuiFlexItem>
+      )}
+      {isAcknowledged && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge iconType="checkCircle" />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+}
