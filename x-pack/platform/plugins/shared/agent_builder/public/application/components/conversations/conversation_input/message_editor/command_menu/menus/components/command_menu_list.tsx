@@ -88,8 +88,9 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
       scrollIndexIntoView(nextIndex);
     };
     const handleSelectOption = () => {
-      if (options.length > 0) {
-        onSelect(options[activeIndexRef.current]);
+      const option = options[activeIndexRef.current];
+      if (option) {
+        onSelect(option);
       }
     };
 
