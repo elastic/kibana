@@ -18,7 +18,7 @@ export function mergeTags(
     .filter(({ document }) => Array.isArray(document.tags))
     .map(({ document }) => document.tags as OpenAPIV3.TagObject[]);
 
-  const merged = mergeArrays(tagsArrayOfArrays);
+  const merged = dedupeTagsByName(mergeArrays(tagsArrayOfArrays));
 
   if (merged.length === 0) {
     return;
@@ -27,6 +27,22 @@ export function mergeTags(
   // To streamline API endpoints categorization it's expected that
   // tags are sorted alphabetically by name
   merged.sort((a, b) => getTagName(a).localeCompare(getTagName(b)));
+
+  return merged;
+}
+
+function dedupeTagsByName(tags: OpenAPIV3.TagObject[]): OpenAPIV3.TagObject[] {
+  const merged: OpenAPIV3.TagObject[] = [];
+  const seenNames = new Set<string>();
+
+  for (const tag of tags) {
+    if (seenNames.has(tag.name)) {
+      continue;
+    }
+
+    merged.push(tag);
+    seenNames.add(tag.name);
+  }
 
   return merged;
 }
