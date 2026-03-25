@@ -764,8 +764,8 @@ export const QueryBarTopRow = React.memo(
           typeof isDisabled === 'object' && isDisabled.display !== undefined;
         datePicker = (
           <DateRangePicker
+            data-test-subj={`${props.dataTestSubj}-dateRangePicker`}
             className="kbnQueryBar__datePicker"
-            data-test-subj={props.dataTestSubj}
             value={noTimeFieldNameDisabled ? strings.getDisabledDatePickerLabel() : dateRangeValue}
             onChange={onDateRangeChange}
             onInputChange={onDateRangeInputChange}
