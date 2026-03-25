@@ -267,10 +267,6 @@ export const INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION =
 /** The default value for the included data stream namespaces setting (empty = no filter) */
 export const DATA_STREAM_NAMESPACES_DEFAULT_SETTING: string[] = [];
 
-/** This Kibana Advanced Setting allows users to enable/disable the Graph Visualizations for alerts and events */
-export const ENABLE_GRAPH_VISUALIZATION_SETTING =
-  'securitySolution:enableGraphVisualization' as const;
-
 /** This Kibana Advanced Setting allows users to enable/disable the Asset Inventory feature */
 export const ENABLE_ASSET_INVENTORY_SETTING = 'securitySolution:enableAssetInventory' as const;
 
