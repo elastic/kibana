@@ -69,11 +69,7 @@ export const AlertHeaderTitle = memo(() => {
           />
         </EuiLink>
       ) : (
-        <FlyoutTitle
-          title={title}
-          iconType={'warning'}
-          data-test-subj={HEADER_TITLE_TEST_ID}
-        />
+        <FlyoutTitle title={title} iconType={'warning'} data-test-subj={HEADER_TITLE_TEST_ID} />
       ),
     [title, href]
   );
