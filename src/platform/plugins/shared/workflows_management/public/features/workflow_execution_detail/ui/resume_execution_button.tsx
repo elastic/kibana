@@ -79,7 +79,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
       }
       setIsSubmitting(true);
       try {
-        await http.post(`/api/workflowExecutions/${executionId}/resume`, {
+        await http.post(`/api/workflows/executions/${executionId}/resume`, {
           body: JSON.stringify({ input: stepInputs }),
         });
         notifications?.toasts.addSuccess({
