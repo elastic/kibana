@@ -714,7 +714,7 @@ describe('AutomaticImportSetupService', () => {
       );
     });
 
-    it('throws when ingest pipeline is missing even if completed', async () => {
+    it('returns empty pipeline and field_mapping when ingest pipeline is missing but completed', async () => {
       const mockGetDataStream = jest.fn().mockResolvedValue({
         attributes: {
           job_info: { status: 'completed' },
@@ -726,9 +726,11 @@ describe('AutomaticImportSetupService', () => {
         getDataStream: mockGetDataStream,
       };
 
-      await expect(service.getDataStreamResults('integration-1', 'ds-1')).rejects.toThrow(
-        'has no ingest pipeline results'
-      );
+      await expect(service.getDataStreamResults('integration-1', 'ds-1')).resolves.toEqual({
+        ingest_pipeline: {},
+        field_mapping: [],
+        results: [{ a: 1 }],
+      });
     });
   });
 
