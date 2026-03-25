@@ -21,7 +21,6 @@ import { SettingsPageObject } from './settings_page';
 import { SharePageObject } from './share_page';
 import { LoginPageObject } from './login_page';
 import { TimePickerPageObject } from './time_picker';
-import { TimelionPageObject } from './timelion_page';
 import { VisualBuilderPageObject } from './visual_builder_page';
 import { VisualizePageObject } from './visualize_page';
 import { VisualizeEditorPageObject } from './visualize_editor_page';
@@ -65,7 +64,6 @@ export const pageObjects = {
   solutionNavigation: SolutionNavigationProvider,
   legacyDataTableVis: LegacyDataTableVisPageObject,
   login: LoginPageObject,
-  timelion: TimelionPageObject,
   timePicker: TimePickerPageObject,
   visualBuilder: VisualBuilderPageObject,
   visualize: VisualizePageObject,

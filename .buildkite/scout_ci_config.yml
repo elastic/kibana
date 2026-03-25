@@ -42,6 +42,7 @@ plugins:
     - triggers_actions_ui
     - uptime
     - ux
+    - vis_types/timelion
     - workflows_extensions
     - workflows_management
   disabled:
