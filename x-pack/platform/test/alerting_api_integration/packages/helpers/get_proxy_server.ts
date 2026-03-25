@@ -20,17 +20,21 @@ function getProxyBasicAuthFromServerArgs(
   if (!userLine || !passLine) {
     return undefined;
   }
-  return {
+
+  const result = {
     user: userLine.replace('--xpack.actions.proxyUser=', ''),
     password: passLine.replace('--xpack.actions.proxyPassword=', ''),
   };
+  // eslint-disable-next-line no-console
+  console.log(`Proxy basic auth credentials: ${result.user}:${result.password}`);
+  return result;
 }
 
 export const getHttpProxyServer = async (
   targetUrl: string,
   kbnTestServerConfig: string[],
   onProxyResHandler: (proxyRes?: unknown, req?: unknown, res?: unknown) => void
-): Promise<http.Server | ReturnType<typeof httpProxy.createProxyServer>> => {
+): Promise<httpProxy> => {
   const proxyServer = httpProxy.createProxyServer({
     target: targetUrl,
     secure: false,
@@ -66,7 +70,7 @@ export const getHttpProxyServer = async (
       proxyServer.web(req, res);
     });
     server.listen(proxyPort);
-    return server;
+    return server as unknown as httpProxy;
   }
 
   proxyServer.listen(proxyPort);
