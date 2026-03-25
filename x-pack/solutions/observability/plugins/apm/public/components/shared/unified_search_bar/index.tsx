@@ -269,6 +269,9 @@ export function UnifiedSearchBar({
   };
 
   return (
+    // Don't remove nor change the attribute
+    // It's used to identify the unified search bar in the DOM (for the size to be correct)
+    // See use_secondary_filters_width_style.ts for more details
     <div data-apm-unified-search-root={true}>
       <SearchBar
         appName={i18n.translate('xpack.apm.appName', {
