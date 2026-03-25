@@ -1,0 +1,133 @@
+openapi: 3.0.0
+info:
+  title: Unified Execution Result Schema
+  version: not applicable
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    UnifiedExecutionStatus:
+      type: string
+      description: Final execution outcome as reported by the Alerting Framework (event.outcome).
+      enum:
+        - success
+        - warning
+        - failure
+
+    UnifiedExecutionResult:
+      type: object
+      description: |-
+        A single unified rule execution result read from the Alerting Framework's "execute" event
+        in the event log. Contains execution metadata and structured metrics.
+      properties:
+        execution_uuid:
+          type: string
+          nullable: true
+          description: Unique identifier of this execution.
+        execution_start:
+          type: string
+          format: date-time
+          description: Start time of the execution (event.start from the Alerting Framework execute event).
+        execution_duration_ms:
+          type: integer
+          nullable: true
+          description: Total execution duration in milliseconds (converted from event.duration nanoseconds).
+        schedule_delay_ms:
+          type: integer
+          nullable: true
+          description: Delay between scheduled and actual start time in milliseconds (from kibana.task.schedule_delay).
+        backfill:
+          nullable: true
+          type: object
+          description: Source event time range for backfill (manual) executions, computed from start and interval.
+          properties:
+            from:
+              type: string
+              format: date-time
+            to:
+              type: string
+              format: date-time
+          required:
+            - from
+            - to
+        outcome:
+          type: object
+          description: Execution outcome information.
+          properties:
+            status:
+              $ref: '#/components/schemas/UnifiedExecutionStatus'
+            message:
+              type: string
+              nullable: true
+              description: Outcome message from the source event (event.message).
+          required:
+            - status
+            - message
+        metrics:
+          type: object
+          description: >-
+            Execution metrics from kibana.alert.rule.execution.metrics in the
+            Alerting Framework execute event.
+          properties:
+            total_search_duration_ms:
+              type: integer
+              nullable: true
+              description: Total search duration in milliseconds.
+            total_indexing_duration_ms:
+              type: integer
+              nullable: true
+              description: Total indexing duration in milliseconds.
+            execution_gap_duration_s:
+              type: integer
+              nullable: true
+              description: Gap duration in seconds.
+            alerts_candidate_count:
+              type: integer
+              nullable: true
+              description: Number of candidate alerts evaluated during execution (from kibana.alert.rule.execution.metrics.alerts_candidate_count).
+            alert_counts:
+              type: object
+              nullable: true
+              description: Alert counts for this execution.
+              properties:
+                new:
+                  type: integer
+                  nullable: true
+              required:
+                - new
+            matched_indices_count:
+              type: integer
+              nullable: true
+              description: Number of indices matched during execution (from kibana.alert.rule.execution.metrics.matched_indices_count).
+            frozen_indices_queried_count:
+              type: integer
+              nullable: true
+              description: Number of frozen indices queried during execution (from kibana.alert.rule.execution.metrics.frozen_indices_queried_count).
+            index_duration_ms:
+              type: integer
+              nullable: true
+              description: Indexing duration in milliseconds. Not populated from the execute event currently.
+          required:
+            - total_search_duration_ms
+            - total_indexing_duration_ms
+            - execution_gap_duration_s
+            - alerts_candidate_count
+            - alert_counts
+            - matched_indices_count
+            - frozen_indices_queried_count
+            - index_duration_ms
+      required:
+        - execution_uuid
+        - execution_start
+        - execution_duration_ms
+        - schedule_delay_ms
+        - backfill
+        - outcome
+        - metrics
+
+    UnifiedExecutionResultSortField:
+      type: string
+      description: Fields available for sorting unified execution results.
+      enum:
+        - execution_start
+        - execution_duration_ms
