@@ -7,8 +7,8 @@
 
 import type { JsonValue } from '@kbn/utility-types';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { WorkflowYaml } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import type { WaitForInputStep } from '@kbn/workflows';
+import { ExecutionStatus, getStepByNameFromNestedSteps } from '@kbn/workflows';
 import { getWorkflowOutput } from './get_workflow_output';
 
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
@@ -33,52 +33,6 @@ export interface WorkflowExecutionState {
   /** Present when status is WAITING_FOR_INPUT; describes what input is needed to resume. */
   waiting_input?: WaitingInputContext;
 }
-
-/**
- * Recursively searches the workflow definition for a waitForInput step by name.
- * Returns its `with` block (message + schema) if found.
- */
-const findWaitForInputStepConfig = (
-  definition: WorkflowYaml,
-  stepId: string
-): { message?: string; schema?: Record<string, unknown> } | undefined => {
-  interface StepLike {
-    name?: string;
-    type?: string;
-    with?: { message?: string; schema?: unknown };
-    steps?: StepLike[];
-    else?: StepLike[];
-  }
-  const steps = definition?.steps;
-  if (!Array.isArray(steps)) return undefined;
-
-  const search = (list: StepLike[]): ReturnType<typeof findWaitForInputStepConfig> => {
-    for (const step of list) {
-      if (step?.type === 'waitForInput' && step?.name === stepId) {
-        return {
-          message: step.with?.message,
-          schema:
-            typeof step.with?.schema === 'object' &&
-            step.with.schema !== null &&
-            !Array.isArray(step.with.schema)
-              ? (step.with.schema as Record<string, unknown>)
-              : undefined,
-        };
-      }
-      if (Array.isArray(step?.steps)) {
-        const found = search(step.steps);
-        if (found) return found;
-      }
-      if (Array.isArray(step?.else)) {
-        const found = search(step.else);
-        if (found) return found;
-      }
-    }
-    return undefined;
-  };
-
-  return search(steps as StepLike[]);
-};
 
 /**
  * Returns the state of a workflow execution.
@@ -122,13 +76,15 @@ export const getExecutionState = async ({
     );
 
     if (waitingStep) {
-      const stepConfig = findWaitForInputStepConfig(
-        execution.workflowDefinition,
+      const step = getStepByNameFromNestedSteps(
+        execution.workflowDefinition.steps,
         waitingStep.stepId
       );
+      const stepConfig =
+        step?.type === 'waitForInput' ? (step as WaitForInputStep).with : undefined;
       const waitContext: WaitingInputContext = {
         ...(stepConfig?.message && { message: stepConfig.message }),
-        ...(stepConfig?.schema && { schema: stepConfig.schema }),
+        ...(stepConfig?.schema && { schema: stepConfig.schema as Record<string, unknown> }),
       };
       if (waitContext.message !== undefined || waitContext.schema !== undefined) {
         state.waiting_input = waitContext;
