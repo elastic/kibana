@@ -11,10 +11,30 @@ import { i18n } from '@kbn/i18n';
 import { InlineFilterPopover } from './inline_filter_popover';
 
 const EPISODE_STATUS_OPTIONS: Array<{ label: string; value: string }> = [
-  { label: 'Active', value: 'active' },
-  { label: 'Recovered', value: 'recovering' },
-  { label: 'Pending', value: 'pending' },
-  { label: 'Inactive', value: 'inactive' },
+  {
+    label: i18n.translate('xpack.alertingV2EpisodesUi.statusFilter.activeLabel', {
+      defaultMessage: 'Active',
+    }),
+    value: 'active',
+  },
+  {
+    label: i18n.translate('xpack.alertingV2EpisodesUi.statusFilter.recoveringLabel', {
+      defaultMessage: 'Recovered',
+    }),
+    value: 'recovering',
+  },
+  {
+    label: i18n.translate('xpack.alertingV2EpisodesUi.statusFilter.pendingLabel', {
+      defaultMessage: 'Pending',
+    }),
+    value: 'pending',
+  },
+  {
+    label: i18n.translate('xpack.alertingV2EpisodesUi.statusFilter.inactiveLabel', {
+      defaultMessage: 'Inactive',
+    }),
+    value: 'inactive',
+  },
 ];
 
 interface StatusFilterProps {
