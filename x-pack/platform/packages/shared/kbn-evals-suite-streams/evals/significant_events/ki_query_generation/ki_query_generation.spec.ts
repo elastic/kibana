@@ -28,14 +28,13 @@ import {
   MANAGED_STREAM_NAME,
   MANAGED_STREAM_SEARCH_PATTERN,
   resolveScenarioSnapshotSource,
+  snapshotCatalogKey,
 } from '../datasets';
 import { KI_FEATURE_SOURCES_TO_RUN } from './resolve_ki_sources';
 import { extractLogTextFromSourceDoc } from './extract_log_text';
 import { getComputedKIFeaturesFromDocs } from './get_computed_ki_features_from_docs';
 
 const SAMPLE_DOCS_SIZE = 500;
-
-const snapshotCatalogKey = (gcs: GcsConfig): string => `${gcs.bucket}/${gcs.basePathPrefix}`;
 
 evaluate.describe('KI query generation', { tag: tags.serverless.observability.complete }, () => {
   const activeDatasets = getActiveDatasets();

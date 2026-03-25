@@ -16522,6 +16522,10 @@
               },
               {
                 "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/attachments.ts"
+              },
+              {
+                "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/a2a.ts"
               },
               {
@@ -16943,6 +16947,10 @@
               {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/saved_query/read_saved_query_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/get_users_route.ts"
               },
               {
                 "plugin": "osquery",

@@ -10,7 +10,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { TestProviders } from '../../../common/mock';
 import React from 'react';
 import { SessionPreviewContainer } from './session_preview_container';
-import { useSessionViewConfig } from '../hooks/use_session_view_config';
+import { useSessionViewConfig } from '../../session_view/hooks/use_session_view_config';
 import { useLicense } from '../../../common/hooks/use_license';
 import { SESSION_PREVIEW_TEST_ID } from './test_ids';
 import {
@@ -18,7 +18,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
 } from '../../shared/components/test_ids';
 
-jest.mock('../hooks/use_session_view_config');
+jest.mock('../../session_view/hooks/use_session_view_config');
 jest.mock('../../../common/hooks/use_license');
 
 const sessionViewConfig = {

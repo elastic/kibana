@@ -95,7 +95,7 @@ const Logo = ({ logoCss }: { logoCss: HeaderCss['logo'] }) => {
   );
 };
 
-export const ProjectHeader = () => {
+export const ProjectHeader = React.memo(() => {
   const breadcrumbs = useProjectBreadcrumbs();
   const { euiTheme } = useEuiTheme();
   const headerCss = getHeaderCss(euiTheme);
@@ -155,4 +155,4 @@ export const ProjectHeader = () => {
       </header>
     </>
   );
-};
+});
