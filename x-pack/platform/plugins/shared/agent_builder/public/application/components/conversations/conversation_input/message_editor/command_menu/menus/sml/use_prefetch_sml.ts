@@ -15,10 +15,9 @@ export const usePrefetchSml = () => {
   const { smlService } = useAgentBuilderServices();
 
   return useCallback(() => {
-    const keywords = ['*'] as const;
     queryClient.prefetchQuery({
-      queryKey: queryKeys.sml.search(keywords),
-      queryFn: () => smlService.search({ keywords: [...keywords], size: 20 }),
+      queryKey: queryKeys.sml.search('*'),
+      queryFn: () => smlService.search({ query: '*', size: 20 }),
     });
   }, [queryClient, smlService]);
 };

@@ -16,10 +16,10 @@ export class SmlService {
     this.http = http;
   }
 
-  async search(params: { keywords: string[]; size?: number }): Promise<SmlSearchHttpResponse> {
+  async search(params: { query: string; size?: number }): Promise<SmlSearchHttpResponse> {
     return await this.http.post<SmlSearchHttpResponse>(`${internalApiPath}/sml/_search`, {
       body: JSON.stringify({
-        keywords: params.keywords,
+        query: params.query,
         size: params.size ?? 20,
       }),
     });

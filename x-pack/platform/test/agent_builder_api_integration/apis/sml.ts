@@ -65,12 +65,12 @@ export default function ({ getService }: FtrProviderContext) {
         }
       });
 
-      it('returns a hit when keywords match a partial word in the title (autocomplete)', async () => {
+      it('returns a hit when query matches a partial word in the title (autocomplete)', async () => {
         const response = await supertest
           .post('/internal/agent_builder/sml/_search')
           .set('kbn-xsrf', 'kibana')
           .set('x-elastic-internal-origin', 'kibana')
-          .send({ keywords: ['pacif'], size: 20 })
+          .send({ query: 'pacif', size: 20 })
           .expect(200);
 
         const body = response.body as SmlSearchHttpResponse;
@@ -87,7 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/agent_builder/sml/_search')
           .set('kbn-xsrf', 'kibana')
           .set('x-elastic-internal-origin', 'kibana')
-          .send({ keywords: ['*'], size: 10 })
+          .send({ query: '*', size: 10 })
           .expect(200);
 
         const body = response.body as SmlSearchHttpResponse;
@@ -109,12 +109,12 @@ export default function ({ getService }: FtrProviderContext) {
         }
       });
 
-      it('rejects an empty keywords array', async () => {
+      it('rejects an empty query string', async () => {
         await supertest
           .post('/internal/agent_builder/sml/_search')
           .set('kbn-xsrf', 'kibana')
           .set('x-elastic-internal-origin', 'kibana')
-          .send({ keywords: [] })
+          .send({ query: '' })
           .expect(400);
       });
     });

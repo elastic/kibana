@@ -79,7 +79,7 @@ const createNotFoundError = () =>
 
 /** Must stay aligned with SAYT fields queried in `buildSmlSearchQuery` (sml_service.ts). */
 const EXPECTED_SML_SAYT_FIELDS = [
-  'title^2',
+  'title',
   'title._2gram',
   'title._3gram',
   'title._index_prefix',
@@ -179,7 +179,7 @@ describe('SmlService', () => {
       } as any);
 
       await smlService.search({
-        keywords: ['foo', 'bar'],
+        query: 'foo bar',
         size: 10,
         spaceId: 'default',
         esClient,
@@ -196,24 +196,10 @@ describe('SmlService', () => {
         bool: {
           must: [
             {
-              bool: {
-                should: [
-                  {
-                    multi_match: {
-                      query: 'foo',
-                      type: 'bool_prefix',
-                      fields: [...EXPECTED_SML_SAYT_FIELDS],
-                    },
-                  },
-                  {
-                    multi_match: {
-                      query: 'bar',
-                      type: 'bool_prefix',
-                      fields: [...EXPECTED_SML_SAYT_FIELDS],
-                    },
-                  },
-                ],
-                minimum_should_match: 1,
+              multi_match: {
+                query: 'foo bar',
+                type: 'bool_prefix',
+                fields: [...EXPECTED_SML_SAYT_FIELDS],
               },
             },
           ],
@@ -241,7 +227,7 @@ describe('SmlService', () => {
       } as any);
 
       await smlService.search({
-        keywords: ['ba'],
+        query: 'ba',
         size: 10,
         spaceId: 'default',
         esClient,
@@ -251,23 +237,16 @@ describe('SmlService', () => {
       const call = esClient.search.mock.calls[0]![0]!;
       const smlQuery = (call.query as { bool: { must: unknown[] } }).bool.must[0];
       expect(smlQuery).toEqual({
-        bool: {
-          should: [
-            {
-              multi_match: {
-                query: 'ba',
-                type: 'bool_prefix',
-                fields: [...EXPECTED_SML_SAYT_FIELDS],
-              },
-            },
-          ],
-          minimum_should_match: 1,
+        multi_match: {
+          query: 'ba',
+          type: 'bool_prefix',
+          fields: [...EXPECTED_SML_SAYT_FIELDS],
         },
       });
       expect((call as { highlight?: unknown }).highlight).toBeUndefined();
     });
 
-    it('trims whitespace from keywords before querying', async () => {
+    it('trims whitespace from the query before querying', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
@@ -277,7 +256,7 @@ describe('SmlService', () => {
       } as any);
 
       await smlService.search({
-        keywords: ['  banana  '],
+        query: '  banana  ',
         size: 10,
         spaceId: 'default',
         esClient,
@@ -286,14 +265,13 @@ describe('SmlService', () => {
 
       const call = esClient.search.mock.calls[0]![0]!;
       const smlQuery = (call.query as { bool: { must: unknown[] } }).bool.must[0] as {
-        bool: { should: Array<{ multi_match: { query: string } }> };
+        multi_match: { query: string };
       };
-      expect(smlQuery.bool.should).toHaveLength(1);
-      expect(smlQuery.bool.should[0].multi_match.query).toBe('banana');
+      expect(smlQuery.multi_match.query).toBe('banana');
       expect((call as { highlight?: unknown }).highlight).toBeUndefined();
     });
 
-    it('uses match_all when all keywords are empty after trim', async () => {
+    it('uses match_all when the query is only whitespace', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
@@ -303,7 +281,7 @@ describe('SmlService', () => {
       } as any);
 
       await smlService.search({
-        keywords: ['  ', '', '\t'],
+        query: '  \t',
         size: 5,
         spaceId: 'default',
         esClient,
@@ -318,7 +296,7 @@ describe('SmlService', () => {
       expect(call.highlight).toBeUndefined();
     });
 
-    it('uses match_all for keywords ["*"]', async () => {
+    it('uses match_all for query "*"', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
@@ -328,7 +306,7 @@ describe('SmlService', () => {
       } as any);
 
       await smlService.search({
-        keywords: ['*'],
+        query: '*',
         size: 5,
         spaceId: 'default',
         esClient,
@@ -343,7 +321,7 @@ describe('SmlService', () => {
       expect(call.highlight).toBeUndefined();
     });
 
-    it('uses match_all for empty keywords', async () => {
+    it('uses match_all for an empty query string', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
@@ -353,7 +331,7 @@ describe('SmlService', () => {
       } as any);
 
       await smlService.search({
-        keywords: [],
+        query: '',
         size: 5,
         spaceId: 'default',
         esClient,
@@ -396,7 +374,7 @@ describe('SmlService', () => {
       } as any);
 
       const result = await smlService.search({
-        keywords: ['viz'],
+        query: 'viz',
         size: 10,
         spaceId: 'default',
         esClient,
@@ -429,7 +407,7 @@ describe('SmlService', () => {
       } as any);
 
       await smlService.search({
-        keywords: ['visualization/my'],
+        query: 'visualization/my',
         size: 10,
         spaceId: 'default',
         esClient,
@@ -438,10 +416,9 @@ describe('SmlService', () => {
 
       const call = esClient.search.mock.calls[0]![0]!;
       const smlQuery = (call.query as { bool: { must: unknown[] } }).bool.must[0] as {
-        bool: { should: Array<{ multi_match: { query: string } }> };
+        multi_match: { query: string };
       };
-      expect(smlQuery.bool.should).toHaveLength(1);
-      expect(smlQuery.bool.should[0].multi_match.query).toBe('visualization/my');
+      expect(smlQuery.multi_match.query).toBe('visualization/my');
       expect((call as { highlight?: unknown }).highlight).toBeUndefined();
     });
 
@@ -487,7 +464,7 @@ describe('SmlService', () => {
       } as any);
 
       const result = await smlService.search({
-        keywords: ['*'],
+        query: '*',
         size: 10,
         spaceId: 'default',
         esClient,
@@ -506,7 +483,7 @@ describe('SmlService', () => {
       esClient.search.mockRejectedValue(createNotFoundError());
 
       const result = await smlService.search({
-        keywords: ['foo'],
+        query: 'foo',
         size: 10,
         spaceId: 'default',
         esClient,
@@ -529,7 +506,7 @@ describe('SmlService', () => {
 
       await expect(
         smlService.search({
-          keywords: ['foo'],
+          query: 'foo',
           size: 10,
           spaceId: 'default',
           esClient,
@@ -586,7 +563,7 @@ describe('SmlService', () => {
       } as any);
 
       const result = await smlService.search({
-        keywords: ['*'],
+        query: '*',
         size: 10,
         spaceId: 'default',
         esClient,
@@ -641,7 +618,7 @@ describe('SmlService', () => {
       } as any);
 
       const result = await smlService.search({
-        keywords: ['*'],
+        query: '*',
         size: 10,
         spaceId: 'default',
         esClient,
@@ -662,7 +639,7 @@ describe('SmlService', () => {
       } as any);
 
       await smlService.search({
-        keywords: ['*'],
+        query: '*',
         spaceId: 'default',
         esClient,
         request,

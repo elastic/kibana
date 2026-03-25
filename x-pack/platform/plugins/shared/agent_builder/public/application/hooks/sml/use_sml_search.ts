@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
+import { useDebouncedValue } from '@kbn/react-hooks';
 import { useQuery } from '@kbn/react-query';
 import { queryKeys } from '../../query_keys';
 import { useAgentBuilderServices } from '../use_agent_builder_service';
@@ -14,21 +15,16 @@ const SML_SEARCH_DEBOUNCE_MS = 250;
 
 export const useSmlSearch = (query: string) => {
   const { smlService } = useAgentBuilderServices();
-  const [debouncedQuery, setDebouncedQuery] = useState(query);
+  const debouncedQuery = useDebouncedValue(query, SML_SEARCH_DEBOUNCE_MS);
 
-  useEffect(() => {
-    const timer = window.setTimeout(() => setDebouncedQuery(query), SML_SEARCH_DEBOUNCE_MS);
-    return () => window.clearTimeout(timer);
-  }, [query]);
-
-  const keywords = useMemo(() => {
+  const searchQuery = useMemo(() => {
     const trimmed = debouncedQuery.trim();
-    return trimmed.length > 0 ? [trimmed] : ['*'];
+    return trimmed.length > 0 ? trimmed : '*';
   }, [debouncedQuery]);
 
   const queryResult = useQuery({
-    queryKey: queryKeys.sml.search(keywords),
-    queryFn: () => smlService.search({ keywords, size: 20 }),
+    queryKey: queryKeys.sml.search(searchQuery),
+    queryFn: () => smlService.search({ query: searchQuery, size: 20 }),
   });
 
   return {

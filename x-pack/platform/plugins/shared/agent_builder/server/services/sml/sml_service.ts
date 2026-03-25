@@ -75,8 +75,8 @@ class SmlServiceImpl implements SmlServiceInstance {
 
     return {
       getCrawler: () => crawler,
-      search: async ({ keywords, size = 10, spaceId, esClient, request }) => {
-        const rawResults = await searchSml({ keywords, size, spaceId, esClient, logger });
+      search: async ({ query, size = 10, spaceId, esClient, request }) => {
+        const rawResults = await searchSml({ query, size, spaceId, esClient, logger });
         return filterResultsByPermissions({
           searchResult: rawResults,
           request,
@@ -301,45 +301,29 @@ const checkItemsAccess = async ({
   return accessMap;
 };
 
-/**
- * Fields for `search_as_you_type` (see
- * https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/search-as-you-type ).
- *
- * - **Title**: root + shingle + `._index_prefix` — shingles help order when the title has
- *   multiple tokens; `._index_prefix` powers prefix completion on the last token.
- * - **Type**: indexed as SAYT but values are effectively a **single token** (e.g. `lens`,
- *   `visualization`). Shingle subfields (`type._2gram`, `type._3gram`) add little for
- *   single-token text; we query `type` + `type._index_prefix` only for prefix typeahead.
- */
 const SML_SEARCH_AS_YOU_TYPE_FIELDS = [
-  'title^2',
-  'title._2gram',
-  'title._3gram',
+  'title',
+  'title._2gram', // Combination of two words
+  'title._3gram', // Combination of three words
   'title._index_prefix',
   'type',
   'type._index_prefix',
 ] as const;
 
 /**
- * Build the search query from keywords. Only `type` and `title` (search_as_you_type + bool_prefix) are searched — not `content`.
- *
- * - `["*"]` or empty array → `match_all` (return everything)
+ * Build the search query from a single string. Only `type` and `title` (search_as_you_type + bool_prefix) are searched.
+ * After trim: empty string or `*` → `match_all` (return everything)
  */
-const buildSmlSearchQuery = (keywords: string[]): Record<string, unknown> => {
-  const filtered = keywords.map((k) => k.trim()).filter(Boolean);
-  if (filtered.length === 0 || (filtered.length === 1 && filtered[0] === '*')) {
+const buildSmlSearchQuery = (query: string): Record<string, unknown> => {
+  const trimmed = query.trim();
+  if (trimmed === '' || trimmed === '*') {
     return { match_all: {} };
   }
   return {
-    bool: {
-      should: filtered.map((keyword) => ({
-        multi_match: {
-          query: keyword,
-          type: 'bool_prefix',
-          fields: [...SML_SEARCH_AS_YOU_TYPE_FIELDS],
-        },
-      })),
-      minimum_should_match: 1,
+    multi_match: {
+      query: trimmed,
+      type: 'bool_prefix',
+      fields: [...SML_SEARCH_AS_YOU_TYPE_FIELDS],
     },
   };
 };
@@ -349,26 +333,26 @@ const buildSmlSearchQuery = (keywords: string[]): Record<string, unknown> => {
  * the function returns empty results silently.
  */
 const searchSml = async ({
-  keywords,
+  query,
   size,
   spaceId,
   esClient,
   logger,
 }: {
-  keywords: string[];
+  query: string;
   size: number;
   spaceId: string;
   esClient: ElasticsearchClient;
   logger: Logger;
 }): Promise<{ results: SmlSearchResult[]; total: number }> => {
   logger.debug(
-    `SML search: keywords=${JSON.stringify(
-      keywords
+    `SML search: query=${JSON.stringify(
+      query
     )}, size=${size}, spaceId='${spaceId}', index='${smlIndexName}'`
   );
 
   try {
-    const smlQuery = buildSmlSearchQuery(keywords);
+    const smlQuery = buildSmlSearchQuery(query);
 
     const response = await esClient.search<SmlDocument>({
       index: smlIndexName,

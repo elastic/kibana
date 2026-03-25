@@ -13,6 +13,9 @@ import { internalApiPath } from '../../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY } from '../route_security';
 import type { SmlSearchHttpResponse } from '../../../common/http_api/sml';
 
+/** Max length of the search string (bounds request size and ES query payload). */
+const SML_SEARCH_QUERY_MAX_LENGTH = 512;
+
 export function registerInternalSmlRoutes({
   router,
   getInternalServices,
@@ -25,7 +28,7 @@ export function registerInternalSmlRoutes({
       path: `${internalApiPath}/sml/_search`,
       validate: {
         body: schema.object({
-          keywords: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 50 }),
+          query: schema.string({ minLength: 1, maxLength: SML_SEARCH_QUERY_MAX_LENGTH }),
           size: schema.maybe(schema.number({ min: 1, max: 50 })),
         }),
       },
@@ -35,12 +38,12 @@ export function registerInternalSmlRoutes({
     wrapHandler(
       async (ctx, request, response) => {
         const { sml } = getInternalServices();
-        const { keywords, size } = request.body;
+        const { query, size } = request.body;
         const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
         const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
 
         const searchResult = await sml.search({
-          keywords,
+          query,
           size,
           spaceId,
           esClient,

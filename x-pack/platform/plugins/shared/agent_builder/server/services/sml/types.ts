@@ -192,7 +192,7 @@ export interface SmlService {
   getCrawler: () => SmlCrawler;
   /** Search the SML index, filtering results by space and permissions */
   search: (params: {
-    keywords: string[];
+    query: string;
     size?: number;
     spaceId: string;
     esClient: ElasticsearchClient;
