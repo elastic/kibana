@@ -7,5 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const MIN_OPTIONS_LIST_REQUEST_SIZE = 10;
-export const MAX_OPTIONS_LIST_BULK_SELECT_SIZE = 100;
+import { DEFAULT_DATA_CONTROL_STATE } from './control_constants';
+
+export const DEFAULT_RANGE_SLIDER_STATE = {
+  ...DEFAULT_DATA_CONTROL_STATE,
+  step: 1,
+} as const;

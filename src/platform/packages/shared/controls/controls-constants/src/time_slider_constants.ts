@@ -7,5 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const MIN_OPTIONS_LIST_REQUEST_SIZE = 10;
-export const MAX_OPTIONS_LIST_BULK_SELECT_SIZE = 100;
+export const DEFAULT_TIME_SLIDER_STATE = {
+  start_percentage_of_time_range: 0,
+  end_percentage_of_time_range: 1,
+  is_anchored: false,
+} as const;
