@@ -21,7 +21,6 @@ import { registerGetTriggerDefinitionsRoute } from './routes/get_trigger_definit
 import { ServerStepRegistry } from './step_registry';
 import { registerInternalStepDefinitions } from './steps';
 import { TriggerRegistry } from './trigger_registry';
-import { registerInternalTriggerDefinitions } from './triggers';
 import type {
   EmitEventParams,
   TriggerEventHandler,
@@ -68,7 +67,6 @@ export class WorkflowsExtensionsServerPlugin
     // Register HTTP route to expose trigger definitions for testing
     registerGetTriggerDefinitionsRoute(router, this.triggerRegistry);
     registerInternalStepDefinitions(core, this.stepRegistry);
-    registerInternalTriggerDefinitions(this.triggerRegistry);
 
     core.http.registerRouteHandlerContext<WorkflowsExtensionsRequestHandlerContext, 'workflows'>(
       'workflows',
