@@ -16,10 +16,10 @@ import {
   loadWorkflowsFromConnectorSpec,
   getWorkflowYaml,
   type ProcessedWorkflow,
-} from '../__test_helpers__/workflow.test_helpers';
+} from '../../workflow.test_helpers';
 
-const CONNECTOR_NAME = 'fake-google-drive-connector';
-const CONNECTOR_ID = 'fake-gd-connector-uuid';
+const CONNECTOR_NAME = 'fake-sharepoint-connector';
+const CONNECTOR_ID = 'fake-sp-connector-uuid';
 
 const TINY_PDF_BASE64 = Buffer.from(
   '%PDF-1.0\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n' +
@@ -28,7 +28,7 @@ const TINY_PDF_BASE64 = Buffer.from(
     'xref\n0 4\ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n0\n%%EOF'
 ).toString('base64');
 
-describe('google drive workflows (real ES)', () => {
+describe('sharepoint online workflows (real ES)', () => {
   let esCluster: EsTestCluster;
   let esClient: Client;
   let fixture: WorkflowRunFixture;
@@ -37,7 +37,7 @@ describe('google drive workflows (real ES)', () => {
   beforeAll(async () => {
     jest.setTimeout(5 * 60_000);
 
-    workflows = loadWorkflowsFromConnectorSpec('.google_drive', {
+    workflows = loadWorkflowsFromConnectorSpec('.sharepoint-online', {
       connectorName: CONNECTOR_NAME,
     });
 
@@ -63,7 +63,7 @@ describe('google drive workflows (real ES)', () => {
     (scopedClientMock.asCurrentUser as unknown) = esClient;
 
     fixture.scopedActionsClientMock.getAll.mockResolvedValue([
-      { id: CONNECTOR_ID, name: CONNECTOR_NAME, actionTypeId: '.google_drive' },
+      { id: CONNECTOR_ID, name: CONNECTOR_NAME, actionTypeId: '.sharepoint-online' },
     ]);
 
     fixture.scopedActionsClientMock.returnMockedConnectorResult = async ({
@@ -74,24 +74,19 @@ describe('google drive workflows (real ES)', () => {
       params: Record<string, unknown>;
     }): Promise<ActionTypeExecutorResult<unknown>> => {
       const subAction = params.subAction as string;
-      const subActionParams = params.subActionParams as Record<string, unknown>;
 
-      if (subAction === 'downloadFile') {
+      if (subAction === 'downloadItemFromURL') {
         return {
           status: 'ok',
           actionId,
           data: {
-            id: subActionParams.fileId,
-            name: `${subActionParams.fileId}.pdf`,
+            base64: TINY_PDF_BASE64,
             mimeType: 'application/pdf',
-            content: TINY_PDF_BASE64,
-            encoding: 'base64',
-            size: '1024',
           },
         };
       }
 
-      throw new Error(`Unexpected Google Drive subAction: ${subAction}`);
+      throw new Error(`Unexpected SharePoint subAction: ${subAction}`);
     };
   });
 
@@ -103,45 +98,18 @@ describe('google drive workflows (real ES)', () => {
   const getWorkflowExecution = () =>
     fixture.workflowExecutionRepositoryMock.workflowExecutions.get('fake_workflow_execution_id');
 
-  describe('download workflow with real ES extraction', () => {
-    it('_ingest/pipeline/_simulate returns real extracted text from attachment processor', async () => {
-      const fileIds = ['file-alpha', 'file-beta'];
+  describe('download workflow (downloadItemFromURL) with real ES extraction', () => {
+    it('_ingest/pipeline/_simulate extracts text from the attachment processor', async () => {
       await fixture.runWorkflow({
         workflowYaml: getWorkflowYaml(workflows, 'download'),
-        inputs: { fileIds, rerank: false },
+        inputs: { download_action: 'downloadItemFromURL', download_url: 'https://sp/file.pdf' },
       });
 
       const execution = getWorkflowExecution();
       expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
 
-      expect(getStepExecutions('download_file')).toHaveLength(2);
-      expect(getStepExecutions('extract_content')).toHaveLength(2);
-      expect(getStepExecutions('normalize_result')).toHaveLength(2);
-      expect(getStepExecutions('accumulate_result')).toHaveLength(2);
-
-      const normalizeSteps = getStepExecutions('normalize_result');
-      for (const step of normalizeSteps) {
-        const vars = (step as unknown as Record<string, unknown>).variables as Record<
-          string,
-          unknown
-        >;
-        const normalized = vars?.normalized as Record<string, unknown> | undefined;
-        if (normalized) {
-          expect(normalized.filename).toMatch(/\.pdf$/);
-        }
-      }
-    }, 60_000);
-
-    it('handles multiple files through the foreach loop with real extraction', async () => {
-      const fileIds = ['doc-1', 'doc-2', 'doc-3'];
-      await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml(workflows, 'download'),
-        inputs: { fileIds, rerank: false },
-      });
-
-      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
-      expect(getStepExecutions('download_file')).toHaveLength(3);
-      expect(getStepExecutions('extract_content')).toHaveLength(3);
+      expect(getStepExecutions('download-item-from-url')).toHaveLength(1);
+      expect(getStepExecutions('extract-content')).toHaveLength(1);
     }, 60_000);
   });
 });

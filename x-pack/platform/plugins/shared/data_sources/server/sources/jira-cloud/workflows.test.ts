@@ -12,7 +12,7 @@ import {
   getWorkflowYaml,
   loadWorkflowsFromConnectorSpec,
   type ProcessedWorkflow,
-} from './__test_helpers__/workflow.test_helpers';
+} from '../workflow.test_helpers';
 
 const CONNECTOR_NAME = 'fake-jira-connector';
 const CONNECTOR_ID = 'fake-jira-connector-uuid';

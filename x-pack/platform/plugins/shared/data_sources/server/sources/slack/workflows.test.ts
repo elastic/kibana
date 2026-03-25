@@ -12,7 +12,7 @@ import {
   getWorkflowYaml,
   loadWorkflowsFromConnectorSpec,
   type ProcessedWorkflow,
-} from './__test_helpers__/workflow.test_helpers';
+} from '../workflow.test_helpers';
 
 const CONNECTOR_NAME = 'fake-slack-connector';
 const CONNECTOR_ID = 'fake-slack-connector-uuid';

@@ -16,10 +16,10 @@ import {
   loadWorkflowsFromConnectorSpec,
   getWorkflowYaml,
   type ProcessedWorkflow,
-} from '../__test_helpers__/workflow.test_helpers';
+} from '../../workflow.test_helpers';
 
-const CONNECTOR_NAME = 'fake-sharepoint-connector';
-const CONNECTOR_ID = 'fake-sp-connector-uuid';
+const CONNECTOR_NAME = 'fake-servicenow-connector';
+const CONNECTOR_ID = 'fake-sn-connector-uuid';
 
 const TINY_PDF_BASE64 = Buffer.from(
   '%PDF-1.0\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n' +
@@ -28,7 +28,7 @@ const TINY_PDF_BASE64 = Buffer.from(
     'xref\n0 4\ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n0\n%%EOF'
 ).toString('base64');
 
-describe('sharepoint online workflows (real ES)', () => {
+describe('servicenow workflows (real ES)', () => {
   let esCluster: EsTestCluster;
   let esClient: Client;
   let fixture: WorkflowRunFixture;
@@ -37,7 +37,7 @@ describe('sharepoint online workflows (real ES)', () => {
   beforeAll(async () => {
     jest.setTimeout(5 * 60_000);
 
-    workflows = loadWorkflowsFromConnectorSpec('.sharepoint-online', {
+    workflows = loadWorkflowsFromConnectorSpec('.servicenow_search', {
       connectorName: CONNECTOR_NAME,
     });
 
@@ -63,7 +63,7 @@ describe('sharepoint online workflows (real ES)', () => {
     (scopedClientMock.asCurrentUser as unknown) = esClient;
 
     fixture.scopedActionsClientMock.getAll.mockResolvedValue([
-      { id: CONNECTOR_ID, name: CONNECTOR_NAME, actionTypeId: '.sharepoint-online' },
+      { id: CONNECTOR_ID, name: CONNECTOR_NAME, actionTypeId: '.servicenow_search' },
     ]);
 
     fixture.scopedActionsClientMock.returnMockedConnectorResult = async ({
@@ -75,18 +75,19 @@ describe('sharepoint online workflows (real ES)', () => {
     }): Promise<ActionTypeExecutorResult<unknown>> => {
       const subAction = params.subAction as string;
 
-      if (subAction === 'downloadItemFromURL') {
+      if (subAction === 'getAttachment') {
         return {
           status: 'ok',
           actionId,
           data: {
+            fileName: 'report.pdf',
+            contentType: 'application/pdf',
             base64: TINY_PDF_BASE64,
-            mimeType: 'application/pdf',
           },
         };
       }
 
-      throw new Error(`Unexpected SharePoint subAction: ${subAction}`);
+      throw new Error(`Unexpected ServiceNow subAction: ${subAction}`);
     };
   });
 
@@ -98,18 +99,19 @@ describe('sharepoint online workflows (real ES)', () => {
   const getWorkflowExecution = () =>
     fixture.workflowExecutionRepositoryMock.workflowExecutions.get('fake_workflow_execution_id');
 
-  describe('download workflow (downloadItemFromURL) with real ES extraction', () => {
+  describe('get_attachment workflow with real ES extraction', () => {
     it('_ingest/pipeline/_simulate extracts text from the attachment processor', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml(workflows, 'download'),
-        inputs: { download_action: 'downloadItemFromURL', download_url: 'https://sp/file.pdf' },
+        workflowYaml: getWorkflowYaml(workflows, 'get_attachment'),
+        inputs: { sys_id: 'ATT001' },
       });
 
       const execution = getWorkflowExecution();
       expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
 
-      expect(getStepExecutions('download-item-from-url')).toHaveLength(1);
+      expect(getStepExecutions('download-attachment')).toHaveLength(1);
       expect(getStepExecutions('extract-content')).toHaveLength(1);
+      expect(getStepExecutions('set-result')).toHaveLength(1);
     }, 60_000);
   });
 });

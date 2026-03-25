@@ -13,7 +13,7 @@ import {
   loadWorkflowsFromConnectorSpec,
   registerExtensionSteps,
   type ProcessedWorkflow,
-} from './__test_helpers__/workflow.test_helpers';
+} from '../workflow.test_helpers';
 
 const CONNECTOR_NAME = 'fake-zendesk-connector';
 const CONNECTOR_ID = 'fake-zendesk-connector-uuid';
