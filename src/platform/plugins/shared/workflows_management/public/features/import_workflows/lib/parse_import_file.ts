@@ -10,16 +10,16 @@
 import JSZip from 'jszip';
 import { v4 as generateUuid } from 'uuid';
 import YAML from 'yaml';
+import { MAX_WORKFLOW_YAML_LENGTH } from '@kbn/workflows';
 import {
   detectFileFormat,
-  extractWorkflowPreview,
   isValidWorkflowId,
   MAX_AGGREGATE_IMPORT_BYTES,
   MAX_IMPORT_WORKFLOWS,
-  MAX_WORKFLOW_YAML_LENGTH,
   WorkflowExportManifestSchema,
-} from '../../../../common/lib/export';
-import type { WorkflowPreview } from '../../../../common/lib/export';
+} from '../../../../common/lib/import';
+import type { WorkflowPreview } from '../../../common/lib/export/workflow_preview';
+import { extractWorkflowPreview } from '../../../common/lib/export/workflow_preview';
 
 export interface ClientPreflightResult {
   format: 'zip' | 'yaml';

@@ -91,7 +91,7 @@ export const MicrosoftTeams: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.microsoftTeams.auth.oauth.tokenUrl.helpText',
                 {
                   defaultMessage:
-                    'Replace {tenant-id} with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token',
+                    "Replace '{tenant-id}' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
                 }
               ),
             },
