@@ -32,4 +32,13 @@ export * from './src/streams';
 export * from './src/extract';
 export * from './src/diff_strings';
 export * from './src/git';
+export {
+  parseAndResolveValidationContract,
+  VALIDATION_PROFILE_DEFAULTS,
+  type ValidationDownstreamMode,
+  type ValidationProfile,
+  type ResolvedValidationContract,
+  type ValidationScope,
+  type ValidationTestMode,
+} from './src/validation_run_contract';
 export * from './src/worker';
