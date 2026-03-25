@@ -10,24 +10,73 @@ import { scriptLibraryFiltersFromUrlParams } from './script_library_url_params';
 
 describe('#scriptLibraryFiltersFromUrlParams', () => {
   it('should return no params when no URL params are provided', () => {
-    expect(scriptLibraryFiltersFromUrlParams({})).toEqual({});
+    expect(scriptLibraryFiltersFromUrlParams({})).toEqual({
+      fileType: [],
+      category: [],
+      os: [],
+    });
   });
 
   it('should parse and return only valid URL params', () => {
     expect(
       scriptLibraryFiltersFromUrlParams({
-        kuery: 'name: test',
+        os: ['windows', 'linux'],
+        fileType: ['archive', 'script'],
+        category: ['discovery', 'userManagement'],
+
         page: 2,
         pageSize: 20,
         sortField: 'updatedBy',
         sortDirection: 'desc',
       })
     ).toEqual({
-      kuery: 'name: test',
+      os: ['linux', 'windows'],
+      fileType: ['archive', 'script'],
+      category: ['discovery', 'userManagement'],
+
       page: 2,
       pageSize: 20,
       sortField: 'updatedBy',
       sortDirection: 'desc',
+    });
+  });
+
+  it('should ignore invalid fileType params', () => {
+    expect(
+      scriptLibraryFiltersFromUrlParams({
+        // @ts-expect-error - testing invalid fileType value
+        fileType: ['invalid', 'script'],
+      })
+    ).toEqual({
+      fileType: ['script'],
+      category: [],
+      os: [],
+    });
+  });
+
+  it('should ignore invalid os params', () => {
+    expect(
+      scriptLibraryFiltersFromUrlParams({
+        // @ts-expect-error - testing invalid os value
+        os: ['invalid', 'windows'],
+      })
+    ).toEqual({
+      fileType: [],
+      category: [],
+      os: ['windows'],
+    });
+  });
+
+  it('should ignore invalid category params', () => {
+    expect(
+      scriptLibraryFiltersFromUrlParams({
+        // @ts-expect-error - testing invalid category value
+        category: ['invalid', 'discovery'],
+      })
+    ).toEqual({
+      fileType: [],
+      category: ['discovery'],
+      os: [],
     });
   });
 
@@ -38,10 +87,12 @@ describe('#scriptLibraryFiltersFromUrlParams', () => {
         pageSize: 0,
         sortField: 'createdBy',
         sortDirection: 'asc',
-        kuery: 'name: test',
       })
     ).toEqual({
-      kuery: 'name: test',
+      category: [],
+      fileType: [],
+      os: [],
+
       sortField: 'createdBy',
       sortDirection: 'asc',
     });
@@ -50,14 +101,16 @@ describe('#scriptLibraryFiltersFromUrlParams', () => {
   it('should ignore invalid sorting URL params', () => {
     expect(
       scriptLibraryFiltersFromUrlParams({
-        kuery: 'name: test',
         page: 12,
         pageSize: 50,
         sortField: 'invalid_field' as ScriptLibraryUrlParams['sortField'],
         sortDirection: 'invalid_direction' as ScriptLibraryUrlParams['sortDirection'],
       })
     ).toEqual({
-      kuery: 'name: test',
+      category: [],
+      fileType: [],
+      os: [],
+
       page: 12,
       pageSize: 50,
     });
@@ -66,11 +119,13 @@ describe('#scriptLibraryFiltersFromUrlParams', () => {
   it('should handle partial URL params', () => {
     expect(
       scriptLibraryFiltersFromUrlParams({
-        kuery: 'name: test',
         page: 1,
       })
     ).toEqual({
-      kuery: 'name: test',
+      category: [],
+      fileType: [],
+      os: [],
+
       page: 1,
     });
   });

@@ -63,7 +63,6 @@ describe('useGetEndpointScriptsList hook', () => {
         pageSize: 20,
         sortField: 'updatedBy',
         sortDirection: 'desc',
-        kuery: 'name: test*',
       })
     );
     expect(apiMocks.responseProvider.getScriptsList).toHaveBeenCalledWith({
@@ -74,9 +73,101 @@ describe('useGetEndpointScriptsList hook', () => {
         pageSize: 20,
         sortField: 'updatedBy',
         sortDirection: 'desc',
-        kuery: 'name: test*',
       },
     });
+  });
+
+  it('should construct the correct KQL query when single element array', async () => {
+    await renderReactQueryHook(() =>
+      useGetEndpointScriptsList({
+        os: ['windows'],
+        fileType: ['script'],
+        category: ['dataCollection'],
+      })
+    );
+
+    expect(apiMocks.responseProvider.getScriptsList).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({
+          kuery: 'platform:"windows" AND fileType:"script" AND tags:"dataCollection"',
+        }),
+      })
+    );
+  });
+
+  it('should construct the correct KQL query when multiple element array', async () => {
+    await renderReactQueryHook(() =>
+      useGetEndpointScriptsList({
+        os: ['linux', 'windows'],
+        fileType: ['script', 'archive'],
+        category: ['dataCollection', 'userManagement'],
+      })
+    );
+
+    expect(apiMocks.responseProvider.getScriptsList).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({
+          kuery:
+            '(platform:"linux" OR platform:"windows") AND (fileType:"script" OR fileType:"archive") AND (tags:"dataCollection" OR tags:"userManagement")',
+        }),
+      })
+    );
+  });
+
+  it('should construct the correct KQL query when with mixed length arrays', async () => {
+    await renderReactQueryHook(() =>
+      useGetEndpointScriptsList({
+        os: ['linux', 'windows'],
+        fileType: ['script'],
+        category: ['dataCollection', 'userManagement'],
+      })
+    );
+
+    expect(apiMocks.responseProvider.getScriptsList).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({
+          kuery:
+            '(platform:"linux" OR platform:"windows") AND fileType:"script" AND (tags:"dataCollection" OR tags:"userManagement")',
+        }),
+      })
+    );
+  });
+
+  it('should construct the correct KQL query when some arrays are empty', async () => {
+    await renderReactQueryHook(() =>
+      useGetEndpointScriptsList({
+        os: ['linux', 'windows'],
+        fileType: [],
+        category: ['dataCollection', 'userManagement'],
+      })
+    );
+
+    expect(apiMocks.responseProvider.getScriptsList).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({
+          kuery:
+            '(platform:"linux" OR platform:"windows") AND (tags:"dataCollection" OR tags:"userManagement")',
+        }),
+      })
+    );
+  });
+
+  it('should not include KQL filters when filter arrays are empty', async () => {
+    await renderReactQueryHook(() =>
+      useGetEndpointScriptsList({
+        os: [],
+        fileType: [],
+        category: [],
+      })
+    );
+
+    expect(apiMocks.responseProvider.getScriptsList).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({
+          kuery: undefined,
+        }),
+      })
+    );
   });
 
   it('should allow custom options to be used', async () => {

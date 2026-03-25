@@ -14,6 +14,7 @@ import {
   createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
 import { EndpointScriptsGenerator } from '../../../../../../../common/endpoint/data_generators/endpoint_scripts_generator';
+import { SCRIPT_LIBRARY_ALLOWED_FILE_TYPES } from '../../../../../../../common/endpoint/service/script_library/constants';
 
 describe('EndpointScriptEditForm', () => {
   let render: (props?: EndpointScriptEditFormProps) => ReturnType<AppContextTestRender['render']>;
@@ -221,7 +222,7 @@ describe('EndpointScriptEditForm', () => {
       expect(onChangeMock).not.toHaveBeenCalled();
     });
 
-    it.each(['script', 'archive'])(
+    it.each(SCRIPT_LIBRARY_ALLOWED_FILE_TYPES)(
       'should trigger form `isValid: true` when required fields are filled for a `%s` type file',
       async (testFileType) => {
         const { getByTestId, container } = renderResult;

@@ -6,7 +6,17 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { SCRIPT_LIBRARY_SORTABLE_FIELDS } from '../../../../../../common/endpoint/service/script_library/constants';
+import type { SupportedHostOsType } from '../../../../../../common/endpoint/constants';
+import { SUPPORTED_HOST_OS_TYPE } from '../../../../../../common/endpoint/constants';
+import type {
+  ScriptLibraryAllowedFileType,
+  ScriptTagKey,
+} from '../../../../../../common/endpoint/service/script_library/constants';
+import {
+  SCRIPT_LIBRARY_ALLOWED_FILE_TYPES,
+  SCRIPT_LIBRARY_SORTABLE_FIELDS,
+  SORTED_SCRIPT_TAGS_KEYS,
+} from '../../../../../../common/endpoint/service/script_library/constants';
 import type {
   SortableScriptLibraryFields,
   SortDirection,
@@ -14,17 +24,21 @@ import type {
 import { useUrlParams } from '../../../../hooks/use_url_params';
 
 export interface ScriptLibraryUrlParams {
-  kuery?: string;
   page?: number;
   pageSize?: number;
   sortField?: SortableScriptLibraryFields;
   sortDirection?: SortDirection;
   selectedScriptId?: string;
   show?: 'create' | 'delete' | 'details' | 'edit';
+  os?: SupportedHostOsType[]; // maps to "platform" filter in the UI
+  fileType?: ScriptLibraryAllowedFileType[]; // maps to "fileType" filter in the UI
+  category?: ScriptTagKey[]; // maps to "tags" filter in the UI
 }
 
 interface ScriptLibraryUrlParamSetters {
-  setUrlKueryParam: (kuery: string) => void;
+  setUrlOsFilter: (platforms: string) => void;
+  setUrlFileTypeFilter: (fileTypes: string) => void;
+  setUrlCategoryFilter: (category: string) => void;
   setPagingAndSortingParams: (params: {
     page: number;
     pageSize: number;
@@ -33,11 +47,17 @@ interface ScriptLibraryUrlParamSetters {
   }) => void;
 }
 
+const verifyIsValidItem = <T extends string>(item: string, validItems: readonly T[]): item is T => {
+  return validItems.includes(item as T);
+};
+
 export const scriptLibraryFiltersFromUrlParams = (
   urlParams: Partial<ScriptLibraryUrlParams>
 ): ScriptLibraryUrlParams => {
   const scriptLibraryFilters: ScriptLibraryUrlParams = {
-    kuery: '',
+    os: [],
+    fileType: [],
+    category: [],
   };
 
   const page = urlParams.page && Number(urlParams.page) > 0 ? Number(urlParams.page) : undefined;
@@ -47,8 +67,29 @@ export const scriptLibraryFiltersFromUrlParams = (
     urlParams.pageSize && Number(urlParams.pageSize) > 0 ? Number(urlParams.pageSize) : undefined;
   scriptLibraryFilters.pageSize = pageSize;
 
-  const urlKuery = urlParams.kuery ? String(urlParams.kuery) : undefined;
-  scriptLibraryFilters.kuery = urlKuery;
+  const urlFileTypeFilter = urlParams.fileType
+    ? String(urlParams.fileType)
+        .split(',')
+        .filter((fileType) => verifyIsValidItem(fileType, SCRIPT_LIBRARY_ALLOWED_FILE_TYPES))
+        .sort()
+    : [];
+  scriptLibraryFilters.fileType = urlFileTypeFilter as ScriptLibraryAllowedFileType[];
+
+  const urlOsFilter = urlParams.os
+    ? String(urlParams.os)
+        .split(',')
+        .filter((os) => verifyIsValidItem(os, SUPPORTED_HOST_OS_TYPE))
+        .sort()
+    : [];
+  scriptLibraryFilters.os = urlOsFilter;
+
+  const urlCategoryFilter = urlParams.category
+    ? String(urlParams.category)
+        .split(',')
+        .filter((category) => verifyIsValidItem(category, SORTED_SCRIPT_TAGS_KEYS))
+        .sort()
+    : [];
+  scriptLibraryFilters.category = urlCategoryFilter;
 
   const urlSortField =
     urlParams.sortField && SCRIPT_LIBRARY_SORTABLE_FIELDS.includes(urlParams.sortField)
@@ -77,13 +118,39 @@ export const useScriptLibraryUrlParams = (): ScriptLibraryUrlParams &
   );
   const [scriptLibraryFilters, setScriptLibraryFilters] = useState(getUrlScriptLibraryFilters);
 
-  const setUrlKueryParam = useCallback(
-    (kuery: string) => {
+  const setUrlFileTypeFilter = useCallback(
+    (fileTypes: string) => {
       history.push({
         ...location,
         search: toUrlParams({
           ...urlParams,
-          kuery: kuery.length ? kuery : undefined,
+          fileType: fileTypes.length ? fileTypes : undefined,
+        }),
+      });
+    },
+    [history, location, toUrlParams, urlParams]
+  );
+
+  const setUrlOsFilter = useCallback(
+    (platforms: string) => {
+      history.push({
+        ...location,
+        search: toUrlParams({
+          ...urlParams,
+          os: platforms.length ? platforms : undefined,
+        }),
+      });
+    },
+    [history, location, toUrlParams, urlParams]
+  );
+
+  const setUrlCategoryFilter = useCallback(
+    (category: string) => {
+      history.push({
+        ...location,
+        search: toUrlParams({
+          ...urlParams,
+          category: category.length ? category : undefined,
         }),
       });
     },
@@ -126,7 +193,9 @@ export const useScriptLibraryUrlParams = (): ScriptLibraryUrlParams &
     ...scriptLibraryFilters,
     selectedScriptId: urlParams?.selectedScriptId as ScriptLibraryUrlParams['selectedScriptId'],
     show: urlParams?.show as ScriptLibraryUrlParams['show'],
-    setUrlKueryParam,
+    setUrlFileTypeFilter,
+    setUrlOsFilter,
+    setUrlCategoryFilter,
     setPagingAndSortingParams,
   };
 };

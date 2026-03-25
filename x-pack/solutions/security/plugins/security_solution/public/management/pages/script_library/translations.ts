@@ -44,10 +44,15 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
     { defaultMessage: 'Upload script' }
   ),
 
+  filterClearAll: i18n.translate('xpack.securitySolution.scriptLibrary.filter.clearAll', {
+    defaultMessage: 'Clear all',
+  }),
+
   // table labels
   table: {
     noItemsMessage: i18n.translate('xpack.securitySolution.scriptLibrary.table.noItemsMessage', {
-      defaultMessage: 'No scripts found',
+      defaultMessage:
+        'No results match your search criteria! Try modifying your search or filter set.',
     }),
     columns: {
       name: i18n.translate('xpack.securitySolution.scriptLibrary.table.nameColumnTitle', {
