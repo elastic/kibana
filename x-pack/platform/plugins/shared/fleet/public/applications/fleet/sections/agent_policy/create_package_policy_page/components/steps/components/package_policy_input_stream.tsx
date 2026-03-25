@@ -444,7 +444,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                         <EuiButtonEmpty
                           aria-label="Advanced options"
                           size="xs"
-                          iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
+                          iconType={isShowingAdvanced ? 'chevronSingleDown' : 'chevronSingleRight'}
                           onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
                           flush="left"
                           data-test-subj={`advancedStreamOptionsToggle-${packagePolicyInputStream.id}`}
