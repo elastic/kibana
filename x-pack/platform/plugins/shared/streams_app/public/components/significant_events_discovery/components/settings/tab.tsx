@@ -145,18 +145,18 @@ export function SettingsTab() {
     if (!settingsFetch.value) return false;
     const v = settingsFetch.value;
     return (
-      knowledgeIndicatorExtraction !== toFormValue(v.connectorIdKnowledgeIndicatorExtraction) ||
-      ruleGeneration !== toFormValue(v.connectorIdRuleGeneration) ||
+      kiExtraction !== toFormValue(v.connectorIdKnowledgeIndicatorExtraction) ||
+      kiQueryGeneration !== toFormValue(v.connectorIdRuleGeneration) ||
       discovery !== toFormValue(v.connectorIdDiscovery) ||
       indexPatterns !== (v.indexPatterns || DEFAULT_INDEX_PATTERNS)
     );
-  }, [settingsFetch.value, knowledgeIndicatorExtraction, ruleGeneration, discovery, indexPatterns]);
+  }, [settingsFetch.value, kiExtraction, kiQueryGeneration, discovery, indexPatterns]);
 
   const handleCancel = useCallback(() => {
     if (!settingsFetch.value) return;
     const v = settingsFetch.value;
-    setKnowledgeIndicatorExtraction(toFormValue(v.connectorIdKnowledgeIndicatorExtraction));
-    setRuleGeneration(toFormValue(v.connectorIdRuleGeneration));
+    setKiExtraction(toFormValue(v.connectorIdKnowledgeIndicatorExtraction));
+    setKiQueryGeneration(toFormValue(v.connectorIdRuleGeneration));
     setDiscovery(toFormValue(v.connectorIdDiscovery));
     setIndexPatterns(v.indexPatterns || DEFAULT_INDEX_PATTERNS);
     setSaveError(null);
@@ -338,16 +338,6 @@ export function SettingsTab() {
                         defaultMessage:
                           'You can pick one default LLM for all tasks, or specify each per step.',
                       }
-                    )}
-                    {defaultConnectorName && (
-                      <>
-                        {' '}
-                        {i18n.translate(
-                          'xpack.streams.significantEventsDiscovery.settings.defaultConnectorLabel',
-                          { defaultMessage: 'Default connector:' }
-                        )}{' '}
-                        <EuiBadge color="hollow">{defaultConnectorName}</EuiBadge>
-                      </>
                     )}
                   </EuiText>
                 </EuiFlexItem>
@@ -538,4 +528,4 @@ export function SettingsTab() {
       )}
     </>
   );
-};
+}

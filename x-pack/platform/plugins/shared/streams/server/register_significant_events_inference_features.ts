@@ -46,7 +46,7 @@ export function registerSignificantEventsInferenceFeatures(
   });
   if (parentResult.ok) {
     logger.debug(
-      `Registered inference feature "${STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID}"`
+      `Registered parent inference feature "${STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID}"`
     );
   } else {
     logger.warn(
@@ -101,7 +101,7 @@ export function registerSignificantEventsInferenceFeatures(
       recommendedEndpoints: [],
     });
     if (childResult.ok) {
-      logger.debug(`Registered inference feature "${child.featureId}"`);
+      logger.debug(`Registered child inference feature "${child.featureId}"`);
     } else {
       logger.warn(
         `Failed to register inference feature "${child.featureId}": ${childResult.error}`
