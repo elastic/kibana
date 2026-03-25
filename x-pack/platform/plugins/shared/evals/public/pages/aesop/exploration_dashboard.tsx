@@ -162,7 +162,7 @@ export const ExplorationDashboard = () => {
       name: 'Actions',
       width: '12%',
       render: (run: ExplorationRun) => (
-        <EuiButton size="s" onClick={() => viewDetails(run.execution_id)}>
+        <EuiButton size="s" onClick={() => viewDetails(run.execution_id)} aria-label={`View exploration details for execution ${run.execution_id}`}>
           View
         </EuiButton>
       ),
@@ -201,6 +201,7 @@ export const ExplorationDashboard = () => {
               onClick={handleDeployDashboard}
               isLoading={isDeployingDashboard}
               color="accent"
+              aria-label="View AESOP performance dashboard"
             >
               View Performance Dashboard
             </EuiButton>,
@@ -274,6 +275,7 @@ export const ExplorationDashboard = () => {
                 onClick={() => triggerExploration.mutate()}
                 isLoading={triggerExploration.isLoading}
                 disabled={activeExplorations.length > 0}
+                aria-label="Start autonomous exploration of your data"
               >
                 {activeExplorations.length > 0
                   ? 'Exploration Running...'
@@ -392,6 +394,7 @@ export const ExplorationDashboard = () => {
                   iconType="play"
                   onClick={() => triggerExploration.mutate()}
                   isLoading={triggerExploration.isLoading}
+                  aria-label="Start autonomous exploration of your data"
                 >
                   Start Exploration
                 </EuiButton>

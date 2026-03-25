@@ -241,6 +241,7 @@ export const ProposedSkillsList = () => {
         <EuiButton
           size="s"
           onClick={() => setSelectedSkill(skill)}
+          aria-label={`Review skill: ${skill.name}`}
         >
           Review
         </EuiButton>
@@ -289,6 +290,7 @@ export const ProposedSkillsList = () => {
               <EuiButton
                 iconType="refresh"
                 onClick={() => refetch()}
+                aria-label="Refresh proposed skills list"
               >
                 Refresh
               </EuiButton>,
@@ -361,6 +363,7 @@ export const ProposedSkillsList = () => {
                       compressed
                       prepend="LLM"
                       disabled={isDiscoveryRunning}
+                      aria-label="Select LLM connector for skill discovery"
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
@@ -370,6 +373,7 @@ export const ProposedSkillsList = () => {
                       onClick={() => runExplorationMutation.mutate()}
                       isLoading={isDiscoveryRunning}
                       disabled={isDiscoveryRunning || !discoveryConnectorId}
+                      aria-label="Run skill discovery to find new patterns"
                     >
                       {isDiscoveryRunning ? 'Discovery Running...' : 'Run Skill Discovery'}
                     </EuiButton>
@@ -388,6 +392,7 @@ export const ProposedSkillsList = () => {
                 size="s"
                 fill={statusFilter === 'pending_review'}
                 onClick={() => setStatusFilter('pending_review')}
+                aria-label="Filter skills by pending review status"
               >
                 Pending Review
               </EuiButton>
@@ -397,6 +402,7 @@ export const ProposedSkillsList = () => {
                 size="s"
                 fill={statusFilter === 'all'}
                 onClick={() => setStatusFilter('all')}
+                aria-label="Show all skills regardless of status"
               >
                 All Skills
               </EuiButton>

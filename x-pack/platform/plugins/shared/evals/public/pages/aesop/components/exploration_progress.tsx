@@ -150,28 +150,28 @@ export const ExplorationProgress: React.FC<ExplorationProgressProps> = ({
         return {
           icon: 'check',
           color: euiTheme.colors.success,
-          text: `✅ ${phase.phase_name}`,
+          text: `Completed: ${phase.phase_name}`,
           suffix: phase.duration_ms ? `(${formatDuration(phase.duration_ms)})` : '',
         };
       case 'running':
         return {
           icon: 'clock',
           color: euiTheme.colors.primary,
-          text: `🔄 ${phase.phase_name}`,
+          text: `In progress: ${phase.phase_name}`,
           suffix: '',
         };
       case 'failed':
         return {
           icon: 'cross',
           color: euiTheme.colors.danger,
-          text: `❌ ${phase.phase_name}`,
+          text: `Failed: ${phase.phase_name}`,
           suffix: '',
         };
       default:
         return {
           icon: 'dot',
           color: euiTheme.colors.lightShade,
-          text: `⏳ ${phase.phase_name}`,
+          text: `Pending: ${phase.phase_name}`,
           suffix: '',
         };
     }

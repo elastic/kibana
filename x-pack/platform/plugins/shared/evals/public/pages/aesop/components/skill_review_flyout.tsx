@@ -277,6 +277,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                   compressed
                   prepend="LLM"
                   disabled={connectorsLoading || connectorOptions.length === 0}
+                  aria-label="Select LLM connector for validation"
                 />
               </EuiFlexItem>
             )}
@@ -387,6 +388,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                         size="s"
                         onClick={() => validateMutation.mutate()}
                         disabled={!selectedConnectorId}
+                        aria-label={`Run validation for ${skill.name}`}
                       >
                         {skill.validation?.status === 'failed' ? 'Re-run Validation' : 'Run Validation'}
                       </EuiButton>
@@ -398,6 +400,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                         iconType="sparkles"
                         onClick={() => validateMutation.mutate({ autoConverge: true })}
                         disabled={!selectedConnectorId}
+                        aria-label={`Validate and auto-improve ${skill.name}`}
                       >
                         Validate & Auto-Improve
                       </EuiButton>
@@ -414,6 +417,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                     size="s"
                     onClick={() => validateMutation.mutate()}
                     disabled={!selectedConnectorId}
+                    aria-label={`Run validation for ${skill.name}`}
                   >
                     Re-run Validation
                   </EuiButton>
@@ -547,6 +551,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                         disabled={!selectedConnectorId}
                         size="s"
                         fill
+                        aria-label="Apply LLM suggestions to improve skill"
                       >
                         Apply LLM Suggestions
                       </EuiButton>
@@ -577,6 +582,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                             setEditedMarkdown(skill.markdown || '');
                             setIsEditing(false);
                           }}
+                          aria-label="Cancel editing"
                         >
                           Cancel
                         </EuiButtonEmpty>
@@ -587,6 +593,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                           fill
                           onClick={() => saveMutation.mutate()}
                           isLoading={saveMutation.isPending}
+                          aria-label="Save skill content changes"
                         >
                           Save Changes
                         </EuiButton>
@@ -597,6 +604,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                       size="s"
                       iconType="pencil"
                       onClick={() => setIsEditing(true)}
+                      aria-label="Edit skill content"
                     >
                       Edit
                     </EuiButtonEmpty>
@@ -721,6 +729,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                   color="warning"
                   onClick={() => unrejectMutation.mutate()}
                   isLoading={unrejectMutation.isPending}
+                  aria-label={`Restore ${skill.name} to pending review`}
                 >
                   Restore to Pending Review
                 </EuiButton>
@@ -749,6 +758,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                   iconType="refresh"
                   onClick={() => redeployMutation.mutate()}
                   isLoading={redeployMutation.isPending}
+                  aria-label={`Re-deploy ${skill.name} to Agent Builder`}
                 >
                   Re-deploy to Agent Builder
                 </EuiButton>
@@ -767,6 +777,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                 value={reviewNotes}
                 onChange={(e) => setReviewNotes(e.target.value)}
                 placeholder="e.g., Approved for production use. Addresses common triage workflow."
+                aria-label="Review notes for this skill"
               />
             </EuiFormRow>
           )}
@@ -782,6 +793,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                   color="danger"
                   isLoading={rejectMutation.isPending}
                   disabled={!reviewNotes.trim()}
+                  aria-label={`Reject skill: ${skill.name}`}
                 >
                   Reject
                 </EuiButtonEmpty>
@@ -790,7 +802,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty onClick={onClose}>
+                    <EuiButtonEmpty onClick={onClose} aria-label="Close skill review">
                       Cancel
                     </EuiButtonEmpty>
                   </EuiFlexItem>
@@ -801,6 +813,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                         onClick={() => approveMutation.mutate({ updateExisting: true })}
                         disabled={!canApprove}
                         isLoading={approveMutation.isPending}
+                        aria-label={`Update existing skill ${skill.base_skill?.name}`}
                       >
                         Update Existing Skill
                       </EuiButton>
@@ -813,6 +826,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
                       onClick={() => approveMutation.mutate()}
                       disabled={!canApprove}
                       isLoading={approveMutation.isPending}
+                      aria-label={skill.base_skill ? `Create ${skill.name} as new skill in Agent Builder` : `Approve and deploy ${skill.name} to Agent Builder`}
                     >
                       {skill.base_skill ? 'Create as New Skill' : 'Approve & Deploy to Agent Builder'}
                     </EuiButton>
@@ -823,7 +837,7 @@ export const SkillReviewFlyout = ({ skill: initialSkill, onClose }: SkillReviewF
           ) : (
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={onClose}>Close</EuiButton>
+                <EuiButton onClick={onClose} aria-label="Close skill review">Close</EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
