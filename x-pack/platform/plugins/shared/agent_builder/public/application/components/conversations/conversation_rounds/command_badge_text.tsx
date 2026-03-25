@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
+import { euiTextTruncate, useEuiTheme } from '@elastic/eui';
 import {
   COMMAND_BADGE_MAX_WIDTH_CH,
   deserializeCommandBadge,
@@ -54,16 +54,23 @@ export const CommandBadgeText: React.FC<CommandBadgeTextProps> = ({ text }) => {
             css={[
               badgeStyle,
               css`
-                display: inline-block;
+                display: inline-flex;
+                align-items: baseline;
                 max-width: ${COMMAND_BADGE_MAX_WIDTH_CH}ch;
-                vertical-align: middle;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
+                min-width: 0;
+                vertical-align: baseline;
+                line-height: inherit;
               `,
             ]}
           >
-            {fullBadgeText}
+            <span
+              css={css`
+                min-width: 0;
+                ${euiTextTruncate('100%')}
+              `}
+            >
+              {fullBadgeText}
+            </span>
           </span>
         );
       })}

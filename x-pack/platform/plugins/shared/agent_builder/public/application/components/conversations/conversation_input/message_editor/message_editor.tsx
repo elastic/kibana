@@ -140,7 +140,8 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
       cursor: default;
       user-select: all;
       max-width: ${COMMAND_BADGE_MAX_WIDTH_CH}ch;
-      vertical-align: middle;
+      vertical-align: baseline;
+      line-height: inherit;
     }
   `;
   const editorStyles = [
