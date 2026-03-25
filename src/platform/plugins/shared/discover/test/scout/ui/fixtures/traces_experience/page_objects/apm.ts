@@ -43,7 +43,7 @@ export function createApmPage(page: ScoutPage): ApmPage {
         ? page.testSubj.locator(tableTestSubj)
         : page.locator('table');
 
-      await container.getByText(linkText).click();
+      await container.getByText(linkText).first().click();
     },
 
     async clickWaterfallItem(itemName: string) {
