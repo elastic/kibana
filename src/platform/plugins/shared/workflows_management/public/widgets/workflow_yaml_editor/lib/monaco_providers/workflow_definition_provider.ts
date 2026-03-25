@@ -49,13 +49,19 @@ const resolveConstsDefinition: DefinitionResolver = ({ model, templateInfo, yaml
 };
 
 /**
- * Resolve `inputs.<name>` — jump to `- name: <name>` in the inputs array.
+ * Resolve `inputs.<name>` — supports both legacy array format
+ * (`inputs: [{ name: "x", type: "string" }]`) and JSON Schema format
+ * (`inputs: { type: object, properties: { x: { type: string } } }`).
  */
 const resolveInputsDefinition: DefinitionResolver = ({ model, templateInfo, yamlDocument }) => {
   if (templateInfo.cursorSegmentIndex !== 1 || templateInfo.pathSegments.length < 2) {
     return null;
   }
-  return findArrayItemByName(model, yamlDocument, 'inputs', templateInfo.pathSegments[1]);
+  const fieldName = templateInfo.pathSegments[1];
+  return (
+    findArrayItemByName(model, yamlDocument, 'inputs', fieldName) ??
+    findJsonSchemaPropertyLocation(model, yamlDocument, 'inputs', fieldName)
+  );
 };
 
 /**
@@ -74,7 +80,7 @@ const resolveVariablesDefinition: DefinitionResolver = ({
     return null;
   }
   for (const stepInfo of Object.values(workflowLookup.steps)) {
-    if (stepInfo.stepType === 'data.set' && stepInfo.propInfos[varName]) {
+    if (stepInfo.stepType === 'data.set' && stepInfo.propInfos[`with.${varName}`]) {
       return locationFromLine(model, stepInfo.lineStart, stepInfo.stepId);
     }
   }
@@ -118,6 +124,54 @@ const resolveForeachDefinition: DefinitionResolver = ({ model, templateInfo, wor
 };
 
 /**
+ * Resolve `while` — jump to the `condition:` property of the enclosing while step.
+ * Sub-properties (while.iteration) are runtime-only and return null.
+ */
+const resolveWhileDefinition: DefinitionResolver = ({ model, templateInfo, workflowLookup }) => {
+  if (templateInfo.cursorSegmentIndex !== 0 || !workflowLookup?.steps) {
+    return null;
+  }
+
+  const cursorLine = templateInfo.templateRange.startLineNumber;
+  let bestMatch: (typeof workflowLookup.steps)[string] | null = null;
+  for (const stepInfo of Object.values(workflowLookup.steps)) {
+    if (
+      stepInfo.stepType === 'while' &&
+      stepInfo.lineStart <= cursorLine &&
+      cursorLine <= stepInfo.lineEnd
+    ) {
+      if (!bestMatch || stepInfo.lineStart > bestMatch.lineStart) {
+        bestMatch = stepInfo;
+      }
+    }
+  }
+  if (!bestMatch) {
+    return null;
+  }
+
+  const conditionProp = bestMatch.propInfos.condition;
+  if (conditionProp?.keyNode?.range) {
+    const line = model.getPositionAt(conditionProp.keyNode.range[0]).lineNumber;
+    return locationFromLine(model, line, 'condition');
+  }
+  return locationFromLine(model, bestMatch.lineStart, bestMatch.stepId);
+};
+
+/**
+ * Resolve `outputs.<name>` — supports both legacy array and JSON Schema formats.
+ */
+const resolveOutputsDefinition: DefinitionResolver = ({ model, templateInfo, yamlDocument }) => {
+  if (templateInfo.cursorSegmentIndex !== 1 || templateInfo.pathSegments.length < 2) {
+    return null;
+  }
+  const fieldName = templateInfo.pathSegments[1];
+  return (
+    findArrayItemByName(model, yamlDocument, 'outputs', fieldName) ??
+    findJsonSchemaPropertyLocation(model, yamlDocument, 'outputs', fieldName)
+  );
+};
+
+/**
  * Registry mapping path prefixes (segment 0) to their definition resolvers.
  * To add go-to-definition for a new context, add an entry here.
  */
@@ -125,8 +179,10 @@ const definitionResolvers: Record<string, DefinitionResolver> = {
   steps: resolveStepDefinition,
   consts: resolveConstsDefinition,
   inputs: resolveInputsDefinition,
+  outputs: resolveOutputsDefinition,
   variables: resolveVariablesDefinition,
   foreach: resolveForeachDefinition,
+  while: resolveWhileDefinition,
 };
 
 /**
@@ -137,6 +193,7 @@ const rootSectionKeys: Record<string, string> = {
   steps: 'steps',
   consts: 'consts',
   inputs: 'inputs',
+  outputs: 'outputs',
   triggers: 'triggers',
 };
 
@@ -166,6 +223,10 @@ export class WorkflowDefinitionProvider implements monaco.languages.DefinitionPr
       return null;
     }
 
+    if (templateInfo.isOnFilter) {
+      return null;
+    }
+
     const ctx: DefinitionContext = {
       model,
       templateInfo,
@@ -176,16 +237,14 @@ export class WorkflowDefinitionProvider implements monaco.languages.DefinitionPr
     const rootKey = templateInfo.pathSegments[0];
 
     // When cursor is on segment 0 (root keyword), navigate to the section header
+    // or to the enclosing loop step (foreach/while)
     if (templateInfo.cursorSegmentIndex === 0) {
       const sectionKey = rootSectionKeys[rootKey];
       if (sectionKey) {
         return findTopLevelKeyLocation(model, ctx.yamlDocument, sectionKey);
       }
-      // foreach at segment 0 — jump to the enclosing foreach step
-      if (rootKey === 'foreach') {
-        return resolveForeachDefinition(ctx);
-      }
-      return null;
+      const resolver = definitionResolvers[rootKey];
+      return resolver ? resolver(ctx) : null;
     }
 
     const resolver = definitionResolvers[rootKey];
@@ -266,6 +325,36 @@ function findArrayItemByName(
         const line = model.getPositionAt(nameNode.range[0]).lineNumber;
         return locationFromLine(model, line, itemName);
       }
+    }
+  }
+  return null;
+}
+
+/**
+ * Find a property key inside a JSON Schema-formatted section.
+ * e.g. inputs: { type: object, properties: { my_field: { type: string } } }
+ */
+function findJsonSchemaPropertyLocation(
+  model: monaco.editor.ITextModel,
+  yamlDocument: YAML.Document | null,
+  sectionName: string,
+  propertyName: string
+): monaco.languages.Location | null {
+  if (!yamlDocument || !YAML.isMap(yamlDocument.contents)) {
+    return null;
+  }
+  const section = (yamlDocument.contents as YAML.YAMLMap).get(sectionName, true);
+  if (!YAML.isMap(section)) {
+    return null;
+  }
+  const properties = section.get('properties', true);
+  if (!YAML.isMap(properties)) {
+    return null;
+  }
+  for (const pair of properties.items) {
+    if (YAML.isScalar(pair.key) && pair.key.value === propertyName && pair.key.range) {
+      const line = model.getPositionAt(pair.key.range[0]).lineNumber;
+      return locationFromLine(model, line, propertyName);
     }
   }
   return null;
