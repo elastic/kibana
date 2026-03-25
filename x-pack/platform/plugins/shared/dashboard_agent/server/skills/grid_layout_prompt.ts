@@ -49,7 +49,6 @@ Always set \`x\` and \`y\` so panels tile with **no gaps**:
 
 ### Reflow after removals
 
-- There is no move operation. To reposition panels or fix gaps after removals, remove the affected panels and add them again with updated \`grid\` coordinates in the same ordered call.
 - If removing a panel leaves a gap in a row, shift the affected neighboring panels left by re-adding them with updated \`x\` values.
 - If removing a panel leaves later rows with unnecessary empty space above them, re-add the affected panels with updated \`y\` values.
 

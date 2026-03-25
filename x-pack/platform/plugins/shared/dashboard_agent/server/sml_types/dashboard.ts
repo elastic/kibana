@@ -97,10 +97,6 @@ const toDashboardSearchContent = (
 };
 
 const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | undefined => {
-  const title =
-    (panel.config as { title?: string } | undefined)?.title ??
-    (panel.config as { attributes?: { title?: string } } | undefined)?.attributes?.title;
-
   // TODO: update this when LENS_EMBEDDABLE_TYPE is moved to @kbn/lens-common
   if (panel.type === 'lens') {
     const attributes = (
@@ -116,9 +112,8 @@ const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | undefined =
 
         return {
           type: 'lens',
-          panelId: panel.uid ?? '',
-          visualization,
-          title,
+          uid: panel.uid ?? '',
+          config: visualization,
           grid: panel.grid,
         };
       } catch {
@@ -129,38 +124,41 @@ const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | undefined =
 
   return {
     type: panel.type,
-    panelId: panel.uid ?? '',
-    rawConfig: (panel.config as Record<string, unknown> | undefined) ?? {},
-    title,
+    uid: panel.uid ?? '',
+    config: (panel.config as Record<string, unknown> | undefined) ?? {},
     grid: panel.grid,
   };
 };
 
-const toAttachmentSections = (sections: DashboardSection[]): DashboardAttachmentSection[] => {
-  return sections.map((section) => ({
-    sectionId: section.uid ?? '',
-    title: section.title,
-    collapsed: section.collapsed ?? false,
-    grid: { y: section.grid.y },
-    panels: section.panels
-      .map(toAttachmentPanel)
-      .filter((panel): panel is AttachmentPanel => panel !== undefined),
-  }));
+const toAttachmentSection = (section: DashboardSection): DashboardAttachmentSection => ({
+  uid: section.uid ?? '',
+  title: section.title,
+  collapsed: section.collapsed ?? false,
+  grid: { y: section.grid.y },
+  panels: section.panels
+    .map(toAttachmentPanel)
+    .filter((panel): panel is AttachmentPanel => panel !== undefined),
+});
+
+const toAttachmentWidget = (
+  widget: DashboardPanel | DashboardSection
+): DashboardAttachmentData['panels'][number] | undefined => {
+  if ('panels' in widget) {
+    return toAttachmentSection(widget);
+  }
+
+  return toAttachmentPanel(widget);
 };
 
 const toAttachmentData = (state: DashboardState): DashboardAttachmentData => {
-  const topLevelPanels = state.panels.filter(
-    (panel): panel is DashboardPanel => !('panels' in panel)
-  );
-  const sections = state.panels.filter((panel): panel is DashboardSection => 'panels' in panel);
-
   return {
     title: state.title ?? '',
     description: state.description ?? '',
-    panels: topLevelPanels
-      .map(toAttachmentPanel)
-      .filter((panel): panel is AttachmentPanel => panel !== undefined),
-    ...(sections.length > 0 ? { sections: toAttachmentSections(sections) } : {}),
+    panels: state.panels
+      .map(toAttachmentWidget)
+      .filter(
+        (widget): widget is DashboardAttachmentData['panels'][number] => widget !== undefined
+      ),
   };
 };
 

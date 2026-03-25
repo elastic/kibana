@@ -9,6 +9,7 @@ import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { DashboardSavedObjectAttributes } from '@kbn/dashboard-plugin/server';
+import type { DashboardAttachmentData } from '@kbn/dashboard-agent-common';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import { dashboardSmlType } from './dashboard';
 
@@ -23,6 +24,9 @@ const references: SavedObjectReference[] = [
 const dashboardAttributes: DashboardSavedObjectAttributes = {
   title: 'System Overview',
   description: 'Main dashboard for key metrics',
+  kibanaSavedObjectMeta: {
+    searchSourceJSON: '{}',
+  },
   panelsJSON: JSON.stringify([
     {
       type: 'lens',
@@ -66,6 +70,9 @@ const dashboardAttributes: DashboardSavedObjectAttributes = {
 const dashboardWithLensApiAttributes: DashboardSavedObjectAttributes = {
   title: 'API Lens Dashboard',
   description: 'Dashboard with API-format lens panel',
+  kibanaSavedObjectMeta: {
+    searchSourceJSON: '{}',
+  },
   panelsJSON: JSON.stringify([
     {
       type: 'lens',
@@ -213,14 +220,22 @@ describe('dashboardSmlType', () => {
         }),
       })
     );
-    expect(result?.data.panels).toHaveLength(1);
-    expect(result?.data.sections).toEqual([
-      expect.objectContaining({
-        sectionId: 'section-1',
-        title: 'Operations',
-        panels: [expect.objectContaining({ panelId: 'panel-2', type: 'markdown' })],
-      }),
-    ]);
+    const attachmentData = result?.data as DashboardAttachmentData | undefined;
+
+    expect(attachmentData?.panels).toHaveLength(2);
+    expect(attachmentData?.panels).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          uid: 'panel-1',
+          type: 'lens',
+        }),
+        expect.objectContaining({
+          uid: 'section-1',
+          title: 'Operations',
+          panels: [expect.objectContaining({ uid: 'panel-2', type: 'markdown' })],
+        }),
+      ])
+    );
   });
 
   it('falls back to generic panel storage when a lens panel is already in API format', async () => {
@@ -259,11 +274,13 @@ describe('dashboardSmlType', () => {
         origin: 'dashboard-2',
       })
     );
-    expect(result?.data.panels).toEqual([
+    const attachmentData = result?.data as DashboardAttachmentData | undefined;
+
+    expect(attachmentData?.panels).toEqual([
       expect.objectContaining({
-        panelId: 'panel-3',
+        uid: 'panel-3',
         type: 'lens',
-        rawConfig: expect.objectContaining({
+        config: expect.objectContaining({
           attributes: expect.objectContaining({
             type: 'lnsXY',
             title: 'Request Rate',

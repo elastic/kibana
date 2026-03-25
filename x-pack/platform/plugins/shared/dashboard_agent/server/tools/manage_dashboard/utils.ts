@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
@@ -14,6 +13,7 @@ import type { Logger } from '@kbn/core/server';
 import { type AttachmentVersion, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
 import { z } from '@kbn/zod/v4';
+import { createDashboardPanel, type DashboardPanelContent } from './panel_content';
 
 /**
  * Failure record for tracking visualization errors.
@@ -35,12 +35,9 @@ const visualizationAttachmentDataSchema = z.object({
   visualization: z.record(z.string(), z.unknown()),
 });
 
-type ResolvedPanelWithoutGrid = Omit<AttachmentPanel, 'grid'>;
+type ResolvedPanelContent = DashboardPanelContent;
 
-const resolvePanelsFromVisualizationAttachment = (
-  data: unknown,
-  attachmentId: string
-): ResolvedPanelWithoutGrid[] => {
+const resolvePanelsFromVisualizationAttachment = (data: unknown): ResolvedPanelContent[] => {
   const parseResult = visualizationAttachmentDataSchema.safeParse(data);
   if (!parseResult.success) {
     throw new Error('Visualization attachment does not contain a valid visualization payload.');
@@ -51,20 +48,14 @@ const resolvePanelsFromVisualizationAttachment = (
   return [
     {
       type: 'lens',
-      uid: uuidv4(),
       config: visualization as LensApiSchemaType,
-      sourceAttachmentId: attachmentId,
     },
   ];
 };
 
-const resolvePanelsFromAttachment = (
-  type: string,
-  data: unknown,
-  attachmentId: string
-): ResolvedPanelWithoutGrid[] => {
+const resolvePanelsFromAttachment = (type: string, data: unknown): ResolvedPanelContent[] => {
   if (type === AttachmentType.visualization) {
-    return resolvePanelsFromVisualizationAttachment(data, attachmentId);
+    return resolvePanelsFromVisualizationAttachment(data);
   }
 
   throw new Error(
@@ -104,12 +95,10 @@ export const resolvePanelsFromAttachments = ({
         throw new Error(`Attachment "${attachmentId}" does not have a readable version.`);
       }
 
-      const resolvedPanels = resolvePanelsFromAttachment(
-        attachmentRecord.type,
-        latestVersion.data,
-        attachmentId
+      const resolvedPanels = resolvePanelsFromAttachment(attachmentRecord.type, latestVersion.data);
+      panels.push(
+        ...resolvedPanels.map((panelContent) => createDashboardPanel({ panelContent, grid }))
       );
-      panels.push(...resolvedPanels.map((panel) => ({ ...panel, grid })));
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       logger.error(
