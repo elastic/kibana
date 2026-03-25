@@ -13,6 +13,7 @@ import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { useQueryInferenceEndpoints } from '../hooks/use_inference_endpoints';
 import { useKibana } from '../hooks/use_kibana';
 import { isElasticInferenceServiceEnabled } from '../feature_flag';
+import { isEndpointPreconfigured } from '../utils/preconfigured_endpoint_helper';
 import { TabularPage } from './all_inference_endpoints/tabular_page';
 import { InferenceEndpointsHeader } from './inference_endpoints_header';
 import { AddInferenceFlyoutWrapper } from './add_inference_endpoints/add_inference_flyout_wrapper';
@@ -40,11 +41,10 @@ export const InferenceEndpoints: React.FC = () => {
   const inferenceEndpoints = useMemo(() => {
     const endpoints = data || [];
     if (isEisEnabled) {
-      const elasticProviders = new Set<string>([
-        ServiceProviderKeys.elastic,
-        ServiceProviderKeys.elasticsearch,
-      ]);
-      return endpoints.filter((ep) => !elasticProviders.has(ep.service));
+      return endpoints.filter(
+        (ep) =>
+          ep.service !== ServiceProviderKeys.elastic && !isEndpointPreconfigured(ep.inference_id)
+      );
     }
     return endpoints;
   }, [data, isEisEnabled]);

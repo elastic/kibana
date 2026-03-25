@@ -18,6 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const searchSpace = getService('searchSpace');
   const kibanaServer = getService('kibanaServer');
+  const es = getService('es');
   describe('Inference Management UI', function () {
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
@@ -175,9 +176,38 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
-      it('still displays non-EIS endpoints when flag is enabled', async () => {
-        await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectHeaderToBeExist();
-        await pageObjects.searchInferenceManagementPage.ProviderInferenceEmptyPrompt.expectEmptyPromptNotToBeDisplayed();
+      it('displays empty prompt when no third-party endpoints exist', async () => {
+        await pageObjects.searchInferenceManagementPage.ProviderInferenceEmptyPrompt.expectEmptyPromptToBeDisplayed();
+      });
+
+      describe('with a third-party endpoint', () => {
+        const testEndpointId = 'test-openai-endpoint';
+
+        before(async () => {
+          await es.transport.request({
+            path: `_inference/completion/${testEndpointId}`,
+            method: 'PUT',
+            body: {
+              service: 'openai',
+              service_settings: {
+                api_key: 'test-api-key',
+                model_id: 'gpt-4o',
+              },
+            },
+          });
+        });
+
+        after(async () => {
+          await es.transport.request({
+            path: `_inference/completion/${testEndpointId}`,
+            method: 'DELETE',
+          });
+        });
+
+        it('displays tabular view with third-party endpoints', async () => {
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectHeaderToBeExist();
+          await pageObjects.searchInferenceManagementPage.ProviderInferenceEmptyPrompt.expectEmptyPromptNotToBeDisplayed();
+        });
       });
     });
   });
