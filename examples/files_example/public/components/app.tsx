@@ -138,6 +138,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
         <EuiPageTemplate.Header pageTitle="Files example" />
         <EuiPageTemplate.Section>
           <EuiInMemoryTable
+            tableCaption="Files example"
             columns={columns}
             items={items}
             itemId="id"

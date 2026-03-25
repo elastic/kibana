@@ -27,7 +27,8 @@ import {
 } from '../../screens/experimental';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/258936
+describe.skip(
   'EXPERIMENTAL - History (queryHistoryRework)',
   {
     tags: ['@ess', '@experimental'],
@@ -170,7 +171,7 @@ describe(
       cy.getBySel(UNIFIED_HISTORY_TABLE)
         .find('tbody tr')
         .each(($row) => {
-          cy.wrap($row).should('contain', 'uptime');
+          expect($row.text()).to.include('uptime');
         });
 
       // Filter to "processes" queries
@@ -179,7 +180,7 @@ describe(
       cy.getBySel(UNIFIED_HISTORY_TABLE)
         .find('tbody tr')
         .each(($row) => {
-          cy.wrap($row).should('contain', 'processes');
+          expect($row.text()).to.include('processes');
         });
 
       // Non-matching search shows empty state

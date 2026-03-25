@@ -1,0 +1,120 @@
+version: '1'
+name: 'sources.github.list'
+description: 'List GitHub resources in a repository (issues, pull requests, commits, branches, releases, tags). '
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: list_type
+    type: choice
+    required: true
+    description: |
+      The type of GitHub resource to list in a repository. All use cursor-based pagination (first/after):
+        listIssues - List issues (supports state filter: open, closed, all)
+        listPullRequests - List pull requests (supports state filter: open, closed, all)
+        listCommits - List commits (supports sha param to specify branch or starting commit)
+        listBranches - List branches
+        listReleases - List releases
+        listTags - List tags
+    options:
+      - listIssues
+      - listPullRequests
+      - listCommits
+      - listBranches
+      - listReleases
+      - listTags
+  - name: owner
+    type: string
+    required: true
+    description: "Repository owner (username or organization)"
+  - name: repo
+    type: string
+    required: true
+    description: "Repository name"
+  - name: state
+    type: string
+    default: "open"
+    required: false
+    description: "Filter by state. Valid values: open, closed, all. Used by listIssues and listPullRequests."
+  - name: sha
+    type: string
+    required: false
+    description: "Branch name or commit SHA to start listing from. Used by listCommits."
+  - name: first
+    type: number
+    default: 10
+    required: false
+    description: "Number of results to return"
+  - name: after
+    type: string
+    required: false
+    description: "Cursor for pagination (endCursor from previous response)"
+steps:
+  - name: route-list
+    type: switch
+    expression: "{{ inputs.list_type }}"
+    cases:
+      - match: listIssues
+        steps:
+          - name: list-issues
+            type: github.listIssues
+            connector-id: <%= github-stack-connector-id %>
+            with:
+              owner: "${{inputs.owner}}"
+              repo: "${{inputs.repo}}"
+              state: "${{inputs.state}}"
+              first: ${{inputs.first}}
+              after: "${{inputs.after}}"
+      - match: listPullRequests
+        steps:
+          - name: list-pull-requests
+            type: github.listPullRequests
+            connector-id: <%= github-stack-connector-id %>
+            with:
+              owner: "${{inputs.owner}}"
+              repo: "${{inputs.repo}}"
+              state: "${{inputs.state}}"
+              first: ${{inputs.first}}
+              after: "${{inputs.after}}"
+      - match: listCommits
+        steps:
+          - name: list-commits
+            type: github.listCommits
+            connector-id: <%= github-stack-connector-id %>
+            with:
+              owner: "${{inputs.owner}}"
+              repo: "${{inputs.repo}}"
+              sha: "${{inputs.sha}}"
+              first: ${{inputs.first}}
+              after: "${{inputs.after}}"
+      - match: listBranches
+        steps:
+          - name: list-branches
+            type: github.listBranches
+            connector-id: <%= github-stack-connector-id %>
+            with:
+              owner: "${{inputs.owner}}"
+              repo: "${{inputs.repo}}"
+              first: ${{inputs.first}}
+              after: "${{inputs.after}}"
+      - match: listReleases
+        steps:
+          - name: list-releases
+            type: github.listReleases
+            connector-id: <%= github-stack-connector-id %>
+            with:
+              owner: "${{inputs.owner}}"
+              repo: "${{inputs.repo}}"
+              first: ${{inputs.first}}
+              after: "${{inputs.after}}"
+      - match: listTags
+        steps:
+          - name: list-tags
+            type: github.listTags
+            connector-id: <%= github-stack-connector-id %>
+            with:
+              owner: "${{inputs.owner}}"
+              repo: "${{inputs.repo}}"
+              first: ${{inputs.first}}
+              after: "${{inputs.after}}"

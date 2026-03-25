@@ -13,17 +13,26 @@ import {
   EuiBasicTable,
   EuiButtonIcon,
   EuiCodeBlock,
+  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSkeletonText,
   EuiSpacer,
+  EuiSuperDatePicker,
   EuiTablePagination,
   EuiToolTip,
   formatDate,
 } from '@elastic/eui';
-import type { UseEuiTheme } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import type {
+  EuiBasicTableColumn,
+  OnRefreshChangeProps,
+  OnTimeChangeProps,
+  UseEuiTheme,
+} from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { css } from '@emotion/react';
 
 import { QUERY_TIMEOUT } from '../../common/constants';
 import { removeMultilines } from '../../common/utils/build_query/remove_multilines';
@@ -42,15 +51,94 @@ import { usePacks } from '../packs/use_packs';
 import { RunByColumn } from './components/run_by_column';
 import { SourceBadge } from './components/source_column';
 import { TagsColumn } from './components/tags_column';
-import { HistoryFilters } from './components/history_filters';
+import { TagsFilterPopover } from './components/tags_filter_popover';
+import { SourceFilterPopover } from './components/source_filter_popover';
+import { RunByFilterPopover } from './components/run_by_filter_popover';
+import { TableToolbar } from '../components/table_toolbar';
 import { usePersistedPageSize, PAGE_SIZE_OPTIONS } from '../common/use_persisted_page_size';
 import { useHistoryUrlParams } from './use_history_url_params';
+import type { SortDirection } from './use_history_url_params';
 
 const EMPTY_ARRAY: UnifiedHistoryRow[] = [];
 const EMPTY_TAGS: string[] = [];
 const ITEMS_PER_PAGE_OPTIONS = [...PAGE_SIZE_OPTIONS];
 
 const PACKS_CONFIG = { isLive: false } as const;
+
+const HISTORY_COLUMNS_STORAGE_KEY = 'osquery:historyColumns';
+
+const ALL_COLUMN_IDS = [
+  'query',
+  'tags',
+  'results',
+  'source',
+  'agents',
+  'created_at',
+  'run_by',
+] as const;
+
+const COLUMN_CONFIGS = [
+  {
+    id: 'query',
+    label: i18n.translate('xpack.osquery.history.table.queryColumnTitle', {
+      defaultMessage: 'Query',
+    }),
+  },
+  {
+    id: 'tags',
+    label: i18n.translate('xpack.osquery.history.table.tagsColumnTitle', {
+      defaultMessage: 'Tags',
+    }),
+  },
+  {
+    id: 'results',
+    label: i18n.translate('xpack.osquery.history.table.resultsColumnTitle', {
+      defaultMessage: 'Results',
+    }),
+  },
+  {
+    id: 'source',
+    label: i18n.translate('xpack.osquery.history.table.sourceColumnTitle', {
+      defaultMessage: 'Source',
+    }),
+  },
+  {
+    id: 'agents',
+    label: i18n.translate('xpack.osquery.history.table.agentsColumnTitle', {
+      defaultMessage: 'Agents',
+    }),
+  },
+  {
+    id: 'created_at',
+    label: i18n.translate('xpack.osquery.history.table.createdAtColumnTitle', {
+      defaultMessage: 'Created at',
+    }),
+  },
+  {
+    id: 'run_by',
+    label: i18n.translate('xpack.osquery.history.table.runByColumnTitle', {
+      defaultMessage: 'Run by',
+    }),
+  },
+];
+
+const SORT_FIELDS = [
+  {
+    id: 'created_at',
+    label: i18n.translate('xpack.osquery.history.sort.createdAtLabel', {
+      defaultMessage: 'Created at',
+    }),
+  },
+];
+
+const SEARCH_PLACEHOLDER = i18n.translate('xpack.osquery.history.searchPlaceholder', {
+  defaultMessage: 'Search by query or pack name',
+});
+
+const datePickerCss = css`
+  min-width: 300px;
+  max-width: 500px;
+`;
 
 const separatorCss = ({ euiTheme }: UseEuiTheme) => ({ color: euiTheme.colors.lightShade });
 const badgePaddingCss = { padding: '0 6px' };
@@ -117,6 +205,13 @@ const UnifiedHistoryTableComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
   const { push } = useHistory();
 
+  const [storedColumns, setStoredColumns] = useLocalStorage<string[]>(HISTORY_COLUMNS_STORAGE_KEY, [
+    ...ALL_COLUMN_IDS,
+  ]);
+  const visibleColumns = useMemo(() => storedColumns ?? [...ALL_COLUMN_IDS], [storedColumns]);
+  const [isPaused, setIsPaused] = useState(true);
+  const [refreshInterval, setRefreshInterval] = useState(5000);
+
   const [persistedPageSize, setPersistedPageSize] = usePersistedPageSize();
   const {
     filters: {
@@ -127,6 +222,7 @@ const UnifiedHistoryTableComponent = () => {
       end: endDate,
       pageSize: urlPageSize,
       tags: selectedTags,
+      sortDirection,
     },
     setFilter,
     setFilters,
@@ -151,6 +247,7 @@ const UnifiedHistoryTableComponent = () => {
     tags: selectedTags.length > 0 ? selectedTags : undefined,
     startDate,
     endDate,
+    sortDirection,
   });
 
   const rows = useMemo(() => historyData?.data ?? EMPTY_ARRAY, [historyData?.data]);
@@ -192,11 +289,38 @@ const UnifiedHistoryTableComponent = () => {
   );
 
   const handleTimeChange = useCallback(
-    (start: string, end: string) => {
+    ({ start, end }: OnTimeChangeProps) => {
       setFilters({ start, end });
       resetPagination();
     },
     [setFilters, resetPagination]
+  );
+
+  const handleRefresh = useCallback(() => {
+    refetch();
+  }, [refetch]);
+
+  const handleRefreshChange = useCallback(
+    ({ isPaused: paused, refreshInterval: interval }: Partial<OnRefreshChangeProps>) => {
+      if (paused !== undefined) setIsPaused(paused);
+      if (interval !== undefined) setRefreshInterval(interval);
+    },
+    []
+  );
+
+  const handleSortChange = useCallback(
+    (_field: string, direction: SortDirection) => {
+      setFilter('sortDirection', direction);
+      resetPagination();
+    },
+    [setFilter, resetPagination]
+  );
+
+  const handleVisibleColumnsChange = useCallback(
+    (columnIds: string[]) => {
+      setStoredColumns(columnIds);
+    },
+    [setStoredColumns]
   );
 
   const handlePageSizeChange = useCallback(
@@ -430,8 +554,10 @@ const UnifiedHistoryTableComponent = () => {
     [handlePlayClick, isPlayButtonAvailable]
   );
 
-  const columns = useMemo(
-    () => [
+  const visibleSet = useMemo(() => new Set(visibleColumns), [visibleColumns]);
+
+  const columns = useMemo(() => {
+    const cols: Array<EuiBasicTableColumn<UnifiedHistoryRow>> = [
       {
         name: i18n.translate('xpack.osquery.liveQueryActions.table.actionsColumnTitle', {
           defaultMessage: 'Actions',
@@ -440,74 +566,97 @@ const UnifiedHistoryTableComponent = () => {
         render: renderActionsColumn,
         css: { '.euiTableCellContent': { paddingRight: 0 } },
       },
-      {
+    ];
+
+    if (visibleSet.has('query')) {
+      cols.push({
         field: 'queryText',
         name: i18n.translate('xpack.osquery.liveQueryActions.table.queryColumnTitle', {
           defaultMessage: 'Query',
         }),
         width: '40%',
         render: renderQueryColumn,
-      },
-      {
+      });
+    }
+
+    if (visibleSet.has('tags')) {
+      cols.push({
         field: 'tags',
         name: i18n.translate('xpack.osquery.liveQueryActions.table.tagsColumnTitle', {
           defaultMessage: 'Tags',
         }),
         width: '100px',
         render: renderTagsColumn,
-      },
-      {
+      });
+    }
+
+    if (visibleSet.has('results')) {
+      cols.push({
         field: 'totalRows',
         name: i18n.translate('xpack.osquery.liveQueryActions.table.resultsColumnTitle', {
           defaultMessage: 'Results',
         }),
         width: '120px',
         render: renderResultsColumn,
-      },
-      {
+      });
+    }
+
+    if (visibleSet.has('source')) {
+      cols.push({
         field: 'source',
         name: i18n.translate('xpack.osquery.liveQueryActions.table.sourceColumnTitle', {
           defaultMessage: 'Source',
         }),
         width: '120px',
         render: renderSourceColumn,
-      },
-      {
+      });
+    }
+
+    if (visibleSet.has('agents')) {
+      cols.push({
         field: 'agentCount',
         name: i18n.translate('xpack.osquery.liveQueryActions.table.agentsColumnTitle', {
           defaultMessage: 'Agents',
         }),
         width: '120px',
         render: renderAgentsColumn,
-      },
-      {
+      });
+    }
+
+    if (visibleSet.has('created_at')) {
+      cols.push({
         field: 'timestamp',
         name: i18n.translate('xpack.osquery.liveQueryActions.table.createdAtColumnTitle', {
           defaultMessage: 'Created at',
         }),
         width: '200px',
         render: renderTimestampColumn,
-      },
-      {
+      });
+    }
+
+    if (visibleSet.has('run_by')) {
+      cols.push({
         field: 'userId',
         name: i18n.translate('xpack.osquery.liveQueryActions.table.createdByColumnTitle', {
           defaultMessage: 'Run by',
         }),
         width: '200px',
         render: renderRunByColumn,
-      },
-    ],
-    [
-      renderActionsColumn,
-      renderAgentsColumn,
-      renderQueryColumn,
-      renderResultsColumn,
-      renderRunByColumn,
-      renderSourceColumn,
-      renderTagsColumn,
-      renderTimestampColumn,
-    ]
-  );
+      });
+    }
+
+    return cols;
+  }, [
+    visibleSet,
+    renderActionsColumn,
+    renderAgentsColumn,
+    renderQueryColumn,
+    renderResultsColumn,
+    renderRunByColumn,
+    renderSourceColumn,
+    renderTagsColumn,
+    renderTimestampColumn,
+  ]);
 
   const rowProps = useCallback(
     (row: UnifiedHistoryRow) => ({
@@ -533,27 +682,78 @@ const UnifiedHistoryTableComponent = () => {
     [pageIndex, hasMore, handleNextPage, goToPage]
   );
 
+  const additionalFilters = useMemo(
+    () => (
+      <EuiFlexGroup gutterSize="m" responsive={false} wrap alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiFilterGroup>
+            <TagsFilterPopover
+              selectedTags={selectedTags}
+              onSelectedTagsChanged={handleSelectedTagsChanged}
+            />
+            <SourceFilterPopover
+              selectedSources={selectedSources}
+              onSelectedSourcesChanged={handleSelectedSourcesChanged}
+            />
+            <RunByFilterPopover
+              selectedUserIds={selectedUserIds}
+              onSelectedUsersChanged={handleSelectedUsersChanged}
+              enabled
+            />
+          </EuiFilterGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} css={datePickerCss}>
+          <EuiSuperDatePicker
+            start={startDate}
+            end={endDate}
+            onTimeChange={handleTimeChange}
+            onRefresh={handleRefresh}
+            isPaused={isPaused}
+            refreshInterval={refreshInterval}
+            onRefreshChange={handleRefreshChange}
+            data-test-subj="history-date-picker"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    [
+      selectedTags,
+      handleSelectedTagsChanged,
+      selectedSources,
+      handleSelectedSourcesChanged,
+      selectedUserIds,
+      handleSelectedUsersChanged,
+      startDate,
+      endDate,
+      handleTimeChange,
+      handleRefresh,
+      isPaused,
+      refreshInterval,
+      handleRefreshChange,
+    ]
+  );
+
   if (isLoading) {
     return <EuiSkeletonText lines={10} />;
   }
 
   return (
     <>
-      <HistoryFilters
+      <TableToolbar
+        searchPlaceholder={SEARCH_PLACEHOLDER}
         searchValue={searchValue}
         onSearchSubmit={handleSearchSubmit}
-        selectedTags={selectedTags}
-        onSelectedTagsChanged={handleSelectedTagsChanged}
-        selectedSources={selectedSources}
-        onSelectedSourcesChanged={handleSelectedSourcesChanged}
-        selectedUserIds={selectedUserIds}
-        onSelectedUsersChanged={handleSelectedUsersChanged}
-        startDate={startDate}
-        endDate={endDate}
-        onTimeChange={handleTimeChange}
-        onRefresh={refetch}
+        additionalFilters={additionalFilters}
+        columnConfigs={COLUMN_CONFIGS}
+        visibleColumns={visibleColumns}
+        onVisibleColumnsChange={handleVisibleColumnsChange}
+        sortFields={SORT_FIELDS}
+        sortField="created_at"
+        sortDirection={sortDirection}
+        onSortChange={handleSortChange}
+        data-test-subj="history-toolbar"
       />
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
       <EuiBasicTable
         items={rows}
         loading={isFetching && !isLoading}
