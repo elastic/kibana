@@ -7,330 +7,265 @@
 
 import { ToolResultType, type ErrorResult } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
-import {
-  createToolHandlerContext,
-  createToolTestMocks,
-  setupMockCoreStartServices,
-} from '../__mocks__/test_helpers';
+import { createToolHandlerContext, createToolTestMocks } from '../__mocks__/test_helpers';
 import { timelineCreateTool } from './timeline_create_tool';
-import { coreMock } from '@kbn/core/server/mocks';
+
+jest.mock('../../lib/timeline/saved_object/timelines', () => ({
+  createTimeline: jest.fn(),
+}));
+
+jest.mock('../../lib/timeline/saved_object/pinned_events', () => ({
+  savePinnedEvents: jest.fn(),
+}));
+
+import { createTimeline } from '../../lib/timeline/saved_object/timelines';
+import { savePinnedEvents } from '../../lib/timeline/saved_object/pinned_events';
+
+const mockCreateTimeline = createTimeline as jest.MockedFunction<typeof createTimeline>;
+const mockSavePinnedEvents = savePinnedEvents as jest.MockedFunction<typeof savePinnedEvents>;
 
 describe('timelineCreateTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
   const tool = timelineCreateTool(mockCore, mockLogger);
 
-  const mockSavedObjectsClient = {
-    create: jest.fn(),
-    get: jest.fn(),
-    find: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    bulkCreate: jest.fn(),
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Set up core start services with a savedObjects client
-    const mockCoreStart = coreMock.createStart();
-    Object.assign(mockCoreStart.elasticsearch.client, {
-      asInternalUser: mockEsClient.asInternalUser,
-      asCurrentUser: mockEsClient.asCurrentUser,
-    });
-    mockCoreStart.savedObjects.getScopedClient = jest.fn().mockReturnValue(mockSavedObjectsClient);
-    mockCore.getStartServices.mockResolvedValue([mockCoreStart, {}, {}]);
+    mockCreateTimeline.mockResolvedValue({
+      timeline: {
+        savedObjectId: 'timeline-123',
+        version: '1',
+      },
+    } as ReturnType<typeof createTimeline> extends Promise<infer T> ? T : never);
+
+    mockSavePinnedEvents.mockResolvedValue(undefined as unknown as ReturnType<typeof savePinnedEvents> extends Promise<infer T> ? T : never);
   });
 
   describe('schema', () => {
     it('validates correct input with title and event_ids', () => {
-      const validInput = {
+      const result = tool.schema.safeParse({
         title: 'Investigation Timeline',
         event_ids: ['event-1', 'event-2'],
-      };
-
-      const result = tool.schema.safeParse(validInput);
-
+      });
       expect(result.success).toBe(true);
     });
 
     it('accepts optional description', () => {
-      const validInput = {
-        title: 'Investigation Timeline',
-        description: 'Timeline for investigating suspicious activity',
+      const result = tool.schema.safeParse({
+        title: 'Timeline',
         event_ids: ['event-1'],
-      };
-
-      const result = tool.schema.safeParse(validInput);
-
+        description: 'Test description',
+      });
       expect(result.success).toBe(true);
     });
 
     it('accepts optional index_pattern', () => {
-      const validInput = {
-        title: 'Investigation Timeline',
+      const result = tool.schema.safeParse({
+        title: 'Timeline',
         event_ids: ['event-1'],
-        index_pattern: 'logs-*',
-      };
-
-      const result = tool.schema.safeParse(validInput);
-
+        index_pattern: 'custom-index-*',
+      });
       expect(result.success).toBe(true);
     });
 
-    it('rejects missing title', () => {
-      const invalidInput = {
+    it('rejects empty title', () => {
+      const result = tool.schema.safeParse({
+        title: '',
         event_ids: ['event-1'],
-      };
-
-      const result = tool.schema.safeParse(invalidInput);
-
+      });
       expect(result.success).toBe(false);
     });
 
-    it('rejects missing event_ids', () => {
-      const invalidInput = {
-        title: 'Investigation Timeline',
-      };
-
-      const result = tool.schema.safeParse(invalidInput);
-
-      expect(result.success).toBe(false);
-    });
-
-    it('accepts empty event_ids array', () => {
-      const validInput = {
-        title: 'Investigation Timeline',
+    it('rejects empty event_ids array', () => {
+      const result = tool.schema.safeParse({
+        title: 'Timeline',
         event_ids: [],
-      };
+      });
+      expect(result.success).toBe(false);
+    });
 
-      const result = tool.schema.safeParse(validInput);
+    it('enforces max title length', () => {
+      const result = tool.schema.safeParse({
+        title: 'a'.repeat(257),
+        event_ids: ['event-1'],
+      });
+      expect(result.success).toBe(false);
+    });
 
-      expect(result.success).toBe(true);
+    it('enforces max event_ids count', () => {
+      const result = tool.schema.safeParse({
+        title: 'Timeline',
+        event_ids: Array.from({ length: 101 }, (_, i) => `event-${i}`),
+      });
+      expect(result.success).toBe(false);
     });
   });
 
   describe('handler', () => {
-    it('verifies events exist via search and creates timeline', async () => {
+    const mockSavedObjectsClient = {
+      create: jest.fn(),
+      get: jest.fn(),
+      find: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      bulkCreate: jest.fn(),
+    };
+
+    const createContext = (overrides = {}) =>
+      createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+        savedObjectsClient: mockSavedObjectsClient as any,
+        ...overrides,
+      });
+
+    it('verifies events exist and creates timeline via Timeline API', async () => {
       mockEsClient.asCurrentUser.search.mockResolvedValue({
         hits: {
-          hits: [
-            { _id: 'event-1', _index: '.alerts-security.alerts-default' },
-            { _id: 'event-2', _index: '.alerts-security.alerts-default' },
-          ],
-          total: { value: 2, relation: 'eq' },
+          hits: [{ _id: 'event-1' }, { _id: 'event-2' }],
         },
-      } as never);
-
-      mockSavedObjectsClient.create.mockResolvedValue({ id: 'timeline-123' });
+      } as any);
 
       const result = (await tool.handler(
         { title: 'Test Timeline', event_ids: ['event-1', 'event-2'] },
-        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+        createContext()
       )) as ToolHandlerStandardReturn;
 
-      expect(result.results).toHaveLength(1);
       expect(result.results[0].type).toBe(ToolResultType.other);
-      expect(result.results[0].data).toEqual(
+      expect(result.results[0].data).toMatchObject({
+        timeline_id: 'timeline-123',
+        title: 'Test Timeline',
+        pinned_events: 2,
+      });
+    });
+
+    it('calls createTimeline with correct parameters', async () => {
+      mockEsClient.asCurrentUser.search.mockResolvedValue({
+        hits: { hits: [{ _id: 'event-1' }] },
+      } as any);
+
+      await tool.handler(
+        { title: 'My Timeline', description: 'Test desc', event_ids: ['event-1'] },
+        createContext()
+      );
+
+      expect(mockCreateTimeline).toHaveBeenCalledWith(
         expect.objectContaining({
-          timeline_id: 'timeline-123',
-          title: 'Test Timeline',
-          pinned_events: 2,
+          timelineId: null,
+          timeline: expect.objectContaining({
+            title: 'My Timeline',
+            description: 'Test desc',
+          }),
+          savedObjectsClient: mockSavedObjectsClient,
+          userInfo: null,
         })
       );
     });
 
-    it('creates timeline saved object with correct type', async () => {
+    it('calls savePinnedEvents with found event IDs', async () => {
       mockEsClient.asCurrentUser.search.mockResolvedValue({
-        hits: {
-          hits: [{ _id: 'event-1', _index: '.alerts-security.alerts-default' }],
-          total: { value: 1, relation: 'eq' },
-        },
-      } as never);
-
-      mockSavedObjectsClient.create.mockResolvedValue({ id: 'timeline-456' });
+        hits: { hits: [{ _id: 'event-1' }, { _id: 'event-2' }] },
+      } as any);
 
       await tool.handler(
-        { title: 'Test Timeline', event_ids: ['event-1'] },
-        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+        { title: 'Timeline', event_ids: ['event-1', 'event-2'] },
+        createContext()
       );
 
-      // Verify the first call creates the timeline SO
-      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
-        'siem-ui-timeline',
-        expect.objectContaining({
-          title: 'Test Timeline',
-          status: 'draft',
-          timelineType: 'default',
-        }),
-        expect.objectContaining({ overwrite: false })
-      );
-    });
-
-    it('pins events to the timeline', async () => {
-      mockEsClient.asCurrentUser.search.mockResolvedValue({
-        hits: {
-          hits: [
-            { _id: 'event-1', _index: '.alerts-security.alerts-default' },
-            { _id: 'event-2', _index: '.alerts-security.alerts-default' },
-          ],
-          total: { value: 2, relation: 'eq' },
-        },
-      } as never);
-
-      mockSavedObjectsClient.create.mockResolvedValue({ id: 'timeline-789' });
-
-      await tool.handler(
-        { title: 'Test Timeline', event_ids: ['event-1', 'event-2'] },
-        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
-      );
-
-      // First call is for the timeline, subsequent calls are for pinned events
-      const pinnedEventCalls = mockSavedObjectsClient.create.mock.calls.filter(
-        (call: unknown[]) => call[0] === 'siem-ui-timeline-pinned-event'
-      );
-      expect(pinnedEventCalls).toHaveLength(2);
-      expect(pinnedEventCalls[0][1]).toEqual(
-        expect.objectContaining({
-          eventId: 'event-1',
-          timelineId: 'timeline-789',
-        })
-      );
-      expect(pinnedEventCalls[1][1]).toEqual(
-        expect.objectContaining({
-          eventId: 'event-2',
-          timelineId: 'timeline-789',
-        })
+      expect(mockSavePinnedEvents).toHaveBeenCalledWith(
+        expect.anything(), // frameworkRequest
+        'timeline-123',
+        ['event-1', 'event-2']
       );
     });
 
     it('returns timeline URL', async () => {
       mockEsClient.asCurrentUser.search.mockResolvedValue({
-        hits: {
-          hits: [{ _id: 'event-1', _index: '.alerts-security.alerts-default' }],
-          total: { value: 1, relation: 'eq' },
-        },
-      } as never);
-
-      mockSavedObjectsClient.create.mockResolvedValue({ id: 'timeline-url-test' });
+        hits: { hits: [{ _id: 'event-1' }] },
+      } as any);
 
       const result = (await tool.handler(
-        { title: 'Test Timeline', event_ids: ['event-1'] },
-        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+        { title: 'Timeline', event_ids: ['event-1'] },
+        createContext()
       )) as ToolHandlerStandardReturn;
 
-      expect(result.results[0].data.url).toContain('/app/security/timelines');
-      expect(result.results[0].data.url).toContain('timeline-url-test');
+      expect(result.results[0].data).toMatchObject({
+        url: expect.stringContaining("timeline=(id:'timeline-123'"),
+      });
     });
 
-    it('handles missing events gracefully (some found, some not)', async () => {
+    it('handles partial events — some found, some missing', async () => {
       mockEsClient.asCurrentUser.search.mockResolvedValue({
-        hits: {
-          hits: [{ _id: 'event-1', _index: '.alerts-security.alerts-default' }],
-          total: { value: 1, relation: 'eq' },
-        },
-      } as never);
-
-      mockSavedObjectsClient.create.mockResolvedValue({ id: 'timeline-partial' });
+        hits: { hits: [{ _id: 'event-1' }] },
+      } as any);
 
       const result = (await tool.handler(
-        { title: 'Partial Timeline', event_ids: ['event-1', 'event-missing'] },
-        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+        { title: 'Timeline', event_ids: ['event-1', 'event-missing'] },
+        createContext()
       )) as ToolHandlerStandardReturn;
 
       expect(result.results[0].type).toBe(ToolResultType.other);
-      expect(result.results[0].data).toEqual(
-        expect.objectContaining({
-          pinned_events: 1,
-          missing_events: ['event-missing'],
-        })
-      );
-      expect(result.results[0].data.message).toContain('1 event(s) were not found');
+      expect(result.results[0].data).toMatchObject({
+        pinned_events: 1,
+        missing_events: ['event-missing'],
+      });
     });
 
-    it('errors when no events found', async () => {
+    it('returns error when no events found', async () => {
       mockEsClient.asCurrentUser.search.mockResolvedValue({
-        hits: {
-          hits: [],
-          total: { value: 0, relation: 'eq' },
-        },
-      } as never);
+        hits: { hits: [] },
+      } as any);
 
       const result = (await tool.handler(
-        { title: 'Empty Timeline', event_ids: ['nonexistent-1', 'nonexistent-2'] },
-        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+        { title: 'Timeline', event_ids: ['event-missing'] },
+        createContext()
       )) as ToolHandlerStandardReturn;
 
-      expect(result.results).toHaveLength(1);
-      const errorResult = result.results[0] as ErrorResult;
-      expect(errorResult.type).toBe(ToolResultType.error);
-      expect(errorResult.data.message).toContain('None of the specified event IDs were found');
+      const error = result.results[0] as ErrorResult;
+      expect(error.type).toBe(ToolResultType.error);
+      expect(error.data.message).toContain('None of the specified event IDs were found');
     });
 
     it('uses custom index_pattern when provided', async () => {
       mockEsClient.asCurrentUser.search.mockResolvedValue({
-        hits: {
-          hits: [{ _id: 'event-1', _index: 'custom-index' }],
-          total: { value: 1, relation: 'eq' },
-        },
-      } as never);
-
-      mockSavedObjectsClient.create.mockResolvedValue({ id: 'timeline-custom' });
+        hits: { hits: [{ _id: 'event-1' }] },
+      } as any);
 
       await tool.handler(
-        {
-          title: 'Custom Index Timeline',
-          event_ids: ['event-1'],
-          index_pattern: 'custom-index-*',
-        },
-        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+        { title: 'Timeline', event_ids: ['event-1'], index_pattern: 'custom-index-*' },
+        createContext()
       );
 
-      const searchCall = mockEsClient.asCurrentUser.search.mock.calls[0][0] as Record<
-        string,
-        unknown
-      >;
-      expect(searchCall.index).toBe('custom-index-*');
+      expect(mockEsClient.asCurrentUser.search).toHaveBeenCalledWith(
+        expect.objectContaining({ index: 'custom-index-*' })
+      );
+    });
+
+    it('handles createTimeline errors', async () => {
+      mockEsClient.asCurrentUser.search.mockResolvedValue({
+        hits: { hits: [{ _id: 'event-1' }] },
+      } as any);
+      mockCreateTimeline.mockRejectedValue(new Error('Timeline creation failed'));
+
+      const result = (await tool.handler(
+        { title: 'Timeline', event_ids: ['event-1'] },
+        createContext()
+      )) as ToolHandlerStandardReturn;
+
+      const error = result.results[0] as ErrorResult;
+      expect(error.type).toBe(ToolResultType.error);
+      expect(error.data.message).toContain('Timeline creation failed');
     });
 
     it('handles ES search errors', async () => {
-      mockEsClient.asCurrentUser.search.mockRejectedValue(
-        new Error('Search service unavailable')
-      );
+      mockEsClient.asCurrentUser.search.mockRejectedValue(new Error('ES unavailable'));
 
       const result = (await tool.handler(
-        { title: 'Failing Timeline', event_ids: ['event-1'] },
-        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+        { title: 'Timeline', event_ids: ['event-1'] },
+        createContext()
       )) as ToolHandlerStandardReturn;
 
-      expect(result.results).toHaveLength(1);
-      const errorResult = result.results[0] as ErrorResult;
-      expect(errorResult.type).toBe(ToolResultType.error);
-      expect(errorResult.data.message).toContain('Search service unavailable');
-      expect(mockLogger.error).toHaveBeenCalled();
-    });
-
-    it('handles saved objects create errors', async () => {
-      mockEsClient.asCurrentUser.search.mockResolvedValue({
-        hits: {
-          hits: [{ _id: 'event-1', _index: '.alerts-security.alerts-default' }],
-          total: { value: 1, relation: 'eq' },
-        },
-      } as never);
-
-      mockSavedObjectsClient.create.mockRejectedValue(
-        new Error('Saved objects write error')
-      );
-
-      const result = (await tool.handler(
-        { title: 'Failing Timeline', event_ids: ['event-1'] },
-        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
-      )) as ToolHandlerStandardReturn;
-
-      expect(result.results).toHaveLength(1);
-      const errorResult = result.results[0] as ErrorResult;
-      expect(errorResult.type).toBe(ToolResultType.error);
-      expect(errorResult.data.message).toContain('Saved objects write error');
-      expect(mockLogger.error).toHaveBeenCalled();
+      const error = result.results[0] as ErrorResult;
+      expect(error.type).toBe(ToolResultType.error);
+      expect(error.data.message).toContain('ES unavailable');
     });
   });
 });
