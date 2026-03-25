@@ -232,8 +232,10 @@ export interface KibanaRequest<
   /**
    * API for recording custom timing events during request processing.
    * These events are automatically included in the Server-Timing response header.
+   *
+   * Only available during development.
    */
-  readonly publicallyAvailableTiming: RequestTiming;
+  readonly devToolsTiming: RequestTiming;
 }
 
 /**

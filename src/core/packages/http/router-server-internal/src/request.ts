@@ -153,7 +153,7 @@ export class CoreKibanaRequest<
   /** {@inheritDoc KibanaRequest.authzResult} */
   public readonly authzResult?: Record<string, boolean>;
   /** {@inheritDoc KibanaRequest.timing} */
-  public readonly publicallyAvailableTiming: RequestTiming;
+  public readonly devToolsTiming: RequestTiming;
 
   /** @internal */
   protected readonly [requestSymbol]!: Request;
@@ -182,7 +182,7 @@ export class CoreKibanaRequest<
     this.uuid = appState?.requestUuid ?? uuidv4();
     this.rewrittenUrl = appState?.rewrittenUrl;
     this.authzResult = appState?.authzResult;
-    this.publicallyAvailableTiming = new RequestTimingImpl(appState?.timingState ?? { events: [] });
+    this.devToolsTiming = new RequestTimingImpl(appState?.timingState ?? { events: [] });
     this.injectHostInfo(request);
 
     this.url = request.url ?? new URL('https://fake-request/url');
