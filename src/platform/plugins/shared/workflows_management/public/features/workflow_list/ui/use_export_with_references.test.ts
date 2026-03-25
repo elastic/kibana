@@ -10,10 +10,18 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowListItemDto, WorkflowYaml } from '@kbn/workflows';
+import { useWorkflowsApi } from '@kbn/workflows-ui';
 import { useExportWithReferences } from './use_export_with_references';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
+}));
+
+jest.mock('@kbn/workflows-ui');
+const mockUseWorkflowsApi = useWorkflowsApi as jest.MockedFunction<typeof useWorkflowsApi>;
+
+jest.mock('../../../hooks/use_telemetry', () => ({
+  useTelemetry: () => ({ reportWorkflowExported: jest.fn() }),
 }));
 
 const mockExportSingleWorkflow = jest.fn();
@@ -43,7 +51,7 @@ const createWorkflow = (overrides: Partial<WorkflowListItemDto> = {}): WorkflowL
 });
 
 describe('useExportWithReferences', () => {
-  let mockHttp: { post: jest.Mock };
+  let mockApi: { exportWorkflows: jest.Mock };
   let mockToasts: {
     addSuccess: jest.Mock;
     addWarning: jest.Mock;
@@ -53,16 +61,16 @@ describe('useExportWithReferences', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockHttp = { post: jest.fn() };
+    mockApi = { exportWorkflows: jest.fn() };
     mockToasts = {
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
       addError: jest.fn(),
     };
     onComplete = jest.fn();
+    mockUseWorkflowsApi.mockReturnValue(mockApi as any);
     mockUseKibana.mockReturnValue({
       services: {
-        http: mockHttp,
         notifications: { toasts: mockToasts },
       },
     } as any);
@@ -147,7 +155,7 @@ describe('useExportWithReferences', () => {
       await act(async () => result.current.handleIgnore());
 
       await waitFor(() => {
-        expect(mockExportWorkflows).toHaveBeenCalledWith([wA], mockHttp);
+        expect(mockExportWorkflows).toHaveBeenCalledWith([wA], mockApi);
       });
       expect(result.current.exportModalState).toBeNull();
     });
@@ -174,7 +182,7 @@ describe('useExportWithReferences', () => {
       await act(async () => result.current.handleAddDirect());
 
       await waitFor(() => {
-        expect(mockExportWorkflows).toHaveBeenCalledWith([wA, wB], mockHttp);
+        expect(mockExportWorkflows).toHaveBeenCalledWith([wA, wB], mockApi);
       });
     });
   });
@@ -204,7 +212,7 @@ describe('useExportWithReferences', () => {
 
       await waitFor(() => {
         expect(mockResolveAllReferences).toHaveBeenCalledWith([wA, wB], allMap);
-        expect(mockExportWorkflows).toHaveBeenCalledWith([wA, wB, wC], mockHttp);
+        expect(mockExportWorkflows).toHaveBeenCalledWith([wA, wB, wC], mockApi);
       });
     });
   });
@@ -251,7 +259,7 @@ describe('useExportWithReferences', () => {
       act(() => result.current.startExport(workflows));
 
       await waitFor(() => {
-        expect(mockExportWorkflows).toHaveBeenCalledWith(workflows, mockHttp);
+        expect(mockExportWorkflows).toHaveBeenCalledWith(workflows, mockApi);
         expect(mockToasts.addWarning).toHaveBeenCalledWith(
           expect.stringContaining('skipped'),
           expect.any(Object)

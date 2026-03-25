@@ -38,12 +38,12 @@ const createWorkflow = (overrides: Partial<WorkflowListItemDto> = {}): WorkflowL
   ...overrides,
 });
 
-const createMockWorkflowApi = (): WorkflowApi =>
+const createMockWorkflowApi = (): jest.Mocked<WorkflowApi> =>
   ({
     exportWorkflows: jest
       .fn()
       .mockResolvedValue(new Blob(['zip-data'], { type: 'application/zip' })),
-  } as unknown as WorkflowApi);
+  } as unknown as jest.Mocked<WorkflowApi>);
 
 describe('export_workflows', () => {
   beforeEach(() => {
@@ -152,14 +152,14 @@ describe('export_workflows', () => {
     });
 
     it('should propagate HTTP errors from the _export API', async () => {
-      const http = createMockHttp();
-      http.post.mockRejectedValue(new Error('Network error'));
+      const api = createMockWorkflowApi();
+      api.exportWorkflows.mockRejectedValue(new Error('Network error'));
       const workflows = [
         createWorkflow({ id: 'w-1', name: 'First' }),
         createWorkflow({ id: 'w-2', name: 'Second' }),
       ];
 
-      await expect(exportWorkflows(workflows, http)).rejects.toThrow('Network error');
+      await expect(exportWorkflows(workflows, api)).rejects.toThrow('Network error');
     });
   });
 

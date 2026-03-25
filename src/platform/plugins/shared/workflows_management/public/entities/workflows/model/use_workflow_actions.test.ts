@@ -460,7 +460,7 @@ describe('useWorkflowActions – import mutations', () => {
     });
 
     it('should rewrite cross-workflow references when generateNewIds is true', async () => {
-      mockHttp.post.mockResolvedValueOnce(importSuccess);
+      mockWorkflowApi.bulkCreateWorkflows.mockResolvedValueOnce(importSuccess);
 
       const parentYaml = [
         'name: Parent',
@@ -489,23 +489,22 @@ describe('useWorkflowActions – import mutations', () => {
 
       await waitFor(() => expect(result.current.importWorkflows.isSuccess).toBe(true));
 
-      const [, options] = mockHttp.post.mock.calls[0];
-      const body = JSON.parse(options.body);
+      const [{ workflows: sentWorkflows }] = mockWorkflowApi.bulkCreateWorkflows.mock.calls[0];
 
       // Both workflows should have new IDs
-      const parentPayload = body.workflows.find(
-        (w: { id: string; yaml: string }) => w.id !== 'parent-1' && w.yaml.includes('Parent')
+      const parentPayload = sentWorkflows.find(
+        (w: { id?: string; yaml: string }) => w.id !== 'parent-1' && w.yaml.includes('Parent')
       );
-      const childPayload = body.workflows.find(
-        (w: { id: string; yaml: string }) => w.id !== 'child-1' && w.yaml.includes('Child')
+      const childPayload = sentWorkflows.find(
+        (w: { id?: string; yaml: string }) => w.id !== 'child-1' && w.yaml.includes('Child')
       );
 
       expect(parentPayload).toBeDefined();
       expect(childPayload).toBeDefined();
 
       // The parent's YAML should reference the child's NEW id, not 'child-1'
-      expect(parentPayload.yaml).toContain(childPayload.id);
-      expect(parentPayload.yaml).not.toContain('workflow-id: child-1');
+      expect(parentPayload!.yaml).toContain(childPayload!.id);
+      expect(parentPayload!.yaml).not.toContain('workflow-id: child-1');
     });
   });
 

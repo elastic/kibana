@@ -278,12 +278,12 @@ apiTest.describe('Workflows Import/Export API', { tag: [...tags.stateful.classic
     async ({ kbnClient, apiClient }) => {
       const create1 = await kbnClient.request<{ id: string }>({
         method: 'POST',
-        path: '/api/workflows',
+        path: '/api/workflows/workflow',
         body: { yaml: SIMPLE_WORKFLOW_YAML },
       });
       const create2 = await kbnClient.request<{ id: string }>({
         method: 'POST',
-        path: '/api/workflows',
+        path: '/api/workflows/workflow',
         body: { yaml: SIMPLE_WORKFLOW_YAML.replace('ImportTest Workflow', 'Second') },
       });
 

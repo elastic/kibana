@@ -784,7 +784,7 @@ describe('ImportWorkflowsFlyout', () => {
         ],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValue({ conflicts: [] });
+      mockMgetWorkflows.mockResolvedValue([]);
 
       renderFlyout();
 
@@ -805,9 +805,7 @@ describe('ImportWorkflowsFlyout', () => {
         parseErrors: ['Entry readme.txt is not a .yml file'],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost.mockResolvedValue({
-        conflicts: [{ id: 'w-1', existingName: 'Existing' }],
-      });
+      mockMgetWorkflows.mockResolvedValue([{ id: 'w-1', name: 'Existing' }]);
 
       renderFlyout();
 
@@ -829,9 +827,8 @@ describe('ImportWorkflowsFlyout', () => {
         workflows: [createWorkflowPreview({ id: 'test', name: 'Test' })],
       });
       mockParseImportFile.mockResolvedValue(clientResult);
-      mockHttpPost
-        .mockResolvedValueOnce({ conflicts: [] })
-        .mockRejectedValueOnce(new Error('Server error'));
+      mockMgetWorkflows.mockResolvedValueOnce([]);
+      mockBulkCreateWorkflows.mockRejectedValueOnce(new Error('Server error'));
 
       renderFlyout();
 
