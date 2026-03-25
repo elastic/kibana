@@ -35,7 +35,8 @@ run(({ log, flags }) => restoreEnvSnapshot({ log, flags }), {
       'snapshot-name',
       'gcs-bucket',
       'gcs-base-path',
-      'indices',
+      'logs-index',
+      'alert-indices',
       'system-indices',
     ],
     boolean: ['clean'],
@@ -43,7 +44,8 @@ run(({ log, flags }) => restoreEnvSnapshot({ log, flags }), {
       --snapshot-name         (required) Name of the snapshot to restore
       --gcs-bucket            GCS bucket containing the snapshot (default: significant-events-datasets)
       --gcs-base-path         (required) GCS base path to the snapshot repository
-      --indices               Data index to replay. Can be repeated. (default: logs.otel .internal.alerts-streams.alerts-default-*)
+      --logs-index            Logs index to replay. (default: logs.otel)
+      --alert-indices         Alert index to replay. Can be repeated. (default: .internal.alerts-streams.alerts-default-*)
       --system-indices        .kibana system index pattern to restore. Can be repeated. (default: .kibana_streams_features-* .kibana_streams_assets-*)
       --clean                 Delete pre-existing (.kibana_streams_assets-*,.kibana_streams_features-*,.internal.alerts-streams.alerts-default-*) indices before restoring without prompting. Without this flag the script will prompt interactively (or fail in non-TTY environments).
       --es-url                Elasticsearch URL (default: from kibana.dev.yml)

@@ -7,6 +7,7 @@
 import type { Scenario } from './types';
 
 export const DEFAULT_LOGS_INDEX = 'logs';
+export const DEFAULT_ENV_SNAPSHOT_LOGS_INDEX = 'logs.otel';
 export const DEFAULT_DEMO_APP = 'otel-demo';
 
 export const GCS_BUCKET = 'significant-events-datasets';
@@ -20,5 +21,5 @@ export const KI_FEATURE_EXTRACTION_POLL_INTERVAL_MS = 10_000;
 export const KI_FEATURE_EXTRACTION_TIMEOUT_MS = 5 * 60 * 1000;
 
 export const HEALTHY_BASELINE_SCENARIO: Scenario = { id: 'healthy-baseline' };
-export const DEFAULT_INDICES = ['logs.otel', '.internal.alerts-streams.alerts-default-*'];
+export const DEFAULT_ALERT_INDICES = ['.internal.alerts-streams.alerts-default-*'];
 export const DEFAULT_SYSTEM_INDICES = ['.kibana_streams_features-*', '.kibana_streams_assets-*'];

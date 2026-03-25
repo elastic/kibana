@@ -10,12 +10,19 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { Client } from '@elastic/elasticsearch';
 import { createGcsRepository, replaySnapshot, restoreSnapshot } from '@kbn/es-snapshot-loader';
 import { getConnectionConfig } from '../lib/get_connection_config';
-import { GCS_BUCKET, DEFAULT_INDICES, DEFAULT_SYSTEM_INDICES } from '../lib/constants';
+import {
+  GCS_BUCKET,
+  DEFAULT_ALERT_INDICES,
+  DEFAULT_SYSTEM_INDICES,
+  DEFAULT_ENV_SNAPSHOT_LOGS_INDEX,
+} from '../lib/constants';
 import {
   createMissingAliases,
   parseRepeatableFlag,
   validateIndexPrivileges,
 } from '../lib/snapshot_utils';
+
+const SIGEVENTS_INDEX_TEMPLATE = 'sigevents-logs-template';
 
 async function promptConfirm(question: string): Promise<boolean> {
   const { confirmed } = await inquirer.prompt<{ confirmed: boolean }>([
@@ -48,7 +55,12 @@ async function deleteExisting(esClient: Client, log: ToolingLog, names: string[]
     try {
       await esClient.indices.deleteDataStream({ name });
       log.info(`  deleted data stream: ${name}`);
-    } catch {
+    } catch (dsErr) {
+      log.debug(
+        `  not a data stream "${name}" (${
+          dsErr instanceof Error ? dsErr.message : String(dsErr)
+        }) — trying index delete`
+      );
       try {
         await esClient.indices.delete({ index: name, ignore_unavailable: true });
         log.info(`  deleted index: ${name}`);
@@ -61,22 +73,57 @@ async function deleteExisting(esClient: Client, log: ToolingLog, names: string[]
   }
 }
 
+export async function ensureLogsIndexTemplate({
+  esClient,
+  log,
+  streamName,
+}: {
+  esClient: Client;
+  log: ToolingLog;
+  streamName: string;
+}): Promise<void> {
+  log.debug(`Creating index template "${streamName}"`);
+
+  await esClient.indices.putIndexTemplate({
+    name: SIGEVENTS_INDEX_TEMPLATE,
+    index_patterns: [streamName],
+    data_stream: {},
+    template: {
+      settings: {
+        index: {
+          mapping: {
+            ignore_malformed: true,
+          },
+        },
+      },
+      mappings: {
+        subobjects: false,
+      },
+    },
+    priority: 500,
+  });
+}
+
 async function ensureCleanEnvironment({
   esClient,
   log,
   systemIndices,
-  dataIndices,
+  alertIndices,
+  logsIndex,
   clean,
 }: {
   esClient: Client;
   log: ToolingLog;
   systemIndices: string[];
-  dataIndices: string[];
+  alertIndices: string[];
+  logsIndex: string;
   clean: boolean;
 }): Promise<void> {
-  const existingSystem = await resolveExisting(esClient, systemIndices);
-  const existingData = await resolveExisting(esClient, dataIndices);
-  const allExisting = [...existingSystem, ...existingData];
+  const allExisting = await resolveExisting(esClient, [
+    logsIndex,
+    ...systemIndices,
+    ...alertIndices,
+  ]);
 
   if (allExisting.length === 0) {
     log.debug('Environment is clean — no existing indices found');
@@ -106,7 +153,7 @@ async function ensureCleanEnvironment({
   }
 
   log.info('Cleaning up environment...');
-  await deleteExisting(esClient, log, [...existingSystem, ...existingData]);
+  await deleteExisting(esClient, log, allExisting);
 }
 
 export const restoreEnvSnapshot = async ({
@@ -135,15 +182,17 @@ export const restoreEnvSnapshot = async ({
 
   const clean = Boolean(flags.clean);
 
-  const indicesFlag = parseRepeatableFlag(flags.indices);
-  const indices = indicesFlag.length > 0 ? indicesFlag : DEFAULT_INDICES;
+  const logsIndex = String(flags['logs-index'] || DEFAULT_ENV_SNAPSHOT_LOGS_INDEX);
+
+  const alertIndicesFlag = parseRepeatableFlag(flags['alert-indices']);
+  const alertIndices = alertIndicesFlag.length > 0 ? alertIndicesFlag : DEFAULT_ALERT_INDICES;
 
   const systemIndicesFlag = parseRepeatableFlag(flags['system-indices']);
   const systemIndices = systemIndicesFlag.length > 0 ? systemIndicesFlag : DEFAULT_SYSTEM_INDICES;
 
   log.info(`Restore: ${snapshotName} | ES: ${config.esUrl}`);
   log.info(`GCS bucket: ${gcsBucket} | Base path: ${gcsBasePath}`);
-  log.info(`Data indices: ${indices.join(', ')}`);
+  log.info(`Data indices: ${[logsIndex, ...alertIndices].join(', ')}`);
   log.info(`System indices: ${systemIndices.join(', ')}`);
 
   await validateIndexPrivileges(
@@ -158,7 +207,8 @@ export const restoreEnvSnapshot = async ({
 
   const repository = createGcsRepository({ bucket: gcsBucket, basePath: gcsBasePath });
 
-  await ensureCleanEnvironment({ esClient, log, systemIndices, dataIndices: indices, clean });
+  await ensureCleanEnvironment({ esClient, log, systemIndices, alertIndices, logsIndex, clean });
+  await ensureLogsIndexTemplate({ esClient, log, streamName: logsIndex });
 
   log.info('');
   log.info('Step 1/3 — Replaying data indices (with timestamp transformation)...');
@@ -167,7 +217,7 @@ export const restoreEnvSnapshot = async ({
     log,
     repository,
     snapshotName,
-    patterns: indices,
+    patterns: [logsIndex, ...alertIndices],
   });
 
   if (!replayResult.success) {

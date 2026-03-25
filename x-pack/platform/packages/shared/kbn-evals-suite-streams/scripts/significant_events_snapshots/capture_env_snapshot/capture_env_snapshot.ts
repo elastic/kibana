@@ -11,7 +11,12 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
 import { getConnectionConfig } from '../lib/get_connection_config';
 import { createSnapshot, generateGcsBasePath, registerGcsRepository } from '../lib/gcs';
-import { GCS_BUCKET, DEFAULT_INDICES, DEFAULT_SYSTEM_INDICES } from '../lib/constants';
+import {
+  GCS_BUCKET,
+  DEFAULT_ALERT_INDICES,
+  DEFAULT_SYSTEM_INDICES,
+  DEFAULT_ENV_SNAPSHOT_LOGS_INDEX,
+} from '../lib/constants';
 import {
   resolvePatterns,
   parseRepeatableFlag,
@@ -49,11 +54,28 @@ async function captureSystemIndex(
     mappings,
   });
 
-  const result = await esClient.reindex({
-    wait_for_completion: true,
-    source: { index: sourceIndex },
-    dest: { index: snapshotIndex },
-  });
+  const result = await esClient.reindex(
+    {
+      wait_for_completion: true,
+      source: { index: sourceIndex },
+      dest: { index: snapshotIndex },
+    },
+    { requestTimeout: 30 * 60 * 1000 }
+  );
+
+  if (result.timed_out) {
+    throw new Error(`Reindex timed out capturing "${sourceIndex}"`);
+  }
+
+  const failures = result.failures ?? [];
+  if (failures.length > 0) {
+    throw new Error(
+      `Reindex had ${failures.length} failure(s) capturing "${sourceIndex}": ${failures
+        .slice(0, 3)
+        .map((f) => f.cause?.reason ?? 'unknown')
+        .join('; ')}`
+    );
+  }
 
   const created = result.created ?? 0;
   log.info(`Captured ${sourceIndex} → ${snapshotIndex} (${created} docs)`);
@@ -78,17 +100,18 @@ export async function captureEnvSnapshot({
   const runId = String(flags['run-id'] || moment().format('YYYY-MM-DD'));
 
   const systemIndicesFlag = parseRepeatableFlag(flags['system-indices']);
-  const systemIndexPatterns =
-    systemIndicesFlag.length > 0 ? systemIndicesFlag : DEFAULT_SYSTEM_INDICES;
+  const systemIndices = systemIndicesFlag.length > 0 ? systemIndicesFlag : DEFAULT_SYSTEM_INDICES;
 
-  const indicesFlag = parseRepeatableFlag(flags.indices);
-  const indexPatterns = indicesFlag.length > 0 ? indicesFlag : DEFAULT_INDICES;
+  const alertIndicesFlag = parseRepeatableFlag(flags['alert-indices']);
+  const alertIndices = alertIndicesFlag.length > 0 ? alertIndicesFlag : DEFAULT_ALERT_INDICES;
+
+  const logsIndex = String(flags['logs-index'] ?? DEFAULT_ENV_SNAPSHOT_LOGS_INDEX);
 
   if (!snapshotName) {
     throw new Error('Required: --snapshot-name <name>');
   }
 
-  for (const pattern of systemIndexPatterns) {
+  for (const pattern of systemIndices) {
     if (!pattern.startsWith('.kibana')) {
       throw new Error(
         `--system-indices patterns must start with ".kibana", got "${pattern}". ` +
@@ -102,15 +125,15 @@ export async function captureEnvSnapshot({
   await validateIndexPrivileges(
     esClient,
     log,
-    systemIndexPatterns,
+    systemIndices,
     (missing) =>
       `Capture requires a user with manage privilege on system indices. ` +
       `Pass superuser credentials via --es-username/--es-password. ` +
       `Missing index:manage privilege on: ${missing}`
   );
 
-  const resolvedSystemIndices = await resolvePatterns(esClient, log, systemIndexPatterns);
-  const resolvedIndices = await resolvePatterns(esClient, log, indexPatterns);
+  const resolvedSystemIndices = await resolvePatterns(esClient, log, systemIndices);
+  const resolvedIndices = await resolvePatterns(esClient, log, [logsIndex, ...alertIndices]);
 
   const capturedSystemIndices: string[] = [];
   for (const idx of resolvedSystemIndices) {

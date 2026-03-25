@@ -34,13 +34,18 @@ export async function resolvePatterns(
       });
 
       const indices = (response.indices ?? []).map((idx) => idx.name);
-      if (indices.length === 0) {
+      const dataStreamNames = (response.data_streams ?? []).map((ds) => ds.name);
+
+      if (indices.length === 0 && dataStreamNames.length === 0) {
         log.warning(`No indices matched pattern "${pattern}" — skipping`);
       } else {
         for (const idx of indices) {
           log.info(`Resolved ${pattern} → ${idx}`);
         }
-        resolved.push(...indices);
+        for (const ds of dataStreamNames) {
+          log.info(`Resolved ${pattern} → ${ds} (data stream)`);
+        }
+        resolved.push(...indices, ...dataStreamNames);
       }
     } catch (err) {
       log.warning(

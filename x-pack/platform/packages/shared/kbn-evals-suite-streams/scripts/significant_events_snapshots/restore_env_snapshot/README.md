@@ -25,7 +25,7 @@ This script automates all three steps in a single invocation.
 ```bash
 node scripts/restore_sigevents_env_snapshot.js \
   --snapshot-name my-snapshot \
-  --gcs-base-path 2026-03-22/sigevents-2026-03-22
+  --gcs-base-path 2026-03-22/otel-demo
 ```
 
 ### With custom options
@@ -34,8 +34,8 @@ node scripts/restore_sigevents_env_snapshot.js \
 node scripts/restore_sigevents_env_snapshot.js \
   --snapshot-name my-snapshot \
   --gcs-bucket significant-events-datasets \
-  --gcs-base-path 2026-03-22/sigevents-2026-03-22 \
-  --indices logs.otel \
+  --gcs-base-path 2026-03-22/otel-demo \
+  --logs-index logs.otel \
   --system-indices .kibana_streams_features-* \
   --system-indices .kibana_streams_assets-* \
   --es-username elastic \
@@ -49,7 +49,8 @@ node scripts/restore_sigevents_env_snapshot.js \
 | `--snapshot-name` | **Required.** Name of the snapshot to restore. | none |
 | `--gcs-base-path` | **Required.** GCS base path to the snapshot repository. | none |
 | `--gcs-bucket` | GCS bucket containing the snapshot. | `significant-events-datasets` |
-| `--indices` | Data index to replay. Can be repeated. | `logs.otel` |
+| `--logs-index` | Logs index to replay. | `logs.otel` |
+| `--alert-indices` | Alert index to replay. Can be repeated. | `.internal.alerts-streams.alerts-default-*` |
 | `--system-indices` | `.kibana` system index pattern to restore. Can be repeated. | `.kibana_streams_features-*` `.kibana_streams_assets-*` |
 | `--clean` | Delete conflicting indices before restoring without prompting | `false` |
 | `--es-url` | Elasticsearch URL | from `config/kibana.dev.yml` |

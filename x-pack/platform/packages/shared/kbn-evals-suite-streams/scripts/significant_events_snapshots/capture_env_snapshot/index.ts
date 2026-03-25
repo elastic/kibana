@@ -31,13 +31,15 @@ run(({ log, flags }) => captureEnvSnapshot({ log, flags }), {
       'es-password',
       'snapshot-name',
       'run-id',
-      'indices',
+      'logs-index',
+      'alert-indices',
       'system-indices',
     ],
     help: `
       --snapshot-name         (required) Name for the snapshot
       --run-id                Run identifier for GCS repo name and base path (default: today's date YYYY-MM-DD)
-      --indices               Data index to include in snapshot + replay. Can be repeated. (default: logs.otel .internal.alerts-streams.alerts-default-*)
+      --logs-index            Logs index to include in snapshot + replay. (default: logs.otel)
+      --alert-indices         Alert index to include in snapshot + replay. Can be repeated. (default: .internal.alerts-streams.alerts-default-*)
       --system-indices        .kibana system index pattern to capture. Can be repeated. (default: .kibana_streams_features-* .kibana_streams_assets-*)
       --es-url                Elasticsearch URL (default: from kibana.dev.yml)
       --es-username           ES username (default: from kibana.dev.yml)

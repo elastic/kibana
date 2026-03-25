@@ -77,9 +77,9 @@ async function recreateAliases({
   esClient: Client;
   log: ToolingLog;
   aliasMap: Map<string, AliasEntry[]>;
-}): Promise<void> {
+}): Promise<{ failedCount: number }> {
   if (aliasMap.size === 0) {
-    return;
+    return { failedCount: 0 };
   }
 
   let createdCount = 0;
@@ -121,6 +121,7 @@ async function recreateAliases({
   }
 
   log.info(`Alias recreation: ${createdCount} created, ${failedCount} failed`);
+  return { failedCount };
 }
 
 interface EsqlResponse {
@@ -238,7 +239,12 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
     });
     result.reindexedIndices = reindexedIndices;
 
-    await recreateAliases({ esClient, log, aliasMap });
+    const { failedCount: aliasFailedCount } = await recreateAliases({ esClient, log, aliasMap });
+    if (aliasFailedCount > 0) {
+      result.errors.push(
+        `${aliasFailedCount} alias(es) failed to recreate — indices may lack write aliases`
+      );
+    }
 
     const expectedDataStreams = new Set(
       indicesToRestore
@@ -259,7 +265,7 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
       );
     }
 
-    result.success = reindexedIndices.length > 0;
+    result.success = reindexedIndices.length > 0 && aliasFailedCount === 0;
 
     log.info(
       `Replay completed: ${reindexedIndices.length}/${indicesToRestore.length} indices reindexed successfully`

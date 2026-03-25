@@ -126,6 +126,9 @@ async function resolveWriteIndex(
     const candidate = parts.slice(0, i).join('.');
     const resolved = await tryResolveExisting(esClient, candidate);
     if (resolved) {
+      log.warning(
+        `"${destIndex}" not found — falling back to parent stream "${candidate}". Documents will be indexed into "${candidate}".`
+      );
       try {
         const dsResponse = await esClient.indices.getDataStream({ name: candidate });
         const ds = dsResponse.data_streams[0];
