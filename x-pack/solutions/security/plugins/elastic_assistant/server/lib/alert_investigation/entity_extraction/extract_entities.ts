@@ -61,13 +61,18 @@ export interface ExtractionResult {
  * Extracts observable entities from alert documents using ECS field mappings.
  * Supports configurable exclusion filters and IP version detection.
  */
+const DEFAULT_ENTITY_EXTRACTION_CONFIG: EntityExtractionConfig = {
+  enabled: true,
+  exclusionFilters: {},
+};
+
 export const extractEntitiesFromAlerts = ({
   alerts,
-  config,
+  config = DEFAULT_ENTITY_EXTRACTION_CONFIG,
   logger,
 }: {
   alerts: Array<{ _id: string; _source: Record<string, unknown> }>;
-  config: EntityExtractionConfig;
+  config?: EntityExtractionConfig;
   logger: Logger;
 }): ExtractionResult => {
   const mappings = getEcsFieldMappings();
