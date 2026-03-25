@@ -902,7 +902,7 @@ exports[`CollapsibleNav renders the default nav 1`] = `
                 @media (max-height: 240px){.css-1751mc5-navCss{overflow-y:auto;}}
               </style>
             </head>,
-            "ctr": 2,
+            "ctr": 1,
             "insertionPoint": undefined,
             "isSpeedy": false,
             "key": "css",
@@ -930,11 +930,9 @@ exports[`CollapsibleNav renders the default nav 1`] = `
       isStringTag={false}
       serialized={
         Object {
-          "map": undefined,
           "name": "1751mc5-navCss",
           "next": undefined,
           "styles": "@media (max-height: 240px){overflow-y:auto;};label:navCss;",
-          "toString": [Function],
         }
       }
     />
@@ -1168,7 +1166,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
                 @media (max-height: 240px){.css-1751mc5-navCss{overflow-y:auto;}}
               </style>
             </head>,
-            "ctr": 2,
+            "ctr": 1,
             "insertionPoint": undefined,
             "isSpeedy": false,
             "key": "css",
@@ -1196,11 +1194,9 @@ exports[`CollapsibleNav renders the default nav 2`] = `
       isStringTag={false}
       serialized={
         Object {
-          "map": undefined,
           "name": "1751mc5-navCss",
           "next": undefined,
           "styles": "@media (max-height: 240px){overflow-y:auto;};label:navCss;",
-          "toString": [Function],
         }
       }
     />
