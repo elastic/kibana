@@ -16,6 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AgentIcon } from '@kbn/custom-icons';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asDuration } from '../../../../common/utils/formatters';
@@ -38,7 +39,8 @@ const ORPHAN_CONTENT = i18n.translate(
 
 export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: number }) {
   const theme = useEuiTheme();
-  const { getRelatedErrorsHref, onErrorClick, onClick } = useTraceWaterfallContext();
+  const { getRelatedErrorsHref, onErrorClick, onClick, getServiceBadgeHref } =
+    useTraceWaterfallContext();
   const itemStatusIsFailureOrError = isFailureOrError(item.status?.value);
   const errorCount = item.errors.length;
 
@@ -99,17 +101,21 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
         </EuiFlexItem>
         {item.serviceName && (
           <EuiFlexItem grow={false} style={{ maxWidth: '30%', flexShrink: 0 }}>
+            {/* TODO review how to prevent row click action when cmd+click */}
             <EuiBadge
               color="hollow"
-              iconType="dot"
               data-test-subj="apmBarDetailsServiceNameBadge"
-              css={css`
-                max-width: 100%;
-                & .euiBadge__icon {
-                  color: ${item.color};
-                }
-              `}
+              href={getServiceBadgeHref?.(item.serviceName!) as any}
+              aria-label={
+                getServiceBadgeHref
+                  ? i18n.translate('xpack.apm.trace.barDetails.serviceBadge.ariaLabel', {
+                      defaultMessage: 'Go to {serviceName} service overview',
+                      values: { serviceName: item.serviceName },
+                    })
+                  : undefined
+              }
             >
+              <AgentIcon agentName={item.agentName} size="m" role="presentation" />
               {item.serviceName}
             </EuiBadge>
           </EuiFlexItem>
