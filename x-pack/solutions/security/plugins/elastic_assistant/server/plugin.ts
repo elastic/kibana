@@ -49,7 +49,6 @@ import type { ConfigSchema } from './config_schema';
 import { attackDiscoveryAlertFieldMap } from './lib/attack_discovery/schedules/fields';
 import { ATTACK_DISCOVERY_ALERTS_CONTEXT } from './lib/attack_discovery/schedules/constants';
 import { getAttackDiscoveryDataGeneratorRuleType } from './lib/attack_discovery/data_generator_rule/definition';
-import { uiSettings } from '../common/ui_settings';
 
 interface FeatureFlagDefinition {
   featureFlagName: string;
@@ -91,9 +90,6 @@ export class ElasticAssistantPlugin
     plugins: ElasticAssistantPluginSetupDependencies
   ) {
     this.logger.debug('elasticAssistant: Setup');
-
-    // Register UI settings (feature flags)
-    core.uiSettings.register(uiSettings);
 
     registerEventLogProvider(plugins.eventLog);
     const eventLogger = createEventLogger(plugins.eventLog); // must be created during setup phase
