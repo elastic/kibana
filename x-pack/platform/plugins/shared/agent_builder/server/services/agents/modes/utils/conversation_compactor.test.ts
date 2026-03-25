@@ -588,9 +588,7 @@ describe('compactConversation', () => {
       const completedEvent = mockEventEmitter.mock.calls[1][0];
       expect(completedEvent.type).toBe(ChatEventType.compactionCompleted);
       expect((completedEvent as any).data.token_count_after).toBe(result.tokensAfter);
-      expect((completedEvent as any).data.summarized_round_count).toBe(
-        result.summarizedRoundCount
-      );
+      expect((completedEvent as any).data.summarized_round_count).toBe(result.summarizedRoundCount);
     });
 
     it('should not emit events when eventEmitter is not provided', async () => {
