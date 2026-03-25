@@ -25,11 +25,13 @@ import {
 interface ConversationListProps {
   agentId: string;
   currentConversationId: string | undefined;
+  onItemClick?: () => void;
 }
 
 export const ConversationList: React.FC<ConversationListProps> = ({
   agentId,
   currentConversationId,
+  onItemClick,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { conversations = [], isLoading } = useConversationList({ agentId });
@@ -61,6 +63,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
               to={appPaths.agent.conversations.byId({ agentId, conversationId: conversation.id })}
               css={isActive ? activeLinkStyles : linkStyles}
               data-test-subj={`agentBuilderSidebarConversation-${conversation.id}`}
+              onClick={onItemClick}
             >
               <EuiTextTruncate text={conversation.title || conversation.id} />
             </Link>

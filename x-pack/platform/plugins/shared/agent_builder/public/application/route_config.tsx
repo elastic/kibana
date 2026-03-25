@@ -29,7 +29,7 @@ import { AgentBuilderPluginsPage } from './pages/plugins';
 import { AgentBuilderPluginDetailsPage } from './pages/plugin_details';
 import { AgentBuilderConnectorsPage } from './pages/connectors';
 
-export type SidebarView = 'conversation' | 'agentSettings' | 'manage';
+export type SidebarView = 'conversation' | 'manage';
 
 export interface RouteDefinition {
   path: string;
@@ -39,8 +39,6 @@ export interface RouteDefinition {
   isConnectors?: boolean;
   navLabel?: string;
   navIcon?: string;
-  navSection?: string;
-  isAgentDisplayName?: boolean;
 }
 
 const navLabels = {
@@ -64,18 +62,6 @@ const navLabels = {
   }),
 };
 
-const navSections = {
-  about: i18n.translate('xpack.agentBuilder.routeConfig.about', {
-    defaultMessage: 'About',
-  }),
-  capabilities: i18n.translate('xpack.agentBuilder.routeConfig.capabilities', {
-    defaultMessage: 'Capabilities',
-  }),
-  advanced: i18n.translate('xpack.agentBuilder.routeConfig.advanced', {
-    defaultMessage: 'Advanced',
-  }),
-};
-
 // Routes ordered from most specific to least specific for correct matching
 export const agentRoutes: RouteDefinition[] = [
   {
@@ -85,43 +71,38 @@ export const agentRoutes: RouteDefinition[] = [
   },
   {
     path: '/agents/:agentId/overview',
-    sidebarView: 'agentSettings',
-    navSection: navSections.about,
-    navIcon: 'sparkles',
-    isAgentDisplayName: true,
+    sidebarView: 'conversation',
+    navIcon: 'info',
+    navLabel: navLabels.overview,
     element: <AgentBuilderAgentOverviewPage />,
   },
   {
     path: '/agents/:agentId/skills',
-    sidebarView: 'agentSettings',
+    sidebarView: 'conversation',
     navLabel: navLabels.skills,
     navIcon: 'bolt',
-    navSection: navSections.capabilities,
     element: <AgentBuilderAgentSkillsPage />,
   },
   {
     path: '/agents/:agentId/plugins',
-    sidebarView: 'agentSettings',
+    sidebarView: 'conversation',
     navLabel: navLabels.plugins,
     navIcon: 'package',
-    navSection: navSections.capabilities,
     element: <AgentBuilderAgentPluginsPage />,
   },
   {
     path: '/agents/:agentId/connectors',
-    sidebarView: 'agentSettings',
+    sidebarView: 'conversation',
     navLabel: navLabels.connectors,
     navIcon: 'plugs',
-    navSection: navSections.capabilities,
     isConnectors: true,
     element: <RouteDisplay />,
   },
   {
     path: '/agents/:agentId/tools',
-    sidebarView: 'agentSettings',
+    sidebarView: 'conversation',
     navLabel: navLabels.tools,
     navIcon: 'wrench',
-    navSection: navSections.advanced,
     element: <AgentBuilderAgentToolsPage />,
   },
   // Catch-all for agent root - must be last
@@ -239,25 +220,18 @@ export interface SidebarNavItem {
   label: string;
   path: string;
   icon?: string;
-  section?: string;
   isExperimental?: boolean;
   isConnectors?: boolean;
-  isAgentDisplayName?: boolean;
 }
 
 export const getAgentSettingsNavItems = (agentId: string): SidebarNavItem[] => {
   return agentRoutes
-    .filter(
-      (route) =>
-        (route.navLabel ?? route.isAgentDisplayName) && route.sidebarView === 'agentSettings'
-    )
+    .filter((route) => route.navLabel)
     .map((route) => ({
       label: route.navLabel ?? '',
       path: route.path.replace(':agentId', agentId),
       icon: route.navIcon,
-      section: route.navSection,
       isConnectors: route.isConnectors,
-      isAgentDisplayName: route.isAgentDisplayName,
     }));
 };
 
@@ -268,7 +242,6 @@ export const getManageNavItems = (): SidebarNavItem[] => {
       label: route.navLabel!,
       path: route.path,
       icon: route.navIcon,
-      section: route.navSection,
       isExperimental: route.isExperimental,
       isConnectors: route.isConnectors,
     }));
