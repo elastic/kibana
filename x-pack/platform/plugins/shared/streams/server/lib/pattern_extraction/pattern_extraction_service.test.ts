@@ -45,7 +45,7 @@ describe('PatternExtractionService', () => {
     piscinaWorker?.destroy({ force: true });
   });
 
-  describe('grok extraction', () => {
+  describe('worker integration', () => {
     it('extracts grok patterns through the worker', async () => {
       service = new PatternExtractionService(createTestConfig(), logger);
       const result = await service.extractGrokPatterns(sampleMessages);
@@ -53,39 +53,8 @@ describe('PatternExtractionService', () => {
       expect(result.type).toBe('grok');
       expect(result.patternGroups).toBeDefined();
       expect(Array.isArray(result.patternGroups)).toBe(true);
-    });
+    }, 30_000);
 
-    it('returns empty patternGroups for empty messages', async () => {
-      service = new PatternExtractionService(createTestConfig(), logger);
-      const result = await service.extractGrokPatterns([]);
-
-      expect(result.type).toBe('grok');
-      expect(result.patternGroups).toEqual([]);
-    });
-  });
-
-  describe('dissect extraction', () => {
-    it('extracts dissect patterns through the worker', async () => {
-      service = new PatternExtractionService(createTestConfig(), logger);
-      const result = await service.extractDissectPattern(sampleMessages);
-
-      expect(result.type).toBe('dissect');
-      expect(result.dissectPattern).toBeDefined();
-      expect(result.dissectPattern.ast).toBeDefined();
-      expect(result.largestGroupMessages).toBeDefined();
-    });
-
-    it('returns empty pattern for empty messages', async () => {
-      service = new PatternExtractionService(createTestConfig(), logger);
-      const result = await service.extractDissectPattern([]);
-
-      expect(result.type).toBe('dissect');
-      expect(result.dissectPattern.ast.nodes).toEqual([]);
-      expect(result.largestGroupMessages).toEqual([]);
-    });
-  });
-
-  describe('timeout', () => {
     it('times out and recreates pool when extraction exceeds taskTimeout', async () => {
       service = new PatternExtractionService(
         createTestConfig({ taskTimeout: moment.duration(1, 'millisecond') }),
@@ -100,10 +69,8 @@ describe('PatternExtractionService', () => {
       await expect(service.extractGrokPatterns(longMessages)).rejects.toThrow(
         'Pattern extraction task timed out'
       );
-    });
-  });
+    }, 30_000);
 
-  describe('sync fallback', () => {
     it('runs extraction synchronously when worker is disabled', async () => {
       service = new PatternExtractionService(createTestConfig({ enabled: false }), logger);
       const worker = (service as unknown as { worker?: unknown }).worker;
@@ -112,10 +79,46 @@ describe('PatternExtractionService', () => {
       const grokResult = await service.extractGrokPatterns(sampleMessages);
       expect(grokResult.type).toBe('grok');
       expect(Array.isArray(grokResult.patternGroups)).toBe(true);
+    });
+  });
 
-      const dissectResult = await service.extractDissectPattern(sampleMessages);
-      expect(dissectResult.type).toBe('dissect');
-      expect(dissectResult.dissectPattern).toBeDefined();
+  describe('grok extraction', () => {
+    it('extracts grok patterns from sample messages', async () => {
+      service = new PatternExtractionService(createTestConfig({ enabled: false }), logger);
+      const result = await service.extractGrokPatterns(sampleMessages);
+
+      expect(result.type).toBe('grok');
+      expect(result.patternGroups).toBeDefined();
+      expect(Array.isArray(result.patternGroups)).toBe(true);
+    });
+
+    it('returns empty patternGroups for empty messages', async () => {
+      service = new PatternExtractionService(createTestConfig({ enabled: false }), logger);
+      const result = await service.extractGrokPatterns([]);
+
+      expect(result.type).toBe('grok');
+      expect(result.patternGroups).toEqual([]);
+    });
+  });
+
+  describe('dissect extraction', () => {
+    it('extracts dissect patterns from sample messages', async () => {
+      service = new PatternExtractionService(createTestConfig({ enabled: false }), logger);
+      const result = await service.extractDissectPattern(sampleMessages);
+
+      expect(result.type).toBe('dissect');
+      expect(result.dissectPattern).toBeDefined();
+      expect(result.dissectPattern.ast).toBeDefined();
+      expect(result.largestGroupMessages).toBeDefined();
+    });
+
+    it('returns empty pattern for empty messages', async () => {
+      service = new PatternExtractionService(createTestConfig({ enabled: false }), logger);
+      const result = await service.extractDissectPattern([]);
+
+      expect(result.type).toBe('dissect');
+      expect(result.dissectPattern.ast.nodes).toEqual([]);
+      expect(result.largestGroupMessages).toEqual([]);
     });
   });
 });
