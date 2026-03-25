@@ -10,7 +10,7 @@ import { buildRouteValidationWithZod } from '@kbn/evals-common';
 import type { AESOPRouteDependencies } from './register_aesop_routes';
 import { WorkflowStateTracker } from '../../lib/aesop/workflows/workflow_state_tracker';
 import { ExplorationWorkflowExecutor } from '../../lib/aesop/workflows/exploration_workflow_executor';
-import { RateLimiterService, DEFAULT_RATE_LIMITS } from '../../lib/aesop/security/rate_limiter';
+import { PersistentRateLimiter } from '../../lib/aesop/security/persistent_rate_limiter';
 import { APMInstrumentationService } from '../../lib/aesop/monitoring/apm_instrumentation';
 import { discoverIndices } from '../../services/index_discovery';
 import { inferAnalystRole, describeRole } from '../../services/analyst_role_inference';
@@ -22,9 +22,6 @@ const runExplorationBodySchema = z.object({
 });
 
 export function registerRunExplorationRoute({ router, logger }: AESOPRouteDependencies) {
-  // Singleton rate limiter — persists across requests (not per-request)
-  const rateLimiter = new RateLimiterService(DEFAULT_RATE_LIMITS, logger);
-
   router.versioned
     .post({
       path: '/internal/aesop/exploration/run',
@@ -49,7 +46,11 @@ export function registerRunExplorationRoute({ router, logger }: AESOPRouteDepend
       },
       async (context, request, response) => {
         try {
-          // Rate limiting check
+          // Rate limiting check — persistent across Kibana restarts
+          const coreContext = await context.core;
+          const internalClient = coreContext.elasticsearch.client.asInternalUser;
+          const rateLimiter = new PersistentRateLimiter(internalClient, logger);
+
           const userId = request.auth.credentials?.username || 'anonymous';
           const rateLimit = await rateLimiter.checkRateLimit(userId, 'exploration');
 
@@ -68,7 +69,6 @@ export function registerRunExplorationRoute({ router, logger }: AESOPRouteDepend
             });
           }
 
-          const coreContext = await context.core;
           const evalsContext = await context.evals;
           const esClient = coreContext.elasticsearch.client;
           const { include_sample_data, connector_id: connectorId } = request.body;
@@ -105,7 +105,9 @@ export function registerRunExplorationRoute({ router, logger }: AESOPRouteDepend
           logger.info('[AESOP] Phase 2: Inferring analyst role...');
           const roleInference = await inferAnalystRole(esClient, logger, userId);
           logger.info(
-            `[AESOP] Inferred role: ${describeRole(roleInference.role)} (confidence: ${(roleInference.confidence * 100).toFixed(1)}%)`
+            `[AESOP] Inferred role: ${describeRole(roleInference.role)} (confidence: ${(
+              roleInference.confidence * 100
+            ).toFixed(1)}%)`
           );
 
           // Phase 3: Calibrate sampling strategy
@@ -192,7 +194,9 @@ export function registerRunExplorationRoute({ router, logger }: AESOPRouteDepend
               workflow_name: 'aesop.self_exploration',
               status: 'running',
               started_at: new Date().toISOString(),
-              message: `Autonomous exploration started. Discovered ${indexCatalog.indices.length} indices, inferred role: ${describeRole(roleInference.role)}.`,
+              message: `Autonomous exploration started. Discovered ${
+                indexCatalog.indices.length
+              } indices, inferred role: ${describeRole(roleInference.role)}.`,
             },
           });
         } catch (error) {
@@ -201,7 +205,9 @@ export function registerRunExplorationRoute({ router, logger }: AESOPRouteDepend
           return response.customError({
             statusCode: 500,
             body: {
-              message: `Failed to start exploration: ${error instanceof Error ? error.message : String(error)}`,
+              message: `Failed to start exploration: ${
+                error instanceof Error ? error.message : String(error)
+              }`,
             },
           });
         }
