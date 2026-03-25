@@ -68,10 +68,16 @@ else
   if [[ -n "$AFFECTED_MODULES_FILE" ]]; then
     AFFECTED_FLAG=(--affected-modules "$AFFECTED_MODULES_FILE")
   fi
+  # Draft PRs only: --selective-testing is rejected by discover-playwright-configs unless GITHUB_PR_DRAFT=true.
+  SELECTIVE_SCOUT_DISCOVERY_FLAG=()
+  if [[ "${GITHUB_PR_DRAFT:-false}" == "true" ]] && [[ -n "$AFFECTED_MODULES_FILE" ]]; then
+    SELECTIVE_SCOUT_DISCOVERY_FLAG=(--selective-testing)
+  fi
   node scripts/scout discover-playwright-configs \
     --include-custom-servers \
     --target "$SCOUT_DISCOVERY_TARGET" \
     "${AFFECTED_FLAG[@]}" \
+    "${SELECTIVE_SCOUT_DISCOVERY_FLAG[@]}" \
     --save
   cp .scout/test_configs/scout_playwright_configs.json scout_playwright_configs.json
   buildkite-agent artifact upload "scout_playwright_configs.json"

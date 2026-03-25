@@ -48,8 +48,8 @@ export const readAffectedModules = (filePath: string, log: ToolingLog): Set<stri
 };
 
 /**
- * Mark modules with isAffected based on the affected modules set.
- * All modules are returned; none are filtered out.
+ * Mark modules with isAffected based on the affected modules set (see --affected-modules).
+ * All modules are returned; use --selective-testing in discover-playwright-configs to drop non-affected.
  *
  * Behavior:
  * - Module maps to an affected @kbn/ ID -> isAffected: true
