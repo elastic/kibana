@@ -1,64 +1,48 @@
 {
-  "name": "AESOP Spike - Autonomous Skill Discovery",
-  "dockerComposeFile": "docker-compose.yml",
-  "service": "kibana-dev",
-  "workspaceFolder": "/workspace",
-
-  "features": {
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "22.22.0"
-    },
-    "ghcr.io/devcontainers/features/git:1": {},
-    "ghcr.io/devcontainers/features/github-cli:1": {}
+  "name": "Kibana",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "..",
+    "args": {
+      "KBN_DIR": "${containerWorkspaceFolder}"
+    }
   },
-
   "customizations": {
     "vscode": {
       "extensions": [
         "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode",
         "ms-azuretools.vscode-docker",
-        "redhat.vscode-yaml",
-        "firsttris.vscode-jest-runner"
-      ],
-      "settings": {
-        "typescript.tsdk": "node_modules/typescript/lib",
-        "editor.formatOnSave": true,
-        "editor.codeActionsOnSave": {
-          "source.fixAll.eslint": true
-        }
-      }
+        "editorconfig.editorconfig",
+        "timonwong.shellcheck",
+        "eamodio.gitlens",
+        "github.vscode-pull-request-github"
+      ]
     }
   },
-
   "forwardPorts": [
-    5601,
     9200,
-    4318
+    5601,
+    9229,
+    9230,
+    9231,
+    9001
   ],
-
-  "portsAttributes": {
-    "5601": {
-      "label": "Kibana",
-      "onAutoForward": "notify"
-    },
-    "9200": {
-      "label": "Elasticsearch",
-      "onAutoForward": "silent"
-    },
-    "4318": {
-      "label": "EDOT Collector (OTLP)",
-      "onAutoForward": "silent"
-    }
+  "postStartCommand": "${containerWorkspaceFolder}/.devcontainer/scripts/post_start.sh",
+  "remoteUser": "vscode",
+  "containerEnv": {
+    "KBN_DIR": "${containerWorkspaceFolder}"
   },
-
-  "postCreateCommand": "bash .devcontainer/setup.sh",
-
-  "remoteEnv": {
-    "ES_URL": "http://elasticsearch:9200",
-    "ES_USERNAME": "elastic",
-    "ES_PASSWORD": "changeme",
-    "KIBANA_URL": "http://localhost:5601",
-    "OTEL_EXPORTER_OTLP_ENDPOINT": "http://edot-collector:4318"
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "dockerDashComposeVersion": "latest"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      "installDirectlyFromGitHubRelease": true,
+      "version": "latest"
+    },
+    "ghcr.io/kreemer/features/chrometesting:1": {
+      "version": "stable"
+    }
   }
 }

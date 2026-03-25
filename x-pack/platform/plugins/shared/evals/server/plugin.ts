@@ -31,6 +31,8 @@ export class EvalsPlugin
   private readonly config: EvalsConfig;
   private datasetService?: DatasetService;
   private actionsStart?: EvalsStartDependencies['actions'];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private agentBuilderStart?: any;
 
   constructor(context: PluginInitializerContext<EvalsConfig>) {
     this.logger = context.logger.get();
@@ -59,6 +61,7 @@ export class EvalsPlugin
         return {
           datasetService: this.datasetService,
           getActionsStart: () => this.actionsStart,
+          getAgentBuilderStart: () => this.agentBuilderStart,
         };
       }
     );
@@ -124,6 +127,7 @@ export class EvalsPlugin
 
   async start(core: CoreStart, plugins: EvalsStartDependencies): Promise<EvalsPluginStart> {
     this.actionsStart = plugins.actions;
+    this.agentBuilderStart = plugins.agentBuilder;
     // ═══════════════════════════════════════════════════════════════
     // AESOP: Auto-create custom agents on plugin start
     // ═══════════════════════════════════════════════════════════════

@@ -22,6 +22,9 @@ const runExplorationBodySchema = z.object({
 });
 
 export function registerRunExplorationRoute({ router, logger }: AESOPRouteDependencies) {
+  // Singleton rate limiter — persists across requests (not per-request)
+  const rateLimiter = new RateLimiterService(DEFAULT_RATE_LIMITS, logger);
+
   router.versioned
     .post({
       path: '/internal/aesop/exploration/run',
@@ -47,7 +50,6 @@ export function registerRunExplorationRoute({ router, logger }: AESOPRouteDepend
       async (context, request, response) => {
         try {
           // Rate limiting check
-          const rateLimiter = new RateLimiterService(DEFAULT_RATE_LIMITS, logger);
           const userId = request.auth.credentials?.username || 'anonymous';
           const rateLimit = await rateLimiter.checkRateLimit(userId, 'exploration');
 
@@ -172,13 +174,11 @@ export function registerRunExplorationRoute({ router, logger }: AESOPRouteDepend
               samplingConfig,
               connectorId,
               actionsClient,
-              authHeaders: {
-                authorization: request.headers.authorization as string,
-                'kbn-xsrf': 'true',
-                'x-elastic-internal-origin': 'kibana',
-                'elastic-api-version': '2023-10-31',
+              getSkillRegistry: async () => {
+                const agentBuilderStart = evalsContext.getAgentBuilderStart();
+                if (!agentBuilderStart) return undefined;
+                return agentBuilderStart.skills.getRegistry({ request });
               },
-              kibanaUrl: `${(request.headers['x-forwarded-proto'] as string) || 'http'}://${request.headers.host || 'localhost:5601'}`,
             }
           );
           executor.execute().catch((err) => {

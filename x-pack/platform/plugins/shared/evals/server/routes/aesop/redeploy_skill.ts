@@ -82,44 +82,28 @@ export function registerRedeploySkillRoute({ router, logger }: AESOPRouteDepende
             agent_builder_skill_id: agentBuilderSkillId,
           });
 
-          const host = request.headers.host || 'localhost:5601';
-          const protocol = (request.headers['x-forwarded-proto'] as string) || 'http';
-          const kibanaUrl = `${protocol}://${host}`;
+          // Get Agent Builder SkillRegistry
+          const evalsContext = await context.evals;
+          const agentBuilderStart = evalsContext.getAgentBuilderStart();
+          if (!agentBuilderStart) {
+            throw new Error('Agent Builder plugin not available — cannot redeploy skills');
+          }
+          const skillRegistry = await agentBuilderStart.skills.getRegistry({ request });
 
-          // Try to delete existing skill first (may not exist)
-          await fetch(`${kibanaUrl}/api/agent_builder/skills/${agentBuilderSkillId}`, {
-            method: 'DELETE',
-            headers: {
-              'kbn-xsrf': 'true',
-              'x-elastic-internal-origin': 'kibana',
-              'elastic-api-version': '2023-10-31',
-              Authorization: request.headers.authorization as string,
-            },
-          }).catch(() => {});
+          // Delete existing skill if it exists (ignore errors if not found)
+          const skillExists = await skillRegistry.has(agentBuilderSkillId);
+          if (skillExists) {
+            await skillRegistry.delete(agentBuilderSkillId);
+          }
 
           // Create the skill
-          const createResponse = await fetch(`${kibanaUrl}/api/agent_builder/skills`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'kbn-xsrf': 'true',
-              'x-elastic-internal-origin': 'kibana',
-              'elastic-api-version': '2023-10-31',
-              Authorization: request.headers.authorization as string,
-            },
-            body: JSON.stringify({
-              id: agentBuilderSkillId,
-              name: sanitizeSkillName(skill.name),
-              description: (skill.description || '').slice(0, 1024),
-              content: skill.markdown || '',
-              tool_ids: toolIds,
-            }),
+          await skillRegistry.create({
+            id: agentBuilderSkillId,
+            name: sanitizeSkillName(skill.name),
+            description: (skill.description || '').slice(0, 1024),
+            content: skill.markdown || '',
+            tool_ids: toolIds,
           });
-
-          if (!createResponse.ok) {
-            const errorBody = await createResponse.text();
-            throw new Error(`Agent Builder API returned ${createResponse.status}: ${errorBody}`);
-          }
 
           // Update deployment timestamp
           await esClient.update({

@@ -125,64 +125,34 @@ export function registerApproveSkillRoute({ router, logger }: AESOPRouteDependen
             tool_ids: toolIds,
           });
 
-          // 6. Create or update skill in Agent Builder via internal Kibana API
-          const host = request.headers.host || 'localhost:5601';
-          const protocol = (request.headers['x-forwarded-proto'] as string) || 'http';
-          const kibanaUrl = `${protocol}://${host}`;
+          // 6. Create or update skill in Agent Builder via SkillRegistry
+          const evalsContext = await context.evals;
+          const agentBuilderStart = evalsContext.getAgentBuilderStart();
+          if (!agentBuilderStart) {
+            throw new Error('Agent Builder plugin not available — cannot deploy skills');
+          }
+          const skillRegistry = await agentBuilderStart.skills.getRegistry({ request });
 
-          let agentBuilderResponse: Response;
+          let createdSkill: { id: string };
 
           if (isUpdateExisting) {
-            // Update existing user skill via PUT
-            agentBuilderResponse = await fetch(
-              `${kibanaUrl}/api/agent_builder/skills/${agentBuilderSkillId}`,
-              {
-                method: 'PUT',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'kbn-xsrf': 'true',
-                  'x-elastic-internal-origin': 'kibana',
-                  'elastic-api-version': '2023-10-31',
-                  Authorization: request.headers.authorization as string,
-                },
-                body: JSON.stringify({
-                  name: sanitizeSkillName(skill.name),
-                  description: (skill.description || '').slice(0, 1024),
-                  content: skill.markdown || '',
-                  tool_ids: toolIds,
-                }),
-              }
-            );
+            // Update existing user skill
+            createdSkill = await skillRegistry.update(agentBuilderSkillId, {
+              name: sanitizeSkillName(skill.name),
+              description: (skill.description || '').slice(0, 1024),
+              content: skill.markdown || '',
+              tool_ids: toolIds,
+            });
           } else {
-            // Create new skill via POST
-            agentBuilderResponse = await fetch(
-              `${kibanaUrl}/api/agent_builder/skills`,
-              {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'kbn-xsrf': 'true',
-                  'x-elastic-internal-origin': 'kibana',
-                  'elastic-api-version': '2023-10-31',
-                  Authorization: request.headers.authorization as string,
-                },
-                body: JSON.stringify({
-                  id: agentBuilderSkillId,
-                  name: sanitizeSkillName(skill.name),
-                  description: (skill.description || '').slice(0, 1024),
-                  content: skill.markdown || '',
-                  tool_ids: toolIds,
-                }),
-              }
-            );
+            // Create new skill
+            createdSkill = await skillRegistry.create({
+              id: agentBuilderSkillId,
+              name: sanitizeSkillName(skill.name),
+              description: (skill.description || '').slice(0, 1024),
+              content: skill.markdown || '',
+              tool_ids: toolIds,
+            });
           }
-
-          if (!agentBuilderResponse.ok) {
-            const errorBody = await agentBuilderResponse.text();
-            throw new Error(`Agent Builder API returned ${agentBuilderResponse.status}: ${errorBody}`);
-          }
-
-          const createdSkill = await agentBuilderResponse.json();
 
           logger.info('[AESOP] Skill deployed to Agent Builder', {
             skill_id: skillId,

@@ -96,8 +96,8 @@ interface ExplorationConfig {
   samplingConfig: SamplingConfig;
   connectorId?: string;
   actionsClient?: any;
-  authHeaders?: Record<string, string>; // For calling Kibana APIs (Agent Builder)
-  kibanaUrl?: string; // e.g., 'http://localhost:5601'
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getSkillRegistry?: () => Promise<any | undefined>;
 }
 
 interface SchemaInfo {
@@ -647,17 +647,15 @@ export class ExplorationWorkflowExecutor {
   // Phase 5: Skill Synthesis
   // ---------------------------------------------------------------------------
   private async phaseSkillSynthesis(): Promise<void> {
-    const { actionsClient, connectorId, authHeaders, kibanaUrl } = this.config;
+    const { actionsClient, connectorId, getSkillRegistry } = this.config;
     const useLLM = actionsClient && connectorId;
 
     // Analyze existing Agent Builder skills for improvement proposals
-    if (useLLM && authHeaders && kibanaUrl) {
+    if (useLLM && getSkillRegistry) {
       await this.updateStep(5, 0, 6, 'Fetching existing Agent Builder skills...');
       const improvementSkills = await this.analyzeSkillImprovements(
         actionsClient,
-        connectorId,
-        authHeaders,
-        kibanaUrl
+        connectorId
       );
       if (improvementSkills.length > 0) {
         this.logger.info(`[AESOP] Generated ${improvementSkills.length} skill improvement proposals`);
@@ -667,7 +665,7 @@ export class ExplorationWorkflowExecutor {
 
     if (useLLM) {
       // LLM-powered skill synthesis — generates much higher quality skills
-      await this.updateStep(5, useLLM && authHeaders && kibanaUrl ? 2 : 0, 6, 'Generating skills with LLM...');
+      await this.updateStep(5, useLLM && getSkillRegistry ? 2 : 0, 6, 'Generating skills with LLM...');
       await this.synthesizeSkillsWithLLM(actionsClient, connectorId);
     } else {
       // Template-based fallback
@@ -787,26 +785,20 @@ export class ExplorationWorkflowExecutor {
   // Skill Improvement Analysis
   // ---------------------------------------------------------------------------
 
-  private async fetchExistingSkills(
-    authHeaders: Record<string, string>,
-    kibanaUrl: string
-  ): Promise<AgentBuilderSkillSummary[]> {
+  private async fetchExistingSkills(): Promise<AgentBuilderSkillSummary[]> {
     try {
-      const response = await fetch(`${kibanaUrl}/api/agent_builder/skills`, {
-        method: 'GET',
-        headers: {
-          ...authHeaders,
-          'Content-Type': 'application/json',
-        },
-      });
+      const registry = await this.config.getSkillRegistry?.();
+      if (!registry) return [];
 
-      if (!response.ok) {
-        this.logger.warn(`[AESOP] Failed to fetch Agent Builder skills: ${response.status}`);
-        return [];
-      }
-
-      const data = await response.json();
-      return (data.results || []) as AgentBuilderSkillSummary[];
+      const skills = await registry.list();
+      return (skills || []).map((s: any) => ({
+        id: s.id,
+        name: s.name,
+        description: s.description,
+        readonly: s.readonly ?? false,
+        tool_ids: s.tool_ids ?? [],
+        referenced_content_count: s.referenced_content_count ?? 0,
+      }));
     } catch (error) {
       this.logger.warn(`[AESOP] Error fetching existing skills: ${error instanceof Error ? error.message : String(error)}`);
       return [];
@@ -814,25 +806,27 @@ export class ExplorationWorkflowExecutor {
   }
 
   private async fetchSkillDetail(
-    skillId: string,
-    authHeaders: Record<string, string>,
-    kibanaUrl: string
+    skillId: string
   ): Promise<AgentBuilderSkillDetail | null> {
     try {
-      const response = await fetch(`${kibanaUrl}/api/agent_builder/skills/${skillId}`, {
-        method: 'GET',
-        headers: {
-          ...authHeaders,
-          'Content-Type': 'application/json',
-        },
-      });
+      const registry = await this.config.getSkillRegistry?.();
+      if (!registry) return null;
 
-      if (!response.ok) {
-        this.logger.debug(`[AESOP] Could not fetch skill detail for ${skillId}: ${response.status}`);
+      const skill = await registry.get(skillId);
+      if (!skill) {
+        this.logger.debug(`[AESOP] Could not fetch skill detail for ${skillId}: not found`);
         return null;
       }
 
-      return (await response.json()) as AgentBuilderSkillDetail;
+      return {
+        id: skill.id,
+        name: skill.name,
+        description: skill.description,
+        readonly: skill.readonly ?? false,
+        tool_ids: skill.tool_ids ?? [],
+        referenced_content_count: skill.referenced_content_count ?? 0,
+        content: skill.content ?? '',
+      } as AgentBuilderSkillDetail;
     } catch {
       return null;
     }
@@ -840,11 +834,9 @@ export class ExplorationWorkflowExecutor {
 
   private async analyzeSkillImprovements(
     actionsClient: any,
-    connectorId: string,
-    authHeaders: Record<string, string>,
-    kibanaUrl: string
+    connectorId: string
   ): Promise<ProposedSkill[]> {
-    const existingSkills = await this.fetchExistingSkills(authHeaders, kibanaUrl);
+    const existingSkills = await this.fetchExistingSkills();
     if (existingSkills.length === 0) {
       this.logger.info('[AESOP] No existing Agent Builder skills found to analyze');
       return [];
@@ -861,7 +853,7 @@ export class ExplorationWorkflowExecutor {
     const skillDetails: AgentBuilderSkillDetail[] = [];
 
     for (const skillSummary of skillsToAnalyze) {
-      const detail = await this.fetchSkillDetail(skillSummary.id, authHeaders, kibanaUrl);
+      const detail = await this.fetchSkillDetail(skillSummary.id);
       if (detail) {
         skillDetails.push(detail);
       }

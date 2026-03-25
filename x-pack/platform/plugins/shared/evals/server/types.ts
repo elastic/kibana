@@ -31,6 +31,8 @@ export interface EvalsStartDependencies {
 export interface EvalsRouteHandlerContext {
   datasetService: DatasetService;
   getActionsStart: () => ActionsPluginStart | undefined;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getAgentBuilderStart: () => any | undefined;
 }
 
 export type EvalsRequestHandlerContext = CustomRequestHandlerContext<{
