@@ -29,6 +29,8 @@ describe('When on the endpoint exceptions page', () => {
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
+    mockedContext.setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
+
     render = () => (renderResult = mockedContext.render(<EndpointExceptions />));
 
     act(() => {
@@ -106,6 +108,9 @@ describe('When on the endpoint exceptions page', () => {
     const UPDATE_DETAILS_BTN = 'updateDetailsEndpointExceptionsPerPolicyOptInButton';
     const CANCEL_BTN = 'cancelEndpointExceptionsPerPolicyOptInButton';
     const CONFIRM_BTN = 'confirmEndpointExceptionsPerPolicyOptInButton';
+    const MENU_BTN = 'endpointExceptionsListPage-overflowMenuButtonIcon';
+    const UPDATE_TO_PER_POLICY_ACTION_BTN =
+      'endpointExceptionsListPage-overflowMenuActionItemperPolicyOptInActionMenuItem';
 
     let optInGetMock: ReturnType<
       typeof endpointExceptionsPerPolicyOptInAllHttpMocks
@@ -187,40 +192,40 @@ describe('When on the endpoint exceptions page', () => {
         });
       });
 
-      describe('RBAC', () => {
-        it('should show the update details button if user has superuser role', async () => {
-          mockUserPrivileges.mockReturnValue({
-            endpointPrivileges: getEndpointAuthzInitialStateMock({
-              canWriteEndpointExceptions: true,
-              canOptInPerPolicyEndpointExceptions: true,
-            }),
-          });
+      describe('when using the opt-in action menu item', () => {
+        it('should show the opt-in menu action even when the callout is dismissed', async () => {
+          mockedContext.startServices.sessionStorage.set(STORAGE_KEY, true);
 
           render();
 
-          await waitFor(() => {
-            expect(renderResult.queryByTestId(CALLOUT)).toBeInTheDocument();
-            expect(renderResult.queryByTestId(UPDATE_DETAILS_BTN)).toBeInTheDocument();
-          });
+          await waitFor(() => expect(optInGetMock).toHaveBeenCalled());
+          await waitFor(() => userEvent.click(renderResult.getByTestId(MENU_BTN)));
+
+          expect(renderResult.queryByTestId(UPDATE_TO_PER_POLICY_ACTION_BTN)).toBeInTheDocument();
+          expect(renderResult.queryByTestId(CALLOUT)).not.toBeInTheDocument();
         });
 
-        it('should show "Contact your admin" if user does not have superuser role', async () => {
-          mockUserPrivileges.mockReturnValue({
-            endpointPrivileges: getEndpointAuthzInitialStateMock({
-              canWriteEndpointExceptions: true,
-              canOptInPerPolicyEndpointExceptions: false,
-            }),
-          });
+        it('should show the per-policy opt-in modal when clicking on the action menu item', async () => {
+          render();
+
+          await waitFor(() => userEvent.click(renderResult.getByTestId(MENU_BTN)));
+          await waitFor(() =>
+            userEvent.click(renderResult.getByTestId(UPDATE_TO_PER_POLICY_ACTION_BTN))
+          );
+
+          expect(renderResult.queryByTestId(MODAL)).toBeInTheDocument();
+        });
+
+        it('should hide the per-policy opt-in modal when already opted in', async () => {
+          optInGetMock.mockReturnValue({ status: true });
 
           render();
 
-          await waitFor(() => {
-            expect(renderResult.queryByTestId(CALLOUT)).toBeInTheDocument();
-            expect(
-              renderResult.queryByText(/Contact your administrator to update details/)
-            ).toBeInTheDocument();
-            expect(renderResult.queryByTestId(UPDATE_DETAILS_BTN)).not.toBeInTheDocument();
-          });
+          await waitFor(() => userEvent.click(renderResult.getByTestId(MENU_BTN)));
+
+          expect(
+            renderResult.queryByTestId(UPDATE_TO_PER_POLICY_ACTION_BTN)
+          ).not.toBeInTheDocument();
         });
       });
 
@@ -286,6 +291,75 @@ describe('When on the endpoint exceptions page', () => {
             { title: 'Error updating to policy-based exceptions' }
           );
           expect(renderResult.queryByTestId(MODAL)).toBeInTheDocument();
+        });
+      });
+
+      describe('RBAC', () => {
+        describe('when user has the `canOptInPerPolicyEndpointExceptions` privilege', () => {
+          beforeEach(() => {
+            mockUserPrivileges.mockReturnValue({
+              endpointPrivileges: getEndpointAuthzInitialStateMock({
+                canWriteEndpointExceptions: true,
+                canOptInPerPolicyEndpointExceptions: true,
+              }),
+            });
+          });
+
+          it('should show the update details button', async () => {
+            render();
+
+            await waitFor(() => {
+              expect(renderResult.queryByTestId(CALLOUT)).toBeInTheDocument();
+              expect(renderResult.queryByTestId(UPDATE_DETAILS_BTN)).toBeInTheDocument();
+            });
+          });
+
+          it('should show the opt in menu action', async () => {
+            render();
+
+            await waitFor(() => userEvent.click(renderResult.getByTestId(MENU_BTN)));
+
+            await waitFor(() => {
+              expect(
+                renderResult.queryByTestId(UPDATE_TO_PER_POLICY_ACTION_BTN)
+              ).toBeInTheDocument();
+            });
+          });
+        });
+
+        describe('when user does not have the `canOptInPerPolicyEndpointExceptions` privilege', () => {
+          beforeEach(() => {
+            mockUserPrivileges.mockReturnValue({
+              endpointPrivileges: getEndpointAuthzInitialStateMock({
+                canWriteEndpointExceptions: true,
+                canOptInPerPolicyEndpointExceptions: false,
+              }),
+            });
+          });
+
+          it('should show "Contact your admin" instead of the update details button', async () => {
+            render();
+
+            await waitFor(() => {
+              expect(renderResult.queryByTestId(CALLOUT)).toBeInTheDocument();
+              expect(
+                renderResult.queryByText(/Contact your administrator to update details/)
+              ).toBeInTheDocument();
+              expect(renderResult.queryByTestId(UPDATE_DETAILS_BTN)).not.toBeInTheDocument();
+            });
+          });
+
+          it('should not show the opt in menu action', async () => {
+            render();
+
+            await waitFor(() => userEvent.click(renderResult.getByTestId(MENU_BTN)));
+
+            await waitFor(() => {
+              expect(
+                renderResult.queryByTestId(UPDATE_TO_PER_POLICY_ACTION_BTN)
+              ).not.toBeInTheDocument();
+            });
+          });
         });
       });
     });

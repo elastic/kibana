@@ -21,7 +21,8 @@ export const EndpointExceptions = memo(() => {
   const http = useHttp();
   const endpointExceptionsApiClient = EndpointExceptionsApiClient.getInstance(http);
 
-  const { perPolicyOptInCallout, perPolicyOptInModal } = usePerPolicyOptIn();
+  const { perPolicyOptInCallout, perPolicyOptInModal, perPolicyOptInActionMenuItem } =
+    usePerPolicyOptIn();
 
   return (
     <>
@@ -37,6 +38,9 @@ export const EndpointExceptions = memo(() => {
         allowCardEditAction={canWriteEndpointExceptions}
         allowCardDeleteAction={canWriteEndpointExceptions}
         callout={perPolicyOptInCallout}
+        additionalActions={
+          perPolicyOptInActionMenuItem ? [perPolicyOptInActionMenuItem] : undefined
+        }
       />
     </>
   );

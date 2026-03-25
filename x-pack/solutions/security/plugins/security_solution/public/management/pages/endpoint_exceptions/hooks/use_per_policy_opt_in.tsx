@@ -7,6 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { Action } from '@kbn/securitysolution-exception-list-components/src/header_menu';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { EndpointExceptionsPerPolicyOptInCallout } from '../view/components/per_policy_opt_in_callout';
 import { EndpointExceptionsPerPolicyOptInModal } from '../view/components/per_policy_opt_in_modal';
@@ -21,18 +22,20 @@ const STORAGE_KEY = 'endpointExceptionsPerPolicyOptInCalloutDismissed';
 export const usePerPolicyOptIn = (): {
   perPolicyOptInCallout: React.ReactNode | null;
   perPolicyOptInModal: React.ReactNode | null;
+  perPolicyOptInActionMenuItem: Action | null;
 } => {
   const { sessionStorage } = useKibana().services;
   const toasts = useToasts();
   const { canOptInPerPolicyEndpointExceptions } = useUserPrivileges().endpointPrivileges;
 
   const { mutate, isLoading } = useSendEndpointExceptionsPerPolicyOptIn();
-  const { data: isPerPolicyOptIn } = useGetEndpointExceptionsPerPolicyOptIn();
+  const { data: isPerPolicyOptIn, refetch } = useGetEndpointExceptionsPerPolicyOptIn();
 
   const [isCalloutDismissed, setIsCalloutDismissed] = useState(
     sessionStorage.get(STORAGE_KEY) === true
   );
   const shouldShowCallout = isPerPolicyOptIn !== true && !isCalloutDismissed;
+  const shouldShowAction = isPerPolicyOptIn !== true && canOptInPerPolicyEndpointExceptions;
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -53,7 +56,7 @@ export const usePerPolicyOptIn = (): {
     mutate(undefined, {
       onSuccess: () => {
         setIsModalVisible(false);
-        setIsCalloutDismissed(true);
+        refetch();
 
         toasts.addSuccess({
           title: i18n.translate(
@@ -76,7 +79,7 @@ export const usePerPolicyOptIn = (): {
         });
       },
     });
-  }, [mutate, toasts]);
+  }, [mutate, refetch, toasts]);
 
   return {
     perPolicyOptInCallout: shouldShowCallout ? (
@@ -94,5 +97,17 @@ export const usePerPolicyOptIn = (): {
         isLoading={isLoading}
       />
     ) : null,
+
+    perPolicyOptInActionMenuItem: shouldShowAction
+      ? {
+          key: 'perPolicyOptInActionMenuItem',
+          icon: 'check',
+          label: i18n.translate(
+            'xpack.securitySolution.endpointExceptions.perPolicyOptInActionMenuItem.label',
+            { defaultMessage: 'Update to policy-based exceptions' }
+          ),
+          onClick: handleOnClickUpdateDetails,
+        }
+      : null,
   };
 };
