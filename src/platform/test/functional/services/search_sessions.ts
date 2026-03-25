@@ -83,12 +83,13 @@ export class SearchSessionsService extends FtrService {
   }
 
   public async openFlyout() {
-    await this.retry.try(async () => {
+    await this.retry.waitFor('background search button is visible', async () => {
       if (await this.testSubjects.exists(APP_MENU_OVERFLOW_BUTTON)) {
         await this.testSubjects.click(APP_MENU_OVERFLOW_BUTTON);
       }
-      await this.testSubjects.click(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
+      return this.testSubjects.exists(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
     });
+    await this.testSubjects.click(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
     await this.expectManagementTable();
   }
 
