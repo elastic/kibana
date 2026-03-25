@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { isBoolean, isNumber, isObject } from 'lodash';
+import { isBoolean, isNumber, isObject, isString } from 'lodash';
 import React from 'react';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment-timezone';
 
 const EmptyValue = styled.span`
-  color: ${({ theme }) => theme.euiTheme.colors.mediumShade};
+  color: ${({ theme }) => theme.euiTheme.colors.textSubdued};
   text-align: left;
 `;
 
@@ -23,11 +24,25 @@ export function FormattedKey({ k, value }: { k: string; value: unknown }): JSX.E
   return <React.Fragment>{k}</React.Fragment>;
 }
 
-export function FormattedValue({ value }: { value: any }): JSX.Element {
+export function FormattedValue({
+  value,
+  dateFormat,
+  dateTimezone,
+}: {
+  value: any;
+  dateFormat: string;
+  dateTimezone: string;
+}): JSX.Element {
+  const usableTimezone = dateTimezone === 'Browser' ? moment.tz.guess() : dateTimezone;
+
+  const valueAsDate = moment(value, moment.ISO_8601, true);
+
   if (isObject(value)) {
     return <pre>{JSON.stringify(value, null, 4)}</pre>;
   } else if (isBoolean(value) || isNumber(value)) {
     return <React.Fragment>{String(value)}</React.Fragment>;
+  } else if (isString(value) && valueAsDate.isValid()) {
+    return <React.Fragment>{valueAsDate.tz(usableTimezone).format(dateFormat)}</React.Fragment>;
   } else if (!value) {
     return (
       <EmptyValue>
