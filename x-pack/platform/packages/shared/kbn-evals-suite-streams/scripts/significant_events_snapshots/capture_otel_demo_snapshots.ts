@@ -242,7 +242,7 @@ async function processScenario(
   // Step 1 — Enable the ES native "logs" stream so that its index template
   // exists before the OTel pods start writing. Must happen before deployDemo.
   log.info('[1/8] Enabling ES native logs stream...');
-  await enableLogsNativeStream(esClient, log);
+  await enableLogsNativeStream(esClient, log, logsIndex);
 
   // Step 2 — Deploy the demo app. deployDemo internally enables Kibana
   // Streams (wired definitions, pipelines) and waits for pods to be ready.
