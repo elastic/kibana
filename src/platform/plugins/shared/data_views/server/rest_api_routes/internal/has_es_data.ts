@@ -22,7 +22,7 @@ export const crossClusterPatterns = patterns.map((ds) => `*:${ds}`);
 
 export const createHandler =
   (parentLogger: Logger, hasEsDataTimeout: number): Handler =>
-  async (ctx, request, res) => {
+  async (ctx, _, res) => {
     const logger = parentLogger.get('hasEsData');
     const core = await ctx.core;
     const elasticsearchClient = core.elasticsearch.client.asCurrentUser;

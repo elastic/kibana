@@ -37,8 +37,6 @@ export const handler: RequestHandler<{}, { indices: string | string[] }, string[
   req,
   res
 ) => {
-  req.enableEsTimingTracking = true;
-
   const { indices } = req.query;
   try {
     const indexArray = parseIndices(indices);
