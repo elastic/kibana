@@ -29,7 +29,6 @@ import {
 import { getConnectionConfig, type ConnectionConfig } from './lib/get_connection_config';
 import { createSnapshot, generateGcsBasePath, registerGcsRepository } from './lib/gcs';
 import { sleep } from './lib/sleep';
-import { ensureLogsIndexTemplate } from '../../src/data_generators/logs_index_template';
 import {
   cleanupSigEventsExtractedKIsData,
   configureModelSelectionSettings,
@@ -239,46 +238,51 @@ async function processScenario(
   log.info(`SCENARIO: ${scenario.id}${isFailure ? ' (failure)' : ' (baseline)'}`);
   log.info('='.repeat(70));
 
-  // Step 0 — Ensure the target data stream exists so that feature extraction can run.
-  // (Streams' /internal/streams/{name}/features/_task requires a concrete data stream to exist.)
-  await ensureDataStream(esClient, log, logsIndex);
+  // Step 1 — Enable the ES native "logs" stream so that its index template
+  // exists before the OTel pods start writing. Must happen before deployDemo.
+  log.info('[1/8] Enabling ES native logs stream...');
+  await enableLogsNativeStream(esClient, log);
 
-  // Step 1+2 — Deploy the demo app. Resolves once pods are ready (no log streaming).
-  log.info('[1/7] Deploying demo app...');
+  // Step 2 — Deploy the demo app. deployDemo internally enables Kibana
+  // Streams (wired definitions, pipelines) and waits for pods to be ready.
+  log.info('[2/8] Deploying demo app...');
   await deployDemo({ demoType, log, logsIndex });
-  log.info('[2/7] Deployment complete');
+  log.info('[2/8] Deployment complete');
+
+  // Step 2 — Configure significant events and the connector after Streams
+  // is enabled so the settings APIs are available.
+  log.info('[3/8] Configuring significant events...');
+  await enableSignificantEvents(config, log);
+  await configureModelSelectionSettings(config, log, connectorId);
 
   try {
     // Step 3 — Accumulate baseline traffic
-    log.info('[3/7] Accumulating baseline traffic...');
+    log.info('[4/8] Accumulating baseline traffic...');
     await sleep(baselineWaitMs, log, 'baseline traffic');
 
     // Step 4 — Apply failure (if applicable)
     if (isFailure) {
-      log.info(`[4/7] Applying failure scenario "${scenario.id}"...`);
+      log.info(`[5/8] Applying failure scenario "${scenario.id}"...`);
       await patchScenarios({ demoType, scenarioIds: [scenario.id], log });
 
-      log.info('[4/7] Accumulating failure data...');
+      log.info('[5/8] Accumulating failure data...');
       await sleep(failureWaitMs, log, 'failure data');
     } else {
-      log.info('[4/7] Skipped (healthy baseline)');
+      log.info('[5/8] Skipped failure data accumulation (healthy baseline)');
     }
 
-    // Step 5 — Run feature extraction (the task generates both inferred and computed KIs)
-    // Extracted KIs will be stored as part of the snapshot
-    log.info('[5/7] Running feature extraction...');
-    await enableSignificantEvents(config, log);
-    await configureModelSelectionSettings(config, log, connectorId);
+    // Step 5 — Run feature extraction
+    log.info('[6/8] Running feature extraction...');
     await triggerSigEventsKIFeatureExtraction(config, log, logsIndex);
     await waitForSigEventsKIFeatureExtraction(config, log, logsIndex);
     await logSigEventsExtractedKIFeatures(config, log, logsIndex);
     await persistSigEventsExtractedKIsForSnapshot(config, esClient, log, scenario.id);
 
     // Step 6 — Create a snapshot of the logs and extracted features
-    log.info('[6/7] Creating GCS snapshot...');
+    log.info('[7/8] Creating GCS snapshot...');
     await createSnapshot({ esClient, log, snapshotName: scenario.id, runId });
   } finally {
-    log.info('[7/7] Cleaning up...');
+    log.info('[8/8] Cleaning up...');
     await disableStreams(config, log).catch((e) => log.error(`disableStreams failed: ${e}`));
     await cleanupSigEventsExtractedKIsData(esClient, log).catch((e) =>
       log.error(`cleanupSigEventsExtractedKIsData failed: ${e}`)
@@ -287,6 +291,20 @@ async function processScenario(
   }
 
   log.info(`Scenario "${scenario.id}" — done`);
+}
+
+async function enableLogsNativeStream(esClient: Client, log: ToolingLog): Promise<void> {
+  try {
+    await esClient.transport.request({ method: 'POST', path: '_streams/logs/_enable' });
+    log.info('ES native "logs" stream enabled');
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    if (message.includes('already enabled') || message.includes('resource_already_exists')) {
+      log.info('ES native "logs" stream already enabled');
+      return;
+    }
+    throw err;
+  }
 }
 
 const DURATION_RE = /^(\d+)(s|m|h|d)$/;
@@ -309,41 +327,3 @@ const parseDurationFlag = (
   const unit = match[2] as moment.unitOfTime.DurationConstructor;
   return moment.duration(amount, unit).asMilliseconds();
 };
-
-async function ensureDataStream(
-  esClient: Client,
-  log: ToolingLog,
-  streamName: string = DEFAULT_LOGS_INDEX
-): Promise<void> {
-  try {
-    await esClient.indices.getDataStream({ name: streamName });
-    return;
-  } catch (err) {
-    const statusCode = (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
-    if (statusCode !== 404) {
-      throw err;
-    }
-  }
-
-  log.info(`"${streamName}" data stream not found — creating it for snapshot capture`);
-
-  await ensureLogsIndexTemplate(esClient, log, streamName);
-
-  try {
-    await esClient.indices.createDataStream({ name: streamName });
-  } catch (err) {
-    // If something already exists at this name (e.g. a plain index), try to remove it and retry.
-    log.warning(
-      `Failed to create "${streamName}" data stream (will attempt cleanup and retry): ${
-        err instanceof Error ? err.message : String(err)
-      }`
-    );
-    try {
-      await esClient.indices.deleteDataStream({ name: streamName });
-    } catch {
-      // ignore
-    }
-    await esClient.indices.delete({ index: streamName, ignore_unavailable: true });
-    await esClient.indices.createDataStream({ name: streamName });
-  }
-}

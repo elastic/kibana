@@ -22,7 +22,7 @@ import {
   MANAGED_STREAM_SEARCH_PATTERN,
   type KIFeatureExclusionScenario,
 } from '../datasets';
-import { createExcludeSemanticEvaluator } from '../../../src/evaluators/exclude';
+import { createExcludeSemanticEvaluator } from '../../../src/evaluators/ki_feature_exclusion/evaluators';
 import { runExcludeExperiment } from './run_exclude_experiment';
 
 evaluate.describe.configure({ timeout: 600_000 });

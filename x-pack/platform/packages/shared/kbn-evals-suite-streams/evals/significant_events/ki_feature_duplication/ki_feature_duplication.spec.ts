@@ -18,10 +18,10 @@ import { evaluate } from '../../../src/evaluate';
 import { KI_FEATURE_DUPLICATION_DATASETS } from './ki_feature_duplication_datasets';
 import { indexSynthtraceScenario } from '../../synthtrace_helpers';
 import {
-  kiFeatureDuplicationEvaluator,
+  kiDuplicationEvaluator,
   createSemanticUniquenessEvaluator,
   createIdConsistencyEvaluator,
-} from '../../../src/evaluators/ki_feature_duplication_evaluators';
+} from '../../../src/evaluators/ki_feature_duplication/evaluators';
 
 evaluate.describe('KI feature duplication (harness)', () => {
   const from = kbnDatemath.parse('now-10m')!;
@@ -136,7 +136,7 @@ evaluate.describe('KI feature duplication (harness)', () => {
               },
             },
             [
-              kiFeatureDuplicationEvaluator,
+              kiDuplicationEvaluator,
               createSemanticUniquenessEvaluator({ inferenceClient: evaluatorInferenceClient }),
               createIdConsistencyEvaluator({ inferenceClient: evaluatorInferenceClient }),
               evaluators.traceBasedEvaluators.inputTokens,

@@ -11,8 +11,8 @@ import { type BaseFeature } from '@kbn/streams-schema';
 import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { flattenObject } from '@kbn/object-utils';
-import { createScenarioCriteriaLlmEvaluator } from './scenario_criteria_llm_evaluator';
-import { isEvidenceGrounded } from './evidence_grounding';
+import { createScenarioCriteriaLlmEvaluator } from '../scenario_criteria/evaluators';
+import { isEvidenceGrounded } from './is_evidence_grounded';
 
 export const VALID_KI_FEATURE_TYPES = [
   'entity',

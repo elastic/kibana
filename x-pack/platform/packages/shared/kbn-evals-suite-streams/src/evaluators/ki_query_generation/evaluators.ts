@@ -17,8 +17,8 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { selectEvaluators } from '@kbn/evals';
 import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
 import type { SignificantEventType } from '@kbn/streams-ai/src/significant_events/types';
-import { createScenarioCriteriaLlmEvaluator } from './scenario_criteria_llm_evaluator';
-import { matchesEvidenceText } from './evidence_grounding';
+import { createScenarioCriteriaLlmEvaluator } from '../scenario_criteria/evaluators';
+import { matchesEvidenceText } from '../common/matches_evidence_text';
 
 const ALLOWED_CATEGORIES = [
   SIGNIFICANT_EVENT_TYPE_OPERATIONAL,

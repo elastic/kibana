@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { matchesEvidenceText } from './text_matching';
+import { matchesEvidenceText } from '../common/matches_evidence_text';
 
 /** Dotted paths may include numeric segments for array indices (e.g. `labels.0.key`). */
 const FIELD_PATH_KEY = '[a-zA-Z_][a-zA-Z0-9_/\\-]*(?:\\.(?:[a-zA-Z_][a-zA-Z0-9_/\\-]*|[0-9]+))*';

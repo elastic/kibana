@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { isEvidenceGrounded } from './evidence_grounding';
-import { matchesEvidenceText } from './text_matching';
+import { isEvidenceGrounded } from './is_evidence_grounded';
+import { matchesEvidenceText } from '../common/matches_evidence_text';
 
 describe('matchesEvidenceText', () => {
   it('does not match short evidence as a substring inside a larger token', () => {

@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SignificantEventType } from '@kbn/streams-ai/src/significant_events/types';
-import { createKIQueryGenerationEvaluators } from './ki_query_generation_evaluators';
+import { createKIQueryGenerationEvaluators } from './evaluators';
 
 const createEsClient = (
   responses: Record<string, { values?: unknown[][]; error?: Error }>

@@ -7,7 +7,7 @@
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { BaseFeature } from '@kbn/streams-schema';
-import { createKIFeatureExtractionEvaluators } from './ki_feature_extraction_evaluators';
+import { createKIFeatureExtractionEvaluators } from './evaluators';
 
 const evidenceGroundingEvaluator = createKIFeatureExtractionEvaluators().find(
   (evaluator) => evaluator.name === 'evidence_grounding'
