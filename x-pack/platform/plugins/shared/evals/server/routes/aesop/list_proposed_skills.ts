@@ -101,7 +101,7 @@ export function registerListProposedSkillsRoute({ router, logger }: AESOPRouteDe
           return response.ok({
             body: {
               skills,
-              total: result.hits.total.value,
+              total: typeof result.hits.total === 'number' ? result.hits.total : result.hits.total?.value ?? 0,
               limit,
               offset,
             },
