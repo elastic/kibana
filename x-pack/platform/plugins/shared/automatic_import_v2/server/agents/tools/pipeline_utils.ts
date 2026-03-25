@@ -126,6 +126,12 @@ export const processSimulationResults = (
         sample: samples[index],
         error: 'Document was dropped by the pipeline',
       });
+    } else if (doc.error) {
+      failedSamples.push({
+        sampleIndex: index,
+        sample: samples[index],
+        error: doc.error.reason ?? doc.error.type ?? JSON.stringify(doc.error),
+      });
     } else if (doc.doc?._source?.error) {
       const errorDetail =
         typeof doc.doc._source.error === 'string'

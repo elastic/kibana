@@ -188,78 +188,86 @@ export function ingestPipelineValidatorTool(options: ValidatorToolOptions): Dyna
       }
 
       // Batch-resolve only the fields present in outputs against ECS, plus root fieldsets and event.kind metadata
-      const [ecsHitDict, ecsFieldsets, eventKindField] = await Promise.all([
-        fieldsMetadataClient.find({ fieldNames: [...allFieldPaths], source: ['ecs'] }),
-        fieldsMetadataClient.getECSFieldsets(),
-        fieldsMetadataClient
-          .getByName('event.kind', { source: ['ecs'] })
-          .then((field) => field?.pick(['allowed_values'])),
-      ]);
-
-      const ecsFieldSet = new Set(Object.keys(ecsHitDict.getFields()));
-      const ecsRootSet = new Set(ecsFieldsets);
-      const validEventKinds = new Set((eventKindField?.allowed_values ?? []).map((av) => av.name));
-
       const ecsWarnings: string[] = [];
+      const fieldNamingErrors: string[] = [];
 
-      for (const doc of successfulDocuments.slice(0, 20)) {
-        const source = doc as Record<string, unknown>;
-        const categories = asArray(getNestedValue(source, 'event.category'));
-        const types = asArray(getNestedValue(source, 'event.type'));
-        const eventKind = getNestedValue(source, 'event.kind');
+      try {
+        const [ecsHitDict, ecsFieldsets, eventKindField] = await Promise.all([
+          fieldsMetadataClient.find({ fieldNames: [...allFieldPaths], source: ['ecs'] }),
+          fieldsMetadataClient.getECSFieldsets(),
+          fieldsMetadataClient
+            .getByName('event.kind', { source: ['ecs'] })
+            .then((field) => field?.pick(['allowed_values'])),
+        ]);
 
-        if (categories.length > 0 && types.length > 0) {
-          const valid = await fieldsMetadataClient.matchesAnyTypeForEventCategory(
-            categories,
-            types
-          );
-          if (!valid) {
+        const ecsFieldSet = new Set(Object.keys(ecsHitDict.getFields()));
+        const ecsRootSet = new Set(ecsFieldsets);
+        const validEventKinds = new Set(
+          (eventKindField?.allowed_values ?? []).map((av) => av.name)
+        );
+
+        for (const doc of successfulDocuments.slice(0, 20)) {
+          const source = doc as Record<string, unknown>;
+          const categories = asArray(getNestedValue(source, 'event.category'));
+          const types = asArray(getNestedValue(source, 'event.type'));
+          const eventKind = getNestedValue(source, 'event.kind');
+
+          if (categories.length > 0 && types.length > 0) {
+            const valid = await fieldsMetadataClient.matchesAnyTypeForEventCategory(
+              categories,
+              types
+            );
+            if (!valid) {
+              ecsWarnings.push(
+                `Invalid event.category/type combination: categories=${JSON.stringify(
+                  categories
+                )}, types=${JSON.stringify(types)}`
+              );
+            }
+          }
+
+          if (typeof eventKind === 'string' && !validEventKinds.has(eventKind)) {
             ecsWarnings.push(
-              `Invalid event.category/type combination: categories=${JSON.stringify(
-                categories
-              )}, types=${JSON.stringify(types)}`
+              `Invalid event.kind: "${eventKind}". Valid values: ${[...validEventKinds].join(', ')}`
             );
           }
         }
 
-        if (typeof eventKind === 'string' && !validEventKinds.has(eventKind)) {
-          ecsWarnings.push(
-            `Invalid event.kind: "${eventKind}". Valid values: ${[...validEventKinds].join(', ')}`
-          );
+        const hasTimestamp = successfulDocuments.some(
+          (doc) => (doc as Record<string, unknown>)['@timestamp'] != null
+        );
+        if (!hasTimestamp && successfulDocuments.length > 0) {
+          ecsWarnings.push('@timestamp is not set in any processed document');
         }
-      }
 
-      const hasTimestamp = successfulDocuments.some(
-        (doc) => (doc as Record<string, unknown>)['@timestamp'] != null
-      );
-      if (!hasTimestamp && successfulDocuments.length > 0) {
-        ecsWarnings.push('@timestamp is not set in any processed document');
+        for (const fieldPath of allFieldPaths) {
+          if (ecsFieldSet.has(fieldPath)) continue;
+
+          const dotIndex = fieldPath.indexOf('.');
+          const root = dotIndex !== -1 ? fieldPath.substring(0, dotIndex) : fieldPath;
+
+          if (ecsRootSet.has(root)) {
+            fieldNamingErrors.push(
+              `Field '${fieldPath}' is under ECS root '${root}' but is not a valid ECS field. ` +
+                `Custom fields under ECS paths are not allowed. ` +
+                `Either use a valid ECS field or rename to '${customFieldPrefix}${fieldPath.substring(
+                  dotIndex + 1
+                )}'.`
+            );
+          } else if (!fieldPath.startsWith(customFieldPrefix)) {
+            fieldNamingErrors.push(
+              `Field '${fieldPath}' is not an ECS field and is not properly namespaced. ` +
+                `Non-ECS fields must use the format '${customFieldPrefix}<field_name>'.`
+            );
+          }
+        }
+      } catch (ecsError) {
+        ecsWarnings.push(
+          `ECS validation unavailable: ${(ecsError as Error).message ?? String(ecsError)}`
+        );
       }
 
       const uniqueEcsWarnings = [...new Set(ecsWarnings)];
-
-      const fieldNamingErrors: string[] = [];
-      for (const fieldPath of allFieldPaths) {
-        if (ecsFieldSet.has(fieldPath)) continue;
-
-        const dotIndex = fieldPath.indexOf('.');
-        const root = dotIndex !== -1 ? fieldPath.substring(0, dotIndex) : fieldPath;
-
-        if (ecsRootSet.has(root)) {
-          fieldNamingErrors.push(
-            `Field '${fieldPath}' is under ECS root '${root}' but is not a valid ECS field. ` +
-              `Custom fields under ECS paths are not allowed. ` +
-              `Either use a valid ECS field or rename to '${customFieldPrefix}${fieldPath.substring(
-                dotIndex + 1
-              )}'.`
-          );
-        } else if (!fieldPath.startsWith(customFieldPrefix)) {
-          fieldNamingErrors.push(
-            `Field '${fieldPath}' is not an ECS field and is not properly namespaced. ` +
-              `Non-ECS fields must use the format '${customFieldPrefix}<field_name>'.`
-          );
-        }
-      }
 
       const uniqueFieldNamingErrors = [...new Set(fieldNamingErrors)];
 
