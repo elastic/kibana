@@ -8,7 +8,7 @@
  */
 
 import { waitFor } from '@testing-library/react';
-import { filter, firstValueFrom } from 'rxjs';
+import { filter, firstValueFrom, timeout } from 'rxjs';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
@@ -96,18 +96,26 @@ const waitForCompleteForQuery = async ({
 }: {
   documents$: DataDocuments$;
   esql: string;
-}) =>
-  firstValueFrom(
-    documents$.pipe(
-      filter(
-        (msg) =>
-          msg.fetchStatus === FetchStatus.COMPLETE &&
-          msg.query !== undefined &&
-          'esql' in msg.query &&
-          msg.query.esql === esql
+}) => {
+  try {
+    await firstValueFrom(
+      documents$.pipe(
+        filter(
+          (msg) =>
+            msg.fetchStatus === FetchStatus.COMPLETE &&
+            msg.query !== undefined &&
+            'esql' in msg.query &&
+            msg.query.esql === esql
+        ),
+        timeout({ first: 2000 })
       )
-    )
-  );
+    );
+  } catch (error) {
+    throw new Error(`Timed out waiting for COMPLETE documents$ event for query: ${esql}`, {
+      cause: error,
+    });
+  }
+};
 
 const setupTest = async ({
   appState,
@@ -238,6 +246,7 @@ describe('buildEsqlFetchSubscribe', () => {
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     replaceUrlState.mockClear();
 
+    const sameIndexQueryCompleted = waitForCompleteForQuery({ documents$, esql: sameIndexQuery });
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       result: [
@@ -250,10 +259,14 @@ describe('buildEsqlFetchSubscribe', () => {
       // non transformational command, same columns as msgComplete
       query: { esql: sameIndexQuery },
     });
-    await waitForCompleteForQuery({ documents$, esql: sameIndexQuery });
+    await sameIndexQueryCompleted;
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
     replaceUrlState.mockClear();
 
+    const differentIndexQueryCompleted = waitForCompleteForQuery({
+      documents$,
+      esql: differentIndexQuery,
+    });
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       result: [
@@ -266,7 +279,7 @@ describe('buildEsqlFetchSubscribe', () => {
       // non transformational command, different index
       query: { esql: differentIndexQuery },
     });
-    await waitForCompleteForQuery({ documents$, esql: differentIndexQuery });
+    await differentIndexQueryCompleted;
     expect(replaceUrlState).toHaveBeenCalledWith({
       tabId,
       appState: { columns: ['field1', 'field2'] },
