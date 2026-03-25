@@ -11,7 +11,6 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import { schema } from '@kbn/config-schema';
 import { getRouteConfig } from '../get_route_config';
 import { deleteDashboard } from './delete';
-import { counterNames } from '../telemetry/increment_external_counter';
 import type { DashboardApiRequestHandlerContext } from '../../request_handler_context';
 
 export function registerDeleteRoute(router: VersionedRouter<DashboardApiRequestHandlerContext>) {
@@ -39,24 +38,31 @@ export function registerDeleteRoute(router: VersionedRouter<DashboardApiRequestH
     },
     async (ctx, req, res) => {
       const { dashboardApi } = await ctx.resolve(['dashboardApi']);
-      dashboardApi.telemetry.incrementExternal(counterNames.external('delete'));
       try {
         await deleteDashboard(ctx, req.params.id);
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 404) {
-          return res.notFound({
+          const response = res.notFound({
             body: {
               message: `A dashboard with ID [${req.params.id}] was not found.`,
             },
           });
+          dashboardApi.telemetry.incrementExternal(response);
+          return response;
         }
         if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
+          const response = res.forbidden();
+          dashboardApi.telemetry.incrementExternal(response);
+          return response;
         }
-        return res.badRequest();
+        const response = res.badRequest();
+        dashboardApi.telemetry.incrementExternal(response);
+        return response;
       }
 
-      return res.noContent();
+      const response = res.noContent();
+      dashboardApi.telemetry.incrementExternal(response);
+      return response;
     }
   );
 }

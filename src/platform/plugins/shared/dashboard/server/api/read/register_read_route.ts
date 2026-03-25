@@ -14,7 +14,6 @@ import { getRouteConfig } from '../get_route_config';
 import { getReadResponseBodySchema } from './schemas';
 import { read } from './read';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
-import { counterNames } from '../telemetry/increment_external_counter';
 import type { DashboardApiRequestHandlerContext } from '../../request_handler_context';
 
 export function registerReadRoute(
@@ -57,7 +56,6 @@ export function registerReadRoute(
     },
     async (ctx, req, res) => {
       const { dashboardApi } = await ctx.resolve(['dashboardApi']);
-      dashboardApi.telemetry.incrementExternal(counterNames.external('read'));
       try {
         const result = await read(
           ctx,
@@ -65,23 +63,31 @@ export function registerReadRoute(
           req.params.id,
           isDashboardAppRequest
         );
-        return res.ok({
+        const response = res.ok({
           body: result,
         });
+        dashboardApi.telemetry.incrementExternal(response);
+        return response;
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 404) {
-          return res.notFound({
+          const response = res.notFound({
             body: {
               message: `A dashboard with ID [${req.params.id}] was not found.`,
             },
           });
+          dashboardApi.telemetry.incrementExternal(response);
+          return response;
         }
 
         if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
+          const response = res.forbidden();
+          dashboardApi.telemetry.incrementExternal(response);
+          return response;
         }
 
-        return res.badRequest(e.message);
+        const response = res.badRequest(e.message);
+        dashboardApi.telemetry.incrementExternal(response);
+        return response;
       }
     }
   );

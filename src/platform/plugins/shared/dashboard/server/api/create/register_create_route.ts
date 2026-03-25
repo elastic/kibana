@@ -17,7 +17,6 @@ import {
 } from './schemas';
 import { create } from './create';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
-import { counterNames } from '../telemetry/increment_external_counter';
 import type { DashboardApiRequestHandlerContext } from '../../request_handler_context';
 
 export function registerCreateRoute(
@@ -55,7 +54,6 @@ export function registerCreateRoute(
     },
     async (ctx, req, res) => {
       const { dashboardApi } = await ctx.resolve(['dashboardApi']);
-      dashboardApi.telemetry.incrementExternal(counterNames.external('create'));
       try {
         const result = await create(
           ctx,
@@ -64,21 +62,29 @@ export function registerCreateRoute(
           req.params,
           isDashboardAppRequest
         );
-        return res.created({ body: result });
+        const response = res.created({ body: result });
+        dashboardApi.telemetry.incrementExternal(response);
+        return response;
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 409) {
-          return res.conflict({
+          const response = res.conflict({
             body: {
               message: `A dashboard with ID ${req?.params?.id} already exists.`,
             },
           });
+          dashboardApi.telemetry.incrementExternal(response);
+          return response;
         }
 
         if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
+          const response = res.forbidden();
+          dashboardApi.telemetry.incrementExternal(response);
+          return response;
         }
 
-        return res.badRequest({ body: e });
+        const response = res.badRequest({ body: e });
+        dashboardApi.telemetry.incrementExternal(response);
+        return response;
       }
     }
   );

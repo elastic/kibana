@@ -12,7 +12,6 @@ import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import {
   baseMetaSchema,
   createdMetaSchema,
-  droppedPanelsMetaSchema,
   resolveMetaSchema,
   updatedMetaSchema,
 } from '../meta_schemas';

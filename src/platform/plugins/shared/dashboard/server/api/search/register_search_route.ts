@@ -11,7 +11,6 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import { getRouteConfig } from '../get_route_config';
 import { searchRequestBodySchema, searchResponseBodySchema } from './schemas';
 import { search } from './search';
-import { counterNames } from '../telemetry/increment_external_counter';
 import type { DashboardApiRequestHandlerContext } from '../../request_handler_context';
 
 export function registerSearchRoute(router: VersionedRouter<DashboardApiRequestHandlerContext>) {
@@ -39,18 +38,23 @@ export function registerSearchRoute(router: VersionedRouter<DashboardApiRequestH
     async (ctx, req, res) => {
       let result;
       const { dashboardApi } = await ctx.resolve(['dashboardApi']);
-      dashboardApi.telemetry.incrementExternal(counterNames.external('search'));
       try {
         result = await search(ctx, req.body);
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
+          const response = res.forbidden();
+          dashboardApi.telemetry.incrementExternal(response);
+          return response;
         }
 
-        return res.badRequest();
+        const response = res.badRequest();
+        dashboardApi.telemetry.incrementExternal(response);
+        return response;
       }
 
-      return res.ok({ body: result });
+      const response = res.ok({ body: result });
+      dashboardApi.telemetry.incrementExternal(response);
+      return response;
     }
   );
 }

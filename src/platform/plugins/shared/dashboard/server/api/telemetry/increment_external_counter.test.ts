@@ -7,16 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IKibanaResponse } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { createDashboardApiTelemetryFacade } from '../../request_handler_context';
-import { counterNames } from './increment_external_counter';
 
 describe('dashboard api telemetry - ctx.dashboardApi.telemetry facade', () => {
+  const usageCollection = usageCollectionPluginMock.createSetupContract();
+  const usageCounter = usageCollection.createUsageCounter('increment_external_counter_test');
+  const routePath = '/api/dashboards/{id}';
+  const actualPath = '/api/dashboards/123';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it('is a noop when usageCounter is unavailable', () => {
     const telemetry = createDashboardApiTelemetryFacade({
       usageCounter: undefined,
       isDashboardUiRequest: false,
+      request: httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: actualPath,
+        routePath,
+      }),
     });
-    expect(() => telemetry.incrementExternal('external_read')).not.toThrow();
+    expect(() =>
+      telemetry.incrementExternal({ status: 200 } as IKibanaResponse<any>)
+    ).not.toThrow();
     expect(() =>
       telemetry.incrementExternalByType({
         totalCounterName: 'external_read_stripped_panels_total',
@@ -27,22 +44,30 @@ describe('dashboard api telemetry - ctx.dashboardApi.telemetry facade', () => {
   });
 
   it('does not increment for Dashboard UI request', () => {
-    const usageCounter = { incrementCounter: jest.fn() } as any;
     const telemetry = createDashboardApiTelemetryFacade({
       usageCounter,
       isDashboardUiRequest: true,
+      request: httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: actualPath,
+        routePath,
+      }),
     });
-    telemetry.incrementExternal('external_read');
+    telemetry.incrementExternal({ status: 200 } as IKibanaResponse<any>);
     expect(usageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   it('increments for external request and aggregates by type', () => {
-    const usageCounter = { incrementCounter: jest.fn() } as any;
     const telemetry = createDashboardApiTelemetryFacade({
       usageCounter,
       isDashboardUiRequest: false,
+      request: httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: actualPath,
+        routePath,
+      }),
     });
-    telemetry.incrementExternal('external_read');
+    telemetry.incrementExternal({ status: 200 } as IKibanaResponse<any>);
     telemetry.incrementExternalByType({
       totalCounterName: 'external_read_stripped_panels_total',
       byTypeCounterName: (t) => `external_read_stripped_panels_type_${t}`,
@@ -50,7 +75,7 @@ describe('dashboard api telemetry - ctx.dashboardApi.telemetry facade', () => {
     });
 
     expect(usageCounter.incrementCounter).toHaveBeenNthCalledWith(1, {
-      counterName: 'external_read',
+      counterName: 'get /api/dashboards/{id} 200',
       incrementBy: undefined,
     });
     expect(usageCounter.incrementCounter).toHaveBeenNthCalledWith(2, {
@@ -67,12 +92,19 @@ describe('dashboard api telemetry - ctx.dashboardApi.telemetry facade', () => {
     });
   });
 
-  it('sanitizes dynamic counter name parts', () => {
-    expect(counterNames.externalReadStrippedPanelsByType('anthropic/claude-3-opus')).toBe(
-      'external_read_stripped_panels_type_anthropic_claude-3-opus'
-    );
-    expect(counterNames.externalReadStrippedPanelsByType('!@#$%^&*()')).toBe(
-      'external_read_stripped_panels_type_unknown'
-    );
+  it('falls back to `route.path` when `route.routePath` is missing', () => {
+    const telemetry = createDashboardApiTelemetryFacade({
+      usageCounter,
+      isDashboardUiRequest: false,
+      request: httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: actualPath,
+      }),
+    });
+    telemetry.incrementExternal({ status: 204 } as IKibanaResponse<any>);
+    expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+      counterName: 'get /api/dashboards/123 204',
+      incrementBy: undefined,
+    });
   });
 });
