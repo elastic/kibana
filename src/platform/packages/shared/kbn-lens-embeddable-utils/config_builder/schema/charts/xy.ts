@@ -263,7 +263,7 @@ const xySharedSettings = {
         schema.object(
           {
             ...sharedLegendSchema,
-            inside: schema.maybe(schema.literal(false)),
+            placement: schema.maybe(schema.literal('outside')),
             layout: schema.maybe(schema.literal('list')),
             position: schema.maybe(positionSchema()),
             size: schema.maybe(
@@ -285,7 +285,7 @@ const xySharedSettings = {
         schema.object(
           {
             ...sharedLegendSchema,
-            inside: schema.literal(true),
+            placement: schema.literal('inside'),
             columns: schema.maybe(
               schema.number({ min: 1, max: 5, meta: { description: 'Number of legend columns' } })
             ),

@@ -125,7 +125,7 @@ const metricStatePrimaryMetricOptionsSchema = {
   /**
    * Values configuration
    */
-  values: schema.object(
+  value: schema.object(
     {
       /**
        * Alignment for values. Possible values:
@@ -243,7 +243,7 @@ const metricStateSecondaryMetricOptionsSchema = {
       ),
     ])
   ),
-  values: schema.maybe(
+  value: schema.maybe(
     schema.object(
       {
         /**
@@ -257,7 +257,7 @@ const metricStateSecondaryMetricOptionsSchema = {
           defaultValue: LENS_METRIC_STATE_DEFAULTS.secondaryAlign,
         }),
       },
-      { meta: { description: 'Values configuration' } }
+      { meta: { description: 'Value configuration' } }
     )
   ),
   /**

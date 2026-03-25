@@ -138,9 +138,9 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
     subtitle: primaryMetric.sub_label ?? '',
     showBar: false,
     valueFontMode: primaryMetric.fit ? 'fit' : 'default',
-    ...(primaryMetric.labels?.alignment || primaryMetric.values?.alignment
+    ...(primaryMetric.labels?.alignment || primaryMetric.value?.alignment
       ? {
-          primaryAlign: primaryMetric.values?.alignment,
+          primaryAlign: primaryMetric.value?.alignment,
           titlesTextAlign: primaryMetric.labels?.alignment,
         }
       : {}),
@@ -162,8 +162,8 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
             ? { secondaryLabelPosition: secondaryMetric.placement }
             : {}),
           secondaryAlign:
-            ('values' in secondaryMetric && secondaryMetric.values?.alignment) ||
-            ('values' in primaryMetric ? primaryMetric.values?.alignment : undefined),
+            ('value' in secondaryMetric && secondaryMetric.value?.alignment) ||
+            ('value' in primaryMetric ? primaryMetric.value?.alignment : undefined),
           ...('compare' in secondaryMetric && secondaryMetric.compare
             ? fromCompareAPIToLensState(secondaryMetric.compare)
             : {}),
@@ -403,7 +403,7 @@ function enrichConfigurationWithVisualizationProperties(
       visualization.titlesTextAlign
     ) {
       if (visualization.primaryAlign || visualization.valuesTextAlign) {
-        primaryMetric.values = {
+        primaryMetric.value = {
           alignment:
             visualization.primaryAlign ??
             visualization.valuesTextAlign ??
@@ -449,7 +449,7 @@ function enrichConfigurationWithVisualizationProperties(
     }
 
     if (visualization.secondaryAlign) {
-      secondaryMetric.values = {
+      secondaryMetric.value = {
         alignment: visualization.secondaryAlign,
       };
     }

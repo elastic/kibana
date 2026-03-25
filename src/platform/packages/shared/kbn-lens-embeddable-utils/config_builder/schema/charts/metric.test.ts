@@ -42,7 +42,7 @@ describe('Metric Schema', () => {
             labels: {
               alignment: 'left',
             },
-            values: {
+            value: {
               alignment: 'right',
             },
           },
@@ -68,7 +68,7 @@ describe('Metric Schema', () => {
               alignment: 'left',
             },
             labels: { alignment: 'left' },
-            values: { alignment: 'left' },
+            value: { alignment: 'left' },
           },
         ],
       } satisfies MetricInput;
@@ -90,7 +90,7 @@ describe('Metric Schema', () => {
             field: 'temperature',
             fit: false,
             labels: { alignment: 'left' },
-            values: { alignment: 'left' },
+            value: { alignment: 'left' },
             color: {
               type: 'dynamic',
               range: 'absolute',
@@ -117,7 +117,7 @@ describe('Metric Schema', () => {
             field: 'cpu_usage',
             fit: false,
             labels: { alignment: 'left' },
-            values: { alignment: 'left' },
+            value: { alignment: 'left' },
             background_chart: {
               type: 'bar',
               orientation: 'horizontal',
@@ -153,7 +153,7 @@ describe('Metric Schema', () => {
               },
               fit: false,
               labels: { alignment: 'left' },
-              values: { alignment: 'left' },
+              value: { alignment: 'left' },
             },
           ],
         } satisfies MetricInput;
@@ -181,7 +181,7 @@ describe('Metric Schema', () => {
               },
               fit: false,
               labels: { alignment: 'left' },
-              values: { alignment: 'left' },
+              value: { alignment: 'left' },
             },
           ],
           breakdown_by: {
@@ -213,7 +213,7 @@ describe('Metric Schema', () => {
               },
               fit: false,
               labels: { alignment: 'left' },
-              values: { alignment: 'left' },
+              value: { alignment: 'left' },
               background_chart: {
                 type: 'bar',
                 max_value: { operation: 'static_value', value: 100 },
@@ -238,7 +238,7 @@ describe('Metric Schema', () => {
             field: 'revenue',
             fit: false,
             labels: { alignment: 'left' },
-            values: { alignment: 'left' },
+            value: { alignment: 'left' },
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
           {
@@ -270,7 +270,7 @@ describe('Metric Schema', () => {
             fit: false,
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
             labels: { alignment: 'left' },
-            values: { alignment: 'left' },
+            value: { alignment: 'left' },
           },
           {
             type: 'secondary',
@@ -304,7 +304,7 @@ describe('Metric Schema', () => {
             fit: false,
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
             labels: { alignment: 'left' },
-            values: { alignment: 'left' },
+            value: { alignment: 'left' },
           },
         ],
         breakdown_by: {
@@ -335,7 +335,7 @@ describe('Metric Schema', () => {
             fit: false,
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
             labels: { alignment: 'left' },
-            values: { alignment: 'left' },
+            value: { alignment: 'left' },
           },
         ],
         breakdown_by: {
@@ -399,7 +399,7 @@ describe('Metric Schema', () => {
             field: 'sales',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
             labels: { alignment: 'left' },
-            values: { alignment: 'left' },
+            value: { alignment: 'left' },
             fit: false,
           },
         ],
@@ -425,7 +425,7 @@ describe('Metric Schema', () => {
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
             fit: false,
             labels: { alignment: 'left' },
-            values: { alignment: 'left' },
+            value: { alignment: 'left' },
           },
         ],
       } satisfies MetricInput;
@@ -444,7 +444,7 @@ describe('Metric Schema', () => {
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
             fit: false,
             labels: { alignment: 'left' },
-            values: { alignment: 'left' },
+            value: { alignment: 'left' },
           },
           {
             type: 'primary',
@@ -453,7 +453,7 @@ describe('Metric Schema', () => {
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
             fit: false,
             labels: { alignment: 'left' },
-            values: { alignment: 'left' },
+            value: { alignment: 'left' },
           },
         ],
       } satisfies MetricInput;
@@ -516,7 +516,7 @@ describe('Metric Schema', () => {
             labels: {
               alignment: 'left',
             },
-            values: {
+            value: {
               alignment: 'right',
             },
             icon: {
@@ -578,7 +578,7 @@ describe('Metric Schema', () => {
             column: 'unique_count',
             fit: false,
             labels: { alignment: 'left' },
-            values: { alignment: 'left' },
+            value: { alignment: 'left' },
           },
         ],
       } satisfies MetricInput;
