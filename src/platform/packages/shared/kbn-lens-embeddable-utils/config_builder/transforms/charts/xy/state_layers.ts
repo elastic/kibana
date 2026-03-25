@@ -11,15 +11,18 @@ import type {
   SeriesType,
   XYAnnotationLayerConfig,
   XYDataLayerConfig,
-  XYLayerConfig,
+  XYPersistedByReferenceAnnotationLayerConfig,
+  XYPersistedLayerConfig,
   XYReferenceLineLayerConfig,
   YConfig,
 } from '@kbn/lens-common';
+import type { SavedObjectReference } from '@kbn/core/server';
+import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 import { getValueColumn } from '../../columns/esql_column';
 import type {
   DataLayerType,
-  AnnotationLayerType,
   ReferenceLineLayerType,
+  AnnotationLayerByValueType,
 } from '../../../schema/charts/xy';
 import { addLayerColumn, generateLayer } from '../../utils';
 import {
@@ -101,8 +104,8 @@ function buildDataLayer(layer: DataLayerType, i: number): XYDataLayerConfig {
   };
 }
 
-function buildAnnotationLayer(
-  layer: AnnotationLayerType,
+function buildByValueAnnotationLayer(
+  layer: AnnotationLayerByValueType,
   i: number,
   dataViewId: string
 ): XYAnnotationLayerConfig {
@@ -198,15 +201,36 @@ function buildReferenceLineLayer(
 export function buildXYLayer(
   layer: unknown,
   i: number,
-  dataViewId: string
-): XYLayerConfig | undefined {
+  dataViewId: string,
+  annotationGroupReferences: SavedObjectReference[]
+): XYPersistedLayerConfig | undefined {
   if (!isAPIXYLayer(layer)) {
     return;
   }
 
-  // now enrich the layer based on its type
   if (isAPIAnnotationLayer(layer)) {
-    return buildAnnotationLayer(layer, i, dataViewId);
+    if ('group_id' in layer) {
+      // by-reference annotation layer
+      // TODO: support linked by-value annotation layers as well
+      const layerId = getIdForLayer(layer, i);
+
+      annotationGroupReferences.push({
+        name: `ref-${layerId}`,
+        type: EVENT_ANNOTATION_GROUP_TYPE,
+        id: layer.group_id,
+      });
+
+      const persistedLayer: XYPersistedByReferenceAnnotationLayerConfig = {
+        layerType: 'annotations',
+        persistanceType: 'byReference',
+        layerId,
+        annotationGroupRef: `ref-${layerId}`,
+      };
+      return persistedLayer;
+    }
+
+    // by-value annotation layer
+    return buildByValueAnnotationLayer(layer, i, dataViewId);
   }
   if (isAPIReferenceLineLayer(layer)) {
     return buildReferenceLineLayer(layer, i);
