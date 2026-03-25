@@ -33,7 +33,8 @@ import type { EntityStoreRecord } from '../../../entity_details/shared/hooks/use
 import { getRiskFromEntityRecord } from '../../../entity_details/shared/entity_store_risk_utils';
 import { PreferenceFormattedDateFromPrimitive } from '../../../../common/components/formatted_date';
 import type { DescriptionList } from '../../../../../common/utility_types';
-import { getField } from '../../shared/utils';
+import type { IdentityFields } from '../../shared/utils';
+import { getField, mergeLegacyIdentityWhenStoreEntityMissing } from '../../shared/utils';
 import { CellActions } from '../../shared/components/cell_actions';
 import {
   FirstLastSeen,
@@ -137,9 +138,14 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
     [from, to]
   );
 
-  const stableEntityIdentifiers = useMemo((): Record<string, string> => {
-    return identityFields ?? {};
-  }, [identityFields]);
+  const userIdentityFields = useMemo(() => {
+    const legacyFields =
+      userName != null && userName !== '' ? { 'user.name': userName } : ({} as IdentityFields);
+    if (!entityStoreV2Enabled) {
+      return legacyFields;
+    }
+    return mergeLegacyIdentityWhenStoreEntityMissing(identityFields ?? {}, legacyFields);
+  }, [entityStoreV2Enabled, userName, identityFields]);
 
   const riskScoreFilterQuery = useMemo(
     () => (userName ? (buildUserNamesFilter([userName]) as ESQuery) : undefined),
@@ -193,15 +199,15 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   const isRiskScoreExist = !!userRiskData?.user?.risk;
   const isAuthorized = entityStoreV2Enabled ? true : isRiskScoreAuthorized;
 
-  const userCspIdentityDoc = entityRecord ?? stableEntityIdentifiers;
+  const userCspIdentityDoc = entityRecord ?? userIdentityFields;
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
     buildEuidCspPreviewOptions('user', userCspIdentityDoc, euidApi, {
       entityStoreV2Enabled,
-      legacyIdentityFields: stableEntityIdentifiers,
+      legacyIdentityFields: userIdentityFields,
     })
   );
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    identityFields: stableEntityIdentifiers,
+    identityFields: userIdentityFields,
     entityType: EntityType.user,
     to,
     from,
@@ -210,7 +216,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
 
   const openDetailsPanel = useNavigateToUserDetails({
     userName,
-    identityFields: stableEntityIdentifiers ?? {},
+    identityFields: userIdentityFields,
     entityId: entityRecord?.entity?.id,
     scopeId,
     isRiskScoreExist,
@@ -375,14 +381,14 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
         )}
       </EuiFlexItem>
       <AlertCountInsight
-        identityFields={stableEntityIdentifiers}
+        identityFields={userIdentityFields}
         entityType={EntityType.user}
         queryId={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-${USER_ENTITY_OVERVIEW_ID}`}
         openDetailsPanel={openDetailsPanel}
         data-test-subj={ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID}
       />
       <MisconfigurationsInsight
-        identityFields={stableEntityIdentifiers}
+        identityFields={userIdentityFields}
         openDetailsPanel={openDetailsPanel}
         data-test-subj={ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID}
         telemetryKey={MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW}
