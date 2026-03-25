@@ -31,6 +31,12 @@ export enum TransferAction {
   SaveByValue,
 }
 
+interface TransferOptions {
+  state?: SavedSearchByValueAttributes;
+  path?: string;
+  app?: string;
+}
+
 export class EmbeddableEditorService {
   private embeddableState?: EmbeddableEditorState;
 
@@ -57,7 +63,7 @@ export class EmbeddableEditorService {
 
   public transferBackToEditor(
     action: TransferAction.Cancel | TransferAction.SaveSession,
-    options?: Omit<TransferAction, 'state'> & { state: never }
+    options?: Omit<TransferOptions, 'state'>
   ): void;
   public transferBackToEditor(
     action: TransferAction.SaveByValue,
@@ -91,10 +97,4 @@ export class EmbeddableEditorService {
       });
     }
   }
-}
-
-interface TransferOptions {
-  state?: SavedSearchByValueAttributes;
-  path?: string;
-  app?: string;
 }
