@@ -293,6 +293,8 @@ function resolveAndCreatePipeline({
 }) {
   return from(endpointIdCache.has(connectorId)).pipe(
     switchMap((isInferenceEndpoint) => {
+      let resolvedAsInferenceEndpoint = isInferenceEndpoint;
+
       const resolve: () => Promise<ResolvedPipelineContext> = isInferenceEndpoint
         ? async () => {
             const endpointMeta = await resolveInferenceEndpoint({
@@ -330,6 +332,7 @@ function resolveAndCreatePipeline({
             const connector = executor.getConnector();
 
             if (connector.isInferenceEndpoint) {
+              resolvedAsInferenceEndpoint = true;
               const inferenceId = connector.connectorId;
               const endpointMeta = await resolveInferenceEndpoint({
                 inferenceId,
@@ -397,7 +400,7 @@ function resolveAndCreatePipeline({
       }).pipe(
         catchError((error) => {
           if (error?.meta?.status === 404 || error?.statusCode === 404) {
-            if (isInferenceEndpoint) {
+            if (resolvedAsInferenceEndpoint) {
               endpointIdCache.invalidate();
               return throwError(() => error);
             }
