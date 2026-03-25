@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Subscription } from 'rxjs';
 import { combineLatest } from 'rxjs';
 import type {
@@ -20,11 +20,11 @@ import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { CodeEditor } from '@kbn/code-editor';
 import type { ApplicationStart, HttpSetup, NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { WorkflowApi } from '@kbn/workflows-ui';
 import { PLUGIN_ID } from '../../../../common';
 import type { TelemetryServiceClient } from '../../../common/lib/telemetry/types';
 import { WorkflowsBaseTelemetry } from '../../../common/service/telemetry';
 import { queryClient } from '../../../shared/lib/query_client';
-import { createWorkflow, updateWorkflow } from '../../../shared/lib/workflows_api';
 import {
   useWorkflowsMonacoTheme,
   WORKFLOWS_MONACO_EDITOR_THEME,
@@ -48,7 +48,7 @@ const extractErrorMessage = (error: unknown): string =>
   'Unknown error';
 
 interface SaveWorkflowParams {
-  http: HttpSetup;
+  workflowApi: WorkflowApi;
   notifications: NotificationsStart;
   yaml: string;
   workflowId?: string;
@@ -57,7 +57,7 @@ interface SaveWorkflowParams {
 }
 
 const saveWorkflow = async ({
-  http,
+  workflowApi,
   notifications,
   yaml,
   workflowId,
@@ -67,17 +67,17 @@ const saveWorkflow = async ({
   try {
     let savedId = workflowId;
     if (workflowId) {
-      await updateWorkflow(http, workflowId, yaml);
+      const result = await workflowApi.updateWorkflow(workflowId, { yaml });
       queryClient.invalidateQueries({ queryKey: ['workflows', workflowId] });
       telemetry?.reportWorkflowUpdated({
         workflowId,
         workflowUpdate: { yaml },
-        hasValidationErrors: false,
-        validationErrorCount: 0,
+        hasValidationErrors: result.validationErrors.length > 0,
+        validationErrorCount: result.validationErrors.length,
         aiAssisted: true,
       });
     } else {
-      const result = await createWorkflow(http, yaml);
+      const result = await workflowApi.createWorkflow({ yaml });
       savedId = result.id;
       await updateOrigin(result.id);
       telemetry?.reportWorkflowCreated({
@@ -146,6 +146,8 @@ const WorkflowYamlCanvasContent: React.FC<{
 }) => {
   useWorkflowsMonacoTheme();
 
+  const workflowApi = useMemo(() => new WorkflowApi(http), [http]);
+
   // Defer button registration past the initial mount cycle so the parent
   // flyout's clearing effect (which also fires on mount) doesn't overwrite
   // our buttons. This mirrors the dashboard pattern where registration is
@@ -162,7 +164,7 @@ const WorkflowYamlCanvasContent: React.FC<{
 
   const handleSave = useCallback(async () => {
     const id = await saveWorkflow({
-      http,
+      workflowApi,
       notifications,
       yaml: attachment.data.yaml,
       workflowId,
@@ -172,11 +174,11 @@ const WorkflowYamlCanvasContent: React.FC<{
     if (id && !workflowId) {
       setSavedWorkflowId(id);
     }
-  }, [http, notifications, attachment.data.yaml, workflowId, updateOrigin, telemetry]);
+  }, [workflowApi, notifications, attachment.data.yaml, workflowId, updateOrigin, telemetry]);
 
   const handleSaveAsNew = useCallback(async () => {
     try {
-      const result = await createWorkflow(http, attachment.data.yaml);
+      const result = await workflowApi.createWorkflow({ yaml: attachment.data.yaml });
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
       telemetry?.reportWorkflowCreated({
         workflowId: result.id,
@@ -198,7 +200,7 @@ const WorkflowYamlCanvasContent: React.FC<{
         text: extractErrorMessage(error),
       });
     }
-  }, [http, notifications, application, attachment.data.yaml, telemetry]);
+  }, [workflowApi, notifications, application, attachment.data.yaml, telemetry]);
 
   useEffect(() => {
     if (!ready) {

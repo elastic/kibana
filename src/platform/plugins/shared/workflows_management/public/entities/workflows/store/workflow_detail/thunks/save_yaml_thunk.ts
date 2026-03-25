@@ -67,6 +67,8 @@ export const saveYamlThunk = createAsyncThunk<
         // Get original workflow state for comparison
         const originalWorkflow = selectWorkflow(state);
 
+        // Report telemetry for workflow update
+        // The telemetry service automatically determines editorType ('yaml' when yaml is in update)
         telemetry.reportWorkflowUpdated({
           workflowId: id,
           workflowUpdate: { yaml: yamlString },
@@ -77,7 +79,7 @@ export const saveYamlThunk = createAsyncThunk<
           isBulkAction: false,
           error: undefined,
           origin: 'workflow_detail',
-          ...(isAiAssisted && { aiAssisted: true }),
+          aiAssisted: isAiAssisted,
         });
 
         // For consistency, dispatch the loadWorkflow thunk to update the workflow in the store to the latest version from the API
@@ -85,13 +87,15 @@ export const saveYamlThunk = createAsyncThunk<
       } else {
         const workflow = await workflowApi.createWorkflow({ yaml: yamlString });
 
+        // Report telemetry for workflow creation
+        // Use workflow.definition from the created workflow if available, otherwise fall back to workflowDefinition from state
         telemetry.reportWorkflowCreated({
           workflowId: workflow.id,
           workflowDefinition: workflow.definition || workflowDefinition || undefined,
           error: undefined,
-          editorType: 'yaml',
+          editorType: 'yaml', // Saving YAML always comes from YAML editor
           origin: 'workflow_detail',
-          ...(isAiAssisted && { aiAssisted: true }),
+          aiAssisted: isAiAssisted,
         });
 
         // Update the workflow in the store
