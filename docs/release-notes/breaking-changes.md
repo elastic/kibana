@@ -45,10 +45,6 @@ $$$kibana-255122$$$
 View [#255122]({{kib-pull}}255122).
 ::::
 
-## 9.3.1 [kibana-9.3.1-breaking-changes]
-
-There are no breaking changes in this version.
-
 ## 9.3.0 [kibana-9.3.0-breaking-changes]
 
 There are no breaking changes in this version.
