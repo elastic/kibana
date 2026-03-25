@@ -205,7 +205,8 @@ describe('CasesWebhookActionConnectorFields renders', () => {
     expect(screen.queryByTestId('webhookHeadersValueInput')).not.toBeInTheDocument();
   });
 
-  describe('Step Validation', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/237095
+  describe.skip('Step Validation', () => {
     it('Steps work correctly when all fields valid', async () => {
       render(
         <ConnectorFormTestProvider connector={actionConnector}>

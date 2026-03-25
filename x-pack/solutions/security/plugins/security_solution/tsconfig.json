@@ -78,6 +78,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/ecs-data-quality-dashboard",
     "@kbn/elastic-assistant",
+    "@kbn/inference-connectors",
     "@kbn/elastic-assistant-plugin",
     "@kbn/data-views-plugin",
     "@kbn/datemath",

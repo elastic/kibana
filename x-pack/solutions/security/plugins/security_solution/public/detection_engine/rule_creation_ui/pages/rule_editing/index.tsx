@@ -25,6 +25,9 @@ import { useParams } from 'react-router-dom';
 
 import { ProjectRoutingAccess, useCpsPickerAccess } from '@kbn/cps-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { EndpointExceptionsMovedCallout } from '../../../../exceptions/components/endpoint_exceptions_moved_callout';
 import { useConfirmValidationErrorsModal } from '../../../../common/hooks/use_confirm_validation_errors_modal';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { isEsqlRule } from '../../../../../common/detection_engine/utils';
@@ -530,6 +533,19 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     [defineStepForm]
   );
 
+  const isEndpointExceptionListLinked: boolean = useMemo(
+    () =>
+      rule?.exceptions_list?.some(
+        (list) => list.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+      ) ?? false,
+    [rule]
+  );
+
+  // TODO: switch to per-policy use opt-in state in follow-up (https://github.com/elastic/security-team/issues/14870)
+  const isEndpointExceptionsMovedFFEnabled = useIsExperimentalFeatureEnabled(
+    'endpointExceptionsMovedUnderManagement'
+  );
+
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -563,6 +579,21 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                 <EuiResizablePanel initialSize={70} minSize={'40%'} mode="main">
                   <EuiFlexGroup direction="row" justifyContent="spaceAround">
                     <MaxWidthEuiFlexItem>
+                      {isEndpointExceptionsMovedFFEnabled && isEndpointExceptionListLinked && (
+                        <EndpointExceptionsMovedCallout
+                          id="ruleEdit-whenEndpointExceptionListLinked"
+                          dismissable
+                          title="noLongerEvaluatedOnRules"
+                        />
+                      )}
+                      {isEndpointExceptionsMovedFFEnabled && !isEndpointExceptionListLinked && (
+                        <EndpointExceptionsMovedCallout
+                          id="ruleEdit-whenEndpointExceptionListNotLinked"
+                          dismissable
+                          title="cannotBeAddedToRules"
+                        />
+                      )}
+
                       <CustomHeaderPageMemo
                         backOptions={backOptions}
                         isLoading={isLoading}

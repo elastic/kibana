@@ -88,6 +88,7 @@ export const TabMenu: React.FC<TabMenuProps> = ({
   return (
     <EuiPopover
       id={contextMenuPopoverId}
+      aria-label={menuButtonLabel}
       isOpen={isPopoverOpen}
       panelPaddingSize="none"
       hasArrow={false}
