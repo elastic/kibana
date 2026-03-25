@@ -24,3 +24,13 @@ export type {
   AssistantTool,
   AssistantToolParams,
 } from './types';
+
+// Alert Investigation Pipeline - pure algorithm exports for Agent Builder tools
+export { deduplicateAlerts } from './lib/alert_investigation/deduplication';
+export { extractEntitiesFromAlerts } from './lib/alert_investigation/entity_extraction';
+export { matchAlertsToCases } from './lib/alert_investigation/case_matching';
+export type {
+  ExtractedEntity,
+  CaseMatchScore,
+  ObservableTypeKey,
+} from './lib/alert_investigation/types';

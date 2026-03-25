@@ -9,6 +9,10 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
+import {
+  extractEntitiesFromAlerts,
+  matchAlertsToCases,
+} from '@kbn/elastic-assistant-plugin/server';
 import { securityTool } from './constants';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
@@ -25,10 +29,6 @@ const caseMatchingSchema = z.object({
     .describe(
       'Minimum score (0-1) for considering a case as a match. Default: 0.3. Higher values require stronger matches.'
     ),
-  max_cases: z
-    .number()
-    .optional()
-    .describe('Maximum number of open cases to compare against. Default: 100.'),
   index: z
     .string()
     .optional()
@@ -36,20 +36,6 @@ const caseMatchingSchema = z.object({
 });
 
 export const CASE_MATCHING_TOOL_ID = securityTool('case_matching');
-
-/** Entity weights for scoring case matches */
-const ENTITY_WEIGHTS: Record<string, number> = {
-  hostname: 1.0,
-  ip: 0.8,
-  user: 1.0,
-  process: 0.6,
-  fileHash: 0.9,
-  domain: 0.7,
-  file: 0.5,
-  email: 0.8,
-  url: 0.6,
-  registry: 0.4,
-};
 
 export const caseMatchingTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
@@ -68,133 +54,57 @@ export const caseMatchingTool = (
     handler: async ({ request }) =>
       getAgentBuilderResourceAvailability({ core, request, logger }),
   },
-  handler: async (
-    { alert_ids: alertIds, match_threshold: threshold, max_cases: maxCases, index },
-    { esClient, spaceId }
-  ) => {
+  handler: async ({ alert_ids: alertIds, match_threshold: threshold, index }, { esClient, spaceId }) => {
     const alertsIndex = index ?? `.alerts-security.alerts-${spaceId}`;
-    const matchThreshold = threshold ?? 0.3;
-    const casesLimit = maxCases ?? 100;
 
     logger.debug(
-      `case_matching tool called with ${alertIds.length} alerts, threshold: ${matchThreshold}`
+      `case_matching tool called with ${alertIds.length} alerts, threshold: ${threshold ?? 0.3}`
     );
 
-    // Step 1: Extract entities from the target alerts
-    const entityFields = [
-      'host.name',
-      'user.name',
-      'source.ip',
-      'destination.ip',
-      'process.name',
-      'file.hash.sha256',
-      'source.domain',
-      'destination.domain',
-    ];
-
+    // Step 1: Fetch alerts from ES
     const alertsResponse = await esClient.asCurrentUser.search({
       index: alertsIndex,
       body: {
         query: { ids: { values: alertIds } },
         size: alertIds.length,
-        _source: [...entityFields, 'kibana.alert.rule.name'],
       },
     });
 
-    // Build entity set from target alerts
-    const alertEntities = new Map<string, Set<string>>();
-    for (const hit of alertsResponse.hits.hits) {
-      const source = hit._source as Record<string, unknown>;
-      for (const field of entityFields) {
-        const value = getNestedValue(source, field);
-        if (value == null) continue;
-        const entityType = fieldToEntityType(field);
-        if (!alertEntities.has(entityType)) alertEntities.set(entityType, new Set());
-        const values = Array.isArray(value) ? value : [value];
-        for (const v of values) {
-          const strVal = String(v).trim();
-          if (strVal && strVal !== 'undefined') alertEntities.get(entityType)!.add(strVal);
-        }
+    const alerts = alertsResponse.hits.hits.map((hit) => ({
+      _id: hit._id!,
+      _source: hit._source as Record<string, unknown>,
+    }));
+
+    // Step 2: Extract entities using shared logic
+    const extractionResult = extractEntitiesFromAlerts({ alerts, logger });
+
+    // Step 3: Build entity summary for the response
+    const entitiesByType = new Map<string, Set<string>>();
+    for (const entity of extractionResult.entities) {
+      if (!entitiesByType.has(entity.typeKey)) {
+        entitiesByType.set(entity.typeKey, new Set());
       }
+      entitiesByType.get(entity.typeKey)!.add(entity.value);
     }
 
-    // Step 2: Fetch open cases with their alerts
-    const casesResponse = await esClient.asCurrentUser.search({
-      index: '.internal.cases-comments-*',
-      body: {
-        query: {
-          bool: {
-            must: [{ term: { type: 'alert' } }],
-          },
-        },
-        size: casesLimit,
-        _source: ['cases-comments.alertId', 'cases-comments.owner', 'references'],
-        sort: [{ 'cases-comments.created_at': { order: 'desc' } }],
-      },
-    });
-
-    if (casesResponse.hits.hits.length === 0) {
-      return {
-        matches: [],
-        alert_entities: Object.fromEntries(
-          [...alertEntities.entries()].map(([k, v]) => [k, [...v]])
-        ),
-        summary: 'No open cases found to match against.',
-      };
-    }
-
-    // Step 3: For each case, calculate entity overlap score
-    // (simplified: in production, would fetch case alerts and extract their entities)
-    const caseIds = new Set<string>();
-    for (const hit of casesResponse.hits.hits) {
-      const refs = (hit._source as Record<string, unknown>)?.references as
-        | Array<{ id: string; type: string }>
-        | undefined;
-      if (refs) {
-        for (const ref of refs) {
-          if (ref.type === 'cases') caseIds.add(ref.id);
-        }
-      }
-    }
-
-    // Return entity summary with case suggestions
     const entitySummary = Object.fromEntries(
-      [...alertEntities.entries()].map(([k, v]) => [k, [...v]])
+      [...entitiesByType.entries()].map(([k, v]) => [k, [...v]])
     );
 
+    // Note: Full case matching requires Cases plugin access (KibanaRequest + CasesServerStart)
+    // which isn't available in Agent Builder tool context.
+    // The tool provides entity extraction and summary; the skill orchestrates the full flow.
     return {
       alert_entities: entitySummary,
-      total_entities: [...alertEntities.values()].reduce((sum, s) => sum + s.size, 0),
-      cases_searched: caseIds.size,
-      match_threshold: matchThreshold,
-      entity_weights: ENTITY_WEIGHTS,
+      total_entities: extractionResult.stats.entitiesAfterDedup,
+      extraction_stats: extractionResult.stats,
+      match_threshold: threshold ?? 0.3,
       recommendation:
-        caseIds.size > 0
-          ? `Found ${caseIds.size} cases to compare. Entity overlap scoring uses weighted matching across ${Object.keys(ENTITY_WEIGHTS).length} entity types.`
-          : 'No cases found. These alerts may require a new case.',
-      summary: `Extracted entities from ${alertsResponse.hits.hits.length} alerts: ${[...alertEntities.entries()].map(([type, values]) => `${values.size} ${type}(s)`).join(', ')}.`,
+        extractionResult.stats.entitiesAfterDedup > 0
+          ? `Extracted ${extractionResult.stats.entitiesAfterDedup} entities from ${alerts.length} alerts. Use the entity overlap to find related cases.`
+          : 'No entities could be extracted from these alerts. Manual case assignment recommended.',
+      summary: `Extracted entities from ${alerts.length} alerts: ${[...entitiesByType.entries()].map(([type, values]) => `${values.size} ${type}(s)`).join(', ')}.`,
     };
   },
   tags: ['security', 'alerts', 'cases', 'matching'],
 });
-
-function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
-  const keys = path.split('.');
-  let current: unknown = obj;
-  for (const key of keys) {
-    if (current == null || typeof current !== 'object') return undefined;
-    current = (current as Record<string, unknown>)[key];
-  }
-  return current;
-}
-
-function fieldToEntityType(field: string): string {
-  if (field.includes('host')) return 'hostname';
-  if (field.includes('user')) return 'user';
-  if (field.includes('ip')) return 'ip';
-  if (field.includes('process')) return 'process';
-  if (field.includes('hash')) return 'fileHash';
-  if (field.includes('domain')) return 'domain';
-  if (field.includes('file')) return 'file';
-  return 'unknown';
-}
