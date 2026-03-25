@@ -11,22 +11,18 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 import { APP_ID } from '@kbn/security-solution-features/constants';
 
-import { WATCHLISTS_DATA_SOURCE_URL } from '../../../../../../../common/constants';
-import { WatchlistDataSources } from '../../../../../../../common/api/entity_analytics';
+import { WATCHLISTS_SYNC_URL } from '../../../../../../common/entity_analytics/watchlists/constants';
+import { SyncWatchlistRequestParams } from '../../../../../../common/api/entity_analytics';
+import type { EntityAnalyticsRoutesDeps } from '../../../types';
+import { withMinimumLicense } from '../../../utils/with_minimum_license';
+import { createEntitySourcesService } from '../../entity_sources/entity_sources_service';
+import { getRequestSavedObjectClient } from '../../shared/utils';
 
-import type { EntityAnalyticsRoutesDeps } from '../../../../types';
-import { withMinimumLicense } from '../../../../utils/with_minimum_license';
-import { WatchlistConfigClient } from '../../watchlist_config';
-import { getRequestSavedObjectClient } from '../../../shared/utils';
-
-export const deleteEntitySourceRoute = (
-  router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
-) => {
+export const syncWatchlistRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
-    .delete({
+    .post({
       access: 'public',
-      path: `${WATCHLISTS_DATA_SOURCE_URL}/{id}`,
+      path: WATCHLISTS_SYNC_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -38,7 +34,7 @@ export const deleteEntitySourceRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            params: WatchlistDataSources.DeleteWatchlistEntitySourceRequestParams,
+            params: SyncWatchlistRequestParams,
           },
         },
       },
@@ -48,25 +44,20 @@ export const deleteEntitySourceRoute = (
         try {
           const secSol = await context.securitySolution;
           const core = await context.core;
-          const client = secSol.getMonitoringEntitySourceDataClient();
 
-          // Get the source first so we can pass it for validation
-          const source = await client.get(request.params.id);
-
-          // Validate and remove the reference (checks watchlist managed, source managed, and link)
-          const watchlistClient = new WatchlistConfigClient({
+          const entitySourcesService = createEntitySourcesService({
+            esClient: core.elasticsearch.client.asCurrentUser,
+            soClient: getRequestSavedObjectClient(core),
             logger,
             namespace: secSol.getSpaceId(),
-            soClient: getRequestSavedObjectClient(core),
-            esClient: core.elasticsearch.client.asCurrentUser,
           });
-          await watchlistClient.removeEntitySourceReference(request.params.watchlist_id, source);
-          await client.delete(request.params.id);
+
+          await entitySourcesService.syncWatchlist(request.params.watchlist_id);
 
           return response.ok({ body: { acknowledged: true } });
         } catch (e) {
           const error = transformError(e);
-          logger.error(`Error deleting watchlist entity source config: ${error.message}`);
+          logger.error(`Failed to sync watchlist: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,

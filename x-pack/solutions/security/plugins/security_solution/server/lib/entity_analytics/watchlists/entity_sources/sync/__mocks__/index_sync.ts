@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export * from './management';
-export * from './sync';
-export * as WatchlistDataSources from './data_source';
+export const mockPlainIndexSync = jest.fn();
+
+export const createIndexSyncService = jest.fn().mockImplementation(() => ({
+  plainIndexSync: mockPlainIndexSync,
+}));

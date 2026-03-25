@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export * from './management';
-export * from './sync';
-export * as WatchlistDataSources from './data_source';
+export const mockListEntityStoreEntities = jest.fn();
+
+export const createWatchlistEntitiesService = jest.fn().mockImplementation(() => ({
+  listEntityStoreEntities: mockListEntityStoreEntities,
+}));
