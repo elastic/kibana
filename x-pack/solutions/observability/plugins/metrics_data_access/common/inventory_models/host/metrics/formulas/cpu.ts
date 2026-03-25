@@ -110,8 +110,9 @@ export const cpuUsage: SchemaBasedFormula = {
   label: CPU_USAGE_LABEL,
   value: {
     ecs: 'average(system.cpu.total.norm.pct)',
-    semconv:
-      "1-(average(metrics.system.cpu.utilization,kql='state: idle') + average(metrics.system.cpu.utilization,kql='state: wait'))",
+    // Some OTel datasets do not report the `wait` state. Relying on it causes
+    // the full expression to evaluate to null and the UI shows N/A.
+    semconv: "1-average(metrics.system.cpu.utilization,kql='state: idle')",
   },
   format: 'percent',
   decimals: 0,
