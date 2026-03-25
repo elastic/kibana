@@ -7,7 +7,12 @@ triggers:
   - type: 'manual'
 inputs:
   - name: list_action
-    type: string
+    type: choice
+    options:
+      - "getWeb"
+      - "getLists"
+      - "getListItems"
+      - "getFolderContents"
     required: true
     description: "Required. Which action to perform. Choose one: getWeb, getLists, getListItems, getFolderContents."
   - name: list_title
