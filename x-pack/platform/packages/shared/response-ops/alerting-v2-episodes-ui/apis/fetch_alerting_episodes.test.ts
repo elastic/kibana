@@ -13,9 +13,8 @@ import { buildEpisodesPaginatedQuery } from '../utils/build_episodes_esql_query'
 import { fetchAlertingEpisodes } from './fetch_alerting_episodes';
 
 jest.mock('../utils/execute_esql_query');
-jest.mock('../utils/build_episodes_filters');
 
-const executeEsqlQueryMock = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
+const mockExecuteEsqlQuery = jest.mocked(executeEsqlQuery);
 
 describe('fetchAlertingEpisodes', () => {
   const mockExpressions = {} as ExpressionsStart;
@@ -32,7 +31,7 @@ describe('fetchAlertingEpisodes', () => {
     const expectedQuery = buildEpisodesPaginatedQuery({
       sortField: '@timestamp',
       sortDirection: 'desc',
-    });
+    }).print('basic');
 
     fetchAlertingEpisodes({
       pageSize,
@@ -40,8 +39,8 @@ describe('fetchAlertingEpisodes', () => {
       dataView: mockDataView,
     });
 
-    expect(executeEsqlQueryMock).toHaveBeenCalledTimes(1);
-    expect(executeEsqlQueryMock).toHaveBeenCalledWith({
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
       expressions: mockExpressions,
       query: expectedQuery,
       input: {
@@ -69,7 +68,7 @@ describe('fetchAlertingEpisodes', () => {
     const expectedQuery = buildEpisodesPaginatedQuery({
       sortField: '@timestamp',
       sortDirection: 'desc',
-    });
+    }).print('basic');
 
     fetchAlertingEpisodes({
       pageSize,
@@ -78,8 +77,8 @@ describe('fetchAlertingEpisodes', () => {
       dataView: mockDataView,
     });
 
-    expect(executeEsqlQueryMock).toHaveBeenCalledTimes(1);
-    expect(executeEsqlQueryMock).toHaveBeenCalledWith({
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
       expressions: mockExpressions,
       query: expectedQuery,
       input: {
@@ -108,7 +107,7 @@ describe('fetchAlertingEpisodes', () => {
     const expectedQuery = buildEpisodesPaginatedQuery({
       sortField: '@timestamp',
       sortDirection: 'desc',
-    });
+    }).print('basic');
 
     fetchAlertingEpisodes({
       pageSize,
@@ -117,8 +116,8 @@ describe('fetchAlertingEpisodes', () => {
       dataView: mockDataView,
     });
 
-    expect(executeEsqlQueryMock).toHaveBeenCalledTimes(1);
-    expect(executeEsqlQueryMock).toHaveBeenCalledWith({
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
       expressions: mockExpressions,
       query: expectedQuery,
       input: {
@@ -148,7 +147,7 @@ describe('fetchAlertingEpisodes', () => {
     const expectedQuery = buildEpisodesPaginatedQuery({
       sortField: '@timestamp',
       sortDirection: 'desc',
-    });
+    }).print('basic');
 
     fetchAlertingEpisodes({
       pageSize,
@@ -158,8 +157,8 @@ describe('fetchAlertingEpisodes', () => {
       dataView: mockDataView,
     });
 
-    expect(executeEsqlQueryMock).toHaveBeenCalledTimes(1);
-    expect(executeEsqlQueryMock).toHaveBeenCalledWith({
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
       expressions: mockExpressions,
       query: expectedQuery,
       input: {
