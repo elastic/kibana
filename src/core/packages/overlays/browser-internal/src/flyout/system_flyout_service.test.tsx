@@ -218,7 +218,11 @@ describe('SystemFlyoutService', () => {
       // Back in child2: child2 is removed, child1 is the destination (not in childHistory)
       emitEvent({
         type: 'CLOSE_SESSION',
-        session: { mainFlyoutId: 'parent-flyout', childFlyoutId: 'child-flyout-2', childHistory: [] },
+        session: {
+          mainFlyoutId: 'parent-flyout',
+          childFlyoutId: 'child-flyout-2',
+          childHistory: [],
+        },
       });
 
       expect((child2Ref as SystemFlyoutRef).isClosed).toBe(true);
