@@ -54,8 +54,6 @@ export default function ({ getService }: FtrProviderContext) {
 
     afterEach(async () => {
       await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
-      await new Promise((r) => setTimeout(r, 10000));
-      await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
     });
 
     it('should use instance cost when set, overriding definition cost', async () => {
