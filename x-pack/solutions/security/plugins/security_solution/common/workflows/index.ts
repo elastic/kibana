@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-// Agent registrations have been migrated to skills (Default Elastic Agent pattern).
-// See skills/threat_hunting/ and skills/register_skills.ts for the skill-based equivalents.
+export {
+  SOC_ALERT_TRIGGER_ID,
+  socAlertTriggerEventSchema,
+  socAlertTriggerDefinition,
+} from './soc_alert_trigger';
+
+export type { SocAlertTriggerEvent } from './soc_alert_trigger';

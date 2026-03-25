@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-// Agent registrations have been migrated to skills (Default Elastic Agent pattern).
-// See skills/threat_hunting/ and skills/register_skills.ts for the skill-based equivalents.
+export { getResponseRecommendationSkill } from './response_recommendation_skill';

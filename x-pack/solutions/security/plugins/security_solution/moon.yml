@@ -285,6 +285,8 @@ dependsOn:
   - '@kbn/core-rendering-browser'
   - '@kbn/anonymization-plugin'
   - '@kbn/anonymization-common'
+  - '@kbn/evals'
+  - '@kbn/workflows-extensions'
 tags:
   - plugin
   - prod

@@ -15,10 +15,7 @@ import { isToolProgressEvent, isToolResultEvent } from '@kbn/agent-builder-commo
 import { isErrorResult, isOtherResult } from '@kbn/agent-builder-common/tools';
 import { getKibanaDefaultAgentCapabilities } from '@kbn/agent-builder-common/agents';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
-import {
-  SecurityAgentBuilderAttachments,
-  THREAT_HUNTING_AGENT_ID,
-} from '../../../../../../common/constants';
+import { SecurityAgentBuilderAttachments } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
@@ -106,7 +103,6 @@ export const useAgentBuilderStream = () => {
 
       try {
         const payload = {
-          agent_id: THREAT_HUNTING_AGENT_ID,
           input: `Create a detection rule based on the following user_query using the dedicated detection rule creation tool. Do not perform any other actions after creating the rule. user_query: ${message}`,
           connector_id: connectorId,
           capabilities: getKibanaDefaultAgentCapabilities(),
