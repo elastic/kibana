@@ -13,6 +13,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import { monaco } from '@kbn/monaco';
 
 import { initializeOsqueryEditor } from './osquery_highlight_rules';
+import { useOsqueryTables } from './osquery_tables';
 
 interface OsqueryEditorProps {
   defaultValue: string;
@@ -34,6 +35,7 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
   commands,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { tableNames, tablesRecord } = useOsqueryTables();
   const [editorValue, setEditorValue] = useState(defaultValue ?? '');
   const [height, setHeight] = useState(MIN_HEIGHT);
 
@@ -54,12 +56,12 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
   useEffect(() => setEditorValue(defaultValue), [defaultValue]);
 
   useEffect(() => {
-    const disposable = initializeOsqueryEditor();
+    const disposable = initializeOsqueryEditor(tableNames, tablesRecord);
 
     return () => {
       disposable?.dispose();
     };
-  }, []);
+  }, [tableNames, tablesRecord]);
 
   const editorDidMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
