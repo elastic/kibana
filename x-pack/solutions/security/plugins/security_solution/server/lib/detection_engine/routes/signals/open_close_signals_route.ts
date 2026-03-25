@@ -9,7 +9,10 @@ import { get } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
+import {
+  ALERTS_API_ALL,
+  ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
+} from '@kbn/security-solution-features/constants';
 import { ALERT_CLOSING_REASON_VALIDATION_ERROR } from './translations';
 import { DefaultClosingReasonSchema } from '../../../../../common/types';
 import { SetAlertsStatusRequestBody } from '../../../../../common/api/detection_engine/signals';
@@ -43,7 +46,9 @@ export const setSignalsStatusRoute = (
       access: 'public',
       security: {
         authz: {
-          requiredPrivileges: [ALERTS_API_READ],
+          requiredPrivileges: [
+            { anyRequired: [ALERTS_API_ALL, ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE] },
+          ],
         },
       },
     })

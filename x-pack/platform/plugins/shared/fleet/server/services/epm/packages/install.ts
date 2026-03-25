@@ -1387,13 +1387,22 @@ export const saveKibanaAssetsRefs = async (
           : undefined;
 
       if (saveAsAdditionnalSpace) {
+        let spaceAssetRefs = assetRefs !== null ? assetRefs : [];
+        if (append && installation) {
+          const existingSpaceRefs =
+            installation.attributes?.additional_spaces_installed_kibana?.[spaceId] ?? [];
+          spaceAssetRefs = uniqBy(
+            [...spaceAssetRefs, ...existingSpaceRefs],
+            (asset) => asset.id + asset.type
+          );
+        }
         return savedObjectsClient.update<Installation>(
           PACKAGES_SAVED_OBJECT_TYPE,
           pkgName,
           {
             additional_spaces_installed_kibana: {
               ...omit(installation?.attributes?.additional_spaces_installed_kibana ?? {}, spaceId),
-              ...(assetRefs !== null ? { [spaceId]: assetRefs } : {}),
+              ...(assetRefs !== null ? { [spaceId]: spaceAssetRefs } : {}),
             },
           },
           { refresh: false }
