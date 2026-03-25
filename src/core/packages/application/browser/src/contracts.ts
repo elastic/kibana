@@ -153,6 +153,13 @@ export interface ApplicationStart {
   currentAppId$: Observable<string | undefined>;
 
   /**
+   * An observable that emits the title of the currently mounted application.
+   * Derived from {@link ApplicationStart.currentAppId$ | currentAppId$} and
+   * {@link ApplicationStart.applications$ | applications$}.
+   */
+  currentAppTitle$: Observable<string | undefined>;
+
+  /**
    * An observable that emits the current path#hash and each subsequent update using the global history instance
    */
   currentLocation$: Observable<string>;

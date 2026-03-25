@@ -46,5 +46,6 @@
     "@kbn/shared-ux-label-formatter",
     "@kbn/test-jest-helpers",
     "@kbn/use-observable",
+    "@kbn/core-chrome-layout-components",
   ]
 }

@@ -15,6 +15,7 @@ import {
   ChromeComponentsProvider,
   ClassicHeader,
   ProjectHeader,
+  ProjectNextHeader,
   GridLayoutProjectSideNav,
   HeaderTopBanner,
   ChromelessHeader,
@@ -68,9 +69,8 @@ const layoutConfigs: {
     headerHeight: 0,
     bannerHeight: 32,
 
-    /** The application top bar renders the app specific menu */
-    /** we use it only in project style, because in classic it is included as part of the global header */
-    applicationTopBarHeight: 48,
+    /** Height is reported dynamically by ProjectNextHeader via useReportLayoutHeight */
+    applicationTopBarHeight: 0,
     applicationMarginRight: 8,
     applicationMarginBottom: 8,
     sidebarWidth: 0,
@@ -124,7 +124,7 @@ const useChromeSlots = (nextChrome: boolean): ChromeSlots => {
     return {
       ...base,
       navigation: <GridLayoutProjectSideNav />,
-      applicationTopBar: <>Chrome Next...</>,
+      applicationTopBar: <ProjectNextHeader />,
     };
   }
 

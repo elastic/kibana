@@ -49,6 +49,7 @@ const createStartContractMock = (): jest.Mocked<ApplicationStart> => {
   return lazyObject({
     applications$: new BehaviorSubject<Map<string, PublicAppInfo>>(new Map()),
     currentAppId$: currentAppId$.asObservable(),
+    currentAppTitle$: new BehaviorSubject<string | undefined>(undefined),
     currentLocation$: currentLocation$.asObservable(),
     capabilities: capabilitiesServiceMock.createStartContract().capabilities,
     navigateToApp: jest.fn(),
@@ -92,6 +93,7 @@ const createInternalStartContractMock = (
     applications$: new BehaviorSubject<Map<string, PublicAppInfo>>(new Map()),
     capabilities: capabilitiesServiceMock.createStartContract().capabilities,
     currentAppId$: currentAppId$.asObservable(),
+    currentAppTitle$: new BehaviorSubject<string | undefined>(undefined),
     currentLocation$: currentLocation$.asObservable(),
     currentActionMenu$: new BehaviorSubject<MountPoint | undefined>(undefined),
     getComponent: jest.fn(),
