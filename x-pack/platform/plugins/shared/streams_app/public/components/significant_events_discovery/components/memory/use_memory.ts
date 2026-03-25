@@ -17,6 +17,9 @@ const memoryKeys = {
   search: (query: string) => ['memory', 'search', query] as const,
   byId: (id: string) => ['memory', 'entry', id] as const,
   history: (entryId: string) => ['memory', 'history', entryId] as const,
+  version: (entryId: string, version: number) =>
+    ['memory', 'version', entryId, version] as const,
+  recentChanges: ['memory', 'recent-changes'] as const,
 };
 
 export const useMemoryTree = () => {
@@ -57,6 +60,27 @@ export const useMemoryHistory = (entryId?: string) => {
         `${MEMORY_BASE}/entries/${entryId}/history`
       ),
     enabled: !!entryId,
+  });
+};
+
+export const useMemoryVersion = (entryId?: string, version?: number) => {
+  const { core } = useKibana();
+  return useQuery({
+    queryKey: memoryKeys.version(entryId!, version!),
+    queryFn: () =>
+      core.http.get<MemoryVersionRecord>(
+        `${MEMORY_BASE}/entries/${entryId}/history/${version}`
+      ),
+    enabled: !!entryId && version !== undefined,
+  });
+};
+
+export const useRecentChanges = () => {
+  const { core } = useKibana();
+  return useQuery({
+    queryKey: memoryKeys.recentChanges,
+    queryFn: () =>
+      core.http.get<{ changes: MemoryVersionRecord[] }>(`${MEMORY_BASE}/recent-changes`),
   });
 };
 

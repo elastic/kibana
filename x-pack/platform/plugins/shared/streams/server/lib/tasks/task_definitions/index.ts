@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import type { GetScopedClients } from '../../../routes/types';
 import { createStreamsDescriptionGenerationTask } from './description_generation';
@@ -14,11 +14,13 @@ import { createStreamsSignificantEventsQueriesGenerationTask } from './significa
 import type { EbtTelemetryClient } from '../../telemetry';
 import { createStreamsFeaturesIdentificationTask } from './features_identification';
 import { createStreamsOnboardingTask } from './onboarding';
+import { createStreamsMemoryGenerationTask } from './memory_generation';
 
 export interface TaskContext {
   logger: Logger;
   getScopedClients: GetScopedClients;
   telemetry: EbtTelemetryClient;
+  getInternalEsClient: () => ElasticsearchClient;
 }
 
 export function createTaskDefinitions(taskContext: TaskContext) {
@@ -28,6 +30,7 @@ export function createTaskDefinitions(taskContext: TaskContext) {
     ...createStreamsFeaturesIdentificationTask(taskContext),
     ...createStreamsInsightsDiscoveryTask(taskContext),
     ...createStreamsOnboardingTask(taskContext),
+    ...createStreamsMemoryGenerationTask(taskContext),
   } satisfies TaskDefinitionRegistry;
 }
 

@@ -177,6 +177,9 @@ export interface MemoryService {
     user: string;
   }): Promise<MemoryEntry>;
 
+  // Recent changes across all entries
+  getRecentChanges(params: { space: string; size?: number }): Promise<MemoryVersionRecord[]>;
+
   // Compaction
   compact(params: CompactMemoryParams): Promise<void>;
   getCompactionLog(params: { space: string; size?: number }): Promise<CompactionLogEntry[]>;

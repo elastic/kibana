@@ -278,9 +278,12 @@ const getHistoryRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ id: z.string() }),
-    query: z.object({
-      size: z.coerce.number().min(1).max(100).optional(),
-    }),
+    query: z
+      .object({
+        size: z.coerce.number().min(1).max(100).optional(),
+      })
+      .optional()
+      .default({}),
   }),
   handler: async ({
     params,
@@ -294,7 +297,7 @@ const getHistoryRoute = createServerRoute({
     const history = await memory.getHistory({
       entryId: params.path.id,
       space: spaceId,
-      size: params.query.size,
+      size: params.query?.size,
     });
     return { history };
   },
@@ -388,6 +391,42 @@ const compactionLogRoute = createServerRoute({
   },
 });
 
+const recentChangesRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/memory/recent-changes',
+  options: {
+    access: 'internal',
+    summary: 'Get recent changes across all memory entries',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    query: z
+      .object({
+        size: z.coerce.number().min(1).max(100).optional(),
+      })
+      .optional()
+      .default({}),
+  }),
+  handler: async ({
+    params,
+    request,
+    server,
+    logger,
+  }): Promise<{ changes: MemoryVersionRecord[] }> => {
+    const memory = getMemoryService(server, logger);
+    const spaceId = DEFAULT_SPACE_ID;
+
+    const changes = await memory.getRecentChanges({
+      space: spaceId,
+      size: params.query?.size,
+    });
+    return { changes };
+  },
+});
+
 export const internalMemoryRoutes = {
   ...createEntryRoute,
   ...getEntryRoute,
@@ -401,4 +440,5 @@ export const internalMemoryRoutes = {
   ...getVersionRoute,
   ...rollbackRoute,
   ...compactionLogRoute,
+  ...recentChangesRoute,
 };

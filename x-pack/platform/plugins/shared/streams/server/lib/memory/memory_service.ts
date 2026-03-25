@@ -384,6 +384,27 @@ export class MemoryServiceImpl implements MemoryService {
     return rolledBackEntry;
   }
 
+  async getRecentChanges({
+    space,
+    size = 20,
+  }: {
+    space: string;
+    size?: number;
+  }): Promise<MemoryVersionRecord[]> {
+    const response = await this.historyStorage.getClient().search({
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [createSpaceDslFilter(space)],
+        },
+      },
+      size,
+      sort: [{ created_at: { order: 'desc' } }],
+    });
+
+    return response.hits.hits.map((hit) => (hit as HistoryDocument)._source);
+  }
+
   async compact(params: CompactMemoryParams): Promise<void> {
     const { entryIds, operation, summary, space, user, conversationId } = params;
     const now = new Date().toISOString();

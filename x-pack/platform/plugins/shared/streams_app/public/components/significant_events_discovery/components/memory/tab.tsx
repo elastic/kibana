@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -27,15 +27,24 @@ import {
   EuiTextArea,
   EuiTitle,
   EuiTreeView,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
+import {
+  CODE_EDITOR_DEFAULT_THEME_ID,
+  defaultThemesResolvers,
+  monaco,
+} from '@kbn/monaco';
 import {
   useMemoryTree,
   useMemorySearch,
   useMemoryEntry,
   useMemoryHistory,
+  useMemoryVersion,
   useMemoryMutations,
+  useRecentChanges,
 } from './use_memory';
 import type { MemoryTreeNode, MemoryVersionRecord } from './types';
 
@@ -46,6 +55,8 @@ export function MemoryTab() {
 
   const { data: treeData, isLoading: isTreeLoading } = useMemoryTree();
   const { data: searchData, isLoading: isSearchLoading } = useMemorySearch(searchQuery);
+
+  const { data: recentChangesData, isLoading: isRecentChangesLoading } = useRecentChanges();
 
   const isSearchActive = searchQuery.length >= 2;
 
@@ -58,6 +69,42 @@ export function MemoryTab() {
     setSelectedEntryId(null);
     setShowHistory(false);
   }, []);
+
+  const recentChangesColumns: Array<EuiBasicTableColumn<MemoryVersionRecord>> = useMemo(
+    () => [
+      {
+        field: 'title',
+        name: i18n.translate('xpack.streams.memory.recentChanges.titleColumn', {
+          defaultMessage: 'Title',
+        }),
+        truncateText: true,
+      },
+      {
+        field: 'change_type',
+        name: i18n.translate('xpack.streams.memory.recentChanges.changeColumn', {
+          defaultMessage: 'Change',
+        }),
+        width: '80px',
+        render: (changeType: string) => <EuiBadge>{changeType}</EuiBadge>,
+      },
+      {
+        field: 'change_summary',
+        name: i18n.translate('xpack.streams.memory.recentChanges.summaryColumn', {
+          defaultMessage: 'Summary',
+        }),
+        truncateText: true,
+      },
+      {
+        field: 'created_at',
+        name: i18n.translate('xpack.streams.memory.recentChanges.dateColumn', {
+          defaultMessage: 'Date',
+        }),
+        width: '140px',
+        render: (date: string) => new Date(date).toLocaleString(),
+      },
+    ],
+    []
+  );
 
   return (
     <>
@@ -72,6 +119,45 @@ export function MemoryTab() {
         data-test-subj="streamsMemorySearch"
       />
       <EuiSpacer size="m" />
+
+      {!isSearchActive && (
+        <>
+          <EuiTitle size="xs">
+            <h3>
+              {i18n.translate('xpack.streams.memory.recentChanges.title', {
+                defaultMessage: 'Recent Changes',
+              })}
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          {isRecentChangesLoading ? (
+            <EuiLoadingSpinner size="l" />
+          ) : (
+            <div
+              style={{
+                height: '200px',
+                overflowY: 'scroll',
+                flexBasis: '200px',
+                flexShrink: 0,
+              }}
+            >
+              <EuiBasicTable
+                items={recentChangesData?.changes ?? []}
+                columns={recentChangesColumns}
+                tableCaption={i18n.translate('xpack.streams.memory.recentChanges.tableCaption', {
+                  defaultMessage: 'Recent memory changes',
+                })}
+                rowProps={(record) => ({
+                  onClick: () => setSelectedEntryId(record.entry_id),
+                  style: { cursor: 'pointer' },
+                })}
+                data-test-subj="streamsMemoryRecentChangesTable"
+              />
+            </div>
+          )}
+          <EuiSpacer size="l" />
+        </>
+      )}
 
       {isSearchActive ? (
         isSearchLoading ? (
@@ -360,6 +446,18 @@ function HistoryFlyout({
   const { data: entry } = useMemoryEntry(entryId);
   const { data: historyData, isLoading } = useMemoryHistory(entryId);
   const { rollbackEntry } = useMemoryMutations();
+  const [selectedVersion, setSelectedVersion] = useState<number | null>(null);
+
+  const selectedRecord = useMemo(() => {
+    if (selectedVersion === null || !historyData?.history) return undefined;
+    return historyData.history.find((r) => r.version === selectedVersion);
+  }, [selectedVersion, historyData]);
+
+  const previousVersion = selectedVersion !== null ? selectedVersion - 1 : undefined;
+  const { data: previousRecord } = useMemoryVersion(
+    previousVersion && previousVersion >= 1 ? entryId : undefined,
+    previousVersion && previousVersion >= 1 ? previousVersion : undefined
+  );
 
   const handleRollback = useCallback(
     (version: number) => {
@@ -414,7 +512,10 @@ function HistoryFlyout({
         ) : (
           <EuiButton
             size="s"
-            onClick={() => handleRollback(record.version)}
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation();
+              handleRollback(record.version);
+            }}
             isLoading={rollbackEntry.isPending}
           >
             {i18n.translate('xpack.streams.memory.history.rollbackButton', {
@@ -429,7 +530,7 @@ function HistoryFlyout({
   return (
     <EuiFlyout
       onClose={onClose}
-      size="m"
+      size="l"
       data-test-subj="streamsMemoryHistoryFlyout"
       aria-label={i18n.translate('xpack.streams.memory.historyFlyoutAriaLabel', {
         defaultMessage: 'Memory entry version history',
@@ -464,16 +565,129 @@ function HistoryFlyout({
         {isLoading ? (
           <EuiLoadingSpinner size="l" />
         ) : (
-          <EuiBasicTable
-            items={historyData?.history ?? []}
-            columns={columns}
-            tableCaption={i18n.translate('xpack.streams.memory.history.tableCaption', {
-              defaultMessage: 'Version history',
-            })}
-            data-test-subj="streamsMemoryHistoryTable"
-          />
+          <>
+            <EuiBasicTable
+              items={historyData?.history ?? []}
+              columns={columns}
+              tableCaption={i18n.translate('xpack.streams.memory.history.tableCaption', {
+                defaultMessage: 'Version history',
+              })}
+              rowProps={(record) => ({
+                onClick: () =>
+                  setSelectedVersion(
+                    selectedVersion === record.version ? null : record.version
+                  ),
+                style: {
+                  cursor: 'pointer',
+                  ...(selectedVersion === record.version
+                    ? { backgroundColor: 'rgba(0, 119, 204, 0.1)' }
+                    : {}),
+                },
+              })}
+              data-test-subj="streamsMemoryHistoryTable"
+            />
+            {selectedVersion !== null && selectedRecord && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiTitle size="xs">
+                  <h3>
+                    {i18n.translate('xpack.streams.memory.history.diffTitle', {
+                      defaultMessage: 'Changes in version {version}',
+                      values: { version: selectedVersion },
+                    })}
+                  </h3>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <MemoryDiffViewer
+                  originalContent={previousRecord?.content ?? ''}
+                  modifiedContent={selectedRecord.content}
+                />
+              </>
+            )}
+          </>
         )}
       </EuiFlyoutBody>
     </EuiFlyout>
+  );
+}
+
+function MemoryDiffViewer({
+  originalContent,
+  modifiedContent,
+}: {
+  originalContent: string;
+  modifiedContent: string;
+}) {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const editorRef = useRef<monaco.editor.IDiffEditor | null>(null);
+  const euiTheme = useEuiTheme();
+
+  useLayoutEffect(() => {
+    if (!wrapperRef.current) return;
+
+    const oldModel = monaco.editor.createModel(originalContent, 'markdown');
+    const newModel = monaco.editor.createModel(modifiedContent, 'markdown');
+
+    if (!editorRef.current) {
+      editorRef.current = monaco.editor.createDiffEditor(wrapperRef.current, {
+        automaticLayout: true,
+        theme: CODE_EDITOR_DEFAULT_THEME_ID,
+      });
+    }
+
+    editorRef.current.setModel({ original: oldModel, modified: newModel });
+
+    const commonOptions: monaco.editor.IEditorOptions = {
+      fontSize: 12,
+      lineNumbers: 'off',
+      minimap: { enabled: false },
+      overviewRulerBorder: false,
+      readOnly: true,
+      scrollbar: {
+        alwaysConsumeMouseWheel: false,
+        useShadows: false,
+      },
+      scrollBeyondLastLine: false,
+      wordWrap: 'on',
+      wrappingIndent: 'indent',
+      renderLineHighlight: 'none',
+      contextmenu: false,
+    };
+
+    editorRef.current.updateOptions({
+      ...commonOptions,
+      renderSideBySide: false,
+    });
+    editorRef.current.getOriginalEditor().updateOptions(commonOptions);
+    editorRef.current.getModifiedEditor().updateOptions(commonOptions);
+
+    return () => {
+      oldModel.dispose();
+      newModel.dispose();
+    };
+  }, [originalContent, modifiedContent]);
+
+  useEffect(() => {
+    Object.entries(defaultThemesResolvers).forEach(([themeId, themeResolver]) => {
+      monaco.editor.defineTheme(themeId, themeResolver(euiTheme));
+    });
+  }, [euiTheme]);
+
+  useEffect(() => {
+    return () => {
+      editorRef.current?.dispose();
+      editorRef.current = null;
+    };
+  }, []);
+
+  return (
+    <div
+      ref={wrapperRef}
+      data-test-subj="streamsMemoryDiffViewer"
+      className={css`
+        width: 100%;
+        height: 400px;
+      `}
+    />
   );
 }

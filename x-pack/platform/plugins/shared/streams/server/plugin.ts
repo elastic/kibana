@@ -213,6 +213,7 @@ export class StreamsPlugin
       getScopedClients,
       logger: this.logger,
       telemetry: telemetryClient,
+      getInternalEsClient: () => this.server.core.elasticsearch.client.asInternalUser,
     });
 
     plugins.features.registerKibanaFeature({

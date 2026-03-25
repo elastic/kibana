@@ -19,6 +19,8 @@ import { generateInsights } from '../../significant_events/insights/generate_ins
 import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
+import type { MemoryGenerationTaskParams } from './memory_generation';
+import { MEMORY_GENERATION_TASK_TYPE } from './memory_generation';
 
 export interface InsightsDiscoveryTaskResult {
   insights: Insight[];
@@ -117,6 +119,24 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                   { streamNames },
                   { insights, tokensUsed: result.tokens_used }
                 );
+
+                if (insights.length > 0 && runContext.fakeRequest) {
+                  try {
+                    await taskClient.schedule<MemoryGenerationTaskParams>({
+                      task: {
+                        type: MEMORY_GENERATION_TASK_TYPE,
+                        id: MEMORY_GENERATION_TASK_TYPE,
+                        space: '*',
+                      },
+                      params: { insights },
+                      request: runContext.fakeRequest,
+                    });
+                  } catch (scheduleError) {
+                    taskLogger.warn(
+                      `Failed to schedule memory generation: ${getErrorMessage(scheduleError)}`
+                    );
+                  }
+                }
               } catch (error) {
                 // Get connector info for error enrichment
                 const connector = await inferenceClient.getConnectorById(connectorId);
