@@ -26,8 +26,8 @@ import {
   getAllConnectors,
   getCachedAllConnectorsMap,
 } from '../../../common/schema';
+import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 import type { AgentBuilderPluginSetupContract } from '../../types';
-import type { WorkflowsManagementApi } from '../../workflows_management/workflows_management_api';
 
 interface StepDefinitionForAgent {
   id: string;
@@ -49,9 +49,9 @@ export async function resolveConnectors(
   spaceId: string,
   request: unknown
 ): Promise<{ all: ConnectorContractUnion[]; byType: Map<string, ConnectorContractUnion> }> {
-  const { connectorsByType } = await api.getAvailableConnectors(spaceId, request as never);
+  const { connectorTypes } = await api.getAvailableConnectors(spaceId, request as never);
   const enabledConnectorTypes = Object.fromEntries(
-    Object.entries(connectorsByType).filter(([, info]) => info.enabled !== false)
+    Object.entries(connectorTypes).filter(([, info]) => info.enabled !== false)
   );
   addDynamicConnectorsToCache(enabledConnectorTypes);
   return {

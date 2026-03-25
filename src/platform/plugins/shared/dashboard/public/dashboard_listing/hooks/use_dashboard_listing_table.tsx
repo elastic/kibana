@@ -208,12 +208,10 @@ export const useDashboardListingTable = ({
 
       return findService
         .search({
-          search: searchTerm,
+          query: searchTerm,
           per_page: listingLimit,
-          tags: {
-            included: (references ?? []).map(({ id }) => id),
-            excluded: (referencesToExclude ?? []).map(({ id }) => id),
-          },
+          tags: (references ?? []).map(({ id }) => id),
+          excluded_tags: (referencesToExclude ?? []).map(({ id }) => id),
         })
         .then(({ total, dashboards }) => {
           const searchEndTime = window.performance.now();
@@ -234,7 +232,7 @@ export const useDashboardListingTable = ({
                 isGloballyAuthorized ||
                 accessControlClient.checkUserAccessControl({
                   accessControl: {
-                    owner: data?.access_control?.owner,
+                    owner: meta.owner,
                     accessMode: data?.access_control?.access_mode,
                   },
                   createdBy: meta.created_at,

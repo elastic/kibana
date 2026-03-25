@@ -35,6 +35,7 @@ import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
 import { WorkflowExecuteHistoricalForm } from './workflow_execute_historical_form';
 import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
 import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
+import { sanitizeText } from '../../../shared/lib/sanitize_text';
 
 function getDefaultTrigger(definition: WorkflowYaml | null): WorkflowTriggerTab {
   if (!definition) {
@@ -75,6 +76,10 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
     const [executionInputErrors, setExecutionInputErrors] = useState<string | null>(null);
 
     const { euiTheme } = useEuiTheme();
+
+    const handleInputChange = useCallback((value: string) => {
+      setExecutionInput(sanitizeText(value));
+    }, []);
 
     const handleSubmit = useCallback(() => {
       onSubmit(JSON.parse(executionInput), selectedTrigger);
@@ -271,7 +276,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                 {selectedTrigger === 'alert' && (
                   <WorkflowExecuteEventForm
                     value={executionInput}
-                    setValue={setExecutionInput}
+                    setValue={handleInputChange}
                     errors={executionInputErrors}
                     setErrors={setExecutionInputErrors}
                   />
@@ -282,12 +287,12 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                     inputs={normalizedInputs}
                     errors={executionInputErrors}
                     setErrors={setExecutionInputErrors}
-                    setValue={setExecutionInput}
+                    setValue={handleInputChange}
                   />
                 )}
                 {selectedTrigger === 'index' && (
                   <WorkflowExecuteIndexForm
-                    setValue={setExecutionInput}
+                    setValue={handleInputChange}
                     errors={executionInputErrors}
                     setErrors={setExecutionInputErrors}
                   />
@@ -298,7 +303,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                     inputs={normalizedInputs}
                     initialExecutionId={initialExecutionId}
                     value={executionInput}
-                    setValue={setExecutionInput}
+                    setValue={handleInputChange}
                     errors={executionInputErrors}
                     setErrors={setExecutionInputErrors}
                   />

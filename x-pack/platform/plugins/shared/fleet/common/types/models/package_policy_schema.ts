@@ -100,6 +100,7 @@ export const PackagePolicyInputsSchema = {
   enabled: schema.boolean(),
   keep_enabled: schema.maybe(schema.boolean()),
   vars: schema.maybe(ConfigRecordSchema),
+  var_group_selections: VarGroupSelectionsSchema,
   config: schema.maybe(ConfigRecordSchema),
   streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 100 }),
   deprecated: schema.maybe(DeprecationInfoSchema),
