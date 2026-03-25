@@ -7,7 +7,6 @@
 
 import React, {
   forwardRef,
-  useCallback,
   useEffect,
   useImperativeHandle,
   useMemo,
@@ -68,17 +67,30 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
   ) => {
     const { euiTheme } = useEuiTheme();
     const [activeIndex, setActiveIndex] = useState(0);
+    const activeIndexRef = useRef(activeIndex);
+    activeIndexRef.current = activeIndex;
+
     const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
       setActiveIndex(0);
     }, [options.length]);
 
-    const scrollActiveIntoView = useCallback((index: number) => {
+    const scrollIndexIntoView = (index: number) => {
       const items = containerRef.current?.querySelectorAll('.euiSelectableListItem');
       const item = items?.[index];
       item?.scrollIntoView?.({ block: 'nearest' });
-    }, []);
+    };
+    const handleSetActive = (next: (index: number) => number) => {
+      const nextIndex = next(activeIndexRef.current);
+      setActiveIndex(nextIndex);
+      scrollIndexIntoView(nextIndex);
+    };
+    const handleSelectOption = () => {
+      if (options.length > 0) {
+        onSelect(options[activeIndexRef.current]);
+      }
+    };
 
     const selectableOptions: EuiSelectableOption[] = useMemo(
       () =>
@@ -103,17 +115,11 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
       },
       handleKeyDown: (event: React.KeyboardEvent): void => {
         if (event.key === keys.ARROW_DOWN || (event.ctrlKey && event.key === 'n')) {
-          const nextIndex = Math.min(activeIndex + 1, options.length - 1);
-          setActiveIndex(nextIndex);
-          scrollActiveIntoView(nextIndex);
+          handleSetActive((prev) => Math.min(prev + 1, options.length - 1));
         } else if (event.key === keys.ARROW_UP || (event.ctrlKey && event.key === 'p')) {
-          const nextIndex = Math.max(activeIndex - 1, 0);
-          setActiveIndex(nextIndex);
-          scrollActiveIntoView(nextIndex);
+          handleSetActive((prev) => Math.max(prev - 1, 0));
         } else if (event.key === keys.ENTER || event.key === keys.TAB) {
-          if (options.length > 0) {
-            onSelect(options[activeIndex]);
-          }
+          handleSelectOption();
         }
       },
     }));
