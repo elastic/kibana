@@ -33,7 +33,7 @@ export const CloseJobConfirm: FC<Props> = ({
       title={
         combinedJobState === COMBINED_JOB_STATE.OPEN_AND_RUNNING
           ? i18n.translate('xpack.ml.modelSnapshotTable.closeJobConfirm.stopAndClose.title', {
-              defaultMessage: 'Stop datafeed and close job?',
+              defaultMessage: 'Stop job?',
             })
           : i18n.translate('xpack.ml.modelSnapshotTable.closeJobConfirm.close.title', {
               defaultMessage: 'Close job?',
@@ -48,10 +48,10 @@ export const CloseJobConfirm: FC<Props> = ({
       confirmButtonText={
         combinedJobState === COMBINED_JOB_STATE.OPEN_AND_RUNNING
           ? i18n.translate('xpack.ml.modelSnapshotTable.closeJobConfirm.stopAndClose.button', {
-              defaultMessage: 'Stop and close',
+              defaultMessage: 'Stop job',
             })
           : i18n.translate('xpack.ml.modelSnapshotTable.closeJobConfirm.close.button', {
-              defaultMessage: 'Close',
+              defaultMessage: 'Close job',
             })
       }
       defaultFocusedButton="confirm"
@@ -60,7 +60,7 @@ export const CloseJobConfirm: FC<Props> = ({
         {combinedJobState === COMBINED_JOB_STATE.OPEN_AND_RUNNING && (
           <FormattedMessage
             id="xpack.ml.modelSnapshotTable.closeJobConfirm.contentOpenAndRunning"
-            defaultMessage="Job is currently open and running."
+            defaultMessage="Job is currently running."
           />
         )}
         {combinedJobState === COMBINED_JOB_STATE.OPEN_AND_STOPPED && (

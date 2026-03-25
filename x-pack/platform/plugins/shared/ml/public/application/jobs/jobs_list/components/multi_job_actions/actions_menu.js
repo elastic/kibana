@@ -150,7 +150,7 @@ class MultiJobActionsMenuUI extends Component {
     if (isStoppable(this.props.jobs)) {
       items.push(
         <EuiContextMenuItem
-          key="stop datafeed"
+          key="stop job"
           icon="stop"
           disabled={this.canStartStopDatafeed === false}
           onClick={() => {
@@ -166,11 +166,11 @@ class MultiJobActionsMenuUI extends Component {
             }
             this.closePopover();
           }}
-          data-test-subj="mlADJobListMultiSelectStopDatafeedActionButton"
+          data-test-subj="mlADJobListMultiSelectStopJobsActionButton"
         >
           <FormattedMessage
-            id="xpack.ml.jobsList.multiJobsActions.stopDatafeedsLabel"
-            defaultMessage="Stop {jobsCount, plural, one {datafeed} other {datafeeds}}"
+            id="xpack.ml.jobsList.multiJobsActions.stopJobsLabel"
+            defaultMessage="Stop {jobsCount, plural, one {job} other {jobs}}"
             values={{ jobsCount: this.props.jobs.length }}
           />
         </EuiContextMenuItem>

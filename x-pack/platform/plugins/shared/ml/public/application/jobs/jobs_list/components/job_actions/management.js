@@ -63,11 +63,11 @@ export function actionsMenuContent(
       'data-test-subj': 'mlActionButtonStartDatafeed',
     },
     {
-      name: i18n.translate('xpack.ml.jobsList.managementActions.stopDatafeedLabel', {
-        defaultMessage: 'Stop datafeed',
+      name: i18n.translate('xpack.ml.jobsList.managementActions.stopJobLabel', {
+        defaultMessage: 'Stop job',
       }),
-      description: i18n.translate('xpack.ml.jobsList.managementActions.stopDatafeedDescription', {
-        defaultMessage: 'Stop datafeed',
+      description: i18n.translate('xpack.ml.jobsList.managementActions.stopJobDescription', {
+        defaultMessage: 'Stop job',
       }),
       icon: 'stop',
       enabled: (item) => isJobBlocked(item) === false && canStartStopDatafeed,
@@ -81,7 +81,7 @@ export function actionsMenuContent(
 
         closeMenu(true);
       },
-      'data-test-subj': 'mlActionButtonStopDatafeed',
+      'data-test-subj': 'mlActionButtonStopJob',
     },
     {
       name: i18n.translate('xpack.ml.jobsList.managementActions.createAlertLabel', {

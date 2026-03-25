@@ -247,7 +247,7 @@ export function createPermissionFailureMessage(privilegeType: keyof MlCapabiliti
     });
   } else if (privilegeType === 'canStartStopDatafeed') {
     message = i18n.translate('xpack.ml.privilege.noPermission.startOrStopDatafeedsTooltip', {
-      defaultMessage: 'You do not have permission to start or stop datafeeds.',
+      defaultMessage: 'You do not have permission to start or stop jobs.',
     });
   } else if (privilegeType === 'canUpdateJob') {
     message = i18n.translate('xpack.ml.privilege.noPermission.editJobsTooltip', {
