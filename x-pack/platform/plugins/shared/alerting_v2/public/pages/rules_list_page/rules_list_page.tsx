@@ -100,7 +100,9 @@ export const buildRulesListFilter = ({
 
   const tagClause =
     tags && tags.length > 0
-      ? `(${tags.map((t) => `metadata.labels: "${t.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(' OR ')})`
+      ? `(${tags
+          .map((t) => `metadata.labels: "${t.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`)
+          .join(' OR ')})`
       : undefined;
 
   const clauses = [
