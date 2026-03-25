@@ -16,8 +16,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'header',
   ]);
   const svlSearchNavigation = getService('svlSearchNavigation');
-  const kibanaServer = getService('kibanaServer');
-  const es = getService('es');
 
   describe('Serverless Inference Management UI', function () {
     // see details: https://github.com/elastic/kibana/issues/204539
@@ -143,54 +141,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('has embedded dev console', async () => {
       await testHasEmbeddedConsole(pageObjects);
-    });
-
-    describe('with EIS feature flag enabled', () => {
-      before(async () => {
-        await kibanaServer.uiSettings.update({
-          'searchInferenceEndpoints:elasticInferenceServiceEnabled': true,
-        });
-      });
-
-      after(async () => {
-        await kibanaServer.uiSettings.update({
-          'searchInferenceEndpoints:elasticInferenceServiceEnabled': false,
-        });
-      });
-
-      it('displays empty prompt when no third-party endpoints exist', async () => {
-        await pageObjects.searchInferenceManagementPage.ProviderInferenceEmptyPrompt.expectEmptyPromptToBeDisplayed();
-      });
-
-      describe('with a third-party endpoint', () => {
-        const testEndpointId = 'test-openai-endpoint';
-
-        before(async () => {
-          await es.transport.request({
-            path: `_inference/completion/${testEndpointId}`,
-            method: 'PUT',
-            body: {
-              service: 'openai',
-              service_settings: {
-                api_key: 'test-api-key',
-                model_id: 'gpt-4o',
-              },
-            },
-          });
-        });
-
-        after(async () => {
-          await es.transport.request({
-            path: `_inference/completion/${testEndpointId}`,
-            method: 'DELETE',
-          });
-        });
-
-        it('displays tabular view with third-party endpoints', async () => {
-          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectHeaderToBeExist();
-          await pageObjects.searchInferenceManagementPage.ProviderInferenceEmptyPrompt.expectEmptyPromptNotToBeDisplayed();
-        });
-      });
     });
   });
 }
