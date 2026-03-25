@@ -33,6 +33,7 @@ import {
   cleanupSigEventsExtractedKIsData,
   configureModelSelectionSettings,
   disableStreams,
+  enableLogsNativeStream,
   enableSignificantEvents,
   logSigEventsExtractedKIFeatures,
   persistSigEventsExtractedKIsForSnapshot,
@@ -291,20 +292,6 @@ async function processScenario(
   }
 
   log.info(`Scenario "${scenario.id}" — done`);
-}
-
-async function enableLogsNativeStream(esClient: Client, log: ToolingLog): Promise<void> {
-  try {
-    await esClient.transport.request({ method: 'POST', path: '_streams/logs/_enable' });
-    log.info('ES native "logs" stream enabled');
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    if (message.includes('already enabled') || message.includes('resource_already_exists')) {
-      log.info('ES native "logs" stream already enabled');
-      return;
-    }
-    throw err;
-  }
 }
 
 const DURATION_RE = /^(\d+)(s|m|h|d)$/;

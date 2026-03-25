@@ -242,3 +242,17 @@ export async function disableStreams(config: ConnectionConfig, log: ToolingLog):
     log.warning(`Failed to disable streams (status ${status}), continuing...`);
   }
 }
+
+export async function enableLogsNativeStream(esClient: Client, log: ToolingLog): Promise<void> {
+  try {
+    await esClient.transport.request({ method: 'POST', path: '_streams/logs/_enable' });
+    log.info('ES native "logs" stream enabled');
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    if (message.includes('already enabled') || message.includes('resource_already_exists')) {
+      log.info('ES native "logs" stream already enabled');
+      return;
+    }
+    throw err;
+  }
+}
