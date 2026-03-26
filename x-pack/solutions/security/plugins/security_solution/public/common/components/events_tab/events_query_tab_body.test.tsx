@@ -29,7 +29,7 @@ jest.mock('../../../timelines/components/timeline/body/control_columns', () => (
 jest.mock(
   '../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline',
   () => ({
-    useAddBulkToTimelineAction: jest.fn(),
+    useAddBulkToTimelineAction: jest.fn().mockReturnValue([]),
   })
 );
 
@@ -112,7 +112,6 @@ describe('EventsQueryTabBody', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       notesPrivileges: { read: true },
     });
-    jest.clearAllMocks();
   });
 
   it('renders EventsViewer', () => {

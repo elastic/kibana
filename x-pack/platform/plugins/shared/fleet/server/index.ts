@@ -20,6 +20,7 @@ export type {
   ListArtifactsProps,
   MessageSigningServiceInterface,
 } from './services';
+export type { PackageAsset } from './services/epm/archive/storage';
 export { getRegistryUrl } from './services';
 export { NamingCollisionError } from './services/epm/packages/custom_integrations/validation/check_naming_collision';
 
