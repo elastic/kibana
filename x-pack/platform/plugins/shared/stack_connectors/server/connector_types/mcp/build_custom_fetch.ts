@@ -106,7 +106,8 @@ function shouldUseProxy(logger: Logger, proxySettings: ProxySettings, targetUrl:
  *
  * This allows the MCP connector to respect the same `xpack.actions.ssl`,
  * `xpack.actions.customHostSettings`, and `xpack.actions.proxyUrl` settings
- * as all other stack connectors.
+ * as all other stack connectors. Redirect responses are followed manually
+ * so that each hop is validated against `xpack.actions.allowedHosts`.
  */
 export function buildCustomFetch(
   configurationUtilities: ActionsConfigurationUtilities,
@@ -129,7 +130,7 @@ export function buildCustomFetch(
       logger.warn(`invalid proxy URL "${proxySettings.proxyUrl}" ignored, using direct connection`);
       dispatcher = new Agent({ connect: tlsOptions });
 
-      return createFetchWithDispatcher(dispatcher);
+      return createFetchWithDispatcher(dispatcher, configurationUtilities, logger);
     }
 
     logger.debug(`MCP connector: using proxy ${proxySettings.proxyUrl} for ${targetUrl}`);
@@ -149,15 +150,85 @@ export function buildCustomFetch(
     dispatcher = new Agent({ connect: tlsOptions });
   }
 
-  return createFetchWithDispatcher(dispatcher);
+  return createFetchWithDispatcher(dispatcher, configurationUtilities, logger);
 }
 
-function createFetchWithDispatcher(dispatcher: Dispatcher): FetchLike {
-  return (url: string | URL, init?: RequestInit): Promise<Response> => {
-    return fetch(url, {
+const REDIRECT_STATUS_CODES = new Set([301, 302, 303, 307, 308]);
+
+// WHATWG Fetch specification constants
+const MAX_REDIRECTS = 20;
+const BLOCKED_CROSS_ORIGIN_HEADERS = ['authorization']; // spec also mentions 'cookie', 'proxy-authorization', 'host'. Not applicable here
+const STRIPPED_METHOD_CHANGE_HEADERS = [
+  'content-encoding',
+  'content-language',
+  'content-location',
+  'content-type',
+];
+
+function createFetchWithDispatcher(
+  dispatcher: Dispatcher,
+  configurationUtilities: ActionsConfigurationUtilities,
+  logger: Logger
+): FetchLike {
+  const followRedirects = async (
+    url: string | URL,
+    init?: RequestInit,
+    redirectCount = 0
+  ): Promise<Response> => {
+    const response = await fetch(url, {
       ...init,
-      // Node.js's built-in fetch (undici) supports `dispatcher` as a non-standard option
+      redirect: 'manual',
       dispatcher,
     } as RequestInit);
+
+    if (!REDIRECT_STATUS_CODES.has(response.status)) {
+      return response;
+    }
+
+    if (redirectCount >= MAX_REDIRECTS) {
+      throw new Error(`Max redirects (${MAX_REDIRECTS}) exceeded`);
+    }
+
+    const location = response.headers.get('location');
+    if (!location) {
+      throw new Error(`Redirect response ${response.status} missing Location header`);
+    }
+
+    const resolvedUrl = new URL(location, url).toString();
+
+    configurationUtilities.ensureUriAllowed(resolvedUrl);
+    logger.debug(`MCP connector: following redirect (${response.status}) to ${resolvedUrl}`);
+
+    // undici explicitly recommends reading/cancelling the body to free up resources
+    try {
+      await response.body?.cancel();
+    } catch {
+      // body may be already cancelled or not readable, ignore
+    }
+
+    const preserveMethod = response.status === 307 || response.status === 308;
+    const redirectInit: RequestInit = { ...init };
+
+    if (!preserveMethod) {
+      const sanitizedHeaders = new Headers(redirectInit.headers);
+      STRIPPED_METHOD_CHANGE_HEADERS.forEach((header) => sanitizedHeaders.delete(header));
+
+      redirectInit.headers = sanitizedHeaders;
+      redirectInit.method = 'GET';
+      delete redirectInit.body;
+    }
+
+    // Per WHATWG Fetch, strip authorization header on cross-origin redirects
+    const requestOrigin = new URL(url).origin;
+    const redirectOrigin = new URL(resolvedUrl).origin;
+    if (requestOrigin !== redirectOrigin && redirectInit.headers) {
+      const sanitizedHeaders = new Headers(redirectInit.headers);
+      BLOCKED_CROSS_ORIGIN_HEADERS.forEach((header) => sanitizedHeaders.delete(header));
+      redirectInit.headers = sanitizedHeaders;
+    }
+
+    return followRedirects(resolvedUrl, redirectInit, redirectCount + 1);
   };
+
+  return (url: string | URL, init?: RequestInit): Promise<Response> => followRedirects(url, init);
 }

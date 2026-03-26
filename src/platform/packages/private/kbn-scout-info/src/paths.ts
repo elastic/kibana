@@ -43,11 +43,21 @@ export const TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX = new RegExp(
     `\/([\\w|-]+(?:\\/[\\w|-]+)*)` + // 5: plugin/package name (supports nested paths like vis_types/timelion)
     `\/test\/scout(?:_([^\\/]*))?` // 6: custom target config set name
 );
+
+export const SCOUT_TEST_CATEGORIES = ['api', 'ui'];
+
 export const SCOUT_CONFIG_PATH_GLOB =
-  TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB + '/{ui,api}/{,*.}playwright.config.ts';
+  TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB +
+  `/{${SCOUT_TEST_CATEGORIES.join(',')}}/{,*.}playwright.config.ts`;
 
 export const SCOUT_CONFIG_PATH_REGEX = new RegExp(
   TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX.source +
-    `\/(api|ui)` + // 7: Scout test category
-    `\/(\\w*)\\.?playwright.config.ts` // 8: Scout config type
+    `\/(${SCOUT_TEST_CATEGORIES.join('|')})` + // 7: Scout test category
+    `\/(\\w*)\\.?playwright\\.config\\.ts` // 8: Scout config type
 );
+
+export const SCOUT_CONFIG_MANIFEST_PATH_GLOB =
+  TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB + `/.meta/{${SCOUT_TEST_CATEGORIES.join(',')}}/*.json`;
+
+// Scout CI
+export const SCOUT_CI_CONFIG_PATH = path.resolve(REPO_ROOT, '.buildkite', 'scout_ci_config.yml');

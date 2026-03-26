@@ -45,7 +45,7 @@ jest.mock('../kibana_services', () => ({
   embeddableService: {
     getTransforms: jest.fn((type: string) => {
       switch (type) {
-        case 'lens-dashboard-app':
+        case 'lens':
           return { transformIn: mockLensTransformIn };
         case 'visualization':
           return { transformIn: mockVisualizationTransformIn };
@@ -82,7 +82,7 @@ describe('transformWorkpadIn', () => {
       },
     ]);
 
-    expect(embeddableService?.getTransforms).toHaveBeenCalledWith('lens-dashboard-app');
+    expect(embeddableService?.getTransforms).toHaveBeenCalledWith('lens');
     expect(mockLensTransformIn).toHaveBeenCalledWith({
       savedObjectId: 'test-id',
       title: 'Test lens embeddable',

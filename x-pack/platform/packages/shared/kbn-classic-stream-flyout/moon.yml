@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/storybook'
   - '@kbn/index-management-shared-types'
   - '@kbn/index-lifecycle-management-common-shared'
+  - '@kbn/streams-schema'
 tags:
   - shared-common
   - package
