@@ -7,7 +7,7 @@
 
 import { randomUUID } from 'crypto';
 import type { KibanaRequest, Logger, ElasticsearchServiceStart } from '@kbn/core/server';
-import { createBadRequestError } from '@kbn/agent-builder-common';
+import { createBadRequestError, validateSkillId } from '@kbn/agent-builder-common';
 import type { ParsedPluginArchive, ParsedSkillFile } from '@kbn/agent-builder-common';
 import type { PersistedSkillCreateRequest } from '@kbn/agent-builder-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -212,8 +212,15 @@ const toSkillCreateRequest = ({
   pluginName: string;
   pluginId: string;
 }): PersistedSkillCreateRequest => {
+  const id = `${pluginName}-${skill.dirName}`;
+  const validationError = validateSkillId(id);
+  if (validationError) {
+    throw createBadRequestError(
+      `Invalid skill ID "${id}" generated from plugin "${pluginName}": ${validationError}`
+    );
+  }
   return {
-    id: `${pluginName}-${skill.dirName}`,
+    id,
     name: skill.meta.name ?? skill.dirName,
     base_path: `/skills/${pluginName}`,
     description: skill.meta.description ?? '',
