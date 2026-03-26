@@ -66,7 +66,7 @@ const TagsFilterPopoverComponent = ({
   const triggerButton = (
     <EuiFilterButton
       grow
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={() => setIsTagPopoverOpen(!isTagPopoverOpen)}
       numFilters={tags.length}
       isSelected={isTagPopoverOpen}
