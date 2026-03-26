@@ -8,7 +8,7 @@
  */
 
 import { render, screen, act as rtlAct } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 import { BehaviorSubject } from 'rxjs';
 import type { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -397,7 +397,10 @@ describe('discover responsive sidebar', function () {
   describe('when the input is focused', () => {
     it('should set a11y attributes for the search input in the field list', async function () {
       // Given
-      const user = userEvent.setup();
+      const user = userEvent.setup({
+        pointerEventsCheck: PointerEventsCheckLevel.Never,
+        skipHover: true,
+      });
 
       // When
       await mountComponent(props, undefined, undefined, true);
