@@ -27,42 +27,36 @@ export const WorkflowManagementAuditActions = {
   RESUME_EXECUTION: 'workflow_execution_resume',
 } as const;
 
-function failureEvent(
-  action: string,
-  message: string,
-  error: unknown,
-  eventType: 'access' | 'change' | 'creation' | 'deletion' = 'change'
-): AuditEvent {
-  const err = error instanceof Error ? error : new Error(String(error));
-  return {
-    message,
-    event: {
-      action,
-      category: ['database'],
-      type: [eventType],
-      outcome: 'failure',
-    },
-    error: {
-      code: err.name,
-      message: err.message,
-    },
-  };
-}
+type WorkflowAuditEventType = 'access' | 'change' | 'creation' | 'deletion';
 
-function successEvent(
+/**
+ * Builds a workflow-management audit event (success vs failure from presence of `error`).
+ * Non-`Error` values use ECS error code `Unknown` and `String(error)` as the message.
+ */
+function createEvent(
   action: string,
-  eventType: 'access' | 'change' | 'creation' | 'deletion',
-  message: string
+  eventType: WorkflowAuditEventType,
+  message: string,
+  error?: unknown
 ): AuditEvent {
-  return {
+  const event: AuditEvent = {
     message,
     event: {
       action,
       category: ['database'],
       type: [eventType],
-      outcome: 'success',
+      outcome: error !== undefined ? 'failure' : 'success',
     },
   };
+
+  if (error !== undefined) {
+    event.error =
+      error instanceof Error
+        ? { code: error.name, message: error.message }
+        : { code: 'Unknown', message: String(error) };
+  }
+
+  return event;
 }
 
 async function writeAudit(
@@ -73,9 +67,7 @@ async function writeAudit(
     const coreContext = await context.core;
     await Promise.resolve(coreContext.security.audit.logger.log(event));
   } catch {
-    // Best-effort only: never let audit affect the HTTP response. There is no request-scoped or
-    // module-level Kibana Logger here (core context does not expose one); optional debug on failure
-    // would require plugin-injected configuration, which we avoid for this helper.
+    // Best-effort only: never let audit affect the HTTP response.
   }
 }
 
@@ -91,7 +83,7 @@ export class WorkflowManagementAuditLog {
       : `User created workflow [id=${id}]`;
     await writeAudit(
       context,
-      successEvent(WorkflowManagementAuditActions.CREATE, 'creation', message)
+      createEvent(WorkflowManagementAuditActions.CREATE, 'creation', message)
     );
   }
 
@@ -105,7 +97,7 @@ export class WorkflowManagementAuditLog {
       : 'User failed to create a workflow';
     await writeAudit(
       context,
-      failureEvent(WorkflowManagementAuditActions.CREATE, message, error, 'creation')
+      createEvent(WorkflowManagementAuditActions.CREATE, 'creation', message, error)
     );
   }
 
@@ -114,19 +106,15 @@ export class WorkflowManagementAuditLog {
     params: { index: number; id: string; error: string }
   ): Promise<void> {
     const { index, id, error: errorMessage } = params;
-    await writeAudit(context, {
-      message: `User failed to create workflow via bulk import [index=${index}] [id=${id}]: ${errorMessage}`,
-      event: {
-        action: WorkflowManagementAuditActions.CREATE,
-        category: ['database'],
-        type: ['creation'],
-        outcome: 'failure',
-      },
-      error: {
-        code: 'bulk_create_row',
-        message: errorMessage,
-      },
-    });
+    await writeAudit(
+      context,
+      createEvent(
+        WorkflowManagementAuditActions.CREATE,
+        'creation',
+        `User failed to create workflow via bulk import [index=${index}] [id=${id}]: ${errorMessage}`,
+        errorMessage
+      )
+    );
   }
 
   /**
@@ -160,7 +148,7 @@ export class WorkflowManagementAuditLog {
   ): Promise<void> {
     await writeAudit(
       context,
-      successEvent(
+      createEvent(
         WorkflowManagementAuditActions.UPDATE,
         'change',
         `User updated workflow [id=${params.id}]`
@@ -174,8 +162,9 @@ export class WorkflowManagementAuditLog {
   ): Promise<void> {
     await writeAudit(
       context,
-      failureEvent(
+      createEvent(
         WorkflowManagementAuditActions.UPDATE,
+        'change',
         `User failed to update workflow [id=${params.id}]`,
         params.error
       )
@@ -192,7 +181,7 @@ export class WorkflowManagementAuditLog {
       : `User deleted workflow [id=${id}]`;
     await writeAudit(
       context,
-      successEvent(WorkflowManagementAuditActions.DELETE, 'deletion', message)
+      createEvent(WorkflowManagementAuditActions.DELETE, 'deletion', message)
     );
   }
 
@@ -206,7 +195,7 @@ export class WorkflowManagementAuditLog {
       : `User failed to delete workflow [id=${id}]`;
     await writeAudit(
       context,
-      failureEvent(WorkflowManagementAuditActions.DELETE, message, error, 'deletion')
+      createEvent(WorkflowManagementAuditActions.DELETE, 'deletion', message, error)
     );
   }
 
@@ -238,11 +227,11 @@ export class WorkflowManagementAuditLog {
   ): Promise<void> {
     await writeAudit(
       context,
-      failureEvent(
+      createEvent(
         WorkflowManagementAuditActions.BULK_DELETE,
+        'deletion',
         'User failed bulk workflow delete',
-        error,
-        'deletion'
+        error
       )
     );
   }
@@ -253,7 +242,7 @@ export class WorkflowManagementAuditLog {
   ): Promise<void> {
     await writeAudit(
       context,
-      successEvent(
+      createEvent(
         WorkflowManagementAuditActions.CLONE,
         'creation',
         `User cloned workflow [sourceId=${params.sourceId}] to [id=${params.newId}]`
@@ -267,11 +256,11 @@ export class WorkflowManagementAuditLog {
   ): Promise<void> {
     await writeAudit(
       context,
-      failureEvent(
+      createEvent(
         WorkflowManagementAuditActions.CLONE,
+        'creation',
         `User failed to clone workflow [id=${params.sourceId}]`,
-        params.error,
-        'creation'
+        params.error
       )
     );
   }
@@ -284,7 +273,7 @@ export class WorkflowManagementAuditLog {
     for (const id of params.ids) {
       await writeAudit(
         context,
-        successEvent(
+        createEvent(
           WorkflowManagementAuditActions.EXPORT,
           'access',
           `User exported workflow [id=${id}]`
@@ -306,11 +295,11 @@ export class WorkflowManagementAuditLog {
   ): Promise<void> {
     await writeAudit(
       context,
-      failureEvent(
+      createEvent(
         WorkflowManagementAuditActions.EXPORT,
+        'access',
         'User failed to export workflows',
-        error,
-        'access'
+        error
       )
     );
   }
@@ -321,7 +310,7 @@ export class WorkflowManagementAuditLog {
   ): Promise<void> {
     await writeAudit(
       context,
-      successEvent(
+      createEvent(
         WorkflowManagementAuditActions.GET,
         'access',
         `User accessed workflow [id=${params.id}]`
@@ -335,11 +324,11 @@ export class WorkflowManagementAuditLog {
   ): Promise<void> {
     await writeAudit(
       context,
-      failureEvent(
+      createEvent(
         WorkflowManagementAuditActions.GET,
+        'access',
         `User failed to read workflow [id=${params.id}]`,
-        params.error,
-        'access'
+        params.error
       )
     );
   }
@@ -350,7 +339,7 @@ export class WorkflowManagementAuditLog {
   ): Promise<void> {
     await writeAudit(
       context,
-      successEvent(
+      createEvent(
         WorkflowManagementAuditActions.MGET,
         'access',
         `User requested workflows by ids: requested ${params.requestedCount}, returned ${params.returnedCount}`
@@ -364,11 +353,11 @@ export class WorkflowManagementAuditLog {
   ): Promise<void> {
     await writeAudit(
       context,
-      failureEvent(
+      createEvent(
         WorkflowManagementAuditActions.MGET,
+        'access',
         'User failed workflows mget',
-        error,
-        'access'
+        error
       )
     );
   }
@@ -379,7 +368,7 @@ export class WorkflowManagementAuditLog {
   ): Promise<void> {
     await writeAudit(
       context,
-      successEvent(
+      createEvent(
         WorkflowManagementAuditActions.RUN,
         'change',
         `User ran workflow [id=${params.workflowId}] [executionId=${params.executionId}]`
@@ -393,8 +382,9 @@ export class WorkflowManagementAuditLog {
   ): Promise<void> {
     await writeAudit(
       context,
-      failureEvent(
+      createEvent(
         WorkflowManagementAuditActions.RUN,
+        'change',
         `User failed to run workflow [id=${params.workflowId}]`,
         params.error
       )
@@ -409,7 +399,7 @@ export class WorkflowManagementAuditLog {
       params.workflowId !== undefined ? `[workflowId=${params.workflowId}]` : '[draft yaml]';
     await writeAudit(
       context,
-      successEvent(
+      createEvent(
         WorkflowManagementAuditActions.TEST,
         'change',
         `User tested workflow ${workflowRef} [executionId=${params.workflowExecutionId}]`
@@ -423,7 +413,7 @@ export class WorkflowManagementAuditLog {
   ): Promise<void> {
     await writeAudit(
       context,
-      failureEvent(WorkflowManagementAuditActions.TEST, 'User failed workflow test', error)
+      createEvent(WorkflowManagementAuditActions.TEST, 'change', 'User failed workflow test', error)
     );
   }
 
@@ -439,7 +429,7 @@ export class WorkflowManagementAuditLog {
       params.workflowId !== undefined ? `[workflowId=${params.workflowId}]` : '[draft yaml]';
     await writeAudit(
       context,
-      successEvent(
+      createEvent(
         WorkflowManagementAuditActions.TEST_STEP,
         'change',
         `User tested workflow step [stepId=${params.stepId}] ${wfPart} [executionId=${params.workflowExecutionId}]`
@@ -453,8 +443,9 @@ export class WorkflowManagementAuditLog {
   ): Promise<void> {
     await writeAudit(
       context,
-      failureEvent(
+      createEvent(
         WorkflowManagementAuditActions.TEST_STEP,
+        'change',
         'User failed workflow step test',
         error
       )
@@ -467,7 +458,7 @@ export class WorkflowManagementAuditLog {
   ): Promise<void> {
     await writeAudit(
       context,
-      successEvent(
+      createEvent(
         WorkflowManagementAuditActions.CANCEL_EXECUTION,
         'change',
         `User canceled workflow execution [executionId=${params.executionId}]`
@@ -481,8 +472,9 @@ export class WorkflowManagementAuditLog {
   ): Promise<void> {
     await writeAudit(
       context,
-      failureEvent(
+      createEvent(
         WorkflowManagementAuditActions.CANCEL_EXECUTION,
+        'change',
         `User failed to cancel workflow execution [executionId=${params.executionId}]`,
         params.error
       )
@@ -495,7 +487,7 @@ export class WorkflowManagementAuditLog {
   ): Promise<void> {
     await writeAudit(
       context,
-      successEvent(
+      createEvent(
         WorkflowManagementAuditActions.RESUME_EXECUTION,
         'change',
         `User resumed workflow execution [executionId=${params.executionId}]`
@@ -509,8 +501,9 @@ export class WorkflowManagementAuditLog {
   ): Promise<void> {
     await writeAudit(
       context,
-      failureEvent(
+      createEvent(
         WorkflowManagementAuditActions.RESUME_EXECUTION,
+        'change',
         `User failed to resume workflow execution [executionId=${params.executionId}]`,
         params.error
       )

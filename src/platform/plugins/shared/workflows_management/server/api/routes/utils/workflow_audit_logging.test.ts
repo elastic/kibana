@@ -104,7 +104,7 @@ describe('WorkflowManagementAuditLog', () => {
       expect(log.mock.calls[0][0]).toEqual(
         expect.objectContaining({
           message: expect.stringContaining('[index=2]'),
-          error: { code: 'bulk_create_row', message: 'invalid yaml' },
+          error: { code: 'Unknown', message: 'invalid yaml' },
           event: expect.objectContaining({
             action: WorkflowManagementAuditActions.CREATE,
             outcome: 'failure',
@@ -123,7 +123,7 @@ describe('WorkflowManagementAuditLog', () => {
       expect(log.mock.calls[0][0].message).toContain('bulk import');
       expect(log.mock.calls[0][0].message).toContain('[id=new-1]');
       expect(log.mock.calls[1][0].message).toContain('[id=new-2]');
-      expect(log.mock.calls[2][0].error).toEqual({ code: 'bulk_create_row', message: 'nope' });
+      expect(log.mock.calls[2][0].error).toEqual({ code: 'Unknown', message: 'nope' });
     });
 
     it('logWorkflowUpdated and logWorkflowUpdateFailed', async () => {
