@@ -10,20 +10,28 @@
 import { getAgentIcon } from '@kbn/custom-icons';
 import awsIcon from './icons/aws.svg';
 import cassandraIcon from './icons/cassandra.svg';
+import darkCassandraIcon from './icons/cassandra_dark.svg';
 import databaseIcon from './icons/database.svg';
+import darkDatabaseIcon from './icons/database_dark.svg';
 import defaultIcon from './icons/default.svg';
 import documentsIcon from './icons/documents.svg';
+import darkDocumentsIcon from './icons/documents_dark.svg';
 import elasticsearchIcon from './icons/elasticsearch.svg';
 import globeIcon from './icons/globe.svg';
+import darkGlobeIcon from './icons/globe_dark.svg';
 import graphqlIcon from './icons/graphql.svg';
 import grpcIcon from './icons/grpc.svg';
+import darkGrpcIcon from './icons/grpc_dark.svg';
 import handlebarsIcon from './icons/handlebars.svg';
+import darkHandlebarsIcon from './icons/handlebars_dark.svg';
 import kafkaIcon from './icons/kafka.svg';
+import darkKafkaIcon from './icons/kafka_dark.svg';
 import mongodbIcon from './icons/mongodb.svg';
 import mysqlIcon from './icons/mysql.svg';
 import postgresqlIcon from './icons/postgresql.svg';
 import redisIcon from './icons/redis.svg';
 import websocketIcon from './icons/websocket.svg';
+import darkWebsocketIcon from './icons/websocket_dark.svg';
 import dynamodbIcon from './icons/dynamo_db.svg';
 import sThreeIcon from './icons/s3.svg';
 import snsIcon from './icons/sns.svg';
@@ -43,6 +51,16 @@ const defaultSpanTypeIcons: { [key: string]: string } = {
   external: globeIcon,
   messaging: documentsIcon,
   resource: globeIcon,
+};
+
+const darkDefaultSpanTypeIcons: { [key: string]: string } = {
+  ...defaultSpanTypeIcons,
+  cache: darkDatabaseIcon,
+  db: darkDatabaseIcon,
+  ext: darkGlobeIcon,
+  external: darkGlobeIcon,
+  messaging: darkDocumentsIcon,
+  resource: darkGlobeIcon,
 };
 
 export const spanTypeIcons: {
@@ -87,15 +105,37 @@ export const spanTypeIcons: {
   },
 };
 
-export function getSpanIcon(type?: string, subtype?: string) {
+const darkSpanTypeIcons: { [type: string]: { [subtype: string]: string } } = {
+  ...spanTypeIcons,
+  db: {
+    ...spanTypeIcons.db,
+    cassandra: darkCassandraIcon,
+  },
+  external: {
+    ...spanTypeIcons.external,
+    grpc: darkGrpcIcon,
+    websocket: darkWebsocketIcon,
+  },
+  messaging: {
+    ...spanTypeIcons.messaging,
+    kafka: darkKafkaIcon,
+  },
+  template: {
+    handlebars: darkHandlebarsIcon,
+  },
+};
+
+export function getSpanIcon(type?: string, subtype?: string, isDarkMode: boolean = false) {
   if (!type) {
     return defaultIcon;
   }
 
-  const types = spanTypeIcons[type];
+  const icons = isDarkMode ? darkSpanTypeIcons : spanTypeIcons;
+  const defaults = isDarkMode ? darkDefaultSpanTypeIcons : defaultSpanTypeIcons;
+  const types = icons[type];
 
   if (subtype && types && subtype in types) {
     return types[subtype];
   }
-  return defaultSpanTypeIcons[type] || defaultIcon;
+  return defaults[type] || defaultIcon;
 }
