@@ -179,7 +179,7 @@ const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme'], chromeStyle: C
     bottom: ${layoutVar('application.bottom', '0px')} !important; /* override EUI inline style */
     border-bottom-left-radius: ${_euiTheme.border.radius.medium} !important;
     border-bottom-right-radius: ${_euiTheme.border.radius.medium} !important;
-    box-shadow: ${_euiTheme.shadows.xs.down} !important;
+    box-shadow: ${_euiTheme.shadows?.xs?.down ?? ''} !important;
     clip-path: inset(0 -10px -10px -10px) !important;
   }
 `;
