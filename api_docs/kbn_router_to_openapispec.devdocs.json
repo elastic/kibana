@@ -207,7 +207,7 @@
           "\nOAS-specific extensions that can be declared on a Zod v4 schema via\n`.meta({ openapi: { discriminator: { ... } } })`.\n\nThese fields are merged verbatim into the generated OAS component schema,\nfilling the gap where Zod/JSON Schema cannot express OAS-native concepts.\n\nExample:\n```ts\nexport const StreamDefinition = z.union([...]).meta({\n  id: 'StreamDefinition',\n  openapi: {\n    discriminator: {\n      propertyName: 'type',\n      mapping: { wired: '#/components/schemas/WiredStreamDefinition' },\n    },\n  },\n});\n```"
         ],
         "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/oas_converter/zod/lib.ts",
-        "lineNumber": 615,
+        "lineNumber": 616,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -224,7 +224,23 @@
               ".DiscriminatorObject | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/oas_converter/zod/lib.ts",
-            "lineNumber": 636,
+            "lineNumber": 637,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/router-to-openapispec",
+            "id": "def-server.OasMetaExtensions.availability",
+            "type": "Object",
+            "tags": [],
+            "label": "availability",
+            "description": [],
+            "signature": [
+              "{ stability?: \"experimental\" | \"beta\" | \"stable\" | undefined; since?: string | undefined; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/oas_converter/zod/lib.ts",
+            "lineNumber": 638,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

@@ -3249,6 +3249,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 
 # No owner - generated files covered by CI checks
 **/moon.yml
+**/version_dependencies.txt
 
 # Operations (last-match override)
 /src/platform/test/package @elastic/kibana-operations

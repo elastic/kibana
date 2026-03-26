@@ -136,7 +136,7 @@ export const useSubscribeToChatEvents = ({
       });
       setAgentReasoning(
         i18n.translate('xpack.agentBuilder.chatEvents.compactionStarted', {
-          defaultMessage: 'Compacting conversation context...',
+          defaultMessage: 'Compacting conversation context',
         })
       );
     } else if (isCompactionCompletedEvent(event)) {
