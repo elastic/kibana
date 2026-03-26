@@ -296,7 +296,7 @@ export function fromColorMappingLensStateToAPI(
     return;
   }
 
-  const unassignedColorDef = fromUnassignedColorLensStateToAPI(
+  const unassignedColorAPI = fromUnassignedColorLensStateToAPI(
     colorMapping.specialAssignments[0]?.color
   );
   if (isLensStateCategoricalConfigColorMapping(colorMapping)) {
@@ -309,7 +309,7 @@ export function fromColorMappingLensStateToAPI(
           color: fromColorLensStateToAPI(color),
         };
       }),
-      ...unassignedColorDef,
+      ...unassignedColorAPI,
     };
   }
 
@@ -327,7 +327,7 @@ export function fromColorMappingLensStateToAPI(
     }),
     sort: (colorMapping.colorMode as ColorMapping.GradientColorMode).sort,
     gradient: colorMode.steps.map((color) => fromColorLensStateToAPI(color)),
-    ...unassignedColorDef,
+    ...unassignedColorAPI,
   };
 }
 
