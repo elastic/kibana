@@ -456,6 +456,18 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'mac.ransomware.mode',
+    first_supported_version: '9.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.ransomware.mode',
+      {
+        defaultMessage:
+          "Enable ransomware protection for macOS. Accepted values are 'off', 'detect', and 'prevent'. Default: off.",
+      }
+    ),
+    license: 'platinum',
+  },
+  {
     key: 'mac.advanced.device_control.filter_images',
     first_supported_version: '9.2',
     documentation: i18n.translate(
