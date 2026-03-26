@@ -24,10 +24,9 @@ export const InitializationFlowId = z.enum(['create-list-indices', 'sourcerer-da
 export type InitializationFlowIdEnum = typeof InitializationFlowId.enum;
 export const InitializationFlowIdEnum = InitializationFlowId.enum;
 
-export type InitializationFlowReadyResult = z.infer<typeof InitializationFlowReadyResult>;
-export const InitializationFlowReadyResult = z.object({
+export type CreateListIndicesReadyResult = z.infer<typeof CreateListIndicesReadyResult>;
+export const CreateListIndicesReadyResult = z.object({
   status: z.literal('ready'),
-  payload: z.unknown(),
 });
 
 export type InitializationFlowErrorResult = z.infer<typeof InitializationFlowErrorResult>;
@@ -37,13 +36,26 @@ export const InitializationFlowErrorResult = z.object({
 });
 
 /**
- * Discriminated union representing the outcome of an initialization flow.
+ * Generic ready result used as a placeholder for flows whose payload schema has not yet been defined.
  */
-export type InitializationFlowResult = z.infer<typeof InitializationFlowResult>;
-export const InitializationFlowResult = z.union([
-  InitializationFlowReadyResult,
-  InitializationFlowErrorResult,
-]);
+export type InitializationFlowReadyResult = z.infer<typeof InitializationFlowReadyResult>;
+export const InitializationFlowReadyResult = z.object({
+  status: z.literal('ready'),
+  payload: z.unknown(),
+});
+
+/**
+ * Per-flow results. Only requested flows appear in the response, so all properties are optional. Each flow is either a typed ready result or an error result.
+ */
+export type InitializationFlowsResult = z.infer<typeof InitializationFlowsResult>;
+export const InitializationFlowsResult = z.object({
+  'create-list-indices': z
+    .union([CreateListIndicesReadyResult, InitializationFlowErrorResult])
+    .optional(),
+  'sourcerer-data-views': z
+    .union([InitializationFlowReadyResult, InitializationFlowErrorResult])
+    .optional(),
+});
 
 export type InitializeSecuritySolutionRequestBody = z.infer<
   typeof InitializeSecuritySolutionRequestBody
@@ -57,5 +69,5 @@ export type InitializeSecuritySolutionRequestBodyInput = z.input<
 
 export type InitializeSecuritySolutionResponse = z.infer<typeof InitializeSecuritySolutionResponse>;
 export const InitializeSecuritySolutionResponse = z.object({
-  flows: z.object({}).catchall(InitializationFlowResult),
+  flows: InitializationFlowsResult,
 });

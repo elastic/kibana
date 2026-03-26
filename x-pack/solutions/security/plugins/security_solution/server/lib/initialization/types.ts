@@ -8,7 +8,8 @@
 import type { Logger } from '@kbn/core/server';
 import type {
   InitializationFlowId,
-  InitializationFlowResult,
+  InitializationFlowReadyResult,
+  InitializationFlowErrorResult,
 } from '../../../common/api/initialization';
 import type { SecuritySolutionRequestHandlerContext } from '../../types';
 
@@ -22,5 +23,8 @@ export interface InitializationFlowDefinition<ProvisionContext> {
     requestHandlerContext: InitializationFlowContext,
     logger: Logger
   ) => Promise<ProvisionContext>;
-  provision: (context: ProvisionContext, logger: Logger) => Promise<InitializationFlowResult>;
+  provision: (
+    context: ProvisionContext,
+    logger: Logger
+  ) => Promise<InitializationFlowReadyResult | InitializationFlowErrorResult>;
 }

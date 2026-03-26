@@ -13,8 +13,8 @@ import type {
 import { INITIALIZE_SECURITY_SOLUTION_URL } from '../../../../common/api/initialization';
 
 /**
- * Calls the initialization endpoint. The raw response carries untyped payloads;
- * per-flow validation is performed by the provider via `parseFlowPayload`.
+ * Calls the initialization endpoint. The provider validates the response
+ * against the generated InitializationFlowsResult zod schema.
  */
 export const initializeSecuritySolution = ({
   http,

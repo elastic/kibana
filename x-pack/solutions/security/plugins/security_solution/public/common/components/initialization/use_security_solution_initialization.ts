@@ -8,12 +8,12 @@
 import { useContext, useEffect, useMemo } from 'react';
 import type { InitializationFlowId } from '../../../../common/api/initialization';
 import { InitializationContext } from './initialization_context';
-import type { InitializationFlowPayloadRegistry, InitializationFlowState } from './types';
+import type { FlowPayload, InitializationFlowState } from './types';
 
 const LOADING_STATE = { loading: true, result: null } as const;
 
 type RegistryState<Ids extends InitializationFlowId[]> = {
-  [K in Ids[number]]: InitializationFlowState<InitializationFlowPayloadRegistry[K]>;
+  [K in Ids[number]]: InitializationFlowState<FlowPayload<K>>;
 };
 
 /**
@@ -50,8 +50,8 @@ export const useSecuritySolutionInitialization = <Ids extends InitializationFlow
 
   return useMemo(() => {
     // The assertion to RegistryState<Ids> is safe: the provider validates each
-    // flow's payload with parseFlowPayload (zod) before storing it in
-    // settledState, so the unknown payload is guaranteed to match the registry.
+    // flow's result against the generated InitializationFlowsResult zod schema
+    // before storing it, so the unknown payload is guaranteed to match.
     const result = {} as RegistryState<Ids>;
     for (const id of flows) {
       const settled = settledState[id];

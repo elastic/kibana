@@ -34,9 +34,7 @@ paths:
                   - flows
                 properties:
                   flows:
-                    type: object
-                    additionalProperties:
-                      $ref: '#/components/schemas/InitializationFlowResult'
+                    $ref: '#/components/schemas/InitializationFlowsResult'
 
 components:
   x-codegen-enabled: true
@@ -49,15 +47,38 @@ components:
         # TODO: the implementation of this flow is in a follow up PR
         - sourcerer-data-views
 
-    InitializationFlowResult:
+    InitializationFlowsResult:
+      type: object
       description: >-
-        Discriminated union representing the outcome of an initialization flow.
-      oneOf:
-        - $ref: '#/components/schemas/InitializationFlowReadyResult'
-        - $ref: '#/components/schemas/InitializationFlowErrorResult'
+        Per-flow results. Only requested flows appear in the response, so all
+        properties are optional. Each flow is either a typed ready result or
+        an error result.
+      properties:
+        create-list-indices:
+          oneOf:
+            - $ref: '#/components/schemas/CreateListIndicesReadyResult'
+            - $ref: '#/components/schemas/InitializationFlowErrorResult'
+        sourcerer-data-views:
+          oneOf:
+            # TODO: replace with SourcererDataViewsReadyResult in a follow up PR
+            - $ref: '#/components/schemas/InitializationFlowReadyResult'
+            - $ref: '#/components/schemas/InitializationFlowErrorResult'
+
+    CreateListIndicesReadyResult:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - ready
 
     InitializationFlowReadyResult:
       type: object
+      description: >-
+        Generic ready result used as a placeholder for flows whose payload
+        schema has not yet been defined.
       required:
         - status
         - payload

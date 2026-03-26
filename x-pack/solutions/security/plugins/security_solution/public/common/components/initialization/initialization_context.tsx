@@ -10,7 +10,7 @@ import React, { createContext, useCallback, useMemo, useRef, useState } from 're
 import {
   INITIALIZATION_FLOW_STATUS_READY,
   INITIALIZATION_FLOW_STATUS_ERROR,
-  parseFlowPayload,
+  InitializationFlowsResult,
 } from '../../../../common/api/initialization';
 import type { InitializationFlowId } from '../../../../common/api/initialization';
 import { useHttp } from '../../lib/kibana';
@@ -69,28 +69,44 @@ export const InitializationProvider: FC<PropsWithChildren> = ({ children }) => {
           (id) => response.flows[id]?.status !== INITIALIZATION_FLOW_STATUS_READY
         );
 
+        const flowSchemas = InitializationFlowsResult.shape;
         const toSettle: Array<[InitializationFlowId, InitializationFlowResult<unknown>]> =
           Object.entries(response.flows).map(([key, flowResult]) => {
             const id = key as InitializationFlowId;
-            if (flowResult.status === INITIALIZATION_FLOW_STATUS_READY) {
-              try {
-                const payload = parseFlowPayload(id, flowResult.payload);
-                return [id, { status: INITIALIZATION_FLOW_STATUS_READY, payload }];
-              } catch (parseErr) {
-                return [
-                  id,
-                  {
-                    status: INITIALIZATION_FLOW_STATUS_ERROR,
-                    error: `Invalid returned payload for flow '${id}': ${parseErr.message}`,
-                  },
-                ];
+            const schema = flowSchemas[id];
+
+            if (!schema) {
+              if (flowResult.status === INITIALIZATION_FLOW_STATUS_READY) {
+                return [id, { status: INITIALIZATION_FLOW_STATUS_READY, payload: null }];
               }
+              return [id, { status: INITIALIZATION_FLOW_STATUS_ERROR, error: flowResult.error }];
+            }
+
+            const parsed = schema.safeParse(flowResult);
+            if (!parsed.success) {
+              return [
+                id,
+                {
+                  status: INITIALIZATION_FLOW_STATUS_ERROR,
+                  error: `Invalid response for flow '${id}': ${parsed.error.message}`,
+                },
+              ];
+            }
+
+            if (parsed.data?.status === INITIALIZATION_FLOW_STATUS_READY) {
+              return [
+                id,
+                {
+                  status: INITIALIZATION_FLOW_STATUS_READY,
+                  payload: (parsed.data as { payload?: unknown }).payload ?? null,
+                },
+              ];
             }
             return [
               id,
               {
                 status: INITIALIZATION_FLOW_STATUS_ERROR,
-                error: flowResult.error,
+                error: (parsed.data as { error?: string | null }).error ?? null,
               },
             ];
           });

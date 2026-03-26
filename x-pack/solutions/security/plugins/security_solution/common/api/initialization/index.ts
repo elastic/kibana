@@ -9,10 +9,13 @@ export {
   InitializationFlowId,
   InitializeSecuritySolutionRequestBody,
   InitializeSecuritySolutionResponse,
-  InitializationFlowResult,
+  InitializationFlowsResult,
   InitializationFlowReadyResult,
   InitializationFlowErrorResult,
+  CreateListIndicesReadyResult,
 } from './initialization.gen';
+
+export type { InitializationFlowsResult as InitializationFlowsResultType } from './initialization.gen';
 
 export {
   INITIALIZE_SECURITY_SOLUTION_URL,
@@ -22,10 +25,3 @@ export {
   INITIALIZATION_FLOW_STATUS_READY,
   INITIALIZATION_FLOW_STATUS_ERROR,
 } from './constants';
-
-export type {
-  CreateListIndicesPayload,
-  InitializationFlowPayloadRegistry,
-} from './payload_schemas';
-
-export { parseFlowPayload } from './payload_schemas';

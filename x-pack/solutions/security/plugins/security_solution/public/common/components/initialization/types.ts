@@ -7,12 +7,35 @@
 
 import type {
   InitializationFlowId,
-  InitializationFlowPayloadRegistry,
+  InitializationFlowsResultType,
   INITIALIZATION_FLOW_STATUS_READY,
   INITIALIZATION_FLOW_STATUS_ERROR,
 } from '../../../../common/api/initialization';
 
-export type { InitializationFlowPayloadRegistry } from '../../../../common/api/initialization';
+// ---------------------------------------------------------------------------
+// Utility types derived from the generated OpenAPI schema
+// ---------------------------------------------------------------------------
+
+/**
+ * Extracts the payload type from a flow's ready result union.
+ * - If the ready variant has a `payload` property, infer its type.
+ * - If the ready variant has no `payload` (e.g. CreateListIndicesReadyResult),
+ *   the payload is `null`.
+ */
+type ExtractReadyPayload<T> = T extends { status: 'ready'; payload: infer P }
+  ? P
+  : T extends { status: 'ready' }
+  ? null
+  : never;
+
+/** The typed payload for a given flow ID, derived from the generated schema. */
+export type FlowPayload<K extends InitializationFlowId> = ExtractReadyPayload<
+  NonNullable<InitializationFlowsResultType[K]>
+>;
+
+// ---------------------------------------------------------------------------
+// State types
+// ---------------------------------------------------------------------------
 
 export type InitializationFlowResult<T> =
   | { status: typeof INITIALIZATION_FLOW_STATUS_READY; payload: T }
@@ -37,8 +60,3 @@ export interface InitializationFlowState<T> {
 export type SettledInitializationState = Partial<
   Record<InitializationFlowId, InitializationFlowResult<unknown>>
 >;
-
-/** Per-flow state returned to consumers by useSecuritySolutionInitialization. */
-export type InitializationState = {
-  [K in InitializationFlowId]?: InitializationFlowState<InitializationFlowPayloadRegistry[K]>;
-};

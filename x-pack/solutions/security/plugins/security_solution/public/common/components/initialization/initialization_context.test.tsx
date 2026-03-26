@@ -15,21 +15,20 @@ import { initializeSecuritySolution } from './api';
 import { useHttp } from '../../lib/kibana';
 import type { InitializationFlowId } from '../../../../common/api/initialization';
 import {
+  INITIALIZATION_FLOW_CREATE_LIST_INDICES,
+  INITIALIZATION_FLOW_SOURCERER_DATA_VIEWS,
   INITIALIZATION_FLOW_STATUS_READY,
   INITIALIZATION_FLOW_STATUS_ERROR,
 } from '../../../../common/api/initialization';
 
 jest.mock('./api');
 jest.mock('../../lib/kibana');
-jest.mock('../../../../common/api/initialization/payload_schemas', () => ({
-  parseFlowPayload: jest.fn((_id: unknown, payload: unknown) => payload),
-}));
 
 const mockHttp = {};
 const mockInitializeSecuritySolution = initializeSecuritySolution as jest.Mock;
 
-const flowA = 'flow-a' as InitializationFlowId;
-const flowB = 'flow-b' as InitializationFlowId;
+const flowA = INITIALIZATION_FLOW_CREATE_LIST_INDICES;
+const flowB = INITIALIZATION_FLOW_SOURCERER_DATA_VIEWS;
 
 const wrapper: FC<PropsWithChildren> = ({ children }) => (
   <InitializationProvider>{children}</InitializationProvider>
@@ -59,26 +58,26 @@ describe('InitializationProvider - happy path', () => {
   it('sets loading=false, result={status:ready, payload} when a single flow succeeds', async () => {
     mockInitializeSecuritySolution.mockResolvedValueOnce({
       flows: {
-        [flowA]: { status: INITIALIZATION_FLOW_STATUS_READY, payload: { index: 'my-index' } },
+        [flowB]: { status: INITIALIZATION_FLOW_STATUS_READY, payload: { index: 'my-index' } },
       },
     });
 
-    const { result } = renderInit([flowA]);
+    const { result } = renderInit([flowB]);
 
     await waitFor(() => {
-      expect(result.current.state[flowA]?.loading).toBe(false);
+      expect(result.current.state[flowB]?.loading).toBe(false);
     });
 
-    expect(result.current.state[flowA]).toEqual({
+    expect(result.current.state[flowB]).toEqual({
       loading: false,
       result: { status: INITIALIZATION_FLOW_STATUS_READY, payload: { index: 'my-index' } },
     });
     expect(mockInitializeSecuritySolution).toHaveBeenCalledTimes(1);
   });
 
-  it('sets result={status:ready, payload:null} when a flow returns a null payload', async () => {
+  it('sets result={status:ready, payload:null} when a flow has no payload', async () => {
     mockInitializeSecuritySolution.mockResolvedValueOnce({
-      flows: { [flowA]: { status: INITIALIZATION_FLOW_STATUS_READY, payload: null } },
+      flows: { [flowA]: { status: INITIALIZATION_FLOW_STATUS_READY } },
     });
 
     const { result } = renderInit([flowA]);
@@ -97,7 +96,7 @@ describe('InitializationProvider - happy path', () => {
   it('resolves all flows in a batch in a single request', async () => {
     mockInitializeSecuritySolution.mockResolvedValueOnce({
       flows: {
-        [flowA]: { status: INITIALIZATION_FLOW_STATUS_READY, payload: { index: 'lists' } },
+        [flowA]: { status: INITIALIZATION_FLOW_STATUS_READY },
         [flowB]: { status: INITIALIZATION_FLOW_STATUS_READY, payload: { count: 42 } },
       },
     });
@@ -111,7 +110,7 @@ describe('InitializationProvider - happy path', () => {
 
     expect(result.current.state[flowA]).toEqual({
       loading: false,
-      result: { status: INITIALIZATION_FLOW_STATUS_READY, payload: { index: 'lists' } },
+      result: { status: INITIALIZATION_FLOW_STATUS_READY, payload: null },
     });
     expect(result.current.state[flowB]).toEqual({
       loading: false,
@@ -287,7 +286,7 @@ describe('InitializationProvider - error flow', () => {
         // Call 3: final retry – flowA recovers; budget exhausted, no further retries.
         .mockResolvedValueOnce({
           flows: {
-            [flowA]: { status: INITIALIZATION_FLOW_STATUS_READY, payload: null },
+            [flowA]: { status: INITIALIZATION_FLOW_STATUS_READY },
             [flowB]: { status: INITIALIZATION_FLOW_STATUS_ERROR, error: 'permanent failure' },
           },
         });
@@ -339,7 +338,7 @@ describe('InitializationProvider - error flow', () => {
 
     it('does not re-request a flow that already completed successfully', async () => {
       mockInitializeSecuritySolution.mockResolvedValueOnce({
-        flows: { [flowA]: { status: INITIALIZATION_FLOW_STATUS_READY, payload: null } },
+        flows: { [flowA]: { status: INITIALIZATION_FLOW_STATUS_READY } },
       });
 
       const { result } = renderInit([flowA]);
@@ -369,6 +368,76 @@ describe('InitializationProvider - error flow', () => {
       result.current.ctx.requestInitialization([flowA]);
 
       expect(mockInitializeSecuritySolution).not.toHaveBeenCalled();
+    });
+  });
+});
+
+describe('InitializationProvider - per-flow schema validation', () => {
+  it('settles a flow as error when its schema validation fails', async () => {
+    // flowA (create-list-indices) schema expects { status: 'ready' } or { status: 'error' }.
+    // Sending an invalid status triggers a validation failure on every attempt.
+    mockInitializeSecuritySolution.mockResolvedValue({
+      flows: {
+        [flowA]: { status: 'invalid-status', payload: { bad: true } },
+      },
+    });
+
+    const { result } = renderInit([flowA]);
+
+    await waitFor(() => {
+      expect(result.current.state[flowA]?.loading).toBe(false);
+    });
+
+    expect(result.current.state[flowA]?.result).toMatchObject({
+      status: INITIALIZATION_FLOW_STATUS_ERROR,
+      error: expect.stringContaining(`Invalid response for flow '${flowA}'`),
+    });
+  });
+
+  it('only errors the flow with the invalid result, not the entire batch', async () => {
+    mockInitializeSecuritySolution.mockResolvedValueOnce({
+      flows: {
+        // flowA: invalid status triggers validation failure
+        [flowA]: { status: 'invalid-status' },
+        // flowB: valid result
+        [flowB]: { status: INITIALIZATION_FLOW_STATUS_READY, payload: { good: true } },
+      },
+    });
+
+    const { result } = renderInit([flowA, flowB]);
+
+    await waitFor(() => {
+      expect(result.current.state[flowA]?.loading).toBe(false);
+      expect(result.current.state[flowB]?.loading).toBe(false);
+    });
+
+    expect(result.current.state[flowA]?.result).toMatchObject({
+      status: INITIALIZATION_FLOW_STATUS_ERROR,
+    });
+    expect(result.current.state[flowB]?.result).toMatchObject({
+      status: INITIALIZATION_FLOW_STATUS_READY,
+      payload: { good: true },
+    });
+  });
+
+  it('handles a validated error result correctly', async () => {
+    // Schema validates successfully, but the result has status: 'error'.
+    // The flow will be retried, so mock all 3 calls to return the same error.
+    mockInitializeSecuritySolution.mockResolvedValue({
+      flows: {
+        [flowA]: { status: INITIALIZATION_FLOW_STATUS_ERROR, error: 'flow-level error' },
+      },
+    });
+
+    const { result } = renderInit([flowA]);
+
+    await waitFor(() => {
+      expect(result.current.state[flowA]?.loading).toBe(false);
+    });
+
+    expect(result.current.state[flowA]?.result).toEqual({
+      status: INITIALIZATION_FLOW_STATUS_ERROR,
+      error: 'flow-level error',
     });
   });
 });

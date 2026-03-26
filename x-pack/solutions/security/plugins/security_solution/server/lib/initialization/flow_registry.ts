@@ -8,15 +8,16 @@
 import type { Logger } from '@kbn/core/server';
 import type {
   InitializationFlowId,
-  InitializationFlowResult,
   InitializeSecuritySolutionResponse,
+  InitializationFlowReadyResult,
+  InitializationFlowErrorResult,
 } from '../../../common/api/initialization';
 import {
   INITIALIZATION_FLOW_CREATE_LIST_INDICES,
   INITIALIZATION_FLOW_STATUS_ERROR,
-  INITIALIZATION_FLOW_STATUS_READY,
-  parseFlowPayload,
 } from '../../../common/api/initialization';
+
+type FlowResult = InitializationFlowReadyResult | InitializationFlowErrorResult;
 import type { InitializationFlowContext, InitializationFlowDefinition } from './types';
 import { createListIndicesInitializationFlow } from './flows/create_list_indices';
 
@@ -40,7 +41,7 @@ export const runInitializationFlows = async (
   const promises = requestedFlows.map(
     async (
       flowId: InitializationFlowId
-    ): Promise<{ id: InitializationFlowId; result: InitializationFlowResult }> => {
+    ): Promise<{ id: InitializationFlowId; result: FlowResult }> => {
       const definition = flows[flowId];
 
       if (!definition) {
@@ -56,11 +57,6 @@ export const runInitializationFlows = async (
       try {
         const provisionContext = await definition.resolveProvisionContext(context, logger);
         const result = await definition.provision(provisionContext, logger);
-
-        // Validate the payload against the registered zod schema for this flow.
-        if (result.status === INITIALIZATION_FLOW_STATUS_READY) {
-          result.payload = parseFlowPayload(flowId, result.payload);
-        }
 
         return {
           id: flowId,
@@ -87,7 +83,7 @@ export const runInitializationFlows = async (
   const flowResults = results.reduce((acc, { id, result }) => {
     acc[id] = result;
     return acc;
-  }, {} as Record<InitializationFlowId, InitializationFlowResult>);
+  }, {} as Record<InitializationFlowId, FlowResult>);
 
   return { flows: flowResults };
 };
