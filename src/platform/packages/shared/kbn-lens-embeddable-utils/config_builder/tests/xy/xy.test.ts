@@ -441,7 +441,7 @@ describe('XY', () => {
                     field: 'price',
                     label: 'Median Price',
                     color: { type: 'static', color: 'red' },
-                    text: 'label',
+                    text: { visible: true },
                     axis: 'left',
                   },
                   {
@@ -449,7 +449,7 @@ describe('XY', () => {
                     field: 'price',
                     label: 'Average Price',
                     color: { type: 'static', color: 'blue' },
-                    text: 'none',
+                    text: { visible: false },
                     axis: 'left',
                   },
                 ],
@@ -466,7 +466,7 @@ describe('XY', () => {
                     type: 'point',
                     label: 'New Year',
                     timestamp: '2023-01-01T00:00:00Z',
-                    text: 'label',
+                    text: { visible: true },
                     color: {
                       type: 'static',
                       color: '#ff0000',
@@ -476,7 +476,7 @@ describe('XY', () => {
                     type: 'point',
                     label: 'Christmas',
                     timestamp: '2023-12-25T00:00:00Z',
-                    text: 'label',
+                    text: { visible: true },
                     color: {
                       type: 'static',
                       color: '#ff0000',
@@ -500,7 +500,10 @@ describe('XY', () => {
                     label: 'Bingo!',
                     query: { language: 'kuery', query: 'order_amount > 1000' },
                     time_field: 'order_date',
-                    text: { type: 'field', field: 'order_id' },
+                    text: {
+                      visible: true,
+                      field: 'order_id',
+                    },
                     color: {
                       type: 'static',
                       color: '#0000ff',
@@ -633,8 +636,8 @@ describe('XY', () => {
             title: 'XY Chart with Y-Axis Only',
             axis: {
               left: {
-                ticks: true,
-                grid: true,
+                ticks: { visible: true },
+                grid: { visible: true },
               },
             },
             layers: [

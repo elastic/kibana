@@ -48,6 +48,7 @@ export interface KIFeatureExtractionScenario {
     min_features?: number;
     max_features?: number;
     required_types?: ValidKIFeatureType[];
+    expect_entity_filters?: boolean;
     expected_ground_truth: string;
   };
   metadata: Record<string, unknown> & ScenarioMetadata;
