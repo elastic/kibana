@@ -2,17 +2,10 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node"
-    ]
+    "types": ["jest", "node"]
   },
-  "include": [
-    "**/*.ts",
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/tooling-log",
     "@kbn/dev-cli-runner",
@@ -23,6 +16,7 @@
     "@kbn/es",
     "@kbn/dev-proc-runner",
     "@kbn/kbn-client",
+    "@kbn/test-es-server",
     "@kbn/test",
     "@kbn/es-archiver",
     "@kbn/dev-utils",
