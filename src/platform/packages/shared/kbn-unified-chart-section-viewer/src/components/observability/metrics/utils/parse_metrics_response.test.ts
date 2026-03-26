@@ -204,4 +204,85 @@ describe('parseMetricsResponse', () => {
     expect(dimensionNames).toContain('pod.name');
     expect(dimensionNames).toContain('container.id');
   });
+
+  describe('with getFieldType', () => {
+    const getFieldType = (name: string): string | undefined => {
+      const types: Record<string, string> = {
+        'host.name': 'keyword',
+        'pod.name': 'keyword',
+        'container.id': 'keyword',
+      };
+      return types[name];
+    };
+
+    it('enriches dimensionFields and allDimensions with type from getFieldType', () => {
+      const response: MetricsESQLResponse[] = [
+        {
+          metric_name: 'cpu.usage',
+          data_stream: 'my-index',
+          unit: ['percent'],
+          metric_type: 'gauge',
+          field_type: ES_FIELD_TYPES.DOUBLE,
+          dimension_fields: ['host.name', 'pod.name'],
+        },
+      ];
+      const result = parseMetricsResponse(response, getFieldType);
+      expect(result.metricItems[0].dimensionFields).toEqual([
+        { name: 'host.name', type: 'keyword' },
+        { name: 'pod.name', type: 'keyword' },
+      ]);
+      expect(result.allDimensions).toEqual([
+        { name: 'host.name', type: 'keyword' },
+        { name: 'pod.name', type: 'keyword' },
+      ]);
+    });
+
+    it('omits type when getFieldType returns undefined for a dimension', () => {
+      const response: MetricsESQLResponse[] = [
+        {
+          metric_name: 'cpu.usage',
+          data_stream: 'my-index',
+          unit: ['percent'],
+          metric_type: 'gauge',
+          field_type: ES_FIELD_TYPES.DOUBLE,
+          dimension_fields: ['host.name', 'unknown.field'],
+        },
+      ];
+      const result = parseMetricsResponse(response, getFieldType);
+      expect(result.metricItems[0].dimensionFields).toEqual([
+        { name: 'host.name', type: 'keyword' },
+        { name: 'unknown.field' },
+      ]);
+      expect(result.allDimensions).toEqual([
+        { name: 'host.name', type: 'keyword' },
+        { name: 'unknown.field' },
+      ]);
+    });
+
+    it('enriches allDimensions across multiple metrics', () => {
+      const response: MetricsESQLResponse[] = [
+        {
+          metric_name: 'metric.a',
+          data_stream: 'ds-1',
+          unit: ['percent'],
+          metric_type: 'gauge',
+          field_type: ES_FIELD_TYPES.DOUBLE,
+          dimension_fields: ['host.name'],
+        },
+        {
+          metric_name: 'metric.b',
+          data_stream: 'ds-2',
+          unit: ['bytes'],
+          metric_type: 'counter',
+          field_type: ES_FIELD_TYPES.LONG,
+          dimension_fields: ['container.id'],
+        },
+      ];
+      const result = parseMetricsResponse(response, getFieldType);
+      expect(result.allDimensions).toEqual([
+        { name: 'host.name', type: 'keyword' },
+        { name: 'container.id', type: 'keyword' },
+      ]);
+    });
+  });
 });

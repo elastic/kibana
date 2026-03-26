@@ -112,6 +112,7 @@ export const toPluginDefinition = (persisted: PersistedPluginDefinition): Plugin
   name: persisted.name,
   version: persisted.version,
   description: persisted.description,
+  readonly: false,
   manifest: persisted.manifest,
   source_url: persisted.source_url,
   skill_ids: persisted.skill_ids,

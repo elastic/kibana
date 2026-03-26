@@ -1174,10 +1174,10 @@
           },
           {
             "parentPluginId": "expressionXY",
-            "id": "def-common.LegendConfig.listLayoutMaxWidth",
+            "id": "def-common.LegendConfig.maxPixels",
             "type": "number",
             "tags": [],
-            "label": "listLayoutMaxWidth",
+            "label": "maxPixels",
             "description": [
               "\nMaximum label width in pixels for \"list\" layout truncation"
             ],
