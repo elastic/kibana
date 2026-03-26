@@ -64,7 +64,6 @@ export type {
   ChromeNextHeaderBack,
   ChromeNextHeaderConfig,
   ChromeNextHeaderMetadataItem,
-  ChromeNextHeaderGlobalActionConfig,
   ChromeNextHeaderGlobalActions,
   ChromeNextHeaderTab,
   ChromeNextHeaderCallout,

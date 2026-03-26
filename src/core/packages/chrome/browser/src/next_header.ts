@@ -83,29 +83,33 @@ export interface ChromeNextHeaderMetadataItem {
 }
 
 /**
- * Handler-driven global header action (fixed icon/order in Chrome; apps supply behavior).
- */
-export interface ChromeNextHeaderGlobalActionConfig {
-  onClick: () => void;
-  /** When true, the control is non-interactive. */
-  disabled?: boolean;
-  /** Optional tooltip (e.g. explain why the control is disabled or access hints). */
-  tooltipContent?: string;
-  /** Overrides the default accessible name for the control. */
-  ariaLabel?: string;
-}
-
-/**
  * Global actions beside the Chrome-Next title.
  */
 export interface ChromeNextHeaderGlobalActions {
   /**
    * Edit title action. Chrome renders a pencil icon next to the title.
-   * TODO: Intended to open or focus an inline title editor; interim behavior is app-defined.
+   * TODO: Intended for inline title editing; shape may evolve beyond a simple click handler.
+   * Interim behavior is app-defined (e.g. open settings).
    */
-  editTitle?: ChromeNextHeaderGlobalActionConfig;
+  editTitle?: {
+    onClick: () => void;
+    /** When true, the control is non-interactive. */
+    disabled?: boolean;
+    /** Optional tooltip (e.g. explain why the control is disabled). */
+    tooltipContent?: string;
+    /** Overrides the default "Edit title" accessible name. */
+    ariaLabel?: string;
+  };
   /** Share action. Chrome renders a share icon. */
-  share?: ChromeNextHeaderGlobalActionConfig;
+  share?: {
+    onClick: () => void;
+    /** When true, the control is non-interactive. */
+    disabled?: boolean;
+    /** Optional tooltip (e.g. access mode hints). */
+    tooltipContent?: string;
+    /** Overrides the default "Share" accessible name. */
+    ariaLabel?: string;
+  };
   /**
    * Favorite control supplied by the app (e.g. `FavoriteButton` with providers).
    * Chrome reserves layout only; fixed order after share. A handler-only API is insufficient
