@@ -96,20 +96,20 @@ export function RuleDetailsPageProvider({ getService }: FtrProviderContext) {
     },
     async isViewInAppDisabled() {
       await retry.try(async () => {
-        const viewInAppButton = await testSubjects.find(`ruleDetails-viewInApp`);
+        const viewInAppButton = await testSubjects.find(`ruleDetails-viewInDiscover`);
         expect(await viewInAppButton.getAttribute('disabled')).to.eql('true');
       });
       return true;
     },
     async isViewInAppEnabled() {
       await retry.try(async () => {
-        const viewInAppButton = await testSubjects.find(`ruleDetails-viewInApp`);
+        const viewInAppButton = await testSubjects.find(`ruleDetails-viewInDiscover`);
         expect(await viewInAppButton.getAttribute('disabled')).to.not.eql('true');
       });
       return true;
     },
     async clickViewInApp() {
-      return await testSubjects.click('ruleDetails-viewInApp');
+      return await testSubjects.click('ruleDetails-viewInDiscover');
     },
     async getNoOpAppTitle() {
       await retry.try(async () => {
