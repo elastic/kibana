@@ -8,16 +8,17 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { ActionsClient, Connector } from '@kbn/actions-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
+import type { InferenceConnector } from '@kbn/inference-common';
+import { InferenceConnectorType } from '@kbn/inference-common';
 
 import { getLlmType } from '../../../routes/utils';
 import { runDefendInsightsEvaluations } from './run_evaluations';
 import { evaluateDefendInsights } from '.';
-import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('./run_evaluations');
 jest.mock('@kbn/langchain/server', () => ({
@@ -57,35 +58,31 @@ describe('evaluateDefendInsights', () => {
       {
         getDefaultDefendInsightsGraph: mockGetDefaultDefendInsightsGraph,
         graphType: 'defend-insights' as const,
-        insightType: DefendInsightType.Enum.incompatible_antivirus,
+        insightType: DefendInsightType.enum.incompatible_antivirus,
       },
     ];
 
-    const mockConnectors = [
-      createMockConnector({
-        id: '1',
+    const mockConnectors: InferenceConnector[] = [
+      {
+        connectorId: '1',
+        type: InferenceConnectorType.OpenAI,
         name: 'Test Connector',
-        actionTypeId: '.test',
-        prompts: {
-          default: 'default',
-          refine: 'refine',
-          continue: 'continue',
-          group: 'group',
-          events: 'events',
-          eventsId: 'eventsId',
-          eventsEndpointId: 'eventsEndpointId',
-          eventsValue: 'eventsValue',
-        },
-      } as unknown as Connector),
+        config: {},
+        capabilities: {},
+        isInferenceEndpoint: false,
+        isPreconfigured: false,
+      },
     ];
 
     const mockActionsClient = {} as unknown as PublicMethodsOf<ActionsClient>;
     const mockEsClient = {} as unknown as ElasticsearchClient;
     const mockSoClient = savedObjectsClientMock.create();
     const mockEsClientInternalUser = {} as unknown as ElasticsearchClient;
+    const mockGetInferenceConnectorById = jest.fn();
 
     await evaluateDefendInsights({
       actionsClient: mockActionsClient,
+      getInferenceConnectorById: mockGetInferenceConnectorById,
       defendInsightsGraphs: mockGraphMetadata,
       anonymizationFields: [],
       connectors: mockConnectors,
@@ -103,7 +100,7 @@ describe('evaluateDefendInsights', () => {
       size: 10,
     });
 
-    expect(getLlmType).toHaveBeenCalledWith('.test');
+    expect(getLlmType).toHaveBeenCalledWith(InferenceConnectorType.OpenAI);
     expect(getLangSmithTracer).toHaveBeenCalledWith({
       apiKey: 'api-key',
       projectName: 'project-name',
@@ -120,10 +117,11 @@ describe('evaluateDefendInsights', () => {
         projectName: 'project-name',
         tracers: ['mockTracer'],
       },
+      model: undefined,
     });
 
     expect(mockGetDefaultDefendInsightsGraph).toHaveBeenCalledWith({
-      insightType: DefendInsightType.Enum.incompatible_antivirus,
+      insightType: DefendInsightType.enum.incompatible_antivirus,
       endpointIds: [],
       esClient: mockEsClient,
       llm: expect.any(Object),

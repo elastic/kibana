@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Streams } from '@kbn/streams-schema';
+import { emptyAssets, type Streams } from '@kbn/streams-schema';
 import type { SchemaField } from '../../schema_editor/types';
 
 // Mock stream definitions for reuse in tests
@@ -13,6 +13,7 @@ export const createMockClassicStreamDefinition = (
   overrides: Partial<Streams.ClassicStream.GetResponse> = {}
 ): Streams.ClassicStream.GetResponse => ({
   stream: {
+    type: 'classic',
     name: 'logs.classic-test',
     description: '',
     updated_at: '2024-01-01T00:00:00.000Z',
@@ -55,6 +56,7 @@ export const createMockWiredStreamDefinition = (
   overrides: Partial<Streams.WiredStream.GetResponse> = {}
 ): Streams.WiredStream.GetResponse => ({
   stream: {
+    type: 'wired',
     name: 'logs.wired-test',
     description: '',
     updated_at: '2024-01-01T00:00:00.000Z',
@@ -84,6 +86,7 @@ export const createMockWiredStreamDefinition = (
     view_index_metadata: true,
     create_snapshot_repository: true,
   },
+  data_stream_exists: true,
   inherited_fields: {
     'attributes.inherited_field': {
       type: 'keyword',
@@ -102,6 +105,21 @@ export const createMockWiredStreamDefinition = (
   dashboards: [],
   rules: [],
   queries: [],
+  ...overrides,
+});
+
+export const createMockQueryStreamDefinition = (
+  overrides: Partial<Streams.QueryStream.GetResponse> = {}
+): Streams.QueryStream.GetResponse => ({
+  stream: {
+    type: 'query',
+    name: 'logs.ecs.query',
+    description: '',
+    updated_at: '2024-01-01T00:00:00.000Z',
+    query: { view: '$.logs.ecs.query', esql: 'FROM $.logs.ecs | LIMIT 100' },
+  },
+  inherited_fields: {},
+  ...emptyAssets,
   ...overrides,
 });
 

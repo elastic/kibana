@@ -7,7 +7,7 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   promptDictionary,
   promptGroupId,
@@ -64,9 +64,8 @@ export const entityDetailsHighlightsRoute = (
             const fromDate = request.body.from;
             const toDate = request.body.to;
 
-            const [coreStart] = await getStartServices();
+            const [coreStart, { inference }] = await getStartServices();
             const securitySolution = await context.securitySolution;
-            const actions = await context.actions;
             const esClient = coreStart.elasticsearch.client.asInternalUser;
             const spaceId = securitySolution.getSpaceId();
 
@@ -120,7 +119,7 @@ export const entityDetailsHighlightsRoute = (
             );
 
             const prompt = await getPrompt({
-              actionsClient: actions.getActionsClient(),
+              getInferenceConnectorById: (id) => inference.getConnectorById(id, request),
               connectorId,
               promptId: promptDictionary.entityDetailsHighlights,
               promptGroupId: promptGroupId.aiForEntityAnalytics,

@@ -12,7 +12,7 @@ import type { Logger } from '@kbn/core/server';
 
 import { appContextService } from '../..';
 
-import { compileTemplate } from './agent';
+import { compileTemplate, mergeCompiledTemplates } from './agent';
 
 jest.mock('../../app_context');
 
@@ -659,6 +659,98 @@ describe('semverSatisfies', () => {
     );
     expect(output).toEqual({
       field: 'value',
+    });
+  });
+});
+
+describe('mergeCompiledTemplates', () => {
+  it('returns the override when base is empty', () => {
+    expect(mergeCompiledTemplates({}, { key: 'value' })).toEqual({ key: 'value' });
+  });
+
+  it('returns the base when override is empty', () => {
+    expect(mergeCompiledTemplates({ key: 'value' }, {})).toEqual({ key: 'value' });
+  });
+
+  it('scalar in override replaces scalar in base', () => {
+    expect(mergeCompiledTemplates({ key: 'base' }, { key: 'override' })).toEqual({
+      key: 'override',
+    });
+  });
+
+  it('key only in base is preserved', () => {
+    expect(mergeCompiledTemplates({ a: 1, b: 2 }, { b: 99 })).toEqual({ a: 1, b: 99 });
+  });
+
+  it('key only in override is added', () => {
+    expect(mergeCompiledTemplates({ a: 1 }, { b: 2 })).toEqual({ a: 1, b: 2 });
+  });
+
+  it('arrays are concatenated (base elements first, override appended)', () => {
+    expect(mergeCompiledTemplates({ items: [1, 2] }, { items: [3, 4] })).toEqual({
+      items: [1, 2, 3, 4],
+    });
+  });
+
+  it('nested objects are deep-merged', () => {
+    expect(mergeCompiledTemplates({ config: { a: 1, b: 2 } }, { config: { b: 99, c: 3 } })).toEqual(
+      { config: { a: 1, b: 99, c: 3 } }
+    );
+  });
+
+  it('deeply nested objects are recursively merged', () => {
+    expect(
+      mergeCompiledTemplates(
+        { level1: { level2: { x: 1, y: 2 } } },
+        { level1: { level2: { y: 99, z: 3 } } }
+      )
+    ).toEqual({ level1: { level2: { x: 1, y: 99, z: 3 } } });
+  });
+
+  it('override scalar replaces base object (type mismatch)', () => {
+    expect(mergeCompiledTemplates({ key: { nested: true } }, { key: 'scalar' })).toEqual({
+      key: 'scalar',
+    });
+  });
+
+  it('override object replaces base scalar (type mismatch)', () => {
+    expect(mergeCompiledTemplates({ key: 'scalar' }, { key: { nested: true } })).toEqual({
+      key: { nested: true },
+    });
+  });
+
+  it('override array replaces base scalar (type mismatch)', () => {
+    expect(mergeCompiledTemplates({ key: 'scalar' }, { key: [1, 2] })).toEqual({
+      key: [1, 2],
+    });
+  });
+
+  it('handles mixed keys (scalars, objects, arrays) in the same object', () => {
+    expect(
+      mergeCompiledTemplates(
+        { scalar: 'base', obj: { a: 1 }, list: ['x'] },
+        { scalar: 'override', obj: { b: 2 }, list: ['y'] }
+      )
+    ).toEqual({ scalar: 'override', obj: { a: 1, b: 2 }, list: ['x', 'y'] });
+  });
+
+  it('does not mutate the base or override objects', () => {
+    const base = { arr: [1, 2], obj: { a: 1 } };
+    const override = { arr: [3], obj: { b: 2 } };
+    mergeCompiledTemplates(base, override);
+    expect(base).toEqual({ arr: [1, 2], obj: { a: 1 } });
+    expect(override).toEqual({ arr: [3], obj: { b: 2 } });
+  });
+
+  it('null in base is replaced by override object', () => {
+    expect(mergeCompiledTemplates({ key: null }, { key: { nested: true } })).toEqual({
+      key: { nested: true },
+    });
+  });
+
+  it('override null replaces base value', () => {
+    expect(mergeCompiledTemplates({ key: { nested: true } }, { key: null })).toEqual({
+      key: null,
     });
   });
 });

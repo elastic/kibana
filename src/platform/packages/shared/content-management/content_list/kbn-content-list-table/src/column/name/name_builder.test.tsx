@@ -20,7 +20,14 @@ const defaultContext: ColumnBuilderContext = {
   itemConfig: undefined,
   isReadOnly: false,
   entityName: 'dashboard',
-  supports: { sorting: true, pagination: true, search: false, selection: true },
+  supports: {
+    sorting: true,
+    pagination: true,
+    search: false,
+    selection: true,
+    tags: false,
+    starred: false,
+  },
 };
 
 describe('name column builder', () => {
@@ -70,6 +77,8 @@ describe('name column builder', () => {
           pagination: true,
           search: false,
           selection: true,
+          tags: false,
+          starred: false,
         },
       };
 

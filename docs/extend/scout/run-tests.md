@@ -79,6 +79,31 @@ node scripts/scout.js run-tests \
 All `--testFiles` paths must fall under the same Scout root (for example, `scout/ui/tests` vs `scout/ui/parallel_tests`) so Scout can discover the right config.
 :::::::
 
+### Custom server configuration [scout-run-tests-server-config-set]
+
+By default, Scout starts Kibana and Elasticsearch using the built-in `default` configuration set. This works for most tests and requires no extra flags. Because all suites that use the default config share the same servers, they can be grouped together in CI, saving both time and resources.
+
+If your tests need specific server-level settings that must be present at boot time (for example, feature flags that cannot be toggled at runtime), you can point Scout at a **custom configuration set** with `--serverConfigSet`. Each custom config set requires its own dedicated server instance, so prefer [runtime feature flags](./feature-flags.md#scout-feature-flags-runtime) whenever possible.
+
+```bash
+node scripts/scout.js start-server \
+  --arch stateful \
+  --domain classic \
+  --serverConfigSet evals_entity_analytics
+```
+
+Or with `run-tests`:
+
+```bash
+node scripts/scout.js run-tests \
+  --arch stateful \
+  --domain classic \
+  --serverConfigSet evals_entity_analytics \
+  --config <plugin-path>/test/scout/ui/playwright.config.ts
+```
+
+See [Feature flags](./feature-flags.md#scout-feature-flags-custom-servers) for more details on when and how to use custom server configurations.
+
 ## Run tests on Elastic Cloud [scout-run-tests-cloud]
 
 Follow these steps to run your Scout tests on a real ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on Elastic Cloud Hosted') **Elastic Cloud project or deployment**.
@@ -207,11 +232,12 @@ To retrieve its password, call the `_reset-internal-credentials` Elastic Cloud A
 ```bash
 curl -XPOST \
   -H "Authorization: ApiKey $API_KEY" \
-  "${CLOUD_ENV_URL}/api/v1/serverless/projects/elasticsearch/${PROJECT_ID}/_reset-internal-credentials"
+  "${CLOUD_ENV_URL}/api/v1/serverless/projects/${PROJECT_TYPE}/${PROJECT_ID}/_reset-internal-credentials"
 ```
 
 - `API_KEY`: create in the Elastic Cloud UI (Organization → API keys)
 - `CLOUD_ENV_URL`: base URL of your Cloud environment (for example `https://console.qa.cld.elstc.co`)
+- `PROJECT_TYPE`: serverless project type (`elasticsearch`, `security`, or `observability`)
 - `PROJECT_ID`: serverless project ID from the Cloud UI
 
 :::::::

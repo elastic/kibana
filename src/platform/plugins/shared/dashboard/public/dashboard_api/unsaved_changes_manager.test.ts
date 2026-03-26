@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, skip, Subject } from 'rxjs';
+import { BehaviorSubject, skip } from 'rxjs';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
@@ -22,9 +22,7 @@ import type { initializeProjectRoutingManager } from './project_routing_manager'
 import type { DashboardPanel } from '../../server';
 import { getSampleDashboardState } from '../mocks';
 
-jest.mock('../services/dashboard_backup_service', () => ({}));
-
-const forcePublishOnReset$ = new Subject<void>();
+const setStateMock = () => {};
 
 const layoutUnsavedChanges$ = new BehaviorSubject<{ panels?: DashboardState['panels'] }>({});
 const layoutManagerMock = {
@@ -81,7 +79,7 @@ describe('unsavedChangesManager', () => {
     layoutUnsavedChanges$.next({});
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../services/dashboard_backup_service').getDashboardBackupService = () => ({
+    require('../services/dashboard_api_services').getDashboardBackupService = () => ({
       setState: setBackupStateMock,
     });
   });
@@ -99,7 +97,7 @@ describe('unsavedChangesManager', () => {
           settingsManager,
           unifiedSearchManager: unifiedSearchManagerMock,
           projectRoutingManager: projectRoutingManagerMock,
-          forcePublishOnReset$,
+          setState: setStateMock,
         });
 
         unsavedChangesManager.api.hasUnsavedChanges$
@@ -124,7 +122,7 @@ describe('unsavedChangesManager', () => {
           settingsManager: settingsManagerMock,
           unifiedSearchManager: unifiedSearchManagerMock,
           projectRoutingManager: projectRoutingManagerMock,
-          forcePublishOnReset$,
+          setState: setStateMock,
         });
 
         setBackupStateMock.mockImplementation((id, backupState) => {
@@ -178,7 +176,7 @@ describe('unsavedChangesManager', () => {
         settingsManager: settingsManagerMock,
         unifiedSearchManager: unifiedSearchManagerMock,
         projectRoutingManager: customProjectRoutingManagerMock,
-        forcePublishOnReset$,
+        setState: setStateMock,
       });
 
       unsavedChangesManager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasChanges) => {
@@ -212,7 +210,7 @@ describe('unsavedChangesManager', () => {
         settingsManager: settingsManagerMock,
         unifiedSearchManager: unifiedSearchManagerMock,
         projectRoutingManager: customProjectRoutingManagerMock,
-        forcePublishOnReset$,
+        setState: setStateMock,
       });
 
       unsavedChangesManager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasChanges) => {

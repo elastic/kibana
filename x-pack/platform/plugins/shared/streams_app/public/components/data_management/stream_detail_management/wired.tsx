@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { Streams } from '@kbn/streams-schema';
+import { type Streams, isRoot, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
 import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
@@ -14,7 +14,9 @@ import { RedirectTo } from '../../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
+import { StreamOverview } from '../../stream_detail_overview';
 import { Wrapper } from './wrapper';
+import { MissingDataStreamCallout } from './missing_data_stream_callout';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import { WiredAdvancedView } from './advanced_view/wired_advanced_view';
 import { StreamDetailDataQuality } from '../../stream_data_quality';
@@ -23,6 +25,7 @@ import { WiredStreamBadge } from '../../stream_badges';
 import { StreamDetailAttachments } from '../../stream_detail_attachments';
 
 const wiredStreamManagementSubTabs = [
+  'overview',
   'partitioning',
   'processing',
   'schema',
@@ -41,7 +44,13 @@ const tabRedirects: Record<string, { newTab: WiredStreamManagementSubTab }> = {
   route: { newTab: 'partitioning' },
   enrich: { newTab: 'processing' },
 };
-function isValidManagementSubTab(value: string): value is WiredStreamManagementSubTab {
+function isValidManagementSubTab(
+  value: string,
+  overviewPageEnabled: boolean
+): value is WiredStreamManagementSubTab {
+  if (value === 'overview' && !overviewPageEnabled) {
+    return false;
+  }
   return wiredStreamManagementSubTabs.includes(value as WiredStreamManagementSubTab);
 }
 
@@ -57,7 +66,7 @@ export function WiredStreamDetailManagement({
   } = useStreamsAppParams('/{key}/management/{tab}');
 
   const {
-    features: { attachments },
+    features: { attachments, overviewPage },
   } = useStreamsPrivileges();
 
   const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
@@ -100,7 +109,45 @@ export function WiredStreamDetailManagement({
     );
   }
 
+  if (!definition.data_stream_exists) {
+    return (
+      <>
+        <StreamsAppPageTemplate.Header
+          bottomBorder="extended"
+          pageTitle={
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              {key}
+              <EuiBadgeGroup gutterSize="s">
+                <WiredStreamBadge />
+              </EuiBadgeGroup>
+            </EuiFlexGroup>
+          }
+        />
+        <StreamsAppPageTemplate.Body>
+          <MissingDataStreamCallout
+            streamName={definition.stream.name}
+            canManage={definition.privileges.manage}
+            canDelete={
+              !isRoot(definition.stream.name) || definition.stream.name === LOGS_ROOT_STREAM_NAME
+            }
+            refreshDefinition={refreshDefinition}
+          />
+        </StreamsAppPageTemplate.Body>
+      </>
+    );
+  }
+
   const tabs = {
+    ...(overviewPage.enabled
+      ? {
+          overview: {
+            content: <StreamOverview />,
+            label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
+              defaultMessage: 'Overview',
+            }),
+          },
+        }
+      : {}),
     retention: {
       content: (
         <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
@@ -191,7 +238,13 @@ export function WiredStreamDetailManagement({
     );
   }
 
-  if (isValidManagementSubTab(tab)) {
+  if (tab === 'overview' && !overviewPage.enabled) {
+    return (
+      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'retention' } }} />
+    );
+  }
+
+  if (isValidManagementSubTab(tab, overviewPage.enabled)) {
     return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
   }
 
@@ -199,7 +252,6 @@ export function WiredStreamDetailManagement({
     return null;
   }
 
-  return (
-    <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'partitioning' } }} />
-  );
+  const defaultTab = overviewPage.enabled ? 'overview' : 'retention';
+  return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: defaultTab } }} />;
 }

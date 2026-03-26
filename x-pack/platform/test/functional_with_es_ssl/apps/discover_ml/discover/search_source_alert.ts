@@ -204,9 +204,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const openManagementAlertFlyout = async () => {
-    await PageObjects.common.navigateToApp('management');
-    await PageObjects.header.waitUntilLoadingHasFinished();
-    await testSubjects.click('triggersActions');
+    await PageObjects.common.navigateToApp('rules');
     await PageObjects.header.waitUntilLoadingHasFinished();
     await testSubjects.click('createFirstRuleButton');
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -266,10 +264,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const openAlertRuleInManagement = async (ruleName: string) => {
-    await PageObjects.common.navigateToApp('management');
-    await PageObjects.header.waitUntilLoadingHasFinished();
-
-    await testSubjects.click('triggersActions');
+    await PageObjects.common.navigateToApp('rules');
     await PageObjects.header.waitUntilLoadingHasFinished();
 
     let retries = 0;
@@ -291,7 +286,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const clickViewInApp = async (ruleName: string) => {
     // navigate to discover using view in app link
     await openAlertRuleInManagement(ruleName);
-    await testSubjects.click('ruleDetails-viewInApp');
+    await testSubjects.click('ruleDetails-viewInDiscover');
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
@@ -474,7 +469,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await openAlertRuleInManagement(RULE_NAME);
-      await testSubjects.click('ruleDetails-viewInApp');
+      await testSubjects.click('ruleDetails-viewInDiscover');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await checkInitialRuleParamsState(SOURCE_DATA_VIEW, true);
@@ -490,6 +485,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await openAlertRuleInManagement(RULE_NAME);
 
       // change rule configuration
+      await testSubjects.click('ruleActionsButton');
       await testSubjects.click('openEditRuleFlyoutButton');
       await queryBar.setQuery('message:msg-1');
       await filterBar.addFilter({ field: 'message.keyword', operation: 'is', value: 'msg-1' });
@@ -657,10 +653,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const newAlert = 'New Alert for checking its status';
       await createDataView(SOURCE_DATA_VIEW);
 
-      await PageObjects.common.navigateToApp('management');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
-      await testSubjects.click('triggersActions');
+      await PageObjects.common.navigateToApp('rules');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await testSubjects.click('createRuleButton');

@@ -248,7 +248,9 @@ export default function ({ getService }: FtrProviderContext) {
         findQueries({ foo: 'bar' } as any)
           .expect(400)
           .then(({ body }) => {
-            expect(body.message).to.be('[request body.foo]: definition for this key is missing');
+            expect(body.message).to.be(
+              "[request body.foo]: Additional properties are not allowed ('foo' was unexpected)"
+            );
           }));
 
       it('should return expected queries for find saved queries', async () => {

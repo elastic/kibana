@@ -48,6 +48,7 @@ interface Context {
   initialState?: OptionsListESQLControlState;
   parentApi?: unknown;
   triggerSource?: ControlTriggerSource;
+  controlId?: string;
 }
 
 export class CreateESQLControlAction implements Action<Context> {
@@ -85,6 +86,7 @@ export class CreateESQLControlAction implements Action<Context> {
     initialState,
     parentApi,
     triggerSource,
+    controlId,
   }: Context) {
     if (!isActionCompatible(this.core, variableType)) {
       throw new IncompatibleActionError();
@@ -135,6 +137,7 @@ export class CreateESQLControlAction implements Action<Context> {
       },
       flyoutProps: {
         'data-test-subj': 'create_esql_control_flyout',
+        focusedPanelId: controlId,
         isResizable: true,
         maxWidth: 800,
         triggerId: 'dashboard-controls-menu-button',

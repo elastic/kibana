@@ -273,10 +273,10 @@ describe('Handle request to generate', () => {
           "invalid params: [
             {
               \\"code\\": \\"custom\\",
-              \\"message\\": \\"Invalid timezone\\",
               \\"path\\": [
                 \\"browserTimezone\\"
-              ]
+              ],
+              \\"message\\": \\"Invalid timezone\\"
             }
           ]"
         `);

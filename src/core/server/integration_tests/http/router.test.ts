@@ -13,7 +13,7 @@ import { Stream } from 'stream';
 import Boom from '@hapi/boom';
 import supertest from 'supertest';
 import { schema } from '@kbn/config-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
@@ -65,8 +65,18 @@ describe('Options', () => {
           {
             path: '/',
             validate: false,
-            options: { authRequired: 'optional' },
-            security: { authz: { enabled: false, reason: '' } },
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
           },
           (context, req, res) =>
             res.ok({
@@ -99,9 +109,19 @@ describe('Options', () => {
         router.get(
           {
             path: '/',
-            security: { authz: { enabled: false, reason: '' } },
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
             validate: false,
-            options: { authRequired: 'optional' },
           },
           (context, req, res) =>
             res.ok({
@@ -133,9 +153,19 @@ describe('Options', () => {
         router.get(
           {
             path: '/',
-            security: { authz: { enabled: false, reason: '' } },
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
             validate: false,
-            options: { authRequired: 'optional' },
           },
           (context, req, res) =>
             res.ok({
@@ -167,9 +197,19 @@ describe('Options', () => {
         router.get(
           {
             path: '/',
-            security: { authz: { enabled: false, reason: '' } },
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
             validate: false,
-            options: { authRequired: 'optional' },
           },
           (context, req, res) =>
             res.ok({
@@ -205,9 +245,19 @@ describe('Options', () => {
         router.get(
           {
             path: '/',
-            security: { authz: { enabled: false, reason: '' } },
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
             validate: false,
-            options: { authRequired: 'optional' },
           },
           (context, req, res) =>
             res.ok({
@@ -236,7 +286,6 @@ describe('Options', () => {
             path: '/',
             security: { authz: { enabled: false, reason: '' } },
             validate: false,
-            options: { authRequired: true },
           },
           (context, req, res) =>
             res.ok({
@@ -271,7 +320,6 @@ describe('Options', () => {
             path: '/',
             security: { authz: { enabled: false, reason: '' } },
             validate: false,
-            options: { authRequired: true },
           },
           (context, req, res) =>
             res.ok({
@@ -299,7 +347,6 @@ describe('Options', () => {
             path: '/',
             security: { authz: { enabled: false, reason: '' } },
             validate: false,
-            options: { authRequired: true },
           },
           (context, req, res) => res.ok({ body: 'ok' })
         );
@@ -319,7 +366,6 @@ describe('Options', () => {
             path: '/',
             security: { authz: { enabled: false, reason: '' } },
             validate: false,
-            options: { authRequired: true },
           },
           (context, req, res) => res.ok({ body: 'ok' })
         );
@@ -344,7 +390,6 @@ describe('Options', () => {
             path: '/',
             security: { authz: { enabled: false, reason: '' } },
             validate: false,
-            options: { authRequired: true },
           },
           (context, req, res) => res.ok({ body: 'ok' })
         );
@@ -371,9 +416,19 @@ describe('Options', () => {
         router.get(
           {
             path: '/',
-            security: { authz: { enabled: false, reason: '' } },
+            security: {
+              authc: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
             validate: false,
-            options: { authRequired: false },
           },
           (context, req, res) =>
             res.ok({
@@ -849,7 +904,7 @@ describe('Handler', () => {
 
       expect(result.body).toEqual({
         error: 'Bad Request',
-        message: expect.stringMatching(/Expected number, received string/),
+        message: expect.stringMatching(/Invalid input: expected number, received string/),
         statusCode: 400,
       });
 
@@ -861,13 +916,12 @@ describe('Handler', () => {
               "error": Object {
                 "message": "[
           {
-            \\"code\\": \\"invalid_type\\",
             \\"expected\\": \\"number\\",
-            \\"received\\": \\"string\\",
+            \\"code\\": \\"invalid_type\\",
             \\"path\\": [
               \\"page\\"
             ],
-            \\"message\\": \\"Expected number, received string\\"
+            \\"message\\": \\"Invalid input: expected number, received string\\"
           }
         ]",
               },

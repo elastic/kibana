@@ -94,6 +94,8 @@ test.describe(
       await serviceMapPage.clickEdge(EDGE_OPBEANS_JAVA_TO_POSTGRESQL);
       await serviceMapPage.waitForPopoverToBeVisible();
       await expect(serviceMapPage.serviceMapPopoverContent).toBeVisible();
+      await expect(serviceMapPage.serviceMapEdgeExploreTracesButton).toBeVisible();
+      await expect(serviceMapPage.serviceMapEdgeExploreTracesButton).toHaveText('Explore traces');
 
       const popoverTitle = await serviceMapPage.getPopoverTitle();
       expect(popoverTitle).toContain(`${SERVICE_OPBEANS_JAVA} → ${DEPENDENCY_POSTGRESQL}`);
