@@ -294,8 +294,10 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                       )
                       .join('\n\n');
                   },
-                  extractGroundTruth: (expected) =>
-                    (expected as Record<string, unknown>)?.expected as string,
+                  extractGroundTruth: (expected) => {
+                    const value = (expected as Record<string, unknown>)?.expected;
+                    return typeof value === 'string' ? value : '';
+                  },
                 }),
                 evaluators.traceBasedEvaluators.inputTokens,
                 evaluators.traceBasedEvaluators.outputTokens,
