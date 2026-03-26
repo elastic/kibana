@@ -577,7 +577,7 @@ const UnifiedHistoryTableComponent = () => {
         name: i18n.translate('xpack.osquery.liveQueryActions.table.queryColumnTitle', {
           defaultMessage: 'Query',
         }),
-        width: '40%',
+        width: '42%',
         render: renderQueryColumn,
       });
     }
@@ -588,7 +588,7 @@ const UnifiedHistoryTableComponent = () => {
         name: i18n.translate('xpack.osquery.liveQueryActions.table.tagsColumnTitle', {
           defaultMessage: 'Tags',
         }),
-        width: '100px',
+        width: '7%',
         render: renderTagsColumn,
       });
     }
@@ -599,7 +599,7 @@ const UnifiedHistoryTableComponent = () => {
         name: i18n.translate('xpack.osquery.liveQueryActions.table.resultsColumnTitle', {
           defaultMessage: 'Results',
         }),
-        width: '120px',
+        width: '7%',
         render: renderResultsColumn,
       });
     }
@@ -610,7 +610,7 @@ const UnifiedHistoryTableComponent = () => {
         name: i18n.translate('xpack.osquery.liveQueryActions.table.sourceColumnTitle', {
           defaultMessage: 'Source',
         }),
-        width: '120px',
+        width: '7%',
         render: renderSourceColumn,
       });
     }
@@ -621,7 +621,7 @@ const UnifiedHistoryTableComponent = () => {
         name: i18n.translate('xpack.osquery.liveQueryActions.table.agentsColumnTitle', {
           defaultMessage: 'Agents',
         }),
-        width: '120px',
+        width: '10%',
         render: renderAgentsColumn,
       });
     }
@@ -632,7 +632,7 @@ const UnifiedHistoryTableComponent = () => {
         name: i18n.translate('xpack.osquery.liveQueryActions.table.createdAtColumnTitle', {
           defaultMessage: 'Created at',
         }),
-        width: '200px',
+        width: '14%',
         render: renderTimestampColumn,
       });
     }
@@ -643,7 +643,7 @@ const UnifiedHistoryTableComponent = () => {
         name: i18n.translate('xpack.osquery.liveQueryActions.table.createdByColumnTitle', {
           defaultMessage: 'Run by',
         }),
-        width: '200px',
+        width: '13%',
         render: renderRunByColumn,
       });
     }

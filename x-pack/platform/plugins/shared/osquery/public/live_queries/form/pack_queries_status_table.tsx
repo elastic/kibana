@@ -18,10 +18,10 @@ import {
   RIGHT_ALIGNMENT,
   EuiBadge,
   EuiText,
+  formatDate,
 } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment-timezone';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { QueryDetailsFlyout } from './query_details_flyout';
 import { PackResultsHeader } from './pack_results_header';
@@ -282,7 +282,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   // These renderers intentionally ignore the row item — the value is the same
   // for all rows since it comes from the parent execution context, not per-query data.
   const renderRunAtColumn = useCallback(
-    () => (startDate ? <EuiText size="s">{moment(startDate).format('lll')}</EuiText> : null),
+    () => (startDate ? <EuiText size="s">{formatDate(startDate)}</EuiText> : null),
     [startDate]
   );
 
