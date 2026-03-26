@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { pick } from 'lodash';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
@@ -18,6 +19,16 @@ import { AGENT_BUILDER_READ_SECURITY } from '../route_security';
 
 /** Max page size for SML HTTP search (separate from default UI size). */
 const SML_SEARCH_SIZE_MAX = 1000;
+
+/** Fields exposed on `SmlSearchHttpResponse.results` (subset of `SmlSearchResult`). */
+const SML_SEARCH_HTTP_RESULT_KEYS = [
+  'id',
+  'type',
+  'origin_id',
+  'title',
+  'score',
+  'content',
+] as const;
 
 export function registerInternalSmlRoutes({
   router,
@@ -52,18 +63,12 @@ export function registerInternalSmlRoutes({
           spaceId,
           esClient,
           request,
+          skipContent,
         });
 
         const body: SmlSearchHttpResponse = {
           total,
-          results: results.map((hit) => ({
-            id: hit.id,
-            type: hit.type,
-            origin_id: hit.origin_id,
-            title: hit.title,
-            score: hit.score,
-            content: skipContent ? undefined : hit.content,
-          })),
+          results: results.map((hit) => pick(hit, ...SML_SEARCH_HTTP_RESULT_KEYS)),
         };
 
         return response.ok({ body });

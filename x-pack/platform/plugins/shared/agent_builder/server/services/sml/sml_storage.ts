@@ -18,7 +18,11 @@ export const smlIndexName = chatSystemIndex('sml-data');
  */
 const smlStorageSchemaProperties = {
   id: types.keyword({}),
-  type: types.search_as_you_type({}),
+  type: types.keyword({
+    fields: {
+      autocomplete: types.search_as_you_type({}),
+    },
+  }),
   title: types.search_as_you_type({}),
   origin_id: types.keyword({}),
   content: types.text({}),

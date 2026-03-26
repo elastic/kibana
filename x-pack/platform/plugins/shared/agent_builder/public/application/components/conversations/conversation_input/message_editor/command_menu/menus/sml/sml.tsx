@@ -21,6 +21,18 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
     const { results, isLoading } = useSmlSearch(query, { skipContent: true });
     const { type, title } = useMemo(() => getSmlMenuHighlightSearchStrings(query), [query]);
 
+    const smlMenuLabelStyles = useMemo(
+      () => ({
+        root: css`
+          word-break: break-word;
+        `,
+        typeSegment: css`
+          font-weight: ${euiTheme.font.weight.medium};
+        `,
+      }),
+      [euiTheme.font.weight.medium]
+    );
+
     const options: CommandMenuListOption[] = useMemo(
       () =>
         results.map((item) => {
@@ -31,16 +43,8 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
             key: item.id,
             label: `${typeLabel}/${titlePlain}`,
             renderLabel: (
-              <span
-                css={css`
-                  word-break: break-word;
-                `}
-              >
-                <span
-                  css={css`
-                    font-weight: ${euiTheme.font.weight.medium};
-                  `}
-                >
+              <span css={smlMenuLabelStyles.root}>
+                <span css={smlMenuLabelStyles.typeSegment}>
                   <EuiHighlight strict={false} search={type}>
                     {typeLabel}
                   </EuiHighlight>
@@ -54,7 +58,7 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
             ),
           };
         }),
-      [euiTheme.font.weight.medium, results, title, type]
+      [results, title, type, smlMenuLabelStyles]
     );
 
     const handleSelect = useCallback(

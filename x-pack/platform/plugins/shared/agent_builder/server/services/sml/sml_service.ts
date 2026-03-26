@@ -75,8 +75,15 @@ class SmlServiceImpl implements SmlServiceInstance {
 
     return {
       getCrawler: () => crawler,
-      search: async ({ query, size = 10, spaceId, esClient, request }) => {
-        const rawResults = await searchSml({ query, size, spaceId, esClient, logger });
+      search: async ({ query, size = 10, spaceId, esClient, request, skipContent }) => {
+        const rawResults = await searchSml({
+          query,
+          size,
+          spaceId,
+          esClient,
+          logger,
+          skipContent,
+        });
         return filterResultsByPermissions({
           searchResult: rawResults,
           request,
@@ -306,8 +313,8 @@ const SML_SEARCH_AS_YOU_TYPE_FIELDS = [
   'title._2gram', // Combination of two words
   'title._3gram', // Combination of three words
   'title._index_prefix',
-  'type',
-  'type._index_prefix',
+  'type.autocomplete',
+  'type.autocomplete._index_prefix',
 ] as const;
 
 /**
@@ -338,12 +345,14 @@ const searchSml = async ({
   spaceId,
   esClient,
   logger,
+  skipContent,
 }: {
   query: string;
   size: number;
   spaceId: string;
   esClient: ElasticsearchClient;
   logger: Logger;
+  skipContent?: boolean;
 }): Promise<{ results: SmlSearchResult[]; total: number }> => {
   logger.debug(
     `SML search: query=${JSON.stringify(
@@ -372,7 +381,7 @@ const searchSml = async ({
           ],
         },
       },
-      _source: true,
+      _source: skipContent ? { excludes: ['content'] } : true,
     });
 
     const total =

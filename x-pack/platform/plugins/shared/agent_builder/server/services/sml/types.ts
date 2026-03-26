@@ -199,6 +199,8 @@ export interface SmlService {
     spaceId: string;
     esClient: ElasticsearchClient;
     request: KibanaRequest;
+    /** When true, Elasticsearch omits `content` from `_source` (smaller payloads for autocomplete). */
+    skipContent?: boolean;
   }) => Promise<{ results: SmlSearchResult[]; total: number }>;
 
   /**

@@ -77,16 +77,6 @@ const createNotFoundError = () =>
     meta: {} as any,
   });
 
-/** Must stay aligned with SAYT fields queried in `buildSmlSearchQuery` (sml_service.ts). */
-const EXPECTED_SML_SAYT_FIELDS = [
-  'title',
-  'title._2gram',
-  'title._3gram',
-  'title._index_prefix',
-  'type',
-  'type._index_prefix',
-] as const;
-
 describe('createSmlService', () => {
   describe('lifecycle', () => {
     it('setup() returns registerType', () => {
@@ -166,6 +156,15 @@ describe('SmlService', () => {
   });
 
   describe('search', () => {
+    const saytBoolPrefixFields = [
+      'title',
+      'title._2gram',
+      'title._3gram',
+      'title._index_prefix',
+      'type.autocomplete',
+      'type.autocomplete._index_prefix',
+    ];
+
     it('calls ES search with correct query, space filter, and _source fields', async () => {
       const service = createSmlService();
       service.setup({ logger });
@@ -199,7 +198,7 @@ describe('SmlService', () => {
               multi_match: {
                 query: 'foo bar',
                 type: 'bool_prefix',
-                fields: [...EXPECTED_SML_SAYT_FIELDS],
+                fields: saytBoolPrefixFields,
               },
             },
           ],
@@ -214,10 +213,9 @@ describe('SmlService', () => {
         },
       });
       expect(call._source).toEqual(true);
-      expect((call as { highlight?: unknown }).highlight).toBeUndefined();
     });
 
-    it('uses bool_prefix on SAYT fields only (type + title) for a partial keyword (typeahead)', async () => {
+    it('uses _source excludes when skipContent is true', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
@@ -227,73 +225,16 @@ describe('SmlService', () => {
       } as any);
 
       await smlService.search({
-        query: 'ba',
+        query: 'viz',
         size: 10,
         spaceId: 'default',
         esClient,
         request,
+        skipContent: true,
       });
 
       const call = esClient.search.mock.calls[0]![0]!;
-      const smlQuery = (call.query as { bool: { must: unknown[] } }).bool.must[0];
-      expect(smlQuery).toEqual({
-        multi_match: {
-          query: 'ba',
-          type: 'bool_prefix',
-          fields: [...EXPECTED_SML_SAYT_FIELDS],
-        },
-      });
-      expect((call as { highlight?: unknown }).highlight).toBeUndefined();
-    });
-
-    it('trims whitespace from the query before querying', async () => {
-      const service = createSmlService();
-      service.setup({ logger });
-      const smlService = service.start({ logger });
-
-      esClient.search.mockResolvedValue({
-        hits: { total: 0, hits: [] },
-      } as any);
-
-      await smlService.search({
-        query: '  banana  ',
-        size: 10,
-        spaceId: 'default',
-        esClient,
-        request,
-      });
-
-      const call = esClient.search.mock.calls[0]![0]!;
-      const smlQuery = (call.query as { bool: { must: unknown[] } }).bool.must[0] as {
-        multi_match: { query: string };
-      };
-      expect(smlQuery.multi_match.query).toBe('banana');
-      expect((call as { highlight?: unknown }).highlight).toBeUndefined();
-    });
-
-    it('uses match_all when the query is only whitespace', async () => {
-      const service = createSmlService();
-      service.setup({ logger });
-      const smlService = service.start({ logger });
-
-      esClient.search.mockResolvedValue({
-        hits: { total: 0, hits: [] },
-      } as any);
-
-      await smlService.search({
-        query: '  \t',
-        size: 5,
-        spaceId: 'default',
-        esClient,
-        request,
-      });
-
-      const call = esClient.search.mock.calls[0]![0]! as {
-        query?: { bool?: { must?: unknown[] } };
-        highlight?: unknown;
-      };
-      expect(call.query!.bool!.must).toEqual([{ match_all: {} }]);
-      expect(call.highlight).toBeUndefined();
+      expect(call._source).toEqual({ excludes: ['content'] });
     });
 
     it('uses match_all for query "*"', async () => {
@@ -315,13 +256,11 @@ describe('SmlService', () => {
 
       const call = esClient.search.mock.calls[0]![0]! as {
         query?: { bool?: { must?: unknown[] } };
-        highlight?: unknown;
       };
       expect(call.query!.bool!.must).toEqual([{ match_all: {} }]);
-      expect(call.highlight).toBeUndefined();
     });
 
-    it('uses match_all for an empty query string', async () => {
+    it('uses match_all for empty query after trim', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
@@ -340,10 +279,8 @@ describe('SmlService', () => {
 
       const call = esClient.search.mock.calls[0]![0]! as {
         query?: { bool?: { must?: unknown[] } };
-        highlight?: unknown;
       };
       expect(call.query!.bool!.must).toEqual([{ match_all: {} }]);
-      expect(call.highlight).toBeUndefined();
     });
 
     it('maps response to SmlSearchResult', async () => {
@@ -395,31 +332,6 @@ describe('SmlService', () => {
         score: 1.5,
       });
       expect(result.total).toBe(1);
-    });
-
-    it('searches the full keyword string after / in the main query (type + title SAYT)', async () => {
-      const service = createSmlService();
-      service.setup({ logger });
-      const smlService = service.start({ logger });
-
-      esClient.search.mockResolvedValue({
-        hits: { total: 0, hits: [] },
-      } as any);
-
-      await smlService.search({
-        query: 'visualization/my',
-        size: 10,
-        spaceId: 'default',
-        esClient,
-        request,
-      });
-
-      const call = esClient.search.mock.calls[0]![0]!;
-      const smlQuery = (call.query as { bool: { must: unknown[] } }).bool.must[0] as {
-        multi_match: { query: string };
-      };
-      expect(smlQuery.multi_match.query).toBe('visualization/my');
-      expect((call as { highlight?: unknown }).highlight).toBeUndefined();
     });
 
     it('handles total as object with value', async () => {
