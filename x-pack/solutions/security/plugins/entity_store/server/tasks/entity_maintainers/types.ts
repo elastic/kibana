@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { CRUDClient } from '../../domain/crud';
+import type { EntityUpdateClient } from '../../domain/crud';
 
 export const EntityMaintainerTaskStatus = {
   NEVER_STARTED: 'never_started',
@@ -66,7 +66,7 @@ interface EntityMaintainerTaskMethodContext {
   logger: Logger;
   fakeRequest: KibanaRequest;
   esClient: ElasticsearchClient;
-  crudClient: CRUDClient;
+  crudClient: EntityUpdateClient;
 }
 
 export type EntityMaintainerTaskMethod = (
