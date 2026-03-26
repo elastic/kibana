@@ -74,11 +74,7 @@ export const EmbeddableRenderer = <
                 | TransformErrorEmbeddableState
                 | undefined
             )?.original_type;
-            throw new Error(
-              `Unable to transform ${
-                originalType ?? ''
-              } panel config. To fix, remove or replace panel.`
-            );
+            throw new Error(`Unable to transform ${originalType ?? ''} panel config.`);
           }
           const factory = await getReactEmbeddableFactory<SerializedState, Api>(type);
 
