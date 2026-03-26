@@ -519,7 +519,10 @@ function deriveInitialState(
 function datePartStateToInputFragment(state: DatePartState): string {
   if (state.type === DATE_TYPE_NOW) return 'now';
   if (state.type === DATE_TYPE_RELATIVE) {
-    return datePartStateToDateString(state).replace(/^now/, '');
+    const { count, unit } = state.relativeOffset;
+    const operator = count >= 0 ? '+' : '-';
+    const displayUnit = UNIT_DISPLAY_ABBREV[unit] ?? unit;
+    return `${operator}${Math.abs(count)}${displayUnit}`;
   }
   return state.absoluteText;
 }
@@ -531,9 +534,8 @@ function datePartStateToDateString(state: DatePartState): string {
     case DATE_TYPE_RELATIVE: {
       const { count, unit, roundTo } = state.relativeOffset;
       const operator = count >= 0 ? '+' : '-';
-      const displayUnit = UNIT_DISPLAY_ABBREV[unit] ?? unit;
       const round = roundTo ? `/${roundTo}` : '';
-      return `now${operator}${Math.abs(count)}${displayUnit}${round}`;
+      return `now${operator}${Math.abs(count)}${unit}${round}`;
     }
     case DATE_TYPE_ABSOLUTE:
       return state.absoluteText;
