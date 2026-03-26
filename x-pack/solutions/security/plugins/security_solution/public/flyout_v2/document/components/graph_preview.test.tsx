@@ -7,9 +7,7 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../../../common/mock';
-import { mockContextValue } from '../../shared/mocks/mock_context';
-import { DocumentDetailsContext } from '../../shared/context';
+import { TestProviders } from '../../../common/mock';
 import { GraphPreview, type GraphPreviewProps } from './graph_preview';
 import { GRAPH_PREVIEW_TEST_ID, GRAPH_PREVIEW_LOADING_TEST_ID } from './test_ids';
 
@@ -19,12 +17,10 @@ jest.mock('@kbn/cloud-security-posture-graph', () => {
   return { Graph: mockGraph };
 });
 
-const renderGraphPreview = (contextValue: DocumentDetailsContext, props: GraphPreviewProps) =>
+const renderGraphPreview = (props: GraphPreviewProps) =>
   render(
     <TestProviders>
-      <DocumentDetailsContext.Provider value={contextValue}>
-        <GraphPreview {...props} />
-      </DocumentDetailsContext.Provider>
+      <GraphPreview {...props} />
     </TestProviders>
   );
 
@@ -51,7 +47,7 @@ describe('<GraphPreview />', () => {
       },
     };
 
-    const { findByTestId } = renderGraphPreview(mockContextValue, graphProps);
+    const { findByTestId } = renderGraphPreview(graphProps);
 
     // Using findByTestId to wait for the component to be rendered because it is a lazy loaded component
     expect(await findByTestId(GRAPH_PREVIEW_TEST_ID)).toBeInTheDocument();
@@ -63,7 +59,7 @@ describe('<GraphPreview />', () => {
       isError: false,
     };
 
-    const { getByTestId } = renderGraphPreview(mockContextValue, graphProps);
+    const { getByTestId } = renderGraphPreview(graphProps);
 
     expect(getByTestId(GRAPH_PREVIEW_LOADING_TEST_ID)).toBeInTheDocument();
   });
@@ -74,7 +70,7 @@ describe('<GraphPreview />', () => {
       isError: true,
     };
 
-    const { getByText } = renderGraphPreview(mockContextValue, graphProps);
+    const { getByText } = renderGraphPreview(graphProps);
 
     expect(getByText(ERROR_MESSAGE)).toBeInTheDocument();
   });
@@ -85,7 +81,7 @@ describe('<GraphPreview />', () => {
       isError: false,
     };
 
-    const { getByText } = renderGraphPreview(mockContextValue, graphProps);
+    const { getByText } = renderGraphPreview(graphProps);
 
     expect(getByText(ERROR_MESSAGE)).toBeInTheDocument();
   });

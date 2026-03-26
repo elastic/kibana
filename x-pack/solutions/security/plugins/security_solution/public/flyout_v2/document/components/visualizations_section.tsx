@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
+import { useGraphPreview } from '../hooks/use_graph_preview';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { useKibana } from '../../../common/lib/kibana';
@@ -17,6 +18,7 @@ import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../shared/components/expandable_section';
 import { PREFIX } from '../../../flyout/shared/test_ids';
 import { AnalyzerPreviewContainer } from './analyzer_preview_container';
+import { GraphPreviewContainer } from './graph_preview_container';
 import { SessionPreviewContainer } from './session_preview_container';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { AnalyzerGraph } from '../../analyzer';
@@ -55,13 +57,14 @@ export const VisualizationsSection = memo(
     const { overlays } = services;
     const store = useStore();
     const history = useHistory();
-    const sessionViewConfig = useSessionViewConfig(hit);
 
     const expanded = useExpandSection({
       storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
       title: LOCAL_STORAGE_SECTION_KEY,
       defaultValue: false,
     });
+
+    const sessionViewConfig = useSessionViewConfig(hit);
 
     const onShowAnalyzer = useCallback(
       () =>
@@ -116,6 +119,9 @@ export const VisualizationsSection = memo(
       ]
     );
 
+    const { hasGraphData } = useGraphPreview({ hit });
+    const onShowGraph = useCallback(() => {}, []);
+
     return (
       <ExpandableSection
         data-test-subj={VISUALIZATION_SECTION_TEST_ID}
@@ -138,6 +144,14 @@ export const VisualizationsSection = memo(
           shouldUseAncestor={false}
           showIcon={false}
         />
+        {hasGraphData && (
+          <GraphPreviewContainer
+            disableNavigation={false}
+            hit={hit}
+            onShowGraph={onShowGraph}
+            showIcon={false}
+          />
+        )}
       </ExpandableSection>
     );
   }

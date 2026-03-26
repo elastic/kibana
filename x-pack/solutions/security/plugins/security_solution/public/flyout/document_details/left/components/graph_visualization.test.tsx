@@ -100,14 +100,12 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
 
 jest.mock('../../shared/context', () => ({
   useDocumentDetailsContext: () => ({
-    getFieldsData: jest.fn(),
-    dataAsNestedObject: {},
-    dataFormattedForFieldBrowser: {},
+    searchHit: { _id: 'test-id', _index: 'test-index', fields: {} },
     scopeId: 'test-scope',
   }),
 }));
 
-jest.mock('../../shared/hooks/use_graph_preview', () => ({
+jest.mock('../../../../flyout_v2/document/hooks/use_graph_preview', () => ({
   useGraphPreview: () => ({
     eventIds: ['event-1', 'event-2'],
     timestamp: new Date().toISOString(),

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import dateMath from '@kbn/datemath';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
@@ -28,7 +29,7 @@ import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { GRAPH_VISUALIZATION_TEST_ID } from './test_ids';
-import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
+import { useGraphPreview } from '../../../../flyout_v2/document/hooks/use_graph_preview';
 import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { normalizeTimeRange } from '../../../../common/utils/normalize_time_range';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -67,17 +68,9 @@ export const GraphVisualization: React.FC = memo(() => {
   const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
   const dataViewIndexPattern = dataView ? dataView.getIndexPattern() : undefined;
 
-  const { getFieldsData, dataAsNestedObject, dataFormattedForFieldBrowser, scopeId } =
-    useDocumentDetailsContext();
-  const {
-    eventIds,
-    timestamp = new Date().toISOString(),
-    isAlert,
-  } = useGraphPreview({
-    getFieldsData,
-    ecsData: dataAsNestedObject,
-    dataFormattedForFieldBrowser,
-  });
+  const { searchHit, scopeId } = useDocumentDetailsContext();
+  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
+  const { eventIds, timestamp = new Date().toISOString(), isAlert } = useGraphPreview({ hit });
 
   const { openPreviewPanel } = useExpandableFlyoutApi();
 

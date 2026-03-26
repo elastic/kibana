@@ -113,3 +113,7 @@ export const SUMMARY_ROW_LOADING_TEST_ID = (dataTestSubj: string) => `${dataTest
 export const SUMMARY_ROW_TEXT_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Text`;
 export const SUMMARY_ROW_VALUE_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Value`;
 export const SUMMARY_ROW_BUTTON_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Button`;
+
+/* Graph Preview */
+export const GRAPH_PREVIEW_TEST_ID = `${PREFIX}GraphPreview` as const;
+export const GRAPH_PREVIEW_LOADING_TEST_ID = `${GRAPH_PREVIEW_TEST_ID}Loading` as const;

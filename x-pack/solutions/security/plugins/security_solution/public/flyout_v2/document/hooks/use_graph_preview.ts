@@ -5,34 +5,20 @@
  * 2.0.
  */
 
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { get } from 'lodash/fp';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import {
   GRAPH_ACTOR_ENTITY_FIELDS,
   GRAPH_TARGET_ENTITY_FIELDS,
 } from '@kbn/cloud-security-posture-common';
-import type { GetFieldsData } from './use_get_fields_data';
-import { getField, getFieldArray } from '../utils';
-import { useBasicDataFromDetailsData } from './use_basic_data_from_details_data';
-import { useHasGraphVisualizationLicense } from '../../../../common/hooks/use_has_graph_visualization_license';
-import { useEntityStoreStatus } from '../../../../entity_analytics/components/entity_store/hooks/use_entity_store';
+import { getField, getFieldArray } from '../../../flyout/document_details/shared/utils';
+import { useHasGraphVisualizationLicense } from '../../../common/hooks/use_has_graph_visualization_license';
+import { useEntityStoreStatus } from '../../../entity_analytics/components/entity_store/hooks/use_entity_store';
 
 export interface UseGraphPreviewParams {
   /**
-   * Retrieves searchHit values for the provided field
+   * DataTableRecord of the document
    */
-  getFieldsData: GetFieldsData;
-
-  /**
-   * An object with top level fields from the ECS object
-   */
-  ecsData: Ecs;
-
-  /**
-   * An array of field objects with category and value
-   */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
+  hit: DataTableRecord;
 }
 /**
  * Interface for the result of the useGraphPreview hook
@@ -83,11 +69,9 @@ export interface UseGraphPreviewResult {
 /**
  * Hook that returns the graph view configuration if the graph view is available for the alert
  */
-export const useGraphPreview = ({
-  getFieldsData,
-  ecsData,
-  dataFormattedForFieldBrowser,
-}: UseGraphPreviewParams): UseGraphPreviewResult => {
+export const useGraphPreview = ({ hit }: UseGraphPreviewParams): UseGraphPreviewResult => {
+  const getFieldsData = (field: string) => hit.flattened[field];
+
   const timestamp = getField(getFieldsData('@timestamp'));
   const originalEventId = getFieldsData('kibana.alert.original_event.id');
   const eventId = getFieldsData('event.id');
@@ -107,7 +91,10 @@ export const useGraphPreview = ({
     targetIds.push(...fieldValues);
   });
 
-  const action: string[] | undefined = get(['event', 'action'], ecsData);
+  const actionValue = getFieldsData('event.action');
+  const action: string[] | undefined = actionValue
+    ? (getFieldArray(actionValue) as string[])
+    : undefined;
 
   // Check if user license is high enough to access graph visualization
   const hasRequiredLicense = useHasGraphVisualizationLicense();
@@ -127,7 +114,7 @@ export const useGraphPreview = ({
   // Combine all conditions: data availability + license + entity store running
   const shouldShowGraph = hasGraphData && hasRequiredLicense && isEntityStoreRunning;
 
-  const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const isAlert = Boolean(hit.flattened['kibana.alert.rule.uuid']);
 
   return {
     timestamp,
