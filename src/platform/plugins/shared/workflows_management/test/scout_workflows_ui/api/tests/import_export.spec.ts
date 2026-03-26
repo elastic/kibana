@@ -208,8 +208,8 @@ apiTest.describe('Workflows Import/Export API', { tag: [...tags.stateful.classic
     }
   );
 
-  apiTest('should return 400 when _export ids array is empty', async ({ apiClient }) => {
-    const response = await apiClient.post('api/workflows/_export', {
+  apiTest('should return 400 when export ids array is empty', async ({ apiClient }) => {
+    const response = await apiClient.post('api/workflows/export', {
       headers: {
         ...COMMON_HEADERS,
         ...adminCredentials.apiKeyHeader,
@@ -221,8 +221,8 @@ apiTest.describe('Workflows Import/Export API', { tag: [...tags.stateful.classic
     expect(response).toHaveStatusCode(400);
   });
 
-  apiTest('should return 400 when _check-conflicts ids array is empty', async ({ apiClient }) => {
-    const response = await apiClient.post('api/workflows/_check-conflicts', {
+  apiTest('should return 400 when mget ids array is empty', async ({ apiClient }) => {
+    const response = await apiClient.post('api/workflows/mget', {
       headers: {
         ...COMMON_HEADERS,
         ...adminCredentials.apiKeyHeader,
@@ -235,9 +235,9 @@ apiTest.describe('Workflows Import/Export API', { tag: [...tags.stateful.classic
   });
 
   apiTest(
-    'should handle partial failures in _bulk_create (one valid, one invalid)',
+    'should handle partial failures in bulk_create (one valid, one invalid)',
     async ({ apiClient }) => {
-      const response = await apiClient.post('api/workflows/_bulk_create', {
+      const response = await apiClient.post('api/workflows', {
         headers: {
           ...COMMON_HEADERS,
           ...adminCredentials.apiKeyHeader,
@@ -257,7 +257,7 @@ apiTest.describe('Workflows Import/Export API', { tag: [...tags.stateful.classic
 
   apiTest('should bulk create with explicit custom IDs', async ({ apiClient }) => {
     const customId = `workflow-00000000-0000-4000-a000-000000000001`;
-    const response = await apiClient.post('api/workflows/_bulk_create', {
+    const response = await apiClient.post('api/workflows', {
       headers: {
         ...COMMON_HEADERS,
         ...adminCredentials.apiKeyHeader,
@@ -287,7 +287,7 @@ apiTest.describe('Workflows Import/Export API', { tag: [...tags.stateful.classic
         body: { yaml: SIMPLE_WORKFLOW_YAML.replace('ImportTest Workflow', 'Second') },
       });
 
-      const exportResponse = await apiClient.post('api/workflows/_export', {
+      const exportResponse = await apiClient.post('api/workflows/export', {
         headers: {
           ...COMMON_HEADERS,
           ...adminCredentials.apiKeyHeader,
