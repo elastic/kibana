@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import Boom from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
 import pMap from 'p-map';
 import Papa from 'papaparse';
@@ -247,7 +248,7 @@ const processBatch = async ({
 const validateCsvHeader = (header: string[]): void => {
   const missingHeaders = REQUIRED_CSV_HEADERS.filter((required) => !header.includes(required));
   if (missingHeaders.length > 0) {
-    throw new Error(`CSV header is missing required fields: ${missingHeaders.join(', ')}`);
+    throw Boom.badRequest(`CSV header is missing required fields: ${missingHeaders.join(', ')}`);
   }
 };
 
