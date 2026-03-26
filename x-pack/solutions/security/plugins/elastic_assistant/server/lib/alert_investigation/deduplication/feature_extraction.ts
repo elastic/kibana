@@ -32,12 +32,13 @@ export interface AlertFeatures {
 }
 
 const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => {
+  // Check flat dotted key first (ES returns alerts with flat keys like "host.name")
+  if (path in obj) return obj[path];
+  // Fall back to nested traversal (for properly nested objects)
   const parts = path.split('.');
   let current: unknown = obj;
   for (const part of parts) {
-    if (current == null || typeof current !== 'object') {
-      return undefined;
-    }
+    if (current == null || typeof current !== 'object') return undefined;
     current = (current as Record<string, unknown>)[part];
   }
   return current;
