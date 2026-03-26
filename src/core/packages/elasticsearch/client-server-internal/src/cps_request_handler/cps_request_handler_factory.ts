@@ -11,20 +11,32 @@ import { getSpaceNPRE, PROJECT_ROUTING_ORIGIN } from '@kbn/cps-server-utils';
 import { isKibanaRequest } from '@kbn/core-http-router-server-internal';
 import type { OnRequestHandlerFactory } from '../cluster_client';
 import { getCpsRequestHandler } from './cps_request_handler';
+import { getTimingRequestHandler } from '../timing';
 
 /**
  * Returns an {@link OnRequestHandlerFactory} that maps routing options to the
- * appropriate CPS `OnRequestHandler` for each client scope.
+ * appropriate CPS `OnRequestHandler` for each client scope, composed with
+ * timing instrumentation.
  *
  * @internal
  */
 export function getRequestHandlerFactory(cpsEnabled: boolean): OnRequestHandlerFactory {
   return (opts) => {
     const request = 'request' in opts && isKibanaRequest(opts.request) ? opts.request : undefined;
-    if ('projectRouting' in opts && opts.projectRouting === 'space') {
-      return getCpsRequestHandler(cpsEnabled, getSpaceNPRE(opts.request), opts.logger, request);
-    } else {
-      return getCpsRequestHandler(cpsEnabled, PROJECT_ROUTING_ORIGIN, opts.logger, request);
-    }
+
+    // Get the timing handler
+    const timingHandler = getTimingRequestHandler(request);
+
+    // Get the CPS handler based on routing options
+    const cpsHandler =
+      'projectRouting' in opts && opts.projectRouting === 'space'
+        ? getCpsRequestHandler(cpsEnabled, getSpaceNPRE(opts.request), opts.logger)
+        : getCpsRequestHandler(cpsEnabled, PROJECT_ROUTING_ORIGIN, opts.logger);
+
+    // Return a composed handler that calls both in sequence
+    return (ctx, params, options, logger) => {
+      timingHandler(ctx, params, options, logger);
+      cpsHandler(ctx, params, options, logger);
+    };
   };
 }

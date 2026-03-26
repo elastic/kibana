@@ -46,6 +46,7 @@ const noop = () => undefined;
 
 interface CommonFactoryRoutingOpts {
   logger: Logger;
+  request?: ScopeableUrlRequest;
 }
 
 interface SpaceFactoryRoutingOpts extends CommonFactoryRoutingOpts {
@@ -140,7 +141,7 @@ export class ClusterClient implements ICustomClusterClient {
       const scopedHeaders = this.getScopedHeaders(request);
       const factoryOpts: FactoryRoutingOpts = opts
         ? { ...opts, logger: this.logger, request }
-        : { logger: this.logger };
+        : { logger: this.logger, request };
       const transportClass = createTransport({
         scoped: true,
         getExecutionContext: this.getExecutionContext,

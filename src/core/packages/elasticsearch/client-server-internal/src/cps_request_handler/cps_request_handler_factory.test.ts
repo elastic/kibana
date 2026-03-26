@@ -54,4 +54,47 @@ describe('getRequestHandlerFactory', () => {
       );
     });
   });
+
+  describe('timing context', () => {
+    it('sets timing context for internal user', () => {
+      const factory = getRequestHandlerFactory(true);
+      const handler = factory({ logger: mockLogger });
+      const params = makeSearchParams();
+      const options = {};
+
+      handler({ scoped: false }, params, options, mockLogger);
+
+      expect((options as any).context).toBeDefined();
+      expect((options as any).context.timingContext).toBeDefined();
+      expect((options as any).context.timingContext.startTime).toBeGreaterThan(0);
+    });
+
+    it('sets timing context with kibanaRequest for scoped user', () => {
+      const factory = getRequestHandlerFactory(true);
+      const request = httpServerMock.createKibanaRequest({ path: '/s/my-space/app/discover' });
+      const handler = factory({ projectRouting: 'space', request, logger: mockLogger });
+      const params = makeSearchParams();
+      const options = {};
+
+      handler({ scoped: true }, params, options, mockLogger);
+
+      expect((options as any).context).toBeDefined();
+      expect((options as any).context.timingContext).toBeDefined();
+      expect((options as any).context.timingContext.startTime).toBeGreaterThan(0);
+      expect((options as any).context.timingContext.kibanaRequest).toBe(request);
+    });
+
+    it('sets both timing and CPS contexts', () => {
+      const factory = getRequestHandlerFactory(true);
+      const request = httpServerMock.createKibanaRequest({ path: '/s/my-space/app/discover' });
+      const handler = factory({ projectRouting: 'space', request, logger: mockLogger });
+      const params = makeSearchParams();
+      const options = {};
+
+      handler({ scoped: true }, params, options, mockLogger);
+
+      expect((options as any).context.timingContext).toBeDefined();
+      expect((options as any).context.cpsRoutingContext).toBeDefined();
+    });
+  });
 });

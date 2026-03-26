@@ -112,12 +112,12 @@ function instrumentCpsMetrics({ client, logger }: { client: Client; logger: Logg
 
     // Report ES request timing to Server-Timing header
     const timingContext = (event.meta.request.options?.context as any)?.timingContext;
-    if (timingContext?.kibanaRequest?.timing && timingContext.startTime) {
+    if (timingContext?.kibanaRequest?.serverTiming && timingContext.startTime) {
       const duration = performance.now() - timingContext.startTime;
       const method = event.meta.request.params.method || 'unknown';
       const path = event.meta.request.params.path || 'unknown';
 
-      timingContext.kibanaRequest.timing.measure('es-request', duration, `${method} ${path}`);
+      timingContext.kibanaRequest.serverTiming.measure('es-request', duration, `${method} ${path}`);
     }
 
     logger.debug('CPS request completed', {
