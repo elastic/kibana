@@ -9319,6 +9319,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/test-es-server@link:src/platform/packages/shared/kbn-test-es-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/test-eui-helpers@link:src/platform/packages/private/kbn-test-eui-helpers":
   version "0.0.0"
   uid ""
