@@ -9,19 +9,19 @@ import React from 'react';
 import { EuiListGroupItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export interface DeactivateActionButtonProps {
+export interface ResolveActionButtonProps {
   lastDeactivateAction?: string | null;
 }
 
-export function DeactivateActionButton({ lastDeactivateAction }: DeactivateActionButtonProps) {
+export function ResolveActionButton({ lastDeactivateAction }: ResolveActionButtonProps) {
   const isDeactivated = lastDeactivateAction === 'deactivate';
 
   const label = isDeactivated
-    ? i18n.translate('xpack.alertingV2.episodesUi.deactivateAction.activate', {
-        defaultMessage: 'Activate',
+    ? i18n.translate('xpack.alertingV2.episodesUi.resolveAction.activate', {
+        defaultMessage: 'Resolve',
       })
-    : i18n.translate('xpack.alertingV2.episodesUi.deactivateAction.deactivate', {
-        defaultMessage: 'Deactivate',
+    : i18n.translate('xpack.alertingV2.episodesUi.resolveAction.deactivate', {
+        defaultMessage: 'Unresolve',
       });
 
   const iconType = isDeactivated ? 'check' : 'cross';
@@ -32,7 +32,7 @@ export function DeactivateActionButton({ lastDeactivateAction }: DeactivateActio
       size="s"
       iconType={iconType}
       onClick={() => {}}
-      data-test-subj="alertingEpisodeActionsDeactivateActionButton"
+      data-test-subj="alertingEpisodeActionsResolveActionButton"
     />
   );
 }

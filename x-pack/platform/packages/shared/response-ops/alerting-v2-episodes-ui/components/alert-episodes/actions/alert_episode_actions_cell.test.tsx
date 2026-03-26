@@ -35,7 +35,7 @@ describe('AlertEpisodeActionsCell', () => {
     );
     await user.click(screen.getByTestId('alertingEpisodeActionsMoreButton'));
     expect(
-      await screen.findByTestId('alertingEpisodeActionsDeactivateActionButton')
+      await screen.findByTestId('alertingEpisodeActionsResolveActionButton')
     ).toHaveTextContent('Deactivate');
   });
 
@@ -56,7 +56,7 @@ describe('AlertEpisodeActionsCell', () => {
     );
     await user.click(screen.getByTestId('alertingEpisodeActionsMoreButton'));
     expect(
-      await screen.findByTestId('alertingEpisodeActionsDeactivateActionButton')
+      await screen.findByTestId('alertingEpisodeActionsResolveActionButton')
     ).toHaveTextContent('Activate');
   });
 });

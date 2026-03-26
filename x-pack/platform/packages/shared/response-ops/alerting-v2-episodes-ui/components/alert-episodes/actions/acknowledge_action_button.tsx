@@ -14,7 +14,7 @@ export interface AcknowledgeActionButtonProps {
 }
 
 export function AcknowledgeActionButton({ lastAckAction }: AcknowledgeActionButtonProps) {
-  const isAcknowledged = !lastAckAction || lastAckAction === 'ack';
+  const isAcknowledged = lastAckAction === 'ack';
 
   const label = isAcknowledged
     ? i18n.translate('xpack.alertingV2.episodesUi.acknowledgeAction.unacknowledge', {

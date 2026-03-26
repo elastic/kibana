@@ -13,12 +13,12 @@ describe('AcknowledgeActionButton', () => {
   it('renders Unacknowledge when lastAckAction is undefined (treated as acknowledged)', () => {
     render(<AcknowledgeActionButton />);
     expect(screen.getByTestId('alertEpisodeAcknowledgeActionButton')).toHaveTextContent(
-      'Unacknowledge'
+      'Acknowledge'
     );
     expect(
       screen
         .getByTestId('alertEpisodeAcknowledgeActionButton')
-        .querySelector('[data-euiicon-type="crossCircle"]')
+        .querySelector('[data-euiicon-type="checkCircle"]')
     ).toBeInTheDocument();
   });
 

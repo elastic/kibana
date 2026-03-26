@@ -7,20 +7,20 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { DeactivateActionButton } from './deactivate_action_button';
+import { ResolveActionButton } from './deactivate_action_button';
 
-describe('DeactivateActionButton', () => {
+describe('ResolveActionButton', () => {
   it('renders Deactivate when not deactivated', () => {
-    render(<DeactivateActionButton lastDeactivateAction={null} />);
-    expect(screen.getByTestId('alertingEpisodeActionsDeactivateActionButton')).toHaveTextContent(
-      'Deactivate'
+    render(<ResolveActionButton lastDeactivateAction={null} />);
+    expect(screen.getByTestId('alertingEpisodeActionsResolveActionButton')).toHaveTextContent(
+      'Unresolve'
     );
   });
 
   it('renders Activate when deactivated', () => {
-    render(<DeactivateActionButton lastDeactivateAction="deactivate" />);
-    expect(screen.getByTestId('alertingEpisodeActionsDeactivateActionButton')).toHaveTextContent(
-      'Activate'
+    render(<ResolveActionButton lastDeactivateAction="deactivate" />);
+    expect(screen.getByTestId('alertingEpisodeActionsResolveActionButton')).toHaveTextContent(
+      'Resolve'
     );
   });
 });
