@@ -152,7 +152,7 @@ export const CreateIntegrationSideCardButton = React.memo(() => {
                   defaultMessage="Use AI to create a new one or {uploadLink}"
                   values={{
                     uploadLink: (
-                      // eslint-disable-next-line @elastic/eui/href-or-on-click -- onClick for SPA navigation; href for open in new tab
+                      // eslint-disable-next-line @elastic/eui/href-or-on-click
                       <EuiLink
                         href={uploadHref}
                         onClick={navigateToUpload}
@@ -170,7 +170,7 @@ export const CreateIntegrationSideCardButton = React.memo(() => {
             </EuiFlexItem>
           </EuiFlexGroup>
 
-          {/* eslint-disable-next-line @elastic/eui/href-or-on-click -- onClick for SPA navigation; href for open in new tab */}
+          {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
           <EuiButton
             color="primary"
             size="s"

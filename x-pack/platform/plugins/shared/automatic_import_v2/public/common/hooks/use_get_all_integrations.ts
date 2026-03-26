@@ -6,16 +6,15 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import type {
-  AllIntegrationsResponseIntegration,
-  GetAllAutoImportIntegrationsResponse,
-} from '../../../common';
+import type { AllIntegrationsResponseIntegration } from '../../../common';
 import { getAllIntegrations } from '../lib/api';
 import { useKibana } from './use_kibana';
 
 export interface UseGetAllIntegrationsResult {
   integrations: AllIntegrationsResponseIntegration[];
   isLoading: boolean;
+  isError: boolean;
+  error: Error | null;
   refetch: () => void;
 }
 
@@ -25,24 +24,20 @@ export interface UseGetAllIntegrationsResult {
 export function useGetAllIntegrations(): UseGetAllIntegrationsResult {
   const { http } = useKibana().services;
 
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['all-integrations'],
-    queryFn: async (): Promise<GetAllAutoImportIntegrationsResponse> => {
-      try {
-        return await getAllIntegrations({ http });
-      } catch {
-        return [];
-      }
+    queryFn: async () => {
+      return getAllIntegrations({ http });
     },
     refetchInterval: 30 * 1000,
     refetchOnWindowFocus: true,
-    retryOnMount: false,
-    retry: false,
   });
 
   return {
     integrations: data ?? [],
     isLoading,
+    isError,
+    error: error as Error | null,
     refetch,
   };
 }

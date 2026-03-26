@@ -48,6 +48,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
   const {
     integrations,
     isLoading: isLoadingCreatedIntegrations,
+    isError: isCreatedIntegrationsError,
     refetch: refetchCreatedIntegrations,
   } = useGetAllIntegrationsHook();
   const hasCreatedIntegrations = integrations.length > 0;
@@ -149,6 +150,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
               <ManageIntegrationsTable
                 integrations={integrations}
                 isLoading={isLoadingCreatedIntegrations}
+                isError={isCreatedIntegrationsError}
                 onRefetch={refetchCreatedIntegrations}
               />
             ) : filteredCards.length === 0 && !isLoading ? (

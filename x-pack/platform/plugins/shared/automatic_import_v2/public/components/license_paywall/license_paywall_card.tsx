@@ -17,7 +17,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { useKibana } from '../../common/hooks/use_kibana';
-import * as paywallI18n from './license_paywall_translations';
+import * as i18n from './translations';
 
 export const LicensePaywallCard = React.memo(() => {
   const { getUrlForApp } = useKibana().services.application;
@@ -27,13 +27,13 @@ export const LicensePaywallCard = React.memo(() => {
       <EuiCard
         data-test-subj="LicensePaywallCard"
         betaBadgeProps={{
-          label: paywallI18n.ENTERPRISE_LICENSE_LABEL,
+          label: i18n.ENTERPRISE_LICENSE_LABEL,
         }}
         isDisabled={true}
         icon={<EuiIcon size="xl" type="lock" aria-hidden={true} />}
         title={
           <h3>
-            <strong>{paywallI18n.ENTERPRISE_LICENSE_TITLE}</strong>
+            <strong>{i18n.ENTERPRISE_LICENSE_TITLE}</strong>
           </h3>
         }
         description={false}
@@ -44,13 +44,13 @@ export const LicensePaywallCard = React.memo(() => {
             <EuiText component="div">
               <h4>
                 <EuiTextColor color="subdued" component="span">
-                  {paywallI18n.ENTERPRISE_LICENSE_UPGRADE_TITLE}
+                  {i18n.ENTERPRISE_LICENSE_UPGRADE_TITLE}
                 </EuiTextColor>
               </h4>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText>{paywallI18n.ENTERPRISE_LICENSE_UPGRADE_DESCRIPTION}</EuiText>
+            <EuiText>{i18n.ENTERPRISE_LICENSE_UPGRADE_DESCRIPTION}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <div>
@@ -58,7 +58,7 @@ export const LicensePaywallCard = React.memo(() => {
                 href={getUrlForApp('management', { path: 'stack/license_management' })}
                 fill
               >
-                {paywallI18n.ENTERPRISE_LICENSE_UPGRADE_BUTTON}
+                {i18n.ENTERPRISE_LICENSE_UPGRADE_BUTTON}
               </EuiButton>
             </div>
           </EuiFlexItem>

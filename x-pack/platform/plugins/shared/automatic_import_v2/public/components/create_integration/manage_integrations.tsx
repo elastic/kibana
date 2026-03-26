@@ -6,7 +6,14 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiBadge, EuiBasicTable, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBasicTable,
+  EuiCallOut,
+  EuiEmptyPrompt,
+  EuiLoadingSpinner,
+  EuiText,
+} from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
@@ -36,9 +43,25 @@ const ManageIntegrationsLoading = React.memo(() => (
 ));
 ManageIntegrationsLoading.displayName = 'ManageIntegrationsLoading';
 
-export const ManageIntegrations = React.memo(() => {
-  const { integrations, isLoading } = useGetAllIntegrations();
+const ManageIntegrationsError = React.memo<{ error?: Error | null }>(({ error }) => (
+  <EuiCallOut
+    announceOnMount
+    color="danger"
+    iconType="error"
+    title={
+      <FormattedMessage
+        id="xpack.automaticImportV2.manageIntegrations.errorTitle"
+        defaultMessage="Unable to load integrations"
+      />
+    }
+  >
+    <EuiText size="s">{error?.message}</EuiText>
+  </EuiCallOut>
+));
+ManageIntegrationsError.displayName = 'ManageIntegrationsError';
 
+export const ManageIntegrations = React.memo(() => {
+  const { integrations, isLoading, isError, error } = useGetAllIntegrations();
   const columns = useMemo<Array<EuiBasicTableColumn<AllIntegrationsResponseIntegration>>>(
     () => [
       {
@@ -92,6 +115,8 @@ export const ManageIntegrations = React.memo(() => {
       <KibanaPageTemplate.Section grow>
         {isLoading ? (
           <ManageIntegrationsLoading />
+        ) : isError ? (
+          <ManageIntegrationsError error={error} />
         ) : (
           <EuiBasicTable
             items={integrations}
