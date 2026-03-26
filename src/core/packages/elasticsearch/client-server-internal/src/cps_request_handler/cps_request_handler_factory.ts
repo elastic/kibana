@@ -9,9 +9,11 @@
 
 import { getSpaceNPRE, PROJECT_ROUTING_ORIGIN } from '@kbn/cps-server-utils';
 import { isKibanaRequest } from '@kbn/core-http-router-server-internal';
-import type { OnRequestHandlerFactory } from '../cluster_client';
+import type { OnRequestHandlerFactory, OnRequestHandler } from '../cluster_client';
 import { getCpsRequestHandler } from './cps_request_handler';
 import { getTimingRequestHandler } from '../timing';
+
+const noopHandler: OnRequestHandler = () => undefined;
 
 /**
  * Returns an {@link OnRequestHandlerFactory} that maps routing options to the
@@ -20,12 +22,15 @@ import { getTimingRequestHandler } from '../timing';
  *
  * @internal
  */
-export function getRequestHandlerFactory(cpsEnabled: boolean): OnRequestHandlerFactory {
+export function getRequestHandlerFactory(
+  cpsEnabled: boolean,
+  esTimingEnabled: boolean = true
+): OnRequestHandlerFactory {
   return (opts) => {
     const request = 'request' in opts && isKibanaRequest(opts.request) ? opts.request : undefined;
 
-    // Get the timing handler
-    const timingHandler = getTimingRequestHandler(request);
+    // Get the timing handler (or noop if disabled)
+    const timingHandler = esTimingEnabled ? getTimingRequestHandler(request) : noopHandler;
 
     // Get the CPS handler based on routing options
     const cpsHandler =

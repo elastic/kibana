@@ -269,6 +269,15 @@ const configSchema = schema.object(
       /** In production: only allow false, default to false */
       schema.oneOf([schema.literal(false)], { defaultValue: false })
     ),
+
+    serverTimingElasticsearch: schema.conditional(
+      schema.contextRef('dev'),
+      true,
+      /** In dev mode: allow true/false, default to true */
+      schema.boolean({ defaultValue: true }),
+      /** In production: only allow false, default to false */
+      schema.oneOf([schema.literal(false)], { defaultValue: false })
+    ),
   },
   {
     validate: (rawConfig) => {
@@ -385,6 +394,7 @@ export class HttpConfig implements IHttpConfig {
   public restrictInternalApis: boolean;
   public rateLimiter: RateLimiterConfig;
   public serverTiming: boolean;
+  public serverTimingElasticsearch: boolean;
 
   public eluMonitor: IHttpEluMonitorConfig;
 
@@ -436,6 +446,7 @@ export class HttpConfig implements IHttpConfig {
     this.shutdownTimeout = rawHttpConfig.shutdownTimeout;
     this.rateLimiter = rawHttpConfig.rateLimiter;
     this.serverTiming = rawHttpConfig.serverTiming;
+    this.serverTimingElasticsearch = rawHttpConfig.serverTimingElasticsearch;
 
     // defaults to `true` if not set through config.
     this.restrictInternalApis = rawHttpConfig.restrictInternalApis;

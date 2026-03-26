@@ -42,6 +42,8 @@ import {
 import { createTransport, type OnRequestHandler } from './create_transport';
 import type { AgentFactoryProvider } from './agent_manager';
 
+export type { OnRequestHandler };
+
 const noop = () => undefined;
 
 interface CommonFactoryRoutingOpts {
