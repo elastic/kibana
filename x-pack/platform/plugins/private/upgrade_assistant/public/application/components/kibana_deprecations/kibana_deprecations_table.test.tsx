@@ -133,10 +133,11 @@ describe('KibanaDeprecationsTable', () => {
         />
       );
 
-      const filterButtons =
-        document.body.querySelectorAll<HTMLButtonElement>('button.euiFilterButton');
-      expect(filterButtons.length).toBeGreaterThanOrEqual(2);
-      fireEvent.click(filterButtons[0]);
+      const statusButton = document.body.querySelector<HTMLButtonElement>(
+        'button[aria-label="Status Selection"]'
+      );
+      expect(statusButton).not.toBeNull();
+      fireEvent.click(statusButton!);
       await waitFor(() => {
         const option = document.body.querySelector<HTMLElement>(
           '.euiSelectableListItem[title="Critical"]'
@@ -175,10 +176,11 @@ describe('KibanaDeprecationsTable', () => {
         />
       );
 
-      const filterButtons =
-        document.body.querySelectorAll<HTMLButtonElement>('button.euiFilterButton');
-      expect(filterButtons.length).toBeGreaterThanOrEqual(2);
-      fireEvent.click(filterButtons[1]);
+      const typeButton = document.body.querySelector<HTMLButtonElement>(
+        'button[aria-label="Type Selection"]'
+      );
+      expect(typeButton).not.toBeNull();
+      fireEvent.click(typeButton!);
       await waitFor(() => {
         const option = document.body.querySelector<HTMLElement>(
           '.euiSelectableListItem[title="Config"]'

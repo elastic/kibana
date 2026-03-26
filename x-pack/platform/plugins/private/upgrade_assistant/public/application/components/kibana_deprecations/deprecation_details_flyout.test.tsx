@@ -157,6 +157,34 @@ describe('DeprecationDetailsFlyout', () => {
       expect(screen.getByTestId('resolveButton')).toBeInTheDocument();
     });
 
+    it('SHOULD show loading/disabled resolve button when resolution is in progress', () => {
+      const deprecation = createFeatureDeprecation({
+        id: 'dep-in-progress',
+        level: 'critical',
+        correctiveActions: {
+          manualSteps: ['Step 1'],
+          api: { method: 'POST' as const, path: '/test' },
+        },
+      });
+
+      const resolutionState: DeprecationResolutionState = {
+        id: 'dep-in-progress',
+        resolveDeprecationStatus: 'in_progress',
+      };
+
+      renderWithProviders(
+        <DeprecationDetailsFlyout
+          deprecation={deprecation}
+          closeFlyout={mockCloseFlyout}
+          resolveDeprecation={mockResolveDeprecation}
+          deprecationResolutionState={resolutionState}
+        />
+      );
+
+      expect(screen.getByTestId('resolveButton')).toBeDisabled();
+      expect(screen.getByTestId('resolveButton')).toHaveTextContent('Resolution in progress');
+    });
+
     it('SHOULD call resolveDeprecation when resolve button is clicked', () => {
       const deprecation = createFeatureDeprecation({
         id: 'dep-resolve',
