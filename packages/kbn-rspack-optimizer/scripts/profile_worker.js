@@ -31,7 +31,7 @@ var Path = require('path');
 var Fs = require('fs');
 var getopts = require('getopts');
 var { ToolingLog, pickLevelFromFlags } = require('@kbn/tooling-log');
-var { runHybridBuild } = require('../src/run_hybrid_build');
+var { runBuild } = require('../src/run_build');
 
 var repoRoot = Path.resolve(__dirname, '../../..');
 
@@ -138,7 +138,7 @@ async function main() {
   var startTime = Date.now();
 
   try {
-    var result = await runHybridBuild({
+    var result = await runBuild({
       repoRoot: repoRoot,
       outputRoot: outputRoot,
       dist: dist,

@@ -21,9 +21,7 @@ import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
 import { getJsDependencyPaths, getRspackDependencyPaths } from './get_js_dependency_paths';
-import { getMFDependencyPaths } from './get_mf_dependency_paths';
 import { renderTemplate } from './render_template';
-import { renderMFTemplate } from './render_mf_template';
 import { getBundlesHref } from '../render_utils';
 
 export type BootstrapRendererFactory = (factoryOptions: FactoryOptions) => BootstrapRenderer;
@@ -54,17 +52,7 @@ interface RendererResult {
  * Check if RSPack mode is enabled via environment variable
  */
 export function isRspackModeEnabled(): boolean {
-  return (
-    process.env.KBN_USE_RSPACK === 'true' ||
-    process.env.KBN_USE_MODULE_FEDERATION === 'true'
-  );
-}
-
-/**
- * @deprecated Use isRspackModeEnabled instead
- */
-export function isMFModeEnabled(): boolean {
-  return isRspackModeEnabled();
+  return process.env.KBN_USE_RSPACK === 'true';
 }
 
 export const bootstrapRendererFactory: BootstrapRendererFactory = ({

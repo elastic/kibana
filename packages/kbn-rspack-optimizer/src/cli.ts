@@ -12,7 +12,7 @@ import { fork } from 'child_process';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog, pickLevelFromFlags } from '@kbn/tooling-log';
 import getopts from 'getopts';
-import { runHybridBuild } from './run_hybrid_build';
+import { runBuild } from './run_build';
 import type { ThemeTag } from './types';
 
 export interface CliOptions {
@@ -86,7 +86,7 @@ export async function runRspackCli(options: CliOptions = {}): Promise<void> {
 
     log.info('Building with RSPack unified compilation...');
 
-    const result = await runHybridBuild({
+    const result = await runBuild({
       repoRoot: REPO_ROOT,
       outputRoot: args['output-root'] ? Path.resolve(args['output-root']) : REPO_ROOT,
       watch: args.watch,

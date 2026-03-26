@@ -20,7 +20,7 @@
  * - Worker sends: { type: 'done', success: boolean, errors?: string[] }
  */
 
-import { runHybridBuild } from './run_hybrid_build';
+import { runBuild } from './run_build';
 import type { ThemeTag } from './types';
 
 interface StartMessage {
@@ -52,7 +52,7 @@ async function handleStart(options: StartMessage['options']) {
   const log = createWorkerLog() as any;
 
   try {
-    const result = await runHybridBuild({
+    const result = await runBuild({
       repoRoot: options.repoRoot,
       outputRoot: options.outputRoot || options.repoRoot,
       watch: options.watch,

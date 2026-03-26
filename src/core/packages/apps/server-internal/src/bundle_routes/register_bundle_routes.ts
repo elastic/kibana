@@ -22,10 +22,7 @@ import { registerRouteForBundle } from './bundles_route';
  * Check if RSPack mode is enabled via environment variable
  */
 function isRspackMode(): boolean {
-  return (
-    process.env.KBN_USE_RSPACK === 'true' ||
-    process.env.KBN_USE_MODULE_FEDERATION === 'true'
-  );
+  return process.env.KBN_USE_RSPACK === 'true';
 }
 
 /**

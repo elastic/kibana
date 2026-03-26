@@ -37,7 +37,7 @@ export { themeLoader } from './loaders';
 export { getExternals } from './config/externals';
 
 // Build runner
-export { runHybridBuild, type HybridBuildOptions, type HybridBuildResult } from './run_hybrid_build';
+export { runBuild, type BuildOptions, type BuildResult } from './run_build';
 
 // CLI
 export { runRspackCli, type CliOptions } from './cli';

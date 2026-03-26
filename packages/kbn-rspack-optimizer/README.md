@@ -1,253 +1,208 @@
 # @kbn/rspack-optimizer
 
-RSPack-based bundler for Kibana platform plugins with **optimal bundle sizes** and **isolated build support**.
+RSPack-based bundler for Kibana platform plugins. Builds core and all plugins in a single unified compilation using RSPack's Rust-based engine.
 
-## Key Features
+## Architecture
 
-- **Zero Code Duplication**: Shared deps (React, EUI, lodash) bundled ONCE
-- **Tiny Plugin Bundles**: Plugins contain ONLY their own code (~50-100KB each)
-- **Isolated Builds**: Rebuild ONE plugin without rebuilding everything
-- **External Plugin Support**: Third-party plugins can be built separately
-- **10-20x Faster**: RSPack's Rust-based compilation
-
-## Architecture: Hybrid Mode (Default)
+The optimizer uses a **unified single-compilation** model:
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    HYBRID ARCHITECTURE                           │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  Phase 1: Shared Container (auto-discovered, smart-chunked)     │
-│  ┌─────────────────────────────────────────────────────────────┐│
-│  │  kbn-shared/                                                 ││
-│  │  ├── remoteEntry.js        (container entry)                ││
-│  │  ├── shared-react.js       (~500 KB) ← React ecosystem      ││
-│  │  ├── shared-elastic.js     (~1.5 MB) ← @elastic/*          ││
-│  │  ├── shared-utils.js       (~500 KB) ← lodash, moment       ││
-│  │  ├── shared-state.js       (~200 KB) ← rxjs, redux          ││
-│  │  ├── shared-monaco.js      (~1 MB)   ← Monaco (lazy)        ││
-│  │  ├── shared-kbn-core.js    (~300 KB) ← Core @kbn/*          ││
-│  │  └── shared-kbn.js         (~500 KB) ← Other @kbn/*         ││
-│  └─────────────────────────────────────────────────────────────┘│
-│                                                                  │
-│  Phase 2: Plugin Bundles (externals → shared container)         │
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐               │
-│  │  dashboard  │ │  discover   │ │    maps     │  ...          │
-│  │   ~50 KB    │ │   ~80 KB    │ │  ~120 KB    │               │
-│  │ Only plugin │ │ Only plugin │ │ Only plugin │               │
-│  │ code!       │ │ code!       │ │ code!       │               │
-│  └─────────────┘ └─────────────┘ └─────────────┘               │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│                    UNIFIED COMPILATION                            │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  Generated Entry (kibana-unified-entry.js)                       │
+│  ┌─────────────────────────────────────────────────────────────┐ │
+│  │  Phase 1 (sync):  Core                                      │ │
+│  │  Phase 2 (async): All plugins via import()                  │ │
+│  └─────────────────────────────────────────────────────────────┘ │
+│                         │                                         │
+│                    RSPack builds                                  │
+│                         │                                         │
+│  ┌─────────────────────────────────────────────────────────────┐ │
+│  │  target/public/bundles/                                      │ │
+│  │  ├── kibana.bundle.js        (main entry + runtime)         │ │
+│  │  └── chunks/                                                 │ │
+│  │      ├── vendors-heavy.abc123.js   (maplibre, ace, etc.)    │ │
+│  │      ├── 1a2b3c4d.js              (async plugin chunks)     │ │
+│  │      └── ...                                                 │ │
+│  └─────────────────────────────────────────────────────────────┘ │
+│                                                                   │
+│  Externals (NOT bundled - served separately by webpack):         │
+│  ┌─────────────────────────────────────────────────────────────┐ │
+│  │  @kbn/ui-shared-deps-npm  (react, @elastic/eui, lodash...) │ │
+│  │  @kbn/ui-shared-deps-src  (@kbn/i18n, @emotion/react...)   │ │
+│  └─────────────────────────────────────────────────────────────┘ │
+│                                                                   │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
-### Auto-Discovery
+### How it works
 
-Shared deps are **automatically discovered** by scanning plugin `package.json` files:
+1. **Plugin discovery** scans known plugin directories and collects all plugins with a `public/index.{ts,tsx}` entry.
 
-- **Core deps** always included (React, EUI, rxjs - defined as singletons)
-- **Auto-discovered** packages used by 2+ plugins
-- **@kbn/* packages** automatically included if widely used
+2. **Entry generation** creates `target/.rspack-entry-wrappers/kibana-unified-entry.js` which synchronously imports core and asynchronously imports all plugins via `import()`.
 
-### Smart Chunking
+3. **Single RSPack invocation** compiles everything together. Shared dependencies (React, EUI, lodash, etc.) are **externalized** -- they are provided at runtime by `@kbn/ui-shared-deps-npm` and `@kbn/ui-shared-deps-src`, which are built separately by webpack and served as `<script>` tags before `kibana.bundle.js`.
 
-| Chunk | Contents | Cache Strategy |
-|-------|----------|----------------|
-| `shared-react` | React, Emotion | Long TTL (rarely changes) |
-| `shared-elastic` | @elastic/eui, charts | Medium TTL |
-| `shared-utils` | lodash, moment | Long TTL |
-| `shared-state` | rxjs, redux | Long TTL |
-| `shared-monaco` | Monaco editor | Lazy loaded |
-| `shared-kbn-core` | @kbn/i18n, std | Short TTL (changes often) |
-| `shared-kbn` | Other @kbn/* | Short TTL |
+4. **Chunk splitting** is handled automatically by RSPack's `splitChunks` configuration. Heavy vendor libraries (maplibre-gl, ace-builds, vega, etc.) are split into separate async chunks. Common code used by 3+ plugins is also extracted.
 
-Benefits:
-- **Parallel loading**: Browser loads chunks in parallel
-- **Better caching**: React rarely changes, @kbn/* changes often
-- **Lazy loading**: Monaco only loaded when needed
+5. **Cache busting** is handled by Kibana's `shaDigest` path-based mechanism for all static assets, so output filenames do not need content hashes (except async chunks, which use `[contenthash:8]`).
 
-## Bundle Size Comparison
+### Externals
 
-| Approach | Shared | dashboard | discover | Total |
-|----------|--------|-----------|----------|-------|
-| **Hybrid (this)** | 4 MB | 50 KB | 80 KB | ~4.3 MB |
-| MF (no externals) | - | 1.5 MB | 1.8 MB | ~15+ MB |
-| Webpack DLL | 3 MB | 60 KB | 90 KB | ~4.5 MB |
+Shared dependencies are NOT bundled into `kibana.bundle.js`. They are externalized to `__kbnSharedDeps__` and `__kbnSharedDeps_npm__` globals, which are loaded from separately-built bundles. This avoids duplicating React, EUI, and other large libraries. The full list is in `src/config/externals.ts`.
 
 ## Usage
 
-### Full Build (Default)
+### CLI
 
 ```bash
-# Build everything: shared container + all plugins
-yarn build:rspack --dist
+# Full production build (minified, no source maps)
+node scripts/build_rspack_bundles.js --dist
 
-# Development with watch
-yarn build:rspack --watch
+# Development with watch mode
+node scripts/build_rspack_bundles.js --watch
 
-# Or via environment variable
+# Or via environment variable (dev mode)
 KBN_USE_RSPACK=true yarn start
 ```
 
-### Isolated Plugin Build
+### CLI Options
 
-Rebuild specific plugins WITHOUT rebuilding everything:
+```
+Build Options:
+  --watch, -w           Enable watch mode for development
+  --dist                Build for distribution (minified, no source maps)
+  --examples            Include example plugins
+  --test-plugins        Include test plugins
+  --filter <ids>        Comma-separated plugin IDs to exclude
+  --plugins, -p <ids>   Build only these plugins (for external plugins)
+  --themes <tags>       Comma-separated theme tags to build (default: all)
+  --output-root <dir>   Output root directory (default: repo root)
+  --no-cache            Disable filesystem caching
 
-```bash
-# Rebuild ONLY dashboard (requires prior full build)
-yarn build:rspack --plugins=dashboard --dist
+Profile Mode (one-time build with bundle analysis):
+  --profile             Full profiling with stats.json + RsDoctor report
+  --profile-stats-only  Fast profiling with stats.json only (skips RsDoctor)
+                        Note: --watch is ignored in profile mode
 
-# Rebuild multiple plugins
-yarn build:rspack --plugins=dashboard,discover,maps --dist
+Output Options:
+  --verbose             Verbose output (includes debug messages)
+  --quiet               Quiet output (errors only)
+  --help, -h            Show help message
 ```
 
-**Requirements:**
-- Full build must exist first (creates shared container)
-- Output is 100% compatible with existing bundles
+### Profiling
 
-**Use Cases:**
-- PR only changed `discover` → `--plugins=discover` (5 seconds vs 60 seconds)
-- Third-party plugin development
-- Hot-swap plugins in development
-
-### External Plugin Build
-
-Third-party developers can build plugins:
+Generate bundle analysis data to identify optimization opportunities:
 
 ```bash
-# Build external plugin against Kibana's shared container
+# Full profiling: stats.json + RsDoctor interactive report
+node scripts/build_rspack_bundles.js --profile
+
+# Quick profiling: stats.json only (faster, no RsDoctor)
+node scripts/build_rspack_bundles.js --profile-stats-only
+
+# Profile a production build
+node scripts/build_rspack_bundles.js --dist --profile
+```
+
+After profiling, analyze the output:
+
+- **stats.json**: Upload to [Statoscope](https://statoscope.tech/) or use `webpack-bundle-analyzer`
+- **RsDoctor**: Opens an interactive report with build timing, module graph, and duplicate detection
+
+Profiling runs in an isolated worker process with extra memory (8 GB) to handle the large stats output.
+
+## Persistent Caching
+
+The optimizer uses RSPack's persistent filesystem cache for fast rebuilds between restarts:
+
+- **Cache location**: `node_modules/.cache/.rspack-cache/{dev|dist}/`
+- **Separate caches**: Dev and dist builds use isolated cache directories to prevent stale cache issues
+- **Invalidation**: Cache version includes a hash of all config files (`externals.ts`, `shared_config.ts`, etc.) so config changes automatically invalidate the cache
+- **Disable**: Use `--no-cache` to skip caching entirely
+- **Clear all**: `rm -rf node_modules/.cache/.rspack-cache`
+
+## Watch Mode
+
+In watch mode (`--watch`), the initial build shows full progress details. Subsequent rebuilds produce a single summary line:
+
+```
+succ  Rebuilt 211 entries in 2.3s (68.2 MB)
+```
+
+The `PluginWatchPlugin` monitors `kibana.jsonc` files and automatically regenerates the entry when plugins are added or removed.
+
+## Production Optimizations
+
+When building with `--dist`:
+
+- **Minification**: SWC-based JS minification targeting ES2020 (safe per `.browserslistrc`)
+- **Tree shaking**: `usedExports` + `sideEffects` for dead code elimination
+- **Scope hoisting**: `concatenateModules` for smaller output
+- **Deterministic IDs**: Stable module/chunk IDs for consistent caching
+- **No source maps**: Omitted in production for smaller bundles
+
+## External Plugin Builds
+
+Third-party plugins can be built against Kibana's shared dependencies using `createExternalPluginConfig`:
+
+```bash
 node /path/to/kibana/scripts/build_rspack_bundles.js \
   --plugins=my_custom_plugin \
   --dist
 ```
 
-Output can be dropped into `kibana/plugins/` and works with any Kibana of the same major version.
-
-## CLI Options
-
-```bash
-yarn build:rspack [options]
-
-Options:
-  --watch, -w           Watch mode for development
-  --dist                Production build (minified)
-  --plugins, -p <ids>   Build ONLY these plugins (isolated build)
-  --focus <ids>         Include specific plugins in full build
-  --filter <ids>        Exclude specific plugins
-  --examples            Include example plugins
-  --test-plugins        Include test plugins
-  --single              Force single compilation (no isolated support)
-  --legacy              Use legacy bundle-refs mode
-  --no-cache            Disable filesystem caching
-  --help, -h            Show help
-```
-
-## Shared Dependencies
-
-The following are bundled ONCE in the shared container:
-
-**Core (singletons):**
-- react, react-dom
-- @emotion/react, @emotion/cache
-- rxjs, redux, react-redux, @reduxjs/toolkit
-- moment, moment-timezone
-
-**Elastic UI:**
-- @elastic/eui, @elastic/charts
-- @elastic/datemath, @elastic/numeral
-
-**Utilities:**
-- lodash, classnames, uuid, tslib
-- history, query-string
-- io-ts, fp-ts
-
-**Kibana Packages:**
-- @kbn/i18n, @kbn/i18n-react
-- @kbn/es-query, @kbn/es-types
-- @kbn/monaco, @kbn/code-editor
-- @kbn/std, @kbn/utility-types
-- ... and 30+ more
-
 ## Programmatic API
 
 ```typescript
-import { runHybridBuild } from '@kbn/rspack-optimizer';
+import { runBuild } from '@kbn/rspack-optimizer';
 
-// Full build
-const result = await runHybridBuild({
+const result = await runBuild({
   repoRoot: '/path/to/kibana',
   dist: true,
+  watch: false,
 });
 
-// Isolated build
-const result = await runHybridBuild({
-  repoRoot: '/path/to/kibana',
-  plugins: ['dashboard', 'discover'],
-  dist: true,
-});
-
-console.log(result.pluginBundleSizes);
-// { dashboard: 52000, discover: 81000 }
+if (result.success) {
+  console.log('Build completed');
+} else {
+  console.error('Build failed:', result.errors);
+}
 ```
 
-## Performance
+### Key exports
 
-| Operation | Time |
-|-----------|------|
-| Full build (cold) | ~60-90 seconds |
-| Full build (cached) | ~30-45 seconds |
-| Isolated build (1 plugin) | ~5-15 seconds |
-| Watch rebuild | ~2-5 seconds |
-
-## How It Works
-
-1. **Shared Container** (`kbn-shared/remoteEntry.js`)
-   - Built using Module Federation as a container
-   - Exposes all shared dependencies
-   - Loaded ONCE at runtime, shared by all plugins
-
-2. **Plugin Bundles** (`{plugin}/remoteEntry.js`)
-   - Built with externals pointing to shared container
-   - Zero shared dependency code
-   - MF remotes for cross-plugin imports
-
-3. **Isolated Builds**
-   - Reuse existing shared container
-   - Only rebuild specified plugins
-   - Output is drop-in compatible
-
-## Extending Shared Dependencies
-
-To add a new package to the shared container:
-
-```typescript
-// packages/kbn-rspack-optimizer/src/config/shared_deps.ts
-
-export const UTIL_DEPS: SharedDep[] = [
-  // ... existing
-  { name: 'my-new-package', singleton: false },
-];
-```
-
-Then run a full build to include it in the container.
-
-## Migration from @kbn/optimizer
-
-1. **No code changes needed** - Plugin code works as-is
-2. **Same output location** - `target/public/bundles/`
-3. **Same CI scripts** - Just change the build command
-
-```bash
-# Before
-node scripts/build_kibana_platform_plugins.js
-
-# After
-node scripts/build_rspack_bundles.js --dist
-```
+| Export | Description |
+|--------|-------------|
+| `runBuild` | Run the unified RSPack build |
+| `BuildOptions` | Options for `runBuild` |
+| `BuildResult` | Result from `runBuild` (success, errors, close fn) |
+| `runRspackCli` | CLI entry point |
+| `RspackOptimizer` | Dev-mode optimizer class (used by `kbn-cli-dev-mode`) |
+| `createSingleCompileConfig` | Generate RSPack config for unified build |
+| `createExternalPluginConfig` | Generate RSPack config for external plugins |
+| `getExternals` | Shared dependency externals mapping |
+| `discoverPlugins` | Scan directories for Kibana plugins |
 
 ## Environment Variables
 
 | Variable | Description |
 |----------|-------------|
-| `KBN_USE_RSPACK=true` | Use RSPack optimizer in dev mode |
-| `KBN_RSPACK_LEGACY=true` | Use legacy bundle-refs mode |
+| `KBN_USE_RSPACK=true` | Use RSPack optimizer in dev mode instead of webpack |
+
+## Migration from @kbn/optimizer
+
+1. No plugin code changes needed -- plugin source works as-is
+2. Same output location -- `target/public/bundles/`
+3. Same CI approach -- swap the build command
+
+```bash
+# Before (webpack)
+node scripts/build_kibana_platform_plugins.js
+
+# After (RSPack)
+node scripts/build_rspack_bundles.js --dist
+```

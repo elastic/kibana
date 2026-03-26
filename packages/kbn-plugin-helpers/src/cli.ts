@@ -23,7 +23,7 @@ import { loadConfig } from './config';
  * Check if RSPack mode is enabled via environment variable
  */
 function isRspackMode(): boolean {
-  return process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_MODULE_FEDERATION === 'true';
+  return process.env.KBN_USE_RSPACK === 'true';
 }
 
 export function runCli() {

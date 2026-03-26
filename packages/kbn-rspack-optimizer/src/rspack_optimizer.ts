@@ -13,7 +13,6 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { ThemeTag } from './types';
 
 export type OptimizerPhase = 'initializing' | 'running' | 'success' | 'issue' | 'error' | 'idle';
-export type BuildMode = 'hybrid' | 'single';
 
 export interface RspackOptimizerOptions {
   repoRoot: string;
@@ -22,8 +21,6 @@ export interface RspackOptimizerOptions {
   dist?: boolean;
   examples?: boolean;
   themeTags?: ThemeTag[];
-  /** Build mode: 'hybrid' (default, optimal) or 'single' (fastest, no isolated builds) */
-  mode?: BuildMode;
   log: ToolingLog;
 }
 

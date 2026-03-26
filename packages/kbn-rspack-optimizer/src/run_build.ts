@@ -14,7 +14,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { createSingleCompileConfig } from './config/create_single_compile_config';
 import type { ThemeTag } from './types';
 
-export interface HybridBuildOptions {
+export interface BuildOptions {
   repoRoot: string;
   outputRoot?: string;
   dist?: boolean;
@@ -32,7 +32,7 @@ export interface HybridBuildOptions {
   profileStatsOnly?: boolean;
 }
 
-export interface HybridBuildResult {
+export interface BuildResult {
   success: boolean;
   errors?: string[];
   warnings?: string[];
@@ -44,15 +44,14 @@ export interface HybridBuildResult {
 }
 
 /**
- * Run RSPack build using SINGLE COMPILATION for all plugins.
+ * Run RSPack build using a single unified compilation for all plugins.
  *
- * This is faster and more reliable than batched multi-compilation:
  * - All plugins built in one RSPack run
  * - Shared dependencies parsed only once
  * - Better chunk optimization
  * - Compatible with external plugin builds
  */
-export async function runHybridBuild(options: HybridBuildOptions): Promise<HybridBuildResult> {
+export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   const {
     repoRoot,
     outputRoot = repoRoot,
@@ -117,7 +116,7 @@ async function runProductionBuild(
   log: ToolingLog | undefined,
   startTime: number,
   repoRoot: string
-): Promise<HybridBuildResult> {
+): Promise<BuildResult> {
   return new Promise((resolve) => {
     compiler.run((err, stats) => {
       const duration = (Date.now() - startTime) / 1000;
@@ -163,13 +162,12 @@ async function runWatchBuild(
   log: ToolingLog | undefined,
   startTime: number,
   repoRoot: string
-): Promise<HybridBuildResult> {
+): Promise<BuildResult> {
   return new Promise((resolve) => {
     let isFirstBuild = true;
     let hasResolvedFirstBuild = false;
     let isShuttingDown = false;
 
-    // Create close function that can be called externally
     const closeWatcher = (): Promise<void> => {
       if (isShuttingDown) {
         return Promise.resolve();
@@ -178,13 +176,10 @@ async function runWatchBuild(
 
       log?.info('Stopping RSPack watch mode...');
 
-      // Start closing the watcher (don't wait - it waits for compilation to finish)
       watching.close(() => {
         log?.info('RSPack watch mode stopped.');
       });
       
-      // Return immediately - don't wait for close to complete
-      // The process will exit and clean up
       return Promise.resolve();
     };
 
@@ -265,12 +260,10 @@ async function runWatchBuild(
         }
       }
     );
-
-    // Store watcher reference for external cleanup via close function
   });
 }
 
-interface ProcessStatsResult extends HybridBuildResult {
+interface ProcessStatsResult extends BuildResult {
   entryCount?: number;
   totalSize?: number;
   compilationTime?: number;

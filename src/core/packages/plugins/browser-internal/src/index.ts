@@ -16,11 +16,5 @@ export type {
 } from './plugins_service';
 
 // Plugin reader exports
-export { read, readMF, readPlugin, isMFMode } from './plugin_reader';
-export type {
-  PluginDefinition,
-  UnknownPluginInitializer,
-  CoreWindow,
-  MFCoreWindow,
-  KbnMFRuntime,
-} from './plugin_reader';
+export { read } from './plugin_reader';
+export type { PluginDefinition, UnknownPluginInitializer, CoreWindow } from './plugin_reader';
