@@ -55,6 +55,7 @@ export type {
   SidebarAppDefinition,
   SidebarSetup,
   SidebarStart,
+  ChromeNextHeaderBack,
   ChromeNextHeaderConfig,
   ChromeNextHeaderMetadataItem,
   ChromeNextHeaderGlobalActions,

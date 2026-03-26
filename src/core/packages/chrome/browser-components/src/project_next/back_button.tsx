@@ -13,8 +13,9 @@ import React, { useMemo } from 'react';
 import { useBackButton } from './hooks';
 
 /**
- * Back control for Chrome-Next project header: links to the first project breadcrumb
- * when there are ≥2 crumbs and the root has an `href`. Renders nothing otherwise.
+ * Back control for Chrome-Next project header: uses explicit `chrome.next.header` `back` when
+ * set; otherwise the last non-last project breadcrumb with an `href` (≥2 crumbs; scanning
+ * right to left). Renders nothing when neither applies.
  */
 export const ProjectNextBackButton = React.memo(() => {
   const back = useBackButton();

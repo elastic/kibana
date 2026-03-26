@@ -54,6 +54,19 @@ export interface ChromeNextHeaderConfig {
    * TODO: Consider strict type independent from `@kbn/core-chrome-app-menu-components`
    */
   appMenu?: AppMenuConfigNext;
+
+  /**
+   * Optional explicit back navigation for the Chrome-Next header back control.
+   * When `href` is set, overrides breadcrumb-derived back destination.
+   */
+  back?: ChromeNextHeaderBack;
+}
+
+/** Explicit back target for {@link ChromeNextHeaderConfig.back}. */
+export interface ChromeNextHeaderBack {
+  href: string;
+  /** Destination name for accessibility (e.g. "Back to {label}"). */
+  label?: string;
 }
 
 export interface ChromeNextHeaderMetadataItem {

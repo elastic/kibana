@@ -8,28 +8,46 @@
  */
 
 import { useMemo } from 'react';
-import { useProjectBreadcrumbs } from '../../shared/chrome_hooks';
+import { useNextHeader, useProjectBreadcrumbs } from '../../shared/chrome_hooks';
 import { getBreadcrumbPlainText } from '../../shared/breadcrumb_utils';
 
 export interface BackNavigation {
   backHref: string;
-  /** Plain-text title of the root crumb (for `aria-label` on the back control). */
+  /** Plain-text title of the destination crumb (for `aria-label` on the back control). */
   backDestinationLabel?: string;
 }
 
 /**
- * When there are ≥2 project breadcrumbs, exposes the first crumb's `href` for the back control.
- * Returns `undefined` if the root has no `href` (e.g. popover-only crumb).
+ * Resolution: explicit `chrome.next.header` `back.href` (and optional `back.label`) → else the
+ * last non-last project breadcrumb with a truthy `href` (scanning right to left). Returns
+ * `undefined` if neither applies.
  */
 export function useBackButton(): BackNavigation | undefined {
+  const config = useNextHeader();
   const breadcrumbs = useProjectBreadcrumbs();
 
-  const rootCrumb = breadcrumbs.length >= 2 ? breadcrumbs[0] : undefined;
-  const backHref = rootCrumb?.href;
-  const backDestinationLabel = rootCrumb ? getBreadcrumbPlainText(rootCrumb) : undefined;
-
   return useMemo(() => {
-    if (!backHref) return undefined;
-    return { backHref, backDestinationLabel };
-  }, [backHref, backDestinationLabel]);
+    const explicitHref = config?.back?.href?.trim();
+    if (explicitHref) {
+      return {
+        backHref: explicitHref,
+        backDestinationLabel: config?.back?.label,
+      };
+    }
+
+    if (breadcrumbs.length < 2) {
+      return undefined;
+    }
+    for (let i = breadcrumbs.length - 2; i >= 0; i--) {
+      const crumb = breadcrumbs[i];
+      const href = crumb.href;
+      if (href) {
+        return {
+          backHref: href,
+          backDestinationLabel: getBreadcrumbPlainText(crumb),
+        };
+      }
+    }
+    return undefined;
+  }, [breadcrumbs, config]);
 }

@@ -61,6 +61,7 @@ export type {
 } from './sidebar';
 
 export type {
+  ChromeNextHeaderBack,
   ChromeNextHeaderConfig,
   ChromeNextHeaderMetadataItem,
   ChromeNextHeaderGlobalActions,
