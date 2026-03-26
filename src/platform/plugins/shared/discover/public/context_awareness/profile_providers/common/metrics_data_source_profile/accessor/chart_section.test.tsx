@@ -29,13 +29,11 @@ import {
   useCurrentTabAction,
   useInternalStateDispatch,
 } from '../../../../../application/main/state_management/redux';
-import { useScopedServices } from '../../../../../components/scoped_services_provider/scoped_services_provider';
 
 type UnifiedGridProps = ChartSectionProps & {
   actions: ChartSectionConfigurationExtensionParams['actions'];
   breakdownField?: string;
   onBreakdownFieldChange?: (fieldName?: string) => void;
-  onMetricsTelemetryReported?: (payload: unknown) => void;
 };
 
 let unifiedGridProps: UnifiedGridProps | undefined;
@@ -55,12 +53,6 @@ jest.mock('../../../../../application/main/state_management/redux', () => ({
   useCurrentTabAction: jest.fn(),
   useInternalStateDispatch: jest.fn(),
 }));
-
-jest.mock('../../../../../components/scoped_services_provider/scoped_services_provider', () => ({
-  useScopedServices: jest.fn(),
-}));
-
-const trackMetricsInfoTelemetryMock = jest.fn();
 
 const mockDispatch = jest.fn();
 const mockUpdateAppStateAction = jest.fn((payload) => ({ type: 'updateAppState', payload }));
@@ -103,7 +95,7 @@ const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
     throw new Error('Expected chart section configuration to replace the default chart.');
   }
 
-  return render(<>{config.renderChartSection(createChartSectionProps(overrides))}</>);
+  render(<>{config.renderChartSection(createChartSectionProps(overrides))}</>);
 };
 
 describe('MetricsExperienceGridWrapper', () => {
@@ -114,14 +106,8 @@ describe('MetricsExperienceGridWrapper', () => {
     );
     (useInternalStateDispatch as jest.Mock).mockReturnValue(mockDispatch);
     (useCurrentTabAction as jest.Mock).mockReturnValue(mockUpdateAppStateAction);
-    (useScopedServices as jest.Mock).mockReturnValue({
-      scopedEBTManager: {
-        trackMetricsInfoTelemetry: trackMetricsInfoTelemetryMock,
-      },
-    });
     mockDispatch.mockClear();
     mockUpdateAppStateAction.mockClear();
-    trackMetricsInfoTelemetryMock.mockClear();
   });
 
   it('should not prevent default when onFilter is provided', () => {
