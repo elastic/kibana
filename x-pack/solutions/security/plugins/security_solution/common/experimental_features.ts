@@ -184,10 +184,6 @@ export const allowedExperimentalValues = Object.freeze({
   automaticDashboardsMigration: true,
 
   /**
-   * Enables the SIEM Readiness Dashboard feature
-   */
-  siemReadinessDashboard: false,
-  /**
    * Enables Microsoft Defender for Endpoint's Cancel command
    * Release: 9.2.0
    */
