@@ -34,7 +34,7 @@ describe('TemplateFormHeader', () => {
   it('renders the title', () => {
     renderWithTestingProviders(<TemplateFormHeader {...defaultProps} />);
 
-    expect(screen.getByRole('heading', { name: 'Test Template' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Test Template', level: 1 })).toBeInTheDocument();
   });
 
   it('renders back button with correct label', () => {
