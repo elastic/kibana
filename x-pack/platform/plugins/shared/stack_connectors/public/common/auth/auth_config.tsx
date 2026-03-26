@@ -106,35 +106,41 @@ export const AuthConfig: FunctionComponent<Props> = ({
   useEffect(() => {
     if (loadingHeaders) return;
 
-    const currentFormData = getFormData();
-    const updates: Record<string, unknown> = { ...currentFormData.__internal__ };
-    let needsUpdate = false;
-
+    const formData = getFormData();
     const secretHeaderKeysSet = new Set(secretHeaderKeys);
-    const currentHeaders: Array<InternalFormData> = (
-      currentFormData.__internal__?.headers ?? []
-    ).map((header: InternalFormData) => {
-      if (secretHeaderKeysSet.has(header.key)) {
-        return { ...header, value: '', type: 'secret' };
+    const currentHeaders: Array<InternalFormData> = (formData.__internal__?.headers ?? []).map(
+      (header: InternalFormData) => {
+        if (secretHeaderKeysSet.has(header.key)) {
+          return { ...header, value: '', type: 'secret' };
+        }
+        return header;
       }
-      return header;
-    });
-    const currentHeadersKeysSet = new Set(currentHeaders.map((h) => h.key));
+    );
+    const currentHeadersKeysSet = new Set(currentHeaders.map((header) => header.key));
     const newSecretHeaders = secretHeaderKeys
       .filter((key) => !currentHeadersKeysSet.has(key))
       .map((key) => ({ key, value: '', type: 'secret' }));
+
     let mergedHeaders: Array<InternalFormData> = [...currentHeaders, ...newSecretHeaders];
+
     if (mergedHeaders.length === 0 && hasHeaders) {
       mergedHeaders = [{ key: '', value: '', type: 'config' }];
     }
-    if (!isEqual(currentHeaders, mergedHeaders)) {
-      updates.headers = mergedHeaders;
-      if (!isModified) updates.hasHeaders = mergedHeaders.length > 0;
-      needsUpdate = true;
-    }
 
-    if (needsUpdate) {
-      updateFieldValues({ __internal__: updates });
+    if (!isEqual(currentHeaders, mergedHeaders)) {
+      updateFieldValues({
+        __internal__: {
+          ...formData.__internal__,
+          /*
+           * If the user modifies the form, whatever is returned from useSecretHeaders
+           * might not be up to date.
+           *
+           * Has headers can only be uptaded on first render or after the form is submitted.
+           * */
+          ...(!isModified && { hasHeaders: mergedHeaders.length > 0 }),
+          headers: mergedHeaders,
+        },
+      });
     }
   }, [
     connectorId,

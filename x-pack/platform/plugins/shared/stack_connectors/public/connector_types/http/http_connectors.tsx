@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import {
   UseField,
   useFormContext,
   useFormData,
-  useFormIsModified,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   CardRadioGroupField,
@@ -27,7 +26,6 @@ import {
   type ActionConnectorFieldsProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
-import { isEqual } from 'lodash';
 import { useSecretQueryParams } from '../../common/auth/use_secret_query_params';
 import { QueryParamFields } from '../../common/auth/query_param_fields';
 import * as i18n from './translations';
@@ -88,15 +86,9 @@ const HttpActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
     services: { isWebhookSslWithPfxEnabled: isPfxEnabled },
   } = useConnectorContext();
 
-  const isModified = useFormIsModified();
   const { getFieldDefaultValue, getFormData, updateFieldValues } = useFormContext();
   const [{ config, __internal__, id: connectorId }] = useFormData({
-    watch: [
-      'config.hasProxyAuth',
-      '__internal__.hasProxy',
-      '__internal__.hasQueryParams',
-      '__internal__.queryParams',
-    ],
+    watch: ['config.hasProxyAuth', '__internal__.hasProxy', '__internal__.hasQueryParams'],
   });
 
   const {
@@ -106,6 +98,7 @@ const HttpActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
   } = useSecretQueryParams(connectorId);
 
   const loadingQueryParams = isLoadingQueryParams || isFetchingQueryParams;
+  const queryParamsHydratedRef = useRef(false);
 
   // TODO: remove this check once the intermediate release is complete
   const supportsProxySettings = !isEdit || getFieldDefaultValue('config.proxyUrl') !== undefined;
@@ -114,50 +107,26 @@ const HttpActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
   const hasQueryParams = __internal__?.hasQueryParams ?? false;
 
   useEffect(() => {
-    if (loadingQueryParams) return;
+    if (loadingQueryParams || queryParamsHydratedRef.current) return;
+
+    if (secretQueryParamKeys.length === 0) {
+      queryParamsHydratedRef.current = true;
+      return;
+    }
 
     const currentFormData = getFormData();
-    const updates: Record<string, unknown> = { ...currentFormData.__internal__ };
-    let needsUpdate = false;
+    const queryParams = secretQueryParamKeys.map((key) => ({ key, value: '' }));
 
-    const secretQueryParamKeysSet = new Set(secretQueryParamKeys);
-    const currentQueryParams: Array<{ key: string; value: string }> = (
-      currentFormData.__internal__?.queryParams ?? []
-    ).map((param: { key: string; value: string }) => {
-      if (secretQueryParamKeysSet.has(param.key)) {
-        return { ...param, value: '' };
-      }
-      return param;
+    updateFieldValues({
+      __internal__: {
+        ...currentFormData.__internal__,
+        hasQueryParams: true,
+        queryParams,
+      },
     });
-    const currentQueryParamKeysSet = new Set(currentQueryParams.map((p) => p.key));
-    const newSecretQueryParams = secretQueryParamKeys
-      .filter((key) => !currentQueryParamKeysSet.has(key))
-      .map((key) => ({ key, value: '' }));
-    let mergedQueryParams: Array<{ key: string; value: string }> = [
-      ...currentQueryParams,
-      ...newSecretQueryParams,
-    ];
-    if (mergedQueryParams.length === 0 && hasQueryParams) {
-      mergedQueryParams = [{ key: '', value: '' }];
-    }
-    if (!isEqual(currentQueryParams, mergedQueryParams)) {
-      updates.queryParams = mergedQueryParams;
-      if (!isModified) updates.hasQueryParams = mergedQueryParams.length > 0;
-      needsUpdate = true;
-    }
 
-    if (needsUpdate) {
-      updateFieldValues({ __internal__: updates });
-    }
-  }, [
-    connectorId,
-    getFormData,
-    secretQueryParamKeys,
-    updateFieldValues,
-    hasQueryParams,
-    loadingQueryParams,
-    isModified,
-  ]);
+    queryParamsHydratedRef.current = true;
+  }, [secretQueryParamKeys, loadingQueryParams, getFormData, updateFieldValues]);
 
   const proxyAuthOptions = [
     {

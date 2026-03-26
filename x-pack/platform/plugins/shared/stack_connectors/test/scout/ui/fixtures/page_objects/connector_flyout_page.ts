@@ -10,45 +10,44 @@ import type { ScoutPage, Locator } from '@kbn/scout';
 export class ConnectorFlyoutPage {
   constructor(public readonly page: ScoutPage) {}
 
-  async gotoConnectorsList() {
+  public async gotoConnectorsList() {
     await this.page.gotoApp('management/insightsAndAlerting/triggersActionsConnectors');
   }
 
-  get queryParamsToggle(): Locator {
+  public get queryParamsToggle(): Locator {
     return this.page.testSubj.locator('httpQueryParamsSwitch');
   }
 
-  get queryParamKeyInputs(): Locator {
+  public get queryParamKeyInputs(): Locator {
     return this.page.testSubj.locator('httpQueryParamKeyInput');
   }
 
-  get queryParamValueInputs(): Locator {
+  public get queryParamValueInputs(): Locator {
     return this.page.testSubj.locator('httpQueryParamValueInput');
   }
 
-  get queryParamDeleteButtons(): Locator {
+  public get queryParamDeleteButtons(): Locator {
     return this.page.testSubj.locator('httpRemoveQueryParamButton');
   }
 
-  get addQueryParamButton(): Locator {
+  public get addQueryParamButton(): Locator {
     return this.page.testSubj.locator('httpAddQueryParamButton');
   }
 
-  get saveFlyoutButton(): Locator {
+  public get saveFlyoutButton(): Locator {
     return this.page.testSubj.locator('create-connector-flyout-save-btn');
   }
 
-  get editFlyoutSaveButton(): Locator {
+  public get editFlyoutSaveButton(): Locator {
     return this.page.testSubj.locator('edit-connector-flyout-save-btn');
   }
 
-  async openEditConnectorFlyout(connectorName: string) {
-    const row = this.page.locator(`tr:has-text("${connectorName}")`);
-    await row.locator('button[data-test-subj="edit"]').click();
+  public async openEditConnectorFlyout(connectorName: string) {
+    await this.page.locator(`button:has-text("${connectorName}")`).click();
     await this.page.testSubj.waitForSelector('edit-connector-flyout', { state: 'visible' });
   }
 
-  async waitForQueryParamsLoaded() {
+  public async waitForQueryParamsLoaded() {
     await this.queryParamsToggle.waitFor({ state: 'visible', timeout: 10000 });
   }
 }

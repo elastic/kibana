@@ -9,95 +9,91 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-const CONNECTOR_NAME = `Scout HTTP QP Bug Test ${Date.now()}`;
+const CONNECTOR_NAME = `ScoutQP${Date.now()}`;
 
-test.describe(
-  'HTTP connector secret query params bugs',
-  { tag: tags.stateful.classic },
-  () => {
-    let connectorId: string;
+test.describe('HTTP connector secret query params bugs', { tag: tags.stateful.classic }, () => {
+  let connectorId: string;
 
-    test.beforeAll(async ({ apiServices }) => {
-      const connector = await apiServices.alerting.connectors.create({
-        name: CONNECTOR_NAME,
-        connectorTypeId: '.http',
-        config: {
-          url: 'https://httpbin.org',
-          hasAuth: false,
-        },
-        secrets: {
-          secretQueryParams: { apiKey: 'secret-value', token: 'secret-token' },
-        },
-      });
-      connectorId = connector.id;
+  test.beforeAll(async ({ apiServices }) => {
+    const connector = await apiServices.alerting.connectors.create({
+      name: CONNECTOR_NAME,
+      connectorTypeId: '.http',
+      config: {
+        url: 'https://httpbin.org',
+        hasAuth: false,
+        authType: null,
+      },
+      secrets: {
+        secretQueryParams: { apiKey: 'secret-value', token: 'secret-token' },
+      },
     });
+    connectorId = connector.id;
+  });
 
-    test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
-    });
+  test.beforeEach(async ({ browserAuth }) => {
+    await browserAuth.loginAsAdmin();
+  });
 
-    test.afterAll(async ({ apiServices }) => {
-      if (connectorId) {
-        await apiServices.alerting.connectors.delete(connectorId);
-      }
-    });
+  test.afterAll(async ({ apiServices }) => {
+    if (connectorId) {
+      await apiServices.alerting.connectors.delete(connectorId);
+    }
+  });
 
-    test('Bug 1: toggle should be enabled when editing a connector with existing secret query params', async ({
-      pageObjects,
-    }) => {
-      await pageObjects.connectorFlyout.gotoConnectorsList();
-      await pageObjects.connectorFlyout.openEditConnectorFlyout(CONNECTOR_NAME);
-      await pageObjects.connectorFlyout.waitForQueryParamsLoaded();
+  test('Bug 1: toggle should be enabled when editing, and clicking it OFF should disable query params', async ({
+    pageObjects,
+  }) => {
+    await pageObjects.connectorFlyout.gotoConnectorsList();
+    await pageObjects.connectorFlyout.openEditConnectorFlyout(CONNECTOR_NAME);
+    await pageObjects.connectorFlyout.waitForQueryParamsLoaded();
 
-      const toggle = pageObjects.connectorFlyout.queryParamsToggle;
-      await expect(toggle).toBeVisible();
+    const toggle = pageObjects.connectorFlyout.queryParamsToggle;
+    await expect(toggle).toBeVisible();
+    await expect(toggle).toHaveAttribute('aria-checked', 'true');
 
-      const isChecked = await toggle.getAttribute('aria-checked');
-      expect(isChecked).toBe('true');
+    await expect(pageObjects.connectorFlyout.queryParamKeyInputs).toHaveCount(2);
 
-      const keyInputs = pageObjects.connectorFlyout.queryParamKeyInputs;
-      await expect(keyInputs).toHaveCount(2);
-    });
+    await toggle.click();
 
-    test('Bug 2: editing a query param value should not create a phantom param', async ({
-      pageObjects,
-    }) => {
-      await pageObjects.connectorFlyout.gotoConnectorsList();
-      await pageObjects.connectorFlyout.openEditConnectorFlyout(CONNECTOR_NAME);
-      await pageObjects.connectorFlyout.waitForQueryParamsLoaded();
+    await expect(toggle).toHaveAttribute('aria-checked', 'false');
+    await expect(pageObjects.connectorFlyout.queryParamKeyInputs).toHaveCount(0);
+  });
 
-      const keyInputs = pageObjects.connectorFlyout.queryParamKeyInputs;
-      const initialCount = await keyInputs.count();
+  test('Bug 2: typing into a key field should edit in place, not create a new param', async ({
+    pageObjects,
+  }) => {
+    await pageObjects.connectorFlyout.gotoConnectorsList();
+    await pageObjects.connectorFlyout.openEditConnectorFlyout(CONNECTOR_NAME);
+    await pageObjects.connectorFlyout.waitForQueryParamsLoaded();
 
-      const valueInputs = pageObjects.connectorFlyout.queryParamValueInputs;
-      await valueInputs.first().click();
-      await valueInputs.first().fill('new-secret-value');
+    const keyInputs = pageObjects.connectorFlyout.queryParamKeyInputs;
+    await expect(keyInputs).toHaveCount(2);
 
-      await pageObjects.connectorFlyout.page.waitForTimeout(1000);
+    const firstKey = keyInputs.locator('nth=0');
+    await firstKey.click();
+    await firstKey.press('End');
+    await firstKey.pressSequentially('xyz');
 
-      const countAfterEdit = await keyInputs.count();
-      expect(countAfterEdit).toBe(initialCount);
-    });
+    await expect(keyInputs).toHaveCount(2);
 
-    test('Bug 3: clicking delete should remove the param, not reorder', async ({
-      pageObjects,
-    }) => {
-      await pageObjects.connectorFlyout.gotoConnectorsList();
-      await pageObjects.connectorFlyout.openEditConnectorFlyout(CONNECTOR_NAME);
-      await pageObjects.connectorFlyout.waitForQueryParamsLoaded();
+    await expect(firstKey).toHaveValue(/xyz/);
+  });
 
-      const keyInputs = pageObjects.connectorFlyout.queryParamKeyInputs;
-      await expect(keyInputs).toHaveCount(2);
+  test('Bug 3: clicking delete should remove the param, not reorder', async ({ pageObjects }) => {
+    await pageObjects.connectorFlyout.gotoConnectorsList();
+    await pageObjects.connectorFlyout.openEditConnectorFlyout(CONNECTOR_NAME);
+    await pageObjects.connectorFlyout.waitForQueryParamsLoaded();
 
-      const secondKeyValue = await keyInputs.nth(1).inputValue();
+    const keyInputs = pageObjects.connectorFlyout.queryParamKeyInputs;
+    await expect(keyInputs).toHaveCount(2);
 
-      const deleteButtons = pageObjects.connectorFlyout.queryParamDeleteButtons;
-      await deleteButtons.first().click();
+    const secondKeyValue = await keyInputs.locator('nth=1').inputValue();
 
-      await expect(keyInputs).toHaveCount(1);
+    const deleteButtons = pageObjects.connectorFlyout.queryParamDeleteButtons;
+    await deleteButtons.locator('nth=0').click();
 
-      const remainingKeyValue = await keyInputs.first().inputValue();
-      expect(remainingKeyValue).toBe(secondKeyValue);
-    });
-  }
-);
+    await expect(keyInputs).toHaveCount(1);
+
+    await expect(keyInputs.locator('nth=0')).toHaveValue(secondKeyValue);
+  });
+});

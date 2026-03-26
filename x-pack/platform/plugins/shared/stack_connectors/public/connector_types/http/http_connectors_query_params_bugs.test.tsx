@@ -168,10 +168,6 @@ describe('HTTP connector query params bugs', () => {
         expect(keyInputs).toHaveLength(2);
       });
 
-      const keyInputsBefore = screen.getAllByTestId('httpQueryParamKeyInput');
-      const firstKeyValue = (keyInputsBefore[0] as HTMLInputElement).value;
-      const secondKeyValue = (keyInputsBefore[1] as HTMLInputElement).value;
-
       const deleteButtons = screen.getAllByTestId('httpRemoveQueryParamButton');
       expect(deleteButtons).toHaveLength(2);
 
