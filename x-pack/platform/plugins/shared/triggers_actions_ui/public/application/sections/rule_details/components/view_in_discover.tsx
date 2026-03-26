@@ -55,6 +55,7 @@ export const ViewInDiscover: React.FunctionComponent<ViewInDiscoverProps> = ({ r
   return (
     <EuiButtonEmpty
       data-test-subj="ruleDetails-viewInDiscover"
+      isLoading={ruleNavigation === null}
       href={basePath.prepend(ruleNavigation)}
       iconType="discoverApp"
     >
