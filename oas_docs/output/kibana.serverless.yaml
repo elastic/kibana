@@ -72902,6 +72902,41 @@ components:
                 - field
                 - extractions
             - additionalProperties: false
+              type: object
+              properties:
+                action:
+                  enum:
+                    - enrich
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                ignore_missing:
+                  type: boolean
+                override:
+                  type: boolean
+                policy_name:
+                  description: A non-empty string.
+                  minLength: 1
+                  type: string
+                to:
+                  minLength: 1
+                  type: string
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_Condition'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+                - policy_name
+                - to
+            - additionalProperties: false
               description: Manual ingest pipeline wrapper around native Elasticsearch processors
               type: object
               properties:
