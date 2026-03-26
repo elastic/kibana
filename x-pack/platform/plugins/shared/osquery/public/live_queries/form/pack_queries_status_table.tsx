@@ -66,10 +66,6 @@ const euiFlexItemCss = {
   cursor: 'pointer',
 };
 
-const euiFlexItemWithMinWidthCss = {
-  minWidth: 0,
-  ...euiFlexItemCss,
-};
 
 // TODO fix types
 const euiBasicTableCss = {
@@ -503,7 +499,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           defaultMessage: 'Query',
         }),
         render: renderQueryColumn,
-        width: '40%',
+        width: '42%',
       },
       ...(isHistoryEnabled && !scheduleId && tags
         ? [
@@ -564,7 +560,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
               name: i18n.translate('xpack.osquery.pack.queriesTable.actionsColumnTitle', {
                 defaultMessage: 'Actions',
               }),
-              width: '120px',
+              width: '80px',
               render: renderActionsColumn,
             },
           ]
