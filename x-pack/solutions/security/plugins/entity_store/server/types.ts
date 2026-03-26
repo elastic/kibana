@@ -70,7 +70,7 @@ export type EntityStorePluginRouter = IRouter<EntityStoreRequestHandlerContext>;
 
 export type RegisterEntityMaintainer = (config: RegisterEntityMaintainerConfig) => void;
 
-export type EntityStoreCRUDClient = CRUDClient;
+export type EntityStoreCRUDClient = Omit<CRUDClient, 'createEntity'>;
 
 export interface EntityStoreStartContract {
   createCRUDClient: (esClient: ElasticsearchClient, namespace: string) => EntityStoreCRUDClient;
