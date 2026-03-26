@@ -94,8 +94,7 @@ async function ingestDoc(
   });
 }
 
-// Failing: See https://github.com/elastic/kibana/issues/256991
-apiTest.describe.skip(
+apiTest.describe(
   'Entity Store CCS logs extraction (test against local instance)',
   { tag: ENTITY_STORE_TAGS },
   () => {

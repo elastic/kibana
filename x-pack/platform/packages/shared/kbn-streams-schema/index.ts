@@ -33,7 +33,13 @@ export {
 export { getStreamTypeFromDefinition } from './src/helpers/get_stream_type_from_definition';
 export type { StreamType } from './src/helpers/get_stream_type_from_definition';
 export { isRootStreamDefinition } from './src/helpers/is_root_stream_definition';
-export { isOtelStream } from './src/helpers/is_otel_stream';
+export {
+  isOtelStream,
+  OTEL_CONTENT_FIELD,
+  ECS_CONTENT_FIELD,
+  OTEL_SEVERITY_FIELD,
+  ECS_SEVERITY_FIELD,
+} from './src/helpers/is_otel_stream';
 export { getIndexPatternsForStream, getSourcesForStream } from './src/helpers/hierarchy_helpers';
 export { getDiscoverEsqlQuery } from './src/helpers/get_discover_esql_query';
 export {
