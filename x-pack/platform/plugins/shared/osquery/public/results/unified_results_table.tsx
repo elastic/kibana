@@ -67,7 +67,9 @@ const resultsTableContainerCss = {
 
 const unifiedTableWrapperCss = {
   flex: '1 1 auto',
-  minHeight: 200,
+  '.euiDataGrid__controls': {
+    paddingLeft: '8px',
+  },
 };
 
 const gridStyleOverride = {
