@@ -20,7 +20,7 @@ export interface NonEcsTimelineDataRow {
 function firstNonEmptyValue(
   values: readonly (string | null | undefined)[] | null | undefined
 ): string | undefined {
-  if (values == null) {
+  if (!values || values == null) {
     return undefined;
   }
   for (const v of values) {

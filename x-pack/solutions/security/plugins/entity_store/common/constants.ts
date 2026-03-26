@@ -66,5 +66,3 @@ export interface IdentitySourceFields {
   /** All field names used in EUID composition, deduplicated. */
   identitySourceFields: string[];
 }
-
-export type { Entity } from './domain/definitions/entity.gen';
