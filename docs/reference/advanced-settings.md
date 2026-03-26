@@ -541,7 +541,7 @@ $$$securitysolution-enablenewsfeed$$$`securitySolution:enableNewsFeed` {applies_
 $$$security-solution-exclude-cold-frozen-tiers-analyzer$$$`securitySolution:excludeColdAndFrozenTiersInAnalyzer` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
 :   Skips cold and frozen tiers in Analyzer's queries when activated. `false` by default.
 
-$$$security-solution-enable-graph-visualization$$$`securitySolution:enableGraphVisualization` {applies_to}`stack: preview` {applies_to}`security: preview`
+$$$security-solution-enable-graph-visualization$$$`securitySolution:enableGraphVisualization` {applies_to}`stack: removed 9.4, preview 9.1-9.3` {applies_to}`serverless: removed`
 :   Enables the Graph Visualization feature within the Security solution. `false` by default.
 
 $$$security-solution-enable-asset-inventory$$$`securitySolution:enableAssetInventory` {applies_to}`stack: preview` {applies_to}`security: preview`
@@ -572,7 +572,7 @@ $$$securitysolution-ipreputationlinks$$$`securitySolution:ipReputationLinks` {ap
     ```
     :::
 
-$$$securitysolution-enableCcsWarning$$$`securitySolution:enableCcsWarning` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
+$$$securitysolution-enableCcsWarning$$$`securitySolution:enableCcsWarning` {applies_to}`stack: ga 9.0-9.3, removed 9.4+` {applies_to}`serverless: unavailable`
 :   Enables privilege check warnings in rules for CCS indices. `true` by default.
 
 $$$security-solution-suppression-behavior-on-alert-closure$$$`securitySolution:suppressionBehaviorOnAlertClosure` {applies_to}`stack: ga` {applies_to}`security: ga`

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/esql-editor'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-esql'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/esql-editor'
+  title: '@kbn/esql-editor'
   description: Moon project for @kbn/esql-editor
   channel: ''
   owner: '@elastic/kibana-esql'
-  metadata:
-    sourceRoot: src/platform/packages/private/kbn-esql-editor
+  sourceRoot: src/platform/packages/private/kbn-esql-editor
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/monaco'
@@ -41,7 +40,6 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/index-editor'
   - '@kbn/react-hooks'
-  - '@kbn/react-kibana-context-theme'
   - '@kbn/calculate-width-from-char-count'
   - '@kbn/kql'
   - '@kbn/ebt-tools'
@@ -49,7 +47,6 @@ dependsOn:
   - '@kbn/search-types'
   - '@kbn/aiops-utils'
   - '@kbn/esql-resource-browser'
-  - '@kbn/projects-solutions-groups'
   - '@kbn/data-views-plugin'
 tags:
   - shared-browser
@@ -65,14 +62,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

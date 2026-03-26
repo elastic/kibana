@@ -83,7 +83,7 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
           navigateToPrefilledEditor(
             {
               id: '',
-              timeRange,
+              time_range: timeRange,
               attributes: injectedAttributes,
               lastReloadRequestTime,
             },

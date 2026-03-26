@@ -20,6 +20,8 @@ import React, { memo, useCallback, useRef, useState, useMemo, useEffect } from '
 import styled from 'styled-components';
 
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { EndpointExceptionsMovedCallout } from '../../../../exceptions/components/endpoint_exceptions_moved_callout';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
   isMlRule,
@@ -89,6 +91,7 @@ import { useRuleForms, useRuleIndexPattern } from '../form';
 import { CustomHeaderPageMemo } from '..';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachment_to_chat_button';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 
 const MyEuiPanel = styled(EuiPanel)<{
   zindex?: number;
@@ -123,6 +126,7 @@ const CreateRulePageComponent: React.FC<{
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
+  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
   const { addSuccess } = useAppToasts();
@@ -819,18 +823,18 @@ const CreateRulePageComponent: React.FC<{
 
   const addToChatButton = useMemo(
     () =>
-      sendToAgentChat ? (
+      isAgentChatExperienceEnabled ? (
         <AddRuleAttachmentToChatButton
           defineStepData={defineStepData}
           aboutStepData={aboutStepData}
           scheduleStepData={scheduleStepData}
           actionsStepData={actionsStepData}
           actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
-          size="s"
+          pathway="rule_creation"
         />
-      ) : undefined,
+      ) : null,
     [
-      sendToAgentChat,
+      isAgentChatExperienceEnabled,
       defineStepData,
       aboutStepData,
       scheduleStepData,
@@ -842,6 +846,11 @@ const CreateRulePageComponent: React.FC<{
   const onToggleCollapsedMemo = useCallback(
     () => setIsRulePreviewVisible((isVisible) => !isVisible),
     []
+  );
+
+  // TODO: switch to per-policy use opt-in state in follow-up (https://github.com/elastic/security-team/issues/14870)
+  const isEndpointExceptionsMovedFFEnabled = useIsExperimentalFeatureEnabled(
+    'endpointExceptionsMovedUnderManagement'
   );
 
   if (
@@ -877,6 +886,14 @@ const CreateRulePageComponent: React.FC<{
                 <EuiResizablePanel initialSize={70} minSize={'40%'} mode="main">
                   <EuiFlexGroup direction="row" justifyContent="spaceAround">
                     <MaxWidthEuiFlexItem>
+                      {isEndpointExceptionsMovedFFEnabled && (
+                        <EndpointExceptionsMovedCallout
+                          id="ruleCreation"
+                          dismissable
+                          title="cannotBeAddedToRules"
+                        />
+                      )}
+
                       <CustomHeaderPageMemo
                         backOptions={backComponent ? undefined : backOptions}
                         backComponent={backComponent}

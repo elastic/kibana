@@ -25,9 +25,9 @@ import { LicensePrompt } from '../../shared/license_prompt';
 import { EmptyPrompt } from './empty_prompt';
 import { TimeoutPrompt } from './timeout_prompt';
 import { useRefDimensions } from './use_ref_dimensions';
-import { SearchBar } from '../../shared/search_bar/search_bar';
 import { useServiceName } from '../../../hooks/use_service_name';
 import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../hooks/use_apm_router';
 import type { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
@@ -36,19 +36,11 @@ import { ServiceMapGraph } from './graph';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
-    <>
-      <SearchBar showTimeComparison />
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceAround"
-        // Set the height to give it some top margin
-        style={{ height: '60vh' }}
-      >
-        <EuiFlexItem grow={false} style={{ width: 600, textAlign: 'center' as const }}>
-          {children}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+    <EuiFlexGroup alignItems="center" justifyContent="spaceAround" style={{ height: '60vh' }}>
+      <EuiFlexItem grow={false} style={{ width: 600, textAlign: 'center' as const }}>
+        {children}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 
@@ -99,6 +91,27 @@ export function ServiceMap({
 }) {
   const license = useLicenseContext();
   const serviceName = useServiceName();
+  const apmRouter = useApmRouter();
+  const { query } = useAnyOfApmParams(
+    '/service-map',
+    '/services/{serviceName}/service-map',
+    '/mobile-services/{serviceName}/service-map'
+  );
+
+  const fullMapHref =
+    serviceName && 'rangeFrom' in query && 'rangeTo' in query && query.rangeFrom && query.rangeTo
+      ? apmRouter.link('/service-map', {
+          query: {
+            rangeFrom: query.rangeFrom,
+            rangeTo: query.rangeTo,
+            environment: query.environment,
+            kuery: query.kuery,
+            comparisonEnabled: query.comparisonEnabled,
+            offset: query.offset,
+            serviceGroup: 'serviceGroup' in query ? query.serviceGroup ?? '' : '',
+          },
+        })
+      : undefined;
 
   const { config } = useApmPluginContext();
   const { onPageReady } = usePerformanceContext();
@@ -213,41 +226,39 @@ export function ServiceMap({
   }
 
   return (
-    <>
-      <SearchBar showTimeComparison />
-      <div
-        className={cx({
-          [SERVICE_MAP_WRAPPER_FULL_SCREEN_CLASS]: isFullscreen,
-          [SERVICE_MAP_FULL_SCREEN_CLASS]: isFullscreen,
-        })}
-        css={isFullscreen ? fullScreenContainerStyles : undefined}
-      >
-        <EuiPanel hasBorder={true} paddingSize="none">
-          <div
-            data-test-subj="serviceMap"
-            style={{
-              height: isFullscreen ? '100%' : mapHeight,
-              zIndex: Number(euiTheme.levels.content) + 1,
-              ...(isFullscreen ? { minHeight: 0, flex: 1 } : {}),
-            }}
-            ref={ref}
-          >
-            {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
-            <ServiceMapGraph
-              height={mapHeight}
-              nodes={data.nodes}
-              edges={data.edges}
-              serviceName={serviceName}
-              environment={environment}
-              kuery={kuery}
-              start={start}
-              end={end}
-              isFullscreen={isFullscreen}
-              onToggleFullscreen={onToggleFullscreen}
-            />
-          </div>
-        </EuiPanel>
-      </div>
-    </>
+    <div
+      className={cx({
+        [SERVICE_MAP_WRAPPER_FULL_SCREEN_CLASS]: isFullscreen,
+        [SERVICE_MAP_FULL_SCREEN_CLASS]: isFullscreen,
+      })}
+      css={isFullscreen ? fullScreenContainerStyles : undefined}
+    >
+      <EuiPanel hasBorder={true} paddingSize="none">
+        <div
+          data-test-subj="serviceMap"
+          style={{
+            height: isFullscreen ? '100%' : mapHeight,
+            zIndex: Number(euiTheme.levels.content) + 1,
+            ...(isFullscreen ? { minHeight: 0, flex: 1 } : {}),
+          }}
+          ref={ref}
+        >
+          {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
+          <ServiceMapGraph
+            height={mapHeight}
+            nodes={data.nodes}
+            edges={data.edges}
+            serviceName={serviceName}
+            environment={environment}
+            kuery={kuery}
+            start={start}
+            end={end}
+            isFullscreen={isFullscreen}
+            onToggleFullscreen={onToggleFullscreen}
+            fullMapHref={fullMapHref}
+          />
+        </div>
+      </EuiPanel>
+    </div>
   );
 }

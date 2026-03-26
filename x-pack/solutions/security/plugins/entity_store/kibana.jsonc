@@ -14,9 +14,12 @@
       "taskManager",
       "dataViews",
       "security"
-  ],
+    ],
     "optionalPlugins": [
       "encryptedSavedObjects"
+    ],
+    "extraPublicDirs": [
+      "common"
     ]
   }
 }

@@ -15,6 +15,8 @@
 import { uniq } from 'lodash';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { EsqlFieldType } from '@kbn/esql-types';
+import { Parser } from '@elastic/esql';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import type {
   ICommandCallbacks,
   ISuggestionItem,
@@ -34,8 +36,6 @@ import {
   inOperators,
   nullCheckOperators,
 } from '../../commands/definitions/all_operators';
-import { Parser } from '../../parser';
-import type { ESQLAstAllCommands } from '../../types';
 import type {
   FunctionParameterType,
   FunctionReturnType,
@@ -47,6 +47,7 @@ import { getSafeInsertText } from '../../commands/definitions/utils';
 import { timeUnitsToSuggest } from '../../commands/definitions/constants';
 import { correctQuerySyntax, findAstPosition } from '../../commands/definitions/utils/ast';
 import { FUNCTIONS_TO_IGNORE } from '../../commands/registry/eval/autocomplete';
+import { attachReplacementRanges } from '../../language/autocomplete/utils/prefix_range';
 
 export const IGNORED_FUNCTIONS_BY_LOCATION: { [K in Location]?: string[] } = {
   eval: [...FUNCTIONS_TO_IGNORE.names],
@@ -70,7 +71,7 @@ export const mockFieldsWithTypes = (
   );
 };
 
-export const suggest = (
+export const suggest = async (
   query: string,
   context = mockContext,
   commandName: string,
@@ -101,7 +102,15 @@ export const suggest = (
 
   const contextWithRoot = { ...context, rootAst: root };
 
-  return autocomplete(query, command, mockCallbacks, contextWithRoot, cursorPosition);
+  const suggestions = await autocomplete(
+    query,
+    command,
+    mockCallbacks,
+    contextWithRoot,
+    cursorPosition
+  );
+
+  return attachReplacementRanges(innerText, suggestions, contextWithRoot);
 };
 
 export const expectSuggestions = async (
@@ -359,8 +368,7 @@ export function getFunctionSignaturesByReturnType(
 export function getLiteralsByType(_type: SupportedDataType | SupportedDataType[]) {
   const type = Array.isArray(_type) ? _type : [_type];
   if (type.includes('time_duration')) {
-    // return only singular
-    return timeUnitsToSuggest.map(({ name }) => `1 ${name}`).filter((s) => !/s$/.test(s));
+    return timeUnitsToSuggest.map(({ name }) => `1 ${name}`);
   }
   return [];
 }

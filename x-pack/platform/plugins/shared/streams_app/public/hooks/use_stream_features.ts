@@ -24,6 +24,9 @@ export const useStreamFeatures = (definition: Streams.all.Definition, deps: unkn
         path: {
           name: streamName,
         },
+        query: {
+          include_excluded: true,
+        },
       },
       signal: querySignal ?? null,
     });
@@ -35,13 +38,24 @@ export const useStreamFeatures = (definition: Streams.all.Definition, deps: unkn
     onError: showFetchErrorToast,
   });
 
-  const features: Feature[] = useMemo(
+  const allFeatures = useMemo(
     () => (data?.features ?? []).filter((feature) => !isComputedFeature(feature)),
     [data?.features]
   );
 
+  const features = useMemo(
+    () => allFeatures.filter((feature) => !feature.excluded_at),
+    [allFeatures]
+  );
+
+  const excludedFeatures = useMemo(
+    () => allFeatures.filter((feature) => !!feature.excluded_at),
+    [allFeatures]
+  );
+
   return {
     features,
+    excludedFeatures,
     featuresLoading: isLoading,
     refreshFeatures: refetch,
     error,

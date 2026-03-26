@@ -47,7 +47,6 @@ export const EditSignificantEventFlyout = ({
   });
 
   const { acknowledgeOnboardingTask } = useOnboardingApi({
-    connectorId: aiFeatures?.genAiConnectors.selectedConnector,
     saveQueries: false,
   });
 

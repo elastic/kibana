@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { isEmpty, partition } from 'lodash';
+import { partition, sum } from 'lodash';
 import agent from 'elastic-apm-node';
 
 import type { estypes } from '@elastic/elasticsearch';
-import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
@@ -20,16 +19,13 @@ import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
 import type { FormatAlert } from '@kbn/alerting-plugin/server/types';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
-  checkPrivilegesFromEsClient,
   getExceptions,
   getRuleRangeTuples,
-  hasReadIndexPrivileges,
-  hasTimestampFields,
   isMachineLearningParams,
   isEsqlParams,
   getDisabledActionsWarningText,
-  checkForFrozenIndices,
 } from './utils/utils';
+import { runExecutionValidation } from './validation';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import type { CreateSecurityRuleTypeWrapper } from './types';
 import { getListClient } from './utils/get_list_client';
@@ -38,8 +34,6 @@ import { getNotificationResultsLink } from '../rule_actions_legacy';
 // eslint-disable-next-line no-restricted-imports
 import { formatAlertForNotificationActions } from '../rule_actions_legacy/logic/notifications/schedule_notification_actions';
 import { createResultObject } from './utils';
-import { RuleExecutionStatusEnum } from '../../../../common/api/detection_engine/rule_monitoring';
-import { truncateList } from '../rule_monitoring';
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
 import { extractReferences, injectReferences } from './saved_object_references';
 import { withSecuritySpan } from '../../../utils/with_security_span';
@@ -64,7 +58,6 @@ import {
   SECURITY_RULE_ID,
   SECURITY_TO,
 } from './utils/apm_field_names';
-import { checkErrorDetails } from './utils/check_error_details';
 
 const aliasesFieldMap: FieldMap = {};
 Object.entries(aadFieldConversion).forEach(([key, value]) => {
@@ -179,16 +172,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           let runtimeMappings: estypes.MappingRuntimeFields | undefined;
           const { from, maxSignals, timestampOverride, timestampOverrideFallbackDisabled, to } =
             params;
-          const {
-            savedObjectsClient,
-            scopedClusterClient,
-            uiSettingsClient,
-            ruleMonitoringService,
-            ruleResultService,
-          } = services;
+          const { savedObjectsClient, ruleMonitoringService, ruleResultService } = services;
           const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
-
-          const esClient = scopedClusterClient.asCurrentUser;
 
           const ruleExecutionLogger = await ruleExecutionLoggerFactory({
             savedObjectsClient,
@@ -219,15 +204,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           ruleExecutionLogger.debug(`Starting execution with interval: ${interval}`);
 
-          await ruleExecutionLogger.logStatusChange({
-            newStatus: RuleExecutionStatusEnum.running,
-          });
-
           let result = createResultObject(state);
-
-          let frozenIndicesQueriedCount = 0;
-          const wrapperWarnings = [];
-          const wrapperErrors = [];
 
           const primaryTimestamp = timestampOverride ?? TIMESTAMP;
           const secondaryTimestamp =
@@ -277,16 +254,11 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               runtimeMappings = dataViewRuntimeMappings;
             } catch (exc) {
               if (SavedObjectsErrorHelpers.isNotFoundError(exc)) {
-                await ruleExecutionLogger.logStatusChange({
-                  newStatus: RuleExecutionStatusEnum.failed,
-                  message: `Data view is not found.\nError: ${exc}`,
+                ruleExecutionLogger.error(`Data view is not found.\nError: ${exc}`, {
                   userError: true,
                 });
               } else {
-                await ruleExecutionLogger.logStatusChange({
-                  newStatus: RuleExecutionStatusEnum.failed,
-                  message: `Check for indices to search failed.\nError: ${exc}`,
-                });
+                ruleExecutionLogger.error(`Check for indices to search failed.\nError: ${exc}`);
               }
 
               return { state: result.state };
@@ -297,84 +269,20 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           // as `index`
           agent.setCustomContext({ [SECURITY_INPUT_INDEX]: [...inputIndex] });
 
-          // check if rule has permissions to access given index pattern
-          // move this collection of lines into a function in utils
-          // so that we can use it in create rules route, bulk, etc.
-          let skipExecution: boolean = false;
+          const { skipExecution, warnings, frozenIndicesQueriedCount } =
+            await runExecutionValidation({
+              params,
+              inputIndex,
+              ruleName: rule.name,
+              scopedClusterClient: services.scopedClusterClient,
+              runtimeMappings,
+              primaryTimestamp,
+              secondaryTimestamp,
+              ruleExecutionLogger,
+              isServerless: isServerless ?? false,
+            });
 
-          if (!isMachineLearningParams(params)) {
-            try {
-              const indexPatterns = new IndexPatternsFetcher(scopedClusterClient.asInternalUser);
-              const existingIndices = await indexPatterns.getExistingIndices(inputIndex);
-
-              if (existingIndices.length > 0) {
-                const privileges = await checkPrivilegesFromEsClient(esClient, existingIndices);
-                const readIndexWarningMessage = await hasReadIndexPrivileges({
-                  privileges,
-                  ruleExecutionLogger,
-                  uiSettingsClient,
-                  docLinks,
-                });
-
-                if (readIndexWarningMessage != null) {
-                  wrapperWarnings.push(readIndexWarningMessage);
-                }
-              }
-            } catch (exc) {
-              wrapperWarnings.push(`Check privileges failed to execute ${exc}`);
-            }
-
-            try {
-              const timestampFieldCaps = await withSecuritySpan('fieldCaps', () =>
-                services.scopedClusterClient.asCurrentUser.fieldCaps(
-                  {
-                    index: inputIndex,
-                    fields: secondaryTimestamp
-                      ? [primaryTimestamp, secondaryTimestamp]
-                      : [primaryTimestamp],
-                    include_unmapped: true,
-                    runtime_mappings: runtimeMappings,
-                    ignore_unavailable: true,
-                  },
-                  { meta: true }
-                )
-              );
-
-              const { foundNoIndices, warningMessage: warningMissingTimestampFieldsMessage } =
-                await hasTimestampFields({
-                  timestampField: primaryTimestamp,
-                  timestampFieldCapsResponse: timestampFieldCaps,
-                  inputIndices: inputIndex,
-                  ruleExecutionLogger,
-                });
-              if (warningMissingTimestampFieldsMessage != null) {
-                wrapperWarnings.push(warningMissingTimestampFieldsMessage);
-              }
-              skipExecution = foundNoIndices;
-            } catch (exc) {
-              wrapperWarnings.push(`Timestamp fields check failed to execute ${exc}`);
-            }
-
-            if (!isServerless) {
-              try {
-                const frozenIndices = await checkForFrozenIndices({
-                  inputIndices: inputIndex,
-                  internalEsClient: services.scopedClusterClient.asInternalUser,
-                  currentUserEsClient: services.scopedClusterClient.asCurrentUser,
-                  to: params.to,
-                  from: params.from,
-                  primaryTimestamp,
-                  secondaryTimestamp,
-                });
-
-                if (frozenIndices.length > 0) {
-                  frozenIndicesQueriedCount = frozenIndices.length;
-                }
-              } catch (exc) {
-                wrapperWarnings.push(`Frozen indices check failed to execute ${exc}`);
-              }
-            }
-          }
+          warnings.forEach((warningMessage) => ruleExecutionLogger.warn(warningMessage));
 
           const {
             tuples,
@@ -394,7 +302,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             alerting,
           });
           if (rangeTuplesWarningMessage != null) {
-            wrapperWarnings.push(rangeTuplesWarningMessage);
+            ruleExecutionLogger.warn(rangeTuplesWarningMessage);
           }
 
           agent.setCustomContext({ [SECURITY_NUM_RANGE_TUPLES]: tuples.length });
@@ -412,15 +320,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 ruleParams: params,
               });
             }
-            wrapperErrors.push(gapErrorMessage);
-            await ruleExecutionLogger.logStatusChange({
-              newStatus: RuleExecutionStatusEnum.failed,
-              message: gapErrorMessage,
-              metrics: {
-                executionGap: remainingGap,
-                gapRange: experimentalFeatures.storeGapsInEventLogEnabled ? gap : undefined,
-              },
-            });
+            ruleExecutionLogger.error(gapErrorMessage);
           }
 
           try {
@@ -505,6 +405,14 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   },
                 });
 
+                // Log rule run result errors and warnings explicitly here.
+                // This may lead to the same errors or warnings logged twice.
+                // Duplicates issue will be address in https://github.com/elastic/kibana/issues/259389.
+                runResult.errors.forEach((message) =>
+                  ruleExecutionLogger.error(message, { userError: runResult.userError })
+                );
+                runResult.warningMessages.forEach((message) => ruleExecutionLogger.warn(message));
+
                 const createdSignals = result.createdSignals.concat(runResult.createdSignals);
                 const warningMessages = result.warningMessages.concat(runResult.warningMessages);
                 result = {
@@ -545,28 +453,29 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             const disabledActions = rule.actions.filter(
               (action) => !actions.isActionTypeEnabled(action.actionTypeId)
             );
-
-            if (result.totalEventsFound != null) {
-              ruleExecutionLogger.info(`Found matching events: ${result.totalEventsFound}`);
-            }
             const suppressedAlertsCount = result.suppressedAlertsCount ?? 0;
-            if (suppressedAlertsCount > 0) {
-              ruleExecutionLogger.info(`Alerts suppressed: ${suppressedAlertsCount}`);
-            }
+
+            ruleExecutionLogger.logMetrics({
+              total_search_duration_ms:
+                result.searchAfterTimes.length > 0
+                  ? Math.round(sum(result.searchAfterTimes.map(Number)))
+                  : undefined,
+              total_indexing_duration_ms:
+                result.bulkCreateTimes.length > 0
+                  ? Math.round(sum(result.bulkCreateTimes.map(Number)))
+                  : undefined,
+              total_enrichment_duration_ms:
+                result.enrichmentTimes.length > 0
+                  ? Math.round(sum(result.enrichmentTimes.map(Number)))
+                  : undefined,
+              frozen_indices_queried_count: frozenIndicesQueriedCount,
+              alerts_suppressed_count: suppressedAlertsCount,
+              gap_duration_s:
+                gap && remainingGap ? Math.round(remainingGap.asSeconds()) : undefined,
+              gap_range: gap,
+            });
 
             const createdSignalsCount = result.createdSignals.length;
-
-            if (result.totalEventsFound != null && result.totalEventsFound > 0) {
-              const unaccountedEvents =
-                result.totalEventsFound - createdSignalsCount - suppressedAlertsCount;
-              if (unaccountedEvents > 0) {
-                ruleExecutionLogger.info(
-                  `Events that did not result in alerts: ${unaccountedEvents}\nThis is typically because alerts for these events already exist from a previous rule execution, or events were excluded by value list exceptions. This number doesn't include suppressed alerts.`
-                );
-              }
-            }
-
-            ruleExecutionLogger.info(`Alerts created: ${createdSignalsCount}`);
 
             agent.setCustomContext({ [SECURITY_NUM_ALERTS_CREATED]: createdSignalsCount });
 
@@ -575,76 +484,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 alertsCreated: createdSignalsCount > 0,
                 disabledActions,
               });
-              wrapperWarnings.push(disabledActionsWarning);
-            }
-
-            if (result.warningMessages.length > 0 || wrapperWarnings.length > 0) {
-              // write warning messages first because if we have still have an error to write
-              // we want to write the error messages last, so that the errors are set
-              // as the current status of the rule.
-              await ruleExecutionLogger.logStatusChange({
-                newStatus: RuleExecutionStatusEnum['partial failure'],
-                message: truncateList(result.warningMessages.concat(wrapperWarnings)).join('\n\n'),
-                metrics: {
-                  searchDurations: result.searchAfterTimes,
-                  indexingDurations: result.bulkCreateTimes,
-                  enrichmentDurations: result.enrichmentTimes,
-                  frozenIndicesQueriedCount,
-                },
-              });
-            }
-            if (wrapperErrors.length > 0 || result.errors.length > 0) {
-              await ruleExecutionLogger.logStatusChange({
-                newStatus: RuleExecutionStatusEnum.failed,
-                message: truncateList(result.errors.concat(wrapperErrors)).join(', '),
-                metrics: {
-                  searchDurations: result.searchAfterTimes,
-                  indexingDurations: result.bulkCreateTimes,
-                  enrichmentDurations: result.enrichmentTimes,
-                  executionGap: remainingGap,
-                  gapRange: experimentalFeatures.storeGapsInEventLogEnabled ? gap : undefined,
-                  frozenIndicesQueriedCount,
-                },
-                userError:
-                  result.userError ||
-                  result.errors.every((err) => checkErrorDetails(err).isUserError),
-              });
-            } else if (!(result.warningMessages.length > 0) && !(wrapperWarnings.length > 0)) {
-              ruleExecutionLogger.debug('Security Rule execution completed');
-              ruleExecutionLogger.debug(
-                `Indexed ${createdSignalsCount} alerts into "${ruleDataClient.indexNameWithNamespace(
-                  spaceId
-                )}".${
-                  !isEmpty(tuples)
-                    ? ` Searched between date ranges: ${JSON.stringify(tuples, null, 2)}.`
-                    : ''
-                }`
-              );
-              await ruleExecutionLogger.logStatusChange({
-                newStatus: RuleExecutionStatusEnum.succeeded,
-                message: 'Rule execution completed successfully',
-                metrics: {
-                  searchDurations: result.searchAfterTimes,
-                  indexingDurations: result.bulkCreateTimes,
-                  enrichmentDurations: result.enrichmentTimes,
-                  frozenIndicesQueriedCount,
-                },
-              });
+              ruleExecutionLogger.warn(disabledActionsWarning);
             }
           } catch (error) {
-            const errorMessage = error.message ?? '(no error message given)';
-
-            await ruleExecutionLogger.logStatusChange({
-              newStatus: RuleExecutionStatusEnum.failed,
-              message: `An error occurred during rule execution. ${errorMessage}`,
-              userError: checkErrorDetails(errorMessage).isUserError,
-              metrics: {
-                searchDurations: result.searchAfterTimes,
-                indexingDurations: result.bulkCreateTimes,
-                enrichmentDurations: result.enrichmentTimes,
-                frozenIndicesQueriedCount,
-              },
-            });
+            ruleExecutionLogger.error(error.message ?? '(no error message given)');
+          } finally {
+            await ruleExecutionLogger.close();
           }
 
           if (!isPreview && analytics) {
