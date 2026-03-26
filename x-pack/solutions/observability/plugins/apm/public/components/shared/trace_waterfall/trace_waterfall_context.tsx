@@ -9,7 +9,10 @@ import React, { createContext, useCallback, useContext, useMemo, useState } from
 import { groupBy } from 'lodash';
 import type { EuiAccordionProps } from '@elastic/eui';
 import type { Error } from '@kbn/apm-types';
-import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
+import type {
+  IWaterfallGetRelatedErrorsHref,
+  WaterfallGetServiceBadgeHref,
+} from '../../../../common/waterfall/typings';
 import type { IWaterfallLegend } from '../../../../common/waterfall/legend';
 import { WaterfallLegendType } from '../../../../common/waterfall/legend';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
@@ -47,6 +50,7 @@ export interface TraceWaterfallContextProps {
   highlightedSpanId?: string;
   scrollToHighlightedOnMount?: boolean;
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
+  getServiceBadgeHref?: WaterfallGetServiceBadgeHref;
   isEmbeddable: boolean;
   legends: IWaterfallLegend[];
   colorBy: WaterfallLegendType;
@@ -86,6 +90,7 @@ export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
   agentMarks: [],
   scrollElement: undefined,
   scrollStrategy: 'window',
+  getServiceBadgeHref: undefined,
 });
 
 export interface OnNodeClickOptions {
@@ -108,6 +113,7 @@ interface Props {
   scrollStrategy?: TraceWaterfallScrollStrategy;
   onClick?: OnNodeClick;
   onErrorClick?: OnErrorClick;
+  getServiceBadgeHref?: WaterfallGetServiceBadgeHref;
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
   isEmbeddable: boolean;
   showLegend: boolean;
@@ -134,6 +140,7 @@ export function TraceWaterfallContextProvider({
   scrollStrategy = 'window',
   onClick,
   onErrorClick,
+  getServiceBadgeHref,
   scrollElement,
   getRelatedErrorsHref,
   isEmbeddable,
@@ -257,6 +264,7 @@ export function TraceWaterfallContextProvider({
         showCriticalPathControl,
         onClick,
         onErrorClick,
+        getServiceBadgeHref,
         highlightedSpanId,
         scrollToHighlightedOnMount,
         getRelatedErrorsHref,
