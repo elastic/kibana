@@ -3454,7 +3454,6 @@ paths:
                         source_url: https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis
                         unmanaged_assets:
                           agents: []
-                          commands: []
                           hooks: []
                           lsp_servers: []
                           mcp_servers: []
@@ -3572,7 +3571,6 @@ paths:
                     source_url: https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis
                     unmanaged_assets:
                       agents: []
-                      commands: []
                       hooks: []
                       lsp_servers: []
                       mcp_servers: []
@@ -3669,7 +3667,6 @@ paths:
                     source_url: https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis
                     unmanaged_assets:
                       agents: []
-                      commands: []
                       hooks: []
                       lsp_servers: []
                       mcp_servers: []
@@ -24301,6 +24298,8 @@ paths:
                               nullable: true
                             agent_download_timeout:
                               nullable: true
+                            agent_features_disable_policy_change_acks_enabled:
+                              nullable: true
                             agent_internal:
                               nullable: true
                             agent_limits_go_max_procs:
@@ -25168,6 +25167,8 @@ paths:
                       nullable: true
                     agent_download_timeout:
                       nullable: true
+                    agent_features_disable_policy_change_acks_enabled:
+                      nullable: true
                     agent_internal:
                       nullable: true
                     agent_limits_go_max_procs:
@@ -25404,6 +25405,8 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
+                            nullable: true
+                          agent_features_disable_policy_change_acks_enabled:
                             nullable: true
                           agent_internal:
                             nullable: true
@@ -26291,6 +26294,8 @@ paths:
                               nullable: true
                             agent_download_timeout:
                               nullable: true
+                            agent_features_disable_policy_change_acks_enabled:
+                              nullable: true
                             agent_internal:
                               nullable: true
                             agent_limits_go_max_procs:
@@ -27156,6 +27161,8 @@ paths:
                             nullable: true
                           agent_download_timeout:
                             nullable: true
+                          agent_features_disable_policy_change_acks_enabled:
+                            nullable: true
                           agent_internal:
                             nullable: true
                           agent_limits_go_max_procs:
@@ -28020,6 +28027,8 @@ paths:
                       nullable: true
                     agent_download_timeout:
                       nullable: true
+                    agent_features_disable_policy_change_acks_enabled:
+                      nullable: true
                     agent_internal:
                       nullable: true
                     agent_limits_go_max_procs:
@@ -28258,6 +28267,8 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
+                            nullable: true
+                          agent_features_disable_policy_change_acks_enabled:
                             nullable: true
                           agent_internal:
                             nullable: true
@@ -29236,6 +29247,8 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
+                            nullable: true
+                          agent_features_disable_policy_change_acks_enabled:
                             nullable: true
                           agent_internal:
                             nullable: true

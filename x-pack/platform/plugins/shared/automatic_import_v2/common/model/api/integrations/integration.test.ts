@@ -82,6 +82,7 @@ describe('integration schemas', () => {
   describe('ApproveAutoImportIntegrationRequestBody', () => {
     const validPayload = {
       version: '1.0.0',
+      categories: ['security'],
     };
 
     it('accepts a valid payload', () => {
@@ -115,6 +116,26 @@ describe('integration schemas', () => {
       const payload = { ...validPayload, unknown: 'property' };
       const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
       expectParseError(result);
+    });
+
+    it('requires categories', () => {
+      const payload = { version: '1.0.0' };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toContain('categories: Invalid input');
+    });
+
+    it('rejects empty categories array', () => {
+      const payload = { ...validPayload, categories: [] };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+    });
+
+    it('rejects whitespace-only category id', () => {
+      const payload = { ...validPayload, categories: ['   '] };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toContain('No empty strings allowed');
     });
 
     it('rejects more than 50 categories', () => {

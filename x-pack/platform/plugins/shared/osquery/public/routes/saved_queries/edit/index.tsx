@@ -26,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout, fullWidthFormContentCss } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
+import { useDuplicateGuard } from '../../../common/hooks/use_duplicate_guard';
 import { EditSavedQueryForm } from './form';
 import { useDeleteSavedQuery, useUpdateSavedQuery, useSavedQuery } from '../../../saved_queries';
 import { useCopySavedQuery } from '../../../saved_queries/use_copy_saved_query';
@@ -72,9 +73,10 @@ const EditSavedQueryPageComponent = () => {
     });
   }, [deleteSavedQueryMutation, handleCloseDeleteConfirmationModal]);
 
-  const handleDuplicateClick = useCallback(() => {
-    copySavedQueryMutation.mutateAsync();
-  }, [copySavedQueryMutation]);
+  const { handleDuplicateClick, handleDirtyStateChange, duplicateModal } = useDuplicateGuard({
+    copyMutation: copySavedQueryMutation,
+    resourceType: 'query',
+  });
 
   const backLink = useMemo(
     () => (
@@ -215,6 +217,7 @@ const EditSavedQueryPageComponent = () => {
         defaultValue={savedQueryDetails}
         handleSubmit={handleSubmit}
         viewMode={viewMode}
+        onDirtyStateChange={handleDirtyStateChange}
       />
     );
 
@@ -259,6 +262,7 @@ const EditSavedQueryPageComponent = () => {
         <EuiSpacer size="l" />
         {formContent}
         {deleteModal}
+        {duplicateModal}
       </div>
     );
   }
@@ -301,6 +305,7 @@ const EditSavedQueryPageComponent = () => {
     >
       {formContent}
       {deleteModal}
+      {duplicateModal}
     </WithHeaderLayout>
   );
 };
