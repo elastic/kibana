@@ -9,6 +9,7 @@
 
 import type { EventEmitter } from 'events';
 import { useEffect, useRef, useState } from 'react';
+import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
 import type { VisualizeInput } from '../../..';
 import type { ByValueVisInstance, VisualizeServices, IEditorController } from '../../types';
 import { getVisualizationInstanceFromInput } from '../get_visualization_instance';
@@ -20,7 +21,7 @@ export const useVisByValue = (
   isChromeVisible: boolean | undefined,
   valueInput?: VisualizeInput,
   originatingApp?: string,
-  originatingPath?: string
+  incomingBreadcrumbs?: EmbeddableEditorBreadcrumb[]
 ) => {
   const [state, setState] = useState<{
     byValueVisInstance?: ByValueVisInstance;
@@ -58,18 +59,15 @@ export const useVisByValue = (
       const originatingAppName = originatingApp
         ? stateTransferService.getAppNameFromId(originatingApp)
         : undefined;
-      const redirectToOrigin = originatingApp
-        ? () => navigateToApp(originatingApp, { path: originatingPath })
-        : undefined;
+      const redirectToOrigin = originatingApp ? () => navigateToApp(originatingApp) : undefined;
 
       const editBreadcrumbs = getEditBreadcrumbs({
         originatingAppName,
+        incomingBreadcrumbs,
         redirectToOrigin,
       });
       if (serverless?.setBreadcrumbs) {
-        serverless.setBreadcrumbs(
-          getEditServerlessBreadcrumbs({ byValue: true, originatingAppName, redirectToOrigin })
-        );
+        serverless.setBreadcrumbs(getEditServerlessBreadcrumbs());
       } else {
         chrome?.setBreadcrumbs(editBreadcrumbs, {
           project: { value: editBreadcrumbs, absolute: true },
@@ -92,7 +90,7 @@ export const useVisByValue = (
     state.visEditorController,
     valueInput,
     originatingApp,
-    originatingPath,
+    incomingBreadcrumbs,
   ]);
 
   useEffect(() => {

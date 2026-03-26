@@ -8,10 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ApplicationStart } from '@kbn/core/public';
 import { VisualizeConstants } from '@kbn/visualizations-common';
-
-import { getOriginatingAppBreadcrumbs } from '@kbn/breadcrumbs-utils';
+import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
 
 const defaultEditText = i18n.translate('visualizations.editor.defaultEditBreadcrumbText', {
   defaultMessage: 'Edit visualization',
@@ -33,32 +31,17 @@ const getVisualizeLibraryCrumbs = (originatingAppName?: string) => {
 };
 
 export function getCreateBreadcrumbs({
-  originatingApp,
   originatingAppName,
-  originatingPath,
-  breadcrumbTitle,
+  incomingBreadcrumbs,
   redirectToOrigin,
-  navigateToApp,
 }: {
-  originatingApp?: string;
   originatingAppName?: string;
-  originatingPath?: string;
-  breadcrumbTitle?: string;
+  incomingBreadcrumbs?: EmbeddableEditorBreadcrumb[];
   redirectToOrigin?: () => void;
-  navigateToApp?: ApplicationStart['navigateToApp'];
 }) {
-  const originatingCrumbs = navigateToApp
-    ? getOriginatingAppBreadcrumbs({
-        originatingApp,
-        originatingAppName,
-        originatingPath,
-        breadcrumbTitle,
-        navigateToApp,
-      })
-    : [];
-  if (originatingCrumbs.length > 0) {
+  if (incomingBreadcrumbs?.length) {
     return [
-      ...originatingCrumbs,
+      ...incomingBreadcrumbs,
       {
         text: i18n.translate('visualizations.editor.createBreadcrumb', {
           defaultMessage: 'Create',
@@ -77,19 +60,10 @@ export function getCreateBreadcrumbs({
   ];
 }
 
-export function getCreateServerlessBreadcrumbs({
-  byValue,
-  originatingAppName,
-  redirectToOrigin,
-}: {
-  byValue?: boolean;
-  originatingAppName?: string;
-  redirectToOrigin?: () => void;
-}) {
+export function getCreateServerlessBreadcrumbs() {
   // TODO: https://github.com/elastic/kibana/issues/163488
   // for now, serverless breadcrumbs only set the title,
   // the rest of the breadcrumbs are handled by the serverless navigation
-  // the serverless navigation is not yet aware of the byValue/originatingApp context
   return [
     {
       text: i18n.translate('visualizations.editor.createBreadcrumb', {
@@ -101,33 +75,18 @@ export function getCreateServerlessBreadcrumbs({
 
 export function getEditBreadcrumbs(
   {
-    originatingApp,
     originatingAppName,
-    originatingPath,
-    breadcrumbTitle,
+    incomingBreadcrumbs,
     redirectToOrigin,
-    navigateToApp,
   }: {
-    originatingApp?: string;
     originatingAppName?: string;
-    originatingPath?: string;
-    breadcrumbTitle?: string;
+    incomingBreadcrumbs?: EmbeddableEditorBreadcrumb[];
     redirectToOrigin?: () => void;
-    navigateToApp?: ApplicationStart['navigateToApp'];
   },
   title: string = defaultEditText
 ) {
-  const originatingCrumbs = navigateToApp
-    ? getOriginatingAppBreadcrumbs({
-        originatingApp,
-        originatingAppName,
-        originatingPath,
-        breadcrumbTitle,
-        navigateToApp,
-      })
-    : [];
-  if (originatingCrumbs.length > 0) {
-    return [...originatingCrumbs, { text: title }];
+  if (incomingBreadcrumbs?.length) {
+    return [...incomingBreadcrumbs, { text: title }];
   }
   return [
     ...(originatingAppName ? [{ text: originatingAppName, onClick: redirectToOrigin }] : []),
@@ -138,22 +97,10 @@ export function getEditBreadcrumbs(
   ];
 }
 
-export function getEditServerlessBreadcrumbs(
-  {
-    byValue,
-    originatingAppName,
-    redirectToOrigin,
-  }: {
-    byValue?: boolean;
-    originatingAppName?: string;
-    redirectToOrigin?: () => void;
-  },
-  title: string = defaultEditText
-) {
+export function getEditServerlessBreadcrumbs(title: string = defaultEditText) {
   // TODO: https://github.com/elastic/kibana/issues/163488
   // for now, serverless breadcrumbs only set the title,
   // the rest of the breadcrumbs are handled by the serverless navigation
-  // the serverless navigation is not yet aware of the byValue/originatingApp context
   return [
     {
       text: title,

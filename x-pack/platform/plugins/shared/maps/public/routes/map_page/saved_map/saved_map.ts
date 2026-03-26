@@ -8,7 +8,10 @@
 import _ from 'lodash';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import type {
+  EmbeddableStateTransfer,
+  EmbeddableEditorBreadcrumb,
+} from '@kbn/embeddable-plugin/public';
 import type { ScopedHistory } from '@kbn/core/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { Writable } from '@kbn/utility-types';
@@ -95,7 +98,7 @@ export class SavedMap {
   private readonly _onSaveCallback?: () => void;
   private _originatingApp?: string;
   private _originatingPath?: string;
-  private readonly _breadcrumbTitle?: string;
+  private readonly _breadcrumbs?: EmbeddableEditorBreadcrumb[];
   private readonly _stateTransfer?: EmbeddableStateTransfer;
   private readonly _store: MapStore;
   private _tags: string[] = [];
@@ -110,7 +113,7 @@ export class SavedMap {
     originatingApp,
     stateTransfer,
     originatingPath,
-    breadcrumbTitle,
+    breadcrumbs,
     defaultLayerWizard,
   }: {
     defaultLayers?: LayerDescriptor[];
@@ -120,7 +123,7 @@ export class SavedMap {
     originatingApp?: string;
     stateTransfer?: EmbeddableStateTransfer;
     originatingPath?: string;
-    breadcrumbTitle?: string;
+    breadcrumbs?: EmbeddableEditorBreadcrumb[];
     defaultLayerWizard?: string;
   }) {
     this._defaultLayers = defaultLayers;
@@ -129,7 +132,7 @@ export class SavedMap {
     this._onSaveCallback = onSaveCallback;
     this._originatingApp = originatingApp;
     this._originatingPath = originatingPath;
-    this._breadcrumbTitle = breadcrumbTitle;
+    this._breadcrumbs = breadcrumbs;
     this._stateTransfer = stateTransfer;
     this._store = createMapStore();
     this._defaultLayerWizard = defaultLayerWizard || '';
@@ -327,8 +330,7 @@ export class SavedMap {
           this.hasOriginatingApp() || this._isFromDashboardListing()
             ? this._originatingApp
             : undefined,
-        originatingPath: this._isFromDashboardListing() ? this._originatingPath : undefined,
-        breadcrumbTitle: this._isFromDashboardListing() ? this._breadcrumbTitle : undefined,
+        incomingBreadcrumbs: this._breadcrumbs,
         getAppNameFromId: this._getStateTransfer().getAppNameFromId,
         history,
       });

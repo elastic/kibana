@@ -9,6 +9,7 @@
 
 import React, { useCallback, useRef, useMemo, useEffect } from 'react';
 import { firstValueFrom } from 'rxjs';
+import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
@@ -50,7 +51,6 @@ interface VisualizationTableListProps {
   embeddable: EmbeddableStart;
   savedObjectsTagging?: SavedObjectsTaggingApi;
   parentProps: TableListTabParentProps;
-  breadcrumbTitle?: string;
 }
 
 export const VisualizationTableList = ({
@@ -60,7 +60,6 @@ export const VisualizationTableList = ({
   embeddable,
   savedObjectsTagging,
   parentProps,
-  breadcrumbTitle,
 }: VisualizationTableListProps) => {
   const euiThemeContext = useEuiTheme();
   const tableStyles = useMemo(
@@ -75,15 +74,35 @@ export const VisualizationTableList = ({
   const visualizedUserContent = useRef<VisualizeUserContent[]>();
   const closeNewVisModal = useRef(() => {});
 
+  const visualizationsTabTitle = i18n.translate('visualizationListing.listingViewTitle', {
+    defaultMessage: 'Visualizations',
+  });
+
+  const buildBreadcrumbs = useCallback(
+    (appId: string): EmbeddableEditorBreadcrumb[] => {
+      const stateTransfer = embeddable.getStateTransfer();
+      const appName = stateTransfer.getAppNameFromId(appId);
+      return [
+        { text: appName ?? appId, href: core.application.getUrlForApp(appId) },
+        {
+          text: visualizationsTabTitle,
+          href: core.application.getUrlForApp(appId, { path: window.location.hash }),
+        },
+      ];
+    },
+    [visualizationsTabTitle, embeddable, core.application]
+  );
+
   const createNewVis = useCallback(async () => {
     const currentApp = await firstValueFrom(core.application.currentAppId$);
+    const breadcrumbs = currentApp ? buildBreadcrumbs(currentApp) : undefined;
     closeNewVisModal.current = visualizations.showNewVisModal({
       originatingApp: currentApp,
       originatingPath: window.location.hash,
-      breadcrumbTitle,
+      breadcrumbs,
       outsideVisualizeApp: currentApp !== VISUALIZE_APP_NAME,
     });
-  }, [visualizations, core.application, breadcrumbTitle]);
+  }, [visualizations, core.application, buildBreadcrumbs]);
 
   useEffect(() => {
     return () => {
@@ -113,7 +132,7 @@ export const VisualizationTableList = ({
           state: {
             originatingApp: currentApp,
             originatingPath: window.location.hash,
-            breadcrumbTitle,
+            breadcrumbs: buildBreadcrumbs(currentApp),
           },
         });
         return;
@@ -121,7 +140,7 @@ export const VisualizationTableList = ({
 
       core.application.navigateToApp(targetApp, { path });
     },
-    [core.application, embeddable, breadcrumbTitle]
+    [core.application, embeddable, buildBreadcrumbs]
   );
 
   const fetchItems = useCallback(

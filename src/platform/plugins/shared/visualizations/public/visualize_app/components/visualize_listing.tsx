@@ -55,6 +55,10 @@ import {
   type VisualizeUserContent,
 } from '../../utils/to_table_list_view_saved_object';
 
+const visualizeLibraryPageTitle = i18n.translate('visualizations.listingPageTitle', {
+  defaultMessage: 'Visualize library',
+});
+
 const visualizeListingStyles = {
   table: getVisualizationListingTableStyles,
   calloutLink: css`
@@ -75,8 +79,7 @@ type CustomTableViewProps = Pick<
 
 const useTableListViewProps = (
   closeNewVisModal: MutableRefObject<() => void>,
-  listingLimit: number,
-  breadcrumbTitle: string
+  listingLimit: number
 ): CustomTableViewProps => {
   const {
     services: {
@@ -98,9 +101,16 @@ const useTableListViewProps = (
     closeNewVisModal.current = showNewVisModal({
       originatingApp: VisualizeConstants.APP_ID,
       originatingPath: window.location.hash,
-      breadcrumbTitle,
+      breadcrumbs: [
+        {
+          text: visualizeLibraryPageTitle,
+          href: application.getUrlForApp(VisualizeConstants.APP_ID, {
+            path: `#${VisualizeConstants.LANDING_PAGE_PATH}`,
+          }),
+        },
+      ],
     });
-  }, [closeNewVisModal, breadcrumbTitle]);
+  }, [closeNewVisModal, application]);
 
   const editItem = useCallback(
     async ({ attributes: { id }, editor = { editUrl: '' } }: VisualizeUserContent) => {
@@ -292,9 +302,6 @@ export const VisualizeListing = () => {
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
   const closeNewVisModal = useRef(() => {});
-  const visualizeLibraryPageTitle = i18n.translate('visualizations.listingPageTitle', {
-    defaultMessage: 'Visualize library',
-  });
   useExecutionContext(executionContext, {
     type: 'application',
     page: 'list',
@@ -347,11 +354,7 @@ export const VisualizeListing = () => {
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
-  const tableViewProps = useTableListViewProps(
-    closeNewVisModal,
-    listingLimit,
-    visualizeLibraryPageTitle
-  );
+  const tableViewProps = useTableListViewProps(closeNewVisModal, listingLimit);
 
   const visualizeTab: TableListTab<VisualizeUserContent> = useMemo(() => {
     const calloutMessage = (
@@ -425,7 +428,6 @@ export const VisualizeListing = () => {
     application,
     dashboardCapabilities.createNew,
     initialPageSize,
-    visualizeLibraryPageTitle,
     tableViewProps,
     getVisualizeListItemLink,
   ]);

@@ -577,10 +577,10 @@ export const LensTopNavMenu = ({
     const contextFromEmbeddable =
       initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable;
     const showReplaceInDashboard = Boolean(
-      !initialInput?.savedObjectId && contextFromEmbeddable && initialContext?.embeddableId
+      !initialInput?.ref_id && contextFromEmbeddable && initialContext?.embeddableId
     );
     const showReplaceInCanvas =
-      initialContext?.originatingApp === 'canvas' && !initialInput?.savedObjectId;
+      initialContext?.originatingApp === 'canvas' && !initialInput?.ref_id;
 
     const isComingFromDashboardView =
       incomingState?.originatingApp &&

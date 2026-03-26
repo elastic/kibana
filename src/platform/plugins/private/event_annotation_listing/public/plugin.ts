@@ -84,7 +84,6 @@ export class EventAnnotationListingPlugin
           dataViews,
           createDataView: pluginsStart.dataViews.create.bind(pluginsStart.dataViews),
           sessionService: pluginsStart.data.search.session,
-          breadcrumbTitle: tabTitle,
           queryInputServices: {
             http: coreStart.http,
             docLinks: coreStart.docLinks,

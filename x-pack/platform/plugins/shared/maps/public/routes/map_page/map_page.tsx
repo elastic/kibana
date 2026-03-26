@@ -8,7 +8,10 @@
 import React, { Component } from 'react';
 import { Provider } from 'react-redux';
 import type { AppMountParameters, ScopedHistory } from '@kbn/core/public';
-import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import type {
+  EmbeddableStateTransfer,
+  EmbeddableEditorBreadcrumb,
+} from '@kbn/embeddable-plugin/public';
 import { MapApp } from './map_app';
 import {
   SavedMap,
@@ -25,7 +28,7 @@ interface Props {
   stateTransfer: EmbeddableStateTransfer;
   originatingApp?: string;
   originatingPath?: string;
-  breadcrumbTitle?: string;
+  breadcrumbs?: EmbeddableEditorBreadcrumb[];
   history: ScopedHistory;
 }
 
@@ -50,7 +53,7 @@ export class MapPage extends Component<Props, State> {
         embeddableId: props.embeddableId,
         originatingApp: props.originatingApp,
         originatingPath: props.originatingPath,
-        breadcrumbTitle: props.breadcrumbTitle,
+        breadcrumbs: props.breadcrumbs,
         stateTransfer: props.stateTransfer,
         onSaveCallback: this.updateSaveCounter,
         defaultLayerWizard: getOpenLayerWizardFromUrlParam() || '',

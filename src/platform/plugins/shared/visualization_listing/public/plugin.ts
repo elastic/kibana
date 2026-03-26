@@ -61,7 +61,6 @@ export class VisualizationListingPlugin
           contentManagement: pluginsStart.contentManagement,
           embeddable: pluginsStart.embeddable,
           savedObjectsTagging: pluginsStart.savedObjectsTaggingOss?.getTaggingApi,
-          breadcrumbTitle: tabTitle,
         };
 
         const { getTableList } = await import('./get_table_list');

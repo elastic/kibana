@@ -19,7 +19,7 @@ import type {
   LensAppLocatorParams,
   LensDocument,
 } from '@kbn/lens-common';
-import { getOriginatingAppBreadcrumbs } from '@kbn/breadcrumbs-utils';
+import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
 import type { RedirectToOriginProps } from './types';
 
 const VISUALIZE_APP_ID = 'visualize';
@@ -69,20 +69,14 @@ export function setBreadcrumbsTitle(
     chrome: ChromeStart;
   },
   {
-    isByValueMode,
-    originatingApp,
     originatingAppName,
-    originatingPath,
-    breadcrumbTitle,
+    incomingBreadcrumbs,
     redirectToOrigin,
     isFromLegacyEditor,
     currentDocTitle,
   }: {
-    isByValueMode: boolean;
-    originatingApp: string | undefined;
     originatingAppName: string | undefined;
-    originatingPath: string | undefined;
-    breadcrumbTitle: string | undefined;
+    incomingBreadcrumbs: EmbeddableEditorBreadcrumb[] | undefined;
     redirectToOrigin: ((props?: RedirectToOriginProps | undefined) => void) | undefined;
     isFromLegacyEditor: boolean;
     currentDocTitle: string;
@@ -90,22 +84,8 @@ export function setBreadcrumbsTitle(
 ) {
   const breadcrumbs: EuiBreadcrumb[] = [];
 
-  if (breadcrumbTitle && originatingApp && originatingPath) {
-    const originatingAppBreadcrumbs = getOriginatingAppBreadcrumbs({
-      originatingApp,
-      originatingPath,
-      breadcrumbTitle,
-      originatingAppName,
-      navigateToApp: application.navigateToApp,
-    });
-    if (
-      originatingAppBreadcrumbs.length === 2 &&
-      originatingAppBreadcrumbs[0]?.text === originatingAppBreadcrumbs[1]?.text
-    ) {
-      breadcrumbs.push(originatingAppBreadcrumbs[0]);
-    } else {
-      breadcrumbs.push(...originatingAppBreadcrumbs);
-    }
+  if (incomingBreadcrumbs?.length) {
+    breadcrumbs.push(...incomingBreadcrumbs);
   } else if ((isFromLegacyEditor || originatingAppName) && originatingAppName && redirectToOrigin) {
     breadcrumbs.push({
       onClick: () => {
@@ -113,6 +93,21 @@ export function setBreadcrumbsTitle(
       },
       text: originatingAppName,
     });
+  } else if (!originatingAppName) {
+    breadcrumbs.push(
+      {
+        text: i18n.translate('xpack.lens.breadcrumbsDashboards', {
+          defaultMessage: 'Dashboards',
+        }),
+        href: application.getUrlForApp('dashboards', { path: '#/list' }),
+      },
+      {
+        text: i18n.translate('xpack.lens.breadcrumbsVisualizations', {
+          defaultMessage: 'Visualizations',
+        }),
+        href: application.getUrlForApp('dashboards', { path: '#/list/visualizations' }),
+      }
+    );
   }
 
   const currentDocBreadcrumb: EuiBreadcrumb = { text: currentDocTitle };

@@ -9,6 +9,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { EventEmitter } from 'events';
+import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 
@@ -37,7 +38,7 @@ export const useSavedVisInstance = (
   visualizationIdFromUrl: string | undefined,
   embeddableInput?: VisualizeInput,
   originatingPath?: string,
-  breadcrumbTitle?: string
+  incomingBreadcrumbs?: EmbeddableEditorBreadcrumb[]
 ) => {
   const [state, setState] = useState<{
     savedVisInstance?: SavedVisInstance;
@@ -117,19 +118,14 @@ export const useSavedVisInstance = (
         if (savedVis.id) {
           const breadcrumbs = getEditBreadcrumbs(
             {
-              originatingApp,
               originatingAppName,
-              originatingPath,
-              breadcrumbTitle,
+              incomingBreadcrumbs,
               redirectToOrigin,
-              navigateToApp,
             },
             savedVis.title
           );
           if (serverless?.setBreadcrumbs) {
-            serverless.setBreadcrumbs(
-              getEditServerlessBreadcrumbs({ originatingAppName, redirectToOrigin }, savedVis.title)
-            );
+            serverless.setBreadcrumbs(getEditServerlessBreadcrumbs(savedVis.title));
           } else {
             chrome.setBreadcrumbs(breadcrumbs, {
               project: { value: breadcrumbs, absolute: true },
@@ -139,21 +135,12 @@ export const useSavedVisInstance = (
           chrome.docTitle.change(savedVis.title);
         } else {
           const createBreadcrumbs = getCreateBreadcrumbs({
-            originatingApp,
             originatingAppName,
-            originatingPath,
-            breadcrumbTitle,
+            incomingBreadcrumbs,
             redirectToOrigin,
-            navigateToApp,
           });
           if (serverless?.setBreadcrumbs) {
-            serverless.setBreadcrumbs(
-              getCreateServerlessBreadcrumbs({
-                byValue: Boolean(originatingApp),
-                originatingAppName,
-                redirectToOrigin,
-              })
-            );
+            serverless.setBreadcrumbs(getCreateServerlessBreadcrumbs());
           } else {
             chrome.setBreadcrumbs(createBreadcrumbs, {
               project: { value: createBreadcrumbs, absolute: true },
@@ -224,8 +211,7 @@ export const useSavedVisInstance = (
     state.savedVisInstance,
     state.visEditorController,
     embeddableInput,
-    originatingPath,
-    breadcrumbTitle,
+    incomingBreadcrumbs,
   ]);
 
   useEffect(() => {

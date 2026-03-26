@@ -80,8 +80,7 @@
     "@kbn/visualization-listing-components",
     "@kbn/cps",
     "@kbn/kql",
-    "@kbn/cps-utils",
-    "@kbn/breadcrumbs-utils"
+    "@kbn/cps-utils"
   ],
   "exclude": ["target/**/*"]
 }

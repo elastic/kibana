@@ -203,6 +203,10 @@ describe('useSavedVisInstance', () => {
 
     test('should pass originating app context to breadcrumbs when navigating from another app', async () => {
       mockServices.stateTransferService.getAppNameFromId = jest.fn().mockReturnValue('Dashboards');
+      const incomingBreadcrumbs = [
+        { text: 'Dashboards', href: '/app/dashboards' },
+        { text: 'My Dashboard', href: '/app/dashboards#/view/abc123' },
+      ];
 
       const { result } = renderHook(() =>
         useSavedVisInstance(
@@ -212,8 +216,8 @@ describe('useSavedVisInstance', () => {
           'dashboards',
           savedVisId,
           undefined,
-          '/app/dashboards#/view/abc123',
-          'My Dashboard'
+          undefined,
+          incomingBreadcrumbs
         )
       );
 
@@ -222,12 +226,9 @@ describe('useSavedVisInstance', () => {
 
       expect(getEditBreadcrumbs).toHaveBeenCalledWith(
         expect.objectContaining({
-          originatingApp: 'dashboards',
           originatingAppName: 'Dashboards',
-          originatingPath: '/app/dashboards#/view/abc123',
-          breadcrumbTitle: 'My Dashboard',
+          incomingBreadcrumbs,
           redirectToOrigin: expect.any(Function),
-          navigateToApp: expect.any(Function),
         }),
         'Test Vis'
       );

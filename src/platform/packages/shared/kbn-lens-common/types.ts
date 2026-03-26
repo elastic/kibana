@@ -27,6 +27,7 @@ import type {
 import type { UiActionsStart, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type {
   CellValueContext,
+  EmbeddableEditorBreadcrumb,
   EmbeddableEditorState,
   EmbeddableStateTransfer,
 } from '@kbn/embeddable-plugin/public';
@@ -635,7 +636,7 @@ export type VisualizeEditorContext<T extends LensConfiguration = LensConfigurati
   legacyEditorOriginatingApp?: string;
   originatingApp?: string;
   originatingPath?: string;
-  breadcrumbTitle?: string;
+  breadcrumbs?: EmbeddableEditorBreadcrumb[];
   isVisualizeAction: boolean;
   searchQuery?: Query;
   searchFilters?: Filter[];

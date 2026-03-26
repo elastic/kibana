@@ -22,6 +22,7 @@ import { css } from '@emotion/react';
 import { euiBreakpoint, type UseEuiTheme } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { VISUALIZE_APP_NAME } from '@kbn/visualizations-common';
+import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
 import type {
   VisualizeServices,
   VisualizeAppState,
@@ -67,7 +68,7 @@ interface VisualizeTopNavProps {
   hasUnappliedChanges: boolean;
   originatingApp?: string;
   originatingPath?: string;
-  breadcrumbTitle?: string;
+  incomingBreadcrumbs?: EmbeddableEditorBreadcrumb[];
   visInstance: VisualizeEditorVisInstance;
   setOriginatingApp?: (originatingApp: string | undefined) => void;
   stateContainer: VisualizeAppStateContainer;
@@ -87,7 +88,7 @@ const TopNav = ({
   originatingApp,
   setOriginatingApp,
   originatingPath,
-  breadcrumbTitle,
+  incomingBreadcrumbs,
   visInstance,
   stateContainer,
   visualizationIdFromUrl,
@@ -162,7 +163,7 @@ const TopNav = ({
           originatingApp,
           setOriginatingApp,
           originatingPath,
-          breadcrumbTitle,
+          incomingBreadcrumbs,
           visInstance,
           stateContainer,
           visualizationIdFromUrl,
@@ -186,7 +187,7 @@ const TopNav = ({
     originatingApp,
     setOriginatingApp,
     originatingPath,
-    breadcrumbTitle,
+    incomingBreadcrumbs,
     visInstance,
     stateContainer,
     visualizationIdFromUrl,

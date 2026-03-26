@@ -293,15 +293,10 @@ export function App({
           (initialContext && 'originatingApp' in initialContext
             ? initialContext.originatingApp
             : undefined),
-        originatingPath:
-          incomingState?.originatingPath ??
-          (initialContext && 'originatingPath' in initialContext
-            ? initialContext.originatingPath
-            : undefined),
-        breadcrumbTitle:
-          incomingState?.breadcrumbTitle ??
-          (initialContext && 'breadcrumbTitle' in initialContext
-            ? initialContext.breadcrumbTitle
+        incomingBreadcrumbs:
+          incomingState?.breadcrumbs ??
+          (initialContext && 'breadcrumbs' in initialContext
+            ? initialContext.breadcrumbs
             : undefined),
         isFromLegacyEditor: Boolean(isLinkedToOriginatingApp || legacyEditorAppName),
         originatingAppName: getOriginatingAppName(),
@@ -321,8 +316,7 @@ export function App({
     serverless,
     initialContext,
     incomingState?.originatingApp,
-    incomingState?.originatingPath,
-    incomingState?.breadcrumbTitle,
+    incomingState?.breadcrumbs,
   ]);
 
   const switchDatasource = useCallback(() => {
