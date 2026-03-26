@@ -6,7 +6,7 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import type { Entity } from '../common/constants';
+import type { Entity } from '../common';
 import { ENTITY_STORE_ROUTES } from '../common/constants';
 import type { EntityType } from '../common';
 import { API_VERSIONS } from '../common/constants';

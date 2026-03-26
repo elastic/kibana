@@ -147,16 +147,12 @@ export const PrevalenceDetails: React.FC<PrevalenceDetailsProps> = ({
   const euidApi = useEntityStoreEuidApi();
   const documentHostEntityIdentifiers = useMemo(
     () =>
-      hit.flattened
-        ? (euidApi?.euid.getEntityIdentifiersFromDocument('host', hit.flattened) as IdentityFields)
-        : null,
+      hit.flattened ? euidApi?.euid.getEntityIdentifiersFromDocument('host', hit.flattened) : null,
     [hit.flattened, euidApi?.euid]
   );
   const documentUserEntityIdentifiers = useMemo(
     () =>
-      hit.flattened
-        ? (euidApi?.euid.getEntityIdentifiersFromDocument('user', hit.flattened) as IdentityFields)
-        : null,
+      hit.flattened ? euidApi?.euid.getEntityIdentifiersFromDocument('user', hit.flattened) : null,
     [hit.flattened, euidApi?.euid]
   );
 

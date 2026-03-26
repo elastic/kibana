@@ -56,14 +56,19 @@ jest.mock('../../../common/components/user_privileges');
 
 const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
 
-const renderPreviewLink = (props: {
-  field: string;
-  value: string;
-  entityId?: string;
-  dataTestSubj?: string;
-  ruleId?: string;
-  scopeId?: string;
-}) =>
+const renderPreviewLink = (
+  p0: string,
+  p1: string,
+  p2: string,
+  props: {
+    field: string;
+    value: string;
+    entityId?: string;
+    dataTestSubj?: string;
+    ruleId?: string;
+    scopeId?: string;
+  }
+) =>
   render(
     <TestProviders>
       <PreviewLink
@@ -94,7 +99,11 @@ describe('<PreviewLink />', () => {
   });
 
   it('should not render a link if field is not previewable', () => {
-    const { queryByTestId } = renderPreviewLink({ field: 'event.category', value: 'process' });
+    const { queryByTestId } = renderPreviewLink('event.category', 'process', 'preview-link', {
+      field: 'event.category',
+      value: 'process',
+      dataTestSubj: 'preview-link',
+    });
     expect(queryByTestId(FLYOUT_PREVIEW_LINK_TEST_ID)).not.toBeInTheDocument();
   });
 
@@ -112,7 +121,7 @@ describe('<PreviewLink />', () => {
   });
 
   it('should render a link to open host preview', () => {
-    const { getByTestId } = renderPreviewLink({
+    const { getByTestId } = renderPreviewLink('host.name', 'host', 'host-link', {
       field: 'host.name',
       value: 'host',
       dataTestSubj: 'host-link',
@@ -132,7 +141,7 @@ describe('<PreviewLink />', () => {
   });
 
   it('should pass entityId to host preview (identity / entity store resolution)', () => {
-    const { getByTestId } = renderPreviewLink({
+    const { getByTestId } = renderPreviewLink('host.name', 'my-host', 'host-link-with-entity', {
       field: 'host.name',
       value: 'my-host',
       entityId: 'resolved-host-euid',
@@ -153,7 +162,7 @@ describe('<PreviewLink />', () => {
   });
 
   it('should render a link to open user preview', () => {
-    const { getByTestId } = renderPreviewLink({
+    const { getByTestId } = renderPreviewLink('user.name', 'user', 'user-link', {
       field: 'user.name',
       value: 'user',
       dataTestSubj: 'user-link',
@@ -173,7 +182,7 @@ describe('<PreviewLink />', () => {
   });
 
   it('should render a link to open network preview', () => {
-    const { getByTestId } = renderPreviewLink({
+    const { getByTestId } = renderPreviewLink('source.ip', '100:XXX:XXX', 'ip-link', {
       field: 'source.ip',
       value: '100:XXX:XXX',
       dataTestSubj: 'ip-link',
@@ -192,7 +201,7 @@ describe('<PreviewLink />', () => {
   });
 
   it('should render a link to open rule preview', () => {
-    const { getByTestId } = renderPreviewLink({
+    const { getByTestId } = renderPreviewLink('kibana.alert.rule.name', 'ruleId', 'rule-link', {
       field: 'kibana.alert.rule.name',
       value: 'ruleId',
       ruleId: 'ruleId',
@@ -273,7 +282,11 @@ describe('<PreviewLink />', () => {
       },
     });
 
-    const { getByTestId } = renderPreviewLink('host.name', 'host', 'host-link');
+    const { getByTestId } = renderPreviewLink('host.name', 'host', 'host-link', {
+      field: 'host.name',
+      value: 'host',
+      dataTestSubj: 'host-link',
+    });
 
     expect(getByTestId('host-link')).toBeInTheDocument();
   });
