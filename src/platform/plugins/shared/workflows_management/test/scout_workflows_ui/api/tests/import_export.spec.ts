@@ -8,6 +8,7 @@
  */
 
 import AdmZip from 'adm-zip';
+import YAML from 'yaml';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -204,6 +205,111 @@ apiTest.describe('Workflows Import/Export API', { tag: [...tags.stateful.classic
       expect(importResponse.body.created).toHaveLength(1);
       expect(importResponse.body.failed).toHaveLength(0);
       expect(importResponse.body.created[0].name).toBe('ImportTest Workflow');
+    }
+  );
+
+  apiTest('should return 400 when export ids array is empty', async ({ apiClient }) => {
+    const response = await apiClient.post('api/workflows/export', {
+      headers: {
+        ...COMMON_HEADERS,
+        ...adminCredentials.apiKeyHeader,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ids: [] }),
+    });
+
+    expect(response).toHaveStatusCode(400);
+  });
+
+  apiTest('should return 400 when mget ids array is empty', async ({ apiClient }) => {
+    const response = await apiClient.post('api/workflows/mget', {
+      headers: {
+        ...COMMON_HEADERS,
+        ...adminCredentials.apiKeyHeader,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ids: [] }),
+    });
+
+    expect(response).toHaveStatusCode(400);
+  });
+
+  apiTest(
+    'should handle partial failures in bulk_create (one valid, one invalid)',
+    async ({ apiClient }) => {
+      const response = await apiClient.post('api/workflows', {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminCredentials.apiKeyHeader,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          workflows: [{ yaml: SIMPLE_WORKFLOW_YAML }, { yaml: 'not: valid: yaml: [' }],
+        }),
+      });
+
+      expect(response).toHaveStatusCode(200);
+      // At least one should succeed or fail; partial success is the key behavior
+      const totalProcessed = response.body.created.length + response.body.failed.length;
+      expect(totalProcessed).toBe(2);
+    }
+  );
+
+  apiTest('should bulk create with explicit custom IDs', async ({ apiClient }) => {
+    const customId = `workflow-00000000-0000-4000-a000-000000000001`;
+    const response = await apiClient.post('api/workflows', {
+      headers: {
+        ...COMMON_HEADERS,
+        ...adminCredentials.apiKeyHeader,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        workflows: [{ id: customId, yaml: SIMPLE_WORKFLOW_YAML }],
+      }),
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.created).toHaveLength(1);
+    expect(response.body.created[0].id).toBe(customId);
+  });
+
+  apiTest(
+    'should export manifest with correct version and count',
+    async ({ kbnClient, apiClient }) => {
+      const create1 = await kbnClient.request<{ id: string }>({
+        method: 'POST',
+        path: '/api/workflows/workflow',
+        body: { yaml: SIMPLE_WORKFLOW_YAML },
+      });
+      const create2 = await kbnClient.request<{ id: string }>({
+        method: 'POST',
+        path: '/api/workflows/workflow',
+        body: { yaml: SIMPLE_WORKFLOW_YAML.replace('ImportTest Workflow', 'Second') },
+      });
+
+      const exportResponse = await apiClient.post('api/workflows/export', {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminCredentials.apiKeyHeader,
+          'Content-Type': 'application/json',
+        },
+        responseType: 'buffer',
+        body: JSON.stringify({ ids: [create1.data.id, create2.data.id] }),
+      });
+
+      expect(exportResponse).toHaveStatusCode(200);
+
+      const zipBuffer = exportResponse.body as Buffer;
+      const zip = new AdmZip(zipBuffer);
+      const manifestEntry = zip.getEntries().find((e) => e.entryName === 'manifest.yml');
+      expect(manifestEntry).toBeDefined();
+
+      const manifest = YAML.parse(
+        (manifestEntry ?? { getData: () => Buffer.from('') }).getData().toString('utf-8')
+      );
+      expect(manifest.exportedCount).toBe(2);
+      expect(manifest.version).toBe('1');
+      expect(manifest.exportedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
     }
   );
 });
