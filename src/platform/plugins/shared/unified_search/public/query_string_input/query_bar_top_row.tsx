@@ -342,17 +342,19 @@ export const QueryBarTopRow = React.memo(
     // and `isPaused` (play/pause toggle while enabled). `isPaused` is local-only
     // and has no equivalent in the legacy path.
     const [autoRefresh, setAutoRefresh] = useState<AutoRefreshSettings>(() => ({
-      isEnabled: false,
+      isEnabled: props.isRefreshPaused === false,
       isPaused: false,
       interval: props.refreshInterval ?? 10000,
       intervalUnit: 's',
     }));
 
     useEffect(() => {
-      if (props.refreshInterval != null) {
-        setAutoRefresh((prev) => ({ ...prev, interval: props.refreshInterval! }));
-      }
-    }, [props.refreshInterval]);
+      setAutoRefresh((prev) => ({
+        ...prev,
+        ...(props.refreshInterval != null ? { interval: props.refreshInterval } : {}),
+        isEnabled: props.isRefreshPaused === false,
+      }));
+    }, [props.refreshInterval, props.isRefreshPaused]);
 
     const kibana = useKibana<IUnifiedSearchPluginServices>();
 
