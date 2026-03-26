@@ -339,16 +339,20 @@ describe('StorageIndexAdapter', () => {
   });
 
   describe('when writing/bootstrapping with an legacy index', () => {
+    let upgradedClient: SimpleIStorageClient<typeof storageSettings>;
+
     beforeAll(async () => {
       await client.index({ id: 'foo', document: { foo: 'bar' } });
 
       jest.spyOn(getSchemaVersionModule, 'getSchemaVersion').mockReturnValue('next_version');
 
-      await client.index({ id: 'foo', document: { foo: 'bar' } });
+      const upgradedAdapter = createStorageIndexAdapter(storageSettings);
+      upgradedClient = upgradedAdapter.getClient();
+      await upgradedClient.index({ id: 'foo', document: { foo: 'bar' } });
     });
 
     afterAll(async () => {
-      await client?.clean();
+      await upgradedClient?.clean();
     });
     it('updates the existing write index in place', async () => {
       await verifyIndex({ version: 'next_version' });
