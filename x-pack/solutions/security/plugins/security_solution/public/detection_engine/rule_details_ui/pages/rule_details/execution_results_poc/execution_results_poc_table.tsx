@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import React, { useState, useCallback, useMemo } from 'react';
+import type { CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -17,24 +16,26 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { mockResponse } from './static_data';
 import * as i18n from './translations';
 import * as logTableI18n from '../execution_log_table/translations';
-import { ExecutionStatusIndicator } from '../../../../rule_monitoring';
-import { FormattedDate } from '../../../../../common/components/formatted_date';
-import { RuleDurationFormat } from '../execution_log_table/rule_duration_format';
-import { TableHeaderTooltipCell } from '../../../../rule_management_ui/components/rules_table/table_header_tooltip_cell';
-import { ExecutionDetailsFlyout } from './execution_details_flyout';
+import { getColumns } from './columns';
 import {
-  RULE_EXECUTION_TYPE_BACKFILL,
-  RULE_EXECUTION_TYPE_STANDARD,
-} from '../../../../../common/translations';
+  ExecutionRunTypeFilter,
+  ExecutionStatusFilter,
+  useReadExecutionResults,
+} from '../../../../rule_monitoring';
+import { ExecutionDetailsFlyout } from './execution_details_flyout';
 import { HeaderSection } from '../../../../../common/components/header_section';
-import { ExecutionLogSearchBar } from '../execution_log_table/execution_log_search_bar';
+import {
+  RUN_TYPE_FILTERS,
+  STATUS_FILTERS,
+} from '../../../../../../common/detection_engine/rule_management/execution_log';
+import type { SortOrder } from '../../../../../../common/api/detection_engine';
 import type {
   RuleExecutionStatus,
   RuleRunType,
   UnifiedExecutionResult,
+  UnifiedExecutionResultSortField,
   UnifiedExecutionStatus,
 } from '../../../../../../common/api/detection_engine/rule_monitoring';
 
@@ -42,181 +43,102 @@ const datePickerFlexItemCss = css`
   max-width: 582px;
 `;
 
-const UNIFIED_TO_RULE_STATUS: Record<UnifiedExecutionStatus, RuleExecutionStatus> = {
-  success: 'succeeded',
-  warning: 'partial failure',
-  failure: 'failed',
+const RULE_STATUS_TO_UNIFIED: Partial<Record<RuleExecutionStatus, UnifiedExecutionStatus>> = {
+  succeeded: 'success',
+  'partial failure': 'warning',
+  failed: 'failure',
 };
 
 interface ExecutionResultsPocTableProps {
   ruleId: string;
+  onFilterByExecutionId: (executionId: string, executionStart: string) => void;
 }
 
-export const ExecutionResultsPocTable: React.FC<ExecutionResultsPocTableProps> = ({ ruleId }) => {
+export const ExecutionResultsPocTable: React.FC<ExecutionResultsPocTableProps> = ({
+  ruleId,
+  onFilterByExecutionId,
+}) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
   const [selectedItem, setSelectedItem] = useState<UnifiedExecutionResult | null>(null);
+  const [sortField, setSortField] = useState<UnifiedExecutionResultSortField>('execution_start');
+  const [sortDirection, setSortDirection] = useState<SortOrder>('desc');
+
+  const [start, setStart] = useState('now-2h');
+  const [end, setEnd] = useState('now');
+
+  const [runTypeFilters, setRunTypeFilters] = useState<RuleRunType[]>([]);
 
   const [statusFilters, setStatusFilters] = useState<RuleExecutionStatus[]>([]);
-  const [runTypeFilters, setRunTypeFilters] = useState<RuleRunType[]>([]);
-  const [start, setStart] = useState('now-24h');
-  const [end, setEnd] = useState('now');
-  const [isPaused, setIsPaused] = useState(false);
-  const [refreshInterval, setRefreshInterval] = useState(0);
+  const finalStatusFilters = useMemo(
+    () =>
+      statusFilters
+        .map((status) => RULE_STATUS_TO_UNIFIED[status])
+        .filter((status): status is UnifiedExecutionStatus => status !== undefined),
+    [statusFilters]
+  );
 
-  const onTimeChangeCallback = ({
-    start: newStart,
-    end: newEnd,
-  }: {
-    start: string;
-    end: string;
-  }) => {
-    setStart(newStart);
-    setEnd(newEnd);
-  };
-
-  const onRefreshChangeCallback = ({
-    isPaused: newIsPaused,
-    refreshInterval: newRefreshInterval,
-  }: {
-    isPaused: boolean;
-    refreshInterval: number;
-  }) => {
-    setIsPaused(newIsPaused);
-    setRefreshInterval(newRefreshInterval);
-  };
-
-  const onRefreshCallback = () => {
-    // Placeholder for refresh
-  };
-
-  const onSearchCallback = () => {
-    // Placeholder for search
-  };
-
-  const columns: Array<EuiBasicTableColumn<UnifiedExecutionResult>> = [
-    {
-      field: 'outcome.status',
-      name: (
-        <TableHeaderTooltipCell
-          title={i18n.COLUMN_STATUS}
-          tooltipContent={i18n.COLUMN_STATUS_TOOLTIP}
-        />
-      ),
-      render: (_value: unknown, record: UnifiedExecutionResult) => (
-        <ExecutionStatusIndicator
-          status={UNIFIED_TO_RULE_STATUS[record.outcome.status]}
-          showTooltip={true}
-        />
-      ),
-      width: '10%',
+  const { data, isFetching, refetch } = useReadExecutionResults({
+    ruleId,
+    filter: {
+      from: start,
+      to: end,
+      outcome: finalStatusFilters,
+      run_type: runTypeFilters,
     },
-    {
-      field: 'backfill',
-      name: (
-        <TableHeaderTooltipCell
-          title={i18n.COLUMN_RUN_TYPE}
-          tooltipContent={i18n.COLUMN_RUN_TYPE_TOOLTIP}
-        />
-      ),
-      render: (_value: unknown, record: UnifiedExecutionResult) => {
-        const typeStr = record.backfill
-          ? RULE_EXECUTION_TYPE_BACKFILL
-          : RULE_EXECUTION_TYPE_STANDARD;
-        return <EuiText size="s">{typeStr}</EuiText>;
-      },
-      width: '10%',
-    },
-    {
-      field: 'execution_start',
-      name: (
-        <TableHeaderTooltipCell
-          title={i18n.COLUMN_TIMESTAMP}
-          tooltipContent={i18n.COLUMN_TIMESTAMP_TOOLTIP}
-        />
-      ),
-      render: (value: string) => <FormattedDate value={value} fieldName="execution_start" />,
-      width: '15%',
-    },
-    {
-      field: 'execution_duration_ms',
-      name: (
-        <TableHeaderTooltipCell
-          title={i18n.COLUMN_DURATION}
-          tooltipContent={i18n.COLUMN_DURATION_TOOLTIP}
-        />
-      ),
-      render: (value: number | null) =>
-        value != null ? <RuleDurationFormat duration={value} /> : <span>{'—'}</span>,
-      width: '10%',
-    },
-    {
-      field: 'metrics.alert_counts.new',
-      name: (
-        <TableHeaderTooltipCell
-          title={i18n.COLUMN_ALERTS_CREATED}
-          tooltipContent={i18n.COLUMN_ALERTS_CREATED_TOOLTIP}
-        />
-      ),
-      render: (_value: unknown, record: UnifiedExecutionResult) =>
-        record.metrics.alert_counts?.new ?? 0,
-      width: '10%',
-    },
-    {
-      field: 'outcome.message',
-      name: (
-        <TableHeaderTooltipCell
-          title={i18n.COLUMN_MESSAGE}
-          tooltipContent={i18n.COLUMN_MESSAGE_TOOLTIP}
-        />
-      ),
-      render: (_value: unknown, record: UnifiedExecutionResult) => record.outcome.message ?? '—',
-      width: '35%',
-    },
-    {
-      name: i18n.COLUMN_ACTIONS,
-      actions: [
-        {
-          name: i18n.ACTION_FILTER_BY_EXECUTION_ID,
-          description: i18n.ACTION_FILTER_BY_EXECUTION_ID,
-          icon: 'filter',
-          type: 'icon',
-          onClick: (_item: UnifiedExecutionResult) => {
-            // Placeholder for filter action
-          },
-        },
-        {
-          name: i18n.ACTION_VIEW_DETAILS,
-          description: i18n.ACTION_VIEW_DETAILS,
-          icon: 'maximize',
-          type: 'icon',
-          onClick: (item: UnifiedExecutionResult) => {
-            setSelectedItem(item);
-          },
-        },
-      ],
-      width: '10%',
-    },
-  ];
+    sort: { field: sortField, order: sortDirection },
+    page: pageIndex + 1,
+    perPage: pageSize,
+  });
 
-  const pagination = {
-    pageIndex,
-    pageSize,
-    totalItemCount: mockResponse.total,
-    pageSizeOptions: [5, 10, 25],
-  };
+  const tableItems = data?.data ?? [];
+  const totalItemCount = data?.total ?? 0;
 
-  const onTableChange = ({ page }: { page: { index: number; size: number } }) => {
-    if (page) {
-      setPageIndex(page.index);
-      setPageSize(page.size);
-    }
-  };
+  const onTimeChangeCallback = useCallback(
+    ({ start: newStart, end: newEnd }: { start: string; end: string }) => {
+      setStart(newStart);
+      setEnd(newEnd);
+    },
+    []
+  );
 
-  const items = useMemo(() => {
-    const startIndex = pageIndex * pageSize;
-    return mockResponse.data.slice(startIndex, startIndex + pageSize);
-  }, [pageIndex, pageSize]);
+  const onRefreshCallback = useCallback(() => {
+    refetch();
+  }, [refetch]);
+
+  const onTableChangeCallback = useCallback(
+    ({ page, sort }: CriteriaWithPagination<UnifiedExecutionResult>) => {
+      if (page) {
+        setPageIndex(page.index);
+        setPageSize(page.size);
+      }
+      if (sort) {
+        setSortField(sort.field as UnifiedExecutionResultSortField);
+        setSortDirection(sort.direction);
+      }
+    },
+    []
+  );
+
+  const columns = useMemo(
+    () => getColumns({ onFilterByExecutionId, onViewDetails: setSelectedItem }),
+    [onFilterByExecutionId]
+  );
+
+  const pagination = useMemo(
+    () => ({
+      pageIndex,
+      pageSize,
+      totalItemCount,
+      pageSizeOptions: [5, 10, 25],
+    }),
+    [pageIndex, pageSize, totalItemCount]
+  );
+
+  const sorting = useMemo(
+    () => ({ sort: { field: sortField, direction: sortDirection } }),
+    [sortField, sortDirection]
+  );
 
   return (
     <EuiPanel hasBorder>
@@ -225,14 +147,22 @@ export const ExecutionResultsPocTable: React.FC<ExecutionResultsPocTableProps> =
           <HeaderSection title={logTableI18n.TABLE_TITLE} subtitle={logTableI18n.TABLE_SUBTITLE} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ExecutionLogSearchBar
-            onlyShowFilters={true}
-            selectedStatuses={statusFilters}
-            onStatusFilterChange={setStatusFilters}
-            onSearch={onSearchCallback}
-            selectedRunTypes={runTypeFilters}
-            onRunTypeFilterChange={setRunTypeFilters}
-          />
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={true}>
+              <ExecutionRunTypeFilter
+                items={RUN_TYPE_FILTERS}
+                selectedItems={runTypeFilters}
+                onChange={setRunTypeFilters}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={true}>
+              <ExecutionStatusFilter
+                items={STATUS_FILTERS}
+                selectedItems={statusFilters}
+                onChange={setStatusFilters}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem css={datePickerFlexItemCss}>
           <EuiSuperDatePicker
@@ -240,11 +170,7 @@ export const ExecutionResultsPocTable: React.FC<ExecutionResultsPocTableProps> =
             end={end}
             onTimeChange={onTimeChangeCallback}
             onRefresh={onRefreshCallback}
-            isPaused={isPaused}
-            isLoading={false}
-            refreshInterval={refreshInterval}
-            onRefreshChange={onRefreshChangeCallback}
-            recentlyUsedRanges={[]}
+            isLoading={isFetching}
             width="full"
           />
         </EuiFlexItem>
@@ -253,11 +179,13 @@ export const ExecutionResultsPocTable: React.FC<ExecutionResultsPocTableProps> =
       <EuiSpacer size="s" />
 
       <EuiBasicTable
-        tableCaption="Execution results"
-        items={items}
+        tableCaption={i18n.TABLE_CAPTION}
+        items={tableItems}
         columns={columns}
         pagination={pagination}
-        onChange={onTableChange}
+        sorting={sorting}
+        loading={isFetching}
+        onChange={onTableChangeCallback}
       />
       {selectedItem && (
         <ExecutionDetailsFlyout item={selectedItem} onClose={() => setSelectedItem(null)} />

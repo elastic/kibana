@@ -14,10 +14,13 @@ import type {
   GetSpaceHealthRequestBody,
   GetSpaceHealthResponse,
   LogLevel,
+  ReadRuleExecutionResultsResponse,
   RuleExecutionEventType,
   RuleExecutionResult,
   RuleExecutionStatus,
   RuleRunType,
+  UnifiedExecutionResultSortField,
+  UnifiedExecutionStatus,
 } from '../../../../common/api/detection_engine/rule_monitoring';
 
 export interface IRuleMonitoringApiClient {
@@ -42,6 +45,14 @@ export interface IRuleMonitoringApiClient {
   fetchRuleExecutionResults(
     args: FetchRuleExecutionResultsArgs
   ): Promise<GetRuleExecutionResultsResponse>;
+
+  /**
+   * Fetches unified rule execution results.
+   * @throws An error if response is not OK.
+   */
+  readRuleExecutionResults(
+    args: ReadRuleExecutionResultsArgs
+  ): Promise<ReadRuleExecutionResultsResponse>;
 
   /**
    * Fetches health overview of all detection rules in the current Kibana space.
@@ -179,4 +190,43 @@ export interface FetchRuleExecutionResultsArgs extends RuleMonitoringApiCallArgs
    * Array of `runTypeFilters` (e.g. `manual,scheduled`)
    */
   runTypeFilters?: RuleRunType[];
+}
+
+export interface ReadRuleExecutionResultsRequestArgs {
+  /**
+   * Saved Object ID of the rule.
+   */
+  ruleId: string;
+
+  /**
+   * Filtering criteria.
+   */
+  filter?: {
+    outcome?: UnifiedExecutionStatus[];
+    run_type?: RuleRunType[];
+    from: string;
+    to: string;
+  };
+
+  /**
+   * Sorting configuration.
+   */
+  sort?: {
+    field?: UnifiedExecutionResultSortField;
+    order?: SortOrder;
+  };
+
+  /**
+   * 1-based page number.
+   */
+  page?: number;
+
+  /**
+   * Number of results per page.
+   */
+  perPage?: number;
+}
+
+export interface ReadRuleExecutionResultsArgs extends ReadRuleExecutionResultsRequestArgs {
+  signal?: AbortSignal;
 }
