@@ -116,4 +116,26 @@ export class VisualizeApp {
     await this.selectNewDashboard();
     await this.confirmSave();
   }
+
+  async createAggBasedVisualization(subType: string, dataSource: string) {
+    await this.goto();
+    await this.openNewVisualizationWizard();
+    await this.clickAggBasedType(subType);
+    await this.selectDataSource(dataSource);
+  }
+
+  async createVegaVisualization() {
+    await this.goto();
+    await this.openNewVisualizationWizard();
+    await this.clickVisType('vega');
+    await this.waitForVisualizationLoaded();
+  }
+
+  async createTSVBVisualization() {
+    await this.goto();
+    await this.openNewVisualizationWizard();
+    await this.clickLegacyTab();
+    await this.clickVisType('metrics');
+    await this.waitForVisualizationLoaded();
+  }
 }
