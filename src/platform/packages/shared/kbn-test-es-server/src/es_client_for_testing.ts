@@ -11,8 +11,8 @@ import * as Url from 'url';
 import * as Fs from 'fs';
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { Client as EsClient, ClientOptions, HttpConnection } from '@elastic/elasticsearch';
-import type { Config } from '../functional_test_runner';
+import type { ClientOptions } from '@elastic/elasticsearch';
+import { Client as EsClient, HttpConnection } from '@elastic/elasticsearch';
 
 /** options for creating es instances used in functional testing scenarios */
 export interface EsClientForTestingOptions extends Omit<ClientOptions, 'node' | 'nodes' | 'tls'> {
@@ -28,36 +28,13 @@ export interface EsClientForTestingOptions extends Omit<ClientOptions, 'node' | 
   isCloud?: boolean;
 }
 
-export function createRemoteEsClientForFtrConfig(
-  config: Config,
-  overrides?: Omit<EsClientForTestingOptions, 'esUrl'>
-) {
-  const ccsConfig = config.get('esTestCluster.ccs');
-  if (!ccsConfig) {
-    throw new Error('FTR config is missing esTestCluster.ccs');
-  }
-
-  return createEsClientForTesting({
-    esUrl: ccsConfig.remoteClusterUrl,
-    requestTimeout: config.get('timeouts.esRequestTimeout'),
-    ...overrides,
-  });
-}
-
-export function createEsClientForFtrConfig(
-  config: Config,
-  overrides?: Omit<EsClientForTestingOptions, 'esUrl'>
-) {
-  const esUrl = Url.format(config.get('servers.elasticsearch'));
-  return createEsClientForTesting({
-    esUrl,
-    requestTimeout: config.get('timeouts.esRequestTimeout'),
-    ...overrides,
-  });
-}
-
 export function createEsClientForTesting(options: EsClientForTestingOptions) {
-  const { esUrl, authOverride, isCloud = !!process.env.TEST_CLOUD, ...otherOptions } = options;
+  const {
+    esUrl: _esUrl,
+    authOverride,
+    isCloud = !!process.env.TEST_CLOUD,
+    ...otherOptions
+  } = options;
 
   const url = options.authOverride
     ? Url.format({
