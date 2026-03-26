@@ -238,9 +238,7 @@ describe('embeddable renderer', () => {
     );
 
     await waitFor(() => expect(embeddable.getByTestId('errorMessageMarkdown')).toBeInTheDocument());
-    expect(embeddable.getByTestId('errorMessageMarkdown')).toHaveTextContent(
-      'Panel server error'
-    );
+    expect(embeddable.getByTestId('errorMessageMarkdown')).toHaveTextContent('Panel server error');
   });
 
   it('registers error API via onApiAvailable when buildEmbeddable throws', async () => {
