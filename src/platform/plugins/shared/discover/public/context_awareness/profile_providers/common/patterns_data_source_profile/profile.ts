@@ -59,7 +59,7 @@ export const createPatternsDataSourceProfileProvider = (
             Object.assign(acc, {
               [column]: (props: DataGridCellValueElementProps) =>
                 getSparklineCellRenderer(
-                  services,
+                  services.charts,
                   props.row.flattened[props.columnId],
                   props.isDetails,
                   rowHeight

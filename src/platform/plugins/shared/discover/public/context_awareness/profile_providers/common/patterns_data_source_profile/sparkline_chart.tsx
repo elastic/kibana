@@ -16,10 +16,10 @@ import { Chart, BarSeries, ScaleType, Settings, Tooltip, TooltipType } from '@el
 
 import { useLogRateAnalysisBarColors } from '@kbn/aiops-log-rate-analysis';
 import { i18n } from '@kbn/i18n';
-import type { ProfileProviderServices } from '../..';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 
 interface SparklineChartProps {
-  services: ProfileProviderServices;
+  charts: ChartsPluginStart;
   values?: number[];
   rowHeight: number;
 }
@@ -44,8 +44,7 @@ const miniHistogramChartTheme: PartialTheme = {
   },
 };
 
-export const SparklineChart: FC<SparklineChartProps> = ({ values, services, rowHeight }) => {
-  const { charts } = services;
+export const SparklineChart: FC<SparklineChartProps> = ({ values, charts, rowHeight }) => {
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
   const barColors = useLogRateAnalysisBarColors();
 

@@ -9,19 +9,19 @@
 
 import React from 'react';
 import type { FC } from 'react';
-import type { ProfileProviderServices } from '../../profile_provider_services';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { SparklineChart } from './sparkline_chart';
 import { useContainerStyle } from './use_container_style';
 
 interface Props {
-  services: ProfileProviderServices;
+  charts: ChartsPluginStart;
   values: number[];
   isDetails: boolean;
   defaultRowHeight?: number;
 }
 
 export const SparklineCellRenderer: FC<Props> = ({
-  services,
+  charts,
   values,
   isDetails,
   defaultRowHeight,
@@ -30,13 +30,13 @@ export const SparklineCellRenderer: FC<Props> = ({
 
   return (
     <div css={containerStyle}>
-      <SparklineChart services={services} values={values} rowHeight={defaultRowHeight ?? 1} />
+      <SparklineChart charts={charts} values={values} rowHeight={defaultRowHeight ?? 1} />
     </div>
   );
 };
 
 export function getSparklineCellRenderer(
-  services: ProfileProviderServices,
+  charts: ChartsPluginStart,
   values: unknown,
   isDetails: boolean,
   defaultRowHeight?: number
@@ -46,7 +46,7 @@ export function getSparklineCellRenderer(
   }
   return (
     <SparklineCellRenderer
-      services={services}
+      charts={charts}
       values={values as number[]}
       isDetails={isDetails}
       defaultRowHeight={defaultRowHeight}
