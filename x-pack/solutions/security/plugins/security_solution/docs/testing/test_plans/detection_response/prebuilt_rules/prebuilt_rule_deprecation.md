@@ -247,11 +247,11 @@ Then the response contains an empty rules array (or error from bulkGetRules)
 
 #### **Scenario: Review API respects MAX_DEPRECATED_RULES_TO_RETURN limit**
 
-**Automation**: Unit tests for fetchDeprecatedRules.
+**Automation**: Unit tests.
 
 ```Gherkin
 Given the package contains more than 200 deprecated rule assets
-When fetchDeprecatedRules is called
+When deprecated rules are fetched
 Then at most 200 deprecated rules are returned
 ```
 
