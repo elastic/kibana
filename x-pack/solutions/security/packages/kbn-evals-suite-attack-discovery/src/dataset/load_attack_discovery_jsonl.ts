@@ -79,9 +79,10 @@ export const loadAttackDiscoveryBundledAlertsJsonlDataset = async ({
   const examples = limitedLines.map((line, i) => parseJsonlLine(line, startAt + i + 1));
 
   const hasAnyContent = examples.some((ex) => {
-    const alertCount = ex.input.anonymizedAlerts.length;
-    const discoveryCount = ex.output.attackDiscoveries.length;
-    return alertCount > 0 || discoveryCount > 0;
+    if (ex.input?.mode === 'bundledAlerts' && ex.input.anonymizedAlerts.length > 0) {
+      return true;
+    }
+    return (ex.output?.attackDiscoveries?.length ?? 0) > 0;
   });
 
   if (!hasAnyContent) {
