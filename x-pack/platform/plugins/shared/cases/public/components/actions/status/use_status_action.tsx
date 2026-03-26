@@ -63,7 +63,7 @@ const getUpdateSuccessToast = ({
   // Special handling for closed cases as it can possibly be closed with a close reason to sync to attached alerts
   const alertStatusSyncCount =
     patchCaseStats?.reduce((total, stats) => {
-      return total + (stats?.numberOfAlertsWithStatusSynced ?? 0);
+      return total + (stats?.syncedAlertCount ?? 0);
     }, 0) ?? 0;
   const totalAlertsCount = cases.reduce((total, currentCase) => total + currentCase.totalAlerts, 0);
   const summary =

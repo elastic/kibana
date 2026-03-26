@@ -23,18 +23,18 @@ import {
 
 import * as i18n from './translations';
 
-export interface ClosingReasonOption {
+export interface CloseReasonOption {
   key?: string;
 }
 
 export interface CloseCaseModalProps {
-  closeReasonOptions: Array<EuiSelectableOption<ClosingReasonOption>>;
+  closeReasonOptions: Array<EuiSelectableOption<CloseReasonOption>>;
   onClose: () => void;
   onSubmit: () => void;
   onCloseReasonOptionsChange: (
-    options: Array<EuiSelectableOption<ClosingReasonOption>>,
+    options: Array<EuiSelectableOption<CloseReasonOption>>,
     event?: unknown,
-    changedOption?: EuiSelectableOption<ClosingReasonOption>
+    changedOption?: EuiSelectableOption<CloseReasonOption>
   ) => void;
 }
 

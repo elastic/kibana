@@ -15,7 +15,7 @@ import {
 } from '@kbn/response-ops-alerts-close-reason';
 
 import { CloseCaseModal } from './close_case_modal';
-import type { ClosingReasonOption } from './close_case_modal';
+import type { CloseReasonOption } from './close_case_modal';
 
 interface UseCloseCaseModalProps {
   canSyncCloseReasonToAlerts: boolean;
@@ -36,14 +36,11 @@ export const useCloseCaseModal = ({
   } = useKibana<{ uiSettings: IUiSettingsClient }>();
 
   const initialCloseReasonOptions = useMemo(() => {
-    const customClosingReasons = uiSettings.get<string[]>(
-      CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY,
-      []
-    );
+    const customCloseReasons = uiSettings.get<string[]>(CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY, []);
 
     return [
       ...DEFAULT_CLOSING_REASON_OPTIONS,
-      ...customClosingReasons.map((reason) => ({ label: reason, key: reason })),
+      ...customCloseReasons.map((reason) => ({ label: reason, key: reason })),
     ];
   }, [uiSettings]);
 
@@ -57,17 +54,17 @@ export const useCloseCaseModal = ({
   );
   const [isCloseCaseModalVisible, setIsCloseCaseModalVisible] = useState(false);
   const [closeReasonOptions, setCloseReasonOptions] = useState<
-    Array<EuiSelectableOption<ClosingReasonOption>>
+    Array<EuiSelectableOption<CloseReasonOption>>
   >(() => createCloseReasonOptions());
-  const selectedClosingReason = useMemo(
+  const selectedCloseReason = useMemo(
     () => closeReasonOptions.find((option) => option.checked === 'on'),
     [closeReasonOptions]
   );
   const onCloseReasonOptionsChange = useCallback(
     (
-      options: Array<EuiSelectableOption<ClosingReasonOption>>,
+      options: Array<EuiSelectableOption<CloseReasonOption>>,
       _event?: unknown,
-      _changedOption?: EuiSelectableOption<ClosingReasonOption>
+      _changedOption?: EuiSelectableOption<CloseReasonOption>
     ) => {
       setCloseReasonOptions(options);
     },
@@ -80,8 +77,8 @@ export const useCloseCaseModal = ({
 
   const onSubmit = useCallback(() => {
     closeCloseCaseModal();
-    onCloseCase(selectedClosingReason?.key);
-  }, [closeCloseCaseModal, onCloseCase, selectedClosingReason?.key]);
+    onCloseCase(selectedCloseReason?.key);
+  }, [closeCloseCaseModal, onCloseCase, selectedCloseReason?.key]);
 
   const openCloseCaseModal = useCallback(() => {
     // Should automatically close without reason when case sync to alerts is disabled

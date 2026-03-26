@@ -537,7 +537,7 @@ export const CasesPatchRequestRt = rt.strict({
 });
 
 export const PatchCaseStatsRt = rt.strict({
-  numberOfAlertsWithStatusSynced: rt.number,
+  syncedAlertCount: rt.number,
 });
 
 export const CaseWithPatchStatsRt = rt.intersection([

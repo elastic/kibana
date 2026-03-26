@@ -111,11 +111,11 @@ export const patchCase = async (
 export const updateCases = async (
   cases: CaseUpdateRequest[],
   signal: AbortSignal
-): Promise<Array<CaseUI & { patchCaseStats: { numberOfAlertsWithStatusSynced: number } }>> =>
+): Promise<Array<CaseUI & { patchCaseStats: { syncedAlertCount: number } }>> =>
   Promise.resolve(
     allCases.cases.map((theCase) => ({
       ...theCase,
-      patchCaseStats: { numberOfAlertsWithStatusSynced: 0 },
+      patchCaseStats: { syncedAlertCount: 0 },
     }))
   );
 

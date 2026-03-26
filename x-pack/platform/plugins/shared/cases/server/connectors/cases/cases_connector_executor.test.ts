@@ -1434,7 +1434,7 @@ describe('CasesConnectorExecutor', () => {
             {
               ...cases[0],
               status: CaseStatuses.open,
-              patchCaseStats: { numberOfAlertsWithStatusSynced: 0 },
+              patchCaseStats: { syncedAlertCount: 0 },
             },
           ]);
 
@@ -3514,7 +3514,7 @@ describe('CasesConnectorExecutor', () => {
             {
               ...cases[0],
               status: CaseStatuses.open,
-              patchCaseStats: { numberOfAlertsWithStatusSynced: 0 },
+              patchCaseStats: { syncedAlertCount: 0 },
             },
           ]);
 

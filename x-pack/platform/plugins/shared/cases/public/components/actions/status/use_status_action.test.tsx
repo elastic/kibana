@@ -159,7 +159,7 @@ describe('useStatusAction', () => {
     await waitFor(() => {
       expect(mutate).toHaveBeenCalled();
     });
-    const toast = getUpdateSuccessToastFromLastCall([{ numberOfAlertsWithStatusSynced: 3 }]);
+    const toast = getUpdateSuccessToastFromLastCall([{ syncedAlertCount: 3 }]);
     expect(toast).toEqual(
       expect.objectContaining({
         title: 'Closed "Another horrible breach!!"',
@@ -192,10 +192,7 @@ describe('useStatusAction', () => {
     });
 
     expect(
-      getUpdateSuccessToastFromLastCall([
-        { numberOfAlertsWithStatusSynced: 1 },
-        { numberOfAlertsWithStatusSynced: 1 },
-      ])
+      getUpdateSuccessToastFromLastCall([{ syncedAlertCount: 1 }, { syncedAlertCount: 1 }])
     ).toEqual({
       title: 'Closed 2 cases',
       text: 'Closed 2/4 attached alerts.',
