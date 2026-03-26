@@ -28,3 +28,4 @@ export {
 export { catalogIndexMapping } from './src/index_mapping';
 
 export { CatalogClient } from './src/catalog_client';
+export { CatalogQuery } from './src/catalog_query';
