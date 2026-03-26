@@ -14,7 +14,7 @@ import { extractEntitiesFromAlerts } from '../entity_extraction';
 import { DEFAULT_PIPELINE_CONFIG } from '../types';
 import { fetchAlertsByIds, adaptWorkflowLogger } from '../utils';
 import { PIPELINE_LIMITS, SAFE_ALERTS_INDEX_PATTERN } from '../constants';
-import { LiquidArraySchema } from './workflow_schema_helpers';
+import { LiquidArraySchema, parseArrayInput } from './workflow_schema_helpers';
 
 const SafeAlertIndexPattern = z
   .string()
@@ -135,11 +135,8 @@ export const deduplicateAlertsStep = createServerStepDefinition({
   handler: async (context) => {
     const esClient = context.contextManager.getScopedEsClient();
     const logger = adaptWorkflowLogger(context.logger);
-    const {
-      alert_ids: alertIds,
-      index_pattern: indexPattern,
-      similarity_threshold: threshold,
-    } = context.input;
+    const { index_pattern: indexPattern, similarity_threshold: threshold } = context.input;
+    const alertIds = parseArrayInput(context.input.alert_ids);
 
     if (alertIds.length === 0) {
       return { output: { leader_alert_ids: [], total_before: 0, total_after: 0, dedup_rate: 0 } };
@@ -198,7 +195,8 @@ export const extractEntitiesStep = createServerStepDefinition({
   handler: async (context) => {
     const esClient = context.contextManager.getScopedEsClient();
     const logger = adaptWorkflowLogger(context.logger);
-    const { alert_ids: alertIds, index_pattern: indexPattern } = context.input;
+    const { index_pattern: indexPattern } = context.input;
+    const alertIds = parseArrayInput(context.input.alert_ids);
 
     if (alertIds.length === 0) {
       return { output: { entities: [], total_entities: 0 } };
@@ -256,9 +254,8 @@ export const tagProcessedAlertsStep = createServerStepDefinition({
   outputSchema: TagOutputSchema,
   handler: async (context) => {
     const esClient = context.contextManager.getScopedEsClient();
-    const { alert_ids: alertIds, index_pattern: indexPattern } = context.input;
-
-    const validIds = alertIds.filter((id: string) => id && id.length > 0);
+    const { index_pattern: indexPattern } = context.input;
+    const validIds = parseArrayInput(context.input.alert_ids).filter(Boolean);
 
     if (validIds.length === 0) {
       return { output: { tagged_count: 0 } };

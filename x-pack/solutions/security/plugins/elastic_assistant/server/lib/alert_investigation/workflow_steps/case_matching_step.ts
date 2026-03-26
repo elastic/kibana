@@ -10,7 +10,7 @@ import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { extractEntitiesFromAlerts } from '../entity_extraction';
 import { fetchAlertsByIds, adaptWorkflowLogger } from '../utils';
-import { LiquidArraySchema } from './workflow_schema_helpers';
+import { LiquidArraySchema, parseArrayInput } from './workflow_schema_helpers';
 
 export const CaseMatchingStepId = 'security.matchAndAttachAlertsToCases';
 
@@ -54,7 +54,8 @@ export const caseMatchingStep = createServerStepDefinition({
   handler: async (context) => {
     const esClient = context.contextManager.getScopedEsClient();
     const logger = adaptWorkflowLogger(context.logger);
-    const { leader_alert_ids: leaderAlertIds, index_pattern: indexPattern } = context.input;
+    const { index_pattern: indexPattern } = context.input;
+    const leaderAlertIds = parseArrayInput(context.input.leader_alert_ids);
 
     const emptyOutput = {
       output: {

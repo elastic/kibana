@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { LiquidArraySchema, LiquidRecordSchema } from './workflow_schema_helpers';
+import { LiquidArraySchema, LiquidRecordSchema, parseArrayInput, parseRecordInput } from './workflow_schema_helpers';
 
 export const TriggerIncrementalAdStepId = 'security.triggerIncrementalAd';
 
@@ -45,7 +45,9 @@ export const triggerIncrementalAdStep = createServerStepDefinition({
   inputSchema: TriggerAdInputSchema,
   outputSchema: TriggerAdOutputSchema,
   handler: async (context) => {
-    const { affected_case_ids, alert_ids_by_case, min_new_alerts } = context.input;
+    const { min_new_alerts } = context.input;
+    const affected_case_ids = parseArrayInput(context.input.affected_case_ids);
+    const alert_ids_by_case = parseRecordInput(context.input.alert_ids_by_case);
 
     if (affected_case_ids.length === 0) {
       return {

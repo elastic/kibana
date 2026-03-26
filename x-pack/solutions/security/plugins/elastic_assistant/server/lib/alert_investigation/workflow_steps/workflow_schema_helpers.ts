@@ -8,6 +8,42 @@
 import { z } from '@kbn/zod/v4';
 
 /**
+ * Runtime parser for array values passed between workflow steps.
+ *
+ * The workflow engine does NOT run Zod transforms on step inputs at runtime —
+ * context.input is the raw rendered value from the template engine.
+ * Use this function in handlers to parse the input.
+ */
+export const parseArrayInput = (val: unknown): string[] => {
+  if (Array.isArray(val)) return val.map(String);
+  if (!val) return [];
+  const strVal = String(val);
+  if (!strVal) return [];
+  try {
+    const parsed = JSON.parse(strVal);
+    return Array.isArray(parsed) ? parsed.map(String) : [];
+  } catch {
+    return strVal.split(',').map((s: string) => s.trim()).filter(Boolean);
+  }
+};
+
+/**
+ * Runtime parser for Record<string, string[]> values passed between workflow steps.
+ */
+export const parseRecordInput = (val: unknown): Record<string, string[]> => {
+  if (typeof val === 'object' && val !== null && !Array.isArray(val)) {
+    return val as Record<string, string[]>;
+  }
+  if (!val || typeof val !== 'string') return {};
+  try {
+    const parsed = JSON.parse(val);
+    return typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+};
+
+/**
  * Zod transform that accepts both string[] and JSON-serialized string.
  *
  * Elastic Workflows liquid templates serialize arrays to strings when passing
@@ -25,11 +61,12 @@ export const LiquidArraySchema = z
   .transform((val): string[] => {
     if (Array.isArray(val)) return val;
     if (!val) return [];
+    const strVal = String(val);
     try {
-      const parsed = JSON.parse(val);
+      const parsed = JSON.parse(strVal);
       return Array.isArray(parsed) ? parsed : [];
     } catch {
-      return val.split(',').map((s: string) => s.trim()).filter(Boolean);
+      return strVal.split(',').map((s: string) => s.trim()).filter(Boolean);
     }
   });
 
