@@ -136,7 +136,15 @@ export const deduplicateAlertsStep = createServerStepDefinition({
     const esClient = context.contextManager.getScopedEsClient();
     const logger = adaptWorkflowLogger(context.logger);
     const { index_pattern: indexPattern, similarity_threshold: threshold } = context.input;
-    const alertIds = parseArrayInput(context.input.alert_ids);
+    const raw = context.input.alert_ids;
+    context.logger.info(
+      `DEBUG: type=${typeof raw}, isArray=${Array.isArray(raw)}, ` +
+      `len=${Array.isArray(raw) ? raw.length : 'N/A'}, ` +
+      `nested=${Array.isArray(raw) && raw.length > 0 ? Array.isArray(raw[0]) : 'N/A'}, ` +
+      `first=${Array.isArray(raw) ? JSON.stringify(raw[0]).substring(0, 80) : String(raw).substring(0, 80)}`
+    );
+    const alertIds = parseArrayInput(raw);
+    context.logger.info(`DEBUG parsed: ${alertIds.length} IDs, first=${alertIds[0]}, last=${alertIds[alertIds.length - 1]}`);
 
     if (alertIds.length === 0) {
       return { output: { leader_alert_ids: [], total_before: 0, total_after: 0, dedup_rate: 0 } };
