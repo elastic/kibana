@@ -135,7 +135,7 @@ export function CompositeSloObjectiveSection() {
                   min={0.001}
                   max={99.999}
                   step={0.001}
-                  onChange={(e) => onChange(e.target.value)}
+                  onChange={(e) => onChange(parseFloat(e.target.value))}
                 />
               )}
             />
