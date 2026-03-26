@@ -49,11 +49,12 @@ export interface RestoreConfig extends BaseConfig {
 export interface ReplayConfig extends BaseConfig {
   patterns: string[];
   concurrency?: number;
-  onTempIndicesReady?: (params: {
+  beforeReindex?: (params: {
     esClient: Client;
     log: ToolingLog;
-    tempIndices: string[];
     originalIndices: string[];
+    restoredIndices: string[];
+    destinationIndices: string[];
   }) => Promise<void>;
 }
 

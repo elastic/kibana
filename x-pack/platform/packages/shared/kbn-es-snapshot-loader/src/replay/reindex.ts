@@ -6,6 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 import type {
   BulkIndexByScrollFailure,
   ReindexResponse,
@@ -35,7 +36,7 @@ export function getDestinationInfo(originalIndex: string): DestinationInfo {
   };
 }
 
-function logReindexFailures(
+function throwOnReindexFailures(
   failures: Array<BulkIndexByScrollFailure>,
   destIndex: string,
   log: ToolingLog
@@ -54,8 +55,7 @@ function logReindexFailures(
 }
 
 function isPipelineRejected(error: unknown): boolean {
-  const message = error instanceof Error ? error.message : String(error);
-  return message.includes('Cannot provide a pipeline when writing to a stream');
+  return error instanceof errors.ResponseError && error.statusCode === 400;
 }
 
 async function getDefaultPipelineSetting(
@@ -81,76 +81,32 @@ async function tryResolveExisting(esClient: Client, name: string): Promise<strin
     if (indices.length > 0) {
       return name;
     }
-  } catch {
-    // not found
+  } catch (err) {
+    if (err instanceof errors.ResponseError && err.statusCode === 404) {
+      return undefined;
+    }
+    throw err;
   }
   return undefined;
 }
 
-async function tryCreateDataStream(
-  esClient: Client,
-  log: ToolingLog,
-  name: string
-): Promise<boolean> {
-  try {
-    await esClient.indices.createDataStream({ name });
-    log.info(`Created data stream "${name}"`);
-    return true;
-  } catch (err) {
-    log.debug(`Failed to create data stream "${name}": ${getErrorMessage(err)}`);
-    return false;
-  }
-}
-
-async function resolveWriteIndex(
-  esClient: Client,
-  log: ToolingLog,
-  destIndex: string
-): Promise<string | undefined> {
+async function resolveWriteIndex(esClient: Client, destIndex: string): Promise<string | undefined> {
   const existing = await tryResolveExisting(esClient, destIndex);
-  if (existing) {
-    try {
-      const dsResponse = await esClient.indices.getDataStream({ name: destIndex });
-      const ds = dsResponse.data_streams[0];
-      if (ds) {
-        return ds.indices[ds.indices.length - 1]?.index_name;
-      }
-    } catch {
-      // not a data stream — return index name directly
-    }
-    return destIndex;
+  if (!existing) {
+    return undefined;
   }
 
-  const parts = destIndex.split('.');
-  for (let i = parts.length - 1; i >= 1; i--) {
-    const candidate = parts.slice(0, i).join('.');
-    const resolved = await tryResolveExisting(esClient, candidate);
-    if (resolved) {
-      log.warning(
-        `"${destIndex}" not found — falling back to parent stream "${candidate}". Documents will be indexed into "${candidate}".`
-      );
-      try {
-        const dsResponse = await esClient.indices.getDataStream({ name: candidate });
-        const ds = dsResponse.data_streams[0];
-        if (ds) {
-          return ds.indices[ds.indices.length - 1]?.index_name;
-        }
-      } catch {
-        // not a data stream
-      }
-      return candidate;
-    }
-  }
-
-  if (await tryCreateDataStream(esClient, log, destIndex)) {
+  try {
     const dsResponse = await esClient.indices.getDataStream({ name: destIndex });
     const ds = dsResponse.data_streams[0];
     if (ds) {
       return ds.indices[ds.indices.length - 1]?.index_name;
     }
+  } catch {
+    // not a data stream — return index name directly
   }
 
-  return undefined;
+  return destIndex;
 }
 
 async function reindexWithDefaultPipeline({
@@ -168,7 +124,7 @@ async function reindexWithDefaultPipeline({
   pipelineName: string;
   requestTimeoutMs: number;
 }): Promise<ReindexJobResult> {
-  const writeIndex = await resolveWriteIndex(esClient, log, destIndex);
+  const writeIndex = await resolveWriteIndex(esClient, destIndex);
   if (!writeIndex) {
     throw new Error(
       `Cannot resolve write index for "${destIndex}" — no existing index or data stream found`
@@ -179,6 +135,9 @@ async function reindexWithDefaultPipeline({
     `Pipeline rejected for "${destIndex}", falling back to default_pipeline on write index "${writeIndex}"`
   );
 
+  // Known limitation: concurrent fallback invocations targeting the same write index
+  // can interfere with each other's default_pipeline save/restore. Acceptable for
+  // dev tooling; callers needing correctness guarantees should set concurrency: 1.
   const previousPipeline = await getDefaultPipelineSetting(esClient, writeIndex);
 
   try {
@@ -206,7 +165,7 @@ async function reindexWithDefaultPipeline({
     }
 
     if (failures.length > 0) {
-      logReindexFailures(failures, destIndex, log);
+      throwOnReindexFailures(failures, destIndex, log);
     }
 
     log.debug(`Reindexed ${created} documents to ${destIndex} (via default_pipeline fallback)`);
@@ -268,7 +227,7 @@ export async function reindexThroughPipeline({
     }
 
     if (failures.length > 0) {
-      logReindexFailures(failures, destIndex, log);
+      throwOnReindexFailures(failures, destIndex, log);
     }
 
     log.debug(`Reindexed ${created} documents to ${destIndex}`);

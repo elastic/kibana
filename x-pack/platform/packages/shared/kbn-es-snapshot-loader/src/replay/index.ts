@@ -12,117 +12,9 @@ import { extractDataStreamName, getMissingDataStreams, getErrorMessage } from '.
 import { getSnapshotMetadata, deleteRepository, generateRepoName } from '../repository';
 import { filterIndicesToRestore, restoreIndices } from '../restore/restore';
 import { createTimestampPipeline, deletePipeline } from './pipeline';
-import { reindexAllIndices } from './reindex';
+import { getDestinationInfo, reindexAllIndices } from './reindex';
 
 export const TEMP_INDEX_PREFIX = 'snapshot-loader-temp-';
-
-interface AliasEntry {
-  aliasName: string;
-  isWriteIndex: boolean;
-  isHidden: boolean;
-}
-
-async function getTempIndexAliases({
-  esClient,
-  log,
-}: {
-  esClient: Client;
-  log: ToolingLog;
-}): Promise<Map<string, AliasEntry[]>> {
-  const aliasMap = new Map<string, AliasEntry[]>();
-
-  try {
-    const response = await esClient.indices.getAlias({ index: `${TEMP_INDEX_PREFIX}*` });
-
-    for (const [tempIndexName, indexData] of Object.entries(response)) {
-      const aliases = indexData.aliases;
-      if (!aliases || Object.keys(aliases).length === 0) {
-        continue;
-      }
-
-      const finalIndexName = tempIndexName.slice(TEMP_INDEX_PREFIX.length);
-      const entries: AliasEntry[] = [];
-
-      for (const [aliasName, aliasConfig] of Object.entries(aliases)) {
-        entries.push({
-          aliasName,
-          isWriteIndex: aliasConfig.is_write_index ?? false,
-          isHidden: aliasConfig.is_hidden ?? false,
-        });
-      }
-
-      if (entries.length > 0) {
-        aliasMap.set(finalIndexName, entries);
-      }
-    }
-
-    log.debug(`Captured aliases for ${aliasMap.size} indices from temp indices`);
-  } catch (error) {
-    const statusCode = (error as { meta?: { statusCode?: number } })?.meta?.statusCode;
-    if (statusCode === 404) {
-      log.debug('No temp indices found — skipping alias capture');
-    } else {
-      throw error;
-    }
-  }
-
-  return aliasMap;
-}
-
-async function recreateAliases({
-  esClient,
-  log,
-  aliasMap,
-}: {
-  esClient: Client;
-  log: ToolingLog;
-  aliasMap: Map<string, AliasEntry[]>;
-}): Promise<{ failedCount: number }> {
-  if (aliasMap.size === 0) {
-    return { failedCount: 0 };
-  }
-
-  let createdCount = 0;
-  let failedCount = 0;
-
-  for (const [finalIndexName, aliases] of aliasMap) {
-    for (const { aliasName, isWriteIndex, isHidden } of aliases) {
-      try {
-        // Atomically remove from the still-existing temp index and add to the final index.
-        // Without the remove step, a write alias would exist on both simultaneously and ES
-        // would reject the request with "has more than one write index".
-        await esClient.indices.updateAliases({
-          actions: [
-            {
-              remove: {
-                index: `${TEMP_INDEX_PREFIX}${finalIndexName}`,
-                alias: aliasName,
-              },
-            },
-            {
-              add: {
-                index: finalIndexName,
-                alias: aliasName,
-                is_write_index: isWriteIndex,
-                is_hidden: isHidden,
-              },
-            },
-          ],
-        });
-        log.debug(`Created alias "${aliasName}" on "${finalIndexName}"`);
-        createdCount++;
-      } catch (error) {
-        log.warning(
-          `Failed to create alias "${aliasName}" on "${finalIndexName}": ${getErrorMessage(error)}`
-        );
-        failedCount++;
-      }
-    }
-  }
-
-  log.info(`Alias recreation: ${createdCount} created, ${failedCount} failed`);
-  return { failedCount };
-}
 
 interface EsqlResponse {
   columns: Array<{ name: string; type: string }>;
@@ -160,8 +52,7 @@ export async function getMaxTimestampFromData({
 }
 
 export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> {
-  const { esClient, log, repository, snapshotName, patterns, concurrency, onTempIndicesReady } =
-    config;
+  const { esClient, log, repository, snapshotName, patterns, concurrency, beforeReindex } = config;
 
   const result: LoadResult = {
     success: false,
@@ -214,14 +105,17 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
     });
     result.restoredIndices = restoredIndices;
 
-    const aliasMap = await getTempIndexAliases({ esClient, log });
+    const destinationIndices = [
+      ...new Set(indicesToRestore.map((idx) => getDestinationInfo(idx).destIndex)),
+    ];
 
-    if (onTempIndicesReady) {
-      await onTempIndicesReady({
+    if (beforeReindex) {
+      await beforeReindex({
         esClient,
         log,
-        tempIndices: restoredIndices,
         originalIndices: indicesToRestore,
+        restoredIndices,
+        destinationIndices,
       });
     }
 
@@ -249,13 +143,6 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
     });
     result.reindexedIndices = reindexedIndices;
 
-    const { failedCount: aliasFailedCount } = await recreateAliases({ esClient, log, aliasMap });
-    if (aliasFailedCount > 0) {
-      result.errors.push(
-        `${aliasFailedCount} alias(es) failed to recreate — indices may lack write aliases`
-      );
-    }
-
     const expectedDataStreams = new Set(
       indicesToRestore
         .map((index) => extractDataStreamName(index))
@@ -275,7 +162,7 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
       );
     }
 
-    result.success = reindexedIndices.length > 0 && aliasFailedCount === 0;
+    result.success = reindexedIndices.length > 0;
 
     log.info(
       `Replay completed: ${reindexedIndices.length}/${indicesToRestore.length} indices reindexed successfully`

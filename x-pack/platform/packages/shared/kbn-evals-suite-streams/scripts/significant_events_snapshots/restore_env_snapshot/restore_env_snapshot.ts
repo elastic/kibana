@@ -7,7 +7,7 @@
 
 import inquirer from 'inquirer';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { Client } from '@elastic/elasticsearch';
+import { Client, errors } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { createGcsRepository, replaySnapshot, restoreSnapshot } from '@kbn/es-snapshot-loader';
 import { getConnectionConfig } from '../lib/get_connection_config';
@@ -40,10 +40,10 @@ async function resolveExisting(esClient: Client, patterns: string[]): Promise<st
         ...(response.data_streams ?? []).map((d) => d.name)
       );
     } catch (err) {
-      const statusCode = (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
-      if (statusCode !== 404) {
-        throw err;
+      if (err instanceof errors.ResponseError && err.statusCode === 404) {
+        continue;
       }
+      throw err;
     }
   }
   return found;
@@ -99,19 +99,23 @@ const DEFAULT_LOGS_MAPPING: MappingTypeMapping = { subobjects: false };
 export async function ensureLogsIndexTemplate({
   esClient,
   log,
-  streamName,
+  indexPatterns,
   mappings,
 }: {
   esClient: Client;
   log: ToolingLog;
-  streamName: string;
+  indexPatterns: string[];
   mappings?: MappingTypeMapping;
 }): Promise<void> {
-  log.info(`Creating temporary index template "${SIGEVENTS_INDEX_TEMPLATE}" for "${streamName}"`);
+  log.info(
+    `Creating temporary index template "${SIGEVENTS_INDEX_TEMPLATE}" for ${indexPatterns.join(
+      ', '
+    )}`
+  );
 
   await esClient.indices.putIndexTemplate({
     name: SIGEVENTS_INDEX_TEMPLATE,
-    index_patterns: [streamName],
+    index_patterns: indexPatterns,
     data_stream: {},
     template: {
       settings: {
@@ -245,11 +249,51 @@ export const restoreEnvSnapshot = async ({
   }
 
   log.info('');
-  log.info('Step 2/3 — Recreating missing .kibana system aliases...');
-  await createMissingAliases({
+  log.info('Step 2/3 — Replaying data indices (with timestamp transformation)...');
+  const replayResult = await replaySnapshot({
     esClient,
     log,
-    resolvedIndices: restoreResult.restoredIndices,
+    repository,
+    snapshotName,
+    patterns: [logsIndex, ...alertIndices],
+    async beforeReindex({
+      esClient: client,
+      log: logger,
+      originalIndices,
+      restoredIndices,
+      destinationIndices,
+    }) {
+      const logsTempIndex = originalIndices.reduce<string | undefined>((found, orig, i) => {
+        if (found) {
+          return found;
+        }
+        return orig.includes(logsIndex) ? restoredIndices[i] : undefined;
+      }, undefined);
+
+      const mapping = logsTempIndex
+        ? await extractMappingFromTempIndex(client, logger, logsTempIndex)
+        : undefined;
+
+      await ensureLogsIndexTemplate({
+        esClient: client,
+        log: logger,
+        indexPatterns: destinationIndices,
+        mappings: mapping,
+      });
+
+      for (const dest of destinationIndices) {
+        try {
+          await client.indices.createDataStream({ name: dest });
+          logger.info(`Created data stream "${dest}"`);
+        } catch (err) {
+          logger.debug(
+            `Data stream "${dest}" already exists or could not be created: ${
+              err instanceof Error ? err.message : String(err)
+            }`
+          );
+        }
+      }
+    },
   });
 
   log.info('');
@@ -265,29 +309,6 @@ export const restoreEnvSnapshot = async ({
     );
   }
 
-  log.info('');
-  log.info('Step 3/3 — Replaying data indices (with timestamp transformation)...');
-  const replayResult = await replaySnapshot({
-    esClient,
-    log,
-    repository,
-    snapshotName,
-    patterns: [logsIndex, ...alertIndices],
-    async onTempIndicesReady({ esClient: client, log: logger, tempIndices }) {
-      const firstTempIndex = tempIndices[0];
-      const mapping = firstTempIndex
-        ? await extractMappingFromTempIndex(client, logger, firstTempIndex)
-        : undefined;
-
-      await ensureLogsIndexTemplate({
-        esClient: client,
-        log: logger,
-        streamName: logsIndex,
-        mappings: mapping,
-      });
-    },
-  });
-
   if (!replayResult.success) {
     throw new Error(
       `Failed to replay data indices from snapshot "${snapshotName}": ${replayResult.errors.join(
@@ -295,6 +316,14 @@ export const restoreEnvSnapshot = async ({
       )}`
     );
   }
+
+  log.info('');
+  log.info('Step 3/3 — Recreating missing aliases...');
+  await createMissingAliases({
+    esClient,
+    log,
+    resolvedIndices: [...restoreResult.restoredIndices, ...(replayResult.reindexedIndices ?? [])],
+  });
 
   log.info('');
   log.info('='.repeat(70));

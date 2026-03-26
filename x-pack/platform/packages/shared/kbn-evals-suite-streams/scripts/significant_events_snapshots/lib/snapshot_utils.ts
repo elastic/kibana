@@ -6,6 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   DEFAULT_ALERT_INDICES,
@@ -127,12 +128,36 @@ export const validateIndexPrivileges = async (
   log.debug('Index privilege check passed');
 };
 
-const ALIAS_SUFFIX_REGEX = /^(.+)-\d+$/;
+const ALIAS_REGEX = /^(?:\.internal)?(.+)-\d+$/;
 
 const deriveAliasName = (indexName: string): string | undefined => {
-  const match = indexName.match(ALIAS_SUFFIX_REGEX);
+  const match = indexName.match(ALIAS_REGEX);
   return match ? match[1] : undefined;
 };
+
+async function resolveDataStreamIndices(esClient: Client, indices: string[]): Promise<Set<string>> {
+  const result = new Set<string>();
+  if (indices.length === 0) return result;
+
+  try {
+    const response = await esClient.indices.get({
+      index: indices,
+      filter_path: '*.data_stream',
+    });
+    for (const [name, meta] of Object.entries(response)) {
+      if (meta.data_stream) {
+        result.add(name);
+      }
+    }
+  } catch (err) {
+    if (err instanceof errors.ResponseError && err.statusCode === 404) {
+      return result;
+    }
+    throw err;
+  }
+
+  return result;
+}
 
 export const createMissingAliases = async ({
   esClient,
@@ -143,17 +168,18 @@ export const createMissingAliases = async ({
   log: ToolingLog;
   resolvedIndices: string[];
 }): Promise<void> => {
+  const indicesWithAliases = resolvedIndices.filter((name) => deriveAliasName(name) != null);
+  const dataStreamIndices = await resolveDataStreamIndices(esClient, indicesWithAliases);
+
+  log.debug(`Indices needing aliases: ${indicesWithAliases.join(', ')}`);
+  log.debug(`Data stream backed indices: ${[...dataStreamIndices].join(', ') || 'none'}`);
+
   let created = 0;
   let skipped = 0;
 
-  for (const indexName of resolvedIndices) {
-    const aliasName = deriveAliasName(indexName);
-    if (!aliasName) {
-      log.warning(
-        `Index "${indexName}" does not match expected pattern (name-NNNNNN) — cannot derive alias name, skipping`
-      );
-      continue;
-    }
+  for (const indexName of indicesWithAliases) {
+    const aliasName = deriveAliasName(indexName)!;
+    const isDataStream = dataStreamIndices.has(indexName);
 
     const aliasExists = await esClient.indices.existsAlias({ name: aliasName });
     if (aliasExists) {
@@ -162,16 +188,15 @@ export const createMissingAliases = async ({
       continue;
     }
 
-    log.info(`Creating alias "${aliasName}" → "${indexName}"`);
+    log.info(
+      `Creating alias "${aliasName}" → "${indexName}"${isDataStream ? ' (data stream)' : ''}`
+    );
     await esClient.indices.updateAliases({
       actions: [
         {
-          add: {
-            index: indexName,
-            alias: aliasName,
-            is_write_index: true,
-            is_hidden: true,
-          },
+          add: isDataStream
+            ? { index: indexName, alias: aliasName, is_write_index: true }
+            : { index: indexName, alias: aliasName, is_write_index: true, is_hidden: true },
         },
       ],
     });
