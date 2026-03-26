@@ -8,8 +8,13 @@
 import type { ConnectorSpec } from '@kbn/connector-specs';
 
 import { generateSecretsSchemaFromSpec } from '@kbn/connector-specs/src/lib';
+import { z } from '@kbn/zod/v4';
 import type { ActionTypeSecrets, ValidatorServices, ValidatorType } from '../../types';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
+import {
+  getDiscriminatedUnionVariantJsonSchemaNode,
+  validateValueAgainstAllowedHostsJsonSchema,
+} from './validate_allowed_hosts';
 
 export const generateSecretsSchema = (
   authSpec: ConnectorSpec['auth'],
@@ -17,68 +22,38 @@ export const generateSecretsSchema = (
 ): ValidatorType<ActionTypeSecrets> => {
   const settings = configUtils.getWebhookSettings();
   const isPfxEnabled = settings.ssl.pfx.enabled;
-  const defaultsByAuthType = getDefaultsByAuthType(authSpec);
+  const schema = generateSecretsSchemaFromSpec(authSpec, { isPfxEnabled });
+  const allowedHostsJsonSchema = z.toJSONSchema(schema as never);
   return {
-    schema: generateSecretsSchemaFromSpec(authSpec, {
-      isPfxEnabled,
-    }),
+    schema,
     customValidator: (secrets, services) =>
-      validateOAuthUrls(secrets, services, defaultsByAuthType),
+      validateAllowedHostsUrls(secrets, services, allowedHostsJsonSchema),
   };
 };
 
 /**
- * Validates OAuth URL fields in connector secrets against xpack.actions.allowedHosts.
- * Applies to any auth type that stores authorizationUrl or tokenUrl in secrets
- * (e.g. oauth_authorization_code).
+ * Validates all URL fields in secrets (as defined by the auth type schema) against
+ * `xpack.actions.allowedHosts`, unless the field opts out via
+ * `meta({ validate: { allowedHosts: false } })`.
  */
-function validateOAuthUrls(
+function validateAllowedHostsUrls(
   secrets: ActionTypeSecrets,
   { configurationUtilities }: ValidatorServices,
-  defaultsByAuthType: ReadonlyMap<string, Readonly<Record<string, unknown>>>
+  jsonSchema: unknown
 ): void {
   const authType = getAuthTypeIdFromSecrets(secrets);
-  const defaults = authType ? defaultsByAuthType.get(authType) : undefined;
+  const authTypeSchemaNode = authType
+    ? getDiscriminatedUnionVariantJsonSchemaNode(jsonSchema, 'authType', authType) ?? jsonSchema
+    : jsonSchema;
 
-  const authorizationUrl =
-    typeof secrets.authorizationUrl === 'string'
-      ? secrets.authorizationUrl
-      : typeof defaults?.authorizationUrl === 'string'
-      ? defaults.authorizationUrl
-      : undefined;
-
-  const tokenUrl =
-    typeof secrets.tokenUrl === 'string'
-      ? secrets.tokenUrl
-      : typeof defaults?.tokenUrl === 'string'
-      ? defaults.tokenUrl
-      : undefined;
-
-  if (authorizationUrl) {
-    configurationUtilities.ensureUriAllowed(authorizationUrl);
-  }
-  if (tokenUrl) {
-    configurationUtilities.ensureUriAllowed(tokenUrl);
-  }
+  validateValueAgainstAllowedHostsJsonSchema(
+    secrets as Record<string, unknown>,
+    authTypeSchemaNode,
+    configurationUtilities
+  );
 }
 
 function getAuthTypeIdFromSecrets(secrets: ActionTypeSecrets): string | undefined {
   const authType = (secrets as { authType?: unknown }).authType;
   return typeof authType === 'string' && authType.length > 0 ? authType : undefined;
-}
-
-function getDefaultsByAuthType(
-  authSpec: ConnectorSpec['auth']
-): ReadonlyMap<string, Readonly<Record<string, unknown>>> {
-  const defaults = new Map<string, Readonly<Record<string, unknown>>>();
-  for (const authType of authSpec?.types ?? []) {
-    if (typeof authType === 'object' && authType !== null) {
-      const typeId = (authType as { type?: unknown }).type;
-      const typeDefaults = (authType as { defaults?: unknown }).defaults;
-      if (typeof typeId === 'string' && typeDefaults && typeof typeDefaults === 'object') {
-        defaults.set(typeId, typeDefaults as Readonly<Record<string, unknown>>);
-      }
-    }
-  }
-  return defaults;
 }

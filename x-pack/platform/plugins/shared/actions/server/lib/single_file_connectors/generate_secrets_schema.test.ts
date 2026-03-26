@@ -18,7 +18,7 @@ beforeEach(() => {
 });
 
 describe('generateSecretsSchema', () => {
-  describe('customValidator - OAuth URL allowedHosts validation', () => {
+  describe('customValidator - allowedHosts validation for URL fields', () => {
     const oauthAuthSpec = {
       types: [
         {
@@ -36,6 +36,7 @@ describe('generateSecretsSchema', () => {
 
       validator.customValidator!(
         {
+          authType: 'oauth_authorization_code',
           authorizationUrl: 'https://provider.example.com/authorize',
           tokenUrl: 'https://provider.example.com/token',
           clientId: 'client-id',
@@ -74,7 +75,7 @@ describe('generateSecretsSchema', () => {
         clientSecret: 'client-secret',
       });
 
-      validator.customValidator!(parsedSecrets, validatorServices);
+      validator.customValidator!(parsedSecrets as Record<string, unknown>, validatorServices);
 
       expect(mockConfigUtils.ensureUriAllowed).toHaveBeenCalledWith(
         'https://provider.example.com/authorize'
@@ -96,6 +97,7 @@ describe('generateSecretsSchema', () => {
       expect(() =>
         validator.customValidator!(
           {
+            authType: 'oauth_authorization_code',
             authorizationUrl: 'https://not-allowed.example.com/authorize',
             tokenUrl: 'https://provider.example.com/token',
             clientId: 'client-id',
@@ -120,6 +122,7 @@ describe('generateSecretsSchema', () => {
       expect(() =>
         validator.customValidator!(
           {
+            authType: 'oauth_authorization_code',
             authorizationUrl: 'https://provider.example.com/authorize',
             tokenUrl: 'https://not-allowed.example.com/token',
             clientId: 'client-id',
@@ -130,12 +133,69 @@ describe('generateSecretsSchema', () => {
       ).toThrow('not added to the Kibana config xpack.actions.allowedHosts');
     });
 
-    it('skips URL validation when neither authorizationUrl nor tokenUrl are present', () => {
-      const validator = generateSecretsSchema(oauthAuthSpec, mockConfigUtils);
+    it('does not validate for auth types with no URL fields', () => {
+      const validator = generateSecretsSchema({ types: ['basic'] }, mockConfigUtils);
 
-      validator.customValidator!({ clientId: 'id', clientSecret: 'secret' }, validatorServices);
+      validator.customValidator!(
+        {
+          authType: 'basic',
+          username: 'user',
+          password: 'pass',
+        },
+        validatorServices
+      );
 
       expect(mockConfigUtils.ensureUriAllowed).not.toHaveBeenCalled();
+    });
+
+    it('supports opting out via meta.validate.allowedHosts=false', () => {
+      mockConfigUtils.ensureUriAllowed.mockImplementation((uri: string) => {
+        if (uri === 'https://not-allowed.example.com/token') {
+          throw new Error(
+            'target url "https://not-allowed.example.com/token" is not added to the Kibana config xpack.actions.allowedHosts'
+          );
+        }
+      });
+
+      const validator = generateSecretsSchema(
+        {
+          types: [
+            {
+              type: 'oauth_authorization_code' as const,
+              defaults: {
+                authorizationUrl: 'https://provider.example.com/authorize',
+                tokenUrl: 'https://provider.example.com/token',
+              },
+              overrides: {
+                meta: {
+                  tokenUrl: { validate: { allowedHosts: false } },
+                },
+              },
+            },
+          ],
+        },
+        mockConfigUtils
+      );
+
+      expect(() =>
+        validator.customValidator!(
+          {
+            authType: 'oauth_authorization_code',
+            authorizationUrl: 'https://provider.example.com/authorize',
+            tokenUrl: 'https://not-allowed.example.com/token',
+            clientId: 'client-id',
+            clientSecret: 'client-secret',
+          },
+          validatorServices
+        )
+      ).not.toThrow();
+
+      expect(mockConfigUtils.ensureUriAllowed).toHaveBeenCalledWith(
+        'https://provider.example.com/authorize'
+      );
+      expect(mockConfigUtils.ensureUriAllowed).not.toHaveBeenCalledWith(
+        'https://not-allowed.example.com/token'
+      );
     });
   });
 });
