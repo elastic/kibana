@@ -123,7 +123,8 @@ export function getPanelSchema(isDashboardAppRequest: boolean) {
       {
         meta: {
           id: `kbn-dashboard-panel-${TRANSFORM_ERROR_EMBEDDABLE_TYPE}`,
-          description: 'Replaces panel type when panel transform throws and panel.config can not be created',
+          description:
+            'Replaces panel type when panel transform throws and panel.config can not be created',
           title: TRANSFORM_ERROR_EMBEDDABLE_TYPE,
         },
       }
