@@ -101,6 +101,7 @@ const IlmLifecycleSummary = ({
 
   const isEditLifecycleFlyoutOpen = ilmSummary.isEditLifecycleFlyoutOpen;
   const hasUnsavedChangesInFlyout = ilmSummary.hasUnsavedEditLifecycleFlyoutChanges;
+  const invalidPhases = ilmSummary.flyoutInvalidPhases;
 
   useEffect(() => {
     onFlyoutOpenChange?.(isEditLifecycleFlyoutOpen);
@@ -149,6 +150,7 @@ const IlmLifecycleSummary = ({
         uiState={{
           editedPhaseName: ilmSummary.editingPhase,
           isEditLifecycleFlyoutOpen,
+          invalidPhases,
         }}
       />
 
@@ -182,6 +184,7 @@ const NonIlmLifecycleSummary = ({
 
   const currentDslStepsCount = dslSummary.downsampleSteps?.length ?? 0;
   const isAddDownsampleStepDisabled = currentDslStepsCount >= MAX_DOWNSAMPLE_STEPS;
+  const invalidStepIndices = dslSummary.flyoutInvalidStepIndices;
 
   const addDownsampleStepButton = (
     <EuiButton
@@ -226,7 +229,11 @@ const NonIlmLifecycleSummary = ({
         headerActions={dslHeaderActions}
         uiState={{
           editedPhaseName: undefined,
+          editedDownsampleStepIndex: dslSummary.isEditLifecycleFlyoutOpen
+            ? dslSummary.selectedStepIndex
+            : undefined,
           isEditLifecycleFlyoutOpen: dslSummary.isEditLifecycleFlyoutOpen,
+          invalidStepIndices,
         }}
       />
 

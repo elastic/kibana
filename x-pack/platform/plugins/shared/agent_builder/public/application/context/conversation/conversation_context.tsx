@@ -20,6 +20,7 @@ interface ConversationContextValue {
   autoSendInitialMessage?: boolean;
   resetInitialMessage?: () => void;
   attachments?: AttachmentInput[];
+  upsertAttachments?: (attachments: AttachmentInput[]) => void;
   resetAttachments?: () => void;
   removeAttachment?: (attachmentIndex: number) => void;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;

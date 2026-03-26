@@ -44,6 +44,7 @@ export const setupMockCoreStartServices = (
     asCurrentUser: mockEsClient.asCurrentUser,
   });
   mockCore.getStartServices.mockResolvedValue([mockCoreStart, {}, {}]);
+  return mockCoreStart;
 };
 
 /**

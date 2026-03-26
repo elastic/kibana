@@ -6,15 +6,11 @@
  */
 import type { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import {
-  buildEsqlQuery,
-  getIndexPatternsForStream,
-  systemSchema,
-  type Streams,
+  TaskStatus,
   type SignificantEventsQueriesGenerationResult,
   type SignificantEventsQueriesGenerationTaskResult,
 } from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
-import { BooleanFromString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/significant_events/read_significant_events_from_alerts_indices';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import {
@@ -26,38 +22,23 @@ import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { handleTaskAction } from '../../../utils/task_helpers';
-import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 
 // Make sure strings are expected for input, but still converted to a
 // Date, without breaking the OpenAPI generator
 const dateFromString = z.string().transform((input) => new Date(input));
 
 /**
- * Back-fills `esql.query` on task results for legacy tasks that were completed
- * before the `esql.query` property was introduced. Without this, the client
- * would receive queries without the required `esql.query` field.
+ * Guards against stale task results from a previous Kibana version that stored
+ * queries with `kql`/`feature` but without the now-required `esql.query` field.
+ * Returns a failed status instead of letting the malformed payload reach the client.
  */
-const ensureEsqlQuery = (
-  result: SignificantEventsQueriesGenerationTaskResult,
-  definition: Streams.all.Definition
+const sanitizeTaskResult = (
+  result: SignificantEventsQueriesGenerationTaskResult
 ): SignificantEventsQueriesGenerationTaskResult => {
-  if (!('queries' in result)) {
-    return result;
+  if ('queries' in result && result.queries.some((q) => q.esql.query === undefined)) {
+    return { status: TaskStatus.Failed, error: 'Stale task result from a previous version.' };
   }
-
-  const indices = getIndexPatternsForStream(definition);
-  return {
-    ...result,
-    queries: result.queries.map((query) => ({
-      ...query,
-      esql: query.esql ?? {
-        query: buildEsqlQuery(indices, {
-          kql: { query: query.kql },
-          feature: query.feature,
-        }),
-      },
-    })),
-  };
+  return result;
 };
 
 const significantEventsQueriesGenerationStatusRoute = createServerRoute({
@@ -82,21 +63,20 @@ const significantEventsQueriesGenerationStatusRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsQueriesGenerationTaskResult> => {
-    const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
+    const { licensing, uiSettingsClient, taskClient } = await getScopedClients({
       request,
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { name } = params.path;
-    const definition = await streamsClient.getStream(name);
 
     const result = await taskClient.getStatus<
       SignificantEventsQueriesGenerationTaskParams,
       SignificantEventsQueriesGenerationResult
     >(getSignificantEventsQueriesGenerationTaskId(name));
 
-    return ensureEsqlQuery(result, definition);
+    return sanitizeTaskResult(result);
   },
 });
 
@@ -107,19 +87,6 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
     body: taskActionSchema({
       from: dateFromString.describe('Start of the time range'),
       to: dateFromString.describe('End of the time range'),
-      connectorId: z
-        .string()
-        .optional()
-        .describe(
-          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
-        ),
-      sampleDocsSize: z
-        .number()
-        .optional()
-        .describe(
-          'Number of sample documents to use for generation from the current data of stream'
-        ),
-      systems: z.array(systemSchema).optional().describe('Optional array of systems'),
     }),
   }),
   options: {
@@ -138,7 +105,6 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-    logger,
   }): Promise<SignificantEventsQueriesGenerationTaskResult> => {
     const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
       request,
@@ -147,7 +113,7 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { name } = params.path;
-    const definition = await streamsClient.getStream(name);
+    await streamsClient.getStream(name);
     const { body } = params;
     const taskId = getSignificantEventsQueriesGenerationTaskId(name);
 
@@ -158,21 +124,11 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
             scheduleConfig: {
               taskType: SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
               taskId,
-              params: await (async (): Promise<SignificantEventsQueriesGenerationTaskParams> => {
-                const connectorId = await resolveConnectorId({
-                  connectorId: body.connectorId,
-                  uiSettingsClient,
-                  logger,
-                });
-                return {
-                  connectorId,
-                  start: body.from.getTime(),
-                  end: body.to.getTime(),
-                  systems: body.systems,
-                  sampleDocsSize: body.sampleDocsSize,
-                  streamName: name,
-                };
-              })(),
+              params: {
+                start: body.from.getTime(),
+                end: body.to.getTime(),
+                streamName: name,
+              },
               request,
             },
           } as const)
@@ -187,7 +143,7 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
       ...actionParams,
     });
 
-    return ensureEsqlQuery(result, definition);
+    return sanitizeTaskResult(result);
   },
 });
 
@@ -200,12 +156,9 @@ const readAllSignificantEventsRoute = createServerRoute({
       bucketSize: z.string().describe('Size of time buckets for aggregation'),
       query: z.string().optional().describe('Query string to filter significant events queries'),
       streamNames: z
-        .preprocess(
-          (val) => (typeof val === 'string' ? [val] : val),
-          z.array(z.string()).optional()
-        )
+        .union([z.string().transform((val) => [val]), z.array(z.string())])
+        .optional()
         .describe('Stream names to filter significant events'),
-      ruleBacked: BooleanFromString.optional().describe('Filter by rule-backed status'),
     }),
   }),
   options: {
@@ -230,7 +183,7 @@ const readAllSignificantEventsRoute = createServerRoute({
       });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { from, to, bucketSize, query, streamNames, ruleBacked } = params.query;
+    const { from, to, bucketSize, query, streamNames } = params.query;
 
     return readSignificantEventsFromAlertsIndices(
       {
@@ -239,7 +192,6 @@ const readAllSignificantEventsRoute = createServerRoute({
         bucketSize,
         query,
         streamNames,
-        filters: { ruleBacked },
       },
       { queryClient, scopedClusterClient }
     );

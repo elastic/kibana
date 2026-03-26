@@ -71,8 +71,9 @@ function tryCreateTriggerDecoration(
   const isCustomTrigger = !isTriggerType(triggerType);
   if (isCustomTrigger && !isRegisteredCustomTrigger(triggerType)) return null;
 
+  const techPreviewClass = isCustomTrigger ? ' type-tech-preview' : '';
   const inlineClasses = isCustomTrigger
-    ? `type-inline-highlight ${CUSTOM_TRIGGER_INLINE_CLASS} type-${className}`
+    ? `type-inline-highlight ${CUSTOM_TRIGGER_INLINE_CLASS} type-${className}${techPreviewClass}`
     : `type-inline-highlight type-${className}`;
 
   const valueStartOffset = typeRange[1];

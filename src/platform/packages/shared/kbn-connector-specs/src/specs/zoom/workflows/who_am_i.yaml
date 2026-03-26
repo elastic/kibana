@@ -1,0 +1,13 @@
+version: "1"
+name: "sources.zoom.who_am_i"
+description: "Get the profile of the currently authenticated Zoom user, including name, email, role, timezone, and personal meeting URL."
+tags: ["agent-builder-tool"]
+enabled: true
+triggers:
+  - type: "manual"
+inputs: []
+steps:
+  - name: who-am-i
+    type: zoom.whoAmI
+    connector-id: <%= zoom-stack-connector-id %>
+    with: {}

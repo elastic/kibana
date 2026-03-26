@@ -1,5 +1,5 @@
 ---
-navigation_title: Scout testing framework
+navigation_title: Testing framework
 ---
 
 # Scout [scout]
@@ -13,7 +13,7 @@ Scout is Kibana’s **modern UI and API test framework** built on [Playwright](h
 - [UI testing](./scout/ui-testing.md)
 - [API testing](./scout/api-testing.md)
 
-## Why Scout? [scout-main-features]
+## Scout benefits [scout-main-features]
 
 - **Parallel execution**: run UI suites in [parallel](./scout/parallelism.md) against the same deployment.
 - **Co-located tests**: keep tests close to [plugin code](./scout/setup-plugin.md) for easier iteration and maintenance.
@@ -84,6 +84,10 @@ It’s easier to iterate and maintain, and it can enable smarter test selection 
 
 Not directly—use Scout [fixtures](./scout/fixtures.md) instead.
 
+#### Q: What happens to FTR tests? [scout-faq-ftr-tests]
+
+Existing FTR tests continue to run, and teams can migrate them to Scout incrementally over time.
+
 #### Q: Does Scout support feature flags? [scout-faq-feature-flags]
 
-If your feature is behind a feature flag, you can use the `coreApi` [fixture](https://github.com/elastic/kibana/blob/e4f12d39154fe286ce92217e00a7d8bd758ee02d/src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/apis/core/index.ts#L17-L30) to enable it during test execution (recommended). Alternatively, you can create a [custom config directory](https://github.com/elastic/kibana/pull/244306) and link your Scout tests (reach out for more info).
+Yes. See [Feature flags](./scout/feature-flags.md) for details on enabling flags at runtime with `apiServices.core.settings()` or using custom server configurations.

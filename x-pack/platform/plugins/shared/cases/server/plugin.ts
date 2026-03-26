@@ -207,6 +207,7 @@ export class CasePlugin
       getCasesClient,
       getSpaceId,
       serverlessProjectType,
+      isCasesAttachmentsEnabled: this.caseConfig.attachments?.enabled === true,
     });
 
     registerCaseWorkflowSteps(plugins.workflowsExtensions, getCasesClient);
@@ -321,7 +322,6 @@ export class CasePlugin
           return this.clientFactory.create({
             request,
             scopedClusterClient: coreContext.elasticsearch.client.asCurrentUser,
-            internalClusterClient: coreContext.elasticsearch.client.asInternalUser,
             savedObjectsService: savedObjects,
           });
         },
@@ -337,7 +337,6 @@ export class CasePlugin
       return this.clientFactory.create({
         request,
         scopedClusterClient: client.asScoped(request).asCurrentUser,
-        internalClusterClient: client.asInternalUser,
         savedObjectsService: core.savedObjects,
       });
     };

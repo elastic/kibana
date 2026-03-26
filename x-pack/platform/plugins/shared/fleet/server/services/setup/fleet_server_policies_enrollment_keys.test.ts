@@ -39,7 +39,7 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
     );
 
     mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy.mockReset();
-    mockedAgentPolicyService.getLatestFleetPolicy.mockReset();
+    mockedAgentPolicyService.getLatestFleetPolicyRevision.mockReset();
     mockedAgentPolicyService.deployPolicies.mockReset();
     mockedAgentPolicyService.deployPolicies.mockImplementation(async () => {});
     jest.mocked(scheduleDeployAgentPoliciesTask).mockReset();
@@ -61,21 +61,23 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
     const logger = loggingSystemMock.createLogger();
     const esClient = elasticsearchServiceMock.createInternalClient();
     const soClient = savedObjectsClientMock.create();
-    mockedAgentPolicyService.getLatestFleetPolicy.mockImplementation(async (_, agentPolicyId) => {
-      if (agentPolicyId === 'policy1') {
-        return {
-          revision_idx: 1,
-        } as any;
-      }
+    mockedAgentPolicyService.getLatestFleetPolicyRevision.mockImplementation(
+      async (_, agentPolicyId) => {
+        if (agentPolicyId === 'policy1') {
+          return {
+            revision_idx: 1,
+          } as any;
+        }
 
-      if (agentPolicyId === 'policy2') {
-        return {
-          revision_idx: 2,
-        } as any;
-      }
+        if (agentPolicyId === 'policy2') {
+          return {
+            revision_idx: 2,
+          } as any;
+        }
 
-      return null;
-    });
+        return null;
+      }
+    );
 
     await ensureAgentPoliciesFleetServerKeysAndPolicies({
       logger,
@@ -94,21 +96,23 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
     const logger = loggingSystemMock.createLogger();
     const esClient = elasticsearchServiceMock.createInternalClient();
     const soClient = savedObjectsClientMock.create();
-    mockedAgentPolicyService.getLatestFleetPolicy.mockImplementation(async (_, agentPolicyId) => {
-      if (agentPolicyId === 'policy1') {
-        return {
-          revision_idx: 1,
-        } as any;
-      }
+    mockedAgentPolicyService.getLatestFleetPolicyRevision.mockImplementation(
+      async (_, agentPolicyId) => {
+        if (agentPolicyId === 'policy1') {
+          return {
+            revision_idx: 1,
+          } as any;
+        }
 
-      if (agentPolicyId === 'policy2') {
-        return {
-          revision_idx: 1,
-        } as any;
-      }
+        if (agentPolicyId === 'policy2') {
+          return {
+            revision_idx: 1,
+          } as any;
+        }
 
-      return null;
-    });
+        return null;
+      }
+    );
 
     await ensureAgentPoliciesFleetServerKeysAndPolicies({
       logger,
@@ -129,15 +133,17 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
     const logger = loggingSystemMock.createLogger();
     const esClient = elasticsearchServiceMock.createInternalClient();
     const soClient = savedObjectsClientMock.create();
-    mockedAgentPolicyService.getLatestFleetPolicy.mockImplementation(async (_, agentPolicyId) => {
-      if (agentPolicyId === 'policy1') {
-        return {
-          revision_idx: 1,
-        } as any;
-      }
+    mockedAgentPolicyService.getLatestFleetPolicyRevision.mockImplementation(
+      async (_, agentPolicyId) => {
+        if (agentPolicyId === 'policy1') {
+          return {
+            revision_idx: 1,
+          } as any;
+        }
 
-      return null;
-    });
+        return null;
+      }
+    );
 
     await ensureAgentPoliciesFleetServerKeysAndPolicies({
       logger,
@@ -169,15 +175,17 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
     } as any);
 
     // fleet-server-policy is out of sync; policy1 is up to date
-    mockedAgentPolicyService.getLatestFleetPolicy.mockImplementation(async (_, agentPolicyId) => {
-      if (agentPolicyId === 'fleet-server-policy') {
-        return { revision_idx: 1 } as any;
+    mockedAgentPolicyService.getLatestFleetPolicyRevision.mockImplementation(
+      async (_, agentPolicyId) => {
+        if (agentPolicyId === 'fleet-server-policy') {
+          return { revision_idx: 1 } as any;
+        }
+        if (agentPolicyId === 'policy1') {
+          return { revision_idx: 1 } as any;
+        }
+        return null;
       }
-      if (agentPolicyId === 'policy1') {
-        return { revision_idx: 1 } as any;
-      }
-      return null;
-    });
+    );
 
     await ensureAgentPoliciesFleetServerKeysAndPolicies({
       logger,
@@ -212,7 +220,9 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
     } as any);
 
     // Both are out of sync
-    mockedAgentPolicyService.getLatestFleetPolicy.mockResolvedValue({ revision_idx: 1 } as any);
+    mockedAgentPolicyService.getLatestFleetPolicyRevision.mockResolvedValue({
+      revision_idx: 1,
+    } as any);
 
     await ensureAgentPoliciesFleetServerKeysAndPolicies({
       logger,
@@ -247,7 +257,9 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
       ],
     } as any);
 
-    mockedAgentPolicyService.getLatestFleetPolicy.mockResolvedValue({ revision_idx: 1 } as any);
+    mockedAgentPolicyService.getLatestFleetPolicyRevision.mockResolvedValue({
+      revision_idx: 1,
+    } as any);
     mockedAgentPolicyService.deployPolicies.mockRejectedValue(
       new Error('ES bulk operation failed')
     );
@@ -268,7 +280,9 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
       ],
     } as any);
 
-    mockedAgentPolicyService.getLatestFleetPolicy.mockResolvedValue({ revision_idx: 1 } as any);
+    mockedAgentPolicyService.getLatestFleetPolicyRevision.mockResolvedValue({
+      revision_idx: 1,
+    } as any);
 
     await ensureAgentPoliciesFleetServerKeysAndPolicies({
       logger,
@@ -301,7 +315,9 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
       ],
     } as any);
 
-    mockedAgentPolicyService.getLatestFleetPolicy.mockResolvedValue({ revision_idx: 1 } as any);
+    mockedAgentPolicyService.getLatestFleetPolicyRevision.mockResolvedValue({
+      revision_idx: 1,
+    } as any);
 
     await ensureAgentPoliciesFleetServerKeysAndPolicies({
       logger,

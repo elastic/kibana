@@ -90,6 +90,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
           initialContext: undefined,
           storage: new Storage(localStorage),
           defaultIndexPatternId: props.core.uiSettings.get('defaultIndex'),
+          http: props.core.http,
         },
         {
           isFullEditor: true,
@@ -130,6 +131,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     props.plugins.dataViews,
     props.core.uiSettings,
     props.plugins.eventAnnotationService,
+    props.core.http,
   ]);
 
   const onChangeIndexPattern = useCallback(

@@ -6,7 +6,6 @@
  */
 
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import { EuiFlexGrid, EuiFlexItem, EuiLink, EuiImage, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -26,12 +25,6 @@ interface Props {
 }
 
 export class AssetPicker extends PureComponent<Props> {
-  static propTypes = {
-    assets: PropTypes.array.isRequired,
-    selected: PropTypes.string,
-    onChange: PropTypes.func.isRequired,
-  };
-
   componentDidMount() {
     const selectedAsset = document.getElementById('canvasAssetPicker__selectedAsset');
     if (selectedAsset) {

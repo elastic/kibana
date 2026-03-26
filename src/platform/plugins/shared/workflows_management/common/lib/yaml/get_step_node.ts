@@ -8,34 +8,40 @@
  */
 
 import type { Document, YAMLMap } from 'yaml';
-import { isPair, isScalar, visit } from 'yaml';
-import { getPathFromAncestors } from '@kbn/workflows/common/utils/yaml';
+import { isMap, isPair, isScalar, isSeq } from 'yaml';
+
+const NESTED_STEP_KEYS = ['steps', 'else', 'on-failure', 'iteration-on-failure', 'fallback'];
+
+function findInNode(node: unknown, stepName: string): YAMLMap | null {
+  if (isSeq(node)) {
+    for (const item of node.items) {
+      const found = findInNode(item, stepName);
+      if (found) return found;
+    }
+  } else if (isMap(node)) {
+    if (node.get('name') === stepName) return node;
+
+    for (const pair of node.items) {
+      if (
+        isPair(pair) &&
+        isScalar(pair.key) &&
+        NESTED_STEP_KEYS.includes(pair.key.value as string)
+      ) {
+        const found = findInNode(pair.value, stepName);
+        if (found) return found;
+      }
+    }
+  }
+  return null;
+}
 
 export function getStepNode(document: Document, stepName: string): YAMLMap | null {
-  let stepNode: YAMLMap | null = null;
-  visit(document, {
-    Scalar(key, node, ancestors) {
-      if (!node.range) {
-        return;
-      }
-      const lastAncestor = ancestors?.[ancestors.length - 1];
-
-      const isNameProp =
-        isPair(lastAncestor) && isScalar(lastAncestor.key) && lastAncestor.key.value === 'name';
-
-      const isValueMatch = isNameProp && node.value === stepName;
-
-      const path = getPathFromAncestors(ancestors);
-
-      const isInSteps =
-        path.length >= 3 && (path[path.length - 3] === 'steps' || path[path.length - 3] === 'else');
-
-      if (isValueMatch && isInSteps) {
-        stepNode = ancestors[ancestors.length - 2] as YAMLMap;
-
-        return visit.BREAK;
-      }
-    },
-  });
-  return stepNode;
+  if (!isMap(document.contents)) {
+    return null;
+  }
+  const stepsNode = document.contents.get('steps');
+  if (!stepsNode) {
+    return null;
+  }
+  return findInNode(stepsNode, stepName);
 }

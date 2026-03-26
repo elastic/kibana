@@ -18,10 +18,10 @@ import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_f
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
-import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
+import { useHighlightedFields } from '../../../../flyout_v2/document/hooks/use_highlighted_fields';
 import { useRuleDetails } from '../../../rule_details/hooks/use_rule_details';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
-import { useHighlightedFieldsPrivilege } from '../../shared/hooks/use_highlighted_fields_privilege';
+import { useHighlightedFieldsPrivilege } from '../../../../flyout_v2/document/hooks/use_highlighted_fields_privilege';
 import type { UseBasicDataFromDetailsDataResult } from '../../shared/hooks/use_basic_data_from_details_data';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
@@ -29,10 +29,10 @@ import { useRuleWithFallback } from '../../../../detection_engine/rule_managemen
 jest.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
 }));
-jest.mock('../../shared/hooks/use_highlighted_fields');
+jest.mock('../../../../flyout_v2/document/hooks/use_highlighted_fields');
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../rule_details/hooks/use_rule_details');
-jest.mock('../../shared/hooks/use_highlighted_fields_privilege');
+jest.mock('../../../../flyout_v2/document/hooks/use_highlighted_fields_privilege');
 jest.mock('../../shared/hooks/use_basic_data_from_details_data');
 jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 jest.mock('../../shared/hooks/use_navigate_to_left_panel', () => ({

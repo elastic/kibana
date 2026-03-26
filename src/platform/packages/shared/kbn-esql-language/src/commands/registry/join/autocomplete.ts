@@ -8,12 +8,9 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
+import type { ESQLAstAllCommands, ESQLAstJoinCommand } from '@elastic/esql/types';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import {
-  getLookupIndexCreateSuggestion,
-  handleFragment,
-} from '../../definitions/utils/autocomplete/helpers';
-import type { ESQLAstAllCommands, ESQLAstJoinCommand } from '../../../types';
+import { getLookupIndexCreateSuggestion } from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext, Location } from '../types';
 import { pipeCompleteItem, commaCompleteItem } from '../complete_items';
@@ -75,7 +72,8 @@ export async function autocomplete(
 
     case 'after_mnemonic':
     case 'index': {
-      const indexNameInput = commandText.split(' ').pop() ?? '';
+      const words = commandText.split(' ');
+      const indexNameInput = words[words.length - 1] ?? '';
       const joinSources = context?.joinSources;
       const suggestions: ISuggestionItem[] = [];
 
@@ -94,18 +92,15 @@ export async function autocomplete(
 
       if (joinSources?.length) {
         const joinIndexesSuggestions = specialIndicesToSuggestions(joinSources);
-        suggestions.push(
-          ...(await handleFragment(
-            innerText,
-            (fragment) =>
-              specialIndicesToSuggestions(joinSources).some(
-                ({ label }) => label.toLocaleLowerCase() === fragment.toLocaleLowerCase()
-              ),
-            (_fragment, rangeToReplace?: { start: number; end: number }) =>
-              joinIndexesSuggestions.map((suggestion) => ({ ...suggestion, rangeToReplace })),
-            () => []
-          ))
-        );
+        const isCompleteLookupIndex =
+          indexNameInput &&
+          joinIndexesSuggestions.some(
+            ({ label }) => label.toLocaleLowerCase() === indexNameInput.toLocaleLowerCase()
+          );
+
+        if (!isCompleteLookupIndex) {
+          suggestions.push(...joinIndexesSuggestions);
+        }
       }
 
       return suggestions;
