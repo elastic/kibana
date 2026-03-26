@@ -53,7 +53,7 @@ export function SignificantEventsDiscoveryPage() {
     return [
       {
         title: i18n.translate('xpack.streams.significantEventsDiscovery.breadcrumbTitle', {
-          defaultMessage: 'Significant events Discovery',
+          defaultMessage: 'Significant Events',
         }),
         path: '/_discovery',
       },
@@ -144,7 +144,7 @@ export function SignificantEventsDiscoveryPage() {
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center" gutterSize="m">
                 {i18n.translate('xpack.streams.significantEventsDiscovery.pageHeaderTitle', {
-                  defaultMessage: 'Significant Events Discovery',
+                  defaultMessage: 'Significant Events',
                 })}
               </EuiFlexGroup>
             </EuiFlexItem>
