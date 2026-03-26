@@ -416,12 +416,11 @@ export const executeDashboardOperations = async ({
       }
 
       case 'add_markdown': {
-        const markdownPanel = {
+        const markdownPanel = normalizeDashboardPanel({
           type: MARKDOWN_EMBEDDABLE_TYPE,
           config: { content: operation.markdownContent },
           grid: operation.grid,
-          uid: uuidv4(),
-        };
+        });
         nextDashboardData = appendPanelsToDashboard({
           dashboardData: nextDashboardData,
           panelsToAdd: [markdownPanel],
