@@ -24,7 +24,6 @@ export enum AppMenuActionId {
   alerts = 'alerts',
   inspect = 'inspect',
   createRule = 'createRule',
-  legacyRules = 'legacyRules',
   backgroundsearch = 'backgroundSearch',
   manageRulesAndConnectors = 'manageRulesAndConnectors',
 }

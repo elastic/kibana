@@ -139,10 +139,7 @@ const registerCustomThresholdRuleAction = (
     },
   };
 
-  // Register to legacy alerts menu
   registry.registerPopoverItem(AppMenuActionId.alerts, popoverItem);
-  // Register to v2 rules menu's legacy submenu
-  registry.registerPopoverItem(AppMenuActionId.legacyRules, popoverItem);
 };
 
 const registerCreateSLOAction = (
@@ -191,9 +188,6 @@ const registerCreateSLOAction = (
       },
     };
 
-    // Register to legacy alerts menu
     registry.registerPopoverItem(AppMenuActionId.alerts, popoverItem);
-    // Register to v2 rules menu's legacy submenu
-    registry.registerPopoverItem(AppMenuActionId.legacyRules, popoverItem);
   }
 };
