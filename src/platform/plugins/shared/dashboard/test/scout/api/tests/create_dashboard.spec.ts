@@ -54,7 +54,7 @@ apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => 
 
   apiTest('can create a dashboard with a specific id', async ({ apiClient }) => {
     const title = `foo-${Date.now()}-${Math.random()}`;
-    const id = `bar-${Date.now()}}`;
+    const id = `bar-${Date.now()}`;
 
     const response = await apiClient.post(`${DASHBOARD_API_PATH}/${id}`, {
       headers: {
@@ -124,7 +124,7 @@ apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => 
 
     expect(response).toHaveStatusCode(400);
     expect(response.body.message).toBe(
-      '[request params.id]: value has length [251] but it must have a maximum length of [250].'
+      '[request params.id]: value has length [252] but it must have a maximum length of [250].'
     );
   });
 
