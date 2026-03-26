@@ -23,7 +23,7 @@ export class RequestTimingImpl implements RequestTiming {
 
     return {
       end: () => {
-        if (ended) return; // Idempotent - multiple calls are no-ops
+        if (ended) return;
         ended = true;
 
         const duration = performance.now() - startTime;
@@ -33,7 +33,6 @@ export class RequestTimingImpl implements RequestTiming {
   }
 
   measure(name: string, duration: number, description?: string): void {
-    // Validate name length and duration
     if (name.length > 100 || duration < 0) {
       return;
     }
