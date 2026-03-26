@@ -70,10 +70,10 @@ describe('Gauge Schema', () => {
           operation: 'sum',
           field: 'performance_score',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-          title: 'Score',
+          title: { text: 'Score' },
           sub_title: 'with 80% target',
           color,
-          ticks: 'bands',
+          ticks: { mode: 'bands' as const },
           min: {
             operation: 'static_value',
             value: 0,
@@ -104,7 +104,7 @@ describe('Gauge Schema', () => {
       metric: {
         operation: 'average',
         field: 'cpu_usage',
-        ticks: 'auto',
+        ticks: { mode: 'auto' as const },
       },
       shape: {
         type: 'circle',
@@ -132,9 +132,8 @@ describe('Gauge Schema', () => {
     const validated = gaugeStateSchema.validate(input);
     expect(validated.shape).toEqual({
       type: 'bullet',
-      direction: 'horizontal',
+      orientation: 'horizontal',
     });
-    // ticks default is only applied when explicitly set, not when omitted
     expect(validated.metric.ticks).toBeUndefined();
   });
 
@@ -167,7 +166,7 @@ describe('Gauge Schema', () => {
       metric: {
         operation: 'value',
         column: 'score',
-        title: 'Score',
+        title: { text: 'Score' },
         sub_title: 'with 80% target',
         color: {
           type: 'dynamic',
@@ -177,7 +176,7 @@ describe('Gauge Schema', () => {
             { gte: 100, color: 'red' },
           ],
         },
-        ticks: 'bands',
+        ticks: { mode: 'bands' as const },
         min: {
           operation: 'value',
           column: 'min',
@@ -260,8 +259,10 @@ describe('Gauge Schema', () => {
       metric: {
         operation: 'count',
         field: 'test_field',
-        // @ts-expect-error
-        ticks: 'invalid',
+        ticks: {
+          // @ts-expect-error
+          style: 'invalid',
+        },
       },
     } satisfies GaugeInput;
 

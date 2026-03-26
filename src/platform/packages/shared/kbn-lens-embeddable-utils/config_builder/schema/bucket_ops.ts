@@ -176,7 +176,9 @@ export const bucketTermsOperationSchema = schema.object(
           /**
            * Direction of the alphabetical order
            */
-          direction: builderEnums.direction(),
+          direction: builderEnums.direction({
+            meta: { id: 'termsRankByAlphabeticalDirection' },
+          }),
         }),
         schema.object({
           type: schema.literal('rare'),
@@ -205,7 +207,9 @@ export const bucketTermsOperationSchema = schema.object(
           /**
            * Direction of the column
            */
-          direction: builderEnums.direction(),
+          direction: builderEnums.direction({
+            meta: { id: 'termsRankByColumnDirection' },
+          }),
         }),
         schema.object({
           type: schema.literal('custom'),
@@ -237,7 +241,9 @@ export const bucketTermsOperationSchema = schema.object(
           /**
            * Direction of the custom operation
            */
-          direction: builderEnums.direction(),
+          direction: builderEnums.direction({
+            meta: { id: 'termsRankByCustomDirection' },
+          }),
         }),
       ])
     ),
