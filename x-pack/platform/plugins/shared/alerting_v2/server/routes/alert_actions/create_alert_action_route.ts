@@ -5,23 +5,24 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import {
   createAlertActionBodySchema,
   createAlertActionParamsSchema,
   type CreateAlertActionBody,
   type CreateAlertActionParams,
 } from '@kbn/alerting-v2-schemas';
-import { Request, Response, type RouteHandler } from '@kbn/core-di-server';
-import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
+import { Request } from '@kbn/core-di-server';
+import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { inject, injectable } from 'inversify';
 import { AlertActionsClient } from '../../lib/alert_actions_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_ALERT_API_PATH } from '../constants';
+import { AlertingRouteContext } from '../alerting_route_context';
+import { BaseAlertingRoute } from '../base_alerting_route';
 
 @injectable()
-export class CreateAlertActionRoute implements RouteHandler {
+export class CreateAlertActionRoute extends BaseAlertingRoute {
   static method = 'post' as const;
   static path = `${INTERNAL_ALERTING_V2_ALERT_API_PATH}/{group_hash}/action`;
   static security: RouteSecurity = {
@@ -37,31 +38,27 @@ export class CreateAlertActionRoute implements RouteHandler {
     },
   } as const;
 
+  protected readonly routeName = 'create alert action';
+
   constructor(
+    @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
     private readonly request: KibanaRequest<
       CreateAlertActionParams,
       unknown,
       CreateAlertActionBody
     >,
-    @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(AlertActionsClient) private readonly alertActionsClient: AlertActionsClient
-  ) {}
+  ) {
+    super(ctx);
+  }
 
-  async handle() {
-    try {
-      await this.alertActionsClient.createAction({
-        groupHash: this.request.params.group_hash,
-        action: this.request.body,
-      });
+  protected async execute() {
+    await this.alertActionsClient.createAction({
+      groupHash: this.request.params.group_hash,
+      action: this.request.body,
+    });
 
-      return this.response.noContent();
-    } catch (e) {
-      const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
-      return this.response.customError({
-        statusCode: boom.output.statusCode,
-        body: boom.output.payload,
-      });
-    }
+    return this.ctx.response.noContent();
   }
 }
