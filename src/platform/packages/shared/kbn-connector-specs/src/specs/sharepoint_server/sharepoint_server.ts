@@ -24,6 +24,9 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
+import downloadWorkflow from './workflows/download.yaml';
+import listWorkflow from './workflows/list.yaml';
+import searchWorkflow from './workflows/search.yaml';
 
 const ODATA_HEADERS = { Accept: 'application/json;odata=nometadata' };
 
@@ -40,7 +43,7 @@ export const SharepointServer: ConnectorSpec = {
         'Connect to SharePoint Server (on-premises) to search and retrieve site content.',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {
@@ -315,4 +318,6 @@ export const SharepointServer: ConnectorSpec = {
       }
     },
   },
+
+  agentBuilderWorkflows: [downloadWorkflow, listWorkflow, searchWorkflow],
 };
