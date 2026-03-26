@@ -522,12 +522,13 @@ function DiscoverDocumentsComponent({
     viewModeToggle,
   ]);
 
-  const isEmbeddedEditor = services.embeddableEditor.isEmbeddedEditor();
+  const canSaveDiscoverTable =
+    !services.embeddableEditor.isEmbeddedEditor() && services.embeddableEditor.canSaveToDashboard();
 
   const saveModalButton = useMemo(
     () =>
-      isEmbeddedEditor ? undefined : <SaveDiscoverTableButton key="SaveDiscoverTableButton" />,
-    [isEmbeddedEditor]
+      canSaveDiscoverTable ? <SaveDiscoverTableButton key="SaveDiscoverTableButton" /> : undefined,
+    [canSaveDiscoverTable]
   );
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {

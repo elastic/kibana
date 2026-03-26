@@ -12,6 +12,7 @@ import type {
 } from '@kbn/saved-search-plugin/common';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import type { EmbeddableEditorState, EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import type { ApplicationStart } from '@kbn/core/public';
 
 /**
  * Specifies the action to be taken for navigating back to an editor.
@@ -40,9 +41,16 @@ interface TransferOptions {
 export class EmbeddableEditorService {
   private embeddableState?: EmbeddableEditorState;
 
-  constructor(private embeddableStateTransfer: EmbeddableStateTransfer) {
+  constructor(
+    private embeddableStateTransfer: EmbeddableStateTransfer,
+    private application: ApplicationStart
+  ) {
     this.embeddableState = embeddableStateTransfer.getIncomingEditorState('discover', true);
   }
+
+  public canSaveToDashboard = (): boolean =>
+    (this.application.capabilities.dashboard_v2.show as boolean) &&
+    (this.application.capabilities.dashboard_v2.createNew as boolean);
 
   public isByValueEditor = (): boolean => Boolean(this.embeddableState?.valueInput);
 
