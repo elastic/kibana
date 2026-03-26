@@ -8,6 +8,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFacetGroup,
@@ -21,6 +22,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { omit } from 'lodash';
+import type { CPSPluginStart } from '@kbn/cps/public/types';
 import { PRODUCER_DISPLAY_NAMES } from '../../common/i18n';
 import type { RuleTypeWithDescription, RuleTypeCountsByProducer } from '../types';
 
@@ -32,6 +34,7 @@ interface RuleTypeListProps {
   ruleTypeCountsByProducer: RuleTypeCountsByProducer;
   onClearFilters: () => void;
   showCategories: boolean;
+  cps?: CPSPluginStart;
 }
 
 const producerToDisplayName = (producer: string) => {
@@ -61,6 +64,7 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
   ruleTypeCountsByProducer,
   onClearFilters,
   showCategories = true,
+  cps,
 }) => {
   const ruleTypesList = [...ruleTypes].sort(sortRuleTypes);
   const { euiTheme } = useEuiTheme();
@@ -91,7 +95,7 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
       titleSize="xs"
       textAlign="left"
       hasBorder
-      title={rule.name}
+      title={<RuleCardTitle rule={rule} cps={cps} />}
       onClick={() => onSelectRuleType(rule.id)}
       description={rule.description}
       style={{ marginRight: '8px', flexGrow: 0 }}
@@ -201,6 +205,34 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
             <EuiSpacer size="s" />
           </React.Fragment>
         ))}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+interface RuleCardTitleProps {
+  rule: RuleTypeWithDescription;
+  cps?: CPSPluginStart;
+}
+
+const RuleCardTitle: React.FC<RuleCardTitleProps> = ({ rule, cps }) => {
+  const isCpsEnabled = Boolean(cps?.cpsManager && cps.cpsManager.getTotalProjectCount() > 1);
+  const isMlRule = rule.producer === 'ml';
+  const isTransformRule = rule.id === 'transform_health';
+  const showCpsBadge = isCpsEnabled && (isMlRule || isTransformRule);
+
+  if (!showCpsBadge) {
+    return <>{rule.name}</>;
+  }
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
+      <EuiFlexItem grow={false}>{rule.name}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiBadge color="primary">
+          {i18n.translate('responseOpsRuleForm.components.ruleTypeModal.cpsSupportComingSoon', {
+            defaultMessage: 'CPS support coming soon',
+          })}
+        </EuiBadge>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

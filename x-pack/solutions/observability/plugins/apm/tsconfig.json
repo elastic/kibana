@@ -150,6 +150,7 @@
     "@kbn/kql",
     "@kbn/slo-plugin",
     "@kbn/slo-schema",
+    "@kbn/shared-ux-column-presets",
   ],
   "exclude": ["target/**/*"]
 }
