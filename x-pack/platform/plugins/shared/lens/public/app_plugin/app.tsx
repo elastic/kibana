@@ -285,14 +285,8 @@ export function App({
     setBreadcrumbsTitle(
       { application, chrome, serverless },
       {
-        isByValueMode,
         currentDocTitle,
         redirectToOrigin,
-        originatingApp:
-          incomingState?.originatingApp ??
-          (initialContext && 'originatingApp' in initialContext
-            ? initialContext.originatingApp
-            : undefined),
         incomingBreadcrumbs:
           incomingState?.breadcrumbs ??
           (initialContext && 'breadcrumbs' in initialContext
