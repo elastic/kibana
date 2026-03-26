@@ -240,7 +240,7 @@ const getResponseActionListTableColumns = ({
             data-test-subj={getTestId('expand-button')}
             onClick={onClickCallback(actionListDataItem)}
             aria-label={expandedRowMap[actionId] ? ARIA_LABELS.collapse : ARIA_LABELS.expand}
-            iconType={expandedRowMap[actionId] ? 'arrowUp' : 'arrowDown'}
+            iconType={expandedRowMap[actionId] ? 'chevronSingleUp' : 'chevronSingleDown'}
           />
         );
       },

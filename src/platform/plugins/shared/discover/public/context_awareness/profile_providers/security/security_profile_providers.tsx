@@ -8,14 +8,13 @@
  */
 
 import React from 'react';
-import { getFieldValue } from '@kbn/discover-utils';
-import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { EnhancedAlertEventOverviewLazy, EnhancedAlertFlyoutHeaderLazy } from './components';
 import { SECURITY_PROFILE_ID } from './constants';
 import { extendProfileProvider } from '../extend_profile_provider';
 import { createSecurityDocumentProfileProvider } from './security_document_profile';
 import type { ProfileProviderServices } from '../profile_provider_services';
 import * as i18n from './translations';
+import { isAlertDocument } from './utils/is_alert_document';
 
 export const createSecurityDocumentProfileProviders = (
   providerServices: ProfileProviderServices
@@ -27,7 +26,7 @@ export const createSecurityDocumentProfileProviders = (
     profile: {
       getDocViewer: (prev) => (params) => {
         const prevDocViewer = prev(params);
-        const isAlert = getFieldValue(params.record, EVENT_KIND) === 'signal';
+        const isAlert = isAlertDocument(params.record);
 
         return {
           ...prevDocViewer,
@@ -39,14 +38,16 @@ export const createSecurityDocumentProfileProviders = (
             />
           ),
           docViewsRegistry: (registry) => {
-            registry.add({
-              id: 'doc_view_alerts_overview',
-              title: i18n.overviewTabTitle(isAlert),
-              order: 0,
-              render: (props) => (
-                <EnhancedAlertEventOverviewLazy {...props} providerServices={providerServices} />
-              ),
-            });
+            if (isAlert) {
+              registry.add({
+                id: 'doc_view_alerts_overview',
+                title: i18n.overviewTabTitle(isAlert),
+                order: 0,
+                render: (props) => (
+                  <EnhancedAlertEventOverviewLazy {...props} providerServices={providerServices} />
+                ),
+              });
+            }
 
             return prevDocViewer.docViewsRegistry(registry);
           },
