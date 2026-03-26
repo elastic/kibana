@@ -7,6 +7,10 @@
 
 import pMap from 'p-map';
 import type { PackageList, PackageListItem } from '@kbn/fleet-plugin/common';
+import {
+  estimateTokens,
+  truncateTokens,
+} from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { RuleMigrationIntegration } from '../types';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
 
@@ -17,6 +21,7 @@ const INTEGRATION_WEIGHTS = [
 ];
 
 const PATH_PATTERNS_TO_INCLUDE_IN_KB = ['sample_event', 'knowledge_base'];
+const MAX_KB_TOKENS = 80_000;
 
 /**
  * excludes Splunk, QRadar and Elastic Security integrations since automatic migrations
@@ -64,39 +69,7 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
       );
     }
 
-    let packageKnowledgeBase: string = '';
-
-    try {
-      const packageArchive = await this.dependencies.packageService?.asInternalUser.getPackage(
-        pkg.name,
-        pkg.version
-      );
-
-      const allPaths = await packageArchive?.archiveIterator.getPaths();
-      const relevantPaths = allPaths?.filter((path) =>
-        PATH_PATTERNS_TO_INCLUDE_IN_KB.some((includedPath) => path.includes(includedPath))
-      );
-
-      await packageArchive?.archiveIterator.traverseEntries(
-        async (entry) => {
-          if (entry.buffer && relevantPaths?.includes(entry.path)) {
-            const content = entry.buffer.toString('utf8');
-            const fileName = entry.path;
-
-            packageKnowledgeBase = [packageKnowledgeBase, ` Source : ${fileName}`, content].join(
-              '\n'
-            );
-          }
-        },
-        (path) => relevantPaths?.includes(path) ?? false
-      );
-    } catch (error) {
-      this.logger.warn(
-        `Failed to fetch package archive for ${pkg.name}: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-    }
+    const packageKnowledgeBase = await this.fetchPackageKnowledgeBase(pkg);
 
     return {
       title: pkg.title,
@@ -116,6 +89,60 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
       ].join(' - '),
       fields_metadata: fieldsMetadata,
     };
+  }
+
+  private async fetchPackageKnowledgeBase(pkg: PackageListItem): Promise<string> {
+    let packageKnowledgeBase = '';
+
+    try {
+      const packageArchive = await this.dependencies.packageService?.asInternalUser.getPackage(
+        pkg.name,
+        pkg.version
+      );
+
+      const allPaths = await packageArchive?.archiveIterator.getPaths();
+      const relevantPaths = allPaths?.filter((path) =>
+        PATH_PATTERNS_TO_INCLUDE_IN_KB.some((includedPath) => path.includes(includedPath))
+      );
+
+      let currentTokens = 0;
+      await packageArchive?.archiveIterator.traverseEntries(
+        async (entry) => {
+          if (!entry.buffer || !relevantPaths?.includes(entry.path)) {
+            return;
+          }
+          if (currentTokens >= MAX_KB_TOKENS) {
+            return;
+          }
+          const content = entry.buffer.toString('utf8');
+          const nextChunk = `\n Source : ${entry.path}\n${content}`;
+          const chunkTokens = estimateTokens(nextChunk);
+          const remainingBudget = MAX_KB_TOKENS - currentTokens;
+
+          if (chunkTokens > remainingBudget) {
+            packageKnowledgeBase += `\n Source : ${entry.path}\n${truncateTokens(
+              content,
+              remainingBudget
+            )}`;
+            currentTokens = MAX_KB_TOKENS;
+            this.logger.debug(
+              `Truncated ${entry.path} for ${pkg.name}: token limit (${MAX_KB_TOKENS}) reached`
+            );
+          } else {
+            packageKnowledgeBase += nextChunk;
+            currentTokens += chunkTokens;
+          }
+        },
+        (path) => relevantPaths?.includes(path) ?? false
+      );
+    } catch (error) {
+      this.logger.warn(
+        `Failed to fetch package archive for ${pkg.name}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+    return packageKnowledgeBase;
   }
 
   /** Indexes an array of integrations to be used with ELSER semantic search queries */

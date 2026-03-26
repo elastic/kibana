@@ -96,9 +96,11 @@ QID Map Entry tests check for certain QIDs in the events. QIDs are unique identi
 
 #### How to resolve QID Map Entry test conditions:
 
-- QID map entry must be called as Event category. Downstream system does not understand QIDs but it understands event categories. Your final output should be "Check if event category is <QID name1>, <QID name2> and <QID name3>". This is extremely important otherwise the downstream system will not understand the output and it will fail.
+- QID map entry must be called as Event category. Downstream system does not understand QIDs but it understands event categories.
+- If the QID test is non-negated, your final output should be: "Check if event category is one of <QID name1>, <QID name2>, <QID name3>".
+- If the QID test has negate="true", your final output should be: "Check if event category is NOT one of <QID name1>, <QID name2>, <QID name3>".
 - No tools are needed to resolve QIDs. Just QID names are sufficient.
-- Leave a message for downstream system that these "event category" names are only for indication purposes and it is recommended NOT to use them verbatim (as-is) in the final output.
+- Use the extracted QID names directly in the flattened detection logic.
 
 ### Event or Flow Payload Tests
 

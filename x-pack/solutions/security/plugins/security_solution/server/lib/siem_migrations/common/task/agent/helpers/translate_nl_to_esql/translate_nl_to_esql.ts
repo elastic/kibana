@@ -19,7 +19,6 @@ export interface GetNLToESQLQueryParams {
 export interface NLToESQLQueryInput {
   query: string;
   indexPattern?: string;
-  fieldsMetadata?: object;
   knowledgeBase?: string;
 }
 
@@ -40,13 +39,18 @@ export const getNLToESQLQuery: NodeHelperCreator<
       nl_query: query,
     });
 
-    const indexPatternPrompt = await NL_TO_ESQL_INDEX_PATTERN_PROMPT.format({
-      index_pattern: indexPattern,
-      documentation,
-    });
-    const response = await esqlKnowledgeBase.translate(
-      indexPattern ? `${indexPatternPrompt}\n${mainPrompt}` : mainPrompt
-    );
+    let finalPrompt = mainPrompt;
+
+    if (indexPattern) {
+      const indexPatternPrompt = await NL_TO_ESQL_INDEX_PATTERN_PROMPT.format({
+        index_pattern: indexPattern,
+        documentation,
+      });
+
+      finalPrompt = `${indexPatternPrompt}\n${mainPrompt}`;
+    }
+
+    const response = await esqlKnowledgeBase.translate(finalPrompt);
 
     const translationSummary = response.match(/## Translation Summary[\s\S]*$/)?.[0] ?? '';
 
