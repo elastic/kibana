@@ -23,8 +23,10 @@ import { getTagsNode } from './nodes/get_tags';
 import { getEsqlQueryGraphWithTool } from './sub_graphs/esql_with_tool/esql_query_graph';
 import { addScheduleNode } from './nodes/add_schedule';
 import { addMitreMappingsNode } from './nodes/add_mitre_mappings';
+import { getDiscoverDataSourcesNode } from './nodes/discover_data_sources';
 
 export const BUILD_AGENT_NODE_NAMES = {
+  DISCOVER_DATA_SOURCES: 'discoverDataSources',
   ESQL_QUERY_CREATION: 'esqlQueryCreation',
   GET_TAGS: 'getTags',
   CREATE_RULE_NAME_AND_DESCRIPTION: 'createRuleNameAndDescription',
@@ -33,6 +35,7 @@ export const BUILD_AGENT_NODE_NAMES = {
 } as const;
 
 const {
+  DISCOVER_DATA_SOURCES,
   ESQL_QUERY_CREATION,
   GET_TAGS,
   CREATE_RULE_NAME_AND_DESCRIPTION,
@@ -64,6 +67,7 @@ export const getBuildAgent = async ({
   events,
 }: GetBuildAgentParams) => {
   const buildAgentGraph = new StateGraph(RuleCreationAnnotation)
+    .addNode(DISCOVER_DATA_SOURCES, getDiscoverDataSourcesNode({ esClient, logger, events }))
     .addNode(
       ESQL_QUERY_CREATION,
       await getEsqlQueryGraphWithTool({
@@ -80,7 +84,8 @@ export const getBuildAgent = async ({
     .addNode(CREATE_RULE_NAME_AND_DESCRIPTION, createRuleNameAndDescriptionNode({ model, events }))
     .addNode(ADD_MITRE_MAPPINGS, addMitreMappingsNode({ model, events }))
     .addNode(ADD_SCHEDULE, addScheduleNode({ model, logger, events }))
-    .addEdge(START, ESQL_QUERY_CREATION)
+    .addEdge(START, DISCOVER_DATA_SOURCES)
+    .addEdge(DISCOVER_DATA_SOURCES, ESQL_QUERY_CREATION)
     .addConditionalEdges(ESQL_QUERY_CREATION, shouldContinue, {
       continue: CREATE_RULE_NAME_AND_DESCRIPTION,
       end: END,

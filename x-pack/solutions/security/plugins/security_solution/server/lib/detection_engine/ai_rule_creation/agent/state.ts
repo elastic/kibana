@@ -36,6 +36,10 @@ const defaultRuleValues: Partial<EsqlRuleCreateProps> = {
 
 export const RuleCreationAnnotation = Annotation.Root({
   userQuery: Annotation<string>(),
+  catalogContext: Annotation<string>({
+    default: () => '',
+    reducer: (current, update) => update ?? current,
+  }),
   rule: Annotation<Partial<EsqlRuleCreateProps>>({
     default: () => defaultRuleValues,
     reducer: (current, update) => {
