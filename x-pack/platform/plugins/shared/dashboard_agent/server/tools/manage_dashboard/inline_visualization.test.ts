@@ -93,8 +93,10 @@ describe('createVisualizationResolver', () => {
       identifier: 'panel-1',
       nlQuery: 'turn this into a line chart',
       existingPanel: {
+        uid: 'panel-1',
         type: 'lens',
-        config: { type: 'bar' },
+        config: { attributes: { type: 'bar' } },
+        grid: { w: 24, h: 12, x: 0, y: 0 },
       },
     });
 
@@ -119,8 +121,10 @@ describe('createVisualizationResolver', () => {
       identifier: 'panel-1',
       nlQuery: 'refine this analysis',
       existingPanel: {
+        uid: 'panel-1',
         type: 'aiOpsLogRateAnalysis',
         config: { seriesType: 'log_rate' },
+        grid: { w: 24, h: 12, x: 0, y: 0 },
       },
     });
 

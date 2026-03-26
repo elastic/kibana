@@ -493,17 +493,13 @@ export const executeDashboardOperations = async ({
             }
             continue;
           }
-
           const resolvedPanel = await resolveVisualizationConfig({
             operationType: operation.operation,
             identifier: panelInput.panelId,
             nlQuery: panelInput.query,
             chartType: panelInput.chartType,
             esql: panelInput.esql,
-            existingPanel: {
-              type: existingPanel.type,
-              config: existingPanel.config,
-            },
+            existingPanel,
           });
 
           if (resolvedPanel.type === 'failure') {

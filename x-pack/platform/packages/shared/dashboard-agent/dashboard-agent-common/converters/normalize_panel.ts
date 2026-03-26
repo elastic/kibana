@@ -10,7 +10,10 @@ import type { AttachmentPanel } from '../types';
 
 const LENS_EMBEDDABLE_TYPE = 'lens';
 
-export type VisualizationContent = Pick<AttachmentPanel, 'type' | 'config'>;
+export type VisualizationContent = {
+  type: string;
+  config: Record<string, unknown>;
+};
 
 /** Panel input that may or may not have a uid assigned yet */
 export type DashboardPanelInput = Omit<AttachmentPanel, 'uid'> & { uid?: string };
@@ -38,4 +41,22 @@ export const toEmbeddablePanel = ({
           }
         : config,
   };
+};
+
+/**
+ * Converts an embeddable panel back to vis input format.
+ * - Unwraps Lens config from `attributes` if present
+ */
+export const fromEmbeddablePanel = ({ type, config }: AttachmentPanel): VisualizationContent => {
+  if (type === LENS_EMBEDDABLE_TYPE && 'attributes' in config) {
+    const { attributes, title } = config as { attributes: Record<string, unknown>; title?: string };
+    return {
+      type,
+      config: {
+        ...(title ? { title } : {}),
+        ...attributes,
+      },
+    };
+  }
+  return { type, config };
 };

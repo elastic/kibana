@@ -10,7 +10,11 @@ import { buildVisualizationConfig, type VisualizationConfig } from '@kbn/agent-b
 import { type ModelProvider, type ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import type { VisualizationContent } from '@kbn/dashboard-agent-common';
+import {
+  fromEmbeddablePanel,
+  type AttachmentPanel,
+  type VisualizationContent,
+} from '@kbn/dashboard-agent-common';
 import type { VisualizationFailure } from './utils';
 import { getErrorMessage } from './utils';
 
@@ -31,7 +35,7 @@ interface ResolveVisualizationConfigParams {
   index?: string;
   chartType?: SupportedChartType;
   esql?: string;
-  existingPanel?: VisualizationContent;
+  existingPanel?: AttachmentPanel;
 }
 
 export type ResolveVisualizationConfig = (
@@ -76,7 +80,9 @@ export const createVisualizationResolver = ({
       }
 
       const existingConfig =
-        existingPanel?.type === 'lens' ? (existingPanel.config as VisualizationConfig) : undefined;
+        existingPanel?.type === 'lens'
+          ? (fromEmbeddablePanel(existingPanel).config as VisualizationConfig)
+          : undefined;
 
       const result = await buildVisualizationConfig({
         nlQuery,

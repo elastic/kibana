@@ -27,6 +27,7 @@ export {
   dashboardStateToAttachment,
   attachmentToDashboardState,
   toEmbeddablePanel,
+  fromEmbeddablePanel,
   DEFAULT_TIME_RANGE,
   type VisualizationContent,
   type DashboardPanelInput,

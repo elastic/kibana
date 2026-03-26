@@ -11,6 +11,7 @@ export { attachmentToDashboardState, DEFAULT_TIME_RANGE } from './from_attachmen
 
 export {
   toEmbeddablePanel,
+  fromEmbeddablePanel,
   type VisualizationContent,
   type DashboardPanelInput,
 } from './normalize_panel';
