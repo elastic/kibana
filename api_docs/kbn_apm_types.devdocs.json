@@ -1582,152 +1582,6 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
-        "id": "def-common.FullTraceWaterfallProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "FullTraceWaterfallProps",
-        "description": [],
-        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/full_trace_waterfall.ts",
-        "lineNumber": 7,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/apm-types",
-            "id": "def-common.FullTraceWaterfallProps.traceId",
-            "type": "string",
-            "tags": [],
-            "label": "traceId",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/full_trace_waterfall.ts",
-            "lineNumber": 8,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/apm-types",
-            "id": "def-common.FullTraceWaterfallProps.rangeFrom",
-            "type": "string",
-            "tags": [],
-            "label": "rangeFrom",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/full_trace_waterfall.ts",
-            "lineNumber": 9,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/apm-types",
-            "id": "def-common.FullTraceWaterfallProps.rangeTo",
-            "type": "string",
-            "tags": [],
-            "label": "rangeTo",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/full_trace_waterfall.ts",
-            "lineNumber": 10,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/apm-types",
-            "id": "def-common.FullTraceWaterfallProps.serviceName",
-            "type": "string",
-            "tags": [],
-            "label": "serviceName",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/full_trace_waterfall.ts",
-            "lineNumber": 11,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/apm-types",
-            "id": "def-common.FullTraceWaterfallProps.scrollElement",
-            "type": "Object",
-            "tags": [],
-            "label": "scrollElement",
-            "description": [],
-            "signature": [
-              "Element | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/full_trace_waterfall.ts",
-            "lineNumber": 12,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/apm-types",
-            "id": "def-common.FullTraceWaterfallProps.onNodeClick",
-            "type": "Function",
-            "tags": [],
-            "label": "onNodeClick",
-            "description": [],
-            "signature": [
-              "((nodeSpanId: string) => void) | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/full_trace_waterfall.ts",
-            "lineNumber": 13,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/apm-types",
-                "id": "def-common.FullTraceWaterfallProps.onNodeClick.$1",
-                "type": "string",
-                "tags": [],
-                "label": "nodeSpanId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/platform/packages/shared/kbn-apm-types/src/full_trace_waterfall.ts",
-                "lineNumber": 13,
-                "columnNumber": 18,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/apm-types",
-            "id": "def-common.FullTraceWaterfallProps.onErrorClick",
-            "type": "Function",
-            "tags": [],
-            "label": "onErrorClick",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/apm-types",
-                "scope": "common",
-                "docId": "kibKbnApmTypesPluginApi",
-                "section": "def-common.FullTraceWaterfallOnErrorClick",
-                "text": "FullTraceWaterfallOnErrorClick"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/full_trace_waterfall.ts",
-            "lineNumber": 14,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.Host",
         "type": "Interface",
         "tags": [],
@@ -4978,7 +4832,7 @@
           "(params: { traceId: string; docId: string; errorCount: number; errorDocId?: string | undefined; docIndex?: string | undefined; }) => void"
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/full_trace_waterfall.ts",
-        "lineNumber": 17,
+        "lineNumber": 21,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4995,12 +4849,37 @@
               "{ traceId: string; docId: string; errorCount: number; errorDocId?: string | undefined; docIndex?: string | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/full_trace_waterfall.ts",
-            "lineNumber": 17,
+            "lineNumber": 21,
             "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.FullTraceWaterfallProps",
+        "type": "Type",
+        "tags": [],
+        "label": "FullTraceWaterfallProps",
+        "description": [],
+        "signature": [
+          "{ traceId: string; rangeFrom: string; rangeTo: string; serviceName?: string | undefined; scrollElement?: Element | undefined; onNodeClick?: ((nodeSpanId: string) => void) | undefined; onErrorClick?: ",
+          {
+            "pluginId": "@kbn/apm-types",
+            "scope": "common",
+            "docId": "kibKbnApmTypesPluginApi",
+            "section": "def-common.FullTraceWaterfallOnErrorClick",
+            "text": "FullTraceWaterfallOnErrorClick"
+          },
+          " | undefined; } & FullTraceWaterfallScrollProps"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/full_trace_waterfall.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
