@@ -127,7 +127,7 @@ async function getES(log: ToolingLog) {
 
         if (isValid) {
           log.info(
-            `Connected to Elasticsearch at ${chalk.cyan(baseUrl)} via ${protocol} (${credentials.type} credentials: ${credentials.username})`
+            `Connected to Elasticsearch at ${chalk.cyan(baseUrl)} (${credentials.type} credentials: ${credentials.username})`
           );
 
           return {
