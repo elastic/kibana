@@ -19,7 +19,6 @@ export const useShouldShowCpsMlRuleCallout = (): boolean => {
 
   useEffect(() => {
     if (!cpsManager) {
-      setShouldShow(false);
       return;
     }
 

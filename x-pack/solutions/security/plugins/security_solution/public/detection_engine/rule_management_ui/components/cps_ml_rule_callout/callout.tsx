@@ -60,13 +60,13 @@ const CpsMlRuleCalloutComponent = () => {
     <>
       <EuiCallOut
         color="primary"
-        title={CPS_ML_RULE_CALLOUT_TITLE}
+        title={CPS_ML_RULE_CALLOUT_MESSAGE.title}
         iconType="info"
         onDismiss={onDismiss}
         dismissButtonProps={{ 'data-test-subj': 'callout-cps-ml-rule-dismiss' }}
         data-test-subj="callout-cps-ml-rule"
       >
-        <EuiText>{CPS_ML_RULE_CALLOUT_BODY}</EuiText>
+        <EuiText size="s">{CPS_ML_RULE_CALLOUT_MESSAGE.description}</EuiText>
       </EuiCallOut>
       <EuiSpacer size="m" />
     </>
