@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { useConversationsByDate } from './use_conversations_by_date';
 import { getAbsoluteTime, isValidDateMath } from '../utils/date';
-import { Conversation } from '@kbn/observability-ai-assistant-plugin/common';
+import type { Conversation } from '@kbn/observability-ai-assistant-plugin/common';
 
 jest.mock('../utils/date', () => ({
   getAbsoluteTime: jest.fn(),

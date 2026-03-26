@@ -112,6 +112,80 @@ describe('findInternalRulesRoute', () => {
     });
   });
 
+  it('finds rules with search_fields string parameters', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    findInternalRulesRoute(router, licenseState);
+
+    const [config, handler] = router.post.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rules/_find"`);
+
+    const findResult = {
+      page: 1,
+      perPage: 1,
+      total: 0,
+      data: [],
+    };
+    rulesClient.find.mockResolvedValueOnce(findResult);
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        body: {
+          per_page: 1,
+          page: 1,
+          default_search_operator: 'OR',
+          search_fields: 'foo',
+          consumers: ['bar'],
+        },
+      },
+      ['ok']
+    );
+
+    expect(await handler(context, req, res)).toMatchInlineSnapshot(`
+            Object {
+              "body": Object {
+                "data": Array [],
+                "page": 1,
+                "per_page": 1,
+                "total": 0,
+              },
+            }
+        `);
+
+    expect(rulesClient.find).toHaveBeenCalledTimes(1);
+    expect(rulesClient.find.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "excludeFromPublicApi": false,
+          "includeSnoozeData": true,
+          "options": Object {
+            "consumers": Array [
+              "bar",
+            ],
+            "defaultSearchOperator": "OR",
+            "page": 1,
+            "perPage": 1,
+            "searchFields": Array [
+              "foo",
+            ],
+          },
+        },
+      ]
+    `);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: {
+        page: 1,
+        per_page: 1,
+        total: 0,
+        data: [],
+      },
+    });
+  });
+
   it('returns artifacts in the response', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();

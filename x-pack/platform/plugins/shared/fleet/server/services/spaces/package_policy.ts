@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { ALL_SPACES_ID, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common/constants';
 
 import { appContextService } from '../app_context';
 
@@ -29,7 +29,7 @@ export async function updatePackagePolicySpaces({
       },
     ],
     newSpaceIds,
-    [],
+    newSpaceIds.length === 1 && newSpaceIds[0] === ALL_SPACES_ID ? [currentSpaceId] : [],
     { refresh: 'wait_for', namespace: currentSpaceId }
   );
 

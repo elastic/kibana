@@ -5,22 +5,29 @@
  * 2.0.
  */
 
+import type { Plugin } from '@kbn/core/server';
 import {
-  Plugin,
   type CoreSetup,
   type CoreStart,
   type PluginInitializerContext,
   type Logger,
 } from '@kbn/core/server';
 import type { InterceptSetup, InterceptStart } from '@kbn/intercepts-plugin/server';
-import { TRIGGER_DEF_ID } from '../common/constants';
-import { ServerConfigSchema } from '../common/config';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
+import {
+  TRIGGER_DEF_ID,
+  UPGRADE_TRIGGER_DEF_PREFIX_ID,
+  TRIAL_TRIGGER_DEF_ID,
+} from '../common/constants';
+import type { ServerConfigSchema } from '../common/config';
 
 interface ProductInterceptServerPluginSetup {
+  cloud?: CloudSetup;
   intercepts: InterceptSetup;
 }
 
 interface ProductInterceptServerPluginStart {
+  cloud?: CloudStart;
   intercepts: InterceptStart;
 }
 
@@ -32,22 +39,46 @@ export class ProductInterceptServerPlugin
 {
   private readonly logger: Logger;
   private readonly config: ServerConfigSchema;
+  private readonly buildVersion: string;
 
   constructor(initContext: PluginInitializerContext<unknown>) {
     this.logger = initContext.logger.get();
     this.config = initContext.config.get<ServerConfigSchema>();
+    this.buildVersion = initContext.env.packageInfo.version;
   }
 
-  setup(core: CoreSetup, {}: ProductInterceptServerPluginSetup) {
+  setup(core: CoreSetup, { cloud }: ProductInterceptServerPluginSetup) {
     return {};
   }
 
-  start(core: CoreStart, { intercepts }: ProductInterceptServerPluginStart) {
+  start(core: CoreStart, { cloud, intercepts }: ProductInterceptServerPluginStart) {
     if (this.config.enabled) {
       void intercepts.registerTriggerDefinition?.(TRIGGER_DEF_ID, () => {
-        this.logger.debug('Registering kibana product trigger definition');
+        this.logger.debug('Registering global product intercept trigger definition');
         return { triggerAfter: this.config.interval };
       });
+
+      void intercepts.registerTriggerDefinition?.(
+        `${UPGRADE_TRIGGER_DEF_PREFIX_ID}:${this.buildVersion}`,
+        () => {
+          this.logger.debug('Registering global product upgrade intercept trigger definition');
+          return { triggerAfter: this.config.upgradeInterceptInterval, isRecurrent: false };
+        }
+      );
+
+      // Register trial intercept only if the trial end date is set and not passed
+      if (cloud?.isInTrial()) {
+        void intercepts.registerTriggerDefinition?.(
+          `${TRIAL_TRIGGER_DEF_ID}:${this.buildVersion}`,
+          () => {
+            this.logger.debug('Registering global product trial intercept trigger definition');
+            return {
+              triggerAfter: this.config.trialInterceptInterval,
+              isRecurrent: false,
+            };
+          }
+        );
+      }
     }
 
     return {};

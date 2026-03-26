@@ -1,0 +1,26 @@
+# RATE
+
+Calculates the per-second average rate of increase of a counter. This function accounts for breaks in monotonicity, such as counter resets when a service restarts, and extrapolates values within each bucketed time interval. Rate is the most appropriate aggregate function for counters and is only allowed in a STATS command under a `TS` source command, to ensure correct application per time series.
+
+## Syntax
+
+`RATE(field, window)`
+
+### Parameters
+
+#### field
+
+The counter field whose per-second average rate of increase is computed.
+
+#### window
+
+The time window over which the rate is computed.
+
+## Examples
+
+Calculates the maximum per-second rate of increase for the `network.total_bytes_in` counter within each 5-minute time bucket.
+
+```esql
+TS k8s
+| STATS max_rate=MAX(RATE(network.total_bytes_in)) BY time_bucket = TBUCKET(5minute)
+```

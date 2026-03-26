@@ -8,7 +8,8 @@
  */
 
 import { isEqual } from 'lodash';
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
 import { constants as cryptoConstants } from 'crypto';
 import { readFileSync } from 'fs';
@@ -18,7 +19,6 @@ const protocolMap = new Map<string, number>([
   [TLS_V1, cryptoConstants.SSL_OP_NO_TLSv1],
   [TLS_V1_1, cryptoConstants.SSL_OP_NO_TLSv1_1],
   [TLS_V1_2, cryptoConstants.SSL_OP_NO_TLSv1_2],
-  // @ts-expect-error According to the docs SSL_OP_NO_TLSv1_3 should exist (https://nodejs.org/docs/latest-v12.x/api/crypto.html)
   [TLS_V1_3, cryptoConstants.SSL_OP_NO_TLSv1_3],
 ]);
 
@@ -26,10 +26,11 @@ export const sslSchema = schema.object(
   {
     certificate: schema.maybe(schema.string()),
     certificateAuthorities: schema.maybe(
-      schema.oneOf([schema.arrayOf(schema.string()), schema.string()])
+      schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 100 }), schema.string()])
     ),
     cipherSuites: schema.arrayOf(schema.string(), {
       defaultValue: cryptoConstants.defaultCoreCipherList.split(':'),
+      maxSize: 100,
     }),
     enabled: schema.boolean({
       defaultValue: false,
@@ -52,7 +53,7 @@ export const sslSchema = schema.object(
         schema.literal(TLS_V1_2),
         schema.literal(TLS_V1_3),
       ]),
-      { defaultValue: [TLS_V1_2, TLS_V1_3], minSize: 1 }
+      { defaultValue: [TLS_V1_2, TLS_V1_3], minSize: 1, maxSize: 10 }
     ),
     clientAuthentication: schema.oneOf(
       [schema.literal('none'), schema.literal('optional'), schema.literal('required')],

@@ -46,6 +46,18 @@ properties:
             description: List of metrics with their name, aggregation type, and field.
             type: array
             items:
+              discriminator:
+                propertyName: aggregation
+                mapping:
+                  percentile: './timeslice_metric_percentile_metric.yaml'
+                  doc_count: './timeslice_metric_doc_count_metric.yaml'
+                  sum: './timeslice_metric_basic_metric_with_field.yaml'
+                  avg: './timeslice_metric_basic_metric_with_field.yaml'
+                  min: './timeslice_metric_basic_metric_with_field.yaml'
+                  max: './timeslice_metric_basic_metric_with_field.yaml'
+                  std_deviation: './timeslice_metric_basic_metric_with_field.yaml'
+                  last_value: './timeslice_metric_basic_metric_with_field.yaml'
+                  cardinality: './timeslice_metric_basic_metric_with_field.yaml'
               anyOf:
                 - $ref: './timeslice_metric_basic_metric_with_field.yaml'
                 - $ref: './timeslice_metric_percentile_metric.yaml'

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { PresentationContainer } from '@kbn/presentation-containers';
+import { openLazyFlyout } from '@kbn/presentation-util';
+import type { PresentationContainer } from '@kbn/presentation-publishing';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
@@ -14,6 +16,7 @@ import { ML_APP_NAME, PLUGIN_ICON, PLUGIN_ID } from '../../common/constants/app'
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables';
 import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
 import type { MlCoreSetup } from '../plugin';
+import { AnomalySwimlaneUserInput } from '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout';
 
 export const EDIT_SWIMLANE_PANEL_ACTION = 'editSwimlanePanelAction';
 
@@ -24,7 +27,7 @@ export type CreateSwimlanePanelActionContext = EmbeddableApiContext & {
 const parentApiIsCompatible = async (
   parentApi: unknown
 ): Promise<PresentationContainer | undefined> => {
-  const { apiIsPresentationContainer } = await import('@kbn/presentation-containers');
+  const { apiIsPresentationContainer } = await import('@kbn/presentation-publishing');
   // we cannot have an async type check, so return the casted parentApi rather than a boolean
   return apiIsPresentationContainer(parentApi) ? (parentApi as PresentationContainer) : undefined;
 };
@@ -60,32 +63,32 @@ export function createAddSwimlanePanelAction(
 
       const [coreStart, pluginStart] = await getStartServices();
 
-      try {
-        const { resolveAnomalySwimlaneUserInput } = await import(
-          '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout'
-        );
-
-        const initialState = await resolveAnomalySwimlaneUserInput(
-          {
-            ...coreStart,
-            ...pluginStart,
-          },
-          context.embeddable,
-          context.embeddable.uuid
-        );
-
-        presentationContainerParent.addNewPanel({
-          panelType: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-          serializedState: {
-            rawState: {
-              ...initialState,
-              title: initialState.panelTitle,
-            },
-          },
-        });
-      } catch (e) {
-        return Promise.reject();
-      }
+      openLazyFlyout({
+        core: coreStart,
+        parentApi: context.embeddable,
+        flyoutProps: {
+          focusedPanelId: context.embeddable.uuid,
+        },
+        loadContent: async ({ closeFlyout }) => {
+          return (
+            <AnomalySwimlaneUserInput
+              coreStart={coreStart}
+              pluginStart={pluginStart}
+              onConfirm={(initialState) => {
+                presentationContainerParent.addNewPanel({
+                  panelType: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+                  serializedState: {
+                    ...initialState,
+                    title: initialState.panelTitle,
+                  },
+                });
+                closeFlyout();
+              }}
+              onCancel={closeFlyout}
+            />
+          );
+        },
+      });
     },
   };
 }

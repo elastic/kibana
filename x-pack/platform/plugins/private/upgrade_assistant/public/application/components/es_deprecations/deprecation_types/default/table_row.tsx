@@ -6,12 +6,13 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { EuiTableRowCell, EuiTableRow } from '@elastic/eui';
+import { EuiTableRowCell, EuiTableRow, EuiIcon, EuiLink } from '@elastic/eui';
 import { GlobalFlyout } from '../../../../../shared_imports';
-import { EnrichedDeprecationInfo } from '../../../../../../common/types';
-import { DeprecationTableColumns } from '../../../types';
+import type { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import type { DeprecationTableColumns } from '../../../types';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
-import { DefaultDeprecationFlyout, DefaultDeprecationFlyoutProps } from './flyout';
+import type { DefaultDeprecationFlyoutProps } from './flyout';
+import { DefaultDeprecationFlyout } from './flyout';
 
 const { useGlobalFlyout } = GlobalFlyout;
 
@@ -56,19 +57,24 @@ export const DefaultTableRow: React.FunctionComponent<Props> = ({
   }, [addContentToGlobalFlyout, closeFlyout, deprecation, showFlyout]);
 
   return (
-    <EuiTableRow
-      data-test-subj="deprecationTableRow"
-      key={`deprecation-row-${index}`}
-      onClick={() => setShowFlyout(true)}
-    >
+    <EuiTableRow data-test-subj="deprecationTableRow" key={`deprecation-row-${index}`}>
       {rowFieldNames.map((field) => {
         return (
           <EuiTableRowCell
             key={field}
             truncateText={false}
             data-test-subj={`defaultTableCell-${field}`}
+            align={field === 'actions' ? 'right' : 'left'}
           >
-            <EsDeprecationsTableCells fieldName={field} deprecation={deprecation} />
+            <EsDeprecationsTableCells
+              fieldName={field}
+              deprecation={deprecation}
+              actionsTableCell={
+                <EuiLink onClick={() => setShowFlyout(true)} data-test-subj="deprecation-default">
+                  <EuiIcon type="gear" />
+                </EuiLink>
+              }
+            />
           </EuiTableRowCell>
         );
       })}

@@ -23,7 +23,7 @@ import type {
 import { CONTENT_ID } from '@kbn/event-annotation-plugin/common';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const CONTENT_ENDPOINT = '/api/content_management/rpc';
 
@@ -315,7 +315,7 @@ export default function ({ getService }: FtrProviderContext) {
         ] as unknown as EventAnnotationGroupSavedObjectAttributes[]; // (coerce the types because these are intentionally malformed)
 
         const expectedMessages = [
-          'Invalid data. [extraProp]: definition for this key is missing',
+          "Invalid data. [extraProp]: Additional properties are not allowed ('extraProp' was unexpected)",
           'Invalid data. [title]: expected value of type [string] but got [undefined]',
           'Invalid data. [ignoreGlobalFilters]: expected value of type [boolean] but got [string]',
         ];
@@ -423,7 +423,7 @@ export default function ({ getService }: FtrProviderContext) {
         ] as unknown as EventAnnotationGroupSavedObjectAttributes[]; // (coerce the types because these are intentionally malformed)
 
         const expectedMessages = [
-          'Invalid data. [extraProp]: definition for this key is missing',
+          "Invalid data. [extraProp]: Additional properties are not allowed ('extraProp' was unexpected)",
           'Invalid data. [title]: expected value of type [string] but got [undefined]',
           'Invalid data. [ignoreGlobalFilters]: expected value of type [boolean] but got [string]',
         ];

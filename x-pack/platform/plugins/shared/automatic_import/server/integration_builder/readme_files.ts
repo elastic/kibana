@@ -8,7 +8,7 @@
 import { Environment, FileSystemLoader } from 'nunjucks';
 
 import { join as joinPath } from 'path';
-import { DataStream, InputType } from '../../common';
+import type { DataStream, InputType } from '../../common';
 import { createSync, ensureDirSync } from '../util';
 import { INPUTS_INCLUDE_SSL_CONFIG } from './constants';
 

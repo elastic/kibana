@@ -32,7 +32,6 @@ import {
   ARTIFACT_POLICIES_NOT_ACCESSIBLE_IN_ACTIVE_SPACE_MESSAGE,
   NO_PRIVILEGE_FOR_MANAGEMENT_OF_GLOBAL_ARTIFACT_MESSAGE,
 } from '../../common/translations';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
@@ -49,7 +48,7 @@ const StyledEuiFlexItemButtonGroup = styled(EuiFlexItem)`
   }
 `;
 
-const StyledButtonGroup = styled(EuiButtonGroup)`
+export const StyledButtonGroup = styled(EuiButtonGroup)`
   display: flex;
   justify-content: right;
   .euiButtonGroupButton {
@@ -77,30 +76,31 @@ export interface EffectedPolicySelectProps {
   'data-test-subj'?: string;
 }
 
+/**
+ * Policy Selection component used on Endpoint Artifact forms for setting Global/Per-Policy assignment.
+ */
 export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
   ({ item, description, onChange, disabled = false, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
-    const isSpaceAwarenessEnabled = useIsExperimentalFeatureEnabled(
-      'endpointManagementSpaceAwarenessEnabled'
-    );
     const canManageGlobalArtifacts =
       useUserPrivileges().endpointPrivileges.canManageGlobalArtifacts;
     const { getTagsUpdatedBy } = useGetUpdatedTags(item);
     const artifactRestrictedPolicyIds = useArtifactRestrictedPolicyAssignments(item);
     const [selectedPolicyIds, setSelectedPolicyIds] = useState(getPolicyIdsFromArtifact(item));
 
+    const accessiblePolicyIds = useMemo(() => {
+      return selectedPolicyIds.filter(
+        (policyId) => !artifactRestrictedPolicyIds.policyIds.includes(policyId)
+      );
+    }, [artifactRestrictedPolicyIds.policyIds, selectedPolicyIds]);
     const isGlobal = useMemo(() => isArtifactGlobal(item), [item]);
     const selectedAssignmentType = useMemo(() => {
-      if (isSpaceAwarenessEnabled) {
-        return canManageGlobalArtifacts && isGlobal ? 'globalPolicy' : 'perPolicy';
-      }
-
-      return isGlobal ? 'globalPolicy' : 'perPolicy';
-    }, [canManageGlobalArtifacts, isGlobal, isSpaceAwarenessEnabled]);
+      return canManageGlobalArtifacts && isGlobal ? 'globalPolicy' : 'perPolicy';
+    }, [canManageGlobalArtifacts, isGlobal]);
 
     const toggleGlobal: EuiButtonGroupOptionProps[] = useMemo(() => {
-      const isGlobalButtonDisabled = !isSpaceAwarenessEnabled ? false : !canManageGlobalArtifacts;
+      const isGlobalButtonDisabled = !canManageGlobalArtifacts;
 
       return [
         {
@@ -124,20 +124,54 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           'data-test-subj': getTestId('perPolicy'),
         },
       ];
-    }, [canManageGlobalArtifacts, getTestId, isSpaceAwarenessEnabled, selectedAssignmentType]);
+    }, [canManageGlobalArtifacts, getTestId, selectedAssignmentType]);
+
+    const unAccessiblePolicies: PolicySelectorProps['additionalListItems'] = useMemo(() => {
+      const additionalPolicyItems: PolicySelectorProps['additionalListItems'] = [];
+
+      if (artifactRestrictedPolicyIds.policyIds.length > 0) {
+        additionalPolicyItems.push({
+          label: i18n.translate(
+            'xpack.securitySolution.effectedPolicySelect.unaccessibleGroupLabel',
+            { defaultMessage: 'Assigned policies not accessible from current space' }
+          ),
+          isGroupLabel: true,
+          'data-test-subj': getTestId('unaccessibleGroupLabel'),
+        });
+      }
+
+      for (const policyId of artifactRestrictedPolicyIds.policyIds) {
+        additionalPolicyItems.push({
+          label: policyId,
+          toolTipContent: i18n.translate(
+            'xpack.securitySolution.effectedPolicySelect.unaccessiblePolicyTooltip',
+            { defaultMessage: 'Policy is not accessible from the current space' }
+          ),
+          disabled: true,
+          checked: 'on',
+          'data-test-subj': getTestId(`unAccessiblePolicy-${policyId}`),
+        });
+      }
+
+      return additionalPolicyItems;
+    }, [artifactRestrictedPolicyIds.policyIds, getTestId]);
 
     const handleOnPolicySelectChange = useCallback<PolicySelectorProps['onChange']>(
       (updatedSelectedPolicyIds) => {
-        setSelectedPolicyIds(updatedSelectedPolicyIds);
+        const artifactCompleteSelectedPolicyIds = updatedSelectedPolicyIds.concat(
+          ...artifactRestrictedPolicyIds.policyIds
+        );
+
+        setSelectedPolicyIds(artifactCompleteSelectedPolicyIds);
         onChange({
           ...item,
           tags: getTagsUpdatedBy(
             'policySelection',
-            updatedSelectedPolicyIds.map(buildPerPolicyTag)
+            artifactCompleteSelectedPolicyIds.map(buildPerPolicyTag)
           ),
         });
       },
-      [getTagsUpdatedBy, item, onChange]
+      [artifactRestrictedPolicyIds.policyIds, getTagsUpdatedBy, item, onChange]
     );
 
     const handleGlobalButtonChange = useCallback(
@@ -203,7 +237,8 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
         {selectedAssignmentType === 'perPolicy' && (
           <EuiFormRow fullWidth>
             <PolicySelector
-              selectedPolicyIds={selectedPolicyIds}
+              selectedPolicyIds={accessiblePolicyIds}
+              additionalListItems={unAccessiblePolicies}
               onChange={handleOnPolicySelectChange}
               data-test-subj={getTestId('policiesSelector')}
               useCheckbox={true}
@@ -216,7 +251,11 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
         {artifactRestrictedPolicyIds.policyIds.length > 0 && !isGlobal && (
           <>
             <EuiSpacer />
-            <EuiCallOut size="s" data-test-subj={getTestId('unAccessiblePoliciesCallout')}>
+            <EuiCallOut
+              announceOnMount={false}
+              size="s"
+              data-test-subj={getTestId('unAccessiblePoliciesCallout')}
+            >
               {ARTIFACT_POLICIES_NOT_ACCESSIBLE_IN_ACTIVE_SPACE_MESSAGE(
                 artifactRestrictedPolicyIds.policyIds.length
               )}

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './index.scss';
 import { SearchProfilerUIPlugin } from './plugin';
 
 export function plugin() {

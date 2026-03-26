@@ -15,6 +15,6 @@ export class ApmServiceInventoryPage {
   }
 
   public async assertTransactionExists() {
-    await expect(this.page.getByTestId('apmTransactionDetailLinkLink')).toBeVisible();
+    await expect(this.page.getByTestId('apmTransactionDetailLinkLink').first()).toBeVisible();
   }
 }

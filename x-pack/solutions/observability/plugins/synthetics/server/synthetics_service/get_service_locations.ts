@@ -7,15 +7,18 @@
 
 import axios from 'axios';
 import { pick } from 'lodash';
-import { SyntheticsServerSetup } from '../types';
-import {
+import pRetry from 'p-retry';
+import type { SyntheticsServerSetup } from '../types';
+import type {
   ManifestLocation,
   PublicLocation,
   PublicLocations,
   ThrottlingOptions,
-  BandwidthLimitKey,
-  LocationStatus,
 } from '../../common/runtime_types';
+import { BandwidthLimitKey, LocationStatus } from '../../common/runtime_types';
+
+const RETRY_COUNT = 3;
+const MIN_TIMEOUT_MS = 1000; // 1 second initial delay
 
 export const getDevLocation = (devUrl: string): PublicLocation[] => [
   {
@@ -51,10 +54,24 @@ export async function getServiceLocations(server: SyntheticsServerSetup) {
   }
 
   try {
-    const { data } = await axios.get<{
-      throttling: ThrottlingOptions;
-      locations: Record<string, ManifestLocation>;
-    }>(server.config.service!.manifestUrl!);
+    const { data } = await pRetry(
+      async () => {
+        return axios.get<{
+          throttling: ThrottlingOptions;
+          locations: Record<string, ManifestLocation>;
+        }>(server.config.service!.manifestUrl!);
+      },
+      {
+        retries: RETRY_COUNT,
+        minTimeout: MIN_TIMEOUT_MS,
+        factor: 2, // Exponential backoff: 1s, 2s, 4s
+        onFailedAttempt: (error) => {
+          server.logger.debug(
+            `Attempt ${error.attemptNumber} to fetch Synthetics locations failed. ${error.retriesLeft} retries remaining.`
+          );
+        },
+      }
+    );
 
     const availableLocations = Object.entries(data.locations);
 
@@ -77,8 +94,10 @@ export async function getServiceLocations(server: SyntheticsServerSetup) {
     ) as ThrottlingOptions;
 
     return { throttling, locations };
-  } catch (e) {
-    server.logger.error(e);
+  } catch (error) {
+    server.logger.error(`Error getting available Synthetics locations, Error: ${error.message}`, {
+      error,
+    });
     return { locations: [] };
   }
 }

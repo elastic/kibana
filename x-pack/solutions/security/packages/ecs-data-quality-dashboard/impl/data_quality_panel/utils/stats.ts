@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataQualityCheckResult, MeteringStatsIndex, PatternRollup } from '../types';
+import type { DataQualityCheckResult, MeteringStatsIndex, PatternRollup } from '../types';
 
 export const getIndexIncompatible = ({
   indexName,

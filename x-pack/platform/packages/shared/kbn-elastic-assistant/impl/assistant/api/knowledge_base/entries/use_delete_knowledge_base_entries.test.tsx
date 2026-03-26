@@ -6,10 +6,8 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import {
-  useDeleteKnowledgeBaseEntries,
-  UseDeleteKnowledgeEntriesParams,
-} from './use_delete_knowledge_base_entries';
+import type { UseDeleteKnowledgeEntriesParams } from './use_delete_knowledge_base_entries';
+import { useDeleteKnowledgeBaseEntries } from './use_delete_knowledge_base_entries';
 import { useInvalidateKnowledgeBaseEntries } from './use_knowledge_base_entries';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 
@@ -17,7 +15,7 @@ jest.mock('./use_knowledge_base_entries', () => ({
   useInvalidateKnowledgeBaseEntries: jest.fn(),
 }));
 
-jest.mock('@tanstack/react-query', () => ({
+jest.mock('@kbn/react-query', () => ({
   useMutation: jest.fn().mockImplementation((queryKey, fn, opts) => {
     return {
       mutate: async (variables: unknown) => {

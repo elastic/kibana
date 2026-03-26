@@ -12,8 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ColorSchemaParams, ColorSchema } from '@kbn/charts-plugin/public';
-import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import type { ColorSchemaParams, ColorSchema } from '@kbn/charts-plugin/public';
+import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { SelectOption } from './select';
 import { SwitchOption } from './switch';
 

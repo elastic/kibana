@@ -8,8 +8,8 @@
  */
 
 import { escape, isFunction } from 'lodash';
-import { IFieldFormat, HtmlContextTypeConvert, FieldFormatsContentType } from '../types';
-import { asPrettyString, getHighlightHtml } from '../utils';
+import type { IFieldFormat, HtmlContextTypeConvert, FieldFormatsContentType } from '../types';
+import { getHighlightHtml, checkForMissingValueHtml } from '../utils';
 
 export const HTML_CONTEXT_TYPE: FieldFormatsContentType = 'html';
 
@@ -18,6 +18,11 @@ const getConvertFn = (
   convert?: HtmlContextTypeConvert
 ): HtmlContextTypeConvert => {
   const fallbackHtml: HtmlContextTypeConvert = (value, options = {}) => {
+    const missing = checkForMissingValueHtml(value);
+    if (missing) {
+      return missing;
+    }
+
     const { field, hit } = options;
     const formatted = escape(format.convert(value, 'text'));
 
@@ -37,10 +42,6 @@ export const setup = (
   const highlight = (text: string) => `<span class="ffArray__highlight">${text}</span>`;
 
   const recurse: HtmlContextTypeConvert = (value, options = {}) => {
-    if (value == null) {
-      return asPrettyString(value, options);
-    }
-
     if (!value || !isFunction(value.map)) {
       return convert.call(format, value, options);
     }

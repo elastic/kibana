@@ -9,11 +9,11 @@
 
 import fs from 'fs/promises';
 import { range } from 'lodash';
-import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import '../../jest_matchers';
-import { getKibanaMigratorTestKit } from '../../kibana_migrator_test_kit';
+import { getKibanaMigratorTestKit } from '@kbn/migrator-test-kit';
 import { parseLogFile } from '../../test_utils';
-import { EsRunner, EsServer } from '../../test_types';
+import type { EsRunner, EsServer } from '../../test_types';
 import {
   getBaseMigratorParams,
   getSampleAType,

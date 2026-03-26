@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MonitoringCore } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 import { logstashNodeRoute } from './node';
 import { logstashNodesRoute } from './nodes';
 import { logstashOverviewRoute } from './overview';

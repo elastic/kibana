@@ -1,0 +1,189 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { EsWorkflowExecution, WorkflowSettings } from '@kbn/workflows';
+import { WorkflowRepository } from '@kbn/workflows';
+import { WorkflowGraph } from '@kbn/workflows/graph';
+import { setWorkflowEventChainContext } from '@kbn/workflows-extensions/server';
+import type { WorkflowsExecutionEngineConfig } from '../config';
+
+import { ConnectorExecutor } from '../connector_executor';
+import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
+import { StepExecutionRepository } from '../repositories/step_execution_repository';
+import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { NodesFactory } from '../step/nodes_factory';
+import type { WorkflowsExecutionEnginePluginStart } from '../types';
+import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
+import type { ContextDependencies } from '../workflow_context_manager/types';
+import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
+
+import { WorkflowEventLoggerService } from '../workflow_event_logger';
+import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+
+const defaultWorkflowSettings: WorkflowSettings = {
+  timeout: '6h',
+};
+
+/**
+ * Extracts event-chain depth from workflow execution context when this run was scheduled
+ * by the trigger event handler (event-driven). The handler injects eventChainDepth into
+ * context.event; manual/scheduled runs do not have it. Returns undefined when not present
+ * or invalid so we only set event-chain context on the request for event-driven runs.
+ */
+function getEventChainDepthFromExecutionContext(
+  context: Record<string, unknown> | undefined
+): number | undefined {
+  const event = context?.event;
+  if (event == null || typeof event !== 'object') {
+    return undefined;
+  }
+  const depth = (event as { eventChainDepth?: unknown }).eventChainDepth;
+  return typeof depth === 'number' && depth >= 0 ? depth : undefined;
+}
+
+export async function setupDependencies(
+  workflowRunId: string,
+  spaceId: string,
+  logger: Logger,
+  config: WorkflowsExecutionEngineConfig,
+  dependencies: ContextDependencies,
+  fakeRequest?: KibanaRequest,
+  workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart
+) {
+  const { coreStart, actions, taskManager } = dependencies;
+
+  // Get ES client from core services (guaranteed to be available at task execution time)
+  const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
+
+  const workflowExecutionRepository = new WorkflowExecutionRepository(internalEsClient);
+  const stepExecutionRepository = new StepExecutionRepository(internalEsClient);
+  const workflowRepository = new WorkflowRepository({
+    esClient: internalEsClient,
+    logger,
+  });
+
+  const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
+    workflowRunId,
+    spaceId
+  );
+
+  if (!workflowExecution) {
+    throw new Error(`Workflow execution with ID ${workflowRunId} not found`);
+  }
+
+  if (!fakeRequest) {
+    logger.error('Cannot execute a workflow without Kibana Request');
+    throw new Error(
+      `Workflow execution id ${workflowRunId} cannot execute a workflow without Kibana Request`
+    );
+  }
+
+  const eventChainDepth = getEventChainDepthFromExecutionContext(workflowExecution.context);
+
+  if (eventChainDepth !== undefined) {
+    setWorkflowEventChainContext(fakeRequest, {
+      depth: eventChainDepth,
+      sourceWorkflowId: workflowExecution.workflowId,
+    });
+  }
+
+  let workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(
+    workflowExecution.workflowDefinition,
+    defaultWorkflowSettings
+  );
+
+  // If the execution is for a specific step, narrow the graph to that step
+  if (workflowExecution.stepId) {
+    workflowExecutionGraph = workflowExecutionGraph.getStepGraph(workflowExecution.stepId);
+  }
+
+  const scopedActionsClient = await actions.getActionsClientWithRequest(fakeRequest);
+  const connectorExecutor = new ConnectorExecutor(scopedActionsClient);
+
+  const workflowEventLoggerService = new WorkflowEventLoggerService(
+    dependencies.coreStart.dataStreams,
+    logger,
+    config.logging.console
+  );
+
+  const workflowLogger = workflowEventLoggerService.createLogger({
+    workflowId: workflowExecution.workflowId,
+    workflowName: workflowExecution.workflowDefinition.name,
+    executionId: workflowExecution.id,
+    spaceId: workflowExecution.spaceId,
+  });
+
+  const workflowExecutionState = new WorkflowExecutionState(
+    workflowExecution as EsWorkflowExecution,
+    workflowExecutionRepository,
+    stepExecutionRepository
+  );
+
+  // Create telemetry client
+  const telemetryClient = new WorkflowExecutionTelemetryClient(coreStart.analytics, logger);
+
+  // Create workflow runtime first (simpler, fewer dependencies)
+  const workflowRuntime = new WorkflowExecutionRuntimeManager({
+    workflowExecution: workflowExecution as EsWorkflowExecution,
+    workflowExecutionGraph,
+    workflowLogger,
+    workflowExecutionState,
+    coreStart,
+    dependencies,
+    telemetryClient,
+  });
+
+  const esClient: ElasticsearchClient =
+    coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
+
+  const workflowTaskManager = new WorkflowTaskManager(taskManager);
+
+  const enhancedDependencies: ContextDependencies = {
+    ...dependencies,
+    workflowRepository,
+    workflowExecutionRepository,
+    stepExecutionRepository,
+    workflowsExecutionEngine,
+    spaceId,
+    request: fakeRequest,
+  };
+
+  const stepExecutionRuntimeFactory = new StepExecutionRuntimeFactory({
+    workflowExecutionGraph,
+    workflowExecutionState,
+    workflowLogger,
+    esClient,
+    fakeRequest,
+    coreStart,
+    dependencies: enhancedDependencies,
+  });
+
+  const nodesFactory = new NodesFactory(
+    connectorExecutor,
+    workflowRuntime,
+    workflowLogger,
+    workflowExecutionGraph,
+    stepExecutionRuntimeFactory,
+    enhancedDependencies
+  );
+
+  return {
+    workflowExecutionGraph,
+    workflowRuntime,
+    stepExecutionRuntimeFactory,
+    workflowExecutionState,
+    workflowLogger,
+    workflowTaskManager,
+    nodesFactory,
+    workflowExecutionRepository,
+    esClient,
+  };
+}

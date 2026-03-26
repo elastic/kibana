@@ -196,7 +196,11 @@ describe('#asScoped', () => {
       headers: {
         'x-forwarded-for': '1.1.1.1, 2.2.2.2',
       },
-      kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
+      kibanaRequestState: {
+        requestId: 'REQUEST_ID',
+        requestUuid: 'REQUEST_UUID',
+        startTime: Date.now(),
+      },
     });
 
     await auditSetup.asScoped(request).log({
@@ -287,7 +291,11 @@ describe('#asScoped', () => {
       recordAuditLoggingUsage,
     });
     const request = httpServerMock.createKibanaRequest({
-      kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
+      kibanaRequestState: {
+        requestId: 'REQUEST_ID',
+        requestUuid: 'REQUEST_UUID',
+        startTime: Date.now(),
+      },
     });
 
     await auditSetup.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
@@ -318,7 +326,11 @@ describe('#asScoped', () => {
       recordAuditLoggingUsage,
     });
     const request = httpServerMock.createKibanaRequest({
-      kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
+      kibanaRequestState: {
+        requestId: 'REQUEST_ID',
+        requestUuid: 'REQUEST_UUID',
+        startTime: Date.now(),
+      },
     });
 
     await auditSetup.asScoped(request).log(undefined);
@@ -345,7 +357,11 @@ describe('#asScoped', () => {
       headers: {
         'x-forwarded-for': '1.1.1.1, 2.2.2.2',
       },
-      kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
+      kibanaRequestState: {
+        requestId: 'REQUEST_ID',
+        requestUuid: 'REQUEST_UUID',
+        startTime: Date.now(),
+      },
     });
 
     await auditSetup.asScoped(request).log({

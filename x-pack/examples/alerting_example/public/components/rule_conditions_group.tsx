@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiButtonIcon, EuiTitle } from '@elastic/eui';
-import { RuleConditionsProps, ActionGroupWithCondition } from './rule_conditions';
+import type { RuleConditionsProps, ActionGroupWithCondition } from './rule_conditions';
 
 export type RuleConditionsGroupProps<ConditionProps> = {
   actionGroup?: ActionGroupWithCondition<ConditionProps, string>;
@@ -36,7 +37,7 @@ export const RuleConditionsGroup = <ConditionProps extends unknown>({
         onResetConditionsFor &&
         !actionGroup.isRequired && (
           <EuiButtonIcon
-            iconType="minusInCircle"
+            iconType="minusCircle"
             color="danger"
             aria-label={i18n.translate(
               'xpack.triggersActionsUI.sections.ruleForm.conditions.removeConditionLabel',
@@ -51,7 +52,6 @@ export const RuleConditionsGroup = <ConditionProps extends unknown>({
     >
       {React.isValidElement(children) ? (
         React.cloneElement(React.Children.only(children), {
-          // @ts-expect-error upgrade typescript v4.9.5
           actionGroup,
           ...otherProps,
         })

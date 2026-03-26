@@ -47,6 +47,21 @@ const initialEnrichedColumns = getColumnHeaders(
 );
 
 const initialEnrichedColumnsIds = initialEnrichedColumns.map((c) => c.id);
+const mockAttackTimelineData = [
+  {
+    ...mockTimelineData[0],
+    _id: 'attack-1',
+    data: [
+      ...mockTimelineData[0].data,
+      { field: 'kibana.alert.attack_discovery.alert_ids', value: ['alert-1'] },
+      { field: 'kibana.alert.rule.rule_type_id', value: ['attack-discovery'] },
+    ],
+    ecs: {
+      ...mockTimelineData[0].ecs,
+      _index: 'attack-index',
+    },
+  },
+];
 
 type TestComponentProps = Partial<ComponentProps<typeof TimelineDataTable>> & {
   store?: ReturnType<typeof createMockStore>;
@@ -116,6 +131,29 @@ describe('unified data table', () => {
     async () => {
       render(<TestComponent />);
       expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+    },
+    SPECIAL_TEST_TIMEOUT
+  );
+
+  it(
+    'opens attack flyout when expanded row is an attack discovery alert',
+    async () => {
+      render(<TestComponent events={mockAttackTimelineData} />);
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+      fireEvent.click(screen.getByTestId('docTableExpandToggleColumn'));
+
+      await waitFor(() => {
+        expect(openFlyoutMock).toHaveBeenCalledWith({
+          right: {
+            id: 'attack-details-right',
+            params: {
+              attackId: 'attack-1',
+              indexName: 'attack-index',
+            },
+          },
+        });
+      });
     },
     SPECIAL_TEST_TIMEOUT
   );

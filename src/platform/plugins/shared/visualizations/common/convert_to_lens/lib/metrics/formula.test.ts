@@ -8,8 +8,9 @@
  */
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { DataViewField, IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
-import { SchemaConfig } from '../../..';
+import type { DataViewField, IAggConfig } from '@kbn/data-plugin/common';
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import type { SchemaConfig } from '../../..';
 import { getFormulaForPipelineAgg, getFormulaForAgg } from './formula';
 
 const mockGetMetricFromParentPipelineAgg = jest.fn();

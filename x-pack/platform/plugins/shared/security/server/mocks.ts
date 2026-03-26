@@ -7,11 +7,13 @@
 
 import type { TransportResult } from '@elastic/elasticsearch';
 
-import { apiKeysMock, securityServiceMock } from '@kbn/core-security-server-mocks';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
+import { lazyObject } from '@kbn/lazy-object';
 
 import { auditServiceMock } from './audit/mocks';
 import { authenticationServiceMock } from './authentication/authentication_service.mock';
 import { authorizationMock } from './authorization/index.mock';
+import type { SecurityPluginSetup } from './plugin';
 import { userProfileServiceMock } from './user_profile/user_profile_service.mock';
 import { licenseMock } from '../common/licensing/index.mock';
 
@@ -19,48 +21,45 @@ function createSetupMock() {
   const mockAuthz = authorizationMock.create();
   return {
     audit: auditServiceMock.create(),
-    authc: {
+    authc: lazyObject({
       getCurrentUser: jest.fn(),
-      apiKeys: apiKeysMock.create(),
-    },
-    authz: {
+    }),
+    authz: lazyObject({
       actions: mockAuthz.actions,
       checkPrivilegesWithRequest: mockAuthz.checkPrivilegesWithRequest,
       checkPrivilegesDynamicallyWithRequest: mockAuthz.checkPrivilegesDynamicallyWithRequest,
       checkSavedObjectsPrivilegesWithRequest: mockAuthz.checkSavedObjectsPrivilegesWithRequest,
       mode: mockAuthz.mode,
-    },
-    registerSpacesService: jest.fn(),
+    }),
     license: licenseMock.create(),
-    privilegeDeprecationsService: {
+    privilegeDeprecationsService: lazyObject({
       getKibanaRolesByFeatureId: jest.fn(),
-    },
-    setIsElasticCloudDeployment: jest.fn(),
-  };
+    }),
+  } satisfies jest.Mocked<SecurityPluginSetup>;
 }
 
 function createStartMock() {
   const mockAuthz = authorizationMock.create();
   const mockAuthc = authenticationServiceMock.createStart();
   const mockUserProfiles = userProfileServiceMock.createStart();
-  return {
-    authc: {
+  return lazyObject({
+    authc: lazyObject({
       apiKeys: mockAuthc.apiKeys,
       getCurrentUser: mockAuthc.getCurrentUser,
-    },
-    authz: {
+    }),
+    authz: lazyObject({
       actions: mockAuthz.actions,
       checkPrivilegesWithRequest: mockAuthz.checkPrivilegesWithRequest,
       checkPrivilegesDynamicallyWithRequest: mockAuthz.checkPrivilegesDynamicallyWithRequest,
       checkSavedObjectsPrivilegesWithRequest: mockAuthz.checkSavedObjectsPrivilegesWithRequest,
       mode: mockAuthz.mode,
-    },
-    userProfiles: {
+    }),
+    userProfiles: lazyObject({
       getCurrent: mockUserProfiles.getCurrent,
       suggest: mockUserProfiles.suggest,
       bulkGet: mockUserProfiles.bulkGet,
-    },
-  };
+    }),
+  });
 }
 
 function createApiResponseMock<TResponse, TContext>(

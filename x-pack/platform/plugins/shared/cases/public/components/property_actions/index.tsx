@@ -57,10 +57,11 @@ PropertyActionButton.displayName = 'PropertyActionButton';
 export interface PropertyActionsProps {
   propertyActions: AttachmentAction[];
   customDataTestSubj?: string;
+  buttonRef?: React.Ref<HTMLAnchorElement>;
 }
 
 export const PropertyActions = React.memo<PropertyActionsProps>(
-  ({ propertyActions, customDataTestSubj }) => {
+  ({ propertyActions, customDataTestSubj, buttonRef }) => {
     const [showActions, setShowActions] = useState(false);
 
     const onButtonClick = useCallback(() => {
@@ -87,6 +88,7 @@ export const PropertyActions = React.memo<PropertyActionsProps>(
             aria-label={i18n.ACTIONS_ARIA}
             iconType="boxesHorizontal"
             onClick={onButtonClick}
+            buttonRef={buttonRef}
           />
         }
         id="settingsPopover"

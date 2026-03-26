@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers/v4';
 import { RuleResponse } from './rule_schemas.gen';
 import {
   getRulesSchemaMock,
@@ -40,9 +40,7 @@ describe('Rule response schema', () => {
 
     const result = RuleResponse.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"`
-    );
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"type: Invalid input"`);
   });
 
   test('it should validate a type of "query" with a saved_id together', () => {
@@ -70,7 +68,9 @@ describe('Rule response schema', () => {
 
     const result = RuleResponse.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"saved_id: Required"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"saved_id: Invalid input: expected string, received undefined"`
+    );
   });
 
   test('it should validate a type of "timeline_id" if there is a "timeline_title" dependent', () => {
@@ -101,7 +101,7 @@ describe('Rule response schema', () => {
       const result = RuleResponse.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-        `"exceptions_list: Expected array, received string"`
+        `"exceptions_list: Invalid input: expected array, received string"`
       );
     });
   });
@@ -222,7 +222,7 @@ describe('investigation_fields', () => {
     const result = RuleResponse.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'investigation_fields.field_names: Array must contain at least 1 element(s)'
+      'investigation_fields.field_names: Too small: expected array to have >=1 items'
     );
   });
 
@@ -237,7 +237,7 @@ describe('investigation_fields', () => {
     const result = RuleResponse.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"investigation_fields: Expected object, received string"`
+      `"investigation_fields: Invalid input: expected object, received string"`
     );
   });
 });
@@ -259,6 +259,8 @@ describe('rule_source', () => {
     payload.rule_source = {
       type: 'external',
       is_customized: true,
+      customized_fields: [{ field_name: 'name' }],
+      has_base_version: true,
     };
 
     const result = RuleResponse.safeParse(payload);
@@ -273,6 +275,8 @@ describe('rule_source', () => {
 
     const result = RuleResponse.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"rule_source: Required"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"rule_source: Invalid input: expected object, received undefined"`
+    );
   });
 });

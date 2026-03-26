@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/server';
+import { SPACES_EXTENSION_ID, type CoreSetup } from '@kbn/core/server';
 
-import { SavedObjectsClient } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 export async function getInternalClients(
   core: CoreSetup
-): Promise<[SavedObjectsClient, ElasticsearchClient]> {
+): Promise<[SavedObjectsClientContract, ElasticsearchClient]> {
   return core.getStartServices().then(async ([coreStart]) => {
-    const savedObjectsRepo = coreStart.savedObjects.createInternalRepository();
+    const savedObjectsClient = coreStart.savedObjects.getUnsafeInternalClient({
+      excludedExtensions: [SPACES_EXTENSION_ID],
+    });
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    return [new SavedObjectsClient(savedObjectsRepo), esClient];
+    return [savedObjectsClient, esClient];
   });
 }

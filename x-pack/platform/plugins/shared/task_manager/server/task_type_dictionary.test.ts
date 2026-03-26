@@ -119,7 +119,7 @@ describe('taskTypeDictionary', () => {
       };
 
       expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
-        `"[fail]: definition for this key is missing"`
+        `"[fail]: Additional properties are not allowed ('fail' was unexpected)"`
       );
     });
 
@@ -201,7 +201,7 @@ describe('taskTypeDictionary', () => {
       };
 
       expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid priority \\"23\\". Priority must be one of Low => 1,Normal => 50"`
+        `"Invalid priority \\"23\\". Priority must be one of Low => 1,NormalLongRunning => 40,Normal => 50"`
       );
     });
   });
@@ -249,7 +249,7 @@ describe('taskTypeDictionary', () => {
         },
       });
       expect(logger.error).toHaveBeenCalledWith(
-        `Could not sanitize task definitions: Invalid priority \"23\". Priority must be one of Low => 1,Normal => 50`
+        `Could not sanitize task definitions: Invalid priority \"23\". Priority must be one of Low => 1,NormalLongRunning => 40,Normal => 50`
       );
       expect(definitions.get('foo')).toEqual(undefined);
     });

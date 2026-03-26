@@ -32,6 +32,34 @@ export interface InferenceConnector {
    * the list of properties depends on the connector type (and subtype for inference)
    */
   config: Record<string, any>;
+  /**
+   * Capabilities of this connector.
+   */
+  capabilities: InferenceConnectorCapabilities;
+  /**
+   * When true, this entry represents an Elasticsearch inference endpoint
+   * rather than a Kibana stack connector. `connectorId` holds the inference endpoint ID.
+   */
+  isInferenceEndpoint: boolean;
+  /**
+   * When true, this connector is preconfigured (i.e. managed by Elastic).
+   * For native inference endpoints this is determined by the presence of
+   * `metadata.display.name` on the underlying ES inference endpoint.
+   */
+  isPreconfigured: boolean;
+  /** Present when sourced from a stack connector that exposes deprecation state. */
+  isDeprecated?: boolean;
+  /** Present when sourced from a stack connector that exposes connector-type deprecation. */
+  isConnectorTypeDeprecated?: boolean;
+  /** Present when sourced from a stack connector that exposes missing-secrets state. */
+  isMissingSecrets?: boolean;
+}
+
+export interface InferenceConnectorCapabilities {
+  /**
+   * The context window size for this connector, if the information is available.
+   */
+  contextWindowSize?: number;
 }
 
 /**
@@ -44,6 +72,10 @@ export interface RawConnector {
   actionTypeId: string;
   name: string;
   config?: Record<string, any>;
+  isPreconfigured?: boolean;
+  isDeprecated?: boolean;
+  isConnectorTypeDeprecated?: boolean;
+  isMissingSecrets?: boolean;
 }
 
 export interface RawInferenceConnector {
@@ -51,4 +83,8 @@ export interface RawInferenceConnector {
   actionTypeId: InferenceConnectorType;
   name: string;
   config?: Record<string, any>;
+  isPreconfigured?: boolean;
+  isDeprecated?: boolean;
+  isConnectorTypeDeprecated?: boolean;
+  isMissingSecrets?: boolean;
 }

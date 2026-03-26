@@ -10,11 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 
+import type { ComponentTemplateDeserialized, CommonWizardSteps } from '../../shared_imports';
 import {
   serializers,
   Forms,
-  ComponentTemplateDeserialized,
-  CommonWizardSteps,
   StepSettingsContainer,
   StepMappingsContainer,
   StepAliasesContainer,
@@ -101,11 +100,32 @@ export const ComponentTemplateForm = ({
   onStepChange,
 }: Props) => {
   const {
-    template: { settings, mappings, aliases, lifecycle, data_stream_options: dataStreamOptions },
+    template: {
+      settings,
+      mappings: initialMappings,
+      aliases,
+      lifecycle,
+      data_stream_options: dataStreamOptions,
+    },
     ...logistics
   } = defaultValue;
 
   const { documentation } = useComponentTemplatesContext();
+
+  const mappings = useMemo(() => {
+    if (initialMappings && initialMappings._source && 'mode' in initialMappings._source) {
+      const { mode, ...otherSource } = initialMappings._source;
+      const newMappings = {
+        ...initialMappings,
+        _source: Object.keys(otherSource).length > 0 ? otherSource : undefined,
+      };
+      if (newMappings._source === undefined) {
+        delete newMappings._source;
+      }
+      return Object.keys(newMappings).length > 0 ? newMappings : undefined;
+    }
+    return initialMappings;
+  }, [initialMappings]);
 
   const wizardDefaultValue: WizardContent = {
     logistics: {
@@ -134,6 +154,7 @@ export const ComponentTemplateForm = ({
   const apiError = saveError ? (
     <>
       <EuiCallOut
+        announceOnMount
         title={
           <FormattedMessage
             id="xpack.idxMgmt.componentTemplateForm.saveTemplateError"

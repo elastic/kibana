@@ -15,6 +15,7 @@ import { MlPageHeader } from '../components/page_header';
 import { NodeAvailableWarning } from '../components/node_available_warning';
 import { UpgradeWarning } from '../components/upgrade';
 import { HelpMenu } from '../components/help_menu';
+import { PageTitle } from '../components/page_title';
 
 export const NotificationsPage: FC = () => {
   const {
@@ -27,9 +28,13 @@ export const NotificationsPage: FC = () => {
   return (
     <div>
       <MlPageHeader>
-        <FormattedMessage
-          id="xpack.ml.notifications.notificationsLabel"
-          defaultMessage="Notifications"
+        <PageTitle
+          title={
+            <FormattedMessage
+              id="xpack.ml.notifications.notificationsLabel"
+              defaultMessage="Notifications"
+            />
+          }
         />
       </MlPageHeader>
 

@@ -6,10 +6,15 @@
  */
 
 import memoizeOne from 'memoize-one';
-import { DatasourceDimensionProps, IndexPatternMap, OperationMetadata } from '../../../types';
-import { OperationType } from '../form_based';
-import { memoizedGetAvailableOperationsByMetadata, OperationFieldTuple } from '../operations';
-import { FormBasedPrivateState } from '../types';
+import type {
+  DatasourceDimensionProps,
+  IndexPatternMap,
+  OperationMetadata,
+  FormBasedPrivateState,
+} from '@kbn/lens-common';
+import type { OperationType } from '../form_based';
+import type { OperationFieldTuple } from '../operations';
+import { memoizedGetAvailableOperationsByMetadata } from '../operations';
 
 export interface OperationSupportMatrix {
   operationByField: Map<string, Set<OperationType>>;

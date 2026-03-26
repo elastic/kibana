@@ -5,26 +5,12 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 
 export const plugin = async (context: PluginInitializerContext) => {
   const { LicensingPlugin } = await import('./plugin');
   return new LicensingPlugin(context);
 };
-
-export type {
-  LicenseCheckState,
-  LicenseType,
-  LicenseStatus,
-  LicenseFeature,
-  PublicLicense,
-  PublicFeatures,
-  PublicLicenseJSON,
-  LicenseCheck,
-  ILicense,
-} from '../common/types';
-
-export { LICENSE_TYPE } from '../common/types';
 
 export type { FeatureUsageServiceSetup, FeatureUsageServiceStart } from './services';
 

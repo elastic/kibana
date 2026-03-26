@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './filters';
+export { filtersOperation, FilterList, filtersDefaultLabel } from './filters';

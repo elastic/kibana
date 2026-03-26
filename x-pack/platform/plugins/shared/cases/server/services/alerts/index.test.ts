@@ -128,7 +128,8 @@ describe('updateAlertsStatus', () => {
                     }
                     if (ctx._source.signal != null && ctx._source.signal.status != null) {
                       ctx._source.signal.status = 'acknowledged'
-                    }",
+                    }
+                    ctx._source.remove('kibana.alert.workflow_reason')",
             },
           },
         ]
@@ -194,7 +195,8 @@ describe('updateAlertsStatus', () => {
                     }
                     if (ctx._source.signal != null && ctx._source.signal.status != null) {
                       ctx._source.signal.status = 'open'
-                    }",
+                    }
+                    ctx._source.remove('kibana.alert.workflow_reason')",
             },
           },
         ]
@@ -260,7 +262,8 @@ describe('updateAlertsStatus', () => {
                     }
                     if (ctx._source.signal != null && ctx._source.signal.status != null) {
                       ctx._source.signal.status = 'open'
-                    }",
+                    }
+                    ctx._source.remove('kibana.alert.workflow_reason')",
             },
           },
         ]

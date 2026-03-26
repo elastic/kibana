@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { JSONSchema } from 'json-schema-typed';
+import type { JSONSchema } from 'json-schema-typed';
 import { desc } from './desc';
 
 export const MANIFEST_V1: JSONSchema = {

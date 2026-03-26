@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   PaletteContinuity,
   PaletteRegistry,
   CustomPaletteParams,
@@ -249,3 +249,7 @@ export function getOverridePaletteStops<T extends PaletteOutput<CustomPalettePar
     color: colors[i],
   }));
 }
+
+export const hasPaletteStops = (
+  palette?: PaletteOutput<{ stops?: ColorStop[] | number[] }>
+): boolean => Boolean(palette?.params?.stops?.length);

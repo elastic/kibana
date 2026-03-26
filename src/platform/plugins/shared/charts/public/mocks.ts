@@ -8,7 +8,7 @@
  */
 
 import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
-import { ChartsPlugin } from './plugin';
+import type { ChartsPlugin } from './plugin';
 import { themeServiceMock } from './services/theme/mock';
 import { activeCursorMock } from './services/active_cursor/mock';
 import { getPaletteRegistry, paletteServiceMock } from './services/palettes/mock';

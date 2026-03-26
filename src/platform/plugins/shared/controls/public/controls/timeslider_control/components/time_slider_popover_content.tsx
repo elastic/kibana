@@ -10,18 +10,19 @@
 import React from 'react';
 import { useMemo, useEffect, useState } from 'react';
 import { debounce } from 'lodash';
-import { EuiButtonIcon, EuiRangeTick, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import type { EuiRangeTick } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 
+import type { TimeSlice } from '@kbn/controls-schemas';
 import { TimeSliderStrings } from './time_slider_strings';
 import { TimeSliderAnchoredRange } from './time_slider_anchored_range';
 import { TimeSliderSlidingWindowRange } from './time_slider_sliding_window_range';
-import { Timeslice } from '../types';
 
 interface Props {
   isAnchored: boolean;
   setIsAnchored: (isAnchored: boolean) => void;
-  value: Timeslice;
-  onChange: (value?: Timeslice) => void;
+  value: TimeSlice;
+  onChange: (value?: TimeSlice) => void;
   stepSize: number;
   ticks: EuiRangeTick[];
   timeRangeMin: number;
@@ -40,12 +41,12 @@ export function TimeSliderPopoverContent({
   timeRangeMax,
   compressed,
 }: Props) {
-  const [displayedValue, setDisplayedValue] = useState<Timeslice>(value);
+  const [displayedValue, setDisplayedValue] = useState<TimeSlice>(value);
 
   const debouncedOnChange = useMemo(
     () =>
-      debounce((updateTimeslice: Timeslice | undefined) => {
-        onChange(updateTimeslice);
+      debounce((updateTimeSlice: TimeSlice | undefined) => {
+        onChange(updateTimeSlice);
       }, 750),
     [onChange]
   );
@@ -62,7 +63,7 @@ export function TimeSliderPopoverContent({
     <TimeSliderAnchoredRange
       value={[displayedValue[0] || timeRangeMin, displayedValue[1] || timeRangeMax]}
       onChange={(newValue) => {
-        setDisplayedValue(newValue as Timeslice);
+        setDisplayedValue(newValue as TimeSlice);
         debouncedOnChange(newValue);
       }}
       stepSize={stepSize}
@@ -75,7 +76,7 @@ export function TimeSliderPopoverContent({
     <TimeSliderSlidingWindowRange
       value={[displayedValue[0] || timeRangeMin, displayedValue[1] || timeRangeMax]}
       onChange={(newValue) => {
-        setDisplayedValue(newValue as Timeslice);
+        setDisplayedValue(newValue as TimeSlice);
         debouncedOnChange(newValue);
       }}
       stepSize={stepSize}
@@ -104,7 +105,11 @@ export function TimeSliderPopoverContent({
       }}
     >
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={anchorStartToggleButtonLabel} position="left">
+        <EuiToolTip
+          content={anchorStartToggleButtonLabel}
+          position="left"
+          disableScreenReaderOutput
+        >
           <EuiButtonIcon
             iconType={isAnchored ? 'pinFilled' : 'pin'}
             onClick={() => {

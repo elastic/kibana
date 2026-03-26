@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AppMenuActionPrimary } from '@kbn/discover-utils';
-import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
+import type { DiscoverAppMenuItemType } from '@kbn/discover-utils';
+import { AppMenuActionId } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 
 export const getNewSearchAppMenuItem = ({
@@ -17,20 +17,18 @@ export const getNewSearchAppMenuItem = ({
 }: {
   onNewSearch: () => void;
   newSearchUrl?: string;
-}): AppMenuActionPrimary => {
+}): DiscoverAppMenuItemType => {
   return {
     id: AppMenuActionId.new,
-    type: AppMenuActionType.primary,
-    controlProps: {
-      label: i18n.translate('discover.localMenu.localMenu.newDiscoverSessionTitle', {
-        defaultMessage: 'New session',
-      }),
-      iconType: 'plus',
-      testId: 'discoverNewButton',
-      href: newSearchUrl,
-      onClick: () => {
-        onNewSearch();
-      },
+    order: 1,
+    label: i18n.translate('discover.localMenu.localMenu.newDiscoverSessionTitle', {
+      defaultMessage: 'New',
+    }),
+    iconType: 'plusInCircle',
+    testId: 'discoverNewButton',
+    href: newSearchUrl,
+    run: () => {
+      onNewSearch();
     },
   };
 };

@@ -18,7 +18,7 @@
     "patterns": [
       "_security/profile/{uid}/_enable"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-enable-user-profile.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-enable-user-profile",
     "availability": {
       "stack": true,
       "serverless": false

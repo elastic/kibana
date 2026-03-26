@@ -31,6 +31,9 @@ const ruleRequestsTypesMap = {
   new_terms: {
     findAllTerms: 'pageDelimiter',
   },
+  esql: {
+    findMatches: 'pageDelimiter',
+  },
 };
 
 type RuleTypesWithPages = keyof typeof ruleRequestsTypesMap;

@@ -5,13 +5,8 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  EuiButtonIcon,
-  EuiButtonIconProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-} from '@elastic/eui';
+import type { EuiButtonIconProps } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { Teletype } from '../../../common';
 import { DEFAULT_TTY_FONT_SIZE } from '../../../common/constants';
 import { ZOOM_FIT, ZOOM_IN, ZOOM_OUT } from './translations';
@@ -86,7 +81,7 @@ export const TTYTextSizer = ({
         <div css={styles.separator} />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiToolTip content={ZOOM_FIT}>
+        <EuiToolTip content={ZOOM_FIT} disableScreenReaderOutput>
           <EuiButtonIcon
             data-test-subj="sessionView:TTYZoomFit"
             aria-label={ZOOM_FIT}
@@ -102,11 +97,11 @@ export const TTYTextSizer = ({
         <div css={styles.separator} />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiToolTip content={ZOOM_OUT}>
+        <EuiToolTip content={ZOOM_OUT} disableScreenReaderOutput>
           <EuiButtonIcon
             data-test-subj="sessionView:TTYZoomOut"
             aria-label={ZOOM_OUT}
-            iconType="minusInCircle"
+            iconType="minusCircle"
             onClick={onZoomOut}
             {...commonButtonProps}
           />
@@ -116,11 +111,11 @@ export const TTYTextSizer = ({
         {`${Math.round((fontSize / DEFAULT_TTY_FONT_SIZE) * 100)}%`}
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiToolTip content={ZOOM_IN}>
+        <EuiToolTip content={ZOOM_IN} disableScreenReaderOutput>
           <EuiButtonIcon
             data-test-subj="sessionView:TTYZoomIn"
             aria-label={ZOOM_IN}
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={onZoomIn}
             {...commonButtonProps}
           />

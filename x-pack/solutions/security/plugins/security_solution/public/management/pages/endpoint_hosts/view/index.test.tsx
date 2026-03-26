@@ -93,6 +93,16 @@ jest.mock('../../../services/policies/hooks', () => ({
   ...jest.requireActual('../../../services/policies/hooks'),
   useBulkGetAgentPolicies: jest.fn().mockReturnValue({}),
 }));
+jest.mock(
+  '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields',
+  () => ({
+    useFetchAnonymizationFields: jest.fn().mockReturnValue({
+      data: { data: [], total: 0, page: 1, perPage: 10 },
+      isLoading: false,
+      refetch: jest.fn(),
+    }),
+  })
+);
 const useBulkGetAgentPoliciesMock = useBulkGetAgentPolicies as unknown as jest.Mock<
   DeepPartial<ReturnType<typeof useBulkGetAgentPolicies>>
 >;
@@ -151,6 +161,9 @@ const timepickerRanges = [
   },
 ];
 
+jest.mock('@kbn/inference-connectors', () => ({
+  useLoadConnectors: jest.fn().mockReturnValue({ isLoading: false, data: [] }),
+}));
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_license');
 jest.mock('../../../hooks/endpoint/use_get_endpoint_details');

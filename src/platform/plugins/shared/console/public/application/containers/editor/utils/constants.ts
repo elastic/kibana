@@ -9,16 +9,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-/*
- * CSS class name used for the styling of highlighted requests
- */
-export const SELECTED_REQUESTS_CLASSNAME = 'console__monaco_editor__selectedRequests';
-
-/*
- * CSS class names used for the styling of multiple-response status codes
- */
-export const STATUS_CODE_LINE_CLASSNAME = 'monaco__status_code_line';
-
 export const whitespacesRegex = /\s+/;
 export const newLineRegex = /\n/;
 export const slashesRegex = /\/+/;
@@ -50,10 +40,10 @@ export const startsWithMethodRegex = /^\s*(GET|POST|PUT|PATCH|DELETE)/i;
 export const methodWithUrlRegex = /^\s*(GET|POST|PUT|PATCH|DELETE)\s+[a-z0-9\/._\-?=&]*[?=\/]$/i;
 /*
  * This regex matches a string that has
- * optional whitespace characters and a double quote, for example `  "`.
+ * optional whitespace characters and a double quote, for example `  "` or `  "cate`.
  * In this case autocomplete suggestions should be triggered for a property name.
  */
-export const propertyNameRegex = /^\s*"$/;
+export const propertyNameRegex = /^\s*"[^"]*$/;
 /*
  * This regex matches a string that has
  * a property name, a colon and an optional double quote, for example `"query" : "`.

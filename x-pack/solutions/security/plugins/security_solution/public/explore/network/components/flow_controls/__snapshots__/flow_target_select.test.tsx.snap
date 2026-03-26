@@ -17,6 +17,7 @@ exports[`FlowTargetSelect Component it renders the FlowTargetSelect 1`] = `
     >
       <button
         aria-haspopup="listbox"
+        aria-label="Flow target"
         class="euiSuperSelectControl emotion-euiSuperSelect__control"
         type="button"
       >
@@ -31,7 +32,7 @@ exports[`FlowTargetSelect Component it renders the FlowTargetSelect 1`] = `
           <span
             aria-hidden="true"
             class="euiFormControlLayoutCustomIcon__icon"
-            data-euiicon-type="arrowDown"
+            data-euiicon-type="chevronSingleDown"
           />
         </span>
       </div>

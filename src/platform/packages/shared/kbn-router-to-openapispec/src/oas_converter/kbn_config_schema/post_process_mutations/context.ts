@@ -8,27 +8,49 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
+import type { Env } from '../../../generate_oas';
+import { getIdFromRefString } from './mutations/utils';
 
 export interface IContext {
   addSharedSchema: (id: string, schema: OpenAPIV3.SchemaObject) => void;
+  derefSharedSchema: (id: string) => OpenAPIV3.SchemaObject | undefined;
   getSharedSchemas: () => { [id: string]: OpenAPIV3.SchemaObject };
+  getEnv: () => Env;
 }
 
 interface Options {
   sharedSchemas?: Map<string, OpenAPIV3.SchemaObject>;
+  env?: Env;
 }
 
 class Context implements IContext {
   private readonly sharedSchemas: Map<string, OpenAPIV3.SchemaObject>;
+  private readonly namespace?: string;
+  private readonly env: Env;
   constructor(opts: Options) {
     this.sharedSchemas = opts.sharedSchemas ?? new Map();
+    this.env = opts.env ?? { serverless: false };
   }
+
   public addSharedSchema(id: string, schema: OpenAPIV3.SchemaObject): void {
     this.sharedSchemas.set(id, schema);
   }
 
+  /** Assumes id is in the form of "#/components/schemas/my-schema-my-team" */
+  public derefSharedSchema(id: string) {
+    return this.sharedSchemas.get(getIdFromRefString(id));
+  }
+
   public getSharedSchemas() {
     return Object.fromEntries(this.sharedSchemas.entries());
+  }
+
+  public getEnv() {
+    return this.env;
+  }
+
+  public getNamespace() {
+    return this.namespace;
   }
 }
 

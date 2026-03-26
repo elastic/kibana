@@ -7,21 +7,35 @@
 
 import axios from 'axios';
 import moment from 'moment';
+import { readKibanaConfig } from '@kbn/observability-synthetics-test-data';
 
-const UP_MONITORS = 0;
+const UP_MONITORS = 10;
 const DOWN_MONITORS = 10;
 
+function getAuthFromKibanaConfig() {
+  const config = readKibanaConfig();
+  let username = config.elasticsearch?.username;
+  if (username === 'kibana_system_user') {
+    username = 'elastic';
+  }
+  const password = config.elasticsearch?.password;
+  return { username, password };
+}
+
 export const generateMonitors = async () => {
+  const policy = (await createTestAgentPolicy()) as { data: { item: { id: string } } };
+  const location = await createPrivateLocation(policy.data.item.id);
+
   // eslint-disable-next-line no-console
   console.log(`Generating ${UP_MONITORS} up monitors`);
   for (let i = 0; i < UP_MONITORS; i++) {
-    await createMonitor(getHttpMonitor());
+    await createMonitor(getHttpMonitor({ privateLocation: location }));
   }
 
   // eslint-disable-next-line no-console
   console.log(`Generating ${DOWN_MONITORS} down monitors`);
   for (let i = 0; i < DOWN_MONITORS; i++) {
-    await createMonitor(getHttpMonitor(true));
+    await createMonitor(getHttpMonitor({ isDown: true, privateLocation: location }));
   }
 };
 
@@ -31,7 +45,7 @@ const createMonitor = async (monitor: any) => {
       data: monitor,
       method: 'post',
       url: 'http://127.0.0.1:5601/test/api/synthetics/monitors',
-      auth: { username: 'elastic', password: 'jdpAyka8HBiq81dFAIB86Nkp' },
+      auth: getAuthFromKibanaConfig(),
       headers: { 'kbn-xsrf': 'true', 'elastic-api-version': '2023-10-31' },
     })
     .catch((error) => {
@@ -40,7 +54,63 @@ const createMonitor = async (monitor: any) => {
     });
 };
 
-const getHttpMonitor = (isDown?: boolean) => {
+const createTestAgentPolicy = async () => {
+  const data = {
+    name: 'Test agent policy ' + moment().format('LTS'),
+    description: '',
+    namespace: 'default',
+    monitoring_enabled: ['logs', 'metrics', 'traces'],
+    inactivity_timeout: 1209600,
+    is_protected: false,
+  };
+  return await axios
+    .request({
+      data,
+      method: 'post',
+      url: 'http://127.0.0.1:5601/test/api/fleet/agent_policies',
+      auth: getAuthFromKibanaConfig(),
+      headers: { 'kbn-xsrf': 'true', 'elastic-api-version': '2023-10-31' },
+    })
+    .catch((error) => {
+      // eslint-disable-next-line no-console
+      console.error(error);
+    });
+};
+
+const createPrivateLocation = async (policyId: string) => {
+  const data = {
+    label: 'Test private location ' + moment().format('LTS'),
+    agentPolicyId: policyId,
+    geo: { lat: 0, lon: 0 },
+    spaces: ['*'],
+  };
+
+  return (
+    (await axios
+      .request({
+        data,
+        method: 'post',
+        url: 'http://127.0.0.1:5601/test/api/synthetics/private_locations',
+        auth: getAuthFromKibanaConfig(),
+        headers: { 'kbn-xsrf': 'true', 'elastic-api-version': '2023-10-31' },
+      })
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error(error);
+      })) as any
+  ).data;
+};
+
+const getHttpMonitor = ({
+  isDown,
+  privateLocation,
+}: {
+  isDown?: boolean;
+  privateLocation?: {
+    id: string;
+    label: string;
+  };
+}) => {
   return {
     type: 'http',
     form_monitor_type: 'http',
@@ -56,6 +126,9 @@ const getHttpMonitor = (isDown?: boolean) => {
       { id: 'us_central_staging', label: 'US Central Staging', isServiceManaged: true },
       { id: 'us_central', label: 'North America - US Central', isServiceManaged: true },
       { id: 'us_central_qa', label: 'US Central QA', isServiceManaged: true },
+      ...(privateLocation
+        ? [{ id: privateLocation.id, label: privateLocation.label, isServiceManaged: false }]
+        : []),
     ],
     namespace: 'default',
     origin: 'ui',

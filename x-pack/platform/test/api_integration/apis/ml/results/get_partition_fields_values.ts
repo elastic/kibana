@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import type { PartitionFieldValueResponse } from '@kbn/ml-plugin/server/models/results_service/get_partition_fields_values';
 import { USER } from '../../../services/ml/security_common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -104,8 +104,8 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('PartitionFieldsValues', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await createMockJobs();
     });

@@ -196,7 +196,7 @@ export class StepDateHistogram extends Component {
               flush="right"
               href={documentationLinks.apis.createRollupJobsRequest}
               target="_blank"
-              iconType="help"
+              iconType="question"
               data-test-subj="rollupJobCreateDateHistogramDocsButton"
             >
               <FormattedMessage
@@ -295,6 +295,7 @@ export class StepDateHistogram extends Component {
               fullWidth
             >
               <EuiSelect
+                isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramTimeZone)}
                 options={timeZoneOptions}
                 value={dateHistogramTimeZone}
                 onChange={(e) => onFieldsChange({ dateHistogramTimeZone: e.target.value })}

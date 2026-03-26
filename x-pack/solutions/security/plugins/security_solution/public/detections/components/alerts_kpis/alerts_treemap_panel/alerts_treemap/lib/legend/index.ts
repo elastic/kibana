@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-
 import { TableId } from '@kbn/securitysolution-data-table';
 import { firstNonNullValue } from '../../../../../../../../common/endpoint/models/ecs_safety_helpers';
 import type { LegendItem } from '../../../../../../../common/components/charts/draggable_legend_item';
 import { getFillColor } from '../chart_palette';
-import { escapeDataProviderId } from '../../../../../../../common/components/drag_and_drop/helpers';
 import { getLabel } from '../labels';
 import type { FlattenedBucket, RawBucket } from '../../types';
 
@@ -35,9 +32,6 @@ export const getLegendItemFromRawBucket = ({
       })
     : undefined,
   count: bucket.doc_count,
-  dataProviderId: escapeDataProviderId(
-    `draggable-legend-item-treemap-${stackByField0}-${bucket.key}-${uuidv4()}`
-  ),
   render: () =>
     getLabel({
       baseLabel: bucket.key_as_string ?? firstNonNullValue(bucket.key) ?? '', // prefer key_as_string when available, because it contains a formatted date
@@ -66,9 +60,6 @@ export const getLegendItemFromFlattenedBucket = ({
     colorPalette,
   }),
   count: stackByField1DocCount,
-  dataProviderId: escapeDataProviderId(
-    `draggable-legend-item-treemap-${key}-${stackByField1Key}-${uuidv4()}`
-  ),
   render: () => `${stackByField1Key}`,
   field: `${stackByField1}`,
   value: `${stackByField1Key}`,

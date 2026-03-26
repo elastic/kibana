@@ -8,7 +8,7 @@
 import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPopover, EuiFilterButton, EuiFilterSelectItem, useEuiTheme } from '@elastic/eui';
-import { ActionType } from '../../../../types';
+import type { ActionType } from '../../../../types';
 
 interface ActionTypeFilterProps {
   actionTypes: ActionType[];
@@ -44,7 +44,8 @@ export const ActionTypeFilter: React.FunctionComponent<ActionTypeFilterProps> = 
       closePopover={() => setIsPopoverOpen(false)}
       button={
         <EuiFilterButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
+          isSelected={isPopoverOpen}
           hasActiveFilters={filters.length > 0}
           numActiveFilters={filters.length}
           numFilters={filters.length}

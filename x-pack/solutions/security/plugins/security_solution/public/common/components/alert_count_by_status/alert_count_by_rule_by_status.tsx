@@ -150,6 +150,7 @@ export const AlertCountByRuleByStatus = React.memo(
                   columns={columns}
                   items={items}
                   loading={isLoading}
+                  tableCaption={i18n.ALERTS_BY_RULE}
                   noItemsMessage={
                     <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
                   }

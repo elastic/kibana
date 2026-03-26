@@ -6,11 +6,11 @@
  */
 import React from 'react';
 import Embeddable from './embeddable';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
-import { DataViewState } from '../hooks/use_app_data_view';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { DataViewState } from '../hooks/use_app_data_view';
 import { render } from '../rtl_helpers';
 import { AddToCaseAction } from '../header/add_to_case_action';
-import { ActionTypes } from './use_actions';
+import type { ActionTypes } from './use_actions';
 import * as lensHook from './use_embeddable_attributes';
 
 jest.mock('../header/add_to_case_action', () => ({
@@ -45,7 +45,6 @@ const mockLensAttrs = {
                 isBucketed: false,
                 label: ' ',
                 operationType: 'unique_count',
-                scale: 'ratio',
                 sourceField: 'host.name',
               },
             },

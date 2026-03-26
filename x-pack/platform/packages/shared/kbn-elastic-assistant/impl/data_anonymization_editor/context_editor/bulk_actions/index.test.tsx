@@ -13,6 +13,7 @@ import { BulkActions } from '.';
 
 const selected = [
   {
+    id: '1',
     allowed: true,
     anonymized: false,
     denied: false,
@@ -20,6 +21,7 @@ const selected = [
     rawValues: ['abc', 'def'],
   },
   {
+    id: '2',
     allowed: false,
     anonymized: true,
     denied: true,
@@ -33,7 +35,8 @@ const defaultProps = {
   disabled: false,
   onListUpdated: jest.fn(),
   onlyDefaults: false,
-  selected,
+  selectedFields: selected.map((item) => item.field),
+  handleRowChecked: jest.fn(),
 };
 
 describe('BulkActions', () => {

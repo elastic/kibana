@@ -8,8 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from '../types';
-import { Datatable } from '../../expression_types';
+import type { ExpressionFunctionDefinition } from '../types';
+import type { Datatable } from '../../expression_types';
 
 export type MathArguments = {
   expression: string;

@@ -1,6 +1,6 @@
 # BIT_LENGTH
 
-This function calculates the bit length of a given string.
+Returns the bit length of a string. All strings are in UTF-8, so a single character can use multiple bytes.
 
 ## Syntax
 
@@ -10,11 +10,11 @@ This function calculates the bit length of a given string.
 
 #### string
 
-This is the string whose bit length you want to calculate. If `null` is provided, the function will return `null`.
-
-**Note**: Strings are in UTF-8 format, which means a single character may occupy multiple bytes.
+String expression. If `null`, the function returns `null`.
 
 ## Examples
+
+Calculates the number of characters and the bit length (in bits) of the city names for airports located in India.
 
 ```esql
 FROM airports

@@ -12,7 +12,7 @@ import { EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useConnectionDetailsOpts, useConnectionDetailsService } from './context';
 import { useBehaviorSubject } from './hooks/use_behavior_subject';
-import { TabID } from './types';
+import type { TabID } from './types';
 
 export const Tabs: React.FC = () => {
   type Tab = [id: TabID, name: string];
@@ -20,6 +20,7 @@ export const Tabs: React.FC = () => {
   const ctx = useConnectionDetailsOpts();
   const service = useConnectionDetailsService();
   const tab = useBehaviorSubject(service.tabId$);
+  const apiKeyHasAccess = useBehaviorSubject(service.apiKeyHasAccess$);
 
   const tabs: Tab[] = [];
 
@@ -32,7 +33,9 @@ export const Tabs: React.FC = () => {
     ]);
   }
 
-  if (ctx.apiKeys) {
+  // Only show API keys tab if user has permission (apiKeyHasAccess is true or still loading/null)
+  // Hide the tab when we explicitly know the user doesn't have permission (apiKeyHasAccess === false)
+  if (ctx.apiKeys && apiKeyHasAccess !== false) {
     tabs.push([
       'apiKeys',
       i18n.translate('cloud.connectionDetails.tab.apiKeys', {

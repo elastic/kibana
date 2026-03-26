@@ -6,10 +6,11 @@
  */
 
 import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { isNumber } from 'lodash';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { type AlertsQueryParams, createFindAlerts } from '../services/find_alerts';
 
 export type UseAlertsQueryParams = AlertsQueryParams;
@@ -41,12 +42,14 @@ export const useFetchAlerts = ({
   from,
   size,
   sort,
+  index,
 }: UseAlertsQueryParams): UseAlertsQueryResult => {
   const QUERY_KEY = `useFetchAlerts`;
 
   const {
     services: { data: dataService },
   } = useKibana();
+  const { hasAlertsRead } = useAlertsPrivileges();
 
   const findAlerts = useMemo(() => createFindAlerts(dataService.search), [dataService.search]);
 
@@ -54,7 +57,7 @@ export const useFetchAlerts = ({
     SearchResponse<Record<string, unknown>, Record<string, AggregationsAggregate>>,
     unknown
   >(
-    [QUERY_KEY, alertIds, from, size, sort],
+    [QUERY_KEY, alertIds, from, size, sort, index],
     async ({ signal }) =>
       findAlerts({
         signal,
@@ -62,9 +65,11 @@ export const useFetchAlerts = ({
         from,
         size,
         sort,
+        index,
       }),
     {
       keepPreviousData: true,
+      enabled: hasAlertsRead && (alertIds?.length ?? 0) > 0,
     }
   );
 

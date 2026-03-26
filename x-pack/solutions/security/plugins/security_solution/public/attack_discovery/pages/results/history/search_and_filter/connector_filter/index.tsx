@@ -27,25 +27,29 @@ import * as i18n from '../translations';
 import type { ConnectorFilterOptionData } from '../../types';
 import { useInvalidateFindAttackDiscoveries } from '../../../../use_find_attack_discoveries';
 
+export const DESCRIPTION_PLACEHOLDER = '-';
+
 const LIST_PROPS = {
   isVirtualized: false,
   rowHeight: 60,
 };
 
-interface Props {
+export interface ConnectorFilterProps {
   aiConnectors: AIConnector[] | undefined;
   connectorNames: string[] | undefined;
   isLoading?: boolean;
   selectedConnectorNames: string[];
   setSelectedConnectorNames: React.Dispatch<React.SetStateAction<string[]>>;
+  compressed?: boolean;
 }
 
-const ConnectorFilterComponent: React.FC<Props> = ({
+const ConnectorFilterComponent: React.FC<ConnectorFilterProps> = ({
   aiConnectors,
   connectorNames,
   isLoading = false,
   selectedConnectorNames,
   setSelectedConnectorNames,
+  compressed = false,
 }) => {
   const invalidateFindAttackDiscoveries = useInvalidateFindAttackDiscoveries();
   const { euiTheme } = useEuiTheme();
@@ -73,7 +77,7 @@ const ConnectorFilterComponent: React.FC<Props> = ({
           return {
             checked: checked ? 'on' : undefined,
             data: {
-              description: getDescription(connector?.actionTypeId),
+              description: getDescription(connector?.actionTypeId) ?? DESCRIPTION_PLACEHOLDER,
               deleted: connector == null,
             },
             label: name,
@@ -119,7 +123,7 @@ const ConnectorFilterComponent: React.FC<Props> = ({
                 data-test-subj="optionDescription"
                 size="s"
               >
-                {option.deleted ? '-' : option.description}
+                {option.description}
               </EuiText>
             </EuiFlexItem>
 
@@ -153,6 +157,7 @@ const ConnectorFilterComponent: React.FC<Props> = ({
     () => (
       <EuiFilterButton
         badgeColor="subdued"
+        data-test-subj="connectorFilterButton"
         disabled={isLoading}
         iconType="arrowDown"
         isSelected={isPopoverOpen}
@@ -179,7 +184,7 @@ const ConnectorFilterComponent: React.FC<Props> = ({
   );
 
   return (
-    <EuiFilterGroup>
+    <EuiFilterGroup compressed={compressed}>
       <EuiPopover
         button={button}
         closePopover={closePopover}

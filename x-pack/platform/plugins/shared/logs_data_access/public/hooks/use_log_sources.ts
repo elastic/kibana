@@ -9,7 +9,7 @@ import createContainer from 'constate';
 import { useTrackedPromise } from '@kbn/use-tracked-promise';
 import { useState, useEffect, useMemo } from 'react';
 import { flattenLogSources } from '../../common/services/log_sources_service/utils';
-import { LogSource, LogSourcesService } from '../../common/services/log_sources_service/types';
+import type { LogSource, LogSourcesService } from '../../common/services/log_sources_service/types';
 
 export const useLogSources = ({ logSourcesService }: { logSourcesService: LogSourcesService }) => {
   const [logSources, setLogSources] = useState<LogSource[]>([]);

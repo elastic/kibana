@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/core/server';
 
 export const mockAuthenticatedUser: AuthenticatedUser = {
   enabled: true,

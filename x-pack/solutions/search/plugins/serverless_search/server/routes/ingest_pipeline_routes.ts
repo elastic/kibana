@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteDependencies } from '../plugin';
+import type { RouteDependencies } from '../plugin';
 import { errorHandler } from '../utils/error_handler';
 
 export const registerIngestPipelineRoutes = ({ logger, router }: RouteDependencies) => {

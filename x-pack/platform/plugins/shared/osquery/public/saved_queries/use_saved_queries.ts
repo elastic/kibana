@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
+import { sanitizeSearch } from '../common/sanitize_search';
 import { SAVED_QUERIES_ID } from './constants';
 import type { SavedQuerySO } from '../routes/saved_queries/list';
 
@@ -19,9 +20,20 @@ export const useSavedQueries = ({
   pageSize = 10000,
   sortField = 'updated_at',
   sortOrder = 'desc',
+  search,
+  createdBy,
+}: {
+  isLive?: boolean;
+  pageIndex?: number;
+  pageSize?: number;
+  sortField?: string;
+  sortOrder?: string;
+  search?: string;
+  createdBy?: string;
 }) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
+  const sanitizedSearch = sanitizeSearch(search);
 
   return useQuery<
     {
@@ -32,11 +44,18 @@ export const useSavedQueries = ({
     },
     { body: { error: string; message: string } }
   >(
-    [SAVED_QUERIES_ID, { pageIndex, pageSize, sortField, sortOrder }],
+    [SAVED_QUERIES_ID, { pageIndex, pageSize, sortField, sortOrder, search, createdBy }],
     () =>
       http.get('/api/osquery/saved_queries', {
         version: API_VERSIONS.public.v1,
-        query: { page: pageIndex + 1, pageSize, sort: sortField, sortOrder },
+        query: {
+          page: pageIndex + 1,
+          pageSize,
+          sort: sortField,
+          sortOrder,
+          ...(sanitizedSearch && { search: sanitizedSearch }),
+          ...(createdBy && { createdBy }),
+        },
       }),
     {
       keepPreviousData: true,

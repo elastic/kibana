@@ -18,7 +18,7 @@ import {
   EuiStepsHorizontal,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
+import type { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 
 import {
   AddInferencePipelineFlyout,

@@ -235,7 +235,7 @@ export const EqlQueryBarFooter: FC<EqlQueryBarFooterProps> = ({
                     button={
                       <EuiButtonIcon
                         onClick={openEqlSettingsHandler}
-                        iconType="controlsVertical"
+                        iconType="controls"
                         isDisabled={openEqlSettings}
                         aria-label="eql settings"
                         data-test-subj="eql-settings-trigger"
@@ -247,7 +247,7 @@ export const EqlQueryBarFooter: FC<EqlQueryBarFooterProps> = ({
                     ownFocus={false}
                   >
                     <EuiPopoverTitle>{i18n.EQL_SETTINGS_TITLE}</EuiPopoverTitle>
-                    <div style={{ width: '300px' }}>
+                    <div css={{ width: '300px' }}>
                       {!isSizeOptionDisabled && (
                         <EuiFormRow
                           data-test-subj="eql-size-field"

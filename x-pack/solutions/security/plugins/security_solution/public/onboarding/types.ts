@@ -7,7 +7,7 @@
 
 import type React from 'react';
 import type { EuiBadgeProps, IconType } from '@elastic/eui';
-import type { LicenseType } from '@kbn/licensing-plugin/public';
+import type { LicenseType } from '@kbn/licensing-types';
 
 import type { ExperimentalFeatures } from '../../common';
 import type { OnboardingTopicId, OnboardingCardId } from './constants';

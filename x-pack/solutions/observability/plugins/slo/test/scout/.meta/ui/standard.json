@@ -1,0 +1,109 @@
+{
+  "sha1": "497ba62263201cb3b8c52d2974e89918faf833e2",
+  "tests": [
+    {
+      "id": "b77b3725a7cda3a-a405bc5e45e74c0",
+      "title": "Setup environment for SLO tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/global.setup.ts",
+        "line": 10,
+        "column": 16
+      }
+    },
+    {
+      "id": "27cb3cfb52afaa0-d4057e4746e6d25",
+      "title": "Annotations List create an annotation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
+        "line": 18,
+        "column": 7
+      }
+    },
+    {
+      "id": "27cb3cfb52afaa0-847fd6698b3b503",
+      "title": "Annotations List Go to SLOs and check that annotation is displayed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
+        "line": 41,
+        "column": 7
+      }
+    },
+    {
+      "id": "27cb3cfb52afaa0-2d4124b6ff8f776",
+      "title": "Annotations List update annotation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
+        "line": 54,
+        "column": 7
+      }
+    },
+    {
+      "id": "27cb3cfb52afaa0-c180b803b4e7cdb",
+      "title": "Annotations List delete annotation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
+        "line": 73,
+        "column": 7
+      }
+    },
+    {
+      "id": "3789b2ba4b5abe6-f1d0e5a2143a659",
+      "title": "Health Scan pagination paginates through health scan results and shows correct content per page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/health_scan_pagination.spec.ts",
+        "line": 71,
+        "column": 9
+      }
+    },
+    {
+      "id": "448f08951b285c6-2f7c95082c6900b",
+      "title": "SLOs Overview Go to slos overview and validate data retention tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/slos_overview.spec.ts",
+        "line": 26,
+        "column": 9
+      }
+    }
+  ]
+}

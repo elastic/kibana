@@ -18,7 +18,7 @@ const execaOpts = { cwd: root, stderr: 'pipe' };
 
 const tsconfig = resolve(root, 'x-pack/solutions/observability/plugins/apm/tsconfig.json');
 
-const testTsconfig = resolve(root, 'x-pack/test/tsconfig.json');
+const testTsconfig = resolve(root, 'x-pack/solutions/observability/test/tsconfig.json');
 
 const tasks = new Listr(
   [

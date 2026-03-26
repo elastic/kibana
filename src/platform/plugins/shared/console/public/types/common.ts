@@ -34,5 +34,5 @@ export enum RestoreMethod {
 }
 export interface RequestToRestore {
   request: string;
-  restoreMethod: RestoreMethod;
+  restoreMethod?: RestoreMethod;
 }

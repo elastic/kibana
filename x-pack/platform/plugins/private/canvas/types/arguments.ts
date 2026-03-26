@@ -23,6 +23,7 @@ export interface UpdatePropsRef<Props extends {} = {}> {
   updateProps: (newProps: Props) => void;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-shadow
 export interface ArgumentSpec<ArgumentConfig = {}> {
   /** The argument type */
   name: string;
@@ -54,6 +55,7 @@ export interface ArgumentSpec<ArgumentConfig = {}> {
   ) => void;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-shadow
 export type ArgumentFactory<ArgumentConfig = {}> = () => ArgumentSpec<ArgumentConfig>;
 
 // Settings for the argument to display in the sidebar

@@ -36,7 +36,9 @@
           "I18nStart",
           "; analytics?: Pick<",
           "AnalyticsServiceStart",
-          ", \"reportEvent\"> | undefined; executionContext?: ",
+          ", \"reportEvent\"> | undefined; chrome?: Pick<",
+          "ChromeStart",
+          ", \"withProvider\"> | undefined; executionContext?: ",
           "ExecutionContextSetup",
           " | undefined; theme: ",
           {
@@ -56,9 +58,13 @@
           "EuiThemeShapeBase",
           " & { overrides?: ",
           "_EuiThemeOverrides",
-          " | undefined; }> | undefined; }"
+          " | undefined; }> | undefined; coreEnv?: ",
+          "CoreEnv",
+          " | undefined; }"
         ],
         "path": "src/platform/packages/shared/react/kibana_context/render/render_provider.tsx",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

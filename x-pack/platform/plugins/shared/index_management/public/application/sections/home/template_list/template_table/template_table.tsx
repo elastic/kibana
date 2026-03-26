@@ -9,13 +9,15 @@ import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink, EuiIcon } from '@elastic/eui';
-import { ScopedHistory } from '@kbn/core/public';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiInMemoryTable, EuiButton, EuiLink, EuiIcon } from '@elastic/eui';
+import type { ScopedHistory } from '@kbn/core/public';
 
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
-import { TemplateListItem } from '../../../../../../common';
+import type { TemplateListItem } from '../../../../../../common';
 import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
-import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
+import type { UseRequestResponse } from '../../../../../shared_imports';
+import { reactRouterNavigate } from '../../../../../shared_imports';
 import { useServices } from '../../../../app_context';
 import { TemplateDeleteModal } from '../../../../components';
 import { TemplateContentIndicator } from '../../../../components/shared';
@@ -52,7 +54,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         defaultMessage: 'Name',
       }),
       sortable: true,
-      width: '30%',
+      minWidth: '8em',
       render: (name: TemplateListItem['name'], item: TemplateListItem) => {
         return (
           <span>
@@ -83,7 +85,8 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         defaultMessage: 'Index patterns',
       }),
       sortable: true,
-      width: '20%',
+      minWidth: '10em',
+      width: '18em',
       render: (indexPatterns: string[]) => <strong>{indexPatterns.join(', ')}</strong>,
     },
     {
@@ -91,8 +94,8 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       name: i18n.translate('xpack.idxMgmt.templateList.table.componentsColumnTitle', {
         defaultMessage: 'Component templates',
       }),
-      width: '100px',
-      truncateText: true,
+      width: '12em',
+      minWidth: '12em',
       sortable: (template) => {
         return template.composedOf?.length;
       },
@@ -112,9 +115,9 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       name: i18n.translate('xpack.idxMgmt.templateList.table.dataStreamColumnTitle', {
         defaultMessage: 'Data stream',
       }),
-      width: '90px',
       align: 'center',
-      truncateText: true,
+      width: '6.5em',
+      minWidth: '6.5em',
       render: (template: TemplateListItem) =>
         template._kbnMeta.hasDatastream ? <EuiIcon type="check" /> : null,
     },
@@ -123,6 +126,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         defaultMessage: 'Content',
       }),
       width: '120px',
+      className: 'eui-textNoWrap',
       render: (item: TemplateListItem) => (
         <TemplateContentIndicator
           mappings={item.hasMappings}
@@ -142,7 +146,8 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       name: i18n.translate('xpack.idxMgmt.templateList.table.actionColumnTitle', {
         defaultMessage: 'Actions',
       }),
-      width: '120px',
+      width: '7.5em',
+      minWidth: '7.5em',
       actions: [
         {
           name: i18n.translate('xpack.idxMgmt.templateList.table.actionEditText', {
@@ -251,7 +256,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       ) : undefined,
     toolsRight: [
       <EuiButton
-        iconType="plusInCircle"
+        iconType="plusCircle"
         data-test-subj="createTemplateButton"
         key="createTemplateButton"
         fill
@@ -300,12 +305,21 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           'data-test-subj': 'cell',
         })}
         data-test-subj="templateTable"
-        message={
+        tableCaption={i18n.translate(
+          'xpack.idxMgmt.templateList.table.indexTemplatesTableCaption',
+          {
+            defaultMessage: 'Index templates list',
+          }
+        )}
+        noItemsMessage={
           <FormattedMessage
             id="xpack.idxMgmt.templateList.table.noIndexTemplatesMessage"
             defaultMessage="No index templates found"
           />
         }
+        tableLayout="auto"
+        scrollableInline
+        responsiveBreakpoint={false}
       />
     </Fragment>
   );

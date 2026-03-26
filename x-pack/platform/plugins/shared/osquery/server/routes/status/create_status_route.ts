@@ -19,8 +19,10 @@ import { API_VERSIONS } from '../../../common/constants';
 import { packSavedObjectType } from '../../../common/types';
 import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { PackQueryInput } from '../pack/utils';
 import { convertPackQueriesToSO } from '../pack/utils';
-import { getInternalSavedObjectsClient } from '../utils';
+import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { fetchOsqueryPackagePolicyIds } from '../utils';
 
 export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -41,18 +43,34 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       async (context, request, response) => {
         const coreContext = await context.core;
         const esClient = coreContext.elasticsearch.client.asInternalUser;
-        const internalSavedObjectsClient = await getInternalSavedObjectsClient(
-          osqueryContext.getStartServices
+        const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+          osqueryContext,
+          request
         );
+
         const packageService = osqueryContext.service.getPackageService()?.asInternalUser;
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
         const agentPolicyService = osqueryContext.service.getAgentPolicyService();
 
-        const packageInfo = await packageService?.getInstallation(OSQUERY_INTEGRATION_NAME);
+        const packageInfo = await packageService?.getInstallation(
+          OSQUERY_INTEGRATION_NAME,
+          spaceScopedClient
+        );
+
+        const osqueryPackagePolicyIdsWithinCurrentSpace = await fetchOsqueryPackagePolicyIds(
+          spaceScopedClient,
+          osqueryContext
+        );
+
+        if (!osqueryPackagePolicyIdsWithinCurrentSpace.length) {
+          return response.ok({
+            body: undefined,
+          });
+        }
 
         if (packageInfo?.install_version && satisfies(packageInfo?.install_version, '<0.6.0')) {
           try {
-            const policyPackages = await packagePolicyService?.list(internalSavedObjectsClient, {
+            const policyPackages = await packagePolicyService?.list(spaceScopedClient, {
               kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
               perPage: 10000,
               page: 1,
@@ -128,18 +146,20 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
 
             const agentPolicyIds = uniq(flatMap(policyPackages?.items, 'policy_ids'));
             const agentPolicies = mapKeys(
-              await agentPolicyService?.getByIds(internalSavedObjectsClient, agentPolicyIds),
+              await agentPolicyService?.getByIds(spaceScopedClient, agentPolicyIds),
               'id'
             );
 
             await Promise.all(
               map(migrationObject.packs, async (packObject) => {
-                await internalSavedObjectsClient.create(
+                await spaceScopedClient.create(
                   packSavedObjectType,
                   {
                     name: packObject.name,
                     description: packObject.description,
-                    queries: convertPackQueriesToSO(packObject.queries),
+                    queries: convertPackQueriesToSO(
+                      packObject.queries as Record<string, PackQueryInput>
+                    ),
                     enabled: packObject.enabled,
                     created_at: new Date().toISOString(),
                     created_by: 'system',
@@ -160,7 +180,7 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
 
             // delete unnecessary package policies
             await packagePolicyService?.delete(
-              internalSavedObjectsClient,
+              spaceScopedClient,
               esClient,
               migrationObject.packagePoliciesToDelete
             );
@@ -171,15 +191,12 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                 const agentPacks = filter(migrationObject.packs, (pack) =>
                   pack.policy_ids.includes(key)
                 );
-                await packagePolicyService?.upgrade(internalSavedObjectsClient, esClient, value);
-                const packagePolicy = await packagePolicyService?.get(
-                  internalSavedObjectsClient,
-                  value
-                );
+                await packagePolicyService?.upgrade(spaceScopedClient, esClient, value);
+                const packagePolicy = await packagePolicyService?.get(spaceScopedClient, value);
 
                 if (packagePolicy) {
                   return packagePolicyService?.update(
-                    internalSavedObjectsClient,
+                    spaceScopedClient,
                     esClient,
                     packagePolicy.id,
                     produce(packagePolicy, (draft) => {

@@ -8,22 +8,25 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { EuiText, EuiLoadingSpinner } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { DataViewField } from '@kbn/data-views-plugin/common';
-import { ReactWrapper } from 'enzyme';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
-import FieldListGrouped, { type FieldListGroupedProps } from './field_list_grouped';
-import { FieldListFilters } from '../field_list_filters';
+import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { DataViewField } from '@kbn/data-views-plugin/common';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { EuiText, EuiThemeProvider } from '@elastic/eui';
 import { ExistenceFetchStatus } from '../../types';
-import { FieldsAccordion } from './fields_accordion';
-import { NoFieldsCallout } from './no_fields_callout';
-import { useGroupedFields, type GroupedFieldsParams } from '../../hooks/use_grouped_fields';
+import { FieldListFilters } from '../field_list_filters';
+import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen, within } from '@testing-library/react';
+import { useGroupedFields, type GroupedFieldsParams } from '../../hooks/use_grouped_fields';
+import FieldListGrouped, { type FieldListGroupedProps } from './field_list_grouped';
 import userEvent from '@testing-library/user-event';
+
+interface WrapperProps {
+  listProps: Omit<FieldListGroupedProps<DataViewField>, 'fieldGroups'>;
+  hookParams: Omit<GroupedFieldsParams<DataViewField>, 'services'>;
+}
+
+const DESCRIPTION_ID = 'fieldListGrouped__ariaDescription';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -40,9 +43,9 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
   const allFields = dataView.fields;
   // 5 times more fields. Added fields will be treated as Unmapped as they are not a part of the data view.
   const manyFields = [...new Array(5)].flatMap((_, index) =>
-    allFields.map((field) => {
-      return new DataViewField({ ...field.toSpec(), name: `${field.name}${index || ''}` });
-    })
+    allFields.map(
+      (field) => new DataViewField({ ...field.toSpec(), name: `${field.name}${index || ''}` })
+    )
   );
 
   beforeEach(() => {
@@ -52,9 +55,7 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
       core: coreMock.createStart(),
     };
 
-    dataViews.get.mockImplementation(async (id: string) => {
-      return dataView;
-    });
+    dataViews.get.mockResolvedValue(dataView);
 
     defaultProps = {
       fieldGroups: {},
@@ -73,12 +74,13 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
     };
   });
 
-  interface WrapperProps {
-    listProps: Omit<FieldListGroupedProps<DataViewField>, 'fieldGroups'>;
-    hookParams: Omit<GroupedFieldsParams<DataViewField>, 'services'>;
-  }
+  const Providers: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+    <EuiThemeProvider>
+      <I18nProvider>{children}</I18nProvider>
+    </EuiThemeProvider>
+  );
 
-  function mountWithRTL({ listProps, hookParams }: WrapperProps) {
+  const mountGroupedList = async ({ listProps, hookParams }: WrapperProps) => {
     const Wrapper: React.FC<WrapperProps> = (props) => {
       const {
         fieldListFiltersProps,
@@ -96,40 +98,29 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
       );
     };
 
-    render(<Wrapper hookParams={hookParams} listProps={listProps} />);
-  }
+    const utils = render(
+      <Providers>
+        <Wrapper hookParams={hookParams} listProps={listProps} />
+      </Providers>
+    );
 
-  async function mountGroupedList({ listProps, hookParams }: WrapperProps): Promise<ReactWrapper> {
-    const Wrapper: React.FC<WrapperProps> = (props) => {
-      const {
-        fieldListFiltersProps,
-        fieldListGroupedProps: { fieldGroups },
-      } = useGroupedFields({
-        ...props.hookParams,
-        services: mockedServices,
-      });
+    // wait for lazy modules
+    await screen.findByTestId('fieldListFiltersFieldSearch');
+    await screen.findByTestId('fieldListGroupedFieldGroups');
 
-      return (
-        <>
-          <FieldListFilters {...fieldListFiltersProps} />
-          <FieldListGrouped {...props.listProps} fieldGroups={fieldGroups} />
-        </>
-      );
+    return {
+      ...utils,
+      rerenderWithProviders: (nextProps: WrapperProps) =>
+        utils.rerender(
+          <Providers>
+            <Wrapper hookParams={nextProps.hookParams} listProps={nextProps.listProps} />
+          </Providers>
+        ),
     };
-
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = await mountWithIntl(<Wrapper hookParams={hookParams} listProps={listProps} />);
-      // wait for lazy modules if any
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      await wrapper.update();
-    });
-
-    return wrapper!;
-  }
+  };
 
   it('renders correctly in empty state', () => {
-    const wrapper = mountWithIntl(
+    render(
       <FieldListGrouped
         {...defaultProps}
         fieldGroups={{}}
@@ -137,61 +128,47 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
       />
     );
 
-    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe('');
+    expect(screen.getByTestId(DESCRIPTION_ID)).toHaveTextContent('');
   });
 
   it('renders correctly in loading state', async () => {
-    const wrapper = await mountGroupedList({
+    const listProps = {
+      ...defaultProps,
+      fieldsExistenceStatus: ExistenceFetchStatus.unknown,
+    };
+    const hookParams = {
+      dataViewId: dataView.id ?? null,
+      allFields,
+    };
+
+    const { rerenderWithProviders } = await mountGroupedList({
+      listProps,
+      hookParams,
+    });
+
+    expect(screen.getAllByTestId(/fieldListGrouped.*-countLoading/)).toHaveLength(2);
+    expect(screen.getByTestId('fieldListGrouped__ariaDescription')).toHaveTextContent('');
+    expect(screen.getAllByTestId(/^fieldListGrouped(Available|Meta)Fields$/)).toHaveLength(2);
+    expect(screen.queryAllByTestId(/NoFieldsCallout/)).toHaveLength(0);
+
+    rerenderWithProviders({
       listProps: {
-        ...defaultProps,
-        fieldsExistenceStatus: ExistenceFetchStatus.unknown,
+        ...listProps,
+        fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
       },
-      hookParams: {
-        dataViewId: dataView.id ?? null,
-        allFields,
-      },
+      hookParams,
     });
 
-    expect(wrapper.find(FieldListGrouped).prop('fieldsExistenceStatus')).toBe(
-      ExistenceFetchStatus.unknown
-    );
-    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe('');
-    expect(wrapper.find(FieldsAccordion)).toHaveLength(2);
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(2);
-    expect(
-      wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('hasLoaded'))
-    ).toStrictEqual([false, false]);
-    expect(wrapper.find(NoFieldsCallout)).toHaveLength(0);
-
-    await act(async () => {
-      await wrapper.setProps({
-        listProps: {
-          ...defaultProps,
-          fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
-        },
-      });
-      await wrapper.update();
-    });
-
-    expect(wrapper.find(FieldListGrouped).prop('fieldsExistenceStatus')).toBe(
-      ExistenceFetchStatus.succeeded
-    );
-    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
-      '25 available fields. 3 meta fields.'
-    );
-    expect(wrapper.find(FieldsAccordion)).toHaveLength(2);
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(
-      wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('hasLoaded'))
-    ).toStrictEqual([true, true]);
-    expect(
-      wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('paginatedFields').length)
-    ).toStrictEqual([25, 0]);
-    expect(wrapper.find(NoFieldsCallout)).toHaveLength(0);
+    expect(screen.getByText('25 available fields. 3 meta fields.')).toBeVisible();
+    expect(screen.queryAllByTestId(/-countLoading$/)).toHaveLength(0);
+    expect(screen.getAllByTestId(/^fieldListGrouped(Available|Meta)Fields$/)).toHaveLength(2);
+    expect(screen.getAllByTestId(/fieldListGrouped(Available|Meta)Fields-count$/)).toHaveLength(2);
+    expect(screen.getAllByTestId('testFieldItem')).toHaveLength(25);
+    expect(screen.queryAllByTestId(/NoFieldsCallout/)).toHaveLength(0);
   });
 
   it('renders correctly in failed state', async () => {
-    const wrapper = await mountGroupedList({
+    await mountGroupedList({
       listProps: {
         ...defaultProps,
         fieldsExistenceStatus: ExistenceFetchStatus.failed,
@@ -202,24 +179,14 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
       },
     });
 
-    expect(wrapper.find(FieldListGrouped).prop('fieldsExistenceStatus')).toBe(
-      ExistenceFetchStatus.failed
-    );
-    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
-      '25 available fields. 3 meta fields.'
-    );
-    expect(wrapper.find(FieldsAccordion)).toHaveLength(2);
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(
-      wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('hasLoaded'))
-    ).toStrictEqual([true, true]);
-    expect(
-      wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('showExistenceFetchError'))
-    ).toStrictEqual([true, true]);
+    expect(screen.getByText('25 available fields. 3 meta fields.')).toBeVisible();
+    expect(screen.queryAllByTestId(/-countLoading$/)).toHaveLength(0);
+    expect(screen.getAllByTestId(/^fieldListGrouped(Available|Meta)Fields$/)).toHaveLength(2);
+    expect(screen.getAllByText('Existence fetch failed')).toHaveLength(2);
   });
 
   it('renders correctly in no fields state', async () => {
-    const wrapper = await mountGroupedList({
+    await mountGroupedList({
       listProps: {
         ...defaultProps,
         fieldsExistInIndex: false,
@@ -231,18 +198,16 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
       },
     });
 
-    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+    expect(screen.getByTestId(DESCRIPTION_ID)).toHaveTextContent(
       '0 available fields. 0 meta fields.'
     );
-    expect(wrapper.find(FieldsAccordion)).toHaveLength(2);
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(
-      wrapper.find(NoFieldsCallout).map((callout) => callout.prop('fieldsExistInIndex'))
-    ).toStrictEqual([false, false]);
+    expect(screen.getAllByTestId(/^fieldListGrouped(Available|Meta)Fields$/)).toHaveLength(2);
+    expect(screen.queryAllByTestId(/-countLoading$/)).toHaveLength(0);
+    expect(screen.getAllByText('No fields exist in this data view.')).toHaveLength(2);
   });
 
   it('renders correctly for text-based queries (no data view)', async () => {
-    const wrapper = await mountGroupedList({
+    await mountGroupedList({
       listProps: {
         ...defaultProps,
         fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
@@ -254,16 +219,20 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
       },
     });
 
-    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+    expect(screen.getByTestId(DESCRIPTION_ID)).toHaveTextContent(
       '1 selected field. 28 available fields.'
     );
-    expect(
-      wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('paginatedFields').length)
-    ).toStrictEqual([1, 28]);
+
+    const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
+    const selectedFields = screen.getByTestId('fieldListGroupedSelectedFields');
+    expect(within(availableFields).getAllByTestId('testFieldItem')).toHaveLength(28);
+    expect(within(selectedFields).getAllByTestId('testFieldItem')).toHaveLength(1);
   });
 
   it('renders correctly when Meta gets open', async () => {
-    const wrapper = await mountGroupedList({
+    const user = userEvent.setup();
+
+    await mountGroupedList({
       listProps: {
         ...defaultProps,
         fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
@@ -274,29 +243,24 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
       },
     });
 
-    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+    expect(screen.getByTestId(DESCRIPTION_ID)).toHaveTextContent(
       '25 available fields. 3 meta fields.'
     );
-    expect(
-      wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('paginatedFields').length)
-    ).toStrictEqual([25, 0]);
+    const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
+    const metaFields = screen.getByTestId('fieldListGroupedMetaFields');
+    expect(within(availableFields).getAllByTestId('testFieldItem')).toHaveLength(25);
+    expect(within(metaFields).queryAllByTestId('testFieldItem')).toHaveLength(0);
 
-    await act(async () => {
-      await wrapper
-        .find('[data-test-subj="fieldListGroupedMetaFields"]')
-        .find('button')
-        .first()
-        .simulate('click');
-      await wrapper.update();
-    });
+    await user.click(screen.getByRole('button', { name: /meta fields/i }));
 
-    expect(
-      wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('paginatedFields').length)
-    ).toStrictEqual([25, 3]);
+    expect(within(availableFields).getAllByTestId('testFieldItem')).toHaveLength(25);
+    expect(within(metaFields).getAllByTestId('testFieldItem')).toHaveLength(3);
   });
 
   it('renders correctly when paginated', async () => {
-    const wrapper = await mountGroupedList({
+    const user = userEvent.setup();
+
+    await mountGroupedList({
       listProps: {
         ...defaultProps,
         fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
@@ -307,131 +271,103 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
       },
     });
 
-    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+    expect(screen.getByTestId(DESCRIPTION_ID)).toHaveTextContent(
       '25 available fields. 112 unmapped fields. 3 meta fields.'
     );
+
+    const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
+    const unmappedFields = screen.getByTestId('fieldListGroupedUnmappedFields');
+    const metaFields = screen.getByTestId('fieldListGroupedMetaFields');
+    expect(within(availableFields).getAllByTestId('testFieldItem')).toHaveLength(25);
+    expect(within(unmappedFields).queryAllByTestId('testFieldItem')).toHaveLength(0);
+    expect(within(metaFields).queryAllByTestId('testFieldItem')).toHaveLength(0);
     expect(
-      wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('paginatedFields').length)
-    ).toStrictEqual([25, 0, 0]);
+      screen.getByText("Fields that aren't explicitly mapped to a field data type.")
+    ).toBeVisible();
 
-    await act(async () => {
-      await wrapper
-        .find('[data-test-subj="fieldListGroupedUnmappedFields"]')
-        .find('button')
-        .first()
-        .simulate('click');
-      await wrapper.update();
-    });
+    await user.click(screen.getByRole('button', { name: /unmapped fields/i }));
 
-    expect(
-      wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('paginatedFields').length)
-    ).toStrictEqual([25, 50, 0]);
+    expect(within(availableFields).getAllByTestId('testFieldItem')).toHaveLength(25);
+    expect(within(unmappedFields).getAllByTestId('testFieldItem')).toHaveLength(50);
+    expect(within(metaFields).queryAllByTestId('testFieldItem')).toHaveLength(0);
 
-    await act(async () => {
-      await wrapper
-        .find('[data-test-subj="fieldListGroupedMetaFields"]')
-        .find('button')
-        .first()
-        .simulate('click');
-      await wrapper.update();
-    });
+    await user.click(screen.getByRole('button', { name: /meta fields/i }));
 
-    expect(
-      wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('paginatedFields').length)
-    ).toStrictEqual([25, 88, 0]);
+    expect(within(availableFields).getAllByTestId('testFieldItem')).toHaveLength(25);
+    expect(within(unmappedFields).getAllByTestId('testFieldItem')).toHaveLength(88);
+    expect(within(metaFields).queryAllByTestId('testFieldItem')).toHaveLength(0);
   });
 
   it('renders correctly when fields are searched and filtered', async () => {
-    const hookParams = {
-      dataViewId: dataView.id!,
-      allFields: manyFields,
-    };
-    const wrapper = await mountGroupedList({
+    const user = userEvent.setup();
+
+    await mountGroupedList({
       listProps: {
         ...defaultProps,
         fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
       },
-      hookParams,
+      hookParams: {
+        dataViewId: dataView.id!,
+        allFields: manyFields,
+      },
     });
 
-    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+    expect(screen.getByTestId(DESCRIPTION_ID)).toHaveTextContent(
       '25 available fields. 112 unmapped fields. 3 meta fields.'
     );
 
-    await act(async () => {
-      await wrapper
-        .find('[data-test-subj="fieldListFiltersFieldSearch"]')
-        .last()
-        .simulate('change', {
-          target: { value: '@' },
-        });
-      await wrapper.update();
-    });
+    const searchInput = screen.getByTestId('fieldListFiltersFieldSearch') as HTMLInputElement;
+    await user.type(searchInput, '@');
 
-    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+    expect(screen.getByTestId(DESCRIPTION_ID)).toHaveTextContent(
       '2 available fields. 8 unmapped fields. 0 meta fields.'
     );
 
-    await act(async () => {
-      await wrapper
-        .find('[data-test-subj="fieldListFiltersFieldSearch"]')
-        .last()
-        .simulate('change', {
-          target: { value: '_' },
-        });
-      await wrapper.update();
+    await user.type(searchInput, '_', {
+      initialSelectionStart: 0,
+      initialSelectionEnd: searchInput.value.length,
     });
 
-    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+    expect(screen.getByTestId(DESCRIPTION_ID)).toHaveTextContent(
       '3 available fields. 24 unmapped fields. 3 meta fields.'
     );
 
-    await act(async () => {
-      await wrapper
-        .find('[data-test-subj="fieldListFiltersFieldTypeFilterToggle"]')
-        .last()
-        .simulate('click');
-      await wrapper.update();
-    });
+    await user.click(screen.getByTestId('fieldListFiltersFieldTypeFilterToggle'));
+    await user.click(screen.getByTestId('typeFilter-date'));
 
-    await act(async () => {
-      await wrapper.find('button[data-test-subj="typeFilter-date"]').first().simulate('click');
-      await wrapper.update();
-    });
-
-    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+    expect(screen.getByTestId(DESCRIPTION_ID)).toHaveTextContent(
       '1 available field. 4 unmapped fields. 0 meta fields.'
     );
-  }, 10000);
+  });
 
   it('renders correctly when non-supported fields are filtered out', async () => {
     const hookParams = {
       dataViewId: dataView.id!,
       allFields: manyFields,
     };
-    const wrapper = await mountGroupedList({
-      listProps: {
-        ...defaultProps,
-        fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
-      },
+    const listProps = {
+      ...defaultProps,
+      fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
+    };
+
+    const { rerenderWithProviders } = await mountGroupedList({
+      listProps,
       hookParams,
     });
 
-    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+    expect(screen.getByTestId(DESCRIPTION_ID)).toHaveTextContent(
       '25 available fields. 112 unmapped fields. 3 meta fields.'
     );
 
-    await act(async () => {
-      await wrapper.setProps({
-        hookParams: {
-          ...hookParams,
-          onSupportedFieldFilter: (field: DataViewField) => field.aggregatable,
-        },
-      });
-      await wrapper.update();
+    rerenderWithProviders({
+      listProps,
+      hookParams: {
+        ...hookParams,
+        onSupportedFieldFilter: (field: DataViewField) => field.aggregatable,
+      },
     });
 
-    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+    expect(screen.getByTestId(DESCRIPTION_ID)).toHaveTextContent(
       '23 available fields. 104 unmapped fields. 3 meta fields.'
     );
   });
@@ -441,30 +377,30 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
       dataViewId: dataView.id!,
       allFields: manyFields,
     };
-    const wrapper = await mountGroupedList({
-      listProps: {
-        ...defaultProps,
-        fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
-      },
+    const listProps = {
+      ...defaultProps,
+      fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
+    };
+
+    const { rerenderWithProviders } = await mountGroupedList({
+      listProps,
       hookParams,
     });
 
-    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+    expect(screen.getByTestId(DESCRIPTION_ID)).toHaveTextContent(
       '25 available fields. 112 unmapped fields. 3 meta fields.'
     );
 
-    await act(async () => {
-      await wrapper.setProps({
-        hookParams: {
-          ...hookParams,
-          onSelectedFieldFilter: (field: DataViewField) =>
-            ['@timestamp', 'bytes'].includes(field.name),
-        },
-      });
-      await wrapper.update();
+    rerenderWithProviders({
+      listProps,
+      hookParams: {
+        ...hookParams,
+        onSelectedFieldFilter: (field: DataViewField) =>
+          ['@timestamp', 'bytes'].includes(field.name),
+      },
     });
 
-    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+    expect(screen.getByTestId(DESCRIPTION_ID)).toHaveTextContent(
       '2 selected fields. 25 available fields. 112 unmapped fields. 3 meta fields.'
     );
   });
@@ -476,7 +412,8 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
       popularFieldsLimit: 10,
       sortedSelectedFields: [manyFields[0], manyFields[1]],
     };
-    const wrapper = await mountGroupedList({
+
+    await mountGroupedList({
       listProps: {
         ...defaultProps,
         fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
@@ -484,14 +421,14 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
       hookParams,
     });
 
-    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+    expect(screen.getByTestId(DESCRIPTION_ID)).toHaveTextContent(
       '2 selected fields. 10 popular fields. 25 available fields. 112 unmapped fields. 3 meta fields.'
     );
   });
 
   describe('Skip Link Functionality', () => {
     it('renders the skip link when there is a next section', async () => {
-      mountWithRTL({
+      await mountGroupedList({
         listProps: {
           ...defaultProps,
           fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
@@ -513,7 +450,7 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
     });
 
     it('does not render a skip link in the last section', async () => {
-      mountWithRTL({
+      await mountGroupedList({
         listProps: {
           ...defaultProps,
           fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
@@ -538,7 +475,7 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
     it('sets focus on the next section when skip link is clicked', async () => {
       const user = userEvent.setup();
 
-      mountWithRTL({
+      await mountGroupedList({
         listProps: {
           ...defaultProps,
           fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
@@ -565,52 +502,44 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
   });
 
   it('persists sections state in local storage', async () => {
-    const wrapper = await mountGroupedList({
-      listProps: {
-        ...defaultProps,
-        fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
-        localStorageKeyPrefix: 'test',
-      },
-      hookParams: {
-        dataViewId: dataView.id!,
-        allFields: manyFields,
-      },
+    const user = userEvent.setup();
+
+    const listProps = {
+      ...defaultProps,
+      fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
+      localStorageKeyPrefix: 'test',
+    };
+    const hookParams = {
+      dataViewId: dataView.id!,
+      allFields: manyFields,
+    };
+
+    const { unmount } = await mountGroupedList({
+      listProps,
+      hookParams,
     });
+
+    const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
+    expect(availableFields).toHaveClass('euiAccordion-isOpen');
 
     // only Available is open
-    expect(
-      wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('initialIsOpen'))
-    ).toStrictEqual([true, false, false]);
+    await user.click(screen.getByRole('button', { name: /meta fields/i }));
 
-    await act(async () => {
-      await wrapper
-        .find('[data-test-subj="fieldListGroupedMetaFields"]')
-        .find('button')
-        .first()
-        .simulate('click');
-      await wrapper.update();
-    });
+    // now Meta is open too
+    const metaFields = screen.getByTestId('fieldListGroupedMetaFields');
+    expect(metaFields).toHaveClass('euiAccordion-isOpen');
 
-    // now Empty is open too
-    expect(
-      wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('initialIsOpen'))
-    ).toStrictEqual([true, false, true]);
+    unmount();
 
-    const wrapper2 = await mountGroupedList({
-      listProps: {
-        ...defaultProps,
-        fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
-        localStorageKeyPrefix: 'test',
-      },
-      hookParams: {
-        dataViewId: dataView.id!,
-        allFields: manyFields,
-      },
+    await mountGroupedList({
+      listProps,
+      hookParams,
     });
 
     // both Available and Empty are open for the second instance
-    expect(
-      wrapper2.find(FieldsAccordion).map((accordion) => accordion.prop('initialIsOpen'))
-    ).toStrictEqual([true, false, true]);
+    const availableFields2 = screen.getByTestId('fieldListGroupedAvailableFields');
+    expect(availableFields2).toHaveClass('euiAccordion-isOpen');
+    const metaFields2 = screen.getByTestId('fieldListGroupedMetaFields');
+    expect(metaFields2).toHaveClass('euiAccordion-isOpen');
   });
 });

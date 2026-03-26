@@ -7,7 +7,8 @@
 
 import { useAssistantOverlay } from '.';
 import { waitFor, renderHook, act } from '@testing-library/react';
-import { FetchCurrentUserConversations, useFetchCurrentUserConversations } from '../api';
+import type { FetchCurrentUserConversations } from '../api';
+import { useFetchCurrentUserConversations } from '../api';
 import { mockConnectors } from '../../mock/connectors';
 
 const mockUseAssistantContext = {
@@ -35,7 +36,7 @@ jest.mock('../use_conversation', () => {
 });
 
 jest.mock('../../connectorland/helpers');
-jest.mock('../../connectorland/use_load_connectors', () => {
+jest.mock('@kbn/inference-connectors', () => {
   return {
     useLoadConnectors: jest.fn(() => ({
       data: mockConnectors,

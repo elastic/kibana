@@ -7,54 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView, DataViewField, DataViewsContract } from '@kbn/data-views-plugin/common';
 import { buildMetric } from './metric';
+import { mockDataViewsService } from './mock_utils';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(() => '3feeaf26-927e-448e-968f-c7e970671564'),
 }));
-
-const dataViews: Record<string, DataView> = {
-  test: {
-    id: 'test',
-    fields: {
-      getByName: (name: string) => {
-        switch (name) {
-          case '@timestamp':
-            return {
-              type: 'datetime',
-            } as unknown as DataViewField;
-          case 'category':
-            return {
-              type: 'string',
-            } as unknown as DataViewField;
-          case 'price':
-            return {
-              type: 'number',
-            } as unknown as DataViewField;
-          default:
-            return undefined;
-        }
-      },
-    } as any,
-  } as unknown as DataView,
-};
-
-function mockDataViewsService() {
-  return {
-    get: jest.fn(async (id: '1' | '2') => {
-      const result = {
-        ...dataViews[id],
-        metaFields: [],
-        isPersisted: () => true,
-        toSpec: () => ({}),
-      };
-      return result;
-    }),
-    create: jest.fn(),
-  } as unknown as Pick<DataViewsContract, 'get' | 'create'>;
-}
-
 test('generates metric chart config', async () => {
   const result = await buildMetric(
     {
@@ -67,18 +25,11 @@ test('generates metric chart config', async () => {
     },
     {
       dataViewsAPI: mockDataViewsService() as any,
-      formulaAPI: {} as any,
     }
   );
   expect(result).toMatchInlineSnapshot(`
     Object {
-      "references": Array [
-        Object {
-          "id": "test",
-          "name": "indexpattern-datasource-layer-layer_0",
-          "type": "index-pattern",
-        },
-      ],
+      "references": Array [],
       "state": Object {
         "adHocDataViews": Object {
           "test": Object {},
@@ -115,7 +66,13 @@ test('generates metric chart config', async () => {
           },
         },
         "filters": Array [],
-        "internalReferences": Array [],
+        "internalReferences": Array [
+          Object {
+            "id": "test",
+            "name": "indexpattern-datasource-layer-layer_0",
+            "type": "index-pattern",
+          },
+        ],
         "query": Object {
           "language": "kuery",
           "query": "",
@@ -148,61 +105,12 @@ test('generates metric chart config with trendline', async () => {
     },
     {
       dataViewsAPI: mockDataViewsService() as any,
-      formulaAPI: {
-        insertOrReplaceFormulaColumn: jest.fn(() => ({
-          columnOrder: ['formula_accessor_0_0X0', 'formula_accessor_0_0'],
-          columns: {
-            ['formula_accessor_0_0X0']: {
-              label: 'Part of count()',
-              dataType: 'number',
-              operationType: 'count',
-              isBucketed: false,
-              scale: 'ratio',
-              sourceField: '___records___',
-              params: {
-                emptyAsNull: false,
-              },
-              customLabel: true,
-            },
-            ['formula_accessor_0_0']: {
-              label: 'count()',
-              customLabel: true,
-              operationType: 'formula',
-              dataType: 'number',
-              references: ['formula_accessor_0_0X0'],
-              isBucketed: false,
-              timeScale: 's',
-              params: {
-                formula: 'count()',
-                format: {
-                  id: 'number',
-                  params: {
-                    decimals: 0,
-                  },
-                },
-                isFormulaBroken: false,
-              },
-            },
-          },
-        })),
-      },
     }
   );
 
   expect(result).toMatchInlineSnapshot(`
     Object {
-      "references": Array [
-        Object {
-          "id": undefined,
-          "name": "indexpattern-datasource-layer-layer_0",
-          "type": "index-pattern",
-        },
-        Object {
-          "id": undefined,
-          "name": "indexpattern-datasource-layer-layer_0_trendline",
-          "type": "index-pattern",
-        },
-      ],
+      "references": Array [],
       "state": Object {
         "adHocDataViews": Object {
           "3feeaf26-927e-448e-968f-c7e970671564": Object {},
@@ -212,88 +120,61 @@ test('generates metric chart config with trendline', async () => {
             "layers": Object {
               "layer_0": Object {
                 "columnOrder": Array [
-                  "formula_accessor_0_0X0",
-                  "formula_accessor_0_0",
+                  "metric_formula_accessor",
                 ],
                 "columns": Object {
-                  "formula_accessor_0_0": Object {
+                  "metric_formula_accessor": Object {
                     "customLabel": true,
                     "dataType": "number",
                     "isBucketed": false,
                     "label": "count()",
                     "operationType": "formula",
                     "params": Object {
-                      "format": Object {
-                        "id": "number",
-                        "params": Object {
-                          "decimals": 0,
-                        },
-                      },
+                      "format": undefined,
                       "formula": "count()",
-                      "isFormulaBroken": false,
                     },
-                    "references": Array [
-                      "formula_accessor_0_0X0",
-                    ],
-                    "timeScale": "s",
-                  },
-                  "formula_accessor_0_0X0": Object {
-                    "customLabel": true,
-                    "dataType": "number",
-                    "isBucketed": false,
-                    "label": "Part of count()",
-                    "operationType": "count",
-                    "params": Object {
-                      "emptyAsNull": false,
-                    },
-                    "scale": "ratio",
-                    "sourceField": "___records___",
+                    "references": Array [],
+                    "timeScale": undefined,
                   },
                 },
               },
               "layer_0_trendline": Object {
                 "columnOrder": Array [
-                  "formula_accessor_0_0X0",
-                  "formula_accessor_0_0",
+                  "metric_formula_accessor",
+                  "x_date_histogram",
+                  "metric_formula_accessor_trendline",
                 ],
                 "columns": Object {
-                  "formula_accessor_0_0": Object {
+                  "metric_formula_accessor_trendline": Object {
                     "customLabel": true,
                     "dataType": "number",
                     "isBucketed": false,
                     "label": "count()",
                     "operationType": "formula",
                     "params": Object {
-                      "format": Object {
-                        "id": "number",
-                        "params": Object {
-                          "decimals": 0,
-                        },
-                      },
+                      "format": undefined,
                       "formula": "count()",
-                      "isFormulaBroken": false,
                     },
-                    "references": Array [
-                      "formula_accessor_0_0X0",
-                    ],
-                    "timeScale": "s",
+                    "references": Array [],
+                    "timeScale": undefined,
                   },
-                  "formula_accessor_0_0X0": Object {
-                    "customLabel": true,
-                    "dataType": "number",
-                    "isBucketed": false,
-                    "label": "Part of count()",
-                    "operationType": "count",
+                  "x_date_histogram": Object {
+                    "dataType": "date",
+                    "isBucketed": true,
+                    "label": "@timestamp",
+                    "operationType": "date_histogram",
                     "params": Object {
-                      "emptyAsNull": false,
+                      "includeEmptyRows": true,
+                      "interval": "auto",
                     },
-                    "scale": "ratio",
-                    "sourceField": "___records___",
+                    "scale": "interval",
+                    "sourceField": "@timestamp",
                   },
                 },
                 "linkToLayers": Array [
                   "layer_0",
                 ],
+                "sampling": 1,
               },
             },
           },

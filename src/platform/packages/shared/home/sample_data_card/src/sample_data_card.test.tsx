@@ -14,14 +14,20 @@ import { act } from 'react-dom/test-utils';
 import { SampleDataCard } from './sample_data_card';
 import { SampleDataCardProvider } from './services';
 import { getMockServices, getMockDataSet } from './mocks';
-import { Services } from './services';
+import type { Services } from './services';
 import { INSTALLED_STATUS, UNINSTALLED_STATUS } from './constants';
+
+// Mock the polling functions to resolve immediately in tests
+jest.mock('./hooks/poll_sample_data_status', () => ({
+  pollForInstallation: jest.fn(async () => Promise.resolve()),
+  pollForRemoval: jest.fn(async () => Promise.resolve()),
+}));
 
 describe('SampleDataCard', () => {
   const onStatusChange = jest.fn();
   const sampleDataSet = getMockDataSet();
 
-  beforeAll(() => jest.resetAllMocks());
+  beforeEach(() => jest.resetAllMocks());
 
   const render = (element: React.ReactElement, services: Partial<Services> = {}) =>
     renderWithIntl(
