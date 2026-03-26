@@ -18,14 +18,13 @@ import {
   type MemoryUpdateTaskParams,
 } from '../lib/tasks/task_definitions/memory_update';
 import { registerAgentBuilderTools } from './tools/register_tools';
-import { registerMemoryTools } from './tools/register_memory_tools';
 import { registerMemoryContextHook } from './hooks/memory/register_memory_context_hook';
 import { registerMemoryLearningHook } from './hooks/memory/register_memory_learning_hook';
 import { registerSigeventsMemoryHook } from './hooks/memory/register_sigevents_memory_hook';
 import { streamExplorationSkill } from './skills/stream_exploration_skill';
-import { sigEventsMemorySkill } from './skills/sig_events_memory_skill';
+import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
 
-export const registerStreamsAgentBuilder = ({
+export const registerStreamsAgentBuilder = async ({
   agentBuilder,
   getScopedClients,
   server,
@@ -59,58 +58,59 @@ export const registerStreamsAgentBuilder = ({
     }
   };
 
-  // Memory tools are always registered so the skill can reference them,
-  // but the skill and hooks gate on the useMemory setting.
-  registerMemoryTools({
-    agentBuilder,
-    getMemoryService,
-    getSecurity: () => server.core.security,
-    logger,
-  });
-
-  const getMemoryServices = () => ({
-    memory: getMemoryService(),
-    spaces: getSpaces(),
-  });
-
-  const scheduleMemoryTask = async (
-    triggerId: string,
-    payload: Record<string, unknown>,
-    request: KibanaRequest
-  ) => {
-    const { taskClient } = await getScopedClients({ request });
-    const taskId = `memory_update_${triggerId}_${Date.now()}`;
-    await taskClient.schedule<MemoryUpdateTaskParams>({
-      task: {
-        type: MEMORY_UPDATE_TASK_TYPE,
-        id: taskId,
-        space: '*',
-      },
-      params: { triggerId, payload },
-      request,
-    });
-    logger.info(`Scheduled memory update task "${taskId}" for trigger "${triggerId}"`);
-  };
-
-  registerMemoryContextHook(agentBuilder, {
-    logger,
-    getMemoryServices,
-    isMemoryEnabled,
-  });
-
-  registerMemoryLearningHook(agentBuilder, {
-    logger,
-    getMemoryServices,
-    isMemoryEnabled,
-  });
-
-  registerSigeventsMemoryHook(agentBuilder, {
-    logger,
-    getMemoryServices,
-    isMemoryEnabled,
-    scheduleMemoryTask,
-  });
-
   agentBuilder.skills.register(streamExplorationSkill);
-  agentBuilder.skills.register(sigEventsMemorySkill);
+
+  if (await isMemoryEnabled()) {
+    const getMemoryServices = () => ({
+      memory: getMemoryService(),
+      spaces: getSpaces(),
+    });
+
+    const scheduleMemoryTask = async (
+      triggerId: string,
+      payload: Record<string, unknown>,
+      request: KibanaRequest
+    ) => {
+      const { taskClient } = await getScopedClients({ request });
+      const taskId = `memory_update_${triggerId}_${Date.now()}`;
+      await taskClient.schedule<MemoryUpdateTaskParams>({
+        task: {
+          type: MEMORY_UPDATE_TASK_TYPE,
+          id: taskId,
+          space: '*',
+        },
+        params: { triggerId, payload },
+        request,
+      });
+      logger.info(`Scheduled memory update task "${taskId}" for trigger "${triggerId}"`);
+    };
+
+    registerMemoryContextHook(agentBuilder, {
+      logger,
+      getMemoryServices,
+      isMemoryEnabled,
+    });
+
+    registerMemoryLearningHook(agentBuilder, {
+      logger,
+      getMemoryServices,
+      isMemoryEnabled,
+    });
+
+    registerSigeventsMemoryHook(agentBuilder, {
+      logger,
+      getMemoryServices,
+      isMemoryEnabled,
+      scheduleMemoryTask,
+    });
+
+    agentBuilder.skills.register(
+      createSigEventsMemorySkill({
+        getMemoryService,
+        getSecurity: () => server.core.security,
+      })
+    );
+
+    logger.info('Memory skill and hooks registered (useMemory is enabled)');
+  }
 };

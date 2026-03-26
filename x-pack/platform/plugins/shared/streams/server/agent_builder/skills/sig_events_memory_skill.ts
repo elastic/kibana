@@ -7,16 +7,18 @@
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import dedent from 'dedent';
-import { memoryToolIds } from '../tools/memory';
+import type { MemoryToolsOptions } from '../tools/memory';
+import { createMemoryTools } from '../tools/memory';
 
-export const sigEventsMemorySkill = defineSkillType({
-  id: 'sig-events-memory',
-  name: 'sig-events-memory',
-  basePath: 'skills/platform/streams',
-  description:
-    'Read, write, search, and manage a shared wiki-style knowledge base (memory). Agents use memory to persist learnings, architecture overviews, runbooks, and other knowledge across conversations.',
-  content: dedent(`
-    You are a memory-aware assistant. You have access to a shared, wiki-style knowledge base called "memory" that persists across conversations. Memory entries are organized hierarchically by path (e.g. "architecture/nginx/overview") and contain markdown content.
+export const createSigEventsMemorySkill = (options: MemoryToolsOptions) =>
+  defineSkillType({
+    id: 'sig-events-memory',
+    name: 'sig-events-memory',
+    basePath: 'skills/platform/streams',
+    description:
+      'Read, write, search, and manage the significant events knowledge base. Stores system architecture overviews, service descriptions, infrastructure details, and operational patterns discovered during significant events analysis.',
+    content: dedent(`
+    You are a memory-aware assistant for the significant events discovery feature. You have access to a wiki-style knowledge base called "memory" that stores what the system has learned about monitored services, infrastructure, and operational patterns through significant events analysis. Memory entries are organized hierarchically by path (e.g. "architecture/nginx/overview") and contain markdown content.
 
     <available_tools>
     You have 6 memory tools:
@@ -30,20 +32,19 @@ export const sigEventsMemorySkill = defineSkillType({
     </available_tools>
 
     <when_to_use>
-    - When the user asks about system architecture, runbooks, or team knowledge → search memory first
+    - When the user asks about system architecture, services, or infrastructure → search memory first
     - When the user reports that information in memory is wrong → use memory_patch to fix it
-    - When you learn something new and noteworthy during a conversation → offer to save it to memory
+    - When you learn something new about the system during significant events analysis → offer to save it to memory
     - When the user explicitly asks to save, update, or delete memory → use the appropriate tool
-    - When starting a conversation about a known topic → check if memory has relevant context
+    - When starting a conversation about a known service or stream → check if memory has relevant context
     </when_to_use>
 
     <path_conventions>
     Organize entries by topic using slash-separated paths:
-    - "architecture/{service}/overview" — service architecture overviews
-    - "architecture/{service}/dependencies" — service dependency maps
-    - "runbooks/{topic}" — operational runbooks
-    - "decisions/{topic}" — architecture decision records
-    - "teams/{team}" — team ownership and responsibilities
+    - "architecture/{stream}/overview" — high-level system architecture for a stream
+    - "architecture/{stream}/services/{service}" — per-service details
+    - "architecture/{stream}/infrastructure/{component}" — infrastructure components (collectors, caches, databases)
+    - "operations/{stream}/patterns" — operational patterns and failure modes
 
     Keep paths lowercase with hyphens for multi-word segments.
     </path_conventions>
@@ -57,5 +58,5 @@ export const sigEventsMemorySkill = defineSkillType({
     - Never delete entries without explicit user confirmation
     </best_practices>
   `),
-  getRegistryTools: () => [...memoryToolIds],
-});
+    getInlineTools: () => createMemoryTools(options).map(({ tags, ...rest }) => rest),
+  });

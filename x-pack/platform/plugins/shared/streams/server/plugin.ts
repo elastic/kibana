@@ -217,6 +217,8 @@ export class StreamsPlugin
             return undefined;
           }
         },
+      }).catch((err) => {
+        this.logger.error(`Failed to register agent builder: ${err.message}`);
       });
     }
 
