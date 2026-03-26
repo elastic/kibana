@@ -57,6 +57,7 @@ describe('approveIntegrationRoute telemetry', () => {
         },
         getCurrentUser,
         reportTelemetryEvent,
+        isAvailable: () => true,
       }),
     } as any);
 
