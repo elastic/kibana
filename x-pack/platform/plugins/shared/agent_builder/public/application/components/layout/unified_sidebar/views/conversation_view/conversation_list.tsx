@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom-v5-compat';
 
 import {
@@ -21,6 +21,7 @@ import {
   createConversationListItemStyles,
   createActiveConversationListItemStyles,
 } from '../../../../conversations/conversation_list_item_styles';
+import { NoConversationsPrompt } from '../../../../conversations/embeddable_conversation_header/no_conversations_prompt';
 
 interface ConversationListProps {
   agentId: string;
@@ -36,8 +37,12 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   const { euiTheme } = useEuiTheme();
   const { conversations = [], isLoading } = useConversationList({ agentId });
 
-  const sortedConversations = [...conversations].sort(
-    (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+  const sortedConversations = useMemo(
+    () =>
+      [...conversations].sort(
+        (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+      ),
+    [conversations]
   );
 
   const linkStyles = createConversationListItemStyles(euiTheme);
@@ -51,6 +56,10 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     );
+  }
+
+  if (sortedConversations.length === 0) {
+    return <NoConversationsPrompt isFiltered={false} />;
   }
 
   return (
