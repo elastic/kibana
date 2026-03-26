@@ -15,13 +15,19 @@ import { z } from '@kbn/zod/v4';
  * Use this function in handlers to parse the input.
  */
 export const parseArrayInput = (val: unknown): string[] => {
-  if (Array.isArray(val)) return val.map(String);
+  // Handle nested arrays (Zod transform may wrap the result)
+  if (Array.isArray(val)) {
+    // Flatten one level: [[a,b,c]] → [a,b,c]
+    const flat = val.length === 1 && Array.isArray(val[0]) ? val[0] : val;
+    return flat.map(String);
+  }
   if (!val) return [];
   const strVal = String(val);
   if (!strVal) return [];
   try {
     const parsed = JSON.parse(strVal);
-    return Array.isArray(parsed) ? parsed.map(String) : [];
+    if (Array.isArray(parsed)) return parsed.map(String);
+    return [];
   } catch {
     return strVal.split(',').map((s: string) => s.trim()).filter(Boolean);
   }
