@@ -8,6 +8,9 @@ applies_to:
 
 # PNG/PDF settings [reporting-capture-settings]
 
+:::{settings} /reference/configuration-reference/reporting-settings-png-pdf.yml
+:::
+
 ::::{note}
 We recommend using PNG/PDF reports to export moderate amounts of data only. The feature enables a high-level export capability, but it’s not intended for bulk export. If you need to export several pages of image data, consider using multiple report jobs to export a small number of pages at a time. If the screenshot of exported dashboard contains a large number of pixels, consider splitting the large dashboard into smaller artifacts to use less memory and CPU resources.
 

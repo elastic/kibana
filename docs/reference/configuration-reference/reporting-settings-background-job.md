@@ -8,6 +8,9 @@ applies_to:
 
 # Background job settings [reporting-job-queue-settings]
 
+:::{settings} /reference/configuration-reference/reporting-settings-background-job.yml
+:::
+
 Reporting generates reports on the {{kib}} server as background tasks, and jobs are coordinated using documents in {{es}}. Depending on how often you generate reports and the overall number of reports, you might need to change the following settings.
 
 `xpack.reporting.capture.maxAttempts` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")

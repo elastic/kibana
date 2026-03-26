@@ -8,6 +8,9 @@ applies_to:
 
 # CSV settings [reporting-csv-settings]
 
+:::{settings} /reference/configuration-reference/reporting-settings-csv.yml
+:::
+
 ::::{note}
 We recommend using CSV reports to export moderate amounts of data only. The feature enables analysis of data in external tools, but it is not intended for bulk export or to backup Elasticsearch data. Report timeout and incomplete data issues are likely if you are exporting data where:
 

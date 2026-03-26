@@ -8,6 +8,9 @@ applies_to:
 
 # Enable reporting [general-reporting-settings]
 
+:::{settings} /reference/configuration-reference/reporting-settings-enable.yml
+:::
+
 $$$xpack-enable-reporting$$$`xpack.reporting.enabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   When `true`, enables the {{report-features}}. Set this to `false` to disable {{report-features}} entirely. The default is `true`.
 
