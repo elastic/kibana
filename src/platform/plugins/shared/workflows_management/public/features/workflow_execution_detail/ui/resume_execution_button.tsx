@@ -8,17 +8,24 @@
  */
 
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useCallback, useEffect, useState } from 'react';
+import type { JSONSchema7 } from 'json-schema';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { StepContext } from '@kbn/workflows';
+import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { ResumeExecutionModal } from './resume_execution_modal';
+import { generateSampleFromJsonSchema } from '../../../../common/lib/generate_sample_from_json_schema';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 
 interface ResumeExecutionButtonProps {
   executionId: string;
   resumeMessage?: string;
+  resumeSchema?: JsonModelSchemaType;
   /** When true, opens the input modal immediately on mount */
   autoOpen?: boolean;
 }
@@ -26,6 +33,7 @@ interface ResumeExecutionButtonProps {
 export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   executionId,
   resumeMessage,
+  resumeSchema,
   autoOpen = false,
 }) => {
   const { http, notifications } = useKibana().services;
@@ -39,6 +47,24 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   useEffect(() => {
     if (autoOpen) setIsModalOpen(true);
   }, [autoOpen]);
+
+  const contextOverride = useMemo<ContextOverrideData | undefined>(() => {
+    if (!resumeSchema) return undefined;
+    try {
+      const jsonSchema = resumeSchema as JSONSchema7;
+      const zodSchema = convertJsonSchemaToZod(jsonSchema);
+      const defaults = generateSampleFromJsonSchema(jsonSchema);
+      return {
+        schema: zodSchema,
+        stepContext: defaults as Partial<StepContext>,
+        rawJsonSchema: resumeSchema,
+      };
+    } catch {
+      // A malformed or unsupported schema must not crash the execution detail page
+      // Fall back to no context override so the modal still opens with a free form JSON editor.
+      return undefined;
+    }
+  }, [resumeSchema]);
 
   const openModal = useCallback(() => setIsModalOpen(true), []);
   const closeModal = useCallback(() => {
@@ -114,6 +140,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
 
       {isModalOpen && (
         <ResumeExecutionModal
+          initialcontextOverride={contextOverride}
           resumeMessage={resumeMessage}
           onClose={closeModal}
           onSubmit={handleSubmit}

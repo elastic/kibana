@@ -16,7 +16,9 @@ project:
   channel: ''
   owner: '@elastic/kibana-data-discovery'
   sourceRoot: src/platform/packages/shared/as-code/data-views-transforms
-dependsOn: []
+dependsOn:
+  - '@kbn/data-views-plugin'
+  - '@kbn/as-code-data-views-schema'
 tags:
   - shared-common
   - package
