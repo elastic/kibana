@@ -8,9 +8,30 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { PROJECT_ROUTING, ProjectRoutingAccess, type ICPSManager } from '@kbn/cps-utils';
+import { of } from 'rxjs';
 
 import { HasData } from './has_data';
 import { HttpFetchError } from '@kbn/core-http-browser-internal/src/http_fetch_error';
+
+const createCpsManager = ({
+  totalProjectCount = 2,
+}: {
+  totalProjectCount?: number;
+} = {}): ICPSManager => {
+  return {
+    whenReady: jest.fn().mockResolvedValue(undefined),
+    fetchProjects: jest.fn().mockResolvedValue(null),
+    getTotalProjectCount: jest.fn().mockReturnValue(totalProjectCount),
+    getProjectRouting$: jest.fn(() => of(undefined)),
+    setProjectRouting: jest.fn(),
+    getProjectRouting: jest.fn(() => undefined),
+    getDefaultProjectRouting: jest.fn(() => PROJECT_ROUTING.ALL),
+    updateDefaultProjectRouting: jest.fn(),
+    getProjectPickerAccess$: jest.fn(() => of(ProjectRoutingAccess.DISABLED)),
+    registerAppAccess: jest.fn(),
+  };
+};
 
 describe('when calling hasData service', () => {
   describe('hasDataView', () => {
@@ -90,9 +111,8 @@ describe('when calling hasData service', () => {
       const hasDataService = hasData.start(coreStart, true);
       const response = hasDataService.hasUserDataView();
 
-      expect(spy).toHaveBeenCalledTimes(1);
-
       expect(await response).toBe(false);
+      expect(spy).toHaveBeenCalledTimes(1);
     });
 
     it('should return true for hasUserDataView when server returns true', async () => {
@@ -111,9 +131,8 @@ describe('when calling hasData service', () => {
       const hasDataService = hasData.start(coreStart, true);
       const response = hasDataService.hasUserDataView();
 
-      expect(spy).toHaveBeenCalledTimes(1);
-
       expect(await response).toBe(true);
+      expect(spy).toHaveBeenCalledTimes(1);
     });
 
     it('should return true for hasUserDataView when server throws an error', async () => {
@@ -129,13 +148,29 @@ describe('when calling hasData service', () => {
       const hasDataService = hasData.start(coreStart, true);
       const response = hasDataService.hasUserDataView();
 
-      expect(spy).toHaveBeenCalledTimes(1);
-
       expect(await response).toBe(true);
+      expect(spy).toHaveBeenCalledTimes(1);
     });
   });
   describe('hasESData', () => {
     describe('resolve/cluster is available', () => {
+      it('should return true for hasESData when CPS has linked projects', async () => {
+        const coreStart = coreMock.createStart();
+        const http = coreStart.http;
+        const cpsManager = createCpsManager();
+
+        const spy = jest.spyOn(http, 'get');
+
+        const hasData = new HasData();
+        const hasDataService = hasData.start(coreStart, true, cpsManager);
+        const response = hasDataService.hasESData();
+
+        expect(await response).toBe(true);
+        expect(cpsManager.whenReady).toHaveBeenCalledTimes(1);
+        expect(cpsManager.getTotalProjectCount).toHaveBeenCalledTimes(1);
+        expect(spy).not.toHaveBeenCalled();
+      });
+
       it('should return true for hasESData when indices exist', async () => {
         const coreStart = coreMock.createStart();
         const http = coreStart.http;
@@ -149,9 +184,8 @@ describe('when calling hasData service', () => {
         const hasDataService = hasData.start(coreStart, true);
         const response = hasDataService.hasESData();
 
-        expect(spy).toHaveBeenCalledTimes(1);
-
         expect(await response).toBe(true);
+        expect(spy).toHaveBeenCalledTimes(1);
       });
 
       it('should return false for hasESData when no indices exist', async () => {
@@ -167,9 +201,8 @@ describe('when calling hasData service', () => {
         const hasDataService = hasData.start(coreStart, true);
         const response = hasDataService.hasESData();
 
-        expect(spy).toHaveBeenCalledTimes(1);
-
         expect(await response).toBe(false);
+        expect(spy).toHaveBeenCalledTimes(1);
       });
 
       it('should return true and show an error toast when checking for remote cluster data times out', async () => {
@@ -198,8 +231,8 @@ describe('when calling hasData service', () => {
         const hasDataService = hasData.start(coreStart, true);
         const response = hasDataService.hasESData();
 
-        expect(spy).toHaveBeenCalledTimes(1);
         expect(await response).toBe(true);
+        expect(spy).toHaveBeenCalledTimes(1);
         expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
         expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith({
           title: 'Remote cluster timeout',
@@ -237,8 +270,8 @@ describe('when calling hasData service', () => {
         const onRemoteDataTimeout = jest.fn();
         const response = hasDataService.hasESData({ onRemoteDataTimeout });
 
-        expect(spy).toHaveBeenCalledTimes(1);
         expect(await response).toBe(true);
+        expect(spy).toHaveBeenCalledTimes(1);
         expect(coreStart.notifications.toasts.addDanger).not.toHaveBeenCalled();
         expect(onRemoteDataTimeout).toHaveBeenCalledTimes(1);
         expect(onRemoteDataTimeout).toHaveBeenCalledWith(responseBody);
@@ -269,9 +302,8 @@ describe('when calling hasData service', () => {
         const hasDataService = hasData.start(coreStart, false);
         const response = hasDataService.hasESData();
 
-        expect(spy).toHaveBeenCalledTimes(1);
-
         expect(await response).toBe(true);
+        expect(spy).toHaveBeenCalledTimes(1);
       });
 
       it('should return false for hasESData when no indices exist', async () => {
@@ -291,9 +323,8 @@ describe('when calling hasData service', () => {
         const hasDataService = hasData.start(coreStart, false);
         const response = hasDataService.hasESData();
 
-        expect(spy).toHaveBeenCalledTimes(1);
-
         expect(await response).toBe(false);
+        expect(spy).toHaveBeenCalledTimes(2);
       });
 
       it('should return false for hasESData when only automatically created sources exist', async () => {
@@ -321,9 +352,8 @@ describe('when calling hasData service', () => {
         const hasDataService = hasData.start(coreStart, false);
         const response = hasDataService.hasESData();
 
-        expect(spy).toHaveBeenCalledTimes(1);
-
         expect(await response).toBe(false);
+        expect(spy).toHaveBeenCalledTimes(2);
       });
 
       it('should hit search api in case resolve api throws', async () => {
