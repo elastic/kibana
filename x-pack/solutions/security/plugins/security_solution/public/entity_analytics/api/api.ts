@@ -146,7 +146,7 @@ export const useEntityAnalyticsRoutes = () => {
       signal?: AbortSignal;
       params: FetchEntitiesListParams;
     }) =>
-      http.fetch<ListEntitiesResponse>(ENTITY_STORE_ROUTES.SEARCH_ENTITIES, {
+      http.fetch<ListEntitiesResponse>(ENTITY_STORE_ROUTES.CRUD_GET, {
         version: ENTITY_STORE_API_VERSIONS.internal.v2,
         method: 'GET',
         query: {

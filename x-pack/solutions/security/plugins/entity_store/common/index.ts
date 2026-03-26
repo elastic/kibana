@@ -57,7 +57,6 @@ export const ENTITY_STORE_ROUTES = {
   CRUD_UPDATE: `${ENTITY_STORE_BASE_ROUTE}/entities/{entityType}`,
   CRUD_BULK_UPDATE: `${ENTITY_STORE_BASE_ROUTE}/entities/bulk`,
   CRUD_GET: `${ENTITY_STORE_BASE_ROUTE}/entities`,
-  SEARCH_ENTITIES: `${ENTITY_STORE_BASE_ROUTE}/entities/search`,
   CRUD_DELETE: `${ENTITY_STORE_BASE_ROUTE}/entities/`,
   RESOLUTION_LINK: `${ENTITY_STORE_BASE_ROUTE}/resolution/link`,
   RESOLUTION_UNLINK: `${ENTITY_STORE_BASE_ROUTE}/resolution/unlink`,
