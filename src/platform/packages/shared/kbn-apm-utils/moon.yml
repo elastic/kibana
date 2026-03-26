@@ -16,6 +16,8 @@ project:
   channel: ''
   owner: '@elastic/obs-presentation-team'
   sourceRoot: src/platform/packages/shared/kbn-apm-utils
+dependsOn:
+  - '@kbn/tracing-utils'
 tags:
   - shared-common
   - package
