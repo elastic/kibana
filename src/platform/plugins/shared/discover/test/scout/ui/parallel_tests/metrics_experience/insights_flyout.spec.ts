@@ -62,9 +62,11 @@ spaceTest.describe(
           await expect(descriptionList).toContainText(testData.DATA_VIEW_NAME);
         });
 
+        // The viewer role does not grant the 'streams' feature privilege,
+        // so the data stream name should render as plain text without a navigation link.
         await spaceTest.step('data stream name renders as plain text (no link)', async () => {
-          await expect(page.getByTestId('metricsDataStreamText')).toBeVisible();
-          await expect(page.getByTestId('metricsDataStreamLink')).toHaveCount(0);
+          await expect(metricsExperience.flyout.overview.dataStream.text).toBeVisible();
+          await expect(metricsExperience.flyout.overview.dataStream.link).toBeHidden();
         });
 
         await spaceTest.step('Overview tab has no a11y violations', async () => {

@@ -15,6 +15,10 @@ import { createDimensionsPagination } from './pagination';
 export interface FlyoutOverviewTab {
   readonly tabButton: Locator;
   readonly descriptionList: Locator;
+  readonly dataStream: {
+    readonly link: Locator;
+    readonly text: Locator;
+  };
   readonly dimensionsPagination: PaginationLocators;
   readonly dimensionsListItems: Locator;
 }
@@ -39,6 +43,10 @@ export function createFlyout(page: ScoutPage): MetricsFlyout {
     overview: {
       tabButton: page.testSubj.locator('metricsExperienceFlyoutOverviewTab'),
       descriptionList: page.testSubj.locator('metricsExperienceFlyoutOverviewTabDescriptionList'),
+      dataStream: {
+        link: page.testSubj.locator('metricsDataStreamLink'),
+        text: page.testSubj.locator('metricsDataStreamText'),
+      },
       dimensionsPagination: createDimensionsPagination(container),
       dimensionsListItems: page.testSubj
         .locator('metricsExperienceFlyoutOverviewTabDimensionsList')
