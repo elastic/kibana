@@ -55,8 +55,11 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
         const defaultValue = defaults[key];
         const fieldSchema = schemaToUse.shape[key];
         const fieldMeta = fieldSchema.meta?.();
-        const defaultedSchema = fieldSchema.default(defaultValue);
-        schemaToUse.shape[key] = fieldMeta ? defaultedSchema.meta(fieldMeta) : defaultedSchema;
+        if (fieldMeta) {
+          schemaToUse.shape[key] = fieldSchema.default(defaultValue).meta(fieldMeta);
+        } else {
+          schemaToUse.shape[key] = fieldSchema.default(defaultValue);
+        }
       }
     });
   }

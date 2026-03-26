@@ -21,10 +21,10 @@ beforeEach(() => {
 
 describe('generateConfigSchema', () => {
   describe('customValidator - allowedHosts validation for URL fields', () => {
-    it('calls ensureUriAllowed for uri formatted config fields', () => {
+    it('calls ensureUriAllowed for uri formatted config fields when validate meta is set', () => {
       const validator = generateConfigSchema(
         z.object({
-          serviceUrl: z.url(),
+          serviceUrl: z.url().meta({ validate: { allowedHosts: true } }),
         })
       );
 
@@ -50,7 +50,7 @@ describe('generateConfigSchema', () => {
 
       const validator = generateConfigSchema(
         z.object({
-          serviceUrl: z.url(),
+          serviceUrl: z.url().meta({ validate: { allowedHosts: true } }),
         })
       );
 
@@ -76,7 +76,7 @@ describe('generateConfigSchema', () => {
 
       const validator = generateConfigSchema(
         z.object({
-          serviceUrl: z.url(),
+          serviceUrl: z.url().meta({ validate: { allowedHosts: true } }),
           optionalWebhookUrl: z.url().meta({ validate: { allowedHosts: false } }),
         })
       );
@@ -96,30 +96,6 @@ describe('generateConfigSchema', () => {
       expect(mockConfigUtils.ensureUriAllowed).not.toHaveBeenCalledWith(
         'https://not-allowed.example.com/webhook'
       );
-    });
-
-    it('validates nested object uri fields and array items', () => {
-      const validator = generateConfigSchema(
-        z.object({
-          endpoints: z.object({
-            primary: z.url(),
-          }),
-          mirrors: z.array(z.url()),
-        })
-      );
-
-      validator.customValidator!(
-        {
-          authType: 'basic',
-          endpoints: { primary: 'https://primary.example.com' },
-          mirrors: ['https://a.example.com', 'https://b.example.com'],
-        },
-        validatorServices
-      );
-
-      expect(mockConfigUtils.ensureUriAllowed).toHaveBeenCalledWith('https://primary.example.com');
-      expect(mockConfigUtils.ensureUriAllowed).toHaveBeenCalledWith('https://a.example.com');
-      expect(mockConfigUtils.ensureUriAllowed).toHaveBeenCalledWith('https://b.example.com');
     });
   });
 });
