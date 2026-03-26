@@ -411,19 +411,19 @@ export class TaskManagerRunner implements TaskRunner {
         // For long running tasks, update retryAt on an interval to allow for quicker task recovery
         const stopUpdatingLongRunningTasks = this.updateRetryAtOnIntervalForLongRunningTasks();
 
-    try {
-      const sanitizedTaskInstance = omit(modifiedContext.taskInstance, [
-        'apiKey',
-        'uiamApiKey',
-        'userScope',
-      ]);
-      const apiKeyForRequest = this.apiKeyStrategy.getApiKeyForFakeRequest(
-        modifiedContext.taskInstance
-      );
-      const fakeRequest = this.getFakeKibanaRequest(
-        apiKeyForRequest,
-        modifiedContext.taskInstance.userScope?.spaceId
-      );
+        try {
+          const sanitizedTaskInstance = omit(modifiedContext.taskInstance, [
+            'apiKey',
+            'uiamApiKey',
+            'userScope',
+          ]);
+          const apiKeyForRequest = this.apiKeyStrategy.getApiKeyForFakeRequest(
+            modifiedContext.taskInstance
+          );
+          const fakeRequest = this.getFakeKibanaRequest(
+            apiKeyForRequest,
+            modifiedContext.taskInstance.userScope?.spaceId
+          );
 
           const abortController = new AbortController();
 
