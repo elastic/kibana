@@ -171,14 +171,16 @@ export function RuleConditionChart({
       return;
     }
     const refLayers: LensReferenceLineLayer[] = [];
-    if (
+    const isWarningNotBetween =
       warningComparator === COMPARATORS.NOT_BETWEEN ||
-      (warningComparator === COMPARATORS.BETWEEN && warningThreshold.length === 2)
-    ) {
-      const [startFill, endFill] =
-        warningComparator === COMPARATORS.NOT_BETWEEN
-          ? (['below', 'above'] as const)
-          : (['above', 'none'] as const);
+      warningComparator === COMPARATORS.NOT_BETWEEN_INCLUSIVE;
+    const isWarningBetween =
+      warningComparator === COMPARATORS.BETWEEN ||
+      warningComparator === COMPARATORS.BETWEEN_INCLUSIVE;
+    if (isWarningNotBetween || (isWarningBetween && warningThreshold.length === 2)) {
+      const [startFill, endFill] = isWarningNotBetween
+        ? (['below', 'above'] as const)
+        : (['above', 'none'] as const);
 
       const refLayer: LensReferenceLineLayer = {
         type: 'reference',
@@ -188,7 +190,7 @@ export function RuleConditionChart({
             seriesColor: euiTheme.colors.warning,
             fill: startFill,
           },
-          warningComparator === COMPARATORS.BETWEEN
+          isWarningBetween
             ? {
                 value: (warningThreshold[1] || 0).toString(),
                 seriesColor: 'transparent',
@@ -247,14 +249,14 @@ export function RuleConditionChart({
     if (!threshold) return;
     const refLayers: LensReferenceLineLayer[] = [];
 
-    if (
-      comparator === COMPARATORS.NOT_BETWEEN ||
-      (comparator === COMPARATORS.BETWEEN && threshold.length === 2)
-    ) {
-      const [startFill, endFill] =
-        comparator === COMPARATORS.NOT_BETWEEN
-          ? (['below', 'above'] as const)
-          : (['above', 'none'] as const);
+    const isNotBetween =
+      comparator === COMPARATORS.NOT_BETWEEN || comparator === COMPARATORS.NOT_BETWEEN_INCLUSIVE;
+    const isBetween =
+      comparator === COMPARATORS.BETWEEN || comparator === COMPARATORS.BETWEEN_INCLUSIVE;
+    if (isNotBetween || (isBetween && threshold.length === 2)) {
+      const [startFill, endFill] = isNotBetween
+        ? (['below', 'above'] as const)
+        : (['above', 'none'] as const);
 
       const refLayer: LensReferenceLineLayer = {
         type: 'reference',
@@ -264,7 +266,7 @@ export function RuleConditionChart({
             seriesColor: euiTheme.colors.danger,
             fill: startFill,
           },
-          comparator === COMPARATORS.BETWEEN
+          isBetween
             ? {
                 value: (threshold[1] || 0).toString(),
                 seriesColor: 'transparent',

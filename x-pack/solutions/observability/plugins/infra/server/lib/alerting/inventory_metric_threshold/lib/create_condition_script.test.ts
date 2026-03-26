@@ -11,10 +11,29 @@ describe('createConditionScript', () => {
   it('should convert tx threshold from bits to byte', () => {
     expect(createConditionScript([8], COMPARATORS.GREATER_THAN_OR_EQUALS, 'tx')).toEqual({
       params: {
-        // Threshold has been converted from 8 bits to 1 byte
         threshold: 1,
       },
       source: 'params.value >= params.threshold ? 1 : 0',
+    });
+  });
+
+  it('should create between inclusive condition script', () => {
+    expect(createConditionScript([10, 20], COMPARATORS.BETWEEN_INCLUSIVE, 'cpu')).toEqual({
+      params: {
+        threshold0: 0.1,
+        threshold1: 0.2,
+      },
+      source: 'params.value >= params.threshold0 && params.value <= params.threshold1 ? 1 : 0',
+    });
+  });
+
+  it('should create not between inclusive condition script', () => {
+    expect(createConditionScript([10, 20], COMPARATORS.NOT_BETWEEN_INCLUSIVE, 'cpu')).toEqual({
+      params: {
+        threshold0: 0.1,
+        threshold1: 0.2,
+      },
+      source: 'params.value >= params.threshold0 && params.value <= params.threshold1 ? 0 : 1',
     });
   });
 });

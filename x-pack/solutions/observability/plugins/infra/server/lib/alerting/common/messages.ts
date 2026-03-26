@@ -61,9 +61,15 @@ const recoveredComparatorToI18n = (
   switch (comparator) {
     case COMPARATORS.BETWEEN:
       return currentValue < threshold[0] ? belowText : aboveText;
+    case COMPARATORS.BETWEEN_INCLUSIVE:
+      return currentValue < threshold[0] ? belowText : aboveText;
     case COMPARATORS.NOT_BETWEEN:
       return i18n.translate('xpack.infra.metrics.alerting.threshold.betweenRecovery', {
         defaultMessage: 'between',
+      });
+    case COMPARATORS.NOT_BETWEEN_INCLUSIVE:
+      return i18n.translate('xpack.infra.metrics.alerting.threshold.betweenInclusiveRecovery', {
+        defaultMessage: 'between (inclusive)',
       });
     case COMPARATORS.GREATER_THAN:
     case COMPARATORS.GREATER_THAN_OR_EQUALS:
@@ -79,9 +85,17 @@ const alertComparatorToI18n = (comparator: COMPARATORS) => {
       return i18n.translate('xpack.infra.customThreshold.rule.threshold.between', {
         defaultMessage: 'between',
       });
+    case COMPARATORS.BETWEEN_INCLUSIVE:
+      return i18n.translate('xpack.infra.customThreshold.rule.threshold.betweenInclusive', {
+        defaultMessage: 'between (inclusive)',
+      });
     case COMPARATORS.NOT_BETWEEN:
       return i18n.translate('xpack.infra.customThreshold.rule.threshold.notBetween', {
         defaultMessage: 'not between',
+      });
+    case COMPARATORS.NOT_BETWEEN_INCLUSIVE:
+      return i18n.translate('xpack.infra.customThreshold.rule.threshold.notBetweenInclusive', {
+        defaultMessage: 'not between (inclusive)',
       });
     case COMPARATORS.GREATER_THAN:
       return i18n.translate('xpack.infra.customThreshold.rule.threshold.above', {

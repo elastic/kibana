@@ -75,4 +75,24 @@ export const builtInComparators: { [key: string]: Comparator } = {
     value: COMPARATORS.NOT_BETWEEN,
     requiredValues: 2,
   },
+  [COMPARATORS.BETWEEN_INCLUSIVE]: {
+    text: i18n.translate(
+      'xpack.triggersActionsUI.common.constants.comparators.isBetweenInclusiveLabel',
+      {
+        defaultMessage: 'Is between (inclusive)',
+      }
+    ),
+    value: COMPARATORS.BETWEEN_INCLUSIVE,
+    requiredValues: 2,
+  },
+  [COMPARATORS.NOT_BETWEEN_INCLUSIVE]: {
+    text: i18n.translate(
+      'xpack.triggersActionsUI.common.constants.comparators.isNotBetweenInclusiveLabel',
+      {
+        defaultMessage: 'Is not between (inclusive)',
+      }
+    ),
+    value: COMPARATORS.NOT_BETWEEN_INCLUSIVE,
+    requiredValues: 2,
+  },
 };

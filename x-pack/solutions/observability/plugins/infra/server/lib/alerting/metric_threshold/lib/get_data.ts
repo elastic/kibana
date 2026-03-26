@@ -300,4 +300,8 @@ const comparatorMap = {
   [COMPARATORS.NOT_BETWEEN]: (value: number, [a, b]: number[]) => value < a || value > b,
   [COMPARATORS.GREATER_THAN_OR_EQUALS]: (a: number, [b]: number[]) => a >= b,
   [COMPARATORS.LESS_THAN_OR_EQUALS]: (a: number, [b]: number[]) => a <= b,
+  [COMPARATORS.BETWEEN_INCLUSIVE]: (value: number, [a, b]: number[]) =>
+    value >= Math.min(a, b) && value <= Math.max(a, b),
+  [COMPARATORS.NOT_BETWEEN_INCLUSIVE]: (value: number, [a, b]: number[]) =>
+    value < Math.min(a, b) || value > Math.max(a, b),
 };
