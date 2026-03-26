@@ -23,13 +23,14 @@ import {
 } from '../date_range_picker_panel_ui';
 import { calendarPanelTexts, mainPanelTexts } from '../translations';
 import { timeRangeToDisplayText } from '../format';
-import { getEndDate, getStartDate, formatDateRange, toLocalPreciseString } from '../utils';
+import { getEndDate, getStartDate, formatDateRange, formatAbsoluteDate } from '../utils';
 import { useDateRangePickerContext } from '../date_range_picker_context';
 
 /** Calendar-based date selection panel. */
 export function CalendarPanel() {
-  const { applyRange, onPresetSave, setText, text, timeRange, calendarOptions } =
+  const { applyRange, onPresetSave, setText, text, timeRange, calendarOptions, settings } =
     useDateRangePickerContext();
+  const timePrecision = settings.timePrecision ?? 's';
   const saveAsPresetCheckboxId = useGeneratedHtmlId({ prefix: 'saveAsPreset' });
 
   const [pendingFrom, setPendingFrom] = useState<Date | null>(null);
@@ -54,9 +55,15 @@ export function CalendarPanel() {
   // On mount: convert to absolute format so user sees resolved dates
   useEffect(() => {
     if (timeSourceRef.current.startDate && timeSourceRef.current.endDate) {
-      setText(formatDateRange(timeSourceRef.current.startDate, timeSourceRef.current.endDate));
+      setText(
+        formatDateRange(
+          timeSourceRef.current.startDate,
+          timeSourceRef.current.endDate,
+          timePrecision
+        )
+      );
     }
-  }, [setText]);
+  }, [setText, timePrecision]);
 
   const hasTimeRangeChanged = useMemo(() => {
     if (!timeRange.startDate || !timeRange.endDate) return false;
@@ -81,12 +88,12 @@ export function CalendarPanel() {
 
   const formatRangeText = useCallback(
     (from: Date, to?: Date): string => {
-      if (!to) return toLocalPreciseString(getStartDate(from));
+      if (!to) return formatAbsoluteDate(getStartDate(from), timePrecision);
 
       const { start, end } = getOrderedDates(from, to);
-      return formatDateRange(start, end);
+      return formatDateRange(start, end, timePrecision);
     },
-    [getOrderedDates]
+    [getOrderedDates, timePrecision]
   );
 
   const absoluteRange = useMemo(() => {
@@ -95,13 +102,13 @@ export function CalendarPanel() {
     const { start, end } = getOrderedDates(calendarRange.from, calendarRange.to);
 
     return {
-      start: toLocalPreciseString(start),
-      end: toLocalPreciseString(end),
+      start: start.toISOString(),
+      end: end.toISOString(),
       startDate: start,
       endDate: end,
-      inputText: formatDateRange(start, end),
+      inputText: formatDateRange(start, end, timePrecision),
     };
-  }, [calendarRange, getOrderedDates]);
+  }, [calendarRange, getOrderedDates, timePrecision]);
 
   const handleRangeChange = useCallback(
     (newRange: DateRange | undefined) => {

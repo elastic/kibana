@@ -224,23 +224,25 @@ describe('getEndDate', () => {
 });
 
 describe('formatDateRange', () => {
-  it('formats two dates with the standard delimiter', () => {
+  it('formats two dates with the standard delimiter (default precision = s)', () => {
     const start = new Date(2026, 1, 10, 10, 15, 30, 500);
     const end = new Date(2026, 1, 11, 23, 30, 0, 0);
-    expect(formatDateRange(start, end)).toBe('2026-02-10T10:15:30.500 - 2026-02-11T23:30:00.000');
+    expect(formatDateRange(start, end)).toBe('Feb 10, 2026, 10:15:30 - Feb 11, 2026, 23:30:00');
   });
 
-  it('uses local time (no Z suffix)', () => {
-    const start = new Date(2026, 0, 1, 0, 0, 0, 0);
-    const end = new Date(2026, 0, 2, 0, 0, 0, 0);
-    const result = formatDateRange(start, end);
-    expect(result).not.toMatch(/Z/);
+  it('respects timePrecision', () => {
+    const start = new Date(2026, 1, 10, 10, 15, 30, 500);
+    const end = new Date(2026, 1, 11, 23, 30, 0, 0);
+    expect(formatDateRange(start, end, 'ms')).toBe(
+      'Feb 10, 2026, 10:15:30.500 - Feb 11, 2026, 23:30:00.000'
+    );
+    expect(formatDateRange(start, end, 'none')).toBe('Feb 10, 2026, 10:15 - Feb 11, 2026, 23:30');
   });
 
   it('handles same-day ranges', () => {
     const start = new Date(2026, 2, 5, 9, 0, 0, 0);
     const end = new Date(2026, 2, 5, 17, 0, 0, 0);
-    expect(formatDateRange(start, end)).toBe('2026-03-05T09:00:00.000 - 2026-03-05T17:00:00.000');
+    expect(formatDateRange(start, end)).toBe('Mar 5, 2026, 09:00:00 - Mar 5, 2026, 17:00:00');
   });
 });
 

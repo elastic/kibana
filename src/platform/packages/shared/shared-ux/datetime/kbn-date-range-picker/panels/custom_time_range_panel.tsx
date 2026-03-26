@@ -49,7 +49,7 @@ import {
   SubPanelHeading,
 } from '../date_range_picker_panel_ui';
 import { useDateRangePickerContext } from '../date_range_picker_context';
-import { dateMathToRelativeParts } from '../format';
+import { dateMathToRelativeParts, applyTimePrecision } from '../format';
 import { getOptionShorthand } from '../utils';
 import type { DateType, DateOffset, TimeUnit } from '../types';
 import {
@@ -308,7 +308,9 @@ const ShorthandDisplay = ({ value, isDisabled }: ShorthandDisplayProps) => {
  * Panel for specifying a custom absolute or relative time range.
  */
 export function CustomTimeRangePanel() {
-  const { timeRange, text, setText, applyRange, onPresetSave } = useDateRangePickerContext();
+  const { timeRange, text, setText, applyRange, onPresetSave, settings } =
+    useDateRangePickerContext();
+  const absoluteFormat = applyTimePrecision(DEFAULT_DATE_FORMAT, settings.timePrecision ?? 's');
   const formId = useGeneratedHtmlId({ prefix: 'customTimeRangeForm' });
   const saveCheckboxId = useGeneratedHtmlId({ prefix: 'saveAsPreset' });
   const [saveAsPreset, setSaveAsPreset] = useState(false);
@@ -317,10 +319,10 @@ export function CustomTimeRangePanel() {
   const hasAppliedRef = useRef(false);
 
   const [startState, setStartState] = useState<DatePartState>(() =>
-    deriveInitialState(timeRange.start, timeRange.startDate, timeRange.type[0])
+    deriveInitialState(timeRange.start, timeRange.startDate, timeRange.type[0], absoluteFormat)
   );
   const [endState, setEndState] = useState<DatePartState>(() =>
-    deriveInitialState(timeRange.end, timeRange.endDate, timeRange.type[1])
+    deriveInitialState(timeRange.end, timeRange.endDate, timeRange.type[1], absoluteFormat)
   );
 
   const startDateString = useMemo(() => datePartStateToDateString(startState), [startState]);
@@ -358,9 +360,20 @@ export function CustomTimeRangePanel() {
     }
     // Both bounds must be present; skip when input is partial or unparseable.
     if (!timeRange.start || !timeRange.end) return;
-    setStartState(deriveInitialState(timeRange.start, timeRange.startDate, timeRange.type[0]));
-    setEndState(deriveInitialState(timeRange.end, timeRange.endDate, timeRange.type[1]));
-  }, [timeRange.start, timeRange.end, timeRange.startDate, timeRange.endDate, timeRange.type]);
+    setStartState(
+      deriveInitialState(timeRange.start, timeRange.startDate, timeRange.type[0], absoluteFormat)
+    );
+    setEndState(
+      deriveInitialState(timeRange.end, timeRange.endDate, timeRange.type[1], absoluteFormat)
+    );
+  }, [
+    timeRange.start,
+    timeRange.end,
+    timeRange.startDate,
+    timeRange.endDate,
+    timeRange.type,
+    absoluteFormat,
+  ]);
 
   useEffect(() => {
     if (!isPanelDrivenChangeRef.current) return;
@@ -458,10 +471,10 @@ CustomTimeRangePanel.PANEL_ID = 'custom-time-range-panel';
 function deriveInitialState(
   dateString: string,
   date: Date | null,
-  dateType: DateType
+  dateType: DateType,
+  absoluteFormat: string = DEFAULT_DATE_FORMAT
 ): DatePartState {
-  // TODO: temporary default format, will be refactored
-  const formatAbsolute = (d: Date | null) => moment(d ?? undefined).format(DEFAULT_DATE_FORMAT);
+  const formatAbsolute = (d: Date | null) => moment(d ?? undefined).format(absoluteFormat);
 
   if (dateType === DATE_TYPE_NOW) {
     return {
@@ -492,7 +505,7 @@ function deriveInitialState(
     type: DATE_TYPE_ABSOLUTE,
     relativeOffset: DEFAULT_RELATIVE,
     absoluteText: isValidDate
-      ? moment(date).format(DEFAULT_DATE_FORMAT)
+      ? moment(date).format(absoluteFormat)
       : dateString || formatAbsolute(null),
   };
 }

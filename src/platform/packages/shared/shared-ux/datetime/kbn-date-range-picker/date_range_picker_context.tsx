@@ -282,9 +282,14 @@ export function DateRangePickerProvider({
         rangeToApply = timeRange;
       }
 
+      // When the caller provides absolute bounds (no datemath), preserve them
+      // as-is so UTC ISO strings from calendar / time window buttons aren't
+      // re-parsed into a different format. Datemath bounds (containing "now")
+      // go through the parser which may apply rounding.
+      const preserveBounds = range && !range.start.includes('now') && !range.end.includes('now');
       onChange({
-        start: rangeToApply.start,
-        end: rangeToApply.end,
+        start: preserveBounds ? range.start : rangeToApply.start,
+        end: preserveBounds ? range.end : rangeToApply.end,
         startDate: rangeToApply.startDate,
         endDate: rangeToApply.endDate,
         value: rangeToApply.value,
