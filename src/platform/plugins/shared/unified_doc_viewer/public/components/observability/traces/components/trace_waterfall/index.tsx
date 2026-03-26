@@ -168,6 +168,10 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
   // in two scenarios: cascade close (tab switch unmount) and back-button click.
   // We must preserve restorable state during cascade close but honor back-button.
   //
+  // NOTE: The 'navigation' event type string is an EUI internal — it is not part
+  // of EUI's public API and may change without notice. If this breaks after an EUI
+  // upgrade, check flyout_managed.tsx for the current synthetic event type.
+  //
   // The trick: when we receive a 'navigation' event, we defer the state clearing
   // to a useEffect. During a cascade close the component is unmounting, so React
   // will not run new effects — the deferred clear never commits and the restorable
