@@ -20,7 +20,8 @@ export default function lastRunOutcomeMsgMigrationTests({ getService }: FtrProvi
   const es = getService('es');
   const supertest = getService('supertest');
 
-  describe('lastRun outcomeMsg migration', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/259634
+  describe.skip('lastRun outcomeMsg migration', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(async () => {
