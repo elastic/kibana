@@ -142,14 +142,17 @@ const createMockWorkflow = (overrides: Partial<WorkflowListItemDto> = {}): Workf
   valid: true,
   ...overrides,
 });
-const defaultSearch: WorkflowsSearchParams = { page: 1, size: 20 };
+const PAGE = 1;
+const SIZE = 20;
+const defaultSearch: WorkflowsSearchParams = { page: PAGE, size: SIZE };
 
 const createMockWorkflowListDto = (
   workflows: WorkflowListItemDto[] = [createMockWorkflow()]
 ): WorkflowListDto => ({
   results: workflows,
   total: workflows.length,
-  ...defaultSearch,
+  page: PAGE,
+  size: SIZE,
 });
 
 describe('WorkflowList', () => {
