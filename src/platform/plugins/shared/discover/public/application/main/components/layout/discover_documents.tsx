@@ -314,9 +314,6 @@ function DiscoverDocumentsComponent({
   const docViewerUiState = useCurrentTabSelector((state) => state.uiState.docViewer);
   const setDocViewerUiState = useCurrentTabAction(internalStateActions.setDocViewerUiState);
 
-  const latestDocViewerUiState = useLatest(docViewerUiState);
-  const latestInitialDocViewerTabId = useLatest(initialDocViewerTabId);
-
   const onInitialDocViewerStateChange = useCallback(
     (newDocViewerUiState: Partial<DocViewerRestorableState>) => {
       dispatch(setDocViewerUiState({ docViewerUiState: newDocViewerUiState }));
@@ -584,13 +581,13 @@ function DiscoverDocumentsComponent({
         dataView={dataView}
         savedSearchId={persistedDiscoverSession?.id!}
         query={query}
-        initialTabId={latestInitialDocViewerTabId.current}
+        initialTabId={initialDocViewerTabId}
         onFilter={onAddFilter}
         onRemoveColumn={onRemoveColumnWithTracking}
         onAddColumn={onAddColumnWithTracking}
         docViewerExtensionActions={docViewerExtensionActions}
         onUpdateSelectedTabId={onUpdateSelectedTabId}
-        initialDocViewerState={latestDocViewerUiState.current}
+        initialDocViewerState={docViewerUiState}
         onInitialDocViewerStateChange={onInitialDocViewerStateChange}
       />
     </EuiFlexItem>

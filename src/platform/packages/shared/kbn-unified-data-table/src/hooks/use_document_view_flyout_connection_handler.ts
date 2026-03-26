@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type {
   DocViewerSnapshot,
@@ -24,6 +24,17 @@ export interface UseDocumentViewFlyoutConnectionHandlerOptions {
     doc?: DataTableRecord,
     options?: { initialTabId?: string; initialTabState?: object }
   ) => void;
+  /**
+   * Callback to clear the expanded document
+   */
+  clearExpandedOnGridChange?: boolean;
+}
+
+interface UseDocumentViewFlyoutConnectionHandlerResult {
+  documentViewFlyoutConnectionHandler: NonNullable<
+    UnifiedDataTableProps['documentViewFlyoutConnectionHandler']
+  >;
+  connectedGridMeta: React.MutableRefObject<ConnectedGridMeta | null>;
 }
 
 export interface ConnectedGridMeta {
@@ -75,12 +86,8 @@ const createDefaultDocViewerSnapshot = (): DocViewerSnapshot => ({
 export function useDocumentViewFlyoutConnectionHandler({
   expandedDoc,
   setExpandedDoc,
-}: UseDocumentViewFlyoutConnectionHandlerOptions): {
-  documentViewFlyoutConnectionHandler: NonNullable<
-    UnifiedDataTableProps['documentViewFlyoutConnectionHandler']
-  >;
-  connectedGridMeta: React.MutableRefObject<ConnectedGridMeta | null>;
-} {
+  clearExpandedOnGridChange = true,
+}: UseDocumentViewFlyoutConnectionHandlerOptions): UseDocumentViewFlyoutConnectionHandlerResult {
   const latestExpandedDocRef = useRef(expandedDoc);
   const connectedGridMeta = useRef<ConnectedGridMeta | null>(null);
 
@@ -98,18 +105,6 @@ export function useDocumentViewFlyoutConnectionHandler({
     };
     storeRef.current.listeners.forEach((listener) => listener());
   }, []);
-
-  const wrappedSetExpandedDoc = useCallback(
-    (
-      doc: DataTableRecord | undefined,
-      options?: { initialTabId?: string; initialTabState?: object }
-    ) => {
-      latestExpandedDocRef.current = doc;
-      setExpandedDoc(doc, options);
-      notifyListeners();
-    },
-    [setExpandedDoc, notifyListeners]
-  );
 
   const subscribe = useCallback((listener: () => void) => {
     storeRef.current.listeners.add(listener);
@@ -129,12 +124,32 @@ export function useDocumentViewFlyoutConnectionHandler({
     [subscribe, getSnapshot, getServerSnapshot]
   );
 
+  const wrappedSetExpandedDoc = useCallback(
+    (
+      doc: DataTableRecord | undefined,
+      options?: { initialTabId?: string; initialTabState?: object }
+    ) => {
+      latestExpandedDocRef.current = doc;
+      setExpandedDoc(doc, options);
+      notifyListeners();
+    },
+    [setExpandedDoc, notifyListeners]
+  );
+
+  useEffect(() => {
+    if (latestExpandedDocRef.current !== expandedDoc) {
+      latestExpandedDocRef.current = expandedDoc;
+      notifyListeners();
+    }
+  }, [expandedDoc, notifyListeners]);
+
   const documentViewFlyoutConnectionHandler = useCallback<
     NonNullable<UnifiedDataTableProps['documentViewFlyoutConnectionHandler']>
   >(
     (displayedRows, displayedColumns, customColumnsMeta) => {
-      if (connectedGridMeta.current && latestExpandedDocRef.current) {
-        // if the document viewer is open we want to update the expanded doc to the first row of the grid
+      if (connectedGridMeta.current && latestExpandedDocRef.current && clearExpandedOnGridChange) {
+        // if the document viewer is open we want to update
+        // the expanded doc to the first row of the incoming grid displayed rows
         wrappedSetExpandedDoc(displayedRows[0]);
       }
 
@@ -144,14 +159,12 @@ export function useDocumentViewFlyoutConnectionHandler({
         displayedRows,
       };
 
-      notifyListeners();
-
       return {
         externalStore,
         setExpandedDoc: wrappedSetExpandedDoc,
       };
     },
-    [externalStore, notifyListeners, wrappedSetExpandedDoc]
+    [externalStore, wrappedSetExpandedDoc, clearExpandedOnGridChange]
   );
 
   return {
