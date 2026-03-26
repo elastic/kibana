@@ -39,7 +39,10 @@ import type { PackQueryFormData } from '../queries/use_pack_query_form';
 import { PackTypeSelectable } from './shards/pack_type_selectable';
 import { overflowCss } from '../utils';
 
-type PackFormData = Omit<PackItem, 'id' | 'queries'> & { queries: PackQueryFormData[] };
+type PackFormData = Omit<PackItem, 'id' | 'queries'> & {
+  queries: PackQueryFormData[];
+  pack_type: string;
+};
 
 const euiAccordionCss = ({ euiTheme }: UseEuiTheme) => ({
   '.euiAccordion__button': {
@@ -68,7 +71,6 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     const newState = isOpen ? 'open' : 'closed';
     setShardsToggleState(newState);
   }, []);
-  const [packType, setPackType] = useState('policy');
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const handleHideConfirmationModal = useCallback(() => setShowConfirmationModal(false), []);
 
@@ -99,25 +101,24 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     };
   };
 
-  const hooksForm = useHookForm({
+  const defaultPackType = defaultValue?.shards?.['*'] ? 'global' : 'policy';
+
+  const hooksForm = useHookForm<PackFormData>({
     defaultValues: defaultValue
-      ? deserializer(defaultValue)
+      ? { ...deserializer(defaultValue), pack_type: defaultPackType }
       : {
           name: '',
           description: '',
           policy_ids: [],
           enabled: true,
           queries: [],
+          pack_type: 'policy',
         },
   });
 
   useEffect(() => {
-    if (!isEmpty(defaultValue?.shards)) {
-      if (defaultValue?.shards?.['*']) {
-        setPackType('global');
-      } else {
-        setShardsToggleState('open');
-      }
+    if (!isEmpty(defaultValue?.shards) && !defaultValue?.shards?.['*']) {
+      setShardsToggleState('open');
     }
   }, [defaultValue, defaultValue?.shards]);
 
@@ -125,9 +126,10 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     handleSubmit,
     watch,
     trigger,
+    setValue,
     formState: { isSubmitting, isDirty },
   } = hooksForm;
-  const { policy_ids: policyIds, shards } = watch();
+  const { policy_ids: policyIds, shards, pack_type: packType } = watch();
 
   const onDirtyStateChangeRef = useRef(onDirtyStateChange);
   onDirtyStateChangeRef.current = onDirtyStateChange;
@@ -158,6 +160,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     async (values: PackFormData) => {
       const serializer = ({
         shards: _,
+        pack_type: __,
         policy_ids: payloadAgentPolicyIds,
         queries,
         ...restPayload
@@ -233,9 +236,9 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const changePackType = useCallback(
     (type: 'global' | 'policy' | 'shards') => {
-      setPackType(type);
+      setValue('pack_type', type, { shouldDirty: true });
     },
-    [setPackType]
+    [setValue]
   );
 
   const options = useMemo(
