@@ -40,6 +40,7 @@ import {
 } from '../../../rule_gaps/context/gap_auto_fill_scheduler_context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { CpsMlRuleCallout } from '../../components/cps_ml_rule_callout/callout';
 
 const RulesPageContent = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -92,6 +93,7 @@ const RulesPageContent = () => {
     <>
       <NeedAdminForUpdateRulesCallOut />
       <MissingDetectionsPrivilegesCallOut />
+      <CpsMlRuleCallout />
       <MlJobCompatibilityCallout />
       <ValueListsFlyout showFlyout={isValueListFlyoutVisible} onClose={hideValueListFlyout} />
       <RuleImportModal
