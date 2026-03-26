@@ -25,15 +25,26 @@ function getProxyBasicAuthFromServerArgs(
     user: userLine.replace('--xpack.actions.proxyUser=', ''),
     password: passLine.replace('--xpack.actions.proxyPassword=', ''),
   };
-  // eslint-disable-next-line no-console
-  console.log(`Proxy basic auth credentials: ${result.user}:${result.password}`);
   return result;
 }
+
+type ProxyReqHandler = (
+  proxyReq?: http.ClientRequest,
+  req?: http.IncomingMessage,
+  res?: http.ServerResponse
+) => void;
+
+type ProxyResHandler = (
+  proxyRes?: http.IncomingMessage,
+  req?: http.IncomingMessage,
+  res?: http.ServerResponse
+) => void;
 
 export const getHttpProxyServer = async (
   targetUrl: string,
   kbnTestServerConfig: string[],
-  onProxyResHandler: (proxyRes?: unknown, req?: unknown, res?: unknown) => void
+  onProxyResHandler: ProxyResHandler,
+  onProxyReqHandler?: ProxyReqHandler
 ): Promise<httpProxy> => {
   const proxyServer = httpProxy.createProxyServer({
     target: targetUrl,
@@ -41,7 +52,7 @@ export const getHttpProxyServer = async (
     selfHandleResponse: false,
   });
 
-  proxyServer.on('proxyRes', (proxyRes: unknown, req: unknown, res: unknown) => {
+  proxyServer.on('proxyRes', (proxyRes, req, res) => {
     onProxyResHandler(proxyRes, req, res);
   });
 
@@ -51,6 +62,7 @@ export const getHttpProxyServer = async (
         proxyReq.destroy();
       }
     });
+    onProxyReqHandler?.(proxyReq, req, res);
   });
 
   const proxyPort = getProxyPort(kbnTestServerConfig);
