@@ -13,7 +13,7 @@ export type {
   EntityStoreCRUDClient,
 } from './types';
 export type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
-export type { BulkObject, BulkObjectResponse } from './domain/crud';
+export type { EntityUpdateClient, BulkObject, BulkObjectResponse } from './domain/crud';
 export { getLatestEntitiesIndexName } from '../common';
 export { getHistorySnapshotIndexPattern } from './domain/asset_manager/history_snapshot_index';
 

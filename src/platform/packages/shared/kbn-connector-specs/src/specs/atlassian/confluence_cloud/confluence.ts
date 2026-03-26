@@ -17,6 +17,8 @@ import {
   GetSpaceInputSchema,
 } from './types';
 import type { ListPagesInput, GetPageInput, ListSpacesInput, GetSpaceInput } from './types';
+import getResourceWorkflow from './workflows/get_resource.yaml';
+import listResourceWorkflow from './workflows/list_resource.yaml';
 
 /** Bare subdomain: alphanumeric and hyphens only (no dots, no .atlassian.net suffix). */
 const BARE_SUBDOMAIN_REGEX = /^[a-z0-9-]+$/i;
@@ -59,7 +61,7 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       defaultMessage: 'Connect to Confluence Cloud to search and retrieve pages and spaces.',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
   auth: {
     types: [
@@ -216,4 +218,6 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       }
     },
   },
+
+  agentBuilderWorkflows: [getResourceWorkflow, listResourceWorkflow],
 };
