@@ -9,13 +9,13 @@ import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import {
   getStreamTypeFromDefinition,
+  STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   type SignificantEventsQueriesGenerationResult,
 } from '@kbn/streams-schema';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
-import { STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID } from '@kbn/streams-schema';
-import { getErrorMessage } from '../../streams/errors/parse_error';
+import { parseError } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
-import { resolveConnectorIdWithInferenceAllowlist } from '../../../routes/utils/resolve_connector_id_with_inference_allowlist';
+import { resolveConnectorIdAndCheckAllowlist } from '../../../routes/utils/resolve_connector_id_and_check_allowlist';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
 import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
@@ -66,7 +66,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
 
               const taskLogger = taskContext.logger.get('significant_events_queries_generation');
               const settings = await modelSettingsClient.getSettings();
-              const connectorId = await resolveConnectorIdWithInferenceAllowlist({
+              const connectorId = await resolveConnectorIdAndCheckAllowlist({
                 connectorId: settings.connectorIdRuleGeneration,
                 uiSettingsClient,
                 logger: taskLogger,
@@ -130,7 +130,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
 
                 const errorMessage = isInferenceProviderError(error)
                   ? formatInferenceProviderError(error, connector)
-                  : getErrorMessage(error);
+                  : parseError(error).message;
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||

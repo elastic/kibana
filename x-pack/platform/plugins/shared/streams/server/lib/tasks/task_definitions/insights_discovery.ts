@@ -9,17 +9,19 @@ import { v4 as uuidv4 } from 'uuid';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import { isInferenceProviderError } from '@kbn/inference-common';
-import type { Insight } from '@kbn/streams-schema';
-import { getImpactLevel } from '@kbn/streams-schema';
+import {
+  type Insight,
+  getImpactLevel,
+  STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+} from '@kbn/streams-schema';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
-import { STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID } from '@kbn/streams-schema';
 import type { TaskContext } from '.';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskParams } from '../types';
 import { generateInsights } from '../../significant_events/insights/generate_insights';
-import { getErrorMessage } from '../../streams/errors/parse_error';
+import { parseError } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
-import { resolveConnectorIdWithInferenceAllowlist } from '../../../routes/utils/resolve_connector_id_with_inference_allowlist';
+import { resolveConnectorIdAndCheckAllowlist } from '../../../routes/utils/resolve_connector_id_and_check_allowlist';
 
 export interface InsightsDiscoveryTaskResult {
   insights: Insight[];
@@ -62,7 +64,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
 
               const taskLogger = taskContext.logger.get('insights_discovery');
               const settings = await modelSettingsClient.getSettings();
-              const connectorId = await resolveConnectorIdWithInferenceAllowlist({
+              const connectorId = await resolveConnectorIdAndCheckAllowlist({
                 connectorId: settings.connectorIdDiscovery,
                 uiSettingsClient,
                 logger: taskLogger,
@@ -108,9 +110,9 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                     );
                   } catch (persistError) {
                     taskContext.logger.error(
-                      `Failed to persist ${result.insights.length} insights: ${getErrorMessage(
-                        persistError
-                      )}`
+                      `Failed to persist ${result.insights.length} insights: ${
+                        parseError(persistError).message
+                      }`
                     );
                   }
                 }
@@ -126,7 +128,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
 
                 const errorMessage = isInferenceProviderError(error)
                   ? formatInferenceProviderError(error, connector)
-                  : getErrorMessage(error);
+                  : parseError(error).message;
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||

@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 
 /** Logs at info if the resolved connector is outside the feature allowlist; usage continues. */
-export async function pickAllowedConnectorForInferenceFeature({
+export async function logIfConnectorNotInAllowlist({
   resolvedConnectorId,
   featureId,
   searchInferenceEndpoints,

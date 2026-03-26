@@ -7,10 +7,10 @@
 
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
-import { pickAllowedConnectorForInferenceFeature } from './pick_allowed_connector_for_inference_feature';
+import { logIfConnectorNotInAllowlist } from './log_if_connector_not_in_allowlist';
 import { resolveConnectorId } from './resolve_connector_id';
 
-export async function resolveConnectorIdWithInferenceAllowlist({
+export async function resolveConnectorIdAndCheckAllowlist({
   connectorId,
   uiSettingsClient,
   logger,
@@ -24,7 +24,7 @@ export async function resolveConnectorIdWithInferenceAllowlist({
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
 }): Promise<string> {
   const resolved = await resolveConnectorId({ connectorId, uiSettingsClient, logger });
-  return pickAllowedConnectorForInferenceFeature({
+  return logIfConnectorNotInAllowlist({
     resolvedConnectorId: resolved,
     featureId,
     searchInferenceEndpoints,
