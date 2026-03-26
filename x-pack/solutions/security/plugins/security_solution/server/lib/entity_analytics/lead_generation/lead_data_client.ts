@@ -298,15 +298,19 @@ export const createLeadDataClient = ({
     id: string,
     updates: Partial<Pick<Lead, 'status'>>
   ): Promise<boolean> => {
+    const status = updates.status;
+    if (status === undefined) {
+      return false;
+    }
+
     try {
       const resp = await esClient.updateByQuery({
         index: allIndices,
         query: { term: { id } },
         script: {
-          source: Object.entries(updates)
-            .map(([key, val]) => `ctx._source['${key}'] = '${val}'`)
-            .join('; '),
+          source: `ctx._source['status'] = params.status`,
           lang: 'painless',
+          params: { status },
         },
         refresh: true,
         conflicts: 'proceed',
@@ -315,7 +319,7 @@ export const createLeadDataClient = ({
       return (resp.updated ?? 0) > 0;
     } catch (e) {
       logger.error(`[LeadGeneration] Error updating lead ${id}: ${e}`);
-      return false;
+      throw e;
     }
   };
 

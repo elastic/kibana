@@ -320,6 +320,9 @@ describe('LeadDataClient', () => {
         expect.objectContaining({
           index: allIndices,
           query: { term: { id: 'lead-1' } },
+          script: expect.objectContaining({
+            params: { status: 'dismissed' },
+          }),
         })
       );
     });
@@ -335,6 +338,12 @@ describe('LeadDataClient', () => {
 
       const result = await client.dismissLead('nonexistent');
       expect(result).toBe(false);
+    });
+
+    it('propagates Elasticsearch errors', async () => {
+      esClient.updateByQuery.mockRejectedValueOnce(new Error('cluster_block_exception'));
+
+      await expect(client.dismissLead('lead-1')).rejects.toThrow('cluster_block_exception');
     });
   });
 

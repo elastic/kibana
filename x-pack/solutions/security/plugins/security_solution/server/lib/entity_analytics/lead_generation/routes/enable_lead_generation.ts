@@ -47,9 +47,6 @@ export const enableLeadGenerationRoute = (
           const spaceId = getSpaceId();
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
-          const indexService = createLeadIndexService({ esClient, logger, spaceId });
-          await indexService.createIndices();
-
           const [, startPlugins] = await getStartServices();
           const taskManager = startPlugins.taskManager;
           if (!taskManager) {
@@ -58,6 +55,9 @@ export const enableLeadGenerationRoute = (
               body: 'Task Manager is not available',
             });
           }
+
+          const indexService = createLeadIndexService({ esClient, logger, spaceId });
+          await indexService.createIndices();
 
           await startLeadGenerationTask({ taskManager, logger, namespace: spaceId });
 

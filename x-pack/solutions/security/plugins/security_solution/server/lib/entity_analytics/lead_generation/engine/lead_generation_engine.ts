@@ -247,7 +247,7 @@ const groupIntoLeads = async (
   logger: Logger,
   chatModel?: InferenceChatModel
 ): Promise<Lead[]> => {
-  resetUsedTitles();
+  const usedTitleTracker = new Map<string, number>();
   const groups = groupByObservationPattern(scoredEntities);
   const leads: Lead[] = [];
   const now = new Date();
@@ -263,7 +263,8 @@ const groupIntoLeads = async (
       group,
       allObservations,
       logger,
-      chatModel
+      chatModel,
+      usedTitleTracker
     );
     const synthMs = Date.now() - synthStart;
     logger.info(
@@ -335,7 +336,8 @@ const synthesizeLeadContent = async (
   group: ScoredEntity[],
   observations: Observation[],
   logger: Logger,
-  chatModel?: InferenceChatModel
+  chatModel: InferenceChatModel | undefined,
+  usedTitleTracker: Map<string, number>
 ): Promise<{
   title: string;
   byline: string;
@@ -346,7 +348,7 @@ const synthesizeLeadContent = async (
   if (chatModel) {
     try {
       const llmResult = await llmSynthesizeLeadContent(chatModel, group, observations, logger);
-      const dominantPattern = selectDominantPattern(observations);
+      const dominantPattern = selectDominantPattern(observations, usedTitleTracker);
       const byline = buildByline(group, observations, dominantPattern);
 
       return {
@@ -363,12 +365,13 @@ const synthesizeLeadContent = async (
     }
   }
 
-  return ruleSynthesizeLeadContent(group, observations);
+  return ruleSynthesizeLeadContent(group, observations, usedTitleTracker);
 };
 
 const ruleSynthesizeLeadContent = (
   group: ScoredEntity[],
-  observations: Observation[]
+  observations: Observation[],
+  usedTitleTracker: Map<string, number>
 ): {
   title: string;
   byline: string;
@@ -378,7 +381,7 @@ const ruleSynthesizeLeadContent = (
 } => {
   const observationTypes = [...new Set(observations.map((o) => o.type))];
 
-  const dominantPattern = selectDominantPattern(observations);
+  const dominantPattern = selectDominantPattern(observations, usedTitleTracker);
 
   const title = buildRuleBasedTitle(group, dominantPattern);
   const byline = buildByline(group, observations, dominantPattern);
@@ -528,13 +531,10 @@ const PATTERN_CATALOG: Record<string, { labels: string[]; distinctiveness: numbe
   },
 };
 
-const usedTitleTracker = new Map<string, number>();
-
-const resetUsedTitles = (): void => {
-  usedTitleTracker.clear();
-};
-
-const selectDominantPattern = (observations: Observation[]): DominantPattern => {
+const selectDominantPattern = (
+  observations: Observation[],
+  usedTitleTracker: Map<string, number>
+): DominantPattern => {
   const bestByType = new Map<string, { score: number; confidence: number }>();
 
   for (const obs of observations) {
