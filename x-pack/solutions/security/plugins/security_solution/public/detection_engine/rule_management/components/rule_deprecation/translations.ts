@@ -51,6 +51,12 @@ export const DELETE_RULE = i18n.translate(
   }
 );
 
+export const DELETE_RULES = (count: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.deprecation.deleteRules', {
+    defaultMessage: 'Delete {count, plural, one {rule} other {rules}}',
+    values: { count },
+  });
+
 export const DEPRECATED_RULES_MODAL_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.deprecation.modalTitle',
   {

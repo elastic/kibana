@@ -15,7 +15,6 @@ import {
   EuiModalFooter,
   EuiButton,
   EuiButtonEmpty,
-  EuiConfirmModal,
   EuiText,
   EuiListGroup,
   EuiLoadingSpinner,
@@ -28,6 +27,7 @@ import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { useExecuteBulkAction } from '../../logic/bulk_actions/use_execute_bulk_action';
 import { useInvalidateFetchPrebuiltRulesDeprecationReviewQuery } from '../../api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_deprecation_review_query';
+import { DeleteDeprecatedRulesConfirmModal } from './delete_deprecated_rules_confirm_modal';
 import { RuleLink } from '../../../rule_management_ui/components/rules_table/use_columns';
 import type { DeprecatedRuleForReview } from '../../../../../common/api/detection_engine/prebuilt_rules';
 import * as i18n from './translations';
@@ -111,19 +111,11 @@ export const DeprecatedRulesModal: React.FC<DeprecatedRulesModalProps> = ({
         </EuiModalFooter>
       </EuiModal>
       {isConfirmVisible && (
-        <EuiConfirmModal
-          aria-label={i18n.DELETE_ALL_CONFIRMATION_TITLE(rules.length)}
-          title={i18n.DELETE_ALL_CONFIRMATION_TITLE(rules.length)}
+        <DeleteDeprecatedRulesConfirmModal
+          count={rules.length}
           onCancel={hideConfirm}
           onConfirm={handleDeleteAll}
-          confirmButtonText={i18n.DELETE_ALL_DEPRECATED_RULES(rules.length)}
-          cancelButtonText={i18n.CANCEL_DELETE}
-          buttonColor="danger"
-          defaultFocusedButton="confirm"
-          data-test-subj="deprecated-rules-delete-all-confirm-modal"
-        >
-          <p>{i18n.DELETE_ALL_CONFIRMATION_DESCRIPTION(rules.length)}</p>
-        </EuiConfirmModal>
+        />
       )}
     </>
   );
