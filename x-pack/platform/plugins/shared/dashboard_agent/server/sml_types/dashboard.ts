@@ -14,7 +14,7 @@ import type {
   DashboardState,
 } from '@kbn/dashboard-plugin/server';
 import type { DashboardSavedObjectAttributes } from '@kbn/dashboard-plugin/server';
-import { transformDashboardOut } from '@kbn/dashboard-plugin/server/api/transforms/out/transform_dashboard_out';
+import { transformDashboardOut } from '@kbn/dashboard-plugin/server/api/transforms';
 
 const DASHBOARD_SML_TYPE = 'dashboard';
 
