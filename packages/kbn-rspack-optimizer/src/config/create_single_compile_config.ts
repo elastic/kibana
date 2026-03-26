@@ -170,14 +170,13 @@ function createLogProgressPlugin(log?: ToolingLog): RspackPluginInstance {
   let lastLoggedPercent = -5;
   let lastLogTime = Date.now();
   let startTime = Date.now();
+  let compilationCount = 0;
 
-  // How often to log (in percentage points and seconds)
-  const PERCENT_INTERVAL = 10; // Log every 10%
-  const TIME_INTERVAL_MS = 10000; // Also log if 10 seconds have passed
+  const PERCENT_INTERVAL = 10;
+  const TIME_INTERVAL_MS = 10000;
 
-  // Fallback logger if no ToolingLog provided
   const logInfo = (message: string) => {
-    if (isShuttingDown) return; // Don't log during shutdown
+    if (isShuttingDown) return;
     if (log) {
       log.info(message);
     } else {
@@ -186,8 +185,15 @@ function createLogProgressPlugin(log?: ToolingLog): RspackPluginInstance {
     }
   };
 
+  const logDebug = (message: string) => {
+    if (isShuttingDown) return;
+    if (log) {
+      log.debug(message);
+    }
+  };
+
   const logError = (message: string) => {
-    if (isShuttingDown) return; // Don't log during shutdown
+    if (isShuttingDown) return;
     if (log) {
       log.error(message);
     } else {
@@ -200,33 +206,34 @@ function createLogProgressPlugin(log?: ToolingLog): RspackPluginInstance {
     apply(compiler: Compiler) {
       compiler.hooks.compile.tap('LogProgressPlugin', () => {
         if (isShuttingDown) return;
+        compilationCount++;
         startTime = Date.now();
         lastLogTime = Date.now();
         lastLoggedPercent = -PERCENT_INTERVAL;
-        logInfo('Starting compilation...');
+
+        if (compilationCount === 1) {
+          logInfo('Starting compilation...');
+        }
       });
 
-      // Use RSPack's built-in progress tracking
       new rspack.ProgressPlugin((percent: number, msg: string) => {
-        if (isShuttingDown) return; // Don't log during shutdown
+        if (isShuttingDown) return;
+        // Only show progress details for the initial build
+        if (compilationCount > 1) return;
 
         const percentInt = Math.floor(percent * 100);
         const now = Date.now();
         const timeSinceLastLog = now - lastLogTime;
 
-        // Calculate next milestone (e.g., if last was 43%, next milestone is 50%)
         const nextMilestone = Math.ceil((lastLoggedPercent + 1) / PERCENT_INTERVAL) * PERCENT_INTERVAL;
 
-        // Log at percentage milestones OR if enough time has passed
         const hitPercentMilestone = percentInt >= nextMilestone;
         const hitTimeInterval = timeSinceLastLog >= TIME_INTERVAL_MS && percentInt > lastLoggedPercent;
 
         if (hitPercentMilestone || hitTimeInterval) {
-          // Track actual percent logged, not floored milestone
           lastLoggedPercent = percentInt;
           lastLogTime = now;
 
-          // Extract just the stage name (first word), ignore file paths
           const stage = msg.split(' ')[0] || 'processing';
           const elapsed = ((now - startTime) / 1000).toFixed(1);
 
@@ -235,12 +242,14 @@ function createLogProgressPlugin(log?: ToolingLog): RspackPluginInstance {
       }).apply(compiler);
 
       compiler.hooks.done.tap('LogProgressPlugin', (stats) => {
-        if (isShuttingDown) return; // Don't log during shutdown
+        if (isShuttingDown) return;
         const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
         if (stats.hasErrors()) {
           logError(`Compilation failed [${elapsed}s]`);
-        } else {
+        } else if (compilationCount === 1) {
           logInfo(`Compilation complete [${elapsed}s]`);
+        } else {
+          logDebug(`Compilation complete [${elapsed}s]`);
         }
       });
     },

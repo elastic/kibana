@@ -145,9 +145,8 @@ async function runProductionBuild(
         return;
       }
 
-      const result = processStats(stats, log, duration);
+      const result = processStats(stats, log, { duration });
 
-      // Copy bundles to plugin directories if successful
       if (result.success) {
         copyBundlesToPluginDirs(repoRoot, log);
       }
@@ -190,8 +189,8 @@ async function runWatchBuild(
     };
 
     log?.info('Setting up RSPack watcher...');
-    log?.info(`Watcher will ignore: /node_modules/`);
-    log?.info(`Aggregate timeout: 300ms`);
+    log?.debug('Watcher will ignore: /node_modules/');
+    log?.debug('Aggregate timeout: 300ms');
 
     const watching = compiler.watch(
       {
@@ -199,11 +198,8 @@ async function runWatchBuild(
         ignored: /node_modules/,
       },
       (err, stats) => {
-        log?.info('RSPack watch callback triggered');
-
-        // Ignore callbacks during shutdown
         if (isShuttingDown) {
-          log?.info('Ignoring callback - shutdown in progress');
+          log?.debug('Ignoring callback - shutdown in progress');
           return;
         }
 
@@ -237,11 +233,8 @@ async function runWatchBuild(
           return;
         }
 
-        const result = processStats(stats, log, isFirstBuild ? duration : undefined);
-
-        // For the first build, resolve the promise with the result
-        // This tells the optimizer whether the initial build succeeded
         if (isFirstBuild && !hasResolvedFirstBuild) {
+          const result = processStats(stats, log, { duration });
           hasResolvedFirstBuild = true;
           isFirstBuild = false;
 
@@ -257,15 +250,19 @@ async function runWatchBuild(
           return;
         }
 
-        // For subsequent builds (rebuilds), just log the result
-        isFirstBuild = false; // Ensure this is set
+        // Subsequent rebuilds: single concise line
+        isFirstBuild = false;
+        const result = processStats(stats, log, { quiet: true });
+        const rebuildTime = result.compilationTime?.toFixed(1) ?? '?';
+
         if (result.success) {
-          log?.success(`Rebuild completed at ${new Date().toISOString()}`);
-          copyBundlesToPluginDirs(repoRoot, log);
+          copyBundlesToPluginDirs(repoRoot, log, true);
+          log?.success(
+            `Rebuilt ${result.entryCount} entries in ${rebuildTime}s (${formatSize(result.totalSize ?? 0)})`
+          );
         } else {
-          log?.error('Rebuild failed - waiting for changes...');
+          log?.error(`Rebuild failed in ${rebuildTime}s - waiting for changes...`);
         }
-        log?.info('Waiting for more changes...');
       }
     );
 
@@ -273,11 +270,18 @@ async function runWatchBuild(
   });
 }
 
+interface ProcessStatsResult extends HybridBuildResult {
+  entryCount?: number;
+  totalSize?: number;
+  compilationTime?: number;
+}
+
 function processStats(
   stats: Stats,
   log: ToolingLog | undefined,
-  duration?: number
-): HybridBuildResult {
+  options: { duration?: number; quiet?: boolean } = {}
+): ProcessStatsResult {
+  const { duration, quiet = false } = options;
   const hasErrors = stats.hasErrors();
   const hasWarnings = stats.hasWarnings();
 
@@ -311,7 +315,6 @@ function processStats(
       assets: false,
       modules: false,
     });
-    // Only show first few warnings
     const lines = warningOutput.split('\n').slice(0, 20);
     if (lines.length > 0) {
       log.warning('Build warnings (first 20):');
@@ -321,9 +324,9 @@ function processStats(
     }
   }
 
-  // Log success stats
   const info = stats.toJson({
     assets: true,
+    timings: true,
     errors: false,
     warnings: false,
     modules: false,
@@ -332,16 +335,22 @@ function processStats(
 
   const entryCount = Object.keys(info.entrypoints ?? {}).length;
   const totalSize = info.assets?.reduce((sum, a) => sum + a.size, 0) ?? 0;
+  const compilationTime = info.time ? info.time / 1000 : undefined;
 
-  log?.success(`Built ${entryCount} entries, total size: ${formatSize(totalSize)}`);
+  if (!quiet) {
+    log?.success(`Built ${entryCount} entries, total size: ${formatSize(totalSize)}`);
 
-  if (duration) {
-    log?.info(`Build time: ${duration.toFixed(2)}s`);
+    if (duration) {
+      log?.info(`Build time: ${duration.toFixed(2)}s`);
+    }
   }
 
   return {
     success: true,
     duration,
+    entryCount,
+    totalSize,
+    compilationTime,
   };
 }
 
@@ -349,7 +358,7 @@ function processStats(
  * Copy built bundles from central output to each plugin's target/public directory.
  * This is needed because Kibana serves bundles from each plugin's own directory.
  */
-function copyBundlesToPluginDirs(repoRoot: string, log: ToolingLog | undefined) {
+function copyBundlesToPluginDirs(repoRoot: string, log: ToolingLog | undefined, quiet = false) {
   const bundlesDir = Path.resolve(repoRoot, 'target/public/bundles');
 
   if (!Fs.existsSync(bundlesDir)) {
@@ -357,18 +366,17 @@ function copyBundlesToPluginDirs(repoRoot: string, log: ToolingLog | undefined) 
     return;
   }
 
-  // Each subdirectory in bundles/ corresponds to a plugin
   const pluginDirs = Fs.readdirSync(bundlesDir, { withFileTypes: true })
     .filter((d) => d.isDirectory())
     .map((d) => d.name);
 
-  log?.info(`Distributing bundles to ${pluginDirs.length} plugin directories...`);
-
-  // For now, we keep bundles in the central location
-  // Kibana's bundle routes will need to be updated to serve from there
-  // OR we update the output path in the config to write directly to plugin dirs
-
-  log?.info('Bundles ready at target/public/bundles/');
+  if (quiet) {
+    log?.debug(`Distributing bundles to ${pluginDirs.length} plugin directories...`);
+    log?.debug('Bundles ready at target/public/bundles/');
+  } else {
+    log?.info(`Distributing bundles to ${pluginDirs.length} plugin directories...`);
+    log?.info('Bundles ready at target/public/bundles/');
+  }
 }
 
 function formatSize(bytes: number): string {
