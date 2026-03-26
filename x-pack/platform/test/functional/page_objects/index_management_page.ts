@@ -19,10 +19,6 @@ export function IndexManagementPageProvider({ getService, getPageObjects }: FtrP
       return await testSubjects.getVisibleText('appTitle');
     },
 
-    async expectToBeOnSearchIndexManagement() {
-      await testSubjects.existOrFail('elasticsearchIndexManagement');
-    },
-
     async expectToBeOnIndexManagement() {
       const headingText = await testSubjects.getVisibleText('appTitle');
       expect(headingText).to.be('Index Management');
