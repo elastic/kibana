@@ -87,6 +87,20 @@ describe('WorkflowsAiTelemetryClient', () => {
       );
     });
 
+    it('does not include validation fields when editSuccess is false', () => {
+      client.reportEditResult({
+        toolId: 'workflows.workflow_insert_step',
+        editSuccess: false,
+        isCreation: false,
+        conversationId: 'conv-1',
+        validation: { valid: false, errors: ['some error'] },
+      });
+
+      const reported = analytics.reportEvent.mock.calls[0][1];
+      expect(reported.validation_passed).toBeUndefined();
+      expect(reported.validation_error_count).toBeUndefined();
+    });
+
     it('reports creation flag correctly', () => {
       client.reportEditResult({
         toolId: 'workflows.workflow_replace_yaml',
@@ -178,6 +192,30 @@ describe('WorkflowsAiTelemetryClient', () => {
 
       const secondCall = analytics.reportEvent.mock.calls[1][1];
       expect(secondCall.is_self_correction).toBeUndefined();
+    });
+
+    it('evicts oldest entries when conversation count exceeds cap', () => {
+      const cap = 1000;
+      for (let i = 0; i < cap + 10; i++) {
+        client.reportEditResult({
+          toolId: 'workflows.workflow_insert_step',
+          editSuccess: true,
+          isCreation: false,
+          validation: { valid: false, errors: ['err'] },
+          conversationId: `conv-${i}`,
+        });
+      }
+
+      client.reportEditResult({
+        toolId: 'workflows.workflow_insert_step',
+        editSuccess: true,
+        isCreation: false,
+        validation: { valid: true },
+        conversationId: 'conv-0',
+      });
+
+      const lastCall = analytics.reportEvent.mock.calls.at(-1)?.[1];
+      expect(lastCall.is_self_correction).toBeUndefined();
     });
   });
 });

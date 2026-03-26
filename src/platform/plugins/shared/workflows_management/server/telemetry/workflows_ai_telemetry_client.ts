@@ -24,6 +24,7 @@ interface CompactValidation {
  * Tracks edit tool outcomes, validation results, and self-correction patterns.
  */
 export class WorkflowsAiTelemetryClient {
+  private static readonly CONVERSATION_MAP_CAP = 1000;
   private lastValidationFailed = new Map<string, boolean>();
 
   constructor(private readonly analytics: AnalyticsServiceSetup, private readonly logger: Logger) {
@@ -51,6 +52,13 @@ export class WorkflowsAiTelemetryClient {
         isSelfCorrection = true;
       }
 
+      if (this.lastValidationFailed.size >= WorkflowsAiTelemetryClient.CONVERSATION_MAP_CAP) {
+        const oldest = this.lastValidationFailed.keys().next().value;
+        if (oldest !== undefined) {
+          this.lastValidationFailed.delete(oldest);
+        }
+      }
+
       this.lastValidationFailed.set(conversationId, !validation.valid);
     }
 
@@ -60,8 +68,8 @@ export class WorkflowsAiTelemetryClient {
         edit_success: editSuccess,
         is_creation: isCreation,
         ...(conversationId ? { conversation_id: conversationId } : {}),
-        ...(validation ? { validation_passed: validation.valid } : {}),
-        ...(!validation?.valid && validation?.errors
+        ...(editSuccess && validation ? { validation_passed: validation.valid } : {}),
+        ...(editSuccess && !validation?.valid && validation?.errors
           ? { validation_error_count: validation.errors.length }
           : {}),
         ...(isSelfCorrection !== undefined ? { is_self_correction: isSelfCorrection } : {}),

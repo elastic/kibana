@@ -146,7 +146,7 @@ export class AttachmentBridge {
     this.onProposalReceived?.({
       proposalId,
       toolId: resolvedToolId,
-      workflowId: workflowId ?? this.workflowId,
+      workflowId,
     });
   }
 }
