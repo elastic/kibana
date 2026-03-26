@@ -16,6 +16,7 @@ import type {
 import { panelGridSchema } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
+import { toEmbeddablePanel } from '@kbn/dashboard-agent-common';
 import {
   appendPanelsToDashboard,
   findPanelById,
@@ -24,7 +25,6 @@ import {
   removePanelsFromDashboard,
   updatePanelInDashboard,
 } from './dashboard_state';
-import { normalizeDashboardPanel } from './panel_content';
 import type { ResolveVisualizationConfig } from './inline_visualization';
 import { createVisualizationFailureResult } from './inline_visualization';
 import type { VisualizationFailure } from './utils';
@@ -368,8 +368,8 @@ const materializeResolvedVisualizationPanels = ({
 
     successfulPanels.push({
       request,
-      panel: normalizeDashboardPanel({
-        ...resolvedPanel.panelContent,
+      panel: toEmbeddablePanel({
+        ...resolvedPanel.visContent,
         grid: request.panelInput.grid,
       }),
     });
@@ -416,7 +416,7 @@ export const executeDashboardOperations = async ({
       }
 
       case 'add_markdown': {
-        const markdownPanel = normalizeDashboardPanel({
+        const markdownPanel = toEmbeddablePanel({
           type: MARKDOWN_EMBEDDABLE_TYPE,
           config: { content: operation.markdownContent },
           grid: operation.grid,
@@ -515,9 +515,9 @@ export const executeDashboardOperations = async ({
             dashboardData: nextDashboardData,
             panelId: panelInput.panelId,
             transformPanel: (panel) => ({
-              ...normalizeDashboardPanel({
+              ...toEmbeddablePanel({
                 ...panel,
-                ...resolvedPanel.panelContent,
+                ...resolvedPanel.visContent,
               }),
             }),
           });

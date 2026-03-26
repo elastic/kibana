@@ -20,7 +20,14 @@ export type {
   AttachmentPanel,
   DashboardSection,
   DashboardAttachmentData,
-  DashboardAttachmentOrigin,
-  PanelAddedEventData,
-  PanelsRemovedEventData,
+  DashboardAttachment,
 } from './types';
+
+export {
+  dashboardStateToAttachment,
+  attachmentToDashboardState,
+  toEmbeddablePanel,
+  DEFAULT_TIME_RANGE,
+  type VisualizationContent,
+  type DashboardPanelInput,
+} from './converters';

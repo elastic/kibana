@@ -13,7 +13,7 @@ import type { Logger } from '@kbn/core/server';
 import { type AttachmentVersion, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
 import { z } from '@kbn/zod/v4';
-import { normalizeDashboardPanel, type DashboardPanelContent } from './panel_content';
+import { toEmbeddablePanel, type VisualizationContent } from '@kbn/dashboard-agent-common';
 
 /**
  * Failure record for tracking visualization errors.
@@ -35,9 +35,7 @@ const visualizationAttachmentDataSchema = z.object({
   visualization: z.record(z.string(), z.unknown()),
 });
 
-type ResolvedPanelContent = DashboardPanelContent;
-
-const resolvePanelsFromVisualizationAttachment = (data: unknown): ResolvedPanelContent[] => {
+const resolvePanelsFromVisualizationAttachment = (data: unknown): VisualizationContent[] => {
   const parseResult = visualizationAttachmentDataSchema.safeParse(data);
   if (!parseResult.success) {
     throw new Error('Visualization attachment does not contain a valid visualization payload.');
@@ -52,7 +50,7 @@ const resolvePanelsFromVisualizationAttachment = (data: unknown): ResolvedPanelC
   ];
 };
 
-const resolvePanelsFromAttachment = (type: string, data: unknown): ResolvedPanelContent[] => {
+const resolvePanelsFromAttachment = (type: string, data: unknown): VisualizationContent[] => {
   if (type === AttachmentType.visualization) {
     return resolvePanelsFromVisualizationAttachment(data);
   }
@@ -96,7 +94,7 @@ export const resolvePanelsFromAttachments = ({
 
       const resolvedPanels = resolvePanelsFromAttachment(attachmentRecord.type, latestVersion.data);
       panels.push(
-        ...resolvedPanels.map((panelContent) => normalizeDashboardPanel({ ...panelContent, grid }))
+        ...resolvedPanels.map((visContent) => toEmbeddablePanel({ ...visContent, grid }))
       );
     } catch (error) {
       const errorMessage = getErrorMessage(error);

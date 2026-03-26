@@ -7,12 +7,7 @@
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { SmlTypeDefinition } from '@kbn/agent-builder-plugin/server';
-import {
-  DASHBOARD_ATTACHMENT_TYPE,
-  type AttachmentPanel,
-  type DashboardAttachmentData,
-  type DashboardSection as DashboardAttachmentSection,
-} from '@kbn/dashboard-agent-common';
+import { DASHBOARD_ATTACHMENT_TYPE, dashboardStateToAttachment } from '@kbn/dashboard-agent-common';
 import type {
   DashboardPanel,
   DashboardSection,
@@ -20,20 +15,8 @@ import type {
 } from '@kbn/dashboard-plugin/server';
 import type { DashboardSavedObjectAttributes } from '@kbn/dashboard-plugin/server';
 import { transformDashboardOut } from '@kbn/dashboard-plugin/server/api/transforms/out/transform_dashboard_out';
-import {
-  LensConfigBuilder,
-  type LensApiSchemaType,
-  type LensAttributes,
-} from '@kbn/lens-embeddable-utils/config_builder';
 
 const DASHBOARD_SML_TYPE = 'dashboard';
-const lensConfigBuilder = new LensConfigBuilder();
-
-const isLensAttributes = (
-  attributes: LensApiSchemaType | LensAttributes | undefined
-): attributes is LensAttributes => {
-  return Boolean(attributes && typeof attributes === 'object' && 'visualizationType' in attributes);
-};
 
 const getReferenceText = (
   references: SavedObjectReference[] | undefined,
@@ -94,72 +77,6 @@ const toDashboardSearchContent = (
   );
 
   return contentParts.filter(Boolean).join('\n');
-};
-
-const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | undefined => {
-  // TODO: update this when LENS_EMBEDDABLE_TYPE is moved to @kbn/lens-common
-  if (panel.type === 'lens') {
-    const attributes = (
-      panel.config as { attributes?: LensApiSchemaType | LensAttributes } | undefined
-    )?.attributes;
-
-    if (isLensAttributes(attributes)) {
-      try {
-        const visualization = lensConfigBuilder.toAPIFormat(attributes) as unknown as Record<
-          string,
-          unknown
-        >;
-
-        return {
-          type: 'lens',
-          uid: panel.uid ?? '',
-          config: visualization,
-          grid: panel.grid,
-        };
-      } catch {
-        // fall through to generic storage when the Lens attributes cannot be converted to API format
-      }
-    }
-  }
-
-  return {
-    type: panel.type,
-    uid: panel.uid ?? '',
-    config: (panel.config as Record<string, unknown> | undefined) ?? {},
-    grid: panel.grid,
-  };
-};
-
-const toAttachmentSection = (section: DashboardSection): DashboardAttachmentSection => ({
-  uid: section.uid ?? '',
-  title: section.title,
-  collapsed: section.collapsed ?? false,
-  grid: { y: section.grid.y },
-  panels: section.panels
-    .map(toAttachmentPanel)
-    .filter((panel): panel is AttachmentPanel => panel !== undefined),
-});
-
-const toAttachmentWidget = (
-  widget: DashboardPanel | DashboardSection
-): DashboardAttachmentData['panels'][number] | undefined => {
-  if ('panels' in widget) {
-    return toAttachmentSection(widget);
-  }
-
-  return toAttachmentPanel(widget);
-};
-
-const toAttachmentData = (state: DashboardState): DashboardAttachmentData => {
-  return {
-    title: state.title ?? '',
-    description: state.description ?? '',
-    panels: state.panels
-      .map(toAttachmentWidget)
-      .filter(
-        (widget): widget is DashboardAttachmentData['panels'][number] => widget !== undefined
-      ),
-  };
 };
 
 const toDashboardState = (
@@ -238,7 +155,7 @@ export const dashboardSmlType: SmlTypeDefinition = {
 
     return {
       type: DASHBOARD_ATTACHMENT_TYPE,
-      data: toAttachmentData(state),
+      data: dashboardStateToAttachment(state),
       origin: resolvedDashboard.id,
     };
   },

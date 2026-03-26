@@ -13,11 +13,8 @@ import type {
 } from '@kbn/dashboard-agent-common';
 import { isSection } from '@kbn/dashboard-agent-common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
-import type {
-  ResolveVisualizationConfig,
-  ResolvedVisualizationResult,
-} from './inline_visualization';
-import type { DashboardPanelContent } from './panel_content';
+import type { ResolveVisualizationConfig, VisualizationAttempt } from './inline_visualization';
+import type { VisualizationContent } from '@kbn/dashboard-agent-common';
 import { executeDashboardOperations, type DashboardOperation } from './operations';
 
 const createMockLogger = (): Logger =>
@@ -67,15 +64,13 @@ describe('executeDashboardOperations', () => {
     panels,
   });
 
-  const createResolvedVisualization = (
-    panelContent: DashboardPanelContent
-  ): ResolvedVisualizationResult => ({
+  const createResolvedVisualization = (visContent: VisualizationContent): VisualizationAttempt => ({
     type: 'success',
-    panelContent,
+    visContent,
   });
 
   const createResolveVisualizationConfig = (
-    resultsByIdentifier: Record<string, ResolvedVisualizationResult> = {}
+    resultsByIdentifier: Record<string, VisualizationAttempt> = {}
   ): ResolveVisualizationConfig => {
     return async ({ identifier }) =>
       resultsByIdentifier[identifier] ??
@@ -305,12 +300,12 @@ describe('executeDashboardOperations', () => {
       panels: [
         expect.objectContaining({
           type: 'lens',
-          config: { type: 'metric' },
+          config: { attributes: { type: 'metric' } },
           grid: { x: 0, y: 0, w: 24, h: 9 },
         }),
         expect.objectContaining({
           type: 'lens',
-          config: { type: 'bar' },
+          config: { attributes: { type: 'bar' } },
           grid: { x: 24, y: 0, w: 24, h: 9 },
         }),
       ],
@@ -365,7 +360,7 @@ describe('executeDashboardOperations', () => {
     expect(sections[0].panels).toEqual([
       expect.objectContaining({
         type: 'lens',
-        config: { type: 'metric' },
+        config: { attributes: { type: 'metric' } },
         grid: { x: 0, y: 0, w: 24, h: 9 },
       }),
     ]);
@@ -379,8 +374,8 @@ describe('executeDashboardOperations', () => {
   });
 
   it('resolves inline panels for multiple section creations in parallel', async () => {
-    const firstSectionPanel = createDeferred<ResolvedVisualizationResult>();
-    const secondSectionPanel = createDeferred<ResolvedVisualizationResult>();
+    const firstSectionPanel = createDeferred<VisualizationAttempt>();
+    const secondSectionPanel = createDeferred<VisualizationAttempt>();
     const resolveVisualizationConfig = jest.fn<
       ReturnType<ResolveVisualizationConfig>,
       Parameters<ResolveVisualizationConfig>
@@ -463,18 +458,18 @@ describe('executeDashboardOperations', () => {
     expect(getSections(result.dashboardData.panels)).toEqual([
       expect.objectContaining({
         title: 'Overview',
-        panels: [expect.objectContaining({ config: { type: 'metric' } })],
+        panels: [expect.objectContaining({ config: { attributes: { type: 'metric' } } })],
       }),
       expect.objectContaining({
         title: 'Errors',
-        panels: [expect.objectContaining({ config: { type: 'bar' } })],
+        panels: [expect.objectContaining({ config: { attributes: { type: 'bar' } } })],
       }),
     ]);
   });
 
   it('pre-resolves top-level visualization creations alongside section creations', async () => {
-    const sectionPanel = createDeferred<ResolvedVisualizationResult>();
-    const topLevelPanel = createDeferred<ResolvedVisualizationResult>();
+    const sectionPanel = createDeferred<VisualizationAttempt>();
+    const topLevelPanel = createDeferred<VisualizationAttempt>();
     const resolveVisualizationConfig = jest.fn<
       ReturnType<ResolveVisualizationConfig>,
       Parameters<ResolveVisualizationConfig>
@@ -555,11 +550,11 @@ describe('executeDashboardOperations', () => {
     expect(getSections(result.dashboardData.panels)).toEqual([
       expect.objectContaining({
         title: 'Overview',
-        panels: [expect.objectContaining({ config: { type: 'metric' } })],
+        panels: [expect.objectContaining({ config: { attributes: { type: 'metric' } } })],
       }),
     ]);
     expect(getPanelsOnly(result.dashboardData.panels)).toEqual([
-      expect.objectContaining({ config: { type: 'bar' } }),
+      expect.objectContaining({ config: { attributes: { type: 'bar' } } }),
     ]);
   });
 
@@ -932,14 +927,14 @@ describe('executeDashboardOperations', () => {
       expect(topLevelPanels).toEqual([
         expect.objectContaining({
           type: 'lens',
-          config: { type: 'metric' },
+          config: { attributes: { type: 'metric' } },
           grid: { x: 0, y: 0, w: 24, h: 9 },
         }),
       ]);
       expect(sections[0].panels).toEqual([
         expect.objectContaining({
           type: 'lens',
-          config: { type: 'bar' },
+          config: { attributes: { type: 'bar' } },
           grid: { x: 24, y: 0, w: 24, h: 9 },
         }),
       ]);
@@ -982,14 +977,14 @@ describe('executeDashboardOperations', () => {
         expect.objectContaining({
           uid: 'panel-1',
           grid: { x: 0, y: 5, w: 24, h: 9 },
-          config: { type: 'bar' },
+          config: { attributes: { type: 'bar' } },
         })
       );
       expect(sections[0].panels[0]).toEqual(
         expect.objectContaining({
           uid: 'section-panel-1',
           grid: { x: 0, y: 0, w: 24, h: 9 },
-          config: { type: 'line' },
+          config: { attributes: { type: 'line' } },
         })
       );
     });
@@ -1017,9 +1012,10 @@ describe('executeDashboardOperations', () => {
         resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
         resolveVisualizationConfig: async (params) => {
           const { nlQuery } = params;
-          const configStep =
-            (params.existingPanel?.config as { testStep?: string } | undefined)?.testStep ??
-            'initial';
+          const config = params.existingPanel?.config as
+            | { attributes?: { testStep?: string }; testStep?: string }
+            | undefined;
+          const configStep = config?.attributes?.testStep ?? config?.testStep ?? 'initial';
           seenConfigSteps.push(configStep);
 
           if (nlQuery === 'make this a bar chart') {
@@ -1043,7 +1039,7 @@ describe('executeDashboardOperations', () => {
       expect(getPanelsOnly(result.dashboardData.panels)[0]).toEqual(
         expect.objectContaining({
           uid: 'panel-1',
-          config: { type: 'metric', testStep: 'after-second-edit' },
+          config: { attributes: { type: 'metric', testStep: 'after-second-edit' } },
           grid: { x: 0, y: 5, w: 24, h: 9 },
         })
       );

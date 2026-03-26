@@ -95,27 +95,6 @@ export const dashboardAttachmentDataSchema = z.object({
  */
 export type DashboardAttachmentData = z.infer<typeof dashboardAttachmentDataSchema>;
 
-/**
- * Origin payload for dashboard attachments is a saved object ID string.
- */
-export type DashboardAttachmentOrigin = string;
-
-/**
- * Data payload for a panel added event.
- */
-export interface PanelAddedEventData {
-  dashboardAttachmentId: string;
-  panel: AttachmentPanel;
-}
-
-/**
- * Data payload for a panel removed event.
- */
-export interface PanelsRemovedEventData {
-  dashboardAttachmentId: string;
-  panelIds: string[];
-}
-
 export type DashboardAttachment = Attachment<
   typeof DASHBOARD_ATTACHMENT_TYPE,
   DashboardAttachmentData

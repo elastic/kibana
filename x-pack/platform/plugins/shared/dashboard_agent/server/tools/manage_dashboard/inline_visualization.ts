@@ -10,14 +10,14 @@ import { buildVisualizationConfig, type VisualizationConfig } from '@kbn/agent-b
 import { type ModelProvider, type ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import type { DashboardPanelContent } from './panel_content';
+import type { VisualizationContent } from '@kbn/dashboard-agent-common';
 import type { VisualizationFailure } from './utils';
 import { getErrorMessage } from './utils';
 
-export type ResolvedVisualizationResult =
+export type VisualizationAttempt =
   | {
       type: 'success';
-      panelContent: DashboardPanelContent;
+      visContent: VisualizationContent;
     }
   | {
       type: 'failure';
@@ -31,18 +31,18 @@ interface ResolveVisualizationConfigParams {
   index?: string;
   chartType?: SupportedChartType;
   esql?: string;
-  existingPanel?: DashboardPanelContent;
+  existingPanel?: VisualizationContent;
 }
 
 export type ResolveVisualizationConfig = (
   params: ResolveVisualizationConfigParams
-) => Promise<ResolvedVisualizationResult>;
+) => Promise<VisualizationAttempt>;
 
 export const createVisualizationFailureResult = (
   type: VisualizationFailure['type'],
   identifier: string,
   error: string
-): ResolvedVisualizationResult => ({
+): VisualizationAttempt => ({
   type: 'failure',
   failure: {
     type,
@@ -94,7 +94,7 @@ export const createVisualizationResolver = ({
 
       return {
         type: 'success',
-        panelContent: {
+        visContent: {
           type: 'lens',
           config: result.validatedConfig,
         },

@@ -6,15 +6,21 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { AttachmentPanel } from '@kbn/dashboard-agent-common';
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/common/constants';
+import type { AttachmentPanel } from '../types';
 
-export type DashboardPanelContent = Pick<AttachmentPanel, 'type' | 'config'>;
+const LENS_EMBEDDABLE_TYPE = 'lens';
+
+export type VisualizationContent = Pick<AttachmentPanel, 'type' | 'config'>;
 
 /** Panel input that may or may not have a uid assigned yet */
 export type DashboardPanelInput = Omit<AttachmentPanel, 'uid'> & { uid?: string };
 
-export const normalizeDashboardPanel = ({
+/**
+ * Converts panel input to a full AttachmentPanel (embeddable format).
+ * - Generates a uid if not provided
+ * - Wraps Lens config in `attributes` if needed
+ */
+export const toEmbeddablePanel = ({
   uid,
   grid,
   type,
@@ -27,6 +33,7 @@ export const normalizeDashboardPanel = ({
     config:
       type === LENS_EMBEDDABLE_TYPE && !('attributes' in config)
         ? {
+            ...(config.title ? { title: config.title } : {}),
             attributes: config,
           }
         : config,

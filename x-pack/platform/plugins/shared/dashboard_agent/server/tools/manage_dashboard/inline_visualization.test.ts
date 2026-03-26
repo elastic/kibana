@@ -64,7 +64,7 @@ describe('createVisualizationResolver', () => {
 
     expect(result).toEqual({
       type: 'success',
-      panelContent: {
+      visContent: {
         type: 'lens',
         config: { type: 'metric' },
       },
