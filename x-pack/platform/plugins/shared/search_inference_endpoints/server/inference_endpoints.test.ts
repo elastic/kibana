@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, ISavedObjectsRepository, SavedObject } from '@kbn/core/server';
+import type { ISavedObjectsRepository, Logger, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { type InferenceConnector, InferenceConnectorType } from '@kbn/inference-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { InferenceFeatureConfig } from './types';
@@ -26,14 +25,7 @@ const createValidFeature = (
   ...overrides,
 });
 
-const createEndpointInfo = (id: string): InferenceInferenceEndpointInfo =>
-  ({
-    inference_id: id,
-    task_type: 'text_embedding',
-    service: 'elasticsearch',
-  } as InferenceInferenceEndpointInfo);
-
-const createExpectedConnector = (id: string): InferenceConnector => ({
+const createConnector = (id: string): InferenceConnector => ({
   type: InferenceConnectorType.Inference,
   name: id,
   connectorId: id,
@@ -67,71 +59,111 @@ const createSoClient = (
     }),
   } as unknown as ISavedObjectsRepository);
 
-const createEsClient = (
-  endpointMap: Record<string, InferenceInferenceEndpointInfo | 'not_found'> = {}
-): ElasticsearchClient =>
-  ({
-    inference: {
-      get: jest.fn().mockImplementation(({ inference_id: id }: { inference_id: string }) => {
-        const entry = endpointMap[id];
-        if (entry === 'not_found') {
-          const err = new Error('Not found') as any;
-          err.statusCode = 404;
-          throw err;
-        }
-        return Promise.resolve({ endpoints: entry ? [entry] : [] });
-      }),
-    },
-  } as unknown as ElasticsearchClient);
+const createGetConnectorById = (
+  connectorIds: string[]
+): ((id: string) => Promise<InferenceConnector>) => {
+  const connectorMap = new Map(connectorIds.map((id) => [id, createConnector(id)]));
+  return jest.fn().mockImplementation((id: string) => {
+    const connector = connectorMap.get(id);
+    if (!connector) {
+      throw new Error(`Connector ${id} not found`);
+    }
+    return Promise.resolve(connector);
+  });
+};
 
 describe('getForFeature', () => {
   let registry: InferenceFeatureRegistry;
+  let logger: Logger;
 
   beforeEach(() => {
-    registry = new InferenceFeatureRegistry(loggingSystemMock.createLogger());
+    logger = loggingSystemMock.createLogger();
+    registry = new InferenceFeatureRegistry(logger);
   });
 
-  it('throws when featureId is not registered', async () => {
-    await expect(
-      getForFeature(registry, createSoClient(), createEsClient(), 'unknown')
-    ).rejects.toThrow('not registered');
+  it('returns empty result and logs warning when featureId is not registered', async () => {
+    const result = await getForFeature(
+      registry,
+      createSoClient(),
+      createGetConnectorById([]),
+      'unknown',
+      logger
+    );
+    expect(result).toEqual({
+      endpoints: [],
+      warnings: [],
+      soEntryFound: false,
+    });
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('not registered'));
   });
 
-  it('returns empty result when no endpoints resolved', async () => {
+  it('returns empty endpoints for features with no SO and no recommendations', async () => {
+    registry.register(createValidFeature({ featureId: 'f1', taskType: 'chat_completion' }));
+    const result = await getForFeature(
+      registry,
+      createSoClient(),
+      createGetConnectorById([]),
+      'f1',
+      logger
+    );
+    expect(result).toEqual({
+      endpoints: [],
+      warnings: [],
+      soEntryFound: false,
+    });
+  });
+
+  it('returns empty result when SO explicitly lists empty endpoints', async () => {
     registry.register(createValidFeature({ featureId: 'f1' }));
     await expect(
-      getForFeature(registry, createSoClient(), createEsClient(), 'f1')
-    ).resolves.toEqual({ endpoints: [], warnings: [] });
+      getForFeature(
+        registry,
+        createSoClient([{ feature_id: 'f1', endpoints: [] }]),
+        createGetConnectorById(['.anthropic-claude-4.5-sonnet-chat_completion']),
+        'f1',
+        logger
+      )
+    ).resolves.toEqual({ endpoints: [], warnings: [], soEntryFound: true });
   });
 
   it('returns hydrated endpoints from SO override', async () => {
     registry.register(createValidFeature({ featureId: 'f1' }));
-    const info = createEndpointInfo('ep1');
     await expect(
       getForFeature(
         registry,
         createSoClient([{ feature_id: 'f1', endpoints: [{ id: 'ep1' }] }]),
-        createEsClient({ ep1: info }),
-        'f1'
+        createGetConnectorById(['ep1']),
+        'f1',
+        logger
       )
-    ).resolves.toEqual({ endpoints: [createExpectedConnector('ep1')], warnings: [] });
+    ).resolves.toEqual({
+      endpoints: [createConnector('ep1')],
+      warnings: [],
+      soEntryFound: true,
+    });
   });
 
   it('returns hydrated endpoints from recommendedEndpoints', async () => {
     registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] }));
-    const info = createEndpointInfo('rec1');
     await expect(
-      getForFeature(registry, createSoClient(), createEsClient({ rec1: info }), 'f1')
-    ).resolves.toEqual({ endpoints: [createExpectedConnector('rec1')], warnings: [] });
+      getForFeature(registry, createSoClient(), createGetConnectorById(['rec1']), 'f1', logger)
+    ).resolves.toEqual({
+      endpoints: [createConnector('rec1')],
+      warnings: [],
+      soEntryFound: false,
+    });
   });
 
   it('walks the fallback chain to parent recommendedEndpoints', async () => {
     registry.register(createValidFeature({ featureId: 'parent', recommendedEndpoints: ['prec1'] }));
     registry.register(createValidFeature({ featureId: 'child', parentFeatureId: 'parent' }));
-    const info = createEndpointInfo('prec1');
     await expect(
-      getForFeature(registry, createSoClient(), createEsClient({ prec1: info }), 'child')
-    ).resolves.toEqual({ endpoints: [createExpectedConnector('prec1')], warnings: [] });
+      getForFeature(registry, createSoClient(), createGetConnectorById(['prec1']), 'child', logger)
+    ).resolves.toEqual({
+      endpoints: [createConnector('prec1')],
+      warnings: [],
+      soEntryFound: false,
+    });
   });
 
   it('walks the full chain: child -> parent -> grandparent', async () => {
@@ -140,94 +172,134 @@ describe('getForFeature', () => {
     );
     registry.register(createValidFeature({ featureId: 'parent', parentFeatureId: 'grandparent' }));
     registry.register(createValidFeature({ featureId: 'child', parentFeatureId: 'parent' }));
-    const info = createEndpointInfo('gp_ep');
     await expect(
-      getForFeature(registry, createSoClient(), createEsClient({ gp_ep: info }), 'child')
-    ).resolves.toEqual({ endpoints: [createExpectedConnector('gp_ep')], warnings: [] });
+      getForFeature(registry, createSoClient(), createGetConnectorById(['gp_ep']), 'child', logger)
+    ).resolves.toEqual({
+      endpoints: [createConnector('gp_ep')],
+      warnings: [],
+      soEntryFound: false,
+    });
   });
 
   it('prefers SO override over recommendedEndpoints', async () => {
     registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] }));
-    const soInfo = createEndpointInfo('so_ep');
     await expect(
       getForFeature(
         registry,
         createSoClient([{ feature_id: 'f1', endpoints: [{ id: 'so_ep' }] }]),
-        createEsClient({ so_ep: soInfo, rec1: createEndpointInfo('rec1') }),
-        'f1'
+        createGetConnectorById(['so_ep', 'rec1']),
+        'f1',
+        logger
       )
-    ).resolves.toEqual({ endpoints: [createExpectedConnector('so_ep')], warnings: [] });
+    ).resolves.toEqual({
+      endpoints: [createConnector('so_ep')],
+      warnings: [],
+      soEntryFound: true,
+    });
   });
 
-  it('skips SO entry with empty endpoints and falls through to recommended', async () => {
+  it('returns empty when SO explicitly lists empty endpoints even if recommended exist', async () => {
     registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] }));
-    const info = createEndpointInfo('rec1');
     await expect(
       getForFeature(
         registry,
         createSoClient([{ feature_id: 'f1', endpoints: [] }]),
-        createEsClient({ rec1: info }),
-        'f1'
+        createGetConnectorById(['rec1']),
+        'f1',
+        logger
       )
-    ).resolves.toEqual({ endpoints: [createExpectedConnector('rec1')], warnings: [] });
+    ).resolves.toEqual({ endpoints: [], warnings: [], soEntryFound: true });
   });
 
   it('handles SO 404 and falls through to recommended', async () => {
     registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] }));
-    const info = createEndpointInfo('rec1');
     await expect(
-      getForFeature(registry, createSoClient('not_found'), createEsClient({ rec1: info }), 'f1')
-    ).resolves.toEqual({ endpoints: [createExpectedConnector('rec1')], warnings: [] });
+      getForFeature(
+        registry,
+        createSoClient('not_found'),
+        createGetConnectorById(['rec1']),
+        'f1',
+        logger
+      )
+    ).resolves.toEqual({
+      endpoints: [createConnector('rec1')],
+      warnings: [],
+      soEntryFound: false,
+    });
   });
 
-  it('returns warning for ES endpoints that no longer exist (404)', async () => {
+  it('returns warning for endpoints that are not found in connectors list', async () => {
     registry.register(
       createValidFeature({ featureId: 'f1', recommendedEndpoints: ['ep1', 'ep2'] })
     );
-    const info = createEndpointInfo('ep2');
     const result = await getForFeature(
       registry,
       createSoClient(),
-      createEsClient({ ep1: 'not_found', ep2: info }),
-      'f1'
+      createGetConnectorById(['ep2']),
+      'f1',
+      logger
     );
-    expect(result.endpoints).toEqual([createExpectedConnector('ep2')]);
+    expect(result.endpoints).toEqual([createConnector('ep2')]);
     expect(result.warnings).toHaveLength(1);
     expect(result.warnings[0]).toContain('ep1');
   });
 
-  it('propagates non-404 ES errors', async () => {
-    registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['ep1'] }));
-    const esClient = {
-      inference: {
-        get: jest
-          .fn()
-          .mockRejectedValue(Object.assign(new Error('ES unavailable'), { statusCode: 503 })),
-      },
-    } as unknown as ElasticsearchClient;
-    await expect(getForFeature(registry, createSoClient(), esClient, 'f1')).rejects.toThrow(
-      'ES unavailable'
-    );
-  });
-
-  it('propagates non-404 SO errors', async () => {
-    registry.register(createValidFeature({ featureId: 'f1' }));
+  it('falls back to recommended endpoints when SO client fails with non-404 error', async () => {
+    registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] }));
     const soClient = {
       get: jest.fn().mockRejectedValue(new Error('Connection refused')),
     } as unknown as ISavedObjectsRepository;
-    await expect(getForFeature(registry, soClient, createEsClient(), 'f1')).rejects.toThrow(
-      'Connection refused'
+    const result = await getForFeature(
+      registry,
+      soClient,
+      createGetConnectorById(['rec1']),
+      'f1',
+      logger
     );
+    expect(result).toEqual({
+      endpoints: [createConnector('rec1')],
+      warnings: [],
+      soEntryFound: false,
+    });
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Connection refused'));
   });
 
-  it('detects cycles and returns empty result with warning', async () => {
-    registry.register(createValidFeature({ featureId: 'a' }));
-    registry.register(createValidFeature({ featureId: 'b', parentFeatureId: 'a' }));
+  it('detects cycles and returns empty endpoints with warning', async () => {
+    registry.register(createValidFeature({ featureId: 'a', taskType: 'chat_completion' }));
+    registry.register(
+      createValidFeature({ featureId: 'b', parentFeatureId: 'a', taskType: 'chat_completion' })
+    );
     (registry as any).features.get('a').parentFeatureId = 'b';
-    const result = await getForFeature(registry, createSoClient(), createEsClient(), 'a');
+    const result = await getForFeature(
+      registry,
+      createSoClient(),
+      createGetConnectorById(['.anthropic-claude-4.5-sonnet-chat_completion']),
+      'a',
+      logger
+    );
     expect(result.endpoints).toEqual([]);
     expect(result.warnings).toHaveLength(1);
     expect(result.warnings[0]).toContain('Cyclic dependency');
+    expect(result.soEntryFound).toBe(false);
+  });
+
+  it('detects cycles and returns empty endpoints for non-chat features', async () => {
+    registry.register(createValidFeature({ featureId: 'a', taskType: 'text_embedding' }));
+    registry.register(
+      createValidFeature({ featureId: 'b', parentFeatureId: 'a', taskType: 'text_embedding' })
+    );
+    (registry as any).features.get('a').parentFeatureId = 'b';
+    const result = await getForFeature(
+      registry,
+      createSoClient(),
+      createGetConnectorById([]),
+      'a',
+      logger
+    );
+    expect(result.endpoints).toEqual([]);
+    expect(result.warnings).toHaveLength(1);
+    expect(result.warnings[0]).toContain('Cyclic dependency');
+    expect(result.soEntryFound).toBe(false);
   });
 
   it('prefers child recommendedEndpoints over parent recommendedEndpoints', async () => {
@@ -241,15 +313,19 @@ describe('getForFeature', () => {
         recommendedEndpoints: ['child_ep'],
       })
     );
-    const info = createEndpointInfo('child_ep');
     await expect(
       getForFeature(
         registry,
         createSoClient(),
-        createEsClient({ child_ep: info, parent_ep: createEndpointInfo('parent_ep') }),
-        'child'
+        createGetConnectorById(['child_ep', 'parent_ep']),
+        'child',
+        logger
       )
-    ).resolves.toEqual({ endpoints: [createExpectedConnector('child_ep')], warnings: [] });
+    ).resolves.toEqual({
+      endpoints: [createConnector('child_ep')],
+      warnings: [],
+      soEntryFound: false,
+    });
   });
 
   it('uses first recommendedEndpoints found in chain when child has none', async () => {
@@ -264,15 +340,19 @@ describe('getForFeature', () => {
       })
     );
     registry.register(createValidFeature({ featureId: 'child', parentFeatureId: 'parent' }));
-    const info = createEndpointInfo('parent_ep');
     await expect(
       getForFeature(
         registry,
         createSoClient(),
-        createEsClient({ parent_ep: info, gp_ep: createEndpointInfo('gp_ep') }),
-        'child'
+        createGetConnectorById(['parent_ep', 'gp_ep']),
+        'child',
+        logger
       )
-    ).resolves.toEqual({ endpoints: [createExpectedConnector('parent_ep')], warnings: [] });
+    ).resolves.toEqual({
+      endpoints: [createConnector('parent_ep')],
+      warnings: [],
+      soEntryFound: false,
+    });
   });
 
   it('prefers parent SO override over child recommendedEndpoints', async () => {
@@ -284,15 +364,19 @@ describe('getForFeature', () => {
         recommendedEndpoints: ['child_ep'],
       })
     );
-    const soInfo = createEndpointInfo('so_ep');
     await expect(
       getForFeature(
         registry,
         createSoClient([{ feature_id: 'parent', endpoints: [{ id: 'so_ep' }] }]),
-        createEsClient({ so_ep: soInfo, child_ep: createEndpointInfo('child_ep') }),
-        'child'
+        createGetConnectorById(['so_ep', 'child_ep']),
+        'child',
+        logger
       )
-    ).resolves.toEqual({ endpoints: [createExpectedConnector('so_ep')], warnings: [] });
+    ).resolves.toEqual({
+      endpoints: [createConnector('so_ep')],
+      warnings: [],
+      soEntryFound: true,
+    });
   });
 
   it('uses grandparent recommendedEndpoints when parent has none', async () => {
@@ -301,10 +385,13 @@ describe('getForFeature', () => {
     );
     registry.register(createValidFeature({ featureId: 'parent', parentFeatureId: 'grandparent' }));
     registry.register(createValidFeature({ featureId: 'child', parentFeatureId: 'parent' }));
-    const info = createEndpointInfo('gp_ep');
     await expect(
-      getForFeature(registry, createSoClient(), createEsClient({ gp_ep: info }), 'child')
-    ).resolves.toEqual({ endpoints: [createExpectedConnector('gp_ep')], warnings: [] });
+      getForFeature(registry, createSoClient(), createGetConnectorById(['gp_ep']), 'child', logger)
+    ).resolves.toEqual({
+      endpoints: [createConnector('gp_ep')],
+      warnings: [],
+      soEntryFound: false,
+    });
   });
 
   it('prefers grandparent SO override over all recommendedEndpoints', async () => {
@@ -325,19 +412,18 @@ describe('getForFeature', () => {
         recommendedEndpoints: ['child_rec'],
       })
     );
-    const soInfo = createEndpointInfo('gp_so');
     await expect(
       getForFeature(
         registry,
         createSoClient([{ feature_id: 'grandparent', endpoints: [{ id: 'gp_so' }] }]),
-        createEsClient({
-          gp_so: soInfo,
-          child_rec: createEndpointInfo('child_rec'),
-          parent_rec: createEndpointInfo('parent_rec'),
-          gp_rec: createEndpointInfo('gp_rec'),
-        }),
-        'child'
+        createGetConnectorById(['gp_so', 'child_rec', 'parent_rec', 'gp_rec']),
+        'child',
+        logger
       )
-    ).resolves.toEqual({ endpoints: [createExpectedConnector('gp_so')], warnings: [] });
+    ).resolves.toEqual({
+      endpoints: [createConnector('gp_so')],
+      warnings: [],
+      soEntryFound: true,
+    });
   });
 });

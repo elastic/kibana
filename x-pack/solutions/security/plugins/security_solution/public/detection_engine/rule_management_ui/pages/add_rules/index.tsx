@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { ProjectRoutingAccess, useCpsPickerAccess } from '@kbn/cps-utils';
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import { redirectToDetections } from '../../../common/helpers';
 import { SecurityPageName } from '../../../../app/types';
 import { HeaderPage } from '../../../../common/components/header_page';
@@ -33,7 +33,7 @@ const AddRulesPageComponent: React.FC = () => {
 
   const [{ isSignalIndexExists, isAuthenticated, hasEncryptionKey }] = useUserData();
   const { needsConfiguration: needsListsConfiguration } = useListsConfig();
-  useCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
+  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
 
   if (
     redirectToDetections(

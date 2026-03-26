@@ -8,86 +8,114 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useHistory } from 'react-router-dom';
 import { BehaviorSubject } from 'rxjs';
-import { ProjectRoutingAccess } from '../types';
+import { type ICPSManager, ProjectRoutingAccess } from '../types';
 import { useCpsPickerAccess } from './use_cps_picker_access';
-
-jest.mock('react-router-dom', () => ({
-  useHistory: jest.fn(),
-}));
-
-const mockUseHistory = jest.mocked(useHistory);
-const mockCurrentAppId$ = new BehaviorSubject<string | undefined>('app-id');
 
 describe('useCpsPickerAccess', () => {
   const registerAppAccess = jest.fn();
-  const services = {
-    application: { currentAppId$: mockCurrentAppId$ },
-    cps: { cpsManager: { registerAppAccess } },
-  } as any;
+  const mockCurrentAppId$ = new BehaviorSubject<string | undefined>('app-id');
+  const cpsManager = { registerAppAccess } as unknown as ICPSManager;
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockCurrentAppId$.next('app-id');
-    mockUseHistory.mockReturnValue({ location: { pathname: '/app/alerts/rule/123' } } as any);
   });
 
-  const getRegisteredCallback = () =>
-    registerAppAccess.mock.calls[registerAppAccess.mock.calls.length - 1]?.[1];
+  it('registers the provided resolver when app id and cpsManager are defined', () => {
+    const resolver = jest.fn().mockReturnValue(ProjectRoutingAccess.READONLY);
 
-  it('registers access for the current app and matches the route', () => {
-    renderHook(() => useCpsPickerAccess(ProjectRoutingAccess.READONLY, services));
+    renderHook(() =>
+      useCpsPickerAccess({
+        resolver,
+        currentAppId$: mockCurrentAppId$,
+        cpsManager,
+      })
+    );
 
     expect(registerAppAccess).toHaveBeenCalledTimes(1);
-    expect(registerAppAccess).toHaveBeenCalledWith('app-id', expect.any(Function));
-
-    const callback = getRegisteredCallback();
-    expect(callback?.('/app/alerts/rule/123')).toBe(ProjectRoutingAccess.READONLY);
-    expect(callback?.('/app/alerts/rule/999')).toBe(ProjectRoutingAccess.DISABLED);
+    expect(registerAppAccess).toHaveBeenCalledWith('app-id', resolver);
   });
 
-  it('updates the access value when rerendered with a new access', () => {
-    const { rerender } = renderHook(({ access }) => useCpsPickerAccess(access, services), {
-      initialProps: { access: ProjectRoutingAccess.DISABLED },
-    });
+  it('does not register when currentAppId is undefined', () => {
+    mockCurrentAppId$.next(undefined);
 
-    rerender({ access: ProjectRoutingAccess.READONLY });
+    renderHook(() =>
+      useCpsPickerAccess({
+        resolver: () => ProjectRoutingAccess.READONLY,
+        currentAppId$: mockCurrentAppId$,
+        cpsManager,
+      })
+    );
 
-    expect(registerAppAccess).toHaveBeenCalledTimes(3);
-    const callback = getRegisteredCallback();
-    expect(callback?.('/app/alerts/rule/123')).toBe(ProjectRoutingAccess.READONLY);
-    expect(callback?.('/app/alerts/rule/999')).toBe(ProjectRoutingAccess.DISABLED);
+    expect(registerAppAccess).not.toHaveBeenCalled();
   });
 
-  it('resets access to disabled on unmount', () => {
+  it('does not register when cpsManager is undefined', () => {
+    renderHook(() =>
+      useCpsPickerAccess({
+        resolver: () => ProjectRoutingAccess.READONLY,
+        currentAppId$: mockCurrentAppId$,
+        cpsManager: undefined,
+      })
+    );
+
+    expect(registerAppAccess).not.toHaveBeenCalled();
+  });
+
+  it('re-registers when the resolver reference changes', () => {
+    const resolverA = jest.fn().mockReturnValue(ProjectRoutingAccess.DISABLED);
+    const resolverB = jest.fn().mockReturnValue(ProjectRoutingAccess.EDITABLE);
+
+    const { rerender } = renderHook(
+      ({ resolver }) =>
+        useCpsPickerAccess({ resolver, currentAppId$: mockCurrentAppId$, cpsManager }),
+      {
+        initialProps: { resolver: resolverA },
+      }
+    );
+
+    expect(registerAppAccess).toHaveBeenLastCalledWith('app-id', resolverA);
+
+    rerender({ resolver: resolverB });
+
+    expect(registerAppAccess).toHaveBeenLastCalledWith('app-id', resolverB);
+  });
+
+  it('re-registers when currentAppId$ emits a new app id', () => {
+    const resolver = jest.fn().mockReturnValue(ProjectRoutingAccess.READONLY);
+
+    const { rerender } = renderHook(() =>
+      useCpsPickerAccess({
+        resolver,
+        currentAppId$: mockCurrentAppId$,
+        cpsManager,
+      })
+    );
+
+    expect(registerAppAccess).toHaveBeenCalledWith('app-id', resolver);
+
+    mockCurrentAppId$.next('other-app');
+    rerender();
+
+    expect(registerAppAccess).toHaveBeenLastCalledWith('other-app', resolver);
+  });
+
+  it('resets access to DISABLED on unmount', () => {
+    const resolver = jest.fn().mockReturnValue(ProjectRoutingAccess.READONLY);
+
     const { unmount } = renderHook(() =>
-      useCpsPickerAccess(ProjectRoutingAccess.READONLY, services)
+      useCpsPickerAccess({
+        resolver,
+        currentAppId$: mockCurrentAppId$,
+        cpsManager,
+      })
     );
 
     unmount();
 
     expect(registerAppAccess).toHaveBeenCalledTimes(2);
-    const callback = getRegisteredCallback();
-    expect(callback?.('/app/alerts/rule/123')).toBe(ProjectRoutingAccess.DISABLED);
-  });
-
-  it('does not register when currentAppId is missing', () => {
-    mockCurrentAppId$.next(undefined);
-
-    renderHook(() => useCpsPickerAccess(ProjectRoutingAccess.READONLY, services));
-
-    expect(registerAppAccess).not.toHaveBeenCalled();
-  });
-
-  it('does not register when cpsManager is missing', () => {
-    renderHook(() =>
-      useCpsPickerAccess(ProjectRoutingAccess.READONLY, {
-        application: { currentAppId$: mockCurrentAppId$ },
-        cps: {} as any,
-      })
-    );
-
-    expect(registerAppAccess).not.toHaveBeenCalled();
+    const cleanupResolver = registerAppAccess.mock.calls[1][1];
+    expect(cleanupResolver('any-location')).toBe(ProjectRoutingAccess.DISABLED);
   });
 });

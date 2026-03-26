@@ -9,44 +9,44 @@
 
 import { useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { useHistory } from 'react-router-dom';
 import type { Observable } from 'rxjs';
-import type { ICPSManager } from '../types';
+import type { ICPSManager, CPSAppAccessResolver } from '../types';
 import { ProjectRoutingAccess } from '../types';
 
-interface ApplicationService {
+interface UseCpsPickerAccessParams {
+  /** The access resolver function - called to determine access for a given location */
+  resolver: CPSAppAccessResolver;
+  /** Observable of the current app ID */
   currentAppId$: Observable<string | undefined>;
-}
-
-interface CpsService {
+  /** The CPS manager instance (may be undefined if CPS is disabled) */
   cpsManager?: ICPSManager;
 }
 
+const cleanupResolver = () => ProjectRoutingAccess.DISABLED;
+
 /**
- * Set the CPS global project picker access state only for the current matching route.
- * Pass `application` and `cps` from your plugin's `useKibana().services`.
+ * Registers a CPS picker access resolver for the current app.
+ * Automatically cleans up (sets DISABLED) on unmount.
+ *
+ * Consumers are responsible for providing their own resolver logic
+ * based on their routing patterns.
  */
-export const useCpsPickerAccess = (
-  access: ProjectRoutingAccess,
-  { application, cps }: { application: ApplicationService; cps: CpsService | undefined }
-) => {
-  const pathname = useHistory().location.pathname;
-  const currentAppId = useObservable(application.currentAppId$);
-  const cpsManager = cps?.cpsManager;
+export const useCpsPickerAccess = ({
+  resolver,
+  currentAppId$,
+  cpsManager,
+}: UseCpsPickerAccessParams) => {
+  const currentAppId = useObservable(currentAppId$);
 
   useEffect(() => {
     if (!currentAppId || !cpsManager) {
       return;
     }
-    cpsManager.registerAppAccess(currentAppId, (location) => {
-      if (pathname.length > 0 && location.endsWith(pathname)) {
-        return access;
-      }
-      return ProjectRoutingAccess.DISABLED;
-    });
+
+    cpsManager.registerAppAccess(currentAppId, resolver);
 
     return () => {
-      cpsManager.registerAppAccess(currentAppId, () => ProjectRoutingAccess.DISABLED);
+      cpsManager.registerAppAccess(currentAppId, cleanupResolver);
     };
-  }, [access, cpsManager, currentAppId, pathname]);
+  }, [resolver, cpsManager, currentAppId]);
 };
