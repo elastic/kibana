@@ -11,11 +11,7 @@ import { globSync } from 'fast-glob';
 import { REPO_ROOT } from '@kbn/repo-info';
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
-import {
-  SCOUT_CONFIG_PATH_GLOB,
-  SCOUT_CONFIG_PATH_REGEX,
-  SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX,
-} from '@kbn/scout-info';
+import { SCOUT_CONFIG_PATH_GLOB, SCOUT_UNIFIED_CONFIG_PATH_REGEX } from '@kbn/scout-info';
 import { existsSync, readFileSync } from 'node:fs';
 import { readKibanaModuleManifest } from '../helpers/read_manifest';
 import type { ScoutTestableModule } from './testable_module';
@@ -55,6 +51,53 @@ const loadScoutManifestFile = (
   };
 };
 
+const resolveModuleMetadata = (
+  configPath: string,
+  moduleRoot: string
+): {
+  module: ScoutTestableModule;
+  serverConfigSet: string | undefined;
+  testCategory: string;
+  testConfigType: string;
+} => {
+  const match = configPath.match(SCOUT_UNIFIED_CONFIG_PATH_REGEX);
+  if (!match?.groups) {
+    throw new Error(
+      `Failed to create Scout config from path '${configPath}': ` +
+        'path did not match the expected regex pattern'
+    );
+  }
+
+  const g = match.groups;
+  const module: ScoutTestableModule = g.examplesRoot
+    ? (() => {
+        const manifest = readKibanaModuleManifest(
+          path.join(REPO_ROOT, moduleRoot, 'kibana.jsonc')
+        );
+        return {
+          name: manifest.id,
+          group: manifest.group,
+          type: manifest.type as ScoutTestableModule['type'],
+          visibility: manifest.visibility as ScoutTestableModule['visibility'],
+          root: moduleRoot,
+        };
+      })()
+    : {
+        name: g.moduleName,
+        group: g.platformOrCore ?? g.solution,
+        type: g.moduleKind.slice(0, -1) as ScoutTestableModule['type'],
+        visibility: (g.moduleVisibility || 'private') as ScoutTestableModule['visibility'],
+        root: moduleRoot,
+      };
+
+  return {
+    module,
+    serverConfigSet: g.serverConfigSet,
+    testCategory: g.testCategory,
+    testConfigType: g.testConfigType,
+  };
+};
+
 export const testConfig = {
   fromPath(configPath: string): ScoutTestConfig {
     // Make sure we're working with a path relative to the repo root
@@ -69,71 +112,13 @@ export const testConfig = {
       );
     }
 
-    const examplesMatch = configPath.match(SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX);
-    if (examplesMatch) {
-      const [, , , serverConfigSet, testCategory, testConfigType] = examplesMatch;
-      const moduleRoot = configPath.split('/test/scout')[0];
-      const scoutDirName = `scout${serverConfigSet ? `_${serverConfigSet}` : ''}`;
-      const manifestPath = path.join(
-        moduleRoot,
-        'test',
-        scoutDirName,
-        '.meta',
-        testCategory,
-        `${testConfigType || 'standard'}.json`
-      );
-      const manifestFileData = loadScoutManifestFile(manifestPath);
-      const kibanaManifest = readKibanaModuleManifest(
-        path.join(REPO_ROOT, moduleRoot, 'kibana.jsonc')
-      );
-
-      return {
-        path: configPath,
-        category: testCategory,
-        type: testConfigType || 'standard',
-        module: {
-          name: kibanaManifest.id,
-          group: kibanaManifest.group,
-          type: kibanaManifest.type as ScoutTestableModule['type'],
-          visibility: kibanaManifest.visibility as ScoutTestableModule['visibility'],
-          root: moduleRoot,
-        },
-        manifest: {
-          path: manifestPath,
-          exists: manifestFileData.exists,
-          sha1: manifestFileData.sha1,
-          tests: manifestFileData.tests,
-        },
-        server: {
-          configSet: serverConfigSet || 'default',
-        },
-      };
-    }
-
-    const match = configPath.match(SCOUT_CONFIG_PATH_REGEX);
-
-    if (match == null) {
-      throw new Error(
-        `Failed to create Scout config from path '${configPath}': ` +
-          'path did not match the expected regex pattern'
-      );
-    }
-
-    const [
-      _,
-      platform,
-      solution,
-      moduleType,
-      moduleVisibility,
-      moduleName,
-      serverConfigSet,
-      testCategory,
-      testConfigType,
-    ] = match;
+    const moduleRoot = configPath.split('/test/scout')[0];
+    const { module, serverConfigSet, testCategory, testConfigType } = resolveModuleMetadata(
+      configPath,
+      moduleRoot
+    );
 
     const scoutDirName = `scout${serverConfigSet ? `_${serverConfigSet}` : ''}`;
-    const moduleRoot = configPath.split('/test/scout')[0];
-
     const manifestPath = path.join(
       moduleRoot,
       'test',
@@ -148,13 +133,7 @@ export const testConfig = {
       path: configPath,
       category: testCategory,
       type: testConfigType || 'standard',
-      module: {
-        name: moduleName,
-        group: platform ?? solution,
-        type: moduleType.slice(0, -1) as ScoutTestableModule['type'],
-        visibility: (moduleVisibility || 'private') as ScoutTestableModule['visibility'],
-        root: moduleRoot,
-      },
+      module,
       manifest: {
         path: manifestPath,
         exists: manifestFileData.exists,

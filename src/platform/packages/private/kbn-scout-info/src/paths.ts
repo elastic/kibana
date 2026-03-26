@@ -32,8 +32,16 @@ export const SCOUT_PLAYWRIGHT_CONFIGS_PATH = path.resolve(
   'scout_playwright_configs.json'
 );
 
-export const TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB =
-  '{src/platform,src/core,x-pack/**}/{plugins,packages}/**/test/scout{_*,},{examples,x-pack/examples}/**/test/scout{_*,}';
+export const PLATFORM_AND_SOLUTION_SCOUT_ROOT_PATH_GLOB =
+  '{src/platform,src/core,x-pack/**}/{plugins,packages}/**/test/scout{_*,}';
+
+export const EXAMPLE_PLUGIN_SCOUT_ROOT_PATH_GLOB =
+  '{examples,x-pack/examples}/**/test/scout{_*,}';
+
+export const TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB = `{${[
+  PLATFORM_AND_SOLUTION_SCOUT_ROOT_PATH_GLOB,
+  EXAMPLE_PLUGIN_SCOUT_ROOT_PATH_GLOB,
+].join(',')}}`;
 
 export const TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX = new RegExp(
   `(?:src|x-pack)` +
@@ -67,6 +75,24 @@ export const SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX = new RegExp(
   `^(examples|x-pack/examples)/([^/]+)/test/scout(?:_([^/]*))?/(${SCOUT_TEST_CATEGORIES.join(
     '|'
   )})/(\\w*)\\.?playwright\\.config\\.ts$`
+);
+
+/**
+ * Unified regex matching both platform/solution and example plugin Playwright config paths.
+ * Uses named capture groups so callers can branch on `examplesRoot` to decide how to
+ * resolve module metadata (kibana.jsonc vs directory-derived).
+ */
+export const SCOUT_UNIFIED_CONFIG_PATH_REGEX = new RegExp(
+  `^(?:` +
+    `(?<examplesRoot>examples|x-pack/examples)/(?<examplePlugin>[^/]+)` +
+    `|` +
+    `(?:src|x-pack)/(?:(?<platformOrCore>platform|core)|solutions/(?<solution>\\w+))` +
+    `/(?<moduleKind>plugins|packages)/?(?<moduleVisibility>shared|private|)` +
+    `/(?<moduleName>[\\w|-]+(?:\\/[\\w|-]+)*)` +
+  `)` +
+  `/test/scout(?:_(?<serverConfigSet>[^/]*))?` +
+  `/(?<testCategory>${SCOUT_TEST_CATEGORIES.join('|')})` +
+  `/(?<testConfigType>\\w*)\\.?playwright\\.config\\.ts$`
 );
 
 // Scout CI
