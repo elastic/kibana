@@ -46,6 +46,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
 import type { Section } from './constants';
@@ -95,6 +96,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   contentManagement?: ContentManagementPublicStart;
   uiActions?: UiActionsStart;
   cps?: CPSPluginStart;
+  getAlertingV2Plugin?: () => Promise<AlertingV2PublicStart | undefined>;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {

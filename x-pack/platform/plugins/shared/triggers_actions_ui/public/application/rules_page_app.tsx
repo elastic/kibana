@@ -17,6 +17,7 @@ import {
   ruleLogsRoute,
   editRuleRoute,
 } from '@kbn/rule-data-utils';
+import { routeToRulesV2 } from './constants';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
@@ -85,6 +86,11 @@ const AppWithoutRouter = () => {
           <Route
             exact
             path={ruleLogsRoute}
+            component={suspendedComponentWithProps(RulesPage, 'xl')}
+          />
+          <Route
+            exact
+            path={routeToRulesV2}
             component={suspendedComponentWithProps(RulesPage, 'xl')}
           />
           <Route

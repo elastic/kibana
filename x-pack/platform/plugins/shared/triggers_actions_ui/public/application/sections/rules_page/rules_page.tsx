@@ -7,7 +7,7 @@
 
 import React, { lazy, useCallback, useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
@@ -18,6 +18,7 @@ import {
   rulesAppDetailsRoute,
   getCreateRuleFromTemplateRoute,
 } from '@kbn/rule-data-utils';
+import useAsync from 'react-use/lib/useAsync';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { RuleTypeModal } from '@kbn/response-ops-rule-form';
 import { RulesSettingsLink } from '../../components/rules_setting/rules_settings_link';
@@ -30,6 +31,7 @@ import { CreateRuleButton } from '../rules_list/components/create_rule_button';
 import { getCurrentDocTitle } from '../../lib/doc_title';
 import { NON_SIEM_CONSUMERS } from '../alerts_search_bar/constants';
 import type { Section } from '../../constants';
+import { routeToRulesV2 } from '../../constants';
 import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
 
 const LogsList = lazy(() => import('../rule_details/components/global_rule_event_log_list'));
@@ -46,8 +48,14 @@ const RulesPage = () => {
     notifications: { toasts },
     ruleTypeRegistry,
     cps,
+    getAlertingV2Plugin,
   } = useKibana().services;
   const useUnifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
+
+  const { value: alertingV2Start } = useAsync(
+    () => getAlertingV2Plugin?.() ?? Promise.resolve(undefined),
+    [getAlertingV2Plugin]
+  );
 
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     http,
@@ -55,7 +63,11 @@ const RulesPage = () => {
     filteredRuleTypes: [],
   });
 
-  const currentSection: Section = location.pathname.endsWith('/logs') ? 'logs' : 'rules';
+  const currentSection: Section = location.pathname.endsWith('/rules-v2')
+    ? 'rules_v2'
+    : location.pathname.endsWith('/logs')
+    ? 'logs'
+    : 'rules';
 
   const tabs: Array<{
     id: Section;
@@ -77,6 +89,19 @@ const RulesPage = () => {
       ),
     });
   }
+
+  if (alertingV2Start) {
+    tabs.push({
+      id: 'rules_v2',
+      name: (
+        <FormattedMessage
+          id="xpack.triggersActionsUI.home.rulesV2TabTitle"
+          defaultMessage="Rules V2"
+        />
+      ),
+    });
+  }
+
   const [ruleTypeModalVisible, setRuleTypeModalVisibility] = useState<boolean>(false);
 
   const openRuleTypeModal = useCallback(() => {
@@ -94,6 +119,8 @@ const RulesPage = () => {
   const onSectionChange = (newSection: Section) => {
     if (newSection === 'logs') {
       history.push('/logs');
+    } else if (newSection === 'rules_v2') {
+      history.push(routeToRulesV2);
     } else {
       history.push('/');
     }
@@ -174,11 +201,26 @@ const RulesPage = () => {
     );
   }, []);
 
+  const renderRulesV2List = useCallback(() => {
+    if (!alertingV2Start) {
+      return <EuiLoadingSpinner size="l" />;
+    }
+    const { RulesListV2 } = alertingV2Start;
+    return (
+      <KibanaPageTemplate.Section paddingSize="l" data-test-subj="rulesV2ListWrapper">
+        <RulesListV2 />
+      </KibanaPageTemplate.Section>
+    );
+  }, [alertingV2Start]);
+
   useEffect(() => {
     if (setBreadcrumbs) {
       if (currentSection === 'logs') {
         const rulesBreadcrumbWithAppPath = getRulesBreadcrumbWithHref(getUrlForApp);
         setBreadcrumbs([rulesBreadcrumbWithAppPath, getAlertingSectionBreadcrumb('logs')]);
+      } else if (currentSection === 'rules_v2') {
+        const rulesBreadcrumbWithAppPath = getRulesBreadcrumbWithHref(getUrlForApp);
+        setBreadcrumbs([rulesBreadcrumbWithAppPath, getAlertingSectionBreadcrumb('rules')]);
       } else {
         setBreadcrumbs([getAlertingSectionBreadcrumb('rules')]);
       }
@@ -219,6 +261,7 @@ const RulesPage = () => {
         <EuiSpacer size="l" />
         <Routes>
           <Route exact path="/logs" component={renderLogsList} />
+          <Route exact path={routeToRulesV2} component={renderRulesV2List} />
           <Route exact path="/" component={renderRulesList} />
         </Routes>
       </RulesPageTemplate>

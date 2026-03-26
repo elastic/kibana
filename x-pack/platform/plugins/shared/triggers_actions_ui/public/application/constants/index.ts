@@ -18,13 +18,14 @@ export {
 } from '@kbn/alerting-plugin/common';
 export { BASE_ACTION_API_PATH, INTERNAL_BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 
-export type Section = 'connectors' | 'rules' | 'alerts' | 'logs';
+export type Section = 'connectors' | 'rules' | 'alerts' | 'logs' | 'rules_v2';
 
 export const routeToHome = `/`;
 export const routeToConnectors = `/connectors`;
 export const routeToConnectorEdit = `/connectors/:connectorId`;
 export const routeToRules = `/rules`;
 export const routeToLogs = `/logs`;
+export const routeToRulesV2 = `/rules-v2`;
 export const routeToCreateRule = '/rules/create';
 export const routeToEditRule = '/rules/edit';
 export const legacyRouteToAlerts = `/alerts`;

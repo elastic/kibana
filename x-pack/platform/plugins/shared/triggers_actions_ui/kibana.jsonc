@@ -36,6 +36,7 @@
     "extraPublicDirs": ["public/common", "public/common/constants"],
     "runtimePluginDependencies": [
       "cases",
+      "alertingVTwo"
     ]
   }
 }

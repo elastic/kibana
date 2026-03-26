@@ -5,29 +5,129 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPopover,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { ALERTING_V2_RULE_CREATE_LOCATOR } from '@kbn/deeplinks-alerting-v2';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export interface CreateRuleButtonProps {
   openFlyout: () => void;
 }
 
-export const CreateRuleButton = (props: CreateRuleButtonProps) => {
-  const { openFlyout } = props;
+const splitGroupStyles = css`
+  gap: 1px;
+
+  .splitButton__primary {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .splitButton__dropdown {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    min-inline-size: 0;
+    padding-inline: 8px;
+  }
+`;
+
+export const CreateRuleButton = ({ openFlyout }: CreateRuleButtonProps) => {
+  const { application, share } = useKibana().services;
+  const canViewAlertingV2 = !!application.capabilities.alertingVTwo;
+
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const v2CreateUrl = useMemo(() => {
+    const locator = share?.url.locators.get(ALERTING_V2_RULE_CREATE_LOCATOR);
+    return locator?.getRedirectUrl({}) ?? undefined;
+  }, [share]);
+
+  if (!canViewAlertingV2 || !v2CreateUrl) {
+    return (
+      <EuiButton
+        iconType="plusInCircle"
+        key="create-rule"
+        data-test-subj="createRuleButton"
+        fill
+        onClick={openFlyout}
+      >
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.rulesList.addRuleButtonLabel"
+          defaultMessage="Create rule"
+        />
+      </EuiButton>
+    );
+  }
 
   return (
-    <EuiButton
-      iconType="plusInCircle"
-      key="create-rule"
-      data-test-subj="createRuleButton"
-      fill
-      onClick={openFlyout}
-    >
-      <FormattedMessage
-        id="xpack.triggersActionsUI.sections.rulesList.addRuleButtonLabel"
-        defaultMessage="Create rule"
-      />
-    </EuiButton>
+    <EuiFlexGroup responsive={false} gutterSize="none" css={splitGroupStyles}>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          className="splitButton__primary"
+          iconType="plusInCircle"
+          data-test-subj="createRuleButton"
+          fill
+          onClick={openFlyout}
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.rulesList.addRuleButtonLabel"
+            defaultMessage="Create rule"
+          />
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          aria-label={i18n.translate(
+            'xpack.triggersActionsUI.sections.rulesList.createRuleDropdownAriaLabel',
+            { defaultMessage: 'More create rule options' }
+          )}
+          button={
+            <EuiButtonIcon
+              className="splitButton__dropdown"
+              display="fill"
+              size="m"
+              iconType="arrowDown"
+              aria-label={i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.createRuleDropdownAriaLabel',
+                { defaultMessage: 'More create rule options' }
+              )}
+              onClick={() => setIsDropdownOpen((open) => !open)}
+              data-test-subj="createRuleDropdownButton"
+            />
+          }
+          isOpen={isDropdownOpen}
+          closePopover={() => setIsDropdownOpen(false)}
+          panelPaddingSize="none"
+          anchorPosition="downRight"
+        >
+          <EuiContextMenuPanel
+            size="s"
+            items={[
+              <EuiContextMenuItem
+                key="create-v2-rule"
+                icon={<EuiIcon type="bell" size="m" aria-hidden={true} />}
+                href={v2CreateUrl}
+                data-test-subj="createV2RuleButton"
+              >
+                {i18n.translate('xpack.triggersActionsUI.sections.rulesList.createV2RuleLabel', {
+                  defaultMessage: 'Create v2 Rule',
+                })}
+              </EuiContextMenuItem>,
+            ]}
+          />
+        </EuiPopover>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

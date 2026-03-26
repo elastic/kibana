@@ -10,4 +10,5 @@ import type { CreateRuleFormFlyoutProps } from './create_rule_form_flyout';
 
 export interface AlertingV2PublicStart {
   DynamicRuleFormFlyout: ComponentType<CreateRuleFormFlyoutProps>;
+  RulesListV2: ComponentType;
 }

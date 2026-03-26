@@ -47,6 +47,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ON_OPEN_PANEL_MENU, ALERT_RULE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
 import type { Rule, RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 
@@ -236,6 +237,13 @@ export class Plugin
       return casesResponse.found ? casesResponse.contract : undefined;
     };
 
+    const getAlertingV2Plugin = async (): Promise<AlertingV2PublicStart | undefined> => {
+      const { alertingVTwo } = await core.plugins.onStart<{
+        alertingVTwo: AlertingV2PublicStart;
+      }>('alertingVTwo');
+      return alertingVTwo.found ? alertingVTwo.contract : undefined;
+    };
+
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
 
     const featureTitle = i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
@@ -326,6 +334,7 @@ export class Plugin
               ...coreStart,
               actions: plugins.actions,
               getCasesPlugin,
+              getAlertingV2Plugin,
               security: pluginsStart.security,
               cloud: plugins.cloud,
               data: pluginsStart.data,
