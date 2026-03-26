@@ -49,15 +49,6 @@ function useRspackOptimizer(): boolean {
   return process.env.KBN_USE_RSPACK === 'true';
 }
 
-/**
- * Determine which RSPack build mode to use.
- * Currently only 'single' is supported (all plugins in ONE compilation).
- */
-function getRspackMode(): 'single' {
-  // Only single mode is supported now
-  return 'single';
-}
-
 export type OptimizerPhase = OptimizerUpdate['state']['phase'] | 'running' | 'idle' | 'error';
 
 export class Optimizer {
@@ -126,7 +117,6 @@ export class Optimizer {
    */
   private createRspackRun$(options: Options): Rx.Observable<void> {
     const log = this.createLog(options, '@kbn/rspack-optimizer');
-    const mode = getRspackMode();
 
     return new Rx.Observable<void>((subscriber) => {
       let rspackOptimizerInstance: { stop: () => Promise<void> } | undefined;
@@ -140,7 +130,6 @@ export class Optimizer {
             cache: options.cache,
             dist: options.dist,
             examples: options.runExamples,
-            mode, // 'single' mode - all plugins in one compilation
             log,
           });
 

@@ -12,6 +12,8 @@ import Fs from 'fs';
 import { rspack, type Compiler, type Stats } from '@rspack/core';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createSingleCompileConfig } from './config/create_single_compile_config';
+import { isHmrEnabled } from './hmr/hmr_enabled';
+import { HmrServer } from './hmr/hmr_server';
 import type { ThemeTag } from './types';
 
 export interface BuildOptions {
@@ -30,6 +32,8 @@ export interface BuildOptions {
   profile?: boolean;
   /** Skip RsDoctor, only generate stats.json (faster) */
   profileStatsOnly?: boolean;
+  /** Enable Hot Module Replacement in watch mode (undefined = auto-detect) */
+  hmr?: boolean;
 }
 
 export interface BuildResult {
@@ -66,11 +70,29 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     log,
     profile = false,
     profileStatsOnly = false,
+    hmr: hmrFlag,
   } = options;
 
   const startTime = Date.now();
 
+  let hmrServer: HmrServer | undefined;
+
   try {
+    // Resolve HMR enablement
+    const hmr = isHmrEnabled({
+      watch,
+      dist,
+      profile,
+      hmrFlag,
+      kbnHmrEnv: process.env.KBN_HMR,
+    });
+
+    let hmrPort: number | undefined;
+    if (hmr) {
+      hmrServer = new HmrServer();
+      hmrPort = await hmrServer.start();
+    }
+
     log?.info('Creating single-compilation RSPack config...');
 
     const config = await createSingleCompileConfig({
@@ -87,6 +109,8 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       log,
       profile,
       profileStatsOnly,
+      hmr,
+      hmrPort,
     });
 
     log?.info('Starting RSPack compilation...');
@@ -94,11 +118,14 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     const compiler = rspack(config) as Compiler;
 
     if (watch) {
-      return runWatchBuild(compiler, log, startTime, repoRoot);
+      return runWatchBuild(compiler, log, startTime, repoRoot, hmrServer);
     } else {
+      // HMR is not used outside watch mode; clean up if somehow started
+      await hmrServer?.close();
       return runProductionBuild(compiler, log, startTime, repoRoot);
     }
   } catch (error: any) {
+    await hmrServer?.close();
     log?.error(`Build failed: ${error.message}`);
     if (error.stack) {
       log?.error(error.stack);
@@ -161,7 +188,8 @@ async function runWatchBuild(
   compiler: Compiler,
   log: ToolingLog | undefined,
   startTime: number,
-  repoRoot: string
+  repoRoot: string,
+  hmrServer?: HmrServer
 ): Promise<BuildResult> {
   return new Promise((resolve) => {
     let isFirstBuild = true;
@@ -176,6 +204,8 @@ async function runWatchBuild(
       isShuttingDown = true;
 
       log?.info('Stopping RSPack watch mode...');
+
+      hmrServer?.close();
 
       watching.close(() => {
         log?.info('RSPack watch mode stopped.');
@@ -239,6 +269,9 @@ async function runWatchBuild(
               previousAssetSizes.set(asset.name, asset.size);
             }
             copyBundlesToPluginDirs(repoRoot, log);
+            if (stats.hash && hmrServer) {
+              hmrServer.broadcast(stats.hash);
+            }
             log?.info('Watching for changes... (Ctrl+C to stop)');
           }
 
@@ -272,6 +305,9 @@ async function runWatchBuild(
           }
 
           copyBundlesToPluginDirs(repoRoot, log, true);
+          if (stats.hash && hmrServer) {
+            hmrServer.broadcast(stats.hash);
+          }
           log?.success(
             `Rebuilt in ${rebuildTime}s (${changedCount} chunks updated, ${formatSize(changedSize)} changed)`
           );

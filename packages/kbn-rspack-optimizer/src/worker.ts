@@ -33,6 +33,7 @@ interface StartMessage {
     dist?: boolean;
     examples?: boolean;
     themeTags?: ThemeTag[];
+    hmr?: boolean;
   };
 }
 
@@ -60,6 +61,7 @@ async function handleStart(options: StartMessage['options']) {
       dist: options.dist,
       examples: options.examples,
       themeTags: options.themeTags ?? ['borealislight', 'borealisdark'],
+      hmr: options.hmr,
       log,
     });
 

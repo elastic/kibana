@@ -12,6 +12,7 @@ export interface BootstrapTemplateData {
   themeTagName: string;
   jsDependencyPaths: string[];
   publicPathMap: string;
+  useHMR?: boolean;
 }
 
 export const renderTemplate = ({
@@ -19,11 +20,38 @@ export const renderTemplate = ({
   colorMode,
   jsDependencyPaths,
   publicPathMap,
+  useHMR = false,
 }: BootstrapTemplateData) => {
   const kbnThemeTagTemplate =
     colorMode === 'system'
       ? `window.__kbnThemeTag__ = window.matchMedia('(prefers-color-scheme: dark)').matches ? '${themeTagName}dark' : '${themeTagName}light';`
       : `window.__kbnThemeTag__ = '${themeTagName}${colorMode}';`;
+
+  // React Fast Refresh requires __REACT_DEVTOOLS_GLOBAL_HOOK__ to exist
+  // BEFORE React-DOM loads so that the renderer calls hook.inject().
+  // Without this stub, react-refresh/runtime (loaded later in kibana.bundle.js)
+  // cannot capture the renderer and performReactRefresh() becomes a no-op.
+  const reactDevtoolsHookStub = useHMR
+    ? [
+        '',
+        "    if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ === 'undefined') {",
+        '      var __hmrNextId = 0;',
+        '      __REACT_DEVTOOLS_GLOBAL_HOOK__ = {',
+        '        renderers: new Map(),',
+        '        supportsFiber: true,',
+        '        inject: function(internals) {',
+        '          var id = __hmrNextId++;',
+        '          __REACT_DEVTOOLS_GLOBAL_HOOK__.renderers.set(id, internals);',
+        '          return id;',
+        '        },',
+        '        onScheduleFiberRoot: function() {},',
+        '        onCommitFiberRoot: function() {},',
+        '        onCommitFiberUnmount: function() {},',
+        '      };',
+        '    }',
+        '',
+      ].join('\n')
+    : '';
 
   return `
 function kbnBundlesLoader() {
@@ -154,7 +182,7 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
         }
       });
     }
-
+${reactDevtoolsHookStub}
     performance.mark('kbnLoad', {
       detail: 'load_started',
     })

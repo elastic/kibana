@@ -273,6 +273,10 @@ export interface SingleCompileConfigOptions {
   profile?: boolean;
   /** Skip RsDoctor, only generate stats.json (faster) */
   profileStatsOnly?: boolean;
+  /** Enable Hot Module Replacement (resolved by caller via isHmrEnabled) */
+  hmr?: boolean;
+  /** Port the HMR SSE server is listening on (required when hmr=true) */
+  hmrPort?: number;
 }
 
 /**
@@ -301,6 +305,8 @@ export async function createSingleCompileConfig(
     filter,
     profile = false,
     profileStatsOnly = false,
+    hmr = false,
+    hmrPort,
   } = options;
 
   // Discover all plugins
@@ -332,6 +338,9 @@ export async function createSingleCompileConfig(
 
   if (log) {
     log.info(`Unified compilation: ${pluginEntries.length} bundles (core + ${plugins.length} plugins)`);
+    if (hmr) {
+      log.info(`HMR enabled (port ${hmrPort})`);
+    }
   }
 
   // Collect plugin manifest paths for watching
@@ -358,7 +367,10 @@ export async function createSingleCompileConfig(
 
     entry: {
       // Single entry point that imports all plugins
-      kibana: unifiedEntryPath,
+      // When HMR is enabled, prepend the HMR client for SSE-based update notifications
+      kibana: hmr
+        ? [Path.resolve(__dirname, '../hmr/hmr_client.js'), unifiedEntryPath]
+        : unifiedEntryPath,
     },
 
     output: {
@@ -412,7 +424,7 @@ export async function createSingleCompileConfig(
       // Plus additional rules specific to main build
       // SWC for performance + require_interop_loader for ESM/CJS interop
       rules: [
-        ...getSharedModuleRules(repoRoot, dist, themeTags, 'kibana'),
+        ...getSharedModuleRules(repoRoot, dist, themeTags, 'kibana', false, hmr),
         // URL imports (?asUrl query) - specific to main build
         {
           resourceQuery: /asUrl/,
@@ -551,7 +563,19 @@ export async function createSingleCompileConfig(
         'process.env.NODE_ENV': JSON.stringify(dist ? 'production' : 'development'),
         // Match legacy webpack - used for conditional code in plugins
         'process.env.IS_KIBANA_DISTRIBUTABLE': JSON.stringify(dist ? 'true' : 'false'),
+        // HMR SSE server port - injected at build time for the HMR client
+        ...(hmr && hmrPort ? { __KBN_HMR_PORT__: JSON.stringify(hmrPort) } : {}),
       }),
+
+      // HMR plugins -- enabled in watch dev mode
+      ...(hmr
+        ? [
+            new rspack.HotModuleReplacementPlugin(),
+            new (require('@rspack/plugin-react-refresh').ReactRefreshRspackPlugin)({
+              overlay: false,
+            }),
+          ]
+        : []),
 
       // Progress reporting - use log-based progress instead of dynamic terminal updates
       // This avoids terminal state issues on Ctrl+C

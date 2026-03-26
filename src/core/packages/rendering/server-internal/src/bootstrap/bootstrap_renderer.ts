@@ -70,6 +70,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   };
 
   const useRspack = isRspackModeEnabled();
+  const useHMR = !packageInfo.dist && process.env.KBN_HMR !== 'false';
 
   return async function bootstrapRenderer({ uiSettingsClient, request, isAnonymousPage = false }) {
     let darkMode: DarkModeValue = false;
@@ -127,6 +128,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
         themeTagName,
         jsDependencyPaths: rspackPaths,
         publicPathMap,
+        useHMR,
       });
     } else {
       // Legacy mode - use __kbnBundles__ with DLLs

@@ -1836,6 +1836,7 @@
     "@redocly/cli": "2.19.2",
     "@rsdoctor/rspack-plugin": "1.5.5",
     "@rspack/core": "1.7.10",
+    "@rspack/plugin-react-refresh": "1.6.1",
     "@statoscope/webpack-plugin": "5.28.2",
     "@storybook/addon-a11y": "8.6.17",
     "@storybook/addon-actions": "8.6.17",

@@ -21,6 +21,8 @@ export interface RspackOptimizerOptions {
   dist?: boolean;
   examples?: boolean;
   themeTags?: ThemeTag[];
+  /** Enable HMR in watch mode (undefined = auto-detect) */
+  hmr?: boolean;
   log: ToolingLog;
 }
 
@@ -117,6 +119,7 @@ export class RspackOptimizer {
                 dist: this.options.dist,
                 examples: this.options.examples,
                 themeTags: this.options.themeTags ?? ['borealislight', 'borealisdark'],
+                hmr: this.options.hmr,
               },
             });
             break;

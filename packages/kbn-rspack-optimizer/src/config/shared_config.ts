@@ -81,7 +81,7 @@ export function getSharedResolveFallback(): Record<string, false> {
  * Common SWC options for both TypeScript and JavaScript files.
  * Uses @kbn/transpiler-config for consistent settings across Babel and SWC.
  */
-function getSwcOptions(dist: boolean) {
+function getSwcOptions(dist: boolean, hmr: boolean = false) {
   const sharedConfig = getSharedConfig();
 
   return {
@@ -99,6 +99,8 @@ function getSwcOptions(dist: boolean) {
           // Use shared React config
           runtime: sharedConfig.react.runtime,
           development: !dist,
+          // React Fast Refresh transform -- injects $RefreshReg$ / $RefreshSig$ calls
+          refresh: hmr,
           // Use Emotion's JSX runtime to handle the css prop natively.
           // This works because @emotion/react/jsx-runtime is externalized
           // to __kbnSharedDeps__.EmotionReact (which exports jsx, jsxs, Fragment).
@@ -118,8 +120,8 @@ function getSwcOptions(dist: boolean) {
   };
 }
 
-export function getSwcLoaderRules(dist: boolean): RuleSetRule[] {
-  const swcOptions = getSwcOptions(dist);
+export function getSwcLoaderRules(dist: boolean, hmr: boolean = false): RuleSetRule[] {
+  const swcOptions = getSwcOptions(dist, hmr);
 
   return [
     // TypeScript files - SWC only
@@ -402,12 +404,13 @@ export function getSharedModuleRules(
   dist: boolean,
   themeTags: ThemeTag[] = ['borealislight', 'borealisdark'],
   bundleId: string = 'kibana',
-  useBabel: boolean = false
+  useBabel: boolean = false,
+  hmr: boolean = false
 ): RuleSetRule[] {
   // Use SWC by default for better performance.
   // The css prop is handled by Emotion's JSX runtime (importSource: '@emotion/react')
   // which is externalized to use the shared Emotion instance.
-  const jsRules = useBabel ? [getBabelLoaderRule(dist)] : getSwcLoaderRules(dist);
+  const jsRules = useBabel ? [getBabelLoaderRule(dist)] : getSwcLoaderRules(dist, hmr);
 
   return [
     ...jsRules,

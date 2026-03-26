@@ -32,6 +32,7 @@ export async function runRspackCli(options: CliOptions = {}): Promise<void> {
       'test-plugins',
       'help',
       'no-cache',
+      'no-hmr',
       'verbose',
       'quiet',
       'profile',
@@ -49,6 +50,7 @@ export async function runRspackCli(options: CliOptions = {}): Promise<void> {
       examples: false,
       'test-plugins': false,
       'no-cache': false,
+      'no-hmr': false,
       profile: false,
       'profile-stats-only': false,
     },
@@ -99,6 +101,7 @@ export async function runRspackCli(options: CliOptions = {}): Promise<void> {
       plugins,
       log,
       profile: false,
+      hmr: args['no-hmr'] ? false : undefined,
     });
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
@@ -204,6 +207,7 @@ Build Options:
   --themes <tags>       Comma-separated theme tags to build (default: all)
   --output-root <dir>   Output root directory (default: repo root)
   --no-cache            Disable filesystem caching
+  --no-hmr              Disable Hot Module Replacement in watch mode
 
 Profile Mode (one-time build with bundle analysis):
   --profile             Full profiling with stats.json + RsDoctor report
@@ -217,6 +221,8 @@ Output Options:
 
 Environment Variables:
   KBN_USE_RSPACK=true   Use RSPack optimizer instead of webpack
+  KBN_HMR=false         Disable HMR (RSPack only, alternative to --no-hmr)
+  KBN_HMR_PORT=5678     Override the HMR SSE server port (RSPack only, default: 5678)
 
 Examples:
   # Full production build

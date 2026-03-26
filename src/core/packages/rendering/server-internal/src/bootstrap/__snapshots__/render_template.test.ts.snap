@@ -137,7 +137,11 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
 
     load([
       '/js-1','/js-2'
-    ], function () {
+    ], async function () {
+      // RSPack progressive loading: wait for async plugin chunks to load
+      if (window.__kbnPluginsLoaded) {
+        await window.__kbnPluginsLoaded;
+      }
       __kbnBundles__.get('entry/core/public').__kbnBootstrap__();
     });
   }
@@ -282,7 +286,11 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
 
     load([
       '/js-1','/js-2'
-    ], function () {
+    ], async function () {
+      // RSPack progressive loading: wait for async plugin chunks to load
+      if (window.__kbnPluginsLoaded) {
+        await window.__kbnPluginsLoaded;
+      }
       __kbnBundles__.get('entry/core/public').__kbnBootstrap__();
     });
   }

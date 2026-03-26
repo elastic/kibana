@@ -231,6 +231,38 @@ describe('shared_config', () => {
     });
   });
 
+  describe('HMR config conditionals', () => {
+    describe('SWC refresh option', () => {
+      it('sets refresh=true when hmr is enabled', () => {
+        const rules = getSwcLoaderRules(false, true);
+        const tsRule = rules[0];
+        const options = tsRule.options as any;
+        expect(options.jsc.transform.react.refresh).toBe(true);
+      });
+
+      it('sets refresh=false when hmr is disabled', () => {
+        const rules = getSwcLoaderRules(false, false);
+        const tsRule = rules[0];
+        const options = tsRule.options as any;
+        expect(options.jsc.transform.react.refresh).toBe(false);
+      });
+
+      it('sets refresh=false by default (no hmr arg)', () => {
+        const rules = getSwcLoaderRules(false);
+        const tsRule = rules[0];
+        const options = tsRule.options as any;
+        expect(options.jsc.transform.react.refresh).toBe(false);
+      });
+
+      it('propagates hmr through getSharedModuleRules', () => {
+        const rules = getSharedModuleRules(REPO_ROOT, false, undefined, undefined, false, true);
+        const tsRule = rules.find((r) => r.test?.toString() === '/\\.tsx?$/');
+        const options = tsRule?.options as any;
+        expect(options.jsc.transform.react.refresh).toBe(true);
+      });
+    });
+  });
+
   describe('getSharedIgnoreWarnings', () => {
     const warnings = getSharedIgnoreWarnings();
 
