@@ -384,6 +384,63 @@ export const otelDemoDataset: DatasetConfig = {
         failure_mode: 'demand_surge',
       },
     },
+    {
+      input: {
+        scenario_id: 'healthy-baseline-90pct-noise',
+      },
+      output: {
+        // TODO: set criteria after first run — acceptance bar TBD empirically
+        criteria: [
+          {
+            id: 'permissive-placeholder',
+            text: 'Placeholder criterion — always passes. Replace after first empirical eval run.',
+            score: 1,
+          },
+        ],
+        min_features: 1,
+        max_features: 30,
+        expected_ground_truth:
+          'TBD after first eval run at 90% noise — expected to identify at least some signal entities despite heavy noise',
+      },
+      metadata: {
+        difficulty: 'hard',
+        failure_domain: 'none',
+        failure_mode: 'healthy_baseline',
+      },
+      sampling_strategy: {
+        kind: 'needle_in_haystack',
+        signal_query: {
+          term: { 'resource.attributes.app': 'frontend' },
+        },
+        noise_ratio: 0.9,
+      },
+    },
+    {
+      input: {
+        scenario_id: 'pure-noise',
+      },
+      output: {
+        criteria: [
+          {
+            id: 'no-hallucination',
+            text: 'Model must return zero or near-zero features when given only noise documents with no signal. Returning more than 2 features is a hallucination failure.',
+            score: 3,
+          },
+        ],
+        max_features: 2,
+        expected_ground_truth: 'no features (pure noise)',
+      },
+      metadata: {
+        difficulty: 'easy',
+        failure_domain: 'none',
+        failure_mode: 'pure_noise',
+      },
+      sampling_strategy: {
+        kind: 'needle_in_haystack',
+        signal_query: { match_phrase: { 'body.text': '___no_match___' } },
+        noise_ratio: 1.0,
+      },
+    },
   ],
   kiFeatureDuplication: [
     {

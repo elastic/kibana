@@ -86,56 +86,107 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
         }
       });
 
-      evaluate(
-        'KI feature extraction',
-        async ({ executorClient, evaluators, inferenceClient, logger, traceEsClient, log }) => {
-          await executorClient.runExperiment(
-            {
-              dataset: {
-                name: `sigevents: KI feature extraction: ${scenario.input.scenario_id} (${dataset.id})`,
-                description: `[${dataset.id}] KI feature extraction from ${scenario.metadata.failure_domain} / ${scenario.metadata.failure_mode}`,
-                examples: [
-                  {
-                    input: { sample_documents: sampleDocuments },
-                    output: {
-                      ...scenario.output,
-                      expected: scenario.output.expected_ground_truth,
+      const runScenarioExample = (
+        label: string,
+        effectiveScenario: typeof scenario,
+        getDocuments: () => Array<SearchHit<Record<string, unknown>>>
+      ) => {
+        evaluate(
+          label,
+          async ({ executorClient, evaluators, inferenceClient, logger, traceEsClient, log }) => {
+            await executorClient.runExperiment(
+              {
+                dataset: {
+                  name: `sigevents: KI feature extraction: ${effectiveScenario.input.scenario_id} (${dataset.id})`,
+                  description: `[${dataset.id}] KI feature extraction from ${effectiveScenario.metadata.failure_domain} / ${effectiveScenario.metadata.failure_mode}`,
+                  examples: [
+                    {
+                      input: { sample_documents: getDocuments() },
+                      output: {
+                        ...effectiveScenario.output,
+                        expected: effectiveScenario.output.expected_ground_truth,
+                      },
+                      metadata: effectiveScenario.metadata,
                     },
-                    metadata: scenario.metadata,
-                  },
-                ],
-              },
-              concurrency: 1,
-              task: async ({ input }) => {
-                const taskSampleDocuments = (
-                  input as { sample_documents: Array<SearchHit<Record<string, unknown>>> }
-                ).sample_documents;
+                  ],
+                },
+                concurrency: 1,
+                task: async ({ input }) => {
+                  const taskSampleDocuments = (
+                    input as { sample_documents: Array<SearchHit<Record<string, unknown>>> }
+                  ).sample_documents;
 
-                const { features } = await identifyFeatures({
-                  streamName: MANAGED_STREAM_NAME,
-                  sampleDocuments: taskSampleDocuments,
-                  systemPrompt: featuresPrompt,
-                  inferenceClient,
-                  logger,
-                  signal: new AbortController().signal,
-                });
+                  const { features } = await identifyFeatures({
+                    streamName: MANAGED_STREAM_NAME,
+                    sampleDocuments: taskSampleDocuments,
+                    systemPrompt: featuresPrompt,
+                    inferenceClient,
+                    logger,
+                    signal: new AbortController().signal,
+                  });
 
-                return { features, traceId: getCurrentTraceId() };
+                  return { features, traceId: getCurrentTraceId() };
+                },
               },
+              [
+                ...createKIFeatureExtractionEvaluators({
+                  criteriaFn: evaluators.criteria.bind(evaluators),
+                  criteria: effectiveScenario.output.criteria,
+                }),
+                evaluators.traceBasedEvaluators.inputTokens,
+                evaluators.traceBasedEvaluators.outputTokens,
+                evaluators.traceBasedEvaluators.cachedTokens,
+                createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
+              ]
+            );
+          }
+        );
+      };
+
+      if (
+        scenario.sampling_strategy?.kind === 'needle_in_haystack' &&
+        scenario.sampling_strategy.sweep_ratios
+      ) {
+        const sweepRatios = scenario.sampling_strategy.sweep_ratios;
+        const originalId = scenario.input.scenario_id;
+        const originalStrategy = scenario.sampling_strategy;
+        const sweepDocumentsMap = new Map<number, Array<SearchHit<Record<string, unknown>>>>();
+
+        evaluate.beforeAll(async ({ esClient, log }) => {
+          for (const ratio of sweepRatios) {
+            const sweepScenario = {
+              ...scenario,
+              sampling_strategy: {
+                kind: 'needle_in_haystack' as const,
+                signal_query: originalStrategy.signal_query,
+                noise_ratio: ratio,
+              },
+            };
+            sweepDocumentsMap.set(
+              ratio,
+              await collectSampleDocuments({ esClient, scenario: sweepScenario, log })
+            );
+          }
+        });
+
+        for (const ratio of sweepRatios) {
+          const sweepScenario = {
+            ...scenario,
+            sampling_strategy: {
+              kind: 'needle_in_haystack' as const,
+              signal_query: originalStrategy.signal_query,
+              noise_ratio: ratio,
             },
-            [
-              ...createKIFeatureExtractionEvaluators({
-                criteriaFn: evaluators.criteria.bind(evaluators),
-                criteria: scenario.output.criteria,
-              }),
-              evaluators.traceBasedEvaluators.inputTokens,
-              evaluators.traceBasedEvaluators.outputTokens,
-              evaluators.traceBasedEvaluators.cachedTokens,
-              createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
-            ]
+          };
+          runScenarioExample(
+            `KI feature extraction ${originalId}@${ratio}`,
+            sweepScenario,
+            () => sweepDocumentsMap.get(ratio) ?? []
           );
         }
-      );
+      } else {
+        runScenarioExample('KI feature extraction', scenario, () => sampleDocuments);
+      }
 
       evaluate.afterAll(async ({ esClient, log }) => {
         log.debug('Cleaning replayed logs and index template');

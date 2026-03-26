@@ -88,6 +88,77 @@ const addUniqueHitsToSample = ({
   }
 };
 
+/* eslint-disable no-bitwise */
+// Mulberry32 seeded PRNG — deterministic, reproducible across runs
+const seededRandom = (seed: number) => {
+  let s = seed;
+  return () => {
+    s = (s + 0x6d2b79f5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+};
+
+const strToSeed = (str: string): number => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (Math.imul(31, hash) + str.charCodeAt(i)) | 0;
+  }
+  return hash >>> 0;
+};
+/* eslint-enable no-bitwise */
+
+const shuffle = <T>(arr: T[], seed: number): T[] => {
+  const result = [...arr];
+  const random = seededRandom(seed);
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+};
+
+const fetchDocsPaginated = async ({
+  esClient,
+  query,
+  maxDocs,
+}: {
+  esClient: Client;
+  query: Record<string, unknown>;
+  maxDocs: number;
+}) => {
+  const docs: Array<SearchHit<Record<string, unknown>>> = [];
+  let searchAfter: FieldValue[] | undefined;
+
+  while (docs.length < maxDocs) {
+    const remaining = maxDocs - docs.length;
+    const size = Math.min(SAMPLE_DOCS_PAGE_SIZE, remaining);
+
+    const searchResult = await esClient.search<Record<string, unknown>>({
+      index: MANAGED_STREAM_SEARCH_PATTERN,
+      size,
+      query,
+      sort: [{ '@timestamp': { order: 'desc' } }, { _shard_doc: { order: 'desc' } }],
+      ...(searchAfter ? { search_after: searchAfter } : {}),
+    });
+
+    const hits = searchResult.hits.hits;
+    if (hits.length === 0) {
+      break;
+    }
+
+    docs.push(...hits);
+
+    searchAfter = hits.at(-1)?.sort as FieldValue[] | undefined;
+    if (!searchAfter) {
+      break;
+    }
+  }
+
+  return docs;
+};
+
 export const collectSampleDocuments = async ({
   esClient,
   scenario,
@@ -96,7 +167,32 @@ export const collectSampleDocuments = async ({
   esClient: Client;
   scenario: KIFeatureExtractionScenario;
   log: ToolingLog;
-}): Promise<Array<SearchHit<Record<string, unknown>>>> => {
+}) => {
+  if (scenario.sampling_strategy?.kind === 'needle_in_haystack') {
+    const { noise_ratio: noiseRatio, signal_query: signalQuery } = scenario.sampling_strategy;
+    const noiseCount = Math.round(noiseRatio * SAMPLE_DOCS_MAX);
+    const signalCount = SAMPLE_DOCS_MAX - noiseCount;
+
+    const noiseQuery = { bool: { must_not: [signalQuery] } };
+
+    const signalDocs =
+      signalCount > 0
+        ? await fetchDocsPaginated({ esClient, query: signalQuery, maxDocs: signalCount })
+        : [];
+
+    const noiseDocs = await fetchDocsPaginated({
+      esClient,
+      query: noiseQuery,
+      maxDocs: noiseCount,
+    });
+
+    log.info(
+      `needle_in_haystack: collected ${signalDocs.length} signal doc(s) and ${noiseDocs.length} noise doc(s) (noise_ratio=${noiseRatio})`
+    );
+
+    return shuffle([...signalDocs, ...noiseDocs], strToSeed(scenario.input.scenario_id));
+  }
+
   const query = scenario.input.log_query_filter ?? { match_all: {} };
 
   const docs: Array<SearchHit<Record<string, unknown>>> = [];
