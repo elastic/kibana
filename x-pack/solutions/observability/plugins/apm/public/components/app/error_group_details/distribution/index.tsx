@@ -35,6 +35,7 @@ type ErrorDistributionAPIResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/distribution'>;
 
 interface DiscoverParams {
+  label: string;
   rangeFrom: string;
   rangeTo: string;
   queryParams: ESQLQueryParams;
@@ -97,11 +98,9 @@ export function ErrorDistribution({ distribution, title, fetchStatus, discoverPa
         {discoverParams && (
           <EuiFlexItem grow={false}>
             <OpenInDiscover
-              variant="iconButton"
               dataTestSubj="errorGroupDetailsOpenErrorInDiscoverButton"
-              label={i18n.translate('xpack.apm.errorGroupDetails.openErrorGroupInDiscover', {
-                defaultMessage: 'Open error group in Discover',
-              })}
+              label={discoverParams.label}
+              variant="iconButton"
               indexType="error"
               rangeFrom={discoverParams.rangeFrom}
               rangeTo={discoverParams.rangeTo}

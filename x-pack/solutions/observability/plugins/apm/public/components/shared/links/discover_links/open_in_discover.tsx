@@ -8,7 +8,6 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { EuiButton, EuiButtonEmpty, EuiButtonIcon, EuiLink, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
 import type { ESQLQueryParams } from './get_esql_query';
@@ -20,30 +19,26 @@ const linkStyle = css`
   align-items: center;
 `;
 
-const OPEN_IN_DISCOVER_DEFAULT_LABEL = i18n.translate('xpack.apm.openInDiscover.label', {
-  defaultMessage: 'Open in Discover',
-});
-
 type DiscoverButtonVariant = 'button' | 'emptyButton' | 'iconButton' | 'link';
 
 interface OpenInDiscoverProps {
   dataTestSubj: string;
+  label: string;
   variant: DiscoverButtonVariant;
   indexType: 'traces' | 'error';
   rangeFrom: string;
   rangeTo: string;
   queryParams: ESQLQueryParams;
-  label?: string;
 }
 
 export function OpenInDiscover({
   dataTestSubj,
+  label,
   variant,
   indexType,
   rangeFrom,
   rangeTo,
   queryParams,
-  label = OPEN_IN_DISCOVER_DEFAULT_LABEL,
 }: OpenInDiscoverProps) {
   const { indexSettingsStatus } = useApmIndexSettingsContext();
 

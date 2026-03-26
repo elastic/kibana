@@ -84,6 +84,7 @@ export function AllVariants() {
               <OpenInDiscover
                 variant={variant}
                 dataTestSubj={`story-${variant}`}
+                label="Open in Discover"
                 indexType="traces"
                 rangeFrom="now-15m"
                 rangeTo="now"
@@ -102,6 +103,7 @@ export function Button() {
     <OpenInDiscover
       variant="button"
       dataTestSubj="story-button"
+      label="Open in Discover"
       indexType="traces"
       rangeFrom="now-15m"
       rangeTo="now"
@@ -115,6 +117,7 @@ export function EmptyButton() {
     <OpenInDiscover
       variant="emptyButton"
       dataTestSubj="story-emptyButton"
+      label="Open in Discover"
       indexType="traces"
       rangeFrom="now-15m"
       rangeTo="now"
@@ -142,6 +145,7 @@ export function Link() {
     <OpenInDiscover
       variant="link"
       dataTestSubj="story-link"
+      label="Open in Discover"
       indexType="traces"
       rangeFrom="now-15m"
       rangeTo="now"
@@ -177,6 +181,7 @@ export function Loading() {
           <OpenInDiscover
             variant="button"
             dataTestSubj="story-loading-button"
+            label="Open in Discover"
             indexType="traces"
             rangeFrom="now-15m"
             rangeTo="now"
@@ -187,6 +192,7 @@ export function Loading() {
           <OpenInDiscover
             variant="emptyButton"
             dataTestSubj="story-loading-emptyButton"
+            label="Open in Discover"
             indexType="traces"
             rangeFrom="now-15m"
             rangeTo="now"
@@ -197,6 +203,7 @@ export function Loading() {
           <OpenInDiscover
             variant="iconButton"
             dataTestSubj="story-loading-iconButton"
+            label="Open in Discover"
             indexType="traces"
             rangeFrom="now-15m"
             rangeTo="now"
@@ -221,6 +228,7 @@ export function Disabled() {
           <OpenInDiscover
             variant="button"
             dataTestSubj="story-disabled-button"
+            label="Open in Discover"
             indexType="traces"
             rangeFrom="now-15m"
             rangeTo="now"
@@ -231,6 +239,7 @@ export function Disabled() {
           <OpenInDiscover
             variant="link"
             dataTestSubj="story-disabled-link"
+            label="Open in Discover"
             indexType="traces"
             rangeFrom="now-15m"
             rangeTo="now"

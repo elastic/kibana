@@ -88,6 +88,7 @@ describe('OpenInDiscover', () => {
         <OpenInDiscover
           variant="emptyButton"
           dataTestSubj="testButton"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -123,6 +124,7 @@ describe('OpenInDiscover', () => {
         <OpenInDiscover
           variant="emptyButton"
           dataTestSubj="testButton"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -152,6 +154,7 @@ describe('OpenInDiscover', () => {
         <OpenInDiscover
           variant="emptyButton"
           dataTestSubj="testButton"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -178,6 +181,7 @@ describe('OpenInDiscover', () => {
         <OpenInDiscover
           variant="emptyButton"
           dataTestSubj="testButton"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -225,6 +229,7 @@ describe('OpenInDiscover', () => {
         <OpenInDiscover
           variant="button"
           dataTestSubj="testOutlinedButton"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -243,6 +248,7 @@ describe('OpenInDiscover', () => {
         <OpenInDiscover
           variant="link"
           dataTestSubj="testLink"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -266,6 +272,7 @@ describe('OpenInDiscover', () => {
         <OpenInDiscover
           variant="link"
           dataTestSubj="testLink"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -293,6 +300,7 @@ describe('OpenInDiscover', () => {
         <OpenInDiscover
           variant="link"
           dataTestSubj="testLink"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -312,6 +320,7 @@ describe('OpenInDiscover', () => {
         <OpenInDiscover
           variant="emptyButton"
           dataTestSubj="testButton"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -330,6 +339,7 @@ describe('OpenInDiscover', () => {
         <OpenInDiscover
           variant="emptyButton"
           dataTestSubj="testButton"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -346,6 +356,7 @@ describe('OpenInDiscover', () => {
         <OpenInDiscover
           variant="emptyButton"
           dataTestSubj="testButton"
+          label="Open in Discover"
           indexType="error"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -363,6 +374,7 @@ describe('OpenInDiscover', () => {
         <OpenInDiscover
           variant="emptyButton"
           dataTestSubj="testButton"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -433,6 +445,7 @@ describe('OpenInDiscover', () => {
           <OpenInDiscover
             variant="emptyButton"
             dataTestSubj="apmWaterfallOpenInDiscoverButton"
+            label="Open in Discover"
             indexType="traces"
             rangeFrom="now-24h"
             rangeTo="now"
@@ -469,6 +482,7 @@ describe('OpenInDiscover', () => {
           <OpenInDiscover
             variant="emptyButton"
             dataTestSubj="apmWaterfallOpenInDiscoverButton"
+            label="Open in Discover"
             indexType="traces"
             rangeFrom="now-1h"
             rangeTo="now"
@@ -498,6 +512,7 @@ describe('OpenInDiscover', () => {
           <OpenInDiscover
             variant="link"
             dataTestSubj="apmLatencyChartOpenInDiscover"
+            label="Open in Discover"
             indexType="traces"
             rangeFrom="now-15m"
             rangeTo="now"
@@ -528,6 +543,7 @@ describe('OpenInDiscover', () => {
           <OpenInDiscover
             variant="link"
             dataTestSubj="apmServiceOverviewThroughputChartOpenInDiscover"
+            label="Open in Discover"
             indexType="traces"
             rangeFrom="now-15m"
             rangeTo="now"
@@ -555,6 +571,7 @@ describe('OpenInDiscover', () => {
           <OpenInDiscover
             variant="emptyButton"
             dataTestSubj="apmLatencyCorrelationsOpenInDiscoverButton"
+            label="Open in Discover"
             indexType="traces"
             rangeFrom="now-15m"
             rangeTo="now"
@@ -585,6 +602,7 @@ describe('OpenInDiscover', () => {
           <OpenInDiscover
             variant="emptyButton"
             dataTestSubj="apmFailedCorrelationsViewInDiscoverButton"
+            label="Open in Discover"
             indexType="traces"
             rangeFrom="now-15m"
             rangeTo="now"
@@ -613,6 +631,7 @@ describe('OpenInDiscover', () => {
           <OpenInDiscover
             variant="emptyButton"
             dataTestSubj="errorGroupDetailsOpenErrorInDiscoverButton"
+            label="Open in Discover"
             indexType="error"
             rangeFrom="now-15m"
             rangeTo="now"
@@ -640,6 +659,7 @@ describe('OpenInDiscover', () => {
           <OpenInDiscover
             variant="emptyButton"
             dataTestSubj="spanFlyoutViewSpanInDiscoverLink"
+            label="Open in Discover"
             indexType="traces"
             rangeFrom="now-15m"
             rangeTo="now"

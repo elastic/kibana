@@ -247,6 +247,9 @@ export function ErrorGroupDetails() {
               fetchStatus={errorDistributionStatus}
               distribution={errorDistributionData}
               discoverParams={{
+                label: i18n.translate('xpack.apm.errorGroupDetails.openErrorGroupInDiscover', {
+                  defaultMessage: 'Open error group in Discover',
+                }),
                 rangeFrom,
                 rangeTo,
                 queryParams: {

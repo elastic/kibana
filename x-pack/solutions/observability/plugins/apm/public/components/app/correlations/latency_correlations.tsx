@@ -343,8 +343,11 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
         <EuiFlexItem grow={false}>
           <OpenInDiscover
-            variant="emptyButton"
             dataTestSubj="apmLatencyCorrelationsOpenInDiscoverButton"
+            label={i18n.translate('xpack.apm.latencyCorrelations.openInDiscover', {
+              defaultMessage: 'Open in Discover',
+            })}
+            variant="emptyButton"
             indexType="traces"
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
