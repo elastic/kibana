@@ -359,6 +359,44 @@ export function getEuidEsqlEvaluation(
   return appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId);
 }
 
+/**
+ * Generates ESQL evaluation from a given entity definition (not from the registry).
+ * This allows computing EUIDs from transformed definitions (e.g., target-namespace).
+ */
+export function getEuidEsqlEvaluationFromDefinition(
+  entityType: EntityType,
+  definition: EntityDefinitionWithoutId,
+  { withTypeId = true }: { withTypeId?: boolean } = {}
+) {
+  const { identityField } = definition;
+  const mustPrependTypeId = withTypeId && !identityField.skipTypePrepend;
+
+  if (isSingleFieldIdentity(identityField)) {
+    return appendTypeIdIfNeeded(entityType, identityField.singleField, mustPrependTypeId);
+  }
+
+  const { euidRanking } = identityField;
+  const branches = euidRanking.branches;
+  const hasConditionalBranch = branches.some((b) => b.when != null);
+  if (!hasConditionalBranch && branches.length === 1) {
+    const idLogic = buildRankingCaseEsql(branches[0].ranking);
+    return appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId);
+  }
+  const branchCaseParts: string[] = [];
+  for (const branch of branches) {
+    const rankingCase = buildRankingCaseEsql(branch.ranking);
+    if (branch.when) {
+      const whenCondition = conditionToESQL(branch.when);
+      branchCaseParts.push(`(${whenCondition}), ${rankingCase}`);
+    } else {
+      branchCaseParts.push(`true, ${rankingCase}`);
+    }
+  }
+  const idLogic =
+    branchCaseParts.length > 0 ? `CASE(${branchCaseParts.join(',\n')}, NULL)` : 'NULL';
+  return appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId);
+}
+
 function appendTypeIdIfNeeded(
   entityType: EntityType,
   euidLogic: string,

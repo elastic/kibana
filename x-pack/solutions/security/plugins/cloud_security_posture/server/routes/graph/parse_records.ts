@@ -32,6 +32,44 @@ import {
 } from './types';
 import { transformEntityTypeToIconAndShape, compareConnectorNodes } from './utils';
 
+/**
+ * Deduplicates entity documentsData by entity ID and merges sourceFields.
+ * MV_EXPAND in the ES|QL query can create Cartesian products when multiple source fields
+ * are multi-value, producing duplicate documents for the same entity with different
+ * sourceField combinations. This function merges those into a single document per entity,
+ * collecting all unique values into arrays where values differ.
+ */
+const deduplicateEntityDocuments = (docs: NodeDocumentDataModel[]): NodeDocumentDataModel[] => {
+  const byId = new Map<string, NodeDocumentDataModel>();
+
+  for (const doc of docs) {
+    const existing = byId.get(doc.id);
+    if (!existing) {
+      byId.set(doc.id, doc);
+      continue;
+    }
+
+    // Merge sourceFields: collect unique values per field
+    const existingSf = existing.entity?.sourceFields;
+    const docSf = doc.entity?.sourceFields;
+    if (existingSf && docSf) {
+      for (const [key, value] of Object.entries(docSf)) {
+        const existingVal = existingSf[key];
+        if (existingVal === undefined) {
+          existingSf[key] = value;
+        } else if (existingVal !== value) {
+          const arr = Array.isArray(existingVal) ? existingVal : [existingVal];
+          if (!arr.includes(value)) {
+            existingSf[key] = [...arr, value];
+          }
+        }
+      }
+    }
+  }
+
+  return Array.from(byId.values());
+};
+
 interface ConnectorEdges {
   source: string;
   target: string;
@@ -199,11 +237,13 @@ const createEntityNode = (
   const resolvedType = resolveEntityType(entityType, idsCount);
   const label = generateEntityLabel(idsCount, nodeId, resolvedType, entityName, entitySubType);
 
-  const documentsData: NodeDocumentDataModel[] = docData
-    ? castArray(docData)
-        .filter((d): d is string => d != null)
-        .map((d) => JSON.parse(d))
-    : [];
+  const documentsData: NodeDocumentDataModel[] = deduplicateEntityDocuments(
+    docData
+      ? castArray(docData)
+          .filter((d): d is string => d != null)
+          .map((d) => JSON.parse(d))
+      : []
+  );
 
   nodesMap[nodeId] = {
     id: nodeId,
