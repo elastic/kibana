@@ -175,26 +175,23 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
   // effect runs on the next render, and the state is properly cleared.
   //
   // See: https://github.com/elastic/eui/blob/v113.3.0/packages/eui/src/components/flyout/manager/flyout_managed.tsx
-  const pendingExitRef = useRef(false);
-  const pendingChildCloseRef = useRef(false);
+  const pendingCloseRef = useRef<'exit' | 'child' | null>(null);
   const [flushToken, setFlushToken] = useState(0);
 
   useEffect(() => {
-    if (pendingExitRef.current) {
-      pendingExitRef.current = false;
+    if (pendingCloseRef.current === 'exit') {
       setShowFullScreenWaterfall(false);
       clearActiveFlyout();
-    }
-    if (pendingChildCloseRef.current) {
-      pendingChildCloseRef.current = false;
+    } else if (pendingCloseRef.current === 'child') {
       clearActiveFlyout();
     }
+    pendingCloseRef.current = null;
   }, [flushToken, setShowFullScreenWaterfall, clearActiveFlyout]);
 
   const onExitFullScreen = useCallback<NonNullable<EuiFlyoutProps['onClose']>>(
     (event) => {
       if (event.type === 'navigation') {
-        pendingExitRef.current = true;
+        pendingCloseRef.current = 'exit';
         setFlushToken((n) => n + 1);
         return;
       }
@@ -208,7 +205,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
   const onCloseFlyout = useCallback<NonNullable<EuiFlyoutProps['onClose']>>(
     (event) => {
       if (event.type === 'navigation') {
-        pendingChildCloseRef.current = true;
+        pendingCloseRef.current = 'child';
         setFlushToken((n) => n + 1);
         return;
       }
