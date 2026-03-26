@@ -47,6 +47,7 @@ plugins:
     - share
     - slo
     - spaces
+    - stack_connectors
     - streams
     - streams_app
     - synthetics
