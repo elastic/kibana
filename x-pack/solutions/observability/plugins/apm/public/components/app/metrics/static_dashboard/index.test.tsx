@@ -13,6 +13,7 @@ import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import type { DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import {
   MockApmPluginContextWrapper,
@@ -104,6 +105,7 @@ describe('JsonMetricsDashboard', () => {
         {
           type: OPTIONS_LIST_CONTROL,
           config: {
+            ...DEFAULT_DSL_OPTIONS_LIST_STATE,
             data_view_id: 'test-data-view-id',
             title: 'Node name',
             field_name: 'service.node.name',
