@@ -147,10 +147,13 @@ export function DateRangePickerControl() {
     [isEditing, setIsEditing]
   );
 
-  // The CSS custom property --kbnDateRangePickerWidth is not set by this component,
-  // allowing consumers to override the width; 21.25rem is the default fallback.
+  // The CSS custom properties are not set by this component,
+  // allowing consumers to override the widths; the rem values are defaults.
   const wrapperRestrictedStyles = css`
-    inline-size: var(--kbnDateRangePickerWidth, 21.25rem);
+    inline-size: var(--kbnDateRangePickerWidthRestricted, 21.25rem);
+  `;
+  const wrapperAutoInputStyles = css`
+    inline-size: var(--kbnDateRangePickerInputWidthAuto, 24rem);
   `;
   const tooltipStyles = css`
     max-inline-size: min(58ch, 90vw);
@@ -160,7 +163,13 @@ export function DateRangePickerControl() {
     <div
       ref={controlRef}
       onKeyDown={onControlKeyDown}
-      css={width === 'restricted' ? wrapperRestrictedStyles : undefined}
+      css={
+        width === 'restricted'
+          ? wrapperRestrictedStyles
+          : width === 'auto' && isEditing
+          ? wrapperAutoInputStyles
+          : undefined
+      }
       data-test-subj="dateRangePickerControlWrapper"
     >
       <EuiFormControlLayout

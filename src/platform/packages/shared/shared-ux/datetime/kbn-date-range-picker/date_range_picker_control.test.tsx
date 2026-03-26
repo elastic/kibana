@@ -367,7 +367,7 @@ describe('DateRangePickerControl', () => {
       renderWithEuiTheme(<DateRangePicker {...defaultProps} width="restricted" />);
       const wrapper = screen.getByTestId('dateRangePickerControlWrapper');
       expect(wrapper).toHaveStyle({
-        'inline-size': 'var(--kbnDateRangePickerWidth, 21.25rem)',
+        'inline-size': 'var(--kbnDateRangePickerWidthRestricted, 21.25rem)',
       });
     });
 
