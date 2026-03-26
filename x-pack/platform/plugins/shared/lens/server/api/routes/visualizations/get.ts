@@ -10,7 +10,12 @@ import { boomify, isBoom } from '@hapi/boom';
 import type { TypeOf } from '@kbn/config-schema';
 
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
-import { LENS_VIS_API_PATH, LENS_API_VERSION } from '../../../../common/constants';
+import {
+  LENS_VIS_API_PATH,
+  LENS_API_VERSION,
+  LENS_API_ACCESS,
+  LENS_API_TAG,
+} from '../../../../common/constants';
 import type { LensSavedObject } from '../../../content_management';
 import { lensGetRequestParamsSchema, lensGetResponseBodySchema } from './schema';
 import { getLensResponseItem } from './utils';
@@ -22,12 +27,12 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
 ) => {
   const getRoute = router.get({
     path: `${LENS_VIS_API_PATH}/{id}`,
-    access: 'internal', // to go public in 9.4
+    access: LENS_API_ACCESS,
     enableQueryVersion: true,
-    summary: 'Get Lens visualization',
-    description: 'Get a Lens visualization from id.',
+    summary: 'Get visualization',
+    description: 'Get a visualization from id.',
     options: {
-      tags: ['oas-tag:Lens'],
+      tags: [LENS_API_TAG],
       availability: {
         stability: 'experimental',
       },

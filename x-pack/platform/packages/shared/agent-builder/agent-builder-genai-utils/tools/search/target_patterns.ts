@@ -5,15 +5,6 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-
-export const lensDeleteRequestParamsSchema = schema.object(
-  {
-    id: schema.string({
-      meta: {
-        description: 'The id of a visualization.',
-      },
-    }),
-  },
-  { unknowns: 'forbid' }
-);
+export const isIndexPattern = (target: string): boolean => {
+  return target.includes('*') || target.includes(',');
+};
