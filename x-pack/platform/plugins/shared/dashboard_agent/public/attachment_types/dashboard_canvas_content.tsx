@@ -161,24 +161,26 @@ export const DashboardCanvasContent = ({
         />
       </div>
       <div css={styles.renderer}>
-        <DashboardRenderer
-          getCreationOptions={getCreationOptions}
-          showPlainSpinner
-          locator={dashboardLocator}
-          savedObjectId={
-            savedObjectStatus.status === 'resolved' && savedObjectStatus.exists
-              ? attachmentOrigin
-              : undefined
-          }
-          onApiAvailable={(api) => {
-            api.setViewMode('view');
-            const initialTimeRange = api.timeRange$.value;
-            if (initialTimeRange) {
-              api.setTimeRange(initialTimeRange);
+        {savedObjectStatus.status !== 'resolved' ? null : (
+          <DashboardRenderer
+            getCreationOptions={getCreationOptions}
+            showPlainSpinner
+            locator={dashboardLocator}
+            savedObjectId={
+              savedObjectStatus.status === 'resolved' && savedObjectStatus.exists
+                ? attachmentOrigin
+                : undefined
             }
-            setDashboardApi(api);
-          }}
-        />
+            onApiAvailable={(api) => {
+              api.setViewMode('view');
+              const initialTimeRange = api.timeRange$.value;
+              if (initialTimeRange) {
+                api.setTimeRange(initialTimeRange);
+              }
+              setDashboardApi(api);
+            }}
+          />
+        )}
       </div>
     </div>
   );

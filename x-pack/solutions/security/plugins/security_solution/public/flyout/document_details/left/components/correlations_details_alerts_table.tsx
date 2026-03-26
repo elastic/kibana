@@ -17,12 +17,14 @@ import { CellTooltipWrapper } from '../../shared/components/cell_tooltip_wrapper
 import type { DataProvider } from '../../../../../common/types';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { InvestigateInTimelineButton } from '../../../../common/components/event_details/investigate_in_timeline_button';
 import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
 import { getDataProvider } from '../../../../common/components/event_details/use_action_cell_data_provider';
 import { AlertPreviewButton } from '../../../shared/components/alert_preview_button';
 import { PreviewLink } from '../../../shared/components/preview_link';
+import { FlyoutMissingAlertsPrivilege } from '../../../../flyout_v2/document/components/flyout_missing_alerts_privilege';
 
 export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const dataProviderLimit = 5;
@@ -103,6 +105,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
   columns,
   timelineDataViewId,
 }) => {
+  const { hasAlertsRead } = useAlertsPrivileges();
   const {
     setPagination,
     setSorting,
@@ -260,13 +263,34 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
     [scopeId, dataTestSubj]
   );
 
+  const panelContent = !hasAlertsRead ? (
+    <FlyoutMissingAlertsPrivilege data-test-subj={`${dataTestSubj}MissingAlertsPrivilege`} />
+  ) : (
+    <EuiBasicTable<CorrelationsTableRow>
+      data-test-subj={`${dataTestSubj}Table`}
+      loading={loading || alertsLoading}
+      tableCaption={i18n.translate(
+        'xpack.securitySolution.flyout.left.insights.correlations.correlatedAlertsCaption',
+        {
+          defaultMessage: 'Correlated alerts',
+        }
+      )}
+      items={mappedData}
+      columns={columns ?? defaultColumns}
+      pagination={paginationConfig}
+      sorting={sorting}
+      onChange={onTableChange}
+      noItemsMessage={noItemsMessage}
+    />
+  );
+
   return (
     <ExpandablePanel
       header={{
         title,
         iconType: 'warning',
         headerContent:
-          alertIds && alertIds.length && alertIds.length > 0 ? (
+          hasAlertsRead && alertIds && alertIds.length && alertIds.length > 0 ? (
             <div data-test-subj={`${dataTestSubj}InvestigateInTimeline`}>
               <InvestigateInTimelineButton
                 dataProviders={dataProviders}
@@ -280,29 +304,14 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
             </div>
           ) : null,
       }}
-      content={{ error }}
+      content={{ error: hasAlertsRead ? error : undefined }}
       expand={{
         expandable: true,
         expandedOnFirstRender: true,
       }}
       data-test-subj={dataTestSubj}
     >
-      <EuiBasicTable<CorrelationsTableRow>
-        data-test-subj={`${dataTestSubj}Table`}
-        loading={loading || alertsLoading}
-        tableCaption={i18n.translate(
-          'xpack.securitySolution.flyout.left.insights.correlations.correlatedAlertsCaption',
-          {
-            defaultMessage: 'Correlated alerts',
-          }
-        )}
-        items={mappedData}
-        columns={columns ?? defaultColumns}
-        pagination={paginationConfig}
-        sorting={sorting}
-        onChange={onTableChange}
-        noItemsMessage={noItemsMessage}
-      />
+      {panelContent}
     </ExpandablePanel>
   );
 };

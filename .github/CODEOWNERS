@@ -652,6 +652,7 @@ src/platform/packages/shared/kbn-synthtrace-client @elastic/obs-presentation-tea
 src/platform/packages/shared/kbn-telemetry @elastic/kibana-core @elastic/obs-ai-team
 src/platform/packages/shared/kbn-telemetry-config @elastic/kibana-core
 src/platform/packages/shared/kbn-test @elastic/kibana-operations @elastic/appex-qa
+src/platform/packages/shared/kbn-test-es-server @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-timerange @elastic/obs-onboarding-team
@@ -716,6 +717,7 @@ src/platform/packages/shared/shared-ux/card/no_data/mocks @elastic/appex-sharedu
 src/platform/packages/shared/shared-ux/card/no_data/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/code_editor/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/code_editor/mocks @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/column-presets @elastic/eui @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker @elastic/appex-sharedux @elastic/eui-team
 src/platform/packages/shared/shared-ux/document_data_cascade/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/error_boundary @elastic/appex-sharedux
@@ -1112,7 +1114,7 @@ x-pack/platform/plugins/shared/data_catalog @elastic/workchat-eng
 x-pack/platform/plugins/shared/data_quality @elastic/obs-onboarding-team
 x-pack/platform/plugins/shared/data_sources @elastic/workchat-eng
 x-pack/platform/plugins/shared/dataset_quality @elastic/obs-onboarding-team
-x-pack/platform/plugins/shared/elastic_console @elastic/obs-onboarding-team
+x-pack/platform/plugins/shared/elastic_console @elastic/obs-elastic-brain-team
 x-pack/platform/plugins/shared/embeddable_alerts_table @elastic/response-ops
 x-pack/platform/plugins/shared/encrypted_saved_objects @elastic/kibana-security
 x-pack/platform/plugins/shared/entity_manager @elastic/core-analysis
@@ -2385,7 +2387,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/**
 src/platform/packages/shared/kbn-connector-specs/src/specs/abuseipdb/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/alienvault_otx/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/amazon_s3/** @elastic/workchat-eng
-src/platform/packages/shared/kbn-connector-specs/src/specs/atlassian/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/atlassian/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_lambda/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/brave_search/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/gmail/** @elastic/workchat-eng
@@ -2768,6 +2770,7 @@ x-pack/solutions/security/test/serverless/functional/configs/config.context_awar
 
 /x-pack/platform/test/fixtures/es_archives/auditbeat/overview @elastic/security-threat-hunting-investigations
 
+/x-pack/solutions/security/test/security_solution_api_integration/test_suites/investigation @elastic/security-threat-hunting-investigations
 
 /x-pack/solutions/security/test/serverless/functional/configs/config.context_awareness.ts @elastic/security-threat-hunting-investigations
 
@@ -3247,6 +3250,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 
 # No owner - generated files covered by CI checks
 **/moon.yml
+**/version_dependencies.txt
 
 # Operations (last-match override)
 /src/platform/test/package @elastic/kibana-operations
