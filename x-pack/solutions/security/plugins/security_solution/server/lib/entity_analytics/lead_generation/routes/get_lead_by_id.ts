@@ -8,7 +8,7 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 
 import { GET_LEAD_BY_ID_URL } from '../../../../../common/entity_analytics/lead_generation/constants';
 import { getLeadByIdRequestSchema } from '../../../../../common/entity_analytics/lead_generation/types';

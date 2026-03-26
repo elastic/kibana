@@ -30,7 +30,7 @@ export const registerEntityAnalyticsRoutes = (routeDeps: EntityAnalyticsRoutesDe
     registerEntityDetailsRoutes(routeDeps);
   }
 
-  if (routeDeps.config.experimentalFeatures.entityThreatHuntingEnabled) {
+  if (routeDeps.config.experimentalFeatures.leadGenerationEnabled) {
     registerLeadGenerationRoutes(routeDeps);
   }
   if (routeDeps.config.experimentalFeatures.entityAnalyticsWatchlistEnabled) {

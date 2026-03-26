@@ -14,7 +14,7 @@ import { createLeadGenerationEngine } from './lead_generation_engine';
 // ---------------------------------------------------------------------------
 
 const createMockEntity = (name: string, type = 'user'): LeadEntity => ({
-  record: { name, type, id: `${type}-${name}` } as LeadEntity['record'],
+  record: { name, type, id: `${type}-${name}` } as unknown as LeadEntity['record'],
   type,
   name,
 });

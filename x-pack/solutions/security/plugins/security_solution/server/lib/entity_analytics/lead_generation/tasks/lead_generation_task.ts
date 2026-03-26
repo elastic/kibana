@@ -73,7 +73,7 @@ export const registerLeadGenerationTask = ({
     return;
   }
 
-  if (!experimentalFeatures.entityThreatHuntingEnabled) {
+  if (!experimentalFeatures.leadGenerationEnabled) {
     return;
   }
 
