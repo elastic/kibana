@@ -448,6 +448,143 @@ describe('partitionStream', () => {
       expect(result.partitions[1].name).toBe('logs.test.invalid-name');
     });
 
+    it('should pass userPrompt to the prompt input when provided', async () => {
+      const definition = createMockDefinition();
+
+      mockClusterLogs.mockResolvedValueOnce([
+        {
+          name: 'Uncategorized logs',
+          condition: { always: {} },
+          clustering: {
+            sampled: 100,
+            noise: [],
+            clusters: [{ count: 50, analysis: createMockAnalysis() }],
+          },
+        },
+      ]);
+
+      mockExecuteAsReasoningAgent.mockResolvedValueOnce({
+        content: '',
+        toolCalls: [
+          {
+            toolCallId: 'call-1',
+            function: {
+              name: 'partition_logs',
+              arguments: { index: 'logs.test', partitions: [] },
+            },
+          },
+        ],
+      } as unknown as Awaited<ReturnType<typeof executeAsReasoningAgent>>);
+
+      await partitionStream({
+        ...defaultParams,
+        definition,
+        userPrompt: 'Partition by service name',
+      });
+
+      expect(mockExecuteAsReasoningAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: expect.objectContaining({
+            user_prompt: 'Partition by service name',
+          }),
+        })
+      );
+    });
+
+    it('should not include user_prompt in input when not provided', async () => {
+      const definition = createMockDefinition();
+
+      mockClusterLogs.mockResolvedValueOnce([
+        {
+          name: 'Uncategorized logs',
+          condition: { always: {} },
+          clustering: {
+            sampled: 100,
+            noise: [],
+            clusters: [{ count: 50, analysis: createMockAnalysis() }],
+          },
+        },
+      ]);
+
+      mockExecuteAsReasoningAgent.mockResolvedValueOnce({
+        content: '',
+        toolCalls: [
+          {
+            toolCallId: 'call-1',
+            function: {
+              name: 'partition_logs',
+              arguments: { index: 'logs.test', partitions: [] },
+            },
+          },
+        ],
+      } as unknown as Awaited<ReturnType<typeof executeAsReasoningAgent>>);
+
+      await partitionStream({
+        ...defaultParams,
+        definition,
+      });
+
+      const callInput = (
+        mockExecuteAsReasoningAgent.mock.calls[0][0] as Parameters<
+          typeof executeAsReasoningAgent
+        >[0]
+      ).input;
+      expect(callInput).not.toHaveProperty('user_prompt');
+      expect(callInput).not.toHaveProperty('existing_partitions');
+    });
+
+    it('should seed initial clustering with existingPartitions', async () => {
+      const definition = createMockDefinition();
+      const existingPartitions = [
+        { name: 'logs.test.api', condition: { field: 'service.name' as const, eq: 'api' } },
+      ];
+
+      mockClusterLogs.mockResolvedValueOnce([
+        {
+          name: 'Uncategorized logs',
+          condition: { always: {} },
+          clustering: {
+            sampled: 100,
+            noise: [],
+            clusters: [{ count: 50, analysis: createMockAnalysis() }],
+          },
+        },
+      ]);
+
+      mockExecuteAsReasoningAgent.mockResolvedValueOnce({
+        content: '',
+        toolCalls: [
+          {
+            toolCallId: 'call-1',
+            function: {
+              name: 'partition_logs',
+              arguments: { index: 'logs.test', partitions: [] },
+            },
+          },
+        ],
+      } as unknown as Awaited<ReturnType<typeof executeAsReasoningAgent>>);
+
+      await partitionStream({
+        ...defaultParams,
+        definition,
+        existingPartitions,
+      });
+
+      expect(mockClusterLogs).toHaveBeenCalledWith(
+        expect.objectContaining({
+          partitions: existingPartitions,
+        })
+      );
+
+      expect(mockExecuteAsReasoningAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: expect.objectContaining({
+            existing_partitions: JSON.stringify(existingPartitions),
+          }),
+        })
+      );
+    });
+
     it('should pass excludeConditions to partition_logs tool callback', async () => {
       const definition = createMockDefinition([
         {
