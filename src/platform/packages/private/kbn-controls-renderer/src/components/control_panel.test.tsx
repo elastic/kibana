@@ -81,7 +81,7 @@ describe('render', () => {
         <ControlPanel
           control={{
             ...DEFAULT_PINNED_CONTROL_STATE,
-            uid: 'control1',
+            id: 'control1',
             type: 'optionsListControl',
             order: 0,
           }}
@@ -100,7 +100,7 @@ describe('render', () => {
       const controlPanel = render(
         <ControlPanel
           control={{
-            uid: 'control1',
+            id: 'control1',
             type: 'optionsListControl',
             order: 0,
             width: 'small',

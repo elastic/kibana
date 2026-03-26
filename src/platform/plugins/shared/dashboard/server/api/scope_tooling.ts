@@ -22,7 +22,7 @@ export function stripUnmappedKeys(dashboardState: Partial<DashboardState>) {
         transforms.throwOnUnmappedPanel(panel.config);
       } catch (e) {
         warnings.push(
-          `Dropped panel ${panel.uid}, panel config is not supported. Reason: ${e.message}.`
+          `Dropped panel ${panel.id}, panel config is not supported. Reason: ${e.message}.`
         );
         return false;
       }
@@ -32,7 +32,7 @@ export function stripUnmappedKeys(dashboardState: Partial<DashboardState>) {
 
     if (!panelSchema) {
       warnings.push(
-        `Dropped panel ${panel.uid}, panel schema not available for panel type: ${panel.type}. Panels without schemas are not supported by dashboard REST endpoints`
+        `Dropped panel ${panel.id}, panel schema not available for panel type: ${panel.type}. Panels without schemas are not supported by dashboard REST endpoints`
       );
     }
     return Boolean(panelSchema);
@@ -47,7 +47,7 @@ export function stripUnmappedKeys(dashboardState: Partial<DashboardState>) {
       Array.isArray(enhancements?.dynamicActions?.events) &&
       enhancements.dynamicActions.events.length
     ) {
-      warnings.push(`Dropped unmapped panel config key 'enhancements' from panel ${panel.uid}`);
+      warnings.push(`Dropped unmapped panel config key 'enhancements' from panel ${panel.id}`);
     }
     return {
       ...panel,

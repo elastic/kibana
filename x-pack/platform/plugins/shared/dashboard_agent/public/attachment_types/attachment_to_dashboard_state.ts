@@ -19,7 +19,7 @@ import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 
 const lensConfigBuilder = new LensConfigBuilder();
 
-const buildPanelFromConfig = ({ config, type, uid, grid }: AttachmentPanel): DashboardPanel => {
+const buildPanelFromConfig = ({ config, type, id, grid }: AttachmentPanel): DashboardPanel => {
   let configObject = config;
   if (type === LENS_EMBEDDABLE_TYPE && config.attributes && isLensAPIFormat(config.attributes)) {
     const lensAttributes = lensConfigBuilder.fromAPIFormat(config.attributes);
@@ -30,7 +30,7 @@ const buildPanelFromConfig = ({ config, type, uid, grid }: AttachmentPanel): Das
   }
   return {
     type,
-    uid,
+    id,
     grid,
     config: configObject,
   };
@@ -40,7 +40,7 @@ type AgentWidget = AttachmentPanel | AgentDashboardSection;
 type DashboardWidget = DashboardPanel | DashboardSection;
 
 const normalizeSection = (section: AgentDashboardSection): DashboardSection => ({
-  uid: section.uid, // id generation should never happen
+  id: section.id, // id generation should never happen
   title: section.title,
   collapsed: section.collapsed,
   grid: { y: section.grid.y },
