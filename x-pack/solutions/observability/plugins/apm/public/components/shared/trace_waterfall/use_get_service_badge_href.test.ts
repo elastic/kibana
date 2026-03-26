@@ -1,0 +1,91 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { renderHook } from '@testing-library/react';
+import { useGetServiceBadgeHref } from './use_get_service_badge_href';
+import * as useApmRouterModule from '../../../hooks/use_apm_router';
+import * as useApmParamsModule from '../../../hooks/use_apm_params';
+
+describe('useGetServiceBadgeHref', () => {
+  const mockLink = jest.fn();
+
+  const mockUseApmRouter = jest.spyOn(useApmRouterModule, 'useApmRouter');
+  const mockUseAnyOfApmParams = jest.spyOn(useApmParamsModule, 'useAnyOfApmParams');
+
+  const defaultQuery = {
+    rangeFrom: 'now-15m',
+    rangeTo: 'now',
+    environment: 'ENVIRONMENT_ALL',
+    serviceGroup: 'my-group',
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    mockLink.mockImplementation(
+      (path: string, { path: { serviceName } }: any) => `/apm/services/${serviceName}/overview`
+    );
+
+    mockUseApmRouter.mockReturnValue({ link: mockLink } as any);
+    mockUseAnyOfApmParams.mockReturnValue({ query: defaultQuery } as any);
+  });
+
+  it('returns a function', () => {
+    const { result } = renderHook(() => useGetServiceBadgeHref());
+
+    expect(typeof result.current).toBe('function');
+  });
+
+  it('calls router.link with the correct service overview route and service name', () => {
+    const { result } = renderHook(() => useGetServiceBadgeHref());
+
+    result.current('my-service');
+
+    expect(mockLink).toHaveBeenCalledWith('/services/{serviceName}/overview', {
+      path: { serviceName: 'my-service' },
+      query: expect.objectContaining({ rangeFrom: 'now-15m', rangeTo: 'now' }),
+    });
+  });
+
+  it('preserves existing query params when building the href', () => {
+    const { result } = renderHook(() => useGetServiceBadgeHref());
+
+    result.current('my-service');
+
+    expect(mockLink).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        query: expect.objectContaining({
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          environment: 'ENVIRONMENT_ALL',
+        }),
+      })
+    );
+  });
+
+  it('resets serviceGroup to empty string regardless of current value', () => {
+    const { result } = renderHook(() => useGetServiceBadgeHref());
+
+    result.current('my-service');
+
+    expect(mockLink).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        query: expect.objectContaining({ serviceGroup: '' }),
+      })
+    );
+  });
+
+  it('returns the href produced by router.link', () => {
+    const { result } = renderHook(() => useGetServiceBadgeHref());
+
+    const href = result.current('checkout-service');
+
+    expect(href).toBe('/apm/services/checkout-service/overview');
+  });
+});
