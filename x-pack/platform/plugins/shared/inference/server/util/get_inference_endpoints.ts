@@ -13,6 +13,13 @@ export interface InferenceEndpoint {
   taskType: InferenceTaskType;
   service: string;
   serviceSettings?: Record<string, unknown>;
+  // Fix this typing when ES response is updated to include metadata
+  metadata: {
+    display?: {
+      name?: string;
+      creator?: string;
+    };
+  };
 }
 
 /**
@@ -33,6 +40,7 @@ export const getInferenceEndpoints = async ({
     taskType: ep.task_type,
     service: ep.service,
     serviceSettings: ep.service_settings as Record<string, unknown> | undefined,
+    metadata: 'metadata' in ep ? (ep.metadata as Record<string, unknown>) : {},
   }));
 
   if (taskType) {

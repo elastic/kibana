@@ -12,6 +12,7 @@ import {
   parseVersionId,
   isAttachmentActive,
   getActiveAttachments,
+  isVersionedAttachmentWithOrigin,
   hashContent,
   estimateTokens,
   attachmentVersionSchema,
@@ -327,6 +328,21 @@ describe('versioned_attachment', () => {
       const large = estimateTokens({ content: 'a'.repeat(1000) });
 
       expect(large).toBeGreaterThan(small);
+    });
+  });
+
+  describe('isVersionedAttachmentWithOrigin', () => {
+    it('returns false when origin is undefined', () => {
+      const attachment = createTestAttachment();
+      expect(isVersionedAttachmentWithOrigin(attachment)).toBe(false);
+    });
+
+    it('returns true when origin is defined and narrows the type', () => {
+      const attachment = createTestAttachment({ origin: 'saved-object-id' });
+      expect(isVersionedAttachmentWithOrigin(attachment)).toBe(true);
+      if (isVersionedAttachmentWithOrigin(attachment)) {
+        expect(attachment.origin).toBe('saved-object-id');
+      }
     });
   });
 

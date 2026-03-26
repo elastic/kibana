@@ -23,6 +23,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useHistory } from 'react-router-dom';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import { cellActionRenderer } from '../../../../../flyout_v2/shared/components/cell_actions';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
 import { useOnExpandableFlyoutClose } from '../../../../../flyout/shared/hooks/use_on_expandable_flyout_close';
@@ -56,7 +57,7 @@ import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { DocumentEventTypes } from '../../../../../common/lib/telemetry/types';
 import { getTimelineRowTypeIndicator } from './get_row_indicator';
 import { isAttackDiscoveryRow } from './is_attack_discovery_row';
-import { OverviewTab } from '../../../../../flyout_v2/document/tabs/overview_tab';
+import { DocumentFlyout } from '../../../../../flyout_v2/document';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
 
 const DataGridMemoized = React.memo(UnifiedDataTable);
@@ -190,7 +191,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
               services,
               store,
               history,
-              children: <OverviewTab hit={hit} />,
+              children: <DocumentFlyout hit={hit} renderCellActions={cellActionRenderer} />,
             }),
             {
               ownFocus: false,

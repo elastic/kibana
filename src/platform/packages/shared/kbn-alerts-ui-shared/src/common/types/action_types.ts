@@ -31,6 +31,7 @@ export interface ActionConnectorFieldsProps {
   readOnly: boolean;
   isEdit: boolean;
   registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
+  authMode?: 'shared' | 'per-user';
 }
 
 export interface ActionConnectorProps<Config, Secrets> {
@@ -46,6 +47,7 @@ export interface ActionConnectorProps<Config, Secrets> {
   isMissingSecrets?: boolean;
   isConnectorTypeDeprecated: boolean;
   source?: ActionTypeSource;
+  authMode?: 'shared' | 'per-user';
 }
 
 export type SystemAction = Omit<ActionConnectorProps<never, never>, 'config' | 'secrets'> & {
@@ -86,7 +88,7 @@ export type ConnectorFormSchema<
   UserConfiguredActionConnector<Config, Secrets>,
   'actionTypeId' | 'isDeprecated' | 'config' | 'secrets'
 > &
-  Partial<Pick<UserConfiguredActionConnector<Config, Secrets>, 'id' | 'name'>>;
+  Partial<Pick<UserConfiguredActionConnector<Config, Secrets>, 'id' | 'name' | 'authMode'>>;
 
 export type InternalConnectorForm = ConnectorFormSchema & {
   __internal__?: {

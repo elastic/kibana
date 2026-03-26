@@ -19,8 +19,7 @@ import { SOLUTION_NAME } from './translations';
 
 export const createNavigationTree = (
   services: Services,
-  chatExperience: AIChatExperience = AIChatExperience.Classic,
-  templatesEnabled: boolean = false
+  chatExperience: AIChatExperience = AIChatExperience.Classic
 ): NavigationTreeDefinition => ({
   body: [
     {
@@ -64,7 +63,7 @@ export const createNavigationTree = (
       icon: 'bullseye',
       link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
     },
-    defaultNavigationTree.cases(templatesEnabled),
+    defaultNavigationTree.cases(),
     defaultNavigationTree.entityAnalytics(),
     defaultNavigationTree.explore(),
     defaultNavigationTree.investigations(),
@@ -204,10 +203,6 @@ export const createNavigationTree = (
               id: SecurityPageName.entityAnalyticsManagement,
               link: securityLink(SecurityPageName.entityAnalyticsManagement),
             },
-            {
-              id: SecurityPageName.entityAnalyticsEntityStoreManagement,
-              link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
-            },
           ],
         },
         {
@@ -224,6 +219,7 @@ export const createNavigationTree = (
           title: i18nStrings.stackManagement.ai.title,
           children: [
             { link: 'management:genAiSettings' },
+            { link: 'management:evals' },
             { link: 'management:aiAssistantManagementSelection' },
           ],
         },

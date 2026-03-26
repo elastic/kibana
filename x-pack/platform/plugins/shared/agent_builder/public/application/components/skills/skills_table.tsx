@@ -7,7 +7,10 @@
 
 import type { CriteriaWithPagination, EuiBasicTableColumn, SearchFilterConfig } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiConfirmModal,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIconTip,
   EuiInMemoryTable,
   EuiSkeletonText,
@@ -141,7 +144,7 @@ const useSkillsTableColumns = ({
 }: {
   onDelete: (skillId: string) => void;
 }): Array<EuiBasicTableColumn<PublicSkillSummary>> => {
-  const { manageTools } = useUiPrivileges();
+  const { manageSkills } = useUiPrivileges();
   const { navigateToAgentBuilderUrl } = useNavigation();
 
   const handleSkillClick = useCallback(
@@ -168,10 +171,19 @@ const useSkillsTableColumns = ({
         name: labels.skills.descriptionLabel,
         truncateText: true,
         width: '40%',
-        render: (description: string) => (
-          <EuiText size="xs" color="subdued">
-            {description}
-          </EuiText>
+        render: (description: string, skill: PublicSkillSummary) => (
+          <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
+            {skill.experimental && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">{labels.skills.experimentalLabel}</EuiBadge>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem>
+              <EuiText size="xs" color="subdued">
+                {description}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
       },
       createSkillTypeColumn(),
@@ -199,10 +211,10 @@ const useSkillsTableColumns = ({
         width: '60px',
         align: 'right' as const,
         render: (skill: PublicSkillSummary) => (
-          <SkillContextMenu skill={skill} onDelete={onDelete} canManage={manageTools} />
+          <SkillContextMenu skill={skill} onDelete={onDelete} canManage={manageSkills} />
         ),
       },
     ],
-    [manageTools, handleSkillClick, onDelete]
+    [manageSkills, handleSkillClick, onDelete]
   );
 };

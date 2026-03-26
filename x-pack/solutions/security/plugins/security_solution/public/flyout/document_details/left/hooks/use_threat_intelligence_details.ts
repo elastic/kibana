@@ -6,21 +6,14 @@
  */
 
 import { useMemo } from 'react';
-import { SecurityPageName } from '@kbn/deeplinks-security';
-import { PageScope } from '../../../../data_view_manager/constants';
-import type { RunTimeMappings } from '../../../../../common/api/search_strategy';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import type { CtiEnrichment, EventFields } from '../../../../../common/search_strategy';
-import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import {
   filterDuplicateEnrichments,
   getEnrichmentFields,
   parseExistingEnrichments,
-  timelineDataToEnrichment,
-} from '../../shared/utils/threat_intelligence';
-import { useInvestigationTimeEnrichment } from '../../shared/hooks/use_investigation_enrichment';
-import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
+} from '../../../../flyout_v2/document/utils/threat_intelligence_helpers';
+import { useInvestigationTimeEnrichment } from '../../../../flyout_v2/document/hooks/use_investigation_enrichment';
 import { useDocumentDetailsContext } from '../../shared/context';
 
 export interface ThreatIntelligenceDetailsResult {
@@ -60,23 +53,13 @@ export interface ThreatIntelligenceDetailsResult {
  * for component testing.
  */
 export const useThreatIntelligenceDetails = (): ThreatIntelligenceDetailsResult => {
-  const { indexName, eventId } = useDocumentDetailsContext();
-  const [{ pageName }] = useRouteSpy();
-  const sourcererScope =
-    pageName === SecurityPageName.detections ? PageScope.alerts : PageScope.default;
-  const sourcererDataView = useSourcererDataView(sourcererScope);
-
-  const [isEventDataLoading, eventData] = useTimelineEventsDetails({
-    indexName,
-    eventId,
-    runtimeMappings: sourcererDataView.sourcererDataView.runtimeFieldMap as RunTimeMappings,
-    skip: !eventId,
-  });
-
-  const { isAlert } = useBasicDataFromDetailsData(eventData);
-
-  const data = useMemo(() => eventData || [], [eventData]);
-  const eventFields = useMemo(() => getEnrichmentFields(data || []), [data]);
+  const { searchHit } = useDocumentDetailsContext();
+  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
+  const alertRuleUuid = hit.flattened['kibana.alert.rule.uuid'];
+  const isAlert = Array.isArray(alertRuleUuid)
+    ? alertRuleUuid.some((value) => value != null)
+    : alertRuleUuid != null;
+  const eventFields = useMemo(() => getEnrichmentFields(hit), [hit]);
 
   const {
     result: enrichmentsResponse,
@@ -86,13 +69,8 @@ export const useThreatIntelligenceDetails = (): ThreatIntelligenceDetailsResult 
   } = useInvestigationTimeEnrichment({ eventFields });
 
   const existingEnrichments = useMemo(
-    () =>
-      isAlert
-        ? parseExistingEnrichments(data).map((enrichmentData) =>
-            timelineDataToEnrichment(enrichmentData)
-          )
-        : [],
-    [data, isAlert]
+    () => (isAlert ? parseExistingEnrichments(hit) : []),
+    [hit, isAlert]
   );
 
   const allEnrichments = useMemo(() => {
@@ -102,7 +80,8 @@ export const useThreatIntelligenceDetails = (): ThreatIntelligenceDetailsResult 
     return filterDuplicateEnrichments([...existingEnrichments, ...enrichmentsResponse.enrichments]);
   }, [isEnrichmentsLoading, enrichmentsResponse, existingEnrichments]);
 
-  const isLoading = isEnrichmentsLoading || isEventDataLoading;
+  const isEventDataLoading = false;
+  const isLoading = isEnrichmentsLoading;
 
   return {
     enrichments: allEnrichments,

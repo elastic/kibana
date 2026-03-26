@@ -141,7 +141,11 @@
     "@kbn/react-kibana-context-env",
     "@kbn/scout",
     "@kbn/cps-utils",
+    "@kbn/controls-constants",
     "@kbn/presentation-publishing-schemas",
+    "@kbn/field-formats-common",
+    "@kbn/calculate-auto",
+    "@kbn/esql-language",
   ],
   "exclude": ["target/**/*"]
 }

@@ -5,18 +5,37 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
+import type { IRouter, KibanaRequest } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceConnector } from '@kbn/inference-common';
 import { fetchInferenceEndpoints } from './lib/fetch_inference_endpoints';
 import { defineInferenceSettingsRoutes } from './routes/inference_settings';
+import { defineInferenceFeaturesRoutes } from './routes/inference_features';
+import { defineInferenceConnectorsRoute } from './routes/inference_connectors';
+import type { InferenceFeatureRegistry } from './inference_feature_registry';
+import type { ResolvedInferenceEndpoints } from './types';
 import { APIRoutes } from './types';
 import { errorHandler } from './utils/error_handler';
 import { deleteInferenceEndpoint } from './lib/delete_inference_endpoint';
 
-export function defineRoutes({ logger, router }: { logger: Logger; router: IRouter }) {
+export function defineRoutes({
+  logger,
+  router,
+  featureRegistry,
+  getForFeature,
+  getConnectorList,
+}: {
+  logger: Logger;
+  router: IRouter;
+  featureRegistry: InferenceFeatureRegistry;
+  getForFeature: (featureId: string, request: KibanaRequest) => Promise<ResolvedInferenceEndpoints>;
+  getConnectorList: (request: KibanaRequest) => Promise<InferenceConnector[]>;
+}) {
   defineInferenceSettingsRoutes({ logger, router });
+  defineInferenceFeaturesRoutes({ logger, router, featureRegistry });
+  defineInferenceConnectorsRoute({ logger, router, getForFeature, getConnectorList });
   router.get(
     {
       path: APIRoutes.GET_INFERENCE_ENDPOINTS,

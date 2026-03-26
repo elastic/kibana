@@ -20,10 +20,12 @@ import {
 
 apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
+  let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
     // returns editor role in most deployment project and deployment types
     editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
+    viewerCredentials = await requestAuth.getApiKeyForViewer();
     await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
     await kbnClient.importExport.load(KBN_ARCHIVES.TAGS);
   });
@@ -46,11 +48,8 @@ apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => 
       responseType: 'json',
     });
 
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.spaces).toStrictEqual(['default']);
-    expect(response.body.data).toStrictEqual({
-      title,
-    });
+    expect(response).toHaveStatusCode(201);
+    expect(response.body.data.title).toStrictEqual(title);
   });
 
   apiTest('can create a dashboard with a specific id', async ({ apiClient }) => {
@@ -68,7 +67,7 @@ apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => 
       responseType: 'json',
     });
 
-    expect(response).toHaveStatusCode(200);
+    expect(response).toHaveStatusCode(201);
     expect(response.body.id).toBe(id);
   });
 
@@ -88,8 +87,7 @@ apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => 
       responseType: 'json',
     });
 
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.spaces).toStrictEqual([spaceId]);
+    expect(response).toHaveStatusCode(201);
   });
 
   apiTest('return error if provided id already exists', async ({ apiClient }) => {
@@ -144,4 +142,23 @@ apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => 
       '[request body.panels]: expected value of type [array] but got [Object]'
     );
   });
+
+  apiTest(
+    'validation - returns error if user does not have permission to create a dashboard',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(DASHBOARD_API_PATH, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...viewerCredentials.apiKeyHeader,
+        },
+        body: {
+          title: 'foo',
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(403);
+      expect(response.body.message).toBe('Unable to create dashboard');
+    }
+  );
 });

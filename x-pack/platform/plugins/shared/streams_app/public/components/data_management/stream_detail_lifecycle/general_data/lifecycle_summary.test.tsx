@@ -99,6 +99,7 @@ describe('LifecycleSummary', () => {
   }): Streams.ingest.all.GetResponse =>
     ({
       stream: {
+        type: 'wired' as const,
         name,
         description: '',
         updated_at: new Date().toISOString(),
