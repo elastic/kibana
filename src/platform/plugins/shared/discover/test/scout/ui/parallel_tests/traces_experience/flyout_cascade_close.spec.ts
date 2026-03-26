@@ -70,24 +70,18 @@ spaceTest.describe(
           }
         });
 
-        await spaceTest.step(
-          'open the Document Viewer and Trace Timeline flyouts',
-          async () => {
-            await pageObjects.discover.waitUntilSearchingHasFinished();
-            await openDocViewerAndTraceTimeline(pageObjects);
-          }
-        );
+        await spaceTest.step('open the Document Viewer and Trace Timeline flyouts', async () => {
+          await pageObjects.discover.waitUntilSearchingHasFinished();
+          await openDocViewerAndTraceTimeline(pageObjects);
+        });
 
-        await spaceTest.step(
-          'close the Trace Timeline flyout via the Back button',
-          async () => {
-            await flyout.waterfallFlyout.backButton.click();
-            await expect(flyout.waterfallFlyout.container).toBeHidden();
-            // The Document Viewer remains visible — it was not cascade-closed because
-            // both flyouts share the same EUI flyout-manager historyKey.
-            await expect(docViewerFlyout).toBeVisible();
-          }
-        );
+        await spaceTest.step('close the Trace Timeline flyout via the Back button', async () => {
+          await flyout.waterfallFlyout.backButton.click();
+          await expect(flyout.waterfallFlyout.container).toBeHidden();
+          // The Document Viewer remains visible — it was not cascade-closed because
+          // both flyouts share the same EUI flyout-manager historyKey.
+          await expect(docViewerFlyout).toBeVisible();
+        });
 
         await spaceTest.step(
           're-open the Trace Timeline flyout after navigating back',
