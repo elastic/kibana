@@ -12,10 +12,15 @@ import type {
 import { createEndpointFleetServicesFactoryMock } from './endpoint_fleet_services_factory.mocks';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import { NotFoundError } from '../../errors';
-import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  type AgentPolicy,
+  type PackagePolicy,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '@kbn/fleet-plugin/common';
 import { FleetAgentPolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_policy_generator';
 import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_generator';
+import type { GetInstalledPackagesResponse } from '@kbn/fleet-plugin/common/types';
 
 describe('EndpointServiceFactory', () => {
   let fleetServicesMock: EndpointInternalFleetServicesInterfaceMocked;
@@ -40,6 +45,7 @@ describe('EndpointServiceFactory', () => {
       'getPolicyNamespace',
       'getIntegrationNamespaces',
       'getSoClient',
+      'isEndpointPackageInstalled',
     ]);
   });
 
@@ -369,7 +375,7 @@ describe('EndpointServiceFactory', () => {
           fleetServicesFactoryMock.dependencies.fleetDependencies.packagePolicyService.list
         ).toHaveBeenCalledWith(expect.anything(), {
           perPage: 10_000,
-          kuery: 'ingest-package-policies.package.name: (packageOne OR packageTwo)',
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: (packageOne OR packageTwo)`,
         });
       });
 
@@ -392,6 +398,46 @@ describe('EndpointServiceFactory', () => {
           packageTwo: [],
         });
       });
+    });
+  });
+
+  describe('#isEndpointPackageInstalled()', () => {
+    let installedPackagesResponseMock: GetInstalledPackagesResponse;
+
+    beforeEach(() => {
+      installedPackagesResponseMock = {
+        items: ['endpoint_something', 'endpoint', 'some_ohther_endpoint'].map((name) => ({
+          dataStreams: [],
+          name,
+          title: name,
+          description: '',
+          icons: [],
+          status: 'installed',
+          version: '1.0.0',
+        })),
+        total: 3,
+        searchAfter: undefined,
+      };
+
+      fleetServicesMock.packages.getInstalledPackages.mockImplementation(async () => {
+        return installedPackagesResponseMock;
+      });
+    });
+
+    it('should return `true` if endpoint package is installed', async () => {
+      await expect(fleetServicesMock.isEndpointPackageInstalled()).resolves.toBe(true);
+      expect(fleetServicesMock.packages.getInstalledPackages).toHaveBeenCalledWith({
+        nameQuery: 'endpoint',
+        perPage: 1000,
+        sortOrder: 'asc',
+      });
+    });
+
+    it('should return `false` if endpoint package is not installed', async () => {
+      installedPackagesResponseMock.items = installedPackagesResponseMock.items.filter(
+        ({ name }) => name !== 'endpoint'
+      );
+      await expect(fleetServicesMock.isEndpointPackageInstalled()).resolves.toBe(false);
     });
   });
 });

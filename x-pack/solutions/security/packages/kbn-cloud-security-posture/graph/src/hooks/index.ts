@@ -6,3 +6,4 @@
  */
 
 export { useFetchGraphData } from './use_fetch_graph_data';
+export { useGraphCallout } from './use_graph_callout';

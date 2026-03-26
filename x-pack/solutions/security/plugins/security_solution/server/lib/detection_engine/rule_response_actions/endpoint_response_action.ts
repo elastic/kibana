@@ -6,17 +6,23 @@
  */
 
 import { each } from 'lodash';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { EndpointRunScriptActionRequestParams } from '../../../../common/api/endpoint';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { stringify } from '../../../endpoint/utils/stringify';
 import type {
   RuleResponseEndpointAction,
   ProcessesParams,
 } from '../../../../common/api/detection_engine';
-import { getErrorProcessAlerts, getIsolateAlerts, getProcessAlerts } from './utils';
+import {
+  getErrorProcessAlerts,
+  getIsolateAlerts,
+  getProcessAlerts,
+  getResponseActionDataFromAlert,
+} from './utils';
 import type { AlertsAction, ResponseActionAlerts } from './types';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type {
+  AutomatedRunScriptConfig,
   ResponseActionParametersWithEntityId,
   ResponseActionParametersWithPid,
 } from '../../../../common/endpoint/types';
@@ -33,20 +39,15 @@ export const endpointResponseAction = async (
   const ruleId = alerts[0].kibana.alert?.rule.uuid;
   const ruleName = alerts[0].kibana.alert?.rule.name;
   const errors: string[] = [];
-  let spaceId = (alerts[0].kibana.space_ids ?? [])[0];
+  const spaceId = (alerts[0].kibana.space_ids ?? [])[0];
 
-  if (endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-    if (!spaceId) {
-      logger.error(
-        new EndpointError(
-          `Unable to identify the space ID from alert data ('kibana.space_ids') for rule [${ruleName}][${ruleId}]`
-        )
-      );
-      return;
-    }
-  } else {
-    // force the space to `default` when space awareness is not enabled
-    spaceId = DEFAULT_SPACE_ID;
+  if (!spaceId) {
+    logger.error(
+      new EndpointError(
+        `Unable to identify the space ID from alert data ('kibana.space_ids') for rule [${ruleName}][${ruleId}]`
+      )
+    );
+    return;
   }
 
   const logMsgPrefix = `Rule [${ruleName}][${ruleId}][${spaceId}]:`;
@@ -57,8 +58,7 @@ export const endpointResponseAction = async (
     spaceId,
   });
 
-  const automatedProcessActionsEnabled =
-    endpointAppContextService.experimentalFeatures.automatedProcessActionsEnabled;
+  logger.debug(() => `Processing automated response action: ${stringify(responseAction)}`);
 
   const processResponseActionClientError = (err: Error, endpointIds: string[]): Promise<void> => {
     errors.push(
@@ -75,7 +75,6 @@ export const endpointResponseAction = async (
       response.push(
         Promise.all(
           Object.values(getIsolateAlerts(alerts)).map(
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             ({ endpoint_ids, alert_ids, parameters, error, hosts }: AlertsAction) => {
               logger.info(
                 `${logMsgPrefix} [${command}] [${endpoint_ids.length}] agent(s): ${stringify(
@@ -110,58 +109,133 @@ export const endpointResponseAction = async (
 
     case 'suspend-process':
     case 'kill-process':
-      if (automatedProcessActionsEnabled) {
-        const processesActionRuleConfig: ProcessesParams['config'] = (
-          responseAction.params as ProcessesParams
-        ).config;
+      const processesActionRuleConfig: ProcessesParams['config'] = (
+        responseAction.params as ProcessesParams
+      ).config;
 
-        const createProcessActionFromAlerts = (
-          actionAlerts: Record<string, Record<string, AlertsAction>>
-        ) => {
-          return each(actionAlerts, (actionPerAgent) => {
-            return each(
-              actionPerAgent,
-              // eslint-disable-next-line @typescript-eslint/naming-convention
-              ({ endpoint_ids, alert_ids, parameters, error, hosts }: AlertsAction) => {
-                logger.info(
-                  `${logMsgPrefix} [${command}] [${endpoint_ids.length}] agent(s): ${stringify(
-                    endpoint_ids
-                  )}`
-                );
+      const createProcessActionFromAlerts = (
+        actionAlerts: Record<string, Record<string, AlertsAction>>
+      ) => {
+        return each(actionAlerts, (actionPerAgent) => {
+          return each(
+            actionPerAgent,
+            ({ endpoint_ids, alert_ids, parameters, error, hosts }: AlertsAction) => {
+              logger.info(
+                `${logMsgPrefix} [${command}] [${endpoint_ids.length}] agent(s): ${stringify(
+                  endpoint_ids
+                )}`
+              );
 
-                return responseActionsClient[
-                  command === 'kill-process' ? 'killProcess' : 'suspendProcess'
-                ](
-                  {
-                    comment,
-                    endpoint_ids,
-                    alert_ids,
-                    parameters: parameters as
-                      | ResponseActionParametersWithPid
-                      | ResponseActionParametersWithEntityId,
+              return responseActionsClient[
+                command === 'kill-process' ? 'killProcess' : 'suspendProcess'
+              ](
+                {
+                  comment,
+                  endpoint_ids,
+                  alert_ids,
+                  parameters: parameters as
+                    | ResponseActionParametersWithPid
+                    | ResponseActionParametersWithEntityId,
+                },
+                {
+                  hosts,
+                  ruleId,
+                  ruleName,
+                  error,
+                }
+              ).catch((err) => {
+                return processResponseActionClientError(err, endpoint_ids);
+              });
+            }
+          );
+        });
+      };
+
+      const foundFields = getProcessAlerts(alerts, processesActionRuleConfig);
+      const notFoundField = getErrorProcessAlerts(alerts, processesActionRuleConfig);
+      const processActions = createProcessActionFromAlerts(foundFields);
+      const processActionsWithError = createProcessActionFromAlerts(notFoundField);
+
+      response.push(Promise.all([processActions, processActionsWithError]));
+
+      break;
+
+    case 'runscript':
+      if (
+        !endpointAppContextService.experimentalFeatures.responseActionsEndpointAutomatedRunScript
+      ) {
+        logger.debug(
+          `${logMsgPrefix}: Endpoint runscript automated response action feature is not enabled`
+        );
+      } else {
+        const processedAgentIds = new Set<string>();
+
+        for (const alert of alerts) {
+          const alertData = getResponseActionDataFromAlert(alert);
+
+          if (processedAgentIds.has(alertData.agentId)) {
+            // eslint-disable-next-line no-continue
+            continue;
+          }
+
+          processedAgentIds.add(alert.agent.id);
+
+          logger.debug(
+            () => `${logMsgPrefix}: Alert data for use with runscript: ${stringify(alertData)}`
+          );
+
+          let ruleScriptConfig: EndpointRunScriptActionRequestParams | undefined;
+          let error: string | undefined;
+
+          if (!alertData.hostOsType) {
+            error = `Unable to determine host OS type from alert [${alertData.alertId}]`;
+          } else {
+            ruleScriptConfig = (
+              responseAction.params.config as AutomatedRunScriptConfig | undefined
+            )?.[alertData.hostOsType];
+          }
+
+          logger.debug(
+            () =>
+              `${logMsgPrefix}: runscript configuration for OS type [${
+                alertData.hostOsType
+              }]: ${stringify(ruleScriptConfig)}`
+          );
+
+          // If we have an error
+          //  - OR -
+          //  the rule defined a runscript configuration for this OS type
+          // then create the action request
+          if (error || (ruleScriptConfig && ruleScriptConfig.scriptId)) {
+            response.push(
+              responseActionsClient.runscript(
+                {
+                  endpoint_ids: [alertData.agentId],
+                  alert_ids: [alertData.alertId],
+                  comment: responseAction.params.comment,
+                  parameters: {
+                    scriptId: ruleScriptConfig?.scriptId ?? 'error',
+                    scriptInput: ruleScriptConfig?.scriptInput,
+                    timeout: ruleScriptConfig?.timeout,
                   },
-                  {
-                    hosts,
-                    ruleId,
-                    ruleName,
-                    error,
-                  }
-                ).catch((err) => {
-                  return processResponseActionClientError(err, endpoint_ids);
-                });
-              }
+                },
+                {
+                  hosts: { [alertData.agentId]: { name: alertData.hostName } },
+                  ruleId: alertData.ruleId,
+                  ruleName: alertData.ruleName,
+                  error,
+                }
+              )
             );
-          });
-        };
+          }
 
-        const foundFields = getProcessAlerts(alerts, processesActionRuleConfig);
-        const notFoundField = getErrorProcessAlerts(alerts, processesActionRuleConfig);
-        const processActions = createProcessActionFromAlerts(foundFields);
-        const processActionsWithError = createProcessActionFromAlerts(notFoundField);
-
-        response.push(Promise.all([processActions, processActionsWithError]));
+          if (!error && ruleScriptConfig && !ruleScriptConfig.scriptId) {
+            logger.debug(
+              `${logMsgPrefix}: Skipping 'runscript' response action for alert [${alertData.alertId}]: No script defined for OS type [${alertData.hostOsType}]`
+            );
+          }
+        }
       }
-
       break;
 
     default:

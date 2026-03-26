@@ -13,6 +13,7 @@ import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 
 export interface StartDeps {
   security?: SecurityPluginStart;
@@ -23,4 +24,5 @@ export interface SetupDeps {
   customIntegrations?: CustomIntegrationsPluginSetup;
   home?: HomeServerPluginSetup;
   data: DataPluginSetup;
+  embeddable: EmbeddableSetup;
 }

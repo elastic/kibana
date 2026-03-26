@@ -8,7 +8,7 @@
 import { Subject } from 'rxjs';
 import { take, bufferCount } from 'rxjs';
 import { createConfigurationAggregator } from './configuration_statistics';
-import type { TaskManagerConfig } from '../config';
+import { ApiKeyType, type TaskManagerConfig } from '../config';
 import { taskPollingLifecycleMock } from '../polling_lifecycle.mock';
 
 describe('Configuration Statistics Aggregator', () => {
@@ -30,6 +30,10 @@ describe('Configuration Statistics Aggregator', () => {
         interval: 10000,
       },
       kibanas_per_partition: 2,
+      invalidate_api_key_task: {
+        interval: '5m',
+        removalDelay: '1h',
+      },
       max_attempts: 9,
       poll_interval: 6000000,
       allow_reading_invalid_state: false,
@@ -65,6 +69,7 @@ describe('Configuration Statistics Aggregator', () => {
         update_by_query: 1000,
       },
       auto_calculate_default_ech_capacity: false,
+      api_key_type: ApiKeyType.ES,
     };
 
     return new Promise<void>(async (resolve, reject) => {

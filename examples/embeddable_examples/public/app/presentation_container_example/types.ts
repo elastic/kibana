@@ -7,22 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TimeRange } from '@kbn/es-query';
-import {
+import type { TimeRange } from '@kbn/es-query';
+import type {
   CanAddNewPanel,
   HasLastSavedChildState,
   HasSerializedChildState,
   PresentationContainer,
-} from '@kbn/presentation-containers';
-import {
   HasExecutionContext,
   PublishesDataLoading,
   PublishesTimeRange,
   PublishesUnsavedChanges,
-  SerializedPanelState,
   PublishesViewMode,
 } from '@kbn/presentation-publishing';
-import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
+import type { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 
 export type PageApi = PresentationContainer &
   CanAddNewPanel &
@@ -37,5 +34,5 @@ export type PageApi = PresentationContainer &
 
 export interface PageState {
   timeRange: TimeRange;
-  panels: Array<{ id: string; type: string; serializedState: SerializedPanelState | undefined }>;
+  panels: Array<{ id: string; type: string; serializedState: object | undefined }>;
 }

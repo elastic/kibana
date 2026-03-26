@@ -10,7 +10,6 @@
 import type { UnifiedHistogramState } from '../services/state_service';
 
 export const chartHiddenSelector = (state: UnifiedHistogramState) => state.chartHidden;
-export const timeIntervalSelector = (state: UnifiedHistogramState) => state.timeInterval;
 export const topPanelHeightSelector = (state: UnifiedHistogramState) => state.topPanelHeight;
 export const totalHitsResultSelector = (state: UnifiedHistogramState) => state.totalHitsResult;
 export const totalHitsStatusSelector = (state: UnifiedHistogramState) => state.totalHitsStatus;

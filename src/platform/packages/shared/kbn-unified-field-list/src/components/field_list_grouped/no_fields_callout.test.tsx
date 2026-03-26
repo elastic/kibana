@@ -8,86 +8,38 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
 import { NoFieldsCallout } from './no_fields_callout';
+import { render, screen } from '@testing-library/react';
 
 describe('UnifiedFieldList <NoFieldCallout />', () => {
   it('renders correctly for index with no fields', () => {
-    const component = shallow(<NoFieldsCallout fieldsExistInIndex={false} />);
-    expect(component).toMatchInlineSnapshot(`
-      <EuiText
-        color="subdued"
-        css="unknown styles"
-        data-test-subj="noFieldsCallout-noFieldsExist"
-        size="s"
-      >
-        <p>
-          No fields exist in this data view.
-        </p>
-      </EuiText>
-    `);
+    render(<NoFieldsCallout fieldsExistInIndex={false} />);
+
+    expect(screen.getByText('No fields exist in this data view.')).toBeVisible();
   });
+
   it('renders correctly when empty with no filters/timerange reasons', () => {
-    const component = shallow(<NoFieldsCallout fieldsExistInIndex={true} />);
-    expect(component).toMatchInlineSnapshot(`
-      <EuiText
-        color="subdued"
-        css="unknown styles"
-        data-test-subj="noFieldsCallout-noFieldsMatch"
-        size="s"
-      >
-        <p>
-          There are no fields.
-        </p>
-      </EuiText>
-    `);
+    render(<NoFieldsCallout fieldsExistInIndex={true} />);
+
+    expect(screen.getByText('There are no fields.')).toBeVisible();
   });
+
   it('renders correctly with passed defaultNoFieldsMessage', () => {
-    const component = shallow(
-      <NoFieldsCallout fieldsExistInIndex={true} defaultNoFieldsMessage="No empty fields" />
-    );
-    expect(component).toMatchInlineSnapshot(`
-      <EuiText
-        color="subdued"
-        css="unknown styles"
-        data-test-subj="noFieldsCallout-noFieldsMatch"
-        size="s"
-      >
-        <p>
-          No empty fields
-        </p>
-      </EuiText>
-    `);
+    render(<NoFieldsCallout fieldsExistInIndex={true} defaultNoFieldsMessage="No empty fields" />);
+
+    expect(screen.getByText('No empty fields')).toBeVisible();
   });
 
   it('renders properly when affected by field filter', () => {
-    const component = shallow(
-      <NoFieldsCallout fieldsExistInIndex={true} isAffectedByFieldFilter={true} />
-    );
-    expect(component).toMatchInlineSnapshot(`
-      <EuiText
-        color="subdued"
-        css="unknown styles"
-        data-test-subj="noFieldsCallout-noFieldsMatch"
-        size="s"
-      >
-        <p>
-          No fields match the selected filters.
-        </p>
-        <strong>
-          Try:
-        </strong>
-        <ul>
-          <li>
-            Using different field filters
-          </li>
-        </ul>
-      </EuiText>
-    `);
+    render(<NoFieldsCallout fieldsExistInIndex={true} isAffectedByFieldFilter={true} />);
+
+    expect(screen.getByText('No fields match the selected filters.')).toBeVisible();
+    expect(screen.getByText('Try:')).toBeVisible();
+    expect(screen.getByText('Using different field filters')).toBeVisible();
   });
 
   it('renders correctly when affected by global filters and timerange', () => {
-    const component = shallow(
+    render(
       <NoFieldsCallout
         fieldsExistInIndex={true}
         isAffectedByTimerange={true}
@@ -95,33 +47,15 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
         defaultNoFieldsMessage="There are no available fields that contain data."
       />
     );
-    expect(component).toMatchInlineSnapshot(`
-      <EuiText
-        color="subdued"
-        css="unknown styles"
-        data-test-subj="noFieldsCallout-noFieldsMatch"
-        size="s"
-      >
-        <p>
-          There are no available fields that contain data.
-        </p>
-        <strong>
-          Try:
-        </strong>
-        <ul>
-          <li>
-            Extending the time range
-          </li>
-          <li>
-            Changing the global filters
-          </li>
-        </ul>
-      </EuiText>
-    `);
+
+    expect(screen.getByText('There are no available fields that contain data.')).toBeVisible();
+    expect(screen.getByText('Try:')).toBeVisible();
+    expect(screen.getByText('Extending the time range')).toBeVisible();
+    expect(screen.getByText('Changing the global filters')).toBeVisible();
   });
 
   it('renders correctly when affected by global filters and field filters', () => {
-    const component = shallow(
+    render(
       <NoFieldsCallout
         fieldsExistInIndex={true}
         isAffectedByTimerange={true}
@@ -129,33 +63,15 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
         defaultNoFieldsMessage="There are no available fields that contain data."
       />
     );
-    expect(component).toMatchInlineSnapshot(`
-      <EuiText
-        color="subdued"
-        css="unknown styles"
-        data-test-subj="noFieldsCallout-noFieldsMatch"
-        size="s"
-      >
-        <p>
-          No fields match the selected filters.
-        </p>
-        <strong>
-          Try:
-        </strong>
-        <ul>
-          <li>
-            Extending the time range
-          </li>
-          <li>
-            Using different field filters
-          </li>
-        </ul>
-      </EuiText>
-    `);
+
+    expect(screen.getByText('No fields match the selected filters.')).toBeVisible();
+    expect(screen.getByText('Try:')).toBeVisible();
+    expect(screen.getByText('Extending the time range')).toBeVisible();
+    expect(screen.getByText('Using different field filters')).toBeVisible();
   });
 
   it('renders correctly when affected by field filters, global filter and timerange', () => {
-    const component = shallow(
+    render(
       <NoFieldsCallout
         fieldsExistInIndex={true}
         isAffectedByFieldFilter={true}
@@ -164,31 +80,11 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
         defaultNoFieldsMessage={`doesn't exist`}
       />
     );
-    expect(component).toMatchInlineSnapshot(`
-      <EuiText
-        color="subdued"
-        css="unknown styles"
-        data-test-subj="noFieldsCallout-noFieldsMatch"
-        size="s"
-      >
-        <p>
-          No fields match the selected filters.
-        </p>
-        <strong>
-          Try:
-        </strong>
-        <ul>
-          <li>
-            Extending the time range
-          </li>
-          <li>
-            Using different field filters
-          </li>
-          <li>
-            Changing the global filters
-          </li>
-        </ul>
-      </EuiText>
-    `);
+
+    expect(screen.getByText('No fields match the selected filters.')).toBeVisible();
+    expect(screen.getByText('Try:')).toBeVisible();
+    expect(screen.getByText('Extending the time range')).toBeVisible();
+    expect(screen.getByText('Using different field filters')).toBeVisible();
+    expect(screen.getByText('Changing the global filters')).toBeVisible();
   });
 });

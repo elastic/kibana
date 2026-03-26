@@ -14,7 +14,7 @@ import {
 } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InfraCustomDashboardAssetType } from '../../../common/custom_dashboards';
 
 export const buildCombinedAssetFilter = ({
   field,
@@ -57,7 +57,7 @@ export const retrieveFieldsFromFilter = (filters: Filter[], fields: string[] = [
 
 export const buildAssetIdFilter = (
   assetId: string,
-  assetType: InventoryItemType,
+  assetType: InfraCustomDashboardAssetType,
   dataView: DataView
 ): Filter[] => {
   const assetIdField = dataView.getFieldByName(findInventoryFields(assetType).id);

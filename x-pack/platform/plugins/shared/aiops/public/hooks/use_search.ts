@@ -21,7 +21,10 @@ import {
 import { useAiopsAppContext } from './use_aiops_app_context';
 
 export const useSearch = (
-  { dataView, savedSearch }: { dataView: DataView; savedSearch: SavedSearch | null },
+  {
+    dataView,
+    savedSearch,
+  }: { dataView: DataView; savedSearch: Pick<SavedSearch, 'searchSource'> | null },
   aiopsListState: AiOpsIndexBasedAppState,
   readOnly: boolean = false
 ) => {

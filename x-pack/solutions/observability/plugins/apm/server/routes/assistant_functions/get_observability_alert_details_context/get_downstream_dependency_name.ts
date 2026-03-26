@@ -6,7 +6,7 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { maybe } from '../../../../common/utils/maybe';
 import { ApmDocumentType } from '../../../../common/document_type';
@@ -56,7 +56,9 @@ export async function getDownstreamServiceResource({
     fields: requiredFields,
   });
 
-  const event = unflattenKnownApmEventFields(maybe(response.hits.hits[0])?.fields, requiredFields);
+  const fields = maybe(response.hits.hits[0])?.fields;
 
-  return event?.span.destination.service.resource;
+  const event = fields && accessKnownApmEventFields(fields).requireFields(requiredFields);
+
+  return event?.[SPAN_DESTINATION_SERVICE_RESOURCE];
 }

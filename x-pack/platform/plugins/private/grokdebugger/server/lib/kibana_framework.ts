@@ -7,12 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { CoreSetup, IRouter, RouteMethod, RouteConfig, RequestHandler } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  IRouter,
+  RouteMethod,
+  RouteConfig,
+  RequestHandler,
+} from '@kbn/core/server';
 
-import { ILicense } from '@kbn/licensing-plugin/server';
+import type { ILicense } from '@kbn/licensing-types';
 
 type GrokDebuggerRouteConfig<Params, Query, Body, Method extends RouteMethod> = {
-  method: RouteMethod;
+  method: Method;
 } & RouteConfig<Params, Query, Body, Method>;
 
 export class KibanaFramework {
@@ -36,7 +42,12 @@ export class KibanaFramework {
     return this.license.isActive;
   }
 
-  public registerRoute<Params = any, Query = any, Body = any, Method extends RouteMethod = any>(
+  public registerRoute<
+    Params = unknown,
+    Query = unknown,
+    Body = unknown,
+    Method extends RouteMethod = RouteMethod
+  >(
     config: GrokDebuggerRouteConfig<Params, Query, Body, Method>,
     handler: RequestHandler<Params, Query, Body>
   ) {

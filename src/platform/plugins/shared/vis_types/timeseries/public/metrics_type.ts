@@ -10,14 +10,10 @@
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
-import {
-  Vis,
-  VIS_EVENT_TO_TRIGGER,
-  VisGroups,
-  VisParams,
-  VisTypeDefinition,
-} from '@kbn/visualizations-plugin/public';
+import type { Vis, VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import { VIS_EVENT_TO_TRIGGER, VisGroups } from '@kbn/visualizations-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
+import type { VisParams } from '@kbn/visualizations-common';
 import { TSVB_EDITOR_NAME } from './application/editor_controller';
 import { PANEL_TYPES, TOOLTIP_MODES } from '../common/enums';
 import {
@@ -96,15 +92,21 @@ async function getUsedIndexPatterns(params: VisParams): Promise<DataView[]> {
   return resolvedIndexPatterns;
 }
 
+export const TSVB_ICON = 'visVisualBuilder';
+export const TSVB_TITLE = i18n.translate('visTypeTimeseries.kbnVisTypes.metricsTitle', {
+  defaultMessage: 'TSVB',
+});
+export const TSVB_DESCRIPTION = i18n.translate('visTypeTimeseries.kbnVisTypes.metricsDescription', {
+  defaultMessage: 'Create visualizations using time series data.',
+});
+
 export const metricsVisDefinition: VisTypeDefinition<
   TimeseriesVisParams | TimeseriesVisDefaultParams
 > = {
   name: VIS_TYPE,
-  title: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsTitle', { defaultMessage: 'TSVB' }),
-  description: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsDescription', {
-    defaultMessage: 'Create visualizations using time series data.',
-  }),
-  icon: 'visVisualBuilder',
+  title: TSVB_TITLE,
+  description: TSVB_DESCRIPTION,
+  icon: TSVB_ICON,
   group: VisGroups.LEGACY,
   order: 10,
   visConfig: {

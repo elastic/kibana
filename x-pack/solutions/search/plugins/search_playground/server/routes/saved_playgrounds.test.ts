@@ -6,18 +6,15 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import {
-  RequestHandlerContext,
-  SavedObjectsErrorHelpers,
-  StartServicesAccessor,
-} from '@kbn/core/server';
+import type { RequestHandlerContext, StartServicesAccessor } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { MockRouter } from '../../__mocks__/router.mock';
-import {
-  APIRoutes,
+import type {
   SearchPlaygroundPluginStart,
   SearchPlaygroundPluginStartDependencies,
 } from '../types';
+import { APIRoutes } from '../types';
 
 import { ROUTE_VERSIONS } from '../../common';
 import { defineSavedPlaygroundRoutes } from './saved_playgrounds';

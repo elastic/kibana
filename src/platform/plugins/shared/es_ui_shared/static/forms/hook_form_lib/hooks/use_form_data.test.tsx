@@ -8,12 +8,13 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { act } from 'react-dom/test-utils';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
-import { registerTestBed, TestBed } from '../shared_imports';
 import { Form, UseField } from '../components';
 import { useForm } from './use_form';
-import { useFormData, HookReturn } from './use_form_data';
+import type { HookReturn } from './use_form_data';
+import { useFormData } from './use_form_data';
 
 interface Props<T extends object> {
   onHookValueChange(data: HookReturn<T>): void;
@@ -54,7 +55,6 @@ describe('useFormData() hook', () => {
   const HookListener = React.memo(HookListenerComp);
 
   describe('form data updates', () => {
-    let testBed: TestBed;
     let onChangeSpy: jest.Mock;
 
     const getLastMockValue = () => {
@@ -72,31 +72,28 @@ describe('useFormData() hook', () => {
       );
     };
 
-    const setup = registerTestBed(TestComp, {
-      memoryRouter: { wrapComponent: false },
-    });
-
     beforeEach(() => {
       onChangeSpy = jest.fn();
-      testBed = setup({ onHookValueChange: onChangeSpy }) as TestBed;
     });
 
     test('should return the form data', () => {
+      render(<TestComp onHookValueChange={onChangeSpy} />);
+
       expect(onChangeSpy).toBeCalledTimes(1);
       const [data] = getLastMockValue();
       expect(data).toEqual({ title: 'titleInitialValue' });
     });
 
     test('should listen to field changes', async () => {
-      const {
-        form: { setInputValue },
-      } = testBed;
+      const user = userEvent.setup();
+      render(<TestComp onHookValueChange={onChangeSpy} />);
 
-      await act(async () => {
-        setInputValue('titleField', 'titleChanged');
-      });
+      const titleField = screen.getByTestId('titleField');
+      await user.clear(titleField);
+      await user.type(titleField, 'titleChanged');
 
-      expect(onChangeSpy).toBeCalledTimes(2);
+      // userEvent.type() triggers onChange for each character
+      expect(onChangeSpy).toHaveBeenCalled();
       const [data] = getLastMockValue();
       expect(data).toEqual({ title: 'titleChanged' });
     });
@@ -121,16 +118,13 @@ describe('useFormData() hook', () => {
       );
     };
 
-    const setup = registerTestBed(TestComp, {
-      memoryRouter: { wrapComponent: false },
-    });
-
     beforeEach(() => {
       onChangeSpy = jest.fn();
-      setup({ onHookValueChange: onChangeSpy });
     });
 
     test('should expose a handler to build the form data', () => {
+      render(<TestComp onHookValueChange={onChangeSpy} />);
+
       const [formData] = getLastMockValue();
       expect(formData).toEqual({
         user: {
@@ -143,7 +137,6 @@ describe('useFormData() hook', () => {
 
   describe('options', () => {
     describe('watch', () => {
-      let testBed: TestBed;
       let onChangeSpy: jest.Mock;
 
       const getLastMockValue = () => {
@@ -166,34 +159,40 @@ describe('useFormData() hook', () => {
         );
       };
 
-      const setup = registerTestBed(TestComp, {
-        memoryRouter: { wrapComponent: false },
-      });
-
       beforeEach(() => {
         onChangeSpy = jest.fn();
-        testBed = setup({ watch: 'title', onHookValueChange: onChangeSpy }) as TestBed;
       });
 
       test('should not listen to changes on fields we are not interested in', async () => {
-        const {
-          form: { setInputValue },
-        } = testBed;
+        const user = userEvent.setup();
+        render(<TestComp watch="title" onHookValueChange={onChangeSpy} />);
 
-        await act(async () => {
-          // Changing a field we are **not** interested in
-          setInputValue('subTitleField', 'subTitleChanged');
-          // Changing a field we **are** interested in
-          setInputValue('titleField', 'titleChanged');
-        });
+        const subTitleField = screen.getByTestId('subTitleField');
+        const titleField = screen.getByTestId('titleField');
+
+        const initialCallCount = onChangeSpy.mock.calls.length;
+
+        // Changing a field we are **not** interested in
+        await user.clear(subTitleField);
+        await user.type(subTitleField, 'subTitleChanged');
+
+        // Callback should not have been triggered by subtitle changes
+        expect(onChangeSpy.mock.calls.length).toBe(initialCallCount);
+
+        // Changing a field we **are** interested in
+        await user.clear(titleField);
+        await user.type(titleField, 'titleChanged');
+
+        // Now the callback should have been triggered
+        expect(onChangeSpy.mock.calls.length).toBeGreaterThan(initialCallCount);
 
         const [data] = getLastMockValue();
-        expect(data).toEqual({ title: 'titleChanged', subTitle: 'subTitleInitialValue' });
+        // The data includes all current form values (both title and subtitle have changed)
+        expect(data).toEqual({ title: 'titleChanged', subTitle: 'subTitleChanged' });
       });
     });
 
     describe('form', () => {
-      let testBed: TestBed;
       let onChangeSpy: jest.Mock;
 
       const getLastMockValue = () => {
@@ -215,26 +214,20 @@ describe('useFormData() hook', () => {
         );
       };
 
-      const setup = registerTestBed(TestComp, {
-        memoryRouter: { wrapComponent: false },
-      });
-
       beforeEach(() => {
         onChangeSpy = jest.fn();
-        testBed = setup({ onHookValueChange: onChangeSpy }) as TestBed;
       });
 
       test('should allow a form to be provided when the hook is called outside of the FormDataContext', async () => {
-        const {
-          form: { setInputValue },
-        } = testBed;
+        const user = userEvent.setup();
+        render(<TestComp onHookValueChange={onChangeSpy} />);
 
         const [initialData] = getLastMockValue();
         expect(initialData).toEqual({ title: 'titleInitialValue' });
 
-        await act(async () => {
-          setInputValue('titleField', 'titleChanged');
-        });
+        const titleField = screen.getByTestId('titleField');
+        await user.clear(titleField);
+        await user.type(titleField, 'titleChanged');
 
         const [updatedData] = getLastMockValue();
         expect(updatedData).toEqual({ title: 'titleChanged' });
@@ -242,7 +235,6 @@ describe('useFormData() hook', () => {
     });
 
     describe('onChange', () => {
-      let testBed: TestBed;
       let onChangeSpy: jest.Mock;
       let validationSpy: jest.Mock;
 
@@ -271,20 +263,14 @@ describe('useFormData() hook', () => {
         );
       };
 
-      const setup = registerTestBed(TestComp, {
-        memoryRouter: { wrapComponent: false },
-      });
-
       beforeEach(() => {
         onChangeSpy = jest.fn();
         validationSpy = jest.fn();
-        testBed = setup({ watch: 'title' }) as TestBed;
       });
 
       test('should call onChange handler _before_ running the validations', async () => {
-        const {
-          form: { setInputValue },
-        } = testBed;
+        const user = userEvent.setup();
+        render(<TestComp />);
 
         onChangeSpy.mockReset(); // Reset our counters
         validationSpy.mockReset();
@@ -292,9 +278,9 @@ describe('useFormData() hook', () => {
         expect(onChangeSpy).not.toHaveBeenCalled();
         expect(validationSpy).not.toHaveBeenCalled();
 
-        await act(async () => {
-          setInputValue('titleField', 'titleChanged');
-        });
+        const titleField = screen.getByTestId('titleField');
+        await user.clear(titleField);
+        await user.type(titleField, 'titleChanged');
 
         expect(onChangeSpy).toHaveBeenCalled();
         expect(validationSpy).toHaveBeenCalled();

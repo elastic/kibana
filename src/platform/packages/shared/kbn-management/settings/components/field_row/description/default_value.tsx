@@ -15,7 +15,11 @@ import {
   isJsonFieldDefinition,
   isMarkdownFieldDefinition,
 } from '@kbn/management-settings-field-definition';
-import { FieldDefinition, SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
+import type {
+  FieldDefinition,
+  SettingType,
+  UnsavedFieldChange,
+} from '@kbn/management-settings-types';
 
 export const DATA_TEST_SUBJ_DEFAULT_DISPLAY_PREFIX = 'default-display-block';
 /**

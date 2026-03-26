@@ -8,6 +8,7 @@
  */
 
 import { of, Subscription } from 'rxjs';
+import { apm, type Transaction } from '@elastic/apm-rum';
 import type { AnalyticsClient } from '@elastic/ebt/client';
 import { createAnalytics } from '@elastic/ebt/client';
 import { registerPerformanceMetricEventType } from '@kbn/ebt-tools';
@@ -25,6 +26,10 @@ export interface AnalyticsServiceSetupDeps {
   injectedMetadata: InternalInjectedMetadataSetup;
 }
 
+interface TransactionWithUndocumentedProps extends Transaction {
+  traceId: string;
+}
+
 export class AnalyticsService {
   private readonly analyticsClient: AnalyticsClient;
   private readonly subscriptionsHandler = new Subscription();
@@ -33,6 +38,9 @@ export class AnalyticsService {
     this.analyticsClient = createAnalytics({
       isDev: core.env.mode.dev,
       logger: core.logger.get('analytics'),
+      getTraceContext: () => ({
+        id: (apm.getCurrentTransaction() as TransactionWithUndocumentedProps | undefined)?.traceId,
+      }),
     });
 
     this.registerBuildInfoAnalyticsContext(core);
@@ -81,12 +89,16 @@ export class AnalyticsService {
 
   /**
    * Enriches the events with a session_id, so we can correlate them and understand funnels.
-   * @private
+   * @internal
    */
   private registerSessionIdContext() {
+    const sessionInfo = { session_id: getSessionId() };
+
+    apm.addLabels(sessionInfo); // Attach this label to APM to help us identify issues affecting multiple sessions
+
     this.analyticsClient.registerContextProvider({
       name: 'session-id',
-      context$: of({ session_id: getSessionId() }),
+      context$: of(sessionInfo),
       schema: {
         session_id: {
           type: 'keyword',
@@ -99,7 +111,7 @@ export class AnalyticsService {
   /**
    * Enriches the event with the build information.
    * @param core The core context.
-   * @private
+   * @internal
    */
   private registerBuildInfoAnalyticsContext(core: CoreContext) {
     this.analyticsClient.registerContextProvider({
@@ -134,7 +146,7 @@ export class AnalyticsService {
 
   /**
    * Enriches events with the current Browser's information
-   * @private
+   * @internal
    */
   private registerBrowserInfoAnalyticsContext() {
     this.analyticsClient.registerContextProvider({
@@ -167,7 +179,7 @@ export class AnalyticsService {
   /**
    * Enriches the events with the Elasticsearch info (cluster name, uuid and version).
    * @param injectedMetadata The injected metadata service.
-   * @private
+   * @internal
    */
   private registerElasticsearchInfoContext(injectedMetadata: InternalInjectedMetadataSetup) {
     this.analyticsClient.registerContextProvider({

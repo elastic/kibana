@@ -6,24 +6,33 @@
  */
 
 import React from 'react';
+import { screen } from '@testing-library/react';
 import { UserAgentSummaryItem } from './user_agent_summary_item';
-import { mountWithTheme } from '../../../utils/test_helpers';
+import { renderWithTheme } from '../../../utils/test_helpers';
 
 describe('UserAgentSummaryItem', () => {
-  describe('render', () => {
-    const props = { original: 'Other' };
+  it('renders with basic props', () => {
+    renderWithTheme(
+      <div data-test-subj="user-agent-summary-item">
+        <UserAgentSummaryItem name="Other" />
+      </div>
+    );
 
-    it('renders', () => {
-      expect(() => mountWithTheme(<UserAgentSummaryItem {...props} />)).not.toThrowError();
-    });
+    const summary = screen.getByTestId('user-agent-summary-item');
+    expect(summary).toBeInTheDocument();
+    expect(summary).toHaveTextContent('Other');
+  });
 
-    describe('with a version', () => {
-      it('shows the version', () => {
-        const p = { ...props, version: '1.0' };
-        const wrapper = mountWithTheme(<UserAgentSummaryItem {...p} />);
+  it('renders with version', () => {
+    renderWithTheme(
+      <div data-test-subj="user-agent-summary-item">
+        <UserAgentSummaryItem name="Other" version="1.0" />
+      </div>
+    );
 
-        expect(wrapper.text()).toContain('(1.0)');
-      });
-    });
+    const summary = screen.getByTestId('user-agent-summary-item');
+    expect(summary).toBeInTheDocument();
+    expect(summary).toHaveTextContent('Other');
+    expect(summary).toHaveTextContent('(1.0)');
   });
 });

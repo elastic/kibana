@@ -14,7 +14,8 @@ import { FileUpload } from '@kbn/shared-ux-file-upload';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import { FilesContext } from '@kbn/shared-ux-file-context';
-import { FilePicker, Props } from './file_picker';
+import type { Props } from './file_picker';
+import { FilePicker } from './file_picker';
 
 describe('FilePicker', () => {
   const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));

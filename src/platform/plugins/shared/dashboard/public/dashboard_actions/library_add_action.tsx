@@ -9,8 +9,7 @@
 
 import React from 'react';
 
-import { PanelPackage, PresentationContainer } from '@kbn/presentation-containers';
-import {
+import type {
   CanAccessViewMode,
   EmbeddableApiContext,
   HasLibraryTransforms,
@@ -19,6 +18,10 @@ import {
   HasTypeDisplayName,
   HasUniqueId,
   PublishesTitle,
+  PanelPackage,
+  PresentationContainer,
+} from '@kbn/presentation-publishing';
+import {
   apiCanAccessViewMode,
   apiHasLibraryTransforms,
   apiHasParentApi,
@@ -27,13 +30,13 @@ import {
   getInheritedViewMode,
   getTitle,
 } from '@kbn/presentation-publishing';
+import type { OnSaveProps, SaveResult } from '@kbn/saved-objects-plugin/public';
 import {
-  OnSaveProps,
-  SaveResult,
-  SavedObjectSaveModal,
+  SavedObjectSaveModalWithSaveResult,
   showSaveModal,
 } from '@kbn/saved-objects-plugin/public';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { coreServices } from '../services/kibana_services';
 import { dashboardAddToLibraryActionStrings } from './_dashboard_actions_strings';
@@ -98,10 +101,10 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
           );
           try {
             const libraryId = await embeddable.saveToLibrary(newTitle);
-            const { rawState, references } = embeddable.getSerializedStateByReference(libraryId);
+            const byReferenceState = embeddable.getSerializedStateByReference(libraryId);
             resolve({
               byRefPackage: {
-                serializedState: { rawState: { ...rawState, title: newTitle }, references },
+                serializedState: { ...byReferenceState, title: newTitle },
                 panelType: embeddable.type,
               },
               libraryTitle: newTitle,
@@ -113,7 +116,7 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
           }
         };
         showSaveModal(
-          <SavedObjectSaveModal
+          <SavedObjectSaveModalWithSaveResult
             onSave={onSave}
             onClose={() => {}}
             title={lastTitle ?? ''}

@@ -7,25 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { UnifiedHistogramLayout } from '@kbn/unified-histogram';
 import { OutPortal } from 'react-reverse-portal';
+import { PanelsToggle } from '../../../../components/panels_toggle';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
-import { useCurrentChartPortalNode, useCurrentTabRuntimeState } from '../../state_management/redux';
-
-export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
-  container: HTMLElement | null;
-}
+import {
+  DEFAULT_HISTOGRAM_KEY_PREFIX,
+  useCurrentChartPortalNode,
+  useCurrentTabRuntimeState,
+} from '../../state_management/redux';
 
 export const DiscoverHistogramLayout = ({
-  container,
-  panelsToggle,
+  sidebarToggleState$,
   ...mainContentProps
-}: DiscoverHistogramLayoutProps) => {
+}: DiscoverMainContentProps) => {
   const chartPortalNode = useCurrentChartPortalNode();
-  const layoutProps = useCurrentTabRuntimeState(
-    mainContentProps.stateContainer.runtimeStateManager,
-    (tab) => tab.unifiedHistogramLayoutProps$
+  const { localStorageKeyPrefix, layoutPropsMap } = useCurrentTabRuntimeState(
+    (tab) => tab.unifiedHistogramConfig$
+  );
+  const layoutProps = layoutPropsMap[localStorageKeyPrefix ?? DEFAULT_HISTOGRAM_KEY_PREFIX];
+  const panelsToggle = useMemo(
+    () => (
+      <PanelsToggle sidebarToggleState$={sidebarToggleState$} dataTestSubjSuffix="InHistogram" />
+    ),
+    [sidebarToggleState$]
   );
 
   if (!layoutProps) {
@@ -34,13 +40,12 @@ export const DiscoverHistogramLayout = ({
 
   return (
     <UnifiedHistogramLayout
-      container={container}
       unifiedHistogramChart={
         chartPortalNode ? <OutPortal node={chartPortalNode} panelsToggle={panelsToggle} /> : null
       }
       {...layoutProps}
     >
-      <DiscoverMainContent {...mainContentProps} panelsToggle={panelsToggle} />
+      <DiscoverMainContent {...mainContentProps} sidebarToggleState$={sidebarToggleState$} />
     </UnifiedHistogramLayout>
   );
 };

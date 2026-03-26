@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { QueryRulesQueryRule, QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { SearchQueryRulesQueryRule } from '../types';
+import type {
+  QueryRulesQueryRule,
+  QueryRulesQueryRuleset,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { SearchQueryRulesQueryRule } from '../types';
 
 export const fetchQueryRulesQueryRule = async (
   client: ElasticsearchClient,

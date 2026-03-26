@@ -8,8 +8,12 @@
  */
 
 import type { FunctionComponent } from 'react';
-import type { EuiDataGridCellValueElementProps, EuiDataGridColumn } from '@elastic/eui';
-import type { DataTableRecord } from '@kbn/discover-utils/src/types';
+import type {
+  EuiContextMenuItem,
+  EuiDataGridCellValueElementProps,
+  EuiDataGridColumn,
+} from '@elastic/eui';
+import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 export type { DataTableColumnsMeta } from '@kbn/discover-utils/types';
@@ -44,6 +48,7 @@ export type DataGridCellValueElementProps = EuiDataGridCellValueElementProps & {
   fieldFormats: FieldFormatsStart;
   closePopover: () => void;
   isCompressed?: boolean;
+  columnsMeta: DataTableColumnsMeta | undefined;
 };
 
 export type CustomCellRenderer = Record<string, FunctionComponent<DataGridCellValueElementProps>>;
@@ -59,3 +64,11 @@ export type CustomGridColumnsConfiguration = Record<
 >;
 
 export type DataGridPaginationMode = 'multiPage' | 'singlePage' | 'infinite';
+
+export type CustomBulkActions = Array<
+  Omit<React.ComponentProps<typeof EuiContextMenuItem>, 'onClick'> & {
+    onClick: (payload: { selectedDocIds: string[] }) => void;
+    label: React.ReactElement | string;
+    key: string;
+  }
+>;

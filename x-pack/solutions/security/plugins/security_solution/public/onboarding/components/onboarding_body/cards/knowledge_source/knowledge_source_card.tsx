@@ -91,7 +91,7 @@ export const KnowledgeSourceCard: OnboardingCardComponent = ({
               <EuiSpacer size="m" />
               <CardCallOut
                 color="primary"
-                icon="iInCircle"
+                icon="info"
                 text={i18n.KNOWLEDGE_SOURCE_CARD_CALLOUT_INTEGRATIONS_TEXT}
                 action={
                   <EuiLink onClick={expandIntegrationsCard}>

@@ -25,7 +25,7 @@ export async function createNewAPIKeySet(
     shouldUpdateApiKey: boolean;
     errorMessage?: string;
   }
-): Promise<Pick<RawRule, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser'>> {
+): Promise<Pick<RawRule, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey'>> {
   let createdAPIKey = null;
   let isAuthTypeApiKey = false;
   try {

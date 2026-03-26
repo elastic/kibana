@@ -8,6 +8,7 @@ import {
   expandFlattenedAlert,
   compactObject,
   removeUnflattenedFieldsFromAlert,
+  replaceEmptyAlertFields,
 } from './format_alert';
 import {
   ALERT_ACTION_GROUP,
@@ -268,6 +269,124 @@ describe('compactObject', () => {
       'kibana.alert.rule.zero': 0,
       'kibana.alert.bool_field': false,
       'kibana.alert.null_field': null,
+    });
+  });
+});
+
+describe('replaceEmptyAlertFields', () => {
+  test('should correctly replace empty fields', () => {
+    expect(
+      replaceEmptyAlertFields(
+        {
+          '@timestamp': '2023-03-29T12:27:28.159Z',
+          event: {
+            action: 'active',
+            kind: 'signal',
+          },
+          kibana: {
+            alert: {
+              action_group: 'warning',
+              duration: {
+                us: '36000000',
+              },
+              evaluation: {
+                conditions: 'matched query',
+                value: '123',
+              },
+              flapping: false,
+              flapping_history: [],
+              instance: {
+                id: 'alert-A',
+              },
+              maintenance_window_ids: [],
+              reason: 'because i said so',
+              rule: {
+                category: 'My test rule',
+                consumer: 'bar',
+                execution: {
+                  uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                },
+                name: 'rule-name',
+                parameters: {
+                  bar: true,
+                },
+                producer: 'alerts',
+                revision: 0,
+                rule_type_id: 'test.rule-type',
+                tags: ['rule-', '-tags'],
+                uuid: '1',
+              },
+              start: '2023-03-28T12:27:28.159Z',
+              status: 'active',
+              time_range: {
+                gte: '2023-03-28T12:27:28.159Z',
+              },
+              title: 'this is an alert',
+              uuid: 'abcdefg',
+              url: 'https://alert.url/abcdefg',
+              workflow_status: 'open',
+            },
+            space_ids: ['default'],
+            version: '8.9.0',
+          },
+          tags: ['rule-', '-tags'],
+          message: ['message1', 'message2'],
+          'event.dataset': ['dataset1', 'dataset2'],
+        },
+        {
+          [TIMESTAMP]: '2023-03-30T12:27:28.159Z',
+          [EVENT_ACTION]: 'active',
+          [ALERT_ACTION_GROUP]: 'warning',
+          [ALERT_FLAPPING]: false,
+          [ALERT_FLAPPING_HISTORY]: [],
+          [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+          [ALERT_DURATION]: '36000000',
+          [SPACE_IDS]: ['default'],
+          [VERSION]: '8.9.0',
+          [TAGS]: ['rule-', '-tags'],
+          [ALERT_RULE_CATEGORY]: 'My test rule',
+          [ALERT_RULE_CONSUMER]: 'bar',
+          [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+          [ALERT_RULE_NAME]: 'rule-name',
+          [ALERT_RULE_PARAMETERS]: { bar: true },
+          [ALERT_RULE_PRODUCER]: 'alerts',
+          [ALERT_RULE_REVISION]: 0,
+          [ALERT_RULE_TYPE_ID]: 'test.rule-type',
+          [ALERT_RULE_TAGS]: ['rule-', '-tags'],
+          [ALERT_RULE_UUID]: '1',
+          [ALERT_URL]: 'https://abc',
+          [ALERT_REASON]: 'because',
+          'kibana.alert.evaluation.conditions': 'condition',
+        }
+      )
+    ).toEqual({
+      '@timestamp': '2023-03-30T12:27:28.159Z',
+      'event.action': 'active',
+      'event.dataset': [],
+      'kibana.alert.action_group': 'warning',
+      'kibana.alert.duration.us': '36000000',
+      'kibana.alert.evaluation.conditions': 'condition',
+      'kibana.alert.flapping': false,
+      'kibana.alert.flapping_history': [],
+      'kibana.alert.maintenance_window_ids': [],
+      'kibana.alert.reason': 'because',
+      'kibana.alert.rule.category': 'My test rule',
+      'kibana.alert.rule.consumer': 'bar',
+      'kibana.alert.rule.execution.uuid': '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+      'kibana.alert.rule.name': 'rule-name',
+      'kibana.alert.rule.parameters': {
+        bar: true,
+      },
+      'kibana.alert.rule.producer': 'alerts',
+      'kibana.alert.rule.revision': 0,
+      'kibana.alert.rule.rule_type_id': 'test.rule-type',
+      'kibana.alert.rule.tags': ['rule-', '-tags'],
+      'kibana.alert.rule.uuid': '1',
+      'kibana.alert.url': 'https://abc',
+      'kibana.space_ids': ['default'],
+      'kibana.version': '8.9.0',
+      message: [],
+      tags: ['rule-', '-tags'],
     });
   });
 });

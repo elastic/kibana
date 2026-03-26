@@ -62,6 +62,31 @@ const updateTotalFieldLimitSetting = async ({
   }
 };
 
+export const rolloverDataStream = async ({
+  logger,
+  esClient,
+  dataStreamName,
+}: {
+  logger: Logger;
+  esClient: ElasticsearchClient;
+  dataStreamName: string;
+}) => {
+  logger.info(`Rollover data stream - ${dataStreamName}`);
+  try {
+    await retryTransientEsErrors(
+      () =>
+        esClient.indices.rollover({
+          alias: dataStreamName,
+        }),
+      { logger }
+    );
+    logger.info(`Successfully rolled over data stream - ${dataStreamName}`);
+  } catch (err) {
+    logger.error(`Failed to rollover data stream - ${dataStreamName}: ${err.message}`);
+    throw err;
+  }
+};
+
 // This will update the mappings of  indices but *not* the settings. This
 // is due to the fact settings can be classed as dynamic and static, and static
 // updates will fail on an index that isn't closed. New settings *will* be applied as part

@@ -8,9 +8,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { LogRecord, Appender, DisposableAppender } from '@kbn/logging';
+import type { LogRecord, Appender, DisposableAppender } from '@kbn/logging';
 import type { RewriteAppenderConfig } from '@kbn/core-logging-server';
-import { createRewritePolicy, rewritePolicyConfigSchema, RewritePolicy } from './policies';
+import type { RewritePolicy } from './policies';
+import { createRewritePolicy, rewritePolicyConfigSchema } from './policies';
 
 /**
  * Appender that can modify the `LogRecord` instances it receives before passing
@@ -20,7 +21,7 @@ import { createRewritePolicy, rewritePolicyConfigSchema, RewritePolicy } from '.
 export class RewriteAppender implements DisposableAppender {
   public static configSchema = schema.object({
     type: schema.literal('rewrite'),
-    appenders: schema.arrayOf(schema.string(), { defaultValue: [] }),
+    appenders: schema.arrayOf(schema.string(), { defaultValue: [], maxSize: 25 }),
     policy: rewritePolicyConfigSchema,
   });
 

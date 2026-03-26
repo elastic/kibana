@@ -11,7 +11,6 @@ import type { AgentPolicy } from '../../../common';
 import type { AgentPolicySOAttributes } from '../../types';
 
 export const mapAgentPolicySavedObjectToAgentPolicy = ({
-  /* eslint-disable @typescript-eslint/naming-convention */
   id,
   namespaces,
   version,

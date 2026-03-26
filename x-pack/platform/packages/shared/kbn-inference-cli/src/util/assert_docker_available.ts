@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import execa, { ExecaError } from 'execa';
+import type { ExecaError } from 'execa';
+import execa from 'execa';
 
 class DockerUnavailableError extends Error {
   constructor(cause: ExecaError) {

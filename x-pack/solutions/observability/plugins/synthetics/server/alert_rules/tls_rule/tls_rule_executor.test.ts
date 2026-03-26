@@ -14,10 +14,10 @@ import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_mon
 import { SyntheticsService } from '../../synthetics_service/synthetics_service';
 import * as locationsUtils from '../../synthetics_service/get_all_locations';
 import type { PublicLocation } from '../../../common/runtime_types';
-import { SyntheticsServerSetup } from '../../types';
+import type { SyntheticsServerSetup } from '../../types';
 import { randomUUID } from 'node:crypto';
-import { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
-import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 describe('tlsRuleExecutor', () => {
   const mockEsClient = elasticsearchClientMock.createElasticsearchClient();
@@ -62,7 +62,7 @@ describe('tlsRuleExecutor', () => {
   const monitorClient = new SyntheticsMonitorClient(syntheticsService, serverMock);
 
   const commonFilter =
-    'synthetics-monitor.attributes.alert.tls.enabled: true and (synthetics-monitor.attributes.type: http or synthetics-monitor.attributes.type: tcp)';
+    'synthetics-monitor-multi-space.attributes.alert.tls.enabled: true and (synthetics-monitor-multi-space.attributes.type: http or synthetics-monitor-multi-space.attributes.type: tcp)';
 
   const getTLSRuleExecutorParams = (
     ruleParams: TLSRuleParams = {}
@@ -110,7 +110,7 @@ describe('tlsRuleExecutor', () => {
       await tlsRule.getMonitors();
 
       expect(getAllMock).toHaveBeenCalledWith({
-        filter: `${commonFilter} AND synthetics-monitor.attributes.id:(\"${monitorId}\")`,
+        filter: `${commonFilter} AND synthetics-monitor-multi-space.attributes.id:(\"${monitorId}\")`,
       });
     });
 
@@ -123,7 +123,7 @@ describe('tlsRuleExecutor', () => {
       await tlsRule.getMonitors();
 
       expect(getAllMock).toHaveBeenCalledWith({
-        filter: `${commonFilter} AND synthetics-monitor.attributes.tags:(\"${tag}\")`,
+        filter: `${commonFilter} AND synthetics-monitor-multi-space.attributes.tags:(\"${tag}\")`,
       });
     });
 
@@ -138,7 +138,7 @@ describe('tlsRuleExecutor', () => {
       await tlsRule.getMonitors();
 
       expect(getAllMock).toHaveBeenCalledWith({
-        filter: `${commonFilter} AND synthetics-monitor.attributes.type:(\"${monitorType}\")`,
+        filter: `${commonFilter} AND synthetics-monitor-multi-space.attributes.type:(\"${monitorType}\")`,
       });
     });
 
@@ -168,7 +168,7 @@ describe('tlsRuleExecutor', () => {
             }),
           }),
         }),
-        { meta: true }
+        { meta: true, context: { loggingOptions: { loggerName: 'synthetics' } } }
       );
     });
   });

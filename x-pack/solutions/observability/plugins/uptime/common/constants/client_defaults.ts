@@ -81,3 +81,12 @@ export const getTimeSpanFilter = () => ({
     },
   },
 });
+
+export const getRangeFilter = ({ from, to }: { from: string; to: string }) => ({
+  range: {
+    '@timestamp': {
+      gte: from,
+      lte: to,
+    },
+  },
+});

@@ -9,8 +9,8 @@
 
 import type { IToasts, ToastsStart } from '@kbn/core/public';
 import type { FilterManager } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useEffect } from 'react';
 import { debounceTime } from 'rxjs';
 
@@ -29,11 +29,11 @@ const addInvalidFiltersWarn = (toastNotifications: IToasts) => {
 };
 
 export const useFiltersValidation = ({
-  savedSearch,
+  dataView,
   filterManager,
   toastNotifications,
 }: {
-  savedSearch: SavedSearch;
+  dataView: DataView;
   filterManager: FilterManager;
   toastNotifications: ToastsStart;
 }) => {
@@ -43,7 +43,6 @@ export const useFiltersValidation = ({
       .pipe(debounceTime(500))
       .subscribe(() => {
         const currentFilters = filterManager.getFilters();
-        const dataView = savedSearch.searchSource.getField('index');
         const areFiltersInvalid =
           dataView &&
           !dataView.isPersisted() &&
@@ -53,5 +52,5 @@ export const useFiltersValidation = ({
         }
       });
     return () => subscription.unsubscribe();
-  }, [filterManager, savedSearch.searchSource, toastNotifications]);
+  }, [dataView, filterManager, toastNotifications]);
 };

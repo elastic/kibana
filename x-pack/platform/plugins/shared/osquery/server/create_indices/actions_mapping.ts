@@ -23,6 +23,9 @@ export const actionsMapping: MappingTypeMapping = {
       type: 'keyword',
       ignore_above: 1024,
     },
+    space_id: {
+      type: 'keyword',
+    },
     data: {
       properties: {
         query: {
@@ -58,6 +61,10 @@ export const actionsMapping: MappingTypeMapping = {
       type: 'keyword',
       ignore_above: 1024,
     },
+    user_profile_uid: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
     metadata: {
       type: 'object',
       enabled: false,
@@ -72,6 +79,10 @@ export const actionsMapping: MappingTypeMapping = {
     },
     pack_prebuilt: {
       type: 'boolean',
+    },
+    tags: {
+      type: 'keyword',
+      ignore_above: 256,
     },
     queries: {
       properties: {

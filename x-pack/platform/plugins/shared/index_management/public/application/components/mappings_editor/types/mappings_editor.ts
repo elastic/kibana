@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ReactNode, OptionHTMLAttributes } from 'react';
+import type { ReactNode, OptionHTMLAttributes } from 'react';
 
-import { NormalizedField } from './document_fields';
-import { Mappings } from './state';
+import type { NormalizedField } from './document_fields';
+import type { Mappings } from './state';
 
 export type OnUpdateHandler = (arg: OnUpdateHandlerArg) => void;
 

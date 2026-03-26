@@ -9,7 +9,8 @@
         "30s",
         "-1",
         "0"
-      ]
+      ],
+      "wait_for_completion": "__flag__"
     },
     "methods": [
       "DELETE"
@@ -17,7 +18,7 @@
     "patterns": [
       "_snapshot/{repository}/{snapshot}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/delete-snapshot-api.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-delete",
     "availability": {
       "stack": true,
       "serverless": false

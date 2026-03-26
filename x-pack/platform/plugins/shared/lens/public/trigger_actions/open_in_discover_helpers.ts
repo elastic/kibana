@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { type AggregateQuery, type Filter, type Query, type TimeRange } from '@kbn/es-query';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import {
+  type EmbeddableApiContext,
+  apiIsPresentationContainer,
+} from '@kbn/presentation-publishing';
+import { getEsqlControls } from '@kbn/esql-utils';
 import { isLensApi } from '../react_embeddable/type_guards';
 
 interface DiscoverAppLocatorParams extends SerializableRecord {
@@ -74,10 +78,17 @@ async function getDiscoverLocationParams({
     }
   }
 
+  const presentationContainer = apiIsPresentationContainer(embeddable.parentApi)
+    ? embeddable.parentApi
+    : undefined;
+
   return {
     ...args,
     timeRange: timeRangeToApply,
     filters: filtersToApply,
+    esqlControls: presentationContainer
+      ? getEsqlControls(presentationContainer, args.query)
+      : undefined,
   };
 }
 

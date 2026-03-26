@@ -34,7 +34,8 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
-import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
+import type { PageScope } from '../../../data_view_manager/constants';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { InspectButton } from '../inspect';
 import type {
   ControlColumnProps,
@@ -47,7 +48,6 @@ import type { RowRenderer, SortColumnTimeline as Sort } from '../../../../common
 import { InputsModelId } from '../../store/inputs/constants';
 import type { State } from '../../store';
 import { inputsActions } from '../../store/actions';
-import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { useKibana } from '../../lib/kibana';
@@ -82,7 +82,7 @@ export interface EventsViewerProps {
   pageFilters?: Filter[];
   renderCellValue: React.FC<CellValueElementProps>;
   rowRenderers: RowRenderer[];
-  sourcererScope: SourcererScopeName;
+  sourcererScope: PageScope;
   start: string;
   tableId: TableId;
   topRightMenuOptions?: React.ReactNode;
@@ -148,23 +148,36 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     sourcererDataView: oldSourcererDataView,
     loading: oldIsLoadingIndexPattern,
   } = useSourcererDataView(sourcererScope);
+  const oldGetFieldSpec = useGetFieldSpec(sourcererScope);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataViewSpec, status } = useDataViewSpec(sourcererScope);
+  const { dataView: experimentalDataView, status } = useDataView(sourcererScope);
+
   const experimentalSelectedPatterns = useSelectedPatterns(sourcererScope);
   const experimentalBrowserFields = useBrowserFields(sourcererScope);
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
-  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
   const isLoadingIndexPattern = newDataViewPickerEnabled
     ? status !== 'ready'
     : oldIsLoadingIndexPattern;
-  const dataViewId = newDataViewPickerEnabled ? dataViewSpec.id ?? null : oldDataViewId;
-  const selectedDataViewId = newDataViewPickerEnabled ? dataViewSpec.id : oldDataViewId;
+  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id ?? null : oldDataViewId;
+  const selectedDataViewId = newDataViewPickerEnabled ? experimentalDataView.id : oldDataViewId;
   const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
 
-  const getFieldSpec = useGetFieldSpec(sourcererScope);
+  const runtimeMappings = useMemo(() => {
+    return newDataViewPickerEnabled
+      ? (experimentalDataView.getRuntimeMappings() as RunTimeMappings) ?? {}
+      : (oldSourcererDataView?.runtimeFieldMap as RunTimeMappings) ?? {};
+  }, [newDataViewPickerEnabled, experimentalDataView, oldSourcererDataView]);
+
+  const experimentalGetFieldSpec = useCallback(
+    (fieldName: string) => {
+      return experimentalDataView.fields?.getByName(fieldName)?.toSpec();
+    },
+    [experimentalDataView.fields]
+  );
+  const getFieldSpec = newDataViewPickerEnabled ? experimentalGetFieldSpec : oldGetFieldSpec;
 
   const editorActionsRef = useRef<FieldEditorActions>(null);
   useEffect(() => {
@@ -231,12 +244,22 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
         dataProviders: [],
         filters: globalFilters,
         from: start,
-        dataViewSpec: sourcererDataView,
+        dataViewSpec: oldSourcererDataView,
+        dataView: experimentalDataView,
         kqlMode: 'filter',
         kqlQuery: query,
         to: end,
       }),
-    [esQueryConfig, browserFields, globalFilters, start, sourcererDataView, query, end]
+    [
+      esQueryConfig,
+      browserFields,
+      globalFilters,
+      start,
+      oldSourcererDataView,
+      experimentalDataView,
+      query,
+      end,
+    ]
   );
 
   const canQueryTimeline = useMemo(
@@ -265,7 +288,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     [sort]
   );
 
-  const [loading, { events, loadPage, pageInfo, refetch, totalCount = 0, inspect }] =
+  const [loading, { events, rawEvents, loadPage, pageInfo, refetch, totalCount = 0, inspect }] =
     useTimelineEvents({
       // We rely on entityType to determine Events vs Alerts
       alertConsumers: SECURITY_ALERTS_CONSUMERS,
@@ -278,7 +301,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
       id: tableId,
       indexNames: indexNames ?? selectedPatterns,
       limit: itemsPerPage,
-      runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
+      runtimeMappings,
       skip: !canQueryTimeline,
       sort: sortField,
       startDate: start,
@@ -322,6 +345,11 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     () => events.filter((e) => !deletedEventIds.includes(e._id)),
     [deletedEventIds, events]
   );
+  const nonDeletedRawEvents = useMemo(
+    () => rawEvents.filter((e) => !deletedEventIds.includes(e._id as string)),
+    [deletedEventIds, rawEvents]
+  );
+
   useEffect(() => {
     setQuery({ id: tableId, inspect, loading, refetch });
   }, [inspect, loading, refetch, setQuery, tableId]);
@@ -414,6 +442,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
         columnHeaders,
         controlColumns,
         data: nonDeletedEvents,
+        rawEvents: nonDeletedRawEvents,
         fieldBrowserOptions,
         loadingEventIds,
         onRowSelected,
@@ -437,6 +466,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     leadingControlColumns,
     columnHeaders,
     nonDeletedEvents,
+    nonDeletedRawEvents,
     fieldBrowserOptions,
     loadingEventIds,
     onRowSelected,

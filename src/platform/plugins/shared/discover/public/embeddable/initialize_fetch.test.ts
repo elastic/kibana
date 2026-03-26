@@ -42,6 +42,9 @@ describe('initialize fetch', () => {
       api: mockedApi,
       stateManager,
       discoverServices: discoverServiceMock,
+      scopedProfilesManager: discoverServiceMock.profilesManager.createScopedProfilesManager({
+        scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+      }),
       ...setters,
     });
     await waitOneTick();
@@ -102,6 +105,8 @@ describe('initialize fetch', () => {
     );
 
     mockedApi.savedSearch$.next(savedSearch); // reload
+    await waitOneTick(); // allow first request to start
+
     mockedApi.savedSearch$.next(savedSearch); // reload a second time to trigger abort
     await waitOneTick();
     expect(abortSignals[0].aborted).toBe(true); // first request should have been aborted
@@ -109,6 +114,7 @@ describe('initialize fetch', () => {
 
     mockedApi.savedSearch$.next(savedSearch); // reload a third time
     await waitOneTick();
+    expect(abortSignals[1].aborted).toBe(true); // second request should have been aborted
     expect(abortSignals[2].aborted).toBe(false); // third request was not aborted
   });
 });

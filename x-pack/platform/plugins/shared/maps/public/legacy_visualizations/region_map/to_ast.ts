@@ -6,9 +6,9 @@
  */
 
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { VisToExpressionAst } from '@kbn/visualizations-plugin/public';
-import { RegionMapExpressionFunctionDefinition } from './region_map_fn';
-import { RegionMapVisParams } from './types';
+import type { VisToExpressionAst } from '@kbn/visualizations-plugin/public';
+import type { RegionMapExpressionFunctionDefinition } from './region_map_fn';
+import type { RegionMapVisParams } from './types';
 import { extractLayerDescriptorParams } from './utils';
 
 export const toExpressionAst: VisToExpressionAst<RegionMapVisParams> = (vis) => {

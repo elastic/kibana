@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GeneralDatasourceStates } from '../../../../state_management';
+import type { GeneralDatasourceStates } from '@kbn/lens-common';
 import { convertToLegendStats } from './legend_stats';
 import { convertToRawColorMappingsFn } from './raw_color_mappings';
 

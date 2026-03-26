@@ -12,7 +12,7 @@ import {
   type SecurityServiceStart,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, startsWith } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { withSpan } from '@kbn/apm-utils';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
@@ -20,10 +20,13 @@ import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { getErrorSource as getTaskManagerErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
-import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
+import {
+  getGenAiTokenTracking,
+  shouldTrackGenAiToken,
+} from './token_tracking/gen_ai_token_tracking';
 import {
   validateConfig,
   validateConnector,
@@ -37,6 +40,7 @@ import type {
   ActionTypeExecutorResult,
   ActionTypeRegistryContract,
   ActionTypeSecrets,
+  ConnectorTokenClientContract,
   GetServicesFunction,
   GetUnsecuredServicesFunction,
   InMemoryConnector,
@@ -52,6 +56,7 @@ import type { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
 import type { ActionsAuthorization } from '../authorization/actions_authorization';
+import type { ConnectorRateLimiter } from './connector_rate_limiter';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -68,6 +73,7 @@ export interface ActionExecutorContext {
   eventLogger: IEventLogger;
   inMemoryConnectors: InMemoryConnector[];
   getActionsAuthorizationWithRequest: (request: KibanaRequest) => ActionsAuthorization;
+  getCurrentUserProfileIdFromAPIKey: (request: KibanaRequest) => Promise<string | undefined>;
 }
 
 export interface TaskInfo {
@@ -83,12 +89,19 @@ export interface ExecuteOptions<Source = unknown> {
   params: Record<string, unknown>;
   relatedSavedObjects?: RelatedSavedObjects;
   request: KibanaRequest;
+  /**
+   * Optional space override. When provided, Action execution will be scoped to this spaceId.
+   */
+  spaceId?: string;
   source?: ActionExecutionSource<Source>;
   taskInfo?: TaskInfo;
+  connectorTokenClient?: ConnectorTokenClientContract;
+  signal?: AbortSignal;
 }
 
 type ExecuteHelperOptions<Source = unknown> = Omit<ExecuteOptions<Source>, 'request'> & {
   currentUser?: AuthenticatedUser | null;
+  connectorTokenClient?: ConnectorTokenClientContract;
   checkCanExecuteFn?: (connectorTypeId: string) => Promise<void>;
   executeLabel: string;
   namespace: { namespace?: string };
@@ -110,11 +123,18 @@ export class ActionExecutor {
   private isInitialized = false;
   private actionExecutorContext?: ActionExecutorContext;
   private readonly isESOCanEncrypt: boolean;
-
+  private connectorRateLimiter: ConnectorRateLimiter;
   private actionInfo: ActionInfo | undefined;
 
-  constructor({ isESOCanEncrypt }: { isESOCanEncrypt: boolean }) {
+  constructor({
+    isESOCanEncrypt,
+    connectorRateLimiter,
+  }: {
+    isESOCanEncrypt: boolean;
+    connectorRateLimiter: ConnectorRateLimiter;
+  }) {
     this.isESOCanEncrypt = isESOCanEncrypt;
+    this.connectorRateLimiter = connectorRateLimiter;
   }
 
   public initialize(actionExecutorContext: ActionExecutorContext) {
@@ -128,13 +148,16 @@ export class ActionExecutor {
   public async execute({
     actionExecutionId,
     actionId,
+    connectorTokenClient,
     consumer,
     executionId,
     request,
     params,
     relatedSavedObjects,
+    spaceId: spaceIdOverride,
     source,
     taskInfo,
+    signal,
   }: ExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
     const {
       actionTypeRegistry,
@@ -145,7 +168,7 @@ export class ActionExecutor {
     } = this.actionExecutorContext!;
 
     const services = getServices(request);
-    const spaceId = spaces && spaces.getSpaceId(request);
+    const spaceId = spaceIdOverride ?? (spaces && spaces.getSpaceId(request));
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
     const authorization = getActionsAuthorizationWithRequest(request);
     const currentUser = security?.authc.getCurrentUser(request);
@@ -153,6 +176,7 @@ export class ActionExecutor {
     return await this.executeHelper({
       actionExecutionId,
       actionId,
+      connectorTokenClient,
       consumer,
       currentUser,
       checkCanExecuteFn: async (connectorTypeId: string) => {
@@ -180,6 +204,7 @@ export class ActionExecutor {
       source,
       spaceId,
       taskInfo,
+      signal,
     });
   }
 
@@ -239,6 +264,7 @@ export class ActionExecutor {
     taskInfo,
     consumer,
     actionExecutionId,
+    spaceId: spaceIdOverride,
   }: {
     actionId: string;
     actionExecutionId: string;
@@ -248,10 +274,11 @@ export class ActionExecutor {
     relatedSavedObjects: RelatedSavedObjects;
     source?: ActionExecutionSource<Source>;
     consumer?: string;
+    spaceId?: string;
   }) {
     const { spaces, eventLogger } = this.actionExecutorContext!;
 
-    const spaceId = spaces && spaces.getSpaceId(request);
+    const spaceId = spaceIdOverride ?? (spaces && spaces.getSpaceId(request));
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
     if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
@@ -358,6 +385,7 @@ export class ActionExecutor {
   private async executeHelper({
     actionExecutionId,
     actionId,
+    connectorTokenClient,
     consumer,
     currentUser,
     checkCanExecuteFn,
@@ -371,10 +399,15 @@ export class ActionExecutor {
     source,
     spaceId,
     taskInfo,
+    signal,
   }: ExecuteHelperOptions): Promise<ActionTypeExecutorResult<unknown>> {
     if (!this.isInitialized) {
       throw new Error('ActionExecutor not initialized');
     }
+
+    const providedProfileUid = request
+      ? await this.actionExecutorContext!.getCurrentUserProfileIdFromAPIKey(request)
+      : undefined;
 
     return withSpan(
       {
@@ -389,8 +422,9 @@ export class ActionExecutor {
 
         const actionInfo = await this.getActionInfoInternal(actionId, namespace.namespace);
 
-        const { actionTypeId, name, config, secrets } = actionInfo;
-
+        const { actionTypeId, name, config, secrets, rawAction } = actionInfo;
+        const authMode = rawAction.authMode;
+        const profileUid = providedProfileUid || currentUser?.profile_uid;
         const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
         const logger = this.actionExecutorContext!.logger.get(loggerId);
 
@@ -401,6 +435,16 @@ export class ActionExecutor {
 
         if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
           this.actionInfo = actionInfo;
+        }
+
+        if (this.connectorRateLimiter.isRateLimited(actionTypeId)) {
+          return {
+            actionId,
+            status: 'error',
+            message: `Action execution rate limit exceeded for connector: ${actionTypeId}`,
+            retry: true,
+            errorSource: TaskErrorSource.USER,
+          };
         }
 
         if (
@@ -416,6 +460,18 @@ export class ActionExecutor {
         }
         const actionType = actionTypeRegistry.get(actionTypeId);
         const configurationUtilities = actionTypeRegistry.getUtils();
+
+        if (!actionType.executor) {
+          throw new Error(
+            `Connector type "${actionTypeId}" does not have an execute function and cannot be executed.`
+          );
+        }
+
+        if (!actionType.validate.params) {
+          throw new Error(
+            `Connector type "${actionTypeId}" does not have a params validator and cannot be executed.`
+          );
+        }
 
         let validatedParams: Record<string, unknown>;
         let validatedConfig;
@@ -508,11 +564,16 @@ export class ActionExecutor {
             config: validatedConfig,
             secrets: validatedSecrets,
             taskInfo,
+            globalAuthHeaders: actionType.globalAuthHeaders,
             configurationUtilities,
             logger,
             source,
             ...(actionType.isSystemActionType ? { request } : {}),
             connectorUsageCollector,
+            connectorTokenClient,
+            signal,
+            authMode,
+            profileUid,
           });
 
           if (rawResult && rawResult.status === 'error') {
@@ -535,6 +596,8 @@ export class ActionExecutor {
           }
         }
 
+        this.connectorRateLimiter.log(actionTypeId);
+
         // allow null-ish return to indicate success
         const result = rawResult || {
           actionId,
@@ -551,7 +614,13 @@ export class ActionExecutor {
           event.user = event.user || {};
           event.user.name = currentUser?.username;
           event.user.id = currentUser?.profile_uid;
-          event.kibana!.user_api_key = currentUser?.api_key;
+          if (currentUser?.api_key) {
+            event.kibana!.user_api_key = {
+              name: currentUser.api_key?.name,
+              id: currentUser.api_key?.id,
+            };
+          }
+
           set(
             event,
             'kibana.action.execution.usage.request_body_bytes',
@@ -651,6 +720,16 @@ export interface ActionInfo {
   rawAction: RawAction;
 }
 
+function getErrorSource(error: Error): TaskErrorSource | undefined {
+  const SOCKET_DISCONNECTED_ERROR_MESSAGE = 'Client network socket disconnected';
+
+  if (startsWith(error.message, SOCKET_DISCONNECTED_ERROR_MESSAGE)) {
+    return TaskErrorSource.USER;
+  }
+
+  return getTaskManagerErrorSource(error);
+}
+
 function actionErrorToMessage(result: ActionTypeExecutorRawResult<unknown>): string {
   let message = result.message || 'unknown error running action';
 
@@ -685,6 +764,7 @@ function validateAction(
   let validatedSecrets: Record<string, unknown>;
 
   try {
+    // Params validator is guaranteed to exist at this point (validated in execute method)
     validatedParams = validateParams(actionType, params, validatorServices);
   } catch (err) {
     throw new ActionExecutionError(err.message, ActionExecutionErrorReason.Validation, {

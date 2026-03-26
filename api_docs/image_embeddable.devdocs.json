@@ -5,23 +5,7 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "imageEmbeddable",
-        "id": "def-public.IMAGE_CLICK_TRIGGER",
-        "type": "string",
-        "tags": [],
-        "label": "IMAGE_CLICK_TRIGGER",
-        "description": [],
-        "signature": [
-          "\"IMAGE_CLICK_TRIGGER\""
-        ],
-        "path": "src/platform/plugins/private/image_embeddable/public/actions/image_click_trigger.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": []
   },
   "server": {
@@ -29,7 +13,67 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "imageEmbeddable",
+        "id": "def-server.ImageConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "ImageConfig",
+        "description": [],
+        "signature": [
+          "{ readonly alt_text?: string | undefined; readonly background_color?: string | undefined; readonly src: Readonly<{} & { type: \"file\"; file_id: string; }> | Readonly<{} & { type: \"url\"; url: string; }>; readonly object_fit: \"none\" | \"fill\" | \"contain\" | \"cover\"; }"
+        ],
+        "path": "src/platform/plugins/private/image_embeddable/server/schemas.ts",
+        "lineNumber": 80,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "imageEmbeddable",
+        "id": "def-server.ImageConfigState",
+        "type": "Type",
+        "tags": [],
+        "label": "ImageConfigState",
+        "description": [],
+        "signature": [
+          "{ readonly alt_text?: string | undefined; readonly background_color?: string | undefined; readonly src: Readonly<{} & { type: \"file\"; file_id: string; }> | Readonly<{} & { type: \"url\"; url: string; }>; readonly object_fit: \"none\" | \"fill\" | \"contain\" | \"cover\"; }"
+        ],
+        "path": "src/platform/plugins/private/image_embeddable/server/schemas.ts",
+        "lineNumber": 81,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "imageEmbeddable",
+        "id": "def-server.ImageEmbeddableState",
+        "type": "Type",
+        "tags": [],
+        "label": "ImageEmbeddableState",
+        "description": [],
+        "signature": [
+          "{ readonly description?: string | undefined; readonly title?: string | undefined; readonly hide_title?: boolean | undefined; readonly hide_border?: boolean | undefined; readonly drilldowns?: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "server",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-server.DrilldownState",
+            "text": "DrilldownState"
+          },
+          "[] | undefined; readonly image_config: Readonly<{ alt_text?: string | undefined; background_color?: string | undefined; } & { src: Readonly<{} & { type: \"file\"; file_id: string; }> | Readonly<{} & { type: \"url\"; url: string; }>; object_fit: \"none\" | \"fill\" | \"contain\" | \"cover\"; }>; }"
+        ],
+        "path": "src/platform/plugins/private/image_embeddable/server/schemas.ts",
+        "lineNumber": 82,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "common": {
@@ -37,7 +81,42 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "imageEmbeddable",
+        "id": "def-common.DEFAULT_OBJECT_FIT",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_OBJECT_FIT",
+        "description": [],
+        "signature": [
+          "\"contain\""
+        ],
+        "path": "src/platform/plugins/private/image_embeddable/common/constants.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "imageEmbeddable",
+        "id": "def-common.IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS",
+        "type": "Array",
+        "tags": [],
+        "label": "IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "src/platform/plugins/private/image_embeddable/common/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

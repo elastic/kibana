@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter } from '../build_filters';
+import type { Filter } from '../build_filters';
 import { onlyDisabledFiltersChanged } from './only_disabled';
 
 describe('filter manager utilities', () => {

@@ -22,9 +22,9 @@ import {
 const readFileAsync = promisify(readFile);
 
 export const TEST_PACKAGE_DIRECTORIES = [
-  '../../../../../../test/fleet_api_integration/apis/fixtures/bundled_packages',
-  '../../../../../../test/fleet_api_integration/apis/fixtures/test_packages',
-  '../../../../../../test/fleet_api_integration/apis/fixtures/package_verification/packages',
+  '../../../../../test/fleet_api_integration/apis/fixtures/bundled_packages',
+  '../../../../../test/fleet_api_integration/apis/fixtures/test_packages',
+  '../../../../../test/fleet_api_integration/apis/fixtures/package_verification/packages',
 ];
 
 const getAllPathsFromDir = (dir: string): string[] =>

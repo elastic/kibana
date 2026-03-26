@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EventEmitter } from 'events';
+import type { EventEmitter } from 'events';
 import { useEffect, useRef, useState } from 'react';
-import { VisualizeInput } from '../../..';
-import { ByValueVisInstance, VisualizeServices, IEditorController } from '../../types';
+import type { VisualizeInput } from '../../..';
+import type { ByValueVisInstance, VisualizeServices, IEditorController } from '../../types';
 import { getVisualizationInstanceFromInput } from '../get_visualization_instance';
 import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from '../breadcrumbs';
 
@@ -62,14 +62,19 @@ export const useVisByValue = (
         ? () => navigateToApp(originatingApp, { path: originatingPath })
         : undefined;
 
+      const editBreadcrumbs = getEditBreadcrumbs({
+        byValue: true,
+        originatingAppName,
+        redirectToOrigin,
+      });
       if (serverless?.setBreadcrumbs) {
         serverless.setBreadcrumbs(
           getEditServerlessBreadcrumbs({ byValue: true, originatingAppName, redirectToOrigin })
         );
       } else {
-        chrome?.setBreadcrumbs(
-          getEditBreadcrumbs({ byValue: true, originatingAppName, redirectToOrigin })
-        );
+        chrome?.setBreadcrumbs(editBreadcrumbs, {
+          project: { value: editBreadcrumbs, absolute: true },
+        });
       }
 
       loaded.current = true;

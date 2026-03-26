@@ -18,7 +18,7 @@ jest.mock('crypto', () => ({
   },
 }));
 
-import { SecurityServiceConfigType } from '../utils';
+import type { SecurityServiceConfigType } from '../utils';
 import { isFipsEnabled, checkFipsConfig } from './fips';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 

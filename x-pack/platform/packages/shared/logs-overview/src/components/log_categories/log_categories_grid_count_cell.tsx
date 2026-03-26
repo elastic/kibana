@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedNumber } from '@kbn/i18n-react';
 import React from 'react';
-import { LogCategory } from '../../types';
+import type { LogCategory } from '../../types';
 
 export const logCategoriesGridCountColumn = {
   id: 'count' as const,

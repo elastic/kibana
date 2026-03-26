@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FieldFormatEditorFactory } from '../types';
-import { ColorFormatEditorFormatParams } from './color';
+import type { FieldFormatEditorFactory } from '../types';
+import type { ColorFormatEditorFormatParams } from './color';
 import { formatId } from './constants';
 
 export type { ColorFormatEditor } from './color';

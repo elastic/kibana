@@ -350,7 +350,7 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
                     <EuiButtonIcon
                       size="xs"
                       color="primary"
-                      iconType="checkInCircleFilled"
+                      iconType="checkCircleFill"
                       onClick={isAdding ? confirmNewTagChanges : () => confirmEditChanges(index)}
                       aria-label="Confirm"
                     />
@@ -381,7 +381,7 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
                     <EuiButtonIcon
                       size="xs"
                       color="danger"
-                      iconType="errorFilled"
+                      iconType="errorFill"
                       onClick={isAddingRow ? cancelNewTagChanges : () => cancelEditChanges(index)}
                       aria-label="Cancel"
                     />
@@ -437,7 +437,7 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>
               <EuiButton
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 onClick={handleAddField}
                 style={{ marginTop: '16px' }}
                 disabled={isDisabled}
@@ -453,11 +453,17 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
         </EuiPanel>
       ) : (
         <>
-          <EuiBasicTable items={items} columns={columns} />
+          <EuiBasicTable
+            items={items}
+            columns={columns}
+            tableCaption={i18n.translate('xpack.fleet.globalDataTagsTable.tableCaption', {
+              defaultMessage: 'Custom fields included on this policy',
+            })}
+          />
           <EuiFlexGroup justifyContent="flexStart">
             <EuiFlexItem grow={false}>
               <EuiButton
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 onClick={handleAddField}
                 style={{ marginTop: '16px' }}
                 isDisabled={isDisabled || isAdding}

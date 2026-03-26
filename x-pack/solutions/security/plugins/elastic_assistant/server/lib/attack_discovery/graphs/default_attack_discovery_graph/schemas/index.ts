@@ -12,9 +12,9 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
-import { GenerationPrompts } from '../prompts';
+import type { GenerationPrompts } from '../prompts';
 
 export const getAttackDiscoveriesGenerationSchema = (prompts: GenerationPrompts) =>
   z.object({

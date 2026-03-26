@@ -8,13 +8,14 @@
  */
 
 import expect from '@kbn/expect';
-import { PluginFunctionalProviderContext } from '../../plugin_functional/services';
+import type { PluginFunctionalProviderContext } from '../../plugin_functional/services';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const retry = getService('retry');
+  const flyout = getService('flyout');
 
   describe('data_view_field_editor_example', () => {
     it('finds a data view', async () => {
@@ -25,7 +26,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       await testSubjects.click('addField');
       await testSubjects.existOrFail('flyoutTitle');
       await retry.try(async () => {
-        await testSubjects.click('closeFlyoutButton');
+        await flyout.closeFlyout();
         await testSubjects.missingOrFail('flyoutTitle');
       });
     });

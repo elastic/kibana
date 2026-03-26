@@ -20,12 +20,20 @@ import type { IAlertsClient } from '../alerts_client/types';
 import { ErrorWithReason } from '../lib';
 import { getTimeRange } from '../lib/get_time_range';
 import type { NormalizedRuleType } from '../rule_type_registry';
-import type { RuleAlertData, RuleTypeParams, RuleTypeState, SanitizedRule } from '../types';
+import type {
+  AsyncSearchParams,
+  AsyncSearchStrategies,
+  RuleAlertData,
+  RuleTypeParams,
+  RuleTypeState,
+  SanitizedRule,
+} from '../types';
 import { DEFAULT_FLAPPING_SETTINGS, RuleExecutionStatusErrorReasons } from '../types';
 import type { ExecutorServices } from './get_executor_services';
 import type { TaskRunnerTimer } from './task_runner_timer';
 import { TaskRunnerTimerSpan } from './task_runner_timer';
 import type {
+  AsyncSearchClient,
   RuleRunnerErrorStackTraceLog,
   RuleTypeRunnerContext,
   TaskRunnerContext,
@@ -67,6 +75,7 @@ export type RuleData<Params extends RuleTypeParams> = Pick<
   | 'revision'
   | 'snoozeSchedule'
   | 'alertDelay'
+  | 'lastEnabledAt'
 >;
 
 interface RunOpts<
@@ -179,6 +188,7 @@ export class RuleTypeRunner<
       revision,
       snoozeSchedule,
       alertDelay,
+      lastEnabledAt,
     } = rule;
 
     const { alertTypeState: ruleTypeState = {}, previousStartedAt } = state;
@@ -191,9 +201,10 @@ export class RuleTypeRunner<
       async () => {
         const checkHasReachedAlertLimit = () => {
           const reachedLimit = alertsClient.hasReachedAlertLimit() || false;
+          const maxAlerts = alertsClient.getMaxAlertLimit();
           if (reachedLimit) {
             context.logger.warn(
-              `rule execution generated greater than ${this.options.context.maxAlerts} alerts: ${context.ruleLogPrefix}`
+              `rule execution generated greater than ${maxAlerts} alerts: ${context.ruleLogPrefix}`
             );
             context.ruleRunMetricsStore.setHasReachedAlertLimit(true);
           }
@@ -202,6 +213,7 @@ export class RuleTypeRunner<
 
         let executorResult: { state: RuleState } | undefined;
         let wrappedSearchSourceClient: WrappedSearchSourceClient | undefined;
+        let asyncSearchClient: AsyncSearchClient<AsyncSearchParams> | undefined;
         try {
           const ctx = {
             type: 'alert',
@@ -211,6 +223,38 @@ export class RuleTypeRunner<
               context.namespace ?? DEFAULT_NAMESPACE_STRING
             }] namespace`,
           };
+
+          let maintenanceWindowsPromise: Promise<{
+            ids: string[];
+            names: string[];
+          }> | null = null;
+
+          const getMaintenanceWindowsData = async () => {
+            if (!maintenanceWindowsPromise) {
+              maintenanceWindowsPromise = (async () => {
+                if (context.maintenanceWindowsService) {
+                  const { maintenanceWindows, maintenanceWindowsWithoutScopedQueryIds } =
+                    await context.maintenanceWindowsService.getMaintenanceWindows({
+                      eventLogger: context.alertingEventLogger,
+                      request: context.request,
+                      ruleTypeCategory: ruleType.category,
+                      spaceId: context.spaceId,
+                    });
+
+                  const ids = maintenanceWindowsWithoutScopedQueryIds ?? [];
+                  const maintenanceWindowNamesMap = new Map(
+                    (maintenanceWindows ?? []).map((mw) => [mw.id, mw.title])
+                  );
+                  const names = ids.map((id) => maintenanceWindowNamesMap.get(id) || id);
+
+                  return { ids, names };
+                }
+                return { ids: [], names: [] };
+              })();
+            }
+            return maintenanceWindowsPromise;
+          };
+
           executorResult = await withAlertingSpan('rule-type-executor', () =>
             this.options.context.executionContext.withContext(ctx, () =>
               ruleType.executor({
@@ -221,17 +265,12 @@ export class RuleTypeRunner<
                   actionsClient,
                   getDataViews: executorServices.getDataViews,
                   getMaintenanceWindowIds: async () => {
-                    if (context.maintenanceWindowsService) {
-                      const { maintenanceWindowsWithoutScopedQueryIds } =
-                        await context.maintenanceWindowsService.getMaintenanceWindows({
-                          eventLogger: context.alertingEventLogger,
-                          request: context.request,
-                          ruleTypeCategory: ruleType.category,
-                          spaceId: context.spaceId,
-                        });
-                      return maintenanceWindowsWithoutScopedQueryIds ?? [];
-                    }
-                    return [];
+                    const { ids } = await getMaintenanceWindowsData();
+                    return ids;
+                  },
+                  getMaintenanceWindowNames: async () => {
+                    const { names } = await getMaintenanceWindowsData();
+                    return names;
                   },
                   getSearchSourceClient: async () => {
                     if (!wrappedSearchSourceClient) {
@@ -249,6 +288,12 @@ export class RuleTypeRunner<
                   shouldWriteAlerts: () =>
                     this.shouldLogAndScheduleActionsForAlerts(ruleType.cancelAlertsOnRuleTimeout),
                   uiSettingsClient: executorServices.uiSettingsClient,
+                  getAsyncSearchClient: (strategy: AsyncSearchStrategies) => {
+                    if (!asyncSearchClient) {
+                      asyncSearchClient = executorServices.getAsyncSearchClient(strategy);
+                    }
+                    return asyncSearchClient;
+                  },
                 },
                 params: validatedParams,
                 state: ruleTypeState as RuleState,
@@ -278,6 +323,7 @@ export class RuleTypeRunner<
                   muteAll,
                   snoozeSchedule,
                   alertDelay,
+                  ...(lastEnabledAt ? { lastEnabledAt } : {}),
                 },
                 logger: context.logger,
                 flappingSettings: context.flappingSettings ?? DEFAULT_FLAPPING_SETTINGS,
@@ -328,6 +374,9 @@ export class RuleTypeRunner<
         if (wrappedSearchSourceClient) {
           metrics.push(wrappedSearchSourceClient.getMetrics());
         }
+        if (asyncSearchClient) {
+          metrics.push(asyncSearchClient.getMetrics());
+        }
         context.ruleRunMetricsStore.setSearchMetrics(metrics);
 
         return {
@@ -354,18 +403,7 @@ export class RuleTypeRunner<
     await withAlertingSpan('alerting:index-alerts-as-data', () =>
       this.options.timer.runWithTimer(TaskRunnerTimerSpan.PersistAlerts, async () => {
         if (this.shouldLogAndScheduleActionsForAlerts(ruleType.cancelAlertsOnRuleTimeout)) {
-          const updateAlertsMaintenanceWindowResult = await alertsClient.persistAlerts();
-
-          // Set the event log MW ids again, this time including the ids that matched alerts with
-          // scoped query
-          if (
-            updateAlertsMaintenanceWindowResult?.maintenanceWindowIds &&
-            updateAlertsMaintenanceWindowResult?.maintenanceWindowIds.length > 0
-          ) {
-            context.alertingEventLogger.setMaintenanceWindowIds(
-              updateAlertsMaintenanceWindowResult.maintenanceWindowIds
-            );
-          }
+          await alertsClient.persistAlerts();
         } else {
           context.logger.debug(
             `skipping persisting alerts for rule ${context.ruleLogPrefix}: rule execution has been cancelled.`

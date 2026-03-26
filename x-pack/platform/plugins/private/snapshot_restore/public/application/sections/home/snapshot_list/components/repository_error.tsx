@@ -8,11 +8,15 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLink, EuiPageTemplate } from '@elastic/eui';
+import { EuiLink, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { reactRouterNavigate } from '../../../../../shared_imports';
 import { linkToRepositories } from '../../../../services/navigation';
 
-export const RepositoryError: React.FunctionComponent = () => {
+interface RepositoryErrorProps {
+  errorMessage?: string;
+}
+
+export const RepositoryError = ({ errorMessage }: RepositoryErrorProps) => {
   const history = useHistory();
   return (
     <EuiPageTemplate.EmptyPrompt
@@ -29,9 +33,11 @@ export const RepositoryError: React.FunctionComponent = () => {
       }
       body={
         <p>
+          {errorMessage}
+          <EuiSpacer size="xs" />
           <FormattedMessage
             id="xpack.snapshotRestore.snapshotList.emptyPrompt.repositoryWarningDescription"
-            defaultMessage="Go to {repositoryLink} to fix the errors."
+            defaultMessage="Go to {repositoryLink} to fix the errors or select another repository."
             values={{
               repositoryLink: (
                 <EuiLink {...reactRouterNavigate(history, linkToRepositories())}>

@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiSpacer, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import type { AxesSettingsConfig } from '@kbn/visualizations-plugin/common';
+import type { AxesSettingsConfig } from '@kbn/lens-common';
 import { type LabelMode, VisLabel } from '../..';
 
 type SettingsConfigKeys = keyof AxesSettingsConfig | 'legend';

@@ -8,8 +8,8 @@
  */
 
 import { createHash } from 'crypto';
-import { BehaviorSubject } from 'rxjs';
-import { PackageInfo } from '@kbn/config';
+import type { BehaviorSubject } from 'rxjs';
+import type { PackageInfo } from '@kbn/config';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import {
   type DarkModeValue,
@@ -18,7 +18,7 @@ import {
 } from '@kbn/core-ui-settings-common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
-import { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
+import type { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
 import { getJsDependencyPaths } from './get_js_dependency_paths';
 import { renderTemplate } from './render_template';
@@ -83,9 +83,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
     }
 
     const colorMode = darkMode === false ? 'light' : darkMode === true ? 'dark' : 'system';
-    // Amsterdam theme is called `v8` internally
-    // and should be kept this way for compatibility reasons.
-    const themeTagName = themeName === 'amsterdam' ? 'v8' : themeName;
+    const themeTagName = themeName;
     const bundlesHref = getBundlesHref(baseHref);
 
     const bundlePaths = getPluginsBundlePaths({
@@ -115,7 +113,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       publicPathMap,
     });
 
-    const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+    const hash = createHash('sha256');
     hash.update(body);
     const etag = hash.digest('hex');
 

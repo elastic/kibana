@@ -19,6 +19,7 @@ export const routeDependencies: Omit<RouteDependencies, 'router'> = {
     enableMappingsSourceFieldSection: true,
     enableTogglingDataRetention: true,
     enableProjectLevelRetentionChecks: false,
+    enableFailureStoreRetentionDisabling: true,
   },
   indexDataEnricher: new IndexDataEnricher(),
   lib: {

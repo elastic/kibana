@@ -15,6 +15,7 @@ import type {
   SerializedFilterQuery,
   SortColumnTimeline,
   TimelineEventsType,
+  KueryFilterQuery,
   TimelineTabs,
 } from '../../../common/types/timeline';
 import type {
@@ -136,8 +137,6 @@ export interface TimelineModel {
   rowHeight?: number;
   /* sample size, total record number stored in in memory EuiDataGrid */
   sampleSize: number;
-  /** the note id pending deletion */
-  confirmingNoteId?: string | null;
 }
 
 export type SubsetTimelineModel = Readonly<
@@ -200,4 +199,5 @@ export interface TimelineUrl {
   isOpen: boolean;
   graphEventId?: string;
   savedSearchId?: string;
+  query?: KueryFilterQuery;
 }

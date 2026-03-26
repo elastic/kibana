@@ -15,3 +15,13 @@ export * from './data_types';
 
 export * from './components/custom_control_columns';
 export { AppMenuRegistry } from './components/app_menu/app_menu_registry';
+export type {
+  DiscoverAppMenuItemType,
+  DiscoverAppMenuPopoverItem,
+  DiscoverAppMenuPrimaryActionItem,
+  DiscoverAppMenuSecondaryActionItem,
+  DiscoverAppMenuRunAction,
+  DiscoverAppMenuRunActionParams,
+  DiscoverAppMenuContext,
+  DiscoverAppMenuConfig,
+} from './components/app_menu/types';

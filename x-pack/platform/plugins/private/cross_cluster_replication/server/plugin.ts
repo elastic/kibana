@@ -5,15 +5,22 @@
  * 2.0.
  */
 
-import { firstValueFrom, Observable } from 'rxjs';
-import { CoreSetup, CoreStart, Plugin, Logger, PluginInitializerContext } from '@kbn/core/server';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { Observable } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
+import type {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+  PluginInitializerContext,
+} from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
-import { Index } from '@kbn/index-management-plugin/server';
+import type { Index } from '@kbn/index-management-plugin/server';
 import { PLUGIN } from '../common/constants';
-import { SetupDependencies, StartDependencies } from './types';
+import type { SetupDependencies, StartDependencies } from './types';
 import { registerApiRoutes } from './routes';
-import { CrossClusterReplicationConfig } from './config';
+import type { CrossClusterReplicationConfig } from './config';
 import { License, handleEsError } from './shared_imports';
 
 const ccrDataEnricher = async (indicesList: Index[], client: IScopedClusterClient) => {

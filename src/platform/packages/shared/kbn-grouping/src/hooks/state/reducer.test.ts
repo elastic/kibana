@@ -70,4 +70,34 @@ describe('grouping reducer', () => {
     [groupingState, dispatch] = result.current;
     expect(groupingState.groupById[groupingId].activeGroups).toEqual(['user.name']);
   });
+  it('updateGroupSettings', () => {
+    const { result } = renderHook(() =>
+      useReducer(groupsReducerWithStorage, {
+        ...initialState,
+        groupById,
+      })
+    );
+    let [groupingState, dispatch] = result.current;
+    expect(groupingState.groupById[groupingId].settings).toEqual(undefined);
+    act(() => {
+      dispatch(
+        groupActions.updateGroupSettings({
+          id: groupingId,
+          settings: {
+            hideNoneOption: true,
+            hideCustomFieldOption: true,
+            popoverButtonLabel: 'Group by',
+            hideOptionsTitle: true,
+          },
+        })
+      );
+    });
+    [groupingState, dispatch] = result.current;
+    expect(groupingState.groupById[groupingId].settings).toEqual({
+      hideNoneOption: true,
+      hideCustomFieldOption: true,
+      popoverButtonLabel: 'Group by',
+      hideOptionsTitle: true,
+    });
+  });
 });

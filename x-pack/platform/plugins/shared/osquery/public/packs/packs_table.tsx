@@ -17,15 +17,19 @@ import {
   EuiSkeletonText,
 } from '@elastic/eui';
 import moment from 'moment-timezone';
+import type { CriteriaWithPagination } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { useKibana, useRouterNavigate } from '../common/lib/kibana';
+import { usePersistedPageSize, PAGE_SIZE_OPTIONS } from '../common/use_persisted_page_size';
+import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 import { usePacks } from './use_packs';
 import { ActiveStateSwitch } from './active_state_switch';
 import { AgentsPolicyLink } from '../agent_policies/agents_policy_link';
 import type { PackSavedObject } from './types';
+import { PackRowActions } from './pack_row_actions';
 
 const updatedAtCss = {
   whiteSpace: 'nowrap' as const,
@@ -82,8 +86,11 @@ export const AgentPoliciesPopover = ({ agentPolicyIds = [] }: { agentPolicyIds?:
 
 const PacksTableComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
+  const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const { push } = useHistory();
   const { data, isLoading } = usePacks({});
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = usePersistedPageSize();
 
   const renderAgentPolicy = useCallback(
     (agentPolicyIds: any) => <AgentPoliciesPopover agentPolicyIds={agentPolicyIds} />,
@@ -104,21 +111,22 @@ const PacksTableComponent = () => {
 
     return updatedAt ? (
       <EuiToolTip content={`${moment(updatedAt).fromNow()}${updatedBy}`}>
-        <span css={updatedAtCss}>{`${moment(updatedAt).fromNow()}${updatedBy}`}</span>
+        <span tabIndex={0} css={updatedAtCss}>{`${moment(updatedAt).fromNow()}${updatedBy}`}</span>
       </EuiToolTip>
     ) : (
       '-'
     );
   }, []);
 
+  const newQueryPath = isHistoryEnabled ? '/new' : '/live_queries/new';
   const handlePlayClick = useCallback<(item: PackSavedObject) => () => void>(
     (item) => () =>
-      push('/live_queries/new', {
+      push(newQueryPath, {
         form: {
           packId: item.saved_object_id,
         },
       }),
-    [push]
+    [push, newQueryPath]
   );
 
   const renderPlayAction = useCallback(
@@ -131,12 +139,13 @@ const PacksTableComponent = () => {
       });
 
       return (
-        <EuiToolTip position="top" content={playText}>
+        <EuiToolTip position="top" content={playText} disableScreenReaderOutput>
           <EuiButtonIcon
             iconType="play"
             onClick={handlePlayClick(item)}
             isDisabled={!enabled}
             data-test-subj={`play-${item.name}-button`}
+            aria-label={playText}
           />
         </EuiToolTip>
       );
@@ -207,6 +216,14 @@ const PacksTableComponent = () => {
           },
         ],
       } as EuiTableActionsColumnType<PackSavedObject>,
+      ...(isHistoryEnabled
+        ? [
+            {
+              width: '40px',
+              render: (item: PackSavedObject) => <PackRowActions item={item} />,
+            },
+          ]
+        : []),
     ],
     [
       permissions.runSavedQueries,
@@ -216,7 +233,27 @@ const PacksTableComponent = () => {
       renderPlayAction,
       renderQueries,
       renderUpdatedAt,
+      isHistoryEnabled,
     ]
+  );
+
+  const pagination = useMemo(
+    () => ({
+      pageIndex,
+      pageSize,
+      pageSizeOptions: [...PAGE_SIZE_OPTIONS],
+    }),
+    [pageIndex, pageSize]
+  );
+
+  const onTableChange = useCallback(
+    ({ page }: CriteriaWithPagination<PackSavedObject>) => {
+      if (page) {
+        setPageIndex(page.index);
+        setPageSize(page.size);
+      }
+    },
+    [setPageIndex, setPageSize]
   );
 
   const sorting = useMemo(
@@ -237,8 +274,12 @@ const PacksTableComponent = () => {
     <EuiInMemoryTable<PackSavedObject>
       items={data?.data ?? EMPTY_ARRAY}
       columns={columns}
-      pagination={true}
+      pagination={pagination}
       sorting={sorting}
+      onChange={onTableChange}
+      tableCaption={i18n.translate('xpack.osquery.packs.table.caption', {
+        defaultMessage: 'List of saved packs',
+      })}
     />
   );
 };

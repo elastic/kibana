@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export { savedObjectsAdapter } from './saved_objects';
+export {
+  LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
+  LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE_SINGLE,
+} from './synthetics_monitor/legacy_synthetics_monitor';

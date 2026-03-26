@@ -10,12 +10,13 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { lastValueFrom } from 'rxjs';
 import type { DataView } from '@kbn/data-plugin/common';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { AggregationsSingleMetricAggregateBase } from '@elastic/elasticsearch/lib/api/types';
-import { buildEsQuery } from '@kbn/es-query';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 
 export interface Params {
   dataView?: DataView;
@@ -61,7 +62,7 @@ export const useFetchOccurrencesRange = (params: Params): Result => {
       let occurrencesRangeResult = { status: TimeRangeExtendingStatus.failed };
 
       if (dataView?.isTimeBased() && query && mountedRef.current) {
-        abortControllerRef.current?.abort();
+        abortControllerRef.current?.abort(AbortReason.REPLACED);
         abortControllerRef.current = new AbortController();
 
         try {
@@ -93,7 +94,7 @@ export const useFetchOccurrencesRange = (params: Params): Result => {
   useEffect(() => {
     return () => {
       mountedRef.current = false;
-      abortControllerRef.current?.abort();
+      abortControllerRef.current?.abort(AbortReason.CLEANUP);
     };
   }, [abortControllerRef, mountedRef]);
 
@@ -114,6 +115,12 @@ async function fetchDocumentsTimeRange({
   abortSignal?: AbortSignal;
 }): Promise<OccurrencesRangeFetchResult> {
   if (!dataView?.timeFieldName) {
+    return { status: TimeRangeExtendingStatus.failed };
+  }
+
+  const timeField = dataView.getFieldByName(dataView.timeFieldName);
+
+  if (!timeField) {
     return { status: TimeRangeExtendingStatus.failed };
   }
 
@@ -162,9 +169,17 @@ async function fetchDocumentsTimeRange({
   const earliestTimestamp = (
     result.rawResponse?.aggregations?.earliest_timestamp as AggregationsSingleMetricAggregateBase
   )?.value_as_string;
-  const latestTimestamp = (
+  const latestTimestampRaw = (
     result.rawResponse?.aggregations?.latest_timestamp as AggregationsSingleMetricAggregateBase
   )?.value_as_string;
+
+  const isDateNanos = timeField.esTypes?.includes('date_nanos');
+  const latestTimestamp =
+    isDateNanos && latestTimestampRaw
+      ? // round latestTimestamp to the beginning of the next millisecond
+        // because aggregations on date_nanos fields return the max value truncated to milliseconds precision
+        new Date(new Date(latestTimestampRaw).getTime() + 1).toISOString()
+      : latestTimestampRaw;
 
   return earliestTimestamp && latestTimestamp
     ? {

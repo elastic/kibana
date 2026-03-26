@@ -10,8 +10,8 @@
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
-import { SearchSourceSearchOptions } from '../../..';
-import { GetConfigFn } from '../../../types';
+import type { SearchSourceSearchOptions } from '../../..';
+import type { GetConfigFn } from '../../../types';
 
 /**
  * @internal

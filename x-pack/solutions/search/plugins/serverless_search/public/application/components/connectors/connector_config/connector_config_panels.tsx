@@ -6,8 +6,9 @@
  */
 
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
-import { Connector, ConnectorConfigurationComponent } from '@kbn/search-connectors';
-import { useQueryClient } from '@tanstack/react-query';
+import type { Connector } from '@kbn/search-connectors';
+import { ConnectorConfigurationComponent } from '@kbn/search-connectors';
+import { useQueryClient } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { useConnector } from '../../../hooks/api/use_connector';
 import { useEditConnectorConfiguration } from '../../../hooks/api/use_connector_configuration';

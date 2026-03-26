@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FeatureCollection } from 'geojson';
+import type { FeatureCollection } from 'geojson';
 
 export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';

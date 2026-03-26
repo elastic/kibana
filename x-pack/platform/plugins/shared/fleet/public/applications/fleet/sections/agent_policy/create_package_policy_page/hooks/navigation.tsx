@@ -8,6 +8,7 @@
 import { useCallback, useMemo, useEffect, useRef } from 'react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 
+import { splitPkgKey } from '../../../../../../../common/services';
 import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID } from '../../../../constants';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 import { useStartServices, useLink, useIntraAppState } from '../../../../hooks';
@@ -48,7 +49,11 @@ export const useCancelAddPackagePolicy = (params: UseCancelParams) => {
     if (routeState && routeState.onCancelUrl) {
       return routeState.onCancelUrl;
     }
-    return from === 'policy' && agentPolicyId
+    if (from === 'installed-integrations' || from === 'copy-from-installed-integrations') {
+      return `${getHref('integrations_installed', {})}?viewPolicies=${splitPkgKey(pkgkey).pkgName}`;
+    }
+
+    return (from === 'policy' || from === 'copy-from-fleet-policy-list') && agentPolicyId
       ? getHref('policy_details', {
           policyId: agentPolicyId,
         })

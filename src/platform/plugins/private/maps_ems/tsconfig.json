@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -13,6 +13,7 @@
     "@kbn/core-http-common",
     "@kbn/core-plugins-server",
     "@kbn/core-lifecycle-server",
+    "@kbn/licensing-types",
   ],
   "exclude": [
     "target/**/*",

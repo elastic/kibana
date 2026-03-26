@@ -9,12 +9,18 @@
 
 import React, { useMemo } from 'react';
 import { SourceDocument, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import type { ShouldShowFieldInTableHandler, DataTableRecord } from '@kbn/discover-utils';
 import {
-  ShouldShowFieldInTableHandler,
-  getLogDocumentOverview,
   getMessageFieldWithFallbacks,
+  getLogLevelCoalescedValue,
+  getLogLevelColor,
+  LOG_LEVEL_REGEX,
+  OTEL_MESSAGE_FIELD,
 } from '@kbn/discover-utils';
-import { MESSAGE_FIELD } from '@kbn/discover-utils';
+import { MESSAGE_FIELD, escapeAndPreserveHighlightTags } from '@kbn/discover-utils';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { makeHighContrastColor, useEuiTheme } from '@elastic/eui';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { formatJsonDocumentForContent } from './utils';
 
 interface ContentProps extends DataGridCellValueElementProps {
@@ -29,10 +35,10 @@ const LogMessage = ({
   className,
 }: {
   field: string;
-  value: string;
+  value: string | HTMLElement;
   className: string;
 }) => {
-  const shouldRenderFieldName = field !== MESSAGE_FIELD;
+  const shouldRenderFieldName = field !== MESSAGE_FIELD && field !== OTEL_MESSAGE_FIELD;
 
   if (shouldRenderFieldName) {
     return (
@@ -58,6 +64,30 @@ const LogMessage = ({
   );
 };
 
+const getHighlightedMessage = (
+  value: string,
+  _row: DataTableRecord,
+  euiTheme: EuiThemeComputed,
+  isDarkTheme: boolean
+): string => {
+  return value.replace(LOG_LEVEL_REGEX, (match) => {
+    const coalesced = getLogLevelCoalescedValue(match);
+    if (!coalesced) return match;
+
+    const bgColor = getLogLevelColor(coalesced, euiTheme);
+    if (!bgColor) return match;
+
+    // Use EUI's makeHighContrastColor utility to calculate appropriate text color
+    // This function automatically determines the best contrasting color based on WCAG standards
+    const textColor = makeHighContrastColor(
+      isDarkTheme ? euiTheme.colors.textGhost : euiTheme.colors.textInk, // preferred foreground color
+      4.5 // WCAG AA contrast ratio (default in EUI)
+    )(bgColor);
+
+    return `<span style="color:${textColor};background-color:${bgColor};border-radius:2px;padding:0 2px;">${match}</span>`;
+  });
+};
+
 export const Content = ({
   columnId,
   dataView,
@@ -66,13 +96,30 @@ export const Content = ({
   isSingleLine = false,
   row,
   shouldShowFieldHandler,
+  columnsMeta,
 }: ContentProps) => {
-  const documentOverview = getLogDocumentOverview(row, { dataView, fieldFormats });
-  const { field, value } = getMessageFieldWithFallbacks(documentOverview);
-  const shouldRenderContent = !!field && !!value;
+  // Use OTel fallback version that returns the actual field name used
+  const { field, value } = getMessageFieldWithFallbacks(row.flattened);
+
+  const { euiTheme } = useEuiTheme();
+  const isDarkTheme = useKibanaIsDarkMode();
+
+  const highlightedValue = useMemo(
+    () =>
+      value
+        ? getHighlightedMessage(escapeAndPreserveHighlightTags(value), row, euiTheme, isDarkTheme)
+        : value,
+    [value, row, euiTheme, isDarkTheme]
+  );
+
+  const shouldRenderContent = !!field && !!value && !!highlightedValue;
 
   return shouldRenderContent ? (
-    <LogMessage field={field} value={value} className={isSingleLine ? 'eui-textTruncate' : ''} />
+    <LogMessage
+      field={field}
+      value={highlightedValue}
+      className={isSingleLine ? 'eui-textTruncate' : ''}
+    />
   ) : (
     <FormattedSourceDocument
       columnId={columnId}
@@ -81,13 +128,20 @@ export const Content = ({
       shouldShowFieldHandler={shouldShowFieldHandler}
       isCompressed={isCompressed}
       row={row}
+      columnsMeta={columnsMeta}
     />
   );
 };
 
 type FormattedSourceDocumentProps = Pick<
   ContentProps,
-  'columnId' | 'dataView' | 'fieldFormats' | 'isCompressed' | 'row' | 'shouldShowFieldHandler'
+  | 'columnId'
+  | 'dataView'
+  | 'fieldFormats'
+  | 'isCompressed'
+  | 'row'
+  | 'shouldShowFieldHandler'
+  | 'columnsMeta'
 >;
 
 const FormattedSourceDocument = ({ row, ...props }: FormattedSourceDocumentProps) => {

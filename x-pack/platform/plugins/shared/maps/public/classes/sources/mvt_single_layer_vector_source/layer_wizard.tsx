@@ -7,12 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import type { TiledSingleLayerVectorSourceSettings } from './mvt_single_layer_vector_source_editor';
 import { MVTSingleLayerVectorSourceEditor } from './mvt_single_layer_vector_source_editor';
 import { MVTSingleLayerVectorSource, sourceTitle } from './mvt_single_layer_vector_source';
-import { LayerWizard, RenderWizardArguments } from '../../layers';
+import type { LayerWizard, RenderWizardArguments } from '../../layers';
 import { MvtVectorLayer } from '../../layers/vector_layer';
 import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../common/constants';
-import { TiledSingleLayerVectorSourceSettings } from '../../../../common/descriptor_types';
 import { VectorTileLayerIcon } from '../../layers/wizards/icons/vector_tile_layer_icon';
 
 export const mvtVectorSourceWizardConfig: LayerWizard = {

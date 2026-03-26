@@ -6,10 +6,9 @@
  */
 
 import { EuiLink, EuiPageTemplate, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
+import { LEARN_MORE_LABEL, WEB_CRAWLERS_LABEL } from '../../../common/i18n_string';
 import { useKibanaServices } from '../hooks/use_kibana';
 import { ElasticManagedWebCrawlersEmptyPrompt } from './web_crawlers/elastic_managed_web_crawlers_empty_prompt';
 
@@ -24,9 +23,7 @@ export const WebCrawlersElasticManaged = () => {
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchConnectorsPage">
       <EuiPageTemplate.Header
-        pageTitle={i18n.translate('xpack.serverlessSearch.webcrawlers.title', {
-          defaultMessage: 'Web Crawlers',
-        })}
+        pageTitle={WEB_CRAWLERS_LABEL}
         data-test-subj="serverlessSearchConnectorsTitle"
         restrictWidth
       >

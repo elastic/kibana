@@ -19,6 +19,7 @@ import type {
   SavedObjectsModelVersionMap,
   SavedObjectsModelVersionMapProvider,
 } from './model_version';
+import type { SavedObjectUnsanitizedDoc } from './serialization';
 
 /**
  * Definition of a type of savedObject.
@@ -190,66 +191,84 @@ export interface SavedObjectsType<Attributes = any> {
    * ```
    */
   modelVersions?: SavedObjectsModelVersionMap | SavedObjectsModelVersionMapProvider;
-
-  /**
-   * Allows to opt-in to the model version API.
-   *
-   * Must be a valid semver version (with the patch version being necessarily 0)
-   *
-   * When specified, the type will switch from using the {@link SavedObjectsType.migrations | legacy migration API}
-   * to use the {@link SavedObjectsType.modelVersions | modelVersion API} after the specified version.
-   *
-   * Once opted in, it will no longer be possible to use the legacy migration API after the specified version.
-   *
-   * @example A **valid** usage example would be:
-   *
-   * ```ts
-   * {
-   *   name: 'foo',
-   *   // other mandatory attributes...
-   *   switchToModelVersionAt: '8.8.0',
-   *   migrations: {
-   *     '8.1.0': migrateTo810,
-   *     '8.7.0': migrateTo870,
-   *   },
-   *   modelVersions: {
-   *     '1': modelVersion1
-   *   }
-   * }
-   * ```
-   *
-   * @example An **invalid** usage example would be:
-   *
-   * ```ts
-   * {
-   *   name: 'foo',
-   *   // other mandatory attributes...
-   *   switchToModelVersionAt: '8.9.0',
-   *   migrations: {
-   *     '8.1.0': migrateTo8_1,
-   *     '8.9.0': migrateTo8_9, // error: migration registered for the switch version
-   *     '8.10.0': migrateTo8_10, // error: migration registered for after the switch version
-   *   },
-   *   modelVersions: {
-   *     '1': modelVersion1
-   *   }
-   * }
-   * ```
-   *
-   * Please refer to the {@link SavedObjectsType.modelVersions | modelVersion API} for more documentation on
-   * the new API.
-   *
-   * @remarks All types will be forced to switch to use the new API during `8.10.0`. This switch is
-   *          allowing types owners to switch their types before the milestone (and for testing purposes).
-   */
-  switchToModelVersionAt?: string;
-
   /**
    * Function returning the title to display in the management table.
    * If not defined, will use the object's type and id to generate a label.
    */
   getTitle?: (savedObject: Attributes) => string;
+
+  /**
+   * If defined and set to `true`, this saved object type will support access control functionality.
+   *
+   * When enabled, objects of this type can have an `accessControl` property containing:
+   * - `owner`: The ID of the user who owns this object
+   * - `accessMode`: Access mode setting, supports 'write_restricted' or 'default'.
+   *
+   * This property works in conjunction with the SavedObjectAccessControl interface defined
+   * in server_types.ts.
+   */
+  supportsAccessControl?: boolean;
+
+  /**
+   * An optional function that, given a document without a `typeMigrationVersion`, returns an
+   * estimated version representing the document's current schema state.
+   *
+   * The deprecated Saved Objects HTTP API allows callers to omit version metadata. When a document
+   * reaches the {@link IDocumentMigrator | DocumentMigrator} without a `typeMigrationVersion`, the
+   * migrator normally cannot determine which migrations are missing and skips all type migrations,
+   * stamping the document as up-to-date. This can cause validation failures when new required
+   * properties have been added to the schema after the document was originally created.
+   *
+   * When `typeVersionGuesser` is provided, it will be called for such versionless documents.
+   * The returned value is used as the effective starting point for migrations, so only the
+   * transforms introduced after that version will be applied, bringing the document up to date.
+   *
+   * The function may return either:
+   * - A **model version number** (e.g. `2`) — automatically converted to the internal virtual
+   *   semver (`10.2.0`). Use this when the type only has `modelVersions` in its history.
+   * - A **semver string** (e.g. `'8.7.0'`) — used as-is. Necessary when the type has legacy
+   *   `migrations` entries in its history, or when a mix of legacy migrations and model versions
+   *   needs to be expressed.
+   *
+   * If the document already has a `typeMigrationVersion`, this function is never called.
+   *
+   * @example Returning a model version number
+   * ```ts
+   * typeVersionGuesser: (doc) => {
+   *   // If the document already has the 'tabs' structure introduced in model version 2,
+   *   // treat it as that version; otherwise fall back to version 1.
+   *   return doc.attributes?.tabs != null ? 2 : 1;
+   * }
+   * ```
+   *
+   * @example Returning a semver (type with legacy migrations in its history)
+   * ```ts
+   * typeVersionGuesser: (doc) => {
+   *   return doc.attributes?.newField != null ? '8.9.0' : '8.7.0';
+   * }
+   * ```
+   *
+   * @deprecated This API exists solely as a compatibility shim for the deprecated Saved Objects
+   * HTTP API, which allows callers to omit version metadata. It should not be used for any other
+   * purpose. This field will be removed once the deprecated SO HTTP API is removed.
+   */
+  typeVersionGuesser?: SavedObjectTypeVersionGuesser;
 }
+
+/**
+ * A function that, given a saved object document that lacks a `typeMigrationVersion`, returns an
+ * estimated version. Used by the {@link IDocumentMigrator | DocumentMigrator} to determine which
+ * migrations to apply to documents coming from the deprecated Saved Objects HTTP API.
+ *
+ * The return value may be either a **model version number** (e.g. `2`, automatically converted
+ * to the internal virtual semver `10.2.0`) or a **semver string** (e.g. `'8.7.0'`, used as-is).
+ *
+ * @deprecated See {@link SavedObjectsType.typeVersionGuesser}.
+ * @public
+ */
+export type SavedObjectTypeVersionGuesser = (
+  document: SavedObjectUnsanitizedDoc
+) => string | number;
 
 /**
  * If defined, allows a type to run a search query and return a query filter that may match any documents which may

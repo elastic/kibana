@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { dashboard, header, common } = getPageObjects(['dashboard', 'header', 'common']);
@@ -168,11 +168,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(searchFilter).to.equal('nodashboardsnamedme');
       });
 
-      it('stays on listing page if title matches two dashboards', async function () {
+      it('allows dashboards that differ only by casing', async function () {
         await dashboard.clickNewDashboard();
         await dashboard.saveDashboard('two words', {
           saveAsNew: true,
-          needsConfirm: true,
+          needsConfirm: false,
         });
         await dashboard.gotoDashboardLandingPage();
         const currentUrl = await browser.getCurrentUrl();
@@ -216,7 +216,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('saves changes to dashboard metadata', async () => {
         await dashboard.gotoDashboardLandingPage();
         await dashboard.clickCreateDashboardPrompt();
-        await dashboardAddPanel.clickOpenAddPanel();
+        await dashboardAddPanel.clickAddFromLibrary();
         await dashboardAddPanel.addEveryEmbeddableOnCurrentPage();
         await dashboardAddPanel.ensureAddPanelIsClosed();
         await dashboard.saveDashboard(`${dashboardName}-editMetaData`);
@@ -269,8 +269,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return Number(viewsStr);
         }
 
-        const views1 = await getViewsCount();
-        expect(views1).to.be(1);
+        // it might take a bit for the view to be counted
+        await retry.try(async () => {
+          const views1 = await getViewsCount();
+          expect(views1).to.be(1);
+        });
 
         await listingTable.clickItemLink('dashboard', DASHBOARD_NAME);
         await dashboard.waitForRenderComplete();

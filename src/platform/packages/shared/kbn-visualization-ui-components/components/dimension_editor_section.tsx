@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiTitle, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
 import React from 'react';
 
 export const DimensionEditorSection = ({

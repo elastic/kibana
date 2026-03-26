@@ -8,9 +8,15 @@
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { get } from 'lodash/fp';
+import {
+  GRAPH_ACTOR_ENTITY_FIELDS,
+  GRAPH_TARGET_ENTITY_FIELDS,
+} from '@kbn/cloud-security-posture-common';
 import type { GetFieldsData } from './use_get_fields_data';
 import { getField, getFieldArray } from '../utils';
 import { useBasicDataFromDetailsData } from './use_basic_data_from_details_data';
+import { useHasGraphVisualizationLicense } from '../../../../common/hooks/use_has_graph_visualization_license';
+import { useEntityStoreStatus } from '../../../../entity_analytics/components/entity_store/hooks/use_entity_store';
 
 export interface UseGraphPreviewParams {
   /**
@@ -58,9 +64,15 @@ export interface UseGraphPreviewResult {
   action?: string[];
 
   /**
-   * Boolean indicating if the event is has a graph representation (contains event ids, actor ids and action)
+   * Boolean indicating if graph visualization is fully available
+   * Combines: data availability (event ids, actor ids and action) + valid license + entity store running
    */
-  hasGraphRepresentation: boolean;
+  shouldShowGraph: boolean;
+
+  /**
+   * Boolean indicating if the event has all required data fields for graph visualization
+   */
+  hasGraphData: boolean;
 
   /**
    * Boolean indicating if the event is an alert or not
@@ -81,16 +93,50 @@ export const useGraphPreview = ({
   const eventId = getFieldsData('event.id');
   const eventIds = originalEventId ? getFieldArray(originalEventId) : getFieldArray(eventId);
 
-  const actorIds = getFieldArray(getFieldsData('actor.entity.id'));
-  const targetIds = getFieldArray(getFieldsData('target.entity.id'));
+  // Get actor IDs from new ECS schema fields only
+  const actorIds: string[] = [];
+  GRAPH_ACTOR_ENTITY_FIELDS.forEach((field) => {
+    const fieldValues = getFieldArray(getFieldsData(field));
+    actorIds.push(...fieldValues);
+  });
+
+  // Get target IDs from new ECS schema fields only
+  const targetIds: string[] = [];
+  GRAPH_TARGET_ENTITY_FIELDS.forEach((field) => {
+    const fieldValues = getFieldArray(getFieldsData(field));
+    targetIds.push(...fieldValues);
+  });
+
   const action: string[] | undefined = get(['event', 'action'], ecsData);
-  const hasGraphRepresentation =
+
+  // Check if user license is high enough to access graph visualization
+  const hasRequiredLicense = useHasGraphVisualizationLicense();
+
+  // Check if entity store is running
+  const { data: entityStoreStatus } = useEntityStoreStatus();
+  const isEntityStoreRunning = entityStoreStatus?.status === 'running';
+
+  // Check if graph has all required data fields for graph visualization
+  const hasGraphData =
     Boolean(timestamp) &&
     Boolean(action?.length) &&
-    actorIds.length > 0 &&
     eventIds.length > 0 &&
+    actorIds.length > 0 &&
     targetIds.length > 0;
+
+  // Combine all conditions: data availability + license + entity store running
+  const shouldShowGraph = hasGraphData && hasRequiredLicense && isEntityStoreRunning;
+
   const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 
-  return { timestamp, eventIds, actorIds, action, targetIds, hasGraphRepresentation, isAlert };
+  return {
+    timestamp,
+    eventIds,
+    actorIds,
+    action,
+    targetIds,
+    shouldShowGraph,
+    hasGraphData,
+    isAlert,
+  };
 };

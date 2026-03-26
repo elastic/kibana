@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiLink } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Legacy } from '../../legacy_shims';
-import { MonitoringStartServices } from '../../types';
+import type { MonitoringStartServices } from '../../types';
 
 export interface EnableAlertResponse {
   isSufficientlySecure?: boolean;

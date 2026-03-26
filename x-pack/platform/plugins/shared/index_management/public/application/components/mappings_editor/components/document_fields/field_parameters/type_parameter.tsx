@@ -16,7 +16,7 @@ import {
   filterTypesForNonRootFields,
 } from '../../../lib';
 import { UseField } from '../../../shared_imports';
-import { ComboBoxOption, DataType } from '../../../types';
+import type { ComboBoxOption, DataType } from '../../../types';
 import { FIELD_TYPES_OPTIONS } from '../../../constants';
 
 interface Props {
@@ -87,6 +87,7 @@ export const TypeParameter = ({
             }
           >
             <EuiComboBox
+              isInvalid={isInvalid}
               placeholder={i18n.translate(
                 'xpack.idxMgmt.mappingsEditor.typeField.placeholderLabel',
                 {

@@ -6,7 +6,7 @@
  */
 
 import { GraphRecursionError } from '@langchain/langgraph';
-import { GenerationErrorCode } from '../../common/constants';
+import type { GenerationErrorCode } from '../../common/constants';
 import { RecursionLimitError } from '../lib/errors';
 
 /**

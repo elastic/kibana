@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import {
+  type CoreSetup,
+  type CoreStart,
+  type Plugin,
+  DEFAULT_APP_CATEGORIES,
+} from '@kbn/core/public';
 import { SEARCH_INDICES_CREATE_INDEX } from '@kbn/deeplinks-search/constants';
 import { i18n } from '@kbn/i18n';
 
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import { docLinks } from '../common/doc_links';
 import type {
   AppPluginSetupDependencies,
@@ -19,11 +24,10 @@ import type {
   SearchIndicesServicesContextDeps,
 } from './types';
 import { initQueryClient } from './services/query_client';
-import { SEARCH_INDEX_MANAGEMENT_APP_ID, INDICES_APP_ID, START_APP_ID } from '../common';
+import { SEARCH_INDEX_MANAGEMENT_APP_ID, INDICES_APP_ID } from '../common';
 import {
   CREATE_INDEX_PATH,
   INDICES_APP_BASE,
-  START_APP_BASE,
   SearchIndexDetailsTabValues,
   SEARCH_INDEX_MANAGEMENT_APP_BASE,
 } from './routes';
@@ -43,24 +47,6 @@ export class SearchIndicesPlugin
 
     const queryClient = initQueryClient(core.notifications.toasts);
 
-    core.application.register({
-      id: START_APP_ID,
-      appRoute: START_APP_BASE,
-      title: i18n.translate('xpack.searchIndices.elasticsearchStart.startAppTitle', {
-        defaultMessage: 'Elasticsearch Start',
-      }),
-      async mount({ element, history }) {
-        const { renderApp } = await import('./application');
-        const { ElasticsearchStartPage } = await import('./components/start/start_page');
-        const [coreStart, depsStart] = await core.getStartServices();
-        const startDeps: SearchIndicesServicesContextDeps = {
-          ...depsStart,
-          history,
-        };
-        return renderApp(ElasticsearchStartPage, coreStart, startDeps, element, queryClient);
-      },
-      visibleIn: [],
-    });
     core.application.register({
       id: INDICES_APP_ID,
       appRoute: INDICES_APP_BASE,
@@ -92,6 +78,7 @@ export class SearchIndicesPlugin
     core.application.register({
       id: SEARCH_INDEX_MANAGEMENT_APP_ID,
       appRoute: SEARCH_INDEX_MANAGEMENT_APP_BASE,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       title: i18n.translate('xpack.searchIndices.elasticsearchIndices.indexManagementTitle', {
         defaultMessage: 'Index Management',
       }),
@@ -103,15 +90,14 @@ export class SearchIndicesPlugin
           indexManagement: plugins.indexManagement,
         });
       },
-      visibleIn: [],
+      order: 2,
+      visibleIn: ['sideNav'],
     });
 
     registerLocators(plugins.share);
 
     return {
       enabled: true,
-      startAppId: START_APP_ID,
-      startRoute: START_APP_BASE,
     };
   }
 
@@ -141,8 +127,6 @@ export class SearchIndicesPlugin
     }
     return {
       enabled: this.pluginEnabled,
-      startAppId: START_APP_ID,
-      startRoute: START_APP_BASE,
     };
   }
 

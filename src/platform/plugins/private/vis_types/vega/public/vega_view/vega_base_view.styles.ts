@@ -8,8 +8,8 @@
  */
 
 import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
-  UseEuiTheme,
   logicalCSS,
   mathWithUnits,
   euiScrollBarStyles,
@@ -26,6 +26,9 @@ export const vegaBaseViewStyles = (euiThemeContext: UseEuiTheme) => {
       flex: 1 1 100%;
       position: relative;
       // flex-direction determined by js
+      &.vgaVis .maplibregl-canvas-container {
+        cursor: auto;
+      }
     }
 
     .vgaVis--autoresize {

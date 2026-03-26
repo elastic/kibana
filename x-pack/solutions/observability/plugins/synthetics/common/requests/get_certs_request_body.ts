@@ -7,9 +7,13 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import DateMath from '@kbn/datemath';
-import { EXCLUDE_RUN_ONCE_FILTER, FINAL_SUMMARY_FILTER } from '../constants/client_defaults';
+import {
+  EXCLUDE_RUN_ONCE_FILTER,
+  FINAL_SUMMARY_FILTER,
+  getRangeFilter,
+} from '../constants/client_defaults';
 import type { CertificatesResults } from '../../server/queries/get_certs';
-import { CertResult, GetCertsParams, Ping } from '../runtime_types';
+import type { CertResult, GetCertsParams, Ping } from '../runtime_types';
 import { createEsQuery } from '../utils/es_search';
 
 import { asMutableArray } from '../utils/as_mutable_array';
@@ -46,7 +50,7 @@ export const getCertsRequestBody = ({
 }: GetCertsParams) => {
   const sort = SortFields[sortBy as keyof typeof SortFields];
 
-  const searchRequest = createEsQuery({
+  return createEsQuery({
     from: (pageIndex ?? 0) * size,
     size,
     sort: asMutableArray([
@@ -88,6 +92,11 @@ export const getCertsRequestBody = ({
               field: 'tls.server.hash.sha256',
             },
           },
+          // fetch large enough date range to cover the last 7 days, no particular reason for 7 days
+          getRangeFilter({
+            from: 'now-7d',
+            to: 'now',
+          }),
           {
             range: {
               'monitor.timespan': {
@@ -172,8 +181,6 @@ export const getCertsRequestBody = ({
       },
     },
   });
-
-  return searchRequest;
 };
 
 export const processCertsResult = (result: CertificatesResults): CertResult => {

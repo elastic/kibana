@@ -6,10 +6,8 @@
  */
 
 import { last } from 'lodash';
-import {
-  CustomThresholdExpressionMetric,
-  InfraFormatterType,
-} from '../../../../common/custom_threshold_rule/types';
+import type { CustomThresholdExpressionMetric } from '../../../../common/custom_threshold_rule/types';
+import { InfraFormatterType } from '../../../../common/custom_threshold_rule/types';
 
 export const metricToFormat = (metric?: CustomThresholdExpressionMetric) => {
   if (metric && metric.field) {

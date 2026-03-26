@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');

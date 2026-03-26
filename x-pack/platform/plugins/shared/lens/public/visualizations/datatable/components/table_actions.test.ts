@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import type React from 'react';
 
-import { EuiDataGridSorting } from '@elastic/eui';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { EuiDataGridSorting } from '@elastic/eui';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 
 import {
   createGridFilterHandler,

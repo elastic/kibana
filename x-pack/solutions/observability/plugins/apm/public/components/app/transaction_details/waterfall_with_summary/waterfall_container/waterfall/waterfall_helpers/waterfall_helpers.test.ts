@@ -27,13 +27,13 @@ import {
   updateTraceTreeNode,
   reparentOrphanItems,
   generateLegendsAndAssignColorsToWaterfall,
-  WaterfallLegendType,
 } from './waterfall_helpers';
-import type { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
 import type {
   WaterfallSpan,
   WaterfallTransaction,
 } from '../../../../../../../../common/waterfall/typings';
+import { WaterfallLegendType } from '../../../../../../../../common/waterfall/legend';
+import type { Error } from '@kbn/apm-types';
 
 describe('waterfall_helpers', () => {
   const hits = [
@@ -122,6 +122,7 @@ describe('waterfall_helpers', () => {
   ];
   const errorDocs = [
     {
+      id: 'error1',
       processor: { event: 'error' },
       parent: { id: 'myTransactionId1' },
       timestamp: { us: 1549324795810000 },
@@ -139,7 +140,7 @@ describe('waterfall_helpers', () => {
         name: 'ruby',
         version: '2',
       },
-    } as unknown as APMError,
+    } as Error,
   ];
 
   describe('getWaterfall', () => {
@@ -210,6 +211,40 @@ describe('waterfall_helpers', () => {
       expect(waterfall.errorItems.length).toBe(0);
       expect(waterfall.getErrorCount('myTransactionId2')).toEqual(0);
     });
+
+    it('should fallback to root transaction when entry is missing from trace docs', () => {
+      const apiResp = {
+        traceItems: {
+          traceDocs: hits.filter(
+            (item) =>
+              item.processor?.event === 'transaction' && item.transaction?.id === 'myTransactionId2'
+          ),
+          errorDocs,
+          exceedsMax: false,
+          spanLinksCountById: {},
+          traceDocsTotal: hits.length,
+          maxTraceItems: 5000,
+        },
+        entryTransaction: {
+          processor: { event: 'transaction' },
+          trace: { id: 'myTraceId' },
+          service: { name: 'opbeans-node' },
+          transaction: {
+            duration: { us: 49660 },
+            name: 'GET /api',
+            id: 'myTransactionId1',
+          },
+          timestamp: { us: 1549324795784006 },
+        } as Transaction,
+      };
+
+      const waterfall = getWaterfall(apiResp);
+
+      expect(waterfall.items.length).toBe(1);
+      expect(waterfall.items[0].id).toBe('myTransactionId2');
+      expect(waterfall.errorItems.length).toBe(0);
+    });
+
     it('should reparent spans', () => {
       const traceItems = [
         {
@@ -451,7 +486,7 @@ describe('waterfall_helpers', () => {
     it('should order items correctly', () => {
       const legendValues = {
         serviceName: 'opbeans-java',
-        spanType: '',
+        type: '',
       };
 
       const items: IWaterfallSpanOrTransaction[] = [
@@ -966,7 +1001,7 @@ describe('waterfall_helpers', () => {
         duration: 49660,
         offset: 0,
         skew: 0,
-        legendValues: { serviceName: 'opbeans-node', spanType: '' },
+        legendValues: { serviceName: 'opbeans-node', type: '' },
         color: '',
         spanLinksCount: { linkedParents: 0, linkedChildren: 0 },
       },
@@ -995,7 +1030,7 @@ describe('waterfall_helpers', () => {
             duration: 47557,
             offset: 1754,
             skew: 0,
-            legendValues: { serviceName: 'opbeans-node', spanType: '' },
+            legendValues: { serviceName: 'opbeans-node', type: '' },
             color: '',
             spanLinksCount: { linkedParents: 0, linkedChildren: 0 },
           },
@@ -1097,7 +1132,7 @@ describe('waterfall_helpers', () => {
             duration: 47557,
             offset: 1754,
             skew: 0,
-            legendValues: { serviceName: 'opbeans-node', spanType: '' },
+            legendValues: { serviceName: 'opbeans-node', type: '' },
             color: '',
             spanLinksCount: { linkedParents: 0, linkedChildren: 0 },
           },
@@ -1154,7 +1189,7 @@ describe('waterfall_helpers', () => {
         doc: { service: { name: 'default-service' } },
         legendValues: {
           [WaterfallLegendType.ServiceName]: 'default-service',
-          [WaterfallLegendType.SpanType]: 'http',
+          [WaterfallLegendType.Type]: 'http',
         },
         color: '',
         ...overrides,
@@ -1185,16 +1220,16 @@ describe('waterfall_helpers', () => {
       it('should generate legends for span types when only one service exists', () => {
         const waterfallItems: IWaterfallItem[] = [
           createWaterfallItem({
-            legendValues: { [WaterfallLegendType.SpanType]: 'db' },
+            legendValues: { [WaterfallLegendType.Type]: 'db' },
           } as Partial<IWaterfallSpan>),
           createWaterfallItem({
-            legendValues: { [WaterfallLegendType.SpanType]: 'cache' },
+            legendValues: { [WaterfallLegendType.Type]: 'cache' },
           } as Partial<IWaterfallSpan>),
         ];
 
         const { legends, colorBy } = generateLegendsAndAssignColorsToWaterfall(waterfallItems);
         expect(legends.length).toBeGreaterThanOrEqual(2);
-        expect(colorBy).toBe(WaterfallLegendType.SpanType);
+        expect(colorBy).toBe(WaterfallLegendType.Type);
       });
 
       it('should correctly assign colors to items based on legend type', () => {

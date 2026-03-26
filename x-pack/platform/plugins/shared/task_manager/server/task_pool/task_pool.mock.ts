@@ -32,6 +32,7 @@ const createTaskPoolMock = (getCapacityOverride = defaultGetCapacityOverride) =>
     availableCapacity() {
       return getCapacityOverride().availableCapacity ?? 20;
     },
+    getCurrentTasksInPool: jest.fn(),
     getUsedCapacityByType: jest.fn(),
     run: jest.fn(),
     cancelRunningTasks: jest.fn(),

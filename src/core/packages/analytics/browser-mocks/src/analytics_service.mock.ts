@@ -11,11 +11,12 @@ import { Subject } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { AnalyticsService } from '@kbn/core-analytics-browser-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 type AnalyticsServiceContract = PublicMethodsOf<AnalyticsService>;
 
 const createAnalyticsServiceSetup = (): jest.Mocked<AnalyticsServiceSetup> => {
-  return {
+  return lazyObject({
     optIn: jest.fn(),
     reportEvent: jest.fn(),
     registerEventType: jest.fn(),
@@ -23,23 +24,23 @@ const createAnalyticsServiceSetup = (): jest.Mocked<AnalyticsServiceSetup> => {
     removeContextProvider: jest.fn(),
     registerShipper: jest.fn(),
     telemetryCounter$: new Subject(),
-  };
+  });
 };
 
 const createAnalyticsServiceStart = (): jest.Mocked<AnalyticsServiceStart> => {
-  return {
+  return lazyObject({
     optIn: jest.fn(),
     reportEvent: jest.fn(),
     telemetryCounter$: new Subject(),
-  };
+  });
 };
 
 const createAnalyticsServiceMock = (): jest.Mocked<AnalyticsServiceContract> => {
-  return {
+  return lazyObject({
     setup: jest.fn().mockImplementation(createAnalyticsServiceSetup),
     start: jest.fn().mockImplementation(createAnalyticsServiceStart),
     stop: jest.fn(),
-  };
+  });
 };
 
 export const analyticsServiceMock = {
