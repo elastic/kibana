@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css } from '@emotion/react';
 import React, { lazy, Suspense } from 'react';
 import { useHasLegacyActionMenu } from '../shared/chrome_hooks';
 import { HeaderActionMenu } from '../shared/header_action_menu';
@@ -17,11 +16,6 @@ const AppMenuComponent = lazy(async () => {
   const { AppMenuComponent: Component } = await import('@kbn/core-chrome-app-menu-components');
   return { default: Component };
 });
-
-const styles = css`
-  margin-left: auto;
-  flex-shrink: 0;
-`;
 
 /**
  * Renders the app menu for the Chrome-Next project header.
@@ -33,20 +27,14 @@ export const ProjectNextAppMenu = React.memo(() => {
 
   if (appMenuConfig) {
     return (
-      <div css={styles}>
-        <Suspense>
-          <AppMenuComponent config={appMenuConfig} />
-        </Suspense>
-      </div>
+      <Suspense>
+        <AppMenuComponent config={appMenuConfig} />
+      </Suspense>
     );
   }
 
   if (hasLegacyActionMenu) {
-    return (
-      <div css={styles}>
-        <HeaderActionMenu />
-      </div>
-    );
+    return <HeaderActionMenu />;
   }
 
   return null;

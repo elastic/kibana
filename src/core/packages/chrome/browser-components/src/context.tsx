@@ -17,7 +17,7 @@ import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 export interface ChromeComponentsDeps {
   application: Pick<
     InternalApplicationStart,
-    'navigateToUrl' | 'currentAppId$' | 'currentAppTitle$' | 'currentActionMenu$'
+    'navigateToUrl' | 'currentAppId$' | 'currentActionMenu$'
   >;
   http: Pick<HttpStart, 'basePath' | 'getLoadingCount$'>;
   docLinks: DocLinksStart;

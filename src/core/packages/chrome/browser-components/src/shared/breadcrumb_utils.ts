@@ -10,6 +10,20 @@
 import classNames from 'classnames';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 
+/**
+ * Returns a plain string for breadcrumb display: prefers `text`, then `aria-label` when strings.
+ * Returns `undefined` for React node `text`.
+ */
+export function getBreadcrumbPlainText(crumb: ChromeBreadcrumb): string | undefined {
+  if (typeof crumb.text === 'string') {
+    return crumb.text;
+  }
+  if (typeof crumb['aria-label'] === 'string') {
+    return crumb['aria-label'];
+  }
+  return undefined;
+}
+
 /** Maps raw ChromeBreadcrumb[] to EUI-compatible breadcrumb props */
 export function prepareBreadcrumbs(breadcrumbs: ChromeBreadcrumb[]) {
   const crumbs = breadcrumbs.length === 0 ? [{ text: 'Kibana' } as ChromeBreadcrumb] : breadcrumbs;

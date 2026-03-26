@@ -10,7 +10,7 @@
 import React from 'react';
 import { flushSync } from 'react-dom';
 import { BehaviorSubject, firstValueFrom, type Observable, Subject, type Subscription } from 'rxjs';
-import { map, shareReplay, switchMap, takeUntil, distinctUntilChanged, filter, take } from 'rxjs';
+import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs';
 import type { History } from 'history';
 import { createBrowserHistory } from 'history';
 
@@ -327,13 +327,6 @@ export class ApplicationService {
       currentLocation$: this.location$!.pipe(takeUntil(this.stop$)),
       currentAppId$: this.currentAppId$.pipe(
         filter((appId) => appId !== undefined),
-        distinctUntilChanged(),
-        takeUntil(this.stop$)
-      ),
-      currentAppTitle$: this.currentAppId$.pipe(
-        filter((appId) => appId !== undefined),
-        distinctUntilChanged(),
-        switchMap((appId) => applications$.pipe(map((apps) => apps.get(appId)?.title))),
         distinctUntilChanged(),
         takeUntil(this.stop$)
       ),

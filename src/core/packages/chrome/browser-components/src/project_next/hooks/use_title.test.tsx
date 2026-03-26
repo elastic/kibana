@@ -8,40 +8,31 @@
  */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import type { BehaviorSubject } from 'rxjs';
-import type { ChromeNextHeaderConfig } from '@kbn/core-chrome-browser';
+import type { ChromeBreadcrumb, ChromeNextHeaderConfig } from '@kbn/core-chrome-browser';
 import { createMockChromeComponentsDeps, TestChromeProviders } from '../../test_helpers';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { useTitle } from './use_title';
 
 describe('useTitle', () => {
-  it('returns the app title from currentAppTitle$', () => {
-    const deps = createMockChromeComponentsDeps();
-    (deps.application.currentAppTitle$ as BehaviorSubject<string | undefined>).next('Discover');
-
-    const { result } = renderHook(() => useTitle(), {
-      wrapper: ({ children }) => <TestChromeProviders deps={deps}>{children}</TestChromeProviders>,
-    });
-
-    expect(result.current).toBe('Discover');
-  });
-
-  it('returns "Unknown" when no app title is available', () => {
+  it('returns undefined when there is no config title and project breadcrumbs are empty', () => {
     const deps = createMockChromeComponentsDeps();
 
     const { result } = renderHook(() => useTitle(), {
       wrapper: ({ children }) => <TestChromeProviders deps={deps}>{children}</TestChromeProviders>,
     });
 
-    expect(result.current).toBe('Unknown');
+    expect(result.current).toBeUndefined();
   });
 
-  it('prefers chrome.next.header config title over app title', () => {
+  it('prefers chrome.next.header config title over breadcrumbs', () => {
     const deps = createMockChromeComponentsDeps();
-    (deps.application.currentAppTitle$ as BehaviorSubject<string | undefined>).next('Dashboards');
 
     const chrome = chromeServiceMock.createStartContract();
+    const breadcrumbs$ = chrome.project.getBreadcrumbs$() as BehaviorSubject<ChromeBreadcrumb[]>;
+    breadcrumbs$.next([{ text: 'From breadcrumbs' }]);
+
     (chrome.next.header.get$() as BehaviorSubject<ChromeNextHeaderConfig | undefined>).next({
       title: 'My Dashboard',
     });
@@ -57,18 +48,72 @@ describe('useTitle', () => {
     expect(result.current).toBe('My Dashboard');
   });
 
-  it('updates when currentAppTitle$ emits a new value', () => {
+  it('uses a single project breadcrumb string text as title', () => {
     const deps = createMockChromeComponentsDeps();
-    const title$ = deps.application.currentAppTitle$ as BehaviorSubject<string | undefined>;
-    title$.next('Dashboard');
+    const chrome = chromeServiceMock.createStartContract();
+    const breadcrumbs$ = chrome.project.getBreadcrumbs$() as BehaviorSubject<ChromeBreadcrumb[]>;
+    breadcrumbs$.next([{ text: 'Section' }]);
 
     const { result } = renderHook(() => useTitle(), {
-      wrapper: ({ children }) => <TestChromeProviders deps={deps}>{children}</TestChromeProviders>,
+      wrapper: ({ children }) => (
+        <TestChromeProviders deps={deps} chrome={chrome}>
+          {children}
+        </TestChromeProviders>
+      ),
     });
 
-    expect(result.current).toBe('Dashboard');
+    expect(result.current).toBe('Section');
+  });
 
-    act(() => title$.next('Discover'));
-    expect(result.current).toBe('Discover');
+  it('uses the last project breadcrumb text when multiple crumbs', () => {
+    const deps = createMockChromeComponentsDeps();
+    const chrome = chromeServiceMock.createStartContract();
+    const breadcrumbs$ = chrome.project.getBreadcrumbs$() as BehaviorSubject<ChromeBreadcrumb[]>;
+    breadcrumbs$.next([{ text: 'Root', href: '/app/r' }, { text: 'Leaf' }]);
+
+    const { result } = renderHook(() => useTitle(), {
+      wrapper: ({ children }) => (
+        <TestChromeProviders deps={deps} chrome={chrome}>
+          {children}
+        </TestChromeProviders>
+      ),
+    });
+
+    expect(result.current).toBe('Leaf');
+  });
+
+  it('prefers string text over aria-label when both are present on the chosen crumb', () => {
+    const deps = createMockChromeComponentsDeps();
+    const chrome = chromeServiceMock.createStartContract();
+    const breadcrumbs$ = chrome.project.getBreadcrumbs$() as BehaviorSubject<ChromeBreadcrumb[]>;
+    breadcrumbs$.next([{ text: 'Visible', 'aria-label': 'Aria title' }]);
+
+    const { result } = renderHook(() => useTitle(), {
+      wrapper: ({ children }) => (
+        <TestChromeProviders deps={deps} chrome={chrome}>
+          {children}
+        </TestChromeProviders>
+      ),
+    });
+
+    expect(result.current).toBe('Visible');
+  });
+
+  it('returns undefined when breadcrumb text is not a plain string', () => {
+    const deps = createMockChromeComponentsDeps();
+
+    const chrome = chromeServiceMock.createStartContract();
+    const breadcrumbs$ = chrome.project.getBreadcrumbs$() as BehaviorSubject<ChromeBreadcrumb[]>;
+    breadcrumbs$.next([{ text: <span>Rich</span> }]);
+
+    const { result } = renderHook(() => useTitle(), {
+      wrapper: ({ children }) => (
+        <TestChromeProviders deps={deps} chrome={chrome}>
+          {children}
+        </TestChromeProviders>
+      ),
+    });
+
+    expect(result.current).toBeUndefined();
   });
 });
