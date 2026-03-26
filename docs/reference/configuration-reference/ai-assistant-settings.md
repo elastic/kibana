@@ -31,4 +31,4 @@ The `xpack.productDocBase` settings configure how {{kib}} reaches the artifact r
 
 $$$configuring-product-doc-for-airgap$$$
 
-For specific instructions on configuring product documentation for air-gapped environments, refer to the [AI Assistant documentation](docs-content://explore-analyze/ai-features/ai-chat-experiences/ai-assistant-host-doc-artifacts.md).
+% Installing the AI Assistant knowledge base content requires network access to Elastic’s [public artifact URL](https://kibana-knowledge-base-artifacts.elastic.co/). If {{kib}} can't reach that host, which is common for deployments in air-gapped or restricted networks, you must mirror the knowledge base artifact repository and deploy it manually. Refer to [Host a knowledge base artifact repo for AI assistants](docs-content://explore-analyze/ai-features/ai-chat-experiences/ai-assistant-host-doc-artifacts.md) for instructions.
