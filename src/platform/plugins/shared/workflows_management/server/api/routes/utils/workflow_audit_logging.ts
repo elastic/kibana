@@ -123,6 +123,31 @@ export class WorkflowManagementAuditLog {
     });
   }
 
+  /**
+   * One `workflow_create` audit per created workflow and per failed bulk row (bulk POST /api/workflows).
+   */
+  static async logBulkWorkflowCreateResults(
+    context: WorkflowsRequestHandlerContext,
+    params: {
+      created: ReadonlyArray<{ id: string }>;
+      failed: ReadonlyArray<{ index: number; id: string; error: string }>;
+    }
+  ): Promise<void> {
+    for (const workflow of params.created) {
+      await WorkflowManagementAuditLog.logWorkflowCreated(context, {
+        id: workflow.id,
+        viaBulkImport: true,
+      });
+    }
+    for (const row of params.failed) {
+      await WorkflowManagementAuditLog.logBulkCreateRowFailed(context, {
+        index: row.index,
+        id: row.id,
+        error: row.error,
+      });
+    }
+  }
+
   static async logWorkflowUpdated(
     context: WorkflowsRequestHandlerContext,
     params: { id: string }

@@ -56,19 +56,10 @@ export function registerBulkCreateWorkflowsRoute({ router, api, spaces }: RouteD
           const result = await api.bulkCreateWorkflows(request.body.workflows, spaceId, request, {
             overwrite,
           });
-          for (const createdWorkflow of result.created) {
-            await WorkflowManagementAuditLog.logWorkflowCreated(context, {
-              id: createdWorkflow.id,
-              viaBulkImport: true,
-            });
-          }
-          for (const row of result.failed) {
-            await WorkflowManagementAuditLog.logBulkCreateRowFailed(context, {
-              index: row.index,
-              id: row.id,
-              error: row.error,
-            });
-          }
+          await WorkflowManagementAuditLog.logBulkWorkflowCreateResults(context, {
+            created: result.created,
+            failed: result.failed,
+          });
           return response.ok({ body: result });
         } catch (error) {
           await WorkflowManagementAuditLog.logWorkflowCreateFailed(context, error, {

@@ -91,6 +91,19 @@ describe('WorkflowManagementAuditLog', () => {
       );
     });
 
+    it('logBulkWorkflowCreateResults', async () => {
+      const { context, log } = createAuditContext();
+      await WorkflowManagementAuditLog.logBulkWorkflowCreateResults(context, {
+        created: [{ id: 'new-1' }, { id: 'new-2' }],
+        failed: [{ index: 0, id: 'bad', error: 'nope' }],
+      });
+      expect(log).toHaveBeenCalledTimes(3);
+      expect(log.mock.calls[0][0].message).toContain('bulk import');
+      expect(log.mock.calls[0][0].message).toContain('[id=new-1]');
+      expect(log.mock.calls[1][0].message).toContain('[id=new-2]');
+      expect(log.mock.calls[2][0].error).toEqual({ code: 'bulk_create_row', message: 'nope' });
+    });
+
     it('logWorkflowUpdated and logWorkflowUpdateFailed', async () => {
       const { context, log } = createAuditContext();
       await WorkflowManagementAuditLog.logWorkflowUpdated(context, { id: 'u-1' });
