@@ -7,6 +7,11 @@
 
 import { PREFIX } from '../../../flyout/shared/test_ids';
 
+/* Header */
+
+export const HEADER_TITLE_TEST_ID = `${PREFIX}AlertTitle` as const;
+export const HEADER_TITLE_LINK_TEST_ID = `${PREFIX}AlertTitleLink` as const;
+
 /* About */
 
 const ALERT_DESCRIPTION_TEST_ID = `${PREFIX}AlertDescription` as const;
@@ -33,6 +38,37 @@ export const INVESTIGATION_GUIDE_TEST_ID = `${PREFIX}InvestigationGuide` as cons
 export const INVESTIGATION_GUIDE_BUTTON_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Button` as const;
 export const INVESTIGATION_GUIDE_LOADING_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Loading` as const;
 
+const HIGHLIGHTED_FIELDS_TEST_ID = `${PREFIX}HighlightedFields` as const;
+export const HIGHLIGHTED_FIELDS_TITLE_TEST_ID = `${HIGHLIGHTED_FIELDS_TEST_ID}Title` as const;
+export const HIGHLIGHTED_FIELDS_DETAILS_TEST_ID = `${HIGHLIGHTED_FIELDS_TEST_ID}Details` as const;
+export const HIGHLIGHTED_FIELDS_CELL_TEST_ID = `${HIGHLIGHTED_FIELDS_TEST_ID}Cell` as const;
+export const HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_TEST_ID}BasicCell` as const;
+export const HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_TEST_ID}LinkedCell` as const;
+export const HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_TEST_ID}AgentStatusCell` as const;
+
+export const HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_TEST_ID}EditButton` as const;
+export const HIGHLIGHTED_FIELDS_EDIT_BUTTON_LOADING_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID}Loading` as const;
+export const HIGHLIGHTED_FIELDS_EDIT_BUTTON_TOOLTIP_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID}Tooltip` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_TEST_ID = `${HIGHLIGHTED_FIELDS_TEST_ID}Modal` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_TITLE_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}Title` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_DESCRIPTION_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}Description` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_DEFAULT_FIELDS_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}DefaultFields` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_CUSTOM_FIELDS_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}CustomFields` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_SAVE_BUTTON_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}SaveButton` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_CANCEL_BUTTON_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}CancelButton` as const;
+
 /* Visualizations */
 
 export const ANALYZER_PREVIEW_TEST_ID = `${PREFIX}AnalyzerPreview` as const;
@@ -46,7 +82,20 @@ export const SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID =
 export const SESSION_VIEW_UPSELL_TEST_ID = `${PREFIX}SessionViewUpsell` as const;
 export const SESSION_VIEW_NO_DATA_TEST_ID = `${PREFIX}SessionViewNoData` as const;
 
-/* Insights */
+export const CORRELATIONS_TEST_ID = `${PREFIX}Correlations` as const;
+export const CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID =
+  `${CORRELATIONS_TEST_ID}SuppressedAlerts` as const;
+export const CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID =
+  `${CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID}TechnicalPreview` as const;
+export const CORRELATIONS_RELATED_CASES_TEST_ID = `${CORRELATIONS_TEST_ID}RelatedCases` as const;
+export const CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID =
+  `${CORRELATIONS_TEST_ID}RelatedAlertsBySession` as const;
+export const CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID =
+  `${CORRELATIONS_TEST_ID}RelatedAlertsBySameSourceEvent` as const;
+export const CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID =
+  `${CORRELATIONS_TEST_ID}RelatedAlertsByAncestry` as const;
+export const CORRELATIONS_RELATED_ATTACKS_TEST_ID =
+  `${CORRELATIONS_TEST_ID}RelatedAttacks` as const;
 
 export const INSIGHTS_THREAT_INTELLIGENCE_TEST_ID = `${PREFIX}InsightsThreatIntelligence` as const;
 export const INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_TEST_ID =
@@ -55,3 +104,8 @@ export const INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_TEST
   `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}EnrichedWithThreatIntelligence` as const;
 
 export const PREVALENCE_TEST_ID = `${PREFIX}InsightsPrevalence` as const;
+
+export const SUMMARY_ROW_LOADING_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Loading`;
+export const SUMMARY_ROW_TEXT_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Text`;
+export const SUMMARY_ROW_VALUE_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Value`;
+export const SUMMARY_ROW_BUTTON_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Button`;

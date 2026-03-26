@@ -6,13 +6,13 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
 
+import { WorkflowInsightType } from '../../../../../../common/endpoint/types/workflow_insights';
 import { PROMPTS } from './prompts';
 
-export function getDefendInsightsOutputSchema({ type }: { type: DefendInsightType }) {
+export function getDefendInsightsOutputSchema({ type }: { type: WorkflowInsightType }) {
   switch (type) {
-    case DefendInsightType.enum.incompatible_antivirus:
+    case WorkflowInsightType.enum.incompatible_antivirus:
       const antivirusPrompts = PROMPTS.INCOMPATIBLE_ANTIVIRUS;
       return z.object({
         insights: z.array(
@@ -29,7 +29,7 @@ export function getDefendInsightsOutputSchema({ type }: { type: DefendInsightTyp
           })
         ),
       });
-    case DefendInsightType.enum.policy_response_failure:
+    case WorkflowInsightType.enum.policy_response_failure:
       const policyResponsePrompts = PROMPTS.POLICY_RESPONSE_FAILURE;
       return z.object({
         insights: z.array(

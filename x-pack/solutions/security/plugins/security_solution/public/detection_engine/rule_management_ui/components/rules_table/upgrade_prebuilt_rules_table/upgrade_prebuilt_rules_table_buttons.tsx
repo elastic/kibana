@@ -72,7 +72,7 @@ export const UpgradePrebuiltRulesTableButtons = ({
         <EuiToolTip content={allRulesButtonTooltip}>
           <EuiButton
             fill
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={upgradeAllRules}
             disabled={!canEditRules || !hasRulesToUpgrade || isRequestInProgress}
             data-test-subj="upgradeAllRulesButton"
