@@ -25,11 +25,9 @@ inputs:
     description: 'Whether to include images extracted from the pages'
 steps:
   - name: tavily-extract
-    type: mcp.callTool
-    connector-id: <%= mcp-stack-connector-id %>
+    type: tavily_mcp.tavilyExtract
+    connector-id: <%= tavily_mcp-stack-connector-id %>
     with:
-      name: "tavily_extract"
-      arguments:
-        urls: ${{inputs.urls}}
-        extract_depth: "${{inputs.extract_depth}}"
-        include_images: ${{inputs.include_images}}
+      urls: ${{inputs.urls}}
+      extract_depth: "${{inputs.extract_depth}}"
+      include_images: ${{inputs.include_images}}
