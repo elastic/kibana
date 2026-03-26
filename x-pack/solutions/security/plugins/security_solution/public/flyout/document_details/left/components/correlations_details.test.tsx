@@ -32,7 +32,11 @@ import { mockContextValue } from '../../shared/mocks/mock_context';
 import { EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID } from '../../../../flyout_v2/shared/components/test_ids';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
+const useAlertsPrivilegesMock = useAlertsPrivileges as jest.Mock;
+
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
@@ -72,6 +76,9 @@ describe('CorrelationsDetails', () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
       indexPatterns: ['index'],
+    });
+    useAlertsPrivilegesMock.mockReturnValue({
+      hasAlertsRead: true,
     });
   });
 
