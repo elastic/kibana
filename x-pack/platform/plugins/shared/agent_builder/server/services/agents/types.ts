@@ -19,11 +19,6 @@ export interface ToolRefsParams {
   toolIds: string[];
 }
 
-export interface SkillRefsParams {
-  request: KibanaRequest;
-  skillIds: string[];
-}
-
 export interface PluginRefsParams {
   request: KibanaRequest;
   pluginIds: string[];
@@ -33,8 +28,6 @@ export interface AgentsServiceStart {
   getRegistry: (opts: { request: KibanaRequest }) => Promise<AgentRegistry>;
   removeToolRefsFromAgents: (params: ToolRefsParams) => Promise<AgentsUsingToolsResult>;
   getAgentsUsingTools: (params: ToolRefsParams) => Promise<AgentsUsingToolsResult>;
-  removeSkillRefsFromAgents: (params: SkillRefsParams) => Promise<AgentsUsingToolsResult>;
-  getAgentsUsingSkills: (params: SkillRefsParams) => Promise<AgentsUsingToolsResult>;
   removePluginRefsFromAgents: (params: PluginRefsParams) => Promise<AgentsUsingToolsResult>;
   getAgentsUsingPlugins: (params: PluginRefsParams) => Promise<AgentsUsingToolsResult>;
 }

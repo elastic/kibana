@@ -167,25 +167,11 @@ export function registerPluginsRoutes({ router, getInternalServices, logger }: R
         const { force = false } = request.query ?? {};
         const { plugins: pluginService, agents: agentsService } = getInternalServices();
 
-        const client = pluginService.getRegistry({ request });
-        const plugin = await client.get(pluginId);
-        const skillIds = plugin.skill_ids ?? [];
-
         if (!force) {
-          const [skillResult, pluginResult] = await Promise.all([
-            skillIds.length > 0
-              ? agentsService.getAgentsUsingSkills({ request, skillIds })
-              : { agents: [] },
-            agentsService.getAgentsUsingPlugins({ request, pluginIds: [pluginId] }),
-          ]);
-
-          const seenIds = new Set<string>();
-          const agents = [...skillResult.agents, ...pluginResult.agents].filter((agent) => {
-            if (seenIds.has(agent.id)) return false;
-            seenIds.add(agent.id);
-            return true;
+          const { agents } = await agentsService.getAgentsUsingPlugins({
+            request,
+            pluginIds: [pluginId],
           });
-
           if (agents.length > 0) {
             return response.conflict({
               body: {
@@ -199,12 +185,10 @@ export function registerPluginsRoutes({ router, getInternalServices, logger }: R
             });
           }
         } else {
-          await Promise.all([
-            skillIds.length > 0
-              ? agentsService.removeSkillRefsFromAgents({ request, skillIds })
-              : Promise.resolve(),
-            agentsService.removePluginRefsFromAgents({ request, pluginIds: [pluginId] }),
-          ]);
+          await agentsService.removePluginRefsFromAgents({
+            request,
+            pluginIds: [pluginId],
+          });
         }
 
         await pluginService.deletePlugin({ request, pluginId });
