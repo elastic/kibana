@@ -9,8 +9,6 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import type { BehaviorSubject } from 'rxjs';
-import type { ChromeNextHeaderConfig } from '@kbn/core-chrome-browser';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { createMockChromeComponentsDeps, TestChromeProviders } from '../test_helpers';
 import { ProjectNextGlobalActions } from './global_actions';
@@ -36,7 +34,7 @@ describe('ProjectNextGlobalActions', () => {
     const chrome = chromeServiceMock.createStartContract();
     const onClick = jest.fn();
 
-    (chrome.next.header.get$() as BehaviorSubject<ChromeNextHeaderConfig | undefined>).next({
+    chrome.next.header.set({
       title: 'Test',
       globalActions: {
         editTitle: { onClick },
@@ -60,7 +58,7 @@ describe('ProjectNextGlobalActions', () => {
     const chrome = chromeServiceMock.createStartContract();
     const onClick = jest.fn();
 
-    (chrome.next.header.get$() as BehaviorSubject<ChromeNextHeaderConfig | undefined>).next({
+    chrome.next.header.set({
       title: 'Test',
       globalActions: {
         editTitle: { onClick, disabled: true },
@@ -84,7 +82,7 @@ describe('ProjectNextGlobalActions', () => {
     const chrome = chromeServiceMock.createStartContract();
     const onClick = jest.fn();
 
-    (chrome.next.header.get$() as BehaviorSubject<ChromeNextHeaderConfig | undefined>).next({
+    chrome.next.header.set({
       title: 'Test',
       globalActions: {
         share: { onClick },
@@ -108,7 +106,7 @@ describe('ProjectNextGlobalActions', () => {
     const chrome = chromeServiceMock.createStartContract();
     const onClick = jest.fn();
 
-    (chrome.next.header.get$() as BehaviorSubject<ChromeNextHeaderConfig | undefined>).next({
+    chrome.next.header.set({
       title: 'Test',
       globalActions: {
         share: { onClick, disabled: true },
@@ -131,7 +129,7 @@ describe('ProjectNextGlobalActions', () => {
     const deps = createMockChromeComponentsDeps();
     const chrome = chromeServiceMock.createStartContract();
 
-    (chrome.next.header.get$() as BehaviorSubject<ChromeNextHeaderConfig | undefined>).next({
+    chrome.next.header.set({
       title: 'Test',
       globalActions: {
         favorite: <span data-test-subj="favoriteSlotTest">star</span>,

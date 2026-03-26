@@ -10,7 +10,7 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import type { BehaviorSubject } from 'rxjs';
-import type { ChromeBreadcrumb, ChromeNextHeaderConfig } from '@kbn/core-chrome-browser';
+import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import { createMockChromeComponentsDeps, TestChromeProviders } from '../../test_helpers';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { useBackButton } from './use_back_button';
@@ -26,7 +26,7 @@ describe('useBackButton', () => {
       { text: 'Current' },
     ]);
 
-    (chrome.next.header.get$() as BehaviorSubject<ChromeNextHeaderConfig | undefined>).next({
+    chrome.next.header.set({
       title: 'T',
       back: { href: '/app/explicit', label: 'Explicit' },
     });
@@ -51,7 +51,7 @@ describe('useBackButton', () => {
     const breadcrumbs$ = chrome.project.getBreadcrumbs$() as BehaviorSubject<ChromeBreadcrumb[]>;
     breadcrumbs$.next([{ text: 'Root', href: '/app/r' }, { text: 'Leaf' }]);
 
-    (chrome.next.header.get$() as BehaviorSubject<ChromeNextHeaderConfig | undefined>).next({
+    chrome.next.header.set({
       title: 'T',
       back: { href: '/app/only-href' },
     });
@@ -76,7 +76,7 @@ describe('useBackButton', () => {
     const breadcrumbs$ = chrome.project.getBreadcrumbs$() as BehaviorSubject<ChromeBreadcrumb[]>;
     breadcrumbs$.next([{ text: 'Only', href: '/app/one' }]);
 
-    (chrome.next.header.get$() as BehaviorSubject<ChromeNextHeaderConfig | undefined>).next({
+    chrome.next.header.set({
       title: 'T',
       back: { href: '/app/back' },
     });

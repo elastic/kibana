@@ -9,7 +9,11 @@
 
 import { BehaviorSubject, of } from 'rxjs';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import type { ChromeBadge, ChromeBreadcrumb } from '@kbn/core-chrome-browser';
+import type {
+  ChromeBadge,
+  ChromeBreadcrumb,
+  ChromeNextHeaderConfig,
+} from '@kbn/core-chrome-browser';
 import type {
   InternalChromeSetup,
   InternalChromeStart,
@@ -24,6 +28,8 @@ const createSetupContractMock = (): DeeplyMockedKeys<InternalChromeSetup> => {
 };
 
 const createStartContractMock = () => {
+  const nextHeaderState$ = new BehaviorSubject<ChromeNextHeaderConfig | undefined>(undefined);
+
   const startContract: DeeplyMockedKeys<InternalChromeStart> = lazyObject({
     withProvider: jest.fn((children) => children),
     sidebar: lazyObject(sidebarServiceMock.createStartContract()),
@@ -100,8 +106,10 @@ const createStartContractMock = () => {
     }),
     next: lazyObject({
       header: lazyObject({
-        get$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
-        set: jest.fn(),
+        get$: jest.fn().mockReturnValue(nextHeaderState$),
+        set: jest.fn((config?: ChromeNextHeaderConfig) => {
+          nextHeaderState$.next(config);
+        }),
       }),
       aiButton: lazyObject({
         get$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
