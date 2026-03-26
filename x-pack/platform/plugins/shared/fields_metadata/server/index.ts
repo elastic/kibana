@@ -13,6 +13,7 @@ export type {
   DatasetName,
   ExtractedIntegrationFields,
   ExtractedDatasetFields,
+  IFieldsMetadataClient,
 } from './services/fields_metadata/types';
 
 export async function plugin(context: PluginInitializerContext) {

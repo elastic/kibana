@@ -120,6 +120,10 @@ export class StreamsApp {
     await this.gotoStreamManagementTab(streamName, 'dataQuality');
   }
 
+  async gotoOverviewTab(streamName: string) {
+    await this.gotoStreamManagementTab(streamName, 'overview');
+  }
+
   async gotoProcessingTab(streamName: string) {
     await this.gotoStreamManagementTab(streamName, 'processing');
   }

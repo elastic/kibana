@@ -45,6 +45,7 @@ import type {
   StreamsPluginStartDependencies,
   StreamsServer,
 } from './types';
+import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
 import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wired_stream_views';
 import { FeatureService } from './lib/streams/feature/feature_service';
@@ -55,7 +56,6 @@ import { TaskService } from './lib/tasks/task_service';
 import { InsightService } from './lib/significant_events/insights/client/insight_service';
 import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
-import { registerStreamsAgentBuilder } from './agent_builder/register';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
