@@ -11,15 +11,32 @@
         "label": "AppMenuBar",
         "description": [],
         "signature": [
-          "() => React.JSX.Element | null"
+          "React.NamedExoticComponent<unknown> & { readonly type: () => React.JSX.Element | null; }"
         ],
         "path": "src/core/packages/chrome/browser-components/src/project/app_menu.tsx",
         "lineNumber": 33,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
-        "children": [],
         "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-components",
+            "id": "def-public.AppMenuBar.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -92,15 +109,32 @@
         "label": "ClassicHeader",
         "description": [],
         "signature": [
-          "() => React.JSX.Element"
+          "React.NamedExoticComponent<unknown> & { readonly type: () => React.JSX.Element; }"
         ],
         "path": "src/core/packages/chrome/browser-components/src/classic/header.tsx",
         "lineNumber": 33,
-        "columnNumber": 1,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
-        "children": [],
         "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-components",
+            "id": "def-public.ClassicHeader.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -114,7 +148,7 @@
           "() => React.JSX.Element"
         ],
         "path": "src/core/packages/chrome/browser-components/src/project/sidenav/grid_layout_sidenav.tsx",
-        "lineNumber": 16,
+        "lineNumber": 22,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -236,54 +270,32 @@
         "label": "ProjectHeader",
         "description": [],
         "signature": [
-          "() => React.JSX.Element"
+          "React.NamedExoticComponent<unknown> & { readonly type: () => React.JSX.Element; }"
         ],
         "path": "src/core/packages/chrome/browser-components/src/project/header.tsx",
         "lineNumber": 98,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
-        "children": [],
         "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-chrome-browser-components",
-        "id": "def-public.Sidebar",
-        "type": "Function",
-        "tags": [],
-        "label": "Sidebar",
-        "description": [],
-        "signature": [
-          "(props: ",
-          "SidebarProps",
-          ") => React.JSX.Element"
-        ],
-        "path": "src/core/packages/chrome/browser-components/src/sidebar/index.tsx",
-        "lineNumber": 16,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-browser-components",
-            "id": "def-public.Sidebar.$1",
-            "type": "Object",
+            "id": "def-public.ProjectHeader.$1",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "SidebarProps"
+              "P"
             ],
-            "path": "src/core/packages/chrome/browser-components/src/sidebar/index.tsx",
-            "lineNumber": 16,
-            "columnNumber": 54,
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
+            "trackAdoption": false
           }
         ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -407,7 +419,29 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-chrome-browser-components",
+        "id": "def-public.Sidebar",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "Sidebar",
+        "description": [],
+        "signature": [
+          "React.ComponentClass<",
+          "SidebarProps",
+          ", any> | React.FunctionComponent<",
+          "SidebarProps",
+          ">"
+        ],
+        "path": "src/core/packages/chrome/browser-components/src/sidebar/index.tsx",
+        "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "server": {

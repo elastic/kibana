@@ -10,6 +10,8 @@
 import type { RootSchema } from '@kbn/core/public';
 import { workflowExecutionEventNames, workflowExecutionEventSchemas } from './execution';
 import type { WorkflowExecutionEventTypes } from './execution/types';
+import { workflowImportExportEventNames, workflowImportExportEventSchemas } from './import_export';
+import type { WorkflowImportExportEventTypes } from './import_export/types';
 import { workflowLifecycleEventNames, workflowLifecycleEventSchemas } from './lifecycle';
 import type { WorkflowLifecycleEventTypes } from './lifecycle/types';
 import type { WorkflowsTelemetryEvent, WorkflowsTelemetryEventsMap } from './types';
@@ -21,12 +23,14 @@ import type { WorkflowValidationEventTypes } from './validation/types';
 // Re-export types for convenience
 export type { WorkflowEditorType } from './types';
 export * from './execution/types';
+export * from './import_export/types';
 export * from './lifecycle/types';
 export * from './ui/types';
 export * from './validation/types';
 
 export const workflowEventNames = {
   ...workflowExecutionEventNames,
+  ...workflowImportExportEventNames,
   ...workflowLifecycleEventNames,
   ...workflowUIEventNames,
   ...workflowValidationEventNames,
@@ -39,6 +43,7 @@ type WorkflowsTelemetryEventSchemas = {
 
 const eventSchemas: WorkflowsTelemetryEventSchemas = {
   ...workflowExecutionEventSchemas,
+  ...workflowImportExportEventSchemas,
   ...workflowLifecycleEventSchemas,
   ...workflowUIEventSchemas,
   ...workflowValidationEventSchemas,
@@ -48,6 +53,7 @@ export const workflowsTelemetryEvents: WorkflowsTelemetryEvent[] = Object.entrie
   ([key, schema]) => ({
     eventType: key as
       | WorkflowExecutionEventTypes
+      | WorkflowImportExportEventTypes
       | WorkflowLifecycleEventTypes
       | WorkflowUIEventTypes
       | WorkflowValidationEventTypes,
