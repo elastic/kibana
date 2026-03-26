@@ -18,6 +18,7 @@ export const internalNamespaces = {
   observability: 'observability',
   search: 'search',
   security: 'security',
+  streams: 'platform.streams',
   workflows: 'platform.workflows',
 } as const;
 
@@ -33,6 +34,7 @@ export const protectedNamespaces: string[] = [
   internalNamespaces.platformStreams,
   internalNamespaces.search,
   internalNamespaces.security,
+  internalNamespaces.streams,
   internalNamespaces.workflows,
 ];
 

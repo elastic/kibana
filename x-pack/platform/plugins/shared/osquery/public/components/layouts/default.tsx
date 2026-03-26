@@ -26,6 +26,13 @@ export const fullWidthContentCss = ({ euiTheme }: UseEuiTheme) => ({
   minWidth: 0,
 });
 
+export const fullWidthFormContentCss = (theme: UseEuiTheme) => ({
+  ...fullWidthContentCss(theme),
+  maxWidth: 1200,
+  margin: '0 auto',
+  width: '100%',
+});
+
 export const navCss = ({ euiTheme }: UseEuiTheme) => ({
   background: euiTheme.colors.emptyShade,
   borderBottom: euiTheme.border.thin,

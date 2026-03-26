@@ -148,7 +148,9 @@ run(
         log.error(
           'Error count has increased compared to baseline, not updating the baseline count; exit(1).'
         );
-        log.error('To investigate this further see "node ./scripts/validate_oas_docs.js --help".');
+        log.error(
+          'To investigate this further see "node ./scripts/validate_oas_docs.js --help", or use the "debug-oas" and "validate-oas" skills.'
+        );
         process.exit(1);
       } else {
         log.success('No error increase detected.');

@@ -103,6 +103,10 @@ describe('getConnectorTypeSuggestions', () => {
             label: 'wait',
             kind: monaco.languages.CompletionItemKind.Constant,
           }),
+          expect.objectContaining({
+            label: 'waitForInput',
+            kind: monaco.languages.CompletionItemKind.Event,
+          }),
         ])
       );
     });

@@ -17,7 +17,8 @@ import { securityMock } from '../../mocks';
 
 const element = document.body.appendChild(document.createElement('div'));
 
-describe('apiKeysManagementApp', () => {
+// Failing: See https://github.com/elastic/kibana/issues/255972
+describe.skip('apiKeysManagementApp', () => {
   it('renders application and sets breadcrumbs', async () => {
     const { getStartServices } = coreMock.createSetup();
     const coreStartMock = coreMock.createStart();

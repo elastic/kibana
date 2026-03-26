@@ -67,6 +67,7 @@ import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { useDataStreamId, useVarGroupSelections } from './hooks';
 import { sortDatastreamsByDataset } from './sort_datastreams';
 import { VarGroupSelector } from './var_group_selector';
+import { MigrationTooltip } from './package_policy_input_panel';
 
 const ScrollAnchor = styled.div`
   display: none;
@@ -81,6 +82,7 @@ interface Props {
   inputStreamValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
   isEditPage?: boolean;
+  isUpgrade?: boolean;
   totalStreams?: number;
   showDescriptionColumn?: boolean;
   varGroupSelections?: Record<string, string>;
@@ -95,6 +97,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     inputStreamValidationResults,
     forceShowErrors,
     isEditPage,
+    isUpgrade,
     totalStreams,
     showDescriptionColumn = true,
     varGroupSelections = {},
@@ -308,6 +311,14 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                             </span>
                           </EuiFlexItem>
                         )}
+                        {isUpgrade &&
+                          packagePolicyInputStream.migrate_from &&
+                          !showStreamDeprecationIcon && (
+                            <MigrationTooltip
+                              migrateFrom={packagePolicyInputStream.migrate_from}
+                              isStream
+                            />
+                          )}
                       </EuiFlexGroup>
                     </EuiFlexItem>
                   )}
@@ -433,7 +444,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                         <EuiButtonEmpty
                           aria-label="Advanced options"
                           size="xs"
-                          iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
+                          iconType={isShowingAdvanced ? 'chevronSingleDown' : 'chevronSingleRight'}
                           onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
                           flush="left"
                           data-test-subj={`advancedStreamOptionsToggle-${packagePolicyInputStream.id}`}

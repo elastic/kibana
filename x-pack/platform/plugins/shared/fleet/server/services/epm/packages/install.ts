@@ -102,6 +102,7 @@ import { addErrorToLatestFailedAttempts } from './install_errors_helpers';
 import { setLastUploadInstallCache, getLastUploadInstallCache } from './utils';
 import { removeInstallation } from './remove';
 import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
+import { mergeIsDependencyOf } from './dependencies';
 
 export const UPLOAD_RETRY_AFTER_MS = 10000; // 10s
 const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
@@ -412,6 +413,7 @@ interface InstallRegistryPackageParams {
   keepFailedInstallation?: boolean;
   useStreaming?: boolean;
   automaticInstall?: boolean;
+  installedAsDependencyOf?: { name: string; version: string };
   skipDependencyCheck?: boolean;
 }
 
@@ -498,6 +500,7 @@ async function installPackageFromRegistry({
   keepFailedInstallation = false,
   useStreaming = false,
   automaticInstall = false,
+  installedAsDependencyOf,
   skipDependencyCheck = false,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
@@ -605,6 +608,7 @@ async function installPackageFromRegistry({
       useStreaming,
       keepFailedInstallation,
       automaticInstall,
+      installedAsDependencyOf,
       skipDependencyCheck,
     });
   } catch (e) {
@@ -649,6 +653,7 @@ export async function installPackageWithStateMachine(options: {
   useStreaming?: boolean;
   keepFailedInstallation?: boolean;
   automaticInstall?: boolean;
+  installedAsDependencyOf?: { name: string; version: string };
   skipDependencyCheck?: boolean;
 }): Promise<InstallResult> {
   const packageInfo = options.packageInstallContext.packageInfo;
@@ -672,6 +677,7 @@ export async function installPackageWithStateMachine(options: {
     useStreaming,
     keepFailedInstallation,
     automaticInstall,
+    installedAsDependencyOf,
     skipDependencyCheck,
   } = options;
   let { telemetryEvent } = options;
@@ -797,6 +803,7 @@ export async function installPackageWithStateMachine(options: {
       skipDataStreamRollover,
       retryFromLastState,
       useStreaming,
+      installedAsDependencyOf,
       skipDependencyCheck,
     })
       .then(async (assets) => {
@@ -1001,6 +1008,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       keepFailedInstallation,
       useStreaming,
       automaticInstall,
+      installedAsDependencyOf,
       skipDependencyCheck,
     } = args;
 
@@ -1047,6 +1055,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       keepFailedInstallation,
       useStreaming,
       automaticInstall,
+      installedAsDependencyOf,
       skipDependencyCheck,
     });
 
@@ -1212,6 +1221,8 @@ export async function restartInstallation(options: {
   installSource: InstallSource;
   verificationResult?: PackageVerificationResult;
   previousVersion?: string | null;
+  installedAsDependencyOf?: { name: string; version: string };
+  existingIsDependencyOf?: { name: string; version: string }[];
   dependencies?: PackageDependencies | null;
 }) {
   const {
@@ -1232,6 +1243,19 @@ export async function restartInstallation(options: {
     previous_version: previousVersion,
     ...(dependencies ? { dependencies } : {}),
   };
+
+  if (options.installedAsDependencyOf) {
+    savedObjectUpdate.is_dependency_of = mergeIsDependencyOf(
+      options.installedAsDependencyOf,
+      options.existingIsDependencyOf
+    );
+    // Do not overwrite installed_as_dependency here: if the package was manually installed
+    // before becoming a dependency (e.g. it is being updated to satisfy a new constraint),
+    // we want to preserve the existing false value so cleanup won't auto-remove it.
+  } else {
+    // Explicit user install: ensure the package is not marked as a pure dependency.
+    savedObjectUpdate.installed_as_dependency = false;
+  }
 
   if (verificationResult) {
     savedObjectUpdate = {
@@ -1257,10 +1281,17 @@ export async function createInstallation(options: {
   installSource: InstallSource;
   spaceId: string;
   verificationResult?: PackageVerificationResult;
+  installedAsDependencyOf?: { name: string; version: string };
   dependencies?: PackageDependencies | null;
 }) {
-  const { savedObjectsClient, packageInfo, installSource, verificationResult, dependencies } =
-    options;
+  const {
+    savedObjectsClient,
+    packageInfo,
+    installSource,
+    verificationResult,
+    dependencies,
+    installedAsDependencyOf,
+  } = options;
   const { name: pkgName, version: pkgVersion } = packageInfo;
   const toSaveESIndexPatterns = generateESIndexPatterns(
     getNormalizedDataStreams(packageInfo, GENERIC_DATASET_NAME)
@@ -1291,6 +1322,9 @@ export async function createInstallation(options: {
     keep_policies_up_to_date: defaultKeepPoliciesUpToDate,
     verification_status: 'unknown',
     ...(dependencies ? { dependencies } : {}),
+    ...(installedAsDependencyOf
+      ? { is_dependency_of: [installedAsDependencyOf], installed_as_dependency: true }
+      : {}),
   };
 
   if (verificationResult) {
@@ -1353,13 +1387,22 @@ export const saveKibanaAssetsRefs = async (
           : undefined;
 
       if (saveAsAdditionnalSpace) {
+        let spaceAssetRefs = assetRefs !== null ? assetRefs : [];
+        if (append && installation) {
+          const existingSpaceRefs =
+            installation.attributes?.additional_spaces_installed_kibana?.[spaceId] ?? [];
+          spaceAssetRefs = uniqBy(
+            [...spaceAssetRefs, ...existingSpaceRefs],
+            (asset) => asset.id + asset.type
+          );
+        }
         return savedObjectsClient.update<Installation>(
           PACKAGES_SAVED_OBJECT_TYPE,
           pkgName,
           {
             additional_spaces_installed_kibana: {
               ...omit(installation?.attributes?.additional_spaces_installed_kibana ?? {}, spaceId),
-              ...(assetRefs !== null ? { [spaceId]: assetRefs } : {}),
+              ...(assetRefs !== null ? { [spaceId]: spaceAssetRefs } : {}),
             },
           },
           { refresh: false }
