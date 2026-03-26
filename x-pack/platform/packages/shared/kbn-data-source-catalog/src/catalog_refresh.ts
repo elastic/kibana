@@ -1,0 +1,70 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { CatalogClient } from './catalog_client';
+import { discoverIndexMetadata } from './providers/index_metadata_provider';
+import { fetchIntegrationMetadata, type PackageClientLike } from './providers/integration_provider';
+import type { DataSourceEntry, IntegrationMetadata } from './types';
+
+interface RefreshCatalogParams {
+  esClient: ElasticsearchClient;
+  packageClient?: PackageClientLike;
+  patterns: string[];
+}
+
+interface RefreshResult {
+  entriesCount: number;
+  durationMs: number;
+}
+
+export async function refreshCatalog({
+  esClient,
+  packageClient,
+  patterns,
+}: RefreshCatalogParams): Promise<RefreshResult> {
+  const start = Date.now();
+
+  const catalogClient = new CatalogClient(esClient);
+  await catalogClient.ensureIndex();
+
+  const entries = await discoverIndexMetadata(esClient, patterns);
+
+  let integrationMap: Map<string, IntegrationMetadata> | undefined;
+  if (packageClient) {
+    integrationMap = await fetchIntegrationMetadata(packageClient);
+  }
+
+  if (integrationMap && integrationMap.size > 0) {
+    for (const entry of entries) {
+      const matched = matchIntegration(entry, integrationMap);
+      if (matched) {
+        entry.integration = matched;
+      }
+    }
+  }
+
+  await catalogClient.bulkUpsert(entries);
+
+  return {
+    entriesCount: entries.length,
+    durationMs: Date.now() - start,
+  };
+}
+
+function matchIntegration(
+  entry: DataSourceEntry,
+  integrationMap: Map<string, IntegrationMetadata>
+): IntegrationMetadata | undefined {
+  for (const [pattern, metadata] of integrationMap) {
+    const regex = new RegExp(`^${pattern.replace(/\*/g, '.*')}$`);
+    if (regex.test(entry.name)) {
+      return metadata;
+    }
+  }
+  return undefined;
+}
