@@ -78,7 +78,7 @@ describe('useContainerMetricsTable hook', () => {
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         metricsExplorerOptions: expect.objectContaining({
-          kuery: `event.dataset: "dockerstatsreceiver.otel" AND (${kuery})`,
+          kuery: `(data_stream.dataset: "dockerstatsreceiver.otel" OR event.dataset: "dockerstatsreceiver.otel") AND (${kuery})`,
           metrics: expect.arrayContaining([
             expect.objectContaining({ field: SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION }),
             expect.objectContaining({ field: SEMCONV_DOCKER_CONTAINER_MEMORY_PERCENT }),
@@ -110,7 +110,7 @@ describe('useContainerMetricsTable hook', () => {
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         metricsExplorerOptions: expect.objectContaining({
-          kuery: `event.dataset: "kubeletstatsreceiver.otel" AND (${kuery})`,
+          kuery: `(data_stream.dataset: "kubeletstatsreceiver.otel" OR event.dataset: "kubeletstatsreceiver.otel") AND (${kuery})`,
           metrics: expect.arrayContaining([
             expect.objectContaining({
               field: SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION,

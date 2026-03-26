@@ -117,8 +117,10 @@ describe('useHostMetricsTable hook', () => {
 
     const row = transform({
       id: 'otel-host-1',
+      columns: [],
       rows: [
         {
+          timestamp: Date.now(),
           metric_0: 8,
           metric_1: 0.42,
           metric_2: 16_000_000_000,

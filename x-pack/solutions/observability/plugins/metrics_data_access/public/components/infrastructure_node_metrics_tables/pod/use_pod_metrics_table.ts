@@ -63,7 +63,8 @@ type PodMetricsFieldsOtel =
   | typeof MEMORY_LIMIT_UTILIZATION;
 
 const podMetricsQueryConfigOtel: MetricsQueryOptions<PodMetricsFieldsOtel> = {
-  sourceFilter: 'event.dataset: "kubeletstatsreceiver.otel"',
+  sourceFilter:
+    '(data_stream.dataset: "kubeletstatsreceiver.otel" OR event.dataset: "kubeletstatsreceiver.otel")',
   groupByField: ['k8s.pod.uid', 'k8s.pod.name'],
   metricsMap: {
     // this is an optional field and wont populate unless specifically enabled in kubeletstatreceiver.
