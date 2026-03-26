@@ -396,8 +396,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     if (plugins.searchInferenceEndpoints) {
       plugins.searchInferenceEndpoints.features.register({
         featureId: 'security_search_inference_parent',
-        featureName: 'Security Inference Models',
-        featureDescription: 'Security inference endpoint configuration',
+        featureName: 'Security',
+        featureDescription: 'Parent feature for Security',
         taskType: 'chat_completion',
         // If no list is set, the Kibana-wide default endpoint will be surfaced first
         // and the other available endpoints will be made available in the order they're
@@ -408,8 +408,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins.searchInferenceEndpoints.features.register({
         parentFeatureId: 'security_search_inference_parent',
         featureId: 'entity_ai_highlight_summary',
-        featureName: 'Security Entity AI Highlight Summary Inference Models',
-        featureDescription: 'Security Entity AI Highlight Summary inference endpoint configuration',
+        featureName: 'Entity AI Highlight Summary',
+        featureDescription: 'Entity AI Highlight Summary inference endpoint configuration',
         taskType: 'chat_completion',
         recommendedEndpoints: [],
       });
