@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { loadConnectorsForFeature } from '@kbn/inference-connectors';
+import { loadConnectors } from '@kbn/inference-connectors';
 import type { OnboardingCardCheckComplete } from '../../../../../types';
 import { getConnectorsAuthz } from '../../common/connectors/authz';
 import type { AIConnectorCardMetadata } from './types';
@@ -19,7 +19,7 @@ export const checkAiConnectorsCardComplete: OnboardingCardCheckComplete<
     return { isComplete, metadata: { connectors: [], ...authz } };
   }
 
-  const { connectors: aiConnectors } = await loadConnectorsForFeature({
+  const aiConnectors = await loadConnectors({
     http,
     featureId: 'siem_migrations',
     settings,

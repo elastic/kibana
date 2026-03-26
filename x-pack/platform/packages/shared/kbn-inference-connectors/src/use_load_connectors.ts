@@ -12,7 +12,8 @@ import type { IHttpFetchError, HttpSetup } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { i18n } from '@kbn/i18n';
-import { loadConnectorsForFeature } from './load_connectors_for_feature';
+import { fetchConnectorsForFeature } from './fetch_connectors_for_feature';
+import { toAIConnector, applyConnectorSettings } from './load_connectors';
 import type { AIConnector } from './types';
 
 const QUERY_KEY = ['kbn-inference-connectors', 'load-connectors'];
@@ -49,9 +50,9 @@ export const useLoadConnectors = ({
   const query = useQuery(
     [...QUERY_KEY, featureId],
     async () => {
-      const result = await loadConnectorsForFeature({ http, featureId, settings });
+      const result = await fetchConnectorsForFeature(http, featureId);
       setSoEntryFound(result.soEntryFound);
-      return result.connectors;
+      return applyConnectorSettings(result.connectors.map(toAIConnector), settings);
     },
     {
       retry: false,

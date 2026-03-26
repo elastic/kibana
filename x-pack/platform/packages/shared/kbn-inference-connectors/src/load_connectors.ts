@@ -55,16 +55,11 @@ export const applyConnectorSettings = <T extends { id: string }>(
   return allConnectors;
 };
 
-export interface LoadConnectorsForFeatureResult {
-  connectors: AIConnector[];
-  soEntryFound: boolean;
-}
-
 /**
  * Fetches AI connectors for a given feature, maps them to {@link AIConnector},
  * and applies the default-connector UI settings filter.
  */
-export const loadConnectorsForFeature = async ({
+export const loadConnectors = async ({
   http,
   featureId,
   settings,
@@ -72,11 +67,8 @@ export const loadConnectorsForFeature = async ({
   http: HttpSetup;
   featureId: string;
   settings: SettingsStart;
-}): Promise<LoadConnectorsForFeatureResult> => {
-  const { connectors, soEntryFound } = await fetchConnectorsForFeature(http, featureId);
+}): Promise<AIConnector[]> => {
+  const { connectors } = await fetchConnectorsForFeature(http, featureId);
   const aiConnectors = connectors.map(toAIConnector);
-  return {
-    connectors: applyConnectorSettings(aiConnectors, settings),
-    soEntryFound,
-  };
+  return applyConnectorSettings(aiConnectors, settings);
 };
