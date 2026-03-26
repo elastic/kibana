@@ -79,8 +79,9 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
       loadWorkflow({ id }); // sets loaded yaml string
     } else {
       dispatch(setYamlString(workflowDefaultYaml));
+      telemetry.reportWorkflowCreateOpened({ editorType: 'yaml' });
     }
-  }, [loadWorkflow, id, dispatch]);
+  }, [loadWorkflow, id, dispatch, telemetry]);
 
   // Sync activeTab from URL state to store
   useEffect(() => {

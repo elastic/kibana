@@ -637,7 +637,7 @@ export const labels = {
     title: i18n.translate('xpack.agentBuilder.plugins.title', { defaultMessage: 'Plugins' }),
     pluginsTableCaption: (pluginsCount: number) =>
       i18n.translate('xpack.agentBuilder.plugins.pluginsTableCaption', {
-        defaultMessage: 'Installed plugins: {pluginsCount} plugins',
+        defaultMessage: 'Plugins: {pluginsCount} plugins',
         values: { pluginsCount },
       }),
     nameLabel: i18n.translate('xpack.agentBuilder.plugins.nameLabel', {
@@ -764,6 +764,9 @@ export const labels = {
       }),
     uploadPluginErrorToast: i18n.translate('xpack.agentBuilder.plugins.uploadPluginErrorToast', {
       defaultMessage: 'Failed to upload plugin',
+    }),
+    readOnly: i18n.translate('xpack.agentBuilder.plugins.readOnly', {
+      defaultMessage: 'Built-in plugin (read-only)',
     }),
     viewPluginButtonLabel: i18n.translate('xpack.agentBuilder.plugins.viewPluginButtonLabel', {
       defaultMessage: 'View',
