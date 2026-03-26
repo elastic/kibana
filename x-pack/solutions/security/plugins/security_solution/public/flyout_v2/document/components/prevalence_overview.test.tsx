@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import React from 'react';
 import { render } from '@testing-library/react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { TestProviders } from '../../../common/mock';
 import {
   SUMMARY_ROW_TEXT_TEST_ID,
   SUMMARY_ROW_VALUE_TEST_ID,
-} from '../../../flyout/document_details/right/components/test_ids';
-import { PREVALENCE_TEST_ID } from './test_ids';
-import React from 'react';
+  PREVALENCE_TEST_ID,
+} from './test_ids';
 import { PrevalenceOverview } from './prevalence_overview';
 import {
   EXPANDABLE_PANEL_HEADER_RIGHT_SECTION_TEST_ID,
@@ -23,11 +23,11 @@ import {
   EXPANDABLE_PANEL_LOADING_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../shared/components/test_ids';
-import { usePrevalence } from '../hooks/use_prevalence';
+import { usePrevalence } from '../../prevalence/hooks/use_prevalence';
 import { useKibana } from '../../../common/lib/kibana';
 import { mockSearchHit } from '../../../flyout/document_details/shared/mocks/mock_search_hit';
 
-jest.mock('../hooks/use_prevalence');
+jest.mock('../../prevalence/hooks/use_prevalence');
 jest.mock('../../../common/lib/kibana');
 
 const mockNavigateToLeftPanel = jest.fn();

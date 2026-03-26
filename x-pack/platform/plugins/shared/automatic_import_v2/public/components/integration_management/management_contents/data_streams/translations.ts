@@ -125,6 +125,20 @@ export const CREATE_DATA_STREAM_ERROR = i18n.translate(
   }
 );
 
+export const SAMPLES_NORMALIZED_WARNING_TITLE = i18n.translate(
+  'xpack.automaticImportV2.dataStreams.samplesNormalizedWarningTitle',
+  {
+    defaultMessage: 'Sample log limits applied',
+  }
+);
+
+export const SAMPLES_NORMALIZED_WARNING_LINES_OMITTED = (omittedCount: number, maxLines: number) =>
+  i18n.translate('xpack.automaticImportV2.dataStreams.samplesNormalizedWarningLinesOmitted', {
+    defaultMessage:
+      'Only the first {maxLines} non-empty lines are sent. {omittedCount, plural, one {# additional line was not sent.} other {# additional lines were not sent.}}',
+    values: { omittedCount, maxLines },
+  });
+
 export const LOG_FILE_ERROR = {
   CAN_NOT_READ: i18n.translate('xpack.automaticImportV2.dataStreams.logFileError.canNotRead', {
     defaultMessage: 'Failed to read the log file',
