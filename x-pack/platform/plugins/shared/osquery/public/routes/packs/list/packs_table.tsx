@@ -375,12 +375,13 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
   const actionButtons = useMemo(
     () => (
       <EuiFlexGroup gutterSize="m" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <LoadIntegrationAssetsButton />
-        </EuiFlexItem>
+        {hasAssetsToInstall && (
+          <EuiFlexItem grow={false}>
+            <LoadIntegrationAssetsButton />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiButton
-            fill
             {...newPackLinkProps}
             iconType="plusInCircle"
             isDisabled={!permissions.writePacks}
@@ -393,7 +394,7 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [permissions.writePacks, newPackLinkProps]
+    [permissions.writePacks, newPackLinkProps, hasAssetsToInstall]
   );
 
   if (isLoading) {
