@@ -21,7 +21,7 @@ import type { StartPlugins } from '../../../../plugin_contract';
 import { createLeadGenerationEngine } from '../engine/lead_generation_engine';
 import { createRiskScoreModule } from '../observation_modules/risk_score_module';
 import { createTemporalStateModule } from '../observation_modules/temporal_state_module';
-import { createBehavioralAnalysisModule } from '../observation_modules/alert_analysis_module';
+import { createBehavioralAnalysisModule } from '../observation_modules/behavioral_analysis_module';
 import { fetchAllLeadEntities } from '../entity_conversion';
 import { createLeadDataClient } from '../lead_data_client';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
