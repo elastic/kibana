@@ -31,6 +31,11 @@ import { AgentBuilderConnectorsPage } from './pages/connectors';
 
 export type SidebarView = 'conversation' | 'manage';
 
+export interface FeatureFlags {
+  experimental: boolean;
+  connectors: boolean;
+}
+
 export interface RouteDefinition {
   path: string;
   element: React.ReactNode;
@@ -79,6 +84,7 @@ export const agentRoutes: RouteDefinition[] = [
   {
     path: '/agents/:agentId/skills',
     sidebarView: 'conversation',
+    isExperimental: true,
     navLabel: navLabels.skills,
     navIcon: 'bolt',
     element: <AgentBuilderAgentSkillsPage />,
@@ -86,6 +92,7 @@ export const agentRoutes: RouteDefinition[] = [
   {
     path: '/agents/:agentId/plugins',
     sidebarView: 'conversation',
+    isExperimental: true,
     navLabel: navLabels.plugins,
     navIcon: 'package',
     element: <AgentBuilderAgentPluginsPage />,
@@ -154,6 +161,7 @@ export const manageRoutes: RouteDefinition[] = [
   {
     path: '/manage/plugins',
     sidebarView: 'manage',
+    isExperimental: true,
     navLabel: navLabels.plugins,
     navIcon: 'package',
     element: <AgentBuilderPluginsPage />,
@@ -161,6 +169,7 @@ export const manageRoutes: RouteDefinition[] = [
   {
     path: '/manage/plugins/:pluginId',
     sidebarView: 'manage',
+    isExperimental: true,
     element: <AgentBuilderPluginDetailsPage />,
   },
   {
@@ -220,29 +229,37 @@ export interface SidebarNavItem {
   label: string;
   path: string;
   icon?: string;
-  isExperimental?: boolean;
-  isConnectors?: boolean;
 }
 
-export const getAgentSettingsNavItems = (agentId: string): SidebarNavItem[] => {
+const isRouteEnabled = (route: RouteDefinition, flags: FeatureFlags): boolean => {
+  if (route.isExperimental && !flags.experimental) return false;
+  if (route.isConnectors && !flags.connectors) return false;
+  return true;
+};
+
+export const getEnabledRoutes = (flags: FeatureFlags): RouteDefinition[] => {
+  return allRoutes.filter((route) => isRouteEnabled(route, flags));
+};
+
+export const getAgentSettingsNavItems = (
+  agentId: string,
+  flags: FeatureFlags
+): SidebarNavItem[] => {
   return agentRoutes
-    .filter((route) => route.navLabel)
+    .filter((route) => route.navLabel && isRouteEnabled(route, flags))
     .map((route) => ({
       label: route.navLabel ?? '',
       path: route.path.replace(':agentId', agentId),
       icon: route.navIcon,
-      isConnectors: route.isConnectors,
     }));
 };
 
-export const getManageNavItems = (): SidebarNavItem[] => {
+export const getManageNavItems = (flags: FeatureFlags): SidebarNavItem[] => {
   return manageRoutes
-    .filter((route) => route.navLabel)
+    .filter((route) => route.navLabel && isRouteEnabled(route, flags))
     .map((route) => ({
       label: route.navLabel!,
       path: route.path,
       icon: route.navIcon,
-      isExperimental: route.isExperimental,
-      isConnectors: route.isConnectors,
     }));
 };
