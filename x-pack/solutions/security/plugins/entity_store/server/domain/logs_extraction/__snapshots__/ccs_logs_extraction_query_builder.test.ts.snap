@@ -104,19 +104,22 @@ FROM remote:logs-*
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND (\`event.kind\` IS NULL OR \`event.kind\` != \\"enrichment\\") AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\"))
+      AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND ((\`event.kind\` IS NULL OR \`event.kind\` != \\"enrichment\\") AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\" AND NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" AND NOT (\`user.name\` == \\"root\\" OR \`user.name\` == \\"bin\\" OR \`user.name\` == \\"daemon\\" OR \`user.name\` == \\"sys\\" OR \`user.name\` == \\"nobody\\" OR \`user.name\` == \\"jenkins\\" OR \`user.name\` == \\"ansible\\" OR \`user.name\` == \\"deploy\\" OR \`user.name\` == \\"terraform\\" OR \`user.name\` == \\"gitlab-runner\\" OR \`user.name\` == \\"postgres\\" OR \`user.name\` == \\"mysql\\" OR \`user.name\` == \\"redis\\" OR \`user.name\` == \\"elasticsearch\\" OR \`user.name\` == \\"kafka\\" OR \`user.name\` == \\"admin\\" OR \`user.name\` == \\"operator\\" OR \`user.name\` == \\"service\\")) AND (NOT(\`entity.id\` IS NULL) OR MV_CONTAINS(\`event.kind\`, \\"asset\\") OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (MV_CONTAINS(\`event.type\`, \\"user\\") OR MV_CONTAINS(\`event.type\`, \\"creation\\") OR MV_CONTAINS(\`event.type\`, \\"deletion\\") OR MV_CONTAINS(\`event.type\`, \\"group\\")) OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\" AND NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" AND NOT (\`user.name\` == \\"root\\" OR \`user.name\` == \\"bin\\" OR \`user.name\` == \\"daemon\\" OR \`user.name\` == \\"sys\\" OR \`user.name\` == \\"nobody\\" OR \`user.name\` == \\"jenkins\\" OR \`user.name\` == \\"ansible\\" OR \`user.name\` == \\"deploy\\" OR \`user.name\` == \\"terraform\\" OR \`user.name\` == \\"gitlab-runner\\" OR \`user.name\` == \\"postgres\\" OR \`user.name\` == \\"mysql\\" OR \`user.name\` == \\"redis\\" OR \`user.name\` == \\"elasticsearch\\" OR \`user.name\` == \\"kafka\\" OR \`user.name\` == \\"admin\\" OR \`user.name\` == \\"operator\\" OR \`user.name\` == \\"service\\")))
 | EVAL _src_entity_namespace0 = MV_FIRST(event.module),
  _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(data_stream.dataset), \\".\\")),
  _src_entity_namespace = CASE((_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\"), _src_entity_namespace0, (_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\"), _src_entity_namespace1, NULL),
  entity.namespace = CASE((_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", _src_entity_namespace)
-| EVAL entity.id = CONCAT(\\"user:\\", CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.email, \\"@\\", entity.namespace),
+| EVAL entity.namespace = CASE((NOT (MV_CONTAINS(\`event.kind\`, \\"asset\\") OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (MV_CONTAINS(\`event.type\`, \\"user\\") OR MV_CONTAINS(\`event.type\`, \\"creation\\") OR MV_CONTAINS(\`event.type\`, \\"deletion\\") OR MV_CONTAINS(\`event.type\`, \\"group\\"))) AND NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\" AND NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" AND NOT (\`user.name\` == \\"root\\" OR \`user.name\` == \\"bin\\" OR \`user.name\` == \\"daemon\\" OR \`user.name\` == \\"sys\\" OR \`user.name\` == \\"nobody\\" OR \`user.name\` == \\"jenkins\\" OR \`user.name\` == \\"ansible\\" OR \`user.name\` == \\"deploy\\" OR \`user.name\` == \\"terraform\\" OR \`user.name\` == \\"gitlab-runner\\" OR \`user.name\` == \\"postgres\\" OR \`user.name\` == \\"mysql\\" OR \`user.name\` == \\"redis\\" OR \`user.name\` == \\"elasticsearch\\" OR \`user.name\` == \\"kafka\\" OR \`user.name\` == \\"admin\\" OR \`user.name\` == \\"operator\\" OR \`user.name\` == \\"service\\")), \\"local\\", entity.namespace),
+    entity.confidence = CASE((NOT (MV_CONTAINS(\`event.kind\`, \\"asset\\") OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (MV_CONTAINS(\`event.type\`, \\"user\\") OR MV_CONTAINS(\`event.type\`, \\"creation\\") OR MV_CONTAINS(\`event.type\`, \\"deletion\\") OR MV_CONTAINS(\`event.type\`, \\"group\\"))) AND NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\" AND NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" AND NOT (\`user.name\` == \\"root\\" OR \`user.name\` == \\"bin\\" OR \`user.name\` == \\"daemon\\" OR \`user.name\` == \\"sys\\" OR \`user.name\` == \\"nobody\\" OR \`user.name\` == \\"jenkins\\" OR \`user.name\` == \\"ansible\\" OR \`user.name\` == \\"deploy\\" OR \`user.name\` == \\"terraform\\" OR \`user.name\` == \\"gitlab-runner\\" OR \`user.name\` == \\"postgres\\" OR \`user.name\` == \\"mysql\\" OR \`user.name\` == \\"redis\\" OR \`user.name\` == \\"elasticsearch\\" OR \`user.name\` == \\"kafka\\" OR \`user.name\` == \\"admin\\" OR \`user.name\` == \\"operator\\" OR \`user.name\` == \\"service\\")), \\"medium\\", entity.confidence)
+| EVAL entity.id = CONCAT(\\"user:\\", CASE((\`entity.namespace\` == \\"local\\"), CASE((user.name IS NOT NULL AND user.name != \\"\\" AND host.id IS NOT NULL AND host.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", host.id, \\"@\\", entity.namespace), NULL),
+true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.email, \\"@\\", entity.namespace),
 (user.id IS NOT NULL AND user.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.id, \\"@\\", entity.namespace),
 (user.name IS NOT NULL AND user.name != \\"\\" AND user.domain IS NOT NULL AND user.domain != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", user.domain, \\"@\\", entity.namespace),
-(user.name IS NOT NULL AND user.name != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", entity.namespace), NULL))
+(user.name IS NOT NULL AND user.name != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", entity.namespace), NULL), NULL))
 | STATS
     @timestamp = MAX(@timestamp),
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
-    entity.name = LAST(TO_STRING(user.name), @timestamp) WHERE user.name IS NOT NULL,
+    entity.name = LAST(TO_STRING(entity.name), @timestamp) WHERE entity.name IS NOT NULL,
  event.module = MV_DEDUPE(TOP(TO_STRING(event.module), 10)) WHERE event.module IS NOT NULL,
  data_stream.dataset = MV_DEDUPE(TOP(TO_STRING(data_stream.dataset), 50)) WHERE data_stream.dataset IS NOT NULL,
  event.kind = MV_DEDUPE(TOP(TO_STRING(event.kind), 10)) WHERE event.kind IS NOT NULL,
@@ -124,9 +127,10 @@ FROM remote:logs-*
  event.type = MV_DEDUPE(TOP(TO_STRING(event.type), 10)) WHERE event.type IS NOT NULL,
  event.outcome = MV_DEDUPE(TOP(TO_STRING(event.outcome), 10)) WHERE event.outcome IS NOT NULL,
  entity.namespace = LAST(TO_STRING(entity.namespace), @timestamp) WHERE entity.namespace IS NOT NULL,
+ entity.confidence = FIRST(TO_STRING(entity.confidence), @timestamp) WHERE entity.confidence IS NOT NULL,
  user.domain = MV_DEDUPE(TOP(TO_STRING(user.domain), 10)) WHERE user.domain IS NOT NULL,
  user.email = MV_DEDUPE(TOP(TO_STRING(user.email), 10)) WHERE user.email IS NOT NULL,
- user.name = MV_DEDUPE(TOP(TO_STRING(user.name), 10)) WHERE user.name IS NOT NULL,
+ user.name = LAST(TO_STRING(user.name), @timestamp) WHERE user.name IS NOT NULL,
  user.full_name = MV_DEDUPE(TOP(TO_STRING(user.full_name), 10)) WHERE user.full_name IS NOT NULL,
  user.hash = MV_DEDUPE(TOP(TO_STRING(user.hash), 10)) WHERE user.hash IS NOT NULL,
  user.id = MV_DEDUPE(TOP(TO_STRING(user.id), 10)) WHERE user.id IS NOT NULL,
@@ -173,8 +177,12 @@ FROM remote:logs-*
  entity.relationships.resolution.risk.calculated_score_norm = LAST(TO_DOUBLE(user.entity.relationships.resolution.risk.calculated_score_norm), @timestamp) WHERE user.entity.relationships.resolution.risk.calculated_score_norm IS NOT NULL,
  host.entity.id = MV_DEDUPE(TOP(TO_STRING(host.entity.id), 10)) WHERE host.entity.id IS NOT NULL,
  host.id = MV_DEDUPE(TOP(TO_STRING(host.id), 10)) WHERE host.id IS NOT NULL,
- host.name = MV_DEDUPE(TOP(TO_STRING(host.name), 10)) WHERE host.name IS NOT NULL
+ host.name = LAST(TO_STRING(host.name), @timestamp) WHERE host.name IS NOT NULL
     BY entity.id
+| EVAL entity.name = CASE((\`entity.namespace\` == \\"local\\" AND NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\"), CONCAT(TO_STRING(user.name), \\"@\\", TO_STRING(host.name)), entity.name)
+| EVAL entity.name = CASE((\`entity.namespace\` == \\"local\\" AND NOT (NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\")), TO_STRING(user.name), entity.name)
+| EVAL entity.name = CASE((\`entity.namespace\` != \\"local\\"), TO_STRING(user.name), entity.name),
+    entity.confidence = CASE((\`entity.namespace\` != \\"local\\"), \\"high\\", entity.confidence)
 | KEEP entity*,
 event*,
 data_stream*,
