@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
 import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
@@ -26,9 +27,23 @@ describe('Security Skills', () => {
       expect(threatHuntingSkill.description.length).toBeLessThanOrEqual(1024);
     });
 
-    it('returns 5 registry tools (under 7 limit)', () => {
+    it('returns 6 registry tools (under 7 limit)', () => {
       const tools = threatHuntingSkill.getRegistryTools!();
-      expect(tools).toHaveLength(5);
+      expect(tools).toHaveLength(6);
+    });
+
+    it('includes platformCoreTools.cases for escalation', () => {
+      const tools = threatHuntingSkill.getRegistryTools!();
+      expect(tools).toContain(platformCoreTools.cases);
+    });
+
+    it('content mentions case creation for confirmed findings', () => {
+      expect(threatHuntingSkill.content).toContain('platform.core.cases');
+    });
+
+    it('content references alert-analysis and detection-engineering skills', () => {
+      expect(threatHuntingSkill.content).toContain('alert-analysis');
+      expect(threatHuntingSkill.content).toContain('detection-engineering');
     });
 
     it('has no inline tools', () => {
@@ -79,6 +94,14 @@ describe('Security Skills', () => {
       const inlineTools = await alertAnalysisSkill.getInlineTools!();
       expect(registryTools.length + inlineTools.length).toBeLessThanOrEqual(7);
     });
+
+    it('content references entity-analytics skill for deeper profiling', () => {
+      expect(alertAnalysisSkill.content).toContain('entity-analytics');
+    });
+
+    it('content references detection-engineering skill for rule tuning', () => {
+      expect(alertAnalysisSkill.content).toContain('detection-engineering');
+    });
   });
 
   describe('detection-engineering skill', () => {
@@ -108,6 +131,11 @@ describe('Security Skills', () => {
       expect(detectionEngineeringSkill.referencedContent!.length).toBe(3);
       const names = detectionEngineeringSkill.referencedContent!.map((rc) => rc.name);
       expect(names).toEqual(expect.arrayContaining(['kql-rule', 'eql-sequence', 'threshold-rule']));
+    });
+
+    it('content references threat-hunting and alert-analysis skills', () => {
+      expect(detectionEngineeringSkill.content).toContain('threat-hunting');
+      expect(detectionEngineeringSkill.content).toContain('alert-analysis');
     });
   });
 
