@@ -11,7 +11,7 @@
         "label": "getCustomColumn",
         "description": [],
         "signature": [
-          "() => { field: string; name: string; sortable: boolean; width: string; render: (field: string, record: ",
+          "() => { field: string; name: string; sortable: boolean; className: string; minWidth: string; width: string; maxWidth: string; render: (field: string, record: ",
           {
             "pluginId": "@kbn/visualization-listing-components",
             "scope": "public",
