@@ -9,7 +9,7 @@ import { EuiText, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import React from 'react';
-import { GenerateSuggestionButton } from './generate_suggestions_button';
+import { RefinementPopover } from './refinement_popover';
 import type { AIFeatures } from '../../../../../hooks/use_ai_features';
 import type { PartitionSuggestionReason } from './use_review_suggestions_form';
 
@@ -23,7 +23,7 @@ export function NoSuggestionsCallout({
 }: {
   aiFeatures: AIFeatures;
   isLoadingSuggestions: boolean;
-  onRegenerate: (connectorId: string) => void;
+  onRegenerate: (connectorId: string, userPrompt?: string) => void;
   onDismiss: () => void;
   isDisabled?: boolean;
   reason?: PartitionSuggestionReason;
@@ -62,19 +62,12 @@ export function NoSuggestionsCallout({
     >
       <EuiText size="s">{description}</EuiText>
       <EuiSpacer size="m" />
-      <GenerateSuggestionButton
-        iconType="refresh"
-        size="s"
-        onClick={onRegenerate}
+      <RefinementPopover
+        onRefine={onRegenerate}
         isLoading={isLoadingSuggestions}
         aiFeatures={aiFeatures}
         isDisabled={isDisabled}
-      >
-        {i18n.translate(
-          'xpack.streams.streamDetailRouting.childStreamList.regenerateSuggestedPartitions',
-          { defaultMessage: 'Regenerate' }
-        )}
-      </GenerateSuggestionButton>
+      />
     </EuiCallOut>
   );
 }

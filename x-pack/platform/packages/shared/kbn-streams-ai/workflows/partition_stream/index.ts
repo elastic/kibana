@@ -45,6 +45,9 @@ export async function partitionStream({
   maxSteps,
   signal,
   getFeatures,
+  userPrompt,
+  existingPartitions = [],
+  refinementHistory = [],
 }: {
   definition: Streams.WiredStream.Definition;
   inferenceClient: BoundInferenceClient;
@@ -59,6 +62,9 @@ export async function partitionStream({
     minConfidence?: number;
     limit?: number;
   }): Promise<Feature[]>;
+  userPrompt?: string;
+  existingPartitions?: Array<{ name: string; condition: Condition }>;
+  refinementHistory?: string[];
 }): Promise<PartitionStreamResponse> {
   const enabledChildConditions = definition.ingest.wired.routing
     .filter((route) => route.status !== 'disabled')
@@ -70,7 +76,7 @@ export async function partitionStream({
     end,
     index: definition.name,
     logger,
-    partitions: [],
+    partitions: existingPartitions,
     excludeConditions: enabledChildConditions,
     size: 1000,
   });
@@ -123,6 +129,17 @@ export async function partitionStream({
       stream: definition,
       initial_clustering: JSON.stringify(initialClusters),
       condition_schema: JSON.stringify(schema),
+      ...(userPrompt ? { user_prompt: userPrompt } : {}),
+      ...(existingPartitions.length > 0
+        ? { existing_partitions: JSON.stringify(existingPartitions) }
+        : {}),
+      ...(refinementHistory.length > 0
+        ? {
+            refinement_history: refinementHistory
+              .map((prompt, i) => `${i + 1}. "${prompt}"`)
+              .join('\n'),
+          }
+        : {}),
     },
     maxSteps,
     toolCallbacks: {
@@ -183,21 +200,34 @@ export async function partitionStream({
     abortSignal: signal,
   });
 
-  const proposedPartitions =
-    response?.toolCalls
-      ?.flatMap((toolCall) => toolCall.function.arguments.partitions ?? [])
-      .map(({ name, condition }) => {
-        // Sanitize name to be alphanumeric with dashes only, lowercase
-        const sanitizedName = name
-          .toLowerCase()
-          .replace(/[^a-z0-9-]/g, '-')
-          .replace(/-+/g, '-')
-          .replace(/^-+|-+$/g, '');
-        return {
-          name: `${definition.name}.${sanitizedName}`,
-          condition: condition as Condition,
-        };
-      }) ?? [];
+  const seenNames = new Set<string>();
+  const proposedPartitions = (response?.toolCalls
+    ?.flatMap((toolCall) => toolCall.function.arguments.partitions ?? [])
+    .map(({ name, condition }) => {
+      // Sanitize name to be alphanumeric with dashes only, lowercase
+      const sanitizedName = name
+        .toLowerCase()
+        .replace(/[^a-z0-9-]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '');
+
+      if (!sanitizedName) {
+        return null;
+      }
+
+      const fullName = `${definition.name}.${sanitizedName}`;
+
+      if (seenNames.has(fullName)) {
+        return null;
+      }
+      seenNames.add(fullName);
+
+      return {
+        name: fullName,
+        condition: condition as Condition,
+      };
+    })
+    .filter(Boolean) ?? []) as Array<{ name: string; condition: Condition }>;
 
   const partitions = proposedPartitions.filter(
     ({ condition }) =>
