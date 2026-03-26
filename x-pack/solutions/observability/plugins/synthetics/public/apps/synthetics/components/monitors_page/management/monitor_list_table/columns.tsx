@@ -335,8 +335,7 @@ export function useMonitorListColumns({
           type: 'icon' as const,
           color: 'warning' as const,
           available: (fields) => isResetFixable(fields[ConfigKey.CONFIG_ID]),
-          enabled: (fields) =>
-            canEditSynthetics && !isActionLoading(fields) && isServiceAllowed,
+          enabled: (fields) => canEditSynthetics && !isActionLoading(fields) && isServiceAllowed,
           onClick: (fields) => {
             setMonitorPendingReset({
               resetIds: [fields[ConfigKey.CONFIG_ID]],
