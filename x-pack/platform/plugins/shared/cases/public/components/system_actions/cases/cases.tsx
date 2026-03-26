@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isNumber } from 'lodash/fp';
 import { lazy } from 'react';
 import type {
   GenericValidationResult,
@@ -15,12 +16,14 @@ import {
   CASES_CONNECTOR_ID,
   CASES_CONNECTOR_TITLE,
   CASES_CONNECTOR_TIME_WINDOW_REGEX,
+  MAX_OPEN_CASES,
 } from '../../../../common/constants';
 import type { CasesActionParams } from './types';
 import * as i18n from './translations';
 
 interface ValidationErrors {
   timeWindow: string[];
+  maximumCasesToOpen: string[];
 }
 
 export function getConnectorType(): ConnectorTypeModel<{}, {}, CasesActionParams> {
@@ -36,6 +39,7 @@ export function getConnectorType(): ConnectorTypeModel<{}, {}, CasesActionParams
     ): Promise<GenericValidationResult<unknown>> => {
       const errors: ValidationErrors = {
         timeWindow: [],
+        maximumCasesToOpen: [],
       };
       const validationResult = {
         errors,
@@ -59,6 +63,13 @@ export function getConnectorType(): ConnectorTypeModel<{}, {}, CasesActionParams
           const timeSizeAsNumber = Number(timeSize);
           if (timeUnit === 'm' && timeSizeAsNumber < 5) {
             errors.timeWindow.push(i18n.MIN_TIME_WINDOW_SIZE_ERROR);
+          }
+        }
+
+        const { maximumCasesToOpen } = actionParams.subActionParams;
+        if (isNumber(maximumCasesToOpen)) {
+          if (maximumCasesToOpen < 1 || maximumCasesToOpen > MAX_OPEN_CASES) {
+            errors.maximumCasesToOpen.push(i18n.MAX_CASES_TO_OPEN_ERROR(MAX_OPEN_CASES));
           }
         }
       }

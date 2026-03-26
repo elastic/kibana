@@ -9,7 +9,7 @@ import React from 'react';
 import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { SeriesConfig, SeriesUrl } from '../../types';
+import type { SeriesConfig, SeriesUrl } from '../../types';
 import { ReportDefinitionField } from './report_definition_field';
 import { TextReportDefinitionField } from './text_report_definition_field';
 import { isStepLevelMetric } from '../../configurations/synthetics/kpi_over_time_config';

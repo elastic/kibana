@@ -15,11 +15,18 @@ export interface FancySelectProps {
   value: string;
   options: FancySelectOption[];
   onChange: (value: string) => void;
+  ariaLabel: string;
 }
 
-export const FancySelect: React.FC<FancySelectProps> = ({ value, options, onChange }) => {
+export const FancySelect: React.FC<FancySelectProps> = ({
+  value,
+  options,
+  onChange,
+  ariaLabel,
+}) => {
   return (
     <EuiSuperSelect
+      aria-label={ariaLabel}
       valueOfSelected={value}
       options={options.map((option) => ({
         value: option.id,

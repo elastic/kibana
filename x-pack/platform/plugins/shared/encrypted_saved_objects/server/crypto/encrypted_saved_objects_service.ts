@@ -6,11 +6,11 @@
  */
 
 import type { Crypto, EncryptOutput } from '@elastic/node-crypto';
-import stringify from 'json-stable-stringify';
 import typeDetect from 'type-detect';
 
 import type { Logger } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { stableStringify } from '@kbn/std';
 
 import { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';
 import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
@@ -154,6 +154,28 @@ export class EncryptedSavedObjectsService {
   }
 
   /**
+   * Gets an array containing all registered type name
+   *
+   * @returns Array<string> - all SO type names registered with the ESO service
+   */
+  public getRegisteredTypes(): string[] {
+    return Array.from(this.typeDefinitions.keys());
+  }
+
+  /**
+   * Gets a hash map for all types registered with the ESO service
+   *
+   * @returns Record<string, string> - type names and unique hash
+   */
+  public getRegisteredTypeHashMap(): Record<string, string> {
+    const registeredTypes = {} as Record<string, string>;
+    for (const [key, value] of this.typeDefinitions) {
+      registeredTypes[key] = value.getDefinitionHash(key);
+    }
+    return registeredTypes;
+  }
+
+  /**
    * Checks whether the ESO type has explicitly opted out of enforcing random IDs.
    * @param type Saved object type.
    * @returns boolean - true unless explicitly opted out by setting enforceRandomId to false
@@ -231,7 +253,7 @@ export class EncryptedSavedObjectsService {
    * Takes saved object attributes for the specified type and, depending on the type definition,
    * either strips encrypted attributes, replaces with original decrypted value if available, or
    * prepares them for decryption.
-   * @private
+   * @internal
    */
   private prepareAttributesForStripOrDecrypt<T extends Record<string, unknown>>(
     descriptor: SavedObjectDescriptor,
@@ -626,7 +648,7 @@ export class EncryptedSavedObjectsService {
     }
 
     // Always add the descriptor to the AAD.
-    return stringify([...descriptorToArray(descriptor), attributesAAD]);
+    return stableStringify([...descriptorToArray(descriptor), attributesAAD]);
   }
 
   /**
@@ -649,5 +671,43 @@ export class EncryptedSavedObjectsService {
       ...(this.options.primaryCrypto ? [this.options.primaryCrypto] : []),
       ...(this.options.decryptionOnlyCryptos ?? []),
     ];
+  }
+
+  public __dangerousClone(
+    typeRegistrationOverrides?: EncryptedSavedObjectTypeRegistration[]
+  ): EncryptedSavedObjectsService {
+    const dangerouslyExposeAttributes = (
+      registration: EncryptedSavedObjectTypeRegistration
+    ): EncryptedSavedObjectTypeRegistration => {
+      const attributesToEncrypt = new Set<string | AttributeToEncrypt>(
+        [...registration.attributesToEncrypt].map((attr) => {
+          const key = typeof attr === 'string' ? attr : attr.key;
+          return { key, dangerouslyExposeValue: true };
+        })
+      );
+      return { ...registration, attributesToEncrypt };
+    };
+
+    const clone = new EncryptedSavedObjectsService(this.options);
+
+    for (const registration of typeRegistrationOverrides ?? []) {
+      clone.registerType(dangerouslyExposeAttributes(registration));
+    }
+
+    for (const [type, { attributesToEncrypt, attributesToIncludeInAAD, enforceRandomId }] of this
+      .typeDefinitions) {
+      if (!clone.isRegistered(type)) {
+        clone.registerType(
+          dangerouslyExposeAttributes({
+            type,
+            attributesToEncrypt,
+            attributesToIncludeInAAD,
+            enforceRandomId,
+          })
+        );
+      }
+    }
+
+    return clone;
   }
 }

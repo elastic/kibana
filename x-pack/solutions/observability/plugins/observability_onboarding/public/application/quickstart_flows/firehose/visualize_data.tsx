@@ -12,7 +12,7 @@ import useInterval from 'react-use/lib/useInterval';
 import { unionBy } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ObservabilityOnboardingAppServices } from '../../..';
+import type { ObservabilityOnboardingAppServices } from '../../..';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { AccordionWithIcon } from '../shared/accordion_with_icon';
 import { GetStartedPanel } from '../shared/get_started_panel';
@@ -23,7 +23,7 @@ import {
 import { AutoRefreshCallout } from './auto_refresh_callout';
 import { ProgressCallout } from './progress_callout';
 import { HAS_DATA_FETCH_INTERVAL } from './utils';
-import { CreateStackOption } from './types';
+import type { CreateStackOption } from './types';
 import { usePopulatedAWSIndexList } from './use_populated_aws_index_list';
 
 const REQUEST_PENDING_STATUS_LIST = [FETCH_STATUS.LOADING, FETCH_STATUS.NOT_INITIATED];

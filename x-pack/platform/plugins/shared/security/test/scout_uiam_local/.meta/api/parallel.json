@@ -1,0 +1,285 @@
+{
+  "sha1": "700d2adc9e04eae84635b1c3e7f95eb3493ef0ea",
+  "tests": [
+    {
+      "id": "1927b5fbbdf0acf-ad7c5ee24e88621",
+      "title": "UIAM access token errors expired token error should include appropriate `reason`",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_access_token_errors.spec.ts",
+        "line": 38,
+        "column": 10
+      }
+    },
+    {
+      "id": "1927b5fbbdf0acf-114f76c667ae30e",
+      "title": "UIAM access token errors invalid token error should include appropriate `reason`",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_access_token_errors.spec.ts",
+        "line": 67,
+        "column": 10
+      }
+    },
+    {
+      "id": "bf75566191cf10a-93c4958fa7ce4dc",
+      "title": "[NON-MKI] UIAM API Keys grant and invalidate functions should be able to grant a UIAM API key with valid UIAM credentials",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_api_keys.spec.ts",
+        "line": 56,
+        "column": 12
+      }
+    },
+    {
+      "id": "bf75566191cf10a-dfb780a1b8a9b5d",
+      "title": "[NON-MKI] UIAM API Keys grant and invalidate functions should be able to invalidate a UIAM API key with valid UIAM credentials",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_api_keys.spec.ts",
+        "line": 105,
+        "column": 12
+      }
+    },
+    {
+      "id": "bf75566191cf10a-9c6f93ffee8b78e",
+      "title": "[NON-MKI] UIAM API Keys grant and invalidate functions should reject grant request with non-UIAM credentials",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_api_keys.spec.ts",
+        "line": 150,
+        "column": 12
+      }
+    },
+    {
+      "id": "bf75566191cf10a-c609d11cacbffde",
+      "title": "[NON-MKI] UIAM API Keys grant and invalidate functions should reject invalidate request with non-UIAM credentials",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_api_keys.spec.ts",
+        "line": 167,
+        "column": 12
+      }
+    },
+    {
+      "id": "bc0ba9db45b243d-ce86892c7392c31",
+      "title": "[NON-MKI] UIAM API Keys convert function should successfully convert a valid Elasticsearch API key into a UIAM API key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_convert_api_keys.spec.ts",
+        "line": 33,
+        "column": 12
+      }
+    },
+    {
+      "id": "bc0ba9db45b243d-5373626b4a5a040",
+      "title": "[NON-MKI] UIAM API Keys convert function should successfully convert multiple Elasticsearch API keys in a single request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_convert_api_keys.spec.ts",
+        "line": 56,
+        "column": 12
+      }
+    },
+    {
+      "id": "bc0ba9db45b243d-0bf9deca0d013f7",
+      "title": "[NON-MKI] UIAM API Keys convert function should return a failed result for an invalid Elasticsearch API key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_convert_api_keys.spec.ts",
+        "line": 81,
+        "column": 12
+      }
+    },
+    {
+      "id": "bc0ba9db45b243d-f2f9662504036d0",
+      "title": "[NON-MKI] UIAM API Keys convert function should handle a mix of valid and invalid keys in a single request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_convert_api_keys.spec.ts",
+        "line": 96,
+        "column": 12
+      }
+    },
+    {
+      "id": "a0d24173047b2e4-f5d34cb95fb2e09",
+      "title": "Create new UIAM session should be able to authenticate as UIAM user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_create_session.spec.ts",
+        "line": 14,
+        "column": 10
+      }
+    },
+    {
+      "id": "a2e99e58c5b1cc7-0cf9fedf6f86f59",
+      "title": "[NON-MKI] Invalidate UIAM session UIAM session tokens should not be usable after logging out",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_invalidate_session.spec.ts",
+        "line": 70,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e3fcf6c9db6e26-d57ad83f33154d2",
+      "title": "[NON-MKI] Refresh UIAM session should be able to authenticate as UIAM user even if the access token has expired",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_refresh_session.spec.ts",
+        "line": 50,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e3fcf6c9db6e26-123fa16328f07b4",
+      "title": "[NON-MKI] Refresh UIAM session should be able to authenticate as UIAM user when the tokens are refreshed concurrently",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_refresh_session.spec.ts",
+        "line": 74,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e3fcf6c9db6e26-69b150baffe6b8c",
+      "title": "[NON-MKI] Refresh UIAM session should fail if both access and refresh tokens have expired",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_refresh_session.spec.ts",
+        "line": 104,
+        "column": 12
+      }
+    },
+    {
+      "id": "66a114b644ef8c1-d120523489f4b91",
+      "title": "[NON-MKI] Use UIAM credentials for various purposes in real and fake requests should be able to use internal UIAM API key in fake requests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
+        "line": 63,
+        "column": 12
+      }
+    },
+    {
+      "id": "66a114b644ef8c1-a17fad2c3d19a6a",
+      "title": "[NON-MKI] Use UIAM credentials for various purposes in real and fake requests should be able to use internal UIAM credentials to grant and invalidate native Elasticsearch API keys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
+        "line": 87,
+        "column": 12
+      }
+    },
+    {
+      "id": "66a114b644ef8c1-815675983298877",
+      "title": "[NON-MKI] Use UIAM credentials for various purposes in real and fake requests should be able to use internal UIAM session token as secondary credentials",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
+        "line": 139,
+        "column": 12
+      }
+    },
+    {
+      "id": "66a114b644ef8c1-e652647627d8be3",
+      "title": "[NON-MKI] Use UIAM credentials for various purposes in real and fake requests should be able to use internal UIAM API key as secondary credentials",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
+        "line": 156,
+        "column": 12
+      }
+    },
+    {
+      "id": "66a114b644ef8c1-a57d711b9152042",
+      "title": "[NON-MKI] Use UIAM credentials for various purposes in real and fake requests should be able to use non-internal/global UIAM API key against Kibana APIs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
+        "line": 177,
+        "column": 12
+      }
+    }
+  ]
+}

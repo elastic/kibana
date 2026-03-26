@@ -8,14 +8,15 @@
  */
 
 import type { MetricsCollector } from '@kbn/core-metrics-server';
+import { lazyObject } from '@kbn/lazy-object';
 
 const createCollector = <T = any>(
   collectReturnValue: any = {}
 ): jest.Mocked<MetricsCollector<T>> => {
-  const collector: jest.Mocked<MetricsCollector<T>> = {
+  const collector: jest.Mocked<MetricsCollector<T>> = lazyObject({
     collect: jest.fn().mockResolvedValue(collectReturnValue),
     reset: jest.fn(),
-  };
+  });
 
   return collector;
 };

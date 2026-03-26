@@ -11,7 +11,7 @@ import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { StoryFn } from '@storybook/react';
 import React from 'react';
 import { CloudProviderIcon } from '.';
-import { CloudProvider } from './get_cloud_provider_icon';
+import type { CloudProvider } from './get_cloud_provider_icon';
 
 export default {
   title: 'Custom Icons/CloudProviderIcon',

@@ -17,6 +17,8 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
+import type { INpreClient } from '@kbn/cps/server/npre';
+import type { CPSServerStart } from '@kbn/cps/server/types';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import { initPostSpacesApi } from './post';
@@ -35,7 +37,7 @@ import {
 describe('Spaces Public API', () => {
   const spacesSavedObjects = createSpaces();
 
-  const setup = async () => {
+  const setup = async (options?: { cpsStart?: CPSServerStart }) => {
     const httpService = httpServiceMock.createSetupContract();
     const router = httpService.createRouter();
     const versionedRouterMock = router.versioned as MockedVersionedRouter;
@@ -58,7 +60,11 @@ describe('Spaces Public API', () => {
 
     const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
 
-    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
+    const clientServiceStart = clientService.start(
+      coreStart,
+      featuresPluginMock.createStart(),
+      options?.cpsStart
+    );
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,
@@ -82,6 +88,30 @@ describe('Spaces Public API', () => {
       routeValidation: (config.validate as any).request as RouteValidatorConfig<{}, {}, {}>,
       routeHandler: handler,
       savedObjectsRepositoryMock,
+      mockCpsStart: options?.cpsStart,
+    };
+  };
+
+  const setupWithCps = async (options: { cpsEnabled: boolean; canPut?: boolean }) => {
+    const npreClient: INpreClient = {
+      getNpre: jest.fn().mockResolvedValue(undefined),
+      canGetNpre: jest.fn().mockResolvedValue(false),
+      putNpre: jest.fn().mockResolvedValue(undefined),
+      deleteNpre: jest.fn().mockResolvedValue(undefined),
+      canPutNpre: jest.fn().mockResolvedValue(options.canPut),
+    };
+
+    const mockCpsStart = options.cpsEnabled
+      ? {
+          createNpreClient: jest.fn().mockReturnValue(npreClient),
+        }
+      : undefined;
+
+    return {
+      ...(await setup({
+        cpsStart: mockCpsStart,
+      })),
+      npreClient,
     };
   };
 
@@ -181,5 +211,128 @@ describe('Spaces Public API', () => {
       { name: 'my new space', description: 'with a description', disabledFeatures: [] },
       { id: 'my-space-id' }
     );
+  });
+
+  describe('Cross-project search', () => {
+    it('creates the space with projectRouting when CPS is enabled and user has permission', async () => {
+      const payload = {
+        id: 'my-space-id',
+        name: 'my new space',
+        description: 'with a description',
+        disabledFeatures: ['foo'],
+        projectRouting: 'project:test-project',
+      };
+
+      const { routeHandler, savedObjectsRepositoryMock, npreClient } = await setupWithCps({
+        cpsEnabled: true,
+        canPut: true,
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        body: payload,
+        method: 'post',
+      });
+
+      const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+      const { status } = response;
+
+      expect(status).toEqual(200);
+      expect(savedObjectsRepositoryMock.create).toHaveBeenCalledTimes(1);
+      expect(npreClient.canPutNpre).toHaveBeenCalled();
+      expect(npreClient.putNpre).toHaveBeenCalledWith(
+        'kibana_space_my-space-id_default',
+        'project:test-project'
+      );
+    });
+
+    it('creates the space without projectRouting when CPS is enabled and user does not submit projectRouting NPRE', async () => {
+      const payload = {
+        id: 'my-space-id',
+        name: 'my new space',
+        description: 'with a description',
+        disabledFeatures: ['foo'],
+      };
+
+      const { routeHandler, savedObjectsRepositoryMock, npreClient } = await setupWithCps({
+        cpsEnabled: true,
+        canPut: false,
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        body: payload,
+        method: 'post',
+      });
+
+      const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+      const { status } = response;
+
+      expect(status).toEqual(200);
+      expect(savedObjectsRepositoryMock.create).toHaveBeenCalledTimes(1);
+      expect(npreClient.canPutNpre).not.toHaveBeenCalled();
+      expect(npreClient.putNpre).not.toHaveBeenCalled();
+    });
+
+    it('returns 403 when CPS is enabled and user does not have permission to create NPRE', async () => {
+      const payload = {
+        id: 'my-space-id',
+        name: 'my new space',
+        description: 'with a description',
+        disabledFeatures: ['foo'],
+        projectRouting: 'project:test-project',
+      };
+
+      const { routeHandler, savedObjectsRepositoryMock, npreClient } = await setupWithCps({
+        cpsEnabled: true,
+        canPut: false,
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        body: payload,
+        method: 'post',
+      });
+
+      const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+      const { status } = response;
+
+      expect(status).toEqual(403);
+      expect(savedObjectsRepositoryMock.create).not.toHaveBeenCalled();
+      expect(npreClient.canPutNpre).toHaveBeenCalled();
+      expect(npreClient.putNpre).not.toHaveBeenCalled();
+    });
+
+    it('creates the space without projectRouting when CPS is disabled', async () => {
+      const payload = {
+        id: 'my-space-id',
+        name: 'my new space',
+        description: 'with a description',
+        disabledFeatures: ['foo'],
+      };
+
+      const { routeHandler, savedObjectsRepositoryMock, npreClient } = await setupWithCps({
+        cpsEnabled: false,
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        body: payload,
+        method: 'post',
+      });
+
+      const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+      const { status } = response;
+
+      expect(status).toEqual(200);
+      expect(savedObjectsRepositoryMock.create).toHaveBeenCalledTimes(1);
+      expect(savedObjectsRepositoryMock.create).toHaveBeenCalledWith(
+        'space',
+        { name: 'my new space', description: 'with a description', disabledFeatures: ['foo'] },
+        { id: 'my-space-id' }
+      );
+      expect(npreClient.canPutNpre).not.toHaveBeenCalled();
+      expect(npreClient.putNpre).not.toHaveBeenCalled();
+    });
   });
 });

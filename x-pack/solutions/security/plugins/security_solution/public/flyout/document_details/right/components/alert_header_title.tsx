@@ -9,7 +9,6 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { Notes } from './notes';
 import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
 import { DocumentStatus } from './status';
@@ -26,14 +25,16 @@ import {
   RISK_SCORE_TITLE_TEST_ID,
 } from './test_ids';
 import { Assignees } from './assignees';
-import { FlyoutTitle } from '../../../shared/components/flyout_title';
-import { getAlertTitle } from '../../shared/utils';
+import { FlyoutTitle } from '../../../../flyout_v2/shared/components/flyout_title';
+import { getAlertTitle } from '../../../../flyout_v2/document/utils/get_header_title';
 import { AlertHeaderBlock } from '../../../shared/components/alert_header_block';
 
 // minWidth for each block, allows to switch for a 1 row 4 blocks to 2 rows with 2 block each
 const blockStyles = {
   minWidth: 280,
 };
+
+const urlParamOverride = { timeline: { isOpen: false } };
 
 /**
  * Alert details flyout right section header
@@ -43,17 +44,13 @@ export const AlertHeaderTitle = memo(() => {
     dataFormattedForFieldBrowser,
     eventId,
     scopeId,
-    isPreview,
+    isRulePreview,
     refetchFlyoutData,
     getFieldsData,
   } = useDocumentDetailsContext();
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
-  );
-
   const { ruleName, timestamp, ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
-  const title = useMemo(() => getAlertTitle({ ruleName }), [ruleName]);
-  const href = useRuleDetailsLink({ ruleId: !isPreview ? ruleId : null });
+  const title = useMemo(() => getAlertTitle(ruleName), [ruleName]);
+  const href = useRuleDetailsLink({ ruleId: !isRulePreview ? ruleId : null }, urlParamOverride);
   const ruleTitle = useMemo(
     () =>
       href ? (
@@ -119,11 +116,11 @@ export const AlertHeaderTitle = memo(() => {
           eventId={eventId}
           assignedUserIds={alertAssignees}
           onAssigneesUpdated={onAssigneesUpdated}
-          isPreview={isPreview}
+          showAssignees={!isRulePreview}
         />
       </AlertHeaderBlock>
     ),
-    [alertAssignees, eventId, isPreview, onAssigneesUpdated]
+    [alertAssignees, eventId, isRulePreview, onAssigneesUpdated]
   );
 
   return (
@@ -134,46 +131,30 @@ export const AlertHeaderTitle = memo(() => {
       <EuiSpacer size="xs" />
       {ruleTitle}
       <EuiSpacer size="m" />
-      {securitySolutionNotesDisabled ? (
-        <EuiFlexGroup
-          direction="row"
-          gutterSize="s"
-          responsive={false}
-          wrap
-          data-test-subj={ALERT_SUMMARY_PANEL_TEST_ID}
-        >
-          <EuiFlexItem>
-            <DocumentStatus />
-          </EuiFlexItem>
-          <EuiFlexItem>{riskScore}</EuiFlexItem>
-          <EuiFlexItem>{assignees}</EuiFlexItem>
-        </EuiFlexGroup>
-      ) : (
-        <EuiFlexGroup
-          direction="row"
-          gutterSize="s"
-          responsive={false}
-          wrap
-          data-test-subj={ALERT_SUMMARY_PANEL_TEST_ID}
-        >
-          <EuiFlexItem css={blockStyles}>
-            <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
-              <EuiFlexItem>
-                <DocumentStatus />
-              </EuiFlexItem>
-              <EuiFlexItem>{riskScore}</EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem css={blockStyles}>
-            <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
-              <EuiFlexItem>{assignees}</EuiFlexItem>
-              <EuiFlexItem>
-                <Notes />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
+      <EuiFlexGroup
+        direction="row"
+        gutterSize="s"
+        responsive={false}
+        wrap
+        data-test-subj={ALERT_SUMMARY_PANEL_TEST_ID}
+      >
+        <EuiFlexItem css={blockStyles}>
+          <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+            <EuiFlexItem>
+              <DocumentStatus />
+            </EuiFlexItem>
+            <EuiFlexItem>{riskScore}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem css={blockStyles}>
+          <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+            <EuiFlexItem>{assignees}</EuiFlexItem>
+            <EuiFlexItem>
+              <Notes />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 });

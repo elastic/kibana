@@ -8,14 +8,19 @@
  */
 
 import { isString } from 'lodash';
+import { LICENSE_TYPE_GOLD, REPORTING_EXPORT_TYPES } from '@kbn/reporting-common';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { ExportType } from '.';
 
 type GetCallbackFn = (item: ExportType) => boolean;
 
 export class ExportTypesRegistry {
+  private licensing: LicensingPluginSetup;
   private _map: Map<string, ExportType> = new Map();
 
-  constructor() {}
+  constructor(licensing: LicensingPluginSetup) {
+    this.licensing = licensing;
+  }
 
   register(item: ExportType): void {
     if (!isString(item.id)) {
@@ -25,6 +30,9 @@ export class ExportTypesRegistry {
     if (this._map.has(item.id)) {
       throw new Error(`'item' with id ${item.id} has already been registered`);
     }
+
+    // register feature usage
+    this.registerFeatureUsageName(item);
 
     this._map.set(item.id, item);
   }
@@ -87,5 +95,16 @@ export class ExportTypesRegistry {
     }
 
     return result;
+  }
+
+  private registerFeatureUsageName(item: ExportType) {
+    REPORTING_EXPORT_TYPES.forEach((exportType) => {
+      if (item.shouldNotifyUsage(exportType)) {
+        this.licensing.featureUsage.register(
+          item.getFeatureUsageName(exportType),
+          LICENSE_TYPE_GOLD
+        );
+      }
+    });
   }
 }

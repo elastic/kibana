@@ -22,7 +22,7 @@ jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
 
 describe('MoreActionsRowControlColumn', () => {
   it('should render component with all options', async () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsUpdate: true });
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         cases: {
@@ -33,6 +33,7 @@ describe('MoreActionsRowControlColumn', () => {
               createComment: true,
             }),
             getRuleIdFromEvent: jest.fn(),
+            getObservablesFromEcs: jest.fn().mockReturnValue([]),
           },
         },
       },
@@ -58,7 +59,7 @@ describe('MoreActionsRowControlColumn', () => {
   });
 
   it('should not show cases actions if user is not authorized', async () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsUpdate: true });
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         cases: {
@@ -69,6 +70,7 @@ describe('MoreActionsRowControlColumn', () => {
               createComment: false,
             }),
             getRuleIdFromEvent: jest.fn(),
+            getObservablesFromEcs: jest.fn().mockReturnValue([]),
           },
         },
       },
@@ -95,7 +97,7 @@ describe('MoreActionsRowControlColumn', () => {
   });
 
   it('should not show tags actions if user is not authorized', async () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: false });
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsUpdate: false });
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         cases: {
@@ -106,6 +108,7 @@ describe('MoreActionsRowControlColumn', () => {
               createComment: true,
             }),
             getRuleIdFromEvent: jest.fn(),
+            getObservablesFromEcs: jest.fn().mockReturnValue([]),
           },
         },
       },

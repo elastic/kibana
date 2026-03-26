@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 
 import { COMBINED_JOB_STATE } from '../model_snapshots_table';
 
@@ -25,8 +25,11 @@ export const CloseJobConfirm: FC<Props> = ({
   hideCloseJobModalVisible,
   forceCloseJob,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={
         combinedJobState === COMBINED_JOB_STATE.OPEN_AND_RUNNING
           ? i18n.translate('xpack.ml.modelSnapshotTable.closeJobConfirm.stopAndClose.title', {
@@ -36,6 +39,7 @@ export const CloseJobConfirm: FC<Props> = ({
               defaultMessage: 'Close job?',
             })
       }
+      titleProps={{ id: modalTitleId }}
       onCancel={hideCloseJobModalVisible}
       onConfirm={forceCloseJob}
       cancelButtonText={i18n.translate('xpack.ml.modelSnapshotTable.closeJobConfirm.cancelButton', {

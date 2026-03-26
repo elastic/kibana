@@ -55,6 +55,8 @@ export const args = ({
     '--hide-scrollbars',
     // allow screenshot clip region to go outside of the viewport
     `--mainFrameClipsContent=false`,
+    // fix screenshot text kerning
+    '--font-render-hinting=none',
   ];
 
   if (windowSize) {
@@ -82,10 +84,6 @@ export const args = ({
     flags.push('--enable-gpu');
   } else {
     flags.push('--disable-gpu');
-  }
-
-  if (os.arch() === 'linux') {
-    flags.push('--disable-setuid-sandbox');
   }
 
   return [...flags, 'about:blank'];

@@ -250,6 +250,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
     } = useFetchPolicyData(
       {
         kuery: searchKuery,
+        // @ts-expect-error upgrade typescript v5.9.3
         sortOrder,
         sortField,
         perPage,
@@ -260,6 +261,9 @@ export const PolicySelector = memo<PolicySelectorProps>(
       view
     );
 
+    // Store the initial unfiltered total count for consistent display
+    const [unfilteredTotalCount, setUnfilteredTotalCount] = useState<number | null>(null);
+
     const selectedCount = useMemo(() => {
       return (
         selectedPolicyIds.length +
@@ -267,9 +271,21 @@ export const PolicySelector = memo<PolicySelectorProps>(
       );
     }, [additionalListItems, selectedPolicyIds.length]);
 
+    // Set the unfiltered total count when we first get data without search
+    useEffect(() => {
+      if (policyListResponse && !userSearchValue && unfilteredTotalCount === null) {
+        setUnfilteredTotalCount(policyListResponse.total);
+      }
+    }, [policyListResponse, userSearchValue, unfilteredTotalCount]);
+
     const totalItems: number = useMemo(() => {
-      return (policyListResponse?.total ?? 0) + additionalListItems?.length ?? 0;
-    }, [additionalListItems?.length, policyListResponse?.total]);
+      // Use stored unfiltered total when available, otherwise fall back to current total
+      const baseTotalCount = unfilteredTotalCount ?? policyListResponse?.total ?? 0;
+      // Count only selectable additional items, excluding group labels
+      const selectableAdditionalItems =
+        additionalListItems?.filter((item) => !item.isGroupLabel).length ?? 0;
+      return baseTotalCount + selectableAdditionalItems;
+    }, [additionalListItems, policyListResponse?.total, unfilteredTotalCount]);
 
     // @ts-expect-error EUI does not seem to have correctly types the `windowProps` which come from React-Window `FixedSizeList` component
     const listProps: EuiSelectableProps['listProps'] = useMemo(() => {
@@ -282,6 +298,8 @@ export const PolicySelector = memo<PolicySelectorProps>(
       };
     }, [useCheckbox]);
 
+    // The full list of items (options) that will be displayed in the EuiSelectable. This includes both
+    // items from the API results as well as any "additionalListItems" passed in to the component
     const selectableOptions: Array<EuiSelectableOption<OptionPolicyData>> = useMemo(() => {
       if (!policyListResponse) {
         return [];
@@ -310,6 +328,10 @@ export const PolicySelector = memo<PolicySelectorProps>(
             appPath={urlPath}
             target="_blank"
             data-test-subj={getTestId(`policy-${policy.id}-policyLink`)}
+            // @ts-expect-error upgrade typescript v5.9.3
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
           >
             <FormattedMessage
               id="xpack.securitySolution.effectedPolicySelect.viewPolicyLinkLabel"
@@ -348,24 +370,27 @@ export const PolicySelector = memo<PolicySelectorProps>(
         .concat(
           ...additionalListItems
             .filter(
-              (additionalItem) => !(view === 'selected-list' && additionalItem.checked !== 'on')
+              (additionalItem) =>
+                additionalItem.isGroupLabel ||
+                !(view === 'selected-list' && additionalItem.checked !== 'on')
             )
             .map((additionalItem) => {
               return {
                 disabled: isDisabled,
                 ...additionalItem,
                 'data-type': 'customItem',
-                prepend: useCheckbox ? (
-                  <EuiCheckbox
-                    id={htmlIdGenerator()()}
-                    onChange={NOOP}
-                    checked={additionalItem.checked === 'on'}
-                    disabled={additionalItem.disabled ?? isDisabled}
-                    data-test-subj={getTestId(
-                      `${additionalItem['data-test-subj'] ?? 'additionalItem'}-checkbox`
-                    )}
-                  />
-                ) : null,
+                prepend:
+                  useCheckbox && !additionalItem.isGroupLabel ? (
+                    <EuiCheckbox
+                      id={htmlIdGenerator()()}
+                      onChange={NOOP}
+                      checked={additionalItem.checked === 'on'}
+                      disabled={additionalItem.disabled ?? isDisabled}
+                      data-test-subj={getTestId(
+                        `${additionalItem['data-test-subj'] ?? 'additionalItem'}-checkbox`
+                      )}
+                    />
+                  ) : null,
               } as unknown as EuiSelectableOption<OptionPolicyData>;
             })
         );
@@ -509,26 +534,29 @@ export const PolicySelector = memo<PolicySelectorProps>(
         let updatedAdditionalItems = additionalListItems;
 
         for (const option of selectableOptions) {
-          if (isSelectAll) {
-            if (!isCustomOption(option)) {
-              policiesToSelect.push(option.policy.id);
+          // only select/unselect items that are not disabled and not a group label item
+          if (!option.disabled && !option.isGroupLabel) {
+            if (isSelectAll) {
+              if (!isCustomOption(option)) {
+                policiesToSelect.push(option.policy.id);
+              } else {
+                updatedAdditionalItems = getUpdatedAdditionalListItems(
+                  { ...option, checked: 'on' },
+                  updatedAdditionalItems
+                );
+              }
             } else {
-              updatedAdditionalItems = getUpdatedAdditionalListItems(
-                { ...option, checked: 'on' },
-                updatedAdditionalItems
-              );
-            }
-          } else {
-            if (!isCustomOption(option)) {
-              policiesToUnSelect.push(option.policy.id);
-            } else {
-              updatedAdditionalItems = getUpdatedAdditionalListItems(
-                {
-                  ...option,
-                  checked: undefined,
-                },
-                updatedAdditionalItems
-              );
+              if (!isCustomOption(option)) {
+                policiesToUnSelect.push(option.policy.id);
+              } else {
+                updatedAdditionalItems = getUpdatedAdditionalListItems(
+                  {
+                    ...option,
+                    checked: undefined,
+                  },
+                  updatedAdditionalItems
+                );
+              }
             }
           }
         }

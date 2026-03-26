@@ -10,9 +10,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RequestHandler } from '@kbn/core/server';
 
-import { groupBy, isEmpty, isEqual, keyBy } from 'lodash';
-
-import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
+import { groupBy, isEmpty, isEqual, keyBy, uniq } from 'lodash';
 
 import { populatePackagePolicyAssignedAgentsCount } from '../../services/package_policies/populate_package_policy_assigned_agents_count';
 
@@ -47,6 +45,7 @@ import {
   PackagePolicyNotFoundError,
   PackagePolicyRequestError,
   CustomPackagePolicyNotAllowedForAgentlessError,
+  FleetError,
 } from '../../errors';
 import {
   getInstallation,
@@ -60,12 +59,8 @@ import {
   packagePolicyToSimplifiedPackagePolicy,
 } from '../../../common/services/simplified_package_policy_helper';
 
-import type {
-  SimplifiedInputs,
-  SimplifiedPackagePolicy,
-} from '../../../common/services/simplified_package_policy_helper';
+import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 import { runWithCache } from '../../services/epm/packages/cache';
-import { validateAgentlessInputs } from '../../../common/services/agentless_policy_helper';
 
 import {
   isSimplifiedCreatePackagePolicyRequest,
@@ -75,6 +70,8 @@ import {
 } from './utils';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
+
+const deduplicateIds = (ids: string[]) => uniq(ids);
 
 export const getPackagePoliciesHandler: FleetRequestHandler<
   undefined,
@@ -115,7 +112,8 @@ export const bulkGetPackagePoliciesHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const soClient = fleetContext.internalSoClient;
   const limitedToPackages = fleetContext.limitedToPackages;
-  const { ids, ignoreMissing } = request.body;
+  const ignoreMissing = request.body.ignoreMissing;
+  const ids = deduplicateIds(request.body.ids);
 
   try {
     const items = await packagePolicyService.getByIDs(soClient, ids, {
@@ -230,15 +228,25 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
+
   const { force, id, package: pkg, ...newPolicy } = request.body;
   if ('spaceIds' in newPolicy) {
     delete newPolicy.spaceIds;
   }
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
+
   let wasPackageAlreadyInstalled = false;
 
   const spaceId = fleetContext.spaceId;
+
+  if (
+    appContextService.getExperimentalFeatures().disableAgentlessLegacyAPI &&
+    request.body.supports_agentless
+  ) {
+    throw new FleetError(
+      'To create agentless package policies, use the Fleet agentless policies API.'
+    );
+  }
+
   try {
     let newPackagePolicy: NewPackagePolicy;
     if (isSimplifiedCreatePackagePolicyRequest(newPolicy)) {
@@ -279,7 +287,6 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         id,
         force,
         spaceId,
-        authorizationHeader,
       },
       context,
       request
@@ -397,10 +404,6 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         pkgInfo,
         { experimental_data_stream_features: pkg.experimental_data_stream_features }
       );
-      validateAgentlessInputs(
-        body?.inputs as SimplifiedInputs,
-        body?.supports_agentless || newData.supports_agentless
-      );
     } else {
       // complete request
       const { overrides, ...restOfBody } = body as TypeOf<
@@ -423,17 +426,18 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         package: pkg ?? packagePolicy.package,
         inputs: restOfBody.inputs ?? packagePolicyInputs,
         vars: restOfBody.vars ?? packagePolicy.vars,
+        var_group_selections: restOfBody.var_group_selections ?? packagePolicy.var_group_selections,
         supports_agentless: restOfBody.supports_agentless ?? packagePolicy.supports_agentless,
+        supports_cloud_connector:
+          restOfBody.supports_cloud_connector ?? packagePolicy.supports_cloud_connector,
+        cloud_connector_id: restOfBody.cloud_connector_id ?? packagePolicy.cloud_connector_id,
       } as NewPackagePolicy;
 
       if (overrides) {
         newData.overrides = overrides;
       }
     }
-    validateAgentlessInputs(
-      newData.inputs,
-      newData.supports_agentless || packagePolicy.supports_agentless
-    );
+
     newData.inputs = alignInputsAndStreams(newData.inputs);
 
     if (
@@ -487,11 +491,12 @@ export const deletePackagePolicyHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
+  const packagePolicyIds = deduplicateIds(request.body.packagePolicyIds);
 
   const body: PostDeletePackagePoliciesResponse = await packagePolicyService.delete(
     soClient,
     esClient,
-    request.body.packagePolicyIds,
+    packagePolicyIds,
     { user, force: request.body.force, skipUnassignFromAgentPolicies: request.body.force },
     context,
     request
@@ -546,10 +551,11 @@ export const upgradePackagePolicyHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
+  const packagePolicyIds = deduplicateIds(request.body.packagePolicyIds);
   const body: UpgradePackagePolicyResponse = await packagePolicyService.bulkUpgrade(
     soClient,
     esClient,
-    request.body.packagePolicyIds,
+    packagePolicyIds,
     { user }
   );
 
@@ -574,7 +580,7 @@ export const dryRunUpgradePackagePolicyHandler: RequestHandler<
   const soClient = (await context.core).savedObjects.client;
 
   const body: UpgradePackagePolicyDryRunResponse = [];
-  const { packagePolicyIds } = request.body;
+  const packagePolicyIds = deduplicateIds(request.body.packagePolicyIds);
   await runWithCache(async () => {
     for (const id of packagePolicyIds) {
       const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id);

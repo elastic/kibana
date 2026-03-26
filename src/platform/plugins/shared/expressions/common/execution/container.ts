@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  StateContainer,
-  createStateContainer,
-} from '@kbn/kibana-utils-plugin/common/state_containers';
-import { ExecutorState, defaultState as executorDefaultState } from '../executor';
-import { ExpressionAstExpression } from '../ast';
-import { ExpressionValue } from '../expression_types';
+import type { StateContainer } from '@kbn/kibana-utils-plugin/common/state_containers';
+import { createStateContainer } from '@kbn/kibana-utils-plugin/common/state_containers';
+import type { ExecutorState } from '../executor';
+import { defaultState as executorDefaultState } from '../executor';
+import type { ExpressionAstExpression } from '../ast';
+import type { ExpressionValue } from '../expression_types';
 
 export interface ExecutionState<Output = ExpressionValue> extends ExecutorState {
   ast: ExpressionAstExpression;

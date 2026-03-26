@@ -7,21 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
 import { asyncMap } from '@kbn/std';
-import { TriggerRegistry, ActionRegistry, TriggerToActionsRegistry } from '../types';
-import {
-  ActionInternal,
-  Action,
-  ActionDefinition,
-  FrequentCompatibilityChangeAction,
-} from '../actions';
-import { TriggerInternal } from '../triggers/trigger_internal';
-import { TriggerContract } from '../triggers/trigger_contract';
+import type { Trigger, ActionRegistry, TriggerToActionsRegistry } from '../types';
+import type { Action, ActionDefinition, FrequentCompatibilityChangeAction } from '../actions';
+import { ActionInternal } from '../actions';
 import { UiActionsExecutionService } from './ui_actions_execution_service';
+import { triggers } from '../triggers';
 
 export interface UiActionsServiceParams {
-  readonly triggers?: TriggerRegistry;
   readonly actions?: ActionRegistry;
 
   /**
@@ -32,43 +25,22 @@ export interface UiActionsServiceParams {
 
 export class UiActionsService {
   public readonly executionService = new UiActionsExecutionService();
-  protected readonly triggers: TriggerRegistry;
   protected readonly actions: ActionRegistry;
   protected readonly triggerToActions: TriggerToActionsRegistry;
 
-  constructor({
-    triggers = new Map(),
-    actions = new Map(),
-    triggerToActions = new Map(),
-  }: UiActionsServiceParams = {}) {
-    this.triggers = triggers;
+  constructor({ actions = new Map(), triggerToActions = new Map() }: UiActionsServiceParams = {}) {
     this.actions = actions;
     this.triggerToActions = triggerToActions;
   }
 
-  public readonly registerTrigger = (trigger: Trigger) => {
-    if (this.triggers.has(trigger.id)) {
-      throw new Error(`Trigger [trigger.id = ${trigger.id}] already registered.`);
-    }
-
-    const triggerInternal = new TriggerInternal(this, trigger);
-
-    this.triggers.set(trigger.id, triggerInternal);
-    this.triggerToActions.set(trigger.id, []);
-  };
-
-  public readonly hasTrigger = (triggerId: string): boolean => {
-    return Boolean(this.triggers.get(triggerId));
-  };
-
-  public readonly getTrigger = (triggerId: string): TriggerContract => {
-    const trigger = this.triggers.get(triggerId);
+  public readonly getTrigger = (triggerId: string): Trigger => {
+    const trigger = triggers[triggerId];
 
     if (!trigger) {
       throw new Error(`Trigger [triggerId = ${triggerId}] does not exist.`);
     }
 
-    return trigger.contract;
+    return trigger;
   };
 
   /**
@@ -117,7 +89,7 @@ export class UiActionsService {
   };
 
   public readonly attachAction = (triggerId: string, actionId: string): void => {
-    const trigger = this.triggers.get(triggerId);
+    const trigger = triggers[triggerId];
 
     if (!trigger) {
       throw new Error(
@@ -125,15 +97,15 @@ export class UiActionsService {
       );
     }
 
-    const actionIds = this.triggerToActions.get(triggerId);
+    const actionIds = this.triggerToActions.get(triggerId) ?? [];
 
-    if (!actionIds!.find((id) => id === actionId)) {
-      this.triggerToActions.set(triggerId, [...actionIds!, actionId]);
+    if (!actionIds.find((id) => id === actionId)) {
+      this.triggerToActions.set(triggerId, [...actionIds, actionId]);
     }
   };
 
   public readonly detachAction = (triggerId: string, actionId: string) => {
-    const trigger = this.triggers.get(triggerId);
+    const trigger = triggers[triggerId];
 
     if (!trigger) {
       throw new Error(
@@ -231,14 +203,27 @@ export class UiActionsService {
     }) as FrequentCompatibilityChangeAction[];
   };
 
-  /**
-   * @deprecated
-   *
-   * Use `plugins.uiActions.getTrigger(triggerId).exec(params)` instead.
-   */
-  public readonly executeTriggerActions = async (triggerId: string, context: object) => {
+  public readonly executeTriggerActions = async (
+    triggerId: string,
+    context: object,
+    alwaysShowPopup?: boolean
+  ) => {
     const trigger = this.getTrigger(triggerId);
-    await trigger.exec(context);
+
+    const actions = await this.getTriggerCompatibleActions(triggerId, context);
+
+    await Promise.all([
+      actions.map((action) =>
+        this.executionService.execute(
+          {
+            action,
+            context,
+            trigger,
+          },
+          alwaysShowPopup
+        )
+      ),
+    ]);
   };
 
   /**
@@ -246,7 +231,6 @@ export class UiActionsService {
    */
   public readonly clear = () => {
     this.actions.clear();
-    this.triggers.clear();
     this.triggerToActions.clear();
   };
 
@@ -256,14 +240,12 @@ export class UiActionsService {
    * to this instance of `UiActionsService` are only available within this instance.
    */
   public readonly fork = (): UiActionsService => {
-    const triggers: TriggerRegistry = new Map();
     const actions: ActionRegistry = new Map();
     const triggerToActions: TriggerToActionsRegistry = new Map();
 
-    for (const [key, value] of this.triggers.entries()) triggers.set(key, value);
     for (const [key, value] of this.actions.entries()) actions.set(key, value);
     for (const [key, value] of this.triggerToActions.entries())
       triggerToActions.set(key, [...value]);
-    return new UiActionsService({ triggers, actions, triggerToActions });
+    return new UiActionsService({ actions, triggerToActions });
   };
 }

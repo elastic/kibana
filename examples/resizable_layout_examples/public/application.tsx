@@ -10,7 +10,8 @@
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import React, { ReactNode, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -41,7 +42,6 @@ const ResizableSection = ({
   flexPanelContent: ReactNode;
 }) => {
   const [fixedPanelSize, setFixedPanelSize] = useState(initialFixedPanelSize);
-  const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [fixedPanelNode] = useState(() =>
     createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
   );
@@ -76,7 +76,7 @@ const ResizableSection = ({
   `;
 
   return (
-    <div ref={setContainer} css={fullWidthAndHeightCss}>
+    <div css={fullWidthAndHeightCss}>
       <InPortal node={fixedPanelNode}>
         <div css={fixedPanelCss}>{fixedPanelContent}</div>
       </InPortal>
@@ -86,7 +86,6 @@ const ResizableSection = ({
       <ResizableLayout
         mode={layoutMode}
         direction={layoutDirection}
-        container={container}
         fixedPanelSize={fixedPanelSize}
         minFixedPanelSize={minFixedPanelSize}
         minFlexPanelSize={minFlexPanelSize}

@@ -9,7 +9,7 @@ import { TestScheduler } from 'rxjs/testing';
 import { ServiceStatusLevels } from '@kbn/core/server';
 import { licenseMock } from '../common/licensing.mock';
 import { getPluginStatus$ } from './plugin_status';
-import type { ILicense } from '../common/types';
+import type { ILicense } from '@kbn/licensing-types';
 
 const getTestScheduler = () =>
   new TestScheduler((actual, expected) => {

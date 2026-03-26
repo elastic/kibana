@@ -6,10 +6,8 @@
  */
 import qs from 'query-string';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import {
-  DEPENDENCY_OVERVIEW_LOCATOR_ID,
-  DependencyOverviewParams,
-} from '@kbn/deeplinks-observability/locators';
+import type { DependencyOverviewParams } from '@kbn/deeplinks-observability/locators';
+import { DEPENDENCY_OVERVIEW_LOCATOR_ID } from '@kbn/deeplinks-observability/locators';
 
 export type DependencyOverviewLocator = LocatorPublic<DependencyOverviewParams>;
 

@@ -9,15 +9,12 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { KPIsSection } from './kpis_section';
 import { ALERTS_BY_HOST_PANEL } from './alerts_progress_bar_by_host_name_panel';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { TestProviders } from '../../../../common/mock';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useSummaryChartData } from '../../alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data';
 
 jest.mock('../../../../common/hooks/use_selector');
 jest.mock('../../alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data');
-const dataView: DataView = createStubDataView({ spec: {} });
 
 describe('<KPIsSection />', () => {
   beforeEach(() => {
@@ -35,7 +32,7 @@ describe('<KPIsSection />', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <KPIsSection dataView={dataView} />
+        <KPIsSection signalIndexName="test" />
       </TestProviders>
     );
 

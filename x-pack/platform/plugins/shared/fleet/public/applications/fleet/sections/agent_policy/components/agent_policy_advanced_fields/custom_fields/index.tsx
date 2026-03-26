@@ -84,6 +84,7 @@ export const CustomFields: React.FunctionComponent<Props> = ({
             <>
               <EuiSpacer size="s" />
               <EuiCallOut
+                announceOnMount
                 title={
                   <FormattedMessage
                     id="xpack.fleet.agentPolicyForm.globalDataTagUnsupportedInputTitle"
@@ -91,7 +92,7 @@ export const CustomFields: React.FunctionComponent<Props> = ({
                   />
                 }
                 color="warning"
-                iconType="alert"
+                iconType="warning"
                 size="s"
               >
                 <p>

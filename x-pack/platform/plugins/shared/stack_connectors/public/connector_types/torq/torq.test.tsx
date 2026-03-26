@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 import { registerConnectorTypes } from '..';
 import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/torq/constants';
 
-const ACTION_TYPE_ID = '.torq';
 let actionTypeModel: ActionTypeModel;
 
 beforeAll(() => {
   const connectorTypeRegistry = new TypeRegistry<ActionTypeModel>();
   ExperimentalFeaturesService.init({ experimentalFeatures: experimentalFeaturesMock });
   registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
-  const getResult = connectorTypeRegistry.get(ACTION_TYPE_ID);
+  const getResult = connectorTypeRegistry.get(CONNECTOR_ID);
   if (getResult !== null) {
     actionTypeModel = getResult;
   }
@@ -26,7 +26,7 @@ beforeAll(() => {
 
 describe('actionTypeRegistry.get() works', () => {
   test('action type static data is as expected', () => {
-    expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
+    expect(actionTypeModel.id).toEqual(CONNECTOR_ID);
   });
 });
 
@@ -36,7 +36,7 @@ describe('torq action params validation', () => {
       body: '{"message": "{test}"}',
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
       errors: { body: [] },
     });
   });
@@ -46,7 +46,7 @@ describe('torq action params validation', () => {
       body: '{"message": {{number}}}',
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
       errors: { body: [] },
     });
   });
@@ -56,7 +56,7 @@ describe('torq action params validation', () => {
       body: '',
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         body: ['Body is required.'],
       },
@@ -68,7 +68,7 @@ describe('torq action params validation', () => {
       body: 'some text',
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         body: ['Body must be a valid JSON.'],
       },

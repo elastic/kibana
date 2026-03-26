@@ -18,7 +18,7 @@ exports[`LineToolTipContent renders correctly against snapshot 1`] = `
           class="euiBadge__text emotion-euiBadge__text"
         >
           <div
-            class="euiFlexGroup etu9os00 emotion-euiFlexGroup-l-flexStart-stretch-column-EuiFlexGroupStyled"
+            class="euiFlexGroup etu9os00 emotion-euiFlexGroup-m-flexStart-stretch-column-EuiFlexGroupStyled"
           >
             <div
               class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -130,7 +130,7 @@ exports[`LineToolTipContent renders correctly against snapshot 1`] = `
           class="euiBadge__text emotion-euiBadge__text"
         >
           <div
-            class="euiFlexGroup etu9os00 emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-EuiFlexGroupStyled"
+            class="euiFlexGroup etu9os00 emotion-euiFlexGroup-responsive-m-flexStart-stretch-row-EuiFlexGroupStyled"
           >
             <div
               class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -163,7 +163,7 @@ exports[`LineToolTipContent renders correctly against snapshot when rendering cl
           class="euiBadge__text emotion-euiBadge__text"
         >
           <div
-            class="euiFlexGroup etu9os00 emotion-euiFlexGroup-l-flexStart-stretch-column-EuiFlexGroupStyled"
+            class="euiFlexGroup etu9os00 emotion-euiFlexGroup-m-flexStart-stretch-column-EuiFlexGroupStyled"
           >
             <div
               class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -275,7 +275,7 @@ exports[`LineToolTipContent renders correctly against snapshot when rendering cl
           class="euiBadge__text emotion-euiBadge__text"
         >
           <div
-            class="euiFlexGroup etu9os00 emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-EuiFlexGroupStyled"
+            class="euiFlexGroup etu9os00 emotion-euiFlexGroup-responsive-m-flexStart-stretch-row-EuiFlexGroupStyled"
           >
             <div
               class="euiFlexItem emotion-euiFlexItem-growZero"

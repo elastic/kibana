@@ -22,7 +22,9 @@ export const sessionMock = {
     invalidate: jest.fn(),
   }),
 
-  createValue: (sessionValue: Partial<SessionValue> = {}): SessionValue => ({
+  createValue: <TState = unknown>(
+    sessionValue: Partial<SessionValue<TState>> = {}
+  ): SessionValue<TState> => ({
     sid: 'some-long-sid',
     username: mockAuthenticatedUser().username,
     userProfileId: 'uid',
@@ -30,7 +32,7 @@ export const sessionMock = {
     idleTimeoutExpiration: null,
     lifespanExpiration: null,
     createdAt: 1234567890,
-    state: undefined,
+    state: undefined as TState,
     metadata: { index: sessionIndexMock.createValue(sessionValue.metadata?.index) },
     ...sessionValue,
   }),

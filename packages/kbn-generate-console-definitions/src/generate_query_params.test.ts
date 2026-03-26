@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SpecificationTypes } from './types';
+import type { SpecificationTypes } from './types';
 import { generateQueryParams } from './generate_query_params';
 import { getMockProperty, mockRequestType, mockSchema } from './helpers/test_helpers';
 

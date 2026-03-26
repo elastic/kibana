@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { registerOrphanActionsSpaceRoute } from './orphan_actions_space_handler';
 import { registerActionFileInfoRoute } from './file_info_handler';
 import { registerActionFileDownloadRoutes } from './file_download_handler';
 import { registerActionDetailsRoutes } from './details';
@@ -15,7 +16,6 @@ import { registerActionStateRoutes } from './state';
 import { registerActionListRoutes } from './list';
 import { registerResponseActionRoutes } from './response_actions';
 import { registerCustomScriptsRoute } from './custom_scripts_handler';
-// wrap route registration
 
 export function registerActionRoutes(
   router: SecuritySolutionPluginRouter,
@@ -30,4 +30,5 @@ export function registerActionRoutes(
   registerActionFileDownloadRoutes(router, endpointContext);
   registerActionFileInfoRoute(router, endpointContext);
   registerCustomScriptsRoute(router, endpointContext);
+  registerOrphanActionsSpaceRoute(router, endpointContext.service);
 }

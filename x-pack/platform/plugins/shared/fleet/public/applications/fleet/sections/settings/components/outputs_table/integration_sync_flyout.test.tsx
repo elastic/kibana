@@ -64,7 +64,7 @@ describe('IntegrationSyncFlyout', () => {
         },
         updated_at: '2025-05-19T15:40:26.554Z',
         sync_status: SyncStatus.WARNING,
-        warning: 'Unable to remove package 1password:1.32.0',
+        warning: { message: 'Unable to remove package 1password:1.32.0', title: 'warning' },
       },
       {
         package_name: 'apache',

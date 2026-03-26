@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -19,11 +20,12 @@ import {
   useEuiTheme,
   EuiPopover,
   EuiButtonIcon,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DocLinksStart } from '@kbn/core/public';
-import { IndexWarning, IndexWarningType } from '../../../../../../../../../common/types';
+import type { DocLinksStart } from '@kbn/core/public';
+import type { IndexWarning, IndexWarningType } from '@kbn/reindex-service-plugin/common';
 
 export const hasIndexWarning = (
   warnings: IndexWarning[],
@@ -70,6 +72,8 @@ const InfoPopover: React.FunctionComponent<{
 
   const onTogglePopover = () => setIsPopoverOpen((isOpen) => !isOpen);
 
+  const popoverId = useGeneratedHtmlId();
+
   const popoverStyles = css`
     margin-top: -${euiTheme.size.xs};
   `;
@@ -79,16 +83,17 @@ const InfoPopover: React.FunctionComponent<{
       button={
         <EuiButtonIcon
           display="empty"
-          iconType="iInCircle"
+          iconType="info"
           onClick={onTogglePopover}
           css={popoverStyles}
+          aria-labelledby={popoverId}
         />
       }
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       anchorPosition="leftCenter"
     >
-      <EuiText size="s" style={{ width: 300 }}>
+      <EuiText size="s" style={{ width: 300 }} id={popoverId}>
         {children}
       </EuiText>
     </EuiPopover>
@@ -225,7 +230,7 @@ export const MakeIndexReadonlyWarningCheckbox: React.FunctionComponent<WarningCh
           <FormattedMessage
             tagName="b"
             id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.makeIndexReadonlyWarningTitle"
-            defaultMessage="Flag {indexName} index as read-only"
+            defaultMessage="Set {indexName} index to read-only"
             values={{
               indexName: <EuiCode>{meta?.indexName}</EuiCode>,
             }}

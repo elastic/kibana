@@ -12,9 +12,10 @@ import type {
   RouteRepositoryClient,
 } from '@kbn/server-route-repository';
 import { formatRequest } from '@kbn/server-route-repository-utils';
-import { FetchOptions } from '..';
+import type { FetchOptions } from '..';
 import type { APIEndpoint, DatasetQualityServerRouteRepository } from '../../server/routes';
-import { CallApi, callApi } from './call_api';
+import type { CallApi } from './call_api';
+import { callApi } from './call_api';
 
 export type DatasetQualityClientOptions = Omit<
   FetchOptions,
@@ -52,17 +53,20 @@ export let callDatasetQualityApi: DatasetQualityClient = () => {
 export function createCallDatasetQualityApi(core: CoreStart | CoreSetup) {
   callDatasetQualityApi = ((endpoint, options) => {
     const { params } = options as unknown as {
-      params?: Partial<Record<string, any>>;
+      params?: Partial<Record<string, unknown>>;
     };
 
-    const { method, pathname } = formatRequest(endpoint, params?.path);
+    const { method, pathname } = formatRequest(
+      endpoint,
+      (params?.path as Record<string, unknown>) ?? {}
+    );
 
     return callApi(core, {
       ...options,
       method,
       pathname,
-      body: params?.body,
-      query: params?.query,
+      body: params?.body as Record<string, unknown> | undefined,
+      query: params?.query as Record<string, unknown> | undefined,
     } as unknown as Parameters<CallApi>[1]);
   }) as DatasetQualityClient;
 }

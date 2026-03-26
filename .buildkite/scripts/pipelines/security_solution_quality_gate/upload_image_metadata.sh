@@ -3,11 +3,11 @@
 source .buildkite/scripts/common/util.sh
 
 if [ "$KIBANA_MKI_QUALITY_GATE" == "1" ]; then
-    echo "Triggered by quality gate!"
-    triggered_by="Serverless Quality Gate."
+    echo "Triggered by Serverless Kibana Quality Gate"
+    triggered_by="Serverless Quality Gate"
 else
-    echo "Triggered by Serverless Kibana Periodic Pipeline."
-    triggered_by="Serverless Kibana Periodic Pipeline."
+    echo "Triggered by Serverless Kibana Periodic Pipeline"
+    triggered_by="Serverless Kibana Periodic Pipeline"
 fi
 
 KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless"

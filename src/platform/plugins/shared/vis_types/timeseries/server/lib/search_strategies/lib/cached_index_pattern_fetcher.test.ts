@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import { fetchIndexPattern } from '../../../../common/index_patterns_utils';
-import {
-  getCachedIndexPatternFetcher,
-  CachedIndexPatternFetcher,
-} from './cached_index_pattern_fetcher';
+import type { CachedIndexPatternFetcher } from './cached_index_pattern_fetcher';
+import { getCachedIndexPatternFetcher } from './cached_index_pattern_fetcher';
 
 jest.mock('../../../../common/index_patterns_utils');
 

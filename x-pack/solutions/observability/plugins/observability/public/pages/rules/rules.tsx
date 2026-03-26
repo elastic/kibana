@@ -38,6 +38,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
     application,
     triggersActionsUi: { ruleTypeRegistry, getRulesSettingsLink: RulesSettingsLink },
     serverless,
+    cps,
   } = services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
@@ -119,28 +120,24 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
   ];
 
   const rightSideItems = [
-    ...(activeTab === RULES_TAB_NAME
-      ? [
-          <EuiButton
-            data-test-subj="createRuleButton"
-            disabled={!authorizedToCreateAnyRules}
-            fill
-            iconType="plusInCircle"
-            key="create-alert"
-            onClick={() => setRuleTypeModalVisibility(true)}
-          >
-            <FormattedMessage
-              id="xpack.observability.rules.addRuleButtonLabel"
-              defaultMessage="Create rule"
-            />
-          </EuiButton>,
-        ]
-      : []),
+    <EuiButton
+      data-test-subj="createRuleButton"
+      disabled={!authorizedToCreateAnyRules}
+      fill
+      iconType="plusInCircle"
+      key="create-alert"
+      onClick={() => setRuleTypeModalVisibility(true)}
+    >
+      <FormattedMessage
+        id="xpack.observability.rules.addRuleButtonLabel"
+        defaultMessage="Create rule"
+      />
+    </EuiButton>,
     <RulesSettingsLink />,
     <EuiButtonEmpty
       data-test-subj="documentationLink"
       href={docLinks.links.observability.createAlerts}
-      iconType="help"
+      iconType="question"
       target="_blank"
     >
       <FormattedMessage
@@ -181,10 +178,17 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
               http.basePath.prepend(paths.observability.createRule(ruleTypeId))
             );
           }}
+          onSelectTemplate={(templateId) => {
+            setRuleTypeModalVisibility(false);
+            return application.navigateToUrl(
+              http.basePath.prepend(paths.observability.createRuleFromTemplate(templateId))
+            );
+          }}
           http={http}
           toasts={toasts}
           registeredRuleTypes={ruleTypeRegistry.list()}
           filteredRuleTypes={filteredRuleTypes}
+          cps={cps}
         />
       )}
     </ObservabilityPageTemplate>

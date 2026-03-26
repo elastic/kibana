@@ -14,6 +14,7 @@ import type {
 } from '@kbn/rule-data-utils';
 import { ALERT_URL, ALERT_UUID } from '@kbn/rule-data-utils';
 import { intersection as lodashIntersection, isArray } from 'lodash';
+import { setWith } from '@kbn/safer-lodash-set';
 
 import { getAlertDetailsUrl } from '../../../../../common/utils/alert_detail_path';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
@@ -30,10 +31,10 @@ import {
   ALERT_GROUP_INDEX,
 } from '../../../../../common/field_maps/field_names';
 import type {
-  BaseFieldsLatest,
-  EqlBuildingBlockFieldsLatest,
-  EqlShellFieldsLatest,
-  WrappedFieldsLatest,
+  DetectionAlertLatest,
+  EqlBuildingBlockAlertLatest,
+  EqlShellAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { SuppressionTerm } from '../utils';
 
@@ -54,8 +55,8 @@ export interface BuildAlertGroupFromSequence {
 
 // eql shell alerts can have a subAlerts property
 // when suppression is used in EQL sequence queries
-export type WrappedEqlShellOptionalSubAlertsType = WrappedFieldsLatest<EqlShellFieldsLatest> & {
-  subAlerts?: Array<WrappedFieldsLatest<EqlShellFieldsLatest>>;
+export type WrappedEqlShellOptionalSubAlertsType = WrappedAlert<EqlShellAlertLatest> & {
+  subAlerts?: Array<WrappedAlert<EqlShellAlertLatest>>;
 };
 
 /**
@@ -70,8 +71,8 @@ export const buildAlertGroupFromSequence = ({
   sequence,
   buildReasonMessage,
 }: BuildAlertGroupFromSequence): {
-  shellAlert: WrappedFieldsLatest<EqlShellFieldsLatest> | undefined;
-  buildingBlocks: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+  shellAlert: WrappedAlert<EqlShellAlertLatest> | undefined;
+  buildingBlocks: Array<WrappedAlert<EqlBuildingBlockAlertLatest>>;
 } => {
   const {
     alertTimestampOverride,
@@ -82,7 +83,10 @@ export const buildAlertGroupFromSequence = ({
     ruleExecutionLogger,
     publicBaseUrl,
   } = sharedParams;
-  const ancestors: Ancestor[] = sequence.events.flatMap((event) => buildAncestors(event));
+  const sequenceWithoutMissingEvents = sequence.events.filter((event) => event.missing !== true);
+  const ancestors: Ancestor[] = sequenceWithoutMissingEvents.flatMap((event) =>
+    buildAncestors(event)
+  );
   if (ancestors.some((ancestor) => ancestor?.rule === completeRule.alertId)) {
     return { shellAlert: undefined, buildingBlocks: [] };
   }
@@ -91,9 +95,9 @@ export const buildAlertGroupFromSequence = ({
   // We'll add the group ID and index fields
   // after creating the shell alert later on
   // since that's when the group ID is determined.
-  let baseAlerts: BaseFieldsLatest[] = [];
+  let baseAlerts: DetectionAlertLatest[] = [];
   try {
-    baseAlerts = sequence.events.map((event) =>
+    baseAlerts = sequenceWithoutMissingEvents.map((event) =>
       transformHitToAlert({
         sharedParams,
         doc: event,
@@ -103,15 +107,15 @@ export const buildAlertGroupFromSequence = ({
       })
     );
   } catch (error) {
-    ruleExecutionLogger.error(error);
+    ruleExecutionLogger.debug(`Error transforming matched events to alerts\nError: ${error}`);
     return { shellAlert: undefined, buildingBlocks: [] };
   }
 
   // The ID of each building block alert depends on all of the other building blocks as well,
   // so we generate the IDs after making all the BaseFields
   const buildingBlockIds = generateBuildingBlockIds(baseAlerts);
-  const wrappedBaseFields: Array<WrappedFieldsLatest<BaseFieldsLatest>> = baseAlerts.map(
-    (block, i): WrappedFieldsLatest<BaseFieldsLatest> => ({
+  const wrappedBaseFields: Array<WrappedAlert<DetectionAlertLatest>> = baseAlerts.map(
+    (block, i): WrappedAlert<DetectionAlertLatest> => ({
       _id: buildingBlockIds[i],
       _index: '',
       _source: {
@@ -134,7 +138,7 @@ export const buildAlertGroupFromSequence = ({
     publicBaseUrl,
     intendedTimestamp,
   });
-  const sequenceAlert: WrappedFieldsLatest<EqlShellFieldsLatest> = {
+  const sequenceAlert: WrappedAlert<EqlShellAlertLatest> = {
     _id: shellAlert[ALERT_UUID],
     _index: '',
     _source: shellAlert,
@@ -142,7 +146,7 @@ export const buildAlertGroupFromSequence = ({
 
   // Finally, we have the group id from the shell alert so we can convert the BaseFields into EqlBuildingBlocks
   const wrappedBuildingBlocks = wrappedBaseFields.map(
-    (block, i): WrappedFieldsLatest<EqlBuildingBlockFieldsLatest> => {
+    (block, i): WrappedAlert<EqlBuildingBlockAlertLatest> => {
       const alertUrl = getAlertDetailsUrl({
         alertId: block._id,
         index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
@@ -168,7 +172,7 @@ export const buildAlertGroupFromSequence = ({
 };
 
 export interface BuildAlertRootParams {
-  wrappedBuildingBlocks: Array<WrappedFieldsLatest<BaseFieldsLatest>>;
+  wrappedBuildingBlocks: Array<WrappedAlert<DetectionAlertLatest>>;
   completeRule: CompleteRule<RuleParams>;
   spaceId: string | null | undefined;
   buildReasonMessage: BuildReasonMessage;
@@ -187,7 +191,7 @@ export const buildAlertRoot = ({
   alertTimestampOverride,
   publicBaseUrl,
   intendedTimestamp,
-}: BuildAlertRootParams): EqlShellFieldsLatest => {
+}: BuildAlertRootParams): EqlShellAlertLatest => {
   const mergedAlerts = objectArrayIntersection(wrappedBuildingBlocks.map((alert) => alert._source));
   const reason = buildReasonMessage({
     name: completeRule.ruleConfig.name,
@@ -243,11 +247,139 @@ export const objectArrayIntersection = (objects: object[]) => {
   }
 };
 
+const isPlainObject = (v: unknown): v is Record<string, unknown> =>
+  typeof v === 'object' && v !== null && !Array.isArray(v);
+
 /**
- * Finds the intersection of two objects by recursively
- * finding the "intersection" of each of of their common keys'
+ * Flattens an object to path-value pairs and records which paths came from
+ * dot-notation keys. A path is "from dot" when it was produced by expanding
+ * a single key that contained '.'.
+ */
+const flattenToPathValuesWithNotation = (
+  obj: object
+): { pathValues: [string[], unknown][]; dotPaths: Set<string> } => {
+  const pathValues: [string[], unknown][] = [];
+  const dotPaths = new Set<string>();
+  const stack: [object, string[]][] = [[obj, []]];
+  while (stack.length > 0) {
+    const [o, prefix] = stack.pop() as [object, string[]];
+    for (const [k, v] of Object.entries(o)) {
+      const path = prefix.concat(k.includes('.') ? k.split('.') : [k]);
+      const keyWasDot = k.includes('.');
+      if (isPlainObject(v)) {
+        stack.push([v, path]);
+      } else {
+        pathValues.push([path, v]);
+        if (keyWasDot) {
+          dotPaths.add(path.join('.'));
+        }
+      }
+    }
+  }
+  return { pathValues, dotPaths };
+};
+
+/**
+ * Flattens an object to path-value pairs (paths as string arrays).
+ * Dot-notation keys are expanded so 'user.email' and user: { email } yield the same path.
+ */
+const flattenToPathValues = (obj: object): [string[], unknown][] =>
+  flattenToPathValuesWithNotation(obj).pathValues;
+
+/**
+ * Builds a nested object from path-value pairs.
+ */
+const unflatten = (pathValues: [string[], unknown][]): Record<string, unknown> => {
+  const result: Record<string, unknown> = {};
+  for (const [path, value] of pathValues) {
+    setWith(result, path, value);
+  }
+  return result;
+};
+
+/** Result of intersecting two values: either a literal value to set, or a nested pair to process later. */
+type IntersectionResult =
+  | { kind: 'value'; value: unknown }
+  | { kind: 'nested'; a: Record<string, unknown>; b: Record<string, unknown> };
+
+/**
+ * Computes the intersection of two values (primitives, arrays, or nested objects).
+ * For nested objects, returns a descriptor so the caller can push work onto the stack.
+ */
+const intersectValues = (aVal: unknown, bVal: unknown): IntersectionResult | undefined => {
+  if (isPlainObject(aVal) && isPlainObject(bVal)) {
+    return { kind: 'nested', a: aVal, b: bVal };
+  }
+  if (aVal === bVal) {
+    return { kind: 'value', value: aVal };
+  }
+  if (isArray(aVal) || isArray(bVal)) {
+    const arrA = isArray(aVal) ? aVal : [aVal];
+    const arrB = isArray(bVal) ? bVal : [bVal];
+    return { kind: 'value', value: lodashIntersection(arrA, arrB) };
+  }
+  return undefined;
+};
+
+const isEmptyOrAllUndefined = (o: Record<string, unknown>): boolean =>
+  Object.keys(o).length === 0 || Object.values(o).every((v) => v === undefined);
+
+/** Removes nested objects that are empty or have only undefined values (iterative). */
+const pruneEmptyNestedObjects = (obj: Record<string, unknown>): void => {
+  type PruneItem = [Record<string, unknown> | null, string | null, Record<string, unknown>];
+  const pruneStack: PruneItem[] = [[null, null, obj]];
+  const toPrune: PruneItem[] = [];
+  while (pruneStack.length > 0) {
+    const item = pruneStack.pop() as PruneItem;
+    toPrune.push(item);
+    const [, , o] = item;
+    for (const [k, v] of Object.entries(o)) {
+      if (isPlainObject(v)) {
+        pruneStack.push([o, k, v]);
+      }
+    }
+  }
+  for (let i = toPrune.length - 1; i >= 0; i--) {
+    const [parent, key, o] = toPrune[i];
+    if (parent !== null && key !== null && isEmptyOrAllUndefined(o)) {
+      delete parent[key];
+    }
+  }
+};
+
+const hasDefinedValues = (obj: Record<string, unknown>): boolean =>
+  Object.values(obj).some((v) => v !== undefined);
+
+/**
+ * Converts a normalized (nested) intersection result to output form:
+ * paths that were dot notation in both inputs stay as dot keys; others stay nested.
+ */
+const applyNotationPreference = (
+  intersectionNested: Record<string, unknown>,
+  aDotPaths: Set<string>,
+  bDotPaths: Set<string>
+): Record<string, unknown> => {
+  const pathValues = flattenToPathValues(intersectionNested);
+  const result: Record<string, unknown> = {};
+  for (const [path, value] of pathValues) {
+    const pathStr = path.join('.');
+    if (aDotPaths.has(pathStr) && bDotPaths.has(pathStr)) {
+      result[pathStr] = value;
+    } else {
+      setWith(result, path, value);
+    }
+  }
+  return result;
+};
+
+/**
+ * Finds the intersection of two objects iteratively by
+ * finding the "intersection" of each of their common keys'
  * values. If an intersection cannot be found between a key's
  * values, the value will be undefined in the returned object.
+ * Dot-notation keys (e.g. 'user.email') and nested notation
+ * (e.g. user: { email }) are treated as the same; the result
+ * is always in nested form.
  *
  * @param a object
  * @param b object
@@ -257,40 +389,40 @@ export const objectPairIntersection = (a: object | undefined, b: object | undefi
   if (a === undefined || b === undefined) {
     return undefined;
   }
-  const intersection: Record<string, unknown> = {};
-  Object.entries(a).forEach(([key, aVal]) => {
-    if (key in b) {
-      const bVal = (b as Record<string, unknown>)[key];
-      if (
-        typeof aVal === 'object' &&
-        !(aVal instanceof Array) &&
-        aVal !== null &&
-        typeof bVal === 'object' &&
-        !(bVal instanceof Array) &&
-        bVal !== null
-      ) {
-        intersection[key] = objectPairIntersection(aVal, bVal);
-      } else if (aVal === bVal) {
-        intersection[key] = aVal;
-      } else if (isArray(aVal) && isArray(bVal)) {
-        intersection[key] = lodashIntersection(aVal, bVal);
-      } else if (isArray(aVal) && !isArray(bVal)) {
-        intersection[key] = lodashIntersection(aVal, [bVal]);
-      } else if (!isArray(aVal) && isArray(bVal)) {
-        intersection[key] = lodashIntersection([aVal], bVal);
+  const { pathValues: aPathValues, dotPaths: aDotPaths } = flattenToPathValuesWithNotation(a);
+  const { pathValues: bPathValues, dotPaths: bDotPaths } = flattenToPathValuesWithNotation(b);
+  const aNorm = unflatten(aPathValues);
+  const bNorm = unflatten(bPathValues);
+  const intersectionNested: Record<string, unknown> = {};
+  const stack: [Record<string, unknown>, Record<string, unknown>, Record<string, unknown>][] = [
+    [intersectionNested, aNorm, bNorm],
+  ];
+  while (stack.length > 0) {
+    const [target, aObj, bObj] = stack.pop() as [
+      Record<string, unknown>,
+      Record<string, unknown>,
+      Record<string, unknown>
+    ];
+    for (const [key, aVal] of Object.entries(aObj)) {
+      if (key in bObj) {
+        const result = intersectValues(aVal, bObj[key]);
+        if (result === undefined) {
+          // eslint-disable-next-line no-continue
+          continue;
+        }
+        if (result.kind === 'nested') {
+          const nextTarget: Record<string, unknown> = {};
+          target[key] = nextTarget;
+          stack.push([nextTarget, result.a, result.b]);
+        } else {
+          target[key] = result.value;
+        }
       }
     }
-  });
-  // Count up the number of entries that are NOT undefined in the intersection
-  // If there are no keys OR all entries are undefined, return undefined
-  if (
-    Object.values(intersection).reduce(
-      (acc: number, value) => (value !== undefined ? acc + 1 : acc),
-      0
-    ) === 0
-  ) {
-    return undefined;
-  } else {
-    return intersection;
   }
+  pruneEmptyNestedObjects(intersectionNested);
+  if (!hasDefinedValues(intersectionNested)) {
+    return undefined;
+  }
+  return applyNotationPreference(intersectionNested, aDotPaths, bDotPaths);
 };

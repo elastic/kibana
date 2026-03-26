@@ -68,20 +68,20 @@ export interface AssigneesProps {
   onAssigneesUpdated?: () => void;
 
   /**
-   * Boolean to indicate whether it is a preview flyout
+   * Boolean to indicate whether to show assignees
    */
-  isPreview?: boolean;
+  showAssignees?: boolean;
 }
 
 /**
  * Document assignees details displayed in flyout right section header
  */
 export const Assignees = memo(
-  ({ eventId, assignedUserIds, onAssigneesUpdated, isPreview }: AssigneesProps) => {
+  ({ eventId, assignedUserIds, onAssigneesUpdated, showAssignees = true }: AssigneesProps) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const upsellingMessage = useUpsellingMessage('alert_assignments');
 
-    const { hasIndexWrite } = useAlertsPrivileges();
+    const { hasAlertsUpdate } = useAlertsPrivileges();
     const setAlertAssignees = useSetAlertAssignees();
 
     const uids = useMemo(() => new Set(assignedUserIds), [assignedUserIds]);
@@ -119,7 +119,7 @@ export const Assignees = memo(
           button={
             <UpdateAssigneesButton
               togglePopover={togglePopover}
-              isDisabled={!hasIndexWrite || !isPlatinumPlus}
+              isDisabled={!hasAlertsUpdate || !isPlatinumPlus}
               toolTipMessage={
                 upsellingMessage ??
                 i18n.translate(
@@ -147,7 +147,7 @@ export const Assignees = memo(
     }, [
       assignedUserIds,
       handleApplyAssignees,
-      hasIndexWrite,
+      hasAlertsUpdate,
       isPlatinumPlus,
       isPopoverOpen,
       searchInputId,
@@ -157,7 +157,7 @@ export const Assignees = memo(
 
     return (
       <>
-        {isPreview ? (
+        {!showAssignees ? (
           <div data-test-subj={ASSIGNEES_EMPTY_TEST_ID}>{getEmptyTagValue()}</div>
         ) : (
           <EuiFlexGroup gutterSize="none" responsive={false} data-test-subj={ASSIGNEES_TEST_ID}>

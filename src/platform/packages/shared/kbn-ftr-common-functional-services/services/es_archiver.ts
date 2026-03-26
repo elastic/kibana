@@ -8,7 +8,7 @@
  */
 
 import { EsArchiver } from '@kbn/es-archiver';
-import { FtrProviderContext } from './ftr_provider_context';
+import type { FtrProviderContext } from './ftr_provider_context';
 import { extendEsArchiver } from './kibana_server';
 
 export function EsArchiverProvider({ getService }: FtrProviderContext): EsArchiver {
@@ -30,6 +30,7 @@ export function EsArchiverProvider({ getService }: FtrProviderContext): EsArchiv
     kibanaServer,
     retry,
     defaults: config.get('uiSettings.defaults'),
+    globalDefaults: config.get('uiSettings.globalDefaults'),
   });
 
   return esArchiver;

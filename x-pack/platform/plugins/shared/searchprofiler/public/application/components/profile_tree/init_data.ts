@@ -7,9 +7,9 @@
 
 import { cloneDeep } from 'lodash';
 import { flow } from 'fp-ts/function';
-import { Targets, Shard, ShardSerialized } from '../../types';
+import type { Targets, Shard, ShardSerialized } from '../../types';
 import { calcTimes, initTree, normalizeIndices, sortIndices } from './unsafe_utils';
-import { IndexMap } from './types';
+import type { IndexMap } from './types';
 
 /**
  * Functions prefixed with "mutate" change values by reference. Be careful when using these!

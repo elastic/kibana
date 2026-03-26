@@ -8,8 +8,8 @@
  */
 
 import type { TimeRange } from '@kbn/es-query';
-import { RefreshInterval } from '../..';
-import { SavedQuery, SavedQueryAttributes } from '../../../common/types';
+import type { RefreshInterval } from '@kbn/data-service-server';
+import type { SavedQuery, SavedQueryAttributes } from '../../../common/types';
 
 export type SavedQueryTimeFilter = TimeRange & {
   refreshInterval: RefreshInterval;

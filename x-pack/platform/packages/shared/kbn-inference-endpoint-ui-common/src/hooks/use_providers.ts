@@ -6,10 +6,11 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { useQuery } from '@tanstack/react-query';
-import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
-import { IToasts } from '@kbn/core/public';
-import { INFERENCE_ENDPOINT_INTERNAL_API_VERSION, InferenceProvider } from '../..';
+import { useQuery } from '@kbn/react-query';
+import type { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
+import type { IToasts } from '@kbn/core/public';
+import type { InferenceProvider } from '../..';
+import { INFERENCE_ENDPOINT_INTERNAL_API_VERSION } from '../..';
 import * as i18n from '../translations';
 
 export const getProviders = async (http: HttpSetup): Promise<InferenceProvider[]> => {

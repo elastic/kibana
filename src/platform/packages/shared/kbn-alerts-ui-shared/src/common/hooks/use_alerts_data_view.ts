@@ -25,6 +25,7 @@ export interface UseAlertsDataViewParams {
   http: HttpStart;
   dataViewsService: DataViewsContract;
   toasts: ToastsStart;
+  fetchUnifiedAlertsFields?: boolean;
 
   // Params
   /**
@@ -97,6 +98,7 @@ export const useAlertsDataView = ({
   dataViewsService,
   toasts,
   ruleTypeIds,
+  fetchUnifiedAlertsFields = false,
 }: UseAlertsDataViewParams): UseAlertsDataViewResult => {
   const includesSecurity = ruleTypeIds.some(isSiemRuleType);
   const isOnlySecurity = ruleTypeIds.length > 0 && ruleTypeIds.every(isSiemRuleType);
@@ -110,8 +112,9 @@ export const useAlertsDataView = ({
   } = useFetchAlertsIndexNamesQuery(
     { http, ruleTypeIds },
     {
-      // Don't fetch index names when ruleTypeIds includes both Security Solution and other features
-      enabled: !!ruleTypeIds.length && (isOnlySecurity || !includesSecurity),
+      // Don't fetch index names when ruleTypeIds includes both Security Solution and other features or using new api to fetch fields
+      enabled:
+        !!ruleTypeIds.length && (isOnlySecurity || !includesSecurity) && !fetchUnifiedAlertsFields,
     }
   );
 
@@ -123,8 +126,8 @@ export const useAlertsDataView = ({
   } = useFetchAlertsFieldsQuery(
     { http, ruleTypeIds },
     {
-      // Don't fetch fields when ruleTypeIds includes Security Solution
-      enabled: !!ruleTypeIds.length && !includesSecurity,
+      // Don't fetch fields when ruleTypeIds includes Security Solution or using new api to fetch fields
+      enabled: !!ruleTypeIds.length && !includesSecurity && !fetchUnifiedAlertsFields,
     }
   );
 
@@ -170,7 +173,7 @@ export const useAlertsDataView = ({
 
   return useMemo(() => {
     let isLoading: boolean;
-    if (!ruleTypeIds.length || hasMixedFeatureIds) {
+    if (!ruleTypeIds.length || hasMixedFeatureIds || fetchUnifiedAlertsFields) {
       isLoading = false;
     } else {
       if (isOnlySecurity) {
@@ -197,5 +200,6 @@ export const useAlertsDataView = ({
     isLoadingFields,
     isLoadingIndexNames,
     isOnlySecurity,
+    fetchUnifiedAlertsFields,
   ]);
 };

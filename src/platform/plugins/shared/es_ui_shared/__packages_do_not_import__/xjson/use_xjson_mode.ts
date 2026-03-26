@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useState, Dispatch } from 'react';
+import type { Dispatch } from 'react';
+import { useState } from 'react';
 
 import { collapseLiteralStrings, expandLiteralStrings } from './json_xjson_translation_tools';
 

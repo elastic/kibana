@@ -8,11 +8,11 @@
  */
 
 import type { IExternalUrl } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import type { IServiceSettings } from './vega_map_view/service_settings/service_settings_types';
-import { VegaParser } from '../data_model/vega_parser';
-import { createVegaStateRestorer } from '../lib/vega_state_restorer';
+import type { VegaParser } from '../data_model/vega_parser';
+import type { createVegaStateRestorer } from '../lib/vega_state_restorer';
 
 interface VegaViewParams {
   parentEl: HTMLDivElement;

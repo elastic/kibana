@@ -23,7 +23,8 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { NodeInfo } from '@kbn/core-node-server';
 import type { KibanaGroup } from '@kbn/projects-solutions-groups';
 import { PluginType } from '@kbn/core-base-common';
-import { PluginsConfig, PluginsConfigType, config } from '../plugins_config';
+import type { PluginsConfigType } from '../plugins_config';
+import { PluginsConfig, config } from '../plugins_config';
 import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
 
@@ -182,6 +183,7 @@ describe('plugins discovery system', () => {
 
     instanceInfo = {
       uuid: 'instance-uuid',
+      airgapped: false,
     };
 
     nodeInfo = {

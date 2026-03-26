@@ -13,7 +13,8 @@
       "_search/scroll",
       "_search/scroll/{scroll_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/clear-scroll-api.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-clear-scroll",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-clear-scroll",
     "availability": {
       "stack": true,
       "serverless": true

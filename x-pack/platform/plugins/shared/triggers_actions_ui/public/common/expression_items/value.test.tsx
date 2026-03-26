@@ -6,14 +6,23 @@
  */
 
 import * as React from 'react';
-import { shallow } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ValueExpression } from './value';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+
+const renderWithIntl = (ui: React.ReactElement) => {
+  return render(
+    <IntlProvider locale="en" messages={{}}>
+      {ui}
+    </IntlProvider>
+  );
+};
 
 describe('value expression', () => {
-  it('renders description and value', () => {
-    const wrapper = shallow(
+  it('renders description and value', async () => {
+    const user = userEvent.setup();
+    renderWithIntl(
       <ValueExpression
         description="test"
         value={1000}
@@ -21,33 +30,22 @@ describe('value expression', () => {
         onChangeSelectedValue={jest.fn()}
       />
     );
-    expect(wrapper.find('[data-test-subj="valueFieldTitle"]')).toMatchInlineSnapshot(`
-          <ClosablePopoverTitle
-            data-test-subj="valueFieldTitle"
-            onClose={[Function]}
-          >
-            test
-          </ClosablePopoverTitle>
-        `);
-    expect(wrapper.find('[data-test-subj="valueFieldNumberForm"]')).toMatchInlineSnapshot(`
-      <EuiFormRow
-        data-test-subj="valueFieldNumberForm"
-        error={Array []}
-        isInvalid={false}
-      >
-        <EuiFieldNumber
-          data-test-subj="valueFieldNumber"
-          isInvalid={false}
-          min={0}
-          onChange={[Function]}
-          value={1000}
-        />
-      </EuiFormRow>
-    `);
+
+    expect(screen.getByTestId('valueExpression')).toBeInTheDocument();
+    expect(screen.getByText('test')).toBeInTheDocument();
+    expect(screen.getByText('1000')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('valueExpression'));
+
+    expect(await screen.findByTestId('valueFieldTitle')).toBeInTheDocument();
+    expect(screen.getByTestId('valueFieldNumber')).toBeInTheDocument();
+    expect(screen.getByTestId('valueFieldTitle')).toHaveTextContent('test');
+    expect(screen.getByTestId('valueFieldNumber')).toHaveValue(1000);
   });
 
-  it('renders errors', () => {
-    const wrapper = shallow(
+  it('renders errors', async () => {
+    const user = userEvent.setup();
+    renderWithIntl(
       <ValueExpression
         description="test"
         value={1000}
@@ -55,29 +53,19 @@ describe('value expression', () => {
         onChangeSelectedValue={jest.fn()}
       />
     );
-    expect(wrapper.find('[data-test-subj="valueFieldNumberForm"]')).toMatchInlineSnapshot(`
-      <EuiFormRow
-        data-test-subj="valueFieldNumberForm"
-        error={
-          Array [
-            "value is not valid",
-          ]
-        }
-        isInvalid={true}
-      >
-        <EuiFieldNumber
-          data-test-subj="valueFieldNumber"
-          isInvalid={true}
-          min={0}
-          onChange={[Function]}
-          value={1000}
-        />
-      </EuiFormRow>
-    `);
+
+    await user.click(screen.getByTestId('valueExpression'));
+
+    const numberInput = await screen.findByTestId('valueFieldNumber');
+
+    expect(numberInput).toBeInTheDocument();
+    expect(numberInput).toBeInvalid();
+    expect(screen.getByText('value is not valid')).toBeInTheDocument();
   });
 
   it('renders closed popover initially and opens on click', async () => {
-    const wrapper = mountWithIntl(
+    const user = userEvent.setup();
+    renderWithIntl(
       <ValueExpression
         description="test"
         value={1000}
@@ -86,23 +74,20 @@ describe('value expression', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="valueExpression"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="valueFieldTitle"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="valueFieldNumber"]').exists()).toBeFalsy();
+    expect(screen.getByTestId('valueExpression')).toBeInTheDocument();
+    expect(screen.queryByTestId('valueFieldTitle')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('valueFieldNumber')).not.toBeInTheDocument();
 
-    wrapper.find('[data-test-subj="valueExpression"]').last().simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    await user.click(screen.getByTestId('valueExpression'));
 
-    expect(wrapper.find('[data-test-subj="valueFieldTitle"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="valueFieldNumber"]').exists()).toBeTruthy();
+    expect(await screen.findByTestId('valueFieldTitle')).toBeInTheDocument();
+    expect(await screen.findByTestId('valueFieldNumber')).toBeInTheDocument();
   });
 
   it('emits onChangeSelectedValue action when value is updated', async () => {
+    const user = userEvent.setup();
     const onChangeSelectedValue = jest.fn();
-    const wrapper = mountWithIntl(
+    renderWithIntl(
       <ValueExpression
         description="test"
         value={1000}
@@ -111,14 +96,12 @@ describe('value expression', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="valueExpression"]').last().simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-    wrapper
-      .find('input[data-test-subj="valueFieldNumber"]')
-      .simulate('change', { target: { value: 3000 } });
-    expect(onChangeSelectedValue).toHaveBeenCalledWith(3000);
+    await user.click(screen.getByTestId('valueExpression'));
+
+    const numberInput = await screen.findByTestId('valueFieldNumber');
+    onChangeSelectedValue.mockClear();
+    fireEvent.change(numberInput, { target: { value: '3000' } });
+
+    expect(onChangeSelectedValue).toHaveBeenLastCalledWith(3000);
   });
 });

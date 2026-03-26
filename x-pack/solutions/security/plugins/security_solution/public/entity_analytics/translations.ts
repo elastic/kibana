@@ -21,31 +21,53 @@ export const HIDE_USERS_RISK_SCORE = i18n.translate(
   }
 );
 
-export const RISK_ENGINE_STATUS = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.status',
+export const LOADING_RISK_ENGINE_SETTINGS = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.loadingRiskEngineSettings',
+  {
+    defaultMessage: 'Loading risk engine settings...',
+  }
+);
+
+export const ENTITY_ANALYTICS_STATUS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.status',
   {
     defaultMessage: 'Status',
   }
 );
 
-export const RISK_ENGINE_STATUS_ON = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.statusOn',
+export const ENTITY_ANALYTICS_STATUS_ON = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.statusOn',
   {
     defaultMessage: 'On',
   }
 );
 
-export const RISK_ENGINE_STATUS_OFF = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.statusOff',
+export const ENTITY_ANALYTICS_STATUS_OFF = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.statusOff',
   {
     defaultMessage: 'Off',
   }
 );
 
-export const ENTITY_RISK_SCORING = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.entityRiskScoring',
+export const RISK_SCORE_GENERAL_SECTION = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.generalSection',
   {
-    defaultMessage: 'Entity risk score',
+    defaultMessage: 'General',
+  }
+);
+
+export const RISK_SCORE_RETAINMENT_CHECKBOX = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.generalSection.retainmentCheckbox',
+  {
+    defaultMessage: 'Retain last calculated risk scores',
+  }
+);
+
+export const RISK_SCORE_RETAINMENT_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.generalSection.retainmentTooltip',
+  {
+    defaultMessage:
+      'When selected, entities keep their last calculated risk score until a new input (for example, an alert) triggers recalculation. When deselected, risk scores reset to zero if no new inputs are found.',
   }
 );
 
@@ -110,13 +132,6 @@ export const PREVIEW_ERROR_TRY_AGAIN = i18n.translate(
   }
 );
 
-export const PREVIEW_QUERY_ERROR_TITLE = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.queryErrorTitle',
-  {
-    defaultMessage: 'Invalid query',
-  }
-);
-
 export const ERROR_PANEL_TITLE = i18n.translate(
   'xpack.securitySolution.riskScore.errorPanel.title',
   {
@@ -138,31 +153,24 @@ export const ERROR_PANEL_ERRORS = i18n.translate(
   }
 );
 
-export const CHECK_PRIVILEGES = i18n.translate(
-  'xpack.securitySolution.riskScore.errors.privileges.check',
+export const ENTITY_ANALYTICS_TURNED_ON = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.moduleTurnedOn',
   {
-    defaultMessage: 'Check privileges',
+    defaultMessage: 'Entity Analytics has been turned on',
   }
 );
 
-export const NEED_TO_HAVE = i18n.translate(
-  'xpack.securitySolution.riskScore.errors.privileges.needToHave',
+export const ENTITY_ANALYTICS_TURNED_OFF = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.moduleTurnedOff',
   {
-    defaultMessage: 'You need to have:',
+    defaultMessage: 'Entity Analytics has been turned off',
   }
 );
 
-export const RISK_ENGINE_TURNED_ON = i18n.translate(
-  'xpack.securitySolution.riskScore.moduleTurnedOn',
+export const ENTITY_ANALYTICS_TOGGLE_ERROR = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.toggleError',
   {
-    defaultMessage: 'Entity risk score has been turned on',
-  }
-);
-
-export const RISK_ENGINE_TURNED_OFF = i18n.translate(
-  'xpack.securitySolution.riskScore.moduleTurnedOff',
-  {
-    defaultMessage: 'Entity risk score has been turned off',
+    defaultMessage: 'Failed to toggle Entity Analytics',
   }
 );
 
@@ -180,10 +188,24 @@ export const RISK_ENGINE_SAVED_OBJECT_CONFIGURATION_SUCCESS = i18n.translate(
   }
 );
 
+export const RISK_SCORE_ALERT_CONFIG = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.alertConfig',
+  {
+    defaultMessage: 'Alert configuration',
+  }
+);
+
+export const CLOSED_ALERTS_TEXT = i18n.translate(
+  'xpack.securitySolution.riskScore.closedAlertsText',
+  {
+    defaultMessage: 'Closed Alerts',
+  }
+);
+
 export const INCLUDE_CLOSED_ALERTS_LABEL = i18n.translate(
   'xpack.securitySolution.riskScore.includeClosedAlertsLabel',
   {
-    defaultMessage: 'Include closed alerts for risk scoring',
+    defaultMessage: 'Include closed alerts in calculation',
   }
 );
 
@@ -202,10 +224,10 @@ export const RISK_ENGINE_NEXT_RUN_TIME = (timeInMinutes: string) =>
     values: { timeInMinutes },
   });
 
-export const RISK_ENGINE_STATUS_SWITCH_LABEL = i18n.translate(
-  'xpack.securitySolution.riskScore.riskEngineStatus',
+export const ENTITY_ANALYTICS_STATUS_SWITCH_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.statusSwitchLabel',
   {
-    defaultMessage: 'Risk engine status',
+    defaultMessage: 'Entity analytics',
   }
 );
 
@@ -216,14 +238,14 @@ export const RUN_RISK_SCORE_ENGINE = i18n.translate('xpack.securitySolution.risk
 export const SAVE_CHANGES = i18n.translate(
   'xpack.securitySolution.riskScore.engineSavedObjectsaveChanges',
   {
-    defaultMessage: 'Save',
+    defaultMessage: 'Save Changes',
   }
 );
 
 export const DISCARD_CHANGES = i18n.translate(
   'xpack.securitySolution.riskScore.engineSavedObject.discardChanges',
   {
-    defaultMessage: 'Discard',
+    defaultMessage: 'Discard Changes',
   }
 );
 
@@ -233,3 +255,39 @@ export const RISK_SCORE_ENGINE_RUN_FAILURE = i18n.translate(
     defaultMessage: 'Entity risk score engine failed to start',
   }
 );
+
+export const ALERT_TIME_WINDOW_LABEL = i18n.translate(
+  'xpack.securitySolution.riskScore.alertTimeWindowLabel',
+  {
+    defaultMessage: 'Alert time window',
+  }
+);
+
+export const ALERT_FILTERS_LABEL = i18n.translate(
+  'xpack.securitySolution.riskScore.alertFiltersLabel',
+  {
+    defaultMessage: 'Alert filters',
+  }
+);
+
+export const ALERT_FILTERS_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.riskScore.alertFiltersPlaceholder',
+  {
+    defaultMessage: 'Filter out alerts using KQL syntax',
+  }
+);
+
+export const APPLIED_TO_RISK_SCORES_OF = i18n.translate(
+  'xpack.securitySolution.riskScore.appliedToRiskScoresOf',
+  {
+    defaultMessage: 'applied to risk scores of',
+  }
+);
+
+export const REMOVE_FILTER = i18n.translate('xpack.securitySolution.riskScore.removeFilter', {
+  defaultMessage: 'Remove filter',
+});
+
+export const SAVE_FILTERS = i18n.translate('xpack.securitySolution.riskScore.saveFilters', {
+  defaultMessage: 'Save changes',
+});

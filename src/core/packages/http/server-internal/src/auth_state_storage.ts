@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Request } from '@hapi/hapi';
+import type { Request } from '@hapi/hapi';
 import type { KibanaRequest, IsAuthenticated } from '@kbn/core-http-server';
 import { AuthStatus } from '@kbn/core-http-server';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';

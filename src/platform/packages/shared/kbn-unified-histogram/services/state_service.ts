@@ -8,26 +8,25 @@
  */
 
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import { BehaviorSubject } from 'rxjs';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { UnifiedHistogramFetchStatus } from '..';
-import type { UnifiedHistogramServices, UnifiedHistogramChartLoadEvent } from '../types';
+import type {
+  UnifiedHistogramServices,
+  UnifiedHistogramChartLoadEvent,
+  UnifiedHistogramTopPanelHeightContext,
+} from '../types';
 import {
   getChartHidden,
   getTopPanelHeight,
   setChartHidden,
   setTopPanelHeight,
 } from '../utils/local_storage_utils';
-import type { UnifiedHistogramSuggestionContext } from '../types';
 
 /**
  * The current state of the container
  */
 export interface UnifiedHistogramState {
-  /**
-   * The current Lens suggestion
-   */
-  currentSuggestionContext: UnifiedHistogramSuggestionContext | undefined;
   /**
    * Whether or not the chart is hidden
    */
@@ -45,13 +44,9 @@ export interface UnifiedHistogramState {
    */
   dataLoading$?: PublishingSubject<boolean | undefined>;
   /**
-   * The current time interval of the chart
-   */
-  timeInterval: string;
-  /**
    * The current top panel height
    */
-  topPanelHeight: number | undefined;
+  topPanelHeight: UnifiedHistogramTopPanelHeightContext | undefined;
   /**
    * The current fetch status of the hits count request
    */
@@ -87,25 +82,15 @@ export interface UnifiedHistogramStateService {
   /**
    * The current state of the container
    */
-  state$: Observable<UnifiedHistogramState>;
+  state$: BehaviorSubject<UnifiedHistogramState>;
   /**
    * Sets the current chart hidden state
    */
   setChartHidden: (chartHidden: boolean) => void;
   /**
-   * Sets current Lens suggestion
-   */
-  setCurrentSuggestionContext: (
-    suggestionContext: UnifiedHistogramSuggestionContext | undefined
-  ) => void;
-  /**
    * Sets the current top panel height
    */
-  setTopPanelHeight: (topPanelHeight: number | undefined) => void;
-  /**
-   * Sets the current time interval
-   */
-  setTimeInterval: (timeInterval: string) => void;
+  setTopPanelHeight: (topPanelHeight: UnifiedHistogramTopPanelHeightContext) => void;
   /**
    * Sets the current Lens request adapter
    */
@@ -130,7 +115,7 @@ export const createStateService = (
   const { services, localStorageKeyPrefix, initialState } = options;
 
   let initialChartHidden = false;
-  let initialTopPanelHeight: number | undefined;
+  let initialTopPanelHeight: UnifiedHistogramTopPanelHeightContext | undefined;
 
   if (localStorageKeyPrefix) {
     initialChartHidden = getChartHidden(services.storage, localStorageKeyPrefix) ?? false;
@@ -139,13 +124,11 @@ export const createStateService = (
 
   const state$ = new BehaviorSubject<UnifiedHistogramState>({
     chartHidden: initialChartHidden,
-    currentSuggestionContext: undefined,
     lensRequestAdapter: undefined,
-    timeInterval: 'auto',
-    topPanelHeight: initialTopPanelHeight,
     totalHitsResult: undefined,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     ...initialState,
+    topPanelHeight: initialState?.topPanelHeight ?? initialTopPanelHeight,
   });
 
   const updateState = (stateUpdate: Partial<UnifiedHistogramState>) => {
@@ -166,22 +149,12 @@ export const createStateService = (
       updateState({ chartHidden });
     },
 
-    setTopPanelHeight: (topPanelHeight: number | undefined) => {
+    setTopPanelHeight: (topPanelHeight: UnifiedHistogramTopPanelHeightContext) => {
       if (localStorageKeyPrefix) {
         setTopPanelHeight(services.storage, localStorageKeyPrefix, topPanelHeight);
       }
 
       updateState({ topPanelHeight });
-    },
-
-    setCurrentSuggestionContext: (
-      suggestionContext: UnifiedHistogramSuggestionContext | undefined
-    ) => {
-      updateState({ currentSuggestionContext: suggestionContext });
-    },
-
-    setTimeInterval: (timeInterval: string) => {
-      updateState({ timeInterval });
     },
 
     setLensRequestAdapter: (lensRequestAdapter: RequestAdapter | undefined) => {

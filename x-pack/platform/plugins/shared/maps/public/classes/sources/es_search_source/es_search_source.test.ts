@@ -10,13 +10,14 @@ import { APP_ID, ES_GEO_FIELD_TYPE, SCALING_TYPES } from '../../../../common/con
 jest.mock('../../../kibana_services');
 jest.mock('./util/load_index_settings');
 
-import { getIndexPatternService, getSearchService, getHttp } from '../../../kibana_services';
-import { SearchSource } from '@kbn/data-plugin/public';
+import type { SearchSource } from '@kbn/data-plugin/public';
+import { decode } from '@kbn/rison';
+import { getHttp, getIndexPatternService, getSearchService } from '../../../kibana_services';
 
 import { loadIndexSettings } from './util/load_index_settings';
 
+import type { VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 import { ESSearchSource } from './es_search_source';
-import { VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 
 const mockDescriptor = { indexPatternId: 'foo', geoField: 'bar' };
 
@@ -132,14 +133,32 @@ describe('ESSearchSource', () => {
         expect(urlParts[0]).toEqual('rootdir/internal/maps/mvt/getTile/{z}/{x}/{y}.pbf');
 
         const params = new URLSearchParams(urlParts[1]);
-        expect(Object.fromEntries(params)).toEqual({
+
+        expect(Object.fromEntries(params)).toMatchObject({
           buffer: '5',
           geometryFieldName: 'bar',
           hasLabels: 'false',
           index: 'foobar-title-*',
-          requestBody:
-            "(fields:('0':('0':index,'1':(fields:(),title:'foobar-title-*')),'1':('0':size,'1':1000),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:(),title:'foobar-title-*')),'5':('0':query,'1':(language:KQL,query:'tooltipField: foobar')),'6':('0':fieldsFromSource,'1':!(_id)),'7':('0':source,'1':!f),'8':('0':fields,'1':!(tooltipField,styleField)),'9':('0':filter,'1':!((meta:(),query:(exists:(field:bar)))))))",
+          requestBody: expect.any(String),
           token: '1234',
+        });
+
+        // Verify requestBody data after decoding from Rison
+        const requestBody = params.get('requestBody');
+        const requestBodyDecoded = requestBody ? decode(requestBody) : {};
+        expect(requestBodyDecoded).toEqual({
+          fields: {
+            '0': { '0': 'index', '1': { fields: {}, title: 'foobar-title-*' } },
+            '1': { '0': 'size', '1': 1000 },
+            '2': { '0': 'filter', '1': [] },
+            '3': { '0': 'query' },
+            '4': { '0': 'index', '1': { fields: {}, title: 'foobar-title-*' } },
+            '5': { '0': 'query', '1': { language: 'KQL', query: 'tooltipField: foobar' } },
+            '6': { '0': 'fieldsFromSource', '1': ['_id'] },
+            '7': { '0': 'source', '1': false },
+            '8': { '0': 'fields', '1': ['tooltipField', 'styleField'] },
+            '9': { '0': 'filter', '1': [{ meta: {}, query: { exists: { field: 'bar' } } }] },
+          },
         });
       });
 

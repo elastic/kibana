@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-import { newTelemetryLogger, getPreviousDiagTaskTimestamp } from '../helpers';
+import type { LogMeta, Logger } from '@kbn/core/server';
+import { newTelemetryLogger, getPreviousDiagTaskTimestamp, withErrorMessage } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import { TelemetryChannel, type TelemetryEvent } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
@@ -36,7 +36,7 @@ export function createTelemetryDiagnosticsTaskConfig() {
       const log = newTelemetryLogger(logger.get('diagnostic'), mdc);
       const trace = taskMetricsService.start(taskType);
 
-      log.l('Running telemetry task');
+      log.debug('Running telemetry task');
 
       try {
         if (!taskExecutionPeriod.last) {
@@ -61,16 +61,17 @@ export function createTelemetryDiagnosticsTaskConfig() {
           }
 
           alertCount += alerts.length;
-          log.l('Sending diagnostic alerts', {
+          log.debug('Sending diagnostic alerts', {
             alerts_count: alerts.length,
-          });
+          } as LogMeta);
           sender.sendAsync(TelemetryChannel.ENDPOINT_ALERTS, processedAlerts);
         }
 
         await taskMetricsService.end(trace);
         return alertCount;
-      } catch (err) {
-        await taskMetricsService.end(trace, err);
+      } catch (error) {
+        log.warn('Error running diagnostic task', withErrorMessage(error));
+        await taskMetricsService.end(trace, error);
         return 0;
       }
     },

@@ -5,36 +5,29 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
 import { TransactionSummary } from './transaction_summary';
 import * as exampleTransactions from './__fixtures__/transactions';
+import { renderWithContext } from '../../../utils/test_helpers';
 
 describe('TransactionSummary', () => {
-  describe('render', () => {
-    const transaction = exampleTransactions.httpOk;
-
+  it('renders HTTP transaction with request info', () => {
     const props = {
       errorCount: 0,
       totalDuration: 0,
-      transaction,
+      transaction: exampleTransactions.httpOk,
     };
 
-    it('renders', () => {
-      expect(() => shallow(<TransactionSummary {...props} />)).not.toThrowError();
-    });
+    expect(() => renderWithContext(<TransactionSummary {...props} />)).not.toThrowError();
   });
-  describe('renders RUM transaction without request info', () => {
-    const transaction = exampleTransactions.httpRumOK;
 
+  it('renders RUM transaction without request info', () => {
     const props = {
       errorCount: 0,
       totalDuration: 0,
-      transaction,
+      transaction: exampleTransactions.httpRumOK,
     };
 
-    it('renders', () => {
-      expect(() => shallow(<TransactionSummary {...props} />)).not.toThrowError();
-    });
+    expect(() => renderWithContext(<TransactionSummary {...props} />)).not.toThrowError();
   });
 });

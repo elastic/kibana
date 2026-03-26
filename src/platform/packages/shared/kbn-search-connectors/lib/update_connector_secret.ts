@@ -8,7 +8,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Result } from '@elastic/elasticsearch/lib/api/types';
+import type { Result } from '@elastic/elasticsearch/lib/api/types';
 
 export const updateConnectorSecret = async (
   client: ElasticsearchClient,

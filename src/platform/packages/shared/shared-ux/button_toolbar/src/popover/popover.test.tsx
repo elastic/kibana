@@ -36,7 +36,7 @@ describe('<ToolbarPopover />', () => {
     const component = mountWithIntl(<ToolbarPopover label="test" children={() => !isOpen} />);
     const button = component.find('EuiButton');
     expect(button).toHaveStyleRule('background-color', '#FFFFFF');
-    expect(button).toHaveStyleRule('border', '1px solid #E3E8F2');
+    expect(button).toHaveStyleRule('border', '1px solid #CAD3E2');
     expect(button).toHaveStyleRule('color', '#1D2A3E');
   });
 
@@ -54,7 +54,7 @@ describe('<ToolbarPopover />', () => {
 
     const component = mountWithIntl(<ToolbarPopover label="test" children={() => !isOpen} />);
     const button = component.find('EuiButton');
-    expect(button.prop('iconType')).toBe('arrowDown');
+    expect(button.prop('iconType')).toBe('chevronSingleDown');
     expect(button.prop('iconSide')).toBe('right');
   });
 
@@ -62,10 +62,10 @@ describe('<ToolbarPopover />', () => {
     const isOpen = false;
 
     const component = mountWithIntl(
-      <ToolbarPopover label="test" iconType="plusInCircle" children={() => !isOpen} />
+      <ToolbarPopover label="test" iconType="plusCircle" children={() => !isOpen} />
     );
     const button = component.find('EuiButton');
-    expect(button.prop('iconType')).toBe('plusInCircle');
+    expect(button.prop('iconType')).toBe('plusCircle');
     expect(button.prop('iconSide')).toBe('left');
   });
 });

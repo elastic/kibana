@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { useState, FC } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
+import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiButtonIcon,
@@ -13,14 +15,12 @@ import {
   EuiToolTip,
   EuiText,
   EuiInMemoryTable,
-  EuiBasicTableColumn,
-  EuiTableActionsColumnType,
   EuiSpacer,
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { CanvasVariable } from '../../../types';
+import type { CanvasVariable } from '../../../types';
 
 import { EditVar } from './edit_var';
 import { DeleteVar } from './delete_var';
@@ -94,6 +94,10 @@ const strings = {
   getTitleTooltip: () =>
     i18n.translate('xpack.canvas.varConfig.titleTooltip', {
       defaultMessage: 'Add variables to store and edit common values',
+    }),
+  getTableCaption: () =>
+    i18n.translate('xpack.canvas.varConfig.tableCaption', {
+      defaultMessage: 'Canvas variables list',
     }),
 };
 
@@ -189,11 +193,15 @@ export const VarConfig: FC<Props> = ({
               position="left"
               className="canvasArg__tooltip"
             >
-              <span>{strings.getTitle()}</span>
+              <span tabIndex={0}>{strings.getTitle()}</span>
             </EuiToolTip>
           }
           extraAction={
-            <EuiToolTip position="top" content={strings.getAddTooltipLabel()}>
+            <EuiToolTip
+              position="top"
+              content={strings.getAddTooltipLabel()}
+              disableScreenReaderOutput
+            >
               <EuiButtonIcon
                 color="primary"
                 iconType="plusInCircle"
@@ -215,6 +223,7 @@ export const VarConfig: FC<Props> = ({
                 pagination={false}
                 sorting={true}
                 compressed
+                tableCaption={strings.getTableCaption()}
               />
             </div>
           )}

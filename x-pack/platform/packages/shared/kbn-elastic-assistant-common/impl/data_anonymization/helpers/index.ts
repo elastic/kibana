@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Replacements } from '../../schemas';
-import { AnonymizationFieldResponse } from '../../schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import type { Replacements } from '../../schemas';
+import type { AnonymizationFieldResponse } from '../../schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 
 export const getIsDataAnonymizable = (rawData: string | Record<string, string[]>): boolean =>
   typeof rawData !== 'string';

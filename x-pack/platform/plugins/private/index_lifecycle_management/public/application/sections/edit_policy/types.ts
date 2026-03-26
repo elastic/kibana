@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SerializedPolicy } from '../../../../common/types';
+import type { SerializedPolicy } from '../../../../common/types';
 
 export type DataTierAllocationType = 'node_roles' | 'node_attrs' | 'none';
 
@@ -38,6 +38,11 @@ export interface DownsampleFields {
 }
 
 interface HotPhaseMetaFields extends ForcemergeFields, ShrinkFields, DownsampleFields {
+  /**
+   * Hot phase can be optional when editing policies that don't include it.
+   * For new policies (or policies that already contain hot), this remains enabled.
+   */
+  enabled?: boolean;
   /**
    * By default rollover is enabled with set values for max age, max size and max docs. In this policy form
    * opting in to default rollover overrides custom rollover values.

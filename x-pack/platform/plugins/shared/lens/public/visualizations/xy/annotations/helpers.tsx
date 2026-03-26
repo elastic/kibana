@@ -16,10 +16,15 @@ import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { getDefaultQueryAnnotation } from '@kbn/event-annotation-common';
 import { IconChartBarAnnotations } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { FramePublicAPI, Visualization } from '@kbn/lens-common';
 import { getUniqueLabelGenerator, isDraggedDataViewField } from '../../../utils';
-import type { FramePublicAPI, Visualization } from '../../../types';
 import { isHorizontalChart } from '../state_helpers';
-import type { XYState, XYDataLayerConfig, XYAnnotationLayerConfig, XYLayerConfig } from '../types';
+import type {
+  XYVisualizationState,
+  XYDataLayerConfig,
+  XYAnnotationLayerConfig,
+  XYLayerConfig,
+} from '../types';
 import {
   getAnnotationsLayers,
   getAxisName,
@@ -80,7 +85,7 @@ export function getStaticDate(dataLayers: XYDataLayerConfig[], frame: FramePubli
 }
 
 export const getAnnotationsSupportedLayer = (
-  state?: XYState,
+  state?: XYVisualizationState,
   frame?: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>
 ) => {
   const dataLayers = getDataLayers(state?.layers || []);
@@ -114,7 +119,7 @@ export const getAnnotationsSupportedLayer = (
   };
 };
 
-export const onAnnotationDrop: Visualization<XYState>['onDrop'] = ({
+export const onAnnotationDrop: Visualization<XYVisualizationState>['onDrop'] = ({
   prevState,
   frame,
   source,
@@ -351,7 +356,7 @@ export const onAnnotationDrop: Visualization<XYState>['onDrop'] = ({
   }
 };
 
-export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = ({
+export const setAnnotationsDimension: Visualization<XYVisualizationState>['setDimension'] = ({
   prevState,
   layerId,
   columnId,
@@ -394,7 +399,7 @@ export const getAnnotationsConfiguration = ({
   frame,
   layer,
 }: {
-  state: XYState;
+  state: XYVisualizationState;
   frame: Pick<FramePublicAPI, 'datasourceLayers'>;
   layer: XYAnnotationLayerConfig;
 }) => {

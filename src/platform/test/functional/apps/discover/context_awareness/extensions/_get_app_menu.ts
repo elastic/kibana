@@ -44,6 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       await testSubjects.existOrFail('discoverNewButton');
+      await testSubjects.click('app-menu-overflow-button');
       await testSubjects.existOrFail('discoverAlertsButton');
       await testSubjects.existOrFail('example-custom-root-submenu');
     });
@@ -59,7 +60,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       await testSubjects.existOrFail('discoverNewButton');
+      await testSubjects.click('app-menu-overflow-button');
       await testSubjects.existOrFail('discoverAlertsButton');
+      await testSubjects.click('app-menu-overflow-button');
       await testSubjects.existOrFail('example-custom-root-submenu');
       await testSubjects.existOrFail('example-custom-action');
 
@@ -70,6 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('example-custom-root-action12-flyout');
       await testSubjects.click('euiFlyoutCloseButton');
 
+      await testSubjects.click('app-menu-overflow-button');
       await testSubjects.click('discoverAlertsButton');
       await testSubjects.existOrFail('example-custom-action-under-alerts');
     });

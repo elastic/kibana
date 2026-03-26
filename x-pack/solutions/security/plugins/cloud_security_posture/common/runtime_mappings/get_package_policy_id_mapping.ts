@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 
 export const getPackagePolicyIdRuntimeMapping = (): MappingRuntimeFields => ({
   package_policy_identifier: {

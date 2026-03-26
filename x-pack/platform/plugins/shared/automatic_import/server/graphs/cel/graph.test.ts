@@ -26,15 +26,11 @@ import { handleRemoveHeadersDigest } from './auth_digest';
 import { handleUpdateProgramOauth2 } from './auth_oauth2';
 import { handleGetStateVariables } from './retrieve_state_vars';
 import { handleGetStateDetails } from './retrieve_state_details';
-
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 
 const model = new FakeLLM({
   response: "I'll callback later.",
-}) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+}) as unknown as InferenceChatModel;
 
 jest.mock('./summarize_query');
 jest.mock('./build_program');

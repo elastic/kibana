@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import * as i18n from './translations';
 import { deleteCases } from './api';
 import type { ServerError } from '../types';

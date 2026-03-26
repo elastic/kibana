@@ -10,9 +10,10 @@
 import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { Vis, VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import type { Vis, VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 
-import { DefaultEditorDataTab, DefaultEditorDataTabProps } from './data_tab';
+import type { DefaultEditorDataTabProps } from './data_tab';
+import { DefaultEditorDataTab } from './data_tab';
 
 export interface OptionTab {
   editor: React.ComponentType<VisEditorOptionsProps | DefaultEditorDataTabProps>;

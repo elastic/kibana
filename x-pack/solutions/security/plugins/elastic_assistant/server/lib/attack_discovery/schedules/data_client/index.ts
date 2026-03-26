@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import { ActionsClient } from '@kbn/actions-plugin/server';
-import { RulesClient } from '@kbn/alerting-plugin/server';
-import { Logger } from '@kbn/core/server';
-import {
-  ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import type {
   AttackDiscoverySchedule,
   AttackDiscoveryScheduleCreateProps,
   AttackDiscoveryScheduleParams,
   AttackDiscoveryScheduleUpdateProps,
 } from '@kbn/elastic-assistant-common';
+import {
+  ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+  ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID,
+} from '@kbn/elastic-assistant-common';
 import { convertAlertingRuleToSchedule } from '../../../../routes/attack_discovery/schedules/utils/convert_alerting_rule_to_schedule';
-import { AttackDiscoveryScheduleFindOptions } from '../types';
+import type { AttackDiscoveryScheduleFindOptions } from '../types';
 import { convertScheduleActionsToAlertingActions } from './utils/transform_actions';
 
 /**
@@ -72,7 +75,6 @@ export class AttackDiscoveryScheduleDataClient {
     const { enabled = false, actions: _, ...restScheduleAttributes } = ruleToCreate;
     const { actions, systemActions } = convertScheduleActionsToAlertingActions({
       actionsClient: this.options.actionsClient,
-      logger: this.options.logger,
       scheduleActions: ruleToCreate.actions,
     });
     const rule = await this.options.rulesClient.create<AttackDiscoveryScheduleParams>({
@@ -80,7 +82,7 @@ export class AttackDiscoveryScheduleDataClient {
         actions,
         ...(systemActions.length ? { systemActions } : {}),
         alertTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
-        consumer: 'siem',
+        consumer: ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID,
         enabled,
         tags: [],
         ...restScheduleAttributes,
@@ -94,18 +96,18 @@ export class AttackDiscoveryScheduleDataClient {
     ruleToUpdate: AttackDiscoveryScheduleUpdateProps & { id: string }
   ): Promise<AttackDiscoverySchedule> => {
     const { id, actions: _, ...updatePayload } = ruleToUpdate;
+
     const { actions, systemActions } = convertScheduleActionsToAlertingActions({
       actionsClient: this.options.actionsClient,
-      logger: this.options.logger,
       scheduleActions: ruleToUpdate.actions,
     });
     const rule = await this.options.rulesClient.update<AttackDiscoveryScheduleParams>({
       id,
       data: {
+        ...updatePayload,
         actions,
         ...(systemActions.length ? { systemActions } : {}),
         tags: [],
-        ...updatePayload,
       },
     });
     const schedule = convertAlertingRuleToSchedule(rule);

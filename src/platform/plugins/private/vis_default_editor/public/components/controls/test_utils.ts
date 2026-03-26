@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IAggConfig, AggParam } from '@kbn/data-plugin/public';
-import { EditorConfig } from '../utils';
-import { EditorVisState } from '../sidebar/state/reducers';
+import type { IAggConfig, AggParam } from '@kbn/data-plugin/public';
+import type { EditorConfig } from '../utils';
+import type { EditorVisState } from '../sidebar/state/reducers';
 
 export const aggParamCommonPropsMock = {
   agg: {} as IAggConfig,

@@ -74,7 +74,7 @@ Array [
     "id": "a",
     "legendValues": Object {
       "serviceName": "opbeans-java",
-      "spanType": "",
+      "type": "",
     },
     "offset": 0,
     "parent": undefined,
@@ -109,7 +109,7 @@ Array [
     "id": "b2",
     "legendValues": Object {
       "serviceName": "opbeans-java",
-      "spanType": "",
+      "type": "",
     },
     "offset": 1000,
     "parent": Object {
@@ -131,7 +131,7 @@ Array [
       "id": "a",
       "legendValues": Object {
         "serviceName": "opbeans-java",
-        "spanType": "",
+        "type": "",
       },
       "offset": 0,
       "parent": undefined,
@@ -173,7 +173,7 @@ Array [
     "id": "b",
     "legendValues": Object {
       "serviceName": "opbeans-java",
-      "spanType": "",
+      "type": "",
     },
     "offset": 2000,
     "parent": Object {
@@ -195,7 +195,7 @@ Array [
       "id": "a",
       "legendValues": Object {
         "serviceName": "opbeans-java",
-        "spanType": "",
+        "type": "",
       },
       "offset": 0,
       "parent": undefined,
@@ -234,7 +234,7 @@ Array [
     "id": "c",
     "legendValues": Object {
       "serviceName": "opbeans-java",
-      "spanType": "",
+      "type": "",
     },
     "offset": 3000,
     "parent": Object {
@@ -262,7 +262,7 @@ Array [
       "id": "b",
       "legendValues": Object {
         "serviceName": "opbeans-java",
-        "spanType": "",
+        "type": "",
       },
       "offset": 2000,
       "parent": Object {
@@ -284,7 +284,7 @@ Array [
         "id": "a",
         "legendValues": Object {
           "serviceName": "opbeans-java",
-          "spanType": "",
+          "type": "",
         },
         "offset": 0,
         "parent": undefined,
@@ -333,7 +333,7 @@ Array [
     "id": "d",
     "legendValues": Object {
       "serviceName": "opbeans-java",
-      "spanType": "",
+      "type": "",
     },
     "offset": 5000,
     "parent": Object {
@@ -358,7 +358,7 @@ Array [
       "id": "c",
       "legendValues": Object {
         "serviceName": "opbeans-java",
-        "spanType": "",
+        "type": "",
       },
       "offset": 3000,
       "parent": Object {
@@ -386,7 +386,7 @@ Array [
         "id": "b",
         "legendValues": Object {
           "serviceName": "opbeans-java",
-          "spanType": "",
+          "type": "",
         },
         "offset": 2000,
         "parent": Object {
@@ -408,7 +408,7 @@ Array [
           "id": "a",
           "legendValues": Object {
             "serviceName": "opbeans-java",
-            "spanType": "",
+            "type": "",
           },
           "offset": 0,
           "parent": undefined,

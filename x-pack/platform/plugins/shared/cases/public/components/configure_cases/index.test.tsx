@@ -26,7 +26,7 @@ import {
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
 
-import { useKibana } from '../../common/lib/kibana';
+import { KibanaServices, useKibana } from '../../common/lib/kibana';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { usePersistConfiguration } from '../../containers/configure/use_persist_configuration';
 
@@ -1109,6 +1109,7 @@ describe('ConfigureCases', () => {
                 },
                 settings: {
                   syncAlerts: true,
+                  extractObservables: false,
                 },
                 customFields: [
                   {
@@ -1253,6 +1254,7 @@ describe('ConfigureCases', () => {
                 customFields: [],
                 settings: {
                   syncAlerts: true,
+                  extractObservables: false,
                 },
               },
             },
@@ -1287,7 +1289,7 @@ describe('ConfigureCases', () => {
 
     it('should not render observable types section if observable feature is not enabled', async () => {
       renderWithTestingProviders(<ConfigureCases />, {
-        wrapperProps: { features: { observables: { enabled: false } } },
+        wrapperProps: { features: { observables: { enabled: false, autoExtract: false } } },
       });
 
       expect(screen.queryByTestId('observable-types-form-group')).not.toBeInTheDocument();
@@ -1485,6 +1487,43 @@ describe('ConfigureCases', () => {
       it('should not render the warning callout', () => {
         expect(screen.queryByTestId('configure-cases-warning-callout')).not.toBeInTheDocument();
       });
+    });
+  });
+
+  describe('back to cases button', () => {
+    beforeEach(() => {
+      useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
+      usePersistConfigurationMock.mockImplementation(() => usePersistConfigurationMockResponse);
+      useGetConnectorsMock.mockImplementation(() => ({
+        ...useConnectorsResponse,
+        data: [],
+        isLoading: false,
+      }));
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('renders when the templates feature flag is enabled', () => {
+      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: true },
+      } as ReturnType<typeof KibanaServices.getConfig>);
+
+      renderWithTestingProviders(<ConfigureCases />);
+
+      expect(screen.getByTestId('configure-cases-back-to-cases')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: i18n.BACK_TO_ALL })).toBeInTheDocument();
+    });
+
+    it('does not render when the templates feature flag is disabled', () => {
+      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: false },
+      } as ReturnType<typeof KibanaServices.getConfig>);
+
+      renderWithTestingProviders(<ConfigureCases />);
+
+      expect(screen.queryByTestId('configure-cases-back-to-cases')).not.toBeInTheDocument();
     });
   });
 });

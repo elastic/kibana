@@ -78,6 +78,7 @@ export const ApiKeyField: React.FunctionComponent<{
                   defaultMessage: 'Show token',
                 })
           }
+          disableScreenReaderOutput
         >
           <EuiButtonIcon
             aria-label={
@@ -91,7 +92,7 @@ export const ApiKeyField: React.FunctionComponent<{
             }
             color="text"
             onClick={toggleKey}
-            iconType={state === 'VISIBLE' ? 'eyeClosed' : 'eye'}
+            iconType={state === 'VISIBLE' ? 'eyeSlash' : 'eye'}
             data-test-subj="showHideTokenButton"
           />
         </EuiToolTip>

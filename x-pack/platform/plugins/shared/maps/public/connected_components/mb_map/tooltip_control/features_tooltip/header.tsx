@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { Component, Fragment, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
@@ -14,7 +15,7 @@ import {
   EuiFlexItem,
   EuiTextColor,
 } from '@elastic/eui';
-import { IVectorLayer } from '../../../../classes/layers/vector_layer';
+import type { IVectorLayer } from '../../../../classes/layers/vector_layer';
 
 interface Props {
   findLayerById: (layerId: string) => IVectorLayer | undefined;

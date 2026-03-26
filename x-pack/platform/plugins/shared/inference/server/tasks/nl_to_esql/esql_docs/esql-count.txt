@@ -1,6 +1,6 @@
 # COUNT
 
-The COUNT function returns the total number of input values.
+The COUNT function returns the total number of input values. If no field is specified, it counts the number of rows.
 
 ## Syntax
 
@@ -10,18 +10,18 @@ The COUNT function returns the total number of input values.
 
 #### field
 
-This is an expression that outputs values to be counted. If it's omitted, it's equivalent to `COUNT(*)`, which counts the number of rows.
+Expression that outputs values to be counted. If omitted, COUNT returns the number of rows, equivalent to `COUNT(*)`.
 
 ## Examples
 
-Count the number of specific field values:
+Counts the number of non-null values in the `height` field from the `employees` data.
 
 ```esql
 FROM employees
 | STATS COUNT(height)
 ```
 
-Count the number of rows using `COUNT()` or `COUNT(*)`:
+Counts the total number of rows for each language in the `employees` data, sorting the results by language in descending order.
 
 ```esql
 FROM employees
@@ -29,14 +29,14 @@ FROM employees
 | SORT languages DESC
 ```
 
-The expression can use inline functions. In this example, a string is split into multiple values using the `SPLIT` function, and the values are counted:
+Counts the number of elements produced by splitting the `words` string on the semicolon character.
 
 ```esql
 ROW words="foo;bar;baz;qux;quux;foo"
 | STATS word_count = COUNT(SPLIT(words, ";"))
 ```
 
-To count the number of times an expression returns `TRUE`, use a `WHERE` command to remove rows that shouldn’t be included:
+Counts the number of times the value of `n` is less than 0 by filtering with `WHERE`.
 
 ```esql
 ROW n=1
@@ -44,7 +44,7 @@ ROW n=1
 | STATS COUNT(n)
 ```
 
-To count the same stream of data based on two different expressions, use the pattern `COUNT(<expression> OR NULL)`:
+Counts the number of times `n` is greater than 0 and less than 0, respectively, by evaluating two different expressions in the same data stream.
 
 ```esql
 ROW n=1

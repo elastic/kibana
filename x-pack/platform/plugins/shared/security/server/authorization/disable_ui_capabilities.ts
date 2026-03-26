@@ -109,7 +109,8 @@ export function disableUICapabilitiesFactory(
     // Kibana features with no privileges opt out of the Kibana security model and
     // are not subject to our control(e.g.Enterprise Search features)
     const kibanaFeature = features.find((f) => f.id === featureId);
-    if (!!kibanaFeature) return !!kibanaFeature.privileges;
+    if (!!kibanaFeature)
+      return !!kibanaFeature.privileges || (kibanaFeature.reserved?.privileges.length ?? 0 > 0);
 
     // Lastly return true if the feature is a registered es feature (we always want to affect these),
     // otherwise false(we don't know what this feature is so we don't touch it)

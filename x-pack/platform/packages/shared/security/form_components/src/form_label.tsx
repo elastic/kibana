@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { useFormikContext } from 'formik';
 import type { FC, PropsWithChildren } from 'react';
 import React, { useEffect } from 'react';
@@ -46,8 +46,14 @@ export const FormLabel: FC<PropsWithChildren<FormLabelProps>> = (props) => {
   useEffect(() => report(isEqual), [isEqual]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <>
-      {props.children} {!isEqual ? <EuiIcon type="dot" color="success" size="s" /> : undefined}
-    </>
+    <EuiFlexGroup gutterSize="none" responsive={false}>
+      <EuiFlexItem grow={false}>{props.children}</EuiFlexItem>
+
+      {!isEqual ? (
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="dot" color="success" size="s" />
+        </EuiFlexItem>
+      ) : undefined}
+    </EuiFlexGroup>
   );
 };

@@ -1,0 +1,51 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { MOCK_IDP_UIAM_SERVICE_URL, MOCK_IDP_UIAM_SHARED_SECRET } from '@kbn/mock-idp-utils';
+import { resolve } from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import { servers as defaultConfig } from '../../default/serverless/security_complete.serverless.config';
+import type { ScoutServerConfig } from '../../../../../types';
+
+// Indicates whether the config is used on CI or locally.
+const isRunOnCI = process.env.CI;
+
+export const servers: ScoutServerConfig = {
+  ...defaultConfig,
+  esServerlessOptions: { uiam: true },
+  kbnTestServer: {
+    ...defaultConfig.kbnTestServer,
+    serverArgs: [
+      ...defaultConfig.kbnTestServer.serverArgs,
+      ...(isRunOnCI ? [] : ['--mockIdpPlugin.uiam.enabled=true']),
+      // We need to test certain APIs that are only exposed by the plugin contract and not through
+      // any HTTP endpoint, so this test plugin exposes these APIs through test HTTP endpoints that
+      // we can call in our tests.
+      `--plugin-path=${resolve(
+        REPO_ROOT,
+        'x-pack/platform/test/security_functional/plugins/test_endpoints'
+      )}`,
+      `--xpack.security.uiam.enabled=true`,
+      `--xpack.security.uiam.url=${MOCK_IDP_UIAM_SERVICE_URL}`,
+      `--xpack.security.uiam.sharedSecret=${MOCK_IDP_UIAM_SHARED_SECRET}`,
+      `--xpack.security.uiam.ssl.certificate=${KBN_CERT_PATH}`,
+      `--xpack.security.uiam.ssl.key=${KBN_KEY_PATH}`,
+      '--xpack.security.uiam.ssl.verificationMode=none',
+      // cloud.id is decoded by the security plugin to obtain the ES endpoint for UIAM API key conversion.
+      // CI:    decodes to https://es01:9220 (ES listens on port 9220 inside the Docker network)
+      // Local: decodes to https://host.docker.internal:9220 (ES is on the host, reached via Docker bridge)
+      `--xpack.cloud.id=${
+        isRunOnCI
+          ? 'ci:ZXMwMTo5MjIwJDo5MjIwJGtpYmFuYTo5MjIw'
+          : 'local-dev:ZG9ja2VyLmludGVybmFsOjkyMjAkaG9zdDo5MjIwJGtpYmFuYTo5MjIw'
+      }`,
+    ],
+  },
+};

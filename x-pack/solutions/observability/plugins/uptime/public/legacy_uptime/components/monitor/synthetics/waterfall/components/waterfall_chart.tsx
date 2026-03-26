@@ -7,7 +7,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import { TickFormatter, DomainRange, BarStyleAccessor } from '@elastic/charts';
+import type { TickFormatter, DomainRange, BarStyleAccessor } from '@elastic/charts';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import { useWaterfallContext } from '../context/waterfall_chart';
 import {

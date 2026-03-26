@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { API_BASE_PATH } from '../../../../common/constants';
 import { serializeGeoipDatabase } from './serialization';
 import { normalizeDatabaseName } from './normalize_database_name';

@@ -33,9 +33,6 @@ export function RumHome() {
 
   const noDataConfig: NoDataConfig | undefined = !hasData
     ? {
-        solution: i18n.translate('xpack.ux.overview.solutionName', {
-          defaultMessage: 'Observability',
-        }),
         action: {
           elasticAgent: {
             title: i18n.translate('xpack.ux.overview.beatsCard.title', {
@@ -45,9 +42,13 @@ export function RumHome() {
               defaultMessage: 'Enable RUM with the APM agent to collect user experience data.',
             }),
             href: http.basePath.prepend('/app/apm/tutorial'),
+            buttonText: i18n.translate('xpack.ux.overview.beatsCard.buttonLabel', {
+              defaultMessage: 'Add RUM data',
+            }),
+            docsLink: docLinks.links.observability.guide,
+            'data-test-subj': 'rumNoDataCard',
           },
         },
-        docsLink: docLinks.links.observability.guide,
       }
     : undefined;
 

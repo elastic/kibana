@@ -104,7 +104,7 @@ To generate PDF and PNG files, Reporting uses an internal "screenshotting" plugi
 The following settings control the capturing process.
 
 `xpack.screenshotting.capture.timeouts.openUrl` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:   Specify the [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) to allow the Reporting browser to wait for the "Loading…​" screen to dismiss and find the initial data for the page. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `1m`.
+:   Specify the [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) to allow the Reporting browser to wait for the "Loading…" screen to dismiss and find the initial data for the page. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `1m`.
 
 `xpack.screenshotting.capture.timeouts.waitForElements` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Specify the [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) to allow the Reporting browser to wait for all visualization panels to load on the page. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `1m`.
@@ -185,32 +185,41 @@ If the headless Chromium browser is asked to send a request that violates the ne
 The rule objects are evaluated sequentially from the beginning to the end of the array, and continue until there is a matching rule. If no rules allow a request, the request is denied.
 
 ```yaml
-# Only allow requests to placeholder.com
+# Only allow requests to elastic.co
 xpack.screenshotting.networkPolicy:
-  rules: [ { allow: true, host: "placeholder.com" } ]
+  rules: [ { allow: true, host: "elastic.co" } ]
 ```
 
 ```yaml
-# Only allow requests to https://placeholder.com
+# Only allow HTTPS requests to https://elastic.co
 xpack.screenshotting.networkPolicy:
-  rules: [ { allow: true, host: "placeholder.com", protocol: "https:" } ]
+  rules: [ { allow: true, host: "elastic.co", protocol: "https:" } ]
 ```
+
+Example of a baseline configuration for disallowing all requests to external paths:
+```yaml
+xpack.screenshotting.networkPolicy:
+  rules: [ { allow: true, host: "localhost:5601", protocol: "http:" } ]
+```
+::::{note}
+Typically, Chromium will connect to {{kib}} on a local interface, but this may be different based on the environment and specific [headless browser connection settings](#reporting-kibana-server-settings).
+::::
 
 A final `allow` rule with no host or protocol allows all requests that are not explicitly denied:
 
 ```yaml
-# Denies requests from http://placeholder.com, but anything else is allowed.
+# Denies requests from http://elastic.co, but anything else is allowed.
 xpack.screenshotting.networkPolicy:
-  rules: [{ allow: false, host: "placeholder.com", protocol: "http:" }, { allow: true }];
+  rules: [{ allow: false, host: "elastic.co", protocol: "http:" }, { allow: true }];
 ```
 
 A network policy can be composed of multiple rules:
 
 ```yaml
-# Allow any request to http://placeholder.com but for any other host, https is required
+# Allow any request to http://elastic.co but for any other host, https is required
 xpack.screenshotting.networkPolicy
   rules: [
-    { allow: true, host: "placeholder.com", protocol: "http:" },
+    { allow: true, host: "elastic.co", protocol: "http:" },
     { allow: true, protocol: "https:" },
   ]
 ```
@@ -287,4 +296,8 @@ Each method has its own unique limitations which are important to understand.
 
 `xpack.reporting.csv.useByteOrderMarkEncoding`
 :   Adds a byte order mark (`\ufeff`) at the beginning of the CSV file. Defaults to `false`.
+
+`xpack.reporting.csv.maxRows` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.3`
+:    The maximum number of rows in a CSV report. Reports longer than the maximum limit will be truncated. The default is 10,000. The minimum is 1.
+
 

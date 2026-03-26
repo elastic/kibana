@@ -9,8 +9,8 @@
 
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { search } from '@kbn/data-plugin/public';
-import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { XYChartProps } from '../../common';
+import { getColumnByAccessor } from '@kbn/chart-expressions-common';
+import type { XYChartProps } from '../../common';
 import { isTimeChart } from '../../common/helpers';
 import { getFilteredLayers } from './layers';
 import { isDataLayer, getDataLayers } from './visualization';

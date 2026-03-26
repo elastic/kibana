@@ -7,15 +7,12 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import { SECURITY_CELL_ACTIONS_DETAILS_FLYOUT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { useAlertsContext } from '../../../../detections/components/alerts_table/alerts_context';
 import { useDocumentDetailsContext } from '../context';
 import { getSourcererScopeId } from '../../../../helpers';
 import { SecurityCellActionType } from '../../../../app/actions/constants';
-import {
-  CellActionsMode,
-  SecurityCellActions,
-  SecurityCellActionsTrigger,
-} from '../../../../common/components/cell_actions';
+import { CellActionsMode, SecurityCellActions } from '../../../../common/components/cell_actions';
 
 interface CellActionsProps {
   /**
@@ -40,7 +37,7 @@ interface CellActionsProps {
  * Security cell action wrapper for document details flyout
  */
 export const CellActions: FC<CellActionsProps> = ({ field, value, isObjectArray, children }) => {
-  const { scopeId, isPreview } = useDocumentDetailsContext();
+  const { scopeId, isRulePreview } = useDocumentDetailsContext();
   const { alertsTableRef } = useAlertsContext();
 
   const data = useMemo(() => ({ field, value }), [field, value]);
@@ -49,15 +46,16 @@ export const CellActions: FC<CellActionsProps> = ({ field, value, isObjectArray,
     [scopeId, isObjectArray, alertsTableRef]
   );
   const disabledActionTypes = useMemo(
-    () => (isPreview ? [SecurityCellActionType.FILTER, SecurityCellActionType.TOGGLE_COLUMN] : []),
-    [isPreview]
+    () =>
+      isRulePreview ? [SecurityCellActionType.FILTER, SecurityCellActionType.TOGGLE_COLUMN] : [],
+    [isRulePreview]
   );
 
   return (
     <SecurityCellActions
       data={data}
       mode={CellActionsMode.HOVER_DOWN}
-      triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
+      triggerId={SECURITY_CELL_ACTIONS_DETAILS_FLYOUT}
       visibleCellActions={6}
       sourcererScopeId={getSourcererScopeId(scopeId)}
       metadata={metadata}

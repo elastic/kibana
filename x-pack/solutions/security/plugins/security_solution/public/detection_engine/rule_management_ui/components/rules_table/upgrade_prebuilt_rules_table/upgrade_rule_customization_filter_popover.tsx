@@ -53,7 +53,7 @@ const RuleCustomizationFilterPopoverComponent = ({
   const triggerButton = (
     <EuiFilterButton
       grow
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={() => setIsRuleCustomizationPopoverOpen(!isRuleCustomizationPopoverOpen)}
       numFilters={selectableOptions.length}
       isSelected={isRuleCustomizationPopoverOpen}
@@ -78,7 +78,7 @@ const RuleCustomizationFilterPopoverComponent = ({
       }}
     >
       <EuiSelectable options={selectableOptions} onChange={handleSelectableOptionsChange}>
-        {(list) => <div style={{ width: RULE_CUSTOMIZATION_POPOVER_WIDTH }}>{list}</div>}
+        {(list) => <div css={{ width: RULE_CUSTOMIZATION_POPOVER_WIDTH }}>{list}</div>}
       </EuiSelectable>
     </EuiPopover>
   );

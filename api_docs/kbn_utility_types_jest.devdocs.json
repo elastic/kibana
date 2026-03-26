@@ -49,6 +49,8 @@
           "<T[P]> : T[P]; } & T"
         ],
         "path": "src/platform/packages/shared/kbn-utility-types-jest/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -64,6 +66,8 @@
           "{ [P in keyof T]: jest.Mocked<T[P]>; }"
         ],
         "path": "src/platform/packages/shared/kbn-utility-types-jest/index.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

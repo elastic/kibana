@@ -8,7 +8,7 @@
  */
 
 import { createSearchSource as createSearchSourceFactory } from './create_search_source';
-import { SearchSourceDependencies } from './search_source';
+import type { SearchSourceDependencies } from './search_source';
 import type { DataView, DataViewsContract, DataViewLazy } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 

@@ -6,51 +6,85 @@
  */
 
 import { RulesLocatorDefinition } from './rules';
-import { RULES_PATH } from '../../common/locators/paths';
+import { getIsExperimentalFeatureEnabled } from '@kbn/triggers-actions-ui-plugin/public';
+
+jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
+  getIsExperimentalFeatureEnabled: jest.fn(),
+}));
 
 describe('RulesLocator', () => {
   const locator = new RulesLocatorDefinition();
+  const mockGetIsExperimentalFeatureEnabled = getIsExperimentalFeatureEnabled as jest.Mock;
 
-  it('should return correct url when empty params are provided', async () => {
-    const location = await locator.getLocation({});
-    expect(location.app).toEqual('observability');
-    expect(location.path).toEqual(
-      `${RULES_PATH}?_a=(lastResponse:!(),params:(),search:'',status:!(),type:!())`
-    );
+  beforeEach(() => {
+    mockGetIsExperimentalFeatureEnabled.mockClear();
   });
 
-  it('should return correct url when lastResponse is provided', async () => {
-    const location = await locator.getLocation({ lastResponse: ['foo'] });
-    expect(location.path).toEqual(
-      `${RULES_PATH}?_a=(lastResponse:!(foo),params:(),search:'',status:!(),type:!())`
-    );
+  describe('when unifiedRulesPage feature flag is enabled', () => {
+    beforeEach(() => {
+      mockGetIsExperimentalFeatureEnabled.mockReturnValue(true);
+    });
+
+    it('should return correct app and url when empty params are provided', async () => {
+      const location = await locator.getLocation({});
+      expect(location.app).toEqual('rules');
+      expect(location.path).toEqual(
+        `/?_a=(lastResponse:!(),params:(),search:'',status:!(),type:!())`
+      );
+    });
+
+    it('should return correct url when lastResponse is provided', async () => {
+      const location = await locator.getLocation({ lastResponse: ['foo'] });
+      expect(location.app).toEqual('rules');
+      expect(location.path).toEqual(
+        `/?_a=(lastResponse:!(foo),params:(),search:'',status:!(),type:!())`
+      );
+    });
+
+    it('should return correct url when params is provided', async () => {
+      const location = await locator.getLocation({ params: { sloId: 'foo' } });
+      expect(location.app).toEqual('rules');
+      expect(location.path).toEqual(
+        `/?_a=(lastResponse:!(),params:(sloId:foo),search:'',status:!(),type:!())`
+      );
+    });
+
+    it('should return correct url when search is provided', async () => {
+      const location = await locator.getLocation({ search: 'foo' });
+      expect(location.app).toEqual('rules');
+      expect(location.path).toEqual(
+        `/?_a=(lastResponse:!(),params:(),search:foo,status:!(),type:!())`
+      );
+    });
+
+    it('should return correct url when status is provided', async () => {
+      const location = await locator.getLocation({ status: ['enabled'] });
+      expect(location.app).toEqual('rules');
+      expect(location.path).toEqual(
+        `/?_a=(lastResponse:!(),params:(),search:'',status:!(enabled),type:!())`
+      );
+    });
+
+    it('should return correct url when type is provided', async () => {
+      const location = await locator.getLocation({ type: ['foo'] });
+      expect(location.app).toEqual('rules');
+      expect(location.path).toEqual(
+        `/?_a=(lastResponse:!(),params:(),search:'',status:!(),type:!(foo))`
+      );
+    });
   });
 
-  it('should return correct url when params is provided', async () => {
-    const location = await locator.getLocation({ params: { sloId: 'foo' } });
-    expect(location.path).toEqual(
-      `${RULES_PATH}?_a=(lastResponse:!(),params:(sloId:foo),search:'',status:!(),type:!())`
-    );
-  });
+  describe('when unifiedRulesPage feature flag is disabled', () => {
+    beforeEach(() => {
+      mockGetIsExperimentalFeatureEnabled.mockReturnValue(false);
+    });
 
-  it('should return correct url when search is provided', async () => {
-    const location = await locator.getLocation({ search: 'foo' });
-    expect(location.path).toEqual(
-      `${RULES_PATH}?_a=(lastResponse:!(),params:(),search:foo,status:!(),type:!())`
-    );
-  });
-
-  it('should return correct url when status is provided', async () => {
-    const location = await locator.getLocation({ status: ['enabled'] });
-    expect(location.path).toEqual(
-      `${RULES_PATH}?_a=(lastResponse:!(),params:(),search:'',status:!(enabled),type:!())`
-    );
-  });
-
-  it('should return correct url when type is provided', async () => {
-    const location = await locator.getLocation({ type: ['foo'] });
-    expect(location.path).toEqual(
-      `${RULES_PATH}?_a=(lastResponse:!(),params:(),search:'',status:!(),type:!(foo))`
-    );
+    it('should return correct app and url when empty params are provided', async () => {
+      const location = await locator.getLocation({});
+      expect(location.app).toEqual('observability');
+      expect(location.path).toEqual(
+        `/alerts/rules?_a=(lastResponse:!(),params:(),search:'',status:!(),type:!())`
+      );
+    });
   });
 });

@@ -9,6 +9,18 @@ import type { LogLevelId, LogRecord } from '@kbn/logging';
 import { clusterInfo, isElasticCloudDeployment } from './helpers';
 
 export interface TelemetryLogger extends Logger {
+  /**
+   * @deprecated This method is deprecated and should be avoided in new code.
+   * Instead, configure appropriate log levels directly in `kibana.yml`. For example:
+   *
+   * ```yaml
+   * # kibana.yml
+   * logging.loggers:
+   *  - name: plugins.securitySolution
+   *    level: info
+   *  - name: plugins.securitySolution.telemetry_events.sender
+   *    level: debug
+   */
   l<Meta extends LogMeta = LogMeta>(message: string, meta?: Meta | object): void;
 }
 

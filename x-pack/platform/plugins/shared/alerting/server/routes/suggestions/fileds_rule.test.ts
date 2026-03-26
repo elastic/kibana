@@ -6,7 +6,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
-import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { registerFieldsRoute } from './fields_rules';
