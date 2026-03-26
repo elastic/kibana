@@ -167,6 +167,7 @@ async function runWatchBuild(
     let isFirstBuild = true;
     let hasResolvedFirstBuild = false;
     let isShuttingDown = false;
+    const previousAssetSizes = new Map<string, number>();
 
     const closeWatcher = (): Promise<void> => {
       if (isShuttingDown) {
@@ -234,6 +235,9 @@ async function runWatchBuild(
           isFirstBuild = false;
 
           if (result.success) {
+            for (const asset of result.assets ?? []) {
+              previousAssetSizes.set(asset.name, asset.size);
+            }
             copyBundlesToPluginDirs(repoRoot, log);
             log?.info('Watching for changes... (Ctrl+C to stop)');
           }
@@ -245,15 +249,31 @@ async function runWatchBuild(
           return;
         }
 
-        // Subsequent rebuilds: single concise line
+        // Subsequent rebuilds: single concise line with changed chunk info
         isFirstBuild = false;
         const result = processStats(stats, log, { quiet: true });
         const rebuildTime = result.compilationTime?.toFixed(1) ?? '?';
 
         if (result.success) {
+          let changedCount = 0;
+          let changedSize = 0;
+          for (const asset of result.assets ?? []) {
+            const prev = previousAssetSizes.get(asset.name);
+            if (prev === undefined || prev !== asset.size) {
+              changedCount++;
+              changedSize += asset.size;
+            }
+          }
+
+          // Update baseline for next rebuild
+          previousAssetSizes.clear();
+          for (const asset of result.assets ?? []) {
+            previousAssetSizes.set(asset.name, asset.size);
+          }
+
           copyBundlesToPluginDirs(repoRoot, log, true);
           log?.success(
-            `Rebuilt ${result.entryCount} entries in ${rebuildTime}s (${formatSize(result.totalSize ?? 0)})`
+            `Rebuilt in ${rebuildTime}s (${changedCount} chunks updated, ${formatSize(changedSize)} changed)`
           );
         } else {
           log?.error(`Rebuild failed in ${rebuildTime}s - waiting for changes...`);
@@ -267,6 +287,7 @@ interface ProcessStatsResult extends BuildResult {
   entryCount?: number;
   totalSize?: number;
   compilationTime?: number;
+  assets?: Array<{ name: string; size: number }>;
 }
 
 function processStats(
@@ -344,6 +365,7 @@ function processStats(
     entryCount,
     totalSize,
     compilationTime,
+    assets: info.assets?.map((a) => ({ name: a.name, size: a.size })) ?? [],
   };
 }
 
