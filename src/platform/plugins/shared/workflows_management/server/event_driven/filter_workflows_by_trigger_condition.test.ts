@@ -178,4 +178,36 @@ describe('workflowMatchesTriggerCondition', () => {
       )
     ).toBe(false);
   });
+
+  it('should match when condition uses array field like Elasticsearch multi-valued semantics', () => {
+    const workflow = createMockWorkflow({
+      definition: {
+        triggers: [
+          {
+            type: 'example.customTrigger',
+            on: {
+              condition: 'event.category: "alerts" and event.labels: "demo"',
+            },
+          },
+        ],
+        steps: [],
+      },
+    });
+    expect(
+      workflowMatchesTriggerCondition(
+        workflow,
+        'example.customTrigger',
+        { category: 'alerts', labels: ['example', 'demo'], message: 'x', another: 'y' },
+        mockLogger
+      )
+    ).toBe(true);
+    expect(
+      workflowMatchesTriggerCondition(
+        workflow,
+        'example.customTrigger',
+        { category: 'alerts', labels: ['example'], message: 'x', another: 'y' },
+        mockLogger
+      )
+    ).toBe(false);
+  });
 });

@@ -298,6 +298,7 @@ export const RunStepCommandSchema = z.object({
   workflowYaml: z.string(),
   workflowId: z.string().optional(), // Optional to allow for test step runs for unsaved workflows
   stepId: z.string(),
+  executionContext: z.record(z.string(), z.unknown()).optional(),
   contextOverride: z.record(z.string(), z.unknown()).optional(),
 });
 export type RunStepCommand = z.infer<typeof RunStepCommandSchema>;

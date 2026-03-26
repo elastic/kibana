@@ -556,30 +556,46 @@ describe('get()', () => {
   });
 
   describe('schema validation', () => {
-    test('logs warning when connector fails validation but returns connector anyway', async () => {
+    // authMode is passed through directly from attributes, so an invalid value
+    // triggers connectorSchema validation failure
+    const invalidAttributes = {
+      name: 'Test Connector',
+      actionTypeId: '.webhook',
+      config: {},
+      isMissingSecrets: false,
+      authMode: 'invalid-auth-mode',
+    };
+
+    test('does not throw when connector validation fails — returns connector anyway', async () => {
       getConnectorSoMock.mockResolvedValueOnce({
         id: '1',
         type: 'action',
-        attributes: {
-          name: 'Test Connector',
-          actionTypeId: '.webhook',
-          config: {},
-          isMissingSecrets: false,
-        },
+        attributes: invalidAttributes,
         references: [],
       });
 
-      const result = await get({
-        context: mockContext,
-        id: '1',
-      });
+      const result = await get({ context: mockContext, id: '1' });
 
       expect(result).toBeDefined();
       expect(result.id).toBe('1');
-      expect(result.name).toBe('Test Connector');
     });
 
-    test('does not throw when connector validation fails', async () => {
+    test('logs a warning when connector schema validation fails', async () => {
+      getConnectorSoMock.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: invalidAttributes,
+        references: [],
+      });
+
+      await get({ context: mockContext, id: '1' });
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Error validating connector: 1')
+      );
+    });
+
+    test('does not log a warning when connector schema validation passes', async () => {
       getConnectorSoMock.mockResolvedValueOnce({
         id: '1',
         type: 'action',
@@ -592,12 +608,9 @@ describe('get()', () => {
         references: [],
       });
 
-      await expect(
-        get({
-          context: mockContext,
-          id: '1',
-        })
-      ).resolves.toBeDefined();
+      await get({ context: mockContext, id: '1' });
+
+      expect(logger.warn).not.toHaveBeenCalled();
     });
   });
 });

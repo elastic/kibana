@@ -13,16 +13,14 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageHeaderSection,
-  EuiPageTemplate,
   EuiSkeletonTitle,
   EuiSwitch,
   EuiTitle,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { css } from '@emotion/react';
 import * as i18n from '../translations';
-import { componentStyles } from './template_form_layout.styles';
 
 interface TemplateFormHeaderProps {
   title: string;
@@ -51,38 +49,38 @@ export const TemplateFormHeader: React.FC<TemplateFormHeaderProps> = ({
   onSave,
   onIsEnabledChange,
 }) => {
-  const styles = useMemoCss(componentStyles);
+  const { euiTheme } = useEuiTheme();
   const saveTooltipContent = submitError ?? undefined;
 
   return (
-    <EuiPageTemplate offset={0} minHeight={0} grow={false} css={styles.pageTemplate}>
-      <EuiPageTemplate.Header
-        css={styles.header}
-        restrictWidth={false}
-        bottomBorder={false}
-        paddingSize="m"
-        alignItems="bottom"
+    <header>
+      <EuiButtonEmpty
+        iconType="sortLeft"
+        size="xs"
+        flush="left"
+        onClick={onBack}
+        aria-label={i18n.BACK_TO_TEMPLATES}
       >
-        <EuiPageHeaderSection css={styles.headerSection}>
-          <EuiButtonEmpty
-            iconType="sortLeft"
-            size="xs"
-            flush="left"
-            onClick={onBack}
-            aria-label={i18n.BACK_TO_TEMPLATES}
-          >
-            {i18n.BACK_TO_TEMPLATES}
-          </EuiButtonEmpty>
+        {i18n.BACK_TO_TEMPLATES}
+      </EuiButtonEmpty>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        css={css`
+          margin-bottom: ${euiTheme.size.l};
+        `}
+      >
+        <EuiFlexItem
+          css={css`
+            overflow: hidden;
+            display: block;
+          `}
+        >
           <EuiFlexGroup alignItems="center" responsive={false} gutterSize="m">
-            <EuiFlexItem grow={false} css={styles.titleItem}>
-              <EuiSkeletonTitle
-                size="m"
-                isLoading={!!isLoading}
-                contentAriaLabel={title}
-                css={styles.skeletonTitle}
-              >
-                <EuiTitle size="m" css={styles.title}>
-                  <h2>{title}</h2>
+            <EuiFlexItem grow={false}>
+              <EuiSkeletonTitle size="l" isLoading={!!isLoading} contentAriaLabel={title}>
+                <EuiTitle size="l">
+                  <h1>{title}</h1>
                 </EuiTitle>
               </EuiSkeletonTitle>
             </EuiFlexItem>
@@ -92,10 +90,9 @@ export const TemplateFormHeader: React.FC<TemplateFormHeaderProps> = ({
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
-        </EuiPageHeaderSection>
-
-        <EuiPageHeaderSection>
-          <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="m">
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
             {hasChanges && (
               <EuiFlexItem grow={false}>
                 <EuiToolTip
@@ -147,9 +144,9 @@ export const TemplateFormHeader: React.FC<TemplateFormHeaderProps> = ({
               </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiPageHeaderSection>
-      </EuiPageTemplate.Header>
-    </EuiPageTemplate>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </header>
   );
 };
 
