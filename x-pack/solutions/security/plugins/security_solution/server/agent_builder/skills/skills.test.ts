@@ -96,7 +96,6 @@ describe('Security Skills', () => {
     it('content references entity-analytics skill for deeper profiling', () => {
       expect(alertAnalysisSkill.content).toContain('entity-analytics');
     });
-
   });
 
   describe('cross-skill validation', () => {
