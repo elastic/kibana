@@ -20,6 +20,8 @@ interface UseUpdateRuleProps {
 export const useUpdateRule = ({ http, notifications, ruleId }: UseUpdateRuleProps) => {
   const mutation = useMutation(
     (formValues: FormValues) => {
+      // Path duplicated from alerting_v2 plugin server/routes/constants.ts (ALERTING_V2_RULE_API_PATH)
+      // to avoid circular dependency. Keep in sync.
       return http.patch<RuleResponse>(`/api/alerting/v2/rules/${encodeURIComponent(ruleId)}`, {
         body: JSON.stringify(mapFormValuesToUpdateRequest(formValues)),
       });

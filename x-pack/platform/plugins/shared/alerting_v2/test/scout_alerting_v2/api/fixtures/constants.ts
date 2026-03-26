@@ -9,5 +9,6 @@ export const API_HEADERS = {
   'kbn-xsrf': 'true',
 };
 
+// Must match ALERTING_V2_RULE_API_PATH in server/routes/constants.ts
 export const RULE_API_PATH = '/api/alerting/v2/rules';
 export const ALERTING_EVENTS_INDEX = '.rule-events';

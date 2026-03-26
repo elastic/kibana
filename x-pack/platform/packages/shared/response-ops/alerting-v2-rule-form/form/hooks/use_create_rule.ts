@@ -19,6 +19,8 @@ interface UseCreateRuleProps {
 export const useCreateRule = ({ http, notifications }: UseCreateRuleProps) => {
   const mutation = useMutation(
     (formValues: FormValues) => {
+      // Path duplicated from alerting_v2 plugin server/routes/constants.ts (ALERTING_V2_RULE_API_PATH)
+      // to avoid circular dependency. Keep in sync.
       return http.post<RuleResponse>('/api/alerting/v2/rules', {
         body: JSON.stringify(mapFormValuesToCreateRequest(formValues)),
       });
