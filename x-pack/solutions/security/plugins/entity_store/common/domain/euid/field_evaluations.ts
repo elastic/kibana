@@ -84,9 +84,10 @@ export function applyFieldEvaluations(
 ): Record<string, string> {
   const result: Record<string, string> = {};
   for (const evaluation of fieldEvaluations) {
+    const currentDoc = { ...doc, ...result };
     let sourceValue: string | undefined;
     for (const source of evaluation.sources) {
-      sourceValue = resolveSourceValue(doc, source);
+      sourceValue = resolveSourceValue(currentDoc, source);
       if (sourceValue !== undefined) {
         break;
       }

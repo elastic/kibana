@@ -1157,6 +1157,7 @@ Array [
       "savedObject": Object {
         "all": Array [
           "dashboard",
+          "markdown",
           "query",
           "url",
           "search-session",
@@ -1241,6 +1242,7 @@ Array [
           "map",
           "dashboard",
           "tag",
+          "markdown",
           "query",
         ],
       },
@@ -1302,6 +1304,7 @@ Array [
       "savedObject": Object {
         "all": Array [
           "dashboard",
+          "markdown",
           "url",
           "search-session",
         ],
@@ -1353,6 +1356,7 @@ Array [
           "map",
           "dashboard",
           "tag",
+          "markdown",
         ],
       },
       "ui": Array [
@@ -2312,6 +2316,7 @@ Array [
       "savedObject": Object {
         "all": Array [
           "dashboard",
+          "markdown",
           "query",
           "url",
           "search-session",
@@ -2396,6 +2401,7 @@ Array [
           "map",
           "dashboard",
           "tag",
+          "markdown",
           "query",
         ],
       },
@@ -2457,6 +2463,7 @@ Array [
       "savedObject": Object {
         "all": Array [
           "dashboard",
+          "markdown",
           "url",
           "search-session",
         ],
@@ -2508,6 +2515,7 @@ Array [
           "map",
           "dashboard",
           "tag",
+          "markdown",
         ],
       },
       "ui": Array [
