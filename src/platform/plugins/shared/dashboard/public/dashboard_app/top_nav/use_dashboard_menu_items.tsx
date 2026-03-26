@@ -483,6 +483,32 @@ export const useDashboardMenuItems = ({
     isLabsEnabled,
   ]);
 
+  const chromeNextHeaderEditTitleGlobalAction = useMemo(() => {
+    if (viewMode !== 'edit') {
+      return undefined;
+    }
+    return {
+      onClick: () => {
+        // TODO: Open or focus inline dashboard title editor. Interim: settings flyout.
+        openSettingsFlyout(dashboardApi);
+      },
+      disabled: disableTopNav,
+    };
+  }, [viewMode, dashboardApi, disableTopNav]);
+
+  const chromeNextHeaderShareGlobalAction = useMemo(() => {
+    if (!shareService) {
+      return undefined;
+    }
+    const tooltip = getShareTooltip();
+    return {
+      ariaLabel: topNavStrings.share.description,
+      onClick: showShare,
+      disabled: disableTopNav,
+      tooltipContent: tooltip,
+    };
+  }, [showShare, disableTopNav, getShareTooltip]);
+
   const editModeTopNavConfig = useMemo(() => {
     const { storeSearchSession } = getDashboardCapabilities();
 
@@ -525,5 +551,10 @@ export const useDashboardMenuItems = ({
     isLabsEnabled,
   ]);
 
-  return { viewModeTopNavConfig, editModeTopNavConfig };
+  return {
+    viewModeTopNavConfig,
+    editModeTopNavConfig,
+    chromeNextHeaderEditTitleGlobalAction,
+    chromeNextHeaderShareGlobalAction,
+  };
 };

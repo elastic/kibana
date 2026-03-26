@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
+
 import type { AppMenuConfigNext } from '@kbn/core-chrome-app-menu-components';
 
 /**
@@ -30,10 +32,13 @@ export interface ChromeNextHeaderConfig {
   metadata?: ChromeNextHeaderMetadataItem[];
 
   /**
-   * Global object actions whose icon, label, and position are fixed by Chrome.
-   * Apps opt-in by providing handlers; they cannot change icon or order.
+   * Global object actions next to the title. Edit title and share use fixed Chrome icons;
+   * favorite is an optional app-supplied `ReactNode` (e.g. content-management FavoriteButton).
    *
-   * Rendering order (fixed by Chrome): edit, share, favorite.
+   * Rendering order (fixed by Chrome): editTitle, share, favorite.
+   *
+   * See {@link ChromeNextHeaderGlobalActions} and the `ChromeNextHeaderConfig` overview for how
+   * this relates to breadcrumb append extensions.
    */
   globalActions?: ChromeNextHeaderGlobalActions;
 
@@ -78,23 +83,35 @@ export interface ChromeNextHeaderMetadataItem {
 }
 
 /**
- * Global actions whose icon, label, and position are fixed by Chrome.
- * Apps provide only the behavioral handlers.
+ * Handler-driven global header action (fixed icon/order in Chrome; apps supply behavior).
+ */
+export interface ChromeNextHeaderGlobalActionConfig {
+  onClick: () => void;
+  /** When true, the control is non-interactive. */
+  disabled?: boolean;
+  /** Optional tooltip (e.g. explain why the control is disabled or access hints). */
+  tooltipContent?: string;
+  /** Overrides the default accessible name for the control. */
+  ariaLabel?: string;
+}
+
+/**
+ * Global actions beside the Chrome-Next title.
  */
 export interface ChromeNextHeaderGlobalActions {
-  /** Edit action. Chrome renders a pencil icon next to the title. */
-  edit?: {
-    onClick: () => void;
-  };
+  /**
+   * Edit title action. Chrome renders a pencil icon next to the title.
+   * TODO: Intended to open or focus an inline title editor; interim behavior is app-defined.
+   */
+  editTitle?: ChromeNextHeaderGlobalActionConfig;
   /** Share action. Chrome renders a share icon. */
-  share?: {
-    onClick: () => void;
-  };
-  /** Favorite/star action. Chrome renders a star icon. */
-  favorite?: {
-    isFavorited: boolean;
-    onClick: () => void;
-  };
+  share?: ChromeNextHeaderGlobalActionConfig;
+  /**
+   * Favorite control supplied by the app (e.g. `FavoriteButton` with providers).
+   * Chrome reserves layout only; fixed order after share. A handler-only API is insufficient
+   * because favorites need app-owned clients, context, and React Query wiring.
+   */
+  favorite?: ReactNode;
 }
 
 export interface ChromeNextHeaderTab {

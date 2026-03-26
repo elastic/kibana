@@ -11,6 +11,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 import { ProjectNextBackButton } from './back_button';
+import { ProjectNextGlobalActions } from './global_actions';
 import { useReportTopBarHeight } from './hooks';
 import { ProjectNextTitle } from './title';
 import { ProjectNextTrailingActions } from './trailing_actions';
@@ -36,7 +37,32 @@ const useHeaderStyles = () => {
       min-width: 0;
     `;
 
-    return { root, primaryRow };
+    const titleCluster = css`
+      display: flex;
+      align-items: center;
+      flex: 1;
+      min-width: 0;
+    `;
+
+    /**
+     * Keeps the title and global actions grouped on the left; the title truncates with ellipsis
+     * instead of growing and pushing icons toward the app menu (trailing) region.
+     */
+    const titleGroup = css`
+      display: flex;
+      align-items: center;
+      gap: ${euiTheme.size.xs};
+      flex: 0 1 auto;
+      min-width: 0;
+      max-width: 100%;
+    `;
+
+    const titleClusterSpacer = css`
+      flex: 1 1 auto;
+      min-width: 0;
+    `;
+
+    return { root, primaryRow, titleCluster, titleGroup, titleClusterSpacer };
   }, [euiTheme]);
 };
 
@@ -48,7 +74,13 @@ export const ProjectNextHeader = React.memo(() => {
     <div ref={heightRef} css={styles.root} data-test-subj="chromeProjectNextHeader">
       <div css={styles.primaryRow}>
         <ProjectNextBackButton />
-        <ProjectNextTitle />
+        <div css={styles.titleCluster}>
+          <div css={styles.titleGroup}>
+            <ProjectNextTitle />
+            <ProjectNextGlobalActions />
+          </div>
+          <div css={styles.titleClusterSpacer} aria-hidden />
+        </div>
         <ProjectNextTrailingActions />
       </div>
     </div>

@@ -17,7 +17,7 @@ const useTitleStyles = () => {
 
   return useMemo(() => {
     const title = css`
-      flex: 1;
+      flex: 1 1 auto;
       min-width: 0;
       font-size: ${euiTheme.size.base};
       font-weight: ${euiTheme.font.weight.semiBold};
