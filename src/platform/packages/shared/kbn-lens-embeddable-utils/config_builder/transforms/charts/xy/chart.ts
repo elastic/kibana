@@ -98,20 +98,24 @@ function convertAxisSettingsToStateFormat(
           yRight: axis?.right?.title?.visible ?? true,
         };
   const tickLabelsVisibilitySettings =
-    axis?.x?.ticks == null && axis?.left?.ticks == null && axis?.right?.ticks == null
+    axis?.x?.ticks?.visible == null &&
+    axis?.left?.ticks?.visible == null &&
+    axis?.right?.ticks?.visible == null
       ? undefined
       : {
-          x: axis?.x?.ticks ?? true,
-          yLeft: axis?.left?.ticks ?? true,
-          yRight: axis?.right?.ticks ?? true,
+          x: axis?.x?.ticks?.visible ?? true,
+          yLeft: axis?.left?.ticks?.visible ?? true,
+          yRight: axis?.right?.ticks?.visible ?? true,
         };
   const gridlinesVisibilitySettings =
-    axis?.x?.grid == null && axis?.left?.grid == null && axis?.right?.grid == null
+    axis?.x?.grid?.visible == null &&
+    axis?.left?.grid?.visible == null &&
+    axis?.right?.grid?.visible == null
       ? undefined
       : {
-          x: axis?.x?.grid ?? true,
-          yLeft: axis?.left?.grid ?? true,
-          yRight: axis?.right?.grid ?? true,
+          x: axis?.x?.grid?.visible ?? true,
+          yLeft: axis?.left?.grid?.visible ?? true,
+          yRight: axis?.right?.grid?.visible ?? true,
         };
   const labelsOrientation =
     axis?.x?.label_orientation == null &&
@@ -289,11 +293,11 @@ function convertAxisSettingsToAPIFormat(
 
     ticks:
       config.tickLabelsVisibilitySettings?.x != null
-        ? config.tickLabelsVisibilitySettings.x
+        ? { visible: config.tickLabelsVisibilitySettings.x }
         : undefined,
     grid:
       config.gridlinesVisibilitySettings?.x != null
-        ? config.gridlinesVisibilitySettings.x
+        ? { visible: config.gridlinesVisibilitySettings.x }
         : undefined,
     ...convertXExtent(config.xExtent),
     label_orientation:
@@ -322,11 +326,11 @@ function convertAxisSettingsToAPIFormat(
     scale: config.yLeftScale ? config.yLeftScale : undefined,
     ticks:
       config.tickLabelsVisibilitySettings?.yLeft != null
-        ? config.tickLabelsVisibilitySettings.yLeft
+        ? { visible: config.tickLabelsVisibilitySettings.yLeft }
         : undefined,
     grid:
       config.gridlinesVisibilitySettings?.yLeft != null
-        ? config.gridlinesVisibilitySettings.yLeft
+        ? { visible: config.gridlinesVisibilitySettings.yLeft }
         : undefined,
     ...convertExtendsToAPIFormat(config.yLeftExtent),
     label_orientation:
@@ -354,11 +358,11 @@ function convertAxisSettingsToAPIFormat(
     scale: config.yRightScale ? config.yRightScale : undefined,
     ticks:
       config.tickLabelsVisibilitySettings?.yRight != null
-        ? config.tickLabelsVisibilitySettings.yRight
+        ? { visible: config.tickLabelsVisibilitySettings.yRight }
         : undefined,
     grid:
       config.gridlinesVisibilitySettings?.yRight != null
-        ? config.gridlinesVisibilitySettings.yRight
+        ? { visible: config.gridlinesVisibilitySettings.yRight }
         : undefined,
 
     ...convertExtendsToAPIFormat(config.yRightExtent),
