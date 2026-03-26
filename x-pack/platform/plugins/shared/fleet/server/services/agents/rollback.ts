@@ -15,7 +15,7 @@ import {
 } from '../../errors';
 import { AgentNotFoundError } from '../../errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
-import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
+import { agentsKueryNamespaceFilter, buildFilterWithNamespace } from '../spaces/agent_namespaces';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 import { licenseService } from '../license';
 import { LICENSE_FOR_AGENT_ROLLBACK } from '../../../common/constants';
@@ -136,7 +136,7 @@ export async function sendRollbackAgentsActions(
   } else if ('kuery' in options) {
     const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
     const namespaceFilter = await agentsKueryNamespaceFilter(currentSpaceId);
-    const kuery = namespaceFilter ? `${namespaceFilter} AND ${options.kuery}` : options.kuery;
+    const kuery = buildFilterWithNamespace(namespaceFilter, options.kuery);
 
     const res = await getAgentsByKuery(esClient, soClient, {
       kuery,

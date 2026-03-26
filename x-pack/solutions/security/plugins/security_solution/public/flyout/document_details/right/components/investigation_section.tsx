@@ -11,7 +11,7 @@ import { buildDataTableRecord, type DataTableRecord, type EsHitRecord } from '@k
 import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/constants/local_storage';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../../../flyout_v2/shared/components/expandable_section';
-import { HighlightedFields } from './highlighted_fields';
+import { HighlightedFields } from '../../../../flyout_v2/document/components/highlighted_fields';
 import {
   INVESTIGATION_SECTION_TEST_ID,
   INVESTIGATION_SECTION_TITLE,
@@ -22,6 +22,7 @@ import { EventKind } from '../../../../flyout_v2/document/constants/event_kinds'
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 import { LeftPanelInvestigationTab } from '../../left';
+import { CellActions } from '../../shared/components/cell_actions';
 
 const KEY = 'investigation';
 
@@ -74,9 +75,17 @@ export const InvestigationSection = memo(() => {
         hit={hit}
         investigationFields={investigationFields}
         scopeId={scopeId}
-        showCellActions={true}
-        showEditButton={true}
-        isRulePreview={isRulePreview}
+        renderCellActions={({ field, value, scopeId: cellScopeId, children }) => (
+          <CellActions
+            field={field}
+            value={value}
+            scopeId={cellScopeId}
+            isRulePreview={isRulePreview}
+          >
+            {children}
+          </CellActions>
+        )}
+        showPreview={true}
         ancestorsIndexName={ancestorIndex}
       />
     </ExpandableSection>

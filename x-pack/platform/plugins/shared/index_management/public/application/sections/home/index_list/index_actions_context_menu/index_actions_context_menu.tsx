@@ -20,6 +20,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import useObservable from 'react-use/lib/useObservable';
+import { EMPTY } from 'rxjs';
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
@@ -32,6 +34,7 @@ import {
 import { getIndexDetailsLink, navigateToIndexDetailsPage } from '../../../../services/routing';
 import { useAppContext } from '../../../../app_context';
 import type { Index } from '../../../../../../common';
+import { type DocCountApi, RequestResultType } from '../index_table/get_doc_count';
 import { ModalHost, type ModalHostHandles } from './modal_host/modal_host';
 
 export interface IndexActionsContextMenuProps {
@@ -73,6 +76,9 @@ export interface IndexActionsContextMenuProps {
   // this function is called to "refresh" the indices data after and extension service action that uses a modal
   reloadIndices: () => void;
 
+  // observable API for doc counts
+  docCountApi?: DocCountApi;
+
   /**
    * Props added to use the context menu on the new index details page
    */
@@ -100,6 +106,7 @@ export const IndexActionsContextMenu = ({
   forcemergeIndices,
   deleteIndices,
   indexStatusByName,
+  docCountApi,
   performExtensionAction,
   reloadIndices,
   fill = true,
@@ -117,6 +124,8 @@ export const IndexActionsContextMenu = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const modalRef = useRef<ModalHostHandles | null>(null);
   const { euiTheme } = useEuiTheme();
+  const docCountMap = useObservable(docCountApi?.getObservable() ?? EMPTY);
+
   const computedAnchorPosition: EuiPopoverProps['anchorPosition'] =
     anchorPosition ?? (isOnListView ? 'downLeft' : 'downRight');
 
@@ -133,6 +142,17 @@ export const IndexActionsContextMenu = ({
   `;
 
   const onButtonClick = () => {
+    // When opening for a single index, trigger a doc-count fetch if neither the
+    // index data nor the observable cache already has a result. Without this,
+    // isConvertableToLookupIndex returns false until the index list page
+    // populates the count, so the action may appear disabled incorrectly.
+    if (!isPopoverOpen && indexNames.length === 1 && docCountApi) {
+      const indexName = indexNames[0];
+      const selectedIndex = indices.find((index) => index.name === indexName);
+      if (selectedIndex?.documents === undefined && !docCountMap?.[indexName]) {
+        docCountApi.getByName(indexName);
+      }
+    }
     setIsPopoverOpen((prevState) => !prevState);
   };
 
@@ -151,8 +171,16 @@ export const IndexActionsContextMenu = ({
 
   const isConvertableToLookupIndex = (indexName: string) => {
     const selectedIndex = indices.find((index) => index.name === indexName);
+    if (!selectedIndex) {
+      return false;
+    }
 
-    if (!selectedIndex || selectedIndex.documents === undefined) {
+    const docCount = docCountMap?.[indexName];
+    const documents =
+      selectedIndex.documents ??
+      (docCount?.status === RequestResultType.Success ? docCount.count : undefined);
+
+    if (documents === undefined) {
       return false;
     }
 
@@ -162,8 +190,7 @@ export const IndexActionsContextMenu = ({
     }
 
     const isWithinDocumentLimit =
-      selectedIndex.documents >= 0 &&
-      selectedIndex.documents <= MAX_DOCUMENTS_FOR_CONVERT_TO_LOOKUP_INDEX;
+      documents >= 0 && documents <= MAX_DOCUMENTS_FOR_CONVERT_TO_LOOKUP_INDEX;
 
     const hasSinglePrimaryShard =
       Number(selectedIndex.primary) === MAX_SHARDS_FOR_CONVERT_TO_LOOKUP_INDEX;

@@ -26,7 +26,6 @@ describe('convertHighlightedFieldsToTableRow', () => {
             values: ['host-1'],
             scopeId: 'scopeId',
             showCellActions,
-            isRulePreview: false,
           },
         },
       ]
@@ -50,7 +49,6 @@ describe('convertHighlightedFieldsToTableRow', () => {
             values: ['host-1'],
             scopeId: 'scopeId',
             showCellActions,
-            isRulePreview: false,
           },
         },
       ]
@@ -74,7 +72,6 @@ describe('convertHighlightedFieldsToTableRow', () => {
             values: ['value override!'],
             scopeId: 'scopeId',
             showCellActions,
-            isRulePreview: false,
           },
         },
       ]

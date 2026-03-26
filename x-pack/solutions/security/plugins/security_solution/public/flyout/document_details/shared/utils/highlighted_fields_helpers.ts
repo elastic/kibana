@@ -5,44 +5,4 @@
  * 2.0.
  */
 
-import type { UseHighlightedFieldsResult } from '../../../../flyout_v2/document/hooks/use_highlighted_fields';
-import type { HighlightedFieldsTableRow } from '../../right/components/highlighted_fields';
-
-/**
- * Converts the highlighted fields to a format that can be consumed by the HighlightedFields component
- * @param highlightedFields field/value pairs
- * @param scopeId used in the alerts page for CellActions
- * @param showCellActions used in alert summary page to hide CellActions entirely
- * @param ancestorsIndexName optional index for preview links
- * @param isRulePreview disables some cell actions when true
- */
-export const convertHighlightedFieldsToTableRow = (
-  highlightedFields: UseHighlightedFieldsResult,
-  scopeId: string,
-  showCellActions: boolean,
-  ancestorsIndexName?: string,
-  isRulePreview = false
-): HighlightedFieldsTableRow[] => {
-  const fieldNames = Object.keys(highlightedFields);
-  return fieldNames.map((fieldName) => {
-    const overrideFieldName = highlightedFields[fieldName].overrideField?.field;
-    const overrideFieldValues = highlightedFields[fieldName].overrideField?.values;
-    const field = overrideFieldName ? overrideFieldName : fieldName;
-    const values = overrideFieldValues?.length
-      ? overrideFieldValues
-      : highlightedFields[fieldName].values;
-
-    return {
-      field,
-      description: {
-        field,
-        ...(overrideFieldName ? { originalField: fieldName } : {}),
-        values,
-        scopeId,
-        showCellActions,
-        isRulePreview,
-        ancestorsIndexName,
-      },
-    };
-  });
-};
+export { convertHighlightedFieldsToTableRow } from '../../../../flyout_v2/document/utils/highlighted_fields_helpers';
