@@ -62,7 +62,7 @@ describe('createResultTransformer', () => {
 
   const createMockProcessedConversation = (): ProcessedConversation =>
     ({
-      previousRounds: [],
+      previousEvents: [],
       nextInput: {},
       attachmentTypes: [],
       attachments: [],

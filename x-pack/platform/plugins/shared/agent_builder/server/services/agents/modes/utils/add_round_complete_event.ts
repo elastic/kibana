@@ -11,7 +11,6 @@ import { map, merge, share, toArray } from 'rxjs';
 import type {
   RoundCompleteEvent,
   RoundInput,
-  ConversationRound,
   ConversationRoundStep,
   ReasoningEvent,
   ToolCallEvent,
@@ -21,9 +20,9 @@ import type {
   ToolResultEvent,
   RuntimeAgentConfigurationOverrides,
   CompactionStep,
+  AgentResponseEvent,
 } from '@kbn/agent-builder-common';
-import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
-import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import { TimelineEventType, agentResponseEventToRound } from '@kbn/agent-builder-common';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
   ChatEventType,
@@ -62,7 +61,8 @@ const isStepEvent = (event: SourceEvents): event is StepEvents => {
 };
 
 export const addRoundCompleteEvent = ({
-  pendingRound,
+  pendingAgentResponse,
+  agentId,
   userInput,
   startTime,
   endTime,
@@ -73,7 +73,8 @@ export const addRoundCompleteEvent = ({
   configurationOverrides,
   compactionResult,
 }: {
-  pendingRound: ConversationRound | undefined;
+  pendingAgentResponse: AgentResponseEvent | undefined;
+  agentId: string;
   userInput: RoundInput;
   startTime: Date;
   modelProvider: ModelProvider;
@@ -93,36 +94,55 @@ export const addRoundCompleteEvent = ({
         toArray(),
         map<SourceEvents[], RoundCompleteEvent>((events) => {
           const attachmentRefs = attachmentStateManager.getAccessedRefs();
-          const round = pendingRound
-            ? resumeRound({
-                pendingRound,
+
+          // Build AgentResponseEvent first (the new canonical output)
+          const agentResponse = pendingAgentResponse
+            ? resumeAgentResponse({
+                pendingAgentResponse,
                 events,
-                input: userInput,
+                agentId,
                 startTime,
                 endTime,
                 modelProvider,
-                attachmentRefs,
                 configurationOverrides,
                 compactionResult,
               })
-            : createRound({
+            : createAgentResponseEvent({
                 events,
-                input: userInput,
+                agentId,
                 startTime,
                 endTime,
                 modelProvider,
-                attachmentRefs,
                 configurationOverrides,
                 compactionResult,
               });
 
-          round.state = buildRoundState({ round, events, stateManager });
+          agentResponse.state = buildAgentResponseState({
+            agentResponse,
+            events,
+            stateManager,
+          });
+
+          // Derive ConversationRound from AgentResponseEvent for backward compatibility
+          const round = agentResponseEventToRound(agentResponse, {
+            id: `msg-${agentResponse.id}`,
+            timestamp: agentResponse.started_at,
+            type: TimelineEventType.user_message,
+            user: { id: '', username: '' },
+            message: userInput.message,
+            attachments: userInput.attachments,
+            attachment_refs: [
+              ...(userInput.attachment_refs ?? []),
+              ...(attachmentRefs.length > 0 ? attachmentRefs : []),
+            ],
+          });
 
           const event: RoundCompleteEvent = {
             type: ChatEventType.roundComplete,
             data: {
               round,
-              resumed: pendingRound !== undefined,
+              agentResponse,
+              resumed: pendingAgentResponse !== undefined,
               conversation_state: getConversationState(),
               attachments: attachmentStateManager.getAll(),
             },
@@ -135,29 +155,27 @@ export const addRoundCompleteEvent = ({
   };
 };
 
-const resumeRound = ({
-  pendingRound,
+const resumeAgentResponse = ({
+  pendingAgentResponse,
   events,
-  input,
+  agentId,
   startTime,
   endTime = new Date(),
   modelProvider,
-  attachmentRefs,
   configurationOverrides,
   compactionResult,
 }: {
-  pendingRound: ConversationRound;
+  pendingAgentResponse: AgentResponseEvent;
   events: SourceEvents[];
-  input: RoundInput;
+  agentId: string;
   startTime: Date;
   endTime?: Date;
   modelProvider: ModelProvider;
-  attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
   compactionResult?: CompactedConversation;
-}): ConversationRound => {
+}): AgentResponseEvent => {
   // resuming / replaying tool events for the pending step
-  const lastStep = pendingRound.steps[pendingRound.steps.length - 1];
+  const lastStep = pendingAgentResponse.steps[pendingAgentResponse.steps.length - 1];
   if (isToolCallStep(lastStep) && lastStep.results.length === 0) {
     const toolCallId = lastStep.tool_call_id;
     const toolResults = events
@@ -174,21 +192,23 @@ const resumeRound = ({
     ];
   }
 
-  const followUp = createRound({
+  const followUp = createAgentResponseEvent({
     events,
-    input,
+    agentId,
     startTime,
     endTime,
     modelProvider,
-    attachmentRefs,
     configurationOverrides,
     compactionResult,
   });
 
-  return mergeRounds(pendingRound, followUp);
+  return mergeAgentResponses(pendingAgentResponse, followUp);
 };
 
-const mergeRounds = (previous: ConversationRound, next: ConversationRound): ConversationRound => {
+const mergeAgentResponses = (
+  previous: AgentResponseEvent,
+  next: AgentResponseEvent
+): AgentResponseEvent => {
   let traceId: string[] | undefined;
   if (previous.trace_id || next.trace_id) {
     traceId = [
@@ -201,74 +221,38 @@ const mergeRounds = (previous: ConversationRound, next: ConversationRound): Conv
     ];
   }
 
-  const mergedRound: ConversationRound = {
-    id: previous.id,
+  return {
+    ...previous,
     status: next.status,
     pending_prompt: next.pending_prompt,
-    state: undefined, // state is recomputed after the merge
-    input: mergeRoundInput(previous.input, next.input),
+    state: undefined,
     steps: [...previous.steps, ...next.steps],
     trace_id: traceId,
-    started_at: previous.started_at,
     time_to_first_token: previous.time_to_first_token + next.time_to_first_token,
     time_to_last_token: previous.time_to_last_token + next.time_to_last_token,
     model_usage: mergeModelUsage(previous.model_usage, next.model_usage),
     response: next.response,
     configuration_overrides: next.configuration_overrides ?? previous.configuration_overrides,
   };
-
-  return mergedRound;
 };
 
-const mergeRoundInput = (previous: RoundInput, next: RoundInput): RoundInput => {
-  const mergedRefs = mergeAttachmentRefs(previous.attachment_refs, next.attachment_refs);
-  return {
-    ...previous,
-    ...next,
-    ...(mergedRefs ? { attachment_refs: mergedRefs } : {}),
-  };
-};
-
-const mergeAttachmentRefs = (
-  previous?: AttachmentVersionRef[],
-  next?: AttachmentVersionRef[]
-): AttachmentVersionRef[] | undefined => {
-  if (!previous?.length && !next?.length) return undefined;
-  const merged = new Map<string, AttachmentVersionRef>();
-  for (const ref of previous ?? []) {
-    merged.set(
-      `${ref.attachment_id}:${ref.version}:${ref.actor ?? ATTACHMENT_REF_ACTOR.system}`,
-      ref
-    );
-  }
-  for (const ref of next ?? []) {
-    merged.set(
-      `${ref.attachment_id}:${ref.version}:${ref.actor ?? ATTACHMENT_REF_ACTOR.system}`,
-      ref
-    );
-  }
-  return Array.from(merged.values());
-};
-
-const createRound = ({
+const createAgentResponseEvent = ({
   events,
-  input,
+  agentId,
   startTime,
   endTime = new Date(),
   modelProvider,
-  attachmentRefs,
   configurationOverrides,
   compactionResult,
 }: {
   events: SourceEvents[];
-  input: RoundInput;
+  agentId: string;
   startTime: Date;
   endTime?: Date;
   modelProvider: ModelProvider;
-  attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
   compactionResult?: CompactedConversation;
-}): ConversationRound => {
+}): AgentResponseEvent => {
   const toolResults = events.filter(isToolResultEvent);
   const toolProgressions = events.filter(isToolProgressEvent);
   const messages = events.filter(isMessageCompleteEvent).map((event) => event.data);
@@ -324,20 +308,22 @@ const createRound = ({
 
   steps.push(...stepEvents.flatMap(eventToStep));
 
-  const round: ConversationRound = {
-    id: uuidv4(),
+  const id = uuidv4();
+  const now = startTime.toISOString();
+
+  return {
+    id,
+    timestamp: now,
+    type: TimelineEventType.agent_response,
+    agent_id: agentId,
     status: promptRequest
       ? ConversationRoundStatus.awaitingPrompt
       : ConversationRoundStatus.completed,
     pending_prompt: promptRequest ? promptRequest.data.prompt : undefined,
     state: undefined,
-    input: {
-      ...input,
-      ...(attachmentRefs.length > 0 ? { attachment_refs: attachmentRefs } : {}),
-    },
     steps,
     trace_id: getCurrentTraceId(),
-    started_at: startTime.toISOString(),
+    started_at: now,
     time_to_first_token: timeToFirstToken,
     time_to_last_token: timeToLastToken,
     model_usage: getModelUsage(modelProvider.getUsageStats()),
@@ -349,8 +335,6 @@ const createRound = ({
       : { message: '' },
     configuration_overrides: configurationOverrides,
   };
-
-  return round;
 };
 
 const createReasoningStep = (event: ReasoningEvent): ReasoningStep => {
@@ -399,12 +383,12 @@ const getModelUsage = (stats: ModelProviderStats): RoundModelUsageStats => {
   };
 };
 
-const buildRoundState = ({
-  round,
+const buildAgentResponseState = ({
+  agentResponse,
   events,
   stateManager,
 }: {
-  round: ConversationRound;
+  agentResponse: AgentResponseEvent;
   events: SourceEvents[];
   stateManager: ConversationStateManager;
 }): RoundState | undefined => {
@@ -417,12 +401,12 @@ const buildRoundState = ({
 
   const promptRequest = promptRequestEvents[0];
   const toolCallId = promptRequest.source.tool_call_id;
-  const toolCall = round.steps
+  const toolCall = agentResponse.steps
     .filter(isToolCallStep)
     .find((step) => step.tool_call_id === toolCallId);
 
   if (!toolCall) {
-    throw new Error(`Could not find tool call with id ${toolCallId} in round steps`);
+    throw new Error(`Could not find tool call with id ${toolCallId} in agent response steps`);
   }
 
   const toolState = stateManager

@@ -6,17 +6,24 @@
  */
 
 import type { ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
-import type { ConversationRound, ToolCallStep } from '@kbn/agent-builder-common';
-import type { ProcessedConversationRound } from './prepare_conversation';
+import type {
+  ConversationRound,
+  ToolCallStep,
+  AgentResponseEvent,
+} from '@kbn/agent-builder-common';
 import type { ResearchAgentAction } from '../default/actions';
 import { toolCallAction, executeToolAction } from '../default/actions';
 import { groupToolCallSteps } from './to_langchain_messages';
 
+/**
+ * Converts a round or agent response event's steps into graph actions.
+ * Both types share the same `steps` field shape.
+ */
 export const roundToActions = ({
   round,
   toolIdMapping,
 }: {
-  round: ConversationRound | ProcessedConversationRound;
+  round: ConversationRound | AgentResponseEvent;
   toolIdMapping: ToolIdMapping;
 }): ResearchAgentAction[] => {
   const actions: ResearchAgentAction[] = [];

@@ -13,7 +13,13 @@ import { createAgentHandlerContextMock } from '../../../../test_utils/runner';
 import { createRound } from '../../../../test_utils/conversations';
 
 import { runDefaultAgentMode } from './run_chat_agent';
-import { prepareConversation, selectTools, extractRound, getPendingRound } from '../utils';
+import {
+  prepareConversation,
+  selectTools,
+  extractRound,
+  extractAgentResponse,
+  getPendingAgentResponse,
+} from '../utils';
 import { createAgentGraph } from './graph';
 
 jest.mock('../utils', () => ({
@@ -21,10 +27,10 @@ jest.mock('../utils', () => ({
   selectSkills: jest.fn().mockResolvedValue([]),
   selectTools: jest.fn(),
   extractRound: jest.fn(),
-  getPendingRound: jest.fn(),
+  extractAgentResponse: jest.fn(),
+  getPendingAgentResponse: jest.fn().mockReturnValue(undefined),
   addRoundCompleteEvent: jest.fn(() => (source$: any) => source$),
   evictInternalEvents: jest.fn(() => (source$: any) => source$),
-  getRoundsFromConversation: jest.fn((conversation: any) => conversation?.rounds ?? []),
 }));
 
 jest.mock('../utils/create_result_transformer', () => ({
@@ -46,7 +52,10 @@ jest.mock('./convert_graph_events', () => ({
 const prepareConversationMock = prepareConversation as jest.MockedFn<typeof prepareConversation>;
 const selectToolsMock = selectTools as jest.MockedFn<typeof selectTools>;
 const extractRoundMock = extractRound as jest.MockedFn<typeof extractRound>;
-const getPendingRoundMock = getPendingRound as jest.MockedFn<typeof getPendingRound>;
+const extractAgentResponseMock = extractAgentResponse as jest.MockedFn<typeof extractAgentResponse>;
+const getPendingAgentResponseMock = getPendingAgentResponse as jest.MockedFn<
+  typeof getPendingAgentResponse
+>;
 const createAgentGraphMock = createAgentGraph as jest.MockedFn<typeof createAgentGraph>;
 
 describe('runDefaultAgentMode', () => {
@@ -65,7 +74,7 @@ describe('runDefaultAgentMode', () => {
     context.toolManager.getToolIdMapping.mockReturnValue(new Map());
     context.toolManager.getDynamicToolIds.mockReturnValue([]);
 
-    getPendingRoundMock.mockReturnValue(undefined);
+    getPendingAgentResponseMock.mockReturnValue(undefined);
 
     const staticTools = [{ id: 'static-tool-1' } as ExecutableTool];
     const dynamicTools = [{ id: 'dynamic-tool-1' } as ExecutableTool];
@@ -76,7 +85,7 @@ describe('runDefaultAgentMode', () => {
     } as any);
 
     prepareConversationMock.mockResolvedValue({
-      previousRounds: [],
+      previousEvents: [],
       nextInput: { message: 'hello', attachments: [] },
       attachments: [],
       attachmentTypes: [],
@@ -88,6 +97,20 @@ describe('runDefaultAgentMode', () => {
         id: 'round-1',
       })
     );
+
+    extractAgentResponseMock.mockResolvedValue({
+      id: 'round-1',
+      timestamp: new Date().toISOString(),
+      type: 'agent_response',
+      agent_id: 'test-agent',
+      status: 'completed',
+      steps: [],
+      response: { message: 'test' },
+      started_at: new Date().toISOString(),
+      time_to_first_token: 0,
+      time_to_last_token: 0,
+      model_usage: { connector_id: '', llm_calls: 0, input_tokens: 0, output_tokens: 0 },
+    } as any);
 
     createAgentGraphMock.mockReturnValue({
       streamEvents: jest.fn(() => []),

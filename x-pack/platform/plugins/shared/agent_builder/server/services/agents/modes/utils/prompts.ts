@@ -5,21 +5,26 @@
  * 2.0.
  */
 
-import type {
-  Conversation,
-  ConversationRound,
-  ExecutionConversation,
-} from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
-import { getRoundsFromConversation } from './conversation_format';
+import type { AgentResponseEvent, TimelineEvent } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus, isAgentResponseEvent } from '@kbn/agent-builder-common';
+import type { ProcessedTimelineEvent } from './prepare_conversation';
+import { isProcessedAgentResponseEvent } from './prepare_conversation';
 
-export const getPendingRound = (
-  conversation: Conversation | ExecutionConversation | undefined
-): ConversationRound | undefined => {
-  const rounds = getRoundsFromConversation(conversation);
-  const lastRound = rounds[rounds.length - 1];
-  if (lastRound?.status === ConversationRoundStatus.awaitingPrompt) {
-    return lastRound;
+/**
+ * Find the last AgentResponseEvent with `awaiting_prompt` status from timeline events.
+ */
+export const getPendingAgentResponse = (
+  events: TimelineEvent[] | ProcessedTimelineEvent[]
+): AgentResponseEvent | undefined => {
+  for (let i = events.length - 1; i >= 0; i--) {
+    const event = events[i];
+    if (
+      (isAgentResponseEvent(event as TimelineEvent) ||
+        isProcessedAgentResponseEvent(event as ProcessedTimelineEvent)) &&
+      (event as AgentResponseEvent).status === ConversationRoundStatus.awaitingPrompt
+    ) {
+      return event as AgentResponseEvent;
+    }
   }
   return undefined;
 };

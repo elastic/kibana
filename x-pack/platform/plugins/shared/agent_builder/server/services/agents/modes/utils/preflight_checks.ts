@@ -7,42 +7,48 @@
 
 import { createBadRequestError } from '@kbn/agent-builder-common/base/errors';
 import type {
-  Conversation,
-  ExecutionConversation,
   ConverseInput,
   ConversationAction,
+  TimelineEvent,
+  AgentResponseEvent,
 } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
-import { getRoundsFromConversation } from './conversation_format';
+import { ConversationRoundStatus, isAgentResponseEvent } from '@kbn/agent-builder-common';
 
 export const ensureValidInput = ({
   input,
-  conversation,
+  timelineEvents,
   action,
 }: {
   input: ConverseInput;
-  conversation?: Conversation | ExecutionConversation;
+  timelineEvents: TimelineEvent[];
   action?: ConversationAction;
 }) => {
-  // Regenerate uses the last round's input via prepareConversation - skip standard input check
+  // Regenerate uses the last event's input via prepareConversation - skip standard input check
   if (action === 'regenerate') {
     return;
   }
 
-  const rounds = getRoundsFromConversation(conversation);
-  const lastRound = rounds[rounds.length - 1];
-  const lastRoundStatus = lastRound?.status ?? ConversationRoundStatus.completed;
+  // Find the last AgentResponseEvent
+  let lastAgentResponse: AgentResponseEvent | undefined;
+  for (let i = timelineEvents.length - 1; i >= 0; i--) {
+    if (isAgentResponseEvent(timelineEvents[i])) {
+      lastAgentResponse = timelineEvents[i] as AgentResponseEvent;
+      break;
+    }
+  }
+
+  const lastStatus = lastAgentResponse?.status ?? ConversationRoundStatus.completed;
 
   // standard scenario - we need input to continue
-  if (lastRoundStatus === ConversationRoundStatus.completed) {
+  if (lastStatus === ConversationRoundStatus.completed) {
     if (!hasStandardInput(input)) {
       throw createBadRequestError(`No standard input was provided to continue the conversation.`);
     }
   }
 
   // prompt pending - we need a prompt response to continue
-  if (lastRound?.pending_prompt && lastRoundStatus === ConversationRoundStatus.awaitingPrompt) {
-    if (!hasPromptResponse(lastRound.pending_prompt.id, input)) {
+  if (lastAgentResponse?.pending_prompt && lastStatus === ConversationRoundStatus.awaitingPrompt) {
+    if (!hasPromptResponse(lastAgentResponse.pending_prompt.id, input)) {
       throw createBadRequestError(
         `Conversation is awaiting a prompt response, but none was provided.`
       );

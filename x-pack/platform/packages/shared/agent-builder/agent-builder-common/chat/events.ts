@@ -7,7 +7,11 @@
 
 import type { AgentBuilderEvent } from '../base/events';
 import type { ToolResult } from '../tools/tool_result';
-import type { ConversationInternalState, ConversationRound } from './conversation';
+import type {
+  ConversationInternalState,
+  ConversationRound,
+  AgentResponseEvent,
+} from './conversation';
 import type { PromptRequestSource, PromptRequest } from '../agents/prompts';
 import type { VersionedAttachment } from '../attachments';
 
@@ -216,6 +220,8 @@ export const isThinkingCompleteEvent = (
 export interface RoundCompleteEventData {
   /** round that was completed */
   round: ConversationRound;
+  /** The AgentResponseEvent produced by this execution */
+  agentResponse?: AgentResponseEvent;
   /** if true, it means the round was resumed, so we need to replace the last one instead of adding a new one */
   resumed?: boolean;
   /** if the prompt state was updated during the round, contains the up-to-date version */

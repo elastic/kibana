@@ -6,10 +6,18 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  ConversationRoundStepType,
+  type AgentResponseEvent,
+} from '@kbn/agent-builder-common';
 import type { CompactionStructuredData, CompactionSummary } from '@kbn/agent-builder-common';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
+import type {
+  ProcessedConversation,
+  ProcessedUserMessageEvent,
+  ProcessedTimelineEvent,
+} from './prepare_conversation';
 import type { ContextBudget } from './context_budget';
 import {
   compactConversation,
@@ -29,11 +37,11 @@ const mockLogger: Logger = {
   isLevelEnabled: jest.fn().mockReturnValue(true),
 } as unknown as Logger;
 
-const createMockRound = (
+const createMockAgentResponse = (
   id: string,
   messageLength: number = 100,
   toolResults: number = 0
-): ProcessedConversationRound => {
+): AgentResponseEvent => {
   const steps = Array.from({ length: toolResults }, (_, i) => ({
     type: ConversationRoundStepType.toolCall as const,
     tool_call_id: `${id}-tc-${i}`,
@@ -51,11 +59,10 @@ const createMockRound = (
 
   return {
     id,
+    timestamp: new Date().toISOString(),
+    type: 'agent_response',
+    agent_id: 'test-agent',
     status: ConversationRoundStatus.completed,
-    input: {
-      message: `User message ${id}: ${'x'.repeat(messageLength)}`,
-      attachments: [],
-    },
     steps,
     response: { message: `Assistant response ${id}: ${'y'.repeat(messageLength)}` },
     started_at: new Date().toISOString(),
@@ -70,8 +77,37 @@ const createMockRound = (
   };
 };
 
-const createMockConversation = (rounds: ProcessedConversationRound[]): ProcessedConversation => ({
-  previousRounds: rounds,
+const createMockUserMessage = (
+  id: string,
+  messageLength: number = 100
+): ProcessedUserMessageEvent => ({
+  id: `user-${id}`,
+  timestamp: new Date().toISOString(),
+  type: 'user_message',
+  user: { id: '', username: '' },
+  message: `User message ${id}: ${'x'.repeat(messageLength)}`,
+  processedInput: {
+    message: `User message ${id}: ${'x'.repeat(messageLength)}`,
+    attachments: [],
+  },
+});
+
+/**
+ * Creates a pair of [ProcessedUserMessageEvent, AgentResponseEvent] for each mock round.
+ */
+const createMockEventPair = (
+  id: string,
+  messageLength: number = 100,
+  toolResults: number = 0
+): [ProcessedUserMessageEvent, AgentResponseEvent] => [
+  createMockUserMessage(id, messageLength),
+  createMockAgentResponse(id, messageLength, toolResults),
+];
+
+const createMockConversation = (
+  eventPairs: [ProcessedUserMessageEvent, AgentResponseEvent][]
+): ProcessedConversation => ({
+  previousEvents: eventPairs.flat() as ProcessedTimelineEvent[],
   nextInput: { message: 'current question', attachments: [] },
   attachments: [],
   attachmentTypes: [],
@@ -95,9 +131,12 @@ const createMockChatModel = () =>
   } as any);
 
 describe('extractProgrammaticSummary', () => {
-  it('should extract tool calls from round steps', () => {
-    const rounds = [createMockRound('r1', 50, 2), createMockRound('r2', 50, 1)];
-    const result = extractProgrammaticSummary(rounds);
+  it('should extract tool calls from agent response steps', () => {
+    const agentResponses = [
+      createMockAgentResponse('r1', 50, 2),
+      createMockAgentResponse('r2', 50, 1),
+    ];
+    const result = extractProgrammaticSummary(agentResponses);
 
     expect(result.tool_calls_summary).toHaveLength(3);
     expect(result.tool_calls_summary[0].tool_id).toBe('tool-0');
@@ -105,31 +144,31 @@ describe('extractProgrammaticSummary', () => {
   });
 
   it('should not extract entities (delegated to LLM)', () => {
-    const rounds = [createMockRound('r1', 50, 1)];
-    const result = extractProgrammaticSummary(rounds);
+    const agentResponses = [createMockAgentResponse('r1', 50, 1)];
+    const result = extractProgrammaticSummary(agentResponses);
 
     expect(result).not.toHaveProperty('entities');
   });
 
   it('should generate agent_actions for each tool call', () => {
-    const rounds = [createMockRound('r1', 50, 2)];
-    const result = extractProgrammaticSummary(rounds);
+    const agentResponses = [createMockAgentResponse('r1', 50, 2)];
+    const result = extractProgrammaticSummary(agentResponses);
 
     expect(result.agent_actions).toHaveLength(2);
     expect(result.agent_actions[0]).toContain('Called tool-0');
   });
 
-  it('should handle rounds with no tool calls', () => {
-    const rounds = [createMockRound('r1', 50, 0)];
-    const result = extractProgrammaticSummary(rounds);
+  it('should handle agent responses with no tool calls', () => {
+    const agentResponses = [createMockAgentResponse('r1', 50, 0)];
+    const result = extractProgrammaticSummary(agentResponses);
 
     expect(result.tool_calls_summary).toHaveLength(0);
     expect(result.agent_actions).toHaveLength(0);
   });
 
   it('should truncate long params summaries', () => {
-    const round: ProcessedConversationRound = {
-      ...createMockRound('r1', 50, 0),
+    const agentResponse: AgentResponseEvent = {
+      ...createMockAgentResponse('r1', 50, 0),
       steps: [
         {
           type: ConversationRoundStepType.toolCall as const,
@@ -142,7 +181,7 @@ describe('extractProgrammaticSummary', () => {
       ],
     };
 
-    const result = extractProgrammaticSummary([round]);
+    const result = extractProgrammaticSummary([agentResponse]);
 
     expect(result.tool_calls_summary[0].params_summary.length).toBeLessThanOrEqual(121);
   });
@@ -194,8 +233,8 @@ describe('serializeCompactionSummary', () => {
 
 describe('compactConversation', () => {
   it('should not compact when under threshold', async () => {
-    const rounds = [createMockRound('r1', 50), createMockRound('r2', 50)];
-    const conversation = createMockConversation(rounds);
+    const eventPairs = [createMockEventPair('r1', 50), createMockEventPair('r2', 50)];
+    const conversation = createMockConversation(eventPairs);
 
     const budget: ContextBudget = {
       totalBudget: 128000,
@@ -212,18 +251,19 @@ describe('compactConversation', () => {
 
     expect(result.compactionTriggered).toBe(false);
     expect(result.summary).toBeUndefined();
-    expect(result.processedConversation.previousRounds).toHaveLength(2);
+    // 2 pairs = 4 events total (2 user messages + 2 agent responses)
+    expect(result.processedConversation.previousEvents).toHaveLength(4);
   });
 
   it('should trigger LLM summarization when over threshold', async () => {
-    const rounds = [
-      createMockRound('r1', 2000, 3),
-      createMockRound('r2', 2000, 3),
-      createMockRound('r3', 2000, 3),
-      createMockRound('r4', 200),
-      createMockRound('r5', 200),
+    const eventPairs = [
+      createMockEventPair('r1', 2000, 3),
+      createMockEventPair('r2', 2000, 3),
+      createMockEventPair('r3', 2000, 3),
+      createMockEventPair('r4', 200),
+      createMockEventPair('r5', 200),
     ];
-    const conversation = createMockConversation(rounds);
+    const conversation = createMockConversation(eventPairs);
 
     const budget: ContextBudget = {
       totalBudget: 500,
@@ -244,13 +284,13 @@ describe('compactConversation', () => {
   });
 
   it('should merge programmatic and LLM fields in the summary', async () => {
-    const rounds = [
-      createMockRound('r1', 2000, 2),
-      createMockRound('r2', 2000, 1),
-      createMockRound('recent-1', 200),
-      createMockRound('recent-2', 200),
+    const eventPairs = [
+      createMockEventPair('r1', 2000, 2),
+      createMockEventPair('r2', 2000, 1),
+      createMockEventPair('recent-1', 200),
+      createMockEventPair('recent-2', 200),
     ];
-    const conversation = createMockConversation(rounds);
+    const conversation = createMockConversation(eventPairs);
 
     const budget: ContextBudget = {
       totalBudget: 500,
@@ -285,12 +325,12 @@ describe('compactConversation', () => {
   });
 
   it('should reuse existing summary without triggering new compaction when effective tokens are under threshold', async () => {
-    const rounds = [
-      createMockRound('r1', 50),
-      createMockRound('r2', 50),
-      createMockRound('r3', 50),
+    const eventPairs = [
+      createMockEventPair('r1', 50),
+      createMockEventPair('r2', 50),
+      createMockEventPair('r3', 50),
     ];
-    const conversation = createMockConversation(rounds);
+    const conversation = createMockConversation(eventPairs);
 
     const existingSummary: CompactionSummary = {
       summarized_round_count: 1,
@@ -326,20 +366,21 @@ describe('compactConversation', () => {
     // Existing summary is applied but no new compaction event fires
     expect(result.compactionTriggered).toBe(false);
     expect(result.summary).toBe(existingSummary);
-    // Round r1 was summarized, only r2 and r3 remain
-    expect(result.processedConversation.previousRounds).toHaveLength(2);
+    // Round r1 (1 agent response) was summarized; its user message + agent response pair removed,
+    // leaving r2 and r3 pairs = 4 events
+    expect(result.processedConversation.previousEvents).toHaveLength(4);
   });
 
   it('should regenerate summary when effective tokens exceed threshold despite existing summary', async () => {
-    const rounds = [
-      createMockRound('r1', 2000, 2),
-      createMockRound('r2', 2000, 2),
-      createMockRound('r3', 2000, 2),
-      createMockRound('r4', 2000, 2),
-      createMockRound('recent-1', 200),
-      createMockRound('recent-2', 200),
+    const eventPairs = [
+      createMockEventPair('r1', 2000, 2),
+      createMockEventPair('r2', 2000, 2),
+      createMockEventPair('r3', 2000, 2),
+      createMockEventPair('r4', 2000, 2),
+      createMockEventPair('recent-1', 200),
+      createMockEventPair('recent-2', 200),
     ];
-    const conversation = createMockConversation(rounds);
+    const conversation = createMockConversation(eventPairs);
 
     // Stale summary that only covered the first round
     const existingSummary: CompactionSummary = {
@@ -380,14 +421,14 @@ describe('compactConversation', () => {
     expect(chatModel.withStructuredOutput).toHaveBeenCalled();
   });
 
-  it('should preserve the most recent rounds during compaction', async () => {
-    const rounds = [
-      createMockRound('old-1', 2000, 5),
-      createMockRound('old-2', 2000, 5),
-      createMockRound('recent-1', 200),
-      createMockRound('recent-2', 200),
+  it('should preserve the most recent events during compaction', async () => {
+    const eventPairs = [
+      createMockEventPair('old-1', 2000, 5),
+      createMockEventPair('old-2', 2000, 5),
+      createMockEventPair('recent-1', 200),
+      createMockEventPair('recent-2', 200),
     ];
-    const conversation = createMockConversation(rounds);
+    const conversation = createMockConversation(eventPairs);
 
     const budget: ContextBudget = {
       totalBudget: 500,
@@ -403,14 +444,14 @@ describe('compactConversation', () => {
     });
 
     expect(result.compactionTriggered).toBe(true);
-    const roundIds = result.processedConversation.previousRounds.map((r) => r.id);
-    expect(roundIds).toContain('recent-1');
-    expect(roundIds).toContain('recent-2');
+    const eventIds = result.processedConversation.previousEvents.map((e) => e.id);
+    expect(eventIds).toContain('recent-1');
+    expect(eventIds).toContain('recent-2');
   });
 
   it('should handle single-round conversations without error', async () => {
-    const rounds = [createMockRound('r1', 50)];
-    const conversation = createMockConversation(rounds);
+    const eventPairs = [createMockEventPair('r1', 50)];
+    const conversation = createMockConversation(eventPairs);
 
     const budget: ContextBudget = {
       totalBudget: 128000,
@@ -426,7 +467,8 @@ describe('compactConversation', () => {
     });
 
     expect(result.compactionTriggered).toBe(false);
-    expect(result.processedConversation.previousRounds).toHaveLength(1);
+    // 1 pair = 2 events (1 user message + 1 agent response)
+    expect(result.processedConversation.previousEvents).toHaveLength(2);
   });
 
   it('should handle empty conversations', async () => {
@@ -446,17 +488,17 @@ describe('compactConversation', () => {
     });
 
     expect(result.compactionTriggered).toBe(false);
-    expect(result.processedConversation.previousRounds).toHaveLength(0);
+    expect(result.processedConversation.previousEvents).toHaveLength(0);
   });
 
   it('should include token counts when compaction is triggered', async () => {
-    const rounds = [
-      createMockRound('r1', 2000, 2),
-      createMockRound('r2', 2000, 1),
-      createMockRound('recent-1', 200),
-      createMockRound('recent-2', 200),
+    const eventPairs = [
+      createMockEventPair('r1', 2000, 2),
+      createMockEventPair('r2', 2000, 1),
+      createMockEventPair('recent-1', 200),
+      createMockEventPair('recent-2', 200),
     ];
-    const conversation = createMockConversation(rounds);
+    const conversation = createMockConversation(eventPairs);
 
     const budget: ContextBudget = {
       totalBudget: 500,

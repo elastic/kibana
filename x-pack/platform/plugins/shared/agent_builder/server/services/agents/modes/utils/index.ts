@@ -6,12 +6,12 @@
  */
 
 export { addRoundCompleteEvent } from './add_round_complete_event';
-export { extractRound } from './extract_round';
-export { convertPreviousRounds } from './to_langchain_messages';
+export { extractRound, extractAgentResponse } from './extract_round';
+export { convertPreviousEvents } from './to_langchain_messages';
 export { prepareConversation } from './prepare_conversation';
 export { selectSkills } from './select_skills';
 export { selectTools } from './select_tools';
-export { getPendingRound } from './prompts';
+export { getPendingAgentResponse } from './prompts';
 export { evictInternalEvents } from './evict_internal_events';
 export {
   prepareAttachmentPresentation,
@@ -27,4 +27,3 @@ export {
   type CreateResultTransformerOptions,
   FS_TOOL_CALL_TOKEN_THRESHOLD,
 } from './create_result_transformer';
-export { isExecutionConversation, getRoundsFromConversation } from './conversation_format';

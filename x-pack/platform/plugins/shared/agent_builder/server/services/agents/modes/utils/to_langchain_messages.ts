@@ -12,6 +12,7 @@ import type {
   ConversationRoundStep,
   ToolCallStep,
   ToolCallWithResult,
+  AgentResponseEvent,
 } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus, isToolCallStep } from '@kbn/agent-builder-common';
 import {
@@ -22,7 +23,12 @@ import {
 import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
 import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
 import type { CompactionSummary } from '@kbn/agent-builder-common';
-import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
+import type {
+  ProcessedConversation,
+  ProcessedTimelineEvent,
+  ProcessedUserMessageEvent,
+} from './prepare_conversation';
+import { isProcessedUserMessageEvent, isProcessedAgentResponseEvent } from './prepare_conversation';
 import type { ToolCallResultTransformer } from './create_result_transformer';
 import { serializeCompactionSummary } from './conversation_compactor';
 
@@ -39,7 +45,7 @@ export interface ConversationToLangchainOptions {
    */
   ignoreSteps?: boolean;
   /**
-   * Optional compaction summary to inject before the remaining rounds.
+   * Optional compaction summary to inject before the remaining events.
    * When provided, the summary is serialized and prepended as a
    * user/assistant message pair representing the compacted history.
    */
@@ -47,12 +53,12 @@ export interface ConversationToLangchainOptions {
 }
 
 /**
- * Converts a conversation to langchain format.
+ * Converts processed conversation events to langchain message format.
  *
- * When `resultTransformer` is provided, tool results from previous rounds
+ * When `resultTransformer` is provided, tool results from previous events
  * will be passed through the transformer function.
  */
-export const convertPreviousRounds = async ({
+export const convertPreviousEvents = async ({
   conversation,
   resultTransformer,
   ignoreSteps = false,
@@ -60,35 +66,50 @@ export const convertPreviousRounds = async ({
 }: ConversationToLangchainOptions): Promise<BaseMessage[]> => {
   const messages: BaseMessage[] = [];
 
-  let rounds = conversation.previousRounds;
+  let events = conversation.previousEvents;
   let input = conversation.nextInput;
 
-  // need to ignore the last round if it's awaiting a prompt, the graph handles resuming the actions
-  // we also uses the last message's input as the "next" input (given the actual input will be the prompt response)
-  const lastRound = conversation.previousRounds[conversation.previousRounds.length - 1];
-  if (lastRound && lastRound.status === ConversationRoundStatus.awaitingPrompt) {
-    rounds = rounds.slice(0, rounds.length - 1);
-    input = lastRound.input;
+  // Need to ignore the last agent response if it's awaiting a prompt.
+  // The graph handles resuming the actions.
+  // We use the preceding user message's input as the "next" input
+  // (given the actual input will be the prompt response).
+  const lastAgentResponse = findLastAgentResponse(events);
+  if (lastAgentResponse?.status === ConversationRoundStatus.awaitingPrompt) {
+    // Find the preceding user message
+    const lastAgentIdx = events.lastIndexOf(lastAgentResponse);
+    const precedingUserMsg = findPrecedingUserMessage(events, lastAgentIdx);
+    if (precedingUserMsg) {
+      input = precedingUserMsg.processedInput;
+    }
+    // Strip the last agent response from events
+    events = events.slice(0, lastAgentIdx);
   }
 
-  // Inject compaction summary as a user/assistant exchange before remaining rounds
+  // Inject compaction summary as a user/assistant exchange before remaining events
   if (compactionSummary) {
     const summaryText = serializeCompactionSummary(compactionSummary.structured_data);
     messages.push(createUserMessage('[Previous conversation context was compacted]'));
     messages.push(createAIMessage(summaryText));
   }
 
-  for (const round of rounds) {
-    messages.push(...(await roundToLangchain(round, { resultTransformer, ignoreSteps })));
+  for (const event of events) {
+    if (isProcessedUserMessageEvent(event)) {
+      messages.push(formatProcessedInput({ input: event.processedInput }));
+    } else if (isProcessedAgentResponseEvent(event)) {
+      messages.push(...(await agentResponseToLangchain(event, { resultTransformer, ignoreSteps })));
+    }
   }
 
-  messages.push(formatRoundInput({ input }));
+  messages.push(formatProcessedInput({ input }));
 
   return messages;
 };
 
-export const roundToLangchain = async (
-  round: ProcessedConversationRound,
+/**
+ * Converts an AgentResponseEvent to langchain messages (steps + response).
+ */
+export const agentResponseToLangchain = async (
+  agentResponse: AgentResponseEvent,
   {
     resultTransformer,
     ignoreSteps = false,
@@ -96,24 +117,21 @@ export const roundToLangchain = async (
 ): Promise<BaseMessage[]> => {
   const messages: BaseMessage[] = [];
 
-  // user message
-  messages.push(formatRoundInput({ input: round.input }));
-
   // steps
   if (!ignoreSteps) {
-    const groups = groupToolCallSteps(round.steps);
+    const groups = groupToolCallSteps(agentResponse.steps);
     for (const group of groups) {
       messages.push(...(await createGroupedToolCallMessages(group, { resultTransformer })));
     }
   }
 
   // assistant response
-  messages.push(formatAssistantResponse({ response: round.response }));
+  messages.push(formatAssistantResponse({ response: agentResponse.response }));
 
   return messages;
 };
 
-const formatRoundInput = ({ input }: { input: ProcessedRoundInput }): HumanMessage => {
+const formatProcessedInput = ({ input }: { input: ProcessedRoundInput }): HumanMessage => {
   const { message, attachments } = input;
 
   let content = message;
@@ -254,4 +272,31 @@ export const createToolCallMessages = async (
   });
 
   return [toolCallMessage, toolResultMessage];
+};
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+const findLastAgentResponse = (
+  events: ProcessedTimelineEvent[]
+): AgentResponseEvent | undefined => {
+  for (let i = events.length - 1; i >= 0; i--) {
+    if (isProcessedAgentResponseEvent(events[i])) {
+      return events[i] as AgentResponseEvent;
+    }
+  }
+  return undefined;
+};
+
+const findPrecedingUserMessage = (
+  events: ProcessedTimelineEvent[],
+  beforeIndex: number
+): ProcessedUserMessageEvent | undefined => {
+  for (let i = beforeIndex - 1; i >= 0; i--) {
+    if (isProcessedUserMessageEvent(events[i])) {
+      return events[i] as ProcessedUserMessageEvent;
+    }
+  }
+  return undefined;
 };
