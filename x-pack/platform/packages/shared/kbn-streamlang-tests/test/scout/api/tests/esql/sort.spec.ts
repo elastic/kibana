@@ -11,8 +11,7 @@ import type { SortProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
-// https://github.com/elastic/kibana/issues/258476
-apiTest.describe.skip(
+apiTest.describe(
   'Streamlang to ES|QL - Sort Processor',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -96,7 +95,8 @@ apiTest.describe.skip(
         expect(esqlResult.documents).toHaveLength(1);
         expect(esqlResult.documents[0]).toStrictEqual(
           expect.objectContaining({
-            tags: ['charlie', 'alpha', 'bravo'], // Original preserved
+            // ES|QL returns keyword fields sorted, so the original order is not preserved in the result
+            tags: expect.arrayContaining(['charlie', 'alpha', 'bravo']),
             sorted_tags: ['alpha', 'bravo', 'charlie'], // New field created
           })
         );
@@ -147,7 +147,8 @@ apiTest.describe.skip(
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(1);
-      expect(esqlResult.documents[0]).toStrictEqual(expect.objectContaining({ tags: ['single'] }));
+      // ES|QL returns a scalar (not array) when a single-element array is sorted
+      expect(esqlResult.documents[0]).toStrictEqual(expect.objectContaining({ tags: 'single' }));
     });
 
     apiTest('should sort field conditionally with EVAL CASE', async ({ testBed, esql }) => {
@@ -212,16 +213,17 @@ apiTest.describe.skip(
 
         const { query } = transpile(streamlangDSL);
 
+        // Use a non-empty placeholder for sorted_tags to ensure a mapping exists in ES|QL
         const docs = [
           {
             tags: ['charlie', 'alpha', 'bravo'],
-            sorted_tags: [],
+            sorted_tags: '',
             event: { kind: 'test' },
             status: 'doc1',
           },
           {
             tags: ['zulu', 'xray', 'yankee'],
-            sorted_tags: [],
+            sorted_tags: '',
             event: { kind: 'production' },
             status: 'doc2',
           },
@@ -235,17 +237,18 @@ apiTest.describe.skip(
         const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
         expect(doc1).toStrictEqual(
           expect.objectContaining({
-            tags: ['charlie', 'alpha', 'bravo'], // Original preserved
+            // ES|QL returns keyword fields sorted, so original order is not preserved in the result
+            tags: expect.arrayContaining(['charlie', 'alpha', 'bravo']),
             sorted_tags: ['alpha', 'bravo', 'charlie'], // New field sorted
           })
         );
         expect(doc1?.['event.kind']).toBe('test');
 
-        // Second doc should have sorted_tags as empty array (where condition not matched)
+        // Second doc should have sorted_tags as the original placeholder (where condition not matched)
         const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
         expect(doc2?.tags).toStrictEqual(expect.arrayContaining(['zulu', 'xray', 'yankee']));
         expect(doc2?.tags).toHaveLength(3);
-        expect(doc2).toStrictEqual(expect.objectContaining({ sorted_tags: [] }));
+        expect(doc2).toStrictEqual(expect.objectContaining({ sorted_tags: '' }));
         expect(doc2?.['event.kind']).toBe('production');
       }
     );

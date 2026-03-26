@@ -12,7 +12,7 @@ export { registerRoutes } from './register_routes';
 export type { MarkdownCreateRequestBody, MarkdownCreateResponseBody } from './create';
 export type { MarkdownReadResponseBody } from './read';
 export type { MarkdownUpdateRequestBody, MarkdownUpdateResponseBody } from './update';
-export type { MarkdownSearchRequestBody, MarkdownSearchResponseBody } from './search';
+export type { MarkdownSearchRequestQuery, MarkdownSearchResponseBody } from './search';
 
 export { create } from './create/create';
 export { read } from './read/read';
