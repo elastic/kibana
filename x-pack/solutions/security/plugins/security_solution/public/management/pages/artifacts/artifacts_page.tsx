@@ -171,9 +171,12 @@ export const ArtifactsPage = memo(() => {
   const effectiveSelectedIndex =
     visibleTabs.length > 0 && selectedTabIndex >= 0 ? selectedTabIndex : 0;
 
-  const onTabClick = useCallback((tab: AdministrationSubTab) => {
-    history.push(getPathForTab(tab));
-  }, [history, getPathForTab]);
+  const onTabClick = useCallback(
+    (tab: AdministrationSubTab) => {
+      history.push(getPathForTab(tab));
+    },
+    [history, getPathForTab]
+  );
 
   return (
     <AdministrationListPage
