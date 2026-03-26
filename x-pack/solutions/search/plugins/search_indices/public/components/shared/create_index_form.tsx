@@ -7,7 +7,6 @@
 
 import React, { useCallback } from 'react';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiFieldText,
   EuiFlexGroup,
@@ -23,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 
 import type { UserStartPrivilegesResponse } from '../../../common';
 import { SampleDataPanel } from './sample_data_panel';
@@ -111,13 +111,12 @@ export const CreateIndexForm = ({
                 ) : undefined
               }
             >
-              <EuiButton
-                fill
-                color="primary"
+              <AiButton
+                variant="accent"
                 iconSide="left"
                 iconType="sparkles"
                 data-test-subj="createIndexBtn"
-                disabled={
+                isDisabled={
                   userPrivileges?.privileges?.canManageIndex === false ||
                   indexNameHasError ||
                   isLoading ||
@@ -129,13 +128,13 @@ export const CreateIndexForm = ({
                 {i18n.translate('xpack.searchIndices.shared.createIndex.action.text', {
                   defaultMessage: 'Create my index',
                 })}
-              </EuiButton>
+              </AiButton>
             </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem>
             {showAPIKeyCreateLabel && (
               <EuiFlexGroup gutterSize="s">
-                <EuiIcon size="m" type="key" color="subdued" />
+                <EuiIcon size="m" type="key" color="subdued" aria-hidden={true} />
                 <EuiText size="s" data-test-subj="apiKeyLabel">
                   <p>
                     {i18n.translate(

@@ -59,6 +59,7 @@
     "@kbn/search-queries",
     "@kbn/monaco",
     "@kbn/search-shared-ui",
+    "@kbn/shared-ux-ai-components",
     "@kbn/license-management-plugin",
     "@kbn/connector-schemas",
     "@kbn/react-query"

@@ -47,6 +47,7 @@
     "@kbn/licensing-plugin",
     "@kbn/react-query",
     "@kbn/search-api-panels",
+    "@kbn/shared-ux-ai-components",
     "@kbn/deeplinks-management",
     "@kbn/index-management-plugin",
     "@kbn/cloud-connect-plugin",

@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 
 import * as Constants from '../../../../shared/constants';
 import { isValidIndexName } from '../../../utils/validate_index_name';
@@ -39,10 +40,10 @@ import type { SelfManagePreference } from './create_connector';
 
 interface StartStepProps {
   error?: string | React.ReactNode;
-  onSelfManagePreferenceChange(preference: SelfManagePreference): void;
   selfManagePreference: SelfManagePreference;
   setCurrentStep: Function;
   title: string;
+  onSelfManagePreferenceChange(preference: SelfManagePreference): void;
 }
 
 export const StartStep: React.FC<StartStepProps> = ({
@@ -309,13 +310,13 @@ export const StartStep: React.FC<StartStepProps> = ({
               ) : (
                 <EuiFlexGroup gutterSize="xs">
                   <EuiFlexItem grow={false}>
-                    <EuiButton
+                    <AiButton
                       data-test-subj="entSearchContent-connector-configuration-generateConfigButton"
                       data-telemetry-id="entSearchContent-connector-configuration-generateConfigButton"
-                      disabled={
+                      isDisabled={
                         !canConfigureConnector || !isValidIndexName(rawName) || Boolean(error)
                       }
-                      fill
+                      variant="accent"
                       iconType="sparkles"
                       isLoading={isGenerateLoading || isCreateLoading}
                       onClick={() => {
@@ -331,7 +332,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                           defaultMessage: 'Generate configuration',
                         }
                       )}
-                    </EuiButton>
+                    </AiButton>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <ManualConfiguration

@@ -78,6 +78,7 @@
     "@kbn/ui-actions-plugin",
     "@kbn/fleet-plugin",
     "@kbn/search-shared-ui",
+    "@kbn/shared-ux-ai-components",
     "@kbn/search-indices",
     "@kbn/charts-theme",
     "@kbn/licensing-types",

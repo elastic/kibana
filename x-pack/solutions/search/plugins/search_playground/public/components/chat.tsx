@@ -23,6 +23,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 
 import { AnalyticsEvents } from '../analytics/constants';
 import { useAutoBottomScroll } from '../hooks/use_auto_bottom_scroll';
@@ -164,18 +165,19 @@ export const Chat = () => {
 
                 <EuiFlexGroup responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
+                    <AiButton
                       iconType="sparkles"
-                      disabled={isToolBarActionsDisabled}
+                      isDisabled={isToolBarActionsDisabled}
                       onClick={regenerateMessages}
                       size="xs"
+                      variant="empty"
                       data-test-subj="regenerateActionButton"
                     >
                       <FormattedMessage
                         id="xpack.searchPlayground.chat.regenerateBtn"
                         defaultMessage="Regenerate"
                       />
-                    </EuiButtonEmpty>
+                    </AiButton>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty

@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiText,
-  EuiIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiText, EuiIcon, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { GenerativeAIForSearchPlaygroundConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
@@ -64,7 +58,7 @@ export const ConnectLLMButton: React.FC = () => {
       {hasConnectors ? (
         <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj="successConnectLLMText">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="checkInCircleFilled" color="success" />
+            <EuiIcon type="checkInCircleFilled" color="success" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {hasElasticConnector ? (
@@ -93,8 +87,9 @@ export const ConnectLLMButton: React.FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <EuiButton
+        <AiButton
           iconType="sparkles"
+          variant="base"
           data-test-subj="connectLLMButton"
           onClick={handleSetupGenAiConnector}
         >
@@ -102,7 +97,7 @@ export const ConnectLLMButton: React.FC = () => {
             id="xpack.searchPlayground.setupPage.connectLLMButtonLabel"
             defaultMessage="Connect to an LLM"
           />
-        </EuiButton>
+        </AiButton>
       )}
       {connectorFlyoutOpen && (
         <ConnectorFlyout

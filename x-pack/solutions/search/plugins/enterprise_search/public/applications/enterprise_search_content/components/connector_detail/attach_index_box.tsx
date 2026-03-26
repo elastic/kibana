@@ -29,6 +29,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Connector } from '@kbn/search-connectors';
 import { MANAGED_CONNECTOR_INDEX_PREFIX } from '@kbn/search-connectors';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 
 import { Status } from '../../../../../common/types/api';
 
@@ -367,18 +368,17 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>
-              <EuiButton
+              <AiButton
                 data-telemetry-id="entSearchContent-connector-connectorDetail-createAttachIndexButton"
                 data-test-subj="entSearchContent-connector-connectorDetail-createAttachIndexButton"
                 iconType="sparkles"
-                color="primary"
-                fill
+                variant="accent"
                 onClick={() => {
                   createIndex({ indexName: sanitizedName, language: null });
                   setSelectedIndex({ label: sanitizedNameWithoutPrefix });
                 }}
                 isLoading={isSaveLoading || isExistLoading}
-                disabled={indexExists[sanitizedName]}
+                isDisabled={indexExists[sanitizedName]}
               >
                 {i18n.translate(
                   'xpack.enterpriseSearch.attachIndexBox.createSameIndexButtonLabel',
@@ -387,7 +387,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
                     values: { indexName: sanitizedName },
                   }
                 )}
-              </EuiButton>
+              </AiButton>
               {indexExists[sanitizedName] && (
                 <EuiText size="xs">
                   {i18n.translate('xpack.enterpriseSearch.attachIndexBox.indexNameExistsError', {
