@@ -244,7 +244,7 @@ const categoricalColorMappingSchema = schema.object(
       }),
       { maxSize: 1000 }
     ),
-    unassignedColor: schema.maybe(colorDefSchema),
+    unassigned_color: schema.maybe(colorDefSchema),
   },
   { meta: { id: 'categoricalColorMapping', title: 'Categorical Color Mapping' } }
 );
@@ -269,7 +269,7 @@ const gradientColorMappingSchema = schema.object(
       )
     ),
     gradient: schema.maybe(schema.arrayOf(colorDefSchema, { maxSize: 3 })),
-    unassignedColor: schema.maybe(colorDefSchema),
+    unassigned_color: schema.maybe(colorDefSchema),
   },
   { meta: { id: 'gradientColorMapping', title: 'Gradient Color Mapping' } }
 );

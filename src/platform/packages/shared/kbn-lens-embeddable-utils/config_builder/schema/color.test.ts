@@ -238,7 +238,7 @@ describe('Color Schema', () => {
             color: { type: 'color_code', value: 'red' },
           },
         ],
-        unassignedColor: { type: 'color_code', value: 'green' },
+        unassigned_color: { type: 'color_code', value: 'green' },
       };
 
       const validated = allColoringTypeSchema.validate(input);
@@ -271,7 +271,7 @@ describe('Color Schema', () => {
             color: { type: 'from_palette', palette: 'default', index: 0 },
           },
         ],
-        unassignedColor: { type: 'color_code', value: 'green' },
+        unassigned_color: { type: 'color_code', value: 'green' },
       };
 
       const validated = allColoringTypeSchema.validate(input);
@@ -354,7 +354,7 @@ describe('Color Schema', () => {
             palette: 'default',
           },
         ],
-        unassignedColor: { type: 'color_code', value: 'green' },
+        unassigned_color: { type: 'color_code', value: 'green' },
       };
 
       const validated = allColoringTypeSchema.validate(input);
