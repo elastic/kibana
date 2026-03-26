@@ -87,7 +87,7 @@ export const createCorrectnessEvaluators = <
       return pRetry(runAnalysis, {
         retries: 3,
         onFailedAttempt: (error) => {
-          const isLastAttempt = error.attemptNumber === error.retriesLeft + error.attemptNumber;
+          const isLastAttempt = error.retriesLeft === 0;
           if (isLastAttempt) {
             log.error(
               new Error(
