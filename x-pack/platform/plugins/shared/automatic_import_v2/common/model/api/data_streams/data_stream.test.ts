@@ -9,6 +9,7 @@ import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zo
 
 import {
   StopAutoImportDataStreamRequestParams,
+  UpdateDataStreamPipelineRequestBody,
   UploadSamplesToDataStreamRequestParams,
   UploadSamplesToDataStreamRequestBody,
   UploadSamplesToDataStreamResponse,
@@ -218,15 +219,19 @@ describe('data stream schemas', () => {
       sourceValue: 'test.log',
     };
 
-    it('requires samples array', () => {
+    it('accepts payload with sourceIndex and originalSource (index-based upload)', () => {
       const payload = {
-        originalSource: validOriginalSource,
+        sourceIndex: 'logs-*',
+        originalSource: {
+          sourceType: 'index' as const,
+          sourceValue: 'logs-*',
+        },
       };
 
       const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
-      expectParseError(result);
+      expectParseSuccess(result);
 
-      expect(stringifyZodError(result.error)).toContain('samples: Invalid input');
+      expect(result.data).toEqual(payload);
     });
 
     it('requires originalSource', () => {
@@ -237,7 +242,7 @@ describe('data stream schemas', () => {
       const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('originalSource: Invalid input');
+      expect(stringifyZodError(result.error)).toContain('originalSource');
     });
 
     it('rejects non-array samples', () => {
@@ -334,6 +339,16 @@ describe('data stream schemas', () => {
       expect(result.data.samples).toHaveLength(1000);
     });
 
+    it('rejects more than 1000 samples', () => {
+      const payload = {
+        samples: Array.from({ length: 1001 }, (_, i) => `Log line ${i}`),
+        originalSource: validOriginalSource,
+      };
+
+      const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
+      expectParseError(result);
+    });
+
     it('accepts file source type', () => {
       const payload = {
         samples: ['Sample 1'],
@@ -364,6 +379,19 @@ describe('data stream schemas', () => {
       expect(result.data).toEqual(payload);
     });
 
+    it('rejects empty sourceIndex when provided', () => {
+      const payload = {
+        sourceIndex: '',
+        originalSource: {
+          sourceType: 'index' as const,
+          sourceValue: 'logs-*',
+        },
+      };
+
+      const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
+      expectParseError(result);
+    });
+
     it('rejects invalid source type', () => {
       const payload = {
         samples: ['Sample 1'],
@@ -379,7 +407,7 @@ describe('data stream schemas', () => {
       expect(stringifyZodError(result.error)).toContain('Invalid option');
     });
 
-    it('strips unknown properties', () => {
+    it('rejects unknown top-level properties (strict schema)', () => {
       const payload = {
         samples: ['Sample 1', 'Sample 2'],
         originalSource: validOriginalSource,
@@ -387,12 +415,9 @@ describe('data stream schemas', () => {
       };
 
       const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
-      expectParseSuccess(result);
+      expectParseError(result);
 
-      expect(result.data).toEqual({
-        samples: ['Sample 1', 'Sample 2'],
-        originalSource: validOriginalSource,
-      });
+      expect(stringifyZodError(result.error)).toMatch(/unrecognized|Unrecognized/i);
     });
   });
 
@@ -460,6 +485,42 @@ describe('data stream schemas', () => {
       expectParseSuccess(result);
 
       expect(result.data).toEqual({ success: true });
+    });
+  });
+
+  describe('UpdateDataStreamPipelineRequestBody', () => {
+    it('rejects object ingest_pipeline with more than 10000 processors', () => {
+      const payload = {
+        ingest_pipeline: {
+          processors: Array.from({ length: 10001 }, () => ({})),
+        },
+      };
+
+      const result = UpdateDataStreamPipelineRequestBody.safeParse(payload);
+      expectParseError(result);
+    });
+
+    it('accepts object ingest_pipeline with exactly 10000 processors', () => {
+      const payload = {
+        ingest_pipeline: {
+          processors: Array.from({ length: 10000 }, () => ({})),
+        },
+      };
+
+      const result = UpdateDataStreamPipelineRequestBody.safeParse(payload);
+      expectParseSuccess(result);
+    });
+
+    it('rejects unknown top-level properties (strict schema)', () => {
+      const payload = {
+        ingest_pipeline: '{}',
+        extra: true,
+      };
+
+      const result = UpdateDataStreamPipelineRequestBody.safeParse(payload);
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toMatch(/unrecognized|Unrecognized/i);
     });
   });
 });

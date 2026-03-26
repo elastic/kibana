@@ -349,6 +349,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
           isDeleteAll={isDeleteAll}
         />
         <EuiBasicTable
+          tableCaption={i18n.CONVERSATIONS_LIST_TITLE}
           items={conversationOptions}
           columns={columns}
           pagination={pagination}

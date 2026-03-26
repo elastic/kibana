@@ -69,6 +69,7 @@ export class WorkflowGraph {
       'enterForeach_',
       'enterCondition_',
       'enterWhile_',
+      'enterSwitch_',
     ];
 
     for (const prefix of nodePrefixes) {

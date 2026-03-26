@@ -11,9 +11,14 @@ import { appContextService } from '../app_context';
 import type { Agent } from '../../types';
 import { createAppContextStartContractMock } from '../../mocks';
 
+import { SO_SEARCH_LIMIT } from '../../constants';
+
+import * as agentNamespaces from '../spaces/agent_namespaces';
+
 import { sendUpgradeAgentsActions } from './upgrade';
 import { createClientMock } from './action.mock';
 import { getRollingUpgradeOptions, upgradeBatch } from './upgrade_action_runner';
+import * as crud from './crud';
 
 jest.mock('./versions', () => {
   return {
@@ -163,5 +168,51 @@ describe('getRollingUpgradeOptions', () => {
   it('should return empty options for no start time, no duration', () => {
     const options = getRollingUpgradeOptions();
     expect(options).toEqual({});
+  });
+});
+
+describe('sendUpgradeAgentsActions kuery construction', () => {
+  let upgradeMocks: ReturnType<typeof createClientMock>;
+  let mockGetAgentsByKuery: jest.SpyInstance;
+  let mockAgentsKueryNamespaceFilter: jest.SpyInstance;
+
+  beforeEach(async () => {
+    upgradeMocks = createClientMock();
+    appContextService.start(
+      createAppContextStartContractMock({}, false, {
+        internal: upgradeMocks.soClient,
+        withoutSpaceExtensions: upgradeMocks.soClient,
+      })
+    );
+    mockGetAgentsByKuery = jest.spyOn(crud, 'getAgentsByKuery').mockResolvedValue({
+      agents: [],
+      total: 0,
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+    });
+    mockAgentsKueryNamespaceFilter = jest
+      .spyOn(agentNamespaces, 'agentsKueryNamespaceFilter')
+      .mockResolvedValue('namespaces:custom_space');
+  });
+
+  afterEach(() => {
+    mockGetAgentsByKuery.mockRestore();
+    mockAgentsKueryNamespaceFilter.mockRestore();
+    appContextService.stop();
+  });
+
+  it('wraps namespace filter and kuery containing OR in parentheses', async () => {
+    const { soClient, esClient } = upgradeMocks;
+    const kuery = 'status:online or status:error or status:offline';
+
+    await sendUpgradeAgentsActions(soClient, esClient, { kuery, version: '8.5.0' });
+
+    expect(mockGetAgentsByKuery).toHaveBeenCalledWith(
+      esClient,
+      soClient,
+      expect.objectContaining({
+        kuery: `(namespaces:custom_space) AND (${kuery})`,
+      })
+    );
   });
 });

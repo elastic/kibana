@@ -128,7 +128,8 @@ export type FilterCondition = ShorthandBinaryFilterCondition | ShorthandUnaryFil
 
 export const filterConditionSchema = z
   .union([shorthandBinaryFilterConditionSchema, shorthandUnaryFilterConditionSchema])
-  .describe('A basic filter condition, either unary or binary.');
+  .describe('A basic filter condition, either unary or binary.')
+  .meta({ id: 'FilterCondition' });
 
 export interface AndCondition {
   and: Condition[];
@@ -171,7 +172,8 @@ export const conditionSchema: z.Schema<Condition> = z
   )
   .describe(
     'The root condition object. It can be a simple filter or a combination of other conditions.'
-  );
+  )
+  .meta({ id: 'Condition' });
 
 export const andConditionSchema = z
   .object({

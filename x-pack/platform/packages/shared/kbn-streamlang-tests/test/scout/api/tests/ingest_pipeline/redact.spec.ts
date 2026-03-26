@@ -221,11 +221,15 @@ apiTest.describe(
       expect(ingestedDocs).toHaveLength(2);
 
       // Production doc should have IP redacted
-      const prodDoc = ingestedDocs.find((d: any) => d.environment === 'production');
+      const prodDoc = ingestedDocs.find(
+        (d: Record<string, unknown>) => d.environment === 'production'
+      );
       expect(prodDoc).toStrictEqual(expect.objectContaining({ message: 'Connection from <ip>' }));
 
       // Development doc should keep original IP
-      const devDoc = ingestedDocs.find((d: any) => d.environment === 'development');
+      const devDoc = ingestedDocs.find(
+        (d: Record<string, unknown>) => d.environment === 'development'
+      );
       expect(devDoc).toStrictEqual(
         expect.objectContaining({ message: 'Connection from 192.168.1.2' })
       );

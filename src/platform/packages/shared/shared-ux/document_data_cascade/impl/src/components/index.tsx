@@ -68,7 +68,6 @@ export const DataCascade = forwardRef(function DataCascadeWithProvider<
       enableStickyGroupHeader,
       allowMultipleRowToggle,
       enableRowSelection,
-      data,
       overscan,
       children,
       cascadeRef: ref,
@@ -81,7 +80,6 @@ export const DataCascade = forwardRef(function DataCascadeWithProvider<
     allowMultipleRowToggle,
     children,
     customTableHeader,
-    data,
     enableRowSelection,
     overscan,
     onCascadeGroupingChange,
@@ -97,6 +95,7 @@ export const DataCascade = forwardRef(function DataCascadeWithProvider<
         cascadeGroups={cascadeGroups}
         initialGroupColumn={initialGroupColumn}
         initialTableState={initialTableStateRef.current}
+        data={data as G[]}
       >
         <DataCascadeImpl<G, L>
           {...cascadeImplProps}
@@ -105,6 +104,6 @@ export const DataCascade = forwardRef(function DataCascadeWithProvider<
         />
       </DataCascadeProvider>
     ),
-    [cascadeGroups, cascadeImplProps, initialGroupColumn]
+    [cascadeGroups, cascadeImplProps, data, initialGroupColumn]
   );
 }) as DataCascadeComponent;

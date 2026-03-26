@@ -13,12 +13,14 @@ import type { RuleTypeModel } from '@kbn/alerts-ui-shared';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { useDebounceFn } from '@kbn/react-hooks';
 import { useFindTemplatesQuery } from '@kbn/response-ops-rules-apis/hooks/use_find_templates_query';
+import type { CPSPluginStart } from '@kbn/cps/public/types';
 import { RuleTypeModal, type RuleTypeModalProps } from './rule_type_modal';
 import { filterAndCountRuleTypes } from './helpers/filter_and_count_rule_types';
 
 export interface RuleTypeModalComponentProps {
   http: HttpStart;
   toasts: ToastsStart;
+  cps?: CPSPluginStart;
   filteredRuleTypes: string[];
   registeredRuleTypes: RuleTypeModel[];
   onClose: RuleTypeModalProps['onClose'];
@@ -32,6 +34,7 @@ const DEBOUNCE_OPTIONS = { wait: 300 };
 export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
   http,
   toasts,
+  cps,
   filteredRuleTypes = EMPTY_ARRAY,
   registeredRuleTypes,
   ...rest
@@ -112,6 +115,7 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
       templatesLoadingMore={templatesLoadingMore}
       hasMoreTemplates={hasMoreTemplates ?? false}
       onLoadMoreTemplates={loadMoreTemplates}
+      cps={cps}
     />
   );
 };
