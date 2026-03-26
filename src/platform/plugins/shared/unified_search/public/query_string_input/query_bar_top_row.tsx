@@ -335,6 +335,7 @@ export const QueryBarTopRow = React.memo(
     const [dateRangePickerSettings, setDateRangePickerSettings] = useState<DateRangePickerSettings>(
       {
         roundRelativeTime: true,
+        timePrecision: 'none',
       }
     );
     // SuperDatePicker uses a single `isPaused` boolean (pause = off).
@@ -774,7 +775,7 @@ export const QueryBarTopRow = React.memo(
             isInvalid={isDateRangeInvalid}
             isLoading={props.isLoading}
             disabled={props.isDisabled || noTimeFieldNameDisabled}
-            width="full"
+            width="auto"
             compressed
             collapsed="never"
             showTimeWindowButtons
