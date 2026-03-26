@@ -29,3 +29,9 @@ export interface BulkOperationResponse {
 export type BulkOperationParams =
   | { ids: string[]; filter?: undefined }
   | { filter: string; ids?: undefined };
+
+export interface ListRulesParams {
+  page?: number;
+  perPage?: number;
+  search?: string;
+}

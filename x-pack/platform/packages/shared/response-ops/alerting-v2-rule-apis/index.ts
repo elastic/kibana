@@ -7,6 +7,8 @@
 
 export {
   listRules,
+  createRule,
+  getRule,
   updateRule,
   deleteRule,
   bulkDeleteRules,
@@ -17,6 +19,7 @@ export {
 export type {
   RuleApiResponse,
   FindRulesResponse,
+  ListRulesParams,
   BulkOperationParams,
   BulkOperationResponse,
   BulkOperationError,

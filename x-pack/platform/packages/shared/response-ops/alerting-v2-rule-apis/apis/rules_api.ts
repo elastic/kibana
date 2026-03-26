@@ -6,17 +6,27 @@
  */
 
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { RuleResponse, UpdateRuleData } from '@kbn/alerting-v2-schemas';
+import type { CreateRuleData, RuleResponse, UpdateRuleData } from '@kbn/alerting-v2-schemas';
 import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
-import type { FindRulesResponse, BulkOperationParams, BulkOperationResponse } from '../types';
+import type {
+  FindRulesResponse,
+  ListRulesParams,
+  BulkOperationParams,
+  BulkOperationResponse,
+} from '../types';
 
-export const listRules = (
-  http: HttpStart,
-  params: { page?: number; perPage?: number; search?: string }
-) =>
+export const listRules = (http: HttpStart, params: ListRulesParams) =>
   http.get<FindRulesResponse>(INTERNAL_ALERTING_V2_RULE_API_PATH, {
     query: { page: params.page, perPage: params.perPage, search: params.search },
   });
+
+export const createRule = (http: HttpStart, payload: CreateRuleData) =>
+  http.post<RuleResponse>(INTERNAL_ALERTING_V2_RULE_API_PATH, {
+    body: JSON.stringify(payload),
+  });
+
+export const getRule = (http: HttpStart, id: string) =>
+  http.get<RuleResponse>(`${INTERNAL_ALERTING_V2_RULE_API_PATH}/${id}`);
 
 export const updateRule = (http: HttpStart, id: string, payload: UpdateRuleData) =>
   http.patch<RuleResponse>(`${INTERNAL_ALERTING_V2_RULE_API_PATH}/${id}`, {

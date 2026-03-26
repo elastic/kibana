@@ -8,6 +8,8 @@
 import type { HttpStart } from '@kbn/core-http-browser';
 import {
   listRules,
+  createRule,
+  getRule,
   updateRule,
   deleteRule,
   bulkDeleteRules,
@@ -62,6 +64,33 @@ describe('rules_api', () => {
       expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/rule', {
         query: { page: undefined, perPage: undefined, search: undefined },
       });
+    });
+  });
+
+  describe('createRule', () => {
+    it('should call http.post with the correct path and body', async () => {
+      const mockRule = { id: 'rule-1', name: 'My Rule' };
+      http.post.mockResolvedValue(mockRule);
+
+      const payload = { name: 'My Rule', ruleTypeId: 'test-type', params: {} };
+      const result = await createRule(http, payload as never);
+
+      expect(http.post).toHaveBeenCalledWith('/internal/alerting/v2/rule', {
+        body: JSON.stringify(payload),
+      });
+      expect(result).toEqual(mockRule);
+    });
+  });
+
+  describe('getRule', () => {
+    it('should call http.get with the correct path', async () => {
+      const mockRule = { id: 'rule-1', name: 'My Rule' };
+      http.get.mockResolvedValue(mockRule);
+
+      const result = await getRule(http, 'rule-1');
+
+      expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/rule/rule-1');
+      expect(result).toEqual(mockRule);
     });
   });
 
