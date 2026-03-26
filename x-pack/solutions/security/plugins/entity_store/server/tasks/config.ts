@@ -34,7 +34,7 @@ export const TasksConfig = {
   [EntityStoreTaskType.enum.statusReport]: {
     title: 'Entity Store - Status Report Task',
     type: 'entity_store:v2:status_report_task',
-    timeout: '1m',
+    timeout: '5m',
     interval: '12h',
   },
 } as const satisfies Record<EntityStoreTaskType, EntityStoreTaskConfig>;
