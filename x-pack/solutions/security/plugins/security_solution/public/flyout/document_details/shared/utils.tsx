@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { startCase } from 'lodash';
 import type { GetFieldsData } from './hooks/use_get_fields_data';
+import { RiskSeverity } from '../../../../common/search_strategy';
 
 /**
  * Helper function to retrieve a field's value (used in combination with the custom hook useGetFieldsData (x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/shared/hooks/use_get_fields_data.ts)
@@ -36,76 +35,6 @@ export const getFieldArray = (field: unknown | unknown[]) => {
     return field;
   }
   return [];
-};
-
-// mapping of event category to the field displayed as title
-export const EVENT_CATEGORY_TO_FIELD: Record<string, string> = {
-  authentication: 'user.name',
-  configuration: '',
-  database: '',
-  driver: '',
-  email: '',
-  file: 'file.name',
-  host: 'host.name',
-  iam: '',
-  intrusion_detection: '',
-  malware: '',
-  network: '',
-  package: '',
-  process: 'process.name',
-  registry: '',
-  session: '',
-  threat: '',
-  vulnerability: '',
-  web: '',
-};
-
-/**
- * Helper function to retrieve the alert title
- */
-export const getAlertTitle = ({ ruleName }: { ruleName?: string | null }) => {
-  const defaultAlertTitle = i18n.translate(
-    'xpack.securitySolution.flyout.right.header.headerTitle',
-    { defaultMessage: 'Document details' }
-  );
-  return ruleName ?? defaultAlertTitle;
-};
-
-/**
- * Helper function to retrieve the event title
- */
-export const getEventTitle = ({
-  eventKind,
-  eventCategory,
-  getFieldsData,
-}: {
-  eventKind: string | null;
-  eventCategory: string | null;
-  getFieldsData: GetFieldsData;
-}) => {
-  const defaultTitle = i18n.translate('xpack.securitySolution.flyout.title.eventTitle', {
-    defaultMessage: `Event details`,
-  });
-
-  if (eventKind === 'event' && eventCategory) {
-    const fieldName = EVENT_CATEGORY_TO_FIELD[eventCategory];
-    return getField(getFieldsData(fieldName)) ?? defaultTitle;
-  }
-
-  if (eventKind === 'alert') {
-    return i18n.translate('xpack.securitySolution.flyout.title.alertEventTitle', {
-      defaultMessage: 'External alert details',
-    });
-  }
-
-  return eventKind
-    ? i18n.translate('xpack.securitySolution.flyout.title.otherEventTitle', {
-        defaultMessage: '{eventKind} details',
-        values: {
-          eventKind: startCase(eventKind),
-        },
-      })
-    : defaultTitle;
 };
 
 /**
@@ -153,10 +82,42 @@ const HOST_DISPLAY_FIELD_PRIORITY: readonly string[] = ['host.name', 'host.hostn
 const USER_ID_FIELD_KEYS = new Set(['user.id', 'entity.id']);
 const HOST_ID_FIELD_KEYS = new Set(['host.id', 'entity.id']);
 
+const isNonEmpty = (v: string | undefined): v is string => v != null && v.trim() !== '';
+
 const firstNonEmptyIdentityValue = (
   identityFields: IdentityFields | undefined
-): string | undefined =>
-  Object.values(identityFields ?? {}).find((v) => typeof v === 'string' && v.trim() !== '');
+): string | undefined => Object.values(identityFields ?? {}).find(isNonEmpty);
+
+const resolveEntityName = (
+  identityFields: IdentityFields | undefined,
+  getFieldsData: GetFieldsData,
+  displayPriority: readonly string[],
+  idFieldKeys: ReadonlySet<string>,
+  fallbackIdKeys: readonly string[]
+): string | undefined => {
+  for (const field of displayPriority) {
+    const fromDoc = getField(getFieldsData(field));
+    if (fromDoc) return fromDoc;
+  }
+  if (identityFields) {
+    for (const field of displayPriority) {
+      const v = identityFields[field];
+      if (isNonEmpty(v)) return v;
+    }
+    const sortedKeys = Object.keys(identityFields).sort();
+    for (const key of sortedKeys) {
+      if (!idFieldKeys.has(key) && !key.endsWith('.id')) {
+        const v = identityFields[key];
+        if (isNonEmpty(v)) return v;
+      }
+    }
+    for (const key of fallbackIdKeys) {
+      const v = identityFields[key];
+      if (isNonEmpty(v)) return v;
+    }
+  }
+  return undefined;
+};
 
 /**
  * Value to pass into observed-user queries and flyout headers: prefer ECS names from the document
@@ -165,38 +126,14 @@ const firstNonEmptyIdentityValue = (
 export const resolveUserNameForEntityInsights = (
   identityFields: IdentityFields | undefined,
   getFieldsData: GetFieldsData
-): string | undefined => {
-  for (const field of USER_DISPLAY_FIELD_PRIORITY) {
-    const fromDoc = getField(getFieldsData(field));
-    if (fromDoc) {
-      return fromDoc;
-    }
-  }
-  if (identityFields) {
-    for (const field of USER_DISPLAY_FIELD_PRIORITY) {
-      const v = identityFields[field];
-      if (typeof v === 'string' && v.trim() !== '') {
-        return v;
-      }
-    }
-    const sortedKeys = Object.keys(identityFields).sort();
-    for (const key of sortedKeys) {
-      if (!USER_ID_FIELD_KEYS.has(key) && !key.endsWith('.id')) {
-        const v = identityFields[key];
-        if (typeof v === 'string' && v.trim() !== '') {
-          return v;
-        }
-      }
-    }
-    for (const key of ['user.id', 'entity.id'] as const) {
-      const v = identityFields[key];
-      if (typeof v === 'string' && v.trim() !== '') {
-        return v;
-      }
-    }
-  }
-  return undefined;
-};
+): string | undefined =>
+  resolveEntityName(
+    identityFields,
+    getFieldsData,
+    USER_DISPLAY_FIELD_PRIORITY,
+    USER_ID_FIELD_KEYS,
+    ['user.id', 'entity.id']
+  );
 
 /**
  * Same as {@link resolveUserNameForEntityInsights} for host panels (host.name before host.id).
@@ -204,38 +141,14 @@ export const resolveUserNameForEntityInsights = (
 export const resolveHostNameForEntityInsights = (
   identityFields: IdentityFields | undefined,
   getFieldsData: GetFieldsData
-): string | undefined => {
-  for (const field of HOST_DISPLAY_FIELD_PRIORITY) {
-    const fromDoc = getField(getFieldsData(field));
-    if (fromDoc) {
-      return fromDoc;
-    }
-  }
-  if (identityFields) {
-    for (const field of HOST_DISPLAY_FIELD_PRIORITY) {
-      const v = identityFields[field];
-      if (typeof v === 'string' && v.trim() !== '') {
-        return v;
-      }
-    }
-    const sortedKeys = Object.keys(identityFields).sort();
-    for (const key of sortedKeys) {
-      if (!HOST_ID_FIELD_KEYS.has(key) && !key.endsWith('.id')) {
-        const v = identityFields[key];
-        if (typeof v === 'string' && v.trim() !== '') {
-          return v;
-        }
-      }
-    }
-    for (const key of ['host.id', 'entity.id'] as const) {
-      const v = identityFields[key];
-      if (typeof v === 'string' && v.trim() !== '') {
-        return v;
-      }
-    }
-  }
-  return undefined;
-};
+): string | undefined =>
+  resolveEntityName(
+    identityFields,
+    getFieldsData,
+    HOST_DISPLAY_FIELD_PRIORITY,
+    HOST_ID_FIELD_KEYS,
+    ['host.id', 'entity.id']
+  );
 
 export const resolveUserNameForEntityInsightsWithFallback = (
   identityFields: IdentityFields | undefined,
@@ -250,5 +163,23 @@ export const resolveHostNameForEntityInsightsWithFallback = (
 ): string | undefined =>
   resolveHostNameForEntityInsights(identityFields, getFieldsData) ??
   firstNonEmptyIdentityValue(identityFields);
+
+const VALID_RISK_SEVERITIES: ReadonlyArray<RiskSeverity> = Object.values(RiskSeverity);
+
+/**
+ * Returns true when the given string is a valid {@link RiskSeverity} value.
+ */
+export const isRiskSeverity = (value: string): value is RiskSeverity =>
+  VALID_RISK_SEVERITIES.includes(value as RiskSeverity);
+
+/**
+ * Normalises a raw risk level string (e.g. 'critical', 'CRITICAL') to the
+ * canonical {@link RiskSeverity} casing, or returns null when unrecognised.
+ */
+export const normalizeRiskLevel = (level: string | undefined): RiskSeverity | null => {
+  if (level == null || level === '') return null;
+  const normalized = level.charAt(0).toUpperCase() + level.slice(1).toLowerCase();
+  return isRiskSeverity(normalized) ? normalized : isRiskSeverity(level) ? level : null;
+};
 
 export { ecsSliceToFlattenedDocument } from './utils/ecs_slice_to_flattened_document';

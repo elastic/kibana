@@ -23,8 +23,8 @@ import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/u
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
-import { buildUserNamesFilter } from '../../../../../common/search_strategy';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
+import { buildUserNamesFilter } from '../../../../../common/search_strategy';
 import type { ESQuery } from '../../../../../common/typed_json';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
@@ -34,7 +34,12 @@ import { getRiskFromEntityRecord } from '../../../entity_details/shared/entity_s
 import { PreferenceFormattedDateFromPrimitive } from '../../../../common/components/formatted_date';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import type { IdentityFields } from '../../shared/utils';
-import { getField, mergeLegacyIdentityWhenStoreEntityMissing } from '../../shared/utils';
+import {
+  getField,
+  isRiskSeverity,
+  mergeLegacyIdentityWhenStoreEntityMissing,
+  normalizeRiskLevel,
+} from '../../shared/utils';
 import { CellActions } from '../../shared/components/cell_actions';
 import {
   FirstLastSeen,
@@ -74,22 +79,6 @@ import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_sel
 
 const USER_ICON = 'user';
 const USER_ENTITY_OVERVIEW_ID = 'user-entity-overview';
-const VALID_RISK_SEVERITIES: readonly RiskSeverity[] = [
-  'Unknown',
-  'Low',
-  'Moderate',
-  'High',
-  'Critical',
-] as const;
-
-const isRiskSeverity = (value: string): value is RiskSeverity =>
-  VALID_RISK_SEVERITIES.includes(value as RiskSeverity);
-
-const normalizeRiskLevel = (level: string | undefined): RiskSeverity | null => {
-  if (level == null || level === '') return null;
-  const normalized = level.charAt(0).toUpperCase() + level.slice(1).toLowerCase();
-  return isRiskSeverity(normalized) ? normalized : isRiskSeverity(level) ? level : null;
-};
 
 export interface UserEntityOverviewProps {
   userName: string;
