@@ -7,7 +7,11 @@
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
 
-import { generateSecretsSchemaFromSpec, getSchemaForAuthType } from '@kbn/connector-specs/src/lib';
+import {
+  generateSecretsSchemaFromSpec,
+  getMeta,
+  getSchemaForAuthType,
+} from '@kbn/connector-specs/src/lib';
 import type { ActionTypeSecrets, ValidatorType } from '../../types';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 
@@ -23,7 +27,7 @@ export const generateSecretsSchema = (
   for (const authTypeDef of authSpec?.types ?? []) {
     const { schema: authTypeSchema } = getSchemaForAuthType(authTypeDef);
     for (const [key, fieldSchema] of Object.entries(authTypeSchema.shape)) {
-      const meta = fieldSchema.meta() as { validate?: { allowedHosts?: boolean } } | undefined;
+      const meta = getMeta(fieldSchema);
       if (meta?.validate?.allowedHosts) {
         allowedHostsFields.add(key);
       }

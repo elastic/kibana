@@ -105,7 +105,9 @@ describe('generateSecretsSchema', () => {
           },
           validatorServices
         )
-      ).toThrow('not added to the Kibana config xpack.actions.allowedHosts');
+      ).toThrow(
+        'target url "https://not-allowed.example.com/authorize" is not added to the Kibana config xpack.actions.allowedHosts'
+      );
     });
 
     it('throws when tokenUrl is not in allowedHosts', () => {
@@ -130,7 +132,9 @@ describe('generateSecretsSchema', () => {
           },
           validatorServices
         )
-      ).toThrow('not added to the Kibana config xpack.actions.allowedHosts');
+      ).toThrow(
+        'target url "https://not-allowed.example.com/token" is not added to the Kibana config xpack.actions.allowedHosts'
+      );
     });
 
     it('does not validate for auth types with no URL fields', () => {

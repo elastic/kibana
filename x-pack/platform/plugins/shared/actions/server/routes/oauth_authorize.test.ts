@@ -272,9 +272,8 @@ describe('oauthAuthorizeRoute', () => {
     );
     expect(res.badRequest).toHaveBeenCalledWith({
       body: {
-        message: expect.stringContaining(
-          'not added to the Kibana config xpack.actions.allowedHosts'
-        ),
+        message:
+          'target url "https://not-allowed.example.com/authorize" is not added to the Kibana config xpack.actions.allowedHosts',
       },
     });
   });
@@ -313,9 +312,8 @@ describe('oauthAuthorizeRoute', () => {
     );
     expect(res.badRequest).toHaveBeenCalledWith({
       body: {
-        message: expect.stringContaining(
-          'not added to the Kibana config xpack.actions.allowedHosts'
-        ),
+        message:
+          'target url "https://not-allowed.example.com/token" is not added to the Kibana config xpack.actions.allowedHosts',
       },
     });
   });

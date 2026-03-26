@@ -62,7 +62,9 @@ describe('generateConfigSchema', () => {
           },
           validatorServices
         )
-      ).toThrow('not added to the Kibana config xpack.actions.allowedHosts');
+      ).toThrow(
+        'target url "https://not-allowed.example.com" is not added to the Kibana config xpack.actions.allowedHosts'
+      );
     });
 
     it('supports opting out via meta validate.allowedHosts=false', () => {

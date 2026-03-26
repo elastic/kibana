@@ -6,6 +6,7 @@
  */
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
+import { getMeta } from '@kbn/connector-specs/src/lib';
 import { z } from '@kbn/zod/v4';
 
 import type { ActionTypeConfig, ValidatorType } from '../../types';
@@ -20,7 +21,7 @@ export const generateConfigSchema = (
     schema: configSchema,
     customValidator: (config, { configurationUtilities }) => {
       for (const [key, fieldSchema] of Object.entries(configSchema.shape)) {
-        const meta = fieldSchema.meta() as { validate?: { allowedHosts?: boolean } } | undefined;
+        const meta = getMeta(fieldSchema);
         if (meta?.validate?.allowedHosts) {
           configurationUtilities.ensureUriAllowed(
             (config as Record<string, unknown>)[key] as string
