@@ -10,6 +10,19 @@
 import { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import { transformPanelsOut } from './transform_panels_out';
 
+const mockGetTransforms = jest.fn();
+
+beforeAll(() => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  require('../../../kibana_services').embeddableService = {
+    getTransforms: mockGetTransforms,
+  };
+});
+
+beforeEach(() => {
+  mockGetTransforms.mockReset();
+});
+
 describe('transformPanelsOut', () => {
   it('should treat panels with missing sectionId as top-level', () => {
     const panelsJSON = JSON.stringify([
@@ -89,6 +102,53 @@ describe('transformPanelsOut', () => {
           ],
           "title": "Section 1",
           "uid": "bcebc09a-270f-42ef-8d45-daf5f5f4f511",
+        },
+      ]
+    `);
+  });
+
+  it('should return transform_error panel when panel transform throws', () => {
+    mockGetTransforms.mockImplementation((type: string) => {
+      return {
+        transformOut: () => {
+          throw new Error('Simulated panel transform error');
+        },
+      };
+    });
+
+    const panelsJSON = JSON.stringify([
+      {
+        type: 'test',
+        embeddableConfig: { foo: '1' },
+        panelIndex: 'panel-1',
+        gridData: {
+          h: 15,
+          w: 24,
+          x: 0,
+          y: 0,
+        },
+      },
+    ]);
+
+    const panels = transformPanelsOut(panelsJSON, []);
+    expect(panels).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "config": Object {
+            "error": "Simulated panel transform error",
+            "original_config": Object {
+              "foo": "1",
+            },
+            "original_type": "test",
+          },
+          "grid": Object {
+            "h": 15,
+            "w": 24,
+            "x": 0,
+            "y": 0,
+          },
+          "type": "transform_error",
+          "uid": "panel-1",
         },
       ]
     `);
