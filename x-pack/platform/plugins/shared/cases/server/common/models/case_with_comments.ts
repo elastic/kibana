@@ -11,6 +11,7 @@ import type {
   SavedObjectReference,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsFindResponse,
 } from '@kbn/core/server';
 import { intersection } from 'lodash';
 import {
@@ -41,7 +42,7 @@ import type { AlertInfo } from '../types';
 import type { CaseSavedObjectTransformed } from '../types/case';
 import {
   countAlertsForID,
-  flattenCommentSavedObjects,
+  flattenAttachmentSavedObjects,
   transformNewComment,
   getOrUpdateLensReferences,
   isCommentRequestTypeAlert,
@@ -58,6 +59,7 @@ import type {
 } from '../../../common/types/api';
 import type {
   AttachmentAttributesV2,
+  AttachmentMode,
   UnifiedAttachmentPayload,
 } from '../../../common/types/domain/attachment/v2';
 
@@ -98,10 +100,12 @@ export class CaseCommentModel {
     updateRequest,
     updatedAt,
     owner,
+    mode = 'legacy',
   }: {
     updateRequest: AttachmentPatchRequestV2;
     updatedAt: string;
     owner: string;
+    mode?: AttachmentMode;
   }): Promise<CaseCommentModel> {
     try {
       const { id, version, ...queryRestAttributes } = updateRequest;
@@ -124,6 +128,7 @@ export class CaseCommentModel {
       ) {
         const currentComment = (await this.params.services.attachmentService.getter.get({
           attachmentId: id,
+          mode,
         })) as SavedObject<UserCommentAttachmentPayload>;
 
         const updatedReferences = getOrUpdateLensReferences(
@@ -546,7 +551,7 @@ export class CaseCommentModel {
     };
   }
 
-  public async encodeWithComments(): Promise<Case> {
+  public async encodeWithComments({ mode }: { mode: AttachmentMode }): Promise<Case> {
     try {
       const comments = await this.params.services.caseService.getAllCaseComments({
         id: this.caseInfo.id,
@@ -555,13 +560,21 @@ export class CaseCommentModel {
           page: 1,
           perPage: MAX_DOCS_PER_PAGE,
         },
+        mode,
       });
-
-      const totalAlerts = countAlertsForID({ comments, id: this.caseInfo.id }) ?? 0;
-      const totalEvents = countEventsForID({ comments }) ?? 0;
+      // casting alert and event to legacy until they are migrated
+      const totalAlerts =
+        countAlertsForID({
+          comments: comments as SavedObjectsFindResponse<AttachmentAttributes>,
+          id: this.caseInfo.id,
+        }) ?? 0;
+      const totalEvents =
+        countEventsForID({
+          comments: comments as SavedObjectsFindResponse<AttachmentAttributes>,
+        }) ?? 0;
 
       const caseResponse = {
-        comments: flattenCommentSavedObjects(comments.saved_objects),
+        comments: flattenAttachmentSavedObjects(comments.saved_objects),
         totalAlerts,
         totalEvents,
         ...this.formatForEncoding(comments.total),

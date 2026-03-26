@@ -23,7 +23,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   const authorizationIndex = '.kibana-test-authorization';
 
-  describe('execute', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/258921
+  describe.skip('execute', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {

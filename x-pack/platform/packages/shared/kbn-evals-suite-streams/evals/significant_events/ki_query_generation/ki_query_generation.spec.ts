@@ -10,7 +10,7 @@ import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/
 import { tags } from '@kbn/scout';
 import kbnDatemath from '@kbn/datemath';
 import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
-import type { Feature } from '@kbn/streams-schema';
+import type { Feature, Streams } from '@kbn/streams-schema';
 import type { GcsConfig } from '../../../src/data_generators/replay';
 import {
   canonicalKIFeaturesFromExpectedGroundTruth,
@@ -21,21 +21,20 @@ import {
   SIGEVENTS_SNAPSHOT_RUN,
 } from '../../../src/data_generators/replay';
 import { evaluate } from '../../../src/evaluate';
-import { createKIQueryGenerationEvaluators } from '../../../src/evaluators/ki_query_generation_evaluators';
-import { createScenarioCriteriaLlmEvaluator } from '../../../src/evaluators/scenario_criteria_llm_evaluator';
+import { createKIQueryGenerationEvaluators } from '../../../src/evaluators/ki_query_generation/evaluators';
+import { createScenarioCriteriaLlmEvaluator } from '../../../src/evaluators/scenario_criteria/evaluators';
 import {
   getActiveDatasets,
   MANAGED_STREAM_NAME,
   MANAGED_STREAM_SEARCH_PATTERN,
   resolveScenarioSnapshotSource,
+  snapshotCatalogKey,
 } from '../datasets';
 import { KI_FEATURE_SOURCES_TO_RUN } from './resolve_ki_sources';
 import { extractLogTextFromSourceDoc } from './extract_log_text';
 import { getComputedKIFeaturesFromDocs } from './get_computed_ki_features_from_docs';
 
 const SAMPLE_DOCS_SIZE = 500;
-
-const snapshotCatalogKey = (gcs: GcsConfig): string => `${gcs.bucket}/${gcs.basePathPrefix}`;
 
 evaluate.describe('KI query generation', { tag: tags.serverless.observability.complete }, () => {
   const activeDatasets = getActiveDatasets();
@@ -224,7 +223,10 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                     MANAGED_STREAM_NAME
                   );
 
-                  const stream = { ...logsStream, name: MANAGED_STREAM_SEARCH_PATTERN };
+                  const stream = {
+                    ...logsStream,
+                    name: MANAGED_STREAM_SEARCH_PATTERN,
+                  } as Streams.all.Definition;
                   const kiTypeCounts = kis.reduce<Record<string, number>>((counts, ki) => {
                     counts[ki.type] = (counts[ki.type] ?? 0) + 1;
                     return counts;
@@ -313,12 +315,12 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
               ],
             },
             task: async () => {
-              const { stream } = await apiServices.streams.getStreamDefinition(
+              const { stream: streamFromApi } = await apiServices.streams.getStreamDefinition(
                 emptyDataStreamTestIndex!
               );
 
               const { queries } = await generateSignificantEvents({
-                stream,
+                stream: streamFromApi as Streams.all.Definition,
                 esClient,
                 start: kbnDatemath.parse('now-24h')!.valueOf(),
                 end: kbnDatemath.parse('now')!.valueOf(),

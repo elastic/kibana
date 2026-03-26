@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { EuiPanel } from '@elastic/eui';
-import { NotesDetails } from '../components/notes_details';
-import { NOTES_TAB_CONTENT_TEST_ID } from './test_ids';
+import React, { memo, useMemo } from 'react';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
+import { NotesDetails } from '../../../../flyout_v2/notes';
+import { useDocumentDetailsContext } from '../../shared/context';
+import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
+import { Flyouts } from '../../shared/constants/flyouts';
 
 /**
  * Notes view displayed in the document details expandable flyout left section
- * // TODO to be implemented
  */
 export const NotesTab = memo(() => {
-  return (
-    <EuiPanel data-test-subj={NOTES_TAB_CONTENT_TEST_ID} hasShadow={false}>
-      <NotesDetails />
-    </EuiPanel>
-  );
+  const { searchHit } = useDocumentDetailsContext();
+  const hit = useMemo(() => buildDataTableRecord(searchHit as unknown as EsHitRecord), [searchHit]);
+  const isTimelineFlyout = useWhichFlyout() === Flyouts.timeline;
+
+  return <NotesDetails hit={hit} isTimelineFlyout={isTimelineFlyout} />;
 });
 
 NotesTab.displayName = 'NotesTab';

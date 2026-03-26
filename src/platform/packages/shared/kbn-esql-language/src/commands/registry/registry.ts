@@ -91,6 +91,7 @@ export interface ICommandMetadata {
   declaration: string; // The pattern for declaring this command statement. Displayed in the autocomplete.
   examples: string[]; // A list of examples of how to use the command. Displayed in the autocomplete.
   hidden?: boolean; // Optional property to indicate if the command should be hidden in UI
+  limitByHidden?: boolean; // Temporary flag to hide LIMIT BY autocomplete without hiding LIMIT itself
   types?: Array<{ name: string; description: string }>; // Optional property for command-specific types
   license?: LicenseType; // Optional property indicating the license for the command's availability
   observabilityTier?: string; // Optional property indicating the observability tier availability

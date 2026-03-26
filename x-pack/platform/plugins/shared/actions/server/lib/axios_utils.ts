@@ -56,6 +56,8 @@ export const request = async <T = unknown>({
    **/
   keepAlive?: boolean;
 } & AxiosRequestConfig): Promise<AxiosResponse> => {
+  configurationUtilities.ensureUriAllowed(url);
+
   if (!isEmpty(axios?.defaults?.baseURL ?? '')) {
     throw new Error(
       `Do not use "baseURL" in the creation of your axios instance because you will mostly break proxy`

@@ -10,23 +10,20 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
   getWorkflowYaml,
-  loadWorkflowsThroughProductionPath,
+  loadWorkflowsFromConnectorSpec,
   type ProcessedWorkflow,
 } from '../workflow.test_helpers';
-import { githubDataSource } from './data_type';
 
-const MCP_CONNECTOR_NAME = 'fake-mcp-connector';
-const MCP_CONNECTOR_ID = 'fake-mcp-connector-uuid';
-const GITHUB_CONNECTOR_NAME = 'fake-github-connector';
-const GITHUB_CONNECTOR_ID = 'fake-github-connector-uuid';
+const CONNECTOR_NAME = 'fake-github-connector';
+const CONNECTOR_ID = 'fake-github-connector-uuid';
 
 describe('github workflows', () => {
   let fixture: WorkflowRunFixture;
   let workflows: ProcessedWorkflow[];
 
-  beforeAll(async () => {
-    workflows = await loadWorkflowsThroughProductionPath(githubDataSource, {
-      stackConnectorId: GITHUB_CONNECTOR_NAME,
+  beforeAll(() => {
+    workflows = loadWorkflowsFromConnectorSpec('.github', {
+      connectorName: CONNECTOR_NAME,
     });
   });
 
@@ -34,47 +31,22 @@ describe('github workflows', () => {
     fixture = new WorkflowRunFixture();
 
     fixture.scopedActionsClientMock.getAll.mockResolvedValue([
-      { id: MCP_CONNECTOR_ID, name: MCP_CONNECTOR_NAME, actionTypeId: '.mcp' },
-      { id: GITHUB_CONNECTOR_ID, name: GITHUB_CONNECTOR_NAME, actionTypeId: '.github' },
+      { id: CONNECTOR_ID, name: CONNECTOR_NAME, actionTypeId: '.github' },
     ]);
 
     fixture.scopedActionsClientMock.returnMockedConnectorResult = async ({
       actionId,
-      params,
     }: {
       actionId: string;
       params: Record<string, unknown>;
     }): Promise<ActionTypeExecutorResult<unknown>> => {
-      const subAction = params.subAction as string;
-      const subActionParams = params.subActionParams as Record<string, unknown>;
-
-      switch (subAction) {
-        case 'callTool':
-          return {
-            status: 'ok',
-            actionId,
-            data: {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify({ total_count: 1, items: [{ name: 'result.ts' }] }),
-                },
-              ],
-            },
-          };
-        case 'getDoc':
-          return {
-            status: 'ok',
-            actionId,
-            data: {
-              name: subActionParams.path,
-              content: Buffer.from('file content').toString('base64'),
-              encoding: 'base64',
-            },
-          };
-        default:
-          throw new Error(`Unexpected GitHub subAction: ${subAction}`);
-      }
+      return {
+        status: 'ok',
+        actionId,
+        data: {
+          content: [{ type: 'text', text: JSON.stringify({ total_count: 1, items: [] }) }],
+        },
+      };
     };
   });
 
@@ -96,28 +68,60 @@ describe('github workflows', () => {
   });
 
   describe('search workflow', () => {
-    it('calls MCP callTool with the selected search tool and query', async () => {
+    it('routes to searchCode and forwards parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml(workflows, 'source.search'),
-        inputs: { tool_name: 'search_code', query: 'handleError language:typescript', per_page: 5 },
+        workflowYaml: getWorkflowYaml(workflows, 'github.search'),
+        inputs: {
+          search_type: 'searchCode',
+          query: 'handleError language:typescript',
+          page: 2,
+          per_page: 5,
+        },
       });
 
       expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
-      expect(getStepExecutions('search-github')).toHaveLength(1);
+      expect(getStepExecutions('search-code')).toHaveLength(1);
 
       expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            subAction: 'callTool',
+            subAction: 'searchCode',
             subActionParams: {
-              name: 'search_code',
-              arguments: {
-                query: 'handleError language:typescript',
-                order: 'desc',
-                page: 1,
-                perPage: 5,
-                sort: 'created',
-              },
+              query: 'handleError language:typescript',
+              page: 2,
+              perPage: 5,
+            },
+          }),
+        })
+      );
+    });
+
+    it('routes to searchIssues and forwards parameters to the connector', async () => {
+      await fixture.runWorkflow({
+        workflowYaml: getWorkflowYaml(workflows, 'github.search'),
+        inputs: {
+          search_type: 'searchIssues',
+          query: 'is:open label:bug',
+          order: 'asc',
+          sort: 'updated',
+          page: 1,
+          per_page: 10,
+        },
+      });
+
+      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
+      expect(getStepExecutions('search-issues')).toHaveLength(1);
+
+      expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            subAction: 'searchIssues',
+            subActionParams: {
+              query: 'is:open label:bug',
+              order: 'asc',
+              sort: 'updated',
+              page: 1,
+              perPage: 10,
             },
           }),
         })
@@ -125,26 +129,145 @@ describe('github workflows', () => {
     });
   });
 
-  describe('get_doc workflow', () => {
-    it('forwards repository and path parameters to the connector', async () => {
+  describe('list workflow', () => {
+    it('routes to listIssues and forwards repository and pagination parameters', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml(workflows, 'get_doc'),
-        inputs: { owner: 'elastic', repo: 'kibana', path: 'README.md', ref: 'main' },
+        workflowYaml: getWorkflowYaml(workflows, 'github.list'),
+        inputs: {
+          list_type: 'listIssues',
+          owner: 'elastic',
+          repo: 'kibana',
+          state: 'open',
+          first: 10,
+        },
       });
 
       expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
-      expect(getStepExecutions('get-doc')).toHaveLength(1);
+      expect(getStepExecutions('list-issues')).toHaveLength(1);
 
       expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            subAction: 'getDoc',
+            subAction: 'listIssues',
             subActionParams: {
               owner: 'elastic',
               repo: 'kibana',
-              path: 'README.md',
-              ref: 'main',
+              state: 'open',
+              first: 10,
+              after: undefined,
             },
+          }),
+        })
+      );
+    });
+
+    it('routes to listPullRequests and forwards repository and pagination parameters', async () => {
+      await fixture.runWorkflow({
+        workflowYaml: getWorkflowYaml(workflows, 'github.list'),
+        inputs: {
+          list_type: 'listPullRequests',
+          owner: 'elastic',
+          repo: 'kibana',
+          state: 'open',
+          first: 10,
+        },
+      });
+
+      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
+      expect(getStepExecutions('list-pull-requests')).toHaveLength(1);
+
+      expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            subAction: 'listPullRequests',
+            subActionParams: {
+              owner: 'elastic',
+              repo: 'kibana',
+              state: 'open',
+              first: 10,
+              after: undefined,
+            },
+          }),
+        })
+      );
+    });
+  });
+
+  describe('get workflow', () => {
+    it('routes to getIssue and forwards parameters to the connector', async () => {
+      await fixture.runWorkflow({
+        workflowYaml: getWorkflowYaml(workflows, 'github.get'),
+        inputs: {
+          resource_type: 'getIssue',
+          owner: 'elastic',
+          repo: 'kibana',
+          issue_number: 123,
+        },
+      });
+
+      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
+      expect(getStepExecutions('get-issue')).toHaveLength(1);
+
+      expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            subAction: 'getIssue',
+            subActionParams: {
+              owner: 'elastic',
+              repo: 'kibana',
+              issueNumber: 123,
+            },
+          }),
+        })
+      );
+    });
+
+    it('routes to pullRequestRead and forwards method selector to the connector', async () => {
+      await fixture.runWorkflow({
+        workflowYaml: getWorkflowYaml(workflows, 'github.get'),
+        inputs: {
+          resource_type: 'pullRequestRead',
+          owner: 'elastic',
+          repo: 'kibana',
+          pull_number: 42,
+          pull_request_method: 'get_diff',
+        },
+      });
+
+      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
+      expect(getStepExecutions('pull-request-read')).toHaveLength(1);
+
+      expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            subAction: 'pullRequestRead',
+            subActionParams: {
+              owner: 'elastic',
+              repo: 'kibana',
+              pullNumber: 42,
+              method: 'get_diff',
+            },
+          }),
+        })
+      );
+    });
+  });
+
+  describe('who_am_i workflow', () => {
+    it('calls getMe and forwards parameters to the connector', async () => {
+      await fixture.runWorkflow({
+        workflowYaml: getWorkflowYaml(workflows, 'github.who_am_i'),
+        inputs: {},
+      });
+
+      expect(getWorkflowExecution()?.status).toBe(ExecutionStatus.COMPLETED);
+      expect(getStepExecutions('get-me')).toHaveLength(1);
+
+      expect(fixture.scopedActionsClientMock.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            subAction: 'getMe',
+            subActionParams: {},
           }),
         })
       );

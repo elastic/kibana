@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
+import type { EntityUpdateClient } from '@kbn/entity-store/server';
 
 import { LOOKBACK_WINDOW, COMPOSITE_PAGE_SIZE, MAX_ITERATIONS } from './constants';
 import type { CompositeAfterKey, CompositeBucket, ProcessedEntityRecord } from './types';
@@ -56,7 +56,7 @@ export async function runMaintainer({
   esClient: ElasticsearchClient;
   logger: Logger;
   namespace: string;
-  crudClient: EntityStoreCRUDClient;
+  crudClient: EntityUpdateClient;
   integrations?: AccessesIntegrationConfig[];
 }) {
   let totalBuckets = 0;

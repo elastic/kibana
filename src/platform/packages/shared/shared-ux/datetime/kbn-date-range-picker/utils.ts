@@ -9,10 +9,129 @@
 
 import type { RefObject } from 'react';
 
-import type { TimeRange, TimeRangeBoundsOption, InitialFocus } from './types';
+import type {
+  TimeRange,
+  TimeRangeBoundsOption,
+  InitialFocus,
+  AutoRefreshIntervalUnit,
+} from './types';
 import { DATE_RANGE_INPUT_DELIMITER } from './constants';
 import { textToTimeRange } from './parse';
 import { dateMathToRelativeParts, timeRangeToDisplayText } from './format';
+import { MS_PER } from './format/format_duration';
+
+/**
+ * Pads a non-negative integer component with leading zeros to `width` digits.
+ *
+ * @param n - The number to pad.
+ * @param width - The width to pad to.
+ *
+ * @returns The padded number as a string.
+ */
+const pad = (n: number, width: number): string =>
+  String(Math.max(0, Math.floor(n))).padStart(width, '0');
+
+/**
+ * Converts an interval in milliseconds to a count and unit for display.
+ *
+ * @param intervalMs - The interval in milliseconds.
+ * @param unit - The unit to use for the display.
+ * If `unit` is provided, that unit is used (count is rounded to the nearest whole step).
+ * If omitted, picks the largest unit (hours, then minutes, then seconds) that divides
+ * `intervalMs` evenly so common values round-trip without drifting (e.g. 90s stays 90s, not 2m).
+ *
+ * @returns The count and unit for the display.
+ */
+export function msToAutoRefreshInterval(
+  intervalMs: number,
+  unit?: AutoRefreshIntervalUnit
+): { count: number; unit: AutoRefreshIntervalUnit } {
+  if (intervalMs <= 0) {
+    return { count: 0, unit: 's' };
+  }
+
+  if (unit === 'h') {
+    return { count: Math.round(intervalMs / MS_PER.hour), unit: 'h' };
+  }
+  if (unit === 'm') {
+    return { count: Math.round(intervalMs / MS_PER.minute), unit: 'm' };
+  }
+  if (unit === 's') {
+    return { count: Math.round(intervalMs / MS_PER.second), unit: 's' };
+  }
+
+  if (intervalMs % MS_PER.hour === 0) {
+    return { count: intervalMs / MS_PER.hour, unit: 'h' };
+  }
+  if (intervalMs % MS_PER.minute === 0) {
+    return { count: intervalMs / MS_PER.minute, unit: 'm' };
+  }
+  if (intervalMs % MS_PER.second === 0) {
+    return { count: intervalMs / MS_PER.second, unit: 's' };
+  }
+
+  return { count: Math.ceil(intervalMs / MS_PER.second), unit: 's' };
+}
+
+/**
+ * Converts a count and unit to milliseconds.
+ *
+ * @param count - The count to convert to milliseconds.
+ * @param unit - The unit to convert to milliseconds.
+ *
+ * @returns The milliseconds.
+ */
+export function autoRefreshIntervalToMs(count: number, unit: AutoRefreshIntervalUnit): number {
+  switch (unit) {
+    case 'h':
+      return count * MS_PER.hour;
+    case 'm':
+      return count * MS_PER.minute;
+    case 's':
+    default:
+      return count * MS_PER.second;
+  }
+}
+
+/**
+ * Formats total seconds as a realtime countdown for the toolbar (mm:ss, or hh:mm:ss when hours remain).
+ *
+ * @param totalSeconds - The total seconds to format.
+ *
+ * @returns The formatted countdown string.
+ */
+export function formatAutoRefreshCountdown(totalSeconds: number): string {
+  if (!Number.isFinite(totalSeconds) || totalSeconds <= 0) {
+    return '00:00';
+  }
+
+  const s = Math.floor(totalSeconds);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+
+  if (h > 0) {
+    return `${pad(h, 2)}:${pad(m, 2)}:${pad(sec, 2)}`;
+  }
+
+  return `${pad(m, 2)}:${pad(sec, 2)}`;
+}
+
+/**
+ * Ceil(ms → seconds) for auto-refresh timer and toolbar; non-negative and safe for invalid ms.
+ * Matches `useAutoRefresh` tick length.
+ *
+ * @param intervalMs - The interval in milliseconds.
+ *
+ * @returns The total seconds.
+ */
+export function msToSeconds(intervalMs: number): number {
+  if (!Number.isFinite(intervalMs) || intervalMs <= 0) {
+    return 0;
+  }
+
+  return Math.ceil(intervalMs / MS_PER.second);
+}
 
 /**
  * Formats a Date as a local ISO-8601 string with full precision but no UTC offset ("Z").
@@ -22,11 +141,12 @@ import { dateMathToRelativeParts, timeRangeToDisplayText } from './format';
  * rather than `.toISOString()` which always emits UTC.
  */
 export function toLocalPreciseString(d: Date): string {
-  const p2 = (n: number) => String(n).padStart(2, '0');
-  const p3 = (n: number) => String(n).padStart(3, '0');
   return (
-    `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}` +
-    `T${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}.${p3(d.getMilliseconds())}`
+    `${d.getFullYear()}-${pad(d.getMonth() + 1, 2)}-${pad(d.getDate(), 2)}` +
+    `T${pad(d.getHours(), 2)}:${pad(d.getMinutes(), 2)}:${pad(d.getSeconds(), 2)}.${pad(
+      d.getMilliseconds(),
+      3
+    )}`
   );
 }
 
@@ -123,6 +243,16 @@ export function getOptionInputText(option: TimeRangeBoundsOption): string {
   return `${startFragment.text} ${DATE_RANGE_INPUT_DELIMITER} ${endFragment.text}`;
 }
 
+/** Returns a new Date set to the start of the given day (00:00:00.000). */
+export function getStartDate(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+}
+
+/** Returns a new Date set to the end of the given day (23:59:59.999). */
+export function getEndDate(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
+}
+
 /**
  * Formats a date range as a local ISO-8601 string pair with the standard delimiter.
  * e.g. "2026-03-04T10:00:00.000 to 2026-03-05T23:30:00.000"
@@ -131,40 +261,6 @@ export function formatDateRange(start: Date, end: Date): string {
   return `${toLocalPreciseString(start)} ${DATE_RANGE_INPUT_DELIMITER} ${toLocalPreciseString(
     end
   )}`;
-}
-
-/**
- * Parses a `HH:mm:ss.SSS` time string into its numeric components.
- */
-function parseTimeString(time: string): [number, number, number, number] {
-  const [hms, ms = '0'] = time.split('.');
-  const [h = '0', m = '0', s = '0'] = hms.split(':');
-  return [Number(h), Number(m), Number(s), Number(ms)];
-}
-
-/**
- * Combines date (year/month/day) from `date` with time from `timeSource`.
- * Falls back to `defaultTime` (`HH:mm:ss.SSS`) when timeSource is null.
- */
-export function combineDateAndTime(
-  date: Date,
-  timeSource: Date | null,
-  defaultTime = '00:00:00.000'
-): Date {
-  if (timeSource) {
-    return new Date(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate(),
-      timeSource.getHours(),
-      timeSource.getMinutes(),
-      timeSource.getSeconds(),
-      timeSource.getMilliseconds()
-    );
-  }
-
-  const [h, m, s, ms] = parseTimeString(defaultTime);
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), h, m, s, ms);
 }
 
 /**

@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
+import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import type { EntityType } from '@kbn/entity-store/common';
 import type { Entity } from '@kbn/entity-store/common/domain/definitions/entity.gen';
 
@@ -29,7 +29,7 @@ function buildEntityDoc(record: ProcessedEntityRecord): Entity {
 }
 
 export async function upsertEntityRelationships(
-  crudClient: EntityStoreCRUDClient,
+  crudClient: EntityUpdateClient,
   logger: Logger,
   records: ProcessedEntityRecord[]
 ): Promise<number> {
@@ -40,7 +40,7 @@ export async function upsertEntityRelationships(
   const entities = records.map((r) => ({ type: entityType, doc: buildEntityDoc(r) }));
 
   logger.info(`Upserting ${entities.length} entity relationship records via CRUD bulk API`);
-  const errors = await crudClient.upsertEntitiesBulk({ objects: entities, force: true });
+  const errors = await crudClient.bulkUpdateEntity({ objects: entities, force: true });
 
   const upserted = records.length - errors.length;
   if (errors.length > 0) {

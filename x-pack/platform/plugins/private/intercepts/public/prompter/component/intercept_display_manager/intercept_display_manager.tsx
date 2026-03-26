@@ -117,6 +117,7 @@ function InterceptDisplayManager({
           currentIntercept.onDismiss?.({
             runId: currentIntercept.runId,
             stepId: currentIntercept.steps[0].id,
+            interceptId: currentIntercept.id,
           });
           break;
         }
@@ -124,6 +125,7 @@ function InterceptDisplayManager({
           currentIntercept.onFinish?.({
             response: feedbackStore.current,
             runId: currentIntercept.runId,
+            interceptId: currentIntercept.id,
           });
           break;
         }
@@ -169,6 +171,7 @@ function InterceptDisplayManager({
         stepId: this.id,
         stepResponse: value,
         runId: currentIntercept!.runId,
+        interceptId: currentIntercept!.id,
       });
       seekNextStep();
     },

@@ -7,7 +7,7 @@
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
+import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import { runMaintainer } from './run_maintainer';
 import { COMPOSITE_PAGE_SIZE, MAX_ITERATIONS } from './constants';
 import type { CompositeAfterKey, ProcessedEntityRecord } from './types';
@@ -79,7 +79,7 @@ function createEsqlResponse(columns: EsqlColumn[] = [], values: unknown[][] = []
 describe('runMaintainer', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const logger = loggingSystemMock.createLogger();
-  const crudClient = { upsertEntitiesBulk: jest.fn() } as unknown as EntityStoreCRUDClient;
+  const crudClient = { bulkUpdateEntity: jest.fn() } as unknown as EntityUpdateClient;
   let mockIntegration: AccessesIntegrationConfig;
 
   beforeEach(() => {
