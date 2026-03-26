@@ -24,7 +24,7 @@ import {
   removePanelsFromDashboard,
   updatePanelInDashboard,
 } from './dashboard_state';
-import { createDashboardPanel } from './panel_content';
+import { normalizeDashboardPanel } from './panel_content';
 import type { ResolveVisualizationConfig } from './inline_visualization';
 import { createVisualizationFailureResult } from './inline_visualization';
 import type { VisualizationFailure } from './utils';
@@ -368,8 +368,8 @@ const materializeResolvedVisualizationPanels = ({
 
     successfulPanels.push({
       request,
-      panel: createDashboardPanel({
-        panelContent: resolvedPanel.panelContent,
+      panel: normalizeDashboardPanel({
+        ...resolvedPanel.panelContent,
         grid: request.panelInput.grid,
       }),
     });
@@ -416,13 +416,12 @@ export const executeDashboardOperations = async ({
       }
 
       case 'add_markdown': {
-        const markdownPanel = createDashboardPanel({
-          panelContent: {
-            type: MARKDOWN_EMBEDDABLE_TYPE,
-            config: { content: operation.markdownContent },
-          },
+        const markdownPanel = {
+          type: MARKDOWN_EMBEDDABLE_TYPE,
+          config: { content: operation.markdownContent },
           grid: operation.grid,
-        });
+          uid: uuidv4(),
+        };
         nextDashboardData = appendPanelsToDashboard({
           dashboardData: nextDashboardData,
           panelsToAdd: [markdownPanel],
@@ -517,8 +516,10 @@ export const executeDashboardOperations = async ({
             dashboardData: nextDashboardData,
             panelId: panelInput.panelId,
             transformPanel: (panel) => ({
-              ...panel,
-              ...resolvedPanel.panelContent,
+              ...normalizeDashboardPanel({
+                ...panel,
+                ...resolvedPanel.panelContent,
+              }),
             }),
           });
 

@@ -13,7 +13,7 @@ import type { Logger } from '@kbn/core/server';
 import { type AttachmentVersion, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
 import { z } from '@kbn/zod/v4';
-import { createDashboardPanel, type DashboardPanelContent } from './panel_content';
+import { normalizeDashboardPanel, type DashboardPanelContent } from './panel_content';
 
 /**
  * Failure record for tracking visualization errors.
@@ -42,7 +42,6 @@ const resolvePanelsFromVisualizationAttachment = (data: unknown): ResolvedPanelC
   if (!parseResult.success) {
     throw new Error('Visualization attachment does not contain a valid visualization payload.');
   }
-
   const { visualization } = parseResult.data;
 
   return [
@@ -97,7 +96,7 @@ export const resolvePanelsFromAttachments = ({
 
       const resolvedPanels = resolvePanelsFromAttachment(attachmentRecord.type, latestVersion.data);
       panels.push(
-        ...resolvedPanels.map((panelContent) => createDashboardPanel({ panelContent, grid }))
+        ...resolvedPanels.map((panelContent) => normalizeDashboardPanel({ ...panelContent, grid }))
       );
     } catch (error) {
       const errorMessage = getErrorMessage(error);
