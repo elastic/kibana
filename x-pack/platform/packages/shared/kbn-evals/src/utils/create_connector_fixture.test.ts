@@ -243,6 +243,126 @@ describe('createConnectorFixture', () => {
     expect(mockUse).toHaveBeenCalledWith(predefinedConnector);
   });
 
+  describe('when connector is .inference with inferenceId', () => {
+    const inferenceConnector: AvailableConnectorWithId = {
+      id: 'elastic-llm-claude-46-opus',
+      name: 'EIS Claude 4.6 Opus',
+      actionTypeId: '.inference',
+      config: {
+        provider: 'elastic',
+        taskType: 'chat_completion',
+        inferenceId: '.anthropic-claude-4.6-opus-chat_completion',
+      },
+      secrets: {},
+    };
+
+    it('uses the inferenceId as the connector id', async () => {
+      await createConnectorFixture({
+        predefinedConnector: inferenceConnector,
+        fetch: mockFetch,
+        log: mockLog,
+        use: mockUse,
+      });
+
+      expect(mockUse).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: '.anthropic-claude-4.6-opus-chat_completion',
+        })
+      );
+    });
+
+    it('preserves other connector properties', async () => {
+      await createConnectorFixture({
+        predefinedConnector: inferenceConnector,
+        fetch: mockFetch,
+        log: mockLog,
+        use: mockUse,
+      });
+
+      expect(mockUse).toHaveBeenCalledWith({
+        ...inferenceConnector,
+        id: '.anthropic-claude-4.6-opus-chat_completion',
+      });
+    });
+
+    it('skips all fetch calls (no preconfigured check, no create/delete)', async () => {
+      await createConnectorFixture({
+        predefinedConnector: inferenceConnector,
+        fetch: mockFetch,
+        log: mockLog,
+        use: mockUse,
+      });
+
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it('logs the inference endpoint and original connector id', async () => {
+      await createConnectorFixture({
+        predefinedConnector: inferenceConnector,
+        fetch: mockFetch,
+        log: mockLog,
+        use: mockUse,
+      });
+
+      expect(mockLog.info).toHaveBeenCalledWith(
+        expect.stringContaining('.anthropic-claude-4.6-opus-chat_completion')
+      );
+      expect(mockLog.info).toHaveBeenCalledWith(
+        expect.stringContaining('elastic-llm-claude-46-opus')
+      );
+    });
+
+    it('takes priority over KBN_EVALS_SKIP_CONNECTOR_SETUP', async () => {
+      process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP = 'true';
+
+      await createConnectorFixture({
+        predefinedConnector: inferenceConnector,
+        fetch: mockFetch,
+        log: mockLog,
+        use: mockUse,
+      });
+
+      expect(mockUse).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: '.anthropic-claude-4.6-opus-chat_completion',
+        })
+      );
+    });
+
+    it('falls through to normal flow when inferenceId is missing', async () => {
+      const connectorWithoutInferenceId: AvailableConnectorWithId = {
+        ...inferenceConnector,
+        config: { provider: 'elastic', taskType: 'chat_completion' },
+      };
+
+      await createConnectorFixture({
+        predefinedConnector: connectorWithoutInferenceId,
+        fetch: mockFetch,
+        log: mockLog,
+        use: mockUse,
+      });
+
+      // Falls through to preconfigured check (GET) + normal create flow
+      expect(mockFetch).toHaveBeenCalled();
+    });
+
+    it('falls through to normal flow for non-.inference actionTypeId', async () => {
+      const genAiConnector: AvailableConnectorWithId = {
+        ...inferenceConnector,
+        actionTypeId: '.gen-ai',
+      };
+
+      await createConnectorFixture({
+        predefinedConnector: genAiConnector,
+        fetch: mockFetch,
+        log: mockLog,
+        use: mockUse,
+      });
+
+      expect(mockFetch).toHaveBeenCalled();
+    });
+  });
+
   describe('when KBN_EVALS_SKIP_CONNECTOR_SETUP is set', () => {
     beforeEach(() => {
       process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP = 'true';
