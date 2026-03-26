@@ -115,8 +115,12 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
                   : undefined
               }
             >
-              <AgentIcon agentName={item.agentName} size="m" role="presentation" />
-              {item.serviceName}
+              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <AgentIcon agentName={item.agentName} size="m" role="presentation" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>{item.serviceName}</EuiFlexItem>
+              </EuiFlexGroup>
             </EuiBadge>
           </EuiFlexItem>
         )}
