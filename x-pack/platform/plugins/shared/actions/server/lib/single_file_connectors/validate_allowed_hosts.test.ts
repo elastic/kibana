@@ -111,4 +111,3 @@ describe('validate_allowed_hosts', () => {
     });
   });
 });
-

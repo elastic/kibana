@@ -116,7 +116,7 @@ function isUriStringJsonSchema(node: unknown): boolean {
     return false;
   }
   return (
-    (node as { type?: unknown }).type === 'string' && (node as { format?: unknown }).format === 'uri'
+    (node as { type?: unknown }).type === 'string' &&
+    (node as { format?: unknown }).format === 'uri'
   );
 }
-
