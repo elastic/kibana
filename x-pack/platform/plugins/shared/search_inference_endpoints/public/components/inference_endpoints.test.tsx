@@ -278,5 +278,31 @@ describe('InferenceEndpoints', () => {
       expect(addButton).toBeInTheDocument();
       expect(addButton).toBeEnabled();
     });
+
+    it('shows Provider Inference as page title', () => {
+      useQueryInferenceEndpoints.mockReturnValue({
+        data: mixedEndpoints,
+        isLoading: false,
+        refetch: mockRefetch,
+      });
+
+      renderComponent();
+
+      expect(screen.getByText('Provider Inference')).toBeInTheDocument();
+    });
+
+    it('hides EIS documentation and ML Trained Models links', () => {
+      useQueryInferenceEndpoints.mockReturnValue({
+        data: mixedEndpoints,
+        isLoading: false,
+        refetch: mockRefetch,
+      });
+
+      renderComponent();
+
+      expect(screen.queryByTestId('eis-documentation')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('view-your-models')).not.toBeInTheDocument();
+      expect(screen.getByTestId('api-documentation')).toBeInTheDocument();
+    });
   });
 });
