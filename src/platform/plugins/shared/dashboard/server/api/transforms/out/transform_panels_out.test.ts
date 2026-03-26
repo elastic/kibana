@@ -64,7 +64,11 @@ describe('transformPanelsOut', () => {
       },
     ];
     const panels = transformPanelsOut(panelsJSON, sections);
-    getDashboardStateSchema(true).validate({ title: '', panels });
+    getDashboardStateSchema({
+      allowAccessControl: true,
+      isDashboardAppSchema: true,
+      isResponseSchema: true,
+    }).validate({ title: '', panels });
     expect(panels).toMatchInlineSnapshot(`
       Array [
         Object {

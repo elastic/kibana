@@ -29,6 +29,12 @@ import {
 
 const MAX_PANELS = 100;
 
+interface RouteSchemaFlags {
+  allowAccessControl: boolean;
+  isDashboardAppSchema: boolean;
+  isResponseSchema: boolean;
+}
+
 export const allowUnmappedKeysSchema = schema.boolean({
   defaultValue: false,
   meta: {
@@ -54,7 +60,7 @@ export const panelGridSchema = schema.object({
   }),
 });
 
-export function getPanelSchema(isDashboardAppRequest: boolean) {
+export function getPanelSchema({ isDashboardAppSchema, isResponseSchema }: RouteSchemaFlags) {
   const basePanelProps = {
     grid: panelGridSchema,
     /**
@@ -71,7 +77,7 @@ export function getPanelSchema(isDashboardAppRequest: boolean) {
 
   // looser route validation for dashboard application requests
   // TODO remove when all embeddables register schemas
-  if (isDashboardAppRequest) {
+  if (isDashboardAppSchema) {
     return schema.object({
       ...basePanelProps,
       type: schema.string(),
@@ -105,30 +111,33 @@ export function getPanelSchema(isDashboardAppRequest: boolean) {
     );
 
   return schema.discriminatedUnion('type', [
-    ...(panelSchemas as [
-      ObjectType<{
-        grid: ObjectType<{ x: Type<number>; y: Type<number>; w: Type<number>; h: Type<number> }>;
-        uid: Type<string | undefined>;
-        version: Type<string | undefined>;
-        type: Type<string>;
-        config: ObjectType<{}>;
-      }>
-    ]),
-    schema.object(
-      {
-        ...basePanelProps,
-        type: schema.literal(SERVER_ERROR_EMBEDDABLE_TYPE),
-        config: serverErrorEmbeddableSchema,
-      },
-      {
-        meta: {
-          id: `kbn-dashboard-panel-${SERVER_ERROR_EMBEDDABLE_TYPE}`,
-          description:
-            'Replaces panel type when panel transform throws and panel.config can not be created',
-          title: SERVER_ERROR_EMBEDDABLE_TYPE,
-        },
-      }
-    ),
+    ...panelSchemas,
+    ...(isResponseSchema
+      ? [
+          schema.object(
+            {
+              ...basePanelProps,
+              type: schema.literal(SERVER_ERROR_EMBEDDABLE_TYPE),
+              config: serverErrorEmbeddableSchema,
+            },
+            {
+              meta: {
+                id: `kbn-dashboard-panel-${SERVER_ERROR_EMBEDDABLE_TYPE}`,
+                description: 'Replaces panel type when panel.config can not be created',
+                title: SERVER_ERROR_EMBEDDABLE_TYPE,
+              },
+            }
+          ),
+        ]
+      : []),
+  ] as [
+    ObjectType<{
+      grid: ObjectType<{ x: Type<number>; y: Type<number>; w: Type<number>; h: Type<number> }>;
+      uid: Type<string | undefined>;
+      version: Type<string | undefined>;
+      type: Type<string>;
+      config: ObjectType<{}>;
+    }>
   ]);
 }
 
@@ -136,7 +145,7 @@ const sectionGridSchema = schema.object({
   y: schema.number({ meta: { description: 'The y coordinate of the section in grid units' } }),
 });
 
-export function getSectionSchema(isDashboardAppRequest: boolean) {
+export function getSectionSchema(routeSchemaFlags: RouteSchemaFlags) {
   return schema.object(
     {
       title: schema.string({
@@ -147,7 +156,7 @@ export function getSectionSchema(isDashboardAppRequest: boolean) {
         defaultValue: false,
       }),
       grid: sectionGridSchema,
-      panels: schema.arrayOf(getPanelSchema(isDashboardAppRequest), {
+      panels: schema.arrayOf(getPanelSchema(routeSchemaFlags), {
         meta: { description: 'The panels that belong to the section.' },
         defaultValue: [],
         maxSize: MAX_PANELS,
@@ -213,20 +222,14 @@ export const accessControlSchema = schema.maybe(
   })
 );
 
-export function getDashboardStateSchema(
-  isDashboardAppRequest: boolean,
-  { allowAccessControl = true }: { allowAccessControl?: boolean } = {}
-) {
+export function getDashboardStateSchema(routeSchemaFlags: RouteSchemaFlags) {
   return schema.object({
     pinned_panels: pinnedPanelsSchema,
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
     filters: schema.maybe(schema.arrayOf(asCodeFilterSchema, { maxSize: 500 })),
     options: optionsSchema,
     panels: schema.arrayOf(
-      schema.oneOf([
-        getPanelSchema(isDashboardAppRequest),
-        getSectionSchema(isDashboardAppRequest),
-      ]),
+      schema.oneOf([getPanelSchema(routeSchemaFlags), getSectionSchema(routeSchemaFlags)]),
       {
         defaultValue: [],
         maxSize: MAX_PANELS,
@@ -245,6 +248,6 @@ export function getDashboardStateSchema(
     ),
     time_range: schema.maybe(timeRangeSchema),
     title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
-    access_control: allowAccessControl ? accessControlSchema : schema.never(),
+    access_control: routeSchemaFlags.allowAccessControl ? accessControlSchema : schema.never(),
   });
 }

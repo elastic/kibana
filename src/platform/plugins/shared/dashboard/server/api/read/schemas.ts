@@ -19,7 +19,11 @@ import {
 export function getReadResponseBodySchema(isDashboardAppRequest: boolean) {
   return schema.object({
     id: schema.string(),
-    data: getDashboardStateSchema(isDashboardAppRequest),
+    data: getDashboardStateSchema({
+      allowAccessControl: true,
+      isDashboardAppSchema: isDashboardAppRequest,
+      isResponseSchema: true,
+    }),
     meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema, resolveMetaSchema]),
     warnings: schema.maybe(schema.arrayOf(schema.string())),
   });

@@ -173,7 +173,11 @@ export class DashboardPlugin
     // Plugin is registered during setup and before all plugins have reigistered embeddable schemas.
     // Instead, use once to only call getDashboardStateSchema the first time client is executed.
     const getCachedDashboardStateSchema = once(() => {
-      return getDashboardStateSchema(false);
+      return getDashboardStateSchema({
+        allowAccessControl: true,
+        isDashboardAppSchema: false,
+        isResponseSchema: false,
+      });
     });
 
     return {

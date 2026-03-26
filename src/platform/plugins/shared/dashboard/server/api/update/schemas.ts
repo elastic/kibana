@@ -13,13 +13,21 @@ import { baseMetaSchema, updatedMetaSchema } from '../meta_schemas';
 
 export function getUpdateRequestBodySchema(isDashboardAppRequest: boolean) {
   // changing access control is not allowed through update endpoint
-  return getDashboardStateSchema(isDashboardAppRequest, { allowAccessControl: false });
+  return getDashboardStateSchema({
+    allowAccessControl: false,
+    isDashboardAppSchema: isDashboardAppRequest,
+    isResponseSchema: false,
+  });
 }
 
 export function getUpdateResponseBodySchema(isDashboardAppRequest: boolean) {
   return schema.object({
     id: schema.string(),
-    data: getDashboardStateSchema(isDashboardAppRequest),
+    data: getDashboardStateSchema({
+      allowAccessControl: true,
+      isDashboardAppSchema: isDashboardAppRequest,
+      isResponseSchema: true,
+    }),
     meta: schema.allOf([baseMetaSchema, updatedMetaSchema]),
   });
 }

@@ -25,13 +25,21 @@ export const createRequestParamsSchema = schema.maybe(
 );
 
 export function getCreateRequestBodySchema(isDashboardAppRequest: boolean) {
-  return getDashboardStateSchema(isDashboardAppRequest);
+  return getDashboardStateSchema({
+    allowAccessControl: true,
+    isDashboardAppSchema: isDashboardAppRequest,
+    isResponseSchema: false,
+  });
 }
 
 export function getCreateResponseBodySchema(isDashboardAppRequest: boolean) {
   return schema.object({
     id: schema.string(),
-    data: getDashboardStateSchema(isDashboardAppRequest),
+    data: getDashboardStateSchema({
+      allowAccessControl: true,
+      isDashboardAppSchema: isDashboardAppRequest,
+      isResponseSchema: true,
+    }),
     meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
   });
 }
