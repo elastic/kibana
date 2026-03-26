@@ -14,6 +14,8 @@ import type {
   RegistryDataStream,
 } from '../types';
 
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../constants';
+
 import type { NewPackagePolicy } from '../types';
 
 import {
@@ -26,6 +28,7 @@ import {
   getPolicyTemplateInputDefinition,
   registryInputAllowsDynamicSignalTypes,
   packagePolicyInputAllowsUndefinedDataStreamType,
+  shouldIncludeUseAPMVar,
 } from './policy_template';
 
 describe('isInputOnlyPolicyTemplate', () => {
@@ -168,6 +171,29 @@ describe('getNormalizedInputs', () => {
         description: 'myFoo',
       },
     ]);
+  });
+});
+
+describe('shouldIncludeUseAPMVar', () => {
+  const otelcol = OTEL_COLLECTOR_INPUT_TYPE;
+
+  it('returns true for OTel input with traces type', () => {
+    expect(shouldIncludeUseAPMVar(otelcol, 'traces', false)).toBe(true);
+  });
+
+  it('returns true for OTel input with dynamic_signal_types regardless of stream type', () => {
+    expect(shouldIncludeUseAPMVar(otelcol, 'logs', true)).toBe(true);
+    expect(shouldIncludeUseAPMVar(otelcol, 'metrics', true)).toBe(true);
+  });
+
+  it('returns false for OTel input with non-traces type and no dynamic_signal_types', () => {
+    expect(shouldIncludeUseAPMVar(otelcol, 'logs', false)).toBe(false);
+    expect(shouldIncludeUseAPMVar(otelcol, 'metrics', false)).toBe(false);
+  });
+
+  it('returns false for non-OTel input type regardless of stream type', () => {
+    expect(shouldIncludeUseAPMVar('logfile', 'traces', false)).toBe(false);
+    expect(shouldIncludeUseAPMVar('logfile', 'traces', true)).toBe(false);
   });
 });
 

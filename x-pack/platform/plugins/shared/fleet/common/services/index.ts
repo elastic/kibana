@@ -40,6 +40,9 @@ export {
   isAgentEligibleForPrivilegeLevelChange,
 } from './agent_privilege_level_change_helpers';
 export {
+  addUseAPMVarIfNotPresent,
+  DATA_STREAM_USE_APM_VAR,
+  shouldIncludeUseAPMVar,
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,
   getNormalizedInputs,

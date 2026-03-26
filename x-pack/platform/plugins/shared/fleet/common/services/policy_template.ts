@@ -43,7 +43,7 @@ const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
   show_user: true,
 };
 
-const DATA_STREAM_USE_APM_VAR: RegistryVarsEntry = {
+export const DATA_STREAM_USE_APM_VAR: RegistryVarsEntry = {
   name: USE_APM_VAR_NAME,
   type: 'bool',
   title: i18n.translate('xpack.fleet.policyTemplate.useAPMVar.title', {
@@ -204,10 +204,12 @@ export function getNormalizedDataStreams(
         : createDefaultDatasetName(packageInfo, policyTemplate));
 
     let vars = addDatasetVarIfNotPresent(policyTemplate.vars, policyTemplate.name);
-    const isOtelTraces = (dataStreamType || policyTemplate.type) === dataTypes.Traces;
     if (
-      policyTemplate.input === OTEL_COLLECTOR_INPUT_TYPE &&
-      (isOtelTraces || isOtelDynamicSignalTypes)
+      shouldIncludeUseAPMVar(
+        policyTemplate.input,
+        dataStreamType || policyTemplate.type,
+        policyTemplate.dynamic_signal_types === true
+      )
     ) {
       vars = addUseAPMVarIfNotPresent(vars);
     }
@@ -266,7 +268,15 @@ const addDatasetVarIfNotPresent = (
   }
 };
 
-const addUseAPMVarIfNotPresent = (vars?: RegistryVarsEntry[]): RegistryVarsEntry[] => {
+export const shouldIncludeUseAPMVar = (
+  inputType: string,
+  dataStreamType: string | undefined,
+  isDynamicSignalTypes: boolean
+): boolean =>
+  inputType === OTEL_COLLECTOR_INPUT_TYPE &&
+  (dataStreamType === dataTypes.Traces || isDynamicSignalTypes);
+
+export const addUseAPMVarIfNotPresent = (vars?: RegistryVarsEntry[]): RegistryVarsEntry[] => {
   const newVars = vars ?? [];
 
   const isUseAPMVarAlreadyAdded = newVars.find(
