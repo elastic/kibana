@@ -35,6 +35,7 @@ import { createRequestToEs, type Document, fromEs, updateRequestToEs } from './c
 import { validateToolSelection } from './utils/tools';
 import { runToolRefCleanup } from '../tool_reference_cleanup';
 import { runSkillRefCleanup } from '../skill_reference_cleanup';
+import { runPluginRefCleanup } from '../plugin_reference_cleanup';
 import { SYSTEM_USER_ID } from '../../../constants';
 import {
   buildVisibilityReadFilter,
@@ -56,6 +57,8 @@ export interface AgentClient {
   removeToolRefsFromAgents(params: { toolIds: string[] }): Promise<AgentsUsingToolsResult>;
   getAgentsUsingSkills(params: { skillIds: string[] }): Promise<AgentsUsingToolsResult>;
   removeSkillRefsFromAgents(params: { skillIds: string[] }): Promise<AgentsUsingToolsResult>;
+  getAgentsUsingPlugins(params: { pluginIds: string[] }): Promise<AgentsUsingToolsResult>;
+  removePluginRefsFromAgents(params: { pluginIds: string[] }): Promise<AgentsUsingToolsResult>;
 }
 
 export const createClient = async ({
@@ -165,6 +168,27 @@ class AgentClientImpl implements AgentClient {
       storage: this.storage,
       spaceId: this.space,
       skillIds: params.skillIds,
+      logger: this.logger,
+    });
+  }
+
+  async getAgentsUsingPlugins(params: { pluginIds: string[] }): Promise<AgentsUsingToolsResult> {
+    return runPluginRefCleanup({
+      storage: this.storage,
+      spaceId: this.space,
+      pluginIds: params.pluginIds,
+      logger: this.logger,
+      checkOnly: true,
+    });
+  }
+
+  async removePluginRefsFromAgents(params: {
+    pluginIds: string[];
+  }): Promise<AgentsUsingToolsResult> {
+    return runPluginRefCleanup({
+      storage: this.storage,
+      spaceId: this.space,
+      pluginIds: params.pluginIds,
       logger: this.logger,
     });
   }

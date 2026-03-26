@@ -71,7 +71,11 @@ export const useDeletePluginService = ({
     DeletePluginMutationVariables
   >({
     mutationFn: ({ pluginId, force }) => pluginsService.delete({ pluginId, force }),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.plugins.all }),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.plugins.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.skills.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.all });
+    },
     onSuccess,
     onError,
   });
@@ -128,6 +132,8 @@ export const useDeletePlugin = ({
     });
     setDeletePluginState(null);
     setUsedByAgents(null);
+    onConfirmCallbackRef.current?.();
+    onConfirmCallbackRef.current = undefined;
   };
 
   const handleError: DeletePluginErrorCallback = (error, { pluginId, pluginName }) => {
@@ -158,8 +164,6 @@ export const useDeletePlugin = ({
       { pluginId: deletePluginState.pluginId, pluginName: deletePluginState.pluginName },
       { onSuccess, onError }
     );
-    onConfirmCallbackRef.current?.();
-    onConfirmCallbackRef.current = undefined;
   }, [deletePluginState, deletePluginMutation, onSuccess, onError]);
 
   const cancelDelete = useCallback(() => {
@@ -181,8 +185,6 @@ export const useDeletePlugin = ({
       },
       { onSuccess, onError }
     );
-    onConfirmCallbackRef.current?.();
-    onConfirmCallbackRef.current = undefined;
   }, [usedByAgents, deletePluginMutation, onSuccess, onError]);
 
   const cancelForceDelete = useCallback(() => {

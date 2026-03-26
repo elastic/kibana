@@ -30,11 +30,7 @@ export interface PluginsServiceStart {
     source: InstallPluginSource;
     pluginName?: string;
   }): Promise<PersistedPluginDefinition>;
-  deletePlugin(options: {
-    request: KibanaRequest;
-    pluginId: string;
-    force?: boolean;
-  }): Promise<void>;
+  deletePlugin(options: { request: KibanaRequest; pluginId: string }): Promise<void>;
 }
 
 export interface PluginsService {

@@ -6,7 +6,6 @@
  */
 
 import type { PluginDefinition } from '@kbn/agent-builder-common';
-import type { AgentRef } from './tools';
 
 export interface ListPluginsResponse {
   results: PluginDefinition[];
@@ -21,8 +20,3 @@ export interface DeletePluginResponse {
 }
 
 export const PLUGIN_USED_BY_AGENTS_ERROR_CODE = 'PLUGIN_USED_BY_AGENTS';
-
-export interface PluginUsedByAgentsErrorAttributes {
-  code: typeof PLUGIN_USED_BY_AGENTS_ERROR_CODE;
-  agents: AgentRef[];
-}

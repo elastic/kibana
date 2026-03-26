@@ -21,6 +21,7 @@ import type {
   AgentsServiceStart,
   ToolRefsParams,
   SkillRefsParams,
+  PluginRefsParams,
 } from './types';
 import type { AgentsUsingToolsResult } from './persisted/types';
 import type { ToolsServiceStart } from '../tools';
@@ -141,12 +142,30 @@ export class AgentsService {
       return client.getAgentsUsingSkills({ skillIds });
     };
 
+    const removePluginRefsFromAgents = async ({
+      request,
+      pluginIds,
+    }: PluginRefsParams): Promise<AgentsUsingToolsResult> => {
+      const client = await getAgentClient({ request });
+      return client.removePluginRefsFromAgents({ pluginIds });
+    };
+
+    const getAgentsUsingPlugins = async ({
+      request,
+      pluginIds,
+    }: PluginRefsParams): Promise<AgentsUsingToolsResult> => {
+      const client = await getAgentClient({ request });
+      return client.getAgentsUsingPlugins({ pluginIds });
+    };
+
     return {
       getRegistry,
       removeToolRefsFromAgents,
       getAgentsUsingTools,
       removeSkillRefsFromAgents,
       getAgentsUsingSkills,
+      removePluginRefsFromAgents,
+      getAgentsUsingPlugins,
     };
   }
 }

@@ -171,30 +171,40 @@ export function registerPluginsRoutes({ router, getInternalServices, logger }: R
         const plugin = await client.get(pluginId);
         const skillIds = plugin.skill_ids ?? [];
 
-        if (skillIds.length > 0) {
-          if (!force) {
-            const { agents } = await agentsService.getAgentsUsingSkills({
-              request,
-              skillIds,
-            });
-            if (agents.length > 0) {
-              return response.conflict({
-                body: {
-                  message:
-                    'Plugin is used by one or more agents. Use force=true to remove it from agents and delete.',
-                  attributes: {
-                    code: PLUGIN_USED_BY_AGENTS_ERROR_CODE,
-                    agents,
-                  },
+        if (!force) {
+          const [skillResult, pluginResult] = await Promise.all([
+            skillIds.length > 0
+              ? agentsService.getAgentsUsingSkills({ request, skillIds })
+              : { agents: [] },
+            agentsService.getAgentsUsingPlugins({ request, pluginIds: [pluginId] }),
+          ]);
+
+          const seenIds = new Set<string>();
+          const agents = [...skillResult.agents, ...pluginResult.agents].filter((agent) => {
+            if (seenIds.has(agent.id)) return false;
+            seenIds.add(agent.id);
+            return true;
+          });
+
+          if (agents.length > 0) {
+            return response.conflict({
+              body: {
+                message:
+                  'Plugin is used by one or more agents. Use force=true to remove it from agents and delete.',
+                attributes: {
+                  code: PLUGIN_USED_BY_AGENTS_ERROR_CODE,
+                  agents,
                 },
-              });
-            }
-          } else {
-            await agentsService.removeSkillRefsFromAgents({
-              request,
-              skillIds,
+              },
             });
           }
+        } else {
+          await Promise.all([
+            skillIds.length > 0
+              ? agentsService.removeSkillRefsFromAgents({ request, skillIds })
+              : Promise.resolve(),
+            agentsService.removePluginRefsFromAgents({ request, pluginIds: [pluginId] }),
+          ]);
         }
 
         await pluginService.deletePlugin({ request, pluginId });
