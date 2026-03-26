@@ -147,6 +147,7 @@ export function ContextAppContent({
     useDocumentViewFlyoutConnectionHandler({
       expandedDoc,
       setExpandedDoc: setExpandedDocWithInitialTab,
+      clearExpandedOnGridChange: false,
     });
 
   const onResize = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
@@ -237,23 +238,23 @@ export function ContextAppContent({
             onResize={onResize}
             externalCustomRenderers={cellRenderers}
           />
+          {expandedDoc && (
+            <DiscoverGridFlyout
+              dataView={dataView}
+              hit={expandedDoc}
+              hits={connectedGridMeta.current?.displayedRows ?? []}
+              columns={connectedGridMeta.current?.displayedColumns ?? []}
+              onFilter={addFilter}
+              onRemoveColumn={onRemoveColumn}
+              onAddColumn={onAddColumn}
+              onClose={() => setExpandedDoc(undefined)}
+              initialTabId={initialTabId}
+              setExpandedDoc={setExpandedDocWithInitialTab}
+              docViewerRef={docViewerRef}
+            />
+          )}
         </CellActionsProvider>
       </div>
-      {expandedDoc && (
-        <DiscoverGridFlyout
-          dataView={dataView}
-          hit={expandedDoc}
-          hits={connectedGridMeta.current?.displayedRows ?? []}
-          columns={connectedGridMeta.current?.displayedColumns ?? []}
-          onFilter={addFilter}
-          onRemoveColumn={onRemoveColumn}
-          onAddColumn={onAddColumn}
-          onClose={() => setExpandedDoc(undefined)}
-          initialTabId={initialTabId}
-          setExpandedDoc={setExpandedDocWithInitialTab}
-          docViewerRef={docViewerRef}
-        />
-      )}
       <WrapperWithPadding>
         <ActionBarMemoized
           type={SurrDocType.SUCCESSORS}
