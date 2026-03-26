@@ -25,7 +25,7 @@ The `xpack.productDocBase` settings configure how {{kib}} reaches the artifact r
 
     Set this when outbound connections from {{kib}} to the artifact repository base URL (Elastic’s CDN, a private mirror, or an internal endpoint) must go through your network’s HTTP or HTTPS proxy.
 
-    When `xpack.productDocBase.artifactRepositoryUrl` uses the `file://` scheme, {{kib}} reads artifacts from the filesystem on the {{kib}} host and does not issue HTTP or HTTPS requests to that repository base URL, so this setting has no effect.
+    When `xpack.productDocBase.artifactRepositoryUrl` uses the `file://` scheme, this setting has no effect because {{kib}} reads artifacts from the filesystem on the {{kib}} host and does not issue HTTP or HTTPS requests to that repository base URL.
 
     Data type: `string` (URI)
 
