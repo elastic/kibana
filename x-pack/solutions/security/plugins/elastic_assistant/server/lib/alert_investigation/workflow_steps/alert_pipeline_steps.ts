@@ -267,6 +267,7 @@ export const tagProcessedAlertsStep = createServerStepDefinition({
     const result = await esClient.updateByQuery({
       index: indexPattern,
       refresh: true,
+      conflicts: 'proceed',
       query: {
         ids: { values: validIds },
       },
