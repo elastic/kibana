@@ -117,17 +117,18 @@ describe('WorkflowManagementAuditLog', () => {
       expect(l2.mock.calls[0][0].event.outcome).toBe('failure');
     });
 
-    it('logBulkWorkflowDeleteSummary and logBulkWorkflowDeleteFailed', async () => {
+    it('logBulkWorkflowDeleteResults and logBulkWorkflowDeleteFailed', async () => {
       const { context, log } = createAuditContext();
-      await WorkflowManagementAuditLog.logBulkWorkflowDeleteSummary(context, {
-        total: 10,
-        deleted: 8,
-        failureCount: 2,
+      await WorkflowManagementAuditLog.logBulkWorkflowDeleteResults(context, {
+        successfulIds: ['w1', 'w2'],
+        failures: [{ id: 'w3', error: 'es error' }],
       });
-      expect(log.mock.calls[0][0].message).toContain('requested 10');
-      expect(log.mock.calls[0][0].message).toContain('deleted 8');
-      expect(log.mock.calls[0][0].message).toContain('failed 2');
-      expect(log.mock.calls[0][0].event.action).toBe(WorkflowManagementAuditActions.BULK_DELETE);
+      expect(log).toHaveBeenCalledTimes(3);
+      expect(log.mock.calls[0][0].event.action).toBe(WorkflowManagementAuditActions.DELETE);
+      expect(log.mock.calls[0][0].message).toContain('[id=w1]');
+      expect(log.mock.calls[1][0].message).toContain('[id=w2]');
+      expect(log.mock.calls[2][0].event.outcome).toBe('failure');
+      expect(log.mock.calls[2][0].message).toContain('[id=w3]');
 
       const { context: c2, log: l2 } = createAuditContext();
       await WorkflowManagementAuditLog.logBulkWorkflowDeleteFailed(c2, err);

@@ -180,19 +180,25 @@ export class WorkflowManagementAuditLog {
     );
   }
 
-  static async logBulkWorkflowDeleteSummary(
+  /**
+   * One `workflow_delete` audit event per successfully removed id and per failed id (bulk API).
+   */
+  static async logBulkWorkflowDeleteResults(
     context: WorkflowsRequestHandlerContext,
-    params: { total: number; deleted: number; failureCount: number }
+    params: {
+      successfulIds: readonly string[];
+      failures: ReadonlyArray<{ id: string; error: string }>;
+    }
   ): Promise<void> {
-    const { total, deleted, failureCount } = params;
-    await writeAudit(
-      context,
-      successEvent(
-        WorkflowManagementAuditActions.BULK_DELETE,
-        'deletion',
-        `User bulk deleted workflows: requested ${total}, deleted ${deleted}, failed ${failureCount}`
-      )
-    );
+    for (const id of params.successfulIds) {
+      await WorkflowManagementAuditLog.logWorkflowDeleted(context, { id });
+    }
+    for (const f of params.failures) {
+      await WorkflowManagementAuditLog.logWorkflowDeleteFailed(context, {
+        id: f.id,
+        error: new Error(f.error),
+      });
+    }
   }
 
   static async logBulkWorkflowDeleteFailed(

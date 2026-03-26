@@ -1932,6 +1932,7 @@ steps:
         total: 1,
         deleted: 1,
         failures: [],
+        successfulIds: ['test-workflow-id'],
       });
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
@@ -1970,6 +1971,7 @@ steps:
         total: 1,
         deleted: 1,
         failures: [],
+        successfulIds: [],
       });
     });
 
@@ -2017,6 +2019,7 @@ steps:
         total: 2,
         deleted: 1,
         failures: [{ id: 'workflow-2', error: 'Database error' }],
+        successfulIds: ['workflow-1'],
       });
     });
   });

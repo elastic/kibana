@@ -707,6 +707,7 @@ export class WorkflowsService {
 
     const now = new Date();
     const failures: Array<{ id: string; error: string }> = [];
+    const successfulIds: string[] = [];
     const client = this.workflowStorage.getClient();
 
     // Bulk fetch all workflows in a single search call
@@ -741,7 +742,6 @@ export class WorkflowsService {
         });
 
         // Process bulk response to track successes and failures
-        const successfulIds: string[] = [];
         bulkResponse.items.forEach((item) => {
           const operation = item.index;
           if (operation?.error) {
@@ -788,6 +788,7 @@ export class WorkflowsService {
       total: ids.length,
       deleted: ids.length - failures.length,
       failures,
+      successfulIds,
     };
   }
 
