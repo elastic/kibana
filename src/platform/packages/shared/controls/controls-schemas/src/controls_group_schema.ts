@@ -47,31 +47,59 @@ export const controlsGroupSchema = schema.arrayOf(
   // order will be determined by the array
   schema.oneOf([
     schema
-      .allOf([
-        schema.object({ type: schema.literal(OPTIONS_LIST_CONTROL) }),
-        schema.object({ config: optionsListDSLControlSchema }),
-        pinnedControlSchema,
-      ])
+      .allOf(
+        [
+          schema.object({ type: schema.literal(OPTIONS_LIST_CONTROL) }),
+          schema.object({ config: optionsListDSLControlSchema }),
+          pinnedControlSchema,
+        ],
+        {
+          meta: {
+            title: OPTIONS_LIST_CONTROL,
+          },
+        }
+      )
       .extendsDeep({ unknowns: 'allow' }), // allows for legacy unknowns such as `parentField` and `enhancements`
     schema
-      .allOf([
-        schema.object({ type: schema.literal(RANGE_SLIDER_CONTROL) }),
-        schema.object({ config: rangeSliderControlSchema }),
-        pinnedControlSchema,
-      ])
+      .allOf(
+        [
+          schema.object({ type: schema.literal(RANGE_SLIDER_CONTROL) }),
+          schema.object({ config: rangeSliderControlSchema }),
+          pinnedControlSchema,
+        ],
+        {
+          meta: {
+            title: RANGE_SLIDER_CONTROL,
+          },
+        }
+      )
       .extendsDeep({ unknowns: 'allow' }),
     schema
-      .allOf([
-        schema.object({ type: schema.literal(TIME_SLIDER_CONTROL) }),
-        schema.object({ config: timeSliderControlSchema }),
-        pinnedControlSchema,
-      ])
+      .allOf(
+        [
+          schema.object({ type: schema.literal(TIME_SLIDER_CONTROL) }),
+          schema.object({ config: timeSliderControlSchema }),
+          pinnedControlSchema,
+        ],
+        {
+          meta: {
+            title: TIME_SLIDER_CONTROL,
+          },
+        }
+      )
       .extendsDeep({ unknowns: 'allow' }), // allows for legacy unknowns such as `useGlobalFilters`
-    schema.allOf([
-      schema.object({ type: schema.literal(ESQL_CONTROL) }),
-      schema.object({ config: optionsListESQLControlSchema }),
-      pinnedControlSchema,
-    ]), // variable controls do not need `unknowns: 'allow'` because they have no legacy values
+    schema.allOf(
+      [
+        schema.object({ type: schema.literal(ESQL_CONTROL) }),
+        schema.object({ config: optionsListESQLControlSchema }),
+        pinnedControlSchema,
+      ],
+      {
+        meta: {
+          title: ESQL_CONTROL,
+        },
+      }
+    ), // variable controls do not need `unknowns: 'allow'` because they have no legacy values
   ]),
   {
     defaultValue: [],
