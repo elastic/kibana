@@ -179,8 +179,10 @@ apiTest.describe(
 
       // Both documents should be present
       expect(esqlResult.documents).toHaveLength(2);
-      const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
-      const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
+      // status is not referenced in the query so ES|QL does not return it as a column.
+      // Use documentsOrdered by ingestion position: [0] has tags, [1] missing tags.
+      const doc1 = esqlResult.documentsOrdered[0];
+      const doc2 = esqlResult.documentsOrdered[1];
       expect(doc1).toStrictEqual(expect.objectContaining({ tags: ['foo', 'bar', 'baz'] }));
       expect(doc2).toStrictEqual(expect.objectContaining({ tags: null }));
     });
@@ -216,12 +218,12 @@ apiTest.describe(
       expect(esqlResult.documentsOrdered).toHaveLength(2);
 
       // First doc should have tags split (where condition matched)
-      const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
+      const doc1 = esqlResult.documentsOrdered[0];
       expect(doc1).toStrictEqual(expect.objectContaining({ tags: ['foo', 'bar', 'baz'] }));
       expect(doc1?.['event.kind']).toBe('test');
 
       // Second doc should keep original tags (where condition not matched)
-      const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
+      const doc2 = esqlResult.documentsOrdered[1];
       expect(doc2).toStrictEqual(expect.objectContaining({ tags: 'one,two,three' }));
       expect(doc2?.['event.kind']).toBe('production');
     });
@@ -267,8 +269,9 @@ apiTest.describe(
 
         expect(esqlResult.documents).toHaveLength(2);
 
-        // First doc should have tags_array created (where condition matched)
-        const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
+        // status is not referenced in the query so ES|QL does not return it as a column.
+        // Use documentsOrdered by ingestion position: [0] event.kind=test, [1] event.kind=production.
+        const doc1 = esqlResult.documentsOrdered[0];
         expect(doc1).toStrictEqual(
           expect.objectContaining({
             tags: 'foo,bar,baz', // Original preserved
@@ -278,7 +281,7 @@ apiTest.describe(
         expect(doc1?.['event.kind']).toBe('test');
 
         // Second doc should have tags_array as empty string (where condition not matched)
-        const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
+        const doc2 = esqlResult.documentsOrdered[1];
         expect(doc2).toStrictEqual(
           expect.objectContaining({
             tags: 'one,two,three',
