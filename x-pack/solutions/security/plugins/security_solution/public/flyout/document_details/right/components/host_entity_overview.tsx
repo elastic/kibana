@@ -30,7 +30,7 @@ import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
-import { buildHostNamesFilter } from '../../../../../common/search_strategy';
+import { buildHostNamesFilter, RiskSeverity } from '../../../../../common/search_strategy';
 import { HOST_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -77,17 +77,10 @@ import { AlertCountInsight } from '../../shared/components/alert_count_insight';
 import { useNavigateToHostDetails } from '../../../entity_details/host_right/hooks/use_navigate_to_host_details';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
-import type { RiskSeverity } from '../../../../../common/search_strategy';
 
 const HOST_ICON = 'storage';
 const HOST_ENTITY_OVERVIEW_ID = 'host-entity-overview';
-const VALID_RISK_SEVERITIES: readonly RiskSeverity[] = [
-  'Unknown',
-  'Low',
-  'Moderate',
-  'High',
-  'Critical',
-] as const;
+const VALID_RISK_SEVERITIES: ReadonlyArray<RiskSeverity> = Object.values(RiskSeverity);
 
 const isRiskSeverity = (value: string): value is RiskSeverity =>
   VALID_RISK_SEVERITIES.includes(value as RiskSeverity);

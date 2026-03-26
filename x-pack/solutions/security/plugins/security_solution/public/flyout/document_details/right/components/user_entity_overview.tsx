@@ -23,8 +23,7 @@ import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/u
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
-import { buildUserNamesFilter } from '../../../../../common/search_strategy';
-import type { RiskSeverity } from '../../../../../common/search_strategy';
+import { buildUserNamesFilter, RiskSeverity } from '../../../../../common/search_strategy';
 import type { ESQuery } from '../../../../../common/typed_json';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
@@ -74,13 +73,7 @@ import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_sel
 
 const USER_ICON = 'user';
 const USER_ENTITY_OVERVIEW_ID = 'user-entity-overview';
-const VALID_RISK_SEVERITIES: readonly RiskSeverity[] = [
-  'Unknown',
-  'Low',
-  'Moderate',
-  'High',
-  'Critical',
-] as const;
+const VALID_RISK_SEVERITIES: ReadonlyArray<RiskSeverity> = Object.values(RiskSeverity);
 
 const isRiskSeverity = (value: string): value is RiskSeverity =>
   VALID_RISK_SEVERITIES.includes(value as RiskSeverity);
