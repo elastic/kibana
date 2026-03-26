@@ -7,13 +7,13 @@
 
 import expect from '@kbn/expect';
 import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
-import type { LlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
+import type { LlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
+import { createLlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
-  setupLlmProxy,
-  teardownLlmProxy,
-  getLlmMessages,
-} from '../utils/llm_proxy/llm_test_helpers';
+  createLlmProxyActionConnector,
+  deleteActionConnector,
+} from '../utils/llm_proxy/action_connectors';
 import {
   createLogsWithErrors,
   type LogData,
@@ -24,11 +24,11 @@ const MOCKED_AI_SUMMARY_INFO = 'This is a mocked AI insight summary for the info
 const MOCKED_AI_SUMMARY_FIELDS = 'This is a mocked AI insight summary using fields.';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const log = getService('log');
   const observabilityAgentBuilderApi = getService('observabilityAgentBuilderApi');
   const es = getService('es');
 
   describe('AI Insights: Log', function () {
-    // LLM Proxy is not yet supported in cloud environments
     this.tags(['skipCloud']);
 
     describe('POST /internal/observability_agent_builder/ai_insights/log', function () {
@@ -44,7 +44,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const serviceName = 'payment-service';
 
       before(async () => {
-        ({ llmProxy, connectorId } = await setupLlmProxy(getService));
+        llmProxy = await createLlmProxy(log);
+        connectorId = await createLlmProxyActionConnector(getService, {
+          port: llmProxy.getPort(),
+        });
 
         ({ logsSynthtraceEsClient, logData } = await createLogsWithErrors({
           getService,
@@ -79,7 +82,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       after(async () => {
         await logsSynthtraceEsClient?.clean();
-        await teardownLlmProxy(getService, { llmProxy, connectorId });
+        await deleteActionConnector(getService, { actionId: connectorId });
+        llmProxy.close();
       });
 
       const testCases = [
@@ -126,9 +130,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(body).to.have.property('context');
           expect(body.summary).to.contain(testCase.mockedSummary);
 
-          const { user: userMessage } = getLlmMessages(llmProxy, interceptorName);
+          const llmRequest = llmProxy.interceptedRequests.find(
+            (r) => r.matchingInterceptorName === interceptorName
+          );
+          const userMessage = llmRequest?.requestBody?.messages?.find(
+            (m: { role: string }) => m.role === 'user'
+          );
           for (const tag of testCase.expectedContextTags) {
-            expect(userMessage.content).to.contain(tag);
+            expect(userMessage?.content).to.contain(tag);
           }
         });
       }
@@ -165,11 +174,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(body).to.have.property('context');
         expect(body.summary).to.contain(MOCKED_AI_SUMMARY_FIELDS);
 
-        const { user: userMessage } = getLlmMessages(llmProxy, interceptorName);
-        expect(userMessage.content).to.contain('<LogEntryFields>');
-        expect(userMessage.content).to.contain('Payment request received');
-        expect(userMessage.content).not.to.contain('<LogEntryIndex>');
-        expect(userMessage.content).not.to.contain('<LogEntryId>');
+        const llmRequest = llmProxy.interceptedRequests.find(
+          (r) => r.matchingInterceptorName === interceptorName
+        );
+        const userMessage = llmRequest?.requestBody?.messages?.find(
+          (m: { role: string }) => m.role === 'user'
+        );
+        expect(userMessage?.content).to.contain('<LogEntryFields>');
+        expect(userMessage?.content).to.contain('Payment request received');
+        expect(userMessage?.content).not.to.contain('<LogEntryIndex>');
+        expect(userMessage?.content).not.to.contain('<LogEntryId>');
       });
     });
   });

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { EMPTY } from 'rxjs';
-import type { Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { getLogAiInsights, type GetLogAiInsightsParams } from './get_log_ai_insights';
 
@@ -14,40 +12,17 @@ jest.mock('./get_log_document_by_id', () => ({
   getLogDocumentById: jest.fn(),
 }));
 
-jest.mock('../../tools/get_traces/handler', () => ({
-  getToolHandler: jest.fn().mockResolvedValue({ traces: [] }),
-}));
-
-jest.mock('../../utils/warning_and_above_log_filter', () => ({
-  isWarningOrAbove: jest.fn().mockReturnValue(false),
-}));
-
-jest.mock('../../agent/register_observability_agent', () => ({
-  getEntityLinkingInstructions: jest.fn().mockReturnValue(''),
-}));
-
-jest.mock('./types', () => ({
-  createAiInsightResult: jest.fn((context: string, _connector: unknown, events$: unknown) => ({
-    context,
-    events$,
-  })),
-}));
-
 const { getLogDocumentById } = jest.requireMock('./get_log_document_by_id');
-const { getToolHandler: getTraces } = jest.requireMock('../../tools/get_traces/handler');
-
-const mockLogger = { debug: jest.fn(), error: jest.fn() } as unknown as Logger;
 
 function createBaseParams(overrides: Partial<GetLogAiInsightsParams> = {}): GetLogAiInsightsParams {
   return {
-    core: { http: { basePath: { get: () => '' } } } as any,
-    plugins: {} as any,
-    inferenceClient: { chatComplete: jest.fn().mockReturnValue(EMPTY) } as any,
+    dataRegistry: { getData: jest.fn() } as any,
+    inferenceClient: {
+      chatComplete: jest.fn().mockResolvedValue({ content: 'mocked summary' }),
+    } as any,
     connectorId: 'test-connector',
-    connector: {} as any,
     request: httpServerMock.createKibanaRequest(),
     esClient: { asCurrentUser: {} } as any,
-    logger: mockLogger,
     ...overrides,
   };
 }
@@ -55,7 +30,6 @@ function createBaseParams(overrides: Partial<GetLogAiInsightsParams> = {}): GetL
 describe('getLogAiInsights', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    getTraces.mockResolvedValue({ traces: [] });
   });
 
   it('throws when document is not found by id', async () => {
@@ -97,13 +71,5 @@ describe('getLogAiInsights', () => {
     expect(result.context).toContain('from fields');
     expect(result.context).toContain('test-svc');
     expect(result.context).not.toContain('nullField');
-  });
-
-  it('skips trace fetch when using fields without trace.id or timestamp', async () => {
-    const fields = { message: 'no trace info' };
-
-    await getLogAiInsights(createBaseParams({ fields }));
-
-    expect(getTraces).not.toHaveBeenCalled();
   });
 });
