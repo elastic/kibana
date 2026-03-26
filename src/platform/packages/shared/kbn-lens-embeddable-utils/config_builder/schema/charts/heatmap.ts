@@ -26,7 +26,6 @@ import {
   legendVisibilitySchemaWithAuto,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
-import { positionSchema } from '../alignments';
 import { builderEnums } from '../enums';
 import { bucketOperationDefinitionSchema } from '../bucket_ops';
 
@@ -34,7 +33,6 @@ const legendSchemaProps = {
   truncate_after_lines: legendTruncateAfterLinesSchema,
   visibility: legendVisibilitySchemaWithAuto,
   size: legendSizeSchema,
-  position: schema.maybe(positionSchema({ meta: { description: 'Legend position' } })),
 };
 
 const labelsSchemaProps = {

@@ -39,7 +39,6 @@ import type { LensApiAllMetricOperations } from '../../../schema/metric_ops';
 function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapState['legend'] {
   return {
     visibility: legend.isVisible ? 'visible' : 'hidden',
-    position: legend.position,
     ...stripUndefined<HeatmapState['legend']>({
       truncate_after_lines: getLegendTruncateAfterLines(legend),
       size: legend.legendSize,

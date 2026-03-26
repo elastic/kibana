@@ -14,8 +14,6 @@ const VERTICAL_ALIGN = ['top', 'bottom'] as const;
 const LR_ALIGN = ['left', 'right'] as const;
 const BEFORE_AFTER_ALIGN = ['before', 'after'] as const;
 
-type Position = 'top' | 'bottom' | 'left' | 'right';
-
 type HorizontalAlignment = (typeof HORIZONTAL_ALIGN)[number];
 type VerticalAlignment = (typeof VERTICAL_ALIGN)[number];
 type LeftRightAlignment = (typeof LR_ALIGN)[number];
@@ -34,17 +32,6 @@ export const verticalAlignmentSchema = (opts?: Options<VerticalAlignment>) =>
 
 export const leftRightAlignmentSchema = (opts?: Options<LeftRightAlignment>) =>
   schema.oneOf([schema.literal('left'), schema.literal('right')], opts);
-
-export const positionSchema = (opts?: Options<Position>) =>
-  schema.oneOf(
-    [
-      schema.literal('top'),
-      schema.literal('bottom'),
-      schema.literal('left'),
-      schema.literal('right'),
-    ],
-    opts
-  );
 
 export const beforeAfterAlignmentSchema = (opts?: Options<BeforeAfterAlignment>) =>
   schema.oneOf([schema.literal('before'), schema.literal('after')], opts);

@@ -79,14 +79,14 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
     },
     legend: {
       isVisible: layer.legend?.visibility !== 'hidden',
-      position: layer.legend?.position ?? 'right',
       type: 'heatmap_legend',
+      position: 'right',
       ...stripUndefined<HeatmapLegendConfigResult>({
         maxLines: layer.legend?.truncate_after_lines,
         legendSize: layer.legend?.size as LegendSize,
         shouldTruncate: Boolean(layer.legend?.truncate_after_lines),
       }),
-    },
+    } as any,
     ...(basePalette && {
       palette: {
         ...basePalette,
