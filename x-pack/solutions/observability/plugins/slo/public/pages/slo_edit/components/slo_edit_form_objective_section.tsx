@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TimeWindowType } from '@kbn/slo-schema';
+import type { TimeWindowType } from '@kbn/slo-schema';
 import React, { useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import {
@@ -28,7 +28,7 @@ import {
   ROLLING_TIMEWINDOW_OPTIONS,
   TIMEWINDOW_TYPE_OPTIONS,
 } from '../constants';
-import { CreateSLOForm } from '../types';
+import type { CreateSLOForm } from '../types';
 import { MAX_WIDTH } from '../constants';
 import { AdvancedSettings } from './indicator_section/advanced_settings/advanced_settings';
 import { SloEditFormObjectiveSectionTimeslices } from './slo_edit_form_objective_section_timeslices';
@@ -98,7 +98,7 @@ export function SloEditFormObjectiveSection() {
     >
       <EuiFlexGroup direction="column" gutterSize="m">
         {isServerless && (
-          <EuiCallOut>
+          <EuiCallOut announceOnMount>
             {i18n.translate('xpack.slo.sloEdit.timeWindow.serverlessWarning', {
               defaultMessage: 'Initial data backfill is limited to the past 7 days',
             })}
@@ -179,7 +179,7 @@ export function SloEditFormObjectiveSection() {
 
         {indicator === 'sli.metric.timeslice' && (
           <EuiFlexItem>
-            <EuiCallOut color="warning">
+            <EuiCallOut announceOnMount color="warning">
               <p>
                 <FormattedMessage
                   id="xpack.slo.sloEdit.sliType.timesliceMetric.objectiveMessage"
@@ -192,7 +192,7 @@ export function SloEditFormObjectiveSection() {
 
         {indicator === 'sli.synthetics.availability' && (
           <EuiFlexItem>
-            <EuiCallOut color="warning">
+            <EuiCallOut announceOnMount color="warning">
               <p>
                 <FormattedMessage
                   id="xpack.slo.sloEdit.sliType.syntheticAvailability.objectiveMessage"

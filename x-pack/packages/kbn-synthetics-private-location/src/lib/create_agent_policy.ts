@@ -6,8 +6,8 @@
  */
 
 import { isError } from 'lodash';
-import { ToolingLog } from '@kbn/tooling-log';
-import { CliOptions } from '../types';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { CliOptions } from '../types';
 import type { KibanaAPIClient } from './kibana_api_client';
 
 export async function createElasticAgentPolicy(

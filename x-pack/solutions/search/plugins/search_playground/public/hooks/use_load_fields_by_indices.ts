@@ -6,16 +6,17 @@
  */
 
 import { useEffect } from 'react';
-import { UseFormReturn } from 'react-hook-form/dist/types';
+import type { UseFormReturn } from 'react-hook-form/dist/types';
+import type { IndexFields } from '@kbn/search-queries';
 import {
   generateSearchQuery,
   getDefaultQueryFields,
   getDefaultSourceFields,
-  IndexFields,
 } from '@kbn/search-queries';
 
 import { useUsageTracker } from './use_usage_tracker';
-import { PlaygroundForm, PlaygroundFormFields } from '../types';
+import type { PlaygroundForm } from '../types';
+import { PlaygroundFormFields } from '../types';
 import { useIndicesFields } from './use_indices_fields';
 import { AnalyticsEvents } from '../analytics/constants';
 

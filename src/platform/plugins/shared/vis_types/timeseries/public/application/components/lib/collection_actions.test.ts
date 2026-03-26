@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  handleChange,
-  handleAdd,
-  handleDelete,
-  CollectionActionsProps,
-} from './collection_actions';
+import type { CollectionActionsProps } from './collection_actions';
+import { handleChange, handleAdd, handleDelete } from './collection_actions';
 
 describe('collection actions', () => {
   test('handleChange() calls props.onChange() with updated collection', () => {

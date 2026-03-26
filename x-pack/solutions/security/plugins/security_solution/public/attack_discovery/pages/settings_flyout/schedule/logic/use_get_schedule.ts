@@ -6,9 +6,13 @@
  */
 
 import { useCallback } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { replaceParams } from '@kbn/openapi-common/shared';
-import { ATTACK_DISCOVERY_SCHEDULES_BY_ID } from '@kbn/elastic-assistant-common';
+import {
+  ATTACK_DISCOVERY_SCHEDULES_BY_ID,
+  transformAttackDiscoveryScheduleFromApi,
+} from '@kbn/elastic-assistant-common';
+import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
 
 import * as i18n from './translations';
 import { getAttackDiscoverySchedule } from '../api';
@@ -24,9 +28,15 @@ export const useGetAttackDiscoverySchedule = (params: { id: string }) => {
   return useQuery(
     ['GET', SPECIFIC_PATH, params],
     async ({ signal }) => {
-      const response = await getAttackDiscoverySchedule({ signal, ...params });
+      const response = await getAttackDiscoverySchedule({
+        signal,
+        ...params,
+      });
 
-      return { schedule: response };
+      // Transform from API snake_case to frontend camelCase
+      const schedule: AttackDiscoverySchedule = transformAttackDiscoveryScheduleFromApi(response);
+
+      return { schedule };
     },
     {
       ...DEFAULT_QUERY_OPTIONS,

@@ -5,17 +5,14 @@
  * 2.0.
  */
 
+import type { ApplicationStart } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { firstValueFrom } from 'rxjs';
 
-export function getPatternAnalysisAvailable(licensing: LicensingPluginStart) {
-  const lic = firstValueFrom(licensing.license$);
-  return async (dataView: DataView) => {
-    const isPlatinum = (await lic).hasAtLeast('platinum');
+export function getPatternAnalysisAvailable(application: ApplicationStart) {
+  return (dataView: DataView) => {
     return (
-      isPlatinum &&
+      application.capabilities.aiops.enabled &&
       dataView.isTimeBased() &&
       dataView.fields.some((f) => f.esTypes?.includes(ES_FIELD_TYPES.TEXT))
     );

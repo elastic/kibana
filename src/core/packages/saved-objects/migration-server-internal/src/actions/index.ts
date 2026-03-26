@@ -49,11 +49,11 @@ import type { IndexNotGreenTimeout, IndexNotYellowTimeout } from './wait_for_ind
 import { waitForIndexStatus } from './wait_for_index_status';
 
 export type { WaitForTaskResponse, WaitForTaskCompletionTimeout } from './wait_for_task';
-import {
-  waitForTask,
+import type {
   TaskCompletedWithRetriableError,
   WaitForTaskCompletionTimeout,
 } from './wait_for_task';
+import { waitForTask } from './wait_for_task';
 
 export type { UpdateByQueryResponse } from './pickup_updated_mappings';
 import { pickupUpdatedMappings } from './pickup_updated_mappings';
@@ -161,6 +161,11 @@ export interface RequestEntityTooLargeException {
   type: 'request_entity_too_large_exception';
 }
 
+export interface UnavailableShardsException {
+  type: 'unavailable_shards_exception';
+  message: string;
+}
+
 export interface EsResponseTooLargeError {
   type: 'es_response_too_large';
   contentLength: number;
@@ -201,6 +206,7 @@ export interface ActionErrorTypeMap {
   types_added: TypesAdded;
   operation_not_supported: OperationNotSupported;
   source_equals_target: SourceEqualsTarget;
+  unavailable_shards_exception: UnavailableShardsException;
 }
 
 /**

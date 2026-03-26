@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const RULES_DATA_INPUT_COPY_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.copyExportQuery.title',
-  { defaultMessage: 'Export Splunk rules' }
+  { defaultMessage: 'Export rules' }
 );
 
 export const RULES_DATA_INPUT_COPY_DESCRIPTION_SECTION = i18n.translate(

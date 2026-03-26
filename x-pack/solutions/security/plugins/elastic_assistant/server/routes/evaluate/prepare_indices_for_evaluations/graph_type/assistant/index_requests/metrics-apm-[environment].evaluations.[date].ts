@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 
 export const metricsApmIndexRequest: IndexRequest = {
   index: 'metrics-apm-[environment].evaluations.[date]',

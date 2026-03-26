@@ -8,8 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DataViewField } from '@kbn/data-views-plugin/public';
-import { TimestampOption } from '../types';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
+import type { TimestampOption } from '../types';
 
 export const noTimeFieldLabel = i18n.translate(
   'indexPatternEditor.createIndexPattern.stepTime.noTimeFieldOptionLabel',

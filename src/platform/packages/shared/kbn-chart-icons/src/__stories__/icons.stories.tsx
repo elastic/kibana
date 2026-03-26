@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, ComponentType } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiEmptyPrompt, EuiForm, IconType } from '@elastic/eui';
+import type { FC, ComponentType } from 'react';
+import React from 'react';
+import type { IconType } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiEmptyPrompt, EuiForm } from '@elastic/eui';
 import type { StoryFn } from '@storybook/react';
 
 import {

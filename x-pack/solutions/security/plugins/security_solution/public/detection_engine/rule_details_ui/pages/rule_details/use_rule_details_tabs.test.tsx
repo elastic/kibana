@@ -11,12 +11,20 @@ import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 import type { Rule } from '../../../rule_management/logic';
 import { useRuleExecutionSettings } from '../../../rule_monitoring';
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { getUserPrivilegesMockDefaultValue } from '../../../../common/components/user_privileges/__mocks__';
+import { initialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../rule_monitoring');
 jest.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');
+jest.mock('../../../../common/components/user_privileges');
+jest.mock('../../../../common/hooks/use_experimental_features');
 
 const mockUseRuleExecutionSettings = useRuleExecutionSettings as jest.Mock;
 const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as jest.Mock;
+const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 
 const mockRule: Rule = {
   id: 'myfakeruleid',
@@ -65,6 +73,8 @@ describe('useRuleDetailsTabs', () => {
       },
     });
     mockUseEndpointExceptionsCapability.mockReturnValue(true);
+    mockUseUserPrivileges.mockReturnValue(getUserPrivilegesMockDefaultValue());
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
   });
 
   beforeEach(() => {
@@ -83,26 +93,47 @@ describe('useRuleDetailsTabs', () => {
       rule: mockRule,
       ruleId: mockRule.rule_id,
       isExistingRule: true,
-      hasIndexRead: false,
+      canReadAlerts: false,
     });
     const tabsNames = Object.keys(tabs.result.current);
 
     expect(tabsNames).not.toContain(RuleDetailTabs.alerts);
   });
 
-  it('always returns ths rule exception tab ', async () => {
+  it('does not render the rule exception tab if the user does not have read permissions', async () => {
     const tabs = render({
       rule: mockRule,
       ruleId: mockRule.rule_id,
       isExistingRule: true,
-      hasIndexRead: true,
+      canReadAlerts: true,
+    });
+    const tabsNames = Object.keys(tabs.result.current);
+
+    expect(tabsNames).not.toContain(RuleDetailTabs.exceptions);
+  });
+
+  it('renders the rule exception tab if the user has read permissions', async () => {
+    mockUseUserPrivileges.mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: {
+        ...initialUserPrivilegesState().rulesPrivileges,
+        exceptions: { read: true, crud: false },
+      },
+    });
+    const tabs = render({
+      rule: mockRule,
+      ruleId: mockRule.rule_id,
+      isExistingRule: true,
+      canReadAlerts: true,
     });
     const tabsNames = Object.keys(tabs.result.current);
 
     expect(tabsNames).toContain(RuleDetailTabs.exceptions);
   });
 
-  it('renders endpoint exceptions tab when rule includes endpoint list', async () => {
+  it('renders endpoint exceptions tab when rule includes endpoint list and Endpoint exceptions moved FF is disabled', async () => {
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+
     const tabs = render({
       rule: {
         ...mockRule,
@@ -120,11 +151,38 @@ describe('useRuleDetailsTabs', () => {
       },
       ruleId: mockRule.rule_id,
       isExistingRule: true,
-      hasIndexRead: true,
+      canReadAlerts: true,
     });
     const tabsNames = Object.keys(tabs.result.current);
 
     expect(tabsNames).toContain(RuleDetailTabs.endpointExceptions);
+  });
+
+  it('does not render endpoint exceptions tab when rule includes endpoint list and Endpoint exceptions moved FF is enabled', async () => {
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+
+    const tabs = render({
+      rule: {
+        ...mockRule,
+        outcome: 'conflict',
+        alias_target_id: 'aliased_rule_id',
+        alias_purpose: 'savedObjectConversion',
+        exceptions_list: [
+          {
+            id: 'endpoint_list',
+            list_id: 'endpoint_list',
+            type: 'endpoint',
+            namespace_type: 'agnostic',
+          },
+        ],
+      },
+      ruleId: mockRule.rule_id,
+      isExistingRule: true,
+      canReadAlerts: true,
+    });
+    const tabsNames = Object.keys(tabs.result.current);
+
+    expect(tabsNames).not.toContain(RuleDetailTabs.endpointExceptions);
   });
 
   it('hides endpoint exceptions tab when rule includes endpoint list but no endpoint PLI', async () => {
@@ -146,7 +204,7 @@ describe('useRuleDetailsTabs', () => {
       },
       ruleId: mockRule.rule_id,
       isExistingRule: true,
-      hasIndexRead: true,
+      canReadAlerts: true,
     });
     const tabsNames = Object.keys(tabs.result.current);
 
@@ -158,7 +216,7 @@ describe('useRuleDetailsTabs', () => {
       rule: mockRule,
       ruleId: mockRule.rule_id,
       isExistingRule: true,
-      hasIndexRead: true,
+      canReadAlerts: true,
     });
     const tabsNames = Object.keys(tabs.result.current);
 
@@ -176,7 +234,7 @@ describe('useRuleDetailsTabs', () => {
       rule: mockRule,
       ruleId: mockRule.rule_id,
       isExistingRule: true,
-      hasIndexRead: true,
+      canReadAlerts: true,
     });
     const tabsNames = Object.keys(tabs.result.current);
 

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { OverlayRef } from '@kbn/core-mount-utils-browser';
-import { IToasts } from '@kbn/core-notifications-browser';
-import { PointInTimeEventAnnotationConfig } from '@kbn/event-annotation-common';
-import { cloneDeep } from 'lodash';
-import {
+import type { OverlayRef } from '@kbn/core-mount-utils-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
+import type { PointInTimeEventAnnotationConfig } from '@kbn/event-annotation-common';
+import type {
   XYByReferenceAnnotationLayerConfig,
   XYByValueAnnotationLayerConfig,
-  XYState,
+  XYVisualizationState,
 } from '../../types';
 import { revert } from './revert_changes_action';
 
@@ -38,7 +37,7 @@ describe('revert changes routine', () => {
     ...byValueLayer,
     annotationGroupId: 'shouldnt show up',
     __lastSaved: {
-      ...cloneDeep(byValueLayer),
+      ...structuredClone(byValueLayer),
 
       // some differences
       annotations: [
@@ -71,7 +70,7 @@ describe('revert changes routine', () => {
     revert({
       setState,
       layer: byRefLayer,
-      state: { layers: [byRefLayer] } as XYState,
+      state: { layers: [byRefLayer] } as XYVisualizationState,
       modal,
       toasts,
     });
@@ -85,7 +84,7 @@ describe('revert changes routine', () => {
     `);
     expect(modal.close).toHaveBeenCalled();
 
-    const newState = setState.mock.calls[0][0] as XYState;
+    const newState = setState.mock.calls[0][0] as XYVisualizationState;
 
     expect(
       (newState.layers[0] as XYByReferenceAnnotationLayerConfig).ignoreGlobalFilters

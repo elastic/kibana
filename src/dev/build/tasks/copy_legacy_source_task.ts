@@ -13,7 +13,7 @@ import { getPackages } from '@kbn/repo-packages';
 import globby from 'globby';
 import Piscina from 'piscina';
 
-import { Task } from '../lib';
+import type { Task } from '../lib';
 
 export const CopyLegacySource: Task = {
   description: 'Copying legacy/non-package source into platform-generic build directory',
@@ -30,6 +30,7 @@ export const CopyLegacySource: Task = {
       'src/cli_*/**',
       'src/setup_node_env/**',
       '!src/cli*/dev.js',
+      '!src/cli/*/dev.js',
       '!src/setup_node_env/index.js',
 
       'x-pack/.i18nrc.json',

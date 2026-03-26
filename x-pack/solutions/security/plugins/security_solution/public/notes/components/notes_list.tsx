@@ -10,7 +10,6 @@ import { EuiAvatar, EuiComment, EuiCommentList, EuiLoadingElastic } from '@elast
 import { useSelector } from 'react-redux';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { DeleteConfirmModal } from './delete_confirm_modal';
 import { OpenFlyoutButtonIcon } from './open_flyout_button';
 import { OpenTimelineButtonIcon } from './open_timeline_button';
 import { DeleteNoteButtonIcon } from './delete_note_button';
@@ -18,12 +17,7 @@ import { MarkdownRenderer } from '../../common/components/markdown_editor';
 import { ADD_NOTE_LOADING_TEST_ID, NOTE_AVATAR_TEST_ID, NOTES_COMMENT_TEST_ID } from './test_ids';
 import type { State } from '../../common/store';
 import type { Note } from '../../../common/api/timeline';
-import {
-  ReqStatus,
-  selectCreateNoteStatus,
-  selectNotesTablePendingDeleteIds,
-} from '../store/notes.slice';
-import { useUserPrivileges } from '../../common/components/user_privileges';
+import { ReqStatus, selectCreateNoteStatus } from '../store/notes.slice';
 
 export const ADDED_A_NOTE = i18n.translate('xpack.securitySolution.notes.addedANoteLabel', {
   defaultMessage: 'added a note',
@@ -59,14 +53,7 @@ export interface NotesListProps {
  * When a note is being created, the component renders a loading spinner when the new note is about to be added.
  */
 export const NotesList = memo(({ notes, options }: NotesListProps) => {
-  const { notesPrivileges } = useUserPrivileges();
-  const canDeleteNotes = notesPrivileges.crud;
-
   const createStatus = useSelector((state: State) => selectCreateNoteStatus(state));
-
-  const pendingDeleteIds = useSelector(selectNotesTablePendingDeleteIds);
-  const isDeleteModalVisible = pendingDeleteIds.length > 0;
-
   return (
     <>
       <EuiCommentList>
@@ -89,7 +76,7 @@ export const NotesList = memo(({ notes, options }: NotesListProps) => {
                 {note.timelineId && note.timelineId.length > 0 && !options?.hideTimelineIcon && (
                   <OpenTimelineButtonIcon note={note} index={index} />
                 )}
-                {canDeleteNotes && <DeleteNoteButtonIcon note={note} index={index} />}
+                <DeleteNoteButtonIcon note={note} index={index} />
               </>
             }
             timelineAvatar={
@@ -107,7 +94,6 @@ export const NotesList = memo(({ notes, options }: NotesListProps) => {
           <EuiLoadingElastic size="xxl" data-test-subj={ADD_NOTE_LOADING_TEST_ID} />
         )}
       </EuiCommentList>
-      {isDeleteModalVisible && <DeleteConfirmModal refetch={false} />}
     </>
   );
 });

@@ -12,7 +12,7 @@ import {
   validateHasWildcardWithWrongOperator,
 } from '@kbn/securitysolution-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import {
+import type {
   CreateExceptionListItemSchema,
   EntriesArray,
   Entry,
@@ -20,6 +20,9 @@ import {
   ExceptionListType,
   ListSchema,
   NamespaceType,
+  CreateRuleExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
   createExceptionListItemSchema,
@@ -28,15 +31,10 @@ import {
   entry,
   exceptionListItemSchema,
   nestedEntryItem,
-  CreateRuleExceptionListItemSchema,
   createRuleExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  DataViewBase,
-  DataViewFieldBase,
-  getDataViewFieldSubtypeNested,
-  isDataViewFieldSubtypeNested,
-} from '@kbn/es-query';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import { getDataViewFieldSubtypeNested, isDataViewFieldSubtypeNested } from '@kbn/es-query';
 import { castEsToKbnFieldTypeName, KBN_FIELD_TYPES } from '@kbn/field-types';
 
 import {
@@ -53,9 +51,10 @@ import {
   isNotInListOperator,
   matchesOperator,
   doesNotMatchOperator,
+  ALL_OPERATORS_SANS_MATCHES,
 } from '../autocomplete_operators';
 
-import {
+import type {
   BuilderEntry,
   CreateExceptionListItemBuilderSchema,
   DataViewField,
@@ -725,8 +724,9 @@ export const getOperatorOptions = (
           doesNotExistOperator,
         ];
   } else {
+    const supportMatches = fieldSupportsMatches(item.field);
     return listType === 'detection'
-      ? fieldSupportsMatches(item.field)
+      ? supportMatches
         ? DETECTION_ENGINE_EXCEPTION_OPERATORS
         : [
             isOperator,
@@ -738,7 +738,9 @@ export const getOperatorOptions = (
             isInListOperator,
             isNotInListOperator,
           ]
-      : ALL_OPERATORS;
+      : supportMatches
+      ? ALL_OPERATORS
+      : ALL_OPERATORS_SANS_MATCHES;
   }
 };
 

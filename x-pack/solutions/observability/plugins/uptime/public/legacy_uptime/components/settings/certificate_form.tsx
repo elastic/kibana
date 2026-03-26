@@ -19,8 +19,8 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import { DefaultEmail, DynamicSettings } from '../../../../common/runtime_types';
-import { SettingsFormProps } from '../../pages/settings';
+import type { DefaultEmail, DynamicSettings } from '../../../../common/runtime_types';
+import type { SettingsFormProps } from '../../pages/settings';
 import { certificateFormTranslations } from './translations';
 
 export type PartialSettings = Partial<Omit<DynamicSettings, 'defaultEmail'>> & {

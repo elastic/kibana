@@ -12,7 +12,7 @@ import type { CriteriaWithPagination } from '@elastic/eui';
 import { DEFAULT_INITIAL_PAGE_SIZE, DEFAULT_PAGE_SIZE_OPTIONS } from './constants';
 import { createStorage } from './storage';
 import { validatePersistData } from './validate_persist_data';
-import { PersistData, PropertySort } from './types';
+import type { PersistData, PropertySort } from './types';
 
 export interface EuiTablePersistProps<T> {
   /** A unique id that will be included in the local storage variable for this table. */

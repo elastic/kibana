@@ -1,6 +1,6 @@
 # LEAST
 
-The LEAST function returns the smallest value from multiple columns.
+The LEAST function returns the minimum value from multiple columns. It is designed to evaluate several columns at once and select the smallest value among them.
 
 ## Syntax
 
@@ -18,12 +18,9 @@ The remaining columns to evaluate.
 
 ## Examples
 
+Finds the smaller value between columns `a` and `b` and stores it in a new column `l`:
+
 ```esql
 ROW a = 10, b = 20
 | EVAL l = LEAST(a, b)
-```
-
-```esql
-ROW x = 5, y = 15, z = 10
-| EVAL min_value = LEAST(x, y, z)
 ```

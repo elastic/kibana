@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPanel, EuiSelect } from '@elastic/eui';
+import { EuiPanel, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import { getLensAttributes } from './get_lens_attributes';
@@ -19,7 +19,7 @@ import {
   generateVisualizationESQLQuery,
   getBucketTimeRange,
 } from './esql_data_generation';
-import type { VisualizationStackByOption } from '../esql_dashboard_panel/esql_dashboard_panel';
+
 import { EsqlDashboardPanel } from '../esql_dashboard_panel/esql_dashboard_panel';
 import type { TableItemType } from './types';
 
@@ -36,17 +36,20 @@ const PrivilegedUserMonitoringSampleDashboardComponent = () => {
   const stackByOptions = GRANTED_RIGHTS_STACK_BY_OPTIONS;
 
   const setSelectedChartOptionCallback = useCallback(
-    (event: React.ChangeEvent<HTMLSelectElement>) => {
-      setSelectedStackByOption(
-        stackByOptions.find((co) => co.value === event.target.value) ?? stackByOptions[0]
-      );
+    (value: string) => {
+      setSelectedStackByOption(value ?? stackByOptions[0].value);
     },
     [stackByOptions]
   );
 
   const defaultStackByOption = stackByOptions[0];
-  const [selectedStackByOption, setSelectedStackByOption] =
-    useState<VisualizationStackByOption>(defaultStackByOption);
+  const [selectedStackByOption, setSelectedStackByOption] = useState<string>(
+    defaultStackByOption.value
+  );
+
+  const stackByLabel = i18n.translate('xpack.securitySolution.genericDashboard.stackBy.label', {
+    defaultMessage: 'Stack by',
+  });
 
   const title = (
     <FormattedMessage
@@ -58,20 +61,21 @@ const PrivilegedUserMonitoringSampleDashboardComponent = () => {
   return (
     <EuiPanel hasBorder hasShadow={false} data-test-subj="privMonSampleDashboard">
       <HeaderSection title={title} titleSize="s" outerDirection={'column'}>
-        <EuiSelect
+        <EuiSuperSelect
           onChange={setSelectedChartOptionCallback}
           options={GRANTED_RIGHTS_STACK_BY_OPTIONS}
-          prepend={i18n.translate('xpack.securitySolution.genericDashboard.stackBy.label', {
-            defaultMessage: 'Stack by',
-          })}
-          value={selectedStackByOption?.value}
+          prepend={stackByLabel}
+          aria-label={stackByLabel}
+          valueOfSelected={selectedStackByOption}
+          hasDividers={true}
+          itemLayoutAlign="top"
         />
       </HeaderSection>
 
       <EsqlDashboardPanel<TableItemType>
         title={title}
         timerange={bucketTimerange}
-        stackByField={selectedStackByOption.value}
+        stackByField={selectedStackByOption}
         getLensAttributes={getLensAttributes}
         generateVisualizationQuery={generateVisualizationQuery}
         generateTableQuery={generateTableQuery}

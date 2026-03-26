@@ -11,6 +11,7 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { Router } from '@kbn/shared-ux-router';
 
@@ -19,7 +20,8 @@ import { SyntheticsSharedContext } from './contexts/synthetics_shared_context';
 import { kibanaService } from '../../utils/kibana_service';
 import { ActionMenu } from './components/common/header/action_menu';
 import { TestNowModeFlyoutContainer } from './components/test_now_mode/test_now_mode_flyout_container';
-import { SyntheticsAppProps, SyntheticsSettingsContextProvider } from './contexts';
+import type { SyntheticsAppProps } from './contexts';
+import { SyntheticsSettingsContextProvider } from './contexts';
 import { PageRouter } from './routes';
 import { setBasePath, store } from './state';
 
@@ -59,21 +61,23 @@ const Application = (props: SyntheticsAppProps) => {
           },
         }}
       >
-        <SyntheticsSharedContext {...props}>
-          <Router history={appMountParameters.history}>
-            <SyntheticsSettingsContextProvider {...props}>
-              <PerformanceContextProvider>
-                <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
-                  <InspectorContextProvider>
-                    <PageRouter />
-                    <ActionMenu appMountParameters={appMountParameters} />
-                    <TestNowModeFlyoutContainer />
-                  </InspectorContextProvider>
-                </div>
-              </PerformanceContextProvider>
-            </SyntheticsSettingsContextProvider>
-          </Router>
-        </SyntheticsSharedContext>
+        <KibanaErrorBoundaryProvider analytics={coreStart.analytics}>
+          <SyntheticsSharedContext {...props}>
+            <Router history={appMountParameters.history}>
+              <SyntheticsSettingsContextProvider {...props}>
+                <PerformanceContextProvider>
+                  <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
+                    <InspectorContextProvider>
+                      <PageRouter />
+                      <ActionMenu appMountParameters={appMountParameters} />
+                      <TestNowModeFlyoutContainer />
+                    </InspectorContextProvider>
+                  </div>
+                </PerformanceContextProvider>
+              </SyntheticsSettingsContextProvider>
+            </Router>
+          </SyntheticsSharedContext>
+        </KibanaErrorBoundaryProvider>
       </KibanaThemeProvider>
     </KibanaRenderContextProvider>
   );

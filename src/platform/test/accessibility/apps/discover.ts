@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common, discover, share, timePicker, unifiedFieldList } = getPageObjects([
@@ -70,6 +70,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test on share panel', async () => {
+      // The tabs bar menu button tooltip can get in the way of the share button
+      // after closing the inspector flyout, so we move the mouse to hide it first
+      await testSubjects.moveMouseTo('shareTopNavButton');
       await share.clickShareTopNavButton();
       await a11y.testAppSnapshot();
       await share.closeShareModal();
@@ -189,7 +192,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('a11y test for data grid in full screen', async () => {
       await testSubjects.click('dataGridFullScreenButton');
       await a11y.testAppSnapshot();
-      await browser.pressKeys(browser.keys.ESCAPE);
+      await testSubjects.click('dataGridFullScreenButton');
     });
 
     it('a11y test for field statistics data grid view', async () => {

@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Cluster } from '../../../../../../../common/lib';
-import { isAddressValid } from './validate_address';
+import type { Cluster } from '../../../../../../../common/lib';
+import { isAddressValid, extractHostAndPort } from '../../../../../../../common/lib';
 
 export const i18nTexts = {
   urlEmpty: (
@@ -39,9 +39,9 @@ export const isCloudAdvancedOptionsEnabled = (cluster?: Cluster): boolean => {
   if (!proxyAddress) {
     return false;
   }
-  const proxyAddressWithoutPort = (proxyAddress ?? '').split(':')[0];
+  const { host } = extractHostAndPort(proxyAddress) ?? {};
   return (
-    proxyAddressWithoutPort !== serverName ||
+    host !== serverName ||
     (proxySocketConnections != null && proxySocketConnections !== DEFAULT_SOCKET_CONNECTIONS)
   );
 };
@@ -58,8 +58,8 @@ export const convertCloudRemoteAddressToProxyConnection = (url: string) => {
   if (!url || !isAddressValid(url)) {
     return EMPTY_PROXY_VALUES;
   }
-  const host = url.split(':')[0];
-  const port = url.split(':')[1];
+
+  const { host, port } = extractHostAndPort(url) ?? {};
   const proxyAddress = port ? url : `${host}:${CLOUD_DEFAULT_PROXY_PORT}`;
   return { proxyAddress, serverName: host };
 };

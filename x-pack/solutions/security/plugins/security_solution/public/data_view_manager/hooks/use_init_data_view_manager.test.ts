@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 import { sharedDataViewManagerSlice } from '../redux/slices';
 
 jest.mock('../../common/hooks/use_experimental_features', () => ({
-  useEnableExperimental: () => ({ newDataViewPickerEnabled: true }),
+  useIsExperimentalFeatureEnabled: () => true,
 }));
 
 jest.mock('react-redux', () => {

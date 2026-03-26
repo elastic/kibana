@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { hasEditCapabilities } from '@kbn/presentation-publishing';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
-import { CustomizePanelActionApi } from './customize_panel_action';
+import type { CustomizePanelActionApi } from './customize_panel_action';
 import { executeEditPanelAction } from '../edit_panel_action/execute_edit_action';
 
 export const filterDetailsActionStrings = {

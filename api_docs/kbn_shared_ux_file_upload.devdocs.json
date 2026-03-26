@@ -22,6 +22,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/file/file_upload/impl/src/index.tsx",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,6 +44,8 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/file/file_upload/impl/src/index.tsx",
+            "lineNumber": 27,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -70,6 +74,8 @@
           "<Meta>"
         ],
         "path": "src/platform/packages/shared/shared-ux/file/file_upload/impl/src/upload_state.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -81,6 +87,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/shared-ux/file/file_upload/impl/src/upload_state.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -92,6 +100,8 @@
             "label": "kind",
             "description": [],
             "path": "src/platform/packages/shared/shared-ux/file/file_upload/impl/src/upload_state.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -113,6 +123,8 @@
               "<Meta>"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/file_upload/impl/src/upload_state.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -134,6 +146,8 @@
           "<string> & { lazyLoadFallback?: React.ReactNode; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/file/file_upload/impl/src/index.tsx",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

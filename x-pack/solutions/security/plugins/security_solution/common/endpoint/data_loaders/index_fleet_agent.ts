@@ -205,6 +205,7 @@ export const deleteIndexedFleetAgents = async (
       .deleteByQuery({
         index: `${indexedData.fleetAgentsIndex}-*`,
         wait_for_completion: true,
+        conflicts: 'proceed',
         query: {
           bool: {
             filter: [

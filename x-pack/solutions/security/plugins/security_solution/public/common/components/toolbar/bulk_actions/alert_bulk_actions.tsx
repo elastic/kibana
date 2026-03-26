@@ -174,7 +174,7 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
       [dispatch, id]
     );
 
-    const bulkActionItems = useBulkActionItems({
+    const { items: bulkActionItems, panels: bulkActionsPanels } = useBulkActionItems({
       eventIds: Object.keys(selectedEventIds),
       currentStatus: filterStatus,
       ...(showClearSelection ? { query } : {}),
@@ -195,6 +195,7 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
         onSelectAll={onSelectAll}
         onClearSelection={onClearSelection}
         bulkActionItems={bulkActionItems}
+        bulkActionPanels={bulkActionsPanels}
       />
     );
   }

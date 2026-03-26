@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import type { Conversation } from '@kbn/observability-ai-assistant-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';

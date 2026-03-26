@@ -45,6 +45,7 @@ const MyTableComponent: FunctionComponent<Props> = ({ items }) => {
       columns={columns}
       pagination={pagination}
       sorting={sorting}
+      onTableChange={onTableChange}
     />
   );
 };

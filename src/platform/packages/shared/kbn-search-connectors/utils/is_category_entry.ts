@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ConnectorConfigProperties, ConnectorConfigCategoryProperties } from '../types/connectors';
+import type {
+  ConnectorConfigProperties,
+  ConnectorConfigCategoryProperties,
+} from '../types/connectors';
 
 export function isCategoryEntry(
   input:

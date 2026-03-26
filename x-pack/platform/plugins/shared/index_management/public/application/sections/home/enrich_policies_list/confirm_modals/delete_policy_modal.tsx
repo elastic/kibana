@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState, useRef } from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { deleteEnrichPolicy } from '../../../../services/api';
@@ -19,6 +19,7 @@ export const DeletePolicyModal = ({
   policyToDelete: string;
   callback: (data?: { hasDeletedPolicy: boolean }) => void;
 }) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
   const mounted = useRef(false);
   const {
     services: { notificationService },
@@ -75,6 +76,8 @@ export const DeletePolicyModal = ({
 
   return (
     <EuiConfirmModal
+      aria-labelledby={confirmModalTitleId}
+      titleProps={{ id: confirmModalTitleId }}
       buttonColor="danger"
       data-test-subj="deletePolicyModal"
       title={i18n.translate('xpack.idxMgmt.enrichPolicies.deleteModal.confirmTitle', {

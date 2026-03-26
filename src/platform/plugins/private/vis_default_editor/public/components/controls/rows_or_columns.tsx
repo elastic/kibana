@@ -10,7 +10,7 @@
 import React, { useCallback } from 'react';
 import { EuiButtonGroup, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AggControlProps } from './agg_control_props';
+import type { AggControlProps } from './agg_control_props';
 
 const PARAMS = {
   NAME: 'row',

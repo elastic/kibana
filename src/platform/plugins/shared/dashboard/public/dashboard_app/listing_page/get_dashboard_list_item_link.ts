@@ -8,9 +8,10 @@
  */
 
 import type { QueryState } from '@kbn/data-plugin/public';
-import { IKbnUrlStateStorage, setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 
-import { DASHBOARD_APP_ID } from '../../../common/constants';
+import { DASHBOARD_APP_ID } from '../../../common/page_bundle_constants';
 import { coreServices } from '../../services/kibana_services';
 import { GLOBAL_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../utils/urls';
 

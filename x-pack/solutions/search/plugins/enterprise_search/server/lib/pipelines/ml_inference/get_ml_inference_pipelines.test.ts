@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { MlTrainedModels } from '@kbn/ml-plugin/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import { getMlInferencePipelines } from './get_ml_inference_pipelines';
 
@@ -103,24 +102,12 @@ describe('getMlInferencePipelines', () => {
       mockTrainedModelsProvider as unknown as MlTrainedModels
     );
 
-    expect(
-      (actualPipelines.pipeline1.processors as IngestProcessorContainer[])[1].inference?.model_id
-    ).toEqual('model1');
-    expect(
-      (actualPipelines.pipeline2.processors as IngestProcessorContainer[])[1].inference?.model_id
-    ).toEqual('model2');
-    expect(
-      (actualPipelines.pipeline3.processors as IngestProcessorContainer[])[1].inference?.model_id
-    ).toEqual(''); // Redacted model ID
-    expect(
-      (actualPipelines.pipeline4.processors as IngestProcessorContainer[])[1].inference?.model_id
-    ).toEqual('');
-    expect(
-      (actualPipelines.pipeline4.processors as IngestProcessorContainer[])[2].inference?.model_id
-    ).toEqual('model2');
-    expect(
-      (actualPipelines.pipeline4.processors as IngestProcessorContainer[])[3].inference?.model_id
-    ).toEqual('');
+    expect(actualPipelines.pipeline1.processors?.[1]?.inference?.model_id).toEqual('model1');
+    expect(actualPipelines.pipeline2.processors?.[1]?.inference?.model_id).toEqual('model2');
+    expect(actualPipelines.pipeline3.processors?.[1]?.inference?.model_id).toEqual(''); // Redacted model ID
+    expect(actualPipelines.pipeline4.processors?.[1]?.inference?.model_id).toEqual('');
+    expect(actualPipelines.pipeline4.processors?.[2]?.inference?.model_id).toEqual('model2');
+    expect(actualPipelines.pipeline4.processors?.[3]?.inference?.model_id).toEqual('');
     expect(mockClient.ingest.getPipeline).toHaveBeenCalledWith({ id: 'ml-inference-*' });
     expect(mockTrainedModelsProvider.getTrainedModels).toHaveBeenCalledWith({});
   });

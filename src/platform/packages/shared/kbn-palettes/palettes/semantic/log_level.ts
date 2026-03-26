@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { $Keys } from 'utility-types';
+import type { $Keys } from 'utility-types';
 import { KbnPalette } from '../../constants';
 
 // TODO: update colors to vis colors

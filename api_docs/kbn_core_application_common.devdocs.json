@@ -18,25 +18,7 @@
   },
   "common": {
     "classes": [],
-    "functions": [
-      {
-        "parentPluginId": "@kbn/core-application-common",
-        "id": "def-common.GlobalAppStyle",
-        "type": "Function",
-        "tags": [],
-        "label": "GlobalAppStyle",
-        "description": [],
-        "signature": [
-          "() => React.JSX.Element"
-        ],
-        "path": "src/core/packages/application/common/src/global_app_style.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-application-common",
@@ -48,6 +30,8 @@
           "\nA category definition for nav links to know where to sort them in the left hand nav"
         ],
         "path": "src/core/packages/application/common/src/app_category.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -61,6 +45,8 @@
               "\nUnique identifier for the categories"
             ],
             "path": "src/core/packages/application/common/src/app_category.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -74,6 +60,8 @@
               "\nLabel used for category name.\nAlso used as aria-label if one isn't set."
             ],
             "path": "src/core/packages/application/common/src/app_category.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -90,6 +78,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/application/common/src/app_category.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -106,6 +96,8 @@
               "number | undefined"
             ],
             "path": "src/core/packages/application/common/src/app_category.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -122,6 +114,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/application/common/src/app_category.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -144,6 +138,8 @@
           "\"kbnAppWrapper\""
         ],
         "path": "src/core/packages/application/common/src/app_wrapper_class.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -163,6 +159,8 @@
           "; }"
         ],
         "path": "src/core/packages/application/common/src/default_app_categories.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -7,9 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { serializeAutoFollowPattern } from '../../../../common/services/auto_follow_pattern_serialization';
-import { AutoFollowPattern } from '../../../../common/types';
+import type { AutoFollowPattern } from '../../../../common/types';
 import { addBasePath } from '../../../services';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 /**
  * Update an auto-follow pattern
@@ -20,13 +20,13 @@ export const registerUpdateRoute = ({
   lib: { handleEsError },
 }: RouteDependencies) => {
   const paramsSchema = schema.object({
-    id: schema.string(),
+    id: schema.string({ maxLength: 1000 }),
   });
 
   const bodySchema = schema.object({
     active: schema.boolean(),
     remoteCluster: schema.string(),
-    leaderIndexPatterns: schema.arrayOf(schema.string()),
+    leaderIndexPatterns: schema.arrayOf(schema.string(), { maxSize: 1000 }),
     followIndexPattern: schema.string(),
   });
 

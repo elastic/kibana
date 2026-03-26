@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIconProps } from '@elastic/eui';
+import type { EuiIconProps } from '@elastic/eui';
 import React from 'react';
 import { colors } from './common_styles';
 import { ChartIconWrapper } from './icon_simple_wrapper';

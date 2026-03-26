@@ -57,6 +57,12 @@ export const NEXT_URL_QUERY_STRING_PARAMETER = 'next';
 export const SESSION_ERROR_REASON_HEADER = 'kbn-session-error-reason';
 
 /**
+ * The HTTP header that's supposed to carry the client ES authentication information when needed (e.g.,
+ * UIAM shared secret).
+ */
+export const ES_CLIENT_AUTHENTICATION_HEADER = 'x-client-authentication';
+
+/**
  * Matches valid usernames and role names.
  *
  * - Must contain only letters, numbers, spaces, punctuation and printable symbols.

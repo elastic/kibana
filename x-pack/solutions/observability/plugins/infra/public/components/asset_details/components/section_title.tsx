@@ -43,7 +43,7 @@ export const TitleWithTooltip = ({
         <SectionTitle title={title} data-test-subj={dataTestSubject} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <Popover icon="iInCircle" data-test-subj={tooltipTestSubj} aria-label={ariaLabel}>
+        <Popover icon="info" data-test-subj={tooltipTestSubj} aria-label={ariaLabel}>
           {tooltipContent}
         </Popover>
       </EuiFlexItem>

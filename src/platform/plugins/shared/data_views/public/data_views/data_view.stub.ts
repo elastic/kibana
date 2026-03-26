@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup } from '@kbn/core/public';
-import { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
+import type { CoreSetup } from '@kbn/core/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { getFieldFormatsRegistry } from '@kbn/field-formats-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import * as commonStubs from '../../common/stubs';
-import { DataView, DataViewSpec } from '../../common';
+import type { DataView, DataViewSpec } from '../../common';
 /**
  * Create a custom stub index pattern. Use it in your unit tests where an {@link DataView} expected.
  * @param spec - Serialized index pattern object

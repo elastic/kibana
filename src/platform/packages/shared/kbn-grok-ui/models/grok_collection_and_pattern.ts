@@ -13,12 +13,13 @@ import { toRegExp, toRegExpDetails } from 'oniguruma-to-es';
 import { monaco } from '@kbn/monaco';
 import { v4 as uuidv4 } from 'uuid';
 import { unflattenObject } from '@kbn/object-utils';
-import { euiPaletteColorBlindBehindText } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { escape } from 'lodash';
 import { Subject } from 'rxjs';
 import { PATTERN_MAP } from '../constants/pattern_map';
-import { SupportedTypeConversion, FieldDefinition } from './types';
+import type { FieldDefinition } from './types';
+import { SupportedTypeConversion } from './types';
 
 // Grok patterns use this official naming: %{SYNTAX:SEMANTIC:TYPE}
 
@@ -42,6 +43,17 @@ const CUSTOM_NAMED_CAPTURE_PATTERN_PREFIX = i18n.translate(
   { defaultMessage: 'Custom named capture ' }
 );
 
+const EUI_COLOR_PALETTE_VALUES = [
+  'Primary',
+  'Accent',
+  'AccentSecondary',
+  'Neutral',
+  'Success',
+  'Warning',
+  'Risk',
+  'Danger',
+];
+
 export class GrokCollection {
   // Core patterns. Will be used for the lifetime of this collection.
   private patterns: Map<string, GrokPattern> = new Map();
@@ -50,8 +62,6 @@ export class GrokCollection {
   public readonly customPatternsChanged$ = new Subject<void>();
   // Combination of core and custom patterns.
   private patternKeys: string[] = [];
-  // NOTE: This doesn't subscribe to EUI_VIS_COLOR_STORE changes at the moment, whilst UI / UX is being finalised.
-  private colourPalette = euiPaletteColorBlindBehindText({ rotations: 3 });
   private colourIndex = 0;
 
   // NOTE: Model as async for now with future intent to use the /_ingest/processor/grok endpoint
@@ -150,19 +160,22 @@ export class GrokCollection {
 
   public getColour = () => {
     // Loop back to 0 once at the end of the rotations
-    this.colourIndex = this.colourIndex + 1 <= this.colourPalette.length ? this.colourIndex + 1 : 0;
-    return this.colourPalette[this.colourIndex];
+    this.colourIndex =
+      this.colourIndex + 1 < EUI_COLOR_PALETTE_VALUES.length ? this.colourIndex + 1 : 0;
+    return EUI_COLOR_PALETTE_VALUES[this.colourIndex];
   };
 
   // Only relevant for Monaco users.
   // Monaco doesn't support dynamic inline styles, so we need to generate static styles for the colour palette.
-  public getColourPaletteStyles = () => {
-    const styles: Record<string, { backgroundColor: string; cursor: string }> = {};
-    for (let $i = 0; $i < this.colourPalette.length; $i++) {
-      const colour = this.colourPalette[$i];
-      const colourWithoutHash = colour.substring(1);
-      styles[`.grok-pattern-match-${colourWithoutHash}`] = {
-        backgroundColor: colour,
+  public getColourPaletteStyles = (euiTheme: EuiThemeComputed) => {
+    const styles: Record<string, { backgroundColor: string; color: string; cursor: string }> = {};
+    for (let $i = 0; $i < EUI_COLOR_PALETTE_VALUES.length; $i++) {
+      const colour = EUI_COLOR_PALETTE_VALUES[$i];
+      styles[`.grok-pattern-match-${colour}`] = {
+        backgroundColor: euiTheme.colors[
+          `backgroundLight${colour}` as keyof EuiThemeComputed['colors']
+        ] as string,
+        color: euiTheme.colors[`text${colour}` as keyof EuiThemeComputed['colors']] as string,
         cursor: 'pointer',
       };
     }

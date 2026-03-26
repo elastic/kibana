@@ -10,9 +10,17 @@ import { i18n } from '@kbn/i18n';
 import type { FunctionComponent } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { URL_DEMO_ENV } from '@kbn/home-sample-data-tab/src/constants';
-import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ChromeStart, DocLinksStart } from '@kbn/core/public';
+import type { ChromeStart, DocLinksStart } from '@kbn/core/public';
 import supportIconUrl from './support_icon.svg';
 import demoIconUrl from './demo_icon.svg';
 import docsIconUrl from './docs_icon.svg';
@@ -112,39 +120,44 @@ export const ExternalResourceLinks: FunctionComponent = () => {
     },
   ];
 
+  const observabilityOnboardingSectionPrefix = useGeneratedHtmlId({
+    suffix: 'observabilityOnboardingSection',
+  });
+
   return (
-    <>
-      <EuiSpacer size="l" />
-      <EuiFlexGroup gutterSize="xl" justifyContent="center" alignItems="center">
-        {sections.map((section, index) => (
-          <EuiFlexItem key={index} grow={false}>
-            <EuiAvatar size="l" name="" imageUrl={section.iconUrl} color="subdued" />
-            <EuiSpacer size="m" />
-            <EuiText size="s">
-              <strong>{section.title}</strong>
-            </EuiText>
-            <EuiSpacer size="s" />
-            <EuiText size="xs">
-              <p>{section.description}</p>
-            </EuiText>
-            <EuiSpacer size="s" />
-            <EuiText size="xs">
-              <p>
-                <EuiLink
-                  data-test-subj={section.testSubject}
-                  aria-label={section.linkARIALabel}
-                  href={section.link}
-                  target="_blank"
-                  external
-                >
-                  {section.linkLabel}
-                </EuiLink>
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-      <EuiSpacer size="xl" />
-    </>
+    <EuiFlexGroup gutterSize="xl" justifyContent="center" alignItems="center">
+      {sections.map((section, index) => (
+        <EuiFlexItem
+          key={index}
+          grow={false}
+          role="group"
+          aria-labelledby={`${observabilityOnboardingSectionPrefix}_${index}`}
+        >
+          <EuiIcon size="xxl" type={section.iconUrl} color="subdued" aria-hidden={true} />
+          <EuiSpacer size="m" />
+          <EuiText size="s">
+            <strong id={`${observabilityOnboardingSectionPrefix}_${index}`}>{section.title}</strong>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiText size="xs">
+            <p>{section.description}</p>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiText size="xs">
+            <p>
+              <EuiLink
+                data-test-subj={section.testSubject}
+                aria-label={section.linkARIALabel}
+                href={section.link}
+                target="_blank"
+                external
+              >
+                {section.linkLabel}
+              </EuiLink>
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
   );
 };

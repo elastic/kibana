@@ -9,6 +9,7 @@
 
 import type { Location } from 'history';
 import type { ScopedHistory } from '@kbn/core-application-browser';
+import { lazyObject } from '@kbn/lazy-object';
 
 export type ScopedHistoryMock = jest.Mocked<ScopedHistory>;
 
@@ -19,7 +20,7 @@ const createMock = ({
   key,
   state,
 }: Partial<Location> = {}) => {
-  const mock: ScopedHistoryMock = {
+  const mock: ScopedHistoryMock = lazyObject({
     block: jest.fn(),
     createHref: jest.fn(),
     createSubHistory: jest.fn(),
@@ -38,7 +39,7 @@ const createMock = ({
       hash,
       key,
     },
-  };
+  });
 
   return mock;
 };

@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GridLayoutStateManager } from '../../types';
+import { getScrollDimensions, isAtBottomOfPage } from '@kbn/core-chrome-layout-utils';
+import type { GridLayoutStateManager } from '../../types';
 import { updateClientY } from '../keyboard_utils';
-import { KeyboardCode, UserKeyboardEvent } from '../sensors/keyboard/types';
+import type { UserKeyboardEvent } from '../sensors/keyboard/types';
+import { KeyboardCode } from '../sensors/keyboard/types';
 
 export const getNextKeyboardPosition = (
   ev: UserKeyboardEvent,
@@ -27,21 +29,29 @@ export const getNextKeyboardPosition = (
   const headerRef = headerRefs[sectionId];
   const headerRefHeight = (headerRef?.getBoundingClientRect().height ?? 48) * 0.5;
   const stepY = headerRefHeight;
+  const scrollContainer = gridLayoutStateManager.scrollContainer$.getValue();
 
   switch (ev.code) {
     case KeyboardCode.Down: {
-      const bottomOfPageReached = window.innerHeight + window.scrollY >= document.body.scrollHeight;
+      const bottomOfPageReached = isAtBottomOfPage(scrollContainer);
 
       // check if next key will cross the bottom edge
       // if we're at the bottom of the page, the handle can go down even more so we can reorder with the last row
       const bottomMaxPosition = bottomOfPageReached
         ? handlePosition.clientY + stepY
         : handlePosition.clientY + 2 * stepY;
-      const isCloseToBottom = bottomMaxPosition > window.innerHeight;
+      const { clientHeight } = getScrollDimensions(scrollContainer);
+      const isCloseToBottom = bottomMaxPosition > clientHeight;
 
       return {
         ...handlePosition,
-        clientY: updateClientY(handlePosition.clientY, stepY, isCloseToBottom),
+        clientY: updateClientY(
+          handlePosition.clientY,
+          stepY,
+          isCloseToBottom,
+          'drag',
+          scrollContainer
+        ),
       };
     }
     case KeyboardCode.Up: {
@@ -50,7 +60,13 @@ export const getNextKeyboardPosition = (
 
       return {
         ...handlePosition,
-        clientY: updateClientY(handlePosition.clientY, -stepY, isCloseToTop),
+        clientY: updateClientY(
+          handlePosition.clientY,
+          -stepY,
+          isCloseToTop,
+          'drag',
+          scrollContainer
+        ),
       };
     }
     default:

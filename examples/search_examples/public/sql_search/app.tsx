@@ -22,14 +22,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { DataPublicPluginStart, isRunningResponse } from '@kbn/data-plugin/public';
-import {
-  SQL_SEARCH_STRATEGY,
-  SqlSearchStrategyRequest,
-  SqlSearchStrategyResponse,
-} from '@kbn/data-plugin/common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { isRunningResponse } from '@kbn/data-plugin/public';
+import type { SqlSearchStrategyRequest, SqlSearchStrategyResponse } from '@kbn/data-plugin/common';
+import { SQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 
 interface SearchExamplesAppDeps {
   notifications: CoreStart['notifications'];

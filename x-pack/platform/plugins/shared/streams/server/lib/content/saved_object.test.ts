@@ -6,7 +6,10 @@
  */
 
 import expect from 'expect';
-import { ContentPackSavedObject, ContentPackSavedObjectLinks } from '@kbn/content-packs-schema';
+import type {
+  ContentPackSavedObject,
+  ContentPackSavedObjectLinks,
+} from '@kbn/content-packs-schema';
 import { savedObjectLinks } from './saved_object';
 
 describe('Saved object helpers', () => {

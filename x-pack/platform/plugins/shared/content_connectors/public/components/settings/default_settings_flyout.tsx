@@ -23,6 +23,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -30,7 +31,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SettingsLogic } from './settings_logic';
 import { SettingsPanel } from './settings_panel';
-import { docLinks } from '../shared/doc_links';
 
 export interface DefaultSettingsFlyoutProps {
   closeFlyout: () => void;
@@ -49,8 +49,10 @@ const Callout = (
   </EuiCallOut>
 );
 export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ closeFlyout }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const {
-    services: { http },
+    services: { http, docLinks },
   } = useKibana();
   const { makeRequest, setPipeline } = useActions(SettingsLogic({ http }));
   const { defaultPipeline, hasNoChanges, isLoading, pipelineState } = useValues(
@@ -64,10 +66,10 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
   // Reference the first focusable element in the flyout for accessibility on click or Enter key action either Reset or Save button
   const firstFocusInFlyoutRef = useRef<HTMLAnchorElement>(null);
   return (
-    <EuiFlyout onClose={closeFlyout} size="s" paddingSize="l">
+    <EuiFlyout onClose={closeFlyout} size="s" paddingSize="l" aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h4>
+          <h4 id={modalTitleId}>
             {i18n.translate(
               'xpack.contentConnectors.defaultSettingsFlyout.h2.defaultSettingsLabel',
               {
@@ -88,7 +90,7 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
                   <EuiLink
                     data-test-subj="entSearchContent-defaultSettingsFlyout-ingestPipelinesLink"
                     data-telemetry-id="entSearchContent-defaultSettingsFlyout-ingestPipelinesLink"
-                    href={docLinks.ingestPipelines}
+                    href={docLinks?.links.ingest.pipelines}
                     target="_blank"
                     ref={firstFocusInFlyoutRef}
                   >
@@ -178,7 +180,7 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
             <EuiLink
               data-test-subj="entSearchContent-defaultSettingsFlyout-mlInferenceLink"
               data-telemetry-id="entSearchContent-defaultSettingsFlyout-mlInferenceLink"
-              href={docLinks.mlDocumentEnrichment}
+              href={docLinks?.links.enterpriseSearch.mlDocumentEnrichment}
               target="_blank"
             >
               {i18n.translate('xpack.contentConnectors.content.settings.mlInference.link', {

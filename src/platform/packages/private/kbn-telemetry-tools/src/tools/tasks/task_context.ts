@@ -7,24 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TelemetryRC } from '../config';
+import type { TelemetrySchemaObject } from '../../schema_ftr_validations/schema_to_config_schema';
+import type { TelemetryRC } from '../config';
 import { ErrorReporter } from './error_reporter';
-import { ParsedUsageCollection } from '../ts_parser';
+import type { ParsedUsageCollection } from '../ts_parser';
 export interface TelemetryRoot {
   config: TelemetryRC;
+  configChanged?: boolean;
   parsedCollections?: ParsedUsageCollection[];
-  mapping?: any;
+  mapping?: TelemetrySchemaObject;
+  upstreamMapping?: TelemetrySchemaObject;
   esMappingDiffs?: string[];
 }
 
 export interface TaskContext {
   reporter: ErrorReporter;
   roots: TelemetryRoot[];
+  baselineSha?: string;
 }
 
-export function createTaskContext(): TaskContext {
+export function createTaskContext(baselineSha?: string): TaskContext {
   const reporter = new ErrorReporter();
   return {
+    baselineSha,
     roots: [],
     reporter,
   };

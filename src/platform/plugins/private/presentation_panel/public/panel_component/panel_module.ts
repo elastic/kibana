@@ -11,6 +11,7 @@ export { PresentationPanelInternal } from './presentation_panel_internal';
 export { PresentationPanelErrorInternal } from './presentation_panel_error_internal';
 export { RemovePanelAction } from '../panel_actions/remove_panel_action/remove_panel_action';
 export { CustomTimeRangeBadge } from '../panel_actions/customize_panel_action';
+export { CpsUsageOverridesBadge } from '../panel_actions/customize_panel_action';
 export { CustomizePanelAction } from '../panel_actions/customize_panel_action';
 export { EditPanelAction } from '../panel_actions/edit_panel_action/edit_panel_action';
 export { ShowConfigPanelAction } from '../panel_actions/show_config_panel_action/show_config_panel_action';

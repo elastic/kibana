@@ -7,17 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren } from 'react';
-import { KibanaReactContext, KibanaReactContextValue, KibanaServices } from './types';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
+import type { KibanaReactContext, KibanaReactContextValue, KibanaServices } from './types';
 import { createReactOverlays } from '../overlays';
-import { createNotifications } from '../notifications';
 
 const { useMemo, useContext, createElement, createContext } = React;
 
 const defaultContextValue = {
   services: {},
   overlays: createReactOverlays({}),
-  notifications: createNotifications({}),
 };
 
 export const context = createContext<KibanaReactContextValue<KibanaServices>>(defaultContextValue);
@@ -43,7 +42,6 @@ export const createKibanaReactContext = <Services extends KibanaServices>(
   const value: KibanaReactContextValue<Services> = {
     services,
     overlays: createReactOverlays(services),
-    notifications: createNotifications(services),
   };
 
   const Provider: FC<PropsWithChildren<{ services?: Services }>> = ({

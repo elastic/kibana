@@ -10,16 +10,11 @@
 import React, { useEffect, useContext, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiDataGridCellValueElementProps,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
-import {
+import type {
   DataTableColumnsMeta,
   DataTableRecord,
   ShouldShowFieldInTableHandler,
@@ -74,14 +69,11 @@ export const getRenderCellValueFn = ({
       columnMeta: columnsMeta?.[columnId],
     });
     const ctx = useContext(UnifiedDataTableContext);
-    const { euiTheme } = useEuiTheme();
-    const { backgroundBaseWarning: anchorColor } = euiTheme.colors;
 
     useEffect(() => {
       if (row?.isAnchor) {
         setCellProps({
           className: 'unifiedDataTable__cell--highlight',
-          css: { backgroundColor: anchorColor },
         });
       } else if (ctx.expanded && row && ctx.expanded.id === row.id) {
         setCellProps({
@@ -90,7 +82,8 @@ export const getRenderCellValueFn = ({
       } else {
         setCellProps({ style: undefined });
       }
-    }, [ctx, row, setCellProps, anchorColor]);
+      // re-apply styles if `columnId` changes, e.g. when reordering columns in the grid
+    }, [ctx, row, setCellProps, columnId]);
 
     if (typeof row === 'undefined') {
       return <span className={CELL_CLASS}>-</span>;
@@ -114,6 +107,7 @@ export const getRenderCellValueFn = ({
             fieldFormats={fieldFormats}
             closePopover={closePopover}
             isCompressed={isCompressed}
+            columnsMeta={columnsMeta}
           />
         </span>
       );
@@ -136,10 +130,15 @@ export const getRenderCellValueFn = ({
         useTopLevelObjectColumns,
         fieldFormats,
         closePopover,
+        isPlainRecord,
       });
     }
 
-    if (field?.type === '_source' || useTopLevelObjectColumns) {
+    if (
+      field?.type === '_source' ||
+      useTopLevelObjectColumns ||
+      (isPlainRecord && columnId === '_source')
+    ) {
       return (
         <SourceDocument
           useTopLevelObjectColumns={useTopLevelObjectColumns}
@@ -151,6 +150,7 @@ export const getRenderCellValueFn = ({
           maxEntries={maxEntries}
           isPlainRecord={isPlainRecord}
           isCompressed={isCompressed}
+          columnsMeta={columnsMeta}
         />
       );
     }
@@ -187,6 +187,7 @@ function renderPopoverContent({
   useTopLevelObjectColumns,
   fieldFormats,
   closePopover,
+  isPlainRecord,
 }: {
   row: DataTableRecord;
   field: DataViewField | undefined;
@@ -195,6 +196,7 @@ function renderPopoverContent({
   useTopLevelObjectColumns: boolean;
   fieldFormats: FieldFormatsStart;
   closePopover: () => void;
+  isPlainRecord?: boolean;
 }) {
   const closeButton = (
     <EuiButtonIcon
@@ -208,7 +210,11 @@ function renderPopoverContent({
       onClick={closePopover}
     />
   );
-  if (useTopLevelObjectColumns || field?.type === '_source') {
+  if (
+    useTopLevelObjectColumns ||
+    field?.type === '_source' ||
+    (isPlainRecord && columnId === '_source')
+  ) {
     return (
       <SourcePopoverContent
         row={row}

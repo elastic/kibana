@@ -36,14 +36,8 @@ export const UnifiedFieldListItemStats: React.FC<UnifiedFieldListItemStatsProps>
       data: services.data,
       timeRangeUpdatesType: stateService.creationOptions.timeRangeUpdatesType,
     });
-    // prioritize an aggregatable multi field if available or take the parent field
-    const fieldForStats = useMemo(
-      () =>
-        (multiFields?.length &&
-          multiFields.find((multiField) => multiField.field.aggregatable)?.field) ||
-        field,
-      [field, multiFields]
-    );
+
+    const fieldForStats = useMemo(() => getFieldForStats(field, multiFields), [field, multiFields]);
 
     const statsServices: FieldStatsServices = useMemo(
       () => ({
@@ -80,3 +74,18 @@ export const UnifiedFieldListItemStats: React.FC<UnifiedFieldListItemStatsProps>
     );
   }
 );
+
+export const getFieldForStats = (
+  field: DataViewField,
+  multiFields: Array<{ field: DataViewField; isSelected: boolean }> | undefined
+): DataViewField => {
+  if (field.aggregatable) {
+    return field;
+  }
+  // prioritize an aggregatable multi field if available or take the parent field
+  return (
+    (multiFields?.length &&
+      multiFields.find((multiField) => multiField.field.aggregatable)?.field) ||
+    field
+  );
+};

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiFilterButton, EuiButtonColor } from '@elastic/eui';
+import type { EuiButtonColor } from '@elastic/eui';
+import { EuiFilterButton } from '@elastic/eui';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectStatusFilter, setStatusFilter } from '../../../state';

@@ -7,7 +7,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
+import type { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
 import { EuiFilterButton, EuiPopover, EuiFilterGroup, EuiFilterSelectItem } from '@elastic/eui';
 import { getIsExperimentalFeatureEnabled } from '../../../../../common/get_experimental_features';
 import { EventLogListStatus } from './event_log_list_status';
@@ -50,7 +50,7 @@ export const EventLogListStatusFilter = (props: EventLogListStatusFilterProps) =
         button={
           <EuiFilterButton
             data-test-subj="eventLogStatusFilterButton"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             isSelected={isPopoverOpen}
             hasActiveFilters={selectedOptions.length > 0}
             numActiveFilters={selectedOptions.length}

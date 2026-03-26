@@ -164,7 +164,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             <EuiPopover
               button={
                 <EuiFilterButton
-                  iconType="arrowDown"
+                  iconType="chevronSingleDown"
                   data-test-subj="platformSelectorExtended"
                   onClick={() => setShowExtendedPlatforms(!showExtendedPlatforms)}
                   isSelected={showExtendedPlatforms}
@@ -198,7 +198,10 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
                   checked: platform === option.id ? 'on' : undefined,
                   'data-test-subj': option['data-test-subj'],
                 }))}
-                onChange={(_allOptions, _event, option) => setPlatform(option.key)}
+                onChange={(_allOptions, _event, option) => {
+                  setPlatform(option.key);
+                  setShowExtendedPlatforms(false);
+                }}
                 css={{ width: 150 }}
                 listProps={{ paddingSize: 'none', onFocusBadge: false }}
               >
@@ -263,6 +266,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             )}
 
             <EuiCodeBlock
+              data-test-subj="enrollmentInstructionsCodeBlock"
               onClick={onTextAreaClick}
               fontSize="m"
               isCopyable={!fullCopyButton}
@@ -281,7 +285,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
                 {(copy) => (
                   <EuiButton
                     color="primary"
-                    iconType="copyClipboard"
+                    iconType="copy"
                     size="m"
                     onClick={() => onCopyButtonClick(copy)}
                   >

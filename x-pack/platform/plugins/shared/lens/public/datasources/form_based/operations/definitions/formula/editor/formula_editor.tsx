@@ -12,6 +12,7 @@ import {
   LanguageDocumentationPopoverContent,
 } from '@kbn/language-documentation';
 import { css } from '@emotion/react';
+import { css as cssClassName } from '@emotion/css';
 import {
   EuiButtonIcon,
   EuiButtonEmpty,
@@ -29,14 +30,17 @@ import {
 } from '@elastic/eui';
 import useUnmount from 'react-use/lib/useUnmount';
 import { monaco } from '@kbn/monaco';
-import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
+import type { CodeEditorProps } from '@kbn/code-editor';
+import { CodeEditor } from '@kbn/code-editor';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import type { FormulaIndexPatternColumn } from '@kbn/lens-common';
 import { useDebounceWithOptions } from '../../../../../../shared_components';
-import { ParamEditorProps } from '../..';
+import type { ParamEditorProps } from '../..';
 import { getManagedColumnsFrom } from '../../../layer_helpers';
-import { ErrorWrapper, runASTValidation, tryToParse } from '../validation';
+import type { ErrorWrapper } from '../validation';
+import { runASTValidation, tryToParse } from '../validation';
+import type { LensMathSuggestions } from './math_completion';
 import {
-  LensMathSuggestions,
   SUGGESTION_TYPE,
   suggest,
   getSuggestion,
@@ -50,7 +54,6 @@ import {
 } from './math_completion';
 import { LANGUAGE_ID } from './math_tokenization';
 
-import { FormulaIndexPatternColumn } from '../formula';
 import { insertOrReplaceFormulaColumn } from '../parse';
 import { filterByVisibleOperation } from '../util';
 import { getColumnTimeShiftWarnings, getDateHistogramInterval } from '../../../../time_shift_utils';
@@ -100,7 +103,7 @@ export function FormulaEditor({
   columnId,
   indexPattern,
   operationDefinitionMap,
-  unifiedSearch,
+  kql,
   dataViews,
   toggleFullscreen,
   isFullscreen,
@@ -156,7 +159,11 @@ export function FormulaEditor({
     const node1 = (overflowDiv1.current = document.createElement('div'));
     node1.setAttribute('data-test-subj', 'lnsFormulaWidget');
     // Monaco CSS is targeted on the monaco-editor class
-    node1.classList.add('lnsFormulaOverflow', 'monaco-editor');
+    node1.classList.add(
+      'lnsFormulaOverflow',
+      'monaco-editor',
+      cssClassName(sharedEditorStyles.overflowWidget(euiThemeContext))
+    );
     document.body.appendChild(node1);
   }
 
@@ -450,7 +457,7 @@ export function FormulaEditor({
             context,
             indexPattern,
             operationDefinitionMap: visibleOperationsMap,
-            unifiedSearch,
+            kql,
             dataViews,
             dateHistogramInterval: baseIntervalRef.current,
             timefilter: data.query.timefilter.timefilter,
@@ -463,7 +470,7 @@ export function FormulaEditor({
           context,
           indexPattern,
           operationDefinitionMap: visibleOperationsMap,
-          unifiedSearch,
+          kql,
           dataViews,
           dateHistogramInterval: baseIntervalRef.current,
           timefilter: data.query.timefilter.timefilter,
@@ -482,7 +489,7 @@ export function FormulaEditor({
         ),
       };
     },
-    [indexPattern, visibleOperationsMap, unifiedSearch, dataViews, data.query.timefilter.timefilter]
+    [indexPattern, visibleOperationsMap, kql, dataViews, data.query.timefilter.timefilter]
   );
 
   const provideSignatureHelp = useCallback(
@@ -738,6 +745,7 @@ export function FormulaEditor({
                         })
                   }
                   position="top"
+                  disableScreenReaderOutput
                 >
                   <EuiButtonIcon
                     iconType={isWordWrapped ? 'wordWrap' : 'wordWrapDisabled'}
@@ -980,11 +988,6 @@ const sharedEditorStyles = {
         }
       }
 
-      .lnsFormulaOverflow {
-        // Needs to be higher than the modal and all flyouts
-        z-index: ${euiTheme.levels.toast} + 1;
-      }
-
       .lnsFormula__editorContent {
         background-color: ${euiTheme.colors.backgroundBasePlain};
         min-height: 0;
@@ -992,6 +995,10 @@ const sharedEditorStyles = {
       }
     `;
   },
+  overflowWidget: ({ euiTheme }: UseEuiTheme) => `
+    // Needs to be higher than the modal and all flyouts
+    z-index: ${Number(euiTheme.levels.toast) + 1};
+  `,
   formulaDocs: ({ euiTheme }: UseEuiTheme) => css`
     display: flex;
     flex-direction: column;

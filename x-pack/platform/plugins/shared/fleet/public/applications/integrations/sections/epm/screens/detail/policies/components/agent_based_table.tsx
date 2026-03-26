@@ -7,15 +7,7 @@
 import { stringify, parse } from 'query-string';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-import {
-  EuiBasicTable,
-  EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiButton,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiLink, EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n-react';
 
@@ -32,6 +24,7 @@ import {
 import { Persona } from '../persona';
 
 import { PackagePolicyAgentsCell } from './package_policy_agents_cell';
+import { PackagePolicyUpgradeCell } from './package_policy_upgrade_cell';
 
 export const AgentBasedPackagePoliciesTable = ({
   isLoading,
@@ -41,6 +34,7 @@ export const AgentBasedPackagePoliciesTable = ({
   pagination,
   addAgentToPolicyIdFromParams,
   showAddAgentHelpForPolicyId,
+  from,
 }: {
   isLoading: boolean;
   packagePolicies: Array<{
@@ -53,6 +47,7 @@ export const AgentBasedPackagePoliciesTable = ({
   pagination: ReturnType<typeof usePagination>;
   addAgentToPolicyIdFromParams?: string | null;
   showAddAgentHelpForPolicyId?: string | null;
+  from?: 'installed-integrations';
 }) => {
   const { getHref } = useLink();
   const { search } = useLocation();
@@ -60,7 +55,6 @@ export const AgentBasedPackagePoliciesTable = ({
 
   const [selectedTableIndex, setSelectedTableIndex] = useState<number | undefined>();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
-  const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
   const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
   const canReadAgentPolicies = useAuthz().fleet.readAgentPolicies;
   const canShowMultiplePoliciesCell =
@@ -110,13 +104,14 @@ export const AgentBasedPackagePoliciesTable = ({
               defaultMessage: 'Integration policy',
             }),
             render(_, { agentPolicies, packagePolicy }) {
+              const editHref = getHref('integration_policy_edit', {
+                packagePolicyId: packagePolicy.id,
+              });
               return (
                 <EuiLink
                   className="eui-textTruncate"
                   data-test-subj="integrationNameLink"
-                  href={getHref('integration_policy_edit', {
-                    packagePolicyId: packagePolicy.id,
-                  })}
+                  href={from ? `${editHref}?from=${from}` : editHref}
                 >
                   {packagePolicy.name}
                 </EuiLink>
@@ -145,25 +140,10 @@ export const AgentBasedPackagePoliciesTable = ({
                     </EuiText>
                   </EuiFlexItem>
 
-                  {agentPolicies.length > 0 && packagePolicy.hasUpgrade && (
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        size="s"
-                        minWidth="0"
-                        href={`${getHref('upgrade_package_policy', {
-                          policyId: agentPolicies[0].id,
-                          packagePolicyId: packagePolicy.id,
-                        })}?from=integrations-policy-list`}
-                        data-test-subj="integrationPolicyUpgradeBtn"
-                        isDisabled={!canWriteIntegrationPolicies}
-                      >
-                        <FormattedMessage
-                          id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeButton"
-                          defaultMessage="Upgrade"
-                        />
-                      </EuiButton>
-                    </EuiFlexItem>
-                  )}
+                  <PackagePolicyUpgradeCell
+                    packagePolicy={packagePolicy}
+                    agentPolicies={agentPolicies}
+                  />
                 </EuiFlexGroup>
               );
             },
@@ -194,7 +174,17 @@ export const AgentBasedPackagePoliciesTable = ({
                 </EuiText>
               ) : (
                 <EuiText color="subdued" size="xs">
-                  <EuiIcon size="m" type="warning" color="warning" />
+                  <EuiIcon
+                    size="m"
+                    type="warning"
+                    color="warning"
+                    aria-label={i18n.translate(
+                      'xpack.fleet.epm.packageDetails.integrationList.agentPolicyDeletedWarning',
+                      {
+                        defaultMessage: 'Policy not found',
+                      }
+                    )}
+                  />
                   &nbsp;
                   <FormattedMessage
                     id="xpack.fleet.epm.packageDetails.integrationList.agentPolicyDeletedWarning"
@@ -279,6 +269,7 @@ export const AgentBasedPackagePoliciesTable = ({
               packagePolicy: InMemoryPackagePolicy;
             }) {
               const agentPolicy = agentPolicies[0]; // TODO: handle multiple agent policies
+              const upgradeFrom = from || 'integrations-policy-list';
               return (
                 <PackagePolicyActionsMenu
                   agentPolicies={agentPolicies}
@@ -289,9 +280,10 @@ export const AgentBasedPackagePoliciesTable = ({
                       ? `${getHref('upgrade_package_policy', {
                           policyId: agentPolicy.id,
                           packagePolicyId: packagePolicy.id,
-                        })}?from=integrations-policy-list`
+                        })}?from=${upgradeFrom}`
                       : undefined
                   }
+                  from={from}
                 />
               );
             },
@@ -299,6 +291,12 @@ export const AgentBasedPackagePoliciesTable = ({
         ]}
         loading={isLoading}
         data-test-subj="integrationPolicyTable"
+        tableCaption={i18n.translate(
+          'xpack.fleet.epm.packageDetails.integrationList.tableCaption',
+          {
+            defaultMessage: 'Integration policies',
+          }
+        )}
         pagination={{
           pageIndex: pagination.pagination.currentPage - 1,
           pageSize: pagination.pagination.pageSize,

@@ -36,7 +36,7 @@ export function checkAllowedPackages<T>(
       );
     }
 
-    const isRestricted = !allowedPackagedSet.has(pkgName);
+    const isRestricted = !allowedPackagedSet.has(pkgName as string);
     if (isRestricted) {
       throw new FleetUnauthorizedError(
         `Authorization denied to package: ${pkgName}. Allowed package(s): ${allowedPackagesStr}`

@@ -10,23 +10,23 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import moment from 'moment';
 import type {
-  OnTimeChangeProps,
-  OnRefreshProps,
-  OnRefreshChangeProps,
-  EuiSwitchEvent,
   CriteriaWithPagination,
+  EuiSwitchEvent,
+  OnRefreshChangeProps,
+  OnRefreshProps,
+  OnTimeChangeProps,
 } from '@elastic/eui';
 import {
-  EuiTextColor,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSuperDatePicker,
-  EuiSpacer,
-  EuiSwitch,
   EuiBasicTable,
   EuiButton,
   EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiSuperDatePicker,
+  EuiSwitch,
+  EuiTextColor,
 } from '@elastic/eui';
 
 import type { Filter, Query } from '@kbn/es-query';
@@ -37,6 +37,7 @@ import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 
+import { PageScope } from '../../../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { dataViewSpecToViewBase } from '../../../../../common/lib/kuery';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
@@ -72,7 +73,6 @@ import type {
   RelativeTimeRange,
 } from '../../../../../common/store/inputs/model';
 import { isAbsoluteTimeRange, isRelativeTimeRange } from '../../../../../common/store/inputs/model';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { useExecutionResults } from '../../../../rule_monitoring';
 import { useRuleDetailsContext } from '../rule_details_context';
 import { useExpandableRows } from '../../../../rule_monitoring/components/basic/tables/use_expandable_rows';
@@ -80,14 +80,15 @@ import { TextBlock } from '../../../../rule_monitoring/components/basic/text/tex
 import * as i18n from './translations';
 import {
   EXECUTION_LOG_COLUMNS,
-  getMessageColumn,
-  getExecutionLogMetricsColumns,
   expanderColumn,
+  getExecutionLogMetricsColumns,
+  getMessageColumn,
   getSourceEventTimeRangeColumns,
 } from './execution_log_columns';
 import { ExecutionLogSearchBar } from './execution_log_search_bar';
 import { EventLogEventTypes } from '../../../../../common/lib/telemetry';
-import { useDataViewSpec } from '../../../../../data_view_manager/hooks/use_data_view_spec';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { useAlertsPrivileges } from '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 const EXECUTION_UUID_FIELD_NAME = 'kibana.alert.rule.execution.uuid';
 
@@ -131,6 +132,8 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     telemetry,
   } = useKibana().services;
 
+  const { hasAlertsRead: canReadAlerts } = useAlertsPrivileges();
+
   const {
     [RuleDetailTabs.executionResults]: {
       state: {
@@ -163,13 +166,10 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   } = useRuleDetailsContext();
 
   // Index for `add filter` action and toasts for errors
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(PageScope.alerts);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataViewSpec } = useDataViewSpec(SourcererScopeName.detections);
-  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
 
   const { addError, addSuccess, remove } = useAppToasts();
 
@@ -244,8 +244,11 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
   // Cache UUID field from data view as it can be expensive to iterate all data view fields
   const uuidDataViewField = useMemo(
-    () => sourcererDataView.fields?.[EXECUTION_UUID_FIELD_NAME],
-    [sourcererDataView]
+    () =>
+      newDataViewPickerEnabled
+        ? experimentalDataView.fields?.getByName(EXECUTION_UUID_FIELD_NAME)
+        : oldSourcererDataView.fields?.[EXECUTION_UUID_FIELD_NAME],
+    [experimentalDataView, newDataViewPickerEnabled, oldSourcererDataView.fields]
   );
 
   // Callbacks
@@ -311,7 +314,9 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
   const onFilterByExecutionIdCallback = useCallback(
     (executionId: string, executionStart: string) => {
-      const dataViewAsViewBase = dataViewSpecToViewBase(sourcererDataView);
+      const dataViewAsViewBase = newDataViewPickerEnabled
+        ? experimentalDataView
+        : dataViewSpecToViewBase(oldSourcererDataView);
 
       if (
         uuidDataViewField != null &&
@@ -368,11 +373,13 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
       }
     },
     [
+      newDataViewPickerEnabled,
+      experimentalDataView,
+      oldSourcererDataView,
       uuidDataViewField,
       filters,
       query,
       timerange,
-      sourcererDataView,
       dispatch,
       filterManager,
       selectAlertsTab,
@@ -424,32 +431,36 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
   const actions = useMemo(
     () => [
-      {
-        field: EXECUTION_UUID_FIELD_NAME,
-        name: i18n.COLUMN_ACTIONS,
-        width: '64px',
-        actions: [
-          {
-            name: 'Edit',
-            isPrimary: true,
-            field: '',
-            description: i18n.COLUMN_ACTIONS_TOOLTIP,
-            icon: 'filter',
-            type: 'icon',
-            onClick: (executionEvent: RuleExecutionResult) => {
-              if (executionEvent?.execution_uuid) {
-                onFilterByExecutionIdCallback(
-                  executionEvent.execution_uuid,
-                  executionEvent.timestamp
-                );
-              }
+      ...(canReadAlerts
+        ? [
+            {
+              field: EXECUTION_UUID_FIELD_NAME,
+              name: i18n.COLUMN_ACTIONS,
+              width: '64px',
+              actions: [
+                {
+                  name: 'Edit',
+                  isPrimary: true,
+                  field: '',
+                  description: i18n.COLUMN_ACTIONS_TOOLTIP,
+                  icon: 'filter',
+                  type: 'icon',
+                  onClick: (executionEvent: RuleExecutionResult) => {
+                    if (executionEvent?.execution_uuid) {
+                      onFilterByExecutionIdCallback(
+                        executionEvent.execution_uuid,
+                        executionEvent.timestamp
+                      );
+                    }
+                  },
+                  'data-test-subj': 'action-filter-by-execution-id',
+                },
+              ],
             },
-            'data-test-subj': 'action-filter-by-execution-id',
-          },
-        ],
-      },
+          ]
+        : []),
     ],
-    [onFilterByExecutionIdCallback]
+    [onFilterByExecutionIdCallback, canReadAlerts]
   );
 
   const getItemId = useCallback((item: RuleExecutionResult): string => {

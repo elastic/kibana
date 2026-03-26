@@ -15,9 +15,10 @@ import {
 } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { act } from 'react-dom/test-utils';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { RuleStatusPanel, RuleStatusPanelWithApiProps } from './rule_status_panel';
+import type { RuleStatusPanelWithApiProps } from './rule_status_panel';
+import { RuleStatusPanel } from './rule_status_panel';
 import { mockRule } from './test_helpers';
 
 jest.mock('../../../lib/rule_api/load_execution_log_aggregations', () => ({
@@ -140,6 +141,39 @@ describe('rule status panel', () => {
     await waitFor(() => expect(bulkDisableRules).toHaveBeenCalledTimes(1));
   });
 
+  it('should disable the rule when picking disable in the dropdown without showing untrack alerts modal', async () => {
+    const rule = mockRule({ enabled: true });
+    const bulkDisableRules = jest.fn();
+    render(
+      <IntlProvider locale="en">
+        <RuleStatusPanelWithProvider
+          {...mockAPIs}
+          rule={rule}
+          isEditable
+          healthColor="primary"
+          statusMessage="Ok"
+          requestRefresh={requestRefresh}
+          bulkDisableRules={bulkDisableRules}
+          autoRecoverAlerts={false}
+        />
+      </IntlProvider>
+    );
+
+    if (screen.queryByTestId('centerJustifiedSpinner')) {
+      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
+    }
+
+    fireEvent.click(screen.getByTestId('ruleStatusDropdownBadge'));
+
+    fireEvent.click(screen.getByTestId('statusDropdownDisabledItem'));
+
+    expect(screen.queryByRole('confirmModalConfirmButton')).not.toBeInTheDocument();
+
+    expect(screen.queryByRole('progressbar')).toBeInTheDocument();
+
+    await waitFor(() => expect(bulkDisableRules).toHaveBeenCalledTimes(1));
+  });
+
   it('if rule is already disabled should do nothing when picking disable in the dropdown', async () => {
     const rule = mockRule({ enabled: false });
     const bulkDisableRules = jest.fn();
@@ -154,9 +188,7 @@ describe('rule status panel', () => {
         bulkDisableRules={bulkDisableRules}
       />
     );
-    const actionsElem = wrapper
-      .find('[data-test-subj="statusDropdown"] .euiBadge__childButton')
-      .first();
+    const actionsElem = wrapper.find('[data-test-subj="statusDropdown"] button').first();
     actionsElem.simulate('click');
 
     await act(async () => {
@@ -186,9 +218,7 @@ describe('rule status panel', () => {
         requestRefresh={requestRefresh}
       />
     );
-    const actionsElem = wrapper
-      .find('[data-test-subj="statusDropdown"] .euiBadge__childButton')
-      .first();
+    const actionsElem = wrapper.find('[data-test-subj="statusDropdown"] button').first();
     actionsElem.simulate('click');
 
     await act(async () => {
@@ -220,9 +250,7 @@ describe('rule status panel', () => {
         bulkEnableRules={bulkEnableRules}
       />
     );
-    const actionsElem = wrapper
-      .find('[data-test-subj="statusDropdown"] .euiBadge__childButton')
-      .first();
+    const actionsElem = wrapper.find('[data-test-subj="statusDropdown"] button').first();
     actionsElem.simulate('click');
 
     await act(async () => {

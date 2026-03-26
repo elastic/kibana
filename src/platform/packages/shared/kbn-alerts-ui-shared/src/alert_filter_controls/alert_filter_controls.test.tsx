@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
-import { AlertFilterControls, AlertFilterControlsProps } from './alert_filter_controls';
+import type { AlertFilterControlsProps } from './alert_filter_controls';
+import { AlertFilterControls } from './alert_filter_controls';
 import { DEFAULT_CONTROLS } from './constants';
 import { useAlertsDataView } from '../common/hooks/use_alerts_data_view';
 import { FilterGroup } from './filter_group';
@@ -49,10 +50,6 @@ mockServices.dataViews.clearInstanceCache = jest.fn().mockResolvedValue(undefine
 
 const setFilters = jest.fn();
 
-const ControlGroupRenderer = (() => (
-  <span />
-)) as unknown as AlertFilterControlsProps['ControlGroupRenderer'];
-
 describe('AlertFilterControls', () => {
   const props: AlertFilterControlsProps = {
     ruleTypeIds: ['.es-query'],
@@ -62,8 +59,6 @@ describe('AlertFilterControls', () => {
     },
     onFiltersChange: setFilters,
     services: mockServices,
-    chainingSystem: 'HIERARCHICAL',
-    ControlGroupRenderer,
   };
 
   beforeEach(jest.clearAllMocks);

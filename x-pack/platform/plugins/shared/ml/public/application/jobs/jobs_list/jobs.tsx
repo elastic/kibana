@@ -6,12 +6,11 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
-import { EuiSpacer, useEuiTheme, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import React, { useEffect } from 'react';
+import { EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
-import { css } from '@emotion/react';
 import { JobsListView } from './components/jobs_list_view';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { HelpMenu } from '../../components/help_menu';
@@ -30,6 +29,7 @@ import { NewJobButton } from './components/new_job_button';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { ImportJobsFlyout } from '../../components/import_export_jobs/import_jobs_flyout';
 import { ExportJobsFlyout } from '../../components/import_export_jobs';
+import { PageTitle } from '../../components/page_title';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE_FOR_URL;
@@ -61,7 +61,10 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh, r
     },
   } = useMlKibana();
   const { euiTheme } = useEuiTheme();
-  getMlNodeCount(mlApi);
+
+  useEffect(() => {
+    getMlNodeCount(mlApi);
+  }, [mlApi]);
 
   const { showNodeInfo } = useEnabledFeatures();
   const helpLink = docLinks.links.ml.anomalyDetection;
@@ -69,40 +72,36 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh, r
 
   return (
     <>
-      <MlPageHeader>
-        <EuiFlexGroup wrap={true}>
-          <EuiFlexItem grow={true} css={css({ minWidth: '400px' })}>
+      <MlPageHeader
+        wrapHeader
+        rightSideItems={[
+          <SuppliedConfigurationsButton key="supplied-configurations-button" />,
+          <AnomalyDetectionSettingsButton key="anomaly-detection-settings-button" />,
+          <SynchronizeSavedObjectsButton
+            key="synchronize-saved-objects-button"
+            refreshJobs={refreshList}
+          />,
+          <ExportJobsFlyout
+            key="export-jobs-flyout"
+            isDisabled={!canCreateJob}
+            currentTab={'anomaly-detector'}
+          />,
+          <ImportJobsFlyout
+            key="import-jobs-flyout"
+            isDisabled={!canCreateJob}
+            onImportComplete={refreshList}
+          />,
+          <NewJobButton key="new-job-button" size="m" />,
+        ]}
+      >
+        <PageTitle
+          title={
             <FormattedMessage
               id="xpack.ml.jobsList.title"
               defaultMessage="Anomaly Detection Jobs"
             />
-          </EuiFlexItem>
-          <EuiFlexItem grow={true} />
-          <EuiFlexItem grow={false} justifyContent="flexEnd">
-            <EuiFlexGroup direction="row" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <SuppliedConfigurationsButton />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <AnomalyDetectionSettingsButton />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <SynchronizeSavedObjectsButton refreshJobs={refreshList} />
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
-                <ExportJobsFlyout isDisabled={!canCreateJob} currentTab={'anomaly-detector'} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <ImportJobsFlyout isDisabled={!canCreateJob} onImportComplete={refreshList} />
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
-                <NewJobButton size="m" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          }
+        />
       </MlPageHeader>
       <HeaderMenuPortal>
         <JobsActionMenu />

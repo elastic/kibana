@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { ApiStatus, Status, HttpError } from '../../../../common/types/api';
+import type { ApiStatus, HttpError } from '../../../../common/types/api';
+import { Status } from '../../../../common/types/api';
 import { clearFlashMessages, flashAPIErrors, flashSuccessToast } from '../flash_messages';
 
 export interface Values<T> {
@@ -81,25 +83,21 @@ export const createApiLogic = <Result, Args>(
       },
     }),
     path: ['enterprise_search', 'api', ...path],
-    // @ts-expect-error upgrade typescript v5.1.6
     reducers: () => ({
       apiStatus: [
         {
           status: Status.IDLE,
         },
         {
-          // @ts-expect-error upgrade typescript v5.1.6
           apiError: (_, error) => ({
             error,
             status: Status.ERROR,
           }),
           apiReset: () => ({ status: Status.IDLE }),
-          // @ts-expect-error upgrade typescript v5.1.6
           apiSuccess: (_, data) => ({
             data,
             status: Status.SUCCESS,
           }),
-          // @ts-expect-error upgrade typescript v5.1.6
           makeRequest: ({ data }) => {
             return {
               data,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectMigrationContext } from '@kbn/core/server';
+import type { SavedObjectMigrationContext } from '@kbn/core/server';
 import { indexPatternSavedObjectTypeMigrations } from './index_pattern_migrations';
 
 const savedObjectMigrationContext = null as unknown as SavedObjectMigrationContext;

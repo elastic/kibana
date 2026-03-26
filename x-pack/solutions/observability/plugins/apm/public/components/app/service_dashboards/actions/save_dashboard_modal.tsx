@@ -18,9 +18,9 @@ import {
   EuiModalBody,
   EuiComboBox,
   EuiFlexGroup,
-  EuiToolTip,
-  EuiIcon,
+  EuiIconTip,
   EuiButtonEmpty,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
@@ -46,6 +46,8 @@ export function SaveDashboardModal({
   serviceDashboards,
   serviceName,
 }: Props) {
+  const modalTitleId = useGeneratedHtmlId();
+
   const {
     core: { notifications },
   } = useApmPluginContext();
@@ -74,9 +76,15 @@ export function SaveDashboardModal({
   );
 
   const isEditMode = !!currentDashboard?.id;
+  const selectDashboardLabel = i18n.translate(
+    'xpack.apm.serviceDashboards.selectDashboard.placeholder',
+    {
+      defaultMessage: 'Select dashboard',
+    }
+  );
 
   const options = allAvailableDashboards?.map((dashboardItem) => ({
-    label: dashboardItem.attributes.title,
+    label: dashboardItem.data.title,
     value: dashboardItem.id,
     disabled:
       serviceDashboards?.some(
@@ -143,9 +151,13 @@ export function SaveDashboardModal({
   );
 
   return (
-    <EuiModal onClose={onClose} data-test-subj="apmSelectServiceDashboard">
+    <EuiModal
+      onClose={onClose}
+      data-test-subj="apmSelectServiceDashboard"
+      aria-labelledby={modalTitleId}
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {isEditMode
             ? i18n.translate('xpack.apm.serviceDashboards.selectDashboard.modalTitle.edit', {
                 defaultMessage: 'Edit dashboard',
@@ -161,9 +173,8 @@ export function SaveDashboardModal({
           <EuiComboBox
             isLoading={status === FETCH_STATUS.LOADING || isLoading}
             isDisabled={status === FETCH_STATUS.LOADING || isEditMode}
-            placeholder={i18n.translate('xpack.apm.serviceDashboards.selectDashboard.placeholder', {
-              defaultMessage: 'Select dashboard',
-            })}
+            placeholder={selectDashboardLabel}
+            aria-label={selectDashboardLabel}
             singleSelection={{ asPlainText: true }}
             options={options}
             selectedOptions={selectedDashboard}
@@ -179,7 +190,7 @@ export function SaveDashboardModal({
                 {i18n.translate('xpack.apm.dashboard.addDashboard.useContextFilterLabel', {
                   defaultMessage: 'Filter by service and environment',
                 })}{' '}
-                <EuiToolTip
+                <EuiIconTip
                   position="bottom"
                   content={i18n.translate(
                     'xpack.apm.dashboard.addDashboard.useContextFilterLabel.tooltip',
@@ -188,15 +199,12 @@ export function SaveDashboardModal({
                         'Enabling this option will apply filters to the dashboard based on your chosen service and environment.',
                     }
                   )}
-                >
-                  <EuiIcon
-                    type="questionInCircle"
-                    title={i18n.translate(
-                      'xpack.apm.saveDashboardModal.euiIcon.iconWithTooltipLabel',
-                      { defaultMessage: 'Icon with tooltip' }
-                    )}
-                  />
-                </EuiToolTip>
+                  type="question"
+                  title={i18n.translate(
+                    'xpack.apm.saveDashboardModal.euiIcon.iconWithTooltipLabel',
+                    { defaultMessage: 'Icon with tooltip' }
+                  )}
+                />
               </p>
             }
             onChange={() => setServiceFiltersEnabled(!serviceFiltersEnabled)}

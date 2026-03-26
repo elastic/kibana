@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { handleEsError } from './shared_imports';
+import type { IRouter } from '@kbn/core/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { handleEsError } from './shared_imports';
 
 export interface Dependencies {
   security: SecurityPluginSetup;

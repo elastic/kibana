@@ -22,7 +22,7 @@ import * as i18n from '../translations';
 import { MenuItems } from './menu_items';
 import { TextWithEdit } from '../text_with_edit';
 import { EditModal } from './edit_modal';
-import { ListDetails, Rule } from '../types';
+import type { ListDetails, Rule } from '../types';
 import { useExceptionListHeader } from './use_list_header';
 import { textWithEditContainerCss } from '../text_with_edit/text_with_edit.styles';
 
@@ -143,7 +143,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
           {
             text: (
               <div data-test-subj={`${dataTestSubj || ''}Breadcrumb`} css={breadCrumbTextStyles}>
-                <EuiIcon size="s" type="arrowLeft" />
+                <EuiIcon size="s" type="chevronSingleLeft" />
                 {i18n.EXCEPTION_LIST_HEADER_BREADCRUMB}
               </div>
             ),

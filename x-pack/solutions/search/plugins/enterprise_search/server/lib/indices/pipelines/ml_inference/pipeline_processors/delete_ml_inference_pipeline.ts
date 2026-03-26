@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { ErrorCode } from '../../../../../../common/types/error_codes';
-import { DeleteMlInferencePipelineResponse } from '../../../../../../common/types/pipelines';
+import type { DeleteMlInferencePipelineResponse } from '../../../../../../common/types/pipelines';
 
 import { getInferencePipelineNameFromIndexName } from '../../../../../utils/ml_inference_pipeline_utils';
 
@@ -73,7 +73,7 @@ const findUsageInOtherManagedPipelines = async (
     return Object.entries(pipelines).find(
       ([name, pipeline]) =>
         name !== getInferencePipelineNameFromIndexName(indexName) &&
-        pipeline.processors?.find((processor) => processor.pipeline?.name === pipelineName)
+        pipeline.processors?.find((processor) => processor?.pipeline?.name === pipelineName)
     )?.[0]; // Managed pipeline name
   } catch (error) {
     // only suppress Not Found error

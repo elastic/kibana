@@ -8,8 +8,8 @@
 import { groupStatsAggregations } from './group_stats_aggregations';
 
 describe('groupStatsAggregations', () => {
-  it('should return values depending for signal.rule.id input field', () => {
-    const aggregations = groupStatsAggregations('signal.rule.id');
+  it('should return values depending for relatedIntegration input field', () => {
+    const aggregations = groupStatsAggregations('relatedIntegration');
     expect(aggregations).toEqual([
       {
         unitsCount: {
@@ -46,9 +46,9 @@ describe('groupStatsAggregations', () => {
         },
       },
       {
-        signalRuleIdSubAggregation: {
+        relatedIntegrationSubAggregation: {
           terms: {
-            field: 'signal.rule.id',
+            field: 'relatedIntegration',
           },
         },
       },
@@ -73,9 +73,9 @@ describe('groupStatsAggregations', () => {
         },
       },
       {
-        signalRuleIdSubAggregation: {
+        relatedIntegrationSubAggregation: {
           terms: {
-            field: 'signal.rule.id',
+            field: 'relatedIntegration',
           },
         },
       },
@@ -100,9 +100,9 @@ describe('groupStatsAggregations', () => {
         },
       },
       {
-        signalRuleIdSubAggregation: {
+        relatedIntegrationSubAggregation: {
           terms: {
-            field: 'signal.rule.id',
+            field: 'relatedIntegration',
           },
         },
       },

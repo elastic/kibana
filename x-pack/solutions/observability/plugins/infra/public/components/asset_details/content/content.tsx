@@ -12,6 +12,7 @@ import { DatePicker } from '../date_picker/date_picker';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 import {
   Anomalies,
+  Dashboards,
   Logs,
   Metadata,
   Metrics,
@@ -40,6 +41,7 @@ export const Content = () => {
                 ContentTabIds.METRICS,
                 ContentTabIds.PROCESSES,
                 ContentTabIds.ANOMALIES,
+                ContentTabIds.DASHBOARDS,
               ]}
             />
           </EuiFlexItem>
@@ -70,6 +72,9 @@ export const Content = () => {
         <TabPanel activeWhen={ContentTabIds.PROFILING}>
           <Profiling />
         </TabPanel>
+        <TabPanel activeWhen={ContentTabIds.DASHBOARDS}>
+          <Dashboards />
+        </TabPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -94,12 +99,21 @@ const TabPanel = ({
 }) => {
   const { renderedTabsSet, activeTabId } = useTabSwitcherContext();
 
+  // The logs tab is a special case because it is not rendered in the DOM until it is clicked due to performance reasons.
+  if (activeWhen === ContentTabIds.LOGS && activeTabId === activeWhen) {
+    return <div data-test-subj={makeTabPanelDataTestSubj({ tabId: activeWhen })}>{children}</div>;
+  }
+
   return renderedTabsSet.current.has(activeWhen) ? (
     <div
       hidden={activeTabId !== activeWhen}
-      data-test-subj={`infraAssetDetails${capitalize(activeWhen)}TabContent`}
+      data-test-subj={makeTabPanelDataTestSubj({ tabId: activeWhen })}
     >
       {children}
     </div>
   ) : null;
 };
+
+function makeTabPanelDataTestSubj({ tabId }: { tabId: ContentTabIds }) {
+  return `infraAssetDetails${capitalize(tabId)}TabContent`;
+}

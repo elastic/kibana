@@ -409,9 +409,7 @@ describe('AgentUpgradeStatus', () => {
         latestAgentVersion: '8.12.0',
       });
       expectNoUpgradeStatusBadges(results);
-      expect(
-        results.container.querySelector('[data-euiicon-type="iInCircle"]')
-      ).not.toBeInTheDocument();
+      expect(results.container.querySelector('[data-euiicon-type="info"]')).not.toBeInTheDocument();
     });
   });
 });

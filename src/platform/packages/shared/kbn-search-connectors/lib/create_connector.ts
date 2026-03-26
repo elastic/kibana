@@ -11,7 +11,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { fetchConnectorById } from '..';
 
-import { Connector, ConnectorConfiguration, IngestPipelineParams } from '../types/connectors';
+import type { Connector, ConnectorConfiguration, IngestPipelineParams } from '../types/connectors';
 
 export const createConnector = async (
   client: ElasticsearchClient,

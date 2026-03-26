@@ -5,19 +5,4 @@
  * 2.0.
  */
 
-import {
-  setup as mappingsEditorSetup,
-  MappingsEditorTestBed,
-  DomFields,
-  getMappingsEditorDataFactory,
-} from './mappings_editor.helpers';
-
-export type { TestBed } from '@kbn/test-jest-helpers';
-export { nextTick, getRandomString, findTestSubject } from '@kbn/test-jest-helpers';
 export { kibanaVersion } from './setup_environment';
-
-export const componentHelpers = {
-  mappingsEditor: { setup: mappingsEditorSetup, getMappingsEditorDataFactory },
-};
-
-export type { MappingsEditorTestBed, DomFields };

@@ -12,7 +12,8 @@ import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 import { Repos } from './repos';
-import { Config, Source } from './config';
+import type { Source } from './config';
+import { Config } from './config';
 import { quietFail } from './error';
 
 run(

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getOrElse } from 'fp-ts/Either';
 import {
   generateESQLSource,
   generateListESQLQuery,
@@ -17,6 +18,8 @@ import {
 jest.mock('moment', () => {
   return () => jest.requireActual('moment')('2025-03-07T12:00:00Z');
 });
+
+const getValue = getOrElse(() => 'error');
 
 jest.spyOn(global.Math, 'random').mockReturnValue(0.123456789);
 
@@ -48,7 +51,7 @@ describe('esql_data_generation', () => {
   describe('generateESQLSource', () => {
     it('should generate the correct ESQL source string', () => {
       const esqlSource = generateESQLSource();
-      expect(esqlSource).toMatchSnapshot();
+      expect(getValue(esqlSource)).toMatchSnapshot();
     });
   });
 
@@ -56,15 +59,18 @@ describe('esql_data_generation', () => {
     it('should generate the correct ESQL query for list pagination', () => {
       const generateQuery = generateListESQLQuery(generateESQLSource());
       const query = generateQuery('privileged_user', 'asc', 1);
-      expect(query).toMatchSnapshot();
+      expect(getValue(query)).toMatchSnapshot();
     });
   });
 
   describe('generateVisualizationESQLQuery', () => {
     it('should generate the correct ESQL query for visualization', () => {
       const generateQuery = generateVisualizationESQLQuery(generateESQLSource());
-      const query = generateQuery('target_user');
-      expect(query).toMatchSnapshot();
+      const query = generateQuery('target_user', {
+        from: '2025-03-06T12:00:00.000Z',
+        to: '2025-03-07T11:00:00.000Z',
+      });
+      expect(getValue(query)).toMatchSnapshot();
     });
   });
 });

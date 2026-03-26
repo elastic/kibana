@@ -7,7 +7,7 @@
 
 import {
   doesNotExistOperator,
-  EVENT_FILTERS_OPERATORS,
+  ENDPOINT_ARTIFACT_OPERATORS,
   ALL_OPERATORS,
   existsOperator,
   isNotOperator,
@@ -46,7 +46,7 @@ describe('#getOperators', () => {
       type: 'simple',
     });
 
-    expect(operator).toEqual(EVENT_FILTERS_OPERATORS);
+    expect(operator).toEqual(ENDPOINT_ARTIFACT_OPERATORS);
   });
 
   test('it returns all operator types when field type is not null, boolean, or nested', () => {

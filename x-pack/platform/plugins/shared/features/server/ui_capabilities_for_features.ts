@@ -7,8 +7,8 @@
 
 import _ from 'lodash';
 import type { RecursiveReadonly, Writable } from '@kbn/utility-types';
-import { Capabilities as UICapabilities } from '@kbn/core/server';
-import { ElasticsearchFeature, KibanaFeature } from '../common';
+import type { Capabilities as UICapabilities } from '@kbn/core/server';
+import type { ElasticsearchFeature, KibanaFeature } from '../common';
 
 const ELIGIBLE_FLAT_MERGE_KEYS = ['catalogue'] as const;
 const ELIGIBLE_DEEP_MERGE_KEYS = ['management'] as const;

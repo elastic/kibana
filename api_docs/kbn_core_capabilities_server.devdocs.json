@@ -22,6 +22,8 @@
           "\nAPIs to manage the {@link Capabilities} that will be used by the application.\n\nPlugins relying on capabilities to toggle some of their features should register them during the setup phase\nusing the `registerProvider` method.\n\nPlugins having the responsibility to restrict capabilities depending on a given context should register\ntheir capabilities switcher using the `registerSwitcher` method.\n\nRefers to the methods documentation for complete description and examples.\n"
         ],
         "path": "src/core/packages/capabilities/server/src/contracts.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
               ") => void"
             ],
             "path": "src/core/packages/capabilities/server/src/contracts.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -54,6 +58,8 @@
                   "CapabilitiesProvider"
                 ],
                 "path": "src/core/packages/capabilities/server/src/contracts.ts",
+                "lineNumber": 51,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -78,6 +84,8 @@
               ") => void"
             ],
             "path": "src/core/packages/capabilities/server/src/contracts.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -92,6 +100,8 @@
                   "CapabilitiesSwitcher"
                 ],
                 "path": "src/core/packages/capabilities/server/src/contracts.ts",
+                "lineNumber": 93,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -107,6 +117,8 @@
                   "CapabilitiesSwitcherOptions"
                 ],
                 "path": "src/core/packages/capabilities/server/src/contracts.ts",
+                "lineNumber": 93,
+                "columnNumber": 52,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -127,6 +139,8 @@
           "\nAPIs to access the application {@link Capabilities}.\n"
         ],
         "path": "src/core/packages/capabilities/server/src/contracts.ts",
+        "lineNumber": 96,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -149,6 +163,8 @@
               ">"
             ],
             "path": "src/core/packages/capabilities/server/src/contracts.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -166,6 +182,8 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/core/packages/capabilities/server/src/contracts.ts",
+                "lineNumber": 115,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -181,6 +199,8 @@
                   "ResolveCapabilitiesOptions"
                 ],
                 "path": "src/core/packages/capabilities/server/src/contracts.ts",
+                "lineNumber": 116,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -201,6 +221,8 @@
           "\nOptions for the {@link CapabilitiesSetup.registerSwitcher} API.\n"
         ],
         "path": "src/core/packages/capabilities/server/src/contracts.ts",
+        "lineNumber": 143,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -217,6 +239,8 @@
               "string | string[]"
             ],
             "path": "src/core/packages/capabilities/server/src/contracts.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -233,6 +257,8 @@
           "\nOptions for {@link CapabilitiesStart.resolveCapabilities}.\n"
         ],
         "path": "src/core/packages/capabilities/server/src/contracts.ts",
+        "lineNumber": 120,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -249,6 +275,8 @@
               "string | string[]"
             ],
             "path": "src/core/packages/capabilities/server/src/contracts.ts",
+            "lineNumber": 126,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -265,6 +293,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/capabilities/server/src/contracts.ts",
+            "lineNumber": 135,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -289,6 +319,8 @@
           ">"
         ],
         "path": "src/core/packages/capabilities/server/src/capabilities.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -322,6 +354,8 @@
           ">>"
         ],
         "path": "src/core/packages/capabilities/server/src/capabilities.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -338,6 +372,8 @@
               "<unknown, unknown, unknown, any>"
             ],
             "path": "src/core/packages/capabilities/server/src/capabilities.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -352,6 +388,8 @@
               "{ [key: string]: Record<string, boolean | Record<string, boolean>>; navLinks: Record<string, boolean>; management: { [sectionId: string]: Record<string, boolean>; }; catalogue: Record<string, boolean>; } & { discover?: {} | undefined; dashboard?: {} | undefined; maps?: {} | undefined; visualize?: {} | undefined; }"
             ],
             "path": "src/core/packages/capabilities/server/src/capabilities.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -363,6 +401,8 @@
             "label": "useDefaultCapabilities",
             "description": [],
             "path": "src/core/packages/capabilities/server/src/capabilities.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

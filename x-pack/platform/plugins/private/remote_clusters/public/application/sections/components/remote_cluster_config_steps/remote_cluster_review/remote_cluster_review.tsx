@@ -7,9 +7,10 @@
 
 import React, { useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiText, EuiLink, EuiSteps, EuiTitle, EuiStepsProps } from '@elastic/eui';
+import type { EuiStepsProps } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiLink, EuiSteps, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RequestError } from '../../../../../types';
+import type { RequestError } from '../../../../../types';
 import { SECURITY_MODEL } from '../../../../../../common/constants';
 import {
   apiKeys,
@@ -20,7 +21,7 @@ import {
   onPremPrerequisitesCert,
   onPremSecurityCert,
 } from '../../../../services/documentation';
-import { ClusterPayload } from '../../../../../../common/lib';
+import type { ClusterPayload } from '../../../../../../common/lib';
 import { AppContext } from '../../../../app_context';
 import { ActionButtons, SaveError } from '../components';
 

@@ -9,7 +9,8 @@ import { left } from 'fp-ts/Either';
 import { pipe } from 'fp-ts/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
-import { DuplicateExceptionListQuerySchema, duplicateExceptionListQuerySchema } from '.';
+import type { DuplicateExceptionListQuerySchema } from '.';
+import { duplicateExceptionListQuerySchema } from '.';
 import { getDuplicateExceptionListQuerySchemaMock } from './index.mock';
 
 describe('duplicate_exceptionList_query_schema', () => {

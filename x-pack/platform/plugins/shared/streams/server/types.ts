@@ -6,12 +6,15 @@
  */
 
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
@@ -23,6 +26,11 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { FieldsMetadataServerStart } from '@kbn/fields-metadata-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { ConsoleStart as ConsoleServerStart } from '@kbn/console-plugin/server';
 import type { StreamsConfig } from '../common/config';
 
 export interface StreamsServer {
@@ -30,7 +38,9 @@ export interface StreamsServer {
   config: StreamsConfig;
   logger: Logger;
   security: SecurityPluginStart;
+  actions: ActionsPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  inference: InferenceServerStart;
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
 }
@@ -40,14 +50,19 @@ export interface ElasticsearchAccessorOptions {
 }
 
 export interface StreamsPluginSetupDependencies {
+  agentBuilder?: AgentBuilderPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   taskManager: TaskManagerSetupContract;
   alerting: AlertingServerSetup;
   ruleRegistry: RuleRegistryPluginSetup;
   features: FeaturesPluginSetup;
+  usageCollection: UsageCollectionSetup;
+  cloud?: CloudSetup;
+  globalSearch?: GlobalSearchPluginSetup;
 }
 
 export interface StreamsPluginStartDependencies {
+  actions: ActionsPluginStart;
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   licensing: LicensingPluginStart;
@@ -55,4 +70,7 @@ export interface StreamsPluginStartDependencies {
   alerting: AlertingServerStart;
   inference: InferenceServerStart;
   ruleRegistry: RuleRegistryPluginStart;
+  fieldsMetadata: FieldsMetadataServerStart;
+  console: ConsoleServerStart;
+  spaces?: SpacesPluginStart;
 }

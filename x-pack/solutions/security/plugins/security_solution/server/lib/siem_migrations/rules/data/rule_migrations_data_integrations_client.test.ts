@@ -10,7 +10,8 @@ import type {
   IScopedClusterClient,
   AuthenticatedUser,
 } from '@kbn/core/server';
-import type { SiemRuleMigrationsClientDependencies, RuleMigrationIntegration } from '../types';
+import type { SiemMigrationsClientDependencies } from '../../common/types';
+import type { RuleMigrationIntegration } from '../types';
 import type { PackageList, PackageListItem, RegistryDataStream } from '@kbn/fleet-plugin/common';
 import type { SearchHit, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { packageServiceMock } from '@kbn/fleet-plugin/server/services/epm/package_service.mock';
@@ -48,9 +49,10 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
 
   const mockPackageService = packageServiceMock.create();
   const mockGetPackages = mockPackageService.asInternalUser.getPackages;
+  const mockGetFieldMetadata = mockPackageService.asInternalUser.getPackageFieldsMetadata;
   const dependencies = {
     packageService: mockPackageService,
-  } as unknown as SiemRuleMigrationsClientDependencies;
+  } as unknown as SiemMigrationsClientDependencies;
 
   let client: RuleMigrationsDataIntegrationsClient;
 
@@ -90,7 +92,7 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
         currentUser,
         esScopedClientMock,
         logger,
-        { packageService: undefined } as unknown as SiemRuleMigrationsClientDependencies
+        { packageService: undefined } as unknown as SiemMigrationsClientDependencies
       );
 
       const result = await brokenClient.getSecurityLogsPackages();
@@ -147,6 +149,39 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
       );
     });
 
+    it('should return fields metadata if available', async () => {
+      const fieldsMetadata = { 'mock-package': { dataset: { name: 'field1' } } };
+      mockGetPackages.mockResolvedValue([
+        createMockPackage({
+          data_streams: [
+            { type: 'logs', dataset: 'logs.dataset', title: 'Logs' } as RegistryDataStream,
+          ],
+        }),
+      ]);
+      esClientMock.bulk = jest.fn().mockResolvedValue({ errors: false, items: [] });
+
+      // Mock getFieldsMetadata to return our test metadata
+      mockGetFieldMetadata.mockResolvedValue(fieldsMetadata);
+
+      await client.populate();
+
+      expect(mockGetFieldMetadata).toHaveBeenCalledWith({ packageName: 'mock-package' });
+      expect(esClientMock.bulk).toHaveBeenCalledWith(
+        {
+          refresh: 'wait_for',
+          operations: expect.arrayContaining([
+            expect.objectContaining({
+              doc: expect.objectContaining({
+                fields_metadata: fieldsMetadata,
+              }),
+              doc_as_upsert: true,
+            }),
+          ]),
+        },
+        { requestTimeout: 600000 }
+      );
+    });
+
     it('should call bulk with transformed logs packages', async () => {
       mockGetPackages.mockResolvedValue([createMockPackage()]);
       esClientMock.bulk = jest.fn().mockResolvedValue({ errors: false, items: [] });
@@ -171,7 +206,7 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
         currentUser,
         esScopedClientMock,
         logger,
-        { packageService: undefined } as unknown as SiemRuleMigrationsClientDependencies
+        { packageService: undefined } as unknown as SiemMigrationsClientDependencies
       );
 
       await noPackageClient.populate();
@@ -227,16 +262,21 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
       expect(esClientMock.search).toHaveBeenCalledWith({
         index: 'mock-index',
         query: {
-          bool: {
-            should: [
-              { semantic: { query, field: 'elser_embedding', boost: 1.5 } },
-              { multi_match: { query, fields: ['title^2', 'description'], boost: 3 } },
-            ],
-            filter: { exists: { field: 'data_streams' } },
+          function_score: {
+            query: {
+              bool: {
+                must: { semantic: { query, field: 'elser_embedding' } },
+                must_not: { ids: { values: ['splunk', 'elastic_security', 'ibm_qradar'] } },
+                filter: { exists: { field: 'data_streams' } },
+              },
+            },
+            functions: expect.any(Array),
+            score_mode: 'multiply' as const,
+            boost_mode: 'multiply' as const,
           },
         },
         size: 5,
-        min_score: 40,
+        min_score: 7,
       });
       expect(results).toHaveLength(1);
       expect(results[0].title).toBe('Integration 1');

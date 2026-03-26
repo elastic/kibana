@@ -9,9 +9,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, htmlIdGenerator } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { StartServices } from '../../types';
+import type { StartServices } from '../../types';
 
 export function confirmModalPromise(
   message = '',
@@ -23,10 +23,13 @@ export function confirmModalPromise(
     const cancelButtonText = i18n.translate('visualizations.confirmModal.cancelButtonLabel', {
       defaultMessage: 'Cancel',
     });
+    const modalTitleId = htmlIdGenerator()('confirmModalTitleId');
 
     const modal = startServices.overlays.openModal(
       toMountPoint(
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
+          titleProps={{ id: modalTitleId }}
           onCancel={() => {
             modal.close();
             reject();

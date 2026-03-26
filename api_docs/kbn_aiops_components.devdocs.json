@@ -40,6 +40,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+        "lineNumber": 173,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -62,6 +64,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "lineNumber": 173,
+            "columnNumber": 65,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -85,6 +89,8 @@
           "React.FunctionComponent<DocumentCountChartReduxProps>"
         ],
         "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart_redux.tsx",
+        "lineNumber": 65,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [
@@ -104,6 +110,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -118,6 +126,8 @@
               "any"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 20,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -137,6 +147,8 @@
           "(props: DualBrushProps) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/private/ml/aiops_components/src/dual_brush/dual_brush.tsx",
+        "lineNumber": 105,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -153,6 +165,8 @@
               "DualBrushProps"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/dual_brush/dual_brush.tsx",
+            "lineNumber": 105,
+            "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -176,6 +190,8 @@
           "(props: BrushAnnotationProps) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/private/ml/aiops_components/src/dual_brush/dual_brush_annotation.tsx",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -192,6 +208,8 @@
               "BrushAnnotationProps"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/dual_brush/dual_brush_annotation.tsx",
+            "lineNumber": 29,
+            "columnNumber": 63,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -215,6 +233,8 @@
           "(props: React.PropsWithChildren<ProgressControlProps>) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/private/ml/aiops_components/src/progress_controls/progress_controls.tsx",
+        "lineNumber": 54,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -231,6 +251,8 @@
               "React.PropsWithChildren<ProgressControlProps>"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/progress_controls/progress_controls.tsx",
+            "lineNumber": 54,
+            "columnNumber": 79,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -253,6 +275,8 @@
           "\nBrush settings"
         ],
         "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+        "lineNumber": 59,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -269,6 +293,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -288,6 +314,8 @@
               "> | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -304,6 +332,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -320,6 +350,8 @@
           "\nProps for document count chart"
         ],
         "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+        "lineNumber": 90,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -362,6 +394,8 @@
               "; }"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -378,6 +412,8 @@
               "BrushSelectionUpdateHandler | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -394,6 +430,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -410,6 +448,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -433,6 +473,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -456,6 +498,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -469,6 +513,8 @@
               "Start time range for the chart"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -482,6 +528,8 @@
               "Ending time range for the chart"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -495,6 +543,8 @@
               "Time interval for the document count buckets"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -508,6 +558,8 @@
               "Label to name the adjustedChartPointsSplit histogram"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -521,6 +573,8 @@
               "Whether or not brush has been reset"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "lineNumber": 119,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -537,6 +591,8 @@
               "SetAutoRunAnalysisFn | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -561,6 +617,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "lineNumber": 123,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -578,6 +636,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -594,6 +654,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "lineNumber": 127,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -610,6 +672,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -633,6 +697,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "lineNumber": 131,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -656,6 +722,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "lineNumber": 133,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -672,6 +740,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "lineNumber": 135,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -695,6 +765,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "lineNumber": 137,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -711,6 +783,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "lineNumber": 139,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

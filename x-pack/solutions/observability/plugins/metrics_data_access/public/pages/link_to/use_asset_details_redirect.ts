@@ -14,7 +14,7 @@ import {
   type AssetDetailsLocatorParams,
   ASSET_DETAILS_LOCATOR_ID,
 } from '@kbn/observability-shared-plugin/common';
-import type { InventoryItemType } from '../../../common/inventory_models/types';
+import type { DataSchemaFormat, InventoryItemType } from '../../../common/inventory_models/types';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import type { RouteState } from '../../types';
 
@@ -38,13 +38,15 @@ export const useAssetDetailsRedirect = () => {
 
   const getAssetDetailUrl = useCallback(
     ({
-      assetType,
-      assetId,
+      entityType,
+      entityId,
       search,
+      preferredSchema,
     }: {
-      assetType: InventoryItemType;
-      assetId: string;
+      entityType: InventoryItemType;
+      entityId: string;
       search: QueryParams;
+      preferredSchema?: DataSchemaFormat;
     }): RouterLinkProps => {
       const { to, from, ...rest } = search;
       const queryParams = {
@@ -56,6 +58,7 @@ export const useAssetDetailsRedirect = () => {
                   from: from ? new Date(from).toISOString() : undefined,
                   to: to ? new Date(to).toISOString() : undefined,
                 },
+                preferredSchema: preferredSchema ?? 'semconv',
               }
             : {},
         _a: {
@@ -69,8 +72,8 @@ export const useAssetDetailsRedirect = () => {
 
       const assetDetailsLocatorParams = {
         ...queryParams,
-        assetType,
-        assetId,
+        entityType,
+        entityId,
         state: {
           ...(location.state ?? {}),
           ...(location.key

@@ -12,7 +12,7 @@ import { ContentClientProvider, type ContentClient } from '@kbn/content-manageme
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import type { CoreStart } from '@kbn/core/public';
 import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
-import { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { MSearchTable } from './msearch_table';
 
 export const MSearchApp = (props: {

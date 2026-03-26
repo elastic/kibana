@@ -8,7 +8,7 @@ import { useTimeZone } from '@kbn/observability-shared-plugin/public';
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
 import { useSelectedLocation } from './use_selected_location';
-import { Ping, PingState } from '../../../../../../common/runtime_types';
+import type { Ping, PingState } from '../../../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { EuiButtonIcon, EuiCopy, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DetailPanelListItem } from '../detail_panel_list_item';
@@ -35,13 +36,18 @@ export const DetailPanelCopy = ({
 
   const props: DetailPanelListItemProps = {
     copy: (
-      <EuiCopy textToCopy={textToCopy} display={display}>
+      <EuiCopy
+        textToCopy={textToCopy}
+        tooltipProps={{
+          display,
+        }}
+      >
         {(copy) => (
           <EuiButtonIcon
             css={styles.copyButton}
             onClick={copy}
             display="base"
-            iconType="copyClipboard"
+            iconType="copy"
             size="xs"
             aria-label={i18n.translate('xpack.sessionView.detailPanelCopy.copyButton', {
               defaultMessage: 'Copy',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { CliOptions } from './types';
 import { createElasticAgentPolicy } from './lib/create_agent_policy';
 import { fetchAgentPolicyEnrollmentToken } from './lib/fetch_agent_policy_enrollment_token';
@@ -23,7 +23,27 @@ export async function run(options: CliOptions, logger: ToolingLog) {
   const {
     item: { id: agentPolicyId },
   } = await createElasticAgentPolicy(options, logger, kibanaClient);
-  await createPrivateLocation(options, logger, kibanaClient, agentPolicyId);
+  const privateLocationResponse = await createPrivateLocation(
+    options,
+    logger,
+    kibanaClient,
+    agentPolicyId
+  );
+
+  // Output private location ID for use with synthetics_forge
+  logger.info(`
+════════════════════════════════════════════════════════════════
+  SYNTHETICS PRIVATE LOCATION CREATED
+════════════════════════════════════════════════════════════════
+  Private Location ID:    ${privateLocationResponse.id}
+  Private Location Label: ${privateLocationResponse.label}
+  Agent Policy ID:        ${agentPolicyId}
+
+  To use with synthetics_forge:
+  PRIVATE_LOCATION_ID="${privateLocationResponse.id}"
+════════════════════════════════════════════════════════════════
+`);
+
   const { list } = await fetchAgentPolicyEnrollmentToken(
     options,
     logger,

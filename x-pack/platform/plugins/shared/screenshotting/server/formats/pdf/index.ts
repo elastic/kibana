@@ -10,7 +10,8 @@ import { groupBy } from 'lodash';
 import type { LayoutParams, LayoutType } from '../../../common';
 import type { Layout } from '../../layouts';
 import type { CaptureMetrics, CaptureOptions, CaptureResult } from '../../screenshots';
-import { EventLogger, Transactions } from '../../screenshots/event_logger';
+import type { EventLogger } from '../../screenshots/event_logger';
+import { Transactions } from '../../screenshots/event_logger';
 import { pngsToPdf } from './pdf_maker';
 
 /**

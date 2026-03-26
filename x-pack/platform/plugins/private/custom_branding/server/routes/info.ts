@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import { ILicense } from '@kbn/licensing-plugin/server';
-import { CustomBrandingInfoResponse } from '../../common/types';
-import { CustomBrandingRouter } from '../types';
+import type { ILicense } from '@kbn/licensing-types';
+import type { CustomBrandingInfoResponse } from '../../common/types';
+import type { CustomBrandingRouter } from '../types';
 
 export const registerInfoRoute = (router: CustomBrandingRouter) => {
   router.get(
     {
       path: '/api/custom_branding/info',
       security: {
+        authc: {
+          enabled: 'optional',
+          reason:
+            'Custom branding info must be accessible on the login page before the user is authenticated',
+        },
         authz: {
           enabled: false,
           reason:
@@ -21,9 +26,6 @@ export const registerInfoRoute = (router: CustomBrandingRouter) => {
         },
       },
       validate: false,
-      options: {
-        authRequired: 'optional',
-      },
     },
     async (ctx, req, res) => {
       const allowed = isValidLicense((await ctx.licensing).license);

@@ -8,8 +8,8 @@
  */
 
 import { snakeCase } from 'lodash';
-import { PluginPackageManifest } from '@kbn/repo-packages';
-import { PluginManifest } from '@kbn/core-plugins-server';
+import type { PluginPackageManifest } from '@kbn/repo-packages';
+import type { PluginManifest } from '@kbn/core-plugins-server';
 import { PluginType } from '@kbn/core-base-common';
 
 export function pluginManifestFromPluginPackage(
