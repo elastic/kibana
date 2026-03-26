@@ -288,5 +288,3 @@ export interface AppMenuConfig {
    */
   secondaryActionItem?: AppMenuSecondaryActionItem;
 }
-
-export type AppMenuConfigNext = AppMenuConfig;

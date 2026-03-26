@@ -23,7 +23,6 @@ export type {
   AppMenuPrimaryActionItem,
   AppMenuPopoverItem,
   AppMenuSplitButtonProps,
-  AppMenuConfigNext,
 } from './src';
 
 export {
