@@ -21,6 +21,3 @@ export async function plugin(initializerContext: PluginInitializerContext) {
   const { EntityStorePlugin } = await import('./plugin');
   return new EntityStorePlugin(initializerContext);
 }
-
-export type { EntityStoreSetupContract } from './types';
-export type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
