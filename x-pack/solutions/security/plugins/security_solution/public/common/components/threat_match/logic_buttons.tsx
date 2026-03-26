@@ -33,7 +33,7 @@ export const LogicButtons: React.FC<LogicButtonsProps> = ({
       <MyEuiButton
         fill
         size="s"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={onAndClicked}
         data-test-subj="andButton"
         isDisabled={isAndDisabled}
@@ -45,7 +45,7 @@ export const LogicButtons: React.FC<LogicButtonsProps> = ({
       <MyEuiButton
         fill
         size="s"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={onOrClicked}
         isDisabled={isOrDisabled}
         data-test-subj="orButton"

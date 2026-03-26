@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, StartServicesAccessor } from '@kbn/core/server';
+import type { DocLinksServiceSetup, Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { RiskScoresPreviewResponse } from '../../../common/api/entity_analytics';
 import type { EntityType } from '../../../common/search_strategy';
@@ -24,6 +24,7 @@ export interface EntityAnalyticsRoutesDeps {
   router: SecuritySolutionPluginRouter;
   logger: Logger;
   config: ConfigType;
+  docLinks: DocLinksServiceSetup;
   getStartServices: StartServicesAccessor<StartPlugins>;
   telemetrySender: ITelemetryEventsSender;
   ml: SetupPlugins['ml'];
