@@ -18,9 +18,8 @@ describe('@kbn/evals-extensions', () => {
     });
 
     it('should be importable without errors', async () => {
-      await expect(async () => {
-        await import('..');
-      }).resolves.not.toThrow();
+      const mod = await import('..');
+      expect(mod).toBeDefined();
     });
   });
 
