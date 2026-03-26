@@ -206,6 +206,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
           onErrorClick={onErrorClick}
           onCloseFlyout={clearActiveFlyout}
           onExitFullScreen={onExitFullScreen}
+          skipNextEventReport={isRestoringRef.current}
         />
       ) : null}
       <ContentFrameworkSection

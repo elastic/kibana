@@ -24,7 +24,6 @@ import { FieldNameWithIcon } from '@kbn/react-field';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import useWindowSize from 'react-use/lib/useWindowSize';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { getUnitLabel } from '../../../common/utils';
 import { TabTitleAndDescription, MetricTypeBadge, BadgeGroup } from '../components';
 import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from '../utils';
