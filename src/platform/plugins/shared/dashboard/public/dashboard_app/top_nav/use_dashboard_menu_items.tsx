@@ -20,8 +20,8 @@ import { UI_SETTINGS } from '../../../common/constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
 import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_settings_flyout';
-import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import type { SaveDashboardReturn } from '../../services/dashboard_content_management_service/types';
+import { getDashboardBackupService } from '../../services/dashboard_api_services';
 import { coreServices, shareService, dataService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
@@ -175,8 +175,8 @@ export const useDashboardMenuItems = ({
           viewMode === 'view'
             ? topNavStrings.viewModeInteractiveSave.label
             : Boolean(lastSavedId)
-            ? topNavStrings.editModeInteractiveSave.label
-            : topNavStrings.quickSave.label,
+              ? topNavStrings.editModeInteractiveSave.label
+              : topNavStrings.quickSave.label,
         description:
           viewMode === 'view'
             ? topNavStrings.viewModeInteractiveSave.description

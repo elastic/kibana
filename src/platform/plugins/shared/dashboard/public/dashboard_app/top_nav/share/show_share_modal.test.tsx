@@ -9,7 +9,7 @@
 
 import type { Capabilities } from '@kbn/core/public';
 import type { DashboardLocatorParams } from '../../../../common/types';
-import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
+import { getDashboardBackupService } from '../../../services/dashboard_api_services';
 import { shareService } from '../../../services/kibana_services';
 import { showPublicUrlSwitch, ShowShareModal } from './show_share_modal';
 

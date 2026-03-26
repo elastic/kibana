@@ -13,11 +13,9 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { render, waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import {
-  DASHBOARD_PANELS_UNSAVED_ID,
-  getDashboardBackupService,
-} from '../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_backup_service';
+import { getDashboardBackupService } from '../services/dashboard_api_services';
 import { coreServices } from '../services/kibana_services';
 import type { DashboardUnsavedListingProps } from './dashboard_unsaved_listing';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';

@@ -18,19 +18,17 @@ import {
   EuiTitle,
   euiBreakpoint,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DashboardAttributes } from '../../server/content_management';
-import {
-  DASHBOARD_PANELS_UNSAVED_ID,
-  getDashboardBackupService,
-} from '../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_backup_service';
 import { dashboardUnsavedListingStrings, getNewDashboardTitle } from './_dashboard_listing_strings';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
+import { getDashboardBackupService } from '../services/dashboard_api_services';
 
 const unsavedItemStyles = {
   item: (euiThemeContext: UseEuiTheme) =>
@@ -82,7 +80,12 @@ const DashboardUnsavedItem = ({
     <div css={styles.item}>
       <EuiFlexGroup alignItems="center" gutterSize="none" css={styles.heading} responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon color="text" css={styles.icon} type={title ? 'dashboardApp' : 'clock'} />
+          <EuiIcon
+            color="text"
+            css={styles.icon}
+            type={title ? 'dashboardApp' : 'clock'}
+            aria-hidden={true}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
@@ -145,7 +148,6 @@ export const DashboardUnsavedListing = ({
   refreshUnsavedDashboards,
 }: DashboardUnsavedListingProps) => {
   const [items, setItems] = useState<UnsavedItemMap>({});
-  const dashboardBackupService = useMemo(() => getDashboardBackupService(), []);
 
   const onOpen = useCallback(
     (id?: string) => {
@@ -157,11 +159,11 @@ export const DashboardUnsavedListing = ({
   const onDiscard = useCallback(
     (id?: string) => {
       confirmDiscardUnsavedChanges(() => {
-        dashboardBackupService.clearState(id);
+        getDashboardBackupService().clearState(id);
         refreshUnsavedDashboards();
       });
     },
-    [dashboardBackupService, refreshUnsavedDashboards]
+    [refreshUnsavedDashboards]
   );
 
   useEffect(() => {
@@ -172,12 +174,29 @@ export const DashboardUnsavedListing = ({
     const existingDashboardsWithUnsavedChanges = unsavedDashboardIds.filter(
       (id) => id !== DASHBOARD_PANELS_UNSAVED_ID
     );
+<<<<<<< HEAD
     getDashboardContentManagementService()
       .findDashboards.findByIds(existingDashboardsWithUnsavedChanges)
       .then((results) => {
         const dashboardMap = {};
         if (canceled) {
           return;
+=======
+    findService.findByIds(existingDashboardsWithUnsavedChanges).then((results) => {
+      const dashboardMap = {};
+      if (canceled) {
+        return;
+      }
+      let hasError = false;
+      const newItems = results.reduce((map, result) => {
+        if (result.status === 'error') {
+          hasError = true;
+          if (result.error && result.notFound) {
+            // Save object not found error
+            getDashboardBackupService().clearState(result.id);
+          }
+          return map;
+>>>>>>> 523f0637b949 ([Dashboards] Fix backups service (#257762))
         }
         let hasError = false;
         const newItems = results.reduce((map, result) => {
@@ -204,7 +223,7 @@ export const DashboardUnsavedListing = ({
     return () => {
       canceled = true;
     };
-  }, [dashboardBackupService, refreshUnsavedDashboards, unsavedDashboardIds]);
+  }, [refreshUnsavedDashboards, unsavedDashboardIds]);
 
   return unsavedDashboardIds.length === 0 ? null : (
     <>
