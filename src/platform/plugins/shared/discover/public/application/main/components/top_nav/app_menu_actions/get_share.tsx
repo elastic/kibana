@@ -23,7 +23,7 @@ import { createSearchSource } from '../../../state_management/utils/create_searc
 import type { DiscoverAppLocatorParams } from '../../../../../../common/app_locator';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
-import type { TabState } from '../../../state_management/redux/types';
+import type { TabState } from '../../../state_management/redux';
 
 interface BuildShareOptionsParams {
   discoverParams: AppMenuDiscoverParams;

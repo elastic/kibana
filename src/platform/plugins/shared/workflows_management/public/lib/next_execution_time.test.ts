@@ -8,7 +8,7 @@
  */
 
 import { calculateNextExecutionTime, getWorkflowNextExecutionTime } from './next_execution_time';
-import type { WorkflowTrigger } from '../../server/lib/schedule_utils';
+import type { WorkflowTrigger } from '../../common/lib/trigger_types';
 
 describe('next_execution_time', () => {
   const mockNow = new Date('2025-01-15T10:00:00Z');

@@ -38,6 +38,7 @@ import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast
 import { Parser } from '@elastic/esql';
 import { setTestFunctions } from '../../definitions/utils/test_functions';
 import { getDateHistogramCompletionItem, PLACEHOLDER_CONFIG } from '../complete_items';
+import { attachReplacementRanges } from '../../../language/autocomplete/utils/prefix_range';
 
 const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
 const allAggFunctions = getFunctionSignaturesByReturnType(Location.STATS, 'any', {
@@ -131,11 +132,20 @@ describe('STATS Autocomplete', () => {
     const correctedQuery = correctQuerySyntax(query);
     const { root } = Parser.parse(correctedQuery, { withFormatting: true });
     const cursorPosition = query.length;
+    const innerText = query.substring(0, cursorPosition);
     const { command } = findAstPosition(root, cursorPosition);
     if (!command) {
       throw new Error('Command not found in the parsed query');
     }
-    return autocomplete(query, command, mockCallbacks, mockContext, cursorPosition);
+    const contextWithRoot = { ...mockContext, rootAst: root };
+    const suggestions = await autocomplete(
+      query,
+      command,
+      mockCallbacks,
+      contextWithRoot,
+      cursorPosition
+    );
+    return attachReplacementRanges(innerText, suggestions, contextWithRoot);
   };
   describe('STATS ...', () => {
     afterEach(() => setTestFunctions([]));
@@ -847,7 +857,7 @@ describe('STATS Autocomplete', () => {
 
           const suggestions = await suggest('FROM a | STATS BY ');
 
-          expect(suggestions).toContainEqual(expectedCompletionItem);
+          expect(suggestions).toContainEqual(expect.objectContaining(expectedCompletionItem));
         });
 
         test('BUCKET constant arguments should not trigger function suggestions', async () => {

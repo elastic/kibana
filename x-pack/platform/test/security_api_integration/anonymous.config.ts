@@ -16,6 +16,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
+  const testEndpointsPlugin = resolve(__dirname, '../security_functional/plugins/test_endpoints');
   const auditLogPath = resolve(__dirname, './plugins/audit_log/anonymous.log');
 
   return {
@@ -37,6 +38,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
+        `--plugin-path=${testEndpointsPlugin}`,
         `--xpack.security.authc.selector.enabled=false`,
         `--xpack.security.authc.providers=${JSON.stringify({
           anonymous: {

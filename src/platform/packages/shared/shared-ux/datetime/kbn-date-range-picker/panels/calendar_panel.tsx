@@ -23,9 +23,8 @@ import {
 } from '../date_range_picker_panel_ui';
 import { calendarPanelTexts, mainPanelTexts } from '../translations';
 import { timeRangeToDisplayText } from '../format';
-import { combineDateAndTime, formatDateRange, toLocalPreciseString } from '../utils';
+import { getEndDate, getStartDate, formatDateRange, toLocalPreciseString } from '../utils';
 import { useDateRangePickerContext } from '../date_range_picker_context';
-import { DEFAULT_END_TIME, DEFAULT_START_TIME } from './calendar_panel.constants';
 
 /** Calendar-based date selection panel. */
 export function CalendarPanel() {
@@ -71,27 +70,14 @@ export function CalendarPanel() {
     setText(originalTextRef.current);
   }, [setText]);
 
-  const getStartDate = useCallback(
-    (date: Date) => combineDateAndTime(date, timeSourceRef.current.startDate, DEFAULT_START_TIME),
-    []
-  );
+  const getOrderedDates = useCallback((from: Date, to: Date): { start: Date; end: Date } => {
+    const startDate = getStartDate(from);
+    const endDate = getEndDate(to);
 
-  const getEndDate = useCallback(
-    (date: Date) => combineDateAndTime(date, timeSourceRef.current.endDate, DEFAULT_END_TIME),
-    []
-  );
-
-  const getOrderedDates = useCallback(
-    (from: Date, to: Date): { start: Date; end: Date } => {
-      const startDate = getStartDate(from);
-      const endDate = getEndDate(to);
-
-      return startDate <= endDate
-        ? { start: startDate, end: endDate }
-        : { start: endDate, end: startDate };
-    },
-    [getStartDate, getEndDate]
-  );
+    return startDate <= endDate
+      ? { start: startDate, end: endDate }
+      : { start: endDate, end: startDate };
+  }, []);
 
   const formatRangeText = useCallback(
     (from: Date, to?: Date): string => {
@@ -100,7 +86,7 @@ export function CalendarPanel() {
       const { start, end } = getOrderedDates(from, to);
       return formatDateRange(start, end);
     },
-    [getStartDate, getOrderedDates]
+    [getOrderedDates]
   );
 
   const absoluteRange = useMemo(() => {
@@ -173,6 +159,8 @@ export function CalendarPanel() {
           type: [DATE_TYPE_ABSOLUTE, DATE_TYPE_ABSOLUTE],
           isNaturalLanguage: false,
           isInvalid: false,
+          startOffset: null,
+          endOffset: null,
         }),
       });
     }

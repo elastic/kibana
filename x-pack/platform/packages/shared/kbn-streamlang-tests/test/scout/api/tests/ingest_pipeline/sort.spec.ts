@@ -8,12 +8,13 @@
 import { expect } from '@kbn/scout/api';
 import type { SortProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { tags } from '@kbn/scout';
 import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Streamlang to Ingest Pipeline - Sort Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest('should sort an array field in ascending order (in-place)', async ({ testBed }) => {
       const indexName = 'streams-e2e-test-sort-basic';
@@ -253,7 +254,10 @@ apiTest.describe(
         (d: Record<string, unknown>) => asDoc(asDoc(d)?.event)?.kind === 'test'
       );
       expect(doc1).toStrictEqual(
-        expect.objectContaining({ tags: ['alpha', 'bravo', 'charlie'], 'event.kind': 'test' })
+        expect.objectContaining({
+          tags: ['alpha', 'bravo', 'charlie'],
+          event: expect.objectContaining({ kind: 'test' }),
+        })
       );
 
       // Second doc: where condition not matched, processor doesn't sort
@@ -262,7 +266,9 @@ apiTest.describe(
       );
       expect(asDoc(doc2)?.tags).toStrictEqual(expect.arrayContaining(['zulu', 'xray', 'yankee']));
       expect(asDoc(doc2)?.tags).toHaveLength(3);
-      expect(doc2).toStrictEqual(expect.objectContaining({ 'event.kind': 'production' }));
+      expect(doc2).toStrictEqual(
+        expect.objectContaining({ event: expect.objectContaining({ kind: 'production' }) })
+      );
     });
 
     apiTest(
@@ -304,7 +310,7 @@ apiTest.describe(
           expect.objectContaining({
             tags: ['charlie', 'alpha', 'bravo'], // Original preserved
             sorted_tags: ['alpha', 'bravo', 'charlie'], // New field created
-            'event.kind': 'test',
+            event: expect.objectContaining({ kind: 'test' }),
           })
         );
 
@@ -315,7 +321,9 @@ apiTest.describe(
         );
         expect(asDoc(doc2)?.tags).toStrictEqual(expect.arrayContaining(['zulu', 'xray', 'yankee']));
         expect(asDoc(doc2)?.tags).toHaveLength(3);
-        expect(doc2).toStrictEqual(expect.objectContaining({ 'event.kind': 'production' }));
+        expect(doc2).toStrictEqual(
+          expect.objectContaining({ event: expect.objectContaining({ kind: 'production' }) })
+        );
         expect(asDoc(doc2)?.sorted_tags).toBeUndefined();
       }
     );

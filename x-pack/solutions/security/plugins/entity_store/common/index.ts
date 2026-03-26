@@ -27,6 +27,15 @@ export const EntityStoreStatus = z.enum([
   'error',
 ]);
 
+export const API_VERSIONS = {
+  public: {
+    v1: '2023-10-31',
+  },
+  internal: {
+    v2: '2',
+  },
+} as const;
+
 const ENTITY_STORE_BASE_ROUTE = '/internal/security/entity_store';
 
 export const ENTITY_STORE_ROUTES = {
@@ -36,10 +45,13 @@ export const ENTITY_STORE_ROUTES = {
   STATUS: `${ENTITY_STORE_BASE_ROUTE}/status`,
   START: `${ENTITY_STORE_BASE_ROUTE}/start`,
   STOP: `${ENTITY_STORE_BASE_ROUTE}/stop`,
+  CHECK_PRIVILEGES: `${ENTITY_STORE_BASE_ROUTE}/check_privileges`,
   FORCE_LOG_EXTRACTION: `${ENTITY_STORE_BASE_ROUTE}/{entityType}/force_log_extraction`,
   FORCE_HISTORY_SNAPSHOT: `${ENTITY_STORE_BASE_ROUTE}/force_history_snapshot`,
-  CRUD_UPSERT: `${ENTITY_STORE_BASE_ROUTE}/entities/{entityType}`,
-  CRUD_UPSERT_BULK: `${ENTITY_STORE_BASE_ROUTE}/entities/bulk`,
+  CRUD_CREATE: `${ENTITY_STORE_BASE_ROUTE}/entities/{entityType}`,
+  CRUD_UPDATE: `${ENTITY_STORE_BASE_ROUTE}/entities/{entityType}`,
+  CRUD_BULK_UPDATE: `${ENTITY_STORE_BASE_ROUTE}/entities/bulk`,
+  CRUD_GET: `${ENTITY_STORE_BASE_ROUTE}/entities`,
   CRUD_DELETE: `${ENTITY_STORE_BASE_ROUTE}/entities/`,
   RESOLUTION_LINK: `${ENTITY_STORE_BASE_ROUTE}/resolution/link`,
   RESOLUTION_UNLINK: `${ENTITY_STORE_BASE_ROUTE}/resolution/unlink`,
@@ -74,4 +86,15 @@ export interface IdentitySourceFields {
   identitySourceFields: string[];
 }
 
-export type { Entity } from './domain/definitions/entity.gen';
+export type { Entity, AssetCriticalityLevel } from './domain/definitions/entity.gen';
+
+export {
+  ENTITY_LATEST,
+  ENTITY_UPDATES,
+  ENTITY_HISTORY,
+  ENTITY_BASE_PREFIX,
+  ENTITY_SCHEMA_VERSION_V2,
+  getEntityIndexPattern,
+  getEntitiesAliasPattern,
+  getLatestEntitiesIndexName,
+} from './domain/entity_index';

@@ -16,9 +16,18 @@ import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import { isWriteBlockException, isIndexNotFoundException } from './es_errors';
-import { WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE } from './constants';
-import type { TargetIndexHadWriteBlock, RequestEntityTooLargeException, IndexNotFound } from '.';
+import {
+  isWriteBlockException,
+  isIndexNotFoundException,
+  isUnavailableShardsException,
+} from './es_errors';
+import { DEFAULT_TIMEOUT, WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE } from './constants';
+import type {
+  TargetIndexHadWriteBlock,
+  RequestEntityTooLargeException,
+  IndexNotFound,
+  UnavailableShardsException,
+} from '.';
 import type { BulkOperation } from '../model/create_batches';
 
 /** @internal */
@@ -33,6 +42,11 @@ export interface BulkOverwriteTransformedDocumentsParams {
    * must be an alias, otherwise the bulk index will fail.
    */
   useAliasToPreventAutoCreate?: boolean;
+  /**
+   * How long to wait for the request to complete, including waiting for
+   * active shards. Defaults to DEFAULT_TIMEOUT (300s).
+   */
+  timeout?: string;
 }
 
 /**
@@ -46,11 +60,13 @@ export const bulkOverwriteTransformedDocuments =
     operations,
     refresh = false,
     useAliasToPreventAutoCreate = false,
+    timeout = DEFAULT_TIMEOUT,
   }: BulkOverwriteTransformedDocumentsParams): TaskEither.TaskEither<
     | RetryableEsClientError
     | TargetIndexHadWriteBlock
     | IndexNotFound
-    | RequestEntityTooLargeException,
+    | RequestEntityTooLargeException
+    | UnavailableShardsException,
     'bulk_index_succeeded'
   > =>
   () => {
@@ -67,6 +83,7 @@ export const bulkOverwriteTransformedDocuments =
         require_alias: useAliasToPreventAutoCreate,
         wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
         refresh,
+        timeout,
         filter_path: ['items.*.error'],
         // we need to unwrap the existing BulkIndexOperationTuple's
         operations: operations.flat(),
@@ -91,6 +108,12 @@ export const bulkOverwriteTransformedDocuments =
             return Either.left({
               type: 'index_not_found_exception' as const,
               index,
+            });
+          }
+          if (errors.every(isUnavailableShardsException)) {
+            return Either.left({
+              type: 'unavailable_shards_exception' as const,
+              message: `[${index}] Not enough active copies to meet shard count of [ALL]`,
             });
           }
           throw new Error(JSON.stringify(errors));

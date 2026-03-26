@@ -119,19 +119,23 @@ export function convertSortProcessorToESQL(processor: SortProcessor): ESQLAstCom
   const hasCondition = 'where' in processor && processor.where && !('always' in processor.where);
 
   if (hasCondition || ignore_missing) {
-    // Build the condition expression
+    // Build the condition expression using correct ES|QL null check syntax (NOT(field IS NULL))
     let conditionExpression;
 
     if (hasCondition && ignore_missing) {
-      // Combine where condition with null check: (condition) AND (field IS NOT NULL)
+      // Combine where condition with null check: (condition) AND NOT(field IS NULL)
       const whereCondition = conditionToESQLAst(processor.where!);
-      const notNullCheck = Builder.expression.func.call('IS_NOT_NULL', [fromColumn]);
+      const notNullCheck = Builder.expression.func.call('NOT', [
+        Builder.expression.func.postfix('IS NULL', fromColumn),
+      ]);
       conditionExpression = Builder.expression.func.binary('and', [whereCondition, notNullCheck]);
     } else if (hasCondition) {
       conditionExpression = conditionToESQLAst(processor.where!);
     } else {
-      // Just ignore_missing: field IS NOT NULL
-      conditionExpression = Builder.expression.func.call('IS_NOT_NULL', [fromColumn]);
+      // Just ignore_missing: NOT(field IS NULL)
+      conditionExpression = Builder.expression.func.call('NOT', [
+        Builder.expression.func.postfix('IS NULL', fromColumn),
+      ]);
     }
 
     // For CASE else clause: use target field if it exists, else use source field

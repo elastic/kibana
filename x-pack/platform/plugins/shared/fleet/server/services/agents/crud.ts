@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { groupBy } from 'lodash';
+import { chunk, groupBy } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
@@ -627,19 +627,33 @@ export async function getAgentsById(
     return [];
   }
 
-  const idsQuery = {
-    terms: {
-      _id: agentIds,
-    },
-  };
-  const { agents } = await _filterAgents(esClient, soClient, idsQuery, {
-    perPage: agentIds.length,
-  });
+  // Each search must keep from + size <= index.max_result_window (default 10_000).
+  // _filterAgents uses from: (page - 1) * perPage with page 1, so perPage must not exceed SO_SEARCH_LIMIT.
+  const idBatches = chunk(agentIds, SO_SEARCH_LIMIT);
+  const agentsById = new Map<string, Agent>();
+
+  if (idBatches.length > 1) {
+    appContextService
+      .getLogger()
+      .debug(`Querying agents in ${idBatches.length} batches because agentIds.length is > 10k`);
+  }
+
+  for (const batch of idBatches) {
+    const idsQuery = {
+      terms: {
+        _id: batch,
+      },
+    };
+    const { agents } = await _filterAgents(esClient, soClient, idsQuery, {
+      perPage: batch.length,
+    });
+    for (const agent of agents) {
+      agentsById.set(agent.id, agent);
+    }
+  }
 
   // return agents in the same order as agentIds
-  return agentIds.map(
-    (agentId) => agents.find((agent) => agent.id === agentId) || { id: agentId, notFound: true }
-  );
+  return agentIds.map((agentId) => agentsById.get(agentId) || { id: agentId, notFound: true });
 }
 
 // given a list of agentPolicyIds, return a map of agent version => count of agents

@@ -114,6 +114,12 @@ export interface AgentConfiguration {
   workflow_ids?: string[];
 
   /**
+   * Optional list of plugin IDs assigned to this agent.
+   * Skills contributed by these plugins will be available to the agent during execution.
+   */
+  plugin_ids?: string[];
+
+  /**
    * Custom configuration for the research step of the agent.
    */
   research?: AgentResearchStepConfiguration;

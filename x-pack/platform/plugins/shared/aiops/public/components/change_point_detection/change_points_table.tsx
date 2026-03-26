@@ -227,7 +227,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
                           defaultMessage: 'Filter for value',
                         }
                       ),
-                      icon: 'plusInCircle',
+                      icon: 'plusCircle',
                       color: 'primary',
                       type: 'icon',
                       onClick: (item) => {
@@ -255,7 +255,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
                           defaultMessage: 'Filter out value',
                         }
                       ),
-                      icon: 'minusInCircle',
+                      icon: 'minusCircle',
                       color: 'primary',
                       type: 'icon',
                       onClick: (item) => {
@@ -318,7 +318,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       noItemsMessage={
         isLoading ? (
           <EuiEmptyPrompt
-            iconType="search"
+            iconType="magnify"
             title={
               <h3>
                 <FormattedMessage

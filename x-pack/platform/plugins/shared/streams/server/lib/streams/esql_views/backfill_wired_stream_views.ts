@@ -160,7 +160,10 @@ export async function backfillWiredStreamViews({
         name: getEsqlViewName(def.name),
         query: getWiredStreamViewQuery(def.name, directChildren),
       });
-    }
+    },
+    // Sequential to avoid ConcurrentModificationException in Elasticsearch's
+    // PlanTelemetry when multiple PUT view requests arrive in parallel.
+    { sequential: true }
   );
 
   logger.info('Wired stream ES|QL view backfill completed successfully.');

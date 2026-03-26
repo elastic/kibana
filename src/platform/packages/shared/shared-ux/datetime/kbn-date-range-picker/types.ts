@@ -13,16 +13,16 @@ import type { DATE_TYPE_ABSOLUTE, DATE_TYPE_RELATIVE, DATE_TYPE_NOW } from './co
 
 export type DateType = typeof DATE_TYPE_ABSOLUTE | typeof DATE_TYPE_RELATIVE | typeof DATE_TYPE_NOW;
 
-/** Single-character date-math time unit (e.g. `'d'` for days, `'M'` for months). */
+/** Canonical date-math time units */
 export type TimeUnit = 'ms' | 's' | 'm' | 'h' | 'd' | 'w' | 'M' | 'y';
 
-/** Structured offset extracted from a relative date-math string like `now-7d/d`. */
+/** Structured offset extracted from a relative date-math string like `now-7d/d` */
 export interface DateOffset {
   /** Signed offset. Negative = past, positive = future. */
   count: number;
-  /** Time unit for the offset. */
+  /** Time unit for the offset */
   unit: TimeUnit;
-  /** Optional rounding unit (the `/d` in `now-1d/d`). */
+  /** Optional rounding unit (the `/d` in `now-1d/d`) */
   roundTo?: TimeUnit;
 }
 
@@ -57,8 +57,65 @@ export interface CalendarOptions {
 
 export interface TimeRangeTransformOptions {
   presets?: TimeRangeBoundsOption[];
+  /** Additional accepted delimiter (on top of the built-in `'to'`, `'until'`, and `'-'`) */
   delimiter?: string;
+  /**
+   * Format string used for both displaying and parsing absolute dates.
+   * Prepended to built-in formats so custom-formatted dates round-trip correctly.
+   */
   dateFormat?: string;
+  /**
+   * Controls rounding of the start bound for relative time ranges.
+   * Only affects relative `start` bounds (strings containing `now`);
+   * future ranges where start is bare `now` are unaffected.
+   * - `true`: keep existing rounding; if absent, infer it from the offset
+   *   unit (`/d` for day-and-above, next-unit-up for sub-day units).
+   * - `false`: strip any rounding suffix.
+   * - `undefined`: leave the start string as-is.
+   * @default undefined
+   */
+  roundRelativeTime?: boolean;
+}
+
+/** Time unit for the auto-refresh interval. */
+export type AutoRefreshIntervalUnit = 's' | 'm' | 'h';
+
+/** Auto-refresh configuration stored in picker settings. */
+export interface AutoRefreshSettings {
+  /**
+   * When true, shows the play/pause button and allows the timer to run (controlled with `isPaused`).
+   * Toggled from Settings, not from the append control.
+   */
+  isEnabled: boolean;
+  /**
+   * When `isEnabled` is true, whether the refresh interval timer is running (`false`) or paused (`true`).
+   */
+  isPaused: boolean;
+  /**
+   * Refresh interval in milliseconds.
+   * @default 10000
+   */
+  interval: number;
+  /**
+   * The unit used to display the interval count in the Settings panel.
+   * Auto-determined from `interval` when absent.
+   */
+  intervalUnit?: AutoRefreshIntervalUnit;
+}
+
+/** User-facing settings exposed by the date range picker settings panel. */
+export interface DateRangePickerSettings {
+  /**
+   * When true, relative time ranges round to the nearest full unit
+   * (e.g. minute, hour, day).
+   * @default true
+   */
+  roundRelativeTime: boolean;
+  /**
+   * Auto-refresh preferences. The Settings “Refresh every” row and the toolbar play/pause control
+   * are shown only when both this and `DateRangePickerProps.onRefresh` are set.
+   */
+  autoRefresh?: AutoRefreshSettings;
 }
 
 export interface TimeRange {
@@ -70,4 +127,8 @@ export interface TimeRange {
   type: [DateType, DateType];
   isNaturalLanguage: boolean;
   isInvalid: boolean;
+  /** Non-null only when the start bound is RELATIVE */
+  startOffset: DateOffset | null;
+  /** Non-null only when the end bound is RELATIVE */
+  endOffset: DateOffset | null;
 }
