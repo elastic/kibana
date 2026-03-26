@@ -224,13 +224,13 @@ export const useTopNavLinks = ({
     // Only show the ES|QL button in classic mode (not in ES|QL mode)
     // The "Switch to Classic" option is now in the tab menu when in ES|QL mode
     if (services.uiSettings.get(ENABLE_ESQL) && !isEsqlMode) {
-      newAppMenuRegistry.setSecondaryActionItem({
+      newAppMenuRegistry.registerItem({
         id: 'esql',
+        order: 2,
         label: i18n.translate('discover.localMenu.tryESQLTitle', {
           defaultMessage: 'ES|QL',
         }),
         iconType: 'editorCodeBlock',
-        color: 'success',
         tooltipContent: i18n.translate('discover.localMenu.esqlTooltipLabel', {
           defaultMessage: `ES|QL is Elastic's powerful new piped query language.`,
         }),
@@ -266,94 +266,127 @@ export const useTopNavLinks = ({
         testId: 'interactiveSaveMenuItem',
       };
 
-      newAppMenuRegistry.setPrimaryActionItem({
-        id: 'save',
-        label: isEmbeddedEditor
-          ? i18n.translate('discover.localMenu.saveAndReturnTitle', {
-              defaultMessage: 'Save and return',
-            })
-          : i18n.translate('discover.localMenu.saveTitle', {
-              defaultMessage: 'Save',
-            }),
-        testId: 'discoverSaveButton',
-        iconType: isEmbeddedEditor ? 'checkInCircleFilled' : 'save',
-        run: async () => {
-          await onSaveDiscoverSession({
-            services,
-            dispatch,
-            getState,
-            runtimeStateManager,
-            onSaveCb: isEmbeddedEditor
-              ? (saveState) => {
-                  const action = saveState
-                    ? TransferAction.SaveSession
-                    : TransferAction.SaveByValue;
-
-                  services.embeddableEditor.transferBackToEditor(action, saveState);
-                }
-              : undefined,
-          });
-        },
-        popoverWidth: 150,
-        popoverTestId: 'discoverSaveButtonPopover',
-        splitButtonProps: {
-          secondaryButtonIcon: 'arrowDown',
-          secondaryButtonAriaLabel: i18n.translate('discover.localMenu.saveOptionsAriaLabel', {
-            defaultMessage: 'Save options',
-          }),
-          // Show different split button options when in embedded editor mode
-          ...(isEmbeddedEditor
-            ? {
-                items: [
-                  savedAsButton,
-                  {
-                    run: () =>
-                      services.embeddableEditor.transferBackToEditor(TransferAction.Cancel),
-                    id: 'cancel',
-                    order: 100,
-                    label: i18n.translate('discover.localMenu.cancelTitle', {
-                      defaultMessage: 'Cancel',
-                    }),
-                    iconType: 'editorUndo',
-                    testId: 'discoverCancelButton',
-                  },
-                ],
-              }
-            : {
-                showNotificationIndicator: hasUnsavedChanges,
-                notifcationIndicatorTooltipContent: hasUnsavedChanges
-                  ? i18n.translate('discover.localMenu.unsavedChangesTooltip', {
-                      defaultMessage: 'You have unsaved changes',
-                    })
-                  : undefined,
-                items: [
-                  {
-                    ...savedAsButton,
-                    disableButton: !persistedDiscoverSession,
-                  },
-                  {
-                    run: async () => {
-                      dismissFlyouts([DiscoverFlyouts.lensEdit]);
-
-                      const internalState = getState();
-
-                      if (internalState.persistedDiscoverSession) {
-                        await dispatch(internalStateActions.resetDiscoverSession()).unwrap();
-                      }
-                    },
-                    id: 'resetChanges',
-                    order: 2,
-                    label: i18n.translate('discover.localMenu.resetChangesTitle', {
-                      defaultMessage: 'Reset changes',
-                    }),
-                    iconType: 'editorUndo',
-                    testId: 'revertUnsavedChangesButton',
-                    disableButton: !hasUnsavedChanges,
-                  },
-                ],
+      if (services.uiSettings.get(ENABLE_ESQL) && !isEsqlMode) {
+        newAppMenuRegistry.setPrimaryActionItem({
+          id: 'save',
+          label: isEmbeddedEditor
+            ? i18n.translate('discover.localMenu.saveAndReturnTitle', {
+                defaultMessage: 'Save and return',
+              })
+            : i18n.translate('discover.localMenu.saveTitle', {
+                defaultMessage: 'Save',
               }),
-        },
-      });
+          testId: 'discoverSaveButton',
+          iconType: isEmbeddedEditor ? 'checkInCircleFilled' : 'save',
+          run: async () => {
+            await onSaveDiscoverSession({
+              services,
+              dispatch,
+              getState,
+              runtimeStateManager,
+              onSaveCb: isEmbeddedEditor
+                ? (saveState) => {
+                    const action = saveState
+                      ? TransferAction.SaveSession
+                      : TransferAction.SaveByValue;
+
+                    services.embeddableEditor.transferBackToEditor(action, saveState);
+                  }
+                : undefined,
+            });
+          },
+          popoverWidth: 150,
+          popoverTestId: 'discoverSaveButtonPopover',
+          splitButtonProps: {
+            secondaryButtonIcon: 'arrowDown',
+            secondaryButtonAriaLabel: i18n.translate('discover.localMenu.saveOptionsAriaLabel', {
+              defaultMessage: 'Save options',
+            }),
+            // Show different split button options when in embedded editor mode
+            ...(isEmbeddedEditor
+              ? {
+                  items: [
+                    savedAsButton,
+                    {
+                      run: () =>
+                        services.embeddableEditor.transferBackToEditor(TransferAction.Cancel),
+                      id: 'cancel',
+                      order: 100,
+                      label: i18n.translate('discover.localMenu.cancelTitle', {
+                        defaultMessage: 'Cancel',
+                      }),
+                      iconType: 'editorUndo',
+                      testId: 'discoverCancelButton',
+                    },
+                  ],
+                }
+              : {
+                  showNotificationIndicator: hasUnsavedChanges,
+                  notifcationIndicatorTooltipContent: hasUnsavedChanges
+                    ? i18n.translate('discover.localMenu.unsavedChangesTooltip', {
+                        defaultMessage: 'You have unsaved changes',
+                      })
+                    : undefined,
+                  items: [
+                    {
+                      ...savedAsButton,
+                      disableButton: !persistedDiscoverSession,
+                    },
+                    {
+                      run: async () => {
+                        dismissFlyouts([DiscoverFlyouts.lensEdit]);
+
+                        const internalState = getState();
+
+                        if (internalState.persistedDiscoverSession) {
+                          await dispatch(internalStateActions.resetDiscoverSession()).unwrap();
+                        }
+                      },
+                      id: 'resetChanges',
+                      order: 2,
+                      label: i18n.translate('discover.localMenu.resetChangesTitle', {
+                        defaultMessage: 'Reset changes',
+                      }),
+                      iconType: 'editorUndo',
+                      testId: 'revertUnsavedChangesButton',
+                      disableButton: !hasUnsavedChanges,
+                    },
+                  ],
+                }),
+          },
+        });
+      } else {
+        newAppMenuRegistry.registerItem({
+          id: 'save',
+          order: 2,
+          label: isEmbeddedEditor
+            ? i18n.translate('discover.localMenu.saveAndReturnTitle', {
+                defaultMessage: 'Save and return',
+              })
+            : i18n.translate('discover.localMenu.saveTitle', {
+                defaultMessage: 'Save',
+              }),
+          testId: 'discoverSaveButton',
+          iconType: isEmbeddedEditor ? 'checkInCircleFilled' : 'save',
+          run: async () => {
+            await onSaveDiscoverSession({
+              services,
+              dispatch,
+              getState,
+              runtimeStateManager,
+              onSaveCb: isEmbeddedEditor
+                ? (saveState) => {
+                    const action = saveState
+                      ? TransferAction.SaveSession
+                      : TransferAction.SaveByValue;
+
+                    services.embeddableEditor.transferBackToEditor(action, saveState);
+                  }
+                : undefined,
+            });
+          },
+        });
+      }
     }
 
     // Allow profile accessors to add additional items/popover items
@@ -390,12 +423,6 @@ export const useTopNavLinks = ({
       primaryActionItem: config.primaryActionItem
         ? enhanceAppMenuItemWithRunAction({
             appMenuItem: config.primaryActionItem,
-            services,
-          })
-        : undefined,
-      secondaryActionItem: config.secondaryActionItem
-        ? enhanceAppMenuItemWithRunAction({
-            appMenuItem: config.secondaryActionItem,
             services,
           })
         : undefined,
