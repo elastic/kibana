@@ -22,6 +22,7 @@ import { RedirectTo } from '../../redirect_to';
 import { QueryStreamSchemaEditor } from '../../query_streams/query_stream_schema_editor';
 import { QueryStreamsAdvancedView } from '../../query_streams/query_streams_advanced_view';
 import { FeedbackButton } from '../../feedback_button';
+import { StreamOverview } from '../../stream_detail_overview';
 
 const queryStreamManagementSubTabs = [
   'overview',
@@ -33,7 +34,13 @@ const queryStreamManagementSubTabs = [
 
 type QueryStreamManagementSubTab = (typeof queryStreamManagementSubTabs)[number];
 
-function isValidManagementSubTab(value: string): value is QueryStreamManagementSubTab {
+function isValidManagementSubTab(
+  value: string,
+  overviewPageEnabled: boolean
+): value is QueryStreamManagementSubTab {
+  if (value === 'overview' && !overviewPageEnabled) {
+    return false;
+  }
   return queryStreamManagementSubTabs.includes(value as QueryStreamManagementSubTab);
 }
 
@@ -51,8 +58,10 @@ export function QueryStreamDetailManagement({
   const { rangeFrom, rangeTo } = useTimeRange();
 
   const {
-    features: { attachments },
+    features: { attachments, overviewPage },
   } = useStreamsPrivileges();
+
+  const { euiTheme } = useEuiTheme();
 
   const { significantEvents } = useStreamsDetailManagementTabs({
     definition,
@@ -61,12 +70,14 @@ export function QueryStreamDetailManagement({
 
   const tabs: ManagementTabs = {};
 
-  tabs.overview = {
-    content: <div />, // TODO: Implement overview tab
-    label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
-      defaultMessage: 'Overview',
-    }),
-  };
+  if (overviewPage.enabled) {
+    tabs.overview = {
+      content: <StreamOverview />,
+      label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
+        defaultMessage: 'Overview',
+      }),
+    };
+  }
 
   tabs.schema = {
     content: (
@@ -109,11 +120,11 @@ export function QueryStreamDetailManagement({
     ),
   };
 
-  const { euiTheme } = useEuiTheme();
+  const defaultTab = overviewPage.enabled ? 'overview' : 'schema';
 
-  if (!isValidManagementSubTab(tab) || !tabs[tab]?.content) {
+  if (!isValidManagementSubTab(tab, overviewPage.enabled) || !tabs[tab]?.content) {
     return (
-      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />
+      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: defaultTab } }} />
     );
   }
 

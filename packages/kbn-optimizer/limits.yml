@@ -1,12 +1,12 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
-  agentBuilder: 45755
+  agentBuilder: 45717
   agentBuilderPlatform: 8886
   aiAssistantManagementSelection: 13590
   aiops: 15227
   alerting: 22371
-  apm: 26560
+  apm: 26482
   apmSourcesAccess: 2278
   automaticImport: 12162
   automaticImportVTwo: 15269
@@ -42,7 +42,7 @@ pageLoadAssetSize:
   dataViewFieldEditor: 26024
   dataViewManagement: 6250
   dataViews: 66000
-  dataVisualizer: 32778
+  dataVisualizer: 32727
   developerToolbar: 4467
   devTools: 8109
   discover: 28241
@@ -93,7 +93,7 @@ pageLoadAssetSize:
   ingestPipelines: 17866
   inputControlVis: 7660
   inspectComponent: 4590
-  inspector: 17954
+  inspector: 17925
   interactiveSetup: 36524
   intercepts: 21066
   kibanaOverview: 6339
@@ -211,4 +211,4 @@ pageLoadAssetSize:
   watcher: 10485
   workflowsExtensions: 38894
   workflowsManagement: 26577
-  workplaceAIApp: 14236
+  workplaceAIApp: 14056
