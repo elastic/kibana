@@ -81,6 +81,7 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
         </EuiContextMenuItem>,
       ],
       [
+        isCasesAttachment,
         row.action_id,
         actionId,
         agentIds,
