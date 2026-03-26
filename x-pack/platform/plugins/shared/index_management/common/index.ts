@@ -17,6 +17,7 @@ export type {
   IndexSettings,
   IndexSettingsResponse,
   Mappings,
+  MappingsResponse,
   TemplateSerialized,
   TemplateDeserialized,
   TemplateType,

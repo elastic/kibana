@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBetaBadge, EuiFlexGroup, EuiIcon, EuiTitle } from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiTitle } from '@elastic/eui';
 
 import {
   overviewQualityIssuesAccordionTechPreviewBadge,
@@ -16,7 +16,6 @@ import {
 export function PossibleMitigationTitle() {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
-      <EuiIcon type="wrench" />
       <EuiTitle
         size="xs"
         data-test-subj="datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTitle"

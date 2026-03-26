@@ -15,6 +15,7 @@
 
 import type { Logger } from 'elastic-apm-node';
 import apm from 'elastic-apm-node';
+import { withActiveSpan } from '@kbn/tracing-utils';
 import type { Subject } from 'rxjs';
 import { createWrappedLogger } from '../lib/wrapped_logger';
 
@@ -69,19 +70,25 @@ const SIZE_MULTIPLIER_FOR_TASK_FETCH = 4;
 export async function claimAvailableTasksMget(
   opts: TaskClaimerOpts
 ): Promise<ClaimOwnershipResult> {
-  const apmTrans = apm.startTransaction(
-    TASK_MANAGER_MARK_AS_CLAIMED,
-    TASK_MANAGER_TRANSACTION_TYPE
-  );
+  return withActiveSpan(
+    'mark-task-as-claimed',
+    { attributes: { 'transaction.type': TASK_MANAGER_TRANSACTION_TYPE } },
+    async () => {
+      const apmTrans = apm.startTransaction(
+        TASK_MANAGER_MARK_AS_CLAIMED,
+        TASK_MANAGER_TRANSACTION_TYPE
+      );
 
-  try {
-    const result = await claimAvailableTasks(opts);
-    apmTrans.end('success');
-    return result;
-  } catch (err) {
-    apmTrans.end('failure');
-    throw err;
-  }
+      try {
+        const result = await claimAvailableTasks(opts);
+        apmTrans.end('success');
+        return result;
+      } catch (err) {
+        apmTrans.end('failure');
+        throw err;
+      }
+    }
+  );
 }
 
 async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershipResult> {
@@ -149,6 +156,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   // apply capacity constraint to candidate tasks
   const tasksToRun: ConcreteTaskInstance[] = [];
   const leftOverTasks: ConcreteTaskInstance[] = [];
+  const tasksWithMalformedData: ConcreteTaskInstance[] = [];
 
   let capacityAccumulator = 0;
   for (const task of candidateTasks) {
@@ -166,19 +174,28 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const now = new Date();
   const taskUpdates: PartialConcreteTaskInstance[] = [];
   for (const task of tasksToRun) {
-    taskUpdates.push({
-      id: task.id,
-      version: task.version,
-      scheduledAt:
-        task.retryAt != null && new Date(task.retryAt).getTime() < Date.now()
-          ? task.retryAt
-          : task.runAt,
-      status: TaskStatus.Running,
-      startedAt: now,
-      attempts: task.attempts + 1,
-      retryAt: getRetryAt(task, definitions.get(task.taskType)) ?? null,
-      ownerId: taskStore.taskManagerId,
-    });
+    try {
+      taskUpdates.push({
+        id: task.id,
+        version: task.version,
+        scheduledAt:
+          task.retryAt != null && new Date(task.retryAt).getTime() < Date.now()
+            ? task.retryAt
+            : task.runAt,
+        status: TaskStatus.Running,
+        startedAt: now,
+        attempts: task.attempts + 1,
+        retryAt: getRetryAt(task, definitions.get(task.taskType)) ?? null,
+        ownerId: taskStore.taskManagerId,
+      });
+    } catch (error) {
+      logger.error(
+        `Error validating task schema ${task.id}:${task.taskType} during claim: ${JSON.stringify(
+          error.message
+        )}`
+      );
+      tasksWithMalformedData.push(task);
+    }
   }
 
   // perform the task object updates, deal with errors
@@ -224,7 +241,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   }, []);
 
   // TODO: need a better way to generate stats
-  const message = `task claimer claimed: ${fullTasksToRun.length}; stale: ${staleTasks.length}; conflicts: ${conflicts}; missing: ${missingTasks.length}; capacity reached: ${leftOverTasks.length}; updateErrors: ${bulkUpdateErrors}; getErrors: ${bulkGetErrors};`;
+  const message = `task claimer claimed: ${fullTasksToRun.length}; stale: ${staleTasks.length}; conflicts: ${conflicts}; missing: ${missingTasks.length}; capacity reached: ${leftOverTasks.length}; updateErrors: ${bulkUpdateErrors}; getErrors: ${bulkGetErrors}; malformed data errors: ${tasksWithMalformedData.length}`;
   logger.debug(message);
 
   // build results
@@ -234,7 +251,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       tasksConflicted: conflicts,
       tasksClaimed: fullTasksToRun.length,
       tasksLeftUnclaimed: leftOverTasks.length,
-      tasksErrors: bulkUpdateErrors + bulkGetErrors,
+      tasksErrors: bulkUpdateErrors + bulkGetErrors + tasksWithMalformedData.length,
       staleTasks: staleTasks.length,
     },
     docs: fullTasksToRun,

@@ -1,0 +1,351 @@
+{
+  "id": "@kbn/dashboard-agent-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.isSection",
+        "type": "Function",
+        "tags": [],
+        "label": "isSection",
+        "description": [
+          "\nType guard to check if a widget is a section."
+        ],
+        "signature": [
+          "(widget: any) => widget is z.infer<any>"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 78,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dashboard-agent-common",
+            "id": "def-common.isSection.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "widget",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.PanelAddedEventData",
+        "type": "Interface",
+        "tags": [],
+        "label": "PanelAddedEventData",
+        "description": [
+          "\nData payload for a panel added event."
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 105,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dashboard-agent-common",
+            "id": "def-common.PanelAddedEventData.dashboardAttachmentId",
+            "type": "string",
+            "tags": [],
+            "label": "dashboardAttachmentId",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dashboard-agent-common",
+            "id": "def-common.PanelAddedEventData.panel",
+            "type": "Any",
+            "tags": [],
+            "label": "panel",
+            "description": [],
+            "signature": [
+              "z.infer<any>"
+            ],
+            "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.PanelsRemovedEventData",
+        "type": "Interface",
+        "tags": [],
+        "label": "PanelsRemovedEventData",
+        "description": [
+          "\nData payload for a panel removed event."
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 113,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dashboard-agent-common",
+            "id": "def-common.PanelsRemovedEventData.dashboardAttachmentId",
+            "type": "string",
+            "tags": [],
+            "label": "dashboardAttachmentId",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dashboard-agent-common",
+            "id": "def-common.PanelsRemovedEventData.panelIds",
+            "type": "Array",
+            "tags": [],
+            "label": "panelIds",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.AttachmentPanel",
+        "type": "Type",
+        "tags": [],
+        "label": "AttachmentPanel",
+        "description": [
+          "\nA dashboard panel entry."
+        ],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.attachmentPanelSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "attachmentPanelSchema",
+        "description": [
+          "\n\n\nZod schema for generic (non-Lens) panel entries.\nThe `type` field contains the actual embeddable type."
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.DASHBOARD_ATTACHMENT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "DASHBOARD_ATTACHMENT_TYPE",
+        "description": [
+          "\nAttachment type identifier for dashboard state"
+        ],
+        "signature": [
+          "\"platform.dashboard.dashboard_state\""
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.DashboardAttachmentData",
+        "type": "Type",
+        "tags": [],
+        "label": "DashboardAttachmentData",
+        "description": [
+          "\nData for a dashboard attachment."
+        ],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 95,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.dashboardAttachmentDataSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "dashboardAttachmentDataSchema",
+        "description": [
+          "\nZod schema for dashboard attachment data.\nMatches the Dashboard API structure where panels and sections are in a single array."
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 88,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.DashboardAttachmentOrigin",
+        "type": "Type",
+        "tags": [],
+        "label": "DashboardAttachmentOrigin",
+        "description": [
+          "\nOrigin payload for dashboard attachments is a saved object ID string."
+        ],
+        "signature": [
+          "string"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 100,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.DashboardSection",
+        "type": "Type",
+        "tags": [],
+        "label": "DashboardSection",
+        "description": [
+          "\nA dashboard section containing panels."
+        ],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 70,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.dashboardSectionSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "dashboardSectionSchema",
+        "description": [
+          "\nZod schema for a dashboard section containing panels."
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 57,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.panelGridSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "panelGridSchema",
+        "description": [
+          "\nGrid dimensions (in dashboard grid units) for layout.\nDashboard grid is 48 columns wide; height is in same units."
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.sectionGridSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "sectionGridSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 50,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -6,7 +6,7 @@
  */
 
 import { ServerSentEventError } from '@kbn/sse-utils';
-import { InferenceTaskEventBase, InferenceTaskEventType } from './inference_task';
+import type { InferenceTaskEventBase, InferenceTaskEventType } from './inference_task';
 
 /**
  * Enum for generic inference error codes.

@@ -4,28 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { lastValueFrom } from 'rxjs';
 import { CDR_MISCONFIGURATIONS_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import type { UseCspOptions } from '@kbn/cloud-security-posture-common/types/findings';
+import { buildFindingsQueryWithFilters } from '@kbn/cloud-security-posture-common/utils/findings_query_builders';
 import { showErrorToast } from '../..';
 import type {
   CspClientPluginStartDeps,
   LatestFindingsRequest,
   LatestFindingsResponse,
-  UseCspOptions,
 } from '../types';
-import { buildFindingsQueryWithFilters } from '../utils/findings_query_builders';
-
-const GET_MISCONFIGURATIONS_SOURCE_FIELDS = [
-  'result.*',
-  'rule.*',
-  'resource.*',
-  '@timestamp',
-  'observer',
-  'data_stream.*',
-];
 
 export const buildGetMisconfigurationsFindingsQuery = ({ query }: UseCspOptions) => {
   return {
@@ -33,7 +24,6 @@ export const buildGetMisconfigurationsFindingsQuery = ({ query }: UseCspOptions)
     size: 1,
     ignore_unavailable: true,
     query: buildFindingsQueryWithFilters(query),
-    _source: GET_MISCONFIGURATIONS_SOURCE_FIELDS,
   };
 };
 

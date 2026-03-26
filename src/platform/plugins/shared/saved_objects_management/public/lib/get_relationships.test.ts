@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { v1 } from '../../common';
+import type { v1 } from '../../common';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { getRelationships } from './get_relationships';
 

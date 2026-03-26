@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaResponseFactory } from '@kbn/core/server';
+import type { KibanaResponseFactory } from '@kbn/core/server';
 
 export function getMonitorNotFoundResponse(response: KibanaResponseFactory, monitorId: string) {
   return response.notFound({ body: { message: `Monitor id ${monitorId} not found!` } });

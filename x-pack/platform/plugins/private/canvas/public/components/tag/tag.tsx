@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import PropTypes from 'prop-types';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiBadge, EuiHealth } from '@elastic/eui';
 
 interface Props {
@@ -44,10 +44,4 @@ export const Tag: FunctionComponent<Props> = ({
         </EuiBadge>
       );
   }
-};
-
-Tag.propTypes = {
-  name: PropTypes.string.isRequired,
-  color: PropTypes.string,
-  type: PropTypes.string,
 };

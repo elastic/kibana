@@ -35,6 +35,8 @@
           "User"
         ],
         "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -51,6 +53,8 @@
               "UserRealm"
             ],
             "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -67,6 +71,8 @@
               "UserRealm"
             ],
             "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -83,6 +89,8 @@
               "AuthenticationProvider"
             ],
             "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -96,6 +104,8 @@
               "\nThe AuthenticationType used by ES to authenticate the user.\n"
             ],
             "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -109,6 +119,8 @@
               "\nIndicates whether user is authenticated via Elastic Cloud built-in SAML realm."
             ],
             "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -125,6 +137,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -141,6 +155,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -158,6 +174,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -174,6 +192,8 @@
           "\nType and name tuple to identify provider used to authenticate user."
         ],
         "path": "src/core/packages/security/common/src/authentication/authentication_provider.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -187,6 +207,8 @@
               "\nType of the Kibana authentication provider."
             ],
             "path": "src/core/packages/security/common/src/authentication/authentication_provider.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -200,6 +222,8 @@
               "\nName of the Kibana authentication provider (arbitrary string)."
             ],
             "path": "src/core/packages/security/common/src/authentication/authentication_provider.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -216,6 +240,8 @@
           "\nA set of fields describing Kibana user."
         ],
         "path": "src/core/packages/security/common/src/authentication/user.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -227,6 +253,8 @@
             "label": "username",
             "description": [],
             "path": "src/core/packages/security/common/src/authentication/user.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -241,6 +269,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/security/common/src/authentication/user.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -255,6 +285,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/security/common/src/authentication/user.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -269,6 +301,8 @@
               "readonly string[]"
             ],
             "path": "src/core/packages/security/common/src/authentication/user.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -280,6 +314,8 @@
             "label": "enabled",
             "description": [],
             "path": "src/core/packages/security/common/src/authentication/user.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -294,6 +330,8 @@
               "{ _reserved: boolean; _deprecated?: boolean | undefined; _deprecated_reason?: string | undefined; } | undefined"
             ],
             "path": "src/core/packages/security/common/src/authentication/user.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -310,6 +348,8 @@
           "\nAn Elasticsearch realm that was used to resolve and authenticate the user."
         ],
         "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -323,6 +363,8 @@
               "\nArbitrary name of the security realm."
             ],
             "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -336,6 +378,8 @@
               "\nType of the security realm (file, native, saml etc.)."
             ],
             "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

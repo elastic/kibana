@@ -7,4 +7,4 @@
 
 export * from './artifacts';
 export * from './client';
-export * from './types';
+export type * from './types';

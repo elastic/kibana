@@ -21,9 +21,11 @@
           "\n\nInitializes OpenTelemetry (currently only tracing)\n"
         ],
         "signature": [
-          "(argv: string[], rootDir: string, isDistributable: boolean, serviceName: string) => () => Promise<void>"
+          "(argv: string[], rootDir: string, isDistributable: boolean, serviceName: string) => void"
         ],
         "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -57,6 +61,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -74,6 +80,8 @@
               "boolean"
             ],
             "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -91,6 +99,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -99,6 +109,83 @@
         "returnComment": [
           "A function that can be called on shutdown and allows exporters to flush their queue."
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/telemetry",
+        "id": "def-server.setDiagLogger",
+        "type": "Function",
+        "tags": [],
+        "label": "setDiagLogger",
+        "description": [
+          "\nHelper to make it easier to configure OTel's {@link DiagLogger}."
+        ],
+        "signature": [
+          "(logger: ",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          ", logLevel: ",
+          "LogLevelId",
+          " | undefined) => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-telemetry/src/set_diag_logger.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/telemetry",
+            "id": "def-server.setDiagLogger.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [
+              "{@link Logger}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-telemetry/src/set_diag_logger.ts",
+            "lineNumber": 20,
+            "columnNumber": 31,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/telemetry",
+            "id": "def-server.setDiagLogger.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "logLevel",
+            "description": [
+              "The {@link LogLevelId} to set the Diag logger to."
+            ],
+            "signature": [
+              "LogLevelId",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-telemetry/src/set_diag_logger.ts",
+            "lineNumber": 20,
+            "columnNumber": 47,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       }
     ],

@@ -9,13 +9,14 @@ In addition to running our tests, CI collects metrics about the Kibana build. Th
 
 * [Metric types](#ci-metric-types)
 * [Resolving `page load bundle size` overages](#ci-metric-resolving-overages)
+* [Actions to reduce `page load bundle size`](#ci-metric-quick-actions)
 * [Validating `page load bundle size` limits](#ci-metric-validating-limits)
 
 ## Metric types [ci-metric-types]
 
 ### Bundle size [ci-metric-types-bundle-size-metrics]
 
-These metrics help contributors know how they are impacting the size of the bundles Kibana creates, and help make sure that Kibana loads as fast as possible.
+These metrics track the impact of code changes on Kibana bundle sizes, ensuring optimal loading performance.
 
 $$$ci-metric-page-load-bundle-size$$$ `page load bundle size`
 :   The size of the entry file produced for each bundle/plugin. This file is always loaded on every page load, so it should be as small as possible. To reduce this metric you can put any code that isn’t necessary on every page load behind an [`async import()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#Dynamic_Imports).
@@ -24,18 +25,18 @@ $$$ci-metric-page-load-bundle-size$$$ `page load bundle size`
 
 
 $$$ci-metric-async-chunks-size$$$ `async chunks size`
-:   An "async chunk" is created for the files imported by each [`async import()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#Dynamic_Imports) statement. This metric tracks the sum size of these chunks, in bytes, broken down by plugin/bundle id. You can think of this as the amount of code users will have to download if they access all the components/applications within a bundle.
+:   Tracks the sum size (in bytes, by plugin/bundle ID) of "async chunks," which are created for files imported via [`async import()`](https://developer.mozilla.org/en-US/Web/JavaScript/Reference/Statements/import#Dynamic_Imports) statements. This metric reflects the amount of code downloaded when accessing all components within a bundle.
 
 $$$ci-metric-misc-asset-size$$$ `miscellaneous assets size`
-:   A "miscellaneous asset" is anything that isn’t an async chunk or entry chunk, often images. This metric tracks the sum size of these assets, in bytes, broken down by plugin/bundle id.
+:   Tracks the sum size (in bytes, by plugin/bundle ID) of assets that are not async or entry chunks, typically images.
 
 $$$ci-metric-bundle-module-count$$$ `@kbn/optimizer bundle module count`
-:   The number of separate modules included in each bundle/plugin. This is the best indicator we have for how long a specific bundle will take to be built by the `@kbn/optimizer`, so we report it to help people know when they’ve imported a module which might include a surprising number of sub-modules.
+:   The number of separate modules per bundle/plugin. This metric indicates the `@kbn/optimizer` build time for a bundle, highlighting potentially large module imports.
 
 
 ### Distributable size [ci-metric-types-distributable-size]
 
-The size of the Kibana distributable is an essential metric as it not only contributes to the time it takes to download, but it also impacts time it takes to extract the archive once downloaded.
+The Kibana distributable size is crucial, affecting both download and archive extraction times.
 
 There are several metrics that we don’t report on PRs because gzip-compression produces different file sizes even when provided the same input, so this metric would regularly show changes even though PR authors hadn’t made any relevant changes.
 
@@ -64,15 +65,15 @@ You can report new metrics by using the `CiStatsReporter` class provided by the 
 
 ## Resolving `page load bundle size` overages [ci-metric-resolving-overages]
 
-In order to prevent the page load bundles from growing unexpectedly large we limit the `page load asset size` metric for each plugin. When a PR increases this metric beyond the limit defined for that plugin in [`limits.yml`](https://github.com/elastic/kibana/blob/master/packages/kbn-optimizer/limits.yml) a failed commit status is set and the PR author needs to decide how to resolve this issue before the PR can be merged.
+To prevent unexpected growth, the `page load bundle size` for each plugin is limited. If a PR exceeds this limit, defined in [`limits.yml`](https://github.com/elastic/kibana/blob/master/packages/kbn-optimizer/limits.yml), the PR author must resolve the overage before merging.
 
 In most cases the limit should be high enough that PRs shouldn’t trigger overages, but when they do make sure it’s clear what is causing the overage by trying the following:
 
-1. Run the optimizer locally with the `--profile` flag to produce webpack `stats.json` files for bundles which can be inspected using a number of different online tools. Focus on the chunk named `{{pluginId}}.plugin.js`; the `*.chunk.js` chunks make up the `async chunks size` metric which is currently unlimited and is the main way that we [reduce the size of page load chunks](/extend/plugin-performance.md).
+1. Run the optimizer locally with the `--profile` flag to produce webpack `stats.json` files for bundles which can be inspected using a number of different online tools. Focus on the chunk named `{{pluginId}}.plugin.js`; the `*.chunk.js` chunks make up the `async chunks size` metric which is currently unlimited and is the main way to move code off the initial page load.
 
     ```shell
-    node scripts/build_kibana_platform_plugins --focus {pluginid} --profile
-    # builds and creates {pluginDir}target/public/stats.json files for {pluginId} and any plugin it depends on
+    node scripts/build_kibana_platform_plugins --focus {pluginId} --profile
+    # builds and creates {pluginDir}/target/public/stats.json files for {pluginId} and any plugin it depends on
     ```
 
     * Official Webpack tool: [http://webpack.github.io/analyse/](http://webpack.github.io/analyse/)
@@ -99,7 +100,7 @@ In most cases the limit should be high enough that PRs shouldn’t trigger overa
 
 6. If all else fails reach out to Operations for help.
 
-Once you’ve identified the files which were added to the build you likely just need to stick them behind an async import as described in [Plugin performance](/extend/plugin-performance.md).
+Once you’ve identified the files which were added to the build you likely need to stick them behind an async import.
 
 In the case that the bundle size is not being bloated by anything obvious, but it’s still larger than the limit, you can raise the limit in your PR. Do this either by editing the [`limits.yml` file](https://github.com/elastic/kibana/blob/master/packages/kbn-optimizer/limits.yml) manually or by running the following to have the limit updated to the current size + 15kb
 
@@ -111,6 +112,34 @@ This command has to run the optimizer in distributable mode so it will take a lo
 
 Changes to the [`limits.yml` file](https://github.com/elastic/kibana/blob/master/packages/kbn-optimizer/limits.yml) will trigger review from the Operations team, who will attempt to verify that the size increase is justified. If you have findings you can share from the steps above that would be very helpful!
 
+For broader guidance on lazy-loading patterns, see [Plugin performance](/extend/plugin-performance.md).
+
+## Actions to reduce `page load bundle size` [ci-metric-quick-actions]
+
+In many regressions, a short workflow is enough to avoid raising limits:
+
+:::::{note}
+If you are using a coding agent with repository skills, run the `/optimize-bundle-size` skill command to start this workflow for you and help reduce plugin `page load bundle size`.
+:::::
+
+1. Build dist metrics and confirm the current value for your plugin in `target/public/metrics.json`:
+
+    ```shell
+    node scripts/build_kibana_platform_plugins --focus {pluginId} --dist
+    ```
+
+2. Profile the plugin and identify the largest modules in the entry chunk:
+
+    ```shell
+    node scripts/build_kibana_platform_plugins --focus {pluginId} --dist --profile --no-cache
+    entry_id=$(jq -r '.chunks[] | select((.names|index("{pluginId}")) != null) | .id' {pluginDir}/target/public/stats.json)
+    jq -r --argjson cid "$entry_id" '.modules[] | select((.chunks|index($cid)) != null) | [.size, (.name // .identifier)] | @tsv' {pluginDir}/target/public/stats.json | sort -nr | head -40
+    ```
+
+3. Move optional UI and large dependencies behind `async import()` boundaries.
+4. Avoid importing wide barrel files (`index.ts`) from plugin entry paths; import only required modules.
+5. Re-run the dist build and verify that `page load bundle size` is below the existing limit before considering a limit increase.
+
 
 ## Validating `page load bundle size` limits [ci-metric-validating-limits]
 
@@ -120,7 +149,7 @@ While you’re trying to track down changes which will improve the bundle size, 
 node scripts/build_kibana_platform_plugins --dist --watch --focus {pluginId}
 ```
 
-This will build the front-end bundles for your plugin and only the plugins your plugin depends on. Whenever you make changes the bundles are rebuilt and you can inspect the metrics of that build in the `target/public/metrics.json` file within your plugin. This file will be updated as you save changes to the source and should be helpful to determine if your changes are lowering the `page load asset size` enough.
+This will build the front-end bundles for your plugin and only the plugins your plugin depends on. Whenever you make changes the bundles are rebuilt and you can inspect the metrics of that build in the `target/public/metrics.json` file within your plugin. This file will be updated as you save changes to the source and should be helpful to determine if your changes are lowering the `page load bundle size` enough.
 
 If you only want to run the build once you can run:
 
@@ -128,6 +157,4 @@ If you only want to run the build once you can run:
 node scripts/build_kibana_platform_plugins --validate-limits --focus {pluginId}
 ```
 
-This command needs to apply production optimizations to get the right sizes, which means that the optimizer will take significantly longer to run and on most developer machines will consume all of your machines resources for 20 minutes or more. If you’d like to multi-task while this is running you might need to limit the number of workers using the `--max-workers` flag.
-
-
+This command needs to apply production optimizations to get the right sizes, which means that the optimizer will take significantly longer to run and on most developer machines will consume all your machine's resources for 20 minutes or more. If you’d like to multi-task while this is running you might need to limit the number of workers using the `--workers` flag.

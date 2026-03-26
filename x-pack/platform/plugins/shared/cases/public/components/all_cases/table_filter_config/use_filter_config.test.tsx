@@ -12,6 +12,7 @@ import type { FilterOptions } from '../../../../common/ui';
 import { CUSTOM_FIELD_KEY_PREFIX } from '../constants';
 import { CustomFieldTypes } from '../../../../common/types/domain';
 import { TestProviders } from '../../../common/mock';
+import { DEFAULT_FROM_DATE, DEFAULT_TO_DATE } from '../../../containers/constants';
 
 const emptyFilterOptions: FilterOptions = {
   search: '',
@@ -24,6 +25,8 @@ const emptyFilterOptions: FilterOptions = {
   owner: [],
   category: [],
   customFields: {},
+  from: DEFAULT_FROM_DATE,
+  to: DEFAULT_TO_DATE,
 };
 
 describe('useFilterConfig', () => {

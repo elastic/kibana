@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   describe('delete', () => {
-    const archive = 'x-pack/test/functional/es_archives/logstash/example_pipelines';
+    const archive = 'x-pack/platform/test/fixtures/es_archives/logstash/example_pipelines';
 
     before('load pipelines archive', async () => {
       await esArchiver.load(archive);

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { MlTrainedModels } from '@kbn/ml-plugin/server';
+import type { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import { MlModelDeploymentState } from '../../../common/types/ml';
-import { ElasticsearchResponseError } from '../../utils/identify_exceptions';
+import type { ElasticsearchResponseError } from '../../utils/identify_exceptions';
 
 import { getMlModelDeploymentStatus } from './get_ml_model_deployment_status';
 

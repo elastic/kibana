@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
-import { EuiFlexGroup, EuiIcon, EuiLink, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, EuiLink, EuiPanel } from '@elastic/eui';
 import { useKibanaContextForPlugin } from '../../../../../../utils';
 import { useDatasetQualityDetailsState } from '../../../../../../hooks';
 import { getComponentTemplatePrefixFromIndexTemplate } from '../../../../../../../common/utils/component_template_name';
@@ -76,13 +76,12 @@ export function CreateEditComponentTemplateLink({
         data-test-url={templateUrl}
         onClick={onClickHandler}
         target="_blank"
+        color="primary"
         css={{ width: '100%' }}
       >
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiIcon type="popout" />
-          <EuiTitle size="xxs">
-            <p>{otherMitigationsCustomComponentTemplate}</p>
-          </EuiTitle>
+          {otherMitigationsCustomComponentTemplate}
         </EuiFlexGroup>
       </EuiLink>
     </EuiPanel>

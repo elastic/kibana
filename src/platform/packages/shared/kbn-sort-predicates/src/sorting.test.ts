@@ -9,7 +9,7 @@
 
 import { getSortingCriteria } from './sorting';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 
 function getMockFormatter() {
   return { convert: (v: unknown) => `${v as string}` } as FieldFormat;

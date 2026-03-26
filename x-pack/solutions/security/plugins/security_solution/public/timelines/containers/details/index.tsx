@@ -7,7 +7,6 @@
 
 import { isEmpty } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import ReactDOM from 'react-dom';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
@@ -90,13 +89,11 @@ export const useTimelineEventsDetails = ({
             next: (response) => {
               if (!isRunningResponse(response)) {
                 Promise.resolve().then(() => {
-                  ReactDOM.unstable_batchedUpdates(() => {
-                    setLoading(false);
-                    setTimelineDetailsResponse(response.data || []);
-                    setRawEventData(response.rawResponse.hits.hits[0]);
-                    setEcsData(response.ecs || null);
-                    searchSubscription$.current.unsubscribe();
-                  });
+                  setLoading(false);
+                  setTimelineDetailsResponse(response.data || []);
+                  setRawEventData(response.rawResponse.hits.hits[0]);
+                  setEcsData(response.ecs || null);
+                  searchSubscription$.current.unsubscribe();
                 });
               }
             },
@@ -139,6 +136,12 @@ export const useTimelineEventsDetails = ({
       abortCtrl.current.abort();
     };
   }, [timelineDetailsRequest, timelineDetailsSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+    }
+  }, [skip]);
 
   return [loading, timelineDetailsResponse, rawEventData, ecsData, refetch.current];
 };

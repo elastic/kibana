@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './types';
+export type * from './types';
 export * from './format_search_params';
 export * from './parse_search_params';
 export * from './space_url_parser';

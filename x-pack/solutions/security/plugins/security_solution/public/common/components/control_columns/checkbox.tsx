@@ -10,15 +10,26 @@ import React, { useCallback } from 'react';
 import type { ActionProps, HeaderActionProps } from '../../../../common/types';
 import * as i18n from './translations';
 
+export type RowCheckBoxProps = Pick<
+  ActionProps,
+  | 'ariaRowindex'
+  | 'checked'
+  | 'columnValues'
+  | 'disabled'
+  | 'eventId'
+  | 'loadingEventIds'
+  | 'onRowSelected'
+>;
+
 export const RowCheckBox = ({
-  eventId,
-  onRowSelected,
-  checked,
   ariaRowindex,
+  checked,
   columnValues,
   disabled,
+  eventId,
   loadingEventIds,
-}: ActionProps) => {
+  onRowSelected,
+}: RowCheckBoxProps) => {
   const handleSelectEvent = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       if (!disabled) {

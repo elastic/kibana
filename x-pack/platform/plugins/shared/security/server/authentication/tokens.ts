@@ -8,7 +8,13 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { AuthenticationInfo } from '../elasticsearch';
-import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
+import {
+  getDetailedErrorMessage,
+  getErrorStatusCode,
+  InvalidGrantError,
+  isCredentialMismatchError,
+  isExpiredOrInvalidRefreshTokenError,
+} from '../errors';
 
 /**
  * Represents a pair of access and refresh tokens.
@@ -52,7 +58,7 @@ export class Tokens {
    * Tries to exchange provided refresh token to a new pair of access and refresh tokens.
    * @param existingRefreshToken Refresh token to send to the refresh token API.
    */
-  public async refresh(existingRefreshToken: string): Promise<RefreshTokenResult | null> {
+  public async refresh(existingRefreshToken: string): Promise<RefreshTokenResult> {
     try {
       // Token should be refreshed by the same user that obtained that token.
       const {
@@ -95,7 +101,19 @@ export class Tokens {
       // to hit the case when refresh token is no longer valid.
       if (getErrorStatusCode(err) === 400) {
         this.logger.debug('Refresh token is either expired or already used.');
-        return null;
+
+        if (isExpiredOrInvalidRefreshTokenError(err)) {
+          this.logger.warn(getDetailedErrorMessage(err));
+          throw InvalidGrantError.expiredOrInvalidRefreshToken();
+        }
+
+        if (isCredentialMismatchError(err)) {
+          this.logger.error(getDetailedErrorMessage(err));
+
+          throw InvalidGrantError.credentialMismatch();
+        }
+
+        throw new InvalidGrantError('Both access and refresh tokens are expired.');
       }
 
       throw err;

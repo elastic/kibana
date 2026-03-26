@@ -7,7 +7,8 @@
 
 import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import { JourneyScreenshotPreview, StepImagePopoverProps } from './journey_screenshot_preview';
+import type { StepImagePopoverProps } from './journey_screenshot_preview';
+import { JourneyScreenshotPreview } from './journey_screenshot_preview';
 import { render } from '../../../utils/testing';
 import { THUMBNAIL_SCREENSHOT_SIZE } from '../screenshot/screenshot_size';
 

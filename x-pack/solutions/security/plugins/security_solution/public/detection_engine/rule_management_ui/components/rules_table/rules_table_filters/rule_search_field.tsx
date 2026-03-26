@@ -9,7 +9,6 @@ import type { ChangeEvent } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { EuiFieldSearch, EuiFlexItem } from '@elastic/eui';
-import { SEARCH_FIRST_RULE_ANCHOR } from '../rules_table/guided_onboarding/rules_management_tour';
 import * as i18n from '../../../../common/translations';
 
 const SearchBarWrapper = styled(EuiFlexItem)`
@@ -45,7 +44,6 @@ export function RuleSearchField({
   return (
     <SearchBarWrapper grow>
       <EuiFieldSearch
-        id={SEARCH_FIRST_RULE_ANCHOR}
         aria-label={i18n.SEARCH_RULES}
         fullWidth
         incremental={false}

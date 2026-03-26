@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { documentationService } from '../../services/documentation';
@@ -43,7 +43,7 @@ export const EnrichPolicyCreate: React.FunctionComponent<RouteComponentProps> = 
           <EuiButtonEmpty
             href={documentationService.getCreateEnrichPolicyLink()}
             target="_blank"
-            iconType="help"
+            iconType="question"
             data-test-subj="createEnrichPolicyDocumentationLink"
           >
             <FormattedMessage

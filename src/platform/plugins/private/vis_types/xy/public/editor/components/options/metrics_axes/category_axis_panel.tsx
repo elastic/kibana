@@ -12,12 +12,13 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
-import { Position } from '@elastic/charts';
+import type { Position } from '@elastic/charts';
 
 import { SelectOption, SwitchOption } from '@kbn/vis-default-editor-plugin/public';
 
-import { LabelOptions, SetAxisLabel } from './label_options';
-import { CategoryAxis } from '../../../../types';
+import type { SetAxisLabel } from './label_options';
+import { LabelOptions } from './label_options';
+import type { CategoryAxis } from '../../../../types';
 import { getPositions } from '../../../collections';
 
 const positions = getPositions();
@@ -26,14 +27,14 @@ export interface CategoryAxisPanelProps {
   axis: CategoryAxis;
   onPositionChanged: (position: Position) => void;
   setCategoryAxis: (value: CategoryAxis) => void;
-  useMultiLayerAxis: boolean;
+  disableAxisControls: boolean;
 }
 
 function CategoryAxisPanel({
   axis,
   onPositionChanged,
   setCategoryAxis,
-  useMultiLayerAxis,
+  disableAxisControls,
 }: CategoryAxisPanelProps) {
   const setAxis = useCallback(
     <T extends keyof CategoryAxis>(paramName: T, value: CategoryAxis[T]) => {
@@ -102,7 +103,7 @@ function CategoryAxisPanel({
           axisLabels={axis.labels}
           axisFilterCheckboxName={`xAxisFilterLabelsCheckbox${axis.id}`}
           setAxisLabel={setAxisLabel}
-          disableSingleLayerAxisControls={useMultiLayerAxis}
+          disableAxisControls={disableAxisControls}
         />
       )}
     </EuiPanel>

@@ -66,7 +66,7 @@ const TagsFilterPopoverComponent = ({
   const triggerButton = (
     <EuiFilterButton
       grow
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={() => setIsTagPopoverOpen(!isTagPopoverOpen)}
       numFilters={tags.length}
       isSelected={isTagPopoverOpen}
@@ -102,7 +102,7 @@ const TagsFilterPopoverComponent = ({
         noMatchesMessage={i18n.NO_TAGS_AVAILABLE}
       >
         {(list, search) => (
-          <div style={{ width: TAGS_POPOVER_WIDTH }}>
+          <div css={{ width: TAGS_POPOVER_WIDTH }}>
             <EuiPopoverTitle>{search}</EuiPopoverTitle>
             {list}
           </div>

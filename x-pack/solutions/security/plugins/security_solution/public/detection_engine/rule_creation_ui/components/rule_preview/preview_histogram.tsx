@@ -7,13 +7,14 @@
 
 import React, { useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DataViewBase } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { AlertTableCellContextProvider } from '../../../../detections/configurations/security_solution_detections/cell_value_context';
 import { StatefulEventsViewer } from '../../../../common/components/events_viewer';
 import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
@@ -23,7 +24,6 @@ import { Panel } from '../../../../common/components/panel';
 import { HeaderSection } from '../../../../common/components/header_section';
 
 import { getAlertsPreviewDefaultModel } from '../../../../detections/components/alerts_table/default_config';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 import { PreviewRenderCellValue } from './preview_table_cell_renderer';
 import { getPreviewTableControlColumn } from './preview_table_control_columns';
@@ -141,10 +141,7 @@ const PreviewHistogramComponent = ({
   }, [config, indexPattern, previewId]);
 
   return (
-    <AlertTableCellContextProvider
-      tableId={TableId.rulePreview}
-      sourcererScope={SourcererScopeName.detections}
-    >
+    <AlertTableCellContextProvider tableId={TableId.rulePreview} sourcererScope={PageScope.alerts}>
       <Panel height={DEFAULT_HISTOGRAM_HEIGHT} data-test-subj={'preview-histogram-panel'}>
         <EuiFlexGroup gutterSize="none" direction="column">
           <EuiFlexItem grow={1}>
@@ -165,7 +162,7 @@ const PreviewHistogramComponent = ({
               height={CHART_HEIGHT}
               id={previewEmbeddableId}
               inspectTitle={i18n.QUERY_GRAPH_HITS_TITLE}
-              scopeId={SourcererScopeName.detections}
+              scopeId={PageScope.alerts}
               stackByField={ruleType === 'machine_learning' ? 'host.name' : 'event.category'}
               timerange={timerange}
               withActions={INSPECT_ACTION}
@@ -196,7 +193,7 @@ const PreviewHistogramComponent = ({
           renderCellValue={PreviewRenderCellValue}
           rowRenderers={defaultRowRenderers}
           start={startDate}
-          sourcererScope={SourcererScopeName.detections}
+          sourcererScope={PageScope.alerts}
           indexNames={[`${DEFAULT_PREVIEW_INDEX}-${spaceId}`]}
           bulkActions={false}
         />

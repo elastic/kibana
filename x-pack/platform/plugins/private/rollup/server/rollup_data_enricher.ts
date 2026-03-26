@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
-import { Index } from '@kbn/index-management-plugin/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { Index } from '@kbn/index-management-plugin/server';
 import { isArray } from 'lodash';
 
 export const rollupDataEnricher = async (indicesList: Index[], client: IScopedClusterClient) => {

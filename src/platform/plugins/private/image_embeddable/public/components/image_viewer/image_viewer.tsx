@@ -10,20 +10,21 @@
 import classNames from 'classnames';
 import React, { useEffect, useState } from 'react';
 
+import type { EuiImageProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiEmptyPrompt,
   EuiImage,
-  EuiImageProps,
   useIsWithinBreakpoints,
   useResizeObserver,
 } from '@elastic/eui';
-import { css, SerializedStyles } from '@emotion/react';
+import type { SerializedStyles } from '@emotion/react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FileImage } from '@kbn/shared-ux-file-image';
 
-import { ImageConfig } from '../../types';
+import type { ImageConfig } from '../../types';
 import { validateImageConfig } from '../../utils/validate_image_config';
 import notFound from './assets/not_found_light.png';
 import notFound2x from './assets/not_found_light@2x.png';
@@ -60,7 +61,7 @@ export function ImageViewer({
   const src =
     imageConfig.src.type === 'url'
       ? imageConfig.src.url
-      : getImageDownloadHref(imageConfig.src.fileId);
+      : getImageDownloadHref(imageConfig.src.file_id);
 
   const [hasFailedToLoad, setFailedToLoad] = useState<boolean>(false);
 
@@ -90,7 +91,7 @@ export function ImageViewer({
           // uncomment to enable blurhash when it's ready
           // https://github.com/elastic/kibana/issues/145567
           // meta={imageConfig.src.type === 'file' ? imageConfig.src.fileImageMeta : undefined}
-          alt={imageConfig.altText ?? ''}
+          alt={imageConfig.alt_text ?? ''}
           className={classNames(className, { 'visually-hidden': hasFailedToLoad })}
           title={
             onChange
@@ -103,10 +104,10 @@ export function ImageViewer({
           style={{
             width: '100%',
             height: '100%',
-            objectFit: imageConfig?.sizing?.objectFit ?? 'contain',
+            objectFit: imageConfig?.object_fit,
             cursor: onChange || onClick ? 'pointer' : 'initial',
             display: 'block', // needed to remove gap under the image
-            backgroundColor: imageConfig.backgroundColor,
+            backgroundColor: imageConfig.background_color,
           }}
           wrapperProps={{
             style: { display: 'block', height: '100%', width: '100%' },

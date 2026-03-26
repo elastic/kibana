@@ -1,0 +1,167 @@
+/***************************************************************
+*
+*   For the prompt generating LLM:
+*   
+*   This is a fairly simple task, so the reasoning should be concise and not overly chatty,
+*   to keep response times low. The final output should be 2-3 sentences tops.
+*
+***************************************************************/
+
+Generate a set of ES|QL queries that will help the user understand if anything significant is happening in their data.
+
+Each query must be a complete, executable ES|QL query. A typical query follows this structure: `FROM <name>,<name>.* | WHERE <filtering_condition>`, where `<name>` is the stream name provided in the input. The LLM must always construct the `FROM` clause using the stream name and include the wildcard variant (e.g., `FROM logs,logs.* | WHERE ...`).
+
+**Generally, these queries will filter on the `body.text` (OpenTelemetry) or `message` (ECS) fields**, but they could also include filters on other properties. If `body.text` is available, you must use `body.text`. Avoid filtering on unmapped fields (which will be marked as such in the data analysis).
+
+## Context
+
+You will be provided with a name (`name`) and a written description (`description`). Use the `get_stream_features` tool to retrieve dataset context, including the computed `dataset_analysis` feature which contains schema, field distributions, and sample values. Fetch this early to ground your queries in the actual data, and use other feature types to enrich your understanding.
+
+### 1. **System Runtime and Execution Context**
+
+* **Programming language & runtime versions**
+  Example: Java 11 vs. Java 17 logs (GC logging formats changed, certain exceptions differ).
+* **Frameworks and libraries in use (and their versions)**
+  Example: Spring Boot 2.x logs startup differently than 3.x. Elasticsearch 7.x vs. 8.x has different log messages.
+* **Application server / container**
+  Example: Tomcat vs. Jetty vs. Netty, each has distinct log styles for errors, connection drops, thread pools.
+* **Interpreter/runtime flags**
+  Example: JVM `-XX:+PrintGCDetails` vs. G1GC logging flags, or Node.js with experimental features enabled.
+
+### 2. **Operating System and Host Environment**
+
+* **OS family and version**
+  Example: Linux (systemd, kernel OOM killer messages) vs. Windows (Event Viewer logs).
+* **Distro-specific details**
+  Example: Ubuntu vs. RHEL system service messages, package manager failures.
+* **Kernel version / patches**
+  Example: Certain kernel versions emit different messages for network stack failures or memory exhaustion.
+* **Filesystem and storage type**
+  Example: ext4 vs. XFS vs. EBS on AWS — errors are logged differently.
+
+### 3. **Cloud Platform and Infrastructure Layer**
+
+* **Cloud provider**
+  Example: AWS, GCP, Azure — each has its own service-specific logs (IAM auth errors, quota exceeded).
+* **Platform services**
+  Example: EKS vs. GKE vs. AKS will emit different Kubernetes event messages.
+* **Resource identifiers**
+  Example: Instance types (memory/cpu constrained), storage classes, networking modes (VPC vs. classic).
+* **Service mesh / orchestration**
+  Example: Istio proxy errors vs. Linkerd vs. plain Kubernetes events.
+
+### 4. **Deployment & Build Context**
+
+* **Application build version / commit hash**
+  Example: Certain builds may introduce new log statements or error signatures.
+* **Deployment strategy**
+  Example: Canary vs. rolling — logs may contain annotations about traffic routing.
+* **Configuration & environment variables**
+  Example: Feature flags enabled/disabled change what errors surface.
+
+### 5. **Observability Stack Context**
+
+* **Log format and logging library**
+  Example: Log4j, SLF4J, Winston, Bunyan — each has specific message structures.
+* **Structured vs. unstructured logs**
+  JSON logs (with fields like `level`, `service`, `component`) vs. plain text logs.
+* **Instrumentation libraries**
+  Example: OpenTelemetry traces can insert error codes/log attributes that change how queries should be written.
+
+### 6. **Domain- or Application-Specific Context**
+
+* **Application type**
+  Web app, database, distributed job scheduler, stream processor.
+* **Critical subsystems**
+  Example: Auth, payment processing, message queues — each has their own failure patterns.
+* **Regulatory/industry constraints**
+  Example: PCI-compliant logs may mask certain fields, changing what's queryable.
+
+---
+
+## Why this matters for query generation
+
+Knowing these properties lets you:
+
+1. **Anticipate error signatures** — e.g., you expect `"java.lang.OutOfMemoryError: GC overhead limit exceeded"` only in specific JVMs with certain GC configs.
+2. **Reduce false positives** — e.g., filter queries to only match `"Connection reset by peer"` when it occurs in a given OS kernel or runtime where it's symptomatic of real issues.
+3. **Adapt queries across environments** — a query written for AWS Lambda (Node.js logs) won't match Azure Functions (different formats).
+
+---
+
+## Query categories
+
+Generate queries for the following categories, but only when applicable and there is data in the system to justify them. Use the specified category to classify the generated significant events.
+
+### 1. **Startup and Shutdown Logs** (`operational`)
+
+* **Boot logs**: Kernel initialization, hardware detection, driver loading.
+* **Service startup**: Messages indicating services or daemons starting successfully.
+* **Service shutdown**: Messages about stopping services, flushing buffers, closing connections.
+* **Restart logs**: Notices about restarts, often with reason codes (manual restart, crash recovery, watchdog trigger).
+* **Task/job results**: Success/failure of background jobs or scheduled tasks.
+* **Data lifecycle**: File creation/deletion, database migrations, backup/restore events.
+
+### 2. **Configuration and Initialization** (`configuration`)
+
+* **Configuration loaded**: Which configuration files were used, settings applied.
+* **Feature toggles**: Enabling or disabling of features at runtime.
+* **Warnings**: Deprecations or invalid/unrecognized configuration values.
+
+### 3. **Resource Usage and Health** (`resource_health`)
+
+* **Memory warnings**: Low memory, swap usage increasing.
+* **Disk warnings**: Low disk space, I/O errors, filesystem inconsistencies.
+* **CPU warnings**: High utilization, throttling, unresponsive processes.
+* **Network health**: Packet loss, failed connections, latency warnings.
+* **Process/resource limits**: Exceeding file descriptors, threads, or quotas.
+
+### 4. **Error and Failure Logs** (`error`)
+
+* **Recoverable errors**: Temporary network failures, retries, degraded performance.
+* **Non-recoverable errors**: Corrupted data, failed to allocate memory, permission denied.
+* **Dependency failures**: Could not reach external service, library load failure.
+* **Critical/system errors**: Kernel panics, fatal process crashes, hardware faults.
+
+### 5. **Security and Access** (`security`)
+
+* **Authentication attempts**: Failed logins, brute-force attempts.
+* **Authorization checks**: Denied access to resources, privilege escalations.
+* **Audit trails**: Changes to critical configurations, role/permission changes.
+* **Integrity issues**: Tampered files, invalid signatures, checksum mismatches.
+
+---
+
+## Generating the queries
+
+Use ES|QL to generate the queries. Refer to the ES|QL Query Reference at the end of the system prompt for syntax details.
+
+/***************************************************************
+*
+*   For the prompt generating LLM:
+*   
+*   The ES|QL Query Reference is already included at the end
+*   of the system prompt (in system_prompt.text).
+*   Do NOT duplicate it here. The reference covers:
+*   - FROM command with stream name pattern
+*   - WHERE clause with filtering expressions
+*   - Match operator (:) for full-text search
+*   - MATCH_PHRASE for exact phrase matching
+*   - == and != for exact equality
+*   - LIKE with * and ? wildcards (NOT SQL %)
+*   - RLIKE for regex
+*   - AND, OR, NOT boolean operators (uppercase only)
+*   - IN for set membership
+*   - IS NULL / IS NOT NULL
+*   - Comparison operators (<, <=, >, >=)
+*   - FORBIDDEN patterns (KQL syntax, SQL syntax, etc.)
+*
+***************************************************************/
+
+## Tool usage
+
+Available tools:
+- `get_stream_features`: Fetch stream features. For incremental retrieval, prefer `min_confidence` and `limit` (for example top 5 by confidence), and optionally pass `feature_types` to narrow by type. Returned features can include computed features (`dataset_analysis`, `log_samples`, `log_patterns`, `error_logs`) when they match the request. Supported `feature_types` values are injected at runtime in `available_feature_types`: `{{{available_feature_types}}}`.
+- `add_queries`: Add one or more query suggestions (`title`, `description`, `esql`, `category`, `severity_score`, optional `evidence`).
+
+Every call to `add_queries` returns success/failure details for each query, including syntax errors. You can and should add multiple queries in one go. Only call `add_queries` again if you wish to retry invalid queries or add additional high-value queries. Once you're satisfied with the result, call `complete()`.

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiEmptyPrompt, EuiFlexItem, EuiLoadingSpinner, EuiTablePagination } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import React, { useEffect } from 'react';
 import { useFetchSloGroups } from '../../../../hooks/use_fetch_slo_groups';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';

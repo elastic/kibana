@@ -9,9 +9,11 @@
 
 export type {
   ElasticsearchClient,
+  ElasticsearchRequestLoggingOptions,
   IScopedClusterClient,
   IClusterClient,
   ICustomClusterClient,
+  AsScopedOptions,
   ScopeableRequest,
   UnauthorizedErrorHandlerResult,
   UnauthorizedErrorHandler,
@@ -21,6 +23,8 @@ export type {
   UnauthorizedErrorHandlerNotHandledResult,
   UnauthorizedErrorHandlerOptions,
   FakeRequest,
+  UrlRequest,
+  ScopeableUrlRequest,
   ElasticsearchClientSslConfig,
   ElasticsearchClientConfig,
   ElasticsearchApiToRedactInLogs,

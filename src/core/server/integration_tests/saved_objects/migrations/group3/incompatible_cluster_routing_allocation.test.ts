@@ -9,64 +9,26 @@
 
 import Path from 'path';
 import fs from 'fs/promises';
-import JSON5 from 'json5';
-import {
-  createTestServers,
-  createRootWithCorePlugins,
-  type TestElasticsearchUtils,
-} from '@kbn/core-test-helpers-kbn-server';
-import { Root } from '@kbn/core-root-server-internal';
+import { parse } from 'hjson';
+import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { LogRecord } from '@kbn/logging';
+import type { LogRecord } from '@kbn/logging';
 import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';
+import { BASELINE_TEST_ARCHIVE_SMALL } from '../kibana_migrator_archive_utils';
+import { getRelocatingMigratorTestKit } from '@kbn/migrator-test-kit/fixtures';
+import { clearLog } from '@kbn/migrator-test-kit';
 
 const logFilePath = Path.join(__dirname, 'incompatible_cluster_routing_allocation.log');
-
-async function removeLogFile() {
-  // ignore errors if it doesn't exist
-  await fs.unlink(logFilePath).catch(() => void 0);
-}
 
 const { startES } = createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
   settings: {
     es: {
       license: 'basic',
-      dataArchive: Path.join(__dirname, '..', 'archives', '8.4.0_with_sample_data_logs.zip'),
+      dataArchive: BASELINE_TEST_ARCHIVE_SMALL,
     },
   },
 });
-
-function createKbnRoot() {
-  return createRootWithCorePlugins(
-    {
-      migrations: {
-        skip: false,
-      },
-      logging: {
-        appenders: {
-          file: {
-            type: 'file',
-            fileName: logFilePath,
-            layout: {
-              type: 'json',
-            },
-          },
-        },
-        loggers: [
-          {
-            name: 'root',
-            level: 'info',
-            appenders: ['file'],
-          },
-        ],
-      },
-    },
-    {
-      oss: false,
-    }
-  );
-}
 
 const getClusterRoutingAllocations = (settings: Record<string, any>) => {
   const routingAllocations =
@@ -91,19 +53,18 @@ async function updateRoutingAllocations(
 }
 
 describe('incompatible_cluster_routing_allocation', () => {
-  let client: ElasticsearchClient;
-  let root: Root;
-
   beforeAll(async () => {
-    await removeLogFile();
+    await clearLog(logFilePath);
     esServer = await startES();
-    client = esServer.es.getClient();
   });
-  afterAll(async () => {
-    await esServer.stop();
-  });
+
+  afterAll(async () => await esServer?.stop());
 
   it('retries the INIT action with a descriptive message when cluster settings are incompatible', async () => {
+    const { client, runMigrations } = await getRelocatingMigratorTestKit({
+      logFilePath,
+    });
+
     const initialSettings = await client.cluster.getSettings({ flat_settings: true });
 
     expect(getClusterRoutingAllocations(initialSettings)).toBe(true);
@@ -114,11 +75,7 @@ describe('incompatible_cluster_routing_allocation', () => {
 
     expect(getClusterRoutingAllocations(updatedSettings)).toBe(false);
 
-    // Start Kibana
-    root = createKbnRoot();
-    await root.preboot();
-    await root.setup();
-    const startPromise = root.start().catch(() => {
+    const runMigrationsPromise = runMigrations().catch(() => {
       // Silent catch because the test might be done and call shutdown before starting is completed, causing unwanted thrown errors.
     });
 
@@ -133,7 +90,7 @@ describe('incompatible_cluster_routing_allocation', () => {
           const records = logFileContent
             .split('\n')
             .filter(Boolean)
-            .map((str) => JSON5.parse(str)) as LogRecord[];
+            .map((str) => parse(str)) as LogRecord[];
 
           // Wait for logs of the second failed attempt to be sure we're correctly incrementing retries
           expect(records.find((rec) => !!rec.message.match(messageRegexp))).toBeDefined();
@@ -151,7 +108,7 @@ describe('incompatible_cluster_routing_allocation', () => {
           const records = logFileContent
             .split('\n')
             .filter(Boolean)
-            .map((str) => JSON5.parse(str)) as LogRecord[];
+            .map((str) => parse(str)) as LogRecord[];
 
           expect(
             records.find((rec) => rec.message.includes('MARK_VERSION_INDEX_READY_SYNC -> DONE'))
@@ -160,8 +117,7 @@ describe('incompatible_cluster_routing_allocation', () => {
         { retryAttempts: 100, retryDelayMs: 500 }
       );
     } finally {
-      await startPromise; // Wait for start phase to complete before shutting down
-      await root.shutdown();
+      await runMigrationsPromise; // Wait for migrations to complete
     }
   });
 });

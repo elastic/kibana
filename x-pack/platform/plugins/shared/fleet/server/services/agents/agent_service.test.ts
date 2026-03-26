@@ -76,6 +76,7 @@ describe('AgentService', () => {
               readSettings: false,
               addAgents: false,
               addFleetServers: false,
+              generateAgentReports: false,
             },
             integrations: {
               all: true,
@@ -99,7 +100,9 @@ describe('AgentService', () => {
       });
 
       it('rejects on listAgents', async () => {
-        await expect(agentClient.listAgents({ showInactive: true })).rejects.toThrowError(
+        await expect(
+          agentClient.listAgents({ showAgentless: true, showInactive: true })
+        ).rejects.toThrowError(
           new FleetUnauthorizedError(
             `User does not have adequate permissions to access Fleet agents.`
           )
@@ -224,10 +227,11 @@ function expectApisToCallServicesSuccessfully(
 
   test('client.listAgents calls getAgentsByKuery and returns results', async () => {
     mockGetAgentsByKuery.mockResolvedValue('getAgentsByKuery success');
-    await expect(agentClient.listAgents({ showInactive: true })).resolves.toEqual(
-      'getAgentsByKuery success'
-    );
+    await expect(
+      agentClient.listAgents({ showAgentless: true, showInactive: true })
+    ).resolves.toEqual('getAgentsByKuery success');
     expect(mockGetAgentsByKuery).toHaveBeenCalledWith(mockEsClient, mockSoClient, {
+      showAgentless: true,
       showInactive: true,
       spaceId,
     });

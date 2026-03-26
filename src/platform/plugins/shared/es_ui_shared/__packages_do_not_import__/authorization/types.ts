@@ -21,4 +21,9 @@ export interface Error {
   cause?: string[];
   message?: string;
   statusCode?: number;
+  attributes?: {
+    error?: {
+      type?: string;
+    };
+  };
 }

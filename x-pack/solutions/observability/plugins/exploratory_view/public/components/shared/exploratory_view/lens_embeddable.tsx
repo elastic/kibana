@@ -6,9 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { Dispatch, SetStateAction, useCallback, useState } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import React, { useCallback, useState } from 'react';
 import styled from '@emotion/styled';
-import { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { useSeriesStorage } from './hooks/use_series_storage';
 import { useKibana } from './hooks/use_kibana';

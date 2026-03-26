@@ -10,6 +10,8 @@ import { PreserveLayout } from './preserve_layout';
 it('preserve layout uses default layout selectors', () => {
   const testPreserveLayout = new PreserveLayout({ width: 16, height: 16 });
 
+  testPreserveLayout.setPdfImageSize({ height: 16, width: 16 });
+
   expect(testPreserveLayout.getCssOverridesPath()).toMatch(`layouts/preserve_layout.css`);
   expect(testPreserveLayout.getBrowserViewport()).toMatchObject({ height: 32, width: 32 });
   expect(testPreserveLayout.getBrowserZoom()).toBe(2);
@@ -55,4 +57,19 @@ it('preserve layout allows customizable selectors', () => {
       "timefilterDurationAttribute": "data-shared-timefilter-duration",
     }
   `);
+});
+
+it('preserve layout use a default zoom of 2', () => {
+  const testPreserveLayout = new PreserveLayout({ width: 1000, height: 2000 });
+  expect(testPreserveLayout.getBrowserZoom()).toBe(2);
+  expect(testPreserveLayout.getBrowserViewport().height).toBe(4000);
+});
+
+it('preserve layout caps browser zoom for extremely large screenshots to avoid Chromium artifacts', () => {
+  // A very tall layout would exceed Chrome limits at zoom=2.
+  const testPreserveLayout = new PreserveLayout({ width: 1727, height: 15000 });
+
+  // The zoom should be reduced so that output height stays <= 16000 pixels.
+  expect(testPreserveLayout.getBrowserZoom()).toBe(1);
+  expect(testPreserveLayout.getBrowserViewport().height).toBeLessThanOrEqual(16000);
 });

@@ -29,6 +29,9 @@ import {
   buildShowExpiredExceptionsFilter,
   getSavedObjectTypes,
 } from '@kbn/securitysolution-list-utils';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { EndpointExceptionsMovedCallout } from '../../../../exceptions/components/endpoint_exceptions_moved_callout';
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
@@ -45,6 +48,7 @@ import { AddExceptionFlyout } from '../add_exception_flyout';
 import * as i18n from './translations';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
 import type { Rule } from '../../../rule_management/logic/types';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const StyledText = styled(EuiText)`
   font-style: italic;
@@ -97,7 +101,8 @@ const ExceptionsViewerComponent = ({
 }: ExceptionsViewerProps): JSX.Element => {
   const { services } = useKibana();
   const toasts = useToasts();
-  const [{ canUserCRUD, hasIndexWrite }] = useUserData();
+  const [{ hasIndexWrite }] = useUserData();
+  const canEditExceptions = useUserPrivileges().rulesPrivileges.exceptions.edit;
   const exceptionListsToQuery = useMemo(
     () =>
       rule != null && rule.exceptions_list != null
@@ -139,6 +144,8 @@ const ExceptionsViewerComponent = ({
   ] = useReducer(allExceptionItemsReducer(), {
     ...initialState,
   });
+
+  const isReadOnlyOnCurrentList = isEndpointSpecified ? !canWriteEndpointExceptions : isReadOnly;
 
   // Reducer actions
   const setLastUpdated = useCallback(
@@ -457,8 +464,8 @@ const ExceptionsViewerComponent = ({
 
   // User privileges checks
   useEffect((): void => {
-    setReadOnly(isViewReadOnly || !canUserCRUD || !hasIndexWrite);
-  }, [setReadOnly, isViewReadOnly, canUserCRUD, hasIndexWrite]);
+    setReadOnly(isViewReadOnly || !canEditExceptions || !hasIndexWrite);
+  }, [setReadOnly, isViewReadOnly, hasIndexWrite, canEditExceptions]);
 
   useEffect(() => {
     if (exceptionListsToQuery.length > 0) {
@@ -475,6 +482,41 @@ const ExceptionsViewerComponent = ({
         : null,
     [allReferences, exceptionToEdit]
   );
+
+  const isEndpointExceptionListLinked: boolean = useMemo(
+    () =>
+      rule?.exceptions_list?.some(
+        (list) => list.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+      ) ?? false,
+    [rule]
+  );
+
+  const isEndpointSecurityRule: boolean = useMemo(
+    () =>
+      rule != null &&
+      rule.immutable &&
+      rule.rule_source.type === 'external' &&
+      rule.related_integrations.some(({ package: pkg }) => pkg === 'endpoint'),
+    [rule]
+  );
+  const isDetectionRuleWithEndpointExceptions =
+    isEndpointExceptionListLinked && !isEndpointSecurityRule;
+
+  const isEndpointExceptionsMovedFFEnabled = useIsExperimentalFeatureEnabled(
+    'endpointExceptionsMovedUnderManagement'
+  );
+  // TODO: switch to per-policy use opt-in state in follow-up (https://github.com/elastic/security-team/issues/14870)
+  const hasUserOptedInForPerPolicyUse = true;
+
+  const showEndpointExceptionsMovedCallout =
+    isEndpointExceptionsMovedFFEnabled &&
+    (isEndpointSecurityRule ||
+      (isDetectionRuleWithEndpointExceptions && !hasUserOptedInForPerPolicyUse));
+
+  const showEndpointExceptionNoLongerEvaluatedCallout =
+    isEndpointExceptionsMovedFFEnabled &&
+    isDetectionRuleWithEndpointExceptions &&
+    hasUserOptedInForPerPolicyUse;
 
   return (
     <>
@@ -507,6 +549,21 @@ const ExceptionsViewerComponent = ({
 
       <EuiPanel hasBorder={false} hasShadow={false}>
         <>
+          {showEndpointExceptionsMovedCallout && (
+            <EndpointExceptionsMovedCallout
+              id="exceptionsViewer-EndpointSecurityRule"
+              dismissable={false}
+              title="moved"
+            />
+          )}
+          {showEndpointExceptionNoLongerEvaluatedCallout && (
+            <EndpointExceptionsMovedCallout
+              id={`exceptionsViewer-rulesWithEndpointExceptions`}
+              dismissable={true}
+              title="noLongerEvaluatedOnRules"
+            />
+          )}
+
           <StyledText size="s">
             {isEndpointSpecified ? i18n.ENDPOINT_EXCEPTIONS_TAB_ABOUT : i18n.EXCEPTIONS_TAB_ABOUT}
           </StyledText>
@@ -522,7 +579,7 @@ const ExceptionsViewerComponent = ({
               />
               <EuiSpacer size="m" />
               <ExceptionsViewerSearchBar
-                canAddException={isReadOnly}
+                isReadOnly={isReadOnlyOnCurrentList}
                 isEndpoint={isEndpointSpecified}
                 isSearching={viewerState === 'searching'}
                 onSearch={handleSearch}
@@ -533,8 +590,8 @@ const ExceptionsViewerComponent = ({
           <EuiSpacer size="l" />
 
           <ExceptionsViewerItems
-            isReadOnly={isReadOnly}
-            disableActions={isReadOnly || viewerState === 'deleting' || !canWriteEndpointExceptions}
+            isReadOnly={isReadOnlyOnCurrentList}
+            disableActions={isReadOnlyOnCurrentList || viewerState === 'deleting'}
             exceptions={exceptions}
             isEndpoint={isEndpointSpecified}
             ruleReferences={allReferences}

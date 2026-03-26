@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { maxAttemptsFormatter, secondsToCronFormatter } from '../formatting_utils';
-import { arrayFormatter, stringToObjectFormatter } from './formatting_utils';
+import { maxAttemptsFormatter } from '../formatting_utils';
 import {
-  CommonFields,
-  ConfigKey,
-  MonitorFields,
-  SourceType,
-} from '../../../../common/runtime_types';
+  arrayFormatter,
+  publicTimeoutFormatter,
+  stringToObjectFormatter,
+} from './formatting_utils';
+import type { CommonFields, MonitorFields } from '../../../../common/runtime_types';
+import { ConfigKey, SourceType } from '../../../../common/runtime_types';
 
 export type FormattedValue =
   | boolean
@@ -48,7 +48,8 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.MONITOR_QUERY_ID]: null,
   retest_on_failure: null,
   [ConfigKey.MAX_ATTEMPTS]: maxAttemptsFormatter,
-  [ConfigKey.TIMEOUT]: secondsToCronFormatter,
+  [ConfigKey.KIBANA_SPACES]: null,
+  [ConfigKey.TIMEOUT]: publicTimeoutFormatter,
   [ConfigKey.MONITOR_SOURCE_TYPE]: (fields) =>
     fields[ConfigKey.MONITOR_SOURCE_TYPE] || SourceType.UI,
   [ConfigKey.PARAMS]: stringToObjectFormatter,
@@ -56,4 +57,5 @@ export const commonFormatters: CommonFormatMap = {
     `@every ${fields[ConfigKey.SCHEDULE]?.number}${fields[ConfigKey.SCHEDULE]?.unit}`,
   [ConfigKey.TAGS]: arrayFormatter,
   [ConfigKey.LABELS]: null,
+  [ConfigKey.MAINTENANCE_WINDOWS]: null,
 };

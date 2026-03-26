@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializer } from '@kbn/core/server';
+import type { PluginInitializer } from '@kbn/core/server';
 
 export const plugin: PluginInitializer<{}, {}> = async () => {
   const { RoutingExamplePlugin } = await import('./plugin');

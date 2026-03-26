@@ -16,17 +16,19 @@ import type {
   ConnectorUsageCollector,
   ConnectorTokenClientContract,
 } from '@kbn/actions-plugin/server/types';
-
 import { HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
+import { trace } from '@opentelemetry/api';
 import {
+  SUB_ACTION,
+  DEFAULT_TIMEOUT_MS,
   RunActionParamsSchema,
   RunApiResponseSchema,
   RunActionRawResponseSchema,
   InvokeAIActionParamsSchema,
   InvokeAIRawActionParamsSchema,
   StreamingResponseSchema,
-} from '../../../common/gemini/schema';
-import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
+  DashboardActionParamsSchema,
+} from '@kbn/connector-schemas/gemini';
 import type {
   Config,
   Secrets,
@@ -41,9 +43,9 @@ import type {
   InvokeAIActionResponse,
   InvokeAIRawActionParams,
   InvokeAIRawActionResponse,
-} from '../../../common/gemini/types';
-import { SUB_ACTION, DEFAULT_TIMEOUT_MS } from '../../../common/gemini/constants';
-import { DashboardActionParamsSchema } from '../../../common/gemini/schema';
+} from '@kbn/connector-schemas/gemini';
+import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
+import { validateGeminiSecrets } from './validators';
 /** Interfaces to define Gemini model response type */
 
 interface MessagePart {
@@ -198,6 +200,8 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
   /** Retrieve access token based on the GCP service account credential json file */
   private async getAccessToken(): Promise<string | null> {
     // Validate the service account credentials JSON file input
+    validateGeminiSecrets(this.secrets);
+
     let credentialsJson;
     try {
       credentialsJson = JSON.parse(this.secrets.credentialsJson);
@@ -221,6 +225,8 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     { body, model: reqModel, signal, timeout, raw }: RunActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse | RunActionRawResponse> {
+    const parentSpan = trace.getActiveSpan();
+    parentSpan?.setAttribute('gemini.raw_request', body);
     // set model on per request basis
     const currentModel = reqModel ?? this.model;
     const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:generateContent`;
@@ -256,6 +262,9 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     { body, model: reqModel, signal, timeout }: RunActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<StreamingResponse> {
+    const parentSpan = trace.getActiveSpan();
+    parentSpan?.setAttribute('gemini.raw_request', body);
+
     const currentModel = reqModel ?? this.model;
     const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:streamGenerateContent?alt=sse`;
     const token = await this.getAccessToken();
@@ -323,6 +332,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       signal,
       timeout,
       tools,
+      toolConfig,
       systemInstruction,
     }: InvokeAIRawActionParams,
     connectorUsageCollector: ConnectorUsageCollector
@@ -330,7 +340,13 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     const res = await this.runApi(
       {
         body: JSON.stringify({
-          ...formatGeminiPayload({ maxOutputTokens, messages, temperature, systemInstruction }),
+          ...formatGeminiPayload({
+            maxOutputTokens,
+            messages,
+            temperature,
+            systemInstruction,
+            toolConfig,
+          }),
           tools,
         }),
         model,
@@ -455,5 +471,6 @@ const formatGeminiPayload = ({
     }
     previousRole = correctRole;
   }
+
   return payload;
 };

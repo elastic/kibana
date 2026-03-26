@@ -1,0 +1,42 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { KibanaProject } from '@kbn/projects-solutions-groups';
+
+/**
+ * Identifier for the classic (non-solution) view.
+ * Items registered under this ID are visible in all views, regardless of the active solution.
+ */
+export const ESQL_CLASSIC_SOLUTION_ID = 'classic' as const;
+
+/**
+ * Extended solution ID type used by the extensions registry.
+ * Includes the standard Kibana solution project types plus 'classic'
+ * for items that should be available outside of (and across) all solutions.
+ */
+export type ESQLRegistrySolutionId = KibanaProject | typeof ESQL_CLASSIC_SOLUTION_ID;
+
+export interface RecommendedQuery {
+  // The name of the recommended query, appears in the editor as a suggestion
+  name: string;
+  // The actual ESQL query string, this is what appears in the editor when the user selects the recommendation
+  query: string;
+  // Optional description of the query, can be used to provide more context, appears at the right side of the suggestion popover
+  description?: string;
+  // When true, the query is shown in the recommended queries menu regardless of the active editor query.
+  // The query string is treated as a complete query (not prepended with the current dataview).
+  isStandalone?: boolean;
+}
+
+export interface RecommendedField {
+  // The name of the recommended field, will be used to prioritize the field in the autocomplete suggestions
+  name: string;
+  // The associated index pattern for the field, used to match the field with the current query's index pattern
+  pattern: string;
+}

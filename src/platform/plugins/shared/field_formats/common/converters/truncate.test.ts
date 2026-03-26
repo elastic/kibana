@@ -8,6 +8,7 @@
  */
 
 import { TruncateFormat } from './truncate';
+import { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from '../content_types';
 
 describe('String TruncateFormat', () => {
   test('truncate large string', () => {
@@ -39,5 +40,49 @@ describe('String TruncateFormat', () => {
     const truncate = new TruncateFormat({ fieldLength: 3.2 }, jest.fn());
 
     expect(truncate.convert('This is some text')).toBe('Thi...');
+  });
+
+  test('missing value', () => {
+    const truncate = new TruncateFormat({ fieldLength: 3.2 }, jest.fn());
+
+    expect(truncate.convert(null, TEXT_CONTEXT_TYPE)).toBe('(null)');
+    expect(truncate.convert(undefined, TEXT_CONTEXT_TYPE)).toBe('(null)');
+    expect(truncate.convert('', TEXT_CONTEXT_TYPE)).toBe('(blank)');
+    expect(truncate.convert(null, HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(null)</span>'
+    );
+    expect(truncate.convert(undefined, HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(null)</span>'
+    );
+    expect(truncate.convert('', HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(blank)</span>'
+    );
+  });
+
+  test('escapes HTML characters in html context', () => {
+    const truncate = new TruncateFormat({ fieldLength: 100 }, jest.fn());
+
+    expect(truncate.convert('<script>alert("test")</script>', HTML_CONTEXT_TYPE)).toBe(
+      '&lt;script&gt;alert(&quot;test&quot;)&lt;/script&gt;'
+    );
+    expect(truncate.convert('<img src="x" onerror="alert(1)">', HTML_CONTEXT_TYPE)).toBe(
+      '&lt;img src=&quot;x&quot; onerror=&quot;alert(1)&quot;&gt;'
+    );
+  });
+
+  test('escapes HTML characters in truncated html context', () => {
+    const truncate = new TruncateFormat({ fieldLength: 10 }, jest.fn());
+
+    expect(truncate.convert('<script>alert("test")</script>', HTML_CONTEXT_TYPE)).toBe(
+      '&lt;script&gt;al...'
+    );
+  });
+
+  test('does not escape HTML characters in text context', () => {
+    const truncate = new TruncateFormat({ fieldLength: 100 }, jest.fn());
+
+    expect(truncate.convert('<script>alert("test")</script>', TEXT_CONTEXT_TYPE)).toBe(
+      '<script>alert("test")</script>'
+    );
   });
 });

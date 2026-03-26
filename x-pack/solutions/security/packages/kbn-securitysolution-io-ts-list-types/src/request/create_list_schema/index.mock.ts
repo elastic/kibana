@@ -7,7 +7,7 @@
 
 import { DESCRIPTION, LIST_ID, META, NAME, TYPE, VERSION } from '../../constants/index.mock';
 
-import { CreateListSchema } from '.';
+import type { CreateListSchema } from '.';
 
 export const getCreateListSchemaMock = (): CreateListSchema => ({
   description: DESCRIPTION,

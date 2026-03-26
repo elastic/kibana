@@ -10,7 +10,7 @@ import type { ID } from './constants';
 export interface TimelineConfiguration {
   id: string | null;
   title: string;
-  graphEventId?: string;
+
   [key: string]: string | null | undefined;
 }
 

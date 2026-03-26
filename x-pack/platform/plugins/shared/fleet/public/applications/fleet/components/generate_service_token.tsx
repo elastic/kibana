@@ -105,6 +105,7 @@ export const GenerateServiceTokenComponent: React.FunctionComponent<{
       ) : (
         <>
           <EuiCallOut
+            announceOnMount
             iconType="check"
             size="s"
             color="success"

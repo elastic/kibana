@@ -28,6 +28,8 @@ import { getParsedFilterQuery, termQuery } from '@kbn/observability-plugin/serve
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_GROUPING,
+  ALERT_INDEX_PATTERN,
   ALERT_REASON,
   ALERT_RULE_PARAMETERS,
   ApmRuleType,
@@ -300,7 +302,9 @@ export function registerTransactionErrorRateRuleType({
           [PROCESSOR_EVENT]: ProcessorEvent.transaction,
           [ALERT_EVALUATION_VALUE]: errorRate,
           [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
+          [ALERT_GROUPING]: groupingObject,
           [ALERT_REASON]: reasonMessage,
+          [ALERT_INDEX_PATTERN]: index,
           ...sourceFields,
           ...groupByFields,
         };
@@ -335,10 +339,8 @@ export function registerTransactionErrorRateRuleType({
         const alertUuid = recoveredAlert.alert.getUuid();
         const alertDetailsUrl = getAlertDetailsUrl(basePath, spaceId, alertUuid);
 
-        const ruleParamsOfRecoveredAlert = alertHits?.[
-          ALERT_RULE_PARAMETERS
-        ] as TransactionErrorRateRuleTypeParams;
-        const groupByFieldsOfRecoveredAlert = ruleParamsOfRecoveredAlert.groupBy ?? [];
+        const ruleParamsOfRecoveredAlert = alertHits?.[ALERT_RULE_PARAMETERS];
+        const groupByFieldsOfRecoveredAlert = ruleParamsOfRecoveredAlert?.groupBy ?? [];
         const allGroupByFieldsOfRecoveredAlert = getAllGroupByFields(
           ApmRuleType.TransactionErrorRate,
           groupByFieldsOfRecoveredAlert
@@ -363,7 +365,8 @@ export function registerTransactionErrorRateRuleType({
         );
 
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
-        const groupingObject = unflattenObject(groupByFields);
+        const groupingObjectFromRecoveredAlert =
+          alertHits?.[ALERT_GROUPING] ?? unflattenObject(groupByFields);
 
         const recoveredContext = {
           alertDetailsUrl,
@@ -377,7 +380,7 @@ export function registerTransactionErrorRateRuleType({
           threshold: ruleParams.threshold,
           triggerValue: asDecimalOrInteger(alertHits?.[ALERT_EVALUATION_VALUE]),
           viewInAppUrl,
-          grouping: groupingObject,
+          grouping: groupingObjectFromRecoveredAlert,
           ...groupByActionVariables,
         };
 

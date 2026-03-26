@@ -1,0 +1,67 @@
+Analyze this data stream and determine if an ingest pipeline is needed. Use an **iterative eval/dev loop**: analyze, decide, design (if needed), simulate, fix errors, repeat.
+
+## Your Workflow
+
+1. **Analyze** the dataset analysis below to understand the data structure
+2. **Decide** if processing is actually needed:
+   - If data already has proper `@timestamp`, `{{{severity_field}}}`, `{{{content_field}}}`, etc. → **commit an empty pipeline** `{ "steps": [] }`
+   - If there's no `event.original` or raw text to parse → **commit an empty pipeline**
+   - If `{{{content_field}}}` is a simple message (not a structured log line) → **do NOT parse it**
+   - Only design processors if the data actually needs transformation
+   - **Never create no-op grok/dissect patterns** that extract a field's entire content unchanged (e.g., `%{{{content_field}}}` from `{{{content_field}}}`)
+   - Note: `date` processors to reformat timestamps or `convert` processors to change types ARE valid transformations
+3. **Design** a pipeline with appropriate processors (only if processing is needed)
+4. **Call `simulate_pipeline`** to test it against sample data
+5. **Read the errors** carefully and fix the issues
+6. **Repeat** steps 4-5 until simulation passes
+7. **Call `commit_pipeline`** when done - this can be `{ "steps": [] }` if no processing is needed
+
+**Not all data needs processing.** If the data is already well-structured with schema-compliant fields, commit an empty pipeline. Don't add unnecessary processors.
+
+**Expect multiple iterations.** The first attempt rarely works perfectly. Read error messages - they tell you exactly what to fix.
+
+**Less is more.** When fixing errors, simplify rather than add complexity. Remove problematic processors instead of adding workarounds. Prioritize reliable parsing of common cases over handling rare edge cases.
+
+## Tools
+
+- **`simulate_pipeline(pipeline)`** - Runs your COMPLETE pipeline against the ORIGINAL raw documents. Returns errors and metrics. The dataset analysis below shows parsed output - but simulation starts from raw data, so include the parsing processor in your pipeline.
+- **`commit_pipeline(message)`** - Finalize when simulation passes.
+
+## Key Rules
+
+{{#parsing_processor}}
+**Pre-generated parsing processor provided** - Use as a starting point:
+```
+{{{parsing_processor}}}
+```
+**Important:** When a parsing processor is provided, the system has already determined that this data needs parsing. You MUST NOT commit an empty pipeline — use this processor (or a modified version) as the first step, then add date normalization, type conversions, and cleanup. The dataset analysis below shows documents AFTER this processor runs; `simulate_pipeline` runs against ORIGINAL raw documents, so include the parsing step to get the extracted fields.
+{{/parsing_processor}}
+
+{{^parsing_processor}}
+**No parsing processor provided** - Build the full pipeline from scratch.
+{{/parsing_processor}}
+
+**Target Schema:** {{{fields_schema}}}
+- ECS: `log.level`, `service.name`, `host.name`, `@timestamp`
+- OTel: `severity_text`, `resource.attributes.*`, `body.text`, `attributes.*`
+
+**Required:**
+- Valid `@timestamp` on ≥99% of documents
+- Correct field types per schema
+- `on_failure` handlers for error resilience
+
+---
+
+## Dataset: {{stream.name}}
+
+{{{stream.description}}}
+
+---
+
+## Dataset Analysis
+
+{{{initial_dataset_analysis}}}
+
+---
+
+Now analyze the data and start your eval/dev loop. Call `simulate_pipeline` with your first attempt, then iterate based on the results.

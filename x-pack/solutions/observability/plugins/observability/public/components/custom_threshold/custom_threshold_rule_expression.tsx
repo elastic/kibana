@@ -10,45 +10,61 @@ import { debounce } from 'lodash';
 import {
   EuiButtonEmpty,
   EuiCallOut,
-  EuiCheckbox,
   EuiEmptyPrompt,
   EuiFormErrorText,
   EuiFormRow,
   EuiHorizontalRule,
   EuiIconTip,
   EuiLoadingSpinner,
+  EuiPanel,
+  EuiRadioGroup,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { ISearchSource, Query } from '@kbn/data-plugin/common';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { DataViewBase } from '@kbn/es-query';
+import deepEqual from 'fast-deep-equal';
+import type { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
+import type { ISearchSource, Query } from '@kbn/data-plugin/common';
+import { type SavedQuery } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewBase } from '@kbn/es-query';
+import { type Filter } from '@kbn/es-query';
 import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  ForLastExpression,
+import type {
   IErrorObject,
   RuleTypeParams,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { ForLastExpression } from '@kbn/triggers-actions-ui-plugin/public';
+import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import { useKibana } from '../../utils/kibana_react';
-import { Aggregators } from '../../../common/custom_threshold_rule/types';
-import { TimeUnitChar } from '../../../common/utils/formatters/duration';
-import { AlertContextMeta, AlertParams, MetricExpression } from './types';
+import {
+  Aggregators,
+  type CustomThresholdSearchSourceFields,
+  type NoDataBehavior,
+} from '../../../common/custom_threshold_rule/types';
+import type { TimeUnitChar } from '../../../common/utils/formatters/duration';
+import type { AlertContextMeta, AlertParams, MetricExpression } from './types';
 import { ExpressionRow } from './components/expression_row';
-import { MetricsExplorerFields, GroupBy } from './components/group_by';
+import type { MetricsExplorerFields } from './components/group_by';
+import { GroupBy } from './components/group_by';
 import { RuleConditionChart as PreviewChart } from '../rule_condition_chart/rule_condition_chart';
 import { getSearchConfiguration } from './helpers/get_search_configuration';
 
-const FILTER_TYPING_DEBOUNCE_MS = 500;
+const HIDDEN_FILTER_PANEL_OPTIONS: SearchBarProps['hiddenFilterPanelOptions'] = [
+  'pinFilter',
+  'disableFilter',
+];
 
-type Props = Omit<
+export type CustomThresholdRuleExpressionProps = Omit<
   RuleTypeParamsExpressionProps<RuleTypeParams & AlertParams, AlertContextMeta>,
   'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch'
->;
+> & { kql: KqlPluginStart };
 
 export const defaultExpression: MetricExpression = {
   comparator: COMPARATORS.GREATER_THAN,
@@ -59,17 +75,126 @@ export const defaultExpression: MetricExpression = {
     },
   ],
   threshold: [100],
-  timeSize: 1,
+  timeSize: 5,
   timeUnit: 'm',
 };
 
+const FILTER_TYPING_DEBOUNCE_MS = 500;
+const EMPTY_FILTERS: Filter[] = [];
+
+const convertToMinutes = (timeWindowSize: number, timeWindowUnit: TimeUnitChar): number => {
+  switch (timeWindowUnit) {
+    case 's':
+      return timeWindowSize / 60;
+    case 'm':
+      return timeWindowSize;
+    case 'h':
+      return timeWindowSize * 60;
+    case 'd':
+      return timeWindowSize * 60 * 24;
+    default:
+      return timeWindowSize;
+  }
+};
+
+const RECOMMENDED_TIMESIZE_WARNING = i18n.translate(
+  'xpack.observability.common.expressionItems.forTheLast.recommendedTimeSizeError',
+  {
+    defaultMessage: 'Minimum 5 minutes recommended',
+  }
+);
+
+const getNoDataBehaviorOptions = (hasGroupBy: boolean) => [
+  {
+    id: 'recover',
+    label: (
+      <>
+        {i18n.translate('xpack.observability.customThreshold.rule.noDataBehavior.recover', {
+          defaultMessage: 'Recover active alerts',
+        })}{' '}
+        <EuiIconTip
+          size="s"
+          type="question"
+          color="subdued"
+          content={i18n.translate('xpack.observability.customThreshold.rule.recoverHelpText', {
+            defaultMessage:
+              "Recover any active alerts when data isn't returned for the specified conditions. New alerts won't be created for the missing data.",
+          })}
+        />
+      </>
+    ),
+  },
+  {
+    id: 'alertOnNoData',
+    label: (
+      <>
+        {i18n.translate('xpack.observability.customThreshold.rule.noDataBehavior.alertOnNoData', {
+          defaultMessage: 'Alert me about the missing data',
+        })}{' '}
+        <EuiIconTip
+          size="s"
+          type="question"
+          color="subdued"
+          content={
+            hasGroupBy
+              ? i18n.translate('xpack.observability.customThreshold.rule.groupDisappearHelpText', {
+                  defaultMessage:
+                    'Get a "no data" alert when a previously detected group stops returning data. This option is not suitable for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
+                })
+              : i18n.translate('xpack.observability.customThreshold.rule.noDataHelpText', {
+                  defaultMessage:
+                    'Get a "no data" alert when data isn\'t returned during the rule execution period or if the rule does not successfully query Elasticsearch.',
+                })
+          }
+        />
+      </>
+    ),
+  },
+  {
+    id: 'remainActive',
+    label: (
+      <>
+        {i18n.translate('xpack.observability.customThreshold.rule.noDataBehavior.remainActive', {
+          defaultMessage: 'Do nothing',
+        })}{' '}
+        <EuiIconTip
+          size="s"
+          type="question"
+          color="subdued"
+          content={i18n.translate('xpack.observability.customThreshold.rule.remainActiveHelpText', {
+            defaultMessage:
+              'Keep active alerts in their current state, and do not create new alerts for the missing data.',
+          })}
+        />
+      </>
+    ),
+  },
+];
+
+export const getNoDataBehaviorValue = (
+  ruleParams: AlertParams,
+  hasGroupBy: boolean
+): NoDataBehavior => {
+  if (ruleParams.noDataBehavior) {
+    return ruleParams.noDataBehavior;
+  }
+
+  // Derive from legacy params for backwards compatibility
+  if (hasGroupBy) {
+    return ruleParams.alertOnGroupDisappear ? 'alertOnNoData' : 'recover';
+  }
+
+  return ruleParams.alertOnNoData ? 'alertOnNoData' : 'recover';
+};
+
 // eslint-disable-next-line import/no-default-export
-export default function Expressions(props: Props) {
-  const { setRuleParams, ruleParams, errors, metadata, onChangeMetaData } = props;
+export default function Expressions(props: CustomThresholdRuleExpressionProps) {
+  const { setRuleParams, ruleParams, errors, metadata, onChangeMetaData, kql } = props;
   const {
     data,
     dataViews,
     dataViewEditor,
+
     unifiedSearch: {
       ui: { SearchBar },
     },
@@ -80,17 +205,16 @@ export default function Expressions(props: Props) {
     [ruleParams.groupBy]
   );
 
-  const [timeSize, setTimeSize] = useState<number | undefined>(1);
+  const [timeSize, setTimeSize] = useState<number | undefined>(5);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
   const [dataView, setDataView] = useState<DataView>();
   const [dataViewTimeFieldError, setDataViewTimeFieldError] = useState<string>();
   const [searchSource, setSearchSource] = useState<ISearchSource>();
-  const [paramsError, setParamsError] = useState<Error>();
+  const [triggerResetDataView, setTriggerResetDataView] = useState<boolean>(false);
+  const [paramsError, setParamsError] = useState<SavedObjectNotFound>();
   const [paramsWarning, setParamsWarning] = useState<string>();
-  const [isNoDataChecked, setIsNoDataChecked] = useState<boolean>(
-    (hasGroupBy && !!ruleParams.alertOnGroupDisappear) ||
-      (!hasGroupBy && !!ruleParams.alertOnNoData)
-  );
+  const [savedQuery, setSavedQuery] = useState<SavedQuery>();
+
   const derivedIndexPattern = useMemo<DataViewBase>(
     () => ({
       fields: dataView?.fields || [],
@@ -99,77 +223,81 @@ export default function Expressions(props: Props) {
     [dataView]
   );
 
-  useEffect(() => {
-    const initSearchSource = async () => {
-      let initialSearchConfiguration = ruleParams.searchConfiguration;
+  const isTimeSizeBelowRecommended =
+    timeSize && timeUnit ? convertToMinutes(timeSize, timeUnit) < 5 : false;
 
-      if (!ruleParams.searchConfiguration || !ruleParams.searchConfiguration.index) {
-        if (metadata?.currentOptions?.searchConfiguration) {
-          initialSearchConfiguration = {
-            query: {
-              query: ruleParams.searchConfiguration?.query ?? '',
-              language: 'kuery',
-            },
-            ...metadata.currentOptions.searchConfiguration,
-          };
-        } else {
-          const newSearchSource = data.search.searchSource.createEmpty();
-          newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
-          const defaultDataView = await data.dataViews.getDefaultDataView();
-          if (defaultDataView) {
-            newSearchSource.setField('index', defaultDataView);
-            setDataView(defaultDataView);
-          }
-          initialSearchConfiguration = getSearchConfiguration(
-            newSearchSource.getSerializedFields(),
-            setParamsWarning
-          );
+  const initSearchSource = async (resetDataView: boolean, thisData: DataPublicPluginStart) => {
+    let initialSearchConfiguration = resetDataView ? undefined : ruleParams.searchConfiguration;
+    if (!initialSearchConfiguration || !initialSearchConfiguration.index) {
+      if (!resetDataView && metadata?.currentOptions?.searchConfiguration) {
+        initialSearchConfiguration = {
+          query: {
+            query: ruleParams.searchConfiguration?.query ?? '',
+            language: 'kuery',
+          },
+          ...metadata.currentOptions.searchConfiguration,
+        };
+      } else {
+        const newSearchSource = thisData.search.searchSource.createEmpty();
+        newSearchSource.setField('query', thisData.query.queryString.getDefaultQuery());
+        const defaultDataView = await thisData.dataViews.getDefaultDataView();
+        if (defaultDataView) {
+          newSearchSource.setField('index', defaultDataView);
+          setDataView(defaultDataView);
         }
-      }
-
-      try {
-        const createdSearchSource = await data.search.searchSource.create(
-          initialSearchConfiguration
+        initialSearchConfiguration = getSearchConfiguration(
+          newSearchSource.getSerializedFields(),
+          setParamsWarning
         );
-        setRuleParams(
-          'searchConfiguration',
-          getSearchConfiguration(
-            {
-              ...initialSearchConfiguration,
-              ...(ruleParams.searchConfiguration?.query && {
+      }
+    }
+
+    try {
+      const createdSearchSource = await thisData.search.searchSource.create(
+        initialSearchConfiguration
+      );
+      setRuleParams(
+        'searchConfiguration',
+        getSearchConfiguration(
+          {
+            ...initialSearchConfiguration,
+            ...(!resetDataView &&
+              ruleParams.searchConfiguration?.query && {
                 query: ruleParams.searchConfiguration.query,
               }),
-            },
-            setParamsWarning
-          )
-        );
-        setSearchSource(createdSearchSource);
-        setDataView(createdSearchSource.getField('index'));
+          },
+          setParamsWarning
+        )
+      );
+      setSearchSource(createdSearchSource);
+      setDataView(createdSearchSource.getField('index'));
 
-        if (createdSearchSource.getField('index')) {
-          const timeFieldName = createdSearchSource.getField('index')?.timeFieldName;
-          if (!timeFieldName) {
-            setDataViewTimeFieldError(
-              i18n.translate(
-                'xpack.observability.customThreshold.rule.alertFlyout.dataViewError.noTimestamp',
-                {
-                  defaultMessage:
-                    'The selected data view does not have a timestamp field, please select another data view.',
-                }
-              )
-            );
-          } else {
-            setDataViewTimeFieldError(undefined);
-          }
+      if (createdSearchSource.getField('index')) {
+        const timeFieldName = createdSearchSource.getField('index')?.timeFieldName;
+        if (!timeFieldName) {
+          setDataViewTimeFieldError(
+            i18n.translate(
+              'xpack.observability.customThreshold.rule.alertFlyout.dataViewError.noTimestamp',
+              {
+                defaultMessage:
+                  'The selected data view does not have a timestamp field, please select another data view.',
+              }
+            )
+          );
         } else {
           setDataViewTimeFieldError(undefined);
         }
-      } catch (error) {
-        setParamsError(error);
+      } else {
+        setDataViewTimeFieldError(undefined);
       }
-    };
+      setParamsError(undefined);
+    } catch (error) {
+      setParamsError(error);
+    }
+  };
 
-    initSearchSource();
+  useEffect(() => {
+    initSearchSource(false, data);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.search.searchSource, data.dataViews, dataView]);
 
@@ -185,16 +313,9 @@ export default function Expressions(props: Props) {
       preFillGroupBy();
     }
 
-    if (typeof ruleParams.alertOnNoData === 'undefined') {
-      preFillAlertOnNoData();
+    if (typeof ruleParams.noDataBehavior === 'undefined') {
+      setRuleParams('noDataBehavior', getNoDataBehaviorValue(ruleParams, hasGroupBy));
     }
-    if (typeof ruleParams.alertOnGroupDisappear === 'undefined') {
-      preFillAlertOnGroupDisappear();
-    }
-    setIsNoDataChecked(
-      (hasGroupBy && !!ruleParams.alertOnGroupDisappear) ||
-        (!hasGroupBy && !!ruleParams.alertOnNoData)
-    );
   }, [metadata]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onSelectDataView = useCallback(
@@ -245,30 +366,112 @@ export default function Expressions(props: Props) {
     [setRuleParams, ruleParams.criteria]
   );
 
-  const onFilterChange = useCallback(
-    ({ query }: { query?: Query }) => {
-      setParamsWarning(undefined);
+  // Saved query
+  const onSavedQueryUpdated = useCallback(
+    (newSavedQuery: SavedQuery) => {
+      setSavedQuery(newSavedQuery);
+      const { filters: newFilters, query: newQuery } = newSavedQuery.attributes;
+
+      // Only update fields if they are defined
+      const updates: Partial<CustomThresholdSearchSourceFields> = {};
+      if (newFilters !== undefined) updates.filter = newFilters;
+      if (newQuery !== undefined) updates.query = newQuery;
+
+      if (Object.keys(updates).length > 0) {
+        setRuleParams(
+          'searchConfiguration',
+          getSearchConfiguration(
+            {
+              ...ruleParams.searchConfiguration,
+              ...updates,
+            },
+            setParamsWarning
+          )
+        );
+      }
+    },
+    [setRuleParams, ruleParams.searchConfiguration]
+  );
+
+  const onClearSavedQuery = () => {
+    setSavedQuery(undefined);
+    setRuleParams(
+      'searchConfiguration',
+      getSearchConfiguration(
+        {
+          ...ruleParams.searchConfiguration,
+          query: { language: ruleParams.searchConfiguration.query?.language ?? 'kuery', query: '' },
+          filter: undefined,
+        },
+        setParamsWarning
+      )
+    );
+  };
+
+  const onFilterUpdated = useCallback(
+    (filter: Filter[]) => {
       setRuleParams(
         'searchConfiguration',
-        getSearchConfiguration({ ...ruleParams.searchConfiguration, query }, setParamsWarning)
+        getSearchConfiguration(
+          {
+            ...ruleParams.searchConfiguration,
+            filter,
+          },
+          setParamsWarning
+        )
       );
     },
     [setRuleParams, ruleParams.searchConfiguration]
   );
 
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const debouncedOnFilterChange = useCallback(debounce(onFilterChange, FILTER_TYPING_DEBOUNCE_MS), [
-    onFilterChange,
-  ]);
+  const onQuerySubmit = useCallback(
+    ({ query: newQuery }: { query?: Query }) => {
+      setParamsWarning(undefined);
+      if (!deepEqual(newQuery, ruleParams.searchConfiguration.query)) {
+        setRuleParams(
+          'searchConfiguration',
+          getSearchConfiguration(
+            {
+              ...ruleParams.searchConfiguration,
+              query: { language: newQuery?.language ?? 'kuery', query: newQuery?.query ?? '' },
+            },
+            setParamsWarning
+          )
+        );
+      }
+    },
+    [setRuleParams, ruleParams.searchConfiguration]
+  );
+
+  const onQueryChange = useCallback(
+    ({ query: newQuery }: { query?: Query }) => {
+      setParamsWarning(undefined);
+      if (!deepEqual(newQuery, ruleParams.searchConfiguration.query)) {
+        setRuleParams(
+          'searchConfiguration',
+          getSearchConfiguration(
+            {
+              ...ruleParams.searchConfiguration,
+              query: newQuery ?? ruleParams.searchConfiguration.query,
+            },
+            setParamsWarning
+          )
+        );
+      }
+    },
+    [setRuleParams, ruleParams.searchConfiguration]
+  );
+
+  const debouncedOnQueryChange = useMemo(
+    () => debounce(onQueryChange, FILTER_TYPING_DEBOUNCE_MS),
+    [onQueryChange]
+  );
 
   const onGroupByChange = useCallback(
     (group: string | null | string[]) => {
-      const hasGroup = !!group && group.length > 0;
       setRuleParams('groupBy', group && group.length ? group : '');
-      setRuleParams('alertOnGroupDisappear', hasGroup && isNoDataChecked);
-      setRuleParams('alertOnNoData', !hasGroup && isNoDataChecked);
     },
-    [setRuleParams, isNoDataChecked]
+    [setRuleParams]
   );
 
   const emptyError = useMemo(() => {
@@ -278,6 +481,14 @@ export default function Expressions(props: Props) {
       timeWindowSize: [],
     };
   }, []);
+
+  const forLastExpressionErrors = useMemo(() => {
+    return {
+      aggField: [],
+      timeSizeUnit: [],
+      timeWindowSize: isTimeSizeBelowRecommended ? [RECOMMENDED_TIMESIZE_WARNING] : [],
+    };
+  }, [isTimeSizeBelowRecommended]);
 
   const updateTimeSize = useCallback(
     (ts: number | undefined) => {
@@ -330,36 +541,7 @@ export default function Expressions(props: Props) {
     }
   }, [metadata, setRuleParams]);
 
-  const preFillAlertOnNoData = useCallback(() => {
-    const md = metadata;
-    if (md && typeof md.currentOptions?.alertOnNoData !== 'undefined') {
-      setRuleParams('alertOnNoData', md.currentOptions.alertOnNoData);
-    } else {
-      setRuleParams('alertOnNoData', false);
-    }
-  }, [metadata, setRuleParams]);
-
-  const preFillAlertOnGroupDisappear = useCallback(() => {
-    const md = metadata;
-    if (md && typeof md.currentOptions?.alertOnGroupDisappear !== 'undefined') {
-      setRuleParams('alertOnGroupDisappear', md.currentOptions.alertOnGroupDisappear);
-    } else {
-      setRuleParams('alertOnGroupDisappear', false);
-    }
-  }, [metadata, setRuleParams]);
-
-  if (paramsError) {
-    return (
-      <>
-        <EuiCallOut color="danger" iconType="warning" data-test-subj="thresholdRuleExpressionError">
-          <p>{paramsError.message}</p>
-        </EuiCallOut>
-        <EuiSpacer size={'m'} />
-      </>
-    );
-  }
-
-  if (!searchSource) {
+  if (!paramsError && !searchSource) {
     return (
       <>
         <EuiEmptyPrompt title={<EuiLoadingSpinner size="xl" />} />
@@ -368,17 +550,12 @@ export default function Expressions(props: Props) {
     );
   }
 
-  const placeHolder = i18n.translate(
-    'xpack.observability.customThreshold.rule.alertFlyout.searchBar.placeholder',
-    {
-      defaultMessage: 'Search for observability data… (e.g. host.name:host-1)',
-    }
-  );
   return (
     <>
       {!!paramsWarning && (
         <>
           <EuiCallOut
+            announceOnMount
             title={i18n.translate(
               'xpack.observability.customThreshold.rule.alertFlyout.warning.title',
               {
@@ -403,15 +580,54 @@ export default function Expressions(props: Props) {
         </h5>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <DataViewSelectPopover
-        dependencies={{ dataViews, dataViewEditor }}
-        dataView={dataView}
-        metadata={{ adHocDataViewList: metadata?.adHocDataViewList || [] }}
-        onSelectDataView={onSelectDataView}
-        onChangeMetaData={({ adHocDataViewList }) => {
-          onChangeMetaData({ ...metadata, adHocDataViewList });
-        }}
-      />
+      {paramsError && !triggerResetDataView ? (
+        <EuiCallOut
+          announceOnMount
+          color="danger"
+          iconType="warning"
+          data-test-subj="thresholdRuleExpressionError"
+        >
+          <p>
+            {i18n.translate('xpack.observability.customThreshold.rule.alertFlyout.error.message', {
+              defaultMessage: 'Error fetching search source',
+            })}
+            <br />
+            {i18n.translate(
+              'xpack.observability.customThreshold.rule.alertFlyout.error.messageDescription',
+              {
+                defaultMessage: 'Could not locate that data view (id: {id})',
+                values: { id: paramsError?.savedObjectId },
+              }
+            )}
+            <br />
+            <EuiButtonEmpty
+              data-test-subj="thresholdRuleExpressionErrorButton"
+              flush="left"
+              onClick={() => {
+                initSearchSource(true, data);
+                setTriggerResetDataView(true);
+              }}
+            >
+              {i18n.translate(
+                'xpack.observability.customThreshold.rule.alertFlyout.error.message',
+                {
+                  defaultMessage: 'Click here to choose a new data view',
+                }
+              )}
+            </EuiButtonEmpty>
+          </p>
+        </EuiCallOut>
+      ) : (
+        <DataViewSelectPopover
+          dependencies={{ dataViews, dataViewEditor }}
+          dataView={dataView}
+          metadata={{ adHocDataViewList: metadata?.adHocDataViewList || [] }}
+          onSelectDataView={onSelectDataView}
+          onChangeMetaData={({ adHocDataViewList }) => {
+            onChangeMetaData({ ...metadata, adHocDataViewList });
+          }}
+        />
+      )}
       {dataViewTimeFieldError && (
         <EuiFormErrorText data-test-subj="thresholdRuleDataViewErrorNoTimestamp">
           {dataViewTimeFieldError}
@@ -430,31 +646,25 @@ export default function Expressions(props: Props) {
       <SearchBar
         appName="Custom threshold rule"
         iconType="search"
-        placeholder={placeHolder}
         indexPatterns={dataView ? [dataView] : undefined}
-        showQueryInput={true}
-        showQueryMenu={false}
-        showFilterBar={!!ruleParams.searchConfiguration?.filter}
+        allowSavingQueries
+        showQueryInput
+        showQueryMenu
+        showFilterBar
         showDatePicker={false}
         showSubmitButton={false}
         displayStyle="inPage"
-        onQueryChange={debouncedOnFilterChange}
-        onQuerySubmit={onFilterChange}
+        onQueryChange={debouncedOnQueryChange}
+        onQuerySubmit={onQuerySubmit}
+        onClearSavedQuery={onClearSavedQuery}
+        onSavedQueryUpdated={onSavedQueryUpdated}
+        onSaved={onSavedQueryUpdated}
         dataTestSubj="thresholdRuleUnifiedSearchBar"
         query={ruleParams.searchConfiguration?.query}
-        filters={ruleParams.searchConfiguration?.filter}
-        onFiltersUpdated={(filter) => {
-          setRuleParams(
-            'searchConfiguration',
-            getSearchConfiguration(
-              {
-                ...ruleParams.searchConfiguration,
-                filter,
-              },
-              setParamsWarning
-            )
-          );
-        }}
+        filters={ruleParams.searchConfiguration?.filter ?? EMPTY_FILTERS}
+        savedQuery={savedQuery}
+        onFiltersUpdated={onFilterUpdated}
+        hiddenFilterPanelOptions={HIDDEN_FILTER_PANEL_OPTIONS}
       />
       {errors.filterQuery && (
         <EuiFormErrorText data-test-subj="thresholdRuleDataViewErrorNoTimestamp">
@@ -478,6 +688,7 @@ export default function Expressions(props: Props) {
                 errors={(errors[idx] as IErrorObject) || emptyError}
                 expression={e || {}}
                 dataView={derivedIndexPattern}
+                kql={kql}
                 title={
                   ruleParams.criteria.length === 1 ? (
                     <FormattedMessage
@@ -509,10 +720,11 @@ export default function Expressions(props: Props) {
       <ForLastExpression
         timeWindowSize={timeSize}
         timeWindowUnit={timeUnit}
-        errors={emptyError}
+        errors={forLastExpressionErrors}
         onChangeWindowSize={updateTimeSize}
         onChangeWindowUnit={updateTimeUnit}
         display="fullWidth"
+        isTimeSizeBelowRecommended={isTimeSizeBelowRecommended}
       />
 
       <EuiSpacer size="m" />
@@ -557,59 +769,27 @@ export default function Expressions(props: Props) {
           }}
         />
       </EuiFormRow>
-      <EuiSpacer size="s" />
-      <EuiCheckbox
-        id="metrics-alert-group-disappear-toggle"
-        data-test-subj="thresholdRuleAlertOnNoDataCheckbox"
-        label={
-          <>
-            {i18n.translate(
-              'xpack.observability.customThreshold.rule.alertFlyout.alertOnGroupDisappear',
-              {
-                defaultMessage: "Alert me if there's no data",
-              }
-            )}{' '}
-            <EuiIconTip
-              type="questionInCircle"
-              color="subdued"
-              content={
-                hasGroupBy
-                  ? i18n.translate(
-                      'xpack.observability.customThreshold.rule.alertFlyout.groupDisappearHelpText',
-                      {
-                        defaultMessage:
-                          'Enable this to trigger a no data alert if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
-                      }
-                    )
-                  : i18n.translate(
-                      'xpack.observability.customThreshold.rule.alertFlyout.noDataHelpText',
-                      {
-                        defaultMessage:
-                          'Enable this to trigger a no data alert if the condition(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
-                      }
-                    )
-              }
-            />
-          </>
-        }
-        checked={isNoDataChecked}
-        onChange={(e) => {
-          const checked = e.target.checked;
-          setIsNoDataChecked(checked);
-          if (!checked) {
-            setRuleParams('alertOnGroupDisappear', false);
-            setRuleParams('alertOnNoData', false);
-          } else {
-            if (hasGroupBy) {
-              setRuleParams('alertOnGroupDisappear', true);
-              setRuleParams('alertOnNoData', false);
-            } else {
-              setRuleParams('alertOnGroupDisappear', false);
-              setRuleParams('alertOnNoData', true);
-            }
-          }
-        }}
-      />
+      <EuiSpacer size="m" />
+      <EuiPanel color="subdued">
+        <EuiRadioGroup
+          name="noDataBehavior"
+          legend={{
+            children: (
+              <span>
+                {i18n.translate('xpack.observability.customThreshold.rule.noDataBehaviorLabel', {
+                  defaultMessage: 'If there is no data',
+                })}
+              </span>
+            ),
+          }}
+          options={getNoDataBehaviorOptions(hasGroupBy)}
+          idSelected={getNoDataBehaviorValue(ruleParams, hasGroupBy)}
+          onChange={(id) => {
+            setRuleParams('noDataBehavior', id as NoDataBehavior);
+          }}
+          data-test-subj="thresholdRuleAlertOnNoDataRadioGroup"
+        />
+      </EuiPanel>
       <EuiSpacer size="m" />
     </>
   );

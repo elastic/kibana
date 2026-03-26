@@ -16,4 +16,4 @@ NOTE: Despite its similarities to ES mappings, the intention of these files is n
 
 ## Testing
 
-Functional tests are defined at `x-pack/test/api_integration/apis/telemetry/telemetry_local.ts`. They merge all files and [the x-pack counterparts](../../../../../../x-pack/platform/plugins/private/telemetry_collection_xpack/schema), and validates the actual output of the telemetry endpoint against the final schema.
+Functional tests are defined at `x-pack/platform/test/api_integration/apis/telemetry/telemetry_local.ts`. They merge all files and [the x-pack counterparts](../../../../../../x-pack/platform/plugins/private/telemetry_collection_xpack/schema), and validates the actual output of the telemetry endpoint against the final schema.

@@ -196,6 +196,50 @@ it('indexes documents using the bulk client helper', async () => {
   `);
 });
 
+it('filters out null and undefined documents', async () => {
+  const client = new MockClient();
+  const progress = new Progress();
+  const stats = createStats('test', log);
+
+  const recordsWithInvalid = [
+    ...testRecords,
+    { type: 'doc', value: null },
+    { type: 'doc', value: undefined },
+  ];
+
+  await createPromiseFromStreams([
+    createListStream(recordsWithInvalid),
+    createIndexDocRecordsStream(client as any, stats, progress),
+  ]);
+
+  expect(stats).toMatchInlineSnapshot(`
+    Object {
+      "foo": Object {
+        "archived": false,
+        "configDocs": Object {
+          "tagged": 0,
+          "upToDate": 0,
+          "upgraded": 0,
+        },
+        "created": false,
+        "deleted": false,
+        "docs": Object {
+          "archived": 0,
+          "indexed": 4,
+        },
+        "skipped": false,
+        "waitForSnapshot": 0,
+      },
+    }
+  `);
+  // Ensure progress reflects all records were processed
+  expect(progress.getComplete()).toBe(recordsWithInvalid.length);
+  // Ensure bulk was only called with valid documents
+  const bulkCalls = client.helpers.bulk.mock.calls;
+  const documentsInBulkCalls = bulkCalls.reduce((acc, call) => [...acc, ...call[0].datasource], []);
+  expect(documentsInBulkCalls.length).toBe(4);
+});
+
 describe('bulk helper onDocument param', () => {
   it('returns index ops for each doc', async () => {
     expect.assertions(testRecords.length);
@@ -324,19 +368,19 @@ describe('bulk helper onDrop param', () => {
     ]);
 
     await expect(promise).rejects.toThrowErrorMatchingInlineSnapshot(`
-            "
-                Error: Bulk doc failure [operation=index]:
-                  doc: {\\"hello\\":\\"world\\"}
-                  error: {\\"reason\\":\\"1 conflicts with something\\"}
-                    <stack trace>
-                Error: Bulk doc failure [operation=index]:
-                  doc: {\\"hello\\":\\"world\\"}
-                  error: {\\"reason\\":\\"2 conflicts with something\\"}
-                    <stack trace>
-                Error: Bulk doc failure [operation=index]:
-                  doc: {\\"hello\\":\\"world\\"}
-                  error: {\\"reason\\":\\"3 conflicts with something\\"}
-                    <stack trace>"
-          `);
+      "
+          Error: Bulk doc failure [operation=index]:
+            doc: {\\"hello\\":\\"world\\"}
+            error: {\\"reason\\":\\"1 conflicts with something\\"}
+              <stack trace>
+          Error: Bulk doc failure [operation=index]:
+            doc: {\\"hello\\":\\"world\\"}
+            error: {\\"reason\\":\\"2 conflicts with something\\"}
+              <stack trace>
+          Error: Bulk doc failure [operation=index]:
+            doc: {\\"hello\\":\\"world\\"}
+            error: {\\"reason\\":\\"3 conflicts with something\\"}
+              <stack trace>"
+    `);
   });
 });

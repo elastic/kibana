@@ -13,7 +13,8 @@
     "patterns": [
       "_reindex/{task_id}/_rethrottle"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-reindex.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-reindex",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-reindex",
     "availability": {
       "stack": true,
       "serverless": false

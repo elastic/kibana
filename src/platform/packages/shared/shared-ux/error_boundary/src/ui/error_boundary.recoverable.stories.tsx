@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { StoryFn, Meta } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react';
 import React from 'react';
 
 import { EuiFormFieldset } from '@elastic/eui';
 import { Template } from '../../mocks/src/storybook_template';
 import { ChunkLoadErrorComponent, KibanaErrorBoundaryStorybookMock } from '../../mocks';
-import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_services';
+import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_provider';
 import { KibanaErrorBoundary } from './error_boundary';
 import { KibanaSectionErrorBoundary } from './section_error_boundary';
 
@@ -61,6 +61,11 @@ export const SectionErrorInCallout: StoryFn = () => {
         </EuiFormFieldset>
         <EuiFormFieldset legend={{ children: 'Section B' }}>
           <KibanaSectionErrorBoundary sectionName="sectionB">
+            <ChunkLoadErrorComponent />
+          </KibanaSectionErrorBoundary>
+        </EuiFormFieldset>
+        <EuiFormFieldset legend={{ children: 'Section C with 3 retries' }}>
+          <KibanaSectionErrorBoundary sectionName="sectionC" maxRetries={3}>
             <ChunkLoadErrorComponent />
           </KibanaSectionErrorBoundary>
         </EuiFormFieldset>

@@ -5,4 +5,12 @@
  * 2.0.
  */
 
+/**
+ * The ID of the product intercept trigger definition.
+ * This is used to register the trigger definition with the intercepts plugin.
+ */
 export const TRIGGER_DEF_ID = 'productInterceptTrigger' as const;
+
+export const UPGRADE_TRIGGER_DEF_PREFIX_ID = 'productUpgradeInterceptTrigger' as const;
+
+export const TRIAL_TRIGGER_DEF_ID = 'productTrialInterceptTrigger' as const;

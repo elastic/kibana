@@ -8,7 +8,7 @@
 import rison from '@kbn/rison';
 
 import { i18n } from '@kbn/i18n';
-import { Workspace } from '../types';
+import type { Workspace } from '../types';
 import { asKQL } from './kql_encoder';
 
 export interface OutlinkEncoder {

@@ -1,0 +1,5 @@
+$schema: https://moonrepo.dev/schemas/project.json
+layer: unknown
+language: typescript
+
+tasks: {}

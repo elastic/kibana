@@ -49,6 +49,7 @@ export function DiagnosticsIndexPatternSettings() {
               <EuiBadge
                 color={isNonStandard ? 'warning' : 'hollow'}
                 css={{ marginRight: '5px', marginTop: '5px' }}
+                tabIndex={0}
               >
                 {templateName}
               </EuiBadge>

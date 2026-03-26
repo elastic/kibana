@@ -19,7 +19,7 @@ import { AddMetricsCallout } from '../../add_metrics_callout';
 export const ContainerMetrics = () => {
   const ref = useRef<HTMLDivElement>(null);
   const { dateRange } = useDatePickerContext();
-  const { asset } = useAssetDetailsRenderPropsContext();
+  const { entity } = useAssetDetailsRenderPropsContext();
   const { metrics } = useDataViewsContext();
 
   const state = useIntersectingState(ref, { dateRange });
@@ -39,7 +39,7 @@ export const ContainerMetrics = () => {
         DOCKER_METRIC_TYPES.map((metric) => (
           <DockerCharts
             key={metric}
-            assetId={asset.id}
+            entityId={entity.id}
             dataView={metrics.dataView}
             dateRange={state.dateRange}
             metric={metric}
@@ -50,7 +50,7 @@ export const ContainerMetrics = () => {
         KUBERNETES_METRIC_TYPES.map((metric) => (
           <KubernetesContainerCharts
             key={metric}
-            assetId={asset.id}
+            entityId={entity.id}
             dataView={metrics.dataView}
             dateRange={state.dateRange}
             metric={metric}

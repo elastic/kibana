@@ -7,10 +7,16 @@
 
 import { AttachmentType } from '../../../../common/types/domain';
 import type { AttachmentUI } from '../../../containers/types';
+import type {
+  CaseUI,
+  AlertAttachmentUI,
+  EventAttachmentUI,
+  AttachmentUIV2,
+} from '../../../../common/ui/types';
 
-export const getManualAlertIds = (comments: AttachmentUI[]): string[] => {
-  const dedupeAlerts = comments.reduce((alertIds, comment: AttachmentUI) => {
-    if (comment.type === AttachmentType.alert) {
+export const getManualAlertIds = (comments: AttachmentUIV2[]): string[] => {
+  const dedupeAlerts = comments.reduce((alertIds, comment: AttachmentUIV2) => {
+    if (comment.type === AttachmentType.alert && `alertId` in comment) {
       const ids = Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
       ids.forEach((id) => alertIds.add(id));
       return alertIds;
@@ -18,4 +24,63 @@ export const getManualAlertIds = (comments: AttachmentUI[]): string[] => {
     return alertIds;
   }, new Set<string>());
   return Array.from(dedupeAlerts);
+};
+
+const isAlertAttachment = (comment: AttachmentUIV2): comment is AlertAttachmentUI => {
+  return comment.type === AttachmentType.alert && `alertId` in comment;
+};
+
+const filterAlertCommentByIds = (
+  comment: AlertAttachmentUI,
+  searchTerm: string
+): AlertAttachmentUI | null => {
+  const ids = Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
+  const filteredIds = ids.filter((id: string) => Boolean(id) && id.includes(searchTerm));
+  if (filteredIds.length === 0) {
+    return null;
+  }
+  return {
+    ...comment,
+    alertId: filteredIds,
+  };
+};
+
+const isEventAttachment = (comment: AttachmentUIV2): comment is EventAttachmentUI => {
+  return comment.type === AttachmentType.event && `eventId` in comment;
+};
+
+const filterEventCommentByIds = (
+  comment: EventAttachmentUI,
+  searchTerm: string
+): EventAttachmentUI | null => {
+  const ids = Array.isArray(comment.eventId) ? comment.eventId : [comment.eventId];
+  const filteredIds = ids.filter((id: string) => Boolean(id) && id.includes(searchTerm));
+  if (filteredIds.length === 0) {
+    return null;
+  }
+  return {
+    ...comment,
+    eventId: filteredIds,
+  };
+};
+
+export const filterCaseAttachmentsBySearchTerm = (caseData: CaseUI, searchTerm: string): CaseUI => {
+  if (!searchTerm) {
+    return caseData;
+  }
+
+  return {
+    ...caseData,
+    comments: caseData.comments
+      .map((comment) => {
+        if (isAlertAttachment(comment)) {
+          return filterAlertCommentByIds(comment, searchTerm);
+        }
+        if (isEventAttachment(comment)) {
+          return filterEventCommentByIds(comment, searchTerm);
+        }
+        return comment;
+      })
+      .filter((comment): comment is AttachmentUI => comment !== null),
+  };
 };

@@ -14,6 +14,7 @@ import { getTrailingBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../..
 import { getTrailingBreadcrumbs as geExceptionsBreadcrumbs } from '../../../../exceptions/utils/breadcrumbs';
 import { getTrailingBreadcrumbs as getCSPBreadcrumbs } from '../../../../cloud_security_posture/breadcrumbs';
 import { getTrailingBreadcrumbs as getUsersBreadcrumbs } from '../../../../explore/users/pages/details/breadcrumbs';
+import { getTrailingBreadcrumbs as getKubernetesBreadcrumbs } from '../../../../kubernetes/pages/utils/breadcrumbs';
 import { getTrailingBreadcrumbs as getDashboardBreadcrumbs } from '../../../../dashboards/pages/breadcrumbs';
 
 export const getTrailingBreadcrumbs: GetTrailingBreadcrumbs = (
@@ -30,9 +31,12 @@ export const getTrailingBreadcrumbs: GetTrailingBreadcrumbs = (
     case SecurityPageName.rules:
     case SecurityPageName.rulesAdd:
     case SecurityPageName.rulesCreate:
+    case SecurityPageName.aiRuleCreation:
       return getDetectionRulesBreadcrumbs(spyState, getSecuritySolutionUrl);
     case SecurityPageName.exceptions:
       return geExceptionsBreadcrumbs(spyState, getSecuritySolutionUrl);
+    case SecurityPageName.kubernetes:
+      return getKubernetesBreadcrumbs(spyState, getSecuritySolutionUrl);
     case SecurityPageName.cloudSecurityPostureBenchmarks:
       return getCSPBreadcrumbs(spyState, getSecuritySolutionUrl);
     case SecurityPageName.dashboards:

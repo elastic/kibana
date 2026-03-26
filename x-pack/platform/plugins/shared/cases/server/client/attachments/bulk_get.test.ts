@@ -7,12 +7,13 @@
 
 import Boom from '@hapi/boom';
 import { MAX_BULK_GET_ATTACHMENTS } from '../../../common/constants';
-import { mockCaseComments } from '../../mocks';
+import { mockCaseComments, mockCaseUnifiedAttachments } from '../../mocks';
 import { createCasesClientMockArgs, createCasesClientMock } from '../mocks';
 import { bulkGet } from './bulk_get';
 
 describe('bulkGet', () => {
   const attachmentSO = mockCaseComments[0];
+  const unifiedAttachmentSO = mockCaseUnifiedAttachments[0];
 
   describe('errors', () => {
     const casesClient = createCasesClientMock();
@@ -30,7 +31,11 @@ describe('bulkGet', () => {
     it(`throws when trying to fetch more than ${MAX_BULK_GET_ATTACHMENTS} attachments`, async () => {
       await expect(
         bulkGet(
-          { attachmentIDs: Array(MAX_BULK_GET_ATTACHMENTS + 1).fill('foobar'), caseID: '123' },
+          {
+            attachmentIDs: Array(MAX_BULK_GET_ATTACHMENTS + 1).fill('foobar'),
+            caseID: '123',
+            mode: 'legacy',
+          },
           clientArgs,
           casesClient
         )
@@ -41,7 +46,7 @@ describe('bulkGet', () => {
 
     it('throws when trying to fetch zero attachments', async () => {
       await expect(
-        bulkGet({ attachmentIDs: [], caseID: '123' }, clientArgs, casesClient)
+        bulkGet({ attachmentIDs: [], caseID: '123', mode: 'legacy' }, clientArgs, casesClient)
       ).rejects.toThrow(
         'Error: The length of the field ids is too short. Array must be of length >= 1.'
       );
@@ -65,7 +70,7 @@ describe('bulkGet', () => {
       });
 
       const res = await bulkGet(
-        { attachmentIDs: ['my-case-1'], caseID: 'mock-id-1' },
+        { attachmentIDs: ['my-case-1'], caseID: 'mock-id-1', mode: 'legacy' },
         clientArgs,
         casesClient
       );
@@ -100,7 +105,7 @@ describe('bulkGet', () => {
       });
 
       const res = await bulkGet(
-        { attachmentIDs: ['my-case-1'], caseID: 'mock-id-1' },
+        { attachmentIDs: ['my-case-1'], caseID: 'mock-id-1', mode: 'legacy' },
         clientArgs,
         casesClient
       );
@@ -114,6 +119,42 @@ describe('bulkGet', () => {
         message: 'SO not found: My error',
         status: 404,
       });
+    });
+  });
+
+  describe('unified mode', () => {
+    const casesClient = createCasesClientMock();
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.authorization.getAndEnsureAuthorizedEntities.mockResolvedValue({
+        authorized: [unifiedAttachmentSO],
+        unauthorized: [],
+      });
+      clientArgs.services.attachmentService.getter.bulkGet.mockResolvedValue({
+        saved_objects: [unifiedAttachmentSO],
+      });
+    });
+
+    it('uses unified mode and returns attachments', async () => {
+      const res = await bulkGet(
+        { attachmentIDs: ['my-case-1'], caseID: 'mock-id-1', mode: 'unified' },
+        clientArgs,
+        casesClient
+      );
+
+      expect(clientArgs.services.attachmentService.getter.bulkGet).toHaveBeenCalledWith(
+        ['my-case-1'],
+        'unified'
+      );
+      expect(res.attachments[0]).toEqual(
+        expect.objectContaining({
+          id: unifiedAttachmentSO.id,
+          type: 'comment',
+          data: { content: 'test' },
+        })
+      );
     });
   });
 });

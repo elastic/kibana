@@ -7,6 +7,7 @@
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react';
 
+import type { SecurityIntegrationsGridTabsProps } from './security_integrations_grid_tabs';
 import { SecurityIntegrationsGridTabs } from './security_integrations_grid_tabs';
 import * as module from '@kbn/fleet-plugin/public';
 import { TestProviders } from '../../../mock';
@@ -15,13 +16,11 @@ import {
   useStoredIntegrationTabId,
 } from '../hooks/use_stored_state';
 import { INTEGRATION_TABS } from '../configs/integration_tabs_configs';
-import { useSelectedTab } from '../hooks/use_selected_tab';
 import { mockReportLinkClick } from '../hooks/__mocks__/mocks';
 import type { AvailablePackages } from './with_available_packages';
 
 jest.mock('../hooks/integration_context');
 jest.mock('../hooks/use_stored_state');
-jest.mock('../hooks/use_selected_tab');
 jest.mock('../../kibana', () => ({
   ...jest.requireActual('../../kibana'),
   useNavigation: jest.fn().mockReturnValue({
@@ -40,7 +39,6 @@ jest
   .spyOn(module, 'PackageList')
   .mockImplementation(() => Promise.resolve({ PackageListGrid: mockPackageList }));
 
-const mockUseSelectedTab = useSelectedTab as jest.MockedFunction<typeof useSelectedTab>;
 const mockUseStoredIntegrationTabId = useStoredIntegrationTabId as jest.MockedFunction<
   typeof useStoredIntegrationTabId
 >;
@@ -53,7 +51,7 @@ describe('IntegrationsCardGridTabsComponent', () => {
   const mockSetCategory = jest.fn();
   const mockSetSelectedSubCategory = jest.fn();
   const mockSetSearchTerm = jest.fn();
-  const props = {
+  const props: SecurityIntegrationsGridTabsProps = {
     activeIntegrationsCount: 1,
     isAgentRequired: false,
     availablePackages: {
@@ -64,18 +62,14 @@ describe('IntegrationsCardGridTabsComponent', () => {
       searchTerm: 'new search term',
     } as unknown as AvailablePackages,
     integrationList: [],
+    selectedTab: INTEGRATION_TABS[0],
+    setSelectedTabId: mockSetTabId,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseStoredIntegrationTabId.mockReturnValue([INTEGRATION_TABS[0].id, jest.fn()]);
     mockUseStoredIntegrationSearchTerm.mockReturnValue(['', jest.fn()]);
-    mockUseSelectedTab.mockReturnValue({
-      selectedTab: INTEGRATION_TABS[0],
-      toggleIdSelected: INTEGRATION_TABS[0].id,
-      setSelectedTabIdToStorage: mockSetTabId,
-      integrationTabs: INTEGRATION_TABS,
-    });
   });
 
   it('renders loading skeleton when data is loading', () => {
@@ -157,16 +151,14 @@ describe('IntegrationsCardGridTabsComponent', () => {
   });
 
   it('renders auto-import card if appendAutoImport is true', async () => {
-    mockUseSelectedTab.mockReturnValue({
-      selectedTab: { ...INTEGRATION_TABS[0], appendAutoImportCard: true },
-      toggleIdSelected: INTEGRATION_TABS[0].id,
-      setSelectedTabIdToStorage: mockSetTabId,
-      integrationTabs: INTEGRATION_TABS,
-    });
-
-    render(<SecurityIntegrationsGridTabs {...props} />, {
-      wrapper: TestProviders,
-    });
+    render(
+      <SecurityIntegrationsGridTabs
+        {...props}
+        selectedTab={{ ...INTEGRATION_TABS[0], appendAutoImportCard: true }}
+        setSelectedTabId={mockSetTabId}
+      />,
+      { wrapper: TestProviders }
+    );
 
     await waitFor(() => {
       expect(mockPackageList.mock.calls[0][0].list).toEqual([

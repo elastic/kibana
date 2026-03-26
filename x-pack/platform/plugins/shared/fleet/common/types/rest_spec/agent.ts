@@ -21,6 +21,7 @@ import type { ListResult, ListWithKuery } from './common';
 
 export interface GetAgentsRequest {
   query: ListWithKuery & {
+    showAgentless?: boolean;
     showInactive?: boolean;
     showUpgradeable?: boolean;
     withMetrics?: boolean;
@@ -132,6 +133,28 @@ export type PostBulkAgentUpgradeResponse = BulkAgentAction;
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostAgentUpgradeResponse {}
 
+export interface PostAgentRollbackRequest {
+  params: {
+    agentId: string;
+  };
+}
+
+export interface PostAgentRollbackResponse {
+  actionId: string;
+}
+
+export interface PostBulkAgentRollbackRequest {
+  body: {
+    agents: string[] | string;
+    batchSize?: number;
+    includeInactive?: boolean;
+  };
+}
+
+export interface PostBulkAgentRollbackResponse {
+  actionIds: string[];
+}
+
 export interface PostAgentReassignRequest {
   params: {
     agentId: string;
@@ -181,7 +204,55 @@ export interface DeleteAgentRequest {
     agentId: string;
   };
 }
-
+export interface MigrateSingleAgentRequest {
+  body: {
+    id: string;
+    enrollment_token: string;
+    uri: string;
+    settings?: {
+      ca_sha256?: string;
+      certificate_authorities?: string;
+      elastic_agent_cert?: string;
+      elastic_agent_cert_key?: string;
+      elastic_agent_cert_key_passphrase?: string;
+      headers?: Record<string, string>;
+      insecure?: boolean;
+      proxy_disabled?: boolean;
+      proxy_headers?: Record<string, string>;
+      proxy_url?: string;
+      staging?: string;
+      tags?: string;
+      replace_token?: string;
+    };
+  };
+}
+export interface MigrateSingleAgentResponse {
+  actionId: string;
+}
+export interface BulkMigrateAgentsRequest {
+  body: {
+    agents: string[] | string;
+    enrollment_token: string;
+    uri: string;
+    settings?: {
+      ca_sha256?: string;
+      certificate_authorities?: string;
+      elastic_agent_cert?: string;
+      elastic_agent_cert_key?: string;
+      elastic_agent_cert_key_passphrase?: string;
+      headers?: Record<string, string>;
+      insecure?: boolean;
+      proxy_disabled?: boolean;
+      proxy_headers?: Record<string, string>;
+      proxy_url?: string;
+      staging?: string;
+      tags?: string;
+    };
+  };
+}
+export interface BulkMigrateAgentsResponse {
+  actionId: string;
+}
 export interface UpdateAgentRequest {
   params: {
     agentId: string;
@@ -267,4 +338,48 @@ export interface PostRetrieveAgentsByActionsRequest {
 
 export interface PostRetrieveAgentsByActionsResponse {
   items: string[];
+}
+
+export interface ChangeAgentPrivilegeLevelRequest {
+  agentId: string;
+  body: {
+    user_info?: AgentPrivilegeLevelChangeUserInfo;
+  } | null;
+}
+
+export interface ChangeAgentPrivilegeLevelResponse {
+  actionId: string;
+}
+
+export interface AgentPrivilegeLevelChangeUserInfo {
+  username?: string;
+  groupname?: string;
+  password?: string;
+}
+
+export interface BulkChangeAgentPrivilegeLevelRequest {
+  body: {
+    agents: string[] | string;
+    user_info?: AgentPrivilegeLevelChangeUserInfo;
+  };
+}
+
+export interface BulkChangeAgentPrivilegeLevelResponse {
+  actionId: string;
+}
+
+export interface PostGenerateAgentsReportRequest {
+  body: {
+    agents: string[] | string;
+    fields: string[];
+    timezone?: string;
+    sort?: {
+      field?: string;
+      direction?: 'asc' | 'desc';
+    };
+  };
+}
+
+export interface PostGenerateAgentsReportResponse {
+  url: string;
 }

@@ -6,13 +6,14 @@
  */
 
 import { merge } from 'lodash';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 
-import { TemplateFromEs, TemplateSerialized } from '@kbn/index-management-plugin/common/types';
-import { LegacyTemplateSerialized } from '@kbn/index-management-plugin/server';
-import { RouteDependencies } from '../../../types';
+import type { TemplateFromEs, TemplateSerialized } from '@kbn/index-management-plugin/common/types';
+import type { LegacyTemplateSerialized } from '@kbn/index-management-plugin/server';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
 async function getLegacyIndexTemplate(
@@ -67,6 +68,7 @@ async function updateIndexTemplate(
   if (!indexTemplate) {
     return false;
   }
+
   if (isLegacy) {
     merge(indexTemplate, { settings });
   } else {
@@ -81,8 +83,11 @@ async function updateIndexTemplate(
     // @ts-expect-error Types of property auto_expand_replicas are incompatible.
     return client.indices.putTemplate({ name: templateName, body: indexTemplate });
   }
+  // Remove properties from the GET response that cannot be in the PUT request
+  const { created_date_millis, modified_date_millis, ...safeTemplate } =
+    indexTemplate as TemplateSerialized;
   // @ts-expect-error Type 'IndexSettings' is not assignable to type 'IndicesIndexSettings'.
-  return client.indices.putIndexTemplate({ name: templateName, body: indexTemplate });
+  return client.indices.putIndexTemplate({ name: templateName, body: safeTemplate });
 }
 
 const bodySchema = schema.object({

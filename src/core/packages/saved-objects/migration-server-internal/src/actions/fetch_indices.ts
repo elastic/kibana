@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as TaskEither from 'fp-ts/TaskEither';
+import type * as TaskEither from 'fp-ts/TaskEither';
 import * as Either from 'fp-ts/Either';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';

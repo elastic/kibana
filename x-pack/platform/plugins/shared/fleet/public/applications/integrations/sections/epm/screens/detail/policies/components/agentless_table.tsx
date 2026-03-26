@@ -6,7 +6,7 @@
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import type { HorizontalAlignment } from '@elastic/eui';
-import { EuiBadge, EuiBasicTable, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n-react';
 
@@ -30,6 +30,8 @@ import {
 import { Persona } from '../persona';
 import { AgentHealth } from '../../../../../../../fleet/sections/agents/components';
 
+import { PackagePolicyUpgradeCell } from './package_policy_upgrade_cell';
+
 const REFRESH_INTERVAL_MS = 30000;
 
 export const AgentlessPackagePoliciesTable = ({
@@ -38,6 +40,7 @@ export const AgentlessPackagePoliciesTable = ({
   packagePoliciesTotal,
   refreshPackagePolicies,
   pagination,
+  from,
 }: {
   isLoading: boolean;
   packagePolicies: Array<{
@@ -48,6 +51,7 @@ export const AgentlessPackagePoliciesTable = ({
   packagePoliciesTotal: number;
   refreshPackagePolicies: () => void;
   pagination: ReturnType<typeof usePagination>;
+  from?: 'installed-integrations';
 }) => {
   const core = useStartServices();
   const { notifications } = core;
@@ -145,16 +149,48 @@ export const AgentlessPackagePoliciesTable = ({
               defaultMessage: 'Integration policy',
             }),
             render(_, { agentPolicies, packagePolicy }) {
+              const editHref = getHref('integration_policy_edit', {
+                packagePolicyId: packagePolicy.id,
+              });
               return (
                 <EuiLink
                   className="eui-textTruncate"
                   data-test-subj="agentlessIntegrationNameLink"
-                  href={getHref('integration_policy_edit', {
-                    packagePolicyId: packagePolicy.id,
-                  })}
+                  href={from ? `${editHref}?from=${from}` : editHref}
                 >
                   {packagePolicy.name}
                 </EuiLink>
+              );
+            },
+          },
+          {
+            field: 'packagePolicy.package.version',
+            name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.version', {
+              defaultMessage: 'Version',
+            }),
+            render(_version, { agentPolicies, packagePolicy }) {
+              return (
+                <EuiFlexGroup gutterSize="s" alignItems="center" wrap={true}>
+                  <EuiFlexItem grow={false}>
+                    <EuiText
+                      size="s"
+                      className="eui-textNoWrap"
+                      data-test-subj="packageVersionText"
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.epm.packageDetails.integrationList.packageVersion"
+                        defaultMessage="v{version}"
+                        values={{ version: _version }}
+                      />
+                    </EuiText>
+                  </EuiFlexItem>
+
+                  <PackagePolicyUpgradeCell
+                    packagePolicy={packagePolicy}
+                    agentPolicies={agentPolicies}
+                    from={from || 'integrations-policy-list'}
+                  />
+                </EuiFlexGroup>
               );
             },
           },
@@ -255,6 +291,7 @@ export const AgentlessPackagePoliciesTable = ({
               packagePolicy: InMemoryPackagePolicy;
             }) {
               const agentPolicy = agentPolicies[0]; // TODO: handle multiple agent policies
+              const upgradeFrom = from || 'integrations-policy-list';
               return (
                 <PackagePolicyActionsMenu
                   agentPolicies={agentPolicies}
@@ -265,14 +302,21 @@ export const AgentlessPackagePoliciesTable = ({
                       ? `${getHref('upgrade_package_policy', {
                           policyId: agentPolicy.id,
                           packagePolicyId: packagePolicy.id,
-                        })}?from=integrations-policy-list`
+                        })}?from=${upgradeFrom}`
                       : undefined
                   }
+                  from={from}
                 />
               );
             },
           },
         ]}
+        tableCaption={i18n.translate(
+          'xpack.fleet.epm.packageDetails.integrationList.agentlessPoliciesTableCaption',
+          {
+            defaultMessage: 'Agentless integration policies',
+          }
+        )}
         loading={isLoading}
         data-test-subj="integrationPolicyTable"
         pagination={{

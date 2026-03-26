@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { PresentationContainer } from '@kbn/presentation-containers';
+import { openLazyFlyout } from '@kbn/presentation-util';
+import type { PresentationContainer } from '@kbn/presentation-publishing';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
@@ -16,6 +17,7 @@ import { ML_APP_NAME, PLUGIN_ICON, PLUGIN_ID } from '../../common/constants/app'
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../embeddables';
 import type { SingleMetricViewerEmbeddableApi } from '../embeddables/types';
 import type { MlCoreSetup } from '../plugin';
+import { EmbeddableSingleMetricViewerUserInput } from '../embeddables/single_metric_viewer/single_metric_viewer_setup_flyout';
 
 export type CreateSingleMetricViewerPanelActionContext = EmbeddableApiContext & {
   embeddable: SingleMetricViewerEmbeddableApi;
@@ -24,7 +26,7 @@ export type CreateSingleMetricViewerPanelActionContext = EmbeddableApiContext & 
 const parentApiIsCompatible = async (
   parentApi: unknown
 ): Promise<PresentationContainer | undefined> => {
-  const { apiIsPresentationContainer } = await import('@kbn/presentation-containers');
+  const { apiIsPresentationContainer } = await import('@kbn/presentation-publishing');
   // we cannot have an async type check, so return the casted parentApi rather than a boolean
   return apiIsPresentationContainer(parentApi) ? (parentApi as PresentationContainer) : undefined;
 };
@@ -62,34 +64,37 @@ export function createAddSingleMetricViewerPanelAction(
 
       const [coreStart, { data, share }] = await getStartServices();
 
-      try {
-        const { resolveEmbeddableSingleMetricViewerUserInput } = await import(
-          '../embeddables/single_metric_viewer/single_metric_viewer_setup_flyout'
-        );
-        const { mlApiProvider } = await import('../application/services/ml_api_service');
-        const httpService = new HttpService(coreStart.http);
-        const mlApi: MlApi = mlApiProvider(httpService);
+      const { mlApiProvider } = await import('../application/services/ml_api_service');
+      const httpService = new HttpService(coreStart.http);
+      const mlApi: MlApi = mlApiProvider(httpService);
 
-        const initialState = await resolveEmbeddableSingleMetricViewerUserInput(
-          coreStart,
-          context.embeddable,
-          context.embeddable.uuid,
-          { data, share },
-          mlApi
-        );
-
-        presentationContainerParent.addNewPanel({
-          panelType: ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
-          serializedState: {
-            rawState: {
-              ...initialState,
-              title: initialState.panelTitle,
-            },
-          },
-        });
-      } catch (e) {
-        return Promise.reject();
-      }
+      openLazyFlyout({
+        core: coreStart,
+        parentApi: context.embeddable,
+        flyoutProps: {
+          focusedPanelId: context.embeddable.uuid,
+        },
+        loadContent: async ({ closeFlyout }) => {
+          return (
+            <EmbeddableSingleMetricViewerUserInput
+              coreStart={coreStart}
+              services={{ data, share }}
+              mlApi={mlApi}
+              onConfirm={(initialState) => {
+                presentationContainerParent.addNewPanel({
+                  panelType: ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
+                  serializedState: {
+                    ...initialState,
+                    title: initialState.panelTitle,
+                  },
+                });
+                closeFlyout();
+              }}
+              onCancel={closeFlyout}
+            />
+          );
+        },
+      });
     },
   };
 }

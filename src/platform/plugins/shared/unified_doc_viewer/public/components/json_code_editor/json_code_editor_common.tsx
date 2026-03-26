@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './json_code_editor.scss';
-
 import React from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { monaco, XJsonLang } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
+import { XJsonLang } from '@kbn/monaco';
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 
@@ -75,7 +75,7 @@ export const JsonCodeEditorCommon = ({
     return codeEditor;
   }
   return (
-    <EuiFlexGroup className="dscJsonCodeEditor" direction="column" gutterSize="s">
+    <EuiFlexGroup css={styles.codeEditor} direction="column" gutterSize="s">
       <EuiFlexItem>
         <EuiSpacer size="s" />
         <div className="eui-textRight">
@@ -96,3 +96,9 @@ export const JsonCodeEditorCommon = ({
 export const JSONCodeEditorCommonMemoized = React.memo((props: JsonCodeEditorCommonProps) => {
   return <JsonCodeEditorCommon {...props} />;
 });
+
+const styles = {
+  codeEditor: css`
+    height: 100%;
+  `,
+};

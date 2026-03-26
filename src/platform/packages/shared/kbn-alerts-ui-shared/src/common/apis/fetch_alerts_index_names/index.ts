@@ -8,4 +8,4 @@
  */
 
 export * from './fetch_alerts_index_names';
-export * from './types';
+export type * from './types';

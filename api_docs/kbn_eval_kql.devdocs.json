@@ -1,0 +1,82 @@
+{
+  "id": "@kbn/eval-kql",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/eval-kql",
+        "id": "def-common.evaluateKql",
+        "type": "Function",
+        "tags": [],
+        "label": "evaluateKql",
+        "description": [],
+        "signature": [
+          "(kql: string, context: Record<string, any>) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-eval-kql/src/eval_kql.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/eval-kql",
+            "id": "def-common.evaluateKql.$1",
+            "type": "string",
+            "tags": [],
+            "label": "kql",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-eval-kql/src/eval_kql.ts",
+            "lineNumber": 21,
+            "columnNumber": 29,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/eval-kql",
+            "id": "def-common.evaluateKql.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "Record<string, any>"
+            ],
+            "path": "src/platform/packages/shared/kbn-eval-kql/src/eval_kql.ts",
+            "lineNumber": 21,
+            "columnNumber": 42,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

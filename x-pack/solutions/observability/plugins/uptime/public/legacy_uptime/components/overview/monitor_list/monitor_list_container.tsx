@@ -47,7 +47,10 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
   const monitorList = useSelector(monitorListSelector);
   useMappingCheck(monitorList.error);
 
-  usePageReady({ isReady: Boolean(monitorList.isLoaded) });
+  usePageReady({
+    isReady: Boolean(monitorList.isLoaded),
+    isRefreshing: false,
+  });
 
   useEffect(() => {
     filterCheck(() =>

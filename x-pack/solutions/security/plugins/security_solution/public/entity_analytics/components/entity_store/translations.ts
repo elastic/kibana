@@ -44,7 +44,7 @@ export const ENABLEMENT_DESCRIPTION_RISK_ENGINE_ONLY = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityStore.enablement.description.risk',
   {
     defaultMessage:
-      'Provides real-time visibility into user activity, helping you identify and mitigate potential security risks.',
+      'Provides real-time visibility into entity activity, helping you identify and mitigate potential security risks.',
   }
 );
 

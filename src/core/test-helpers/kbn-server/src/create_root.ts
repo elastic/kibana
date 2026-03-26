@@ -8,7 +8,6 @@
  */
 
 import { join } from 'path';
-import loadJsonFile from 'load-json-file';
 import { defaultsDeep } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
@@ -18,14 +17,16 @@ import { getPackages } from '@kbn/repo-packages';
 import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getFips } from 'crypto';
+import type { CreateTestEsClusterOptions } from '@kbn/test';
 import {
   createTestEsCluster,
-  CreateTestEsClusterOptions,
   esTestConfig,
   kibanaServerTestUser,
   systemIndicesSuperuser,
 } from '@kbn/test';
-import { CliArgs, Env, RawPackageInfo } from '@kbn/config';
+import type { CliArgs, RawPackageInfo } from '@kbn/config';
+import { Env } from '@kbn/config';
+import { loadJsonFile } from '@kbn/utils';
 
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
@@ -73,7 +74,7 @@ export function createRootWithSettings(
 ) {
   let pkg: RawPackageInfo | undefined;
   if (customKibanaVersion) {
-    pkg = loadJsonFile.sync(join(REPO_ROOT, 'package.json')) as RawPackageInfo;
+    pkg = loadJsonFile<RawPackageInfo>(join(REPO_ROOT, 'package.json'));
     pkg.version = customKibanaVersion;
   }
 

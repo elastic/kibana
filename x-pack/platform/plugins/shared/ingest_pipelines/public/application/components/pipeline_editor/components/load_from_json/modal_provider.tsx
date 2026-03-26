@@ -7,12 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FunctionComponent, useRef, useState, useCallback } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useRef, useState, useCallback } from 'react';
 import { EuiConfirmModal, EuiSpacer, EuiText, EuiCallOut, useGeneratedHtmlId } from '@elastic/eui';
 
-import { JsonEditor, OnJsonEditorUpdateHandler } from '../../../../../shared_imports';
+import type { OnJsonEditorUpdateHandler } from '../../../../../shared_imports';
+import { JsonEditor } from '../../../../../shared_imports';
 
-import { Processor } from '../../../../../../common/types';
+import type { Processor } from '../../../../../../common/types';
 
 import { deserialize } from '../../deserialize';
 
@@ -118,6 +120,7 @@ export const ModalProvider: FunctionComponent<Props> = ({ onDone, children }) =>
             {error && (
               <>
                 <EuiCallOut
+                  announceOnMount
                   data-test-subj="errorCallOut"
                   title={i18nTexts.error.title}
                   color="danger"

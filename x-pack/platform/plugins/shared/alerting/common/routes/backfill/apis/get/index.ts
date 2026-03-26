@@ -15,6 +15,7 @@ export type {
 export {
   getParamsSchema as getParamsSchemaV1,
   getResponseSchema as getResponseSchemaV1,
+  getBackfillExamples as getBackfillExamplesV1,
 } from './schemas/v1';
 export type {
   GetBackfillRequestParams as GetBackfillRequestParamsV1,

@@ -19,6 +19,8 @@ import {
   ML_JOB_ID,
   ML_PARTITION_FIELD_VALUE,
 } from '@kbn/ml-anomaly-utils';
+import type { CriteriaField, Influencer } from '@kbn/ml-anomaly-utils';
+import type { SeverityThreshold } from '../../../common/types/anomalies';
 import { getIndicesOptions } from '../../../common/util/datafeed_utils';
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
@@ -38,17 +40,6 @@ import { anomalyChartsDataProvider } from './anomaly_charts';
 // ML Results dashboards.
 
 const DEFAULT_MAX_EXAMPLES = 500;
-
-export interface CriteriaField {
-  fieldType?: string;
-  fieldName: string;
-  fieldValue: any;
-}
-
-interface Influencer {
-  fieldName: string;
-  fieldValue: any;
-}
 
 /**
  * Extracts typical and actual values from the anomaly record.
@@ -95,7 +86,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     criteriaFields: CriteriaField[],
     influencers: Influencer[],
     aggregationInterval: string,
-    threshold: number,
+    threshold: SeverityThreshold[],
     earliestMs: number,
     latestMs: number,
     dateFormatTz: string,
@@ -113,13 +104,6 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
             gte: earliestMs,
             lte: latestMs,
             format: 'epoch_millis',
-          },
-        },
-      },
-      {
-        range: {
-          record_score: {
-            gte: threshold,
           },
         },
       },
@@ -193,6 +177,22 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
         },
       });
     }
+
+    const thresholdCriteria = threshold.map((t) => ({
+      range: {
+        record_score: {
+          gte: t.min,
+          ...(t.max !== undefined && { lte: t.max }),
+        },
+      },
+    }));
+
+    boolCriteria.push({
+      bool: {
+        should: thresholdCriteria,
+        minimum_should_match: 1,
+      },
+    });
 
     const body = await mlClient.anomalySearch(
       {

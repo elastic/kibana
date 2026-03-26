@@ -147,9 +147,10 @@ const RequiredFieldsList = ({
     <>
       {hasWarnings && (
         <EuiCallOut
+          announceOnMount
           title={i18n.REQUIRED_FIELDS_GENERAL_WARNING_TITLE}
           color="warning"
-          iconType="help"
+          iconType="question"
           data-test-subj="requiredFieldsGeneralWarning"
         >
           <p>
@@ -197,7 +198,7 @@ const RequiredFieldsList = ({
           <EuiSpacer size="s" />
           <EuiButtonEmpty
             size="xs"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={addItem}
             isDisabled={isIndexPatternLoading || hasEmptyFieldName}
             data-test-subj="addRequiredFieldButton"

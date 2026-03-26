@@ -12,6 +12,7 @@ import type {
   GetRuleMigrationTranslationStatsResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { RuleMigrationStats } from '../../rules/types';
+import { MigrationSource } from '../types';
 
 const getMockMigrationResultRule = ({
   migrationId,
@@ -63,9 +64,8 @@ const getMockMigrationResultRule = ({
 export const mockedMigrationLatestStatsData: RuleMigrationStats[] = [
   {
     id: '1',
-    number: 1,
     status: SiemMigrationTaskStatus.FINISHED,
-    rules: {
+    items: {
       total: 1,
       pending: 0,
       processing: 0,
@@ -74,21 +74,23 @@ export const mockedMigrationLatestStatsData: RuleMigrationStats[] = [
     },
     last_updated_at: '2025-03-06T15:01:37.321Z',
     created_at: '2025-03-06T15:01:37.321Z',
+    name: 'test',
+    vendor: MigrationSource.SPLUNK,
   },
   {
     id: '2',
-    number: 2,
     status: SiemMigrationTaskStatus.FINISHED,
-    rules: {
+    items: {
       total: 2,
       pending: 0,
       processing: 0,
       completed: 2,
       failed: 0,
     },
-
+    name: 'test',
     created_at: '2025-03-06T15:01:37.321Z',
     last_updated_at: '2025-03-06T15:01:37.321Z',
+    vendor: MigrationSource.QRADAR,
   },
 ];
 
@@ -127,6 +129,7 @@ export const mockedMigrationTranslationStats: Record<
         },
         installable: 1,
         prebuilt: 0,
+        missing_index: 0,
       },
       failed: 0,
     },

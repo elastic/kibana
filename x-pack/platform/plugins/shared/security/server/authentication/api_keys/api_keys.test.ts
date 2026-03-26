@@ -19,6 +19,7 @@ import { APIKeys } from './api_keys';
 import type { SecurityLicense } from '../../../common';
 import { ALL_SPACES_ID } from '../../../common/constants';
 import { licenseMock } from '../../../common/licensing/index.mock';
+import { uiamServiceMock } from '../../uiam/uiam_service.mock';
 
 const encodeToBase64 = (str: string) => Buffer.from(str).toString('base64');
 
@@ -426,6 +427,38 @@ describe('API Keys', () => {
       expect(mockClusterClient.asInternalUser.security.grantApiKey).not.toHaveBeenCalled();
     });
 
+    it('throws an error when request does not contain authorization header', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      await expect(
+        apiKeys.grantAsInternalUser(httpServerMock.createKibanaRequest(), {
+          name: 'test_api_key',
+          role_descriptors: {},
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unable to grant an API Key, request does not contain an authorization header"`
+      );
+      expect(mockClusterClient.asInternalUser.security.grantApiKey).not.toHaveBeenCalled();
+    });
+
+    it('throws an error when grantApiKey fails', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      const error = new Error('Elasticsearch error');
+      mockClusterClient.asInternalUser.security.grantApiKey.mockRejectedValue(error);
+
+      await expect(
+        apiKeys.grantAsInternalUser(
+          httpServerMock.createKibanaRequest({
+            headers: { authorization: `Bearer foo-access-token` },
+          }),
+          {
+            name: 'test_api_key',
+            role_descriptors: roleDescriptors,
+          }
+        )
+      ).rejects.toThrowError('Elasticsearch error');
+      expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledTimes(1);
+    });
+
     it('throws an error when kibana privilege validation fails', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
       mockValidateKibanaPrivileges
@@ -593,6 +626,167 @@ describe('API Keys', () => {
       );
       expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled();
       expect(mockClusterClient.asInternalUser.security.grantApiKey).not.toHaveBeenCalled();
+    });
+
+    describe('with UIAM', () => {
+      it('uses UIAM client authentication when credentials are UIAM credentials', async () => {
+        const mockUiam = uiamServiceMock.create();
+        mockUiam.getClientAuthentication.mockReturnValue({
+          scheme: 'SharedSecret',
+          value: 'uiam-shared-secret',
+        });
+        const apiKeysWithUiam = new APIKeys({
+          clusterClient: mockClusterClient,
+          logger,
+          license: mockLicense,
+          applicationName: 'kibana-.kibana',
+          kibanaFeatures: [],
+          uiam: mockUiam,
+        });
+
+        mockClusterClient.asInternalUser.security.grantApiKey.mockResponseOnce({
+          id: '123',
+          name: 'key-name',
+          api_key: 'abc123',
+          encoded: 'utf8',
+        });
+
+        const result = await apiKeysWithUiam.grantAsInternalUser(
+          httpServerMock.createKibanaRequest({
+            headers: {
+              authorization: `Bearer essu_uiam_access_token`,
+            },
+          }),
+          {
+            name: 'test_api_key',
+            role_descriptors: roleDescriptors,
+            expiration: '1d',
+          }
+        );
+
+        expect(result).toEqual({
+          api_key: 'abc123',
+          id: '123',
+          name: 'key-name',
+          encoded: 'utf8',
+        });
+        expect(mockUiam.getClientAuthentication).toHaveBeenCalled();
+        expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
+          api_key: {
+            name: 'test_api_key',
+            role_descriptors: roleDescriptors,
+            expiration: '1d',
+          },
+          grant_type: 'access_token',
+          access_token: 'essu_uiam_access_token',
+          client_authentication: {
+            scheme: 'SharedSecret',
+            value: 'uiam-shared-secret',
+          },
+        });
+      });
+
+      it('ignores es-client-authentication header when credentials are UIAM credentials', async () => {
+        const mockUiam = uiamServiceMock.create();
+        mockUiam.getClientAuthentication.mockReturnValue({
+          scheme: 'SharedSecret',
+          value: 'uiam-shared-secret',
+        });
+        const apiKeysWithUiam = new APIKeys({
+          clusterClient: mockClusterClient,
+          logger,
+          license: mockLicense,
+          applicationName: 'kibana-.kibana',
+          kibanaFeatures: [],
+          uiam: mockUiam,
+        });
+
+        mockClusterClient.asInternalUser.security.grantApiKey.mockResponseOnce({
+          id: '123',
+          name: 'key-name',
+          api_key: 'abc123',
+          encoded: 'utf8',
+        });
+
+        await apiKeysWithUiam.grantAsInternalUser(
+          httpServerMock.createKibanaRequest({
+            headers: {
+              authorization: `Bearer essu_uiam_access_token`,
+              'es-client-authentication': 'SharedSecret should-be-ignored',
+            },
+          }),
+          {
+            name: 'test_api_key',
+            role_descriptors: roleDescriptors,
+            expiration: '1d',
+          }
+        );
+
+        // Should use UIAM client authentication, not the es-client-authentication header
+        expect(mockUiam.getClientAuthentication).toHaveBeenCalled();
+        expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
+          api_key: {
+            name: 'test_api_key',
+            role_descriptors: roleDescriptors,
+            expiration: '1d',
+          },
+          grant_type: 'access_token',
+          access_token: 'essu_uiam_access_token',
+          client_authentication: {
+            scheme: 'SharedSecret',
+            value: 'uiam-shared-secret',
+          },
+        });
+      });
+
+      it('uses es-client-authentication header when UIAM is configured but credentials are not UIAM credentials', async () => {
+        const mockUiam = uiamServiceMock.create();
+        const apiKeysWithUiam = new APIKeys({
+          clusterClient: mockClusterClient,
+          logger,
+          license: mockLicense,
+          applicationName: 'kibana-.kibana',
+          kibanaFeatures: [],
+          uiam: mockUiam,
+        });
+
+        mockClusterClient.asInternalUser.security.grantApiKey.mockResponseOnce({
+          id: '123',
+          name: 'key-name',
+          api_key: 'abc123',
+          encoded: 'utf8',
+        });
+
+        await apiKeysWithUiam.grantAsInternalUser(
+          httpServerMock.createKibanaRequest({
+            headers: {
+              authorization: `Bearer regular_access_token`,
+              'es-client-authentication': 'SharedSecret header-secret',
+            },
+          }),
+          {
+            name: 'test_api_key',
+            role_descriptors: roleDescriptors,
+            expiration: '1d',
+          }
+        );
+
+        // Should NOT use UIAM client authentication since credentials are not UIAM credentials
+        expect(mockUiam.getClientAuthentication).not.toHaveBeenCalled();
+        expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
+          api_key: {
+            name: 'test_api_key',
+            role_descriptors: roleDescriptors,
+            expiration: '1d',
+          },
+          grant_type: 'access_token',
+          access_token: 'regular_access_token',
+          client_authentication: {
+            scheme: 'SharedSecret',
+            value: 'header-secret',
+          },
+        });
+      });
     });
   });
 

@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Operations, PercentileParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type { PercentileParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { Operations } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type { Percentile } from '../../../../common/types';
-import { AdditionalArgs } from '../../types';
+import type { AdditionalArgs } from '../../types';
 import { createColumn, getFormat } from './column';
-import {
+import type {
   PercentileColumnWithExtendedMeta,
   PercentileColumn,
   Column,

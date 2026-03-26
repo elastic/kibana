@@ -13,6 +13,7 @@ import { deleteRuleRequestParamsSchemaV1 } from '../../../../../common/routes/ru
 import type { AlertingRequestHandlerContext } from '../../../../types';
 import { BASE_ALERTING_API_PATH } from '../../../../types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
+import { validateInternalRuleType } from '../../../lib/validate_internal_rule_type';
 
 export const deleteRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -51,8 +52,17 @@ export const deleteRuleRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
+        const ruleTypes = alertingContext.listTypes();
 
         const params: DeleteRuleRequestParamsV1 = req.params;
+
+        const rule = await rulesClient.get({ id: params.id });
+
+        validateInternalRuleType({
+          ruleTypeId: rule.alertTypeId,
+          ruleTypes,
+          operationText: 'delete',
+        });
 
         await rulesClient.delete({ id: params.id });
         return res.noContent();

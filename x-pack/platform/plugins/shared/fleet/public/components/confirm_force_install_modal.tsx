@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal, EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiConfirmModal, EuiCallOut, EuiLink, useGeneratedHtmlId } from '@elastic/eui';
 import type { DocLinksStart } from '@kbn/core/public';
 
 import { i18n } from '@kbn/i18n';
@@ -20,6 +20,8 @@ export const ConfirmForceInstallModal: React.FC<{
   pkg?: Pick<PackageInfo, 'name' | 'version'>;
   docLinks: DocLinksStart;
 }> = ({ onCancel, onConfirm, pkg, docLinks }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const title =
     pkg && pkg.name && pkg.version
       ? i18n.translate('xpack.fleet.ConfirmForceInstallModal.calloutTitleWithPkg', {
@@ -34,6 +36,7 @@ export const ConfirmForceInstallModal: React.FC<{
         });
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={
         <span className="eui-textBreakWord">
           <FormattedMessage
@@ -42,6 +45,7 @@ export const ConfirmForceInstallModal: React.FC<{
           />
         </span>
       }
+      titleProps={{ id: modalTitleId }}
       onCancel={onCancel}
       onConfirm={onConfirm}
       cancelButtonText={

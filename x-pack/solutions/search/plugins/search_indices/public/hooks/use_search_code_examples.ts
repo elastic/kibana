@@ -12,9 +12,11 @@ import {
   buildFieldDescriptorForIndex,
   getDefaultQueryFields,
 } from '@kbn/search-queries';
-import { Mappings, SearchCodeSnippetParameters } from '../types';
+import type { Mappings, SearchCodeSnippetParameters } from '../types';
 import { useElasticsearchUrl } from './use_elasticsearch_url';
-import { AvailableLanguages, Languages } from '../code_examples';
+import { useKibana } from './use_kibana';
+import type { AvailableLanguages } from '../code_examples';
+import { Languages } from '../code_examples';
 import { SearchCodeExample } from '../code_examples/search';
 
 const DEFAULT_QUERY_STRING = 'REPLACE WITH YOUR QUERY';
@@ -33,6 +35,7 @@ const DEFAULT_QUERY_OBJECT = {
 export const useSearchCodeExamples = (indexName: string, mappings?: Mappings) => {
   const elasticsearchURL = useElasticsearchUrl();
   const { apiKey } = useSearchApiKey();
+  const { cloud } = useKibana().services;
 
   return useMemo(() => {
     let queryObject: ReturnType<typeof generateSearchQuery> = DEFAULT_QUERY_OBJECT;
@@ -52,6 +55,7 @@ export const useSearchCodeExamples = (indexName: string, mappings?: Mappings) =>
       apiKey: apiKey ?? undefined,
       indexName,
       queryObject,
+      isServerless: cloud?.isServerlessEnabled ?? false,
     };
 
     const options = Object.entries(Languages).map(([key, language]) => ({
@@ -62,5 +66,5 @@ export const useSearchCodeExamples = (indexName: string, mappings?: Mappings) =>
       options,
       console: SearchCodeExample.sense.searchCommand(codeParams),
     };
-  }, [indexName, mappings, elasticsearchURL, apiKey]);
+  }, [indexName, mappings, elasticsearchURL, apiKey, cloud?.isServerlessEnabled]);
 };

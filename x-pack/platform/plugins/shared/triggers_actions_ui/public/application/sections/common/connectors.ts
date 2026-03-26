@@ -17,7 +17,8 @@ export const getValidConnectors = (
 
   return connectors.filter(
     (connector) =>
-      (allowGroupConnector.includes(connector.actionTypeId) ||
+      ((allowGroupConnector.includes(connector.actionTypeId) &&
+        actionTypesIndex[connector.actionTypeId].enabledInConfig) ||
         connector.actionTypeId === actionItem.actionTypeId) &&
       // include only enabled by config connectors or preconfigured
       (actionType?.enabledInConfig || connector.isPreconfigured)

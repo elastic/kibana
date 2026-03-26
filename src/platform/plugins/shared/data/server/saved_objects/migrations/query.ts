@@ -8,9 +8,9 @@
  */
 
 import { mapValues } from 'lodash';
-import { SavedObject } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 import { mergeMigrationFunctionMaps } from '@kbn/kibana-utils-plugin/common';
-import { SavedQueryAttributes } from '../../../common';
+import type { SavedQueryAttributes } from '../../../common';
 import { extract, getAllMigrations } from '../../../common/query/filters/persistable_state';
 
 const extractFilterReferences = (doc: SavedObject<SavedQueryAttributes>) => {

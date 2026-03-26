@@ -32,6 +32,8 @@
           "(basePath: string, spaceId: string, requestedPath: string) => string"
         ],
         "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48,6 +50,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -65,6 +69,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -82,6 +88,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -89,64 +97,6 @@
         ],
         "returnComment": [
           "the space-aware version of the requested path, inclusive of the server's base path."
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/spaces-utils",
-        "id": "def-common.getSpaceIdFromPath",
-        "type": "Function",
-        "tags": [
-          "private"
-        ],
-        "label": "getSpaceIdFromPath",
-        "description": [
-          "\nExtracts the space id from the given path.\n"
-        ],
-        "signature": [
-          "(requestBasePath: string | null | undefined, serverBasePath: string | null | undefined) => { spaceId: string; pathHasExplicitSpaceIdentifier: boolean; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/spaces-utils",
-            "id": "def-common.getSpaceIdFromPath.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "requestBasePath",
-            "description": [
-              "The base path of the current request."
-            ],
-            "signature": [
-              "string | null | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "@kbn/spaces-utils",
-            "id": "def-common.getSpaceIdFromPath.$2",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "serverBasePath",
-            "description": [
-              "The server's base path."
-            ],
-            "signature": [
-              "string | null | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [
-          "the space id."
         ],
         "initialIsOpen": false
       }
@@ -165,6 +115,8 @@
           "\"default\""
         ],
         "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

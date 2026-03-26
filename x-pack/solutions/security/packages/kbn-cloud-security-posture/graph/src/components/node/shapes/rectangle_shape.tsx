@@ -22,7 +22,7 @@ export const RectangleHoverShape = memo<HoverShapeProps>(({ stroke }) => (
 ));
 RectangleHoverShape.displayName = 'RectangleHoverShape';
 
-export const RectangleShape = memo<ShapeProps>(({ stroke, fill }) => (
-  <rect x="1" y="0.5" width="63" height="63" rx="7.5" fill={fill} stroke={stroke} />
+export const RectangleShape = memo<ShapeProps>(({ stroke, fill, ...rest }) => (
+  <rect x="1" y="0.5" width="63" height="63" rx="7.5" fill={fill} stroke={stroke} {...rest} />
 ));
 RectangleShape.displayName = 'RectangleShape';

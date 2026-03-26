@@ -40,6 +40,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/react/kibana_context/theme/theme_provider.tsx",
+        "lineNumber": 108,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -61,6 +63,8 @@
               }
             ],
             "path": "src/platform/packages/shared/react/kibana_context/theme/theme_provider.tsx",
+            "lineNumber": 77,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -80,6 +84,8 @@
           "() => boolean"
         ],
         "path": "src/platform/packages/shared/react/kibana_context/theme/hooks/use_kibana_is_dark_mode.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -109,6 +115,8 @@
           " | undefined) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/react/kibana_context/theme/with_theme.tsx",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -125,6 +133,8 @@
               "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/react/kibana_context/theme/with_theme.tsx",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -148,6 +158,8 @@
               }
             ],
             "path": "src/platform/packages/shared/react/kibana_context/theme/with_theme.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -164,6 +176,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/react/kibana_context/theme/with_theme.tsx",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -184,6 +198,8 @@
           "\nThe representation of the Kibana theme, (not to be confused with the EUI theme)."
         ],
         "path": "src/platform/packages/shared/react/kibana_context/common/types.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -197,6 +213,8 @@
               "is dark mode enabled or not"
             ],
             "path": "src/platform/packages/shared/react/kibana_context/common/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -210,6 +228,8 @@
               "\nName of the active theme"
             ],
             "path": "src/platform/packages/shared/react/kibana_context/common/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -236,6 +256,8 @@
           " extends EuiProps<{}>"
         ],
         "path": "src/platform/packages/shared/react/kibana_context/theme/theme_provider.tsx",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -258,6 +280,8 @@
               }
             ],
             "path": "src/platform/packages/shared/react/kibana_context/theme/theme_provider.tsx",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -276,6 +300,8 @@
               ", \"getUserProfile$\"> | undefined"
             ],
             "path": "src/platform/packages/shared/react/kibana_context/theme/theme_provider.tsx",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -296,6 +322,8 @@
           "\nThe default `KibanaTheme` for use in Storybook, Jest, or initialization.  At\nruntime, the theme should always be provided by the `ThemeService`."
         ],
         "path": "src/platform/packages/shared/react/kibana_context/common/index.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -310,6 +338,8 @@
               "false"
             ],
             "path": "src/platform/packages/shared/react/kibana_context/common/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -321,6 +351,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/shared/react/kibana_context/common/index.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

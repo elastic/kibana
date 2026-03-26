@@ -11,10 +11,11 @@ import React, { useCallback, useContext, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { FieldIcon } from '@kbn/react-field';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
-import { useGeneratedHtmlId, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { useGeneratedHtmlId, EuiComboBox } from '@elastic/eui';
 import { getFilterableFields } from '../../filter_bar/filter_editor';
 import { FiltersBuilderContextType } from '../context';
 import {

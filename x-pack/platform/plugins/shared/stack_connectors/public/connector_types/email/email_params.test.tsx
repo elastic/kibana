@@ -13,7 +13,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import EmailParamsFields from './email_params';
 import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
-import { getFormattedEmailOptions } from './email_params';
+import { getFormattedEmailOptions, getEmailSender } from './email_params';
+import type { ActionConnector } from '@kbn/alerts-ui-shared/src/common/types/action_types';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
@@ -81,6 +82,35 @@ describe('EmailParamsFields renders', () => {
     expect(await screen.findByTestId('messageTextArea')).toBeVisible();
   });
 
+  test('all params fields is rendered, including replyTo if provided', async () => {
+    const actionParams = {
+      cc: [],
+      bcc: [],
+      replyTo: ['reply@test.com'],
+      to: ['test@test.com'],
+      subject: 'test',
+      message: 'test message',
+    };
+
+    render(
+      <IntlProvider locale="en">
+        <EmailParamsFields
+          actionParams={actionParams}
+          errors={{ to: [], cc: [], bcc: [], subject: [], message: [], replyTo: [] }}
+          editAction={() => {}}
+          defaultMessage={'Some default message'}
+          index={0}
+        />
+      </IntlProvider>
+    );
+
+    expect(screen.getByTestId('toEmailAddressInput')).toBeVisible();
+    expect(screen.getByTestId('toEmailAddressInput').textContent).toStrictEqual('test@test.com');
+    expect(screen.getByTestId('subjectInput')).toBeVisible();
+    expect(screen.getByTestId('replyToEmailAddressInput')).toBeVisible();
+    expect(await screen.findByTestId('messageTextArea')).toBeVisible();
+  });
+
   emailTestCases.forEach(({ field, fieldValue, expected }) => {
     test(`"${field}" field value updates correctly when comma-separated emails are pasted`, async () => {
       const actionParams = {
@@ -113,6 +143,45 @@ describe('EmailParamsFields renders', () => {
       fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
       expect(editAction).toHaveBeenCalledWith(field, expected, 0);
     });
+  });
+
+  test('replyTo field updates correctly when comma-separated emails are added', async () => {
+    const actionParams = {
+      to: ['to@test.com'],
+      cc: [],
+      bcc: [],
+      replyTo: ['reply@test.com'],
+      subject: 'subject',
+      message: 'message',
+    };
+
+    const editAction = jest.fn();
+
+    render(
+      <IntlProvider locale="en">
+        <EmailParamsFields
+          actionParams={actionParams}
+          errors={{ to: [], cc: [], bcc: [], subject: [], message: [], replyTo: [] }}
+          editAction={editAction}
+          defaultMessage={'Some default message'}
+          index={0}
+        />
+      </IntlProvider>
+    );
+
+    const replyToComboBox = screen.getByTestId('replyToEmailAddressInput');
+    const input = within(replyToComboBox).getByTestId('comboBoxSearchInput');
+
+    fireEvent.change(input, {
+      target: { value: 'new1@test.com, new2@test.com, new1@test.com' },
+    });
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+    expect(editAction).toHaveBeenCalledWith(
+      'replyTo',
+      ['reply@test.com', 'new1@test.com', 'new2@test.com'],
+      0
+    );
   });
 
   test('message param field is rendered with default value if not set', () => {
@@ -330,5 +399,50 @@ describe('getFormattedEmailOptions', () => {
     const newOptions = getFormattedEmailOptions(searchValue, previousOptions);
 
     expect(newOptions).toEqual([{ label: 'existing@test.com' }, { label: 'single@test.com' }]);
+  });
+});
+
+describe('getEmailSender', () => {
+  test('returns [] for preconfigured connectors', () => {
+    const preconfiguredEmailConnectorMock: ActionConnector = {
+      actionTypeId: '.email',
+      isPreconfigured: true,
+      isDeprecated: false,
+      referencedByCount: 0,
+      isSystemAction: false,
+      isConnectorTypeDeprecated: false,
+      id: 'test-id',
+      name: 'preconfigured-email',
+    };
+
+    expect(getEmailSender(preconfiguredEmailConnectorMock)).toEqual([]);
+  });
+
+  test('should return the sender email for user configured connector', () => {
+    const userConfiguredConnector: ActionConnector = {
+      actionTypeId: '.email-test',
+      isPreconfigured: false,
+      isDeprecated: false,
+      referencedByCount: 0,
+      isMissingSecrets: false,
+      isSystemAction: false,
+      isConnectorTypeDeprecated: false,
+      id: 'test-id',
+      name: 'email connector',
+      config: {
+        service: 'other',
+        host: 'http://www.test.com',
+        port: 1234,
+        secure: false,
+        from: 'sender_email@test.com',
+        hasAuth: true,
+        tenantId: null,
+        clientId: null,
+        oauthTokenUrl: null,
+      },
+      secrets: {},
+    };
+
+    expect(getEmailSender(userConfiguredConnector)).toEqual(['sender_email@test.com']);
   });
 });

@@ -14,6 +14,7 @@ import {
 } from '@kbn/securitysolution-es-utils';
 
 import type { IKibanaResponse } from '@kbn/core/server';
+import { ALERTS_API_ALL } from '@kbn/security-solution-features/constants';
 import type { DeleteAlertsIndexResponse } from '../../../../../common/api/detection_engine/index_management';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
@@ -37,7 +38,7 @@ export const deleteIndexRoute = (router: SecuritySolutionPluginRouter) => {
       access: 'public',
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [ALERTS_API_ALL],
         },
       },
     })

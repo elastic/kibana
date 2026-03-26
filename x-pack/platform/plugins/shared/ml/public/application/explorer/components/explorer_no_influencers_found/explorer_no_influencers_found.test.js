@@ -6,12 +6,17 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ExplorerNoInfluencersFound } from './explorer_no_influencers_found';
 
 describe('ExplorerNoInfluencersFound', () => {
   test('snapshot', () => {
-    const wrapper = shallow(<ExplorerNoInfluencersFound viewBySwimlaneFieldName="field_name" />);
-    expect(wrapper).toMatchSnapshot();
+    const { container } = render(
+      <IntlProvider>
+        <ExplorerNoInfluencersFound viewBySwimlaneFieldName="field_name" />
+      </IntlProvider>
+    );
+    expect(container).toMatchSnapshot();
   });
 });

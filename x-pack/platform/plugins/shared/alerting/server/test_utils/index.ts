@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ApiKeyType } from '../task_runner/types';
 import type { RawAlertInstance } from '../../common';
 import type { AlertingConfig } from '../config';
 
@@ -48,7 +49,7 @@ export function alertsWithAnyUUID(
   return newAlerts;
 }
 
-export function generateAlertingConfig(): AlertingConfig {
+export function generateAlertingConfig(overwrites: Partial<AlertingConfig> = {}): AlertingConfig {
   return {
     healthCheck: {
       interval: '5m',
@@ -70,8 +71,9 @@ export function generateAlertingConfig(): AlertingConfig {
           max: 1000,
         },
       },
+      apiKeyType: ApiKeyType.ES,
     },
     rulesSettings: { enabled: true, cacheInterval: 60000 },
-    maintenanceWindow: { enabled: true },
+    ...overwrites,
   };
 }

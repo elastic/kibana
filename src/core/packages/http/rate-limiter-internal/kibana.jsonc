@@ -1,9 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/core-http-rate-limiter-internal",
-  "owner": [
-    "@elastic/kibana-core"
-  ],
-  "group": "platform",
-  "visibility": "private"
-}

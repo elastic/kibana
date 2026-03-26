@@ -10,13 +10,13 @@ import { cloneDeep } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { distinctUntilChanged, map } from 'rxjs';
 
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexItem,
   EuiInlineEditTitle,
   EuiTitle,
-  UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -117,7 +117,7 @@ export const GridSectionTitle = React.memo(
             flush="both"
           >
             {editTitleOpen ? null : (
-              <EuiTitle size="xs">
+              <EuiTitle size="xs" css={styles.mediumFontWeight}>
                 <h2>{sectionTitle}</h2>
               </EuiTitle>
             )}
@@ -134,7 +134,10 @@ export const GridSectionTitle = React.memo(
               onCancel={() => setEditTitleOpen(false)}
               startWithEditOpen
               editModeProps={{
-                inputProps: { inputRef },
+                inputProps: {
+                  inputRef,
+                  css: styles.mediumFontWeight,
+                },
               }}
               inputAriaLabel={i18n.translate('kbnGridLayout.section.editTitleAriaLabel', {
                 defaultMessage: 'Edit section title',
@@ -198,6 +201,9 @@ const styles = {
       },
     },
   }),
+  mediumFontWeight: ({ euiTheme }: UseEuiTheme) => css`
+    font-weight: ${euiTheme.font.weight.medium} !important;
+  `,
 };
 
 GridSectionTitle.displayName = 'GridSectionTitle';

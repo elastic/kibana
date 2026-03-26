@@ -11,7 +11,8 @@ import type { Connector } from '../types';
 
 export function connectorFromSavedObject(
   savedObject: SavedObject<RawAction>,
-  isDeprecated: boolean
+  isDeprecated: boolean,
+  isConnectorTypeDeprecated: boolean
 ): Connector {
   return {
     id: savedObject.id,
@@ -19,5 +20,7 @@ export function connectorFromSavedObject(
     isPreconfigured: false,
     isDeprecated,
     isSystemAction: false,
+    isConnectorTypeDeprecated,
+    authMode: (savedObject.attributes.authMode ?? 'shared') as Connector['authMode'],
   };
 }

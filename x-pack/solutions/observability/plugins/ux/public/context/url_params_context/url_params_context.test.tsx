@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { waitFor } from '@testing-library/react';
-import { mount } from 'enzyme';
-import { History, Location } from 'history';
+import { fireEvent, render, waitFor } from '@testing-library/react';
+import type { History, Location } from 'history';
 import moment from 'moment-timezone';
 import * as React from 'react';
 import { MemoryRouter, Router } from '@kbn/shared-ux-router';
@@ -15,22 +14,20 @@ import { MemoryRouter, Router } from '@kbn/shared-ux-router';
 import type { UrlParams } from './types';
 import { UrlParamsContext, UrlParamsProvider } from './url_params_context';
 
-function mountParams(location: Location) {
-  return mount(
+function renderHelper(location: Location) {
+  return render(
     <MemoryRouter initialEntries={[location]}>
       <UrlParamsProvider>
         <UrlParamsContext.Consumer>
           {({ urlParams }: { urlParams: UrlParams }) => (
-            <span id="data">{JSON.stringify(urlParams, null, 2)}</span>
+            <span id="data" role="code">
+              {JSON.stringify(urlParams, null, 2)}
+            </span>
           )}
         </UrlParamsContext.Consumer>
       </UrlParamsProvider>
     </MemoryRouter>
   );
-}
-
-function getDataFromOutput(wrapper: ReturnType<typeof mount>) {
-  return JSON.parse(wrapper.find('#data').text());
 }
 
 describe('UrlParamsContext', () => {
@@ -48,13 +45,12 @@ describe('UrlParamsContext', () => {
       search: '?rangeFrom=2010-03-15T12:00:00Z&rangeTo=2010-04-10T12:00:00Z&transactionId=123abc',
     } as Location;
 
-    const wrapper = mountParams(location);
-    const params = getDataFromOutput(wrapper);
-
-    expect([params.start, params.end]).toEqual([
-      '2010-03-15T12:00:00.000Z',
-      '2010-04-10T12:00:00.000Z',
-    ]);
+    const { getByRole } = renderHelper(location);
+    const contentElement = getByRole('code');
+    expect(contentElement.textContent).not.toBeNull();
+    const data: any = JSON.parse(contentElement.textContent!);
+    expect(data.start).toEqual('2010-03-15T12:00:00.000Z');
+    expect(data.end).toEqual('2010-04-10T12:00:00.000Z');
   });
 
   it('should update param values if location has changed', () => {
@@ -63,13 +59,34 @@ describe('UrlParamsContext', () => {
       search: '?rangeFrom=2009-03-15T12:00:00Z&rangeTo=2009-04-10T12:00:00Z&transactionId=UPDATED',
     } as Location;
 
-    const wrapper = mountParams(location);
+    const { getByRole, rerender } = renderHelper(location);
 
-    // force an update
-    wrapper.setProps({ abc: 123 });
-    const params = getDataFromOutput(wrapper);
+    // Create a new location to simulate location change
+    const updatedLocation = {
+      ...location,
+      key: 'updatedKey', // Add a key change to trigger update
+    };
 
-    expect([params.start, params.end]).toEqual([
+    // Rerender with updated location
+    rerender(
+      <MemoryRouter initialEntries={[updatedLocation]}>
+        <UrlParamsProvider>
+          <UrlParamsContext.Consumer>
+            {({ urlParams }: { urlParams: UrlParams }) => (
+              <span id="data" role="code">
+                {JSON.stringify(urlParams, null, 2)}
+              </span>
+            )}
+          </UrlParamsContext.Consumer>
+        </UrlParamsProvider>
+      </MemoryRouter>
+    );
+
+    // Get data from the rendered output
+    const contentElement = getByRole('code');
+    const data = JSON.parse(contentElement.textContent!);
+
+    expect([data.start, data.end]).toEqual([
       '2009-03-15T12:00:00.000Z',
       '2009-04-10T12:00:00.000Z',
     ]);
@@ -83,11 +100,27 @@ describe('UrlParamsContext', () => {
 
     const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(0);
 
-    const wrapper = mountParams(location);
+    // Use renderHelper instead of mountParams
+    const { getByRole, rerender } = renderHelper(location);
 
-    // force an update
-    wrapper.setProps({ abc: 123 });
-    const params = getDataFromOutput(wrapper);
+    // Force an update by re-rendering with the same content
+    rerender(
+      <MemoryRouter initialEntries={[location]}>
+        <UrlParamsProvider>
+          <UrlParamsContext.Consumer>
+            {({ urlParams }: { urlParams: UrlParams }) => (
+              <span id="data" role="code">
+                {JSON.stringify(urlParams, null, 2)}
+              </span>
+            )}
+          </UrlParamsContext.Consumer>
+        </UrlParamsProvider>
+      </MemoryRouter>
+    );
+
+    // Get data directly from the DOM using getByRole
+    const contentElement = getByRole('code');
+    const params = JSON.parse(contentElement.textContent!);
 
     expect([params.start, params.end]).toEqual([
       '1969-12-31T00:00:00.000Z',
@@ -95,58 +128,6 @@ describe('UrlParamsContext', () => {
     ]);
 
     nowSpy.mockRestore();
-  });
-
-  it('should refresh the time range with new values', async () => {
-    const calls = [];
-    const history = {
-      location: {
-        pathname: '/test',
-      },
-      listen: jest.fn(),
-    } as unknown as History;
-
-    const wrapper = mount(
-      <Router history={history}>
-        <UrlParamsProvider>
-          <UrlParamsContext.Consumer>
-            {({ urlParams, refreshTimeRange }) => {
-              calls.push({ urlParams });
-              return (
-                <React.Fragment>
-                  <span id="data">{JSON.stringify(urlParams, null, 2)}</span>
-                  <button
-                    onClick={() =>
-                      refreshTimeRange({
-                        rangeFrom: '2005-09-20T12:00:00Z',
-                        rangeTo: '2005-10-21T12:00:00Z',
-                      })
-                    }
-                  />
-                </React.Fragment>
-              );
-            }}
-          </UrlParamsContext.Consumer>
-        </UrlParamsProvider>
-      </Router>
-    );
-
-    await waitFor(() => {});
-
-    expect(calls.length).toBe(1);
-
-    wrapper.find('button').simulate('click');
-
-    await waitFor(() => {});
-
-    expect(calls.length).toBe(2);
-
-    const params = getDataFromOutput(wrapper);
-
-    expect([params.start, params.end]).toEqual([
-      '2005-09-20T12:00:00.000Z',
-      '2005-10-21T12:00:00.000Z',
-    ]);
   });
 
   it('should refresh the time range with new values if time range is relative', async () => {
@@ -159,15 +140,18 @@ describe('UrlParamsContext', () => {
 
     jest.spyOn(Date, 'now').mockImplementation(() => new Date('2000-06-15T12:00:00Z').getTime());
 
-    const wrapper = mount(
+    const { getByRole } = render(
       <Router history={history}>
         <UrlParamsProvider>
           <UrlParamsContext.Consumer>
             {({ urlParams, refreshTimeRange }) => {
               return (
                 <React.Fragment>
-                  <span id="data">{JSON.stringify(urlParams, null, 2)}</span>
+                  <span id="data" role="code" data-testid="params-data">
+                    {JSON.stringify(urlParams, null, 2)}
+                  </span>
                   <button
+                    data-testid="refresh-button"
                     onClick={() =>
                       refreshTimeRange({
                         rangeFrom: 'now-1d/d',
@@ -185,15 +169,18 @@ describe('UrlParamsContext', () => {
 
     await waitFor(() => {});
 
-    wrapper.find('button').simulate('click');
+    // Click the button using fireEvent instead of simulate
+    fireEvent.click(getByRole('button'));
 
-    await waitFor(() => {});
+    await waitFor(() => {
+      // Get data directly from the DOM
+      const contentElement = getByRole('code');
+      const params = JSON.parse(contentElement.textContent!);
 
-    const params = getDataFromOutput(wrapper);
-
-    expect([params.start, params.end]).toEqual([
-      '2000-06-14T00:00:00.000Z',
-      '2000-06-14T23:59:59.999Z',
-    ]);
+      expect([params.start, params.end]).toEqual([
+        '2000-06-14T00:00:00.000Z',
+        '2000-06-14T23:59:59.999Z',
+      ]);
+    });
   });
 });

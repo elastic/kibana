@@ -27,7 +27,7 @@ exports[`Should render cancel button when drawing 1`] = `
       closePopover={[Function]}
       data-test-subj="mapToolsControlPopover"
       display="inline-block"
-      hasArrow={true}
+      hasArrow={false}
       id="toolsControlPopover"
       isOpen={false}
       ownFocus={true}
@@ -92,6 +92,7 @@ exports[`Should render cancel button when drawing 1`] = `
   </EuiFlexItem>
   <EuiFlexItem>
     <EuiButton
+      autoFocus={true}
       fill={true}
       onClick={[Function]}
       size="s"
@@ -128,7 +129,7 @@ exports[`renders 1`] = `
   closePopover={[Function]}
   data-test-subj="mapToolsControlPopover"
   display="inline-block"
-  hasArrow={true}
+  hasArrow={false}
   id="toolsControlPopover"
   isOpen={false}
   ownFocus={true}

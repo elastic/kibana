@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import React, { Component, Fragment, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { Component, Fragment } from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
 import { EuiContextMenuItem, EuiLink } from '@elastic/eui';
+import { css } from '@emotion/react';
 // @ts-ignore file exists, but ts def doesn't
 import { euiContextMenuPanelStyles } from '@elastic/eui/lib/components/context_menu/context_menu_panel.styles';
 import { i18n } from '@kbn/i18n';
-import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
-import { GeoJsonProperties } from 'geojson';
-import { Filter } from '@kbn/es-query';
+import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import type { GeoJsonProperties } from 'geojson';
+import type { Filter } from '@kbn/es-query';
 import { FeatureProperties } from './feature_properties';
-import { RawValue } from '../../../../../common/constants';
+import type { RawValue } from '../../../../../common/constants';
 import { Footer } from './footer';
 import { Header } from './header';
-import { TooltipFeature } from '../../../../../common/descriptor_types';
-import { ITooltipProperty } from '../../../../classes/tooltips/tooltip_property';
-import { IVectorLayer } from '../../../../classes/layers/vector_layer';
+import type { TooltipFeature } from '../../../../../common/descriptor_types';
+import type { ITooltipProperty } from '../../../../classes/tooltips/tooltip_property';
+import type { IVectorLayer } from '../../../../classes/layers/vector_layer';
 
 const PROPERTIES_VIEW = 'PROPERTIES_VIEW';
 const FILTER_ACTIONS_VIEW = 'FILTER_ACTIONS_VIEW';
@@ -106,7 +109,7 @@ export class FeaturesTooltip extends Component<Props, State> {
     return this.state.currentFeature.actions.map((action) => {
       return (
         <EuiLink
-          className="mapFeatureTooltip_actionLinks"
+          css={componentStyles.actionLinksStyles}
           onClick={() => {
             if (action.onClick) {
               action.onClick();
@@ -125,8 +128,10 @@ export class FeaturesTooltip extends Component<Props, State> {
   _renderBackButton(label: string) {
     return (
       <EuiContextMenuItem
-        className="mapFeatureTooltip_backButton"
-        css={(euiTheme) => euiContextMenuPanelStyles(euiTheme).euiContextMenuPanel__title}
+        css={[
+          componentStyles.mapFeatureTooltipBackButtonStyles,
+          (euiTheme) => euiContextMenuPanelStyles(euiTheme).euiContextMenuPanel__title,
+        ]}
         onClick={this._showPropertiesView}
         icon="arrowLeft"
       >
@@ -199,3 +204,11 @@ export class FeaturesTooltip extends Component<Props, State> {
     );
   }
 }
+
+const componentStyles = {
+  actionLinksStyles: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.xs,
+    }),
+  mapFeatureTooltipBackButtonStyles: css({ paddingLeft: '0' }),
+};
