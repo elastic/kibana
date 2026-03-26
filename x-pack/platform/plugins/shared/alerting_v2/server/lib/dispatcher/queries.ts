@@ -9,12 +9,12 @@ import { esql, type EsqlRequest } from '@elastic/esql';
 import {
   ALERT_ACTIONS_BACKING_INDEX,
   ALERT_ACTIONS_DATA_STREAM,
-} from '../../resources/alert_actions';
+} from '../../resources/datastreams/alert_actions';
 import {
   ALERT_EVENTS_BACKING_INDEX,
   ALERT_EVENTS_DATA_STREAM,
   type AlertEventType,
-} from '../../resources/alert_events';
+} from '../../resources/datastreams/alert_events';
 import type { AlertEpisode, NotificationGroupId } from './types';
 
 export const getDispatchableAlertEventsQuery = (): EsqlRequest => {

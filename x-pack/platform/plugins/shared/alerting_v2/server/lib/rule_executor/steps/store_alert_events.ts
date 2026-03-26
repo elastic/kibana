@@ -7,7 +7,7 @@
 
 import { inject, injectable } from 'inversify';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
-import { ALERT_EVENTS_DATA_STREAM } from '../../../resources/alert_events';
+import { ALERT_EVENTS_DATA_STREAM } from '../../../resources/datastreams/alert_events';
 import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
 import {

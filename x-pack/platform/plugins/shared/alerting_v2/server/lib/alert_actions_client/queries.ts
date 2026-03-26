@@ -6,7 +6,7 @@
  */
 
 import { esql, type EsqlRequest } from '@elastic/esql';
-import { ALERT_ACTIONS_DATA_STREAM } from '../../resources/alert_actions';
+import { ALERT_ACTIONS_DATA_STREAM } from '../../resources/datastreams/alert_actions';
 
 export const getBulkGetAlertActionsQuery = (episodeIds: string[]): EsqlRequest => {
   const episodeIdValues = episodeIds.map((id) => esql.str(id));

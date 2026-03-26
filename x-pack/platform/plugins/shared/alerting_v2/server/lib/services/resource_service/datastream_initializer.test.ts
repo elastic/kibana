@@ -10,12 +10,12 @@ import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
-import type { ResourceDefinition } from '../../../resources/types';
-import { ResourceInitializer } from './resource_initializer';
+import type { ResourceDefinition } from '../../../resources/datastreams/types';
+import { DatastreamInitializer } from './datastream_initializer';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
-describe('ResourceInitializer', () => {
+describe('DatastreamInitializer', () => {
   let esClient: DeeplyMockedApi<ElasticsearchClient>;
   let mockLogger: jest.Mocked<Logger>;
 
@@ -60,7 +60,7 @@ describe('ResourceInitializer', () => {
   });
 
   it('installs ILM policy, index template, then creates the data stream', async () => {
-    const initializer = new ResourceInitializer(mockLogger, esClient, resourceDefinition);
+    const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
 
     await initializer.initialize();
 
@@ -83,7 +83,7 @@ describe('ResourceInitializer', () => {
       new errors.ResponseError({ statusCode: 409 } as DiagnosticResult)
     );
 
-    const initializer = new ResourceInitializer(mockLogger, esClient, resourceDefinition);
+    const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
     await expect(initializer.initialize()).resolves.toBeUndefined();
   });
 
@@ -95,7 +95,7 @@ describe('ResourceInitializer', () => {
       } as DiagnosticResult)
     );
 
-    const initializer = new ResourceInitializer(mockLogger, esClient, resourceDefinition);
+    const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
     await expect(initializer.initialize()).resolves.toBeUndefined();
   });
 
@@ -106,7 +106,7 @@ describe('ResourceInitializer', () => {
       } as DiagnosticResult)
     );
 
-    const initializer = new ResourceInitializer(mockLogger, esClient, resourceDefinition);
+    const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
     await expect(initializer.initialize()).rejects.toThrow();
   });
 
@@ -117,7 +117,7 @@ describe('ResourceInitializer', () => {
       } as DiagnosticResult)
     );
 
-    const initializer = new ResourceInitializer(mockLogger, esClient, resourceDefinition);
+    const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
     await expect(initializer.initialize()).rejects.toThrow();
   });
 });

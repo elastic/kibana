@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EsqlViewDefinition } from '../lib/services/esql_views_service/types';
+import type { EsqlViewDefinition } from '../../lib/services/resource_service/esql_view_initializer';
 
 export const getAlertActionsViewDefinition = (): EsqlViewDefinition => ({
   key: 'view:alert-actions',
