@@ -133,11 +133,7 @@ describe('KibanaDeprecationsTable', () => {
         />
       );
 
-      const statusButton = document.body.querySelector<HTMLButtonElement>(
-        'button[aria-label="Status Selection"]'
-      );
-      expect(statusButton).not.toBeNull();
-      fireEvent.click(statusButton!);
+      fireEvent.click(screen.getByLabelText('Status Selection'));
       await waitFor(() => {
         const option = document.body.querySelector<HTMLElement>(
           '.euiSelectableListItem[title="Critical"]'
@@ -176,11 +172,7 @@ describe('KibanaDeprecationsTable', () => {
         />
       );
 
-      const typeButton = document.body.querySelector<HTMLButtonElement>(
-        'button[aria-label="Type Selection"]'
-      );
-      expect(typeButton).not.toBeNull();
-      fireEvent.click(typeButton!);
+      fireEvent.click(screen.getByLabelText('Type Selection'));
       await waitFor(() => {
         const option = document.body.querySelector<HTMLElement>(
           '.euiSelectableListItem[title="Config"]'
