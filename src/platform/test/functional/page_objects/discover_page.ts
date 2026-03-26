@@ -25,6 +25,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly globalNav = this.ctx.getService('globalNav');
   private readonly elasticChart = this.ctx.getService('elasticChart');
   private readonly config = this.ctx.getService('config');
+  private readonly appMenu = this.ctx.getPageObject('appMenu');
   private readonly dataGrid = this.ctx.getService('dataGrid');
   private readonly fieldEditor = this.ctx.getService('fieldEditor');
   private readonly queryBar = this.ctx.getService('queryBar');
@@ -46,14 +47,18 @@ export class DiscoverPageObject extends FtrService {
 
   /** Ensures that navigation to discover has completed */
   public async expectOnDiscover() {
-    await this.testSubjects.existOrFail('discoverNewButton');
-    await this.testSubjects.existOrFail('discoverOpenButton');
+    await this.retry.waitFor('discover app menu items to be present', async () => {
+      return (
+        (await this.appMenu.menuItemExists('discoverNewButton')) &&
+        (await this.appMenu.menuItemExists('discoverOpenButton'))
+      );
+    });
   }
 
   public async isOnDashboardsEditMode() {
     const [newButton, openButton] = await Promise.all([
-      this.testSubjects.exists('discoverNewButton', { timeout: 1000 }),
-      this.testSubjects.exists('discoverOpenButton', { timeout: 1000 }),
+      this.appMenu.menuItemExists('discoverNewButton'),
+      this.appMenu.menuItemExists('discoverOpenButton'),
     ]);
 
     return !newButton && !openButton;
@@ -232,7 +237,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickNewSearchButton() {
-    await this.testSubjects.click('discoverNewButton');
+    await this.appMenu.clickMenuItem('discoverNewButton');
     await this.testSubjects.moveMouseTo('dscHideSidebarButton'); // cancel tooltips
     await this.header.waitUntilLoadingHasFinished();
   }
@@ -263,8 +268,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickLoadSavedSearchButton() {
-    await this.testSubjects.moveMouseTo('discoverOpenButton');
-    await this.testSubjects.click('discoverOpenButton');
+    await this.appMenu.clickMenuItem('discoverOpenButton');
   }
 
   public async hasUnsavedChangesIndicator() {

@@ -147,7 +147,6 @@ describe('Discover topnav component', () => {
 
     const itemIds = capturedTopNavMenu?.items?.map((item) => item.id) || [];
     expect(itemIds).toEqual(['inspect', 'new', 'open']);
-    expect(capturedTopNavMenu?.primaryActionItem?.id).toBe('save');
   });
 
   test('generated config of AppMenuConfig is correct when no discover save permissions are assigned', async () => {

@@ -18,7 +18,6 @@ import type {
   AppMenuConfig,
   AppMenuItemType,
   AppMenuPrimaryActionItem,
-  AppMenuSecondaryActionItem,
 } from '@kbn/core-chrome-app-menu-components';
 import { useDashboardExportItems } from './share/use_dashboard_export_items';
 import { getAccessControlClient } from '../../services/access_control_service';
@@ -247,8 +246,19 @@ export const useDashboardMenuItems = ({
   const menuItems = useMemo(() => {
     return {
       // Regular menu items
+      add: {
+        label: topNavStrings.add.label,
+        id: 'add',
+        iconType: 'plus',
+        testId: 'dashboardAddTopNavButton',
+        htmlId: 'dashboardAddTopNavButton',
+        disableButton: disableTopNav,
+        popoverWidth: 200,
+        items: addMenuItems,
+        order: 2,
+      } as AppMenuItemType,
       fullScreen: {
-        order: 1,
+        order: 6,
         label: topNavStrings.fullScreen.label,
         id: 'full-screen',
         testId: 'dashboardFullScreenMode',
@@ -258,7 +268,7 @@ export const useDashboardMenuItems = ({
       } as AppMenuItemType,
 
       duplicate: {
-        order: 2,
+        order: 3,
         disableButton: disableTopNav,
         id: 'interactive-save',
         testId: 'dashboardInteractiveSaveMenuItem',
@@ -279,7 +289,7 @@ export const useDashboardMenuItems = ({
       } as AppMenuItemType,
 
       backgroundSearch: {
-        order: 6,
+        order: viewMode === 'edit' ? 6 : 5,
         label: topNavStrings.backgroundSearch.label,
         id: 'backgroundSearch',
         iconType: 'backgroundTask',
@@ -292,7 +302,7 @@ export const useDashboardMenuItems = ({
       } as AppMenuItemType,
 
       share: {
-        order: 4,
+        order: viewMode === 'edit' ? 3 : 1,
         label: topNavStrings.share.label,
         tooltipContent: getShareTooltip(),
         tooltipTitle: topNavStrings.share.tooltipTitle,
@@ -304,7 +314,7 @@ export const useDashboardMenuItems = ({
       } as AppMenuItemType,
 
       export: {
-        order: 3,
+        order: viewMode === 'edit' ? 4 : 2,
         label: topNavStrings.export.label,
         id: 'export',
         iconType: 'exportAction',
@@ -327,19 +337,6 @@ export const useDashboardMenuItems = ({
       } as AppMenuItemType,
 
       // Action items
-      add: {
-        label: topNavStrings.add.label,
-        id: 'add',
-        iconType: 'plusInCircle',
-        color: 'success',
-        testId: 'dashboardAddTopNavButton',
-        htmlId: 'dashboardAddTopNavButton',
-        disableButton: disableTopNav,
-        minWidth: false,
-        popoverWidth: 200,
-        items: addMenuItems,
-      } as AppMenuSecondaryActionItem,
-
       edit: {
         label: topNavStrings.edit.label,
         id: 'edit',
@@ -417,6 +414,7 @@ export const useDashboardMenuItems = ({
     addMenuItems,
     resetChangesMenuItem,
     exportItems,
+    viewMode,
   ]);
 
   /**
@@ -486,7 +484,11 @@ export const useDashboardMenuItems = ({
   const editModeTopNavConfig = useMemo(() => {
     const { storeSearchSession } = getDashboardCapabilities();
 
-    const items: AppMenuItemType[] = [menuItems.switchToViewMode, menuItems.settings];
+    const items: AppMenuItemType[] = [
+      menuItems.add,
+      menuItems.switchToViewMode,
+      menuItems.settings,
+    ];
 
     // Only show the export button if the current user meets the requirements for at least one registered export integration
     if (shareService && hasExportIntegration) {
@@ -507,7 +509,6 @@ export const useDashboardMenuItems = ({
 
     const editModeConfig: AppMenuConfig = {
       items,
-      secondaryActionItem: menuItems.add,
       primaryActionItem: menuItems.save,
     };
 
@@ -518,9 +519,9 @@ export const useDashboardMenuItems = ({
     menuItems.share,
     menuItems.settings,
     menuItems.backgroundSearch,
-    menuItems.add,
     menuItems.save,
     menuItems.labs,
+    menuItems.add,
     hasExportIntegration,
     isLabsEnabled,
   ]);

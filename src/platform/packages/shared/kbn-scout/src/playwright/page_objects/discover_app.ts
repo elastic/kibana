@@ -76,10 +76,24 @@ export class DiscoverApp {
       .or(this.page.testSubj.locator('dataView-switch-link'));
   }
 
+  private async clickAppMenuItem(testId: string) {
+    const item = this.page.testSubj.locator(testId);
+    if (await item.isVisible()) {
+      await item.click();
+      return;
+    }
+    const overflowButton = this.page.testSubj.locator('app-menu-overflow-button');
+    await expect(overflowButton).toBeVisible();
+    await overflowButton.click();
+    const menuItem = this.page.testSubj.locator(testId);
+    await expect(menuItem).toBeVisible();
+    await menuItem.click();
+  }
+
   async clickNewSearch() {
-    await this.page.testSubj.hover('discoverNewButton');
-    await this.page.testSubj.click('discoverNewButton');
+    await this.clickAppMenuItem('discoverNewButton');
     await this.page.testSubj.hover('dscHideSidebarButton'); // cancel tooltips
+    await this.page.waitForLoadingIndicatorHidden();
     await this.page.testSubj.waitForSelector('loadingSpinner', { state: 'hidden' });
   }
 
@@ -106,7 +120,7 @@ export class DiscoverApp {
   }
 
   async loadSavedSearch(searchName: string) {
-    await this.page.testSubj.click('discoverOpenButton');
+    await this.clickAppMenuItem('discoverOpenButton');
     await this.page.testSubj.waitForSelector('loadSearchForm', { state: 'visible' });
 
     // Filter for the search

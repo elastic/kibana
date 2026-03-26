@@ -46,7 +46,7 @@ spaceTest.describe(
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
-    spaceTest('should save and restore a metrics session', async ({ pageObjects, page }) => {
+    spaceTest('should save and restore a metrics session', async ({ pageObjects }) => {
       const { metricsExperience, discover } = pageObjects;
 
       await discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
@@ -69,8 +69,7 @@ spaceTest.describe(
       });
 
       await spaceTest.step('start a new Discover session', async () => {
-        const newButton = page.testSubj.locator('discoverNewButton');
-        await newButton.click();
+        await discover.clickNewSearch();
         await expect(metricsExperience.grid).toBeHidden();
       });
 

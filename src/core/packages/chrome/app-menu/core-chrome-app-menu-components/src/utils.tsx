@@ -22,19 +22,20 @@ import type {
   AppMenuItemCommon,
   AppMenuPopoverItem,
   AppMenuPrimaryActionItem,
-  AppMenuSecondaryActionItem,
 } from './types';
 import { APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';
 
 /**
- * Calculate how many items can be displayed based on the presence of action buttons.
+ * Calculate how many items can be displayed.
+ * When overflow is needed, one slot is reserved for the overflow button.
  */
 export const getDisplayedItemsAllowedAmount = (config: AppMenuConfig) => {
-  const actionButtonsAmount = [config.primaryActionItem, config.secondaryActionItem].filter(
-    Boolean
-  ).length;
-
-  return APP_MENU_ITEM_LIMIT - actionButtonsAmount;
+  const totalItems = config.items?.length ?? 0;
+  if (totalItems <= APP_MENU_ITEM_LIMIT) {
+    return APP_MENU_ITEM_LIMIT;
+  }
+  // Reserve one slot for the overflow button
+  return APP_MENU_ITEM_LIMIT - 1;
 };
 
 /**
@@ -166,18 +167,16 @@ const createSeparatorItem = (key: string): EuiContextMenuPanelItemDescriptor => 
  */
 export const getPopoverActionItems = ({
   primaryActionItem,
-  secondaryActionItem,
   onCloseOverflowButton,
 }: {
   primaryActionItem?: AppMenuPrimaryActionItem;
-  secondaryActionItem?: AppMenuSecondaryActionItem;
   onCloseOverflowButton?: () => void;
 }): EuiContextMenuPanelItemDescriptor[] => {
-  if (!primaryActionItem && !secondaryActionItem) {
+  if (!primaryActionItem) {
     return [];
   }
 
-  const isHidden = (item: AppMenuPrimaryActionItem | AppMenuSecondaryActionItem | undefined) => {
+  const isHidden = (item: AppMenuPrimaryActionItem | undefined) => {
     if (!item) return true;
 
     const isHiddenInMobile =
@@ -188,9 +187,7 @@ export const getPopoverActionItems = ({
     return item?.hidden === 'all' || isHiddenInMobile;
   };
 
-  const bothButtonsAreHidden = isHidden(primaryActionItem) && isHidden(secondaryActionItem);
-
-  if (bothButtonsAreHidden) {
+  if (isHidden(primaryActionItem)) {
     return [];
   }
 
@@ -203,7 +200,6 @@ export const getPopoverActionItems = ({
       renderItem: () => (
         <AppMenuPopoverActionButtons
           primaryActionItem={primaryActionItem}
-          secondaryActionItem={secondaryActionItem}
           onCloseOverflowButton={onCloseOverflowButton}
         />
       ),
@@ -217,7 +213,6 @@ export const getPopoverActionItems = ({
 export const getPopoverPanels = ({
   items,
   primaryActionItem,
-  secondaryActionItem,
   startPanelId = 0,
   rootPanelWidth = DEFAULT_POPOVER_WIDTH,
   rootPopoverTestId,
@@ -226,7 +221,6 @@ export const getPopoverPanels = ({
 }: {
   items: AppMenuPopoverItem[];
   primaryActionItem?: AppMenuPrimaryActionItem;
-  secondaryActionItem?: AppMenuSecondaryActionItem;
   startPanelId?: number;
   rootPanelWidth?: number;
   rootPopoverTestId?: string;
@@ -234,7 +228,7 @@ export const getPopoverPanels = ({
   onCloseOverflowButton?: () => void;
 }): EuiContextMenuPanelDescriptor[] => {
   const panels: EuiContextMenuPanelDescriptor[] = [];
-  const hasActionItems = Boolean(primaryActionItem || secondaryActionItem);
+  const hasActionItems = Boolean(primaryActionItem);
   let currentPanelId = startPanelId;
 
   const processItems = ({
@@ -312,7 +306,6 @@ export const getPopoverPanels = ({
 
     const actionItems: EuiContextMenuPanelItemDescriptor[] = getPopoverActionItems({
       primaryActionItem,
-      secondaryActionItem,
       onCloseOverflowButton: onClose,
     });
 
