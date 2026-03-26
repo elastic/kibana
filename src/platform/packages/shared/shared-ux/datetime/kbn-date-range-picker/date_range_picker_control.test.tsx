@@ -213,20 +213,53 @@ describe('DateRangePickerControl', () => {
   });
 
   describe('collapsed prop', () => {
-    it('shows the label and omits aria-label when not collapsed (default)', () => {
-      renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
+    describe('collapsed="never" (default)', () => {
+      it('always shows the text label', () => {
+        renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
 
-      const button = screen.getByTestId('dateRangePickerControlButton');
-      expect(button).not.toHaveAttribute('aria-label');
-      expect(button).toHaveTextContent('Last 20 minutes');
+        const button = screen.getByTestId('dateRangePickerControlButton');
+        expect(button).not.toHaveAttribute('aria-label');
+        expect(button).toHaveTextContent('Last 20 minutes');
+      });
+
+      it('hides the duration badge for relative-to-now ranges', () => {
+        renderWithEuiTheme(<DateRangePicker {...defaultProps} defaultValue="last 20 minutes" />);
+        expect(screen.queryByTestId('dateRangePickerDurationBadge')).not.toBeInTheDocument();
+      });
+
+      it('shows the duration badge for non-relative-to-now ranges', () => {
+        renderWithEuiTheme(
+          <DateRangePicker {...defaultProps} defaultValue="2024-01-01 to 2024-02-01" />
+        );
+        expect(screen.getByTestId('dateRangePickerDurationBadge')).toBeInTheDocument();
+      });
     });
 
-    it('hides the label and sets aria-label when collapsed', () => {
-      renderWithEuiTheme(<DateRangePicker {...defaultProps} collapsed />);
+    describe('collapsed="auto"', () => {
+      it('always shows the text label and sets aria-label', () => {
+        renderWithEuiTheme(<DateRangePicker {...defaultProps} collapsed="auto" />);
 
-      const button = screen.getByTestId('dateRangePickerControlButton');
-      expect(button).toHaveAttribute('aria-label');
-      expect(button).not.toHaveTextContent('Last 20 minutes');
+        const button = screen.getByTestId('dateRangePickerControlButton');
+        expect(button).toHaveAttribute('aria-label');
+        expect(button).toHaveTextContent('Last 20 minutes');
+      });
+
+      it('renders the duration badge for non-relative-to-now ranges', () => {
+        renderWithEuiTheme(
+          <DateRangePicker
+            {...defaultProps}
+            collapsed="auto"
+            defaultValue="2024-01-01 to 2024-02-01"
+          />
+        );
+        expect(screen.getByTestId('dateRangePickerDurationBadge')).toBeInTheDocument();
+      });
+
+      it('renders the duration badge (hidden by default via CSS) for relative-to-now ranges', () => {
+        renderWithEuiTheme(<DateRangePicker {...defaultProps} collapsed="auto" />);
+        // Badge is in the DOM but hidden via CSS container query when expanded
+        expect(screen.getByTestId('dateRangePickerDurationBadge')).toBeInTheDocument();
+      });
     });
   });
 
@@ -413,10 +446,12 @@ describe('DateRangePickerControl', () => {
       expect(badge).toBeInTheDocument();
     });
 
-    it('renders a duration label when the range is valid', () => {
-      renderWithEuiTheme(<DateRangePicker {...defaultProps} defaultValue="last 20 minutes" />);
+    it('renders a duration label when the range is valid and not relative-to-now', () => {
+      renderWithEuiTheme(
+        <DateRangePicker {...defaultProps} defaultValue="2024-01-01 to 2024-02-01" />
+      );
       const button = screen.getByTestId('dateRangePickerControlButton');
-      const badge = within(button).getByText('20m');
+      const badge = within(button).getByTestId('dateRangePickerDurationBadge');
       expect(badge).toBeInTheDocument();
     });
   });

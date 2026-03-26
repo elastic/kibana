@@ -36,22 +36,6 @@ exports[`DateRangePicker renders 1`] = `
                 >
                   Last 20 minutes
                 </span>
-                 
-                <span
-                  class="euiBadge emotion-euiBadge-default"
-                  data-test-subj="dateRangePickerDurationBadge"
-                  title="20m"
-                >
-                  <span
-                    class="euiBadge__content emotion-euiBadge__content"
-                  >
-                    <span
-                      class="euiBadge__text emotion-euiBadge__text"
-                    >
-                      20m
-                    </span>
-                  </span>
-                </span>
               </span>
             </button>
           </span>

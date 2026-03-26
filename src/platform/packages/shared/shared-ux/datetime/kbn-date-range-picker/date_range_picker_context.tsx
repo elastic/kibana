@@ -70,8 +70,8 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   setIsEditing: (value: boolean) => void;
   /** Whether to use EUI compressed form styling. */
   compressed: boolean;
-  /** Whether the idle-state control hides its text label. */
-  collapsed: boolean;
+  /** Controls whether the idle-state control collapses its text label. */
+  collapsed: 'auto' | 'never';
   /** Predefined time range options shown in the Presets section. */
   presets: TimeRangeBoundsOption[];
   /** Recently used time ranges shown in the Recent section. */
@@ -157,7 +157,7 @@ export function DateRangePickerProvider({
   disabled = false,
   isLoading = false,
   compressed = true,
-  collapsed = false,
+  collapsed = 'never',
   showTimeWindowButtons = false,
   presets = DEFAULT_PRESETS,
   recent = [],

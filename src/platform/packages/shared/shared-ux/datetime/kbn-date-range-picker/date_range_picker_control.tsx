@@ -21,11 +21,20 @@ import {
 } from '@elastic/eui';
 
 import { FOCUSABLE_SELECTOR } from './constants';
-import { resolveInitialFocus } from './utils';
+import { isRelativeToNow, resolveInitialFocus } from './utils';
 import { DateRangePickerAutoRefreshButton } from './date_range_picker_auto_refresh_button';
 import { useDateRangePickerContext } from './date_range_picker_context';
 import { useSelectTextPartsWithArrowKeys } from './hooks/use_select_text_parts_with_arrow_keys';
 import { useInputHintText } from './hooks/use_input_hint_text';
+
+/**
+ * Container query threshold for `collapsed="auto"`. When the nearest ancestor
+ * with `container-type: inline-size` is narrower than this value, the control
+ * collapses to show only the duration badge.
+ *
+ * TODO this cannot be overriden at runtime, we want to find a nice way to do it
+ */
+const COLLAPSED_AUTO_THRESHOLD = '36rem';
 
 /**
  * The control portion of the DateRangePicker: displays a button when idle
@@ -57,6 +66,7 @@ export function DateRangePickerControl() {
     hasAutoRefresh,
     autoRefreshSecondsRemaining,
     toggleAutoRefresh,
+    timeRange,
   } = useDateRangePickerContext();
   const { euiTheme } = useEuiTheme();
   const hintText = useInputHintText(text);
@@ -147,6 +157,28 @@ export function DateRangePickerControl() {
     [isEditing, setIsEditing]
   );
 
+  const rangeIsRelativeToNow = isRelativeToNow(timeRange);
+  // In non-collapsed mode, hide the badge when the range is relative-to-now
+  // because the label (e.g. "Last 15 minutes") already conveys the duration.
+  const hideBadge = rangeIsRelativeToNow && collapsed === 'never';
+  // In auto mode with a relative-to-now range, the badge should only appear
+  // when the container query triggers collapsed mode.
+  const showBadgeOnlyWhenCollapsed = rangeIsRelativeToNow && collapsed === 'auto';
+
+  // Hide the text label via container query when collapsed='auto'.
+  const buttonTextCollapsedStyles = css`
+    @container (max-width: ${COLLAPSED_AUTO_THRESHOLD}) {
+      display: none !important;
+    }
+  `;
+  // Show the badge only when the container is narrow (collapsed).
+  const badgeCollapsedStyles = css`
+    display: none;
+    @container (max-width: ${COLLAPSED_AUTO_THRESHOLD}) {
+      display: inline-flex;
+    }
+  `;
+
   // The CSS custom properties are not set by this component,
   // allowing consumers to override the widths; the rem values are defaults.
   const wrapperRestrictedStyles = css`
@@ -224,16 +256,22 @@ export function DateRangePickerControl() {
             <EuiFormControlButton
               data-test-subj="dateRangePickerControlButton"
               buttonRef={buttonRef}
-              aria-label={collapsed ? displayText : undefined}
-              value={collapsed ? '' : displayText}
+              aria-label={collapsed === 'auto' ? displayText : undefined}
+              value={displayText}
+              textProps={collapsed === 'auto' ? { css: buttonTextCollapsedStyles } : undefined}
               onClick={onButtonClick}
               isInvalid={isInvalid}
               disabled={disabled}
               compressed={compressed}
             >
-              <EuiBadge data-test-subj="dateRangePickerDurationBadge">
-                {displayShortDuration ?? '--'}
-              </EuiBadge>
+              {!hideBadge && (
+                <EuiBadge
+                  data-test-subj="dateRangePickerDurationBadge"
+                  css={showBadgeOnlyWhenCollapsed ? badgeCollapsedStyles : undefined}
+                >
+                  {displayShortDuration ?? '--'}
+                </EuiBadge>
+              )}
             </EuiFormControlButton>
           </EuiToolTip>
         )}

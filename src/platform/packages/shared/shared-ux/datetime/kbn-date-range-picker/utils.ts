@@ -176,6 +176,18 @@ export function isValidTimeRange(range: TimeRange): boolean {
 }
 
 /**
+ * Returns `true` when one bound of the range is RELATIVE and the other is NOW,
+ * e.g. "last 15 minutes" (now-15m → now) or "next 3 weeks" (now → now+3w).
+ */
+export function isRelativeToNow(range: TimeRange): boolean {
+  const [startType, endType] = range.type;
+  return (
+    (startType === 'RELATIVE' && endType === 'NOW') ||
+    (startType === 'NOW' && endType === 'RELATIVE')
+  );
+}
+
+/**
  * Resolve the `initialFocus` target within the panel.
  * A string is treated as a CSS selector; a ref as a direct element handle.
  * Falls back to the panel div itself when unset.

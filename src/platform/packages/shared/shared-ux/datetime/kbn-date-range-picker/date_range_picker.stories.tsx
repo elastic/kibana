@@ -44,7 +44,6 @@ export const Playground: Story = {
       { start: 'now-1d/d', end: 'now-1d/d', label: 'Yesterday' },
       { start: 'now-24h', end: 'now', label: 'Last 24 hours' },
       { start: 'now-30d', end: 'now', label: 'Last 30 days' },
-      { start: 'now-42d', end: 'now/w', label: 'Something nice' },
       { start: 'now-3M', end: 'now', label: 'Last 3 months' },
       { start: 'now-1y', end: 'now', label: 'Last 1 year' },
     ],
@@ -82,6 +81,39 @@ export const AutoRefresh: Story = {
     onRefresh: fn(),
   },
   render: (args) => <StatefulDateRangePicker {...args} />,
+};
+
+/** Wraps the picker in a resizable container with `container-type: inline-size` so `collapsed="auto"` kicks in. */
+export const CollapsedAuto: Story = {
+  args: {
+    defaultValue: 'last 15 minutes',
+    collapsed: 'auto',
+    presets: [
+      { start: 'now-15m', end: 'now', label: 'Last 15 minutes' },
+      { start: 'now-30m', end: 'now', label: 'Last 30 minutes' },
+      { start: 'now-1h', end: 'now', label: 'Last 1 hour' },
+      { start: 'now/d', end: 'now/d', label: 'Today' },
+      { start: 'now-1d/d', end: 'now-1d/d', label: 'Yesterday' },
+      { start: 'now-24h', end: 'now', label: 'Last 24 hours' },
+      { start: 'now-30d', end: 'now', label: 'Last 30 days' },
+    ],
+  },
+  render: (args) => (
+    <div
+      style={
+        {
+          containerType: 'inline-size',
+          width: 600,
+          resize: 'horizontal',
+          overflow: 'auto',
+          border: '1px dashed #ccc',
+          padding: 8,
+        } as React.CSSProperties
+      }
+    >
+      <StatefulDateRangePicker {...args} />
+    </div>
+  ),
 };
 
 const timeRangeKey = (o: Pick<TimeRangeBoundsOption, 'start' | 'end'>) => `${o.start}|${o.end}`;
