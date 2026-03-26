@@ -617,7 +617,7 @@ export class HttpServer {
       app.measureElu = stop;
       // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
       // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
-      app.traceId = apm.currentTraceIds['trace.id'];
+      app.traceId = apm.currentTraceIds['trace.id'] ?? trace.getActiveSpan()?.spanContext().traceId;
       app.span = apm.startSpan('pre-route handler middlewares');
       app.httpSpan = trace.getActiveSpan();
       app.otelSubSpan = this.createSubspan('pre-route handler middlewares');

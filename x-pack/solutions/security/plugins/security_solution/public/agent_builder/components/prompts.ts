@@ -78,7 +78,7 @@ Formatting Requirements:
   - Use concise, actionable language.
   - Include relevant emojis in section headers for visual clarity (e.g., 📝, 🛡️, 🔍, 📚).`;
 
-export const ENTITY_PROMPT = `Investigate the entity and suggest next steps.`;
+export const ENTITY_PROMPT = `Explain how inputs contributed to the risk score, including any risk modifiers such as asset criticality or privileged user monitoring status. Additionally, outline the recommended next steps for investigating or mitigating the risk if the entity is deemed risky.\nTo answer risk score questions, fetch the risk score information and take into consideration both the risk score inputs and any modifiers that adjusted the final score.`;
 
 export const RULE_EXPLORATION_ATTACHMENT_PROMPT = `
 Analyze the attached Security detection rule and provide actionable insights.
@@ -91,7 +91,7 @@ Analysis Framework:
 1. Detection Intent & Strategy
    - What threats does this rule detect?
    - What is the detection approach (behavior-based, IOC, anomaly, etc.)?
-   
+
 2. Query Logic & Data Sources
    - What data sources are required?
    - What are the key detection conditions?
