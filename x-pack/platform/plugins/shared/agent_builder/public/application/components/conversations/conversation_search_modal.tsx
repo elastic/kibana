@@ -43,6 +43,7 @@ const labels = {
 };
 
 const MODAL_WIDTH = 480;
+const LIST_MAX_HEIGHT = 290;
 
 interface ConversationSearchModalProps {
   agentId: string;
@@ -83,7 +84,7 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
 
   const listStyles = css`
     overflow-y: auto;
-    max-height: 290px;
+    max-height: ${LIST_MAX_HEIGHT}px;
     margin-top: ${euiTheme.size.s};
   `;
 
