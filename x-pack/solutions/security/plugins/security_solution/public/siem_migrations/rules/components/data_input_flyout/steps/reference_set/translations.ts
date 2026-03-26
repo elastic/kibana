@@ -17,3 +17,7 @@ export const REFERENCE_SET_DATA_INPUT_DESCRIPTION = i18n.translate(
     defaultMessage: `We've also found reference sets within your rules. To fully translate those rules containing these reference sets, follow the step-by-step guide to export and upload them all.`,
   }
 );
+export const REFERENCE_SET_CONTINUE_BUTTON = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.referenceSet.continueButton',
+  { defaultMessage: 'Continue without uploading' }
+);
