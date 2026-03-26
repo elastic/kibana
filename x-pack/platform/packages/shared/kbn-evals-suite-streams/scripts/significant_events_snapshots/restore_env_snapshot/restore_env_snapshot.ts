@@ -39,8 +39,11 @@ async function resolveExisting(esClient: Client, patterns: string[]): Promise<st
         ...(response.indices ?? []).map((i) => i.name),
         ...(response.data_streams ?? []).map((d) => d.name)
       );
-    } catch {
-      // not found — skip
+    } catch (err) {
+      const statusCode = (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
+      if (statusCode !== 404) {
+        throw err;
+      }
     }
   }
   return found;
@@ -61,9 +64,9 @@ async function deleteExisting(esClient: Client, log: ToolingLog, names: string[]
         await esClient.indices.delete({ index: name, ignore_unavailable: true });
         log.info(`  deleted index: ${name}`);
       } catch (err) {
-        log.warning(
-          `  failed to delete "${name}": ${err instanceof Error ? err.message : String(err)}`
-        );
+        const msg = err instanceof Error ? err.message : String(err);
+        log.warning(`  failed to delete "${name}": ${msg}`);
+        throw new Error(`Cannot continue restore: failed to delete "${name}": ${msg}`);
       }
     }
   }
