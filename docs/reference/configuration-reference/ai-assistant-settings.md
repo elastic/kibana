@@ -29,6 +29,6 @@ The `xpack.productDocBase` settings configure how {{kib}} reaches the artifact r
 
     Data type: `string` (URI)
 
-## Configuring product documentation for air-gapped environments [configuring-product-doc-for-airgap]
+$$$configuring-product-doc-for-airgap$$$
 
-This heading is kept so existing links to `#configuring-product-doc-for-airgap` still resolve.
+For specific instructions on configuring product documentation for air-gapped environments, refer to the [AI Assistant documentation](docs-content://explore-analyze/ai-features/ai-chat-experiences/ai-assistant-host-doc-artifacts.md).
