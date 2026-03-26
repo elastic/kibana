@@ -26,9 +26,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
 
   describe('discover request counts', function describeIndexTests() {
-    // failsOnMKI, see https://github.com/elastic/kibana/issues/259329
-    this.tags(['failsOnMKI']);
-
     before(async function () {
       await svlCommonPage.loginAsAdmin();
       await esArchiver.loadIfNeeded(
