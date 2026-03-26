@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import {
+  EuiAccordion,
   EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiSpacer,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
@@ -20,28 +23,67 @@ import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { appPaths } from '../../../../../utils/app_paths';
-import { getAgentIdFromPath, getConversationIdFromPath } from '../../../../../route_config';
+import {
+  getAgentIdFromPath,
+  getAgentSettingsNavItems,
+  getConversationIdFromPath,
+} from '../../../../../route_config';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { useValidateAgentId } from '../../../../../hooks/agents/use_validate_agent_id';
 import { useAgentBuilderAgents } from '../../../../../hooks/agents/use_agents';
 import { useLastAgentId } from '../../../../../hooks/use_last_agent_id';
+import { useKibana } from '../../../../../hooks/use_kibana';
+import { useConversationList } from '../../../../../hooks/use_conversation_list';
+import { SidebarNavList } from '../../shared/sidebar_nav_list';
 
 import { ConversationFooter } from './conversation_footer';
 import { ConversationList } from './conversation_list';
-import { SidebarLink } from './sidebar_link';
+import { ConversationSearchModal } from '../../../../conversations/conversation_search_modal';
 
 const customizeLabel = i18n.translate('xpack.agentBuilder.sidebar.conversation.customize', {
   defaultMessage: 'Customize',
 });
 
-const newChatLabel = i18n.translate('xpack.agentBuilder.sidebar.conversation.newChat', {
-  defaultMessage: 'New chat',
+const newLabel = i18n.translate('xpack.agentBuilder.sidebar.conversation.new', {
+  defaultMessage: 'New',
 });
 
-const recentChatsLabel = i18n.translate('xpack.agentBuilder.sidebar.conversation.recentChats', {
-  defaultMessage: 'Recent chats',
+const searchChatsAriaLabel = i18n.translate('xpack.agentBuilder.sidebar.conversation.searchChats', {
+  defaultMessage: 'Search chats',
 });
+
+const chatsLabel = i18n.translate('xpack.agentBuilder.sidebar.conversation.chats', {
+  defaultMessage: 'Chats',
+});
+
+const containerStyles = css`
+  display: flex;
+  gap: 0;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+`;
+
+const chatsAccordionStyles = css`
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .euiAccordion__childWrapper {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .euiAccordion__children {
+    height: 100%;
+  }
+`;
 
 export const ConversationSidebarView: React.FC = () => {
   const { pathname } = useLocation();
@@ -53,20 +95,44 @@ export const ConversationSidebarView: React.FC = () => {
   const { isFetched: isAgentsFetched } = useAgentBuilderAgents();
   const lastAgentId = useLastAgentId();
 
-  const containerStyles = css`
-    display: flex;
-    gap: ${euiTheme.size.base};
-    flex-direction: column;
-    height: 100%;
-    width: 100%;
-  `;
+  const hasSetCustomiseAccordionFirstTime = useRef(false);
 
-  const listStyles = css`
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    padding: 0 ${euiTheme.size.base};
-  `;
+  const { conversations = [] } = useConversationList({ agentId });
+  const hasConversations = conversations.length > 0;
+
+  const {
+    services: { uiSettings },
+  } = useKibana();
+  const isConnectorsEnabled = uiSettings.get<boolean>(
+    AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID,
+    false
+  );
+
+  const navItems = useMemo(() => {
+    return getAgentSettingsNavItems(agentId).filter((item) => {
+      if (item.isConnectors && !isConnectorsEnabled) {
+        return false;
+      }
+      return true;
+    });
+  }, [agentId, isConnectorsEnabled]);
+
+  const isActive = (path: string) => pathname === path;
+
+  const isAnyNavItemActive = navItems.some((item) => isActive(item.path));
+
+  const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
+  const [isChatsOpen, setIsChatsOpen] = useState(true);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+
+  // When the user refreshes on an agent settings route, ensure the Customize accordion is open
+  useEffect(() => {
+    if (isAnyNavItemActive && !isCustomizeOpen && !hasSetCustomiseAccordionFirstTime.current) {
+      setIsCustomizeOpen(true);
+      setIsChatsOpen(false);
+      hasSetCustomiseAccordionFirstTime.current = true;
+    }
+  }, [isAnyNavItemActive, isCustomizeOpen]);
 
   useEffect(() => {
     // Once agents have loaded, redirect to the last valid agent if the current agent ID
@@ -94,80 +160,130 @@ export const ConversationSidebarView: React.FC = () => {
     navigateToAgentBuilderUrl,
   ]);
 
-  const CustomizeLink = () => (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="none"
-      css={css`
-        flex-grow: 0;
-      `}
-    >
-      <EuiFlexItem grow={false}>
-        <EuiHorizontalRule margin="none" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <SidebarLink
-          label={customizeLabel}
-          href={appPaths.agent.overview({ agentId })}
-          onClick={(e) => {
-            e.preventDefault();
-            navigateToAgentBuilderUrl(appPaths.agent.overview({ agentId }));
-          }}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiHorizontalRule margin="none" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+  const accordionButtonStyles = css`
+    padding: ${euiTheme.size.base};
 
-  const newChatBarStyles = css`
-    flex-grow: 0;
-    padding: 0 ${euiTheme.size.base};
+    .euiAccordion__triggerWrapper {
+      padding: 0;
+    }
+
+    .euiAccordion__iconButton {
+      color: ${euiTheme.colors.textParagraph};
+    }
+  `;
+
+  const buttonStyles = css`
+    color: ${euiTheme.colors.textSubdued};
+    font-weight: ${euiTheme.font.weight.semiBold};
+  `;
+
+  const conversationListStyles = css`
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
   `;
 
   return (
     <div css={containerStyles} data-test-subj="agentBuilderSidebar-conversation">
-      <CustomizeLink />
-      <EuiFlexGroup gutterSize="s" responsive={false} css={newChatBarStyles}>
-        <EuiFlexItem grow>
-          <EuiButton
-            iconType="plus"
-            size="s"
-            fullWidth
-            color="text"
-            onClick={() => navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }))}
-          >
-            {newChatLabel}
-          </EuiButton>
-        </EuiFlexItem>
-        {/* <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            color="text"
-            iconType="search"
-            size="s"
-            display="base"
-            aria-label={searchConversationsLabel}
-            onClick={() => {}}
-          />
-        </EuiFlexItem> */}
-      </EuiFlexGroup>
-      <EuiFlexItem
-        grow={false}
-        css={css`
-          padding: 0px ${euiTheme.size.l};
-          font-weight: ${euiTheme.font.weight.medium};
-          color: ${euiTheme.colors.textDisabled};
-        `}
+      <EuiHorizontalRule margin="none" />
+
+      {/* Customize accordion - with agent settings nav items */}
+      <EuiAccordion
+        id="sidebar-customize"
+        buttonContent={
+          <EuiText css={buttonStyles} size="s">
+            {customizeLabel}
+          </EuiText>
+        }
+        arrowDisplay="left"
+        forceState={isCustomizeOpen ? 'open' : 'closed'}
+        onToggle={() => setIsCustomizeOpen((prev) => !prev)}
+        paddingSize="none"
+        css={accordionButtonStyles}
       >
-        <EuiText size="xs" color="text">
-          {recentChatsLabel}
-        </EuiText>
-      </EuiFlexItem>
-      <div css={listStyles}>
-        <ConversationList agentId={agentId} currentConversationId={conversationId} />
-      </div>
+        <div
+          css={css`
+            padding: ${euiTheme.size.s} 0;
+          `}
+        >
+          <SidebarNavList
+            items={navItems}
+            isActive={isActive}
+            onItemClick={() => setIsChatsOpen(false)}
+          />
+        </div>
+      </EuiAccordion>
+
+      <EuiHorizontalRule margin="none" />
+
+      {/* Chats accordion - with conversation list */}
+      <EuiAccordion
+        id="sidebar-chats"
+        buttonContent={
+          <EuiText css={buttonStyles} size="s">
+            {chatsLabel}
+          </EuiText>
+        }
+        extraAction={
+          <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType="plus"
+                size="s"
+                color="text"
+                onClick={() =>
+                  navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }))
+                }
+                data-test-subj="agentBuilderSidebarNewConversationButton"
+              >
+                {newLabel}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                display="base"
+                iconType="search"
+                size="s"
+                color="text"
+                aria-label={searchChatsAriaLabel}
+                onClick={() => setIsSearchModalOpen(true)}
+                disabled={!hasConversations}
+                data-test-subj="agentBuilderSidebarSearchChatsButton"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        arrowDisplay="left"
+        forceState={isChatsOpen ? 'open' : 'closed'}
+        onToggle={() => setIsChatsOpen((prev) => !prev)}
+        paddingSize="none"
+        css={[accordionButtonStyles, chatsAccordionStyles]}
+      >
+        <div css={conversationListStyles}>
+          <EuiSpacer size="m" />
+          <ConversationList
+            agentId={agentId}
+            currentConversationId={conversationId}
+            onItemClick={() => setIsCustomizeOpen(false)}
+          />
+        </div>
+      </EuiAccordion>
+
       <ConversationFooter />
+
+      {isSearchModalOpen && (
+        <ConversationSearchModal
+          agentId={agentId}
+          currentConversationId={conversationId}
+          onClose={() => setIsSearchModalOpen(false)}
+          onSelectConversation={(id) => {
+            navigateToAgentBuilderUrl(
+              appPaths.agent.conversations.byId({ agentId, conversationId: id })
+            );
+            setIsSearchModalOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 };

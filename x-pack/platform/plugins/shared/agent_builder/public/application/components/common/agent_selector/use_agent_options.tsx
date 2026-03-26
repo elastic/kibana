@@ -10,7 +10,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import { AgentAvatar } from '../agent_avatar';
 import { OptionText } from '../../conversations/conversation_input/input_actions/option_text';
 
@@ -20,18 +19,11 @@ interface AgentOptionProps {
   agent?: AgentDefinition;
 }
 
-const readonlyAgentTooltip = i18n.translate(
-  'xpack.agentBuilder.agentSelector.readonlyAgentTooltip',
-  {
-    defaultMessage: 'This agent is read-only.',
-  }
-);
-
 const AgentOptionPrepend: React.FC<{ agent: AgentDefinition }> = ({ agent }) => {
   return (
     <EuiFlexGroup direction="column" justifyContent="flexStart">
       <EuiFlexItem grow={false}>
-        <AgentAvatar agent={agent} size="m" color="subdued" shape="circle" />
+        <AgentAvatar agent={agent} size="l" color="subdued" shape="circle" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -81,25 +73,28 @@ export const useAgentOptions = ({
   agents: AgentDefinition[];
   selectedAgentId?: string;
 }) => {
-  const agentOptions = useMemo(
-    () =>
-      agents.map((agent) => {
-        let checked: 'on' | undefined;
-        if (agent.id === selectedAgentId) {
-          checked = 'on';
-        }
-        const option: AgentOptionData = {
-          key: agent.id,
-          label: agent.name,
-          checked,
-          prepend: <AgentOptionPrepend agent={agent} />,
-          textWrap: 'wrap',
-          data: { agent },
-        };
-        return option;
-      }),
-    [agents, selectedAgentId]
-  );
+  const agentOptions = useMemo(() => {
+    const sorted = [...agents].sort((a, b) => {
+      if (a.id === selectedAgentId) return -1;
+      if (b.id === selectedAgentId) return 1;
+      return 0;
+    });
+    return sorted.map((agent) => {
+      let checked: 'on' | undefined;
+      if (agent.id === selectedAgentId) {
+        checked = 'on';
+      }
+      const option: AgentOptionData = {
+        key: agent.id,
+        label: agent.name,
+        checked,
+        prepend: <AgentOptionPrepend agent={agent} />,
+        textWrap: 'wrap',
+        data: { agent },
+      };
+      return option;
+    });
+  }, [agents, selectedAgentId]);
   return {
     agentOptions,
     renderAgentOption: (props: AgentOptionProps) => <AgentOption {...props} />,

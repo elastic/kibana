@@ -24,24 +24,24 @@ describe('route_config', () => {
         );
       });
 
-      it('returns "agentSettings" for overview route', () => {
-        expect(getSidebarViewForRoute('/agents/elastic-ai-agent/overview')).toBe('agentSettings');
+      it('returns "conversation" for overview route', () => {
+        expect(getSidebarViewForRoute('/agents/elastic-ai-agent/overview')).toBe('conversation');
       });
 
-      it('returns "agentSettings" for skills route', () => {
-        expect(getSidebarViewForRoute('/agents/elastic-ai-agent/skills')).toBe('agentSettings');
+      it('returns "conversation" for skills route', () => {
+        expect(getSidebarViewForRoute('/agents/elastic-ai-agent/skills')).toBe('conversation');
       });
 
-      it('returns "agentSettings" for tools route', () => {
-        expect(getSidebarViewForRoute('/agents/elastic-ai-agent/tools')).toBe('agentSettings');
+      it('returns "conversation" for tools route', () => {
+        expect(getSidebarViewForRoute('/agents/elastic-ai-agent/tools')).toBe('conversation');
       });
 
-      it('returns "agentSettings" for plugins route', () => {
-        expect(getSidebarViewForRoute('/agents/elastic-ai-agent/plugins')).toBe('agentSettings');
+      it('returns "conversation" for plugins route', () => {
+        expect(getSidebarViewForRoute('/agents/elastic-ai-agent/plugins')).toBe('conversation');
       });
 
-      it('returns "agentSettings" for connectors route', () => {
-        expect(getSidebarViewForRoute('/agents/elastic-ai-agent/connectors')).toBe('agentSettings');
+      it('returns "conversation" for connectors route', () => {
+        expect(getSidebarViewForRoute('/agents/elastic-ai-agent/connectors')).toBe('conversation');
       });
     });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom-v5-compat';
 
 import {
@@ -21,21 +21,28 @@ import {
   createConversationListItemStyles,
   createActiveConversationListItemStyles,
 } from '../../../../conversations/conversation_list_item_styles';
+import { NoConversationsPrompt } from '../../../../conversations/embeddable_conversation_header/no_conversations_prompt';
 
 interface ConversationListProps {
   agentId: string;
   currentConversationId: string | undefined;
+  onItemClick?: () => void;
 }
 
 export const ConversationList: React.FC<ConversationListProps> = ({
   agentId,
   currentConversationId,
+  onItemClick,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { conversations = [], isLoading } = useConversationList({ agentId });
 
-  const sortedConversations = [...conversations].sort(
-    (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+  const sortedConversations = useMemo(
+    () =>
+      [...conversations].sort(
+        (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+      ),
+    [conversations]
   );
 
   const linkStyles = createConversationListItemStyles(euiTheme);
@@ -51,6 +58,10 @@ export const ConversationList: React.FC<ConversationListProps> = ({
     );
   }
 
+  if (sortedConversations.length === 0) {
+    return <NoConversationsPrompt isFiltered={false} />;
+  }
+
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       {sortedConversations.map((conversation) => {
@@ -61,6 +72,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
               to={appPaths.agent.conversations.byId({ agentId, conversationId: conversation.id })}
               css={isActive ? activeLinkStyles : linkStyles}
               data-test-subj={`agentBuilderSidebarConversation-${conversation.id}`}
+              onClick={onItemClick}
             >
               <EuiTextTruncate text={conversation.title || conversation.id} />
             </Link>

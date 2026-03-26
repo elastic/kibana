@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom-v5-compat';
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import type { SidebarNavItem } from '../../../../route_config';
@@ -16,43 +16,10 @@ import type { SidebarNavItem } from '../../../../route_config';
 interface SidebarNavListProps {
   items: SidebarNavItem[];
   isActive: (path: string) => boolean;
+  onItemClick?: () => void;
 }
 
-interface NavSection {
-  label?: string;
-  items: SidebarNavItem[];
-}
-
-const groupItemsBySection = (items: SidebarNavItem[]): NavSection[] => {
-  const sections: NavSection[] = [];
-  const sectionMap = new Map<string, SidebarNavItem[]>();
-  const ungrouped: SidebarNavItem[] = [];
-  const sectionOrder: string[] = [];
-
-  for (const item of items) {
-    if (!item.section) {
-      ungrouped.push(item);
-    } else {
-      if (!sectionMap.has(item.section)) {
-        sectionMap.set(item.section, []);
-        sectionOrder.push(item.section);
-      }
-      sectionMap.get(item.section)!.push(item);
-    }
-  }
-
-  if (ungrouped.length > 0) {
-    sections.push({ items: ungrouped });
-  }
-
-  for (const label of sectionOrder) {
-    sections.push({ label, items: sectionMap.get(label)! });
-  }
-
-  return sections;
-};
-
-export const SidebarNavList: React.FC<SidebarNavListProps> = ({ items, isActive }) => {
+export const SidebarNavList: React.FC<SidebarNavListProps> = ({ items, isActive, onItemClick }) => {
   const { euiTheme } = useEuiTheme();
 
   const baseLinkStyles = css`
@@ -78,38 +45,22 @@ export const SidebarNavList: React.FC<SidebarNavListProps> = ({ items, isActive 
     color: ${euiTheme.colors.textPrimary};
   `;
 
-  const sections = useMemo(() => groupItemsBySection(items), [items]);
-
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
-      {sections.map((section, sectionIndex) => (
-        <EuiFlexItem grow={false} key={section.label ?? `ungrouped-${sectionIndex}`}>
-          <EuiFlexGroup direction="column" gutterSize="xs">
-            {section.label && (
-              <EuiFlexItem
-                grow={false}
-                css={css`
-                  padding: 0px ${euiTheme.size.s};
-                  font-weight: ${euiTheme.font.weight.medium};
-                  color: ${euiTheme.colors.textDisabled};
-                `}
-              >
-                <EuiText size="xs" color="text">
-                  {section.label}
-                </EuiText>
-              </EuiFlexItem>
-            )}
-            {section.items.map((item) => (
-              <EuiFlexItem grow={false} key={item.path}>
-                <Link to={item.path} css={isActive(item.path) ? activeLinkStyles : baseLinkStyles}>
-                  {item.icon && <EuiIcon type={item.icon} size="s" aria-hidden={true} />}
-                  {item.label}
-                </Link>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      ))}
+      <EuiFlexGroup direction="column" gutterSize="xs">
+        {items.map((item) => (
+          <EuiFlexItem grow={false} key={item.path}>
+            <Link
+              to={item.path}
+              css={isActive(item.path) ? activeLinkStyles : baseLinkStyles}
+              onClick={onItemClick}
+            >
+              {item.icon && <EuiIcon type={item.icon} size="s" aria-hidden={true} />}
+              {item.label}
+            </Link>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
     </EuiFlexGroup>
   );
 };

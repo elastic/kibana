@@ -24,9 +24,6 @@ import { AgentAvatar } from '../../../common/agent_avatar';
 import { AgentSelector } from './agent_selector';
 
 const labels = {
-  customizeAgent: i18n.translate('xpack.agentBuilder.sidebar.header.customizeAgent', {
-    defaultMessage: 'Customize agent',
-  }),
   manageComponents: i18n.translate('xpack.agentBuilder.sidebar.header.manageComponents', {
     defaultMessage: 'Manage components',
   }),
@@ -39,7 +36,7 @@ const labels = {
 };
 
 interface SidebarHeaderProps {
-  sidebarView: 'conversation' | 'agentSettings' | 'manage';
+  sidebarView: 'conversation' | 'manage';
   agentId: string;
   getNavigationPath: (newAgentId: string) => string;
   isCondensed: boolean;
@@ -126,7 +123,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
         </EuiFlexGroup>
       );
     }
-    if (sidebarView === 'agentSettings' || sidebarView === 'manage') {
+    if (sidebarView === 'manage') {
       return (
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
           <EuiFlexItem grow={false}>
@@ -138,7 +135,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
               color="text"
               onClick={() => navigate(appPaths.root)}
             >
-              {sidebarView === 'agentSettings' ? labels.customizeAgent : labels.manageComponents}
+              {labels.manageComponents}
             </EuiButtonEmpty>
           </EuiFlexItem>
           {sidebarToggle}

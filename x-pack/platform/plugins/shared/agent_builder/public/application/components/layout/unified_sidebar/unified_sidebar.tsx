@@ -18,7 +18,6 @@ import { getSidebarViewForRoute, getAgentIdFromPath } from '../../../route_confi
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import { ConversationSidebarView } from './views/conversation_view';
-import { AgentSettingsSidebarView } from './views/agent_settings_view';
 import { ManageSidebarView } from './views/manage_view';
 import { SidebarHeader } from './shared/sidebar_header';
 import { appPaths } from '../../../utils/app_paths';
@@ -89,9 +88,6 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
       {!isCondensed && (
         <EuiFlexGroup css={sidebarContentStyles}>
           {sidebarView === 'conversation' && <ConversationSidebarView />}
-          {sidebarView === 'agentSettings' && (
-            <AgentSettingsSidebarView pathname={location.pathname} />
-          )}
           {sidebarView === 'manage' && <ManageSidebarView pathname={location.pathname} />}
         </EuiFlexGroup>
       )}
