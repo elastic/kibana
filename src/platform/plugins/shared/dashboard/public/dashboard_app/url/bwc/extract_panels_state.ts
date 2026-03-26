@@ -41,6 +41,9 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
   panels?: DashboardState['panels'];
   savedObjectReferences?: Reference[];
 } {
+  if (!state.panels) {
+    return {};
+  }
   const panels = Array.isArray(state.panels) ? state.panels : [];
 
   if (isPanelVersionTooOld(panels)) {
