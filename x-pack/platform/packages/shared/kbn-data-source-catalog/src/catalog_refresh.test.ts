@@ -131,4 +131,62 @@ describe('refreshCatalog', () => {
 
     expect(entryDoc.integration).toBeUndefined();
   });
+
+  it('includes stats when includeStats is true', async () => {
+    // ensureIndex: index already exists
+    esClient.indices.exists.mockResolvedValue(true);
+
+    // discoverIndexMetadata: resolveIndex returns a regular index
+    esClient.indices.resolveIndex.mockResolvedValue({
+      indices: [{ name: 'custom-index', attributes: [] }],
+      aliases: [],
+      data_streams: [],
+    } as any);
+
+    // getMapping: simple mapping
+    esClient.indices.getMapping.mockResolvedValue({
+      'custom-index': {
+        mappings: { properties: { message: { type: 'text' } } },
+      },
+    } as any);
+
+    // getIndexTemplate: no templates
+    esClient.indices.getIndexTemplate.mockResolvedValue({ index_templates: [] } as any);
+
+    // bulkUpsert: success
+    esClient.bulk.mockResolvedValue({ errors: false, took: 1, items: [] });
+
+    // Stats mocks
+    esClient.indices.stats.mockResolvedValue({
+      indices: {
+        'custom-index': {
+          primaries: { docs: { count: 1000 }, store: { size_in_bytes: 2048 } },
+        },
+      },
+    } as any);
+    esClient.msearch.mockResolvedValue({
+      responses: [
+        {
+          hits: { total: { value: 0 } },
+          aggregations: { max_timestamp: { value_as_string: new Date().toISOString() } },
+        },
+      ],
+    } as any);
+
+    const result = await refreshCatalog({
+      esClient,
+      patterns: ['custom-*'],
+      includeStats: true,
+    });
+
+    expect(result.entriesCount).toBe(1);
+    expect(esClient.indices.stats).toHaveBeenCalled();
+    expect(esClient.msearch).toHaveBeenCalled();
+
+    // Verify bulk body includes stats
+    const bulkCall = esClient.bulk.mock.calls[0][0] as { body: unknown[] };
+    const bulkBody = bulkCall.body[1] as Record<string, unknown>;
+    expect(bulkBody.stats).toBeDefined();
+    expect((bulkBody.stats as Record<string, unknown>).doc_count).toBe(1000);
+  });
 });

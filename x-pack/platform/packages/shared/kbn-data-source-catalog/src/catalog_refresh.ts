@@ -9,12 +9,14 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { CatalogClient } from './catalog_client';
 import { discoverIndexMetadata } from './providers/index_metadata_provider';
 import { fetchIntegrationMetadata, type PackageClientLike } from './providers/integration_provider';
+import { fetchIndexStats } from './providers/index_stats_provider';
 import type { DataSourceEntry, IntegrationMetadata } from './types';
 
 interface RefreshCatalogParams {
   esClient: ElasticsearchClient;
   packageClient?: PackageClientLike;
   patterns: string[];
+  includeStats?: boolean;
 }
 
 interface RefreshResult {
@@ -26,6 +28,7 @@ export async function refreshCatalog({
   esClient,
   packageClient,
   patterns,
+  includeStats,
 }: RefreshCatalogParams): Promise<RefreshResult> {
   const start = Date.now();
 
@@ -44,6 +47,18 @@ export async function refreshCatalog({
       const matched = matchIntegration(entry, integrationMap);
       if (matched) {
         entry.integration = matched;
+      }
+    }
+  }
+
+  // Step 4 (new): Fetch stats if requested
+  if (includeStats) {
+    const names = entries.map((e) => e.name);
+    const statsMap = await fetchIndexStats(esClient, names);
+    for (const entry of entries) {
+      const stats = statsMap.get(entry.name);
+      if (stats) {
+        entry.stats = stats;
       }
     }
   }
