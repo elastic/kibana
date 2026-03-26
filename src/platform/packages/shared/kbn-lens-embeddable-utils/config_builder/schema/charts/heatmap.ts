@@ -28,14 +28,14 @@ import { bucketOperationDefinitionSchema } from '../bucket_ops';
 
 const legendSchemaProps = {
   truncate_after_lines: legendTruncateAfterLinesSchema,
-  visible: schema.maybe(schema.boolean({ meta: { description: 'Whether to show the legend' } })),
+  visible: schema.maybe(schema.boolean({ meta: { description: 'Show the legend' } })),
   size: legendSizeSchema,
   position: schema.maybe(positionSchema({ meta: { description: 'Legend position' } })),
 };
 
 const labelsSchemaProps = {
   visible: schema.maybe(
-    schema.boolean({ defaultValue: true, meta: { description: 'Whether to show axis labels' } })
+    schema.boolean({ defaultValue: true, meta: { description: 'Show axis labels' } })
   ),
   orientation: schema.maybe(
     builderEnums.orientation({
@@ -117,7 +117,7 @@ const heatmapSharedStateSchema = {
             visible: schema.maybe(
               schema.boolean({
                 defaultValue: false,
-                meta: { description: 'Whether to show cell labels' },
+                meta: { description: 'Show cell labels' },
               })
             ),
           })
