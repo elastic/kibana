@@ -244,7 +244,7 @@ export interface KibanaRequest<
    *
    * Only available during development.
    */
-  readonly devToolsTiming: RequestTiming;
+  readonly serverTiming: RequestTiming;
 }
 
 /**

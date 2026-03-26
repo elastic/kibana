@@ -2243,9 +2243,9 @@ test('includes Server-Timing header with custom events', async () => {
     },
     (context, req, res) => {
       // Use timing API
-      const timer = req.devToolsTiming.start('test-operation', 'Test operation');
+      const timer = req.serverTiming.start('test-operation', 'Test operation');
       timer.end();
-      req.devToolsTiming.measure('manual-metric', 42.5, 'Manual measurement');
+      req.serverTiming.measure('manual-metric', 42.5, 'Manual measurement');
 
       return res.ok({ body: 'ok' });
     }
