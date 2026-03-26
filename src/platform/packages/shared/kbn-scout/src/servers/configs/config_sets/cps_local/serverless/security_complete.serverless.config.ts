@@ -30,4 +30,8 @@ export const servers: ScoutServerConfig = {
     uiam: true,
     cps: true,
   },
+  kbnTestServer: {
+    ...uiamConfig.kbnTestServer,
+    serverArgs: [...uiamConfig.kbnTestServer.serverArgs, '--cps.cpsEnabled=true'],
+  },
 };
