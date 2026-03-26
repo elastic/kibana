@@ -5,5 +5,24 @@
  * 2.0.
  */
 
-// Exports will be added as modules are implemented
-export {};
+export type {
+  DataSourceEntry,
+  DataSourceType,
+  DataSourceStats,
+  DataSourceSemantic,
+  FreshnessCategory,
+  FieldMetadata,
+  IntegrationMetadata,
+  CatalogQueryParams,
+  CatalogQueryResult,
+} from './src/types';
+
+export {
+  CATALOG_INDEX_NAME,
+  DEFAULT_FIELD_LIMIT,
+  DEFAULT_SECURITY_PATTERNS,
+  FRESHNESS_THRESHOLDS,
+  CATALOG_VERSION,
+} from './src/constants';
+
+export { catalogIndexMapping } from './src/index_mapping';
