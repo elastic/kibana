@@ -6376,6 +6376,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-source-catalog@link:x-pack/platform/packages/shared/kbn-data-source-catalog":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-sources-plugin@link:x-pack/platform/plugins/shared/data_sources":
   version "0.0.0"
   uid ""

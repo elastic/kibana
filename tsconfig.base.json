@@ -914,6 +914,8 @@
       "@kbn/data-service/*": ["src/platform/packages/shared/kbn-data-service/*"],
       "@kbn/data-service-server": ["src/platform/packages/shared/kbn-data-service-server"],
       "@kbn/data-service-server/*": ["src/platform/packages/shared/kbn-data-service-server/*"],
+      "@kbn/data-source-catalog": ["x-pack/platform/packages/shared/kbn-data-source-catalog"],
+      "@kbn/data-source-catalog/*": ["x-pack/platform/packages/shared/kbn-data-source-catalog/*"],
       "@kbn/data-sources-plugin": ["x-pack/platform/plugins/shared/data_sources"],
       "@kbn/data-sources-plugin/*": ["x-pack/platform/plugins/shared/data_sources/*"],
       "@kbn/data-stream-adapter": ["x-pack/solutions/security/packages/data-stream-adapter"],
