@@ -101,6 +101,7 @@ type OnCascadeGroupNodeExpandedArgs<G extends GroupNode> = CascadeGroupNodeUIInt
 type OnCascadeGroupNodeCollapsedArgs<G extends GroupNode> = CascadeGroupNodeUIInteraction<G>;
 
 export interface CascadeRowActionProps {
+  isMobile: boolean;
   maxActionCount?: number;
   headerRowActions: Array<
     Pick<EuiButtonIconProps, 'iconType' | 'aria-label' | 'data-test-subj'> & {
@@ -118,6 +119,10 @@ export interface CascadeRowActionProps {
 }
 
 export interface CascadeRowHeaderPrimitiveProps<G extends GroupNode, L extends LeafNode> {
+  /**
+   * Denotes if the device viewport matches the mobile screen media query.
+   */
+  isMobile: boolean;
   /**
    * Whether to enable row selection. Default is false.
    */
@@ -178,6 +183,10 @@ export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNod
    */
   activeStickyRenderSlotRef: React.RefObject<HTMLDivElement | null>;
   /**
+   * Denotes if the device viewport matches the mobile screen media query.
+   */
+  isMobile: boolean;
+  /**
    * Denotes if the row is sticky.
    */
   isActiveSticky: boolean;
@@ -237,10 +246,6 @@ export interface CascadeHeaderPrimitiveProps<G extends GroupNode> {
 interface DataCascadeImplBaseProps<G extends GroupNode, L extends LeafNode>
   extends Pick<CascadeVirtualizerProps<G>, 'overscan'>,
     Pick<CascadeRowPrimitiveProps<G, L>, 'enableRowSelection'> {
-  /**
-   * The data to be displayed in the cascade. It should be an array of group nodes.
-   */
-  data: G[];
   /**
    * Callback function that is called when the group by selection changes. Only required if component is not used in a controlled manner
    */

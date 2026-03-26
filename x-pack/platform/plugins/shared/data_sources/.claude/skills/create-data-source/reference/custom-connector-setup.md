@@ -81,6 +81,27 @@ This pattern (used by the ServiceNow and Slack connectors):
 - Keeps the main connector file focused on handler logic
 - Gives handlers full autocomplete without inline `as` casts
 
+### `metadata.description` Quality
+
+The `metadata.description` is shown in the UI and also surfaced to AI agents as context about what the connector can do. Write it to accurately reflect the connector's actual capabilities.
+
+**Rules:**
+- **List the key verbs/actions** the connector supports (e.g., "search", "list", "download", "send")
+- **Name the objects** those actions operate on (e.g., "messages", "issues", "files", "records")
+- **Keep it to one sentence** — no longer than ~15 words
+- **Don't start with "Connect to X"** — that's implied by being a connector; use the space for capabilities instead
+- **Don't say "Kibana Stack Connector for X"** — that's an implementation detail, not a description
+
+**Good examples:**
+- `'Search messages, list public channels, and send messages in Slack'`
+- `'Search repositories, issues, and pull requests, browse file contents, and list branches in GitHub'`
+- `'Search issues, browse projects, and look up users in Jira Cloud'`
+
+**Bad examples:**
+- `'Connect to Jira to pull data from your project.'` — too vague, doesn't say what data
+- `'Kibana Stack Connector for SharePoint Online.'` — says nothing about capabilities
+- `'Any URL to markdown, web search for better LLM grounding'` — jargony, unclear
+
 ### SubActions
 
 - Create subActions for federated search (search, list, get, download attachments as base64, etc.)

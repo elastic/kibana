@@ -6,6 +6,7 @@
  */
 
 import { KbnPalette } from '@kbn/palettes';
+import type { KbnPaletteId } from '@kbn/palettes';
 import type { CoreTheme } from '@kbn/core/public';
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import type { SecondaryTrend } from '@kbn/lens-common';
@@ -26,7 +27,7 @@ const comparedToPaletteLight = {
   ],
 };
 const makeDynamicTrend = (
-  paletteId: string,
+  paletteId: KbnPaletteId,
   reversed = false
 ): Extract<SecondaryTrend, { type: 'dynamic' }> => ({
   type: 'dynamic',

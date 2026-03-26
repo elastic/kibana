@@ -6012,6 +6012,10 @@
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
               },
               {
+                "plugin": "searchInferenceEndpoints",
+                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/utils/inference_settings.test.ts"
+              },
+              {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/packages/get.test.ts"
               },
@@ -6319,7 +6323,39 @@
           },
           {
             "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/user_connector_token_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/user_connector_token_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/user_connector_token_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/user_connector_token_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/user_connector_token_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/connector_token_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/connector_token_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/connector_token_client.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/lib/connector_token_client.ts"
           },
           {
             "plugin": "actions",
@@ -6328,6 +6364,14 @@
           {
             "plugin": "actions",
             "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
           },
           {
             "plugin": "actions",
@@ -8856,6 +8900,14 @@
           {
             "plugin": "fleet",
             "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/model_versions/settings_v1.ts"
+          },
+          {
+            "plugin": "osquery",
+            "path": "x-pack/platform/plugins/shared/osquery/server/lib/saved_query/saved_object_model_versions.ts"
+          },
+          {
+            "plugin": "osquery",
+            "path": "x-pack/platform/plugins/shared/osquery/server/lib/saved_query/saved_object_model_versions.ts"
           },
           {
             "plugin": "osquery",

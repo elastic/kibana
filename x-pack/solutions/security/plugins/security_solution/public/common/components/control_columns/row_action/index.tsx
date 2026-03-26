@@ -12,7 +12,8 @@ import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
-import { OverviewTab } from '../../../../flyout_v2/document/tabs/overview_tab';
+import { cellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
+import { DocumentFlyout } from '../../../../flyout_v2/document';
 import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
 import { useKibana } from '../../../lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
@@ -118,7 +119,7 @@ const RowActionComponent = ({
           services,
           store,
           history,
-          children: <OverviewTab hit={hit} />,
+          children: <DocumentFlyout hit={hit} renderCellActions={cellActionRenderer} />,
         }),
         {
           ownFocus: false,

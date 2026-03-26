@@ -103,7 +103,12 @@ export const ActionBar: FC<ActionBarProps> = ({
                           count: selectedCount,
                         }}
                       />
-                      <EuiIcon className="tagMgt__actionBarIcon" type="arrowDown" size="s" />
+                      <EuiIcon
+                        className="tagMgt__actionBarIcon"
+                        type="chevronSingleDown"
+                        size="s"
+                        aria-hidden={true}
+                      />
                     </EuiLink>
                   </EuiText>
                 }

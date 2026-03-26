@@ -16,7 +16,7 @@ import {
 import {
   metricOperationDefinitionSchema,
   esqlColumnSchema,
-  esqlColumnOperationWithLabelAndFormatSchema,
+  esqlColumnWithFormatSchema,
 } from '../metric_ops';
 import { staticColorSchema, applyColorToSchema, colorByValueSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
@@ -323,54 +323,77 @@ const secondaryMetricSchemaNoESQL = mergeAllMetricsWithChartDimensionSchemaWithR
   metricStateSecondaryMetricOptionsSchema
 );
 
-export const metricStateSchemaNoESQL = schema.object({
-  type: schema.literal('metric'),
-  ...sharedPanelInfoSchema,
-  ...dslOnlyPanelInfoSchema,
-  ...layerSettingsSchema,
-  ...datasetSchema,
-  /**
-   * Primary value configuration, must define operation.
-   */
-  metrics: schema.arrayOf(schema.oneOf([primaryMetricSchemaNoESQL, secondaryMetricSchemaNoESQL]), {
-    minSize: 1,
-    maxSize: 2,
-    validate: validateMetrics,
-  }),
-  /**
-   * Configure how to break down the metric (e.g. show one metric per term).
-   */
-  breakdown_by: schema.maybe(
-    mergeAllBucketsWithChartDimensionSchema(metricStateBreakdownByOptionsSchema)
-  ),
-});
+export const metricStateSchemaNoESQL = schema.object(
+  {
+    type: schema.literal('metric'),
+    ...sharedPanelInfoSchema,
+    ...dslOnlyPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...datasetSchema,
+    /**
+     * Primary value configuration, must define operation.
+     */
+    metrics: schema.arrayOf(
+      schema.oneOf([primaryMetricSchemaNoESQL, secondaryMetricSchemaNoESQL]),
+      {
+        minSize: 1,
+        maxSize: 2,
+        validate: validateMetrics,
+      }
+    ),
+    /**
+     * Configure how to break down the metric (e.g. show one metric per term).
+     */
+    breakdown_by: schema.maybe(
+      mergeAllBucketsWithChartDimensionSchema(metricStateBreakdownByOptionsSchema)
+    ),
+  },
+  {
+    meta: {
+      id: 'metricNoESQL',
+      title: 'Metric Chart (DSL)',
+      description: 'Metric chart configuration for standard queries',
+    },
+  }
+);
 
-const primaryMetricESQL = esqlColumnOperationWithLabelAndFormatSchema
+const primaryMetricESQL = esqlColumnWithFormatSchema
   .extends(metricStatePrimaryMetricOptionsSchema)
   .extends(metricStateBackgroundChartSchemaESQL);
 
-const secondaryMetricESQL = esqlColumnOperationWithLabelAndFormatSchema.extends(
+const secondaryMetricESQL = esqlColumnWithFormatSchema.extends(
   metricStateSecondaryMetricOptionsSchema
 );
 
-export const esqlMetricState = schema.object({
-  type: schema.literal('metric'),
-  ...sharedPanelInfoSchema,
-  ...layerSettingsSchema,
-  ...datasetEsqlTableSchema,
-  /**
-   * Primary value configuration, must define operation.
-   */
-  metrics: schema.arrayOf(schema.oneOf([primaryMetricESQL, secondaryMetricESQL]), {
-    minSize: 1,
-    maxSize: 2,
-    validate: validateMetrics,
-  }),
-  /**
-   * Configure how to break down the metric (e.g. show one metric per term).
-   */
-  breakdown_by: schema.maybe(esqlColumnSchema.extends(metricStateBreakdownByOptionsSchema)),
-});
+export const esqlMetricState = schema.object(
+  {
+    type: schema.literal('metric'),
+    ...sharedPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...datasetEsqlTableSchema,
+    /**
+     * Primary value configuration, must define operation.
+     */
+    metrics: schema.arrayOf(schema.oneOf([primaryMetricESQL, secondaryMetricESQL]), {
+      minSize: 1,
+      maxSize: 2,
+      validate: validateMetrics,
+    }),
+    /**
+     * Configure how to break down the metric (e.g. show one metric per term).
+     */
+    breakdown_by: schema.maybe(
+      esqlColumnWithFormatSchema.extends(metricStateBreakdownByOptionsSchema)
+    ),
+  },
+  {
+    meta: {
+      id: 'metricESQL',
+      title: 'Metric Chart (ES|QL)',
+      description: 'Metric chart configuration for ES|QL queries',
+    },
+  }
+);
 
 export const metricStateSchema = schema.oneOf([metricStateSchemaNoESQL, esqlMetricState], {
   meta: { id: 'metricChart', title: 'Metric Chart' },

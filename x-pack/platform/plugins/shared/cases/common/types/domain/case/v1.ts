@@ -11,7 +11,7 @@ import { CASE_EXTENDED_FIELDS } from '../../../constants';
 import { ExternalServiceRt } from '../external_service/v1';
 import { CaseAssigneesRt, UserRt } from '../user/v1';
 import { CaseConnectorRt } from '../connector/v1';
-import { AttachmentRt } from '../attachment/v1';
+import { AttachmentRtV2 } from '../attachment/v2';
 import { CaseCustomFieldsRt } from '../custom_field/v1';
 import { CaseObservableRt } from '../observable/v1';
 
@@ -165,7 +165,7 @@ export const CaseRt = rt.intersection([
   }),
   rt.exact(
     rt.partial({
-      comments: rt.array(AttachmentRt),
+      comments: rt.array(AttachmentRtV2),
     })
   ),
 ]);

@@ -58,7 +58,7 @@ apiTest.describe(
     apiTest(
       'Should extract properly extract host with pagination',
       async ({ apiClient, esClient }) => {
-        const expectedResultCount = 19;
+        const expectedResultCount = 20;
         const expectedPageCount = 4;
 
         const extractionResponse = await apiClient.post(

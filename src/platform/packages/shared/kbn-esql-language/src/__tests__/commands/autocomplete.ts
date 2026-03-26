@@ -47,6 +47,7 @@ import { getSafeInsertText } from '../../commands/definitions/utils';
 import { timeUnitsToSuggest } from '../../commands/definitions/constants';
 import { correctQuerySyntax, findAstPosition } from '../../commands/definitions/utils/ast';
 import { FUNCTIONS_TO_IGNORE } from '../../commands/registry/eval/autocomplete';
+import { attachReplacementRanges } from '../../language/autocomplete/utils/prefix_range';
 
 export const IGNORED_FUNCTIONS_BY_LOCATION: { [K in Location]?: string[] } = {
   eval: [...FUNCTIONS_TO_IGNORE.names],
@@ -70,7 +71,7 @@ export const mockFieldsWithTypes = (
   );
 };
 
-export const suggest = (
+export const suggest = async (
   query: string,
   context = mockContext,
   commandName: string,
@@ -101,7 +102,15 @@ export const suggest = (
 
   const contextWithRoot = { ...context, rootAst: root };
 
-  return autocomplete(query, command, mockCallbacks, contextWithRoot, cursorPosition);
+  const suggestions = await autocomplete(
+    query,
+    command,
+    mockCallbacks,
+    contextWithRoot,
+    cursorPosition
+  );
+
+  return attachReplacementRanges(innerText, suggestions, contextWithRoot);
 };
 
 export const expectSuggestions = async (
