@@ -13,7 +13,7 @@ import {
 } from '@kbn/esql-utils';
 import { type AggregateQuery, buildEsQuery } from '@kbn/es-query';
 import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
-import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { getEsQueryConfig, UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLRow } from '@kbn/es-types';
 import { getLensAttributesFromSuggestion, mapVisToChartType } from '@kbn/visualization-utils';
@@ -66,20 +66,23 @@ export const getGridAttrs = async (
 ): Promise<ESQLDataGridAttrs> => {
   const indexPattern = getIndexPatternFromESQLQuery(query.esql);
   const dataViewSpec = adHocDataViews.find((adHoc) => {
-    return adHoc.name === indexPattern;
+    return adHoc.title === indexPattern;
   });
 
-  const dataView = dataViewSpec
+  // Fall back to getESQLAdHocDataview when the spec has no timeFieldName,
+  // which detects the time field via HTTP (with a promise cache to avoid
+  // redundant requests).
+  const dataView = dataViewSpec?.timeFieldName
     ? await data.dataViews.create(dataViewSpec)
     : await getESQLAdHocDataview({
         dataViewsService: data.dataViews,
         query: query.esql,
-        options: { skipFetchFields: true },
+        options: { skipFetchFields: true, id: dataViewSpec?.id },
         http,
       });
 
   const filter = getDSLFilter(data.query, uiSettings, dataView.timeFieldName);
-
+  const timezone = uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
   const results = await getESQLResults({
     esqlQuery: query.esql,
     search: data.search.search,
@@ -88,6 +91,7 @@ export const getGridAttrs = async (
     dropNullColumns: true,
     timeRange: data.query.timefilter.timefilter.getAbsoluteTime(),
     variables: esqlVariables,
+    timezone,
   });
 
   let queryColumns = results.response.columns;
@@ -177,7 +181,10 @@ export const getSuggestions = async (
     const attrs = getLensAttributesFromSuggestion({
       filters: [],
       query,
-      suggestion: firstSuggestion,
+      suggestion: {
+        ...firstSuggestion,
+        title: '',
+      },
       dataView,
     }) as TypedLensSerializedState['attributes'];
     return {

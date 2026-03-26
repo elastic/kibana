@@ -33,13 +33,17 @@ import { useBoolean } from '@kbn/react-hooks';
 import React from 'react';
 import { InfoPanel } from '../../info_panel';
 import { DeleteFeatureModal } from './delete_feature_modal';
-import { getConfidenceColor, getStatusColor } from './use_stream_features_table';
+import { getConfidenceColor } from './use_stream_features_table';
 
 interface FeatureDetailsFlyoutProps {
   feature: Feature;
   onClose: () => void;
   onDelete?: () => Promise<void>;
   isDeleting?: boolean;
+  onExclude?: () => Promise<void>;
+  isExcluding?: boolean;
+  onRestore?: () => Promise<void>;
+  isRestoring?: boolean;
 }
 
 const noDataPlaceholder = '-';
@@ -49,6 +53,10 @@ export function FeatureDetailsFlyout({
   onClose,
   onDelete,
   isDeleting = false,
+  onExclude,
+  isExcluding = false,
+  onRestore,
+  isRestoring = false,
 }: FeatureDetailsFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const flyoutTitleId = useGeneratedHtmlId({
@@ -63,30 +71,49 @@ export function FeatureDetailsFlyout({
     showDeleteModal();
   };
 
-  const displayTitle = feature.title ?? Object.values(feature.value).join(', ');
-  const formattedValue = Object.values(feature.value).join(', ');
+  const handleExcludeClick = () => {
+    closeActionsPopover();
+    onExclude?.();
+  };
+
+  const handleRestoreClick = () => {
+    closeActionsPopover();
+    onRestore?.();
+  };
+
+  const displayTitle = feature.title ?? feature.id;
+  const evidence = feature.evidence?.length ? feature.evidence : [];
+  const tags = feature.tags?.length && feature.tags.length > 0 ? feature.tags : [];
 
   const generalInfoItems = [
     {
-      title: NAME_LABEL,
-      description: <EuiText size="s">{feature.name || noDataPlaceholder}</EuiText>,
-    },
-    {
-      title: VALUE_LABEL,
-      description: <EuiText size="s">{formattedValue || noDataPlaceholder}</EuiText>,
+      title: ID_LABEL,
+      description: (
+        <EuiText size="s" data-test-subj="streamsAppFeatureDetailsFlyoutId">
+          {feature.id}
+        </EuiText>
+      ),
     },
     {
       title: TYPE_LABEL,
       description: <EuiBadge color="hollow">{upperFirst(feature.type)}</EuiBadge>,
     },
     {
-      title: CREATED_BY_LABEL,
-      description: <EuiBadge color="hollow">{CREATED_BY_LLM}</EuiBadge>,
+      title: SUBTYPE_LABEL,
+      description: <EuiBadge color="hollow">{feature.subtype ?? noDataPlaceholder}</EuiBadge>,
     },
     {
-      title: STATUS_LABEL,
+      title: PROPERTIES_LABEL,
       description: (
-        <EuiHealth color={getStatusColor(feature.status)}>{upperFirst(feature.status)}</EuiHealth>
+        <EuiText size="s">
+          {Object.entries(feature.properties)
+            .filter(([, value]) => typeof value === 'string')
+            .map(([key, value]) => (
+              <EuiText size="s" key={key}>
+                <strong>{key}</strong> {value as string}
+              </EuiText>
+            ))}
+        </EuiText>
       ),
     },
     {
@@ -98,9 +125,9 @@ export function FeatureDetailsFlyout({
     {
       title: TAGS_LABEL,
       description:
-        feature.tags.length > 0 ? (
+        tags.length > 0 ? (
           <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-            {feature.tags.map((tag) => (
+            {tags.map((tag: string) => (
               <EuiFlexItem key={tag} grow={false}>
                 <EuiBadge color="hollow">{tag}</EuiBadge>
               </EuiFlexItem>
@@ -109,21 +136,6 @@ export function FeatureDetailsFlyout({
         ) : (
           <EuiText size="s">{noDataPlaceholder}</EuiText>
         ),
-    },
-    {
-      title: ID_LABEL,
-      description: (
-        <EuiText size="s" data-test-subj="streamsAppFeatureDetailsFlyoutId">
-          <code
-            css={css`
-              font-family: ${euiTheme.font.familyCode};
-              font-size: ${euiTheme.font.scale.s};
-            `}
-          >
-            {feature.id}
-          </code>
-        </EuiText>
-      ),
     },
     {
       title: LAST_SEEN_LABEL,
@@ -153,7 +165,7 @@ export function FeatureDetailsFlyout({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" responsive={false}>
-              {onDelete && (
+              {(onDelete || onExclude || onRestore) && (
                 <EuiFlexItem grow={false}>
                   <EuiPopover
                     button={
@@ -162,6 +174,7 @@ export function FeatureDetailsFlyout({
                         iconType="boxesVertical"
                         aria-label={ACTIONS_BUTTON_ARIA_LABEL}
                         onClick={toggleActionsPopover}
+                        isLoading={isExcluding || isRestoring}
                       />
                     }
                     isOpen={isActionsPopoverOpen}
@@ -172,17 +185,53 @@ export function FeatureDetailsFlyout({
                     <EuiContextMenuPanel
                       size="s"
                       items={[
-                        <EuiContextMenuItem
-                          key="delete"
-                          icon={<EuiIcon type="trash" color="danger" />}
-                          css={css`
-                            color: ${euiTheme.colors.danger};
-                          `}
-                          onClick={handleDeleteClick}
-                          data-test-subj="streamsAppFeatureDetailsFlyoutDeleteAction"
-                        >
-                          {DELETE_ACTION_LABEL}
-                        </EuiContextMenuItem>,
+                        ...(onRestore
+                          ? [
+                              <EuiContextMenuItem
+                                key="restore"
+                                icon={<EuiIcon type="eye" color="primary" aria-hidden={true} />}
+                                css={css`
+                                  color: ${euiTheme.colors.primary};
+                                `}
+                                onClick={handleRestoreClick}
+                                data-test-subj="streamsAppFeatureDetailsFlyoutRestoreAction"
+                              >
+                                {RESTORE_ACTION_LABEL}
+                              </EuiContextMenuItem>,
+                            ]
+                          : []),
+                        ...(onExclude
+                          ? [
+                              <EuiContextMenuItem
+                                key="exclude"
+                                icon={
+                                  <EuiIcon type="eyeClosed" color="warning" aria-hidden={true} />
+                                }
+                                css={css`
+                                  color: ${euiTheme.colors.warning};
+                                `}
+                                onClick={handleExcludeClick}
+                                data-test-subj="streamsAppFeatureDetailsFlyoutExcludeAction"
+                              >
+                                {EXCLUDE_ACTION_LABEL}
+                              </EuiContextMenuItem>,
+                            ]
+                          : []),
+                        ...(onDelete
+                          ? [
+                              <EuiContextMenuItem
+                                key="delete"
+                                icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
+                                css={css`
+                                  color: ${euiTheme.colors.danger};
+                                `}
+                                onClick={handleDeleteClick}
+                                data-test-subj="streamsAppFeatureDetailsFlyoutDeleteAction"
+                              >
+                                {DELETE_ACTION_LABEL}
+                              </EuiContextMenuItem>,
+                            ]
+                          : []),
                       ]}
                     />
                   </EuiPopover>
@@ -207,6 +256,7 @@ export function FeatureDetailsFlyout({
               {generalInfoItems.map((item, index) => (
                 <React.Fragment key={index}>
                   <EuiDescriptionList
+                    titleProps={{ css: { alignSelf: 'center' } }}
                     type="column"
                     columnWidths={[1, 2]}
                     compressed
@@ -224,8 +274,8 @@ export function FeatureDetailsFlyout({
           </EuiFlexItem>
           <EuiFlexItem>
             <InfoPanel title={EVIDENCE_LABEL}>
-              {feature.evidence.length > 0 ? (
-                feature.evidence.map((item, index) => (
+              {evidence.length > 0 ? (
+                evidence.map((item: string, index: number) => (
                   <React.Fragment key={index}>
                     <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
                       <EuiFlexItem grow={false}>
@@ -235,7 +285,7 @@ export function FeatureDetailsFlyout({
                         <EuiText size="s">{item}</EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>
-                    {index < feature.evidence.length - 1 && <EuiHorizontalRule margin="m" />}
+                    {index < evidence.length - 1 && <EuiHorizontalRule margin="m" />}
                   </React.Fragment>
                 ))
               ) : (
@@ -245,13 +295,20 @@ export function FeatureDetailsFlyout({
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="streamsAppFeatureDetailsFlyoutMeta">
             <InfoPanel title={META_LABEL}>
-              {Object.keys(feature.meta).length === 0 ? (
+              {Object.keys(feature.meta ?? {}).length === 0 ? (
                 <EuiText size="s">{NO_META_AVAILABLE}</EuiText>
               ) : (
                 <EuiCodeBlock language="json" paddingSize="s" fontSize="s" isCopyable>
-                  {JSON.stringify(feature.meta, null, 2)}
+                  {JSON.stringify(feature.meta ?? {}, null, 2)}
                 </EuiCodeBlock>
               )}
+            </InfoPanel>
+          </EuiFlexItem>
+          <EuiFlexItem data-test-subj="streamsAppFeatureDetailsFlyoutRawDocument">
+            <InfoPanel title={RAW_DOCUMENT_LABEL}>
+              <EuiCodeBlock language="json" paddingSize="s" fontSize="s" isCopyable>
+                {JSON.stringify(feature, null, 2)}
+              </EuiCodeBlock>
             </InfoPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -274,28 +331,20 @@ const ID_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.idLabel', {
   defaultMessage: 'ID',
 });
 
-const NAME_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.nameLabel', {
-  defaultMessage: 'Name',
+const SUBTYPE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.subtypeLabel', {
+  defaultMessage: 'Subtype',
 });
 
-const VALUE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.valueLabel', {
-  defaultMessage: 'Value',
+const PROPERTIES_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.propertiesLabel', {
+  defaultMessage: 'Properties',
+});
+
+const RAW_DOCUMENT_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.rawDocumentLabel', {
+  defaultMessage: 'Raw document',
 });
 
 const TYPE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.typeLabel', {
   defaultMessage: 'Type',
-});
-
-const CREATED_BY_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.createdByLabel', {
-  defaultMessage: 'Created by',
-});
-
-const CREATED_BY_LLM = i18n.translate('xpack.streams.featureDetailsFlyout.createdByLLM', {
-  defaultMessage: 'LLM',
-});
-
-const STATUS_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.statusLabel', {
-  defaultMessage: 'Status',
 });
 
 const CONFIDENCE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.confidenceLabel', {
@@ -318,6 +367,14 @@ const ACTIONS_BUTTON_ARIA_LABEL = i18n.translate(
   'xpack.streams.featureDetailsFlyout.actionsButtonAriaLabel',
   { defaultMessage: 'Actions' }
 );
+
+const RESTORE_ACTION_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.restoreAction', {
+  defaultMessage: 'Restore',
+});
+
+const EXCLUDE_ACTION_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.excludeAction', {
+  defaultMessage: 'Exclude',
+});
 
 const DELETE_ACTION_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.deleteAction', {
   defaultMessage: 'Delete',

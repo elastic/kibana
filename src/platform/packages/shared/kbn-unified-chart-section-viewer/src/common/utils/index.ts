@@ -8,9 +8,10 @@
  */
 
 export * from './esql/create_esql_query';
-export * from './esql/constants';
 export * from './esql/create_aggregation';
+export * from './first_null_nullable';
 export * from './metric_unit/get_lens_metric_format';
 export * from './metric_unit/get_unit_label';
 export * from './metric_unit/normalize_unit';
 export * from './fields';
+export * from './user_messages';

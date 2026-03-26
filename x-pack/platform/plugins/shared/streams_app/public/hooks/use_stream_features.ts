@@ -6,13 +6,13 @@
  */
 
 import { useMemo } from 'react';
-import type { Feature, Streams } from '@kbn/streams-schema';
+import { isComputedFeature, type Feature, type Streams } from '@kbn/streams-schema';
 import type { QueryFunctionContext } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
 import { useFetchErrorToast } from './use_fetch_error_toast';
 import { useKibana } from './use_kibana';
 
-export const useStreamFeatures = (definition: Streams.all.Definition) => {
+export const useStreamFeatures = (definition: Streams.all.Definition, deps: unknown[] = []) => {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
   const showFetchErrorToast = useFetchErrorToast();
 
@@ -24,21 +24,38 @@ export const useStreamFeatures = (definition: Streams.all.Definition) => {
         path: {
           name: streamName,
         },
+        query: {
+          include_excluded: true,
+        },
       },
       signal: querySignal ?? null,
     });
   };
 
   const { data, isLoading, error, refetch } = useQuery<{ features: Feature[] }, Error>({
-    queryKey: ['features', streamName],
+    queryKey: ['features', streamName, ...deps],
     queryFn: fetchFeatures,
     onError: showFetchErrorToast,
   });
 
-  const features = useMemo(() => data?.features ?? [], [data?.features]);
+  const allFeatures = useMemo(
+    () => (data?.features ?? []).filter((feature) => !isComputedFeature(feature)),
+    [data?.features]
+  );
+
+  const features = useMemo(
+    () => allFeatures.filter((feature) => !feature.excluded_at),
+    [allFeatures]
+  );
+
+  const excludedFeatures = useMemo(
+    () => allFeatures.filter((feature) => !!feature.excluded_at),
+    [allFeatures]
+  );
 
   return {
     features,
+    excludedFeatures,
     featuresLoading: isLoading,
     refreshFeatures: refetch,
     error,

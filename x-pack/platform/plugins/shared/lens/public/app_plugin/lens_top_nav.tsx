@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+
 import { isEqual, noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
@@ -309,6 +311,7 @@ function getLensTopNavConfig(options: {
 export const LensTopNavMenu = ({
   setHeaderActionMenu,
   initialInput,
+  incomingState,
   indicateNoData,
   lensInspector,
   setIsSaveModalVisible,
@@ -344,7 +347,6 @@ export const LensTopNavMenu = ({
 
   const {
     isSaveable,
-    isLinkedToOriginatingApp,
     query,
     activeData,
     savedQuery,
@@ -574,15 +576,20 @@ export const LensTopNavMenu = ({
 
   const topNavConfig = useMemo(() => {
     const showReplaceInDashboard =
-      initialContext?.originatingApp === 'dashboards' && !initialInput?.savedObjectId;
+      initialContext?.originatingApp === 'dashboards' && !initialInput?.ref_id;
     const showReplaceInCanvas =
-      initialContext?.originatingApp === 'canvas' && !initialInput?.savedObjectId;
+      initialContext?.originatingApp === 'canvas' && !initialInput?.ref_id;
     const contextFromEmbeddable =
       initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable;
 
+    const isComingFromDashboardView =
+      incomingState?.originatingApp &&
+      incomingState?.originatingPath &&
+      !incomingState.originatingPath.includes('/list/');
+
     const showSaveAndReturn =
       !(showReplaceInDashboard || showReplaceInCanvas) &&
-      (isLinkedToOriginatingApp || Boolean(initialContextIsEmbedded));
+      Boolean(isComingFromDashboardView || initialContextIsEmbedded);
 
     const hasData = Boolean(activeData && Object.keys(activeData).length);
     const csvEnabled = Boolean(isSaveable && hasData);
@@ -774,7 +781,7 @@ export const LensTopNavMenu = ({
                   onTitleDuplicate: noop, // Title can never change from this action
                 },
                 {
-                  saveToLibrary: Boolean(initialInput?.savedObjectId),
+                  saveToLibrary: Boolean(initialInput?.ref_id),
                 }
               );
             }
@@ -798,7 +805,7 @@ export const LensTopNavMenu = ({
           },
         },
         cancel: {
-          visible: Boolean(isLinkedToOriginatingApp),
+          visible: Boolean(isComingFromDashboardView),
           execute: () => {
             if (redirectToOrigin) {
               redirectToOrigin();
@@ -853,8 +860,8 @@ export const LensTopNavMenu = ({
     return (additionalMenuEntries || []).concat(baseMenuEntries);
   }, [
     initialContext,
-    initialInput?.savedObjectId,
-    isLinkedToOriginatingApp,
+    initialInput?.ref_id,
+    incomingState,
     initialContextIsEmbedded,
     activeData,
     isSaveable,
@@ -919,7 +926,7 @@ export const LensTopNavMenu = ({
           if (isOfAggregateQueryType(newQuery) && !isOnTextBasedMode) {
             dispatch(
               switchAndCleanDatasource({
-                newDatasourceId: 'textBased',
+                newDatasourceId: LENS_DATASOURCE_ID.TEXT_BASED,
                 visualizationId: visualization?.activeId,
                 currentIndexPatternId: currentIndexPattern?.id,
               })
@@ -1045,7 +1052,7 @@ export const LensTopNavMenu = ({
         if (isOnTextBasedMode) {
           dispatch(
             switchAndCleanDatasource({
-              newDatasourceId: 'formBased',
+              newDatasourceId: LENS_DATASOURCE_ID.FORM_BASED,
               visualizationId: visualization?.activeId,
               currentIndexPatternId: dataView?.id,
             })
@@ -1067,7 +1074,7 @@ export const LensTopNavMenu = ({
       if (isOnTextBasedMode) {
         dispatch(
           switchAndCleanDatasource({
-            newDatasourceId: 'formBased',
+            newDatasourceId: LENS_DATASOURCE_ID.FORM_BASED,
             visualizationId: visualization?.activeId,
             currentIndexPatternId: dataView?.id,
           })
@@ -1103,7 +1110,7 @@ export const LensTopNavMenu = ({
       if (isOnTextBasedMode) {
         dispatch(
           switchAndCleanDatasource({
-            newDatasourceId: 'formBased',
+            newDatasourceId: LENS_DATASOURCE_ID.FORM_BASED,
             visualizationId: visualization?.activeId,
             currentIndexPatternId: newIndexPatternId,
           })

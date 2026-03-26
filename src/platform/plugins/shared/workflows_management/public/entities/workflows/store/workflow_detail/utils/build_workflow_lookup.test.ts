@@ -8,7 +8,7 @@
  */
 
 import { LineCounter, parseDocument } from 'yaml';
-import { buildWorkflowLookup, inspectStep } from './build_workflow_lookup';
+import { buildWorkflowLookup, getValueFromValueNode, inspectStep } from './build_workflow_lookup';
 
 describe('inspectStep', () => {
   describe('simple step parsing', () => {
@@ -78,8 +78,8 @@ steps:
       expect(result.step1.propInfos).toHaveProperty('message');
       expect(result.step1.propInfos).toHaveProperty('enabled');
       expect(result.step1.propInfos.message.path).toEqual(['message']);
-      expect(result.step1.propInfos.message.valueNode.value).toBe('Hello');
-      expect(result.step1.propInfos.enabled.valueNode.value).toBe(true);
+      expect(getValueFromValueNode(result.step1.propInfos.message.valueNode)).toBe('Hello');
+      expect(getValueFromValueNode(result.step1.propInfos.enabled.valueNode)).toBe(true);
     });
 
     it('should collect nested properties in with block', () => {
@@ -99,24 +99,29 @@ steps:
       expect('with.message' in result.step1.propInfos).toBe(true);
       expect('with.level' in result.step1.propInfos).toBe(true);
       expect(result.step1.propInfos['with.message'].path).toEqual(['with', 'message']);
-      expect(result.step1.propInfos['with.message'].valueNode.value).toBe('Hello');
-      expect(result.step1.propInfos['with.level'].valueNode.value).toBe('info');
+      expect(getValueFromValueNode(result.step1.propInfos['with.message'].valueNode)).toBe('Hello');
+      expect(getValueFromValueNode(result.step1.propInfos['with.level'].valueNode)).toBe('info');
     });
 
-    it('should exclude steps, else, and fallback from propInfos', () => {
+    it('should exclude steps, else, and on-failure from propInfos', () => {
       const yaml = `
 steps:
   - name: step1
     type: if
+    condition: "{{ true }}"
     steps:
       - name: nested_step
         type: console
     else:
       - name: else_step
         type: console
-    fallback:
-      - name: fallback_step
-        type: console
+  - name: step2
+    type: action
+    connector-id: my-connector
+    on-failure:
+      fallback:
+        - name: fallback_step
+          type: console
     message: "test"
 `;
       const lineCounter = new LineCounter();
@@ -126,8 +131,8 @@ steps:
 
       expect(result.step1.propInfos).not.toHaveProperty('steps');
       expect(result.step1.propInfos).not.toHaveProperty('else');
-      expect(result.step1.propInfos).not.toHaveProperty('fallback');
-      expect(result.step1.propInfos).toHaveProperty('message');
+      expect(result.step2.propInfos).not.toHaveProperty('on-failure');
+      expect(result.step2.propInfos).toHaveProperty('message');
     });
 
     it('should collect deeply nested properties', () => {
@@ -152,7 +157,9 @@ steps:
         'settings',
         'timeout',
       ]);
-      expect(result.step1.propInfos['config.settings.timeout'].valueNode.value).toBe(5000);
+      expect(
+        getValueFromValueNode(result.step1.propInfos['config.settings.timeout'].valueNode)
+      ).toBe(5000);
     });
   });
 
@@ -199,17 +206,18 @@ steps:
       expect(result.else_step.parentStepId).toBe('if_step');
     });
 
-    it('should set parentStepId for nested steps in fallback block', () => {
+    it('should set parentStepId for nested steps in on-failure fallback block', () => {
       const yaml = `
 steps:
   - name: try_step
-    type: try
+    type: action
     steps:
       - name: try_step_content
         type: console
-    fallback:
-      - name: fallback_step
-        type: console
+    on-failure:
+      fallback:
+        - name: fallback_step
+          type: console
 `;
       const lineCounter = new LineCounter();
       const yamlDocument = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
@@ -320,7 +328,9 @@ steps:
 
       // Check nested step properties
       expect(result.nested_step.propInfos).toHaveProperty('message');
-      expect(result.nested_step.propInfos.message.valueNode.value).toBe('inside if');
+      expect(getValueFromValueNode(result.nested_step.propInfos.message.valueNode)).toBe(
+        'inside if'
+      );
     });
 
     it('should parse nested steps in foreach loop', () => {
@@ -453,7 +463,7 @@ steps:
   });
 
   describe('complex workflow structures', () => {
-    it('should handle if-else-fallback structure', () => {
+    it('should handle if-else with on-failure on connector step', () => {
       const yaml = `
 steps:
   - name: if_step
@@ -461,16 +471,18 @@ steps:
     condition: "{{ value }}"
     steps:
       - name: true_branch
-        type: console
+        type: action
+        connector-id: my-connector
         message: "true"
+        on-failure:
+          fallback:
+            - name: error_branch
+              type: console
+              message: "error"
     else:
       - name: false_branch
         type: console
         message: "false"
-    fallback:
-      - name: error_branch
-        type: console
-        message: "error"
     timeout: 5000
 `;
       const lineCounter = new LineCounter();
@@ -483,7 +495,7 @@ steps:
       expect(result.if_step.propInfos).toHaveProperty('timeout');
       expect(result.if_step.propInfos).not.toHaveProperty('steps');
       expect(result.if_step.propInfos).not.toHaveProperty('else');
-      expect(result.if_step.propInfos).not.toHaveProperty('fallback');
+      expect(result.true_branch.propInfos).not.toHaveProperty('on-failure');
 
       expect(result.true_branch).toBeDefined();
       expect(result.false_branch).toBeDefined();

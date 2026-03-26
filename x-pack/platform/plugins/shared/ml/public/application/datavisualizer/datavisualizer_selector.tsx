@@ -102,7 +102,7 @@ export const DatavisualizerSelector: FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="xl" />
-        <DataVisualizerGrid buttonType="full" isEsqlEnabled={isEsqlEnabled} />
+        <DataVisualizerGrid isEsqlEnabled={isEsqlEnabled} />
         {startTrialVisible === true && (
           <Fragment>
             <EuiSpacer size="xxl" />

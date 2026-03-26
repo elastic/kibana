@@ -8,26 +8,18 @@
  */
 
 import React, { useMemo } from 'react';
+import { useParams, useHistory } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 
-import { FavoritesClient } from '@kbn/content-management-favorites-public';
-import { TableListView } from '@kbn/content-management-table-list-view';
-import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
-import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
+import { TabbedTableListView } from '@kbn/content-management-tabbed-table-list-view';
+import { I18nProvider } from '@kbn/i18n-react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { QueryClientProvider } from '@kbn/react-query';
 
-import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
-import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
-import {
-  coreServices,
-  savedObjectsTaggingService,
-  serverlessService,
-  usageCollectionService,
-} from '../services/kibana_services';
+import { coreServices } from '../services/kibana_services';
 import { dashboardQueryClient } from '../services/dashboard_query_client';
-import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
-import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
-import type { DashboardListingProps, DashboardSavedObjectUserContent } from './types';
+import { getDashboardListingTabs } from './get_dashboard_listing_tabs';
+import type { DashboardListingProps } from './types';
 
 export const DashboardListing = ({
   children,
@@ -35,56 +27,49 @@ export const DashboardListing = ({
   goToDashboard,
   getDashboardUrl,
   useSessionStorageIntegration,
+  getTabs,
 }: DashboardListingProps) => {
   useExecutionContext(coreServices.executionContext, {
     type: 'application',
     page: 'list',
   });
 
-  const {
-    unsavedDashboardIds,
-    refreshUnsavedDashboards,
-    tableListViewTableProps,
-    contentInsightsClient,
-  } = useDashboardListingTable({
-    goToDashboard,
-    getDashboardUrl,
-    useSessionStorageIntegration,
-    initialFilter,
-  });
+  const history = useHistory();
+  const { activeTab: activeTabParam } = useParams<{ activeTab?: string }>();
 
-  const dashboardFavoritesClient = useMemo(() => {
-    return new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_SAVED_OBJECT_TYPE, {
-      http: coreServices.http,
-      usageCollection: usageCollectionService,
-      userProfile: coreServices.userProfile,
-    });
-  }, []);
+  const tabs = useMemo(
+    () =>
+      getDashboardListingTabs({
+        goToDashboard,
+        getDashboardUrl,
+        useSessionStorageIntegration,
+        initialFilter,
+        getTabs,
+      }),
+    [goToDashboard, getDashboardUrl, useSessionStorageIntegration, initialFilter, getTabs]
+  );
+
+  const activeTabId = useMemo(() => {
+    return tabs.find((tab) => tab.id === activeTabParam)?.id ?? 'dashboards';
+  }, [tabs, activeTabParam]);
+
+  const changeActiveTab = (tabId: string) => {
+    history.push(`/list/${tabId}`);
+  };
 
   return (
     <I18nProvider>
       <QueryClientProvider client={dashboardQueryClient}>
-        <TableListViewKibanaProvider
-          {...{
-            core: coreServices,
-            savedObjectsTagging: savedObjectsTaggingService?.getTaggingApi(),
-            FormattedRelative,
-            favorites: dashboardFavoritesClient,
-            contentInsightsClient,
-            isKibanaVersioningEnabled: !serverlessService,
-          }}
-        >
-          <TableListView<DashboardSavedObjectUserContent> {...tableListViewTableProps}>
-            <>
-              {children}
-              <DashboardUnsavedListing
-                goToDashboard={goToDashboard}
-                unsavedDashboardIds={unsavedDashboardIds}
-                refreshUnsavedDashboards={refreshUnsavedDashboards}
-              />
-            </>
-          </TableListView>
-        </TableListViewKibanaProvider>
+        {children}
+        <TabbedTableListView
+          headingId="dashboardListingHeading"
+          title={i18n.translate('dashboard.listing.title', {
+            defaultMessage: 'Dashboards',
+          })}
+          tabs={tabs}
+          activeTabId={activeTabId}
+          changeActiveTab={changeActiveTab}
+        />
       </QueryClientProvider>
     </I18nProvider>
   );

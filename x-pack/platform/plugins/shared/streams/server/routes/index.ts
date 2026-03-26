@@ -12,12 +12,13 @@ import { internalSchemaRoutes } from './internal/streams/schema/route';
 import { internalProcessingRoutes } from './internal/streams/processing/route';
 import { ingestRoutes } from './streams/ingest/route';
 import { internalLifecycleRoutes } from './internal/streams/lifecycle/route';
+import { queryStreamRoutes } from './streams/query/route';
 import { contentRoutes } from './content/route';
 import { internalCrudRoutes } from './internal/streams/crud/route';
 import { internalManagementRoutes } from './internal/streams/management/route';
-import { systemRoutes as internalSystemsRoutes } from './internal/streams/systems/route';
 import { internalPromptsRoutes } from './internal/streams/prompts/route';
 import { internalSignificantEventsRoutes } from './internal/streams/significant_events/route';
+import { internalSignificantEventsSettingsRoutes } from './internal/streams/significant_events_settings/route';
 import { significantEventsRoutes } from './streams/significant_events/route';
 import { queryRoutes } from './queries/route';
 import { failureStoreRoutes } from './internal/streams/failure_store/route';
@@ -30,6 +31,9 @@ import { internalDescriptionGenerationRoutes } from './internal/streams/descript
 import { featureRoutes as internalFeatureRoutes } from './internal/streams/features/route';
 import { internalInsightsRoutes } from './internal/streams/insights/route';
 import { internalTasksRoutes } from './internal/streams/tasks/route';
+import { internalOnboardingRoutes } from './internal/streams/onboarding/route';
+import { internalQueriesRoutes } from './internal/streams/queries/route';
+import { timeSeriesRoutes } from './internal/streams/time_series/route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -39,9 +43,10 @@ export const streamsRouteRepository = {
   ...internalLifecycleRoutes,
   ...internalProcessingRoutes,
   ...failureStoreRoutes,
-  ...internalSystemsRoutes,
+  ...timeSeriesRoutes,
   ...internalPromptsRoutes,
   ...internalSignificantEventsRoutes,
+  ...internalSignificantEventsSettingsRoutes,
   ...internalIngestRoutes,
   ...connectorRoutes,
   ...internalAttachmentRoutes,
@@ -49,12 +54,15 @@ export const streamsRouteRepository = {
   ...internalFeatureRoutes,
   ...internalInsightsRoutes,
   ...internalTasksRoutes,
+  ...internalOnboardingRoutes,
+  ...internalQueriesRoutes,
   // public APIs
   ...docCountsRoutes,
   ...crudRoutes,
   ...enablementRoutes,
   ...managementRoutes,
   ...ingestRoutes,
+  ...queryStreamRoutes,
   ...contentRoutes,
   ...significantEventsRoutes,
   ...queryRoutes,

@@ -10,6 +10,7 @@ export { describeDataset } from './src/tools/describe_dataset';
 export { formatDocumentAnalysis } from './src/tools/describe_dataset/format_document_analysis';
 
 export { mergeSampleDocumentsWithFieldCaps } from './src/tools/describe_dataset/merge_sample_documents_with_field_caps';
+export { getSampleDocuments } from './src/tools/describe_dataset/get_sample_documents';
 export type {
   DocumentAnalysis,
   FormattedDocumentAnalysis,

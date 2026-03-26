@@ -21,8 +21,6 @@ export const RESIZABLE_CONTAINER_INITIAL_HEIGHT = 190;
 export const esqlEditorStyles = (
   euiTheme: EuiThemeComputed,
   editorHeight: number,
-  hasErrors: boolean,
-  hasWarning: boolean,
   editorIsInline: boolean,
   hasOutline: boolean
 ) => {
@@ -33,28 +31,14 @@ export const esqlEditorStyles = (
       right: 0,
       zIndex: 4,
       height: `${editorHeight}px`,
+      border: hasOutline ? euiTheme.border.thin : 'none',
     },
     resizableContainer: {
       display: 'flex',
       width: '100%',
       alignItems: 'flex-start',
-      border: hasOutline ? euiTheme.border.thin : 'none',
       borderBottom: 'none',
       overflow: 'hidden',
-    },
-    linesBadge: {
-      position: 'absolute' as const,
-      zIndex: 1,
-      right: hasErrors || hasWarning ? '60px' : '12px',
-      top: '50%',
-      transform: 'translate(0, -50%)',
-    },
-    errorsBadge: {
-      position: 'absolute' as const,
-      zIndex: 1,
-      right: '12px',
-      top: '50%',
-      transform: 'translate(0, -50%)',
     },
     bottomContainer: {
       paddingLeft: euiTheme.size.xs,
@@ -71,7 +55,6 @@ export const esqlEditorStyles = (
     },
     historyContainer: {
       border: 'none',
-      backgroundColor: euiTheme.colors.lightestShade,
       width: '100%',
       position: 'relative' as const,
       marginTop: 0,
@@ -79,30 +62,6 @@ export const esqlEditorStyles = (
       marginBottom: 0,
       borderBottomLeftRadius: 0,
       borderBottomRightRadius: 0,
-    },
-    topContainer: {
-      border: 'none',
-      borderTopLeftRadius: 0,
-      borderTopRightRadius: 0,
-      backgroundColor: euiTheme.colors.lightestShade,
-      paddingLeft: euiTheme.size.s,
-      paddingRight: euiTheme.size.s,
-      paddingTop: euiTheme.size.s,
-      paddingBottom: euiTheme.size.s,
-      width: '100%',
-      position: 'relative' as const,
-      marginLeft: 0,
-      marginTop: editorIsInline ? 0 : euiTheme.size.s,
-      borderBottom: 'none',
-    },
-    dragResizeContainer: {
-      width: '100%',
-      cursor: 'row-resize',
-      textAlign: 'center' as 'center',
-      height: euiTheme.size.base,
-    },
-    dragResizeButton: {
-      cursor: 'row-resize',
     },
   };
 };

@@ -6,7 +6,8 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
-import { expect, EuiComboBoxWrapper } from '@kbn/scout-oblt';
+import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { waitForApmSettingsHeaderLink } from '../page_helpers';
 import { EXTENDED_TIMEOUT } from '../constants';
 
@@ -52,6 +53,9 @@ export class CustomLinksPage {
   }
 
   async clickDelete() {
+    await expect(this.page.getByTestId('apmDeleteButtonDeleteButton')).toBeVisible({
+      timeout: EXTENDED_TIMEOUT,
+    });
     await this.page.getByTestId('apmDeleteButtonDeleteButton').click();
   }
 
@@ -77,6 +81,9 @@ export class CustomLinksPage {
     const editButton = row.getByTestId('editCustomLink');
     await editButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await editButton.click();
+    await expect(this.page.getByTestId('apmCustomLinkFlyoutFooterCloseButton')).toBeVisible({
+      timeout: EXTENDED_TIMEOUT,
+    });
   }
 
   /**

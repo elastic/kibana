@@ -279,6 +279,12 @@ const RESTRICTED_IMPORTS = [
     name: '@testing-library/react-hooks',
     message: 'Please use @testing-library/react instead',
   },
+  {
+    name: '@elastic/ecs',
+    importNames: ['EcsFlat'],
+    message:
+      'Do not import fields metadata directly in Kibana, as they can bloat the bundle size. Instead, consume metadata fields from @kbn/fields-metadata-plugin, which handles scoped field metadata retrieval (ECS, OTel, etc.).',
+  },
   ...[
     'Alt',
     'Alternative',
@@ -794,6 +800,8 @@ module.exports = {
         'x-pack/solutions/security/test/security_solution_api_integration/*/test_suites/**/*',
         'x-pack/solutions/security/test/security_solution_api_integration/**/config*.ts',
         '**/playwright.config.ts',
+        '**/playwright.v2.config.ts',
+        '**/*.playwright.config.ts',
         '**/parallel.playwright.config.ts',
       ],
       rules: {
@@ -1053,6 +1061,16 @@ module.exports = {
             name: 'semver',
             message: 'Please use "semver/*/{function}" instead',
           },
+        ],
+      },
+    },
+    {
+      files: ['x-pack/platform/plugins/shared/fields_metadata/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          // Exclude @elastic/ecs from restricted imports for the fields metadata plugin.
+          ...RESTRICTED_IMPORTS.filter(({ name }) => name !== '@elastic/ecs'),
         ],
       },
     },
@@ -1867,6 +1885,43 @@ module.exports = {
     },
 
     /**
+     * Onboarding team overrides
+     */
+    {
+      files: [
+        'x-pack/platform/plugins/shared/streams/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/streams_app/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/plugins/observability_onboarding/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/fields_metadata/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/dataset_quality/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/data_quality/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/kbn-streams-schema/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/kbn-streams-ai/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/kbn-streamlang/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/kbn-streamlang-tests/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/kbn-sample-parser/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/kbn-grok-heuristics/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/kbn-evals-suite-streams/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/kbn-dissect-heuristics/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/kbn-content-packs-schema/**/*.{ts,tsx}',
+        'x-pack/platform/packages/private/kbn-data-quality/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-xstate-utils/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-use-tracked-promise/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-timerange/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-synthtrace/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-synthtrace-client/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-react-hooks/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-otel-semantic-conventions/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-otel-demo/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-grok-ui/**/*.{ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
+      },
+    },
+
+    /**
      * Discover overrides
      */
     {
@@ -2595,8 +2650,24 @@ module.exports = {
             ],
             patterns: [
               {
-                group: ['@kbn/scout-*', '@playwright/test/**', 'playwright/**'],
-                message: "Platform tests should import only from '@kbn/scout'.",
+                group: [
+                  '@kbn/scout-oblt',
+                  '@kbn/scout-oblt/**',
+                  '@kbn/scout-search',
+                  '@kbn/scout-search/**',
+                  '@kbn/scout-security',
+                  '@kbn/scout-security/**',
+                  '@kbn/scout-info',
+                  '@kbn/scout-info/**',
+                  '@kbn/scout-reporting',
+                  '@kbn/scout-reporting/**',
+                  '@kbn/scout-release-testing',
+                  '@kbn/scout-release-testing/**',
+                  '@playwright/test/**',
+                  'playwright/**',
+                ],
+                message:
+                  "Platform tests should import from '@kbn/scout' (and '@kbn/scout-synthtrace' if you need synthtrace).",
               },
             ],
           },
@@ -2701,28 +2772,40 @@ module.exports = {
         ],
       },
     },
+    // Custom rules for scout tests
     {
-      // Custom rules for scout tests
+      // Platform & Solutions (plugins and packages, excluding Scout framework's own tests)
       files: [
-        'src/platform/plugins/**/test/{scout,scout_*}/**/*.ts',
-        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/*.ts',
-        'x-pack/solutions/**/plugins/**/test/{scout,scout_*}/**/*.ts',
+        'src/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
+        'x-pack/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
+        'x-pack/solutions/**/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
       ],
+      excludedFiles: ['src/platform/packages/shared/kbn-scout/test/**'],
       rules: {
         '@kbn/eslint/scout_no_describe_configure': 'error',
         '@kbn/eslint/scout_max_one_describe': 'error',
         '@kbn/eslint/scout_test_file_naming': 'error',
-        '@kbn/eslint/scout_require_api_client_in_api_test': 'error',
         '@kbn/eslint/scout_require_global_setup_hook_in_parallel_tests': 'error',
         '@kbn/eslint/scout_no_es_archiver_in_parallel_tests': 'error',
+        '@kbn/eslint/scout_no_cross_boundary_imports': 'error',
+        '@kbn/eslint/scout_expect_import': 'error',
+        '@kbn/eslint/scout_no_deprecated_tags': 'error',
+        '@kbn/eslint/scout_no_locators': ['error', { restricted: ['globalLoadingIndicator'] }],
         '@kbn/eslint/require_include_in_check_a11y': 'warn',
       },
     },
     {
-      // Ensure correct expect import path in solutions scout API tests
-      files: ['x-pack/solutions/**/plugins/**/test/scout/api/**/*.ts'],
+      // Platform & Solutions API Tests
+      files: [
+        'src/platform/plugins/**/test/{scout,scout_*}/api/**/*.ts',
+        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/api/**/*.ts',
+        'x-pack/solutions/**/plugins/**/test/{scout,scout_*}/api/**/*.ts',
+      ],
       rules: {
-        '@kbn/eslint/scout_expect_import': 'error',
+        '@kbn/eslint/scout_require_api_client_in_api_test': [
+          'error',
+          { alternativeFixtures: ['esClient'] },
+        ],
       },
     },
     {

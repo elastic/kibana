@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiCallOut, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import type { IWaterfallGetRelatedErrorsHref } from '../../../../../../../common/waterfall/typings';
+import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
+import { useDiscoverHref } from '../../../../../shared/links/discover_links/use_discover_href';
+import { WaterfallSizeWarning } from '../../../../../shared/trace_waterfall/waterfall_size_warning';
 import {
   TimelineAxisContainer,
   VerticalLinesContainer,
@@ -41,6 +44,7 @@ interface Props {
   isEmbeddable?: boolean;
   scrollElement?: Element;
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
+  serviceBadgesHeight?: number;
 }
 
 function getWaterfallMaxLevel(waterfall: IWaterfall) {
@@ -82,9 +86,26 @@ export function Waterfall({
   isEmbeddable,
   scrollElement,
   getRelatedErrorsHref,
+  serviceBadgesHeight = 0,
 }: Props) {
   const { euiTheme } = useEuiTheme();
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
+  const {
+    query: { rangeFrom, rangeTo },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view',
+    '/traces/explorer/waterfall',
+    '/dependencies/operation'
+  );
+  const traceId = waterfall.entryTransaction?.trace.id;
+
+  const discoverHref = useDiscoverHref({
+    indexType: 'traces',
+    rangeFrom,
+    rangeTo,
+    queryParams: { traceId, sortDirection: 'ASC' },
+  });
 
   const { duration } = waterfall;
 
@@ -106,31 +127,25 @@ export function Waterfall({
   return (
     <Container>
       {waterfall.exceedsMax && (
-        <EuiCallOut
-          announceOnMount
+        <WaterfallSizeWarning
+          traceDocsTotal={waterfall.traceDocsTotal}
+          maxTraceItems={waterfall.maxTraceItems}
+          discoverHref={discoverHref}
           data-test-subj="apmWaterfallSizeWarning"
-          color="warning"
-          size="s"
-          iconType="warning"
-          title={i18n.translate('xpack.apm.waterfall.exceedsMax', {
-            defaultMessage:
-              'The number of items in this trace is {traceDocsTotal} which is higher than the current limit of {maxTraceItems}. Please increase the limit via `xpack.apm.ui.maxTraceItems` to see the full trace',
-            values: {
-              traceDocsTotal: waterfall.traceDocsTotal,
-              maxTraceItems: waterfall.maxTraceItems,
-            },
-          })}
         />
       )}
 
       <div
+        data-test-subj="apmWaterfallTimelineContainer"
+        data-is-embeddable={String(isEmbeddable ?? false)}
+        data-service-badges-height={String(serviceBadgesHeight)}
         css={css`
           display: flex;
           ${isEmbeddable
             ? 'position: relative;'
             : `
             position: sticky;
-            top: var(--euiFixedHeadersOffset, 0);`}
+            top: calc(var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)) + ${serviceBadgesHeight}px);`}
           z-index: ${euiTheme.levels.menu};
           background-color: ${euiTheme.colors.emptyShade};
           border-bottom: 1px solid ${euiTheme.colors.mediumShade};

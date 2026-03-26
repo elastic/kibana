@@ -396,7 +396,10 @@ export type TrainedModelItem = ExistingModelBase & { stats: Stats };
 /** Trained DFA model */
 export type DFAModelItem = Omit<TrainedModelItem, 'inference_config'> & {
   origin_job_exists?: boolean;
-  inference_config?: Pick<MlInferenceConfigCreateContainer, 'classification' | 'regression'>;
+  inference_config?: Pick<
+    NonNullable<MlInferenceConfigCreateContainer>,
+    'classification' | 'regression'
+  >;
   metadata?: estypes.MlTrainedModelConfig['metadata'] & {
     analytics_config: DataFrameAnalyticsConfig;
     input: unknown;
@@ -425,6 +428,36 @@ export function isDFAModelItem(item: unknown): item is DFAModelItem {
 
 export function isModelDownloadItem(item: TrainedModelUIItem): item is ModelDownloadItem {
   return 'putModelConfig' in item && !!item.type?.includes(TRAINED_MODEL_TYPE.PYTORCH);
+}
+
+/**
+ * Identifies rerank (text_similarity) trained models.
+ *
+ * Start and Update deployment actions are disabled for rerank models as a short-term fix:
+ * the deployment modal surfaces an ingest optimization option that is not applicable to the
+ * reranking task, and allowing it leads to a confusing UX.
+ *
+ * TODO: Remove this guard once the deployment modal properly handles rerank models.
+ * See: https://github.com/elastic/kibana/issues/258373
+ */
+export function isRerankModelItem(item: TrainedModelUIItem): boolean {
+  if (Array.isArray(item.type) && item.type.includes('text_similarity')) {
+    return true;
+  }
+
+  if (
+    'inference_config' in item &&
+    typeof item.inference_config === 'object' &&
+    item.inference_config !== null
+  ) {
+    const taskKeys = Object.keys(item.inference_config);
+    if (taskKeys.includes('rerank') || taskKeys.includes('text_similarity')) {
+      return true;
+    }
+  }
+
+  // fallback to inference_apis
+  return !!item.inference_apis?.some((inference) => inference.task_type === 'rerank');
 }
 
 export const isBuiltInModel = (item: TrainedModelConfigResponse | TrainedModelUIItem) =>

@@ -9,7 +9,7 @@ import type { Ast } from '@kbn/interpreter';
 import { fromExpression } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import type { XYState } from './xy_visualization';
+import type { XYVisualizationState } from './xy_visualization';
 import { getXyVisualization } from './xy_visualization';
 import type { OperationDescriptor } from '@kbn/lens-common';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
@@ -18,6 +18,7 @@ import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks'
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import { defaultReferenceLineColor } from './color_assignment';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import { LegendSize } from '@kbn/chart-expressions-common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -476,6 +477,38 @@ describe('#toExpression', () => {
     );
   });
 
+  it('should include legend maxLines and maxPixels in the legendConfig AST when set', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: {
+          position: Position.Bottom,
+          isVisible: true,
+          maxLines: 3,
+          maxPixels: 333,
+        },
+        valueLabels: 'hide',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'area',
+            splitAccessors: ['d'],
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    const legendConfig = (expression.chain[0].arguments.legend[0] as Ast).chain[0].arguments;
+    expect(legendConfig.maxLines).toEqual([3]);
+    expect(legendConfig.maxPixels).toEqual([333]);
+  });
+
   it('should ignore legend size for inside legend', () => {
     const expression = xyVisualization.toExpression(
       {
@@ -505,6 +538,151 @@ describe('#toExpression', () => {
     expect(
       (expression.chain[0].arguments.legend[0] as Ast).chain[0].arguments.legendSize
     ).toBeUndefined();
+  });
+
+  it('should use the line-optimized palette for line charts without explicit palette', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'line',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'line',
+            splitAccessors: ['d'],
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    const paletteExpression = (expression.chain[0].arguments.layers[0] as Ast).chain[1].arguments
+      .palette[0] as Ast;
+    expect(paletteExpression.chain[0].function).toEqual('system_palette');
+    expect(paletteExpression.chain[0].arguments.name).toEqual(['elastic_line_optimized']);
+  });
+
+  it('should use the default palette for non-line charts without explicit palette', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'bar',
+            splitAccessors: ['d'],
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    const paletteExpression = (expression.chain[0].arguments.layers[0] as Ast).chain[1].arguments
+      .palette[0] as Ast;
+    expect(paletteExpression.chain[0].function).toEqual('system_palette');
+    expect(paletteExpression.chain[0].arguments.name).toEqual(['default']);
+  });
+
+  it('should pass through colorMapping.paletteId as-is for line charts', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'line',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'line',
+            splitAccessors: ['d'],
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+            colorMapping: {
+              ...DEFAULT_COLOR_MAPPING_CONFIG,
+              paletteId: 'elastic_line_optimized',
+            },
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    const colorMappingJson = (expression.chain[0].arguments.layers[0] as Ast).chain[1].arguments
+      .colorMapping[0] as string;
+    const colorMappingConfig = JSON.parse(colorMappingJson);
+    expect(colorMappingConfig.paletteId).toEqual('elastic_line_optimized');
+  });
+
+  it('should not override colorMapping.paletteId at expression time', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'line',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'line',
+            splitAccessors: ['d'],
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+            colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    const colorMappingJson = (expression.chain[0].arguments.layers[0] as Ast).chain[1].arguments
+      .colorMapping[0] as string;
+    const colorMappingConfig = JSON.parse(colorMappingJson);
+    expect(colorMappingConfig.paletteId).toEqual('default');
+  });
+
+  it('should use the default palette for area charts without explicit palette', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'area',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'area',
+            splitAccessors: ['d'],
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    const paletteExpression = (expression.chain[0].arguments.layers[0] as Ast).chain[1].arguments
+      .palette[0] as Ast;
+    expect(paletteExpression.chain[0].function).toEqual('system_palette');
+    expect(paletteExpression.chain[0].arguments.name).toEqual(['default']);
   });
 
   it('should compute the correct series color fallback based on the layer type', () => {
@@ -590,7 +768,7 @@ describe('#toExpression', () => {
         return { label: `col_${col}`, dataType: 'date', scale: 'interval' } as OperationDescriptor;
       return { label: `col_${col}`, dataType: 'number' } as OperationDescriptor;
     });
-    const state: XYState = {
+    const state: XYVisualizationState = {
       legend: { position: Position.Bottom, isVisible: true },
       valueLabels: 'show',
       preferredSeriesType: 'bar',
@@ -629,7 +807,7 @@ describe('#toExpression', () => {
   });
 
   it('ignores set current time marker visibility settings if the chart is not time-based', () => {
-    const state: XYState = {
+    const state: XYVisualizationState = {
       legend: { position: Position.Bottom, isVisible: true },
       valueLabels: 'show',
       preferredSeriesType: 'bar',

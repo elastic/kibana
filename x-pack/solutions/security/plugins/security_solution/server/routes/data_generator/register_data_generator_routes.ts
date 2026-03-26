@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { SAVED_OBJECT_TYPES } from '@kbn/cases-plugin/common';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { getSavedObjectsTypes } from '@kbn/cases-plugin/common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 
@@ -105,7 +105,7 @@ export const registerDataGeneratorRoutes = (
           const casesClient = await pluginsStart.cases.getCasesClientWithRequest(request);
 
           const internalRepo = coreStart.savedObjects.createInternalRepository([
-            ...SAVED_OBJECT_TYPES,
+            ...getSavedObjectsTypes(),
           ]);
 
           const spaceId = (await context.securitySolution).getSpaceId();

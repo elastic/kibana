@@ -7,11 +7,19 @@
 
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { useEffect, useRef } from 'react';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { StreamDocsStat } from '@kbn/streams-plugin/common';
 import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
 import { useKibana } from './use_kibana';
 import { useTimefilter } from './use_timefilter';
+import { buildStreamIngestHistogramEsql } from '../util/stream_overview_esql';
 import { executeEsqlQuery } from './use_execute_esql_query';
+
+/**
+ * Default bucket count for ES|QL time histograms (`BUCKET(@timestamp, …)`). Use the same value
+ * for the streams list and stream overview so doc counts stay comparable for the time range.
+ */
+export const STREAMS_HISTOGRAM_NUM_DATA_POINTS = 25;
 
 export interface StreamDocCountsFetch {
   docCount: Promise<StreamDocsStat[]>;
@@ -35,9 +43,15 @@ export function useStreamDocCountsFetch({
 } {
   const { timeState, timeState$ } = useTimefilter();
   const {
-    streams: { streamsRepositoryClient },
-    data,
-  } = useKibana().dependencies.start;
+    dependencies: {
+      start: {
+        data,
+        streams: { streamsRepositoryClient },
+      },
+    },
+    core: { uiSettings },
+  } = useKibana();
+
   const docCountsPromiseCache = useRef<StreamDocCountsFetch | null>(null);
   const histogramPromiseCache = useRef<Partial<Record<string, Promise<UnparsedEsqlResponse>>>>({});
   const abortControllerRef = useRef<AbortController>();
@@ -142,7 +156,8 @@ export function useStreamDocCountsFetch({
       return docCountsFetch;
     },
     getStreamHistogram(streamName: string): Promise<UnparsedEsqlResponse> {
-      const cachedPromise = histogramPromiseCache.current[streamName];
+      const cacheKey = `${streamName}::${timeState.start}::${timeState.end}`;
+      const cachedPromise = histogramPromiseCache.current[cacheKey];
       if (cachedPromise) {
         return cachedPromise;
       }
@@ -153,18 +168,19 @@ export function useStreamDocCountsFetch({
       }
 
       const minInterval = Math.floor((timeState.end - timeState.start) / numDataPoints);
-
       const source = canReadFailureStore ? `${streamName},${streamName}::failures` : streamName;
+      const timezone = uiSettings?.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
 
       const histogramPromise = executeEsqlQuery({
-        query: `FROM ${source} | STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${minInterval} ms)`,
+        query: buildStreamIngestHistogramEsql(source, minInterval),
         search: data.search.search,
+        timezone,
         signal: abortController.signal,
         start: timeState.start,
         end: timeState.end,
       }) as Promise<UnparsedEsqlResponse>;
 
-      histogramPromiseCache.current[streamName] = histogramPromise;
+      histogramPromiseCache.current[cacheKey] = histogramPromise;
 
       return histogramPromise;
     },

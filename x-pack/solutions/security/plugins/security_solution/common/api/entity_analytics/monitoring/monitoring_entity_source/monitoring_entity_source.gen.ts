@@ -14,8 +14,8 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
-import { BooleanFromString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 export type MonitoringEntitySourceType = z.infer<typeof MonitoringEntitySourceType>;
 export const MonitoringEntitySourceType = z.enum(['index', 'entity_analytics_integration']);
@@ -25,9 +25,9 @@ export const MonitoringEntitySourceTypeEnum = MonitoringEntitySourceType.enum;
 export type Matcher = z.infer<typeof Matcher>;
 export const Matcher = z.object({
   fields: z.array(z.string()),
-  /** 
+  /**
       * Matcher values. Must be either an array of strings (e.g. group or role names) or an array of booleans (e.g. integration-derived flags like privileged_group_member). Mixed types are intentionally not supported for simplicity and predictability.
- 
+
       */
   values: z.union([z.array(z.string()), z.array(z.boolean())]),
 });
@@ -85,6 +85,8 @@ export const MonitoringEntitySourceProperties = UpdateableMonitoringEntitySource
   z.object({
     type: MonitoringEntitySourceType.optional(),
     managed: z.boolean().optional(),
+    managedVersion: z.number().int().optional(),
+    matchersModifiedByUser: z.boolean().optional(),
   })
 );
 

@@ -5,24 +5,9 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
-import { isSupportedConnectorType, type InferenceConnector } from '@kbn/inference-common';
+import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
-
-const INFERENCE_CONNECTOR_TYPE = '.inference';
-
-async function inferenceEndpointExists(
-  esClient: ElasticsearchClient,
-  inferenceId: string
-): Promise<boolean> {
-  try {
-    const endpoints = await esClient.inference.get({ inference_id: inferenceId });
-    return endpoints.endpoints.some((endpoint) => endpoint.inference_id === inferenceId);
-  } catch (error) {
-    return false;
-  }
-}
 
 export const getConnectorsRoute = createServerRoute({
   endpoint: 'GET /internal/streams/connectors',
@@ -36,52 +21,34 @@ export const getConnectorsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  handler: async ({ request, getScopedClients, server }) => {
-    const { scopedClusterClient } = await getScopedClients({ request });
+  handler: async ({ request, server }) => {
+    const connectors = await server.inference.getConnectorList(request);
 
-    // Get actions client with request
-    const actionsClient = await server.actions.getActionsClientWithRequest(request);
+    return { connectors };
+  },
+});
 
-    if (!actionsClient) {
-      throw new Error('Actions client not available');
-    }
-
-    const connectors = await actionsClient.getAll();
-
-    // Filter to only supported GenAI connector types
-    const supportedConnectors = connectors.filter((connector) =>
-      isSupportedConnectorType(connector.actionTypeId)
-    );
-
-    // Validate inference connectors have endpoints
-    const validatedConnectors = await Promise.all(
-      supportedConnectors.map(async (connector) => {
-        if (connector.actionTypeId === INFERENCE_CONNECTOR_TYPE) {
-          const inferenceId = (connector.config as InferenceConnector['config'])?.inferenceId;
-          if (inferenceId) {
-            const exists = await inferenceEndpointExists(
-              scopedClusterClient.asCurrentUser,
-              inferenceId
-            );
-            if (!exists) {
-              return null;
-            }
-          }
-        }
-        return connector;
-      })
-    );
-
-    const filteredConnectors = validatedConnectors.filter(
-      (connector): connector is NonNullable<typeof connector> => connector !== null
-    );
-
-    return {
-      connectors: filteredConnectors,
-    };
+export const getConnectorByIdRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/connectors/{connectorId}',
+  options: {
+    access: 'internal',
+    summary: 'Get a GenAI connector by ID',
+    description: 'Fetches a single GenAI connector by its ID',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({ connectorId: z.string() }),
+  }),
+  handler: async ({ request, params, server }) => {
+    return server.inference.getConnectorById(params.path.connectorId, request);
   },
 });
 
 export const connectorRoutes = {
   ...getConnectorsRoute,
+  ...getConnectorByIdRoute,
 };

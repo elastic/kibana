@@ -55,6 +55,7 @@ export function WorkflowUnsavedChangesBadge({
         </EuiBadge>
       ) : (
         <EuiBadge
+          data-test-subj="workflowSavedChangesBadge"
           iconType="check"
           color={euiTheme.colors.backgroundBaseDisabled}
           aria-label={fullDateFormatted}

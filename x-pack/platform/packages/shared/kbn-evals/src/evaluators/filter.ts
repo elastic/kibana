@@ -6,6 +6,14 @@
  */
 
 import type { Evaluator, Example, TaskOutput } from '../types';
+import { isKSpecificRagEvaluator, matchesEvaluatorPattern } from './patterns';
+
+function matchesSelectedEvaluator(evaluatorName: string, selectedPattern: string): boolean {
+  if (isKSpecificRagEvaluator(selectedPattern)) {
+    return false;
+  }
+  return matchesEvaluatorPattern(evaluatorName, selectedPattern);
+}
 
 export function parseSelectedEvaluators() {
   return (
@@ -24,5 +32,7 @@ export function selectEvaluators<TExample extends Example, TTaskOutput extends T
     return evaluators;
   }
 
-  return evaluators.filter((evaluator) => evaluatorsFromEnv.includes(evaluator.name));
+  return evaluators.filter((evaluator) =>
+    evaluatorsFromEnv.some((selected) => matchesSelectedEvaluator(evaluator.name, selected))
+  );
 }

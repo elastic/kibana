@@ -10,11 +10,12 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   GenerateSuggestionButton,
-  AdditionalChargesCallout,
   type GenerateSuggestionButtonProps,
 } from './generate_suggestions_button';
+import { AdditionalChargesCallout } from '../../shared/additional_charges_callout';
 import type { AIFeatures } from '../../../../hooks/use_ai_features';
-import type { UseGenAIConnectorsResult, Connector } from '../../../../hooks/use_genai_connectors';
+import type { UseGenAIConnectorsResult } from '../../../../hooks/use_genai_connectors';
+import { InferenceConnectorType } from '@kbn/inference-common';
 
 jest.mock('../../../../hooks/use_kibana', () => ({
   useKibana: () => ({
@@ -36,10 +37,14 @@ jest.mock('../../../../hooks/use_kibana', () => ({
   }),
 }));
 
-const createMockConnector = (id: string, name: string): Connector => ({
-  id,
+const createMockConnector = (connectorId: string, name: string) => ({
+  connectorId,
   name,
-  actionTypeId: '.gen-ai',
+  type: InferenceConnectorType.OpenAI,
+  config: {},
+  capabilities: {},
+  isPreconfigured: false,
+  isInferenceEndpoint: false,
 });
 
 const createMockGenAiConnectors = (
@@ -161,9 +166,7 @@ describe('GenerateSuggestionButton', () => {
 
       render(<GenerateSuggestionButton {...defaultProps} aiFeatures={aiFeatures} />);
 
-      expect(
-        screen.queryByTestId('streamsAppGenerateSuggestionButtonMoreButton')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('streamsAppAiPickConnectorButton')).not.toBeInTheDocument();
     });
 
     it('renders the more button when there are 2 or more connectors', () => {
@@ -178,9 +181,7 @@ describe('GenerateSuggestionButton', () => {
 
       render(<GenerateSuggestionButton {...defaultProps} aiFeatures={aiFeatures} />);
 
-      expect(
-        screen.getByTestId('streamsAppGenerateSuggestionButtonMoreButton')
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('streamsAppAiPickConnectorButton')).toBeInTheDocument();
     });
 
     it('opens popover and displays connectors when more button is clicked', async () => {
@@ -196,7 +197,7 @@ describe('GenerateSuggestionButton', () => {
 
       render(<GenerateSuggestionButton {...defaultProps} aiFeatures={aiFeatures} />);
 
-      fireEvent.click(screen.getByTestId('streamsAppGenerateSuggestionButtonMoreButton'));
+      fireEvent.click(screen.getByTestId('streamsAppAiPickConnectorButton'));
 
       await waitFor(() => {
         expect(screen.getByText('Connector 1')).toBeInTheDocument();
@@ -219,7 +220,7 @@ describe('GenerateSuggestionButton', () => {
 
       render(<GenerateSuggestionButton {...defaultProps} aiFeatures={aiFeatures} />);
 
-      fireEvent.click(screen.getByTestId('streamsAppGenerateSuggestionButtonMoreButton'));
+      fireEvent.click(screen.getByTestId('streamsAppAiPickConnectorButton'));
 
       await waitFor(() => {
         expect(screen.getByText('Connector 2')).toBeInTheDocument();
@@ -228,36 +229,6 @@ describe('GenerateSuggestionButton', () => {
       fireEvent.click(screen.getByText('Connector 2'));
 
       expect(selectConnector).toHaveBeenCalledWith('connector-2');
-    });
-
-    it('disables the more button when isDisabled prop is true', () => {
-      const aiFeatures = createMockAIFeatures({
-        genAiConnectors: createMockGenAiConnectors({
-          connectors: [
-            createMockConnector('connector-1', 'Connector 1'),
-            createMockConnector('connector-2', 'Connector 2'),
-          ],
-        }),
-      });
-
-      render(<GenerateSuggestionButton {...defaultProps} aiFeatures={aiFeatures} isDisabled />);
-
-      expect(screen.getByTestId('streamsAppGenerateSuggestionButtonMoreButton')).toBeDisabled();
-    });
-
-    it('disables the more button when isLoading prop is true', () => {
-      const aiFeatures = createMockAIFeatures({
-        genAiConnectors: createMockGenAiConnectors({
-          connectors: [
-            createMockConnector('connector-1', 'Connector 1'),
-            createMockConnector('connector-2', 'Connector 2'),
-          ],
-        }),
-      });
-
-      render(<GenerateSuggestionButton {...defaultProps} aiFeatures={aiFeatures} isLoading />);
-
-      expect(screen.getByTestId('streamsAppGenerateSuggestionButtonMoreButton')).toBeDisabled();
     });
   });
 });

@@ -12,7 +12,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Router } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
-import { DataSourcesRoutes } from './routes';
+import { SourcesPage } from './pages/sources_page';
 import type { DataSourcesPluginStart, DataSourcesPluginStartDependencies } from '../types';
 
 export interface DataSourcesMountParams {
@@ -33,7 +33,7 @@ export const renderApp = ({ core, plugins, services, params }: DataSourcesMountP
         <I18nProvider>
           <QueryClientProvider client={queryClient}>
             <Router history={params.history}>
-              <DataSourcesRoutes />
+              <SourcesPage />
             </Router>
           </QueryClientProvider>
         </I18nProvider>

@@ -13,13 +13,17 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { monaco } from '@kbn/monaco';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { ESQLControlState } from '@kbn/esql-types';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { ControlTriggerSource, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import { getESQLResults } from '@kbn/esql-utils';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ESQLControlsFlyout } from '.';
 import { ESQLEditorTelemetryService } from '@kbn/esql-editor';
+import {
+  DEFAULT_ESQL_OPTIONS_LIST_STATE,
+  DEFAULT_PINNED_CONTROL_STATE,
+} from '@kbn/controls-constants';
 
 jest.mock('@kbn/esql-utils', () => {
   return {
@@ -158,16 +162,16 @@ describe('ValueControlForm', () => {
 
     it('should default correctly if initial state is given', async () => {
       const initialState = {
-        grow: true,
-        width: 'small',
+        ...DEFAULT_PINNED_CONTROL_STATE,
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
         title: 'my control',
-        availableOptions: ['5 minutes'],
-        selectedOptions: ['5 minutes'],
-        variableName: 'myInterval',
-        variableType: ESQLVariableType.TIME_LITERAL,
-        esqlQuery: 'FROM foo | STATS BY BUCKET(@timestamp,)"',
-        controlType: EsqlControlType.STATIC_VALUES,
-      } as ESQLControlState;
+        available_options: ['5 minutes'],
+        selected_options: ['5 minutes'],
+        variable_name: 'myInterval',
+        variable_type: ESQLVariableType.TIME_LITERAL,
+        esql_query: 'FROM foo | STATS BY BUCKET(@timestamp,)"',
+        control_type: EsqlControlType.STATIC_VALUES,
+      } as OptionsListESQLControlState;
       const { findByTestId } = render(
         <IntlProvider locale="en">
           <KibanaContextProvider services={services}>
@@ -190,16 +194,16 @@ describe('ValueControlForm', () => {
 
     it('should call the onEditControl callback, if initialState is given', async () => {
       const initialState = {
-        grow: true,
-        width: 'small',
+        ...DEFAULT_PINNED_CONTROL_STATE,
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
         title: 'my control',
-        availableOptions: ['5 minutes'],
-        selectedOptions: ['5 minutes'],
-        variableName: 'myInterval',
-        variableType: ESQLVariableType.TIME_LITERAL,
-        esqlQuery: 'FROM foo | STATS BY BUCKET(@timestamp,)"',
-        controlType: EsqlControlType.STATIC_VALUES,
-      } as ESQLControlState;
+        available_options: ['5 minutes'],
+        selected_options: ['5 minutes'],
+        variable_name: 'myInterval',
+        variable_type: ESQLVariableType.TIME_LITERAL,
+        esql_query: 'FROM foo | STATS BY BUCKET(@timestamp,)"',
+        control_type: EsqlControlType.STATIC_VALUES,
+      } as OptionsListESQLControlState;
       const onEditControlSpy = jest.fn();
       const { findByTestId } = render(
         <IntlProvider locale="en">
@@ -289,6 +293,7 @@ describe('ValueControlForm', () => {
           expect(getESQLResults).toHaveBeenCalledWith(
             expect.objectContaining({
               timeRange: mockTimeRange,
+              signal: expect.any(AbortSignal),
             })
           );
         });
@@ -297,16 +302,15 @@ describe('ValueControlForm', () => {
       it('should preserve custom esqlQuery when editing an existing VALUES_FROM_QUERY control', async () => {
         const customQuery = 'FROM custom-logs* | STATS BY custom_field';
         const initialState = {
-          grow: false,
-          width: 'medium',
+          ...DEFAULT_PINNED_CONTROL_STATE,
+          ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
           title: 'Custom Query Control',
-          availableOptions: [],
-          selectedOptions: [], // Start with empty to trigger the useEffect
-          variableName: 'customVar',
-          variableType: ESQLVariableType.VALUES,
-          esqlQuery: customQuery,
-          controlType: EsqlControlType.VALUES_FROM_QUERY,
-        } as ESQLControlState;
+          available_options: [],
+          variable_name: 'customVar',
+          variable_type: ESQLVariableType.VALUES,
+          esql_query: customQuery,
+          control_type: EsqlControlType.VALUES_FROM_QUERY,
+        } as OptionsListESQLControlState;
 
         const getESQLResultsMock = getESQLResults as jest.Mock;
         getESQLResultsMock.mockClear();

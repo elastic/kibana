@@ -14,8 +14,10 @@ import type {
 } from './types';
 import {
   getDetectionRuleApiService,
+  getDetectionAlertsApiService,
   getEntityAnalyticsApiService,
   getCloudConnectorApiService,
+  getTimelineApiService,
 } from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
 
@@ -32,13 +34,15 @@ export const spaceTest = securityParallelFixtures.extend<
     {
       pageObjects,
       page,
+      config,
     }: {
       pageObjects: SecurityParallelTestFixtures['pageObjects'];
       page: SecurityParallelTestFixtures['page'];
+      config: SecurityParallelWorkerFixtures['config'];
     },
     use: (pageObjects: SecurityParallelTestFixtures['pageObjects']) => Promise<void>
   ) => {
-    const extendedPageObjects = extendPageObjects(pageObjects, page);
+    const extendedPageObjects = extendPageObjects(pageObjects, page, config);
     await use(extendedPageObjects);
   },
   apiServices: [
@@ -46,17 +50,24 @@ export const spaceTest = securityParallelFixtures.extend<
       {
         apiServices,
         kbnClient,
+        esClient,
         log,
         scoutSpace,
       }: {
         apiServices: ApiServicesFixture;
         kbnClient: SecurityParallelWorkerFixtures['kbnClient'];
+        esClient: SecurityParallelWorkerFixtures['esClient'];
         log: SecurityParallelWorkerFixtures['log'];
         scoutSpace: SecurityParallelWorkerFixtures['scoutSpace'];
       },
       use: (extendedApiServices: SecurityApiServicesFixture) => Promise<void>
     ) => {
       const extendedApiServices = apiServices as SecurityApiServicesFixture;
+      extendedApiServices.detectionAlerts = getDetectionAlertsApiService({
+        esClient,
+        log,
+        scoutSpace,
+      });
       extendedApiServices.detectionRule = getDetectionRuleApiService({
         kbnClient,
         log,
@@ -69,6 +80,11 @@ export const spaceTest = securityParallelFixtures.extend<
       });
       extendedApiServices.cloudConnectorApi = getCloudConnectorApiService({
         kbnClient,
+        scoutSpace,
+      });
+      extendedApiServices.timeline = getTimelineApiService({
+        kbnClient,
+        log,
         scoutSpace,
       });
 

@@ -4,26 +4,22 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/content-management-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/content-management-plugin'
+  title: '@kbn/content-management-plugin'
   description: Moon project for @kbn/content-management-plugin
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/content_management
+  sourceRoot: src/platform/plugins/shared/content_management
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
   - '@kbn/core-http-request-handler-context-server'
-  - '@kbn/es-query'
-  - '@kbn/core-test-helpers-kbn-server'
-  - '@kbn/item-buffer'
   - '@kbn/object-versioning'
   - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/core-saved-objects-api-server'
@@ -48,14 +44,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

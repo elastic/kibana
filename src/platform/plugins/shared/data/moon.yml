@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/data-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-visualizations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/data-plugin'
+  title: '@kbn/data-plugin'
   description: Moon project for @kbn/data-plugin
   channel: ''
   owner: '@elastic/kibana-visualizations'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/data
+  sourceRoot: src/platform/plugins/shared/data
 dependsOn:
   - '@kbn/core'
   - '@kbn/ui-actions-plugin'
@@ -68,6 +67,8 @@ dependsOn:
   - '@kbn/core-application-browser-mocks'
   - '@kbn/cps'
   - '@kbn/cps-utils'
+  - '@kbn/std'
+  - '@kbn/core-elasticsearch-server'
 tags:
   - plugin
   - prod
@@ -85,14 +86,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

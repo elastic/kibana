@@ -7,39 +7,15 @@
 
 import { Streams, isInheritFailureStore } from '@kbn/streams-schema';
 import { isInheritLifecycle } from '@kbn/streams-schema';
-import { isEqual, noop } from 'lodash';
-import type {
-  AppendProcessor,
-  ConcatProcessor,
-  Condition,
-  ConvertProcessor,
-  DateProcessor,
-  DissectProcessor,
-  GrokProcessor,
-  JoinProcessor,
-  LowercaseProcessor,
-  MathProcessor,
-  ProcessorType,
-  RemoveByPrefixProcessor,
-  RemoveProcessor,
-  RenameProcessor,
-  ReplaceProcessor,
-  SetProcessor,
-  StreamlangProcessorDefinition,
-  TrimProcessor,
-  UppercaseProcessor,
-} from '@kbn/streamlang';
+import { isEqual } from 'lodash';
+import type { Condition } from '@kbn/streamlang';
 import {
-  isActionBlock,
   isAndCondition,
   isFilterCondition,
   isNotCondition,
   isOrCondition,
-  isConditionBlock,
   isConditionComplete,
-  extractFieldsFromMathExpression,
 } from '@kbn/streamlang';
-import type { StreamlangStep } from '@kbn/streamlang/types/streamlang';
 import { MalformedStreamError } from '../errors/malformed_stream_error';
 import { RootStreamImmutabilityError } from '../errors/root_stream_immutability_error';
 
@@ -79,17 +55,6 @@ export function validateRootStreamChanges(
   }
 }
 
-export function validateNoManualIngestPipelineUsage(steps: StreamlangStep[]) {
-  for (const step of steps) {
-    if ('action' in step && step.action === 'manual_ingest_pipeline') {
-      throw new MalformedStreamError('Manual ingest pipelines are not allowed');
-    }
-    if ('condition' in step && step.condition && 'steps' in step.condition) {
-      validateNoManualIngestPipelineUsage(step.condition.steps);
-    }
-  }
-}
-
 const INVALID_CHARS_REGEX = /[\[\]]/; // Checks for either '[' or ']'
 
 function checkFieldName(fieldName: string) {
@@ -118,138 +83,34 @@ function validateCondition(condition: Condition) {
   }
 }
 
-const actionStepValidators: {
-  [K in ProcessorType]: (step: Extract<StreamlangProcessorDefinition, { action: K }>) => void;
-} = {
-  append: (step: AppendProcessor) => checkFieldName(step.to),
-  convert: (step: ConvertProcessor) => {
-    checkFieldName(step.from);
-    if ('to' in step && step.to) {
-      checkFieldName(step.to);
-    }
-  },
-  date: (step: DateProcessor) => {
-    checkFieldName(step.from);
-    if ('to' in step && step.to) {
-      checkFieldName(step.to);
-    }
-  },
-  dissect: (step: DissectProcessor) => checkFieldName(step.from),
-  grok: (step: GrokProcessor) => checkFieldName(step.from),
-  rename: (step: RenameProcessor) => {
-    checkFieldName(step.from);
-    checkFieldName(step.to);
-  },
-  set: (step: SetProcessor) => {
-    checkFieldName(step.to);
-    if (step.copy_from) {
-      checkFieldName(step.copy_from);
-    }
-  },
-  remove_by_prefix: (step: RemoveByPrefixProcessor) => checkFieldName(step.from),
-  remove: (step: RemoveProcessor) => checkFieldName(step.from),
-  drop_document: noop, // 'where' condition is already validated in validateSteps function
-  replace: (step: ReplaceProcessor) => {
-    checkFieldName(step.from);
-    if ('to' in step && step.to) {
-      checkFieldName(step.to);
-    }
-  },
-  math: (step: MathProcessor) => {
-    checkFieldName(step.to);
-    // Also validate field references in the expression
-    const expressionFields = extractFieldsFromMathExpression(step.expression);
-    for (const field of expressionFields) {
-      checkFieldName(field);
-    }
-  },
-  uppercase: (step: UppercaseProcessor) => {
-    checkFieldName(step.from);
-    if ('to' in step && step.to) {
-      checkFieldName(step.to);
-    }
-  },
-  lowercase: (step: LowercaseProcessor) => {
-    checkFieldName(step.from);
-    if ('to' in step && step.to) {
-      checkFieldName(step.to);
-    }
-  },
-  trim: (step: TrimProcessor) => {
-    checkFieldName(step.from);
-    if ('to' in step && step.to) {
-      checkFieldName(step.to);
-    }
-  },
-  join: (step: JoinProcessor) => {
-    checkFieldName(step.to);
-    for (const field of step.from) {
-      checkFieldName(field);
-    }
-  },
-  concat: (step: ConcatProcessor) => {
-    checkFieldName(step.to);
-    step.from.forEach((from) => {
-      if (from.type === 'field') {
-        checkFieldName(from.value);
-      }
-    });
-  },
-  // fields referenced in manual ingest pipelines are not validated here because
-  // the interface is Elasticsearch directly here, which has its own validation
-  manual_ingest_pipeline: () => {},
-};
-
-function validateSteps(steps: StreamlangStep[], isWithinWhereBlock = false) {
-  for (const step of steps) {
-    if (isConditionBlock(step)) {
-      validateCondition(step.condition as Condition);
-      // Nested steps are within a where block
-      validateSteps(step.condition.steps, true);
-    } else if (isActionBlock(step)) {
-      // Check if remove_by_prefix is being used within a where block
-      if (step.action === 'remove_by_prefix' && isWithinWhereBlock) {
-        throw new MalformedStreamError(
-          'remove_by_prefix processor cannot be used within a where block. Use it at the root level or use the remove processor with a condition instead.'
-        );
-      }
-
-      if ('where' in step && step.where) {
-        validateCondition(step.where);
-      }
-      const validateStep = actionStepValidators[step.action] as (
-        s: StreamlangProcessorDefinition
-      ) => void;
-      validateStep(step);
-    }
-  }
-}
-
+/**
+ * Validates field definitions and routing rules for bracket characters in field names.
+ * Processing step validation is handled by validateStreamlang.
+ */
 export function validateBracketsInFieldNames(definition: Streams.ingest.all.Definition) {
   if (!definition.ingest) {
     return;
   }
 
   if (Streams.WiredStream.Definition.is(definition)) {
+    // Validate field definitions
     if (definition.ingest.wired.fields) {
       for (const fieldName of Object.keys(definition.ingest.wired.fields)) {
         checkFieldName(fieldName);
       }
     }
+    // Validate routing rules
     if (definition.ingest.wired.routing) {
       for (const rule of definition.ingest.wired.routing) {
         validateCondition(rule.where);
       }
     }
   } else if (Streams.ClassicStream.Definition.is(definition)) {
+    // Validate field overrides
     if (definition.ingest.classic.field_overrides) {
       for (const fieldName of Object.keys(definition.ingest.classic.field_overrides)) {
         checkFieldName(fieldName);
       }
     }
-  }
-
-  if (definition.ingest.processing?.steps) {
-    validateSteps(definition.ingest.processing.steps);
   }
 }

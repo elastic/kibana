@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import type { ESQLAstItem } from '@elastic/esql/types';
+import { isMap } from '@elastic/esql';
 import { UnmappedFieldsStrategy, type ISuggestionItem } from '../types';
-import type { ESQLAstItem } from '../../../types';
-import { isMap, SuggestionCategory } from '../../../..';
+import { SuggestionCategory } from '../../../..';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
 import { settings } from '../../definitions/generated/settings';
@@ -88,12 +89,12 @@ const getApproximateCompletionItems = (
 ): ISuggestionItem[] => {
   if (isMap(settingRightSide)) {
     const approximateSetting = settings.find(
-      (s) => s.name === Settings.APPROXIMATE
+      (s) => s.name === Settings.APPROXIMATION
     ) as ApproximateSetting;
     const parsedParameters = parseMapParams(approximateSetting?.mapParams || '');
     const availableParameters: MapParameters = { ...parsedParameters };
     availableParameters.confidence_level.suggestions = confidenceLevelValueItems;
-    availableParameters.num_rows.suggestions = numOfRowsValueItems;
+    availableParameters.rows.suggestions = numOfRowsValueItems;
     return getCommandMapExpressionSuggestions(innerText, availableParameters);
   }
 
@@ -145,7 +146,7 @@ const getApproximateCompletionItems = (
 const COMPLETIONS_BY_SETTING_NAME: Record<string, Function> = {
   [Settings.PROJECT_ROUTING]: getProjectRoutingCommonCompletionItems,
   [Settings.UNMAPPED_FIELDS]: getUnmappedFieldsCompletionItems,
-  [Settings.APPROXIMATE]: getApproximateCompletionItems,
+  [Settings.APPROXIMATION]: getApproximateCompletionItems,
 };
 
 export const getCompletionItemsBySettingName: (

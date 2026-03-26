@@ -25,14 +25,16 @@ import {
   RISK_SCORE_TITLE_TEST_ID,
 } from './test_ids';
 import { Assignees } from './assignees';
-import { FlyoutTitle } from '../../../shared/components/flyout_title';
-import { getAlertTitle } from '../../shared/utils';
+import { FlyoutTitle } from '../../../../flyout_v2/shared/components/flyout_title';
+import { getAlertTitle } from '../../../../flyout_v2/document/utils/get_header_title';
 import { AlertHeaderBlock } from '../../../shared/components/alert_header_block';
 
 // minWidth for each block, allows to switch for a 1 row 4 blocks to 2 rows with 2 block each
 const blockStyles = {
   minWidth: 280,
 };
+
+const urlParamOverride = { timeline: { isOpen: false } };
 
 /**
  * Alert details flyout right section header
@@ -47,8 +49,8 @@ export const AlertHeaderTitle = memo(() => {
     getFieldsData,
   } = useDocumentDetailsContext();
   const { ruleName, timestamp, ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
-  const title = useMemo(() => getAlertTitle({ ruleName }), [ruleName]);
-  const href = useRuleDetailsLink({ ruleId: !isRulePreview ? ruleId : null });
+  const title = useMemo(() => getAlertTitle(ruleName), [ruleName]);
+  const href = useRuleDetailsLink({ ruleId: !isRulePreview ? ruleId : null }, urlParamOverride);
   const ruleTitle = useMemo(
     () =>
       href ? (

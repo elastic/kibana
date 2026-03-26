@@ -406,7 +406,7 @@ export function useFetchAgentsData() {
 
   const newAllTags = useMemo(() => data?.newAllTags || [], [data]);
   useEffect(() => {
-    if (newAllTags.length && !isEqual(newAllTags, allTags)) {
+    if (!isEqual(newAllTags, allTags)) {
       setAllTags(newAllTags);
     }
   }, [newAllTags, allTags]);

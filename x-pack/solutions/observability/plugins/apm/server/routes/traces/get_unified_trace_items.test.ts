@@ -8,7 +8,6 @@
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import type { UnifiedTraceErrors } from './get_unified_trace_errors';
 import { getErrorsByDocId, getUnifiedTraceItems } from './get_unified_trace_items';
-import type { APMConfig } from '../..';
 import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 
 jest.mock('./get_unified_trace_errors');
@@ -40,6 +39,9 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_ID,
   TRANSACTION_NAME,
+  TRANSACTION_RESULT,
+  ATTRIBUTE_HTTP_SCHEME,
+  ATTRIBUTE_HTTP_STATUS_CODE,
   FAAS_COLDSTART,
   SPAN_COMPOSITE_COUNT,
   SPAN_COMPOSITE_SUM,
@@ -104,19 +106,13 @@ describe('getUnifiedTraceItems', () => {
 
   const mockLogsClient = {} as LogsClient;
 
-  const mockConfig = {
-    ui: {
-      maxTraceItems: 1000,
-    },
-  } as APMConfig;
-
   const defaultParams = {
     apmEventClient: mockApmEventClient,
     logsClient: mockLogsClient,
     traceId: 'test-trace-id',
     start: 0,
     end: 1000,
-    config: mockConfig,
+    maxTraceItems: 1000,
   };
 
   const mockUnifiedTraceErrors = {
@@ -170,6 +166,7 @@ describe('getUnifiedTraceItems', () => {
             timestampUs: 1672531200000000,
             traceId: 'test-trace-id',
             duration: 1000,
+            result: undefined,
             status: undefined,
             errors: [{ errorDocId: 'error-1' }],
             parentId: undefined,
@@ -179,10 +176,12 @@ describe('getUnifiedTraceItems', () => {
               incoming: 0,
               outgoing: 0,
             },
+            docType: 'transaction',
           },
         ],
         agentMarks: {},
         unifiedTraceErrors: mockUnifiedTraceErrors,
+        traceDocsTotal: 0,
       });
     });
     it('should return trace items and unified trace with agent marks', async () => {
@@ -226,6 +225,7 @@ describe('getUnifiedTraceItems', () => {
             timestampUs: 1672531200000000,
             traceId: 'test-trace-id',
             duration: 1000,
+            result: undefined,
             status: undefined,
             errors: [{ errorDocId: 'error-1' }],
             parentId: undefined,
@@ -235,6 +235,7 @@ describe('getUnifiedTraceItems', () => {
               incoming: 0,
               outgoing: 0,
             },
+            docType: 'transaction',
           },
         ],
         agentMarks: {
@@ -243,6 +244,7 @@ describe('getUnifiedTraceItems', () => {
           domComplete: 118,
         },
         unifiedTraceErrors: mockUnifiedTraceErrors,
+        traceDocsTotal: 0,
       });
     });
     it('should return trace items and unified trace errors', async () => {
@@ -273,6 +275,7 @@ describe('getUnifiedTraceItems', () => {
             timestampUs: 1672531200000000,
             traceId: 'test-trace-id',
             duration: 1000,
+            result: undefined,
             status: undefined,
             errors: [{ errorDocId: 'error-1' }],
             parentId: undefined,
@@ -282,10 +285,12 @@ describe('getUnifiedTraceItems', () => {
               incoming: 0,
               outgoing: 0,
             },
+            docType: 'span',
           },
         ],
         agentMarks: {},
         unifiedTraceErrors: mockUnifiedTraceErrors,
+        traceDocsTotal: 0,
       });
     });
 
@@ -326,7 +331,7 @@ describe('getUnifiedTraceItems', () => {
       );
     });
 
-    it('should use maxTraceItemsFromUrlParam when provided', async () => {
+    it('should use maxTraceItems when provided', async () => {
       const mockSearchResponse = {
         hits: { hits: [] },
       };
@@ -335,7 +340,7 @@ describe('getUnifiedTraceItems', () => {
 
       await getUnifiedTraceItems({
         ...defaultParams,
-        maxTraceItemsFromUrlParam: 500,
+        maxTraceItems: 500,
       });
 
       expect(mockApmEventClient.search).toHaveBeenCalledWith(
@@ -387,11 +392,14 @@ describe('getUnifiedTraceItems', () => {
         hits: {
           hits: [
             {
+              _source: {},
               fields: {
                 ...defaultSearchFields,
                 [TRANSACTION_ID]: ['transaction-1'],
                 [TRANSACTION_NAME]: ['Test Transaction'],
                 [TRANSACTION_DURATION]: [2000],
+                [TRANSACTION_RESULT]: ['HTTP 2xx'],
+                [PROCESSOR_EVENT]: [ProcessorEvent.transaction],
                 [PARENT_ID]: ['parent-1'],
                 [EVENT_OUTCOME]: ['success'],
               },
@@ -408,12 +416,109 @@ describe('getUnifiedTraceItems', () => {
         id: 'transaction-1',
         name: 'Test Transaction',
         duration: 2000,
+        result: 'HTTP 2xx',
         parentId: 'parent-1',
         status: {
           fieldName: 'event.outcome',
           value: 'success',
         },
       });
+    });
+
+    it('should set result from otel http scheme and status code when both are present', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['OTEL Span'],
+                [SPAN_DURATION]: [1000],
+                [ATTRIBUTE_HTTP_SCHEME]: ['https'],
+                [ATTRIBUTE_HTTP_STATUS_CODE]: [200],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].result).toBe('HTTPS 200');
+    });
+
+    it('should leave result undefined when only otel http scheme is present', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['OTEL Span'],
+                [SPAN_DURATION]: [1000],
+                [ATTRIBUTE_HTTP_SCHEME]: ['http'],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].result).toBeUndefined();
+    });
+
+    it('should leave result undefined when only otel http status code is present', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['OTEL Span'],
+                [SPAN_DURATION]: [1000],
+                [ATTRIBUTE_HTTP_STATUS_CODE]: [404],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].result).toBeUndefined();
+    });
+
+    it('should leave result undefined when no transaction or otel http result fields are present', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['OTEL Span'],
+                [SPAN_DURATION]: [1000],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].result).toBeUndefined();
     });
 
     it('should handle span type, subtype, and kind fields', async () => {
@@ -687,6 +792,78 @@ describe('getUnifiedTraceItems', () => {
         agentName: undefined,
         sync: undefined,
       });
+    });
+
+    it('should return docType as transaction when processor.event is transaction', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              _source: {},
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['tx-1'],
+                [SPAN_NAME]: ['Test Transaction'],
+                [SPAN_DURATION]: [1000],
+                [PROCESSOR_EVENT]: [ProcessorEvent.transaction],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].docType).toBe('transaction');
+    });
+
+    it('should return docType as span when processor.event is span', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+                [PROCESSOR_EVENT]: [ProcessorEvent.span],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].docType).toBe('span');
+    });
+
+    it('should default docType to span when processor.event is not present', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].docType).toBe('span');
     });
 
     it('should include coldstart field when present and true', async () => {
@@ -1057,6 +1234,48 @@ describe('getUnifiedTraceItems', () => {
         incoming: 5,
         outgoing: 2,
       });
+    });
+  });
+
+  describe('traceDocsTotal and maxTraceItems', () => {
+    it('returns traceDocsTotal from hits.total.value when total is an object', async () => {
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue({
+        hits: { hits: [], total: { value: 42, relation: 'eq' } },
+      });
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceDocsTotal).toBe(42);
+    });
+
+    it('defaults traceDocsTotal to 0 when hits.total is undefined', async () => {
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue({
+        hits: { hits: [] },
+      });
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceDocsTotal).toBe(0);
+    });
+
+    it('does not include maxTraceItems in the return value', async () => {
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue({
+        hits: { hits: [] },
+      });
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result).not.toHaveProperty('maxTraceItems');
+    });
+
+    it('does not include exceedMax in the return value', async () => {
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue({
+        hits: { hits: [], total: { value: 2000, relation: 'eq' } },
+      });
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result).not.toHaveProperty('exceedMax');
     });
   });
 

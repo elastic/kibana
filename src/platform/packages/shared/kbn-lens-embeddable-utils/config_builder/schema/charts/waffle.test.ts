@@ -7,26 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WaffleState, WaffleStateESQL, WaffleStateNoESQL } from './waffle';
+import type { WaffleStateNoESQL, WaffleStateESQL } from './waffle';
 import { waffleStateSchema } from './waffle';
 
 describe('Waffle Schema', () => {
-  const baseWaffleConfig: Pick<
-    WaffleStateNoESQL,
-    'type' | 'ignore_global_filters' | 'sampling' | 'dataset'
-  > = {
-    type: 'waffle',
-    ignore_global_filters: false,
-    sampling: 1,
-    dataset: {
-      type: 'dataView',
-      id: 'test-data-view',
-    },
-  };
-
   describe('Non-ES|QL Schema', () => {
+    const baseWaffleConfig = {
+      type: 'waffle',
+      ignore_global_filters: false,
+      sampling: 1,
+      dataset: {
+        type: 'dataView',
+        id: 'test-data-view',
+      },
+    } satisfies Partial<WaffleStateNoESQL>;
+
     it('validates minimal configuration with single metric', () => {
-      const input: WaffleState = {
+      const input: WaffleStateNoESQL = {
         ...baseWaffleConfig,
         metrics: [
           {
@@ -43,7 +40,7 @@ describe('Waffle Schema', () => {
     });
 
     it('validates configuration with metrics and group_by', () => {
-      const input: WaffleState = {
+      const input: WaffleStateNoESQL = {
         ...baseWaffleConfig,
         metrics: [
           {
@@ -66,7 +63,7 @@ describe('Waffle Schema', () => {
     });
 
     it('validates full configuration with waffle-specific legend values', () => {
-      const input: WaffleState = {
+      const input: WaffleStateNoESQL = {
         ...baseWaffleConfig,
         title: 'Sales Waffle',
         description: 'Sales data visualization',
@@ -91,10 +88,11 @@ describe('Waffle Schema', () => {
         legend: {
           values: ['absolute'],
           truncate_after_lines: 2,
-          visible: 'show',
+          visibility: 'visible',
           size: 'medium',
         },
-        value_display: {
+        values: {
+          visible: true,
           mode: 'percentage',
           percent_decimals: 1,
         },
@@ -103,11 +101,11 @@ describe('Waffle Schema', () => {
       const validated = waffleStateSchema.validate(input);
       expect(validated.title).toBe('Sales Waffle');
       expect(validated.legend?.values).toEqual(['absolute']);
-      expect(validated.value_display?.mode).toBe('percentage');
+      expect(validated.values?.mode).toBe('percentage');
     });
 
     it('validates multiple metrics without group_by', () => {
-      const input: WaffleState = {
+      const input: WaffleStateNoESQL = {
         ...baseWaffleConfig,
         metrics: [
           {
@@ -128,7 +126,7 @@ describe('Waffle Schema', () => {
     });
 
     it('validates configuration with color by value', () => {
-      const input: WaffleState = {
+      const input: WaffleStateNoESQL = {
         ...baseWaffleConfig,
         metrics: [
           {
@@ -143,11 +141,41 @@ describe('Waffle Schema', () => {
             fields: ['category'],
             size: 5,
             color: {
-              type: 'dynamic',
-              range: 'absolute',
-              steps: [
-                { type: 'from', from: 0, color: 'red' },
-                { type: 'to', to: 100, color: 'blue' },
+              mode: 'categorical',
+              palette: 'default',
+              mapping: [
+                {
+                  values: ['success'],
+                  color: {
+                    type: 'from_palette',
+                    palette: 'default',
+                    index: 6,
+                  },
+                },
+                {
+                  values: ['info'],
+                  color: {
+                    type: 'from_palette',
+                    palette: 'default',
+                    index: 9,
+                  },
+                },
+                {
+                  values: ['security'],
+                  color: {
+                    type: 'from_palette',
+                    palette: 'default',
+                    index: 4,
+                  },
+                },
+                {
+                  values: ['__other__'],
+                  color: {
+                    type: 'from_palette',
+                    palette: 'default',
+                    index: 5,
+                  },
+                },
               ],
             },
           },
@@ -155,11 +183,11 @@ describe('Waffle Schema', () => {
       };
 
       const validated = waffleStateSchema.validate(input);
-      expect(validated.group_by?.[0].color).toHaveProperty('type', 'dynamic');
+      expect(validated.group_by?.[0].color).toHaveProperty('mode', 'categorical');
     });
 
     it('validates configuration with collapsed dimensions', () => {
-      const input: WaffleState = {
+      const input: WaffleStateNoESQL = {
         ...baseWaffleConfig,
         metrics: [
           {
@@ -188,7 +216,7 @@ describe('Waffle Schema', () => {
     });
 
     it('throws on empty metrics array', () => {
-      const input: WaffleState = {
+      const input: WaffleStateNoESQL = {
         ...baseWaffleConfig,
         metrics: [],
       };
@@ -197,7 +225,7 @@ describe('Waffle Schema', () => {
     });
 
     it('throws on empty group_by array', () => {
-      const input: WaffleState = {
+      const input: WaffleStateNoESQL = {
         ...baseWaffleConfig,
         metrics: [
           {
@@ -213,7 +241,7 @@ describe('Waffle Schema', () => {
 
     describe('Grouping Validation', () => {
       it('allows single metric with single non-collapsed breakdown', () => {
-        const input: WaffleState = {
+        const input: WaffleStateNoESQL = {
           ...baseWaffleConfig,
           metrics: [
             {
@@ -234,7 +262,7 @@ describe('Waffle Schema', () => {
       });
 
       it('allows single metric with multiple collapsed breakdowns and one non-collapsed', () => {
-        const input: WaffleState = {
+        const input: WaffleStateNoESQL = {
           ...baseWaffleConfig,
           metrics: [
             {
@@ -267,7 +295,7 @@ describe('Waffle Schema', () => {
       });
 
       it('throws when single metric has multiple non-collapsed breakdowns', () => {
-        const input: WaffleState = {
+        const input: WaffleStateNoESQL = {
           ...baseWaffleConfig,
           metrics: [
             {
@@ -290,12 +318,12 @@ describe('Waffle Schema', () => {
         };
 
         expect(() => waffleStateSchema.validate(input)).toThrow(
-          /Only a single non-collapsed breakdown dimension is allowed/i
+          /Only a single non-collapsed dimension is allowed for group_by/i
         );
       });
 
       it('allows multiple metrics without group_by', () => {
-        const input: WaffleState = {
+        const input: WaffleStateNoESQL = {
           ...baseWaffleConfig,
           metrics: [
             {
@@ -314,7 +342,7 @@ describe('Waffle Schema', () => {
       });
 
       it('throws with multiple metrics and a single non-collapsed breakdown', () => {
-        const input: WaffleState = {
+        const input: WaffleStateNoESQL = {
           ...baseWaffleConfig,
           metrics: [
             {
@@ -340,7 +368,7 @@ describe('Waffle Schema', () => {
       });
 
       it('allows multiple metrics with multiple collapsed breakdowns', () => {
-        const input: WaffleState = {
+        const input: WaffleStateNoESQL = {
           ...baseWaffleConfig,
           metrics: [
             {
@@ -375,7 +403,7 @@ describe('Waffle Schema', () => {
       });
 
       it('throws when multiple metrics have one collapsed and multiple non-collapsed breakdowns', () => {
-        const input: WaffleState = {
+        const input: WaffleStateNoESQL = {
           ...baseWaffleConfig,
           metrics: [
             {
@@ -411,17 +439,14 @@ describe('Waffle Schema', () => {
         };
 
         expect(() => waffleStateSchema.validate(input)).toThrow(
-          /only collapsed breakdown dimensions are allowed/i
+          /only collapsed group_by dimensions are allowed/i
         );
       });
     });
   });
 
   describe('ES|QL Schema', () => {
-    const baseESQLWaffleConfig: Pick<
-      WaffleStateESQL,
-      'type' | 'ignore_global_filters' | 'sampling' | 'dataset'
-    > = {
+    const baseESQLWaffleConfig = {
       type: 'waffle',
       ignore_global_filters: false,
       sampling: 1,
@@ -429,9 +454,10 @@ describe('Waffle Schema', () => {
         type: 'esql',
         query: 'FROM my-index | STATS count() BY category',
       },
-    };
+    } satisfies Partial<WaffleStateESQL>;
+
     it('validates minimal ES|QL configuration', () => {
-      const input: WaffleState = {
+      const input: WaffleStateESQL = {
         ...baseESQLWaffleConfig,
         metrics: [
           {
@@ -447,7 +473,7 @@ describe('Waffle Schema', () => {
     });
 
     it('validates ES|QL configuration with group_by', () => {
-      const input: WaffleState = {
+      const input: WaffleStateESQL = {
         ...baseESQLWaffleConfig,
         metrics: [
           {
@@ -471,7 +497,7 @@ describe('Waffle Schema', () => {
     });
 
     it('validates ES|QL configuration with multiple metrics', () => {
-      const input: WaffleState = {
+      const input: WaffleStateESQL = {
         ...baseESQLWaffleConfig,
         metrics: [
           {

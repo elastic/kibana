@@ -12,19 +12,16 @@
 
 import type { FetcherConfigSchema } from '@kbn/workflows';
 import { buildKibanaRequest } from '@kbn/workflows';
+import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
+import { getOutboundEventChainHeaders } from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
+import { ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import { getKibanaUrl } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
-
-// Extend BaseStep for kibana-specific properties
-export interface KibanaActionStep extends BaseStep {
-  type: string; // e.g., 'kibana.createCase'
-  with?: Record<string, any>;
-}
 
 /**
  * Fetcher configuration options for customizing HTTP requests
@@ -35,29 +32,47 @@ type FetcherOptions = NonNullable<z.infer<typeof FetcherConfigSchema>> & {
   [key: string]: any;
 };
 
-export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaActionStep> {
+export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
   constructor(
-    step: KibanaActionStep,
+    private node: KibanaGraphNode,
     stepExecutionRuntime: StepExecutionRuntime,
     workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {
+    const step = {
+      name: node.stepId,
+      type: node.stepType,
+      stepId: node.stepId,
+      'max-step-size': node.configuration['max-step-size'],
+    };
     super(step, stepExecutionRuntime, undefined, workflowRuntime);
   }
 
   public getInput() {
-    // Render inputs from 'with' - support both direct step.with and step.configuration.with
-    const stepWith = this.step.with || (this.step as any).configuration?.with || {};
+    const stepWith = this.node.configuration?.with || {};
     return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(stepWith);
   }
 
   public async _run(withInputs?: any): Promise<RunStepResult> {
-    try {
-      // Support both direct step types (kibana.createCase) and atomic+configuration pattern
-      const stepType = this.step.type || (this.step as any).configuration?.type;
-      // Use rendered inputs if provided, otherwise fall back to raw step.with or configuration.with
-      const stepWith = withInputs || this.step.with || (this.step as any).configuration?.with;
+    const stepType = this.node.configuration.type;
+    // Use rendered inputs if provided, otherwise fall back to raw configuration.with
+    const stepWith = withInputs || this.node.configuration.with;
+    // Extract meta params (not forwarded as HTTP request params)
+    const {
+      use_server_info = false,
+      use_localhost = false,
+      debug = false,
+      ...httpParams
+    } = stepWith;
 
+    if (use_server_info && use_localhost) {
+      throw new Error(
+        'Cannot set both use_server_info and use_localhost — they are mutually exclusive. ' +
+          'Use use_server_info to route via the internal server address, or use_localhost to route via localhost:5601.'
+      );
+    }
+
+    try {
       this.workflowLogger.logInfo(`Executing Kibana action: ${stepType}`, {
         event: { action: 'kibana-action', outcome: 'unknown' },
         tags: ['kibana', 'internal-action'],
@@ -68,12 +83,18 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
         },
       });
 
-      // Get Kibana base URL and authentication
-      const kibanaUrl = this.getKibanaUrl();
+      // Get Kibana base URL (respecting force flags) and authentication
+      const kibanaUrl = this.getKibanaUrl(use_server_info, use_localhost);
       const authHeaders = this.getAuthHeaders();
 
       // Generic approach like Dev Console - just forward the request to Kibana
-      const result = await this.executeKibanaRequest(kibanaUrl, authHeaders, stepType, stepWith);
+      const result = await this.executeKibanaRequest(
+        kibanaUrl,
+        authHeaders,
+        stepType,
+        httpParams,
+        debug
+      );
 
       this.workflowLogger.logInfo(`Kibana action completed: ${stepType}`, {
         event: { action: 'kibana-action', outcome: 'success' },
@@ -87,9 +108,6 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
 
       return { input: stepWith, output: result, error: undefined };
     } catch (error) {
-      const stepType = (this.step as any).configuration?.type || this.step.type;
-      const stepWith = withInputs || this.step.with || (this.step as any).configuration?.with;
-
       this.workflowLogger.logError(`Kibana action failed: ${stepType}`, error as Error, {
         event: { action: 'kibana-action', outcome: 'failure' },
         tags: ['kibana', 'internal-action', 'error'],
@@ -99,14 +117,24 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
           action_type: 'kibana',
         },
       });
-      return this.handleFailure(stepWith, error);
+
+      const failure = this.handleFailure(stepWith, error);
+      if (debug && failure.error) {
+        const kibanaUrl = this.getKibanaUrl(use_server_info, use_localhost);
+        failure.error = {
+          type: failure.error.type,
+          message: failure.error.message,
+          details: { ...failure.error.details, _debug: { kibanaUrl } },
+        };
+      }
+      return failure;
     }
   }
 
-  private getKibanaUrl(): string {
+  private getKibanaUrl(use_server_info = false, use_localhost = false): string {
     const coreStart = this.stepExecutionRuntime.contextManager.getCoreStart();
     const { cloudSetup } = this.stepExecutionRuntime.contextManager.getDependencies();
-    return getKibanaUrl(coreStart, cloudSetup);
+    return getKibanaUrl(coreStart, cloudSetup, use_server_info, use_localhost);
   }
 
   private getAuthHeaders(): Record<string, string> {
@@ -131,7 +159,8 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     kibanaUrl: string,
     authHeaders: Record<string, string>,
     stepType: string,
-    params: any
+    params: any,
+    debug: boolean = false
   ): Promise<any> {
     // Get current space ID from workflow context
     const spaceId = this.stepExecutionRuntime.contextManager.getContext().workflow.spaceId;
@@ -139,21 +168,19 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     // Extract and remove fetcher configuration from params (it's only for our internal use)
     const { fetcher: fetcherOptions, ...cleanParams } = params;
 
-    // Support both raw API format and connector-driven syntax
+    // Build the request config from either raw API format or connector definitions
+    let requestConfig: {
+      method: string;
+      path: string;
+      body?: any;
+      query?: any;
+      headers?: Record<string, string>;
+    };
+
     if (cleanParams.request) {
       // Raw API format: { request: { method, path, body, query, headers } } - like Dev Console
       const { method = 'GET', path, body, query, headers: customHeaders } = cleanParams.request;
-      return this.makeHttpRequest(
-        kibanaUrl,
-        {
-          method,
-          path,
-          body,
-          query,
-          headers: { ...authHeaders, ...customHeaders },
-        },
-        fetcherOptions
-      );
+      requestConfig = { method, path, body, query, headers: { ...authHeaders, ...customHeaders } };
     } else {
       // Use generated connector definitions to determine method and path (covers all 454+ Kibana APIs)
       const {
@@ -163,19 +190,36 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
         query,
         headers: connectorHeaders,
       } = buildKibanaRequest(stepType, cleanParams, spaceId);
-
-      return this.makeHttpRequest(
-        kibanaUrl,
-        {
-          method,
-          path,
-          body,
-          query,
-          headers: { ...authHeaders, ...connectorHeaders },
-        },
-        fetcherOptions
-      );
+      requestConfig = {
+        method,
+        path,
+        body,
+        query,
+        headers: { ...authHeaders, ...connectorHeaders },
+      };
     }
+
+    const result = await this.makeHttpRequest(kibanaUrl, requestConfig, fetcherOptions);
+
+    if (debug) {
+      return {
+        ...result,
+        _debug: {
+          fullUrl: this.buildFullUrl(kibanaUrl, requestConfig.path, requestConfig.query),
+          method: requestConfig.method,
+        },
+      };
+    }
+
+    return result;
+  }
+
+  private buildFullUrl(kibanaUrl: string, path: string, query?: Record<string, string>): string {
+    let fullUrl = `${kibanaUrl}${path}`;
+    if (query && Object.keys(query).length > 0) {
+      fullUrl = `${fullUrl}?${new URLSearchParams(query).toString()}`;
+    }
+    return fullUrl;
   }
 
   private async makeHttpRequest(
@@ -191,6 +235,15 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
   ): Promise<any> {
     const { method, path, body, query, headers = {} } = requestConfig;
 
+    // Two paths can lead to emitEvent: (1) In-process: a workflow step (e.g. kibana.createCase) runs in
+    // the same process and gets the fakeRequest from step context; getCasesClient(fakeRequest) and later
+    // emitEvent(fakeRequest) see the Symbol-set context — no headers needed. (2) Outbound HTTP: this
+    // step (kibana.request) sends a new HTTP request; the route handler receives a new request object
+    // with no Symbol. Inject these headers so the server can restore context (depth + sourceWorkflowId)
+    // and enforce the event-chain depth cap when that handler calls emitEvent.
+    const fakeRequest = this.stepExecutionRuntime.contextManager.getFakeRequest();
+    const outboundHeaders = { ...headers, ...getOutboundEventChainHeaders(fakeRequest) };
+
     // Build full URL with query parameters
     let fullUrl = `${kibanaUrl}${path}`;
     if (query && Object.keys(query).length > 0) {
@@ -201,7 +254,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     // Build fetch options
     const fetchOptions: RequestInit = {
       method,
-      headers,
+      headers: outboundHeaders,
       body: body ? JSON.stringify(body) : undefined,
     };
 
@@ -243,9 +296,73 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     const response = await fetch(fullUrl, fetchOptions);
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+      const errorBody = await this.readStreamWithLimit(response, {
+        maxBytes: 1024 * 1024,
+        onExceed: 'truncate',
+      });
+      throw new Error(`HTTP ${response.status}: ${errorBody}`);
     }
 
-    return response.json();
+    if (response.status === 204 || response.status === 304) {
+      return {};
+    }
+
+    return this.readResponseBody(response);
+  }
+
+  /**
+   * Reads a fetch Response body as a stream with size enforcement.
+   * Delegates to the shared stream reader with 'throw' behavior on size exceeded.
+   */
+  private async readResponseBody(response: Response): Promise<any> {
+    if (!response.body) {
+      return null;
+    }
+
+    const maxSize = this.getMaxResponseBytes();
+    const text = await this.readStreamWithLimit(response, {
+      maxBytes: maxSize,
+      onExceed: 'throw',
+    });
+    if (!text) return null;
+    try {
+      return JSON.parse(text);
+    } catch {
+      return text;
+    }
+  }
+
+  /**
+   * Reads a Response body stream with a byte-size limit.
+   * Two behaviors when the limit is exceeded:
+   *  - 'throw': cancels the stream and throws a ResponseSizeLimitError
+   *  - 'truncate': cancels the stream and returns the data read so far with a truncation marker
+   */
+  private async readStreamWithLimit(
+    response: Response,
+    opts: { maxBytes: number; onExceed: 'throw' | 'truncate' }
+  ): Promise<string> {
+    if (!response.body) return '';
+    const reader = response.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let totalBytes = 0;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        totalBytes += value.byteLength;
+        if (opts.maxBytes > 0 && totalBytes > opts.maxBytes) {
+          void reader.cancel();
+          if (opts.onExceed === 'throw') {
+            throw new ResponseSizeLimitError(opts.maxBytes, this.step.name);
+          }
+          return `${Buffer.concat(chunks).toString('utf-8')}... [truncated]`;
+        }
+        chunks.push(value);
+      }
+    } finally {
+      reader.releaseLock();
+    }
+    return Buffer.concat(chunks).toString('utf-8');
   }
 }

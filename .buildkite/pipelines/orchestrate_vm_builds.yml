@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/buildkite/pipeline-schema/refs/heads/main/schema.json
+steps:
+  - block: 'Configure VM image build parameters'
+    prompt: 'Enter the branches to use for ci-agent-images and Kibana'
+    fields:
+      - text: 'VM_IMAGES_BRANCH'
+        key: 'VM_IMAGES_BRANCH'
+        hint: 'Branch in elastic/ci-agent-images to run'
+        required: true
+      - text: 'KIBANA_BRANCH'
+        key: 'KIBANA_BRANCH'
+        hint: 'Branch in elastic/kibana to run build image cache build on'
+        default: '${BUILDKITE_BRANCH}'
+        required: true
+
+  - name: 'Upload trigger steps'
+    command: |
+      VM_IMAGES_BRANCH="$$(buildkite-agent meta-data get "VM_IMAGES_BRANCH")"
+      KIBANA_BRANCH="$$(buildkite-agent meta-data get "KIBANA_BRANCH")"
+
+      buildkite-agent pipeline upload << PIPELINE
+      steps:
+        - name: 'Build base image'
+          key: build-base-image
+          trigger: kibana-vm-images
+          async: false
+          build:
+            branch: '$${VM_IMAGES_BRANCH}'
+            env:
+              IMAGES_CONFIG: kibana/base_image.yml
+        - name: 'Build packages layer'
+          key: build-packages-layer
+          depends_on: build-base-image
+          trigger: kibana-vm-images
+          async: false
+          build:
+            branch: '$${VM_IMAGES_BRANCH}'
+            env:
+              IMAGES_CONFIG: kibana/packages_layer.yml
+              BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml'
+        - name: 'Build image cache'
+          depends_on: build-packages-layer
+          trigger: kibana-vm-images
+          async: false
+          build:
+            branch: '$${VM_IMAGES_BRANCH}'
+            env:
+              IMAGES_CONFIG: kibana/image_cache.tpl.yml
+              BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml'
+              KIBANA_BRANCH: '$${KIBANA_BRANCH}'
+      PIPELINE

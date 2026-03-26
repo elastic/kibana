@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { ConcatProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Streamlang to Ingest Pipeline - Concat Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest('should concatenate fields and literals', async ({ testBed }) => {
       const indexName = 'streams-e2e-test-concat-basic';
@@ -40,7 +41,7 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('full_email', 'john.doe@example.com');
+      expect(ingestedDocs[0]?.full_email).toBe('john.doe@example.com');
     });
 
     apiTest('should concatenate fields and literals with a where clause', async ({ testBed }) => {
@@ -76,8 +77,8 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(2);
-      expect(ingestedDocs[0]).toHaveProperty('full_email', 'john.doe@example.com');
-      expect(ingestedDocs[1]).not.toHaveProperty('full_email');
+      expect(ingestedDocs[0]?.full_email).toBe('john.doe@example.com');
+      expect(ingestedDocs[1]?.full_email).toBeUndefined();
     });
 
     apiTest('should concatenate fields and literals with ignore_missing', async ({ testBed }) => {
@@ -110,8 +111,8 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(2);
-      expect(ingestedDocs[0]).toHaveProperty('full_email', 'john.doe@example.com');
-      expect(ingestedDocs[1]).toHaveProperty('full_email', 'jane.smith@');
+      expect(ingestedDocs[0]?.full_email).toBe('john.doe@example.com');
+      expect(ingestedDocs[1]?.full_email).toBe('jane.smith@');
     });
 
     apiTest(
@@ -146,8 +147,8 @@ apiTest.describe(
 
         const ingestedDocs = await testBed.getDocs(indexName);
         expect(ingestedDocs).toHaveLength(2);
-        expect(ingestedDocs[0]).toHaveProperty('full_email', 'john.doe@example.com');
-        expect(ingestedDocs[1]).not.toHaveProperty('full_email');
+        expect(ingestedDocs[0]?.full_email).toBe('john.doe@example.com');
+        expect(ingestedDocs[1]?.full_email).toBeUndefined();
       }
     );
   }

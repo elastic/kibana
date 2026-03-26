@@ -6,25 +6,28 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { filter, finalize, from, merge, shareReplay, Subject } from 'rxjs';
+import { filter, finalize, from, merge, ReplaySubject, shareReplay } from 'rxjs';
 import { Command } from '@langchain/langgraph';
 import {
   isStreamEvent,
+  reverseMap,
   type ToolIdMapping,
-  toolsToLangchain,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
-import type { StructuredTool } from '@langchain/core/tools';
-import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
-import type { PromptManager } from '@kbn/agent-builder-server/runner';
+import { HookLifecycle } from '@kbn/agent-builder-server';
+import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-builder-common/chat';
+import type { ToolManager } from '@kbn/agent-builder-server/runner';
+import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
+import { ChatEventType } from '@kbn/agent-builder-common';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
+import { createResultTransformer } from '../utils/create_result_transformer';
 import {
   addRoundCompleteEvent,
-  conversationToLangchainMessages,
   extractRound,
   prepareConversation,
+  selectSkills,
   selectTools,
   getPendingRound,
   evictInternalEvents,
@@ -33,10 +36,11 @@ import { resolveCapabilities } from '../utils/capabilities';
 import { resolveConfiguration } from '../utils/configuration';
 import { ensureValidInput } from '../utils/preflight_checks';
 import { roundToActions } from '../utils/round_to_actions';
+import { computeContextBudget } from '../utils/context_budget';
+import { compactConversation } from '../utils/conversation_compactor';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from '../run_agent';
-import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
 import { steps } from './constants';
 import { createPromptFactory } from './prompts';
 import type { StateType } from './state';
@@ -52,6 +56,11 @@ export type RunChatAgentFn = (
   params: RunChatAgentParams,
   context: AgentHandlerContext
 ) => Promise<RunAgentResponse>;
+
+/*
+ * Max number of agent cycles allowed before forcing an answer.
+ */
+const CYCLE_LIMIT = 15;
 
 /**
  * Create the handler function for the default agentBuilder agent.
@@ -70,6 +79,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     outputSchema,
     startTime = new Date(),
     configurationOverrides,
+    action,
   },
   context
 ) => {
@@ -77,15 +87,20 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     logger,
     modelProvider,
     toolProvider,
+    toolRegistry,
     attachments,
     request,
     stateManager,
     events,
     promptManager,
     filestore,
+    skills,
+    skillsStore,
+    toolManager,
+    experimentalFeatures,
   } = context;
 
-  ensureValidInput({ input: nextInput, conversation });
+  ensureValidInput({ input: nextInput, conversation, action });
 
   const pendingRound = getPendingRound(conversation);
   const conversationTimestamp = pendingRound?.started_at ?? startTime.toISOString();
@@ -98,70 +113,140 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
   const resolvedConfiguration = resolveConfiguration(agentConfiguration);
+
+  const pluginSkillIds = await context.plugins.resolveSkillIds(agentConfiguration.plugin_ids ?? []);
+  const filteredSkills = await selectSkills({
+    skills,
+    skillsStore,
+    agentConfiguration,
+    additionalSkillIds: pluginSkillIds,
+  });
+
   logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
 
-  const manualEvents$ = new Subject<ChatAgentEvent>();
+  // ReplaySubject so events emitted before subscription (e.g. compaction) are
+  // replayed to late subscribers when the merged stream is subscribed to.
+  const manualEvents$ = new ReplaySubject<ChatAgentEvent>();
   const eventEmitter: AgentEventEmitterFn = (event) => {
     manualEvents$.next(event);
   };
-  const processedConversation = await prepareConversation({
+  toolManager.setEventEmitter(eventEmitter);
+
+  // Pass action so regenerate uses the last round's original input instead of request input
+  let processedConversation = await prepareConversation({
     nextInput,
     previousRounds: conversation?.rounds ?? [],
     context,
+    action,
   });
 
-  const selectedTools = await selectTools({
+  const beforeHookResult = await context.hooks.run(HookLifecycle.beforeAgent, {
+    request,
+    abortSignal,
+    nextInput: processedConversation.nextInput,
+    agentId,
+  });
+  processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
+
+  const { staticTools, dynamicTools } = await selectTools({
     conversation: processedConversation,
+    previousDynamicToolIds: conversation?.state?.dynamic_tool_ids ?? [],
+    filteredSkills,
+    skills,
     toolProvider,
     agentConfiguration,
     attachmentsService: attachments,
     filestore,
     request,
+    experimentalFeatures,
     spaceId: context.spaceId,
     runner: context.runner,
   });
 
-  const {
-    tools: langchainTools,
-    idMappings: toolIdMapping,
-    agentBuilderToLangchainIdMap,
-  } = await toolsToLangchain({
-    tools: selectedTools,
-    logger,
-    request,
-    sendEvent: eventEmitter,
+  // First add static tools
+  await Promise.all([
+    toolManager.addTools({
+      type: ToolManagerToolType.executable,
+      tools: staticTools,
+      logger,
+    }),
+    toolManager.addTools({
+      type: ToolManagerToolType.browser,
+      tools: browserApiTools ?? [],
+    }),
+  ]);
+
+  // Then add dynamic tools
+  await toolManager.addTools(
+    {
+      type: ToolManagerToolType.executable,
+      tools: dynamicTools,
+      logger,
+    },
+    {
+      dynamic: true,
+    }
+  );
+
+  const graphRecursionLimit = getRecursionLimit(CYCLE_LIMIT);
+
+  // Create unified result transformer for tool result optimization
+  const resultTransformer = createResultTransformer({
+    processedConversation,
+    toolRegistry,
+    toolManager,
+    filestore,
+    filestoreEnabled: experimentalFeatures.filestore,
   });
 
-  let browserLangchainTools: StructuredTool[] = [];
-  let browserIdMappings = new Map<string, string>();
-  if (browserApiTools && browserApiTools.length > 0) {
-    const browserToolResult = browserToolsToLangchain({
-      browserApiTools,
+  // Context-aware compaction: check if conversation history exceeds the
+  // model's context window budget and apply hybrid compaction if needed.
+  const contextBudget = computeContextBudget(model.connector);
+  const compactionResult = await compactConversation({
+    processedConversation,
+    chatModel: model.chatModel,
+    contextBudget,
+    existingSummary: conversation?.state?.compaction_summary,
+    logger,
+    abortSignal,
+  });
+
+  // Reassign to the (possibly compacted) conversation for prompt construction
+  processedConversation = compactionResult.processedConversation;
+
+  // Emit compaction lifecycle events via the eventEmitter. Because manualEvents$
+  // is a ReplaySubject these will be delivered to subscribers even though the
+  // merged stream hasn't been subscribed to yet.
+  if (compactionResult.compactionTriggered) {
+    eventEmitter({
+      type: ChatEventType.compactionStarted as const,
+      data: { token_count_before: compactionResult.tokensBefore ?? 0 },
     });
-    browserLangchainTools = browserToolResult.tools;
-    browserIdMappings = browserToolResult.idMappings;
+    eventEmitter({
+      type: ChatEventType.compactionCompleted as const,
+      data: {
+        token_count_after: compactionResult.tokensAfter ?? 0,
+        summarized_round_count: compactionResult.summarizedRoundCount ?? 0,
+      },
+    });
   }
-
-  const allTools = [...langchainTools, ...browserLangchainTools];
-  const allToolIdMappings = new Map([...toolIdMapping, ...browserIdMappings]);
-
-  const cycleLimit = 10;
-  const graphRecursionLimit = getRecursionLimit(cycleLimit);
 
   const promptFactory = createPromptFactory({
     configuration: resolvedConfiguration,
     capabilities: resolvedCapabilities,
     filestore,
     processedConversation,
+    resultTransformer,
     outputSchema,
     conversationTimestamp,
+    experimentalFeatures,
   });
 
   const agentGraph = createAgentGraph({
     logger,
     events: { emit: eventEmitter },
     chatModel: model.chatModel,
-    tools: allTools,
+    toolManager,
     configuration: resolvedConfiguration,
     capabilities: resolvedCapabilities,
     structuredOutput,
@@ -175,8 +260,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const eventStream = agentGraph.streamEvents(
     createInitializerCommand({
       conversation: processedConversation,
-      agentBuilderToLangchainIdMap,
-      cycleLimit,
+      agentBuilderToLangchainIdMap: reverseMap(toolManager.getToolIdMapping()),
+      cycleLimit: CYCLE_LIMIT,
     }),
     {
       version: 'v2',
@@ -195,7 +280,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     filter(isStreamEvent),
     convertGraphEvents({
       graphName: chatAgentGraphName,
-      toolIdMapping: allToolIdMappings,
+      toolManager,
       logger,
       startTime,
       pendingRound,
@@ -214,13 +299,19 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const events$ = merge(graphEvents$, manualEvents$).pipe(
     addRoundCompleteEvent({
       userInput: processedInput,
-      getConversationState: () => getConversationState({ promptManager }),
+      getConversationState: () =>
+        getConversationState({
+          promptManager,
+          toolManager,
+          compactionSummary: compactionResult.summary,
+        }),
       pendingRound,
       startTime,
       modelProvider,
       stateManager,
       attachmentStateManager: context.attachmentStateManager,
       configurationOverrides: effectiveOverrides,
+      compactionResult,
     }),
     evictInternalEvents(),
     shareReplay()
@@ -234,7 +325,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
 
   const round = await extractRound(events$);
-
   return {
     round,
   };
@@ -242,11 +332,17 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
 const getConversationState = ({
   promptManager,
+  toolManager,
+  compactionSummary,
 }: {
   promptManager: PromptManager;
+  toolManager: ToolManager;
+  compactionSummary?: CompactionSummary;
 }): ConversationInternalState => {
   return {
     prompt: promptManager.dump(),
+    dynamic_tool_ids: toolManager.getDynamicToolIds(),
+    ...(compactionSummary ? { compaction_summary: compactionSummary } : {}),
   };
 };
 
@@ -259,11 +355,7 @@ const createInitializerCommand = ({
   cycleLimit: number;
   agentBuilderToLangchainIdMap: ToolIdMapping;
 }): Command => {
-  const initialMessages = conversationToLangchainMessages({
-    conversation,
-  });
-
-  const initialState: Partial<StateType> = { initialMessages, cycleLimit };
+  const initialState: Partial<StateType> = { cycleLimit };
   let startAt = steps.init;
 
   const lastRound = conversation.previousRounds.length

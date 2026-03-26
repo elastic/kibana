@@ -16,7 +16,7 @@ import {
   type FunctionFilterPredicates,
   type FunctionParameterType,
   FunctionDefinitionTypes,
-  type SupportedDataType,
+  type InlineCastingType,
 } from '../types';
 import { operatorsDefinitions } from '../all_operators';
 import { aggFunctionDefinitions } from '../generated/aggregation_functions';
@@ -28,12 +28,11 @@ import type { ESQLColumnData, ISuggestionItem } from '../../registry/types';
 import { withAutoSuggest } from './autocomplete/helpers';
 import { buildFunctionDocumentation } from './documentation';
 import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers';
-import type { ESQLAstItem, ESQLFunction, InlineCastingType } from '../../../types';
-import { removeFinalUnknownIdentiferArg, techPreviewLabel } from './shared';
+import { buildFieldsBrowserCommandArgs } from '../../../language/autocomplete/autocomplete_utils';
+import { createFieldsBrowserSuggestion } from '../../registry/complete_items';
+import { techPreviewLabel } from './shared';
 import { getTestFunctions } from './test_functions';
-import { getMatchingSignatures } from './expressions';
-import { isLiteral } from '../../../ast/is';
-import { SuggestionCategory } from '../../../shared/sorting/types';
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
 
@@ -318,65 +317,6 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
   };
 }
 
-export function checkFunctionInvocationComplete(
-  func: ESQLFunction,
-  getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown'
-): {
-  complete: boolean;
-  reason?: 'tooFewArgs' | 'wrongTypes';
-} {
-  const fnDefinition = getFunctionDefinition(func.name);
-  if (!fnDefinition) {
-    return { complete: false };
-  }
-
-  const cleanedArgs = removeFinalUnknownIdentiferArg(func.args, getExpressionType);
-
-  const argLengthCheck = fnDefinition.signatures.some((def) => {
-    if (def.minParams && cleanedArgs.length >= def.minParams) {
-      return true;
-    }
-
-    if (cleanedArgs.length === def.params.length) {
-      return true;
-    }
-
-    return cleanedArgs.length >= def.params.filter(({ optional }) => !optional).length;
-  });
-
-  if (!argLengthCheck) {
-    return { complete: false, reason: 'tooFewArgs' };
-  }
-
-  if (func.incomplete && (fnDefinition.name === 'is null' || fnDefinition.name === 'is not null')) {
-    return { complete: false, reason: 'tooFewArgs' };
-  }
-
-  if (
-    (fnDefinition.name === 'in' || fnDefinition.name === 'not in') &&
-    Array.isArray(func.args[1]) &&
-    !func.args[1].length
-  ) {
-    return { complete: false, reason: 'tooFewArgs' };
-  }
-
-  // If the function is complete, check that the types of the arguments match the function definition
-  const givenTypes = func.args.map((arg) => getExpressionType(arg));
-  const literalMask = func.args.map((arg) => isLiteral(Array.isArray(arg) ? arg[0] : arg));
-
-  const hasCorrectTypes = !!getMatchingSignatures(
-    fnDefinition.signatures,
-    givenTypes,
-    literalMask,
-    true
-  ).length;
-
-  if (!hasCorrectTypes) {
-    return { complete: false, reason: 'wrongTypes' };
-  }
-  return { complete: true };
-}
-
 /**
  * Generates a sort key for field suggestions based on their categorization.
  * Recommended fields are prioritized, followed by ECS fields.
@@ -433,6 +373,7 @@ export const buildColumnSuggestions = (
     variableType?: ESQLVariableType;
     supportsControls?: boolean;
     supportsMultiValue?: boolean;
+    isFieldsBrowserEnabled?: boolean;
   },
   variables?: ESQLControlVariable[]
 ): ISuggestionItem[] => {
@@ -487,6 +428,13 @@ export const buildColumnSuggestions = (
       )
     : [];
   suggestions.push(...controlSuggestions);
+
+  if (options?.isFieldsBrowserEnabled) {
+    const commandArgs = buildFieldsBrowserCommandArgs({
+      fields: columns.map((col) => ({ name: col.name, type: col.type })),
+    });
+    suggestions.unshift(createFieldsBrowserSuggestion(commandArgs));
+  }
 
   return [...suggestions];
 };

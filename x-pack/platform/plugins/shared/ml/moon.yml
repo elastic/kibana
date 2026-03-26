@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ml-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/ml-ui'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/ml-plugin'
+  title: '@kbn/ml-plugin'
   description: Moon project for @kbn/ml-plugin
   channel: ''
   owner: '@elastic/ml-ui'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/ml
+  sourceRoot: x-pack/platform/plugins/shared/ml
 dependsOn:
   - '@kbn/core'
   - '@kbn/actions-plugin'
@@ -77,7 +76,6 @@ dependsOn:
   - '@kbn/ml-date-utils'
   - '@kbn/ml-error-utils'
   - '@kbn/ml-field-stats-flyout'
-  - '@kbn/ml-in-memory-table'
   - '@kbn/ml-is-defined'
   - '@kbn/ml-is-populated-object'
   - '@kbn/ml-local-storage'
@@ -96,7 +94,6 @@ dependsOn:
   - '@kbn/ml-validators'
   - '@kbn/monaco'
   - '@kbn/observability-ai-assistant-plugin'
-  - '@kbn/presentation-containers'
   - '@kbn/presentation-publishing'
   - '@kbn/presentation-util-plugin'
   - '@kbn/react-kibana-context-render'
@@ -147,6 +144,9 @@ dependsOn:
   - '@kbn/file-upload'
   - '@kbn/file-upload-common'
   - '@kbn/kql'
+  - '@kbn/as-code-filters-transforms'
+  - '@kbn/cps'
+  - '@kbn/cps-utils'
 tags:
   - plugin
   - prod
@@ -166,14 +166,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

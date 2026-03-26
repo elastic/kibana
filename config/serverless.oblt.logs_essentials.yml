@@ -21,6 +21,8 @@ workflowsExecutionEngine.enabled: false
 xpack.features.overrides:
   ### Machine Learning feature privilege should be hidden
   ml.hidden: true
+  ### Inference Endpoints feature privilege should be hidden
+  searchInferenceEndpoints.hidden: true
 
 xpack.fleet.internal.registry.excludePackages: [
     # Oblt integrations
@@ -70,6 +72,8 @@ xpack.actions.enabledActionTypes:
     '.servicenow',
     '.tines',
     '.torq',
+    '.http',
+    '.http-system',
   ]
 
 xpack.alerting.enabledRuleTypes:

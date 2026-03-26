@@ -6,8 +6,10 @@
  */
 
 import type { Output, FullAgentPolicyInput, TemplateAgentPolicyInput } from '../../types';
-import { generateOtelcolConfig } from './otel_collector';
+
 import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../common/constants';
+
+import { generateOtelcolConfig } from './otel_collector';
 
 describe('generateOtelcolConfig', () => {
   const defaultOutput: Output = {
@@ -199,6 +201,40 @@ describe('generateOtelcolConfig', () => {
             metrics: {
               receivers: ['httpcheck/1', 'httpcheck/2'],
               processors: ['transform/1', 'transform/2'],
+            },
+          },
+        },
+      },
+    ],
+  };
+
+  const otelTracesInputWithAPM: FullAgentPolicyInput = {
+    type: OTEL_COLLECTOR_INPUT_TYPE,
+    id: 'test-traces',
+    name: 'test-traces',
+    revision: 0,
+    data_stream: {
+      namespace: 'apmtest',
+    },
+    use_output: 'default',
+    package_policy_id: 'tracespolicy',
+    streams: [
+      {
+        id: 'stream-id-1',
+        data_stream: {
+          dataset: 'zipkinreceiver',
+          type: 'traces',
+        },
+        use_apm: true,
+        receivers: {
+          zipkin: {
+            endpoint: 'localhost:9411',
+          },
+        },
+        service: {
+          pipelines: {
+            traces: {
+              receivers: ['zipkin'],
             },
           },
         },
@@ -559,6 +595,639 @@ describe('generateOtelcolConfig', () => {
           },
         },
       },
+    });
+  });
+
+  it('should add elasticapm connector and processor for traces input with use_apm enabled', () => {
+    const inputs: FullAgentPolicyInput[] = [otelTracesInputWithAPM];
+    expect(generateOtelcolConfig(inputs, defaultOutput)).toEqual({
+      receivers: {
+        'zipkin/test-traces-stream-id-1': {
+          endpoint: 'localhost:9411',
+        },
+      },
+      processors: {
+        'transform/test-traces-stream-id-1-routing': {
+          trace_statements: [
+            {
+              context: 'span',
+              statements: [
+                'set(attributes["data_stream.type"], "traces")',
+                'set(attributes["data_stream.dataset"], "zipkinreceiver")',
+                'set(attributes["data_stream.namespace"], "apmtest")',
+              ],
+            },
+            {
+              context: 'spanevent',
+              statements: [
+                'set(attributes["data_stream.type"], "logs")',
+                'set(attributes["data_stream.namespace"], "apmtest")',
+              ],
+            },
+          ],
+        },
+        'transform/apmtest-apm-namespace-routing': {
+          metric_statements: [
+            {
+              context: 'datapoint',
+              statements: ['set(attributes["data_stream.namespace"], "apmtest")'],
+            },
+          ],
+        },
+        'elasticapm/apmtest': {},
+      },
+      connectors: {
+        'elasticapm/apmtest': {},
+        forward: {},
+      },
+      exporters: {
+        'elasticsearch/default': {
+          endpoints: ['http://localhost:9200'],
+        },
+      },
+      service: {
+        pipelines: {
+          'traces/test-traces-stream-id-1': {
+            receivers: ['zipkin/test-traces-stream-id-1'],
+            exporters: ['elasticapm/apmtest', 'forward'],
+            processors: ['elasticapm/apmtest', 'transform/test-traces-stream-id-1-routing'],
+          },
+          'metrics/apmtest-aggregated-apm-metrics': {
+            receivers: ['elasticapm/apmtest'],
+            processors: ['transform/apmtest-apm-namespace-routing'],
+            exporters: ['forward'],
+          },
+          traces: {
+            receivers: ['forward'],
+            exporters: ['elasticsearch/default'],
+          },
+          metrics: {
+            receivers: ['forward'],
+            exporters: ['elasticsearch/default'],
+          },
+        },
+      },
+    });
+  });
+
+  it('should produce separate aggregated-apm-metrics pipelines for two APM package policies with different namespaces', () => {
+    const inputA: FullAgentPolicyInput = {
+      ...otelTracesInputWithAPM,
+      id: 'policy-a',
+      name: 'policy-a',
+      package_policy_id: 'policy-a',
+      data_stream: { namespace: 'ns-a' },
+      streams: [
+        {
+          id: 'stream-id-1',
+          data_stream: { dataset: 'apm', type: 'traces' },
+          use_apm: true,
+          receivers: { otlp: { protocols: { grpc: { endpoint: '0.0.0.0:4317' } } } },
+          service: { pipelines: { traces: { receivers: ['otlp'] } } },
+        },
+      ],
+    };
+    const inputB: FullAgentPolicyInput = {
+      ...otelTracesInputWithAPM,
+      id: 'policy-b',
+      name: 'policy-b',
+      package_policy_id: 'policy-b',
+      data_stream: { namespace: 'ns-b' },
+      streams: [
+        {
+          id: 'stream-id-1',
+          data_stream: { dataset: 'apm', type: 'traces' },
+          use_apm: true,
+          receivers: { otlp: { protocols: { grpc: { endpoint: '0.0.0.0:4318' } } } },
+          service: { pipelines: { traces: { receivers: ['otlp'] } } },
+        },
+      ],
+    };
+
+    const result = generateOtelcolConfig([inputA, inputB], defaultOutput);
+
+    expect(result.connectors?.['elasticapm/ns-a']).toEqual({});
+    expect(result.connectors?.['elasticapm/ns-b']).toEqual({});
+    expect(result.connectors?.['elasticapm/policy-a-stream-id-1']).toBeUndefined();
+    expect(result.connectors?.['elasticapm/policy-b-stream-id-1']).toBeUndefined();
+
+    expect(result.service?.pipelines?.['metrics/ns-a-aggregated-apm-metrics']).toEqual({
+      receivers: ['elasticapm/ns-a'],
+      processors: ['transform/ns-a-apm-namespace-routing'],
+      exporters: ['forward'],
+    });
+    expect(result.service?.pipelines?.['metrics/ns-b-aggregated-apm-metrics']).toEqual({
+      receivers: ['elasticapm/ns-b'],
+      processors: ['transform/ns-b-apm-namespace-routing'],
+      exporters: ['forward'],
+    });
+    expect(
+      result.service?.pipelines?.['metrics/policy-a-stream-id-1-aggregated-apm-metrics']
+    ).toBeUndefined();
+    expect(
+      result.service?.pipelines?.['metrics/policy-b-stream-id-1-aggregated-apm-metrics']
+    ).toBeUndefined();
+
+    expect(result.processors?.['transform/ns-a-apm-namespace-routing']).toEqual({
+      metric_statements: [
+        { context: 'datapoint', statements: ['set(attributes["data_stream.namespace"], "ns-a")'] },
+      ],
+    });
+    expect(result.processors?.['transform/ns-b-apm-namespace-routing']).toEqual({
+      metric_statements: [
+        { context: 'datapoint', statements: ['set(attributes["data_stream.namespace"], "ns-b")'] },
+      ],
+    });
+
+    expect(result.service?.pipelines?.['traces/policy-a-stream-id-1']?.exporters).toContain(
+      'elasticapm/ns-a'
+    );
+    expect(result.service?.pipelines?.['traces/policy-b-stream-id-1']?.exporters).toContain(
+      'elasticapm/ns-b'
+    );
+  });
+
+  it('should produce a single aggregated-apm-metrics pipeline for two APM package policies with the same namespace', () => {
+    const inputA: FullAgentPolicyInput = {
+      ...otelTracesInputWithAPM,
+      id: 'policy-a',
+      name: 'policy-a',
+      package_policy_id: 'policy-a',
+      data_stream: { namespace: 'ns-shared' },
+      streams: [
+        {
+          id: 'stream-id-1',
+          data_stream: { dataset: 'apm', type: 'traces' },
+          use_apm: true,
+          receivers: { otlp: { protocols: { grpc: { endpoint: '0.0.0.0:4317' } } } },
+          service: { pipelines: { traces: { receivers: ['otlp'] } } },
+        },
+      ],
+    };
+    const inputB: FullAgentPolicyInput = {
+      ...otelTracesInputWithAPM,
+      id: 'policy-b',
+      name: 'policy-b',
+      package_policy_id: 'policy-b',
+      data_stream: { namespace: 'ns-shared' },
+      streams: [
+        {
+          id: 'stream-id-1',
+          data_stream: { dataset: 'apm', type: 'traces' },
+          use_apm: true,
+          receivers: { otlp: { protocols: { grpc: { endpoint: '0.0.0.0:4318' } } } },
+          service: { pipelines: { traces: { receivers: ['otlp'] } } },
+        },
+      ],
+    };
+
+    const result = generateOtelcolConfig([inputA, inputB], defaultOutput);
+
+    expect(result.connectors?.['elasticapm/ns-shared']).toEqual({});
+    expect(result.connectors?.['elasticapm/policy-a-stream-id-1']).toBeUndefined();
+    expect(result.connectors?.['elasticapm/policy-b-stream-id-1']).toBeUndefined();
+
+    const aggregatedPipelineKeys = Object.keys(result.service?.pipelines ?? {}).filter((k) =>
+      k.includes('aggregated-apm-metrics')
+    );
+    expect(aggregatedPipelineKeys).toHaveLength(1);
+    expect(result.service?.pipelines?.['metrics/ns-shared-aggregated-apm-metrics']).toEqual({
+      receivers: ['elasticapm/ns-shared'],
+      processors: ['transform/ns-shared-apm-namespace-routing'],
+      exporters: ['forward'],
+    });
+
+    expect(result.service?.pipelines?.['traces/policy-a-stream-id-1']?.exporters).toContain(
+      'elasticapm/ns-shared'
+    );
+    expect(result.service?.pipelines?.['traces/policy-b-stream-id-1']?.exporters).toContain(
+      'elasticapm/ns-shared'
+    );
+  });
+
+  describe('with dynamic_signal_types (multiple signal types)', () => {
+    const otelInputWithMultipleSignalTypes: FullAgentPolicyInput = {
+      type: OTEL_COLLECTOR_INPUT_TYPE,
+      id: 'test-multi-signal',
+      name: 'test-multi-signal',
+      revision: 0,
+      data_stream: {
+        namespace: 'default',
+      },
+      use_output: 'default',
+      package_policy_id: 'multipolicy',
+      meta: {
+        package: {
+          name: 'otel-multi-signal',
+          version: '1.0.0',
+        },
+      },
+      streams: [
+        {
+          id: 'stream-id-1',
+          data_stream: {
+            dataset: 'multidataset',
+            type: 'logs',
+          },
+          receivers: {
+            otlp: {
+              protocols: {
+                grpc: {
+                  endpoint: '0.0.0.0:4317',
+                },
+              },
+            },
+          },
+          service: {
+            pipelines: {
+              'logs/otlp': {
+                receivers: ['otlp'],
+              },
+              'metrics/otlp': {
+                receivers: ['otlp'],
+              },
+              'traces/otlp': {
+                receivers: ['otlp'],
+              },
+              'profiles/otlp': {
+                receivers: ['otlp'],
+              },
+            },
+          },
+        },
+      ],
+    };
+
+    const otelInputWithMultipleSignalTypes2: FullAgentPolicyInput = {
+      type: OTEL_COLLECTOR_INPUT_TYPE,
+      id: 'test-multi-signal',
+      name: 'test-multi-signal',
+      revision: 0,
+      data_stream: {
+        namespace: 'default',
+      },
+      use_output: 'default',
+      package_policy_id: 'multipolicy',
+      meta: {
+        package: {
+          name: 'otel-multi-signal',
+          version: '1.0.0',
+        },
+      },
+      streams: [
+        {
+          id: 'stream-id-1',
+          data_stream: {
+            dataset: 'multidataset',
+            type: 'logs',
+          },
+          receivers: {
+            otlp: {
+              protocols: {
+                grpc: {
+                  endpoint: '0.0.0.0:4317',
+                },
+              },
+            },
+          },
+          service: {
+            pipelines: {
+              logs: {
+                receivers: ['otlp'],
+              },
+              metrics: {
+                receivers: ['otlp'],
+              },
+              traces: {
+                receivers: ['otlp'],
+              },
+              profiles: {
+                receivers: ['otlp'],
+              },
+            },
+          },
+        },
+      ],
+    };
+
+    const packageInfoCache = new Map([
+      [
+        'otel-multi-signal-1.0.0',
+        {
+          name: 'otel-multi-signal',
+          version: '1.0.0',
+          policy_templates: [
+            {
+              name: 'template1',
+              title: 'OTel Multi Signal',
+              input: 'otelcol',
+              type: 'logs',
+              template_path: 'input.yml.hbs',
+              dynamic_signal_types: true,
+              vars: [],
+            },
+          ],
+        } as any,
+      ],
+    ]);
+
+    it('should add elasticapm connector and processor when stream has traces pipeline and use_apm enabled even if data_stream.type is not traces', () => {
+      const inputWithUseApm: FullAgentPolicyInput = {
+        ...otelInputWithMultipleSignalTypes,
+        streams:
+          otelInputWithMultipleSignalTypes.streams?.map((stream) => ({
+            ...stream,
+            use_apm: true,
+          })) ?? [],
+      };
+      const inputs: FullAgentPolicyInput[] = [inputWithUseApm];
+      const result = generateOtelcolConfig(inputs, defaultOutput, packageInfoCache);
+
+      expect(result.connectors?.['elasticapm/default']).toEqual({});
+      expect(result.processors?.['elasticapm/default']).toEqual({});
+      expect(result.service?.pipelines?.['metrics/default-aggregated-apm-metrics']).toEqual({
+        receivers: ['elasticapm/default'],
+        processors: ['transform/default-apm-namespace-routing'],
+        exporters: ['forward'],
+      });
+      const tracesPipelineKey = 'traces/otlp/test-multi-signal-stream-id-1';
+      const tracesPipeline = result.service?.pipelines?.[tracesPipelineKey];
+      expect(tracesPipeline).toBeDefined();
+      expect(tracesPipeline?.exporters).toContain('elasticapm/default');
+      expect(tracesPipeline?.processors).toContain('elasticapm/default');
+      const metricsPipelineKey = 'metrics/otlp/test-multi-signal-stream-id-1';
+      const metricsPipeline = result.service?.pipelines?.[metricsPipelineKey];
+      expect(metricsPipeline).toBeDefined();
+      expect(metricsPipeline?.exporters).not.toContain('elasticapm/default');
+      expect(metricsPipeline?.processors).not.toContain('elasticapm/default');
+    });
+
+    it('should generate transform with multiple signal type statements when dynamic_signal_types is true', () => {
+      const inputs: FullAgentPolicyInput[] = [otelInputWithMultipleSignalTypes];
+      const result = generateOtelcolConfig(inputs, defaultOutput, packageInfoCache);
+
+      expect(result.processors?.['transform/test-multi-signal-stream-id-1-routing']).toEqual({
+        log_statements: [
+          {
+            context: 'log',
+            statements: [
+              'set(attributes["data_stream.type"], "logs")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          },
+        ],
+        metric_statements: [
+          {
+            context: 'datapoint',
+            statements: [
+              'set(attributes["data_stream.type"], "metrics")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          },
+        ],
+        trace_statements: [
+          {
+            context: 'span',
+            statements: [
+              'set(attributes["data_stream.type"], "traces")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          },
+          {
+            context: 'spanevent',
+            statements: [
+              'set(attributes["data_stream.type"], "logs")',
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          },
+        ],
+        profile_statements: [
+          {
+            context: 'profile',
+            statements: [
+              'set(attributes["data_stream.type"], "profiles")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          },
+        ],
+      });
+    });
+
+    it('should generate transform with multiple signal type statements when dynamic_signal_types is true and pipelines have simple names', () => {
+      const inputs: FullAgentPolicyInput[] = [otelInputWithMultipleSignalTypes2];
+      const result = generateOtelcolConfig(inputs, defaultOutput, packageInfoCache);
+
+      expect(result.processors?.['transform/test-multi-signal-stream-id-1-routing']).toEqual({
+        log_statements: [
+          {
+            context: 'log',
+            statements: [
+              'set(attributes["data_stream.type"], "logs")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          },
+        ],
+        metric_statements: [
+          {
+            context: 'datapoint',
+            statements: [
+              'set(attributes["data_stream.type"], "metrics")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          },
+        ],
+        trace_statements: [
+          {
+            context: 'span',
+            statements: [
+              'set(attributes["data_stream.type"], "traces")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          },
+          {
+            context: 'spanevent',
+            statements: [
+              'set(attributes["data_stream.type"], "logs")',
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          },
+        ],
+        profile_statements: [
+          {
+            context: 'profile',
+            statements: [
+              'set(attributes["data_stream.type"], "profiles")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          },
+        ],
+      });
+    });
+
+    it('should generate transform with only specified signal types when pipelines have subset', () => {
+      const baseStream = otelInputWithMultipleSignalTypes.streams?.[0];
+      if (!baseStream) {
+        throw new Error('Test data is invalid');
+      }
+
+      const otelInputWithSubsetSignalTypes: FullAgentPolicyInput = {
+        ...otelInputWithMultipleSignalTypes,
+        streams: [
+          {
+            ...baseStream,
+            service: {
+              pipelines: {
+                'logs/otlp': {
+                  receivers: ['otlp'],
+                },
+                'metrics/otlp': {
+                  receivers: ['otlp'],
+                },
+              },
+            },
+          },
+        ],
+      };
+
+      const inputs: FullAgentPolicyInput[] = [otelInputWithSubsetSignalTypes];
+      const result = generateOtelcolConfig(inputs, defaultOutput, packageInfoCache);
+
+      expect(result.processors?.['transform/test-multi-signal-stream-id-1-routing']).toEqual({
+        log_statements: [
+          {
+            context: 'log',
+            statements: [
+              'set(attributes["data_stream.type"], "logs")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          },
+        ],
+        metric_statements: [
+          {
+            context: 'datapoint',
+            statements: [
+              'set(attributes["data_stream.type"], "metrics")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          },
+        ],
+      });
+      // Should not have trace_statements
+      expect(
+        result.processors?.['transform/test-multi-signal-stream-id-1-routing']?.trace_statements
+      ).toBeUndefined();
+    });
+
+    it('should fall back to single signal type when dynamic_signal_types is false', () => {
+      const packageInfoCacheNoDynamic = new Map([
+        [
+          'otel-multi-signal-1.0.0',
+          {
+            name: 'otel-multi-signal',
+            version: '1.0.0',
+            policy_templates: [
+              {
+                name: 'template1',
+                title: 'OTel Multi Signal',
+                input: 'otelcol',
+                type: 'logs',
+                template_path: 'input.yml.hbs',
+                dynamic_signal_types: false,
+                vars: [],
+              },
+            ],
+          } as any,
+        ],
+      ]);
+
+      const inputs: FullAgentPolicyInput[] = [otelInputWithMultipleSignalTypes];
+      const result = generateOtelcolConfig(inputs, defaultOutput, packageInfoCacheNoDynamic);
+
+      // Should generate single signal type transform (uses stream.data_stream.type)
+      expect(result.processors?.['transform/test-multi-signal-stream-id-1-routing']).toEqual({
+        log_statements: [
+          {
+            context: 'log',
+            statements: [
+              'set(attributes["data_stream.type"], "logs")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          },
+        ],
+      });
+    });
+
+    it('should use stream data_stream.type when dynamic_signal_types is not defined', () => {
+      const otelInputWithMetricsType: FullAgentPolicyInput = {
+        ...otelInputWithMultipleSignalTypes,
+        streams: [
+          {
+            id: 'stream-id-1',
+            data_stream: {
+              dataset: 'multidataset',
+              type: 'metrics',
+            },
+            receivers: {
+              otlp: {
+                protocols: {
+                  grpc: {
+                    endpoint: '0.0.0.0:4317',
+                  },
+                },
+              },
+            },
+          },
+        ],
+      };
+
+      const packageInfoCacheNoDynamicVar = new Map([
+        [
+          'otel-multi-signal-1.0.0',
+          {
+            name: 'otel-multi-signal',
+            version: '1.0.0',
+            policy_templates: [
+              {
+                name: 'template1',
+                title: 'OTel Multi Signal',
+                input: 'otelcol',
+                type: 'logs',
+                // No dynamic_signal_types property
+                template_path: 'input.yml.hbs',
+                vars: [],
+              },
+            ],
+          } as any,
+        ],
+      ]);
+
+      const inputs: FullAgentPolicyInput[] = [otelInputWithMetricsType];
+      const result = generateOtelcolConfig(inputs, defaultOutput, packageInfoCacheNoDynamicVar);
+
+      // Should use the stream's data_stream.type (metrics)
+      expect(result.processors?.['transform/test-multi-signal-stream-id-1-routing']).toEqual({
+        metric_statements: [
+          {
+            context: 'datapoint',
+            statements: [
+              'set(attributes["data_stream.type"], "metrics")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          },
+        ],
+      });
     });
   });
 });

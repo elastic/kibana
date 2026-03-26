@@ -30,6 +30,34 @@ POST kbn://api/agent_builder/tools/_execute
 }
 ```
 
+#### Example: Specify latencyType (p95)
+
+```
+POST kbn://api/agent_builder/tools/_execute
+{
+  "tool_id": "observability.get_trace_metrics",
+  "tool_params": {
+    "start": "now-1h",
+    "end": "now",
+    "latencyType": "p95"
+  }
+}
+```
+
+#### Example: Specify sortBy (failureRate)
+
+```
+POST kbn://api/agent_builder/tools/_execute
+{
+  "tool_id": "observability.get_trace_metrics",
+  "tool_params": {
+    "start": "now-1h",
+    "end": "now",
+    "sortBy": "failureRate"
+  }
+}
+```
+
 ### Drill down by transaction name for a specific service
 
 ```

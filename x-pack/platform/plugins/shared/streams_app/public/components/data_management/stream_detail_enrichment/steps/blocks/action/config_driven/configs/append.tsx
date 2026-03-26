@@ -32,10 +32,6 @@ const defaultFormState: AppendProcessorFormState = {
 
 const fieldOptions: FieldOptions = {
   fieldKey: 'to',
-  fieldHelpText: i18n.translate(
-    'xpack.streams.streamDetailView.managementTab.enrichment.processor.appendFieldHelpText',
-    { defaultMessage: 'The field to append values to.' }
-  ),
   includeCondition: true,
   includeIgnoreFailures: true,
   includeIgnoreMissing: false,
@@ -49,12 +45,6 @@ const fieldConfigurations: FieldConfiguration[] = [
     label: i18n.translate(
       'xpack.streams.streamDetailView.managementTab.enrichment.processor.appendValueLabel',
       { defaultMessage: 'Values to append' }
-    ),
-    helpText: (
-      <FormattedMessage
-        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.appendValueHelpText"
-        defaultMessage="The values to append to the field."
-      />
     ),
   },
   {
@@ -89,7 +79,7 @@ export const appendProcessorConfig: ConfigDrivenProcessorConfiguration<
     return (
       <FormattedMessage
         id="xpack.streams.streamDetailView.managementTab.enrichment.processor.appendHelpText"
-        defaultMessage="{appendLink} Appends one or more values to an existing array if the field already exists and it is an array. Converts a scalar to an array and appends one or more values to it if the field exists and it is a scalar. Creates an array containing the provided values if the field doesn't exist."
+        defaultMessage="{appendLink}. If the field is missing or a scalar, it's created or converted to an array first."
         values={{
           appendLink: (
             <EuiLink
@@ -99,7 +89,7 @@ export const appendProcessorConfig: ConfigDrivenProcessorConfiguration<
               href={docLinks.links.ingest.append}
             >
               {i18n.translate('xpack.streams.availableProcessors.appendLinkLabel', {
-                defaultMessage: 'Appends values.',
+                defaultMessage: 'Append one or more values to an existing array',
               })}
             </EuiLink>
           ),

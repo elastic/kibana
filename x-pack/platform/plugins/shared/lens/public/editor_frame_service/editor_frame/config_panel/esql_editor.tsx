@@ -15,8 +15,8 @@ import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { isEqual } from 'lodash';
 import type { MutableRefObject } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ESQLLangEditor } from '@kbn/esql/public';
-import { type ESQLControlVariable } from '@kbn/esql-types';
+import { ESQLLangEditor, useESQLQueryStats } from '@kbn/esql/public';
+import { type ESQLControlVariable, type ESQLQueryStats } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
@@ -58,6 +58,7 @@ export type ESQLEditorProps = Simplify<
     | 'updateSuggestion'
     | 'dataLoading$'
     | 'parentApi'
+    | 'onTextBasedQueryStateChange'
   >
 >;
 
@@ -84,6 +85,7 @@ export function ESQLEditor({
   dataLoading$,
   setCurrentAttributes,
   updateSuggestion,
+  onTextBasedQueryStateChange,
 }: ESQLEditorProps) {
   const prevQuery = useRef<AggregateQuery | Query>(attributes?.state.query || { esql: '' });
   const [query, setQuery] = useState<AggregateQuery | Query>(
@@ -95,6 +97,9 @@ export function ESQLEditor({
   const canEditTextBasedQuery = useLensSelector(selectCanEditTextBasedQuery);
 
   const [errors, setErrors] = useState<Error[]>([]);
+  const [submittedQuery, setSubmittedQuery] = useState<AggregateQuery | Query>(
+    attributes?.state.query || { esql: '' }
+  );
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const [suggestsLimitedColumns, setSuggestsLimitedColumns] = useState(false);
   const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
@@ -108,6 +113,11 @@ export function ESQLEditor({
     initialAttributes: attributes,
   });
 
+  // Use a ref to always read the latest currentAttributes in async callbacks,
+  // avoiding stale closures when the user changes chart type/config between renders
+  const currentAttributesRef = useRef(currentAttributes);
+  currentAttributesRef.current = currentAttributes;
+
   const adHocDataViews =
     attributes && attributes.state.adHocDataViews
       ? Object.values(attributes.state.adHocDataViews)
@@ -116,6 +126,7 @@ export function ESQLEditor({
   const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
 
   const { esqlVariables } = useFetchContext({ uuid: panelId, parentApi });
+  const esqlQueryStats = useESQLQueryStats(isTextBasedLanguage, lensAdapters?.requests);
 
   const dispatch = useLensDispatch();
 
@@ -159,7 +170,7 @@ export function ESQLEditor({
         setDataGridAttrs,
         esqlVariables,
         shouldUpdateAttrs,
-        currentAttributes
+        currentAttributesRef.current
       );
       if (attrs) {
         setCurrentAttributes?.(attrs);
@@ -167,6 +178,7 @@ export function ESQLEditor({
         updateSuggestion?.(attrs);
       }
       prevQuery.current = q;
+      setSubmittedQuery(q);
       setIsVisualizationLoading(false);
     },
     [
@@ -177,7 +189,6 @@ export function ESQLEditor({
       visualizationMap,
       adHocDataViews,
       esqlVariables,
-      currentAttributes,
       setCurrentAttributes,
       updateSuggestion,
     ]
@@ -194,6 +205,14 @@ export function ESQLEditor({
     setErrors,
     setIsInitialized,
   });
+
+  // Track and report query state to parent
+  useEffect(() => {
+    onTextBasedQueryStateChange?.({
+      hasErrors: errors.length > 0,
+      isQueryPendingSubmit: !isEqual(query, submittedQuery),
+    });
+  }, [query, submittedQuery, errors.length, onTextBasedQueryStateChange]);
 
   // Early exit if it's not in TextBased mode or the editor should be hidden
   if (!isTextBasedLanguage || !canEditTextBasedQuery || !isOfAggregateQueryType(query)) {
@@ -213,6 +232,7 @@ export function ESQLEditor({
         isVisualizationLoading={isVisualizationLoading}
         setIsVisualizationLoading={setIsVisualizationLoading}
         esqlVariables={esqlVariables}
+        queryStats={esqlQueryStats}
         closeFlyout={closeFlyout}
         panelId={panelId}
         attributes={attributes}
@@ -260,6 +280,7 @@ type InnerEditorProps = Simplify<
     suggestsLimitedColumns: boolean;
     adHocDataViews: DataViewSpec[];
     esqlVariables: ESQLControlVariable[] | undefined;
+    queryStats?: ESQLQueryStats;
   } & Pick<LayerPanelProps, 'attributes' | 'parentApi' | 'panelId' | 'closeFlyout'>
 >;
 
@@ -278,6 +299,7 @@ function InnerESQLEditor({
   prevQuery,
   runQuery,
   esqlVariables,
+  queryStats,
 }: InnerEditorProps) {
   const { euiTheme } = useEuiTheme();
   const { onSaveControl, onCancelControl } = useESQLVariables({
@@ -292,7 +314,6 @@ function InnerESQLEditor({
       <div
         css={css`
           border-top: ${euiTheme.border.thin};
-          background-color: ${euiTheme.colors.backgroundBaseHighlighted};
         `}
       >
         <ESQLLangEditor
@@ -308,7 +329,6 @@ function InnerESQLEditor({
               : undefined
           }
           editorIsInline
-          hideRunQueryText
           onTextLangQuerySubmit={async (q, a) => {
             // do not run the suggestions if the query is the same as the previous one
             if (q && !isEqual(q, prevQuery.current)) {
@@ -325,6 +345,7 @@ function InnerESQLEditor({
             onCancelControl,
           }}
           esqlVariables={esqlVariables}
+          queryStats={queryStats}
         />
       </div>
     </EuiFlexItem>

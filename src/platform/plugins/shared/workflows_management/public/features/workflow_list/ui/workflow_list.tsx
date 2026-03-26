@@ -10,33 +10,43 @@
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
+  EuiCallOut,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiLoadingSpinner,
+  EuiSpacer,
   EuiSwitch,
   EuiText,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
+import { isTriggerType } from '@kbn/workflows';
 import { useWorkflows } from '@kbn/workflows-ui';
+import { ExportReferencesModal } from './export_references_modal';
+import { useEventDrivenExecutionStatus } from './use_event_driven_execution_status';
+import { useExportWithReferences } from './use_export_with_references';
 import { WorkflowsUtilityBar } from './workflows_utility_bar';
 import { WorkflowsEmptyState } from '../../../components';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useTelemetry } from '../../../hooks/use_telemetry';
 import { getRunTooltipContent, StatusBadge, WorkflowStatus } from '../../../shared/ui';
 import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
 import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
 import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
 import { WorkflowTags } from '../../../widgets/workflow_tags/workflow_tags';
+import type { WorkflowTriggerTab } from '../../run_workflow/ui/types';
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
-import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
+import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE, WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 
 interface WorkflowListProps {
   search: WorkflowsSearchParams;
@@ -45,12 +55,72 @@ interface WorkflowListProps {
 }
 
 export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowListProps) {
+  const { page = 1, size = WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } = search;
   const { application, notifications } = useKibana().services;
-  const { data: workflows, isLoading: isLoadingWorkflows, error, refetch } = useWorkflows(search);
+
+  const searchParams = useMemo(() => {
+    if (search.enabled != null) {
+      // The stats aggs return enabled as 0 (false) and 1 (true), we need to convert the values to booleans for the search params.
+      return { ...search, enabled: search.enabled.map((enabled) => Boolean(enabled)) };
+    }
+    return search;
+  }, [search]);
+
+  const {
+    data: workflows,
+    isLoading: isLoadingWorkflows,
+    error,
+    refetch,
+  } = useWorkflows(searchParams);
+  const {
+    eventDrivenExecutionEnabled,
+    isLoading: isLoadingEventDrivenStatus,
+    error: eventDrivenStatusError,
+  } = useEventDrivenExecutionStatus();
+  const [workflowToDelete, setWorkflowToDelete] = useState<WorkflowListItemDto | null>(null);
+  const modalTitleId = useGeneratedHtmlId();
+  const telemetry = useTelemetry();
   const { deleteWorkflows, runWorkflow, cloneWorkflow, updateWorkflow } = useWorkflowActions();
+
+  const allWorkflowsMap = useMemo(
+    () => new Map((workflows?.results ?? []).map((w) => [w.id, w])),
+    [workflows?.results]
+  );
+
+  const {
+    exportModalState: singleExportModal,
+    startExport: startSingleExport,
+    handleIgnore: handleSingleExportIgnore,
+    handleAddDirect: handleSingleExportAddDirect,
+    handleAddAll: handleSingleExportAddAll,
+    handleCancel: handleSingleExportCancel,
+  } = useExportWithReferences({ allWorkflowsMap });
+
+  // Report list viewed telemetry when workflows are loaded
+  React.useEffect(() => {
+    if (!isLoadingWorkflows && workflows) {
+      telemetry.reportWorkflowListViewed({
+        workflowCount: workflows.results.length,
+        pageNumber: page || 1,
+        search: { ...search },
+      });
+    }
+  }, [isLoadingWorkflows, workflows, page, search, telemetry]);
 
   const [selectedItems, setSelectedItems] = useState<WorkflowListItemDto[]>([]);
   const [executeWorkflow, setExecuteWorkflow] = useState<WorkflowListItemDto | null>(null);
+
+  // Use a ref here to avoid re-rendering when the selected items change
+  const selectedItemsRef = useRef(selectedItems);
+  selectedItemsRef.current = selectedItems;
+
+  const hasEventDrivenWorkflowsInList = useMemo(
+    () =>
+      workflows?.results?.some((w) =>
+        w.definition?.triggers?.some((t) => !isTriggerType(t.type))
+      ) ?? false,
+    [workflows?.results]
+  );
 
   const canCreateWorkflow = application.capabilities.workflowsManagement.createWorkflow;
   const canExecuteWorkflow = application.capabilities.workflowsManagement.executeWorkflow;
@@ -63,20 +133,21 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
 
   const onRefresh = useCallback(async () => {
     const result = await refetch();
-    // Update selected items with fresh data after refetch
-    if (result.data?.results && selectedItems.length > 0) {
-      const selectedIds = selectedItems.map((item) => item.id);
+
+    const currentSelectedItems = selectedItemsRef.current;
+    if (result.data?.results && currentSelectedItems.length > 0) {
+      const selectedIds = new Set(currentSelectedItems.map((item) => item.id));
       const updatedSelectedItems = result.data.results.filter((workflow) =>
-        selectedIds.includes(workflow.id)
+        selectedIds.has(workflow.id)
       );
       setSelectedItems(updatedSelectedItems);
     }
-  }, [refetch, selectedItems]);
+  }, [refetch]);
 
   const handleRunWorkflow = useCallback(
-    (id: string, event: Record<string, unknown>) => {
+    (id: string, event: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) => {
       runWorkflow.mutate(
-        { id, inputs: event },
+        { id, inputs: event, triggerTab },
         {
           onSuccess: ({ workflowExecutionId }) => {
             notifications?.toasts.addSuccess('Workflow run started', {
@@ -101,15 +172,16 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   );
 
   const handleDeleteWorkflow = useCallback(
-    (item: WorkflowListItemDto) => {
-      const confirmed = window.confirm(`Are you sure you want to delete ${item.name}?`);
-      if (!confirmed) {
-        return;
-      }
-      deleteWorkflows.mutate({ ids: [item.id] });
-    },
-    [deleteWorkflows]
+    (item: WorkflowListItemDto) => setWorkflowToDelete(item),
+    []
   );
+
+  const handleConfirmDelete = useCallback(() => {
+    if (workflowToDelete) {
+      deleteWorkflows.mutate({ ids: [workflowToDelete.id] });
+      setWorkflowToDelete(null);
+    }
+  }, [deleteWorkflows, workflowToDelete]);
 
   const handleCloneWorkflow = useCallback(
     (item: WorkflowListItemDto) => {
@@ -128,6 +200,14 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
     [cloneWorkflow, notifications?.toasts]
   );
 
+  const handleExportWorkflow = useCallback(
+    (item: WorkflowListItemDto) => {
+      if (!item.definition) return;
+      startSingleExport([item]);
+    },
+    [startSingleExport]
+  );
+
   const handleToggleWorkflow = useCallback(
     (item: WorkflowListItemDto) => {
       updateWorkflow.mutate(
@@ -136,6 +216,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           workflow: {
             enabled: !item.enabled,
           },
+          skipRefetch: true,
         },
         {
           onError: (err: unknown) => {
@@ -175,6 +256,8 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
                       display: block;
                       max-width: 100%;
                     `}
+                    title={name}
+                    data-test-subj="workflowNameLink"
                   >
                     {name}
                   </Link>
@@ -254,6 +337,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
                   }
                 >
                   <EuiSwitch
+                    data-test-subj={`workflowToggleSwitch-${item.id}`}
                     disabled={!canUpdateWorkflow || !item.valid}
                     checked={item.enabled}
                     onChange={() => handleToggleWorkflow(item)}
@@ -292,6 +376,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             name: i18n.translate('workflows.workflowList.run', {
               defaultMessage: 'Run',
             }),
+            'data-test-subj': 'runWorkflowAction',
             icon: 'play',
             description: (item: WorkflowListItemDto) =>
               getRunTooltipContent({
@@ -314,6 +399,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             name: i18n.translate('workflows.workflowList.edit', {
               defaultMessage: 'Edit',
             }),
+            'data-test-subj': 'editWorkflowAction',
             icon: 'pencil',
             description: i18n.translate('workflows.workflowList.edit', {
               defaultMessage: 'Edit workflow',
@@ -327,6 +413,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             name: i18n.translate('workflows.workflowList.clone', {
               defaultMessage: 'Clone',
             }),
+            'data-test-subj': 'cloneWorkflowAction',
             icon: 'copy',
             description: i18n.translate('workflows.workflowList.clone', {
               defaultMessage: 'Clone workflow',
@@ -336,16 +423,20 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             },
           },
           {
-            enabled: () => false,
+            enabled: (item) => item.definition !== null,
             type: 'icon',
             color: 'primary',
             name: i18n.translate('workflows.workflowList.export', {
               defaultMessage: 'Export',
             }),
+            'data-test-subj': 'exportWorkflowAction',
             icon: 'export',
             description: i18n.translate('workflows.workflowList.export', {
               defaultMessage: 'Export workflow',
             }),
+            onClick: (item: WorkflowListItemDto) => {
+              handleExportWorkflow(item);
+            },
           },
           {
             enabled: () => !!canDeleteWorkflow,
@@ -354,6 +445,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             name: i18n.translate('workflows.workflowList.delete', {
               defaultMessage: 'Delete',
             }),
+            'data-test-subj': 'deleteWorkflowAction',
             icon: 'trash',
             description: i18n.translate('workflows.workflowList.delete', {
               defaultMessage: 'Delete workflow',
@@ -370,11 +462,21 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       application,
       canCreateWorkflow,
       handleCloneWorkflow,
+      handleExportWorkflow,
       canDeleteWorkflow,
       handleDeleteWorkflow,
       setExecuteWorkflow,
     ]
   );
+
+  const showStart = useMemo(() => (page - 1) * size + 1, [page, size]);
+  const showEnd = useMemo(() => {
+    const end = page * size;
+    if (workflows && end > (workflows.total || 0)) {
+      return workflows.total;
+    }
+    return end;
+  }, [page, size, workflows]);
 
   if (isLoadingWorkflows) {
     return (
@@ -419,23 +521,43 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
     );
   }
 
-  const showStart = (search.page - 1) * search.size + 1;
-  let showEnd = search.page * search.size;
-  if (workflows && showEnd > (workflows.total || 0)) {
-    showEnd = workflows.total;
-  }
-
   return (
     <>
+      {!isLoadingEventDrivenStatus &&
+        !eventDrivenStatusError &&
+        !eventDrivenExecutionEnabled &&
+        hasEventDrivenWorkflowsInList && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiCallOut
+              announceOnMount
+              title={i18n.translate('workflows.workflowList.eventDrivenDisabled.title', {
+                defaultMessage: 'Event-driven triggers are disabled',
+              })}
+              color="warning"
+              iconType="alert"
+              data-test-subj="workflows-event-driven-disabled-banner"
+            >
+              <p>
+                {i18n.translate('workflows.workflowList.eventDrivenDisabled.description', {
+                  defaultMessage:
+                    'Event-driven triggers are disabled. Workflows that use event-driven triggers will not run automatically until the feature is enabled again. Manual and Scheduled runs are not affected.',
+                })}
+              </p>
+            </EuiCallOut>
+          </>
+        )}
       <WorkflowsUtilityBar
         totalWorkflows={workflows?.total || 0}
         selectedWorkflows={selectedItems}
+        allWorkflows={workflows?.results ?? []}
         deselectWorkflows={deselectWorkflows}
         onRefresh={onRefresh}
         showStart={showStart}
         showEnd={showEnd}
       />
       <EuiBasicTable
+        data-test-subj="workflowListTable"
         css={css`
           .euiBasicTableAction-showOnHover {
             opacity: 1 !important;
@@ -450,9 +572,9 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         responsiveBreakpoint="xs"
         tableLayout={'fixed'}
         onChange={({
-          page: { index: pageIndex, size },
+          page: { index: pageIndex, size: pageSize },
         }: CriteriaWithPagination<WorkflowListItemDto>) =>
-          setSearch({ ...search, page: pageIndex + 1, size })
+          setSearch({ ...search, page: pageIndex + 1, size: pageSize })
         }
         selection={{
           onSelectionChange: setSelectedItems,
@@ -460,10 +582,10 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           selected: selectedItems,
         }}
         pagination={{
-          pageSize: search.size,
+          pageSize: size,
           pageSizeOptions: WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS,
           totalItemCount: workflows?.total ?? 0,
-          pageIndex: search.page - 1,
+          pageIndex: page - 1,
         }}
       />
       {executeWorkflow?.definition && (
@@ -472,8 +594,45 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           definition={executeWorkflow.definition}
           workflowId={executeWorkflow.id}
           onClose={() => setExecuteWorkflow(null)}
-          onSubmit={(event) => handleRunWorkflow(executeWorkflow.id, event)}
+          onSubmit={(data, triggerTab) => handleRunWorkflow(executeWorkflow.id, data, triggerTab)}
         />
+      )}
+      {singleExportModal && (
+        <ExportReferencesModal
+          missingWorkflows={singleExportModal.missingWorkflows}
+          onIgnore={handleSingleExportIgnore}
+          onAddDirect={handleSingleExportAddDirect}
+          onAddAll={handleSingleExportAddAll}
+          onCancel={handleSingleExportCancel}
+        />
+      )}
+      {workflowToDelete && (
+        <EuiConfirmModal
+          title={i18n.translate('workflows.workflowList.deleteModal.title', {
+            defaultMessage: 'Delete "{name}"?',
+            values: { name: workflowToDelete.name },
+          })}
+          titleProps={{ id: modalTitleId }}
+          aria-labelledby={modalTitleId}
+          onCancel={() => setWorkflowToDelete(null)}
+          onConfirm={handleConfirmDelete}
+          cancelButtonText={i18n.translate('workflows.workflowList.deleteModal.cancel', {
+            defaultMessage: 'Cancel',
+          })}
+          confirmButtonText={i18n.translate('workflows.workflowList.deleteModal.confirm', {
+            defaultMessage: 'Delete',
+          })}
+          buttonColor="danger"
+          defaultFocusedButton="cancel"
+          data-test-subj="workflows-delete-confirmation-modal"
+        >
+          <p>
+            {i18n.translate('workflows.workflowList.deleteModal.message', {
+              defaultMessage: 'Delete the "{name}" workflow? This action cannot be undone.',
+              values: { name: workflowToDelete.name },
+            })}
+          </p>
+        </EuiConfirmModal>
       )}
     </>
   );

@@ -8,14 +8,30 @@
 import type { AuthenticatedUser, ElasticsearchClient } from '@kbn/core/server';
 import type { InputType } from '../../common';
 
+export interface LangSmithOptions {
+  projectName: string;
+  apiKey: string;
+}
+
 export interface CreateUpdateIntegrationParams {
   integrationParams: IntegrationParams;
   authenticatedUser: AuthenticatedUser;
 }
 
+export interface ApproveIntegrationParams {
+  integrationId: string;
+  authenticatedUser: AuthenticatedUser;
+  version: string;
+  categories?: string[];
+}
+
 export interface CreateDataStreamParams {
   dataStreamParams: DataStreamParams;
   authenticatedUser: AuthenticatedUser;
+  /**
+   * Integration name that this data stream belongs to.
+   */
+  integrationName: string;
   /**
    * Scoped ES client for any synchronous work done when the route is called.
    * This client is NOT stored in the task params (Task Manager serializes params).
@@ -25,6 +41,10 @@ export interface CreateDataStreamParams {
    * Inference connector to use when the background task runs.
    */
   connectorId: string;
+  /**
+   * Optional LangSmith tracing options to propagate to background tasks.
+   */
+  langSmithOptions?: LangSmithOptions;
   /**
    * Minimal set of auth headers required to reconstruct a scoped client
    * as the original user inside the Task Manager runner.

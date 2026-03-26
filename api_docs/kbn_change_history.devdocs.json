@@ -1,0 +1,1821 @@
+{
+  "id": "@kbn/change-history",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/change-history",
+        "id": "def-common.ChangeHistoryClient",
+        "type": "Class",
+        "tags": [],
+        "label": "ChangeHistoryClient",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/change-history",
+            "scope": "common",
+            "docId": "kibKbnChangeHistoryPluginApi",
+            "section": "def-common.ChangeHistoryClient",
+            "text": "ChangeHistoryClient"
+          },
+          " implements ",
+          {
+            "pluginId": "@kbn/change-history",
+            "scope": "common",
+            "docId": "kibKbnChangeHistoryPluginApi",
+            "section": "def-common.IChangeHistoryClient",
+            "text": "IChangeHistoryClient"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryClient.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/change-history",
+                "id": "def-common.ChangeHistoryClient.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    module,\n    dataset,\n    logger,\n    kibanaVersion,\n  }",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+                "lineNumber": 67,
+                "columnNumber": 6,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/change-history",
+                    "id": "def-common.ChangeHistoryClient.Unnamed.$1.module",
+                    "type": "string",
+                    "tags": [],
+                    "label": "module",
+                    "description": [],
+                    "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+                    "lineNumber": 68,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/change-history",
+                    "id": "def-common.ChangeHistoryClient.Unnamed.$1.dataset",
+                    "type": "string",
+                    "tags": [],
+                    "label": "dataset",
+                    "description": [],
+                    "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+                    "lineNumber": 69,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/change-history",
+                    "id": "def-common.ChangeHistoryClient.Unnamed.$1.logger",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "logger",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/logging",
+                        "scope": "common",
+                        "docId": "kibKbnLoggingPluginApi",
+                        "section": "def-common.Logger",
+                        "text": "Logger"
+                      }
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+                    "lineNumber": 70,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/change-history",
+                    "id": "def-common.ChangeHistoryClient.Unnamed.$1.kibanaVersion",
+                    "type": "string",
+                    "tags": [],
+                    "label": "kibanaVersion",
+                    "description": [],
+                    "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+                    "lineNumber": 71,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryClient.isInitialized",
+            "type": "Function",
+            "tags": [],
+            "label": "isInitialized",
+            "description": [
+              "\nCheck if the change tracking service is initialized."
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "true if the change tracking service is initialized."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryClient.initialize",
+            "type": "Function",
+            "tags": [
+              "throws"
+            ],
+            "label": "initialize",
+            "description": [
+              "\nInitialize the change tracking service."
+            ],
+            "signature": [
+              "(elasticsearchClient: ",
+              "ElasticsearchClient",
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/change-history",
+                "id": "def-common.ChangeHistoryClient.initialize.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "elasticsearchClient",
+                "description": [
+                  "The privileged elasticsearch client `core.elasticsearch.client.asInternalUser`."
+                ],
+                "signature": [
+                  "ElasticsearchClient"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+                "lineNumber": 103,
+                "columnNumber": 20,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "A promise that resolves when the change tracking service is initialized."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryClient.log",
+            "type": "Function",
+            "tags": [
+              "throws"
+            ],
+            "label": "log",
+            "description": [
+              "\nLog a change for a single object."
+            ],
+            "signature": [
+              "(change: ",
+              {
+                "pluginId": "@kbn/change-history",
+                "scope": "common",
+                "docId": "kibKbnChangeHistoryPluginApi",
+                "section": "def-common.ObjectChange",
+                "text": "ObjectChange"
+              },
+              ", opts: ",
+              {
+                "pluginId": "@kbn/change-history",
+                "scope": "common",
+                "docId": "kibKbnChangeHistoryPluginApi",
+                "section": "def-common.LogChangeHistoryOptions",
+                "text": "LogChangeHistoryOptions"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+            "lineNumber": 140,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/change-history",
+                "id": "def-common.ChangeHistoryClient.log.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "change",
+                "description": [
+                  "- The changes to object that was affected."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/change-history",
+                    "scope": "common",
+                    "docId": "kibKbnChangeHistoryPluginApi",
+                    "section": "def-common.ObjectChange",
+                    "text": "ObjectChange"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+                "lineNumber": 147,
+                "columnNumber": 13,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/change-history",
+                "id": "def-common.ChangeHistoryClient.log.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [
+                  "- The options for the change."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/change-history",
+                    "scope": "common",
+                    "docId": "kibKbnChangeHistoryPluginApi",
+                    "section": "def-common.LogChangeHistoryOptions",
+                    "text": "LogChangeHistoryOptions"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+                "lineNumber": 147,
+                "columnNumber": 35,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "A promise that resolves when the change is logged."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryClient.logBulk",
+            "type": "Function",
+            "tags": [
+              "throws"
+            ],
+            "label": "logBulk",
+            "description": [
+              "\nLog a bulk change for one or more objects."
+            ],
+            "signature": [
+              "(changes: ",
+              {
+                "pluginId": "@kbn/change-history",
+                "scope": "common",
+                "docId": "kibKbnChangeHistoryPluginApi",
+                "section": "def-common.ObjectChange",
+                "text": "ObjectChange"
+              },
+              "[], opts: ",
+              {
+                "pluginId": "@kbn/change-history",
+                "scope": "common",
+                "docId": "kibKbnChangeHistoryPluginApi",
+                "section": "def-common.LogChangeHistoryOptions",
+                "text": "LogChangeHistoryOptions"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+            "lineNumber": 151,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/change-history",
+                "id": "def-common.ChangeHistoryClient.logBulk.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "changes",
+                "description": [
+                  "- The changes to objects that were affected."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/change-history",
+                    "scope": "common",
+                    "docId": "kibKbnChangeHistoryPluginApi",
+                    "section": "def-common.ObjectChange",
+                    "text": "ObjectChange"
+                  },
+                  "[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+                "lineNumber": 167,
+                "columnNumber": 17,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/change-history",
+                "id": "def-common.ChangeHistoryClient.logBulk.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [
+                  "- The options for the bulk change."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/change-history",
+                    "scope": "common",
+                    "docId": "kibKbnChangeHistoryPluginApi",
+                    "section": "def-common.LogChangeHistoryOptions",
+                    "text": "LogChangeHistoryOptions"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+                "lineNumber": 167,
+                "columnNumber": 42,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "A promise that resolves when the bulk change is logged."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryClient.getHistory",
+            "type": "Function",
+            "tags": [
+              "throws"
+            ],
+            "label": "getHistory",
+            "description": [
+              "\nGet the change history of an object."
+            ],
+            "signature": [
+              "(spaceId: string, objectType: string, objectId: string, opts?: ",
+              {
+                "pluginId": "@kbn/change-history",
+                "scope": "common",
+                "docId": "kibKbnChangeHistoryPluginApi",
+                "section": "def-common.GetChangeHistoryOptions",
+                "text": "GetChangeHistoryOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/change-history",
+                "scope": "common",
+                "docId": "kibKbnChangeHistoryPluginApi",
+                "section": "def-common.GetHistoryResult",
+                "text": "GetHistoryResult"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+            "lineNumber": 256,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/change-history",
+                "id": "def-common.ChangeHistoryClient.getHistory.$1",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [
+                  "- The kibana space Id where this object exists"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+                "lineNumber": 270,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/change-history",
+                "id": "def-common.ChangeHistoryClient.getHistory.$2",
+                "type": "string",
+                "tags": [],
+                "label": "objectType",
+                "description": [
+                  "- The type of the object."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+                "lineNumber": 271,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/change-history",
+                "id": "def-common.ChangeHistoryClient.getHistory.$3",
+                "type": "string",
+                "tags": [],
+                "label": "objectId",
+                "description": [
+                  "- The ID of the object."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+                "lineNumber": 272,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/change-history",
+                "id": "def-common.ChangeHistoryClient.getHistory.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [
+                  "- The options for the history query."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/change-history",
+                    "scope": "common",
+                    "docId": "kibKbnChangeHistoryPluginApi",
+                    "section": "def-common.GetChangeHistoryOptions",
+                    "text": "GetChangeHistoryOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+                "lineNumber": 273,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": [
+              "The history of the object."
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/change-history",
+        "id": "def-common.ChangeHistoryDiff",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChangeHistoryDiff",
+        "description": [
+          "\nOutput of the diff calculation"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+        "lineNumber": 180,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryDiff.stats",
+            "type": "Object",
+            "tags": [],
+            "label": "stats",
+            "description": [],
+            "signature": [
+              "{ total: number; additions: number; deletions: number; updates: number; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 184,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryDiff.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "The type of diff calculation (ie `default`, `rfc6902` etc)"
+            ],
+            "signature": [
+              "\"default\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 190,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryDiff.fields",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [
+              "The list of fields that changed, using full paths"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 192,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryDiff.ignored",
+            "type": "Array",
+            "tags": [],
+            "label": "ignored",
+            "description": [
+              "The list of fields that were ignored, using full paths"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 194,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryDiff.before",
+            "type": "Object",
+            "tags": [],
+            "label": "before",
+            "description": [
+              "A partial copy of the original object, including only fields that changed"
+            ],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 196,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryDiff.after",
+            "type": "Object",
+            "tags": [],
+            "label": "after",
+            "description": [
+              "A partial copy of the modified object, including only fields that changed"
+            ],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 198,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/change-history",
+        "id": "def-common.ChangeHistoryDiffOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChangeHistoryDiffOptions",
+        "description": [
+          "\nInput for the diff calculation"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+        "lineNumber": 171,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryDiffOptions.a",
+            "type": "Object",
+            "tags": [],
+            "label": "a",
+            "description": [],
+            "signature": [
+              "Record<string, any> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 175,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryDiffOptions.b",
+            "type": "Object",
+            "tags": [],
+            "label": "b",
+            "description": [],
+            "signature": [
+              "Record<string, any> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 176,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryDiffOptions.fieldsToIgnore",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldsToIgnore",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/change-history",
+                "scope": "common",
+                "docId": "kibKbnChangeHistoryPluginApi",
+                "section": "def-common.ChangeHistoryFieldsToIgnore",
+                "text": "ChangeHistoryFieldsToIgnore"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 177,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/change-history",
+        "id": "def-common.ChangeHistoryDocument",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChangeHistoryDocument",
+        "description": [
+          "\nRepresents a single document in the change history."
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryDocument.timestamp",
+            "type": "string",
+            "tags": [],
+            "label": "'@timestamp'",
+            "description": [
+              "ISO8601 timestamp when the target object was changed (successful write confirmed)."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryDocument.ecs",
+            "type": "Object",
+            "tags": [],
+            "label": "ecs",
+            "description": [],
+            "signature": [
+              "{ version: \"9.3.0\"; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryDocument.user",
+            "type": "Object",
+            "tags": [],
+            "label": "user",
+            "description": [],
+            "signature": [
+              "{ id?: string | undefined; name: string; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryDocument.event",
+            "type": "Object",
+            "tags": [],
+            "label": "event",
+            "description": [],
+            "signature": [
+              "{ id: string; module: string; dataset: string; action: string; type: \"deletion\" | \"creation\" | \"change\"; reason?: string | undefined; created?: string | undefined; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryDocument.transaction",
+            "type": "Object",
+            "tags": [],
+            "label": "transaction",
+            "description": [],
+            "signature": [
+              "{ id: string; } | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryDocument.object",
+            "type": "Object",
+            "tags": [],
+            "label": "object",
+            "description": [],
+            "signature": [
+              "{ id: string; type: string; index?: string | undefined; hash: string; sequence?: number | undefined; diff?: { type: \"default\"; fields: string[]; before: Record<string, unknown>; } | undefined; fields: { hashed: string[]; }; snapshot: Record<string, unknown>; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryDocument.tags",
+            "type": "Array",
+            "tags": [],
+            "label": "tags",
+            "description": [
+              "Optional list of tags for the event."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryDocument.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [
+              "Optional metadata about the event. Information that does not form part of the diff or ECS schema."
+            ],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryDocument.kibana",
+            "type": "Object",
+            "tags": [],
+            "label": "kibana",
+            "description": [],
+            "signature": [
+              "{ space_ids: string; } | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryDocument.service",
+            "type": "Object",
+            "tags": [],
+            "label": "service",
+            "description": [],
+            "signature": [
+              "{ type: \"kibana\"; version: string; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/change-history",
+        "id": "def-common.ChangeHistoryFieldsToHash",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChangeHistoryFieldsToHash",
+        "description": [
+          "\nFields hashed due to sensitive nature (PII, Secret keys, etc) or being very large (base64 blob)"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+        "lineNumber": 164,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryFieldsToHash.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[Key: string]: boolean | ChangeHistoryFieldsToHash",
+            "description": [],
+            "signature": [
+              "[Key: string]:  boolean | ",
+              {
+                "pluginId": "@kbn/change-history",
+                "scope": "common",
+                "docId": "kibKbnChangeHistoryPluginApi",
+                "section": "def-common.ChangeHistoryFieldsToHash",
+                "text": "ChangeHistoryFieldsToHash"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 168,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/change-history",
+        "id": "def-common.ChangeHistoryFieldsToIgnore",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChangeHistoryFieldsToIgnore",
+        "description": [
+          "\nFields excluded from diff calculation"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+        "lineNumber": 157,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ChangeHistoryFieldsToIgnore.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[Key: string]: boolean | ChangeHistoryFieldsToIgnore",
+            "description": [],
+            "signature": [
+              "[Key: string]:  boolean | ",
+              {
+                "pluginId": "@kbn/change-history",
+                "scope": "common",
+                "docId": "kibKbnChangeHistoryPluginApi",
+                "section": "def-common.ChangeHistoryFieldsToIgnore",
+                "text": "ChangeHistoryFieldsToIgnore"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 161,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/change-history",
+        "id": "def-common.GetChangeHistoryOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetChangeHistoryOptions",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+        "lineNumber": 142,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.GetChangeHistoryOptions.additionalFilters",
+            "type": "Array",
+            "tags": [],
+            "label": "additionalFilters",
+            "description": [],
+            "signature": [
+              "QueryDslQueryContainer",
+              "[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.GetChangeHistoryOptions.sort",
+            "type": "Array",
+            "tags": [],
+            "label": "sort",
+            "description": [],
+            "signature": [
+              "SortCombinations",
+              "[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 144,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.GetChangeHistoryOptions.from",
+            "type": "number",
+            "tags": [],
+            "label": "from",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 145,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.GetChangeHistoryOptions.size",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 146,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/change-history",
+        "id": "def-common.GetHistoryResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetHistoryResult",
+        "description": [
+          "\nResult from a history query."
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+        "lineNumber": 149,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.GetHistoryResult.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 153,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.GetHistoryResult.items",
+            "type": "Array",
+            "tags": [],
+            "label": "items",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/change-history",
+                "scope": "common",
+                "docId": "kibKbnChangeHistoryPluginApi",
+                "section": "def-common.ChangeHistoryDocument",
+                "text": "ChangeHistoryDocument"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 154,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/change-history",
+        "id": "def-common.IChangeHistoryClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "IChangeHistoryClient",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.IChangeHistoryClient.isInitialized",
+            "type": "Function",
+            "tags": [],
+            "label": "isInitialized",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.IChangeHistoryClient.initialize",
+            "type": "Function",
+            "tags": [],
+            "label": "initialize",
+            "description": [],
+            "signature": [
+              "(elasticsearchClient: ",
+              "ElasticsearchClient",
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/change-history",
+                "id": "def-common.IChangeHistoryClient.initialize.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "elasticsearchClient",
+                "description": [],
+                "signature": [
+                  "ElasticsearchClient"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+                "lineNumber": 44,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.IChangeHistoryClient.log",
+            "type": "Function",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              "(change: ",
+              {
+                "pluginId": "@kbn/change-history",
+                "scope": "common",
+                "docId": "kibKbnChangeHistoryPluginApi",
+                "section": "def-common.ObjectChange",
+                "text": "ObjectChange"
+              },
+              ", opts: ",
+              {
+                "pluginId": "@kbn/change-history",
+                "scope": "common",
+                "docId": "kibKbnChangeHistoryPluginApi",
+                "section": "def-common.LogChangeHistoryOptions",
+                "text": "LogChangeHistoryOptions"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/change-history",
+                "id": "def-common.IChangeHistoryClient.log.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "change",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/change-history",
+                    "scope": "common",
+                    "docId": "kibKbnChangeHistoryPluginApi",
+                    "section": "def-common.ObjectChange",
+                    "text": "ObjectChange"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+                "lineNumber": 45,
+                "columnNumber": 7,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/change-history",
+                "id": "def-common.IChangeHistoryClient.log.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/change-history",
+                    "scope": "common",
+                    "docId": "kibKbnChangeHistoryPluginApi",
+                    "section": "def-common.LogChangeHistoryOptions",
+                    "text": "LogChangeHistoryOptions"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+                "lineNumber": 45,
+                "columnNumber": 29,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.IChangeHistoryClient.logBulk",
+            "type": "Function",
+            "tags": [],
+            "label": "logBulk",
+            "description": [],
+            "signature": [
+              "(changes: ",
+              {
+                "pluginId": "@kbn/change-history",
+                "scope": "common",
+                "docId": "kibKbnChangeHistoryPluginApi",
+                "section": "def-common.ObjectChange",
+                "text": "ObjectChange"
+              },
+              "[], opts: ",
+              {
+                "pluginId": "@kbn/change-history",
+                "scope": "common",
+                "docId": "kibKbnChangeHistoryPluginApi",
+                "section": "def-common.LogChangeHistoryOptions",
+                "text": "LogChangeHistoryOptions"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/change-history",
+                "id": "def-common.IChangeHistoryClient.logBulk.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "changes",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/change-history",
+                    "scope": "common",
+                    "docId": "kibKbnChangeHistoryPluginApi",
+                    "section": "def-common.ObjectChange",
+                    "text": "ObjectChange"
+                  },
+                  "[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+                "lineNumber": 46,
+                "columnNumber": 11,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/change-history",
+                "id": "def-common.IChangeHistoryClient.logBulk.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/change-history",
+                    "scope": "common",
+                    "docId": "kibKbnChangeHistoryPluginApi",
+                    "section": "def-common.LogChangeHistoryOptions",
+                    "text": "LogChangeHistoryOptions"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+                "lineNumber": 46,
+                "columnNumber": 36,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.IChangeHistoryClient.getHistory",
+            "type": "Function",
+            "tags": [],
+            "label": "getHistory",
+            "description": [],
+            "signature": [
+              "(spaceId: string, objectType: string, objectId: string, opts?: ",
+              {
+                "pluginId": "@kbn/change-history",
+                "scope": "common",
+                "docId": "kibKbnChangeHistoryPluginApi",
+                "section": "def-common.GetChangeHistoryOptions",
+                "text": "GetChangeHistoryOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/change-history",
+                "scope": "common",
+                "docId": "kibKbnChangeHistoryPluginApi",
+                "section": "def-common.GetHistoryResult",
+                "text": "GetHistoryResult"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/change-history",
+                "id": "def-common.IChangeHistoryClient.getHistory.$1",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+                "lineNumber": 48,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/change-history",
+                "id": "def-common.IChangeHistoryClient.getHistory.$2",
+                "type": "string",
+                "tags": [],
+                "label": "objectType",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+                "lineNumber": 49,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/change-history",
+                "id": "def-common.IChangeHistoryClient.getHistory.$3",
+                "type": "string",
+                "tags": [],
+                "label": "objectId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+                "lineNumber": 50,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/change-history",
+                "id": "def-common.IChangeHistoryClient.getHistory.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/change-history",
+                    "scope": "common",
+                    "docId": "kibKbnChangeHistoryPluginApi",
+                    "section": "def-common.GetChangeHistoryOptions",
+                    "text": "GetChangeHistoryOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-change-history/src/client.ts",
+                "lineNumber": 51,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/change-history",
+        "id": "def-common.LogChangeHistoryOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogChangeHistoryOptions",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+        "lineNumber": 118,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.LogChangeHistoryOptions.action",
+            "type": "string",
+            "tags": [],
+            "label": "action",
+            "description": [
+              "Action performed by the user (`rule_create`, `rule_update`, `rule_delete`, etc.). Some Audit log examples (@see https://www.elastic.co/docs/reference/kibana/kibana-audit-events#xpack-security-ecs-audit-logging)"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 119,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.LogChangeHistoryOptions.username",
+            "type": "string",
+            "tags": [],
+            "label": "username",
+            "description": [
+              "Current login name for user that generated the change."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.LogChangeHistoryOptions.userProfileId",
+            "type": "string",
+            "tags": [],
+            "label": "userProfileId",
+            "description": [
+              "Unique profile identifier used by auth realm (@see https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/user-profiles)"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 123,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.LogChangeHistoryOptions.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [
+              "Kibana space that the event belongs to. (ie `default` etc)."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.LogChangeHistoryOptions.correlationId",
+            "type": "string",
+            "tags": [],
+            "label": "correlationId",
+            "description": [
+              "ID shared between events that take place together (ie in the same transaction)."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 127,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.LogChangeHistoryOptions.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [
+              "\nDirect overrides for the change document (`tags`, `metadata`, and selected `event` fields).\n`event.id` is always generated by the client and cannot be supplied here."
+            ],
+            "signature": [
+              "Partial<Pick<",
+              {
+                "pluginId": "@kbn/change-history",
+                "scope": "common",
+                "docId": "kibKbnChangeHistoryPluginApi",
+                "section": "def-common.ChangeHistoryDocument",
+                "text": "ChangeHistoryDocument"
+              },
+              ", \"tags\" | \"event\" | \"metadata\">> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.LogChangeHistoryOptions.fieldsToIgnore",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldsToIgnore",
+            "description": [
+              "List of fields to ignore in change calculation"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/change-history",
+                "scope": "common",
+                "docId": "kibKbnChangeHistoryPluginApi",
+                "section": "def-common.ChangeHistoryFieldsToIgnore",
+                "text": "ChangeHistoryFieldsToIgnore"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.LogChangeHistoryOptions.fieldsToHash",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldsToHash",
+            "description": [
+              "List of fields to hash in the saved change history (secret keys, PII, base64 etc)"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/change-history",
+                "scope": "common",
+                "docId": "kibKbnChangeHistoryPluginApi",
+                "section": "def-common.ChangeHistoryFieldsToHash",
+                "text": "ChangeHistoryFieldsToHash"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.LogChangeHistoryOptions.refresh",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "refresh",
+            "description": [
+              "Optional indicator to force an ES refresh after changes (affects performance)"
+            ],
+            "signature": [
+              "Refresh",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/change-history",
+        "id": "def-common.ObjectChange",
+        "type": "Interface",
+        "tags": [],
+        "label": "ObjectChange",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+        "lineNumber": 101,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ObjectChange.timestamp",
+            "type": "string",
+            "tags": [],
+            "label": "timestamp",
+            "description": [
+              "ISO8601 `@timestamp` when this change was confirmed."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ObjectChange.objectType",
+            "type": "string",
+            "tags": [],
+            "label": "objectType",
+            "description": [
+              "The `object.type`. Allows multiple object types per data stream."
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ObjectChange.objectId",
+            "type": "string",
+            "tags": [],
+            "label": "objectId",
+            "description": [
+              "The `object.id`. Uniquely identifies this object in Kibana within its `type`"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ObjectChange.index",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [
+              "ES backing `_index` where this object was stored."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ObjectChange.sequence",
+            "type": "number",
+            "tags": [],
+            "label": "sequence",
+            "description": [
+              "A sequentially increasing version for ordering changes. Please avoid ES _seq_no or _version as these are not reliable"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ObjectChange.before",
+            "type": "Object",
+            "tags": [],
+            "label": "before",
+            "description": [
+              "Raw version of the object. Before changes. If available."
+            ],
+            "signature": [
+              "Record<string, any> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/change-history",
+            "id": "def-common.ObjectChange.after",
+            "type": "Object",
+            "tags": [],
+            "label": "after",
+            "description": [
+              "Raw copy of the object after changes (ie the `object.snapshot`)."
+            ],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-change-history/src/types.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/change-history",
+        "id": "def-common.DATA_STREAM_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_STREAM_NAME",
+        "description": [
+          "\nName of the datastream in elasticsearch"
+        ],
+        "signature": [
+          "\".kibana-change-history\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-change-history/src/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -22,12 +22,25 @@ import { performBulkActionRoute } from './route';
 import {
   getPerformBulkActionEditSchemaMock,
   getBulkDisableRuleActionSchemaMock,
+  getPerformBulkActionDuplicateSchemaMock,
 } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/detection_engine';
+import { createMockEndpointAppContextService } from '../../../../../../endpoint/mocks';
+import { validateRuleResponseActions as _validateRuleResponseActions } from '../../../../../../endpoint/services';
 
 jest.mock('../../../../../machine_learning/authz');
 
 let bulkGetRulesMock: jest.Mock;
+
+const validateRuleResponseActionsMock = _validateRuleResponseActions as jest.Mock;
+
+jest.mock('../../../../../../endpoint/services', () => {
+  const actualModule = jest.requireActual('../../../../../../endpoint/services');
+  return {
+    ...actualModule,
+    validateRuleResponseActions: jest.fn(actualModule.validateRuleResponseActions),
+  };
+});
 
 describe('Perform bulk action route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -41,6 +54,10 @@ describe('Perform bulk action route', () => {
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
     bulkGetRulesMock = (await context.alerting.getRulesClient()).bulkGetRules as jest.Mock;
+
+    context.securitySolution.getEndpointService.mockReturnValue(
+      createMockEndpointAppContextService()
+    );
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
     clients.rulesClient.bulkDisableRules.mockResolvedValue({
@@ -541,7 +558,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 6 more'
+        'action: Invalid input: expected "delete", action: Invalid input: expected "disable", action: Invalid input: expected "enable", action: Invalid input: expected "export", action: Invalid input: expected "duplicate", and 6 more'
       );
     });
 
@@ -553,7 +570,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 6 more'
+        'action: Invalid input: expected "delete", action: Invalid input: expected "disable", action: Invalid input: expected "enable", action: Invalid input: expected "export", action: Invalid input: expected "duplicate", and 6 more'
       );
     });
 
@@ -587,7 +604,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'ids: Expected array, received string, action: Invalid literal value, expected "delete", ids: Expected array, received string, ids: Expected array, received string, action: Invalid literal value, expected "enable", and 13 more'
+        'ids: Invalid input: expected array, received string, action: Invalid input: expected "delete", ids: Invalid input: expected array, received string, ids: Invalid input: expected array, received string, action: Invalid input: expected "enable", and 13 more'
       );
     });
 
@@ -635,7 +652,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'ids: Array must contain at least 1 element(s)'
+        expect.stringContaining('ids: Too small: expected array to have >=1 items')
       );
     });
 
@@ -646,9 +663,7 @@ describe('Perform bulk action route', () => {
         body: { ...getPerformBulkActionEditSchemaMock(), edit: [] },
       });
       const result = server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith(
-        expect.stringContaining('edit: Array must contain at least 1 element(s)')
-      );
+      expect(result.badRequest).toHaveBeenCalledWith(expect.stringContaining('Invalid input'));
     });
 
     it('rejects payloads if search query dry_run is invalid', async () => {
@@ -661,7 +676,7 @@ describe('Perform bulk action route', () => {
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
         expect.stringContaining(
-          "dry_run: Invalid enum value. Expected 'true' | 'false', received 'invalid', dry_run: Expected boolean, received string"
+          'Invalid option: expected one of "true"|"false", Invalid input: expected boolean, received string'
         )
       );
     });
@@ -758,6 +773,29 @@ describe('Perform bulk action route', () => {
       expect(response.body.message).toEqual(
         'gaps_range_start, gaps_range_end and gap_fill_statuses must be provided together.'
       );
+    });
+
+    it('validates endpoint response actions for duplicate bulk action', async () => {
+      bulkGetRulesMock.mockResolvedValue({
+        rules: [mockRule],
+        errors: [],
+      });
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: getPerformBulkActionDuplicateSchemaMock(),
+      });
+
+      await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(validateRuleResponseActionsMock).toHaveBeenCalledWith({
+        endpointAuthz: expect.any(Object),
+        endpointService: expect.any(Object),
+        spaceId: 'default',
+        rulePayload: {},
+        existingRule: mockRule,
+      });
     });
   });
 

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
+import type { IdentifyFeaturesResult, TaskResult } from '@kbn/streams-schema';
 import { baseFeatureSchema, featureSchema, type Feature } from '@kbn/streams-schema';
+import { v4 as uuid } from 'uuid';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
-import { resolveConnectorId } from '../../../utils/resolve_connector_id';
-import { getFeatureId } from '../../../../lib/streams/feature/feature_client';
 import {
-  type IdentifyFeaturesResult,
   type FeaturesIdentificationTaskParams,
   getFeaturesIdentificationTaskId,
   FEATURES_IDENTIFICATION_TASK_TYPE,
 } from '../../../../lib/tasks/task_definitions/features_identification';
-import type { TaskResult } from '../../../../lib/tasks/types';
+import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 import { handleTaskAction } from '../../../utils/task_helpers';
 
 const dateFromString = z.string().transform((input) => new Date(input));
@@ -59,7 +59,7 @@ export const upsertFeatureRoute = createServerRoute({
             ...params.body,
             status: 'active' as const,
             last_seen: new Date().toISOString(),
-            id: getFeatureId(params.path.name, params.body),
+            uuid: uuid(),
           },
         },
       },
@@ -70,7 +70,7 @@ export const upsertFeatureRoute = createServerRoute({
 });
 
 export const deleteFeatureRoute = createServerRoute({
-  endpoint: 'DELETE /internal/streams/{name}/features/{id}',
+  endpoint: 'DELETE /internal/streams/{name}/features/{uuid}',
   options: {
     access: 'internal',
     summary: 'Deletes a feature for a stream',
@@ -82,7 +82,7 @@ export const deleteFeatureRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string(), id: z.string() }),
+    path: z.object({ name: z.string(), uuid: z.string() }),
   }),
   handler: async ({
     params,
@@ -97,7 +97,7 @@ export const deleteFeatureRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
-    await featureClient.deleteFeature(params.path.name, params.path.id);
+    await featureClient.deleteFeature(params.path.name, params.path.uuid);
 
     return { acknowledged: true };
   },
@@ -120,6 +120,7 @@ export const listFeaturesRoute = createServerRoute({
     query: z.optional(
       z.object({
         type: z.string().optional(),
+        include_excluded: BooleanFromString.optional(),
       })
     ),
   }),
@@ -138,7 +139,38 @@ export const listFeaturesRoute = createServerRoute({
 
     const { hits: features } = await featureClient.getFeatures(params.path.name, {
       type: params.query?.type ? [params.query.type] : [],
+      includeExcluded: params.query?.include_excluded,
     });
+
+    return {
+      features,
+    };
+  },
+});
+
+export const listAllFeaturesRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/_features',
+  options: {
+    access: 'internal',
+    summary: 'Lists all features across streams',
+    description: 'Fetches all features the user has access to',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  handler: async ({ request, getScopedClients, server }): Promise<{ features: Feature[] }> => {
+    const { featureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients({
+      request,
+    });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const streams = await streamsClient.listStreams();
+    const streamNames = streams.map((stream) => stream.name);
+
+    const { hits: features } = await featureClient.getFeatures(streamNames);
 
     return {
       features,
@@ -170,6 +202,16 @@ export const bulkFeaturesRoute = createServerRoute({
           }),
           z.object({
             delete: z.object({
+              id: z.string(),
+            }),
+          }),
+          z.object({
+            exclude: z.object({
+              id: z.string(),
+            }),
+          }),
+          z.object({
+            restore: z.object({
               id: z.string(),
             }),
           }),
@@ -256,32 +298,16 @@ export const featuresTaskRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ name: z.string() }),
-    body: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('schedule'),
-        from: dateFromString,
-        to: dateFromString,
-        connector_id: z
-          .string()
-          .optional()
-          .describe(
-            'Optional connector ID. If not provided, the default AI connector from settings will be used.'
-          ),
-      }),
-      z.object({
-        action: z.literal('cancel'),
-      }),
-      z.object({
-        action: z.literal('acknowledge'),
-      }),
-    ]),
+    body: taskActionSchema({
+      from: dateFromString,
+      to: dateFromString,
+    }),
   }),
   handler: async ({
     params,
     request,
     getScopedClients,
     server,
-    logger,
   }): Promise<FeaturesIdentificationTaskResult> => {
     const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
       request,
@@ -304,19 +330,11 @@ export const featuresTaskRoute = createServerRoute({
             scheduleConfig: {
               taskType: FEATURES_IDENTIFICATION_TASK_TYPE,
               taskId,
-              params: await (async (): Promise<FeaturesIdentificationTaskParams> => {
-                const connectorId = await resolveConnectorId({
-                  connectorId: body.connector_id,
-                  uiSettingsClient,
-                  logger,
-                });
-                return {
-                  connectorId,
-                  start: body.from.getTime(),
-                  end: body.to.getTime(),
-                  streamName: name,
-                };
-              })(),
+              params: {
+                start: body.from.getTime(),
+                end: body.to.getTime(),
+                streamName: name,
+              },
               request,
             },
           } as const)
@@ -334,6 +352,7 @@ export const featureRoutes = {
   ...upsertFeatureRoute,
   ...deleteFeatureRoute,
   ...listFeaturesRoute,
+  ...listAllFeaturesRoute,
   ...bulkFeaturesRoute,
   ...featuresStatusRoute,
   ...featuresTaskRoute,

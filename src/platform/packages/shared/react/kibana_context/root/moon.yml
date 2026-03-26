@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/react-kibana-context-root'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/react-kibana-context-root'
+  title: '@kbn/react-kibana-context-root'
   description: Moon project for @kbn/react-kibana-context-root
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/packages/shared/react/kibana_context/root
+  sourceRoot: src/platform/packages/shared/react/kibana_context/root
 dependsOn:
   - '@kbn/react-kibana-context-common'
   - '@kbn/core-i18n-browser-mocks'
@@ -32,6 +31,7 @@ dependsOn:
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/core-base-browser-internal'
   - '@kbn/react-kibana-context-env'
+  - '@kbn/core-chrome-browser'
 tags:
   - shared-common
   - package
@@ -46,14 +46,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

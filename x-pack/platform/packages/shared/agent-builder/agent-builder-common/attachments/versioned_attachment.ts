@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { AttachmentType, AttachmentDataOf } from './attachment_types';
 
 /**
@@ -50,6 +50,37 @@ export interface VersionedAttachment<
   readonly?: boolean;
   /** The client-provided ID if this attachment was created with one (e.g., via flyout configuration) */
   client_id?: string;
+  /**
+   * Origin/reference info for attachments created from external sources.
+   * For saved-object-backed types this is the saved object ID.
+   * Undefined for by-value attachments.
+   */
+  origin?: string;
+  /**
+   * When this attachment's content was last captured from the origin (for by-reference attachments),
+   * or when the attachment was stored.
+   */
+  origin_snapshot_at?: string;
+}
+
+/**
+ * A versioned attachment with a defined `origin` (by-reference).
+ */
+export type VersionedAttachmentWithOrigin<
+  Type extends string = string,
+  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : unknown
+> = VersionedAttachment<Type, DataType> & { origin: string };
+
+/**
+ * Returns true when `origin` is defined. Narrows `attachment` to {@link VersionedAttachmentWithOrigin}.
+ */
+export function isVersionedAttachmentWithOrigin<
+  Type extends string = string,
+  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : unknown
+>(
+  attachment: VersionedAttachment<Type, DataType>
+): attachment is VersionedAttachmentWithOrigin<Type, DataType> {
+  return attachment.origin !== undefined;
 }
 
 /**
@@ -112,8 +143,10 @@ export interface VersionedAttachmentInput<
   id?: string;
   /** Type of the attachment */
   type: Type;
-  /** The attachment data */
-  data: DataType;
+  /** The attachment data. Optional when `origin` is provided (content will be resolved). */
+  data?: DataType;
+  /** Origin/reference info for by-reference attachments (e.g., saved object ID). */
+  origin?: string;
   /** Human-readable description */
   description?: string;
   /** Whether the attachment should be hidden */
@@ -163,12 +196,15 @@ export const versionedAttachmentSchema = z.object({
   hidden: z.boolean().optional(),
   readonly: z.boolean().optional(),
   client_id: z.string().optional(),
+  origin: z.string().optional(),
+  origin_snapshot_at: z.string().optional(),
 });
 
 export const versionedAttachmentInputSchema = z.object({
   id: z.string().optional(),
   type: z.string(),
-  data: z.unknown(),
+  data: z.unknown().optional(),
+  origin: z.string().optional(),
   description: z.string().optional(),
   hidden: z.boolean().optional(),
   readonly: z.boolean().optional(),
@@ -267,3 +303,11 @@ export const estimateTokens = (data: unknown): number => {
   const str = JSON.stringify(data);
   return Math.ceil(str.length / 4);
 };
+
+/**
+ * Response from the update origin API endpoint.
+ */
+export interface UpdateOriginResponse {
+  success: boolean;
+  attachment: VersionedAttachment;
+}

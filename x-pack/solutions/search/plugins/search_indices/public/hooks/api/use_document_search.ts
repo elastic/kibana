@@ -23,15 +23,12 @@ const DEFAULT_PAGINATION = {
   size: DEFAULT_DOCUMENT_PAGE_SIZE,
   total: 0,
 };
-export const INDEX_SEARCH_POLLING = 30000;
 export const useIndexDocumentSearch = (indexName: string) => {
   const {
     services: { http },
   } = useKibana();
-  const { data, isInitialLoading } = useQuery({
+  const { data, isInitialLoading, refetch } = useQuery({
     queryKey: [QueryKeys.SearchDocuments, indexName],
-    refetchInterval: INDEX_SEARCH_POLLING,
-    refetchIntervalInBackground: true,
     refetchOnWindowFocus: 'always',
     queryFn: async ({ signal }) =>
       http.post<IndexDocuments>(`/internal/search_indices/${indexName}/documents/search`, {
@@ -48,6 +45,7 @@ export const useIndexDocumentSearch = (indexName: string) => {
   });
   return {
     data,
+    refetch,
     isInitialLoading,
     meta: pageToPagination(data?.results?._meta?.page ?? DEFAULT_PAGINATION),
   };

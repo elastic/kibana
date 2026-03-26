@@ -34,6 +34,7 @@ export interface EvalSuiteMetadata {
   configPath: string;
   tags?: string[];
   ciLabels?: string[];
+  serverConfigSet?: string;
 }
 
 export interface EvalSuiteDefinition {
@@ -47,6 +48,7 @@ export interface EvalSuiteDefinition {
   ciLabels: string[];
   description?: string;
   source: 'metadata' | 'discovery';
+  serverConfigSet?: string;
 }
 
 interface MetadataFile {
@@ -151,6 +153,7 @@ const normalizeSuite = (
     ciLabels,
     description: metadata?.description,
     source: metadata ? 'metadata' : 'discovery',
+    serverConfigSet: metadata?.serverConfigSet,
   };
 };
 

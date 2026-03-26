@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const TIME_SLIDER_CONTROL = 'timeSlider';
-export const RANGE_SLIDER_CONTROL = 'rangeSliderControl';
-export const OPTIONS_LIST_CONTROL = 'optionsListControl';
-export const ESQL_CONTROL = 'esqlControl';
+// Do not change constant values - part of public REST APIs
+export const TIME_SLIDER_CONTROL = 'time_slider_control';
+export const RANGE_SLIDER_CONTROL = 'range_slider_control';
+export const OPTIONS_LIST_CONTROL = 'options_list_control';
+export const ESQL_CONTROL = 'esql_control';
 
-export const CONTROL_HOVER_TRIGGER_ID = 'CONTROL_HOVER_TRIGGER';
-export const CONTROL_MENU_TRIGGER = 'CONTROL_MENU_TRIGGER';
+export const DEFAULT_DATA_CONTROL_STATE = {
+  use_global_filters: true,
+  ignore_validations: false,
+};

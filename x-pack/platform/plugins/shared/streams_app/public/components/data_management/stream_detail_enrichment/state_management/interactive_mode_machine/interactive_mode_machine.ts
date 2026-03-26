@@ -11,11 +11,13 @@ import {
   ALWAYS_CONDITION,
   convertStepsForUI,
   convertUIStepsToDSL,
+  isActionBlock,
+  isConditionBlock,
   type StreamlangProcessorDefinition,
 } from '@kbn/streamlang';
 import type { StreamlangConditionBlock, StreamlangDSL } from '@kbn/streamlang/types/streamlang';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import type { MachineImplementationsFrom } from 'xstate5';
+import type { MachineImplementationsFrom } from 'xstate';
 import {
   assertEvent,
   assign,
@@ -24,7 +26,7 @@ import {
   stopChild,
   type ActorRefFrom,
   type SnapshotFrom,
-} from 'xstate5';
+} from 'xstate';
 import { getDefaultGrokProcessor, stepConverter } from '../../utils';
 import { selectPreviewRecords } from '../simulation_state_machine/selectors';
 import { stepMachine } from '../steps_state_machine';
@@ -99,12 +101,27 @@ export const interactiveModeMachine = setup({
           convertedProcessor,
           parentRef,
           assignArgs.spawn as StepSpawner,
+          assignArgs.context.grokCollection,
           { isNew: true }
         );
         const insertIndex = findInsertIndex(
           assignArgs.context.stepRefs,
           conversionOptions.parentId
         );
+
+        // If the processor is created under a condition block, automatically select that condition.
+        const parentId = conversionOptions.parentId;
+        if (parentId) {
+          const parentStep = assignArgs.context.stepRefs
+            .find((ref) => ref.id === parentId)
+            ?.getSnapshot()?.context.step;
+          if (parentStep && isConditionBlock(parentStep)) {
+            assignArgs.context.parentRef.send({
+              type: 'simulation.filterByConditionAuto',
+              conditionId: parentId,
+            });
+          }
+        }
 
         return {
           stepRefs: insertAtIndex(assignArgs.context.stepRefs, newProcessorRef, insertIndex),
@@ -131,6 +148,7 @@ export const interactiveModeMachine = setup({
         },
         parentRef,
         assignArgs.spawn as StepSpawner,
+        assignArgs.context.grokCollection,
         { isNew: true }
       );
       const insertIndex = findInsertIndex(assignArgs.context.stepRefs, parentId);
@@ -161,12 +179,17 @@ export const interactiveModeMachine = setup({
 
         const conversionOptions = options ?? { parentId: null };
         const convertedCondition = stepConverter.toUIDefinition(condition, conversionOptions);
+        const conditionId = convertedCondition.customIdentifier ?? createId();
 
         const parentRef: StepParentActor = assignArgs.self;
         const newProcessorRef = spawnStep(
-          convertedCondition,
+          {
+            ...convertedCondition,
+            customIdentifier: conditionId,
+          },
           parentRef,
           assignArgs.spawn as StepSpawner,
+          assignArgs.context.grokCollection,
           { isNew: true }
         );
         const insertIndex = findInsertIndex(
@@ -174,11 +197,34 @@ export const interactiveModeMachine = setup({
           conversionOptions.parentId
         );
 
+        // Automatically filter the simulation by the newly created condition.
+        // This uses the simulation-only noop processor tagged with the condition id.
+        assignArgs.context.parentRef.send({
+          type: 'simulation.filterByConditionAuto',
+          conditionId,
+        });
+
         return {
           stepRefs: insertAtIndex(assignArgs.context.stepRefs, newProcessorRef, insertIndex),
         };
       }
     ),
+    maybeAutoSelectParentConditionForProcessor: ({ context }, params: { id?: string }) => {
+      if (!params.id) return;
+
+      const stepRef = context.stepRefs.find((ref) => ref.id === params.id);
+      const step = stepRef?.getSnapshot()?.context.step;
+      if (!step || !isActionBlock(step)) return;
+
+      const parentId = step.parentId;
+      if (!parentId) return;
+
+      const parentStep = context.stepRefs.find((ref) => ref.id === parentId)?.getSnapshot()
+        ?.context.step;
+      if (parentStep && isConditionBlock(parentStep)) {
+        context.parentRef.send({ type: 'simulation.filterByConditionAuto', conditionId: parentId });
+      }
+    },
     deleteStep: assign(({ context }, params: { id: string }) => {
       const steps = context.stepRefs.map((ref) => ref.getSnapshot().context.step);
       const idsToDelete = collectDescendantStepIds(steps, params.id);
@@ -313,10 +359,16 @@ export const interactiveModeMachine = setup({
       const parentRef: StepParentActor = assignArgs.self;
 
       const stepRefs = uiSteps.map((step) => {
-        return spawnStep(step, parentRef, assignArgs.spawn as StepSpawner, {
-          isNew: true,
-          isUpdated: true,
-        });
+        return spawnStep(
+          step,
+          parentRef,
+          assignArgs.spawn as StepSpawner,
+          assignArgs.context.grokCollection,
+          {
+            isNew: true,
+            isUpdated: true,
+          }
+        );
       });
 
       return {
@@ -360,7 +412,7 @@ export const interactiveModeMachine = setup({
       // "new" and also "updated" (to mimic being fully configured in interactive mode). "new" alone would just
       // denote a draft state.
       const shouldBeMarkedAsNewAndUpdated = input.newStepIds.includes(step.customIdentifier);
-      return spawnStep(step, parentRef, spawn as StepSpawner, {
+      return spawnStep(step, parentRef, spawn as StepSpawner, input.grokCollection, {
         isNew: shouldBeMarkedAsNewAndUpdated,
         isUpdated: shouldBeMarkedAsNewAndUpdated,
       });
@@ -374,6 +426,7 @@ export const interactiveModeMachine = setup({
       simulationMode: input.simulationMode,
       streamName: input.streamName,
       suggestedPipeline: undefined,
+      grokCollection: input.grokCollection,
     };
   },
   type: 'parallel',
@@ -525,6 +578,12 @@ export const interactiveModeMachine = setup({
             },
             'step.edit': {
               guard: 'hasSimulatePrivileges',
+              actions: [
+                {
+                  type: 'maybeAutoSelectParentConditionForProcessor',
+                  params: ({ event }) => event,
+                },
+              ],
               target: 'editing',
             },
             'step.reorder': {
@@ -608,9 +667,28 @@ export const interactiveModeMachine = setup({
                 { type: 'deleteStep', params: ({ event }) => event },
               ],
             },
+            'step.cancel': {
+              target: 'idle',
+            },
             'step.save': {
               target: 'idle',
               actions: [{ type: 'reassignSteps' }, { type: 'syncToDSL' }],
+            },
+            'step.filterByCondition': {
+              actions: [
+                { type: 'storeConditionFilter', params: ({ event }) => event },
+                {
+                  type: 'sendStepsToSimulator',
+                },
+              ],
+            },
+            'step.clearConditionFilter': {
+              actions: [
+                { type: 'storeConditionFilter', params: () => ({ conditionId: undefined }) },
+                {
+                  type: 'sendStepsToSimulator',
+                },
+              ],
             },
           },
         },
@@ -620,7 +698,9 @@ export const interactiveModeMachine = setup({
             'step.change': {
               actions: [{ type: 'syncToDSL' }, { type: 'sendStepsToSimulator' }],
             },
-            'step.cancel': 'idle',
+            'step.cancel': {
+              target: 'idle',
+            },
             'step.delete': {
               target: 'idle',
               guard: 'hasManagePrivileges',
@@ -632,6 +712,22 @@ export const interactiveModeMachine = setup({
             'step.save': {
               target: 'idle',
               actions: [{ type: 'reassignSteps' }, { type: 'syncToDSL' }],
+            },
+            'step.filterByCondition': {
+              actions: [
+                { type: 'storeConditionFilter', params: ({ event }) => event },
+                {
+                  type: 'sendStepsToSimulator',
+                },
+              ],
+            },
+            'step.clearConditionFilter': {
+              actions: [
+                { type: 'storeConditionFilter', params: () => ({ conditionId: undefined }) },
+                {
+                  type: 'sendStepsToSimulator',
+                },
+              ],
             },
           },
         },

@@ -32,6 +32,7 @@ import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverle
 
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import type { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
 import type { UseIsAddToCaseOpen } from './components/cases_context/state/use_is_add_to_case_open';
@@ -48,6 +49,7 @@ import type { getUICapabilities } from './client/helpers/capabilities';
 import type { AttachmentFramework } from './client/attachment_framework/types';
 import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
+import type { UnifiedAttachmentTypeRegistry } from './client/attachment_framework/unified_attachment_registry';
 import type {
   CasesByAlertIDRequest,
   GetRelatedCasesByAlertResponse,
@@ -63,6 +65,7 @@ import type {
   ExternalReferenceNoSOAttachmentPayload,
   ExternalReferenceSOAttachmentPayload,
   EventAttachmentPayload,
+  UnifiedAttachmentPayload,
 } from '../common/types/domain';
 
 export interface CasesPublicSetupDependencies {
@@ -72,6 +75,7 @@ export interface CasesPublicSetupDependencies {
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
   triggersActionsUi: TriggersActionsSetup;
+  workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
 }
 
 export interface CasesPublicStartDependencies {
@@ -115,6 +119,7 @@ export interface RenderAppProps {
   kibanaVersion: string;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
 }
 
 export interface CasesPublicSetup {
@@ -122,6 +127,9 @@ export interface CasesPublicSetup {
 }
 
 export interface CasesPublicStart {
+  config: {
+    templatesEnabled: boolean;
+  };
   api: {
     getRelatedCases: (
       alertId: string,
@@ -185,11 +193,12 @@ export type SupportedCaseAttachment =
   | UserCommentAttachmentPayload
   | PersistableStateAttachmentPayload
   | ExternalReferenceNoSOAttachmentPayload
-  | ExternalReferenceSOAttachmentPayload;
+  | ExternalReferenceSOAttachmentPayload
+  | UnifiedAttachmentPayload;
 
 export type CaseAttachments = SupportedCaseAttachment[];
 export type CaseAttachmentWithoutOwner = DistributiveOmit<SupportedCaseAttachment, 'owner'>;
 export type CaseAttachmentsWithoutOwner = CaseAttachmentWithoutOwner[];
-export type { LensProps } from './components/visualizations/types';
+export type { LensProps } from './components/attachments/lens/types';
 
 export type ServerError = IHttpFetchError<ResponseErrorBody>;

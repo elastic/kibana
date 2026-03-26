@@ -25,9 +25,10 @@ const API_KEY_MASK = '•'.repeat(60);
 
 interface ApiKeyFormProps {
   hasTitle?: boolean;
+  minWidth?: number;
 }
 
-export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true }) => {
+export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true, minWidth }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const { apiKey, status, updateApiKey, toggleApiKeyVisibility } = useSearchApiKey();
 
@@ -43,6 +44,7 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true }) => {
         copyValue={apiKey}
         dataTestSubj="apiKeyFormAPIKey"
         copyValueDataTestSubj="APIKeyButtonCopy"
+        minWidth={minWidth}
         actions={[
           <EuiButtonIcon
             iconType={status === Status.showPreviewKey ? 'eyeClosed' : 'eye'}

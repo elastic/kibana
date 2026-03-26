@@ -51,7 +51,9 @@ import { getTransactionDistributionChartData } from './get_transaction_distribut
 import { ChartTitleToolTip } from './chart_title_tool_tip';
 import { getLatencyCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
 import { MIN_TAB_TITLE_HEIGHT } from '../../shared/charts/duration_distribution_chart_with_scrubber';
-import { OpenInDiscoverButton } from '../../shared/links/discover_links/open_in_discover_button';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { OpenInDiscover } from '../../shared/links/discover_links/open_in_discover';
 
 export function FallbackCorrelationBadge() {
   return (
@@ -70,6 +72,24 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   } = useApmPluginContext();
 
   const { euiTheme } = useEuiTheme();
+
+  const { serviceName } = useApmServiceContext();
+
+  const {
+    query: {
+      rangeFrom,
+      rangeTo,
+      kuery,
+      environment,
+      transactionName,
+      transactionType,
+      sampleRangeFrom,
+      sampleRangeTo,
+    },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
+  );
 
   const { progress, response, startFetch, cancelFetch } = useLatencyCorrelations();
   const { overallHistogram, hasData, status } = getOverallHistogram(response, progress.isRunning);
@@ -278,7 +298,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           h.fieldValue === selectedSignificantTerm.fieldValue
       );
     } else if (pinnedSignificantTerm) {
-      return histogramTerms.find(
+      return histogramTerms?.find(
         (h) =>
           h.fieldName === pinnedSignificantTerm.fieldName &&
           h.fieldValue === pinnedSignificantTerm.fieldValue
@@ -322,7 +342,23 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <OpenInDiscoverButton dataTestSubj="apmLatencyCorrelationsOpenInDiscoverButton" />
+          <OpenInDiscover
+            variant="button"
+            dataTestSubj="apmLatencyCorrelationsOpenInDiscoverButton"
+            indexType="traces"
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            queryParams={{
+              kuery,
+              serviceName,
+              environment,
+              transactionName,
+              transactionType,
+              sampleRangeFrom,
+              sampleRangeTo,
+              sortDirection: 'DESC',
+            }}
+          />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>

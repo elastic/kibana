@@ -145,7 +145,7 @@ describe('buildResultsQuery', () => {
       expect(result.sort).toEqual([]);
     });
 
-    it('should build query with time range filter', () => {
+    it('should build query with time range filter using event.ingested', () => {
       const startDate = '2024-01-01T00:00:00.000Z';
       const expectedEndDate = moment(startDate).clone().add(30, 'minutes').toISOString();
 
@@ -173,7 +173,7 @@ describe('buildResultsQuery', () => {
           filter: [
             {
               range: {
-                '@timestamp': {
+                'event.ingested': {
                   gte: startDate,
                   lte: expectedEndDate,
                 },
@@ -265,7 +265,7 @@ describe('buildResultsQuery', () => {
             filter: [
               {
                 range: {
-                  '@timestamp': {
+                  'event.ingested': {
                     gte: startDate,
                     lte: expectedEndDate,
                   },
@@ -297,6 +297,51 @@ describe('buildResultsQuery', () => {
           },
         ],
       });
+    });
+  });
+
+  describe('schedule-based filtering', () => {
+    it('should filter by schedule_id and execution count when scheduleId and executionCount are provided', () => {
+      const options: ResultsRequestOptions = {
+        actionId: 'not-used',
+        scheduleId: 'sched-uuid-123',
+        executionCount: 7,
+        pagination: {
+          activePage: 0,
+          querySize: 100,
+          cursorStart: 0,
+        },
+        sort: [{ field: '@timestamp', direction: Direction.desc }],
+      };
+
+      const result = buildResultsQuery(options);
+      const filterQuery = result.query as any;
+      const queryString = filterQuery.bool.filter.find((f: any) => f.query_string)?.query_string
+        ?.query;
+
+      expect(queryString).toContain('schedule_id: sched-uuid-123');
+      expect(queryString).toContain('osquery_meta.schedule_execution_count: 7');
+      expect(queryString).not.toContain('action_id');
+    });
+
+    it('should filter by action_id when scheduleId is not provided', () => {
+      const options: ResultsRequestOptions = {
+        actionId: 'action-456',
+        pagination: {
+          activePage: 0,
+          querySize: 100,
+          cursorStart: 0,
+        },
+        sort: [{ field: '@timestamp', direction: Direction.desc }],
+      };
+
+      const result = buildResultsQuery(options);
+      const filterQuery = result.query as any;
+      const queryString = filterQuery.bool.filter.find((f: any) => f.query_string)?.query_string
+        ?.query;
+
+      expect(queryString).toContain('action_id: action-456');
+      expect(queryString).not.toContain('schedule_id');
     });
   });
 });

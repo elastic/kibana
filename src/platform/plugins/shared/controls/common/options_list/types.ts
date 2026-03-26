@@ -36,14 +36,17 @@ export const isOptionsListESQLControlState = (
  * ----------------------------------------------------------------
  */
 
-export type OptionsListSuggestions = Array<{ value: OptionsListSelection; docCount?: number }>;
+export type OptionsListSuggestions<SelectionType = OptionsListSelection> = Array<{
+  value: SelectionType;
+  docCount?: number;
+}>;
 
 /**
  * The Options list response is returned from the serverside Options List route.
  */
 export interface OptionsListSuccessResponse {
-  suggestions: OptionsListSuggestions;
-  totalCardinality?: number; // total cardinality will be undefined when `useExpensiveQueries` is `false`
+  suggestions: OptionsListSuggestions<OptionsListSelection>;
+  totalCardinality: number;
   invalidSelections?: OptionsListSelection[];
 }
 
@@ -79,13 +82,13 @@ export type OptionsListRequest = Omit<
 /**
  * The Options list request body is sent to the serverside Options List route and is used to create the ES query.
  */
-export interface OptionsListRequestBody
-  extends Pick<
-    OptionsListDSLControlState,
-    'fieldName' | 'searchTechnique' | 'sort' | 'selectedOptions'
-  > {
+export interface OptionsListRequestBody {
+  fieldName: OptionsListDSLControlState['field_name'];
+  searchTechnique?: OptionsListDSLControlState['search_technique'];
+  sort?: OptionsListDSLControlState['sort'];
+  selectedOptions?: OptionsListDSLControlState['selected_options'];
+
   runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
-  allowExpensiveQueries: boolean;
   ignoreValidations?: boolean;
   filters?: Array<{ bool: BoolQuery }>;
   runPastTimeout?: boolean;

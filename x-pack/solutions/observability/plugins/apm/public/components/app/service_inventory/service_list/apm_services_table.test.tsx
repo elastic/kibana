@@ -21,6 +21,8 @@ import { ServiceInventoryFieldName } from '../../../../../common/service_invento
 import type { ServiceListItem } from '../../../../../common/service_inventory';
 import { fromQuery } from '../../../shared/links/url_helpers';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { mockTelemetryClient } from '../../../../services/telemetry/__mocks__/telemetry_client_mock';
+import { EuiThemeProvider } from '@elastic/eui';
 
 jest.mock('../../../../hooks/use_breakpoints', () => ({
   useBreakpoints: () => ({
@@ -36,30 +38,36 @@ jest.mock('../../../../hooks/use_fallback_to_transactions_fetcher', () => ({
   }),
 }));
 
+const mockKibanaServices = {
+  triggersActionsUi: {
+    ruleTypeRegistry: {
+      get: jest.fn(),
+      list: jest.fn().mockReturnValue([]),
+    },
+    actionTypeRegistry: {
+      get: jest.fn(),
+      list: jest.fn().mockReturnValue([]),
+    },
+    getAddRuleFlyout: jest.fn().mockReturnValue(null),
+  },
+  slo: {
+    getCreateSLOFormFlyout: jest.fn().mockReturnValue(null),
+  },
+  uiSettings: {
+    get: jest.fn().mockReturnValue(false),
+  },
+  apmSourcesAccess: {
+    getApmIndexSettings: jest.fn().mockResolvedValue({ apmIndexSettings: [] }),
+  },
+  telemetry: mockTelemetryClient,
+};
+
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
     ...original,
     useKibana: () => ({
-      services: {
-        triggersActionsUi: {
-          ruleTypeRegistry: {
-            get: jest.fn(),
-            list: jest.fn().mockReturnValue([]),
-          },
-          actionTypeRegistry: {
-            get: jest.fn(),
-            list: jest.fn().mockReturnValue([]),
-          },
-          getAddRuleFlyout: jest.fn().mockReturnValue(null),
-        },
-        slo: {
-          getCreateSLOFormFlyout: jest.fn().mockReturnValue(null),
-        },
-        uiSettings: {
-          get: jest.fn().mockReturnValue(false),
-        },
-      },
+      services: mockKibanaServices,
     }),
   };
 });
@@ -112,15 +120,33 @@ const mockServices: ServiceListItem[] = [
 ];
 
 function createMockServiceActions({
-  showActionsColumn = true,
+  hasDiscoverActions = true,
   hasAlertActions = true,
   hasSloActions = true,
 }: {
-  showActionsColumn?: boolean;
+  hasDiscoverActions?: boolean;
   hasAlertActions?: boolean;
   hasSloActions?: boolean;
 } = {}) {
   const actions = [];
+
+  if (hasDiscoverActions) {
+    actions.push({
+      id: 'discover',
+      actions: [
+        {
+          id: 'servicesTable-openTracesInDiscover',
+          name: 'Open traces in Discover',
+          href: jest.fn().mockReturnValue('http://discover/traces'),
+        },
+        {
+          id: 'servicesTable-openLogsInDiscover',
+          name: 'Open logs in Discover',
+          href: jest.fn().mockReturnValue('http://discover/logs'),
+        },
+      ],
+    });
+  }
 
   if (hasAlertActions) {
     actions.push({
@@ -158,7 +184,7 @@ function createMockServiceActions({
     });
   }
 
-  return { actions, showActionsColumn };
+  return actions;
 }
 
 function renderApmServicesTable({
@@ -178,8 +204,11 @@ function renderApmServicesTable({
 }) {
   const defaultSortFn = (items: ServiceListItem[]) => items;
 
+  // TODO: This should be replaced with renderWithKibanaRenderContext, which would eliminate
+  // the need for <EuiThemeProvider> and <IntlProvider> wrappers, but that's currently
+  // impossible with the way <MockApmPluginContextWrapper> is shaped
   return render(
-    <IntlProvider locale="en">
+    <EuiThemeProvider>
       <MockApmPluginContextWrapper history={history}>
         <ApmServicesTable
           status={status}
@@ -196,7 +225,7 @@ function renderApmServicesTable({
           maxCountExceeded={false}
         />
       </MockApmPluginContextWrapper>
-    </IntlProvider>
+    </EuiThemeProvider>
   );
 }
 
@@ -594,55 +623,18 @@ describe('ApmServicesTable', () => {
   });
 
   describe('actions column', () => {
-    it('renders actions column when user has alert permissions', async () => {
-      mockUseServiceActions.mockReturnValue(
-        createMockServiceActions({
-          showActionsColumn: true,
-          hasAlertActions: true,
-          hasSloActions: false,
-        })
-      );
+    it('renders actions column', async () => {
+      mockUseServiceActions.mockReturnValue(createMockServiceActions());
 
       renderApmServicesTable({ history });
 
       expect(await screen.findByRole('table')).toBeInTheDocument();
       expect(screen.getByText('Actions')).toBeInTheDocument();
-    });
-
-    it('renders actions column when user has SLO permissions', async () => {
-      mockUseServiceActions.mockReturnValue(
-        createMockServiceActions({
-          showActionsColumn: true,
-          hasAlertActions: false,
-          hasSloActions: true,
-        })
-      );
-
-      renderApmServicesTable({ history });
-
-      expect(await screen.findByRole('table')).toBeInTheDocument();
-      expect(screen.getByText('Actions')).toBeInTheDocument();
-    });
-
-    it('does not render actions column when user has no permissions', async () => {
-      mockUseServiceActions.mockReturnValue(
-        createMockServiceActions({
-          showActionsColumn: false,
-          hasAlertActions: false,
-          hasSloActions: false,
-        })
-      );
-
-      renderApmServicesTable({ history });
-
-      expect(await screen.findByRole('table')).toBeInTheDocument();
-      expect(screen.queryByText('Actions')).not.toBeInTheDocument();
     });
 
     it('opens actions menu when clicking action button', async () => {
       mockUseServiceActions.mockReturnValue(
         createMockServiceActions({
-          showActionsColumn: true,
           hasAlertActions: true,
           hasSloActions: true,
         })
@@ -658,6 +650,12 @@ describe('ApmServicesTable', () => {
       fireEvent.click(actionButtons[0]);
 
       await waitFor(() => {
+        expect(
+          screen.getByTestId('apmManagedTableActionsMenuItem-servicesTable-openTracesInDiscover')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByTestId('apmManagedTableActionsMenuItem-servicesTable-openLogsInDiscover')
+        ).toBeInTheDocument();
         expect(screen.getByTestId('apmManagedTableActionsMenuGroup-alerts')).toBeInTheDocument();
         expect(screen.getByTestId('apmManagedTableActionsMenuGroup-slos')).toBeInTheDocument();
       });
@@ -666,7 +664,6 @@ describe('ApmServicesTable', () => {
     it('shows alert actions when user has alert permissions', async () => {
       mockUseServiceActions.mockReturnValue(
         createMockServiceActions({
-          showActionsColumn: true,
           hasAlertActions: true,
           hasSloActions: false,
         })
@@ -699,7 +696,6 @@ describe('ApmServicesTable', () => {
     it('shows SLO actions when user has SLO permissions', async () => {
       mockUseServiceActions.mockReturnValue(
         createMockServiceActions({
-          showActionsColumn: true,
           hasAlertActions: false,
           hasSloActions: true,
         })
@@ -721,6 +717,60 @@ describe('ApmServicesTable', () => {
           screen.getByTestId('apmManagedTableActionsMenuItem-createAvailabilitySlo')
         ).toBeInTheDocument();
         expect(screen.getByTestId('apmManagedTableActionsMenuItem-manageSlos')).toBeInTheDocument();
+      });
+    });
+
+    it('shows Discover actions in the menu', async () => {
+      mockUseServiceActions.mockReturnValue(
+        createMockServiceActions({
+          hasDiscoverActions: true,
+          hasAlertActions: false,
+          hasSloActions: false,
+        })
+      );
+
+      renderApmServicesTable({ history });
+
+      await screen.findByRole('table');
+
+      const actionButtons = screen.getAllByTestId('apmManagedTableActionsCellButton');
+      fireEvent.click(actionButtons[0]);
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId('apmManagedTableActionsMenuItem-servicesTable-openTracesInDiscover')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByTestId('apmManagedTableActionsMenuItem-servicesTable-openLogsInDiscover')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('always shows Discover actions alongside alert and SLO actions', async () => {
+      mockUseServiceActions.mockReturnValue(
+        createMockServiceActions({
+          hasDiscoverActions: true,
+          hasAlertActions: true,
+          hasSloActions: true,
+        })
+      );
+
+      renderApmServicesTable({ history });
+
+      await screen.findByRole('table');
+
+      const actionButtons = screen.getAllByTestId('apmManagedTableActionsCellButton');
+      fireEvent.click(actionButtons[0]);
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId('apmManagedTableActionsMenuItem-servicesTable-openTracesInDiscover')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByTestId('apmManagedTableActionsMenuItem-servicesTable-openLogsInDiscover')
+        ).toBeInTheDocument();
+        expect(screen.getByTestId('apmManagedTableActionsMenuGroup-alerts')).toBeInTheDocument();
+        expect(screen.getByTestId('apmManagedTableActionsMenuGroup-slos')).toBeInTheDocument();
       });
     });
   });
@@ -847,7 +897,9 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      expect(screen.getByTestId('serviceInventorySloViolatedBadge')).toBeInTheDocument();
+      const sloBadge = screen.getByTestId('apmSloBadge');
+      expect(sloBadge).toBeInTheDocument();
+      expect(sloBadge).toHaveAttribute('data-slo-status', 'violated');
       expect(screen.getByText('2 Violated')).toBeInTheDocument();
     });
 
@@ -864,7 +916,9 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      expect(screen.getByTestId('serviceInventorySloDegradingBadge')).toBeInTheDocument();
+      const sloBadge = screen.getByTestId('apmSloBadge');
+      expect(sloBadge).toBeInTheDocument();
+      expect(sloBadge).toHaveAttribute('data-slo-status', 'degrading');
       expect(screen.getByText('3 Degrading')).toBeInTheDocument();
     });
 
@@ -881,7 +935,9 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      expect(screen.getByTestId('serviceInventorySloHealthyBadge')).toBeInTheDocument();
+      const sloBadge = screen.getByTestId('apmSloBadge');
+      expect(sloBadge).toBeInTheDocument();
+      expect(screen.getByTestId('apmSloBadge')).toHaveAttribute('data-slo-status', 'healthy');
       expect(screen.getByText('Healthy')).toBeInTheDocument();
     });
 
@@ -898,11 +954,13 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      expect(screen.getByTestId('serviceInventorySloNoDataBadge')).toBeInTheDocument();
+      const badge = screen.getByTestId('apmSloBadge');
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveAttribute('data-slo-status', 'noData');
       expect(screen.getByText('No data')).toBeInTheDocument();
     });
 
-    it('does not render SLO badge when service has no SLO status', async () => {
+    it('renders "no SLOs" badge when service has no SLO status', async () => {
       const servicesWithoutSlos: ServiceListItem[] = [
         {
           ...mockService,
@@ -915,10 +973,9 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      expect(screen.queryByTestId('serviceInventorySloViolatedBadge')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('serviceInventorySloDegradingBadge')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('serviceInventorySloHealthyBadge')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('serviceInventorySloNoDataBadge')).not.toBeInTheDocument();
+      const badge = screen.queryByTestId('apmSloBadge');
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveAttribute('data-slo-status', 'noSLOs');
     });
 
     it('opens SLO overview flyout when clicking SLO badge', async () => {
@@ -934,7 +991,7 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      const sloBadge = screen.getByTestId('serviceInventorySloViolatedBadge');
+      const sloBadge = screen.getByTestId('apmSloBadge');
       fireEvent.click(sloBadge);
 
       await waitFor(() => {

@@ -46,7 +46,6 @@
       "aiops",
       "fieldsMetadata",
       "logsDataAccess",
-      "embeddableEnhanced",
       "apmSourcesAccess",
       "fileUpload",
       "cps"
@@ -56,7 +55,8 @@
       "kibanaReact",
       "unifiedSearch",
       "savedObjects",
-      "presentationPanel"
+      "presentationPanel",
+      "esql"
     ],
     "extraPublicDirs": ["common"]
   }

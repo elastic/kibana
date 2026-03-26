@@ -25,11 +25,13 @@
       "cloud",
       "fleet",
       "actions",
-      "discover"
+      "discover",
+      "cases"
     ],
     "optionalPlugins": [
       "securitySolutionEss",
-      "automaticImport"
+      "automaticImport",
+      "usageApi"
     ]
   }
 }

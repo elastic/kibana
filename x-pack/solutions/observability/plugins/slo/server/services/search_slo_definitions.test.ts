@@ -12,6 +12,71 @@ import { SearchSLODefinitions } from './search_slo_definitions';
 import type { SLOSettings } from '../domain/models';
 import { DEFAULT_SETTINGS } from './slo_settings_repository';
 
+interface MockSummaryDocOptions {
+  id?: string;
+  name?: string;
+  groupBy?: unknown;
+  kibanaUrl?: string;
+  remoteName?: string;
+}
+
+/**
+ * Creates a mock Elasticsearch response with summary documents.
+ * This helper generates realistic summary document structures for testing.
+ */
+function createMockSummaryDocResponse(docs: MockSummaryDocOptions[] = []): {
+  aggregations: { slo_definitions: { buckets: any[]; after_key?: Record<string, unknown> } };
+} {
+  const buckets = docs.map((doc) => ({
+    key: { slo_id: doc.id || 'slo-1' },
+    slo_details: {
+      hits: {
+        hits: [
+          {
+            _source: {
+              ...(doc.name !== undefined || doc.groupBy !== undefined
+                ? {
+                    slo: {
+                      id: doc.id || 'slo-1',
+                      ...(doc.name !== undefined && { name: doc.name }),
+                      ...(doc.groupBy !== undefined && { groupBy: doc.groupBy }),
+                    },
+                  }
+                : {}),
+              ...(doc.kibanaUrl && { kibanaUrl: doc.kibanaUrl }),
+            },
+            fields: {
+              remoteName: [doc.remoteName || 'local'],
+            },
+          },
+        ],
+      },
+    },
+  }));
+
+  return {
+    aggregations: {
+      slo_definitions: {
+        buckets,
+      },
+    },
+  };
+}
+
+/**
+ * Creates a mock Elasticsearch response with multiple summary documents and pagination info.
+ */
+function createMockSummaryDocResponseWithPagination(
+  docs: MockSummaryDocOptions[] = [],
+  afterKey?: Record<string, unknown>
+): any {
+  const response = createMockSummaryDocResponse(docs);
+  if (afterKey) {
+    response.aggregations.slo_definitions.after_key = afterKey;
+  }
+  return response;
+}
+
 describe('SearchSLODefinitions', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
   let mockLogger: jest.Mocked<Logger>;
@@ -37,35 +102,13 @@ describe('SearchSLODefinitions', () => {
 
   describe('happy path', () => {
     it('returns SLO definitions with basic structure', async () => {
-      const mockResponse = {
-        aggregations: {
-          slo_definitions: {
-            buckets: [
-              {
-                key: { slo_id: 'slo-1' },
-                slo_details: {
-                  hits: {
-                    hits: [
-                      {
-                        _source: {
-                          slo: {
-                            id: 'slo-1',
-                            name: 'Test SLO',
-                            groupBy: ['host'],
-                          },
-                        },
-                        fields: {
-                          remoteName: ['local'],
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
-            ],
-          },
+      const mockResponse = createMockSummaryDocResponse([
+        {
+          id: 'slo-1',
+          name: 'Test SLO',
+          groupBy: ['host'],
         },
-      };
+      ]);
 
       mockEsClient.search.mockResolvedValueOnce(mockResponse as any);
 
@@ -96,13 +139,7 @@ describe('SearchSLODefinitions', () => {
     });
 
     it('handles search query parameter', async () => {
-      const mockResponse = {
-        aggregations: {
-          slo_definitions: {
-            buckets: [],
-          },
-        },
-      };
+      const mockResponse = createMockSummaryDocResponse();
 
       mockEsClient.search.mockResolvedValueOnce(mockResponse as any);
 
@@ -130,13 +167,7 @@ describe('SearchSLODefinitions', () => {
     });
 
     it('handles size parameter', async () => {
-      const mockResponse = {
-        aggregations: {
-          slo_definitions: {
-            buckets: [],
-          },
-        },
-      };
+      const mockResponse = createMockSummaryDocResponse();
 
       mockEsClient.search.mockResolvedValueOnce(mockResponse as any);
 
@@ -156,38 +187,44 @@ describe('SearchSLODefinitions', () => {
       );
     });
 
+    it('throws error if size is less than 1', async () => {
+      await expect(searchSLODefinitions.execute({ size: 0 })).rejects.toThrow(
+        'Size must be between 1 and 100'
+      );
+      await expect(searchSLODefinitions.execute({ size: -5 })).rejects.toThrow(
+        'Size must be between 1 and 100'
+      );
+    });
+
+    it('throws error if size is greater than 100', async () => {
+      await expect(searchSLODefinitions.execute({ size: 101 })).rejects.toThrow(
+        'Size must be between 1 and 100'
+      );
+      await expect(searchSLODefinitions.execute({ size: 500 })).rejects.toThrow(
+        'Size must be between 1 and 100'
+      );
+    });
+
+    it('accepts size within valid range', async () => {
+      const mockResponse = createMockSummaryDocResponse();
+      mockEsClient.search.mockResolvedValueOnce(mockResponse as any);
+
+      await expect(searchSLODefinitions.execute({ size: 1 })).resolves.toBeDefined();
+      await expect(searchSLODefinitions.execute({ size: 100 })).resolves.toBeDefined();
+    });
+
     it('handles searchAfter pagination', async () => {
       const afterKey = { slo_id: 'slo-1' };
-      const mockResponse = {
-        aggregations: {
-          slo_definitions: {
-            buckets: [
-              {
-                key: { slo_id: 'slo-2' },
-                slo_details: {
-                  hits: {
-                    hits: [
-                      {
-                        _source: {
-                          slo: {
-                            id: 'slo-2',
-                            name: 'Second SLO',
-                            groupBy: ALL_VALUE,
-                          },
-                        },
-                        fields: {
-                          remoteName: ['local'],
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
-            ],
-            after_key: { slo_id: 'slo-2' },
+      const mockResponse = createMockSummaryDocResponseWithPagination(
+        [
+          {
+            id: 'slo-2',
+            name: 'Second SLO',
+            groupBy: ALL_VALUE,
           },
-        },
-      };
+        ],
+        { slo_id: 'slo-2' }
+      );
 
       mockEsClient.search.mockResolvedValueOnce(mockResponse as any);
 
@@ -213,35 +250,13 @@ describe('SearchSLODefinitions', () => {
     });
 
     it('normalizes groupBy array correctly', async () => {
-      const mockResponse = {
-        aggregations: {
-          slo_definitions: {
-            buckets: [
-              {
-                key: { slo_id: 'slo-1' },
-                slo_details: {
-                  hits: {
-                    hits: [
-                      {
-                        _source: {
-                          slo: {
-                            id: 'slo-1',
-                            name: 'Test SLO',
-                            groupBy: ['host', 'datacenter'],
-                          },
-                        },
-                        fields: {
-                          remoteName: ['local'],
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
-            ],
-          },
+      const mockResponse = createMockSummaryDocResponse([
+        {
+          id: 'slo-1',
+          name: 'Test SLO',
+          groupBy: ['host', 'datacenter'],
         },
-      };
+      ]);
 
       mockEsClient.search.mockResolvedValueOnce(mockResponse as any);
 
@@ -251,35 +266,13 @@ describe('SearchSLODefinitions', () => {
     });
 
     it('filters out ALL_VALUE from groupBy array', async () => {
-      const mockResponse = {
-        aggregations: {
-          slo_definitions: {
-            buckets: [
-              {
-                key: { slo_id: 'slo-1' },
-                slo_details: {
-                  hits: {
-                    hits: [
-                      {
-                        _source: {
-                          slo: {
-                            id: 'slo-1',
-                            name: 'Test SLO',
-                            groupBy: ['host', ALL_VALUE, 'datacenter'],
-                          },
-                        },
-                        fields: {
-                          remoteName: ['local'],
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
-            ],
-          },
+      const mockResponse = createMockSummaryDocResponse([
+        {
+          id: 'slo-1',
+          name: 'Test SLO',
+          groupBy: ['host', ALL_VALUE, 'datacenter'],
         },
-      };
+      ]);
 
       mockEsClient.search.mockResolvedValueOnce(mockResponse as any);
 
@@ -289,35 +282,13 @@ describe('SearchSLODefinitions', () => {
     });
 
     it('returns empty array when groupBy is ALL_VALUE', async () => {
-      const mockResponse = {
-        aggregations: {
-          slo_definitions: {
-            buckets: [
-              {
-                key: { slo_id: 'slo-1' },
-                slo_details: {
-                  hits: {
-                    hits: [
-                      {
-                        _source: {
-                          slo: {
-                            id: 'slo-1',
-                            name: 'Test SLO',
-                            groupBy: ALL_VALUE,
-                          },
-                        },
-                        fields: {
-                          remoteName: ['local'],
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
-            ],
-          },
+      const mockResponse = createMockSummaryDocResponse([
+        {
+          id: 'slo-1',
+          name: 'Test SLO',
+          groupBy: ALL_VALUE,
         },
-      };
+      ]);
 
       mockEsClient.search.mockResolvedValueOnce(mockResponse as any);
 
@@ -327,36 +298,15 @@ describe('SearchSLODefinitions', () => {
     });
 
     it('handles remote cluster information', async () => {
-      const mockResponse = {
-        aggregations: {
-          slo_definitions: {
-            buckets: [
-              {
-                key: { slo_id: 'slo-1' },
-                slo_details: {
-                  hits: {
-                    hits: [
-                      {
-                        _source: {
-                          slo: {
-                            id: 'slo-1',
-                            name: 'Remote SLO',
-                            groupBy: ['host'],
-                          },
-                          kibanaUrl: 'https://remote-kibana.example.com',
-                        },
-                        fields: {
-                          remoteName: ['remote-cluster'],
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
-            ],
-          },
+      const mockResponse = createMockSummaryDocResponse([
+        {
+          id: 'slo-1',
+          name: 'Remote SLO',
+          groupBy: ['host'],
+          kibanaUrl: 'https://remote-kibana.example.com',
+          remoteName: 'remote-cluster',
         },
-      };
+      ]);
 
       mockEsClient.search.mockResolvedValueOnce(mockResponse as any);
 
@@ -374,35 +324,14 @@ describe('SearchSLODefinitions', () => {
     });
 
     it('handles local remoteName correctly', async () => {
-      const mockResponse = {
-        aggregations: {
-          slo_definitions: {
-            buckets: [
-              {
-                key: { slo_id: 'slo-1' },
-                slo_details: {
-                  hits: {
-                    hits: [
-                      {
-                        _source: {
-                          slo: {
-                            id: 'slo-1',
-                            name: 'Local SLO',
-                            groupBy: [],
-                          },
-                        },
-                        fields: {
-                          remoteName: ['local'],
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
-            ],
-          },
+      const mockResponse = createMockSummaryDocResponse([
+        {
+          id: 'slo-1',
+          name: 'Local SLO',
+          groupBy: [],
+          remoteName: 'local',
         },
-      };
+      ]);
 
       mockEsClient.search.mockResolvedValueOnce(mockResponse as any);
 
@@ -448,13 +377,7 @@ describe('SearchSLODefinitions', () => {
     });
 
     it('handles empty results', async () => {
-      const mockResponse = {
-        aggregations: {
-          slo_definitions: {
-            buckets: [],
-          },
-        },
-      };
+      const mockResponse = createMockSummaryDocResponse();
 
       mockEsClient.search.mockResolvedValueOnce(mockResponse as any);
 
@@ -496,13 +419,7 @@ describe('SearchSLODefinitions', () => {
     });
 
     it('handles invalid searchAfter JSON gracefully', async () => {
-      const mockResponse = {
-        aggregations: {
-          slo_definitions: {
-            buckets: [],
-          },
-        },
-      };
+      const mockResponse = createMockSummaryDocResponse();
 
       mockEsClient.search.mockResolvedValueOnce(mockResponse as any);
 
@@ -522,35 +439,14 @@ describe('SearchSLODefinitions', () => {
     });
 
     it('handles array remoteName field', async () => {
-      const mockResponse = {
-        aggregations: {
-          slo_definitions: {
-            buckets: [
-              {
-                key: { slo_id: 'slo-1' },
-                slo_details: {
-                  hits: {
-                    hits: [
-                      {
-                        _source: {
-                          slo: {
-                            id: 'slo-1',
-                            name: 'Test SLO',
-                            groupBy: [],
-                          },
-                        },
-                        fields: {
-                          remoteName: ['remote-cluster'],
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
-            ],
-          },
+      const mockResponse = createMockSummaryDocResponse([
+        {
+          id: 'slo-1',
+          name: 'Test SLO',
+          groupBy: [],
+          remoteName: 'remote-cluster',
         },
-      };
+      ]);
 
       mockEsClient.search.mockResolvedValueOnce(mockResponse as any);
 
@@ -562,35 +458,13 @@ describe('SearchSLODefinitions', () => {
 
   describe('groupBy normalization', () => {
     it('handles string groupBy', async () => {
-      const mockResponse = {
-        aggregations: {
-          slo_definitions: {
-            buckets: [
-              {
-                key: { slo_id: 'slo-1' },
-                slo_details: {
-                  hits: {
-                    hits: [
-                      {
-                        _source: {
-                          slo: {
-                            id: 'slo-1',
-                            name: 'Test SLO',
-                            groupBy: 'host',
-                          },
-                        },
-                        fields: {
-                          remoteName: ['local'],
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
-            ],
-          },
+      const mockResponse = createMockSummaryDocResponse([
+        {
+          id: 'slo-1',
+          name: 'Test SLO',
+          groupBy: 'host',
         },
-      };
+      ]);
 
       mockEsClient.search.mockResolvedValueOnce(mockResponse as any);
 
@@ -600,35 +474,13 @@ describe('SearchSLODefinitions', () => {
     });
 
     it('handles null groupBy', async () => {
-      const mockResponse = {
-        aggregations: {
-          slo_definitions: {
-            buckets: [
-              {
-                key: { slo_id: 'slo-1' },
-                slo_details: {
-                  hits: {
-                    hits: [
-                      {
-                        _source: {
-                          slo: {
-                            id: 'slo-1',
-                            name: 'Test SLO',
-                            groupBy: null,
-                          },
-                        },
-                        fields: {
-                          remoteName: ['local'],
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
-            ],
-          },
+      const mockResponse = createMockSummaryDocResponse([
+        {
+          id: 'slo-1',
+          name: 'Test SLO',
+          groupBy: null,
         },
-      };
+      ]);
 
       mockEsClient.search.mockResolvedValueOnce(mockResponse as any);
 
@@ -638,34 +490,12 @@ describe('SearchSLODefinitions', () => {
     });
 
     it('handles undefined groupBy', async () => {
-      const mockResponse = {
-        aggregations: {
-          slo_definitions: {
-            buckets: [
-              {
-                key: { slo_id: 'slo-1' },
-                slo_details: {
-                  hits: {
-                    hits: [
-                      {
-                        _source: {
-                          slo: {
-                            id: 'slo-1',
-                            name: 'Test SLO',
-                          },
-                        },
-                        fields: {
-                          remoteName: ['local'],
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
-            ],
-          },
+      const mockResponse = createMockSummaryDocResponse([
+        {
+          id: 'slo-1',
+          name: 'Test SLO',
         },
-      };
+      ]);
 
       mockEsClient.search.mockResolvedValueOnce(mockResponse as any);
 

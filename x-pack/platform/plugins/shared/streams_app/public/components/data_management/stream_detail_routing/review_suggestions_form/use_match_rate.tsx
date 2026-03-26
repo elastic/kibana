@@ -7,8 +7,8 @@
 
 import type { Streams } from '@kbn/streams-schema';
 import { useEffect, useMemo } from 'react';
-import { useSelector } from '@xstate5/react';
-import { createActor } from 'xstate5';
+import { useSelector } from '@xstate/react';
+import { createActor } from 'xstate';
 import { getPercentageFormatter } from '../../../../util/formatters';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import type { PartitionSuggestion } from './use_review_suggestions_form';

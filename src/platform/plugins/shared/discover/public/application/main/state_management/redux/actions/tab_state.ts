@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isFunction } from 'lodash';
+import { isFunction, isEqual } from 'lodash';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/common';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import {
@@ -26,20 +26,32 @@ import {
   internalStateSlice,
   type InternalStateThunkActionCreator,
   type TabActionPayload,
+  transitionedFromEsqlToDataView,
+  transitionedFromDataViewToEsql,
 } from '../internal_state';
 import { selectTab } from '../selectors';
-import { selectTabRuntimeState } from '../runtime_state';
+import { selectDataSourceProfileId, selectTabRuntimeState } from '../runtime_state';
 import type {
   DiscoverAppState,
   DiscoverInternalState,
   TabState,
   UpdateESQLQueryActionPayload,
-  UpdateCascadeGroupingActionPayload,
 } from '../types';
 import { addLog } from '../../../../../utils/add_log';
 import { FetchStatus } from '../../../../types';
 
-type AppStatePayload = TabActionPayload<Pick<TabState, 'appState'>>;
+export interface RawAppStatePayload {
+  appState: DiscoverAppState;
+  /**
+   * Marks app state changes that come from URL syncing or other internal updates
+   * instead of direct user actions. These updates skip profile state snapshot
+   * syncing so they do not overwrite restorable profile state. This should
+   * rarely be needed outside of URL syncing and specific edge cases.
+   */
+  isSystemTriggered?: boolean;
+}
+
+type AppStatePayload = TabActionPayload<RawAppStatePayload>;
 
 const mergeAppState = (
   currentState: DiscoverInternalState,
@@ -50,6 +62,20 @@ const mergeAppState = (
   return { mergedAppState, hasStateChanges: !isEqualState(currentAppState, mergedAppState) };
 };
 
+export const setAppState: InternalStateThunkActionCreator<[AppStatePayload]> = (payload) =>
+  function setAppStateThunkFn(dispatch, _, { runtimeStateManager }) {
+    const profileId = selectDataSourceProfileId(runtimeStateManager, payload.tabId);
+    dispatch(internalStateSlice.actions.setAppState({ ...payload, profileId }));
+  };
+
+export const syncProfileStateSnapshot: InternalStateThunkActionCreator<
+  [TabActionPayload<{ appState?: DiscoverAppState }>]
+> = (payload) =>
+  function syncProfileStateSnapshotThunkFn(dispatch, _, { runtimeStateManager }) {
+    const profileId = selectDataSourceProfileId(runtimeStateManager, payload.tabId);
+    dispatch(internalStateSlice.actions.syncProfileStateSnapshot({ ...payload, profileId }));
+  };
+
 /**
  * Partially update the tab app state, merging with existing state and pushing to URL history
  */
@@ -58,9 +84,7 @@ export const updateAppState: InternalStateThunkActionCreator<[AppStatePayload]> 
     const { mergedAppState, hasStateChanges } = mergeAppState(getState(), payload);
 
     if (hasStateChanges) {
-      dispatch(
-        internalStateSlice.actions.setAppState({ tabId: payload.tabId, appState: mergedAppState })
-      );
+      dispatch(setAppState({ ...payload, appState: mergedAppState }));
     }
   };
 
@@ -79,6 +103,15 @@ export const updateAppStateAndReplaceUrl: InternalStateThunkActionCreator<
     }
 
     const { mergedAppState } = mergeAppState(currentState, payload);
+
+    if (!payload.isSystemTriggered) {
+      dispatch(
+        syncProfileStateSnapshot({
+          tabId: payload.tabId,
+          appState: mergedAppState,
+        })
+      );
+    }
 
     await urlStateStorage.set(APP_STATE_URL_KEY, mergedAppState, { replace: true });
   };
@@ -109,6 +142,37 @@ export const updateGlobalState: InternalStateThunkActionCreator<[GlobalStatePayl
         internalStateSlice.actions.setGlobalState({
           tabId: payload.tabId,
           globalState: mergedGlobalState,
+        })
+      );
+    }
+  };
+
+type AttributesPayload = TabActionPayload<{ attributes: Partial<TabState['attributes']> }>;
+
+const mergeAttributes = (
+  currentState: DiscoverInternalState,
+  { tabId, attributes }: AttributesPayload
+) => {
+  const currentAttributes = selectTab(currentState, tabId).attributes;
+  const mergedAttributes = { ...currentAttributes, ...attributes };
+  return {
+    mergedAttributes,
+    hasStateChanges: !isEqual(currentAttributes, mergedAttributes),
+  };
+};
+
+/**
+ * Partially update the tab attributes, merging with existing state
+ */
+export const updateAttributes: InternalStateThunkActionCreator<[AttributesPayload]> = (payload) =>
+  function updateAttributesThunkFn(dispatch, getState) {
+    const { mergedAttributes, hasStateChanges } = mergeAttributes(getState(), payload);
+
+    if (hasStateChanges) {
+      dispatch(
+        internalStateSlice.actions.setAttributes({
+          tabId: payload.tabId,
+          attributes: mergedAttributes,
         })
       );
     }
@@ -160,6 +224,14 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataViewId: string }>]
 > = ({ tabId, dataViewId }) =>
   function transitionFromESQLToDataViewThunkFn(dispatch) {
+    // Mark all profile state fields to reset when transitioning to data view mode
+    dispatch(
+      internalStateSlice.actions.setProfileStateFieldsToReset({
+        tabId,
+        fieldsToReset: 'all',
+      })
+    );
+
     dispatch(
       updateAppState({
         tabId,
@@ -176,6 +248,8 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
         },
       })
     );
+
+    dispatch(transitionedFromEsqlToDataView({ tabId }));
   };
 
 const clearTimeFieldFromSort = (
@@ -197,11 +271,19 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView }>]
 > = ({ tabId, dataView }) =>
   function transitionFromDataViewToESQLThunkFn(dispatch, getState) {
+    // Mark all profile state fields to reset when transitioning to ES|QL mode
+    dispatch(
+      internalStateSlice.actions.setProfileStateFieldsToReset({
+        tabId,
+        fieldsToReset: 'all',
+      })
+    );
+
     const currentState = getState();
     const appState = selectTab(currentState, tabId).appState;
     const { query, sort } = appState;
     const filterQuery = query && isOfQueryType(query) ? query : undefined;
-    const queryString = getInitialESQLQuery(dataView, true, filterQuery);
+    const queryString = getInitialESQLQuery(dataView, filterQuery);
     const clearedSort = clearTimeFieldFromSort(sort, dataView?.timeFieldName);
 
     dispatch(
@@ -221,6 +303,8 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
 
     // clears pinned filters
     dispatch(updateGlobalState({ tabId, globalState: { filters: [] } }));
+
+    dispatch(transitionedFromDataViewToEsql({ tabId }));
   };
 
 /**
@@ -264,7 +348,7 @@ export const onQuerySubmit: InternalStateThunkActionCreator<
     getState,
     { searchSessionManager, runtimeStateManager, services }
   ) {
-    const { scopedEbtManager$, stateContainer$ } = selectTabRuntimeState(
+    const { scopedEbtManager$, dataStateContainer$ } = selectTabRuntimeState(
       runtimeStateManager,
       tabId
     );
@@ -285,34 +369,8 @@ export const onQuerySubmit: InternalStateThunkActionCreator<
       // remove the search session if the given query is not just updated
       searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
       addLog('onQuerySubmit triggers data fetching');
-      stateContainer$.getValue()?.dataState.fetch();
+      dataStateContainer$.getValue()?.fetch();
     }
-  };
-
-/**
- * Triggered when the user changes the grouping of the cascade layout
- */
-export const updateCascadeGrouping: InternalStateThunkActionCreator<
-  [UpdateCascadeGroupingActionPayload]
-> = ({ tabId, groupingOrUpdater: groupingUpdater }) =>
-  async function updateCascadeGroupingThunkFn(dispatch, getState) {
-    addLog('updateCascadeGrouping');
-    const currentState = getState();
-    const { uiState } = selectTab(currentState, tabId);
-
-    const cascadeGrouping = isFunction(groupingUpdater)
-      ? groupingUpdater(uiState.cascadedDocuments!.selectedCascadeGroups)
-      : groupingUpdater;
-
-    dispatch(
-      internalStateSlice.actions.setCascadeUiState({
-        tabId,
-        cascadeUiState: {
-          availableCascadeGroups: uiState.cascadedDocuments!.availableCascadeGroups.slice(0),
-          selectedCascadeGroups: cascadeGrouping,
-        },
-      })
-    );
   };
 
 /**
@@ -324,8 +382,8 @@ export const fetchData: InternalStateThunkActionCreator<
 > = ({ tabId, initial }) =>
   function fetchDataThunkFn(dispatch, getState, { runtimeStateManager }) {
     addLog('fetchData', { initial });
-    const { stateContainer$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-    const dataStateContainer = stateContainer$.getValue()?.dataState;
+    const { dataStateContainer$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const dataStateContainer = dataStateContainer$.getValue();
     if (!initial || dataStateContainer?.getInitialFetchStatus() === FetchStatus.LOADING) {
       dataStateContainer?.fetch();
     }

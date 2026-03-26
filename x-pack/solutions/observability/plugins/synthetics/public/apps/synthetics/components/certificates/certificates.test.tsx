@@ -13,7 +13,6 @@ describe('CertificatesPage', () => {
   it('renders expected elements for valid props', async () => {
     const { findByText } = render(<CertificatesPage />);
 
-    expect(await findByText(/data table \(empty\)/im)).toBeInTheDocument();
     expect(await findByText('No Certificates found.')).toBeInTheDocument();
   });
 });

@@ -153,6 +153,11 @@ export const PromotionRulesTable = () => {
         <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
       )}
       <EuiBasicTable
+        tableCaption={
+          currentTab === PromotionRuleTabs.management
+            ? i18n.INSTALLED_RULES_TAB
+            : i18n.RULE_MONITORING_TAB
+        }
         itemId="id"
         items={rules}
         noItemsMessage={NO_ITEMS_MESSAGE}
@@ -176,7 +181,7 @@ interface ColumnsProps {
 }
 
 const useRulesColumns = ({ currentTab }: ColumnsProps): Array<EuiBasicTableColumn<Rule>> => {
-  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
 
   const enabledColumn = useEnabledColumn({
     hasCRUDPermissions: canEditRules,

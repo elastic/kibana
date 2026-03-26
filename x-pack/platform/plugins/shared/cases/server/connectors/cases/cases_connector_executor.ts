@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import stringify from 'json-stable-stringify';
 import pMap from 'p-map';
 import { get, partition, pick } from 'lodash';
 import dateMath from '@kbn/datemath';
 import { CaseStatuses } from '@kbn/cases-components';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { Logger } from '@kbn/core/server';
-import { getFlattenedObject } from '@kbn/std';
+import { getFlattenedObject, stableStringify } from '@kbn/std';
 import type {
   CustomFieldsConfiguration,
   TemplatesConfiguration,
-  UserCommentAttachmentPayload,
 } from '../../../common/types/domain';
 import {
   MAX_ALERTS_PER_CASE,
@@ -27,7 +25,8 @@ import {
   MAX_SUFFIX_LENGTH,
   MAX_OPEN_CASES,
 } from '../../../common/constants';
-import type { BulkCreateCasesRequest } from '../../../common/types/api';
+import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import type { AttachmentRequestV2, BulkCreateCasesRequest } from '../../../common/types/api';
 import type { Case } from '../../../common';
 import { ConnectorTypes, AttachmentType } from '../../../common';
 import { INITIAL_ORACLE_RECORD_COUNTER, MAX_CONCURRENT_ES_REQUEST } from './constants';
@@ -61,6 +60,7 @@ interface CasesConnectorExecutorParams {
   casesService: CasesService;
   casesClient: CasesClient;
   spaceId: string;
+  isCasesAttachmentsEnabled?: boolean;
 }
 
 type GroupedAlertsWithOracleKey = CasesGroupedAlerts & { oracleKey: string };
@@ -74,6 +74,7 @@ export class CasesConnectorExecutor {
   private readonly casesService: CasesService;
   private readonly casesClient: CasesClient;
   private readonly spaceId: string;
+  private readonly isCasesAttachmentsEnabled: boolean;
 
   constructor({
     logger,
@@ -81,12 +82,14 @@ export class CasesConnectorExecutor {
     casesService,
     casesClient,
     spaceId,
+    isCasesAttachmentsEnabled = false,
   }: CasesConnectorExecutorParams) {
     this.logger = logger;
     this.casesOracleService = casesOracleService;
     this.casesService = casesService;
     this.casesClient = casesClient;
     this.spaceId = spaceId;
+    this.isCasesAttachmentsEnabled = isCasesAttachmentsEnabled;
   }
 
   public async execute(params: CasesConnectorRunParams) {
@@ -246,7 +249,7 @@ export class CasesConnectorExecutor {
 
     for (const alert of alertsWithAllGroupingFields) {
       const alertWithOnlyTheGroupingFields = pick(alert, uniqueGroupingByFields);
-      const groupingKey = stringify(alertWithOnlyTheGroupingFields);
+      const groupingKey = stableStringify(alertWithOnlyTheGroupingFields);
 
       if (this.logger.isLevelEnabled('debug')) {
         this.logger.debug(
@@ -265,7 +268,7 @@ export class CasesConnectorExecutor {
     if (noGroupedAlerts.length > 0) {
       const noGroupedGrouping = this.generateNoGroupAlertGrouping(params.groupingBy);
 
-      groupingMap.set(stringify(noGroupedGrouping), {
+      groupingMap.set(stableStringify(noGroupedGrouping), {
         alerts: noGroupedAlerts,
         grouping: noGroupedGrouping,
       });
@@ -1183,12 +1186,20 @@ export class CasesConnectorExecutor {
 
     const bulkCreateAlertsRequest: BulkCreateAlertsReq[] = casesUnderAlertLimit.map(
       ({ theCase, alerts, comments }) => {
-        const extraComments: UserCommentAttachmentPayload[] =
-          comments?.map((comment) => ({
-            type: AttachmentType.user,
-            comment,
-            owner: theCase.owner,
-          })) ?? [];
+        const extraComments: AttachmentRequestV2[] =
+          comments?.map((comment) =>
+            this.isCasesAttachmentsEnabled
+              ? {
+                  type: COMMENT_ATTACHMENT_TYPE,
+                  data: { content: comment },
+                  owner: theCase.owner,
+                }
+              : {
+                  type: AttachmentType.user,
+                  comment,
+                  owner: theCase.owner,
+                }
+          ) ?? [];
         return {
           caseId: theCase.id,
           attachments: [

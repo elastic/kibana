@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { isSchema } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { isSchema, DeepStrict } from '@kbn/zod-helpers/v4';
 import type { Condition } from './conditions';
 import { conditionSchema } from './conditions';
 import type { StreamlangProcessorDefinition } from './processors';
@@ -21,14 +21,16 @@ import type { StreamlangStepWithUIAttributes } from './ui';
 export type StreamType = 'wired' | 'classic';
 
 // Recursive schema for ConditionWithSteps
-export const conditionWithStepsSchema: z.ZodType<ConditionWithSteps> = z.lazy(() =>
-  z.intersection(
-    conditionSchema,
-    z.object({
-      steps: z.array(streamlangStepSchema),
-    })
+export const conditionWithStepsSchema: z.ZodType<ConditionWithSteps> = z
+  .lazy(() =>
+    z.intersection(
+      conditionSchema,
+      z.object({
+        steps: z.array(streamlangStepSchema),
+      })
+    )
   )
-);
+  .meta({ id: 'ConditionWithSteps' });
 
 export type ConditionWithSteps = Condition & { steps: StreamlangStep[] };
 
@@ -43,30 +45,37 @@ export interface StreamlangConditionBlock {
 /**
  * Zod schema for a condition block
  */
-export const streamlangConditionBlockSchema: z.ZodType<StreamlangConditionBlock> = z.object({
-  customIdentifier: z.string().optional(),
-  condition: conditionWithStepsSchema,
-});
+export const streamlangConditionBlockSchema: z.ZodType<StreamlangConditionBlock> = z
+  .object({
+    customIdentifier: z.string().optional(),
+    condition: conditionWithStepsSchema,
+  })
+  .meta({ id: 'StreamlangConditionBlock' });
 
-export const isConditionBlockSchema = (obj: any): obj is StreamlangConditionBlock => {
+export const isConditionBlockSchema = (obj: unknown): obj is StreamlangConditionBlock => {
   return isSchema(streamlangConditionBlockSchema, obj);
 };
 
 // Cheap check that bypasses having to do full schema checks.
 // This is useful for quickly identifying condition blocks without full recursive validation.
-export const isConditionBlock = (obj: any): obj is StreamlangConditionBlock => {
-  return 'condition' in obj && !('action' in obj);
+export const isConditionBlock = (obj: unknown): obj is StreamlangConditionBlock => {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    Object.hasOwn(obj, 'condition') &&
+    !Object.hasOwn(obj, 'action')
+  );
 };
 
 /**
  * A step can be either a processor or a condition block (optionally recursive)
  */
 export type StreamlangStep = StreamlangProcessorDefinition | StreamlangConditionBlock;
-export const streamlangStepSchema: z.ZodType<StreamlangStep> = z.lazy(() =>
-  z.union([streamlangProcessorSchema, streamlangConditionBlockSchema])
-);
+export const streamlangStepSchema: z.ZodType<StreamlangStep> = z
+  .lazy(() => z.union([streamlangProcessorSchema, streamlangConditionBlockSchema]))
+  .meta({ id: 'StreamlangStep' });
 
-export const isActionBlockSchema = (obj: any): obj is StreamlangProcessorDefinition => {
+export const isActionBlockSchema = (obj: unknown): obj is StreamlangProcessorDefinition => {
   return isSchema(streamlangProcessorSchema, obj);
 };
 
@@ -92,6 +101,12 @@ export const streamlangDSLSchema = z.object({
   steps: z.array(streamlangStepSchema),
 });
 
-export const isStreamlangDSLSchema = (obj: any): obj is StreamlangDSL => {
+/**
+ * Strict version of streamlangDSLSchema that rejects excess/unknown keys.
+ * Pre-constructed for performance as DeepStrict creates proxy wrappers,
+ */
+export const streamlangDSLSchemaStrict = DeepStrict(streamlangDSLSchema);
+
+export const isStreamlangDSLSchema = (obj: unknown): obj is StreamlangDSL => {
   return isSchema(streamlangDSLSchema, obj);
 };

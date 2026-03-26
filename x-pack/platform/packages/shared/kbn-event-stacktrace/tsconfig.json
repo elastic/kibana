@@ -3,6 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
+      "@kbn/ambient-ui-types",
       "jest",
       "node",
       "react",
@@ -12,8 +13,7 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "src/**/*.json",
-    "../../../../../typings/emotion.d.ts"
+    "src/**/*.json"
   ],
   "exclude": [
     "target/**/*"

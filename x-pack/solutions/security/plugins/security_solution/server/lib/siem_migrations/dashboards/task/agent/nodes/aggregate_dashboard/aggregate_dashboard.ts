@@ -5,18 +5,46 @@
  * 2.0.
  */
 
+import type { ParsedPanel } from '../../../../../../../../common/siem_migrations/parsers/types';
 import { generateAssistantComment } from '../../../../../common/task/util/comments';
 import { MigrationTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type { GraphNode } from '../../types';
 import dashboardTemplate from './dashboard.json';
+
+interface DashboardSection {
+  collapsed: boolean;
+  title: string;
+  gridData: {
+    y: number;
+    i: string;
+  };
+}
 
 interface DashboardData {
   attributes: {
     title: string;
     description: string;
     panelsJSON: string;
+    sections?: Array<DashboardSection>;
   };
 }
+
+const processSections = (panels: ParsedPanel[]) => {
+  const sections: Record<string, DashboardSection> = {};
+  panels.forEach((panel) => {
+    if (panel.section && !sections[panel.section.id]) {
+      sections[panel.section.id] = {
+        collapsed: true,
+        title: panel.section.title,
+        gridData: {
+          y: 16,
+          i: panel.section.id,
+        },
+      };
+    }
+  });
+  return Object.values(sections);
+};
 
 export const getAggregateDashboardNode = (): GraphNode => {
   return async (state) => {
@@ -50,6 +78,7 @@ export const getAggregateDashboardNode = (): GraphNode => {
     dashboardData.attributes.title = title;
     dashboardData.attributes.description = description;
     dashboardData.attributes.panelsJSON = JSON.stringify(panels.map(({ data }) => data));
+    dashboardData.attributes.sections = processSections(state.parsed_original_dashboard.panels);
 
     let translationResult: MigrationTranslationResult;
 

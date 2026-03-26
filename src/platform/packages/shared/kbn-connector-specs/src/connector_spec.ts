@@ -56,6 +56,7 @@ export interface ConnectorMetadata {
   description: string;
   docsUrl?: string;
   minimumLicense: LicenseType;
+  isTechnicalPreview?: boolean;
   supportedFeatureIds: Array<
     | 'alerting'
     | 'cases'
@@ -66,6 +67,7 @@ export interface ConnectorMetadata {
     | 'generativeAIForSearchPlayground'
     | 'endpointSecurity'
     | 'workflows'
+    | 'agentBuilder'
   >;
 }
 
@@ -82,6 +84,7 @@ export interface GetTokenOpts {
   clientId: string;
   clientSecret: string;
   additionalFields?: Record<string, unknown>;
+  tokenEndpointAuthMethod?: 'client_secret_post' | 'client_secret_basic';
 }
 
 export interface AuthContext {
@@ -92,11 +95,14 @@ export interface AuthContext {
   sslSettings: SSLSettings;
 }
 
+export type AuthMode = 'per-user' | 'shared';
+
 export interface AuthTypeSpec<T extends Record<string, unknown>> {
   id: string;
   schema: z.ZodObject<Record<string, z.ZodType>>;
   normalizeSchema?: (defaults?: Record<string, unknown>) => z.ZodObject<Record<string, z.ZodType>>;
   configure: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => Promise<AxiosInstance>;
+  authMode?: AuthMode;
 }
 
 export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
@@ -106,7 +112,6 @@ export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
 // ============================================================================
 // - OAuth2 (clientId, clientSecret, token refresh)
 // - SSL/mTLS (certificate-based authentication)
-// - AWS SigV4 (AWS service authentication)
 // - Custom (connector-specific auth flows)
 
 // ============================================================================
@@ -257,11 +262,18 @@ export interface ConnectorSpec {
 
   policies?: ConnectorPolicies;
 
-  actions: Record<string, ActionDefinition>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- record of actions with different input types (contravariance)
+  actions: Record<string, ActionDefinition<any, any, any>>;
 
   test?: ConnectorTest;
 
   transformations?: Transformations;
+
+  // Workflow YAML template strings for Agent Builder. When present, these
+  // workflows are automatically created when a connector of this type is added.
+  // Each string is a raw YAML template that may contain Mustache-style
+  // variables (e.g., `<%= connector-id %>`).
+  agentBuilderWorkflows?: string[];
 }
 
 // ============================================================================

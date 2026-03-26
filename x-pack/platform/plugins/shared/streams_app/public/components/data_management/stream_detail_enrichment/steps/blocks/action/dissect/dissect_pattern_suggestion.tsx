@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { UseFormSetValue, FieldValues } from 'react-hook-form';
 import { useWatch } from 'react-hook-form';
-import type { DissectProcessorResult } from '@kbn/dissect-heuristics';
+import type { DissectProcessor } from '@kbn/streamlang';
 import type { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { useAbortController } from '@kbn/react-hooks';
 import { isNoSuggestionsError } from '../utils/no_suggestions_error';
@@ -27,7 +27,7 @@ import { useStreamDetail } from '../../../../../../../hooks/use_stream_detail';
 import { selectPreviewRecords } from '../../../../state_management/simulation_state_machine/selectors';
 import { useSimulatorSelector } from '../../../../state_management/stream_enrichment_state_machine';
 import type { ProcessorFormState } from '../../../../types';
-import { AdditionalChargesCallout } from '../grok/additional_charges_callout';
+import { AdditionalChargesCallout } from '../../../../../shared/additional_charges_callout';
 import { GenerateSuggestionButton } from '../../../../../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
 import { useDissectPatternSuggestion } from './use_dissect_pattern_suggestion';
 import type { AIFeatures } from '../../../../../../../hooks/use_ai_features';
@@ -144,11 +144,10 @@ export const DissectPatternAISuggestions = ({
             setValue('pattern', suggestionsState.value.dissectProcessor.pattern, {
               shouldValidate: true,
             });
-            // Set append_separator if the processor uses it
-            if (suggestionsState.value.dissectProcessor.processor.dissect.append_separator) {
+            if (suggestionsState.value.dissectProcessor.append_separator) {
               setValue(
                 'append_separator',
-                suggestionsState.value.dissectProcessor.processor.dissect.append_separator,
+                suggestionsState.value.dissectProcessor.append_separator,
                 { shouldValidate: true }
               );
             }
@@ -201,7 +200,7 @@ export const DissectPatternAISuggestions = ({
 };
 
 export interface DissectPatternSuggestionProps {
-  dissectProcessor: DissectProcessorResult;
+  dissectProcessor: DissectProcessor;
   simulationResult: APIReturnType<'POST /internal/streams/{name}/processing/_simulate'>;
   onAccept(): void;
   onDismiss(): void;

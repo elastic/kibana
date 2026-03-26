@@ -19,10 +19,12 @@ import {
   EuiIconTip,
   EuiFlexGroup,
   EuiCheckbox,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
+import { css } from '@emotion/css';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import type { TableColumnName } from './constants';
 import { TABLE_COLUMNS, EMPTY_CONTENT } from './constants';
@@ -49,7 +51,7 @@ export function FieldsTable({
   controls: TControls;
   defaultColumns: TableColumnName[];
   fields: SchemaField[];
-  stream: Streams.ingest.all.Definition;
+  stream: Streams.all.Definition;
   withTableActions: boolean;
   withToolbar: boolean | EuiDataGridToolBarVisibilityOptions;
   selectedFields: string[];
@@ -128,7 +130,7 @@ export function FieldsTable({
 const createCellRenderer =
   (
     fields: SchemaField[],
-    stream: Streams.ingest.all.Definition
+    stream: Streams.all.Definition
   ): EuiDataGridCellProps['renderCellValue'] =>
   ({ rowIndex, columnId }) => {
     const field = fields[rowIndex];
@@ -194,8 +196,33 @@ const createCellRenderer =
       return EMPTY_CONTENT;
     }
 
-    // @ts-expect-error upgrade typescript v5.9.3
-    return <>{field[columnId as keyof SchemaField] || EMPTY_CONTENT}</>;
+    if (columnId === 'description') {
+      if (!field.description) {
+        return EMPTY_CONTENT;
+      }
+      return (
+        <EuiToolTip
+          content={field.description}
+          anchorClassName={css`
+            width: 100%;
+          `}
+        >
+          <div
+            tabIndex={0}
+            className={css`
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            `}
+          >
+            {field.description}
+          </div>
+        </EuiToolTip>
+      );
+    }
+
+    const value = field[columnId as keyof SchemaField];
+    return <>{typeof value === 'string' ? value || EMPTY_CONTENT : EMPTY_CONTENT}</>;
   };
 
 const createFieldActionsCellRenderer = (fields: SchemaField[]): EuiDataGridControlColumn => ({

@@ -225,7 +225,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
               helpText={
                 <FormattedMessage
                   id="dashboard.embeddableApi.showSettings.flyout.form.storeProjectRoutingWithDashboardFormRowHelpText"
-                  defaultMessage="This changes the project routing to the currently selected project each time this dashboard is loaded."
+                  defaultMessage="Saves the current cross-project search (CPS) scope with the dashboard. Anyone who opens the dashboard will start with that scope."
                 />
               }
             >
@@ -238,7 +238,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
                 label={
                   <FormattedMessage
                     id="dashboard.embeddableApi.showSettings.flyout.form.storeProjectRoutingWithDashboardFormRowLabel"
-                    defaultMessage="Store project routing with dashboard"
+                    defaultMessage="Store CPS scope with dashboard"
                   />
                 }
               />
@@ -271,6 +271,22 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
                 updateDashboardSetting({ hide_panel_titles: !event.target.checked })
               }
               data-test-subj="dashboardPanelTitlesCheckbox"
+            />
+          </EuiFormRow>
+
+          <EuiFormRow>
+            <EuiSwitch
+              label={i18n.translate(
+                'dashboard.embeddableApi.showSettings.flyout.form.hideAllPanelBordersSwitchLabel',
+                {
+                  defaultMessage: 'Show panel borders',
+                }
+              )}
+              checked={!localSettings.hide_panel_borders}
+              onChange={(event) =>
+                updateDashboardSetting({ hide_panel_borders: !event.target.checked })
+              }
+              data-test-subj="dashboardPanelBordersCheckbox"
             />
           </EuiFormRow>
 

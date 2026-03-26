@@ -21,7 +21,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { THREAT_INTELLIGENCE_ENRICHMENTS_ACCORDION_TABLE_TEST_ID } from './test_ids';
 import type { CtiEnrichment } from '../../../../../common/search_strategy';
-import { QUERY_ID } from '../../shared/hooks/use_investigation_enrichment';
+import { QUERY_ID } from '../../../../flyout_v2/document/hooks/use_investigation_enrichment';
 import { InspectButton } from '../../../../common/components/inspect';
 import {
   buildThreatDetailsItems,
@@ -180,6 +180,12 @@ export const EnrichmentAccordion = memo(({ enrichment, index }: EnrichmentAccord
       `}
     >
       <EuiInMemoryTable
+        tableCaption={i18n.translate(
+          'xpack.securitySolution.flyout.threatIntelligence.enrichmentDetailsViewAccordionCaption',
+          {
+            defaultMessage: 'Threat enrichment details',
+          }
+        )}
         columns={columns}
         compressed
         data-test-subj={`${THREAT_INTELLIGENCE_ENRICHMENTS_ACCORDION_TABLE_TEST_ID}-${index}`}

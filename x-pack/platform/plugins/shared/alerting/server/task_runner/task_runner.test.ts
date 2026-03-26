@@ -32,6 +32,7 @@ import {
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server';
 import type { TaskRunnerContext } from './types';
+import { ApiKeyType } from './types';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
@@ -203,6 +204,8 @@ describe('Task Runner', () => {
     usageCounter: mockUsageCounter,
     isServerless: false,
     getEventLogClient: jest.fn().mockReturnValue(eventLogClientMock.create()),
+    apiKeyType: ApiKeyType.ES,
+    shouldGrantUiam: false,
   };
 
   beforeEach(() => {
@@ -336,7 +339,11 @@ describe('Task Runner', () => {
     testAlertingEventLogCalls({ status: 'ok' });
 
     expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
-      ...generateRuleUpdateParams({})
+      ...generateRuleUpdateParams({
+        metrics: {
+          total_search_duration_ms: 23423,
+        },
+      })
     );
 
     expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
@@ -353,6 +360,73 @@ describe('Task Runner', () => {
     expect(
       jest.requireMock('../lib/wrap_scoped_cluster_client').createWrappedScopedClusterClientFactory
     ).toHaveBeenCalled();
+  });
+
+  test('passes total_search_duration_ms from execution metrics into rule monitoring via addFrameworkMetrics', async () => {
+    const addFrameworkMetricsSpy = jest.spyOn(
+      RuleMonitoringService.prototype,
+      'addFrameworkMetrics'
+    );
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+        },
+      },
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+
+    await taskRunner.run();
+
+    expect(addFrameworkMetricsSpy).toHaveBeenCalledWith({
+      total_search_duration_ms: 23423,
+    });
+    addFrameworkMetricsSpy.mockRestore();
+  });
+
+  test('passes consumer metrics to AlertingEventLogger', async () => {
+    const consumerMetrics = {
+      alerts_candidate_count: 42,
+      alerts_suppressed_count: 7,
+      frozen_indices_queried_count: 3,
+    };
+    ruleType.executor.mockImplementation(async ({ services: { ruleMonitoringService } }) => {
+      ruleMonitoringService?.setMetrics(consumerMetrics);
+      return { state: {} };
+    });
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+        },
+      },
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+
+    await taskRunner.run();
+
+    expect(alertingEventLogger.done).toHaveBeenCalledWith(
+      expect.objectContaining({
+        consumerMetrics,
+      })
+    );
   });
 
   test('should update the persisted alerts', async () => {
@@ -2753,7 +2827,10 @@ describe('Task Runner', () => {
 
     await taskRunner.run();
     expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
-      ...generateRuleUpdateParams({ nextRun: '1970-01-01T00:00:10.000Z' })
+      ...generateRuleUpdateParams({
+        nextRun: '1970-01-01T00:00:10.000Z',
+        metrics: { total_search_duration_ms: 23423 },
+      })
     );
   });
 
@@ -2912,6 +2989,9 @@ describe('Task Runner', () => {
         outcome: 'warning',
         warning,
         alertsCount: { active: 1, new: 1 },
+        metrics: {
+          total_search_duration_ms: null,
+        },
       })
     );
 
@@ -3085,6 +3165,9 @@ describe('Task Runner', () => {
         outcome: 'warning',
         warning,
         alertsCount: { active: 2, new: 2 },
+        metrics: {
+          total_search_duration_ms: null,
+        },
       })
     );
 
@@ -3687,6 +3770,7 @@ describe('Task Runner', () => {
           triggeredActionsStatus: 'complete',
           hasReachedQueuedActionsLimit,
         },
+        consumerMetrics: undefined,
         status: {
           lastExecutionDate: new Date('1970-01-01T00:00:00.000Z'),
           status,

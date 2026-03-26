@@ -34,6 +34,7 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     label: 'Rules',
     iconType: 'info',
     href: '/rules/management/detection-rules',
+    badgeType: 'new',
     sections: [
       {
         id: 'management',
@@ -79,6 +80,41 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     label: 'Alerts',
     iconType: 'bell',
     href: '/alerts',
+    sections: [
+      {
+        id: 'alerts-views',
+        label: 'Views',
+        items: [
+          {
+            id: 'alerts-overview',
+            label: 'Overview',
+            href: '/alerts',
+          },
+          {
+            id: 'attacks',
+            label: 'Attacks',
+            href: '/alerts/attacks',
+            badgeType: 'new',
+          },
+        ],
+      },
+      {
+        id: 'alerts-management',
+        label: 'Management',
+        items: [
+          {
+            id: 'alert-summary',
+            label: 'Alert summary',
+            href: '/alerts/summary',
+          },
+          {
+            id: 'alert-settings',
+            label: 'Settings',
+            href: '/alerts/settings',
+          },
+        ],
+      },
+    ],
   },
   {
     id: 'attack_discovery',
@@ -135,7 +171,7 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
   {
     id: 'hosts',
     label: 'Explore',
-    iconType: 'search',
+    iconType: 'magnify',
     href: '/explore/hosts',
     sections: [
       {
@@ -324,7 +360,7 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
   {
     id: 'coverage',
     label: 'Coverage',
-    iconType: 'visGauge',
+    iconType: 'chartGauge',
     href: '/coverage',
   },
 ];
@@ -333,7 +369,7 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
   {
     id: 'getting_started',
     label: 'Getting started',
-    iconType: 'launch',
+    iconType: 'rocket',
     href: '/getting-started',
   },
   {

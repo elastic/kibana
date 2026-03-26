@@ -6,7 +6,7 @@
  */
 
 import { omit } from 'lodash';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { StructuredTool } from '@langchain/core/tools';
 import { tool as toTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/logging';
@@ -178,7 +178,7 @@ export const toolIdentifierFromToolCall = (toolCall: ToolCall, mapping: ToolIdMa
   return mapping.get(toolCall.toolName) ?? toolCall.toolName;
 };
 
-function reverseMap<K, V>(map: Map<K, V>): Map<V, K> {
+export function reverseMap<K, V>(map: Map<K, V>): Map<V, K> {
   const reversed = new Map<V, K>();
   for (const [key, value] of map.entries()) {
     if (reversed.has(value)) {

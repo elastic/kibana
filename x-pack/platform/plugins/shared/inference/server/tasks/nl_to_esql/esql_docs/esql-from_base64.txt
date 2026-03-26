@@ -1,15 +1,23 @@
-## FROM_BASE64
+# FROM_BASE64
 
-Decodes a base64 string.
+The FROM_BASE64 command decodes a base64-encoded string.
 
-### Examples
+## Syntax
+
+`FROM_BASE64(string)`
+
+### Parameters
+
+#### string
+
+A base64 string to be decoded.
+
+## Examples
+
+Decodes the base64 string in column `a` and stores the decoded result in a new column `d`.
 
 ```esql
 ROW a = "ZWxhc3RpYw=="
 | EVAL d = FROM_BASE64(a)
 ```
-
-```esql
-ROW encoded = "U29tZSBzYW1wbGUgdGV4dA=="
-| EVAL decoded = FROM_BASE64(encoded)
-```
+This example decodes the base64 string in column `a` and stores the result in column `d`.

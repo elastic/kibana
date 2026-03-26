@@ -26,9 +26,17 @@ export function getForeachStateSchema(
   foreachStep: EnterForeachNodeConfiguration
 ) {
   let itemSchema: z.ZodType = z.unknown();
-  const cleanedForeachParam =
-    foreachStep.foreach.match(VARIABLE_REGEX)?.groups?.key ?? foreachStep.foreach;
+
   try {
+    if (Array.isArray(foreachStep.foreach)) {
+      itemSchema = extractForeachItemSchemaFromArray(foreachStep.foreach);
+      return ForEachContextSchema.extend({
+        item: itemSchema,
+        items: z.array(itemSchema),
+      });
+    }
+    const cleanedForeachParam =
+      foreachStep.foreach.match(VARIABLE_REGEX)?.groups?.key ?? foreachStep.foreach;
     itemSchema = getForeachItemSchema(stepContextSchema, cleanedForeachParam);
     return ForEachContextSchema.extend({
       item: itemSchema,
@@ -47,22 +55,15 @@ export function getForeachStateSchema(
   }
 }
 
-const extractForeachItemSchemaFromJson = (foreachParam: string): z.ZodType => {
+const extractForeachItemSchemaFromArray = (foreachParam: unknown[]): z.ZodType => {
   try {
-    const json = JSON.parse(foreachParam);
-    if (!Array.isArray(json)) {
-      throw new InvalidForeachParameterError(
-        `Expected array for foreach iteration, but got: ${typeof json}`,
-        InvalidForeachParameterErrorCodes.INVALID_ARRAY
-      );
-    }
-    if (json.length === 0) {
+    if (foreachParam.length === 0) {
       throw new InvalidForeachParameterError(
         'Expected non-empty array for foreach iteration',
         InvalidForeachParameterErrorCodes.INVALID_ARRAY
       );
     }
-    return inferZodType(json[0]);
+    return inferZodType(foreachParam[0]);
   } catch (e) {
     if (e instanceof InvalidForeachParameterError) {
       throw e;
@@ -74,12 +75,37 @@ const extractForeachItemSchemaFromJson = (foreachParam: string): z.ZodType => {
   }
 };
 
+const extractForeachItemSchemaFromJson = (foreachParam: string): z.ZodType => {
+  let foreachParamParsed: unknown;
+
+  try {
+    foreachParamParsed = JSON.parse(foreachParam);
+  } catch {
+    throw new InvalidForeachParameterError(
+      'Unable to parse foreach parameter as JSON',
+      InvalidForeachParameterErrorCodes.INVALID_JSON
+    );
+  }
+
+  if (!Array.isArray(foreachParamParsed)) {
+    throw new InvalidForeachParameterError(
+      `Expected array for foreach iteration, but got: ${typeof foreachParamParsed}`,
+      InvalidForeachParameterErrorCodes.INVALID_ARRAY
+    );
+  }
+
+  return extractForeachItemSchemaFromArray(foreachParamParsed);
+};
+
+const ENTRIES_FILTER = 'entries';
+
 export function getForeachItemSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
   foreachParam: string
 ): z.ZodType {
   const parsedPath = parseVariablePath(foreachParam);
   const iterateOverPath = parsedPath?.propertyPath;
+  const hasEntriesFilter = parsedPath?.filters?.includes(ENTRIES_FILTER) ?? false;
 
   // If we have a valid variable path syntax (e.g., {{some.path}})
   if (parsedPath && !parsedPath.errors && iterateOverPath) {
@@ -117,6 +143,8 @@ export function getForeachItemSchema(
           InvalidForeachParameterErrorCodes.INVALID_UNION
         );
       }
+    } else if (iterableSchema instanceof z.ZodObject && hasEntriesFilter) {
+      return z.object({ key: z.string(), value: z.unknown() });
     } else {
       throw new InvalidForeachParameterError(
         `Expected array for foreach iteration, but got ${getZodTypeName(

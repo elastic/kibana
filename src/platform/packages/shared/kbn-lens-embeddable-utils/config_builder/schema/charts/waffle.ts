@@ -9,8 +9,8 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
-import { colorByValueSchema, colorMappingSchema, staticColorSchema } from '../color';
+import { esqlColumnWithFormatSchema } from '../metric_ops';
+import { colorMappingSchema, staticColorSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
   collapseBySchema,
@@ -19,7 +19,11 @@ import {
   sharedPanelInfoSchema,
   legendTruncateAfterLinesSchema,
 } from '../shared';
-import { legendVisibleSchema, valueDisplaySchema } from './partition_shared';
+import {
+  legendVisibilitySchema,
+  validateMultipleMetricsCriteria,
+  valueDisplaySchema,
+} from './partition_shared';
 import {
   legendSizeSchema,
   mergeAllBucketsWithChartDimensionSchema,
@@ -45,19 +49,28 @@ export const waffleStateSharedSchema = {
           )
         ),
         truncate_after_lines: legendTruncateAfterLinesSchema,
-        visible: legendVisibleSchema,
+        visibility: legendVisibilitySchema,
         size: legendSizeSchema,
       },
-      { meta: { id: 'waffleLegend', description: 'Legend configuration for waffle chart' } }
+      {
+        meta: {
+          id: 'waffleLegend',
+          title: 'Legend',
+          description: 'Legend configuration for waffle chart',
+        },
+      }
     )
   ),
-  value_display: valueDisplaySchema,
+  values: valueDisplaySchema,
 };
 
 /**
  * Color configuration for primary metric in waffle chart
  */
 const partitionStatePrimaryMetricOptionsSchema = {
+  /**
+   * Color configuration
+   */
   color: schema.maybe(staticColorSchema),
 };
 
@@ -65,32 +78,9 @@ const partitionStatePrimaryMetricOptionsSchema = {
  * Breakdown configuration including color mapping and collapse behavior
  */
 const partitionStateBreakdownByOptionsSchema = {
-  color: schema.maybe(
-    schema.oneOf([colorByValueSchema, colorMappingSchema], {
-      meta: {
-        description: 'Color configuration: by value (palette-based) or mapping (custom rules)',
-      },
-    })
-  ),
+  color: schema.maybe(colorMappingSchema),
   collapse_by: schema.maybe(collapseBySchema),
 };
-
-function validateGroupings({
-  metrics,
-  group_by,
-}: {
-  metrics: Array<{}>;
-  group_by?: Array<{ collapse_by?: string }>;
-}) {
-  if (metrics.length > 1) {
-    if ((group_by?.filter((def) => def.collapse_by == null).length ?? 0) > 0) {
-      return 'When multiple metrics are defined, only collapsed breakdown dimensions are allowed.';
-    }
-  }
-  if ((group_by?.filter((def) => def.collapse_by == null).length ?? 0) > 1) {
-    return 'Only a single non-collapsed breakdown dimension is allowed.';
-  }
-}
 
 /**
  * Waffle chart configuration for standard (non-ES|QL) queries
@@ -103,6 +93,7 @@ export const waffleStateSchemaNoESQL = schema.object(
     ...datasetSchema,
     ...dslOnlyPanelInfoSchema,
     ...waffleStateSharedSchema,
+    ...dslOnlyPanelInfoSchema,
     metrics: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
         partitionStatePrimaryMetricOptionsSchema
@@ -125,15 +116,19 @@ export const waffleStateSchemaNoESQL = schema.object(
     ),
   },
   {
-    meta: { id: 'waffleNoESQL', description: 'Waffle chart configuration for standard queries' },
-    validate: validateGroupings,
+    meta: {
+      id: 'waffleNoESQL',
+      title: 'Waffle Chart (DSL)',
+      description: 'Waffle chart configuration for standard queries',
+    },
+    validate: validateMultipleMetricsCriteria,
   }
 );
 
 /**
  * Waffle chart configuration for ES|QL queries
  */
-const waffleStateSchemaESQL = schema.object(
+export const waffleStateSchemaESQL = schema.object(
   {
     type: schema.literal('waffle'),
     ...sharedPanelInfoSchema,
@@ -141,11 +136,15 @@ const waffleStateSchemaESQL = schema.object(
     ...datasetEsqlTableSchema,
     ...waffleStateSharedSchema,
     metrics: schema.arrayOf(
-      esqlColumnOperationWithLabelAndFormatSchema.extends(partitionStatePrimaryMetricOptionsSchema),
-      { maxSize: 100 }
+      esqlColumnWithFormatSchema.extends(partitionStatePrimaryMetricOptionsSchema),
+      {
+        minSize: 1,
+        maxSize: 100,
+        meta: { description: 'Array of metric configurations (minimum 1)' },
+      }
     ),
     group_by: schema.maybe(
-      schema.arrayOf(esqlColumnSchema.extends(partitionStateBreakdownByOptionsSchema), {
+      schema.arrayOf(esqlColumnWithFormatSchema.extends(partitionStateBreakdownByOptionsSchema), {
         minSize: 1,
         maxSize: 100,
         meta: { description: 'Array of ES|QL breakdown columns (minimum 1)' },
@@ -153,8 +152,12 @@ const waffleStateSchemaESQL = schema.object(
     ),
   },
   {
-    meta: { id: 'waffleESQL', description: 'Waffle chart configuration for ES|QL queries' },
-    validate: validateGroupings,
+    meta: {
+      id: 'waffleESQL',
+      title: 'Waffle Chart (ES|QL)',
+      description: 'Waffle chart configuration for ES|QL queries',
+    },
+    validate: validateMultipleMetricsCriteria,
   }
 );
 
@@ -163,7 +166,8 @@ const waffleStateSchemaESQL = schema.object(
  */
 export const waffleStateSchema = schema.oneOf([waffleStateSchemaNoESQL, waffleStateSchemaESQL], {
   meta: {
-    id: 'waffleChartSchema',
+    id: 'waffleChart',
+    title: 'Waffle Chart',
     description: 'Waffle chart configuration: DSL or ES|QL query based',
   },
 });

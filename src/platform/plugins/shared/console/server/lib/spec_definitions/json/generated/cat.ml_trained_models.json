@@ -73,6 +73,7 @@
       "_cat/ml/trained_models/{model_id}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-ml-trained-models",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-cat-ml-trained-models",
     "availability": {
       "stack": true,
       "serverless": true

@@ -24,7 +24,7 @@ const VIEW_IN_LOGS = i18n.translate(
 );
 
 interface ViewErrorsInLogsActionProps {
-  actionId: string;
+  actionId?: string;
   agentId: string;
   timestamp?: string;
 }
@@ -70,7 +70,7 @@ const ViewErrorsInLogsActionComponent: React.FC<ViewErrorsInLogsActionProps> = (
 export const ViewErrorsInLogsAction = React.memo(ViewErrorsInLogsActionComponent);
 
 interface ScheduledQueryErrorsTableProps {
-  actionId: string;
+  actionId?: string;
   agentIds?: string[];
   interval: number;
 }
@@ -147,6 +147,9 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
       items={lastErrorsData?.hits ?? []}
       columns={columns}
       pagination={true}
+      tableCaption={i18n.translate('xpack.osquery.scheduledQueryErrorsTable.caption', {
+        defaultMessage: 'Scheduled query errors',
+      })}
     />
   );
 };

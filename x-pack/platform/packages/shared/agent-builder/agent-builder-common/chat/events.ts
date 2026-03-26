@@ -26,6 +26,8 @@ export enum ChatEventType {
   conversationCreated = 'conversation_created',
   conversationUpdated = 'conversation_updated',
   conversationIdSet = 'conversation_id_set',
+  compactionStarted = 'compaction_started',
+  compactionCompleted = 'compaction_completed',
 }
 
 export type ChatEventBase<
@@ -39,6 +41,7 @@ export interface ToolCallEventData {
   tool_call_id: string;
   tool_id: string;
   params: Record<string, unknown>;
+  tool_call_group_id?: string;
 }
 
 export type ToolCallEvent = ChatEventBase<ChatEventType.toolCall, ToolCallEventData>;
@@ -284,6 +287,44 @@ export const isConversationIdSetEvent = (
   return event.type === ChatEventType.conversationIdSet;
 };
 
+// Compaction started
+
+export interface CompactionStartedEventData {
+  /** Estimated token count before compaction */
+  token_count_before: number;
+}
+
+export type CompactionStartedEvent = ChatEventBase<
+  ChatEventType.compactionStarted,
+  CompactionStartedEventData
+>;
+
+export const isCompactionStartedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is CompactionStartedEvent => {
+  return event.type === ChatEventType.compactionStarted;
+};
+
+// Compaction completed
+
+export interface CompactionCompletedEventData {
+  /** Estimated token count after compaction */
+  token_count_after: number;
+  /** Number of rounds that were summarized */
+  summarized_round_count: number;
+}
+
+export type CompactionCompletedEvent = ChatEventBase<
+  ChatEventType.compactionCompleted,
+  CompactionCompletedEventData
+>;
+
+export const isCompactionCompletedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is CompactionCompletedEvent => {
+  return event.type === ChatEventType.compactionCompleted;
+};
+
 /**
  * All types of events that can be emitted from an agent execution.
  */
@@ -298,7 +339,9 @@ export type ChatAgentEvent =
   | MessageChunkEvent
   | MessageCompleteEvent
   | ThinkingCompleteEvent
-  | RoundCompleteEvent;
+  | RoundCompleteEvent
+  | CompactionStartedEvent
+  | CompactionCompletedEvent;
 
 /**
  * All types of events that can be emitted from the chat API.

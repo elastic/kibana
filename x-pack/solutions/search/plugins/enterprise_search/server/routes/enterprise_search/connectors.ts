@@ -538,7 +538,8 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
               rule: schema.string(),
               updated_at: schema.string(),
               value: schema.string(),
-            })
+            }),
+            { maxSize: 1000 }
           ),
         }),
         params: schema.object({
@@ -583,7 +584,8 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
                 rule: schema.string(),
                 updated_at: schema.string(),
                 value: schema.string(),
-              })
+              }),
+              { maxSize: 1000 }
             ),
           })
         ),

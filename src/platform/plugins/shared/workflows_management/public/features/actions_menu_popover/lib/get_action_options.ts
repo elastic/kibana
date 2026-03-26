@@ -7,16 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UseEuiTheme } from '@elastic/eui';
+import type { IconType, UseEuiTheme } from '@elastic/eui';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { i18n } from '@kbn/i18n';
-import { isDynamicConnector } from '@kbn/workflows';
-import type {
-  ActionsMenuGroup,
-  WorkflowsExtensionsPublicPluginStart,
-} from '@kbn/workflows-extensions/public';
+import { getBuiltInStepDefinition, isDynamicConnector, StepCategory } from '@kbn/workflows';
+import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
 import { getAllConnectors } from '../../../../common/schema';
 import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
+import { triggerSchemas } from '../../../trigger_schemas';
 import type { ActionConnectorGroup, ActionGroup, ActionOptionData } from '../types';
 import { isActionGroup } from '../types';
 
@@ -25,6 +23,51 @@ export function getActionOptions(
   workflowsExtensions: WorkflowsExtensionsPublicPluginStart
 ): ActionOptionData[] {
   const connectors = getAllConnectors();
+  const builtInTriggerOptions: ActionOptionData[] = [
+    {
+      id: 'manual',
+      label: i18n.translate('workflows.actionsMenu.manual', {
+        defaultMessage: 'Manual',
+      }),
+      description: i18n.translate('workflows.actionsMenu.manualDescription', {
+        defaultMessage: 'Trigger - Manually start from the UI',
+      }),
+      iconType: 'play',
+      iconColor: 'success',
+    },
+    {
+      id: 'alert',
+      label: i18n.translate('workflows.actionsMenu.alert', {
+        defaultMessage: 'Alert',
+      }),
+      description: i18n.translate('workflows.actionsMenu.alertDescription', {
+        defaultMessage: 'Trigger - When an alert from rule is created',
+      }),
+      iconType: 'bell',
+      iconColor: euiTheme.colors.vis.euiColorVis6,
+    },
+    {
+      id: 'scheduled',
+      label: i18n.translate('workflows.actionsMenu.schedule', {
+        defaultMessage: 'Schedule',
+      }),
+      description: i18n.translate('workflows.actionsMenu.scheduleDescription', {
+        defaultMessage: 'Trigger - On a schedule (e.g. every 10 minutes)',
+      }),
+      iconType: 'clock',
+      iconColor: euiTheme.colors.textParagraph,
+    },
+  ];
+  const registeredTriggerOptions: ActionOptionData[] = triggerSchemas
+    .getTriggerDefinitions()
+    .map((t) => ({
+      id: t.id,
+      label: t.title ?? t.id,
+      description: t.description ?? t.id,
+      iconType: (t.icon != null ? t.icon : 'bolt') as IconType,
+      iconColor: euiTheme.colors.vis.euiColorVis6,
+      stability: 'tech_preview',
+    }));
   const triggersGroup: ActionOptionData = {
     iconType: 'bolt',
     iconColor: euiTheme.colors.vis.euiColorVis6,
@@ -35,41 +78,7 @@ export function getActionOptions(
     description: i18n.translate('workflows.actionsMenu.triggersDescription', {
       defaultMessage: 'Choose which event starts a workflow',
     }),
-    options: [
-      {
-        id: 'manual',
-        label: i18n.translate('workflows.actionsMenu.manual', {
-          defaultMessage: 'Manual',
-        }),
-        description: i18n.translate('workflows.actionsMenu.manualDescription', {
-          defaultMessage: 'Manually start from the UI',
-        }),
-        iconType: 'play',
-        iconColor: 'success',
-      },
-      {
-        id: 'alert',
-        label: i18n.translate('workflows.actionsMenu.alert', {
-          defaultMessage: 'Alert',
-        }),
-        description: i18n.translate('workflows.actionsMenu.alertDescription', {
-          defaultMessage: 'When an alert from rule is created',
-        }),
-        iconType: 'bell',
-        iconColor: euiTheme.colors.vis.euiColorVis6,
-      },
-      {
-        id: 'scheduled',
-        label: i18n.translate('workflows.actionsMenu.schedule', {
-          defaultMessage: 'Schedule',
-        }),
-        description: i18n.translate('workflows.actionsMenu.scheduleDescription', {
-          defaultMessage: 'On a schedule (e.g. every 10 minutes)',
-        }),
-        iconType: 'clock',
-        iconColor: euiTheme.colors.textParagraph,
-      },
-    ],
+    options: [...builtInTriggerOptions, ...registeredTriggerOptions],
   };
 
   const kibanaGroup: ActionOptionData = {
@@ -82,17 +91,6 @@ export function getActionOptions(
       defaultMessage: 'Work with Kibana data and features directly from your workflow',
     }),
     options: [],
-  };
-  const httpRequest: ActionOptionData = {
-    iconType: 'globe',
-    iconColor: euiTheme.colors.vis.euiColorVis0,
-    id: 'http',
-    label: i18n.translate('workflows.actionsMenu.http', {
-      defaultMessage: 'HTTP',
-    }),
-    description: i18n.translate('workflows.actionsMenu.httpDescription', {
-      defaultMessage: 'Make an generic HTTP request',
-    }),
   };
   const externalGroup: ActionOptionData = {
     iconType: 'plugs',
@@ -136,7 +134,7 @@ export function getActionOptions(
         description: i18n.translate('workflows.actionsMenu.dataSetDescription', {
           defaultMessage: 'Define or compute variables to use in your workflow',
         }),
-        iconType: 'tableOfContents',
+        iconType: 'database',
       },
     ],
   };
@@ -163,12 +161,34 @@ export function getActionOptions(
         iconColor: euiTheme.colors.vis.euiColorVis0,
       },
       {
+        id: 'switch',
+        label: i18n.translate('workflows.actionsMenu.switch', {
+          defaultMessage: 'Switch',
+        }),
+        description: i18n.translate('workflows.actionsMenu.switchDescription', {
+          defaultMessage: 'Multi-way branching based on expression value matching',
+        }),
+        iconType: 'productStreamsWired',
+        iconColor: euiTheme.colors.vis.euiColorVis0,
+      },
+      {
         id: 'foreach',
         label: i18n.translate('workflows.actionsMenu.foreach', {
           defaultMessage: 'Loop (foreach)',
         }),
         description: i18n.translate('workflows.actionsMenu.loopDescription', {
           defaultMessage: 'Iterate the action over a specified list',
+        }),
+        iconType: 'refresh',
+        iconColor: euiTheme.colors.vis.euiColorVis0,
+      },
+      {
+        id: 'while',
+        label: i18n.translate('workflows.actionsMenu.while', {
+          defaultMessage: 'While Loop',
+        }),
+        description: i18n.translate('workflows.actionsMenu.whileDescription', {
+          defaultMessage: 'Repeat steps while a condition is true',
         }),
         iconType: 'refresh',
         iconColor: euiTheme.colors.vis.euiColorVis0,
@@ -184,6 +204,17 @@ export function getActionOptions(
         iconType: 'clock',
         iconColor: euiTheme.colors.vis.euiColorVis0,
       },
+      ...(['workflow.execute', 'workflow.executeAsync'] as const)
+        .map((stepId) => getBuiltInStepDefinition(stepId))
+        .filter((def): def is NonNullable<typeof def> => def !== undefined)
+        .map((def) => ({
+          id: def.id,
+          label: def.label,
+          description: def.description,
+          iconType: 'nested' as const,
+          iconColor: euiTheme.colors.vis.euiColorVis0,
+          stability: def.stability,
+        })),
     ],
   };
   const elasticSearchGroup: ActionOptionData = {
@@ -198,12 +229,13 @@ export function getActionOptions(
     options: [],
   };
 
-  const stepGroups: Record<ActionsMenuGroup, ActionGroup> = {
-    elasticsearch: elasticSearchGroup,
-    external: externalGroup,
-    ai: aiGroup,
-    kibana: kibanaGroup,
-    data: dataTransformationGroup,
+  const stepGroups: Record<StepCategory, ActionGroup> = {
+    [StepCategory.Elasticsearch]: elasticSearchGroup,
+    [StepCategory.External]: externalGroup,
+    [StepCategory.Ai]: aiGroup,
+    [StepCategory.Kibana]: kibanaGroup,
+    [StepCategory.Data]: dataTransformationGroup,
+    [StepCategory.FlowControl]: flowControlGroup,
   };
 
   const baseTypeInstancesCount: Record<string, number> = {};
@@ -211,12 +243,13 @@ export function getActionOptions(
   for (const connector of connectors) {
     const customStepDefinition = workflowsExtensions.getStepDefinition(connector.type);
     if (customStepDefinition) {
-      const group = stepGroups[customStepDefinition.actionsMenuGroup ?? 'kibana'];
+      const group = stepGroups[customStepDefinition.category];
       group.options.push({
         id: customStepDefinition.id,
         label: customStepDefinition.label,
         description: customStepDefinition.description,
         iconType: customStepDefinition.icon ?? group.iconType,
+        stability: connector.stability,
       });
     } else if (connector.type.startsWith('elasticsearch.')) {
       elasticSearchGroup.options.push({
@@ -224,6 +257,7 @@ export function getActionOptions(
         label: connector.description || connector.type,
         description: connector.type,
         iconType: 'logoElasticsearch',
+        stability: connector.stability,
       });
     } else if (connector.type.startsWith('kibana.')) {
       kibanaGroup.options.push({
@@ -231,6 +265,7 @@ export function getActionOptions(
         label: connector.summary || connector.description || connector.type,
         description: connector.type,
         iconType: 'logoKibana',
+        stability: connector.stability,
       });
     } else if (isDynamicConnector(connector)) {
       const [baseType, subtype] = connector.type.split('.');
@@ -268,6 +303,7 @@ export function getActionOptions(
           connectorType: connector.type,
           instancesLabel: getInstancesLabel(connector.instances?.length),
           iconType,
+          stability: connector.stability,
         });
       }
     }
@@ -280,7 +316,6 @@ export function getActionOptions(
     aiGroup,
     dataTransformationGroup,
     externalGroup,
-    httpRequest,
     flowControlGroup,
   ];
 }

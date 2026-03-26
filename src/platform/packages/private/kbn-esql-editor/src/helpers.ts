@@ -32,7 +32,7 @@ export const useDebounceWithOptions = (
   deps?: React.DependencyList | undefined
 ) => {
   const isFirstRender = useRef(true);
-  const newDeps = [...(deps || []), isFirstRender];
+  const newDeps = deps || [];
 
   return useDebounce(
     () => {
@@ -62,50 +62,45 @@ const maxWarningLength = 1000;
 export const parseWarning = (warning: string): MonacoMessage[] => {
   // we limit the length to reduce ReDoS risks
   const truncatedWarning = warning.substring(0, maxWarningLength);
-  if (quotedWarningMessageRegexp.test(truncatedWarning)) {
-    const matches = truncatedWarning.match(quotedWarningMessageRegexp);
-    if (matches) {
-      return matches.map((message) => {
-        // replaces the quotes only if they are not escaped,
-        let warningMessage = message.replace(/(?<!\\)"|\\/g, '');
-        let startColumn = 1;
-        let startLineNumber = 1;
-        // initialize the length to 10 in case no error word found
-        let errorLength = 10;
-        // if there's line number encoded in the message use it as new positioning
-        // and replace the actual message without it
-        if (/Line (\d+):(\d+):/.test(warningMessage)) {
-          const [encodedLine, encodedColumn, innerMessage, additionalInfoMessage] =
-            warningMessage.split(':');
-          // sometimes the warning comes to the format java.lang.IllegalArgumentException: warning message
-          warningMessage = additionalInfoMessage ?? innerMessage;
-          if (!Number.isNaN(Number(encodedColumn))) {
-            startColumn = Number(encodedColumn);
-            startLineNumber = Number(encodedLine.replace('Line ', ''));
-          }
-          const openingSquareBracketIndex = warningMessage.indexOf('[');
-          if (openingSquareBracketIndex !== -1) {
-            const closingSquareBracketIndex = warningMessage.indexOf(
-              ']',
-              openingSquareBracketIndex
-            );
-            if (closingSquareBracketIndex !== -1) {
-              errorLength = warningMessage.length - openingSquareBracketIndex - 1;
-            }
+  const matches = truncatedWarning.match(quotedWarningMessageRegexp);
+  if (matches) {
+    return matches.map((message) => {
+      // replaces the quotes only if they are not escaped,
+      let warningMessage = message.replace(/(?<!\\)"|\\/g, '');
+      let startColumn = 1;
+      let startLineNumber = 1;
+      // initialize the length to 10 in case no error word found
+      let errorLength = 10;
+      // if there's line number encoded in the message use it as new positioning
+      // and replace the actual message without it
+      if (/Line (\d+):(\d+):/.test(warningMessage)) {
+        const [encodedLine, encodedColumn, innerMessage, additionalInfoMessage] =
+          warningMessage.split(':');
+        // sometimes the warning comes to the format java.lang.IllegalArgumentException: warning message
+        warningMessage = additionalInfoMessage ?? innerMessage;
+        if (!Number.isNaN(Number(encodedColumn))) {
+          startColumn = Number(encodedColumn);
+          startLineNumber = Number(encodedLine.replace('Line ', ''));
+        }
+        const openingSquareBracketIndex = warningMessage.indexOf('[');
+        if (openingSquareBracketIndex !== -1) {
+          const closingSquareBracketIndex = warningMessage.indexOf(']', openingSquareBracketIndex);
+          if (closingSquareBracketIndex !== -1) {
+            errorLength = warningMessage.length - openingSquareBracketIndex - 1;
           }
         }
+      }
 
-        return {
-          message: warningMessage.trimStart(),
-          startColumn,
-          startLineNumber,
-          endColumn: startColumn + errorLength - 1,
-          endLineNumber: startLineNumber,
-          severity: monaco.MarkerSeverity.Warning,
-          code: 'warningFromES',
-        };
-      });
-    }
+      return {
+        message: warningMessage.trimStart(),
+        startColumn,
+        startLineNumber,
+        endColumn: startColumn + errorLength - 1,
+        endLineNumber: startLineNumber,
+        severity: monaco.MarkerSeverity.Warning,
+        code: 'warningFromES',
+      };
+    });
   }
   // unknown warning message
   return [
@@ -268,7 +263,7 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
       line-height: 1.5rem;
       border-radius: ${theme.euiTheme.border.radius.medium} !important;
       box-shadow: ${theme.euiTheme.shadows.l.down} !important;
-      z-index: 100;
+      z-index: ${theme.euiTheme.levels.flyout};
     }
 
     // Fixes inline suggestions hover styles and only
@@ -322,7 +317,11 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
       border-radius: ${theme.euiTheme.border.radius.medium};
       ${euiShadow(theme, 'l')}
       // Suggestions must be rendered above flyouts
-      z-index: 1100 !important;
+      z-index: ${theme.euiTheme.levels.toast} !important;
+    }
+
+    .suggest-widget.message {
+      display: none !important;
     }
 
     .suggest-details-container {
@@ -391,4 +390,72 @@ export const filterDuplicatedWarnings = (
   return uniqBy(warnings, (warning) => {
     return warning.message;
   });
+};
+
+/**
+ * Computes toggled comment lines for a set of lines, following standard IDE behavior:
+ * comment all lines if any line is uncommented, uncomment all only if every line
+ * is already commented.
+ */
+export const getToggleCommentLines = (lines: string[]): string[] => {
+  const allCommented = lines.every((line) => line.startsWith('//'));
+  const shouldComment = !allCommented;
+
+  return lines.map((line) => {
+    const isCommented = line.startsWith('//');
+    if (shouldComment && !isCommented) {
+      return `//${line}`;
+    }
+    if (!shouldComment && isCommented) {
+      return line.replace('//', '');
+    }
+    return line;
+  });
+};
+
+/**
+ * Keeps suggestions alive when the text before the cursor ends with:
+ * - a token character (`[\w`]`)
+ * - a space
+ * - `::`
+ * - `.`
+ */
+export const shouldAutoTriggerSuggestions = (lineContentBeforeCursor: string): boolean => {
+  const lastCharacter = lineContentBeforeCursor.at(-1);
+  const spaceHasBeenTyped = lineContentBeforeCursor.endsWith(' ');
+  const inlineCastHasBeenTyped = lineContentBeforeCursor.endsWith('::');
+  const dotHasBeenTyped = lineContentBeforeCursor.endsWith('.');
+  const currentTokenHasBeenTyped = Boolean(lastCharacter && /[\w`]/.test(lastCharacter));
+
+  return spaceHasBeenTyped || inlineCastHasBeenTyped || dotHasBeenTyped || currentTokenHasBeenTyped;
+};
+
+/**
+ * Tracks the Monaco suggest-widget visibility so the editor can avoid
+ * re-triggering autocomplete while the popup is already open.
+ */
+export const trackSuggestionPopupState = (
+  editor: monaco.editor.IStandaloneCodeEditor,
+  isSuggestionPopupOpenRef: React.MutableRefObject<boolean>
+) => {
+  const suggestionController = editor.getContribution('editor.contrib.suggestController') as
+    | (monaco.editor.IEditorContribution & {
+        widget?: {
+          value?: {
+            onDidShow?: (cb: () => void) => void;
+            onDidHide?: (cb: () => void) => void;
+          };
+        };
+      })
+    | undefined;
+  const suggestionWidget = suggestionController?.widget?.value;
+
+  if (suggestionWidget?.onDidShow && suggestionWidget?.onDidHide) {
+    suggestionWidget.onDidShow(() => {
+      isSuggestionPopupOpenRef.current = true;
+    });
+    suggestionWidget.onDidHide(() => {
+      isSuggestionPopupOpenRef.current = false;
+    });
+  }
 };

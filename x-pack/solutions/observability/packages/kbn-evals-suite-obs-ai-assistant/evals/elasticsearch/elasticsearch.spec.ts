@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { evaluate } from '../../src/evaluate';
 
 /**
@@ -15,7 +16,7 @@ import { evaluate } from '../../src/evaluate';
 
 // Using 'all' for elasticsearch scenarios enables the LLM to correctly pick
 // elasticsearch functions when querying for data.
-evaluate.describe('Elasticsearch function', { tag: '@svlOblt' }, () => {
+evaluate.describe('Elasticsearch function', { tag: tags.serverless.observability.complete }, () => {
   evaluate('returns the cluster health state', async ({ evaluateDataset }) => {
     await evaluateDataset({
       dataset: {

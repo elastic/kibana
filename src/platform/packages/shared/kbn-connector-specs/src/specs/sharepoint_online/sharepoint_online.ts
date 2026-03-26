@@ -37,10 +37,12 @@ export const SharepointOnline: ConnectorSpec = {
     id: '.sharepoint-online',
     displayName: 'SharePoint Online',
     description: i18n.translate('core.kibanaConnectorSpecs.sharepointOnline.metadata.description', {
-      defaultMessage: 'Kibana Stack Connector for SharePoint Online.',
+      defaultMessage:
+        'Search content, browse sites and document libraries, and download files from SharePoint Online',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    isTechnicalPreview: true,
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {
@@ -49,11 +51,24 @@ export const SharepointOnline: ConnectorSpec = {
         type: 'oauth_client_credentials',
         defaults: {
           scope: 'https://graph.microsoft.com/.default',
-          tokenUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
         },
         overrides: {
           meta: {
             scope: { hidden: true },
+            tokenUrl: {
+              label: i18n.translate(
+                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauth.tokenUrl.label',
+                { defaultMessage: 'Token URL' }
+              ),
+              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauth.tokenUrl.helpText',
+                {
+                  defaultMessage:
+                    "Replace '{tenant-id}' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
+                }
+              ),
+            },
           },
         },
       },
@@ -250,7 +265,7 @@ export const SharepointOnline: ConnectorSpec = {
         ctx.log.debug(`SharePoint getting drive items from ${url}`);
         const response = await ctx.client.get(url, {
           params: {
-            $select:
+            select:
               'id,name,webUrl,createdDateTime,lastModifiedDateTime,size,@microsoft.graph.downloadUrl',
           },
         });
@@ -296,7 +311,7 @@ export const SharepointOnline: ConnectorSpec = {
       output: z.object({
         contentType: z.string().optional().describe('Content-Type header'),
         contentLength: z.string().optional().describe('Content-Length header'),
-        text: z.string().describe('File content as UTF-8 text'),
+        base64: z.string().describe('File content as base64-encoded string'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
@@ -311,7 +326,7 @@ export const SharepointOnline: ConnectorSpec = {
         return {
           contentType: response.headers?.['content-type'],
           contentLength: response.headers?.['content-length'],
-          text: buffer.toString('utf8'),
+          base64: buffer.toString('base64'),
         };
       },
     },
@@ -405,7 +420,6 @@ export const SharepointOnline: ConnectorSpec = {
           ],
         };
 
-        ctx.log.debug(`SharePoint search: ${JSON.stringify(typedInput.query)}`);
         const response = await ctx.client.post(
           'https://graph.microsoft.com/v1.0/search/query',
           searchRequest

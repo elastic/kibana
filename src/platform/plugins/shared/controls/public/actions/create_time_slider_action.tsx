@@ -10,11 +10,15 @@
 import { type Observable } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
-import { apiCanPinPanels } from '@kbn/presentation-containers';
+import { apiCanPinPanels } from '@kbn/presentation-publishing';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
-import { ACTION_CREATE_TIME_SLIDER, TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
+import {
+  ACTION_CREATE_TIME_SLIDER,
+  DEFAULT_TIME_SLIDER_STATE,
+  TIME_SLIDER_CONTROL,
+} from '@kbn/controls-constants';
 
 interface SupportsTimeSliderControl {
   hasTimeSliderControl: () => boolean;
@@ -41,6 +45,7 @@ export const createTimeSliderAction = (): ActionDefinition<EmbeddableApiContext>
     await embeddable.addPinnedPanel({
       panelType: TIME_SLIDER_CONTROL,
       serializedState: {
+        ...DEFAULT_TIME_SLIDER_STATE,
         grow: true,
         width: 'large',
       },

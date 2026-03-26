@@ -7,16 +7,19 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  EXCEPTIONS_UI_READ_PRIVILEGES,
   RULES_UI_DETECTIONS_PRIVILEGE,
   RULES_UI_READ_PRIVILEGE,
   SECURITY_UI_SHOW_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
 import {
   COVERAGE_OVERVIEW_PATH,
+  DE_SPACE_RULES_HEALTH_PATH,
   EXCEPTIONS_PATH,
   RULES_ADD_PATH,
   RULES_CREATE_PATH,
   RULES_LANDING_PATH,
+  AI_RULE_CREATION_PATH,
   RULES_PATH,
   SECURITY_FEATURE_ID,
 } from '../../common/constants';
@@ -24,6 +27,8 @@ import {
   ADD_RULES,
   COVERAGE_OVERVIEW,
   CREATE_NEW_RULE,
+  AI_RULE_CREATE,
+  DE_SPACE_RULES_HEALTH,
   EXCEPTIONS,
   RULES,
   SIEM_RULES,
@@ -73,6 +78,21 @@ export const links: LinkItem = {
           skipUrlState: true,
           hideTimeline: false,
         },
+        {
+          id: SecurityPageName.aiRuleCreation,
+          title: AI_RULE_CREATE,
+          path: AI_RULE_CREATION_PATH,
+          skipUrlState: true,
+          hideTimeline: false,
+        },
+        {
+          id: SecurityPageName.spaceRulesHealth,
+          title: DE_SPACE_RULES_HEALTH,
+          path: DE_SPACE_RULES_HEALTH_PATH,
+          skipUrlState: true,
+          hideTimeline: true,
+          globalSearchDisabled: true,
+        },
       ],
     },
     {
@@ -84,7 +104,10 @@ export const links: LinkItem = {
       }),
       landingIcon: IconConsoleCloud,
       path: EXCEPTIONS_PATH,
-      capabilities: [RULES_UI_READ_PRIVILEGE, `${SECURITY_FEATURE_ID}.showEndpointExceptions`],
+      capabilities: [
+        EXCEPTIONS_UI_READ_PRIVILEGES,
+        `${SECURITY_FEATURE_ID}.showEndpointExceptions`,
+      ],
       skipUrlState: true,
       hideTimeline: true,
       globalSearchKeywords: [

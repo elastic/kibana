@@ -6,11 +6,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KbnPalette, getKbnPalettes } from '@kbn/palettes';
+import { getKbnPalettes } from '@kbn/palettes';
 import type { CoreTheme } from '@kbn/core/public';
-import type { VisualizationDimensionEditorProps } from '@kbn/lens-common';
-import type { MetricVisualizationState, SecondaryTrend, SecondaryTrendType } from './types';
-import { SECONDARY_DEFAULT_STATIC_COLOR } from './constants';
+import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
+import type {
+  VisualizationDimensionEditorProps,
+  MetricVisualizationState,
+  SecondaryTrend,
+  SecondaryTrendType,
+} from '@kbn/lens-common';
+import { getDefaultConfigForMode } from './palette_config';
+import { getMappedSecondaryTrendPalettes } from './trend_palette_mapping';
+import type { PaletteTriplet, SecondaryTrendPalettes } from './types';
 
 export function getColorMode(
   secondaryTrend: MetricVisualizationState['secondaryTrend'],
@@ -63,45 +70,51 @@ export function getSecondaryLabelSelected(
   return { mode: 'custom', label: state.secondaryLabel ?? defaultSecondaryLabel };
 }
 
-export function getDefaultConfigForMode(mode: SecondaryTrendType): SecondaryTrend {
-  if (mode === 'none') {
-    return { type: 'none' };
+function resolveDynamicTrendConfig(
+  secondaryTrend: MetricVisualizationState['secondaryTrend']
+): Pick<Extract<SecondaryTrend, { type: 'dynamic' }>, 'paletteId' | 'reversed'> {
+  if (secondaryTrend && secondaryTrend.type === 'dynamic') {
+    return secondaryTrend;
   }
-  if (mode === 'static') {
-    return {
-      type: 'static',
-      color: SECONDARY_DEFAULT_STATIC_COLOR,
-    };
-  }
-  return {
-    type: 'dynamic',
-    visuals: 'both',
-    paletteId: KbnPalette.CompareTo,
-    reversed: false,
-    baselineValue: 0,
-  };
+  return getDefaultConfigForMode('dynamic') as Extract<SecondaryTrend, { type: 'dynamic' }>;
 }
 
 export function getTrendPalette(
   colorMode: SecondaryTrendType,
   secondaryTrend: MetricVisualizationState['secondaryTrend'],
   theme: CoreTheme
-): [string, string, string] | undefined {
+): PaletteTriplet | undefined {
   if (colorMode !== 'dynamic') {
     return undefined;
   }
-  if (!secondaryTrend || secondaryTrend.type !== colorMode) {
-    const defaultConfig = getDefaultConfigForMode(colorMode) as Extract<
-      SecondaryTrend,
-      { type: 'dynamic' }
-    >;
-    const palette = getKbnPalettes(theme).get(defaultConfig.paletteId);
-    const colors = palette?.colors(3);
-    return (defaultConfig.reversed ? colors.reverse() : colors) as [string, string, string];
-  }
-  const palette = getKbnPalettes(theme).get(secondaryTrend.paletteId);
+  const { paletteId, reversed } = resolveDynamicTrendConfig(secondaryTrend);
+  const palette = getKbnPalettes(theme).get(paletteId);
   const colors = palette?.colors(3);
-  return (secondaryTrend.reversed ? colors.reverse() : colors) as [string, string, string];
+  return (reversed ? colors.reverse() : colors) as PaletteTriplet;
+}
+
+const reverseTriplet = ([a, b, c]: PaletteTriplet): PaletteTriplet => [c, b, a];
+const getEuiThemeVars = (theme: CoreTheme) => (theme.darkMode ? euiDarkVars : euiLightVars);
+
+export function getSecondaryTrendPalettes(
+  colorMode: SecondaryTrendType,
+  secondaryTrend: MetricVisualizationState['secondaryTrend'],
+  theme: CoreTheme
+): SecondaryTrendPalettes | undefined {
+  if (colorMode !== 'dynamic') {
+    return undefined;
+  }
+
+  const euiTheme = getEuiThemeVars(theme);
+  const { paletteId, reversed } = resolveDynamicTrendConfig(secondaryTrend);
+
+  const mapped = getMappedSecondaryTrendPalettes(paletteId, euiTheme);
+  const palette = mapped?.palette;
+  const textPalette = mapped?.textPalette;
+
+  return reversed
+    ? { palette: reverseTriplet(palette), textPalette: reverseTriplet(textPalette) }
+    : { palette, textPalette };
 }
 
 export function getSecondaryDynamicTrendBaselineValue(

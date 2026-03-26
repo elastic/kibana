@@ -17,6 +17,7 @@ import type {
   BulkGetAttachmentsResponse,
   AttachmentRequest,
   BulkCreateAttachmentsRequest,
+  BulkCreateAttachmentsRequestV2,
   AttachmentPatchRequest,
   AttachmentsFindResponse,
   PostFileAttachmentRequest,
@@ -117,7 +118,7 @@ export const bulkCreateAttachments = async ({
 }: {
   supertest: SuperTest.Agent;
   caseId: string;
-  params: BulkCreateAttachmentsRequest;
+  params: BulkCreateAttachmentsRequestV2;
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
 }): Promise<Case> => {
@@ -143,7 +144,7 @@ export const createCaseAndBulkCreateAttachments = async ({
   numberOfAttachments?: number;
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
-}): Promise<{ theCase: Case; attachments: BulkCreateAttachmentsRequest }> => {
+}): Promise<{ theCase: Case; attachments: BulkCreateAttachmentsRequestV2 }> => {
   const postedCase = await createCase(supertest, postCaseReq);
   const attachments = getAttachments(numberOfAttachments);
   const patchedCase = await bulkCreateAttachments({

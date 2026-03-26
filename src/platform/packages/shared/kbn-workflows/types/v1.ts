@@ -98,7 +98,8 @@ export interface EsWorkflowExecution {
   scopeStack: StackFrame[];
   createdAt: string;
   error: SerializedError | null;
-  createdBy: string;
+  createdBy?: string; // Keep for backwards compatibility with existing documents
+  executedBy?: string; // User who executed the workflow
   startedAt: string;
   finishedAt: string;
   cancelRequested: boolean;
@@ -112,6 +113,10 @@ export interface EsWorkflowExecution {
   entryTransactionId?: string; // APM root transaction ID for trace embeddable
   concurrencyGroupKey?: string; // Evaluated concurrency group key for grouping executions
   queueMetrics?: QueueMetrics; // Queue delay metrics for observability
+  /** IDs of all step executions, enables O(1) mget lookup instead of search */
+  stepExecutionIds?: string[];
+  /** Caller-supplied execution metadata, separate from workflow inputs */
+  metadata?: Record<string, unknown>;
 }
 
 export interface ProviderInput {
@@ -137,6 +142,8 @@ export interface EsWorkflowStepExecution {
   workflowRunId: string;
   workflowId: string;
   status: ExecutionStatus;
+  /** Whether this step execution belongs to a test run of the workflow. */
+  isTestRun?: boolean;
   startedAt: string;
   finishedAt?: string;
   executionTimeMs?: number;
@@ -194,6 +201,7 @@ export interface WorkflowExecutionDto {
   stepId?: string | undefined;
   stepExecutions: WorkflowStepExecutionDto[];
   duration: number | null;
+  executedBy?: string; // User who executed the workflow
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
   context?: Record<string, unknown>;
@@ -211,6 +219,13 @@ export interface WorkflowExecutionListDto {
   page: number;
   size: number;
   total: number;
+}
+
+export interface WorkflowStepExecutionListDto {
+  results: EsWorkflowStepExecution[];
+  total: number;
+  page?: number;
+  size?: number;
 }
 
 // TODO: convert to actual elastic document spec
@@ -238,10 +253,21 @@ export type EsWorkflowCreate = Omit<
   'id' | 'createdAt' | 'createdBy' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'yaml' | 'deleted_at'
 >;
 
+export const MAX_WORKFLOW_YAML_LENGTH = 1_048_576;
+const MAX_BULK_CREATE_WORKFLOWS = 500;
+export const WORKFLOW_ID_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,254}$/;
+
 export const CreateWorkflowCommandSchema = z.object({
-  yaml: z.string(),
-  id: z.string().optional(),
+  yaml: z.string().max(MAX_WORKFLOW_YAML_LENGTH),
+  id: z.string().max(255).regex(WORKFLOW_ID_PATTERN).optional(),
 });
+export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
+
+export const BulkCreateWorkflowsCommandSchema = z.object({
+  workflows: z.array(CreateWorkflowCommandSchema).max(MAX_BULK_CREATE_WORKFLOWS),
+});
+
+export type BulkCreateWorkflowsCommand = z.infer<typeof BulkCreateWorkflowsCommandSchema>;
 
 export const UpdateWorkflowCommandSchema = z.object({
   name: z.string(),
@@ -258,6 +284,7 @@ export const SearchWorkflowCommandSchema = z.object({
   createdBy: z.array(z.string()).optional(),
   // bool or number transformed to boolean
   enabled: z.array(z.union([z.boolean(), z.number().transform((val) => val === 1)])).optional(),
+  tags: z.array(z.string()).optional(),
   query: z.string().optional(),
   _full: z.boolean().default(false),
 });
@@ -269,6 +296,7 @@ export type RunWorkflowCommand = z.infer<typeof RunWorkflowCommandSchema>;
 
 export const RunStepCommandSchema = z.object({
   workflowYaml: z.string(),
+  workflowId: z.string().optional(), // Optional to allow for test step runs for unsaved workflows
   stepId: z.string(),
   contextOverride: z.record(z.string(), z.unknown()).optional(),
 });
@@ -289,8 +317,6 @@ export const TestWorkflowResponseSchema = z.object({
   workflowExecutionId: z.string(),
 });
 export type TestWorkflowResponseDto = z.infer<typeof TestWorkflowResponseSchema>;
-
-export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
 
 export interface UpdatedWorkflowResponseDto {
   id: string;
@@ -314,6 +340,11 @@ export interface WorkflowDetailDto {
   yaml: string;
   valid: boolean;
 }
+
+export interface WorkflowPartialDetailDto extends Partial<WorkflowDetailDto> {
+  id: string;
+}
+export type WorkflowMgetResponseDto = WorkflowPartialDetailDto[];
 
 export interface WorkflowListItemDto {
   id: string;
@@ -382,6 +413,11 @@ export interface ConnectorInstance {
   name: string;
   isPreconfigured: boolean;
   isDeprecated: boolean;
+  config?: ConnectorInstanceConfig;
+}
+
+export interface ConnectorInstanceConfig {
+  taskType?: string;
 }
 
 export interface ConnectorTypeInfo {
@@ -399,17 +435,20 @@ export type CompletionFn = () => Promise<
   Array<{ label: string; value: string; detail?: string; documentation?: string }>
 >;
 
+export type StepStabilityLevel = 'stable' | 'beta' | 'tech_preview';
+
 export interface BaseConnectorContract {
   type: string;
   paramsSchema: z.ZodType;
-  connectorIdRequired?: boolean;
-  connectorId?: z.ZodType;
+  hasConnectorId?: 'required' | 'optional' | false;
   outputSchema: z.ZodType;
   configSchema?: z.ZodObject;
   summary: string | null;
   description: string | null;
   /** Documentation URL for this API endpoint */
   documentation?: string | null;
+  /** API stability level derived from the OpenAPI `x-state` field */
+  stability?: StepStabilityLevel;
   examples?: ConnectorExamples;
   // Rich property handlers for completions, validation and decorations
   editorHandlers?: {
@@ -465,6 +504,13 @@ export interface StepPropertyHandler<T = unknown> {
    * Provides a unified interface for search, resolution, and decoration of entity references.
    */
   selection?: PropertySelectionHandler<Exclude<T, undefined>>;
+  /**
+   * Connector ID selection configuration for the property.
+   * Used to resolve connector IDs for custom steps.
+   *
+   * **Note**: This handler is currently only supported for the `connector-id` property in the config schema.
+   */
+  connectorIdSelection?: ConnectorIdSelectionHandler;
 }
 
 export interface PropertySelectionHandler<T = unknown> {
@@ -516,7 +562,7 @@ export interface SelectionDetails {
   }>;
 }
 
-export interface PropertyValidationContext {
+export interface SelectionContext {
   /** The step type ID (e.g., "onechat.runAgent") */
   stepType: string;
   /** The property path ("config" or "input") */
@@ -525,7 +571,18 @@ export interface PropertyValidationContext {
   propertyKey: string;
 }
 
-export type SelectionContext = PropertyValidationContext;
+export interface ConnectorIdSelectionHandler {
+  /**
+   * The action type IDs to search for.
+   */
+  connectorTypes: string[];
+  /**
+   * Whether to disable creation of a new connector from the connector ID selection.
+   * If false (default), creation from the connector ID selection will be disabled.
+   * If true, creation from the connector ID selection will be enabled for the first type in the `connectorTypes` list.
+   */
+  enableCreation?: boolean;
+}
 
 export interface ConnectorExamples {
   params?: Record<string, string>;
@@ -538,11 +595,12 @@ export type ConnectorContractUnion =
   | InternalConnectorContract;
 
 export interface WorkflowsSearchParams {
-  size: number;
-  page: number;
+  size?: number;
+  page?: number;
   query?: string;
   createdBy?: string[];
   enabled?: boolean[];
+  tags?: string[];
 }
 
 export interface RequestOptions {
@@ -553,4 +611,32 @@ export interface RequestOptions {
   headers?: Record<string, string>;
   /** Bulk body for elasticsearch.bulk step */
   bulkBody?: Array<Record<string, unknown>>;
+}
+
+export type WorkflowDiagnosticSeverity = 'error' | 'warning' | 'info';
+
+export interface WorkflowDiagnostic {
+  severity: WorkflowDiagnosticSeverity;
+  message: string;
+  source: string;
+  path?: (string | number)[];
+}
+export interface ValidateWorkflowResponseDto {
+  valid: boolean;
+  diagnostics: WorkflowDiagnostic[];
+  parsedWorkflow?: WorkflowYaml;
+}
+
+export interface GetAvailableConnectorsResponse {
+  connectorTypes: Record<string, ConnectorTypeInfo>;
+  totalConnectors: number;
+}
+
+export interface ChildWorkflowExecutionItem {
+  parentStepExecutionId: string;
+  workflowId: string;
+  workflowName: string;
+  executionId: string;
+  status: ExecutionStatus;
+  stepExecutions: WorkflowStepExecutionDto[];
 }

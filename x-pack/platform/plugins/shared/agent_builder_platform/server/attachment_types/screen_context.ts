@@ -36,6 +36,7 @@ export const createScreenContextAttachmentType = (): AttachmentTypeDefinition<
         },
       };
     },
+    isReadonly: true,
     getTools: () => [],
   };
 };
@@ -51,6 +52,9 @@ const formatScreenContext = (data: ScreenContextAttachmentData): string => {
   }
   if (data.description) {
     parts.push(`Description: ${data.description}`);
+  }
+  if (data.time_range) {
+    parts.push(`Time range: ${data.time_range.from} to ${data.time_range.to}`);
   }
   if (data.additional_data) {
     parts.push(`Additional data: ${JSON.stringify(data.additional_data)}`);

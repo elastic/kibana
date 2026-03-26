@@ -23,6 +23,7 @@ import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library'
 import { registerAgents } from './agent_builder/agents';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 import { registerTools } from './agent_builder/tools/register_tools';
+import { registerSkills } from './agent_builder/skills/register_skills';
 import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
 import { SavedObjectsClientFactory } from './endpoint/services/saved_objects';
 import { registerEntityStoreDataViewRefreshTask } from './lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task';
@@ -59,6 +60,7 @@ import {
   DEFAULT_ALERTS_INDEX,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   SERVER_APP_ID,
+  CASE_ATTACHMENT_INDICATOR_TYPE_ID,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
@@ -125,6 +127,7 @@ import {
 import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
+import { registerRiskScoreMaintainer } from './lib/entity_analytics/risk_score/maintainer/register_risk_score_maintainer';
 import {
   registerEntityStoreFieldRetentionEnrichTask,
   registerEntityStoreSnapshotTask,
@@ -144,10 +147,7 @@ import { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_ser
 import { TelemetryConfigProvider } from '../common/telemetry_config/telemetry_config_provider';
 import { TelemetryConfigWatcher } from './endpoint/lib/policy/telemetry_watch';
 import { threatIntelligenceSearchStrategyProvider } from './threat_intelligence/search_strategy';
-import {
-  CASE_ATTACHMENT_TYPE_ID,
-  THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME,
-} from '../common/threat_intelligence/constants';
+import { THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME } from '../common/threat_intelligence/constants';
 import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_diagnostic_service';
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
 import { ENTITY_RISK_SCORE_TOOL_ID } from './assistant/tools/entity_risk_score/entity_risk_score';
@@ -159,6 +159,8 @@ import {
 } from './lib/trial_companion/services/trial_companion_milestone_service';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
+import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
+import { securityAlertsProfileInitializer } from './lib/anonymization';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -242,15 +244,20 @@ export class Plugin implements ISecuritySolutionPlugin {
   }
 
   private registerAgentBuilderAttachmentsAndTools(
-    agentBuilder: SecuritySolutionPluginSetupDependencies['agentBuilder'],
+    plugins: SecuritySolutionPluginSetupDependencies,
     core: SecuritySolutionPluginCoreSetupDependencies,
     logger: Logger
   ): void {
-    if (!agentBuilder) {
+    if (!plugins.agentBuilder) {
       return;
     }
 
-    registerTools(agentBuilder, core, logger).catch((error) => {
+    const agentBuilder = plugins.agentBuilder;
+
+    const experimentalFeatures = this.config.experimentalFeatures;
+    const endpointAppContextService = this.endpointAppContextService;
+
+    registerTools(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
       this.logger.error(`Error registering security tools: ${error}`);
     });
     registerAttachments(agentBuilder).catch((error) => {
@@ -258,6 +265,17 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
     registerAgents(agentBuilder, core, logger).catch((error) => {
       this.logger.error(`Error registering security agent: ${error}`);
+    });
+    registerSkills({
+      agentBuilder,
+      experimentalFeatures,
+      getStartServices: core.getStartServices,
+      kibanaVersion: this.pluginContext.env.packageInfo.version,
+      logger,
+      ml: plugins.ml,
+      options: { endpointAppContextService },
+    }).catch((error) => {
+      this.logger.error(`Error registering security skills: ${error}`);
     });
   }
 
@@ -291,16 +309,27 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     registerDeprecations({ core, config: this.config, logger: this.logger });
 
-    registerRiskScoringTask({
-      getStartServices: core.getStartServices,
-      kibanaVersion: pluginContext.env.packageInfo.version,
-      logger: this.logger,
-      auditLogger: plugins.security?.audit.withoutRequest,
-      taskManager: plugins.taskManager,
-      telemetry: core.analytics,
-      entityAnalyticsConfig: config.entityAnalytics,
-      experimentalFeatures,
-    });
+    if (experimentalFeatures.entityAnalyticsEntityStoreV2) {
+      registerRiskScoreMaintainer({
+        entityStore: plugins.entityStore,
+        getStartServices: core.getStartServices,
+        kibanaVersion: pluginContext.env.packageInfo.version,
+        logger: this.logger,
+        auditLogger: plugins.security?.audit.withoutRequest,
+        productFeaturesService,
+      });
+    } else {
+      registerRiskScoringTask({
+        getStartServices: core.getStartServices,
+        kibanaVersion: pluginContext.env.packageInfo.version,
+        logger: this.logger,
+        auditLogger: plugins.security?.audit.withoutRequest,
+        taskManager: plugins.taskManager,
+        telemetry: core.analytics,
+        entityAnalyticsConfig: config.entityAnalytics,
+        experimentalFeatures,
+      });
+    }
 
     scheduleEntityAnalyticsMigration({
       getStartServices: core.getStartServices,
@@ -620,7 +649,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         );
 
         plugins.cases.attachmentFramework.registerExternalReference({
-          id: CASE_ATTACHMENT_TYPE_ID,
+          id: CASE_ATTACHMENT_INDICATOR_TYPE_ID,
         });
 
         this.siemMigrationsService.setup({ esClusterClient: coreStart.elasticsearch.client });
@@ -675,7 +704,16 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
     }
 
-    this.registerAgentBuilderAttachmentsAndTools(plugins.agentBuilder, core, this.logger);
+    this.registerAgentBuilderAttachmentsAndTools(plugins, core, this.logger);
+
+    setupAlertsCapabilitiesSwitcher({
+      core,
+      logger: this.logger,
+      getSecurityStart: async () => {
+        const [, startPlugins] = await core.getStartServices();
+        return startPlugins.security;
+      },
+    });
 
     return {
       setProductFeaturesConfigurator:
@@ -718,6 +756,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.licensing$ = plugins.licensing.license$;
 
     this.telemetryConfigProvider.start(plugins.telemetry.isOptedIn$);
+    plugins.anonymization.registerProfileInitializer(securityAlertsProfileInitializer);
 
     // Assistant Tool and Feature Registration
     const filteredTools = config.experimentalFeatures.riskScoreAssistantToolDisabled
@@ -767,6 +806,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       savedObjectsServiceStart: core.savedObjects,
       connectorActions: plugins.actions,
       spacesService: plugins.spaces?.spacesService,
+      agentBuilder: plugins.agentBuilder,
     });
 
     if (this.lists && plugins.taskManager && plugins.fleet) {

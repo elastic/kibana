@@ -6,7 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import {
   RULES_SETTINGS_TEST_SUBJECTS,
   RULE_TYPE_MODAL_TEST_SUBJECTS,
@@ -450,11 +450,11 @@ export class RulesPage {
    * Saves the rule by clicking save and confirming
    */
   async saveRule() {
-    // Scroll the save button into view to ensure it's accessible
-    await this.ruleSaveButton.scrollIntoViewIfNeeded();
-
-    // Click the save button
-    await this.ruleSaveButton.click();
+    // The rule preview chart polls continuously, alternating between a loading overlay
+    // (kbnMountWrapper) and a danger toast. Both intercept pointer events on the footer
+    // save button. Using focus + keyboard bypasses pointer-event interception entirely.
+    await this.ruleSaveButton.focus();
+    await this.page.keyboard.press('Enter');
 
     await expect(this.confirmModalButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
     await this.confirmModalButton.click();

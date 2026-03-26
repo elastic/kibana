@@ -1,6 +1,6 @@
 # CONCAT
 
-Concatenates two or more strings.
+The CONCAT function combines two or more strings into a single string.
 
 ## Syntax
 
@@ -8,23 +8,17 @@ Concatenates two or more strings.
 
 ### Parameters
 
-#### `string1`
+#### string1
 
 The first string to concatenate.
 
-#### `string2`
+#### string2
 
 The second string to concatenate.
 
 ## Examples
 
-```esql
-FROM address
-| KEEP street_1, street_2
-| EVAL fullstreet = CONCAT(street_1, street_2)
-```
-
-CONCAT supports any number of string parameters. The following example concatenates the `first_name` and `last_name` fields with a space in between:
+Combines the first and last names of employees into a single full name field:
 
 ```esql
 FROM employees

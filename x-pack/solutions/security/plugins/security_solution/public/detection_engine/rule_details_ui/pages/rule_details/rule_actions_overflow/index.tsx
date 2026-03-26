@@ -81,7 +81,10 @@ const RuleActionsOverflowComponent = ({
   const { bulkExport } = useBulkExport();
   const downloadExportedRules = useDownloadExportedRules();
   const { scheduleRuleRun } = useScheduleRuleRun();
-  const { edit: canEditRules, read: canReadRules } = useUserPrivileges().rulesPrivileges;
+  const {
+    rules: { edit: canEditRules, read: canReadRules },
+    exceptions: { edit: canEditExceptions },
+  } = useUserPrivileges().rulesPrivileges;
 
   const onRuleDeletedCallback = useCallback(() => {
     navigateToApp(APP_UI_ID, {
@@ -107,8 +110,9 @@ const RuleActionsOverflowComponent = ({
               onClick={async () => {
                 startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
                 closePopover();
-                const modalDuplicationConfirmationResult =
-                  await showBulkDuplicateExceptionsConfirmation();
+                const modalDuplicationConfirmationResult = canEditExceptions
+                  ? await showBulkDuplicateExceptionsConfirmation()
+                  : DuplicateOptions.withoutExceptions;
                 if (modalDuplicationConfirmationResult === null) {
                   return;
                 }
@@ -146,7 +150,7 @@ const RuleActionsOverflowComponent = ({
             </EuiContextMenuItem>,
             <EuiContextMenuItem
               key={i18nActions.EXPORT_RULE}
-              icon="exportAction"
+              icon="upload"
               disabled={!canReadRules}
               data-test-subj="rules-details-export-rule"
               onClick={async () => {
@@ -199,7 +203,7 @@ const RuleActionsOverflowComponent = ({
                         : undefined,
                       'data-test-subj': 'rules-details-revert-rule-tooltip',
                     }}
-                    icon="timeRefresh"
+                    icon="refreshTime"
                     disabled={!canEditRules || !doesBaseVersionExist}
                     data-test-subj="rules-details-revert-rule"
                     onClick={() => {
@@ -245,6 +249,7 @@ const RuleActionsOverflowComponent = ({
       doesBaseVersionExist,
       startTransaction,
       closePopover,
+      canEditExceptions,
       showBulkDuplicateExceptionsConfirmation,
       executeBulkAction,
       navigateToApp,
@@ -263,7 +268,7 @@ const RuleActionsOverflowComponent = ({
     () => (
       <EuiToolTip position="top" content={i18n.ALL_ACTIONS}>
         <MyEuiButtonIcon
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           aria-label={i18n.ALL_ACTIONS}
           isDisabled={isDisabled}
           data-test-subj="rules-details-popover-button-icon"

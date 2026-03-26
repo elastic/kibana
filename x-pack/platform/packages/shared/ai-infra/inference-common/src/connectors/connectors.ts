@@ -36,6 +36,17 @@ export interface InferenceConnector {
    * Capabilities of this connector.
    */
   capabilities: InferenceConnectorCapabilities;
+  /**
+   * When true, this entry represents an Elasticsearch inference endpoint
+   * rather than a Kibana stack connector. `connectorId` holds the inference endpoint ID.
+   */
+  isInferenceEndpoint: boolean;
+  /**
+   * When true, this connector is preconfigured (i.e. managed by Elastic).
+   * For native inference endpoints this is determined by the presence of
+   * `metadata.display.name` on the underlying ES inference endpoint.
+   */
+  isPreconfigured: boolean;
 }
 
 export interface InferenceConnectorCapabilities {
@@ -55,6 +66,7 @@ export interface RawConnector {
   actionTypeId: string;
   name: string;
   config?: Record<string, any>;
+  isPreconfigured?: boolean;
 }
 
 export interface RawInferenceConnector {
@@ -62,4 +74,5 @@ export interface RawInferenceConnector {
   actionTypeId: InferenceConnectorType;
   name: string;
   config?: Record<string, any>;
+  isPreconfigured?: boolean;
 }

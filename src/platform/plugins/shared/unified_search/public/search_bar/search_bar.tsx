@@ -168,6 +168,10 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
 
   hasDirtyState?: boolean;
   useBackgroundSearchButton?: boolean;
+  /**
+   * Enable data source browser suggestion in ES|QL editor.
+   */
+  enableResourceBrowser?: boolean;
 }
 
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
@@ -555,7 +559,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
       text: toMountPoint(
         <FormattedMessage
           id="unifiedSearch.search.searchBar.backgroundSearch.toast.text"
-          defaultMessage="{name} is running now. <link>Check its progress here</link>"
+          defaultMessage='"{name}" is running now. Feel free to close the tab. <link>Check its progress here.</link>'
           values={{
             name,
             link: (chunks: React.ReactNode) => (
@@ -784,7 +788,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           nonKqlMode={this.props.nonKqlMode}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           filtersForSuggestions={this.props.filtersForSuggestions}
-          filters={this.props.filters!}
+          filters={this.props.filters}
           onFiltersUpdated={this.props.onFiltersUpdated}
           dataViewPickerComponentProps={this.props.dataViewPickerComponentProps}
           textBasedLanguageModeErrors={this.props.textBasedLanguageModeErrors}
@@ -807,6 +811,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           esqlQueryStats={this.props.esqlQueryStats}
           onOpenQueryInNewTab={this.props.onOpenQueryInNewTab}
           useBackgroundSearchButton={this.props.useBackgroundSearchButton}
+          enableResourceBrowser={this.props.enableResourceBrowser}
         />
       </div>
     );

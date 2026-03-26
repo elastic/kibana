@@ -29,7 +29,7 @@ export const useQualityIssuesFilters = () => {
   const { data } = qualityIssues ?? {};
 
   const toggleCurrentQualityIssues = useCallback(() => {
-    service.send('TOGGLE_CURRENT_QUALITY_ISSUES');
+    service.send({ type: 'TOGGLE_CURRENT_QUALITY_ISSUES' });
   }, [service]);
 
   // Issue type filter logic

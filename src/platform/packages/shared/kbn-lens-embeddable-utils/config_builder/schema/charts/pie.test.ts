@@ -7,27 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PieStateNoESQL, PieState, PieStateESQL } from './pie';
+import type { PieStateESQL, PieStateNoESQL } from './pie';
 import { pieStateSchema } from './pie';
 
 describe('Pie/Donut Schema', () => {
   describe.each(['pie', 'donut'] as const)('%s chart type', (chartType) => {
-    const basePieConfig: Pick<
-      PieStateNoESQL,
-      'type' | 'dataset' | 'ignore_global_filters' | 'sampling'
-    > = {
-      type: chartType,
-      dataset: {
-        type: 'dataView',
-        id: 'test-data-view',
-      },
-      ignore_global_filters: false,
-      sampling: 1,
-    };
-
     describe('Non-ES|QL Schema', () => {
+      const basePieConfig = {
+        type: chartType,
+        dataset: {
+          type: 'dataView',
+          id: 'test-data-view',
+        },
+        ignore_global_filters: false,
+        sampling: 1,
+      } satisfies Partial<PieStateNoESQL>;
+
       it('validates minimal configuration with single metric', () => {
-        const input: PieState = {
+        const input: PieStateNoESQL = {
           ...basePieConfig,
           metrics: [
             {
@@ -44,7 +41,7 @@ describe('Pie/Donut Schema', () => {
       });
 
       it('validates configuration with metrics and group_by', () => {
-        const input: PieState = {
+        const input: PieStateNoESQL = {
           ...basePieConfig,
           metrics: [
             {
@@ -67,7 +64,7 @@ describe('Pie/Donut Schema', () => {
       });
 
       it('validates configuration with donut_hole', () => {
-        const input: PieState = {
+        const input: PieStateNoESQL = {
           ...basePieConfig,
           metrics: [
             {
@@ -91,7 +88,7 @@ describe('Pie/Donut Schema', () => {
       });
 
       it('validates full configuration with specific options', () => {
-        const input: PieState = {
+        const input: PieStateNoESQL = {
           ...basePieConfig,
           title: 'Sales Chart',
           description: 'Sales data visualization',
@@ -116,12 +113,12 @@ describe('Pie/Donut Schema', () => {
           legend: {
             nested: false,
             truncate_after_lines: 2,
-            visible: 'show',
+            visibility: 'visible',
             size: 'xlarge',
           },
-          label_position: 'inside',
+          labels: { position: 'inside' },
           donut_hole: 'small',
-          value_display: {
+          values: {
             mode: 'percentage',
             percent_decimals: 0,
           },
@@ -130,13 +127,13 @@ describe('Pie/Donut Schema', () => {
         const validated = pieStateSchema.validate(input);
         expect(validated.title).toBe('Sales Chart');
         expect(validated.legend?.nested).toBe(false);
-        expect(validated.label_position).toBe('inside');
+        expect(validated.labels?.position).toBe('inside');
         expect(validated.donut_hole).toBe('small');
-        expect(validated.value_display?.mode).toBe('percentage');
+        expect(validated.values?.mode).toBe('percentage');
       });
 
       it('validates configuration with multiple group_by dimensions', () => {
-        const input: PieState = {
+        const input: PieStateNoESQL = {
           ...basePieConfig,
           metrics: [
             {
@@ -167,8 +164,8 @@ describe('Pie/Donut Schema', () => {
         expect(validated.group_by).toHaveLength(3);
       });
 
-      it('validates configuration with color by value', () => {
-        const input: PieState = {
+      it('validates configuration with color mapping', () => {
+        const input: PieStateNoESQL = {
           ...basePieConfig,
           metrics: [
             {
@@ -182,11 +179,41 @@ describe('Pie/Donut Schema', () => {
               size: 5,
               fields: ['category'],
               color: {
-                type: 'dynamic',
-                range: 'absolute',
-                steps: [
-                  { type: 'from', from: 0, color: 'red' },
-                  { type: 'to', to: 100, color: 'blue' },
+                mode: 'categorical',
+                palette: 'default',
+                mapping: [
+                  {
+                    values: ['success'],
+                    color: {
+                      type: 'from_palette',
+                      palette: 'default',
+                      index: 6,
+                    },
+                  },
+                  {
+                    values: ['info'],
+                    color: {
+                      type: 'from_palette',
+                      palette: 'default',
+                      index: 9,
+                    },
+                  },
+                  {
+                    values: ['security'],
+                    color: {
+                      type: 'from_palette',
+                      palette: 'default',
+                      index: 4,
+                    },
+                  },
+                  {
+                    values: ['__other__'],
+                    color: {
+                      type: 'from_palette',
+                      palette: 'default',
+                      index: 5,
+                    },
+                  },
                 ],
               },
             },
@@ -194,11 +221,11 @@ describe('Pie/Donut Schema', () => {
         };
 
         const validated = pieStateSchema.validate(input);
-        expect(validated.group_by?.[0].color).toHaveProperty('type', 'dynamic');
+        expect(validated.group_by?.[0].color).toHaveProperty('mode', 'categorical');
       });
 
       it('validates configuration with collapsed dimensions', () => {
-        const input: PieState = {
+        const input: PieStateNoESQL = {
           ...basePieConfig,
           metrics: [
             {
@@ -227,7 +254,7 @@ describe('Pie/Donut Schema', () => {
       });
 
       it('throws on empty metrics array', () => {
-        const input: PieState = {
+        const input: PieStateNoESQL = {
           ...basePieConfig,
           metrics: [],
         };
@@ -236,7 +263,7 @@ describe('Pie/Donut Schema', () => {
       });
 
       it('throws on empty group_by array', () => {
-        const input: PieState = {
+        const input: PieStateNoESQL = {
           ...basePieConfig,
           metrics: [
             {
@@ -251,7 +278,7 @@ describe('Pie/Donut Schema', () => {
       });
 
       it('throws on invalid donut hole size', () => {
-        const input: Omit<PieState, 'donut_hole'> & { donut_hole: string } = {
+        const input: PieStateNoESQL = {
           ...basePieConfig,
           metrics: [
             {
@@ -266,6 +293,7 @@ describe('Pie/Donut Schema', () => {
               fields: ['category'],
             },
           ],
+          // @ts-expect-error - invalid donut hole size
           donut_hole: 'invalid',
         };
 
@@ -273,7 +301,7 @@ describe('Pie/Donut Schema', () => {
       });
 
       it('throws on invalid label position', () => {
-        const input: Omit<PieState, 'label_position'> & { label_position: string } = {
+        const input: PieStateNoESQL = {
           ...basePieConfig,
           metrics: [
             {
@@ -288,7 +316,10 @@ describe('Pie/Donut Schema', () => {
               fields: ['category'],
             },
           ],
-          label_position: 'invalid',
+          labels: {
+            // @ts-expect-error - invalid labels position
+            position: 'invalid',
+          },
         };
 
         expect(() => pieStateSchema.validate(input)).toThrow();
@@ -297,7 +328,7 @@ describe('Pie/Donut Schema', () => {
       describe('Grouping Validation', () => {
         describe('Single Metric Scenarios', () => {
           it('allows single metric with single non-collapsed breakdown', () => {
-            const input: PieState = {
+            const input: PieStateNoESQL = {
               ...basePieConfig,
               metrics: [
                 {
@@ -318,7 +349,7 @@ describe('Pie/Donut Schema', () => {
           });
 
           it('allows single metric with two non-collapsed breakdowns', () => {
-            const input: PieState = {
+            const input: PieStateNoESQL = {
               ...basePieConfig,
               metrics: [
                 {
@@ -344,7 +375,7 @@ describe('Pie/Donut Schema', () => {
           });
 
           it('allows single metric with three non-collapsed breakdowns', () => {
-            const input: PieState = {
+            const input: PieStateNoESQL = {
               ...basePieConfig,
               metrics: [
                 {
@@ -375,7 +406,7 @@ describe('Pie/Donut Schema', () => {
           });
 
           it('allows single metric with multiple collapsed and three non-collapsed breakdowns', () => {
-            const input: PieState = {
+            const input: PieStateNoESQL = {
               ...basePieConfig,
               metrics: [
                 {
@@ -418,7 +449,7 @@ describe('Pie/Donut Schema', () => {
           });
 
           it('throws when single metric has more than three non-collapsed breakdowns', () => {
-            const input: PieState = {
+            const input: PieStateNoESQL = {
               ...basePieConfig,
               metrics: [
                 {
@@ -451,14 +482,14 @@ describe('Pie/Donut Schema', () => {
             };
 
             expect(() => pieStateSchema.validate(input)).toThrow(
-              /number of non-collapsed group by dimensions must not exceed 3/i
+              /number of non-collapsed group_by dimensions must not exceed 3/i
             );
           });
         });
 
         describe('Multiple Metrics Scenarios', () => {
           it('allows multiple metrics without group_by', () => {
-            const input: PieState = {
+            const input: PieStateNoESQL = {
               ...basePieConfig,
               metrics: [
                 {
@@ -477,7 +508,7 @@ describe('Pie/Donut Schema', () => {
           });
 
           it('allows multiple metrics with single non-collapsed breakdown', () => {
-            const input: PieState = {
+            const input: PieStateNoESQL = {
               ...basePieConfig,
               metrics: [
                 {
@@ -503,7 +534,7 @@ describe('Pie/Donut Schema', () => {
           });
 
           it('allows multiple metrics with two non-collapsed breakdowns', () => {
-            const input: PieState = {
+            const input: PieStateNoESQL = {
               ...basePieConfig,
               metrics: [
                 {
@@ -534,7 +565,7 @@ describe('Pie/Donut Schema', () => {
           });
 
           it('allows multiple metrics with multiple collapsed and two non-collapsed breakdowns', () => {
-            const input: PieState = {
+            const input: PieStateNoESQL = {
               ...basePieConfig,
               metrics: [
                 {
@@ -578,8 +609,8 @@ describe('Pie/Donut Schema', () => {
             expect(() => pieStateSchema.validate(input)).not.toThrow();
           });
 
-          it('throws when multiple metrics have three non-collapsed breakdowns', () => {
-            const input: PieState = {
+          it('throws when multiple metrics have more than 2 non-collapsed breakdowns', () => {
+            const input: PieStateNoESQL = {
               ...basePieConfig,
               metrics: [
                 {
@@ -612,12 +643,12 @@ describe('Pie/Donut Schema', () => {
             };
 
             expect(() => pieStateSchema.validate(input)).toThrow(
-              /number of group by dimensions must not exceed 2/i
+              /the number of non-collapsed group_by dimensions must not exceed 2/i
             );
           });
 
           it('throws when multiple metrics have one collapsed and three non-collapsed breakdowns', () => {
-            const input: PieState = {
+            const input: PieStateNoESQL = {
               ...basePieConfig,
               metrics: [
                 {
@@ -660,7 +691,7 @@ describe('Pie/Donut Schema', () => {
             };
 
             expect(() => pieStateSchema.validate(input)).toThrow(
-              /number of group by dimensions must not exceed 2/i
+              /the number of non-collapsed group_by dimensions must not exceed 2/i
             );
           });
         });
@@ -668,10 +699,7 @@ describe('Pie/Donut Schema', () => {
     });
 
     describe('ES|QL Schema', () => {
-      const baseESQLPieConfig: Pick<
-        PieStateESQL,
-        'type' | 'dataset' | 'ignore_global_filters' | 'sampling'
-      > = {
+      const baseESQLPieConfig = {
         type: chartType,
         dataset: {
           type: 'esql',
@@ -679,9 +707,9 @@ describe('Pie/Donut Schema', () => {
         },
         ignore_global_filters: false,
         sampling: 1,
-      };
+      } satisfies Partial<PieStateESQL>;
       it('validates minimal ES|QL configuration', () => {
-        const input: PieState = {
+        const input: PieStateESQL = {
           ...baseESQLPieConfig,
           metrics: [
             {
@@ -697,7 +725,7 @@ describe('Pie/Donut Schema', () => {
       });
 
       it('validates ES|QL configuration with group_by', () => {
-        const input: PieState = {
+        const input: PieStateESQL = {
           ...baseESQLPieConfig,
           metrics: [
             {
@@ -719,7 +747,7 @@ describe('Pie/Donut Schema', () => {
       });
 
       it('validates ES|QL configuration with multiple metrics', () => {
-        const input: PieState = {
+        const input: PieStateESQL = {
           ...baseESQLPieConfig,
           metrics: [
             {
@@ -738,7 +766,7 @@ describe('Pie/Donut Schema', () => {
       });
 
       it('validates ES|QL configuration with full options', () => {
-        const input: PieState = {
+        const input: PieStateESQL = {
           ...baseESQLPieConfig,
           title: 'Sales Chart',
           metrics: [
@@ -756,26 +784,56 @@ describe('Pie/Donut Schema', () => {
               operation: 'value',
               column: 'category',
               color: {
-                type: 'dynamic',
-                range: 'absolute',
-                steps: [
-                  { type: 'from', from: 0, color: 'red' },
-                  { type: 'to', to: 100, color: 'blue' },
+                mode: 'categorical',
+                palette: 'default',
+                mapping: [
+                  {
+                    values: ['success'],
+                    color: {
+                      type: 'from_palette',
+                      palette: 'default',
+                      index: 6,
+                    },
+                  },
+                  {
+                    values: ['info'],
+                    color: {
+                      type: 'from_palette',
+                      palette: 'default',
+                      index: 9,
+                    },
+                  },
+                  {
+                    values: ['security'],
+                    color: {
+                      type: 'from_palette',
+                      palette: 'default',
+                      index: 4,
+                    },
+                  },
+                  {
+                    values: ['__other__'],
+                    color: {
+                      type: 'from_palette',
+                      palette: 'default',
+                      index: 5,
+                    },
+                  },
                 ],
               },
             },
           ],
           legend: {
             nested: false,
-            visible: 'show',
+            visibility: 'visible',
           },
-          label_position: 'outside',
+          labels: { position: 'outside' },
           donut_hole: 'large',
         };
 
         const validated = pieStateSchema.validate(input);
         expect(validated.title).toBe('Sales Chart');
-        expect(validated.label_position).toBe('outside');
+        expect(validated.labels?.position).toBe('outside');
         expect(validated.donut_hole).toBe('large');
       });
     });

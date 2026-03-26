@@ -17,7 +17,7 @@ import {
   LOG_LEVEL_REGEX,
   OTEL_MESSAGE_FIELD,
 } from '@kbn/discover-utils';
-import { MESSAGE_FIELD } from '@kbn/discover-utils';
+import { MESSAGE_FIELD, escapeAndPreserveHighlightTags } from '@kbn/discover-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { makeHighContrastColor, useEuiTheme } from '@elastic/eui';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
@@ -80,7 +80,7 @@ const getHighlightedMessage = (
     // Use EUI's makeHighContrastColor utility to calculate appropriate text color
     // This function automatically determines the best contrasting color based on WCAG standards
     const textColor = makeHighContrastColor(
-      isDarkTheme ? euiTheme.colors.ghost : euiTheme.colors.ink, // preferred foreground color
+      isDarkTheme ? euiTheme.colors.textGhost : euiTheme.colors.textInk, // preferred foreground color
       4.5 // WCAG AA contrast ratio (default in EUI)
     )(bgColor);
 
@@ -96,6 +96,7 @@ export const Content = ({
   isSingleLine = false,
   row,
   shouldShowFieldHandler,
+  columnsMeta,
 }: ContentProps) => {
   // Use OTel fallback version that returns the actual field name used
   const { field, value } = getMessageFieldWithFallbacks(row.flattened);
@@ -104,7 +105,10 @@ export const Content = ({
   const isDarkTheme = useKibanaIsDarkMode();
 
   const highlightedValue = useMemo(
-    () => (value ? getHighlightedMessage(value, row, euiTheme, isDarkTheme) : value),
+    () =>
+      value
+        ? getHighlightedMessage(escapeAndPreserveHighlightTags(value), row, euiTheme, isDarkTheme)
+        : value,
     [value, row, euiTheme, isDarkTheme]
   );
 
@@ -124,13 +128,20 @@ export const Content = ({
       shouldShowFieldHandler={shouldShowFieldHandler}
       isCompressed={isCompressed}
       row={row}
+      columnsMeta={columnsMeta}
     />
   );
 };
 
 type FormattedSourceDocumentProps = Pick<
   ContentProps,
-  'columnId' | 'dataView' | 'fieldFormats' | 'isCompressed' | 'row' | 'shouldShowFieldHandler'
+  | 'columnId'
+  | 'dataView'
+  | 'fieldFormats'
+  | 'isCompressed'
+  | 'row'
+  | 'shouldShowFieldHandler'
+  | 'columnsMeta'
 >;
 
 const FormattedSourceDocument = ({ row, ...props }: FormattedSourceDocumentProps) => {

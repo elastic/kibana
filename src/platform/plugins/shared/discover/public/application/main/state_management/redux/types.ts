@@ -13,7 +13,7 @@ import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
-import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type {
   DiscoverGridSettings,
   DiscoverSession,
@@ -30,9 +30,10 @@ import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DocViewerRestorableState } from '@kbn/unified-doc-viewer';
 import type { SerializedError } from '@reduxjs/toolkit';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
-import type { CascadedDocumentsRestorableState } from '../../components/layout/cascaded_documents/cascaded_documents_restorable_state';
+import type { DefaultEsqlQueryConfig } from '../../../../context_awareness';
 
 export interface InternalStateDataRequestParams {
   timeRangeAbsolute: TimeRange | undefined;
@@ -118,12 +119,41 @@ export interface DiscoverAppState {
   density?: DataGridDensity;
 }
 
+export interface CascadedDocumentsState {
+  availableCascadeGroups: string[];
+  selectedCascadeGroups: string[];
+  cascadedDocumentsMap: Record<string, DataTableRecord[] | undefined>;
+}
+
 export enum TabInitializationStatus {
   NotStarted = 'NotStarted',
   InProgress = 'InProgress',
   Complete = 'Complete',
   NoData = 'NoData',
   Error = 'Error',
+}
+
+export const DEFAULT_PROFILE_STATE_FIELDS = [
+  'columns',
+  'rowHeight',
+  'breakdownField',
+  'hideChart',
+] as const;
+
+export type DefaultProfileStateField = (typeof DEFAULT_PROFILE_STATE_FIELDS)[number];
+
+type NonEmptyDefaultProfileStateFields = [DefaultProfileStateField, ...DefaultProfileStateField[]];
+
+export type DefaultProfileStateFields = 'all' | 'none' | NonEmptyDefaultProfileStateFields;
+
+export type ProfileStateSnapshot = Partial<Pick<DiscoverAppState, DefaultProfileStateField>>;
+
+export type ProfileStateSnapshotsByProfileId = Record<string, ProfileStateSnapshot | undefined>;
+
+export interface DefaultProfileState {
+  resetId: string;
+  fieldsToReset: DefaultProfileStateFields;
+  snapshotsByProfileId: ProfileStateSnapshotsByProfileId;
 }
 
 export interface TabState extends TabItem {
@@ -134,31 +164,27 @@ export interface TabState extends TabItem {
   // Initial state for the tab (provided before the tab is initialized).
   initialInternalState?: {
     serializedSearchSource?: SerializedSearchSourceFields;
-    visContext?: UnifiedHistogramVisContext | {};
-    controlGroupJson?: string;
     searchSessionId?: string;
+  };
+
+  // Persistable attributes of the tab (stored in Discover Session and in local storage).
+  attributes: {
+    visContext: UnifiedHistogramVisContext | {} | undefined;
+    controlGroupState: ControlPanelsState<OptionsListESQLControlState> | undefined;
+    timeRestore: boolean;
   };
 
   // The following properties are used to manage the tab's state after it has been initialized.
   globalState: TabStateGlobalState;
   appState: DiscoverAppState;
   previousAppState: DiscoverAppState;
-  controlGroupState: ControlPanelsState<ESQLControlState> | undefined;
-  /**
-   * ESQL query variables
-   */
+  cascadedDocumentsState: CascadedDocumentsState;
   esqlVariables: ESQLControlVariable[] | undefined;
   forceFetchOnSelect: boolean;
   isDataViewLoading: boolean;
   dataRequestParams: InternalStateDataRequestParams;
-  overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
-  resetDefaultProfileState: {
-    resetId: string;
-    columns: boolean;
-    rowHeight: boolean;
-    breakdownField: boolean;
-    hideChart: boolean;
-  };
+  overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saving of the Discover Session
+  defaultProfileState: DefaultProfileState;
   uiState: {
     esqlEditor?: Partial<ESQLEditorRestorableState>;
     dataGrid?: Partial<UnifiedDataTableRestorableState>;
@@ -167,7 +193,6 @@ export interface TabState extends TabItem {
     layout?: Partial<DiscoverLayoutRestorableState>;
     searchDraft?: Partial<UnifiedSearchDraft>;
     metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;
-    cascadedDocuments?: CascadedDocumentsRestorableState;
     docViewer?: Partial<DocViewerRestorableState>;
   };
   expandedDoc: DataTableRecord | undefined;
@@ -191,6 +216,7 @@ export interface DiscoverInternalState {
   hasUnsavedChanges: boolean;
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];
+  defaultProfileEsqlQuery: DefaultEsqlQueryConfig | undefined;
   isESQLToDataViewTransitionModalVisible: boolean;
   tabsBarVisibility: TabsBarVisibility;
   tabs: {
@@ -214,9 +240,4 @@ export interface DiscoverInternalState {
 export interface UpdateESQLQueryActionPayload {
   tabId: string;
   queryOrUpdater: string | ((prevQuery: string) => string);
-}
-
-export interface UpdateCascadeGroupingActionPayload {
-  tabId: string;
-  groupingOrUpdater: string[] | ((prevGrouping: string[]) => string[]);
 }

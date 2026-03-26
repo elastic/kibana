@@ -28,6 +28,7 @@
       "share",
       "spaces",
       "stackConnectors",
+      "taskManager",
       "licensing",
       "triggersActionsUi",
       "esUiShared",
@@ -38,9 +39,13 @@
     ],
     "optionalPlugins": [
       "cloud",
+      "evals",
       "licenseManagement",
+      "security",
       "workflowsManagement",
+      "searchInferenceEndpoints",
       "usageCollection",
+      "usageApi",
       "home",
     ],
     "extraPublicDirs": []

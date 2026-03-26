@@ -49,6 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const supertest = getService('supertest');
   const testHistoryIndex = '.kibana_task_manager_test_result';
+  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
   describe('scheduling and running tasks', () => {
     beforeEach(async () => {
@@ -725,6 +726,9 @@ export default function ({ getService }: FtrProviderContext) {
           result.userScope?.apiKeyId
         );
       });
+
+      // wait for the api_key_to_invalidate saved object to be older than the invalidation removalDelay (1s)
+      await delay(1000);
 
       // run the api key invalidation task
       await supertest

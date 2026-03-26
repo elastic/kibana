@@ -199,6 +199,9 @@ export const TableView = (props: Props) => {
       sorting={initialSorting}
       items={items}
       columns={columns}
+      tableCaption={i18n.translate('xpack.infra.tableView.tableCaption', {
+        defaultMessage: 'Inventory metrics',
+      })}
     />
   );
 };

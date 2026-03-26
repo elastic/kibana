@@ -346,10 +346,12 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
     async clickHostsAnomaliesDropdown() {
       await testSubjects.click('anomaliesComboBoxType');
+      await testSubjects.existOrFail('anomaliesHostComboBoxItem');
       await testSubjects.click('anomaliesHostComboBoxItem');
     },
     async clickK8sAnomaliesDropdown() {
       await testSubjects.click('anomaliesComboBoxType');
+      await testSubjects.existOrFail('anomaliesK8sComboBoxItem');
       await testSubjects.click('anomaliesK8sComboBoxItem');
     },
     async findAnomalies() {
@@ -510,6 +512,27 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async clickCloseFlyoutButton() {
       return testSubjects.click('euiFlyoutCloseButton');
+    },
+
+    /**
+     * Closes the host/asset details flyout using Escape (EuiFlyout closes on Escape).
+     * Retries until the flyout is closed or timeout, then waits for the overlay mask
+     * to disappear so the next click (e.g. open flyout button) is not intercepted.
+     */
+    async closeFlyoutWithEscape() {
+      await retry.tryForTime(5000, async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        const flyoutClosed = !(await testSubjects.exists('euiFlyoutCloseButton', {
+          timeout: 1000,
+        }));
+        if (!flyoutClosed) {
+          throw new Error('Flyout still open');
+        }
+      });
+      await retry.waitFor('flyout overlay mask to disappear', async () => {
+        const overlays = await find.allByCssSelector('.euiOverlayMask', 1000);
+        return overlays.length === 0;
+      });
     },
 
     async clickCustomMetricDropdown() {

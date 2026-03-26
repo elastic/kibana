@@ -180,7 +180,7 @@ describe('buildActionResultsQuery', () => {
       });
     });
 
-    it('should build query with time range filter', () => {
+    it('should build query with time range filter using event.ingested', () => {
       const startDate = '2024-03-15T14:20:00.000Z';
       const expectedEndDate = moment(startDate).clone().add(30, 'minutes').toISOString();
 
@@ -207,7 +207,7 @@ describe('buildActionResultsQuery', () => {
           filter: [
             {
               range: {
-                started_at: {
+                'event.ingested': {
                   gte: startDate,
                   lte: expectedEndDate,
                 },
@@ -317,7 +317,7 @@ describe('buildActionResultsQuery', () => {
             filter: [
               {
                 range: {
-                  started_at: {
+                  'event.ingested': {
                     gte: startDate,
                     lte: expectedEndDate,
                   },

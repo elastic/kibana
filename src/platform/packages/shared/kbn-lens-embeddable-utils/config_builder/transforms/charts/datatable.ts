@@ -9,7 +9,7 @@
 import type { DatatableVisualizationState, TypedLensSerializedState } from '@kbn/lens-common';
 import type { DatatableState, DatatableStateNoESQL } from '../../schema';
 import type { LensAttributes } from '../../types';
-import { DEFAULT_LAYER_ID } from '../../types';
+import { DEFAULT_LAYER_ID } from '../../constants';
 import { buildDatasourceStates, buildReferences, getAdhocDataviews } from '../utils';
 import {
   getDatasourceLayers,
@@ -59,7 +59,7 @@ export function fromAPItoLensState(
       datasourceStates: layers,
       internalReferences,
       visualization,
-      adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
+      adHocDataViews,
     },
   };
 }

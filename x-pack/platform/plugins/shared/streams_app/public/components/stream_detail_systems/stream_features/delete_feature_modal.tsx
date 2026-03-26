@@ -46,13 +46,24 @@ export function DeleteFeatureModal({
         name: FEATURE_COLUMN_LABEL,
         truncateText: true,
         render: (feature: Feature) => {
-          return Object.values(feature.value).join(', ');
+          return Object.entries(feature.properties)
+            .filter(([, value]) => typeof value === 'string')
+            .map(([key, value]) => (
+              <EuiText size="s" key={key}>
+                <strong>{key}</strong> {value as string}
+              </EuiText>
+            ));
         },
       },
       {
         field: 'type',
         name: TYPE_COLUMN_LABEL,
         render: (type: string) => <EuiBadge color="hollow">{upperFirst(type)}</EuiBadge>,
+      },
+      {
+        field: 'stream_name',
+        name: STREAM_COLUMN_LABEL,
+        render: (streamName: string) => <EuiBadge color="hollow">{streamName}</EuiBadge>,
       },
     ],
     []
@@ -131,6 +142,10 @@ const FEATURE_COLUMN_LABEL = i18n.translate('xpack.streams.deleteFeatureModal.fe
 
 const TYPE_COLUMN_LABEL = i18n.translate('xpack.streams.deleteFeatureModal.typeColumn', {
   defaultMessage: 'Type',
+});
+
+const STREAM_COLUMN_LABEL = i18n.translate('xpack.streams.deleteFeatureModal.streamColumn', {
+  defaultMessage: 'Stream',
 });
 
 const MODAL_ARIA_LABEL = i18n.translate(

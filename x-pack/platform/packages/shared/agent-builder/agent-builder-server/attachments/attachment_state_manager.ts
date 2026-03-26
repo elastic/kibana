@@ -6,16 +6,20 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import type {
+  VersionedAttachment,
+  AttachmentVersion,
+  AttachmentVersionRef,
+  AttachmentDiff,
+  VersionedAttachmentInput,
+  AttachmentType,
+  AttachmentRefActor,
+  AttachmentRefOperation,
+  AttachmentStaleCheckResult,
+} from '@kbn/agent-builder-common/attachments';
 import {
   ATTACHMENT_REF_OPERATION,
   ATTACHMENT_REF_ACTOR,
-  type VersionedAttachment,
-  type AttachmentVersion,
-  type AttachmentVersionRef,
-  type AttachmentRefOperation,
-  type AttachmentRefActor,
-  type AttachmentDiff,
-  type VersionedAttachmentInput,
 } from '@kbn/agent-builder-common/attachments';
 import {
   hashContent,
@@ -23,8 +27,24 @@ import {
   getLatestVersion,
   getVersion,
   isAttachmentActive,
+  isVersionedAttachmentWithOrigin,
 } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentTypeDefinition } from './type_definition';
+import type { AttachmentResolveContext, AttachmentTypeDefinition } from './type_definition';
+
+/**
+ * Best-effort message when `Promise.allSettled` reports `rejected` (rejection payloads vary by caller).
+ */
+function messageFromRejectionReason(
+  reason: Error | string | null | undefined | number | boolean | bigint | symbol | object
+): string {
+  if (reason instanceof Error) {
+    return reason.message;
+  }
+  if (typeof reason === 'string') {
+    return reason;
+  }
+  return 'Unexpected error';
+}
 
 /**
  * Input for updating an existing attachment.
@@ -59,20 +79,23 @@ export interface ResolvedAttachmentRef {
  * Provides CRUD operations with version tracking.
  */
 export interface AttachmentStateManager {
-  /** Get an attachment by ID */
-  get(id: string): VersionedAttachment | undefined;
-  /** Get the latest version of an attachment */
-  getLatest(id: string): AttachmentVersion | undefined;
-  /** Get a specific version of an attachment */
-  getVersion(id: string, version: number): AttachmentVersion | undefined;
-  /** Read (track access to) the latest version of an attachment */
-  readLatest(id: string, actor?: AttachmentRefActor): AttachmentVersion | undefined;
-  /** Read (track access to) a specific version of an attachment */
-  readVersion(
+  /** Get an attachment by ID. Returns the version data directly (no resolve). */
+  get(
     id: string,
-    version: number,
-    actor?: AttachmentRefActor
-  ): AttachmentVersion | undefined;
+    options?: {
+      actor?: AttachmentRefActor;
+      version?: number;
+    }
+  ):
+    | {
+        id: string;
+        version: number;
+        type: AttachmentType;
+        data: AttachmentVersion;
+      }
+    | undefined;
+  /** Get the raw stored attachment record (all versions, metadata). */
+  getAttachmentRecord(id: string): VersionedAttachment | undefined;
   /** Get all active (non-deleted) attachments */
   getActive(): VersionedAttachment[];
   /** Get all attachments (including deleted) */
@@ -80,10 +103,11 @@ export interface AttachmentStateManager {
   /** Get diff between two versions of an attachment */
   getDiff(id: string, fromVersion: number, toVersion: number): AttachmentDiff | undefined;
 
-  /** Add a new attachment */
+  /** Add a new attachment. If only `origin` is provided (no `data`), resolves content via the type's resolve(). */
   add<TType extends string>(
     input: VersionedAttachmentInput<TType>,
-    actor?: AttachmentRefActor
+    actor?: AttachmentRefActor,
+    resolveContext?: AttachmentResolveContext
   ): Promise<VersionedAttachment<TType>>;
   /** Update an existing attachment (creates new version if content changed) */
   update(
@@ -99,6 +123,12 @@ export interface AttachmentStateManager {
   permanentDelete(id: string): boolean;
   /** Update description without creating new version */
   rename(id: string, description: string, actor?: AttachmentRefActor): boolean;
+  /** Update the origin reference for an attachment */
+  updateOrigin(id: string, origin: string, actor?: AttachmentRefActor): Promise<boolean>;
+  /** Evaluate staleness for all active attachments. Only attachments with origin are checked via the type's isStale; others are considered not stale. */
+  evaluateStalenessForActiveAttachments(
+    context: AttachmentResolveContext
+  ): Promise<AttachmentStaleCheckResult[]>;
 
   /** Get all attachment version refs that were accessed during this round */
   getAccessedRefs(): AttachmentVersionRef[];
@@ -150,7 +180,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
 
   private getDefaultReadonly(type: string): boolean {
     const definition = this.options.getTypeDefinition(type);
-    return definition?.isReadonly ?? true;
+    return definition?.isReadonly ?? false;
   }
 
   private async validateAttachmentData(type: string, data: unknown): Promise<unknown> {
@@ -170,44 +200,38 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     }
   }
 
-  get(id: string): VersionedAttachment | undefined {
-    return this.attachments.get(id);
-  }
-
-  getLatest(id: string): AttachmentVersion | undefined {
-    const attachment = this.attachments.get(id);
-    if (!attachment) {
-      return undefined;
-    }
-    return getLatestVersion(attachment);
-  }
-
-  getVersion(id: string, version: number): AttachmentVersion | undefined {
-    const attachment = this.attachments.get(id);
-    if (!attachment) {
-      return undefined;
-    }
-    return getVersion(attachment, version);
-  }
-
-  readLatest(id: string, actor?: AttachmentRefActor): AttachmentVersion | undefined {
-    const latest = this.getLatest(id);
-    if (latest) {
-      this.recordAccess(id, latest.version, ATTACHMENT_REF_OPERATION.read, actor);
-    }
-    return latest;
-  }
-
-  readVersion(
+  get(
     id: string,
-    version: number,
-    actor?: AttachmentRefActor
-  ): AttachmentVersion | undefined {
-    const versionData = this.getVersion(id, version);
-    if (versionData) {
-      this.recordAccess(id, versionData.version, ATTACHMENT_REF_OPERATION.read, actor);
+    options?: {
+      version?: number;
+      actor?: AttachmentRefActor;
     }
-    return versionData;
+  ) {
+    const attachment = this.attachments.get(id);
+    if (!attachment) {
+      return undefined;
+    }
+
+    const version = options?.version ?? attachment.current_version;
+    const attachmentVersion = getVersion(attachment, version);
+    if (!attachmentVersion) {
+      return undefined;
+    }
+
+    if (options?.actor) {
+      this.recordAccess(id, version, ATTACHMENT_REF_OPERATION.read, options.actor);
+    }
+
+    return {
+      id,
+      version,
+      type: attachment.type as AttachmentType,
+      data: attachmentVersion,
+    };
+  }
+
+  getAttachmentRecord(id: string): VersionedAttachment | undefined {
+    return this.attachments.get(id);
   }
 
   getActive(): VersionedAttachment[] {
@@ -267,11 +291,42 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
 
   async add<TType extends string>(
     input: VersionedAttachmentInput<TType>,
-    actor?: AttachmentRefActor
+    actor?: AttachmentRefActor,
+    resolveContext?: AttachmentResolveContext
   ): Promise<VersionedAttachment<TType>> {
     const id = input.id || uuidv4();
     const now = new Date().toISOString();
-    const validatedData = await this.validateAttachmentData(input.type, input.data);
+
+    let validatedData: unknown;
+
+    if (input.data !== undefined) {
+      validatedData = await this.validateAttachmentData(input.type, input.data);
+    } else if (input.origin !== undefined) {
+      const typeDefinition = this.options.getTypeDefinition(input.type);
+      if (!typeDefinition) {
+        throw new Error(`Unknown attachment type: ${input.type}`);
+      }
+      if (!typeDefinition.resolve) {
+        throw new Error(`Attachment type "${input.type}" does not support resolving from origin`);
+      }
+
+      if (!resolveContext) {
+        throw new Error(
+          `Resolve context is required to add attachment of type "${input.type}" with origin`
+        );
+      }
+
+      const resolved = await typeDefinition.resolve(input.origin, resolveContext);
+      if (resolved === undefined) {
+        throw new Error(
+          `Failed to resolve content from origin for attachment type "${input.type}"`
+        );
+      }
+      validatedData = resolved;
+    } else {
+      throw new Error('Either data or origin must be provided when adding an attachment');
+    }
+
     const contentHash = hashContent(validatedData);
     const tokens = estimateTokens(validatedData);
 
@@ -292,6 +347,10 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       ...(input.description && { description: input.description }),
       ...(input.hidden !== undefined && { hidden: input.hidden }),
       readonly: input.readonly ?? this.getDefaultReadonly(input.type),
+      ...(input.origin !== undefined && { origin: input.origin }),
+      // When created with origin (by-reference), record snapshot time for isStale comparison.
+      // By-value attachments leave this undefined.
+      ...(input.origin !== undefined && { origin_snapshot_at: now }),
     };
 
     this.attachments.set(id, attachment);
@@ -309,6 +368,10 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     const attachment = this.attachments.get(id);
     if (!attachment) {
       return undefined;
+    }
+
+    if (attachment.active === false) {
+      throw new Error(`Cannot update deleted attachment "${id}"`);
     }
 
     if (input.description !== undefined) {
@@ -359,6 +422,10 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       return false;
     }
 
+    if (attachment.type === 'screen_context') {
+      throw new Error(`Cannot delete screen_context attachment "${id}"`);
+    }
+
     if (attachment.active === false) {
       return false;
     }
@@ -390,6 +457,11 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       return false;
     }
 
+    const attachment = this.attachments.get(id)!;
+    if (attachment.type === 'screen_context') {
+      throw new Error(`Cannot delete screen_context attachment "${id}"`);
+    }
+
     this.attachments.delete(id);
     this.dirty = true;
     return true;
@@ -402,6 +474,24 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     }
 
     attachment.description = description;
+    this.dirty = true;
+    this.recordAccess(id, attachment.current_version, ATTACHMENT_REF_OPERATION.updated, actor);
+    return true;
+  }
+
+  async updateOrigin(id: string, origin: string, actor?: AttachmentRefActor): Promise<boolean> {
+    const attachment = this.attachments.get(id);
+    const now = new Date().toISOString();
+    if (!attachment) {
+      return false;
+    }
+
+    if (attachment.active === false) {
+      return false;
+    }
+
+    attachment.origin = origin;
+    attachment.origin_snapshot_at = now;
     this.dirty = true;
     this.recordAccess(id, attachment.current_version, ATTACHMENT_REF_OPERATION.updated, actor);
     return true;
@@ -459,6 +549,63 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
 
   markClean(): void {
     this.dirty = false;
+  }
+
+  async evaluateStalenessForActiveAttachments(
+    resolveContext: AttachmentResolveContext
+  ): Promise<AttachmentStaleCheckResult[]> {
+    const active = this.getActive();
+    const outcomes = await Promise.allSettled(
+      active.map((attachment) =>
+        this.evaluateStalenessForSingleActiveAttachment(attachment, resolveContext)
+      )
+    );
+
+    return outcomes.map((outcome, index) => {
+      if (outcome.status === 'fulfilled') {
+        return outcome.value;
+      }
+      return {
+        id: active[index].id,
+        is_stale: false as const,
+        error: messageFromRejectionReason(outcome.reason),
+      };
+    });
+  }
+
+  /**
+   * Staleness for one attachment: by-value (no origin) is never stale; otherwise delegates to the type's `isStale` / `resolve`.
+   */
+  private async evaluateStalenessForSingleActiveAttachment(
+    attachment: VersionedAttachment,
+    resolveContext: AttachmentResolveContext
+  ): Promise<AttachmentStaleCheckResult> {
+    const { id, type, hidden } = attachment;
+
+    if (!isVersionedAttachmentWithOrigin(attachment)) {
+      return { id, is_stale: false };
+    }
+
+    const definition = this.options.getTypeDefinition(type);
+    const originIsOutdated = await definition?.isStale?.(attachment, resolveContext);
+
+    if (!originIsOutdated) {
+      return { id, is_stale: false };
+    }
+
+    const latestFromOrigin = await definition?.resolve?.(attachment.origin, resolveContext);
+    if (latestFromOrigin === undefined) {
+      return { id, is_stale: false };
+    }
+
+    return {
+      id,
+      is_stale: true,
+      data: latestFromOrigin as Record<string, unknown>,
+      type,
+      hidden,
+      origin: attachment.origin,
+    };
   }
 
   private recordAccess(

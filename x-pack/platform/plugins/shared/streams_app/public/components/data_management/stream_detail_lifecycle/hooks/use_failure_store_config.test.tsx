@@ -13,7 +13,7 @@ jest.mock('./use_failure_store_default_retention', () => ({
   useFailureStoreDefaultRetention: jest.fn(() => ({ value: undefined })),
 }));
 
-const createBaseDefinition = (name: string): Partial<Streams.ingest.all.GetResponse> => ({
+const createBaseDefinition = (name: string) => ({
   stream: {
     name,
     description: '',
@@ -23,7 +23,7 @@ const createBaseDefinition = (name: string): Partial<Streams.ingest.all.GetRespo
       processing: { steps: [], updated_at: new Date().toISOString() },
       settings: {},
       failure_store: { inherit: {} },
-    } as any,
+    },
   },
 });
 
@@ -34,6 +34,7 @@ const createClassicDefinition = (
   ...createBaseDefinition(name),
   stream: {
     ...createBaseDefinition(name).stream!,
+    type: 'classic',
     ingest: {
       ...createBaseDefinition(name).stream!.ingest,
       classic: {},
@@ -48,6 +49,7 @@ const createClassicDefinition = (
     read_failure_store: true,
     manage_failure_store: true,
     view_index_metadata: true,
+    create_snapshot_repository: true,
   },
   effective_lifecycle: { dsl: {} },
   effective_settings: {},
@@ -66,6 +68,7 @@ const createWiredDefinition = (
   ...createBaseDefinition(name),
   stream: {
     ...createBaseDefinition(name).stream!,
+    type: 'wired',
     ingest: {
       ...createBaseDefinition(name).stream!.ingest,
       wired: {
@@ -83,6 +86,7 @@ const createWiredDefinition = (
     read_failure_store: true,
     manage_failure_store: true,
     view_index_metadata: true,
+    create_snapshot_repository: true,
   },
   effective_lifecycle: {
     dsl: {},
@@ -93,6 +97,7 @@ const createWiredDefinition = (
     from: isRoot ? name : 'logs',
   },
   effective_settings: {},
+  data_stream_exists: true,
   inherited_fields: {},
   dashboards: [],
   queries: [],
@@ -243,7 +248,7 @@ describe('useFailureStoreConfig', () => {
 
   describe('Wired Stream (child)', () => {
     it('should return config for enabled failure store with custom retention', () => {
-      const definition = createWiredDefinition('logs.nginx', {
+      const definition = createWiredDefinition('logs.otel.nginx', {
         lifecycle: {
           enabled: {
             data_retention: '5d',
@@ -268,7 +273,7 @@ describe('useFailureStoreConfig', () => {
     });
 
     it('should return config when inheriting from parent', () => {
-      const definition = createWiredDefinition('logs.nginx', {
+      const definition = createWiredDefinition('logs.otel.nginx', {
         lifecycle: {
           enabled: {
             data_retention: '30d',
@@ -284,7 +289,7 @@ describe('useFailureStoreConfig', () => {
     });
 
     it('should detect when overriding parent', () => {
-      const definition = createWiredDefinition('logs.nginx', {
+      const definition = createWiredDefinition('logs.otel.nginx', {
         lifecycle: {
           enabled: {
             data_retention: '10d',

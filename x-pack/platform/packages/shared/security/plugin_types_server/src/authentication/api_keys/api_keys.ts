@@ -46,18 +46,20 @@ export const crossClusterApiKeySchema = schema.object({
       search: schema.maybe(
         schema.arrayOf(
           schema.object({
-            names: schema.arrayOf(schema.string()),
+            names: schema.arrayOf(schema.string(), { maxSize: 100 }),
             query: schema.maybe(schema.any()),
             field_security: schema.maybe(schema.any()),
             allow_restricted_indices: schema.maybe(schema.boolean()),
-          })
+          }),
+          { maxSize: 100 }
         )
       ),
       replication: schema.maybe(
         schema.arrayOf(
           schema.object({
-            names: schema.arrayOf(schema.string()),
-          })
+            names: schema.arrayOf(schema.string(), { maxSize: 100 }),
+          }),
+          { maxSize: 100 }
         )
       ),
     },
@@ -85,18 +87,20 @@ export const updateCrossClusterApiKeySchema = schema.object({
       search: schema.maybe(
         schema.arrayOf(
           schema.object({
-            names: schema.arrayOf(schema.string()),
+            names: schema.arrayOf(schema.string(), { maxSize: 100 }),
             query: schema.maybe(schema.any()),
             field_security: schema.maybe(schema.any()),
             allow_restricted_indices: schema.maybe(schema.boolean()),
-          })
+          }),
+          { maxSize: 100 }
         )
       ),
       replication: schema.maybe(
         schema.arrayOf(
           schema.object({
-            names: schema.arrayOf(schema.string()),
-          })
+            names: schema.arrayOf(schema.string(), { maxSize: 100 }),
+          }),
+          { maxSize: 100 }
         )
       ),
     },

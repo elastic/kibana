@@ -62,6 +62,8 @@ export type {
   RouteAuthc,
   AuthcDisabled,
   AuthcEnabled,
+  AuthcMinimal,
+  AuthcOptional,
   RouteSecurity,
   AllRequiredCondition,
   AnyRequiredCondition,

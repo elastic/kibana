@@ -7,7 +7,12 @@
 
 import type { BaseMessage, HumanMessage } from '@langchain/core/messages';
 import { AIMessage, ToolMessage } from '@langchain/core/messages';
-import type { AssistantResponse, ToolCallWithResult } from '@kbn/agent-builder-common';
+import type {
+  AssistantResponse,
+  ConversationRoundStep,
+  ToolCallStep,
+  ToolCallWithResult,
+} from '@kbn/agent-builder-common';
 import { ConversationRoundStatus, isToolCallStep } from '@kbn/agent-builder-common';
 import {
   createAIMessage,
@@ -15,23 +20,44 @@ import {
   sanitizeToolId,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
-import type {
-  ProcessedAttachment,
-  ProcessedConversation,
-  ProcessedConversationRound,
-  ProcessedRoundInput,
-} from './prepare_conversation';
+import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
+import type { CompactionSummary } from '@kbn/agent-builder-common';
+import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
+import type { ToolCallResultTransformer } from './create_result_transformer';
+import { serializeCompactionSummary } from './conversation_compactor';
+
+export interface ConversationToLangchainOptions {
+  conversation: ProcessedConversation;
+  /**
+   * Optional function to transform all results from a tool call.
+   * When provided, results will be passed through this function.
+   * Defaults to identity (no transformation).
+   */
+  resultTransformer?: ToolCallResultTransformer;
+  /**
+   * When true, tool call steps will be ignored.
+   */
+  ignoreSteps?: boolean;
+  /**
+   * Optional compaction summary to inject before the remaining rounds.
+   * When provided, the summary is serialized and prepended as a
+   * user/assistant message pair representing the compacted history.
+   */
+  compactionSummary?: CompactionSummary;
+}
 
 /**
- * Converts a conversation to langchain format
+ * Converts a conversation to langchain format.
+ *
+ * When `resultTransformer` is provided, tool results from previous rounds
+ * will be passed through the transformer function.
  */
-export const conversationToLangchainMessages = ({
+export const convertPreviousRounds = async ({
   conversation,
+  resultTransformer,
   ignoreSteps = false,
-}: {
-  conversation: ProcessedConversation;
-  ignoreSteps?: boolean;
-}): BaseMessage[] => {
+  compactionSummary,
+}: ConversationToLangchainOptions): Promise<BaseMessage[]> => {
   const messages: BaseMessage[] = [];
 
   let rounds = conversation.previousRounds;
@@ -45,8 +71,15 @@ export const conversationToLangchainMessages = ({
     input = lastRound.input;
   }
 
+  // Inject compaction summary as a user/assistant exchange before remaining rounds
+  if (compactionSummary) {
+    const summaryText = serializeCompactionSummary(compactionSummary.structured_data);
+    messages.push(createUserMessage('[Previous conversation context was compacted]'));
+    messages.push(createAIMessage(summaryText));
+  }
+
   for (const round of rounds) {
-    messages.push(...roundToLangchain(round, { ignoreSteps }));
+    messages.push(...(await roundToLangchain(round, { resultTransformer, ignoreSteps })));
   }
 
   messages.push(formatRoundInput({ input }));
@@ -54,10 +87,13 @@ export const conversationToLangchainMessages = ({
   return messages;
 };
 
-export const roundToLangchain = (
+export const roundToLangchain = async (
   round: ProcessedConversationRound,
-  { ignoreSteps = false }: { ignoreSteps?: boolean } = {}
-): BaseMessage[] => {
+  {
+    resultTransformer,
+    ignoreSteps = false,
+  }: { resultTransformer?: ToolCallResultTransformer; ignoreSteps?: boolean } = {}
+): Promise<BaseMessage[]> => {
   const messages: BaseMessage[] = [];
 
   // user message
@@ -65,10 +101,9 @@ export const roundToLangchain = (
 
   // steps
   if (!ignoreSteps) {
-    for (const step of round.steps) {
-      if (isToolCallStep(step)) {
-        messages.push(...createToolCallMessages(step));
-      }
+    const groups = groupToolCallSteps(round.steps);
+    for (const group of groups) {
+      messages.push(...(await createGroupedToolCallMessages(group, { resultTransformer })));
     }
   }
 
@@ -113,7 +148,89 @@ const formatAssistantResponse = ({ response }: { response: AssistantResponse }):
   return createAIMessage(response.message);
 };
 
-export const createToolCallMessages = (toolCall: ToolCallWithResult): [AIMessage, ToolMessage] => {
+/**
+ * Groups consecutive tool call steps by `tool_call_group_id`.
+ * Steps sharing the same group ID are grouped together (parallel calls).
+ * Steps without a group ID are each in their own group (backward compat).
+ */
+export const groupToolCallSteps = (steps: ConversationRoundStep[]): ToolCallStep[][] => {
+  const groups: ToolCallStep[][] = [];
+  let currentGroup: ToolCallStep[] = [];
+  let currentGroupId: string | undefined;
+
+  for (const step of steps) {
+    if (!isToolCallStep(step)) {
+      if (currentGroup.length > 0) {
+        groups.push(currentGroup);
+        currentGroup = [];
+        currentGroupId = undefined;
+      }
+      continue;
+    }
+
+    const { tool_call_group_id: groupId } = step;
+
+    if (groupId && groupId === currentGroupId) {
+      currentGroup.push(step);
+    } else {
+      if (currentGroup.length > 0) {
+        groups.push(currentGroup);
+      }
+      currentGroup = [step];
+      currentGroupId = groupId;
+    }
+  }
+
+  if (currentGroup.length > 0) {
+    groups.push(currentGroup);
+  }
+
+  return groups;
+};
+
+/**
+ * Creates langchain messages for a group of tool call steps.
+ * For parallel groups (multiple steps), produces one AIMessage with all tool_calls
+ * followed by one ToolMessage per tool call.
+ */
+const createGroupedToolCallMessages = async (
+  toolCalls: ToolCallWithResult[],
+  { resultTransformer }: { resultTransformer?: ToolCallResultTransformer } = {}
+): Promise<BaseMessage[]> => {
+  const aiMessage = new AIMessage({
+    content: '',
+    tool_calls: toolCalls.map((toolCall) => ({
+      id: toolCall.tool_call_id,
+      name: sanitizeToolId(toolCall.tool_id),
+      args: toolCall.params,
+      type: 'tool_call' as const,
+    })),
+  });
+
+  const toolMessages: ToolMessage[] = [];
+  for (const toolCall of toolCalls) {
+    const processedResults = resultTransformer
+      ? await resultTransformer(toolCall)
+      : toolCall.results;
+    toolMessages.push(
+      new ToolMessage({
+        tool_call_id: toolCall.tool_call_id,
+        content: JSON.stringify({ results: processedResults }),
+      })
+    );
+  }
+
+  return [aiMessage, ...toolMessages];
+};
+
+/**
+ * Creates tool call messages for a single tool call.
+ * When `resultTransformer` is provided, results will be passed through it.
+ */
+export const createToolCallMessages = async (
+  toolCall: ToolCallWithResult,
+  { resultTransformer }: { resultTransformer?: ToolCallResultTransformer } = {}
+): Promise<[AIMessage, ToolMessage]> => {
   const toolName = sanitizeToolId(toolCall.tool_id);
 
   const toolCallMessage = new AIMessage({
@@ -128,9 +245,12 @@ export const createToolCallMessages = (toolCall: ToolCallWithResult): [AIMessage
     ],
   });
 
+  // Process results - apply transformer if provided
+  const processedResults = resultTransformer ? await resultTransformer(toolCall) : toolCall.results;
+
   const toolResultMessage = new ToolMessage({
     tool_call_id: toolCall.tool_call_id,
-    content: JSON.stringify({ results: toolCall.results }),
+    content: JSON.stringify({ results: processedResults }),
   });
 
   return [toolCallMessage, toolResultMessage];

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type {
   DeleteTransformsRequestSchema,
   DeleteTransformsResponseSchema,
@@ -15,7 +16,7 @@ import { generateTransformConfig, generateDestIndex } from '../helpers/transform
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
 
-apiTest.describe('/internal/transform/delete_transforms', { tag: tags.ESS_ONLY }, () => {
+apiTest.describe('/internal/transform/delete_transforms', { tag: tags.stateful.all }, () => {
   const transformId = 'transform-test-delete';
   const transformId2 = 'test2';
   const destinationIndex2 = generateDestIndex(transformId2);

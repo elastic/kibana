@@ -366,7 +366,7 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
     },
 
     async dismissIngestTourIfShown() {
-      if (await testSubjects.isDisplayed('searchIngestTourCloseButton')) {
+      if (await testSubjects.exists('searchIngestTourCloseButton')) {
         await testSubjects.click('searchIngestTourCloseButton');
         await testSubjects.missingOrFail('searchIngestTourCloseButton', { timeout: 2000 });
       }

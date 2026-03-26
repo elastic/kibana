@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLMessage, ESQLSingleAstItem } from '../../../../types';
+import type { ESQLMessage, ESQLSingleAstItem } from '@elastic/esql/types';
+import { isMap } from '@elastic/esql';
 import type { SupportedDataType } from '../../..';
 import { getExpressionType } from '../expressions';
 import { getMessageFromId } from '../errors';
-import { isMap } from '../../../../ast/is';
 import { parseMapParams } from '../maps';
 
-// the setting 'approximate' uses 'map_param' as a type,
+// the setting 'approximation' uses 'map_param' as a type,
 // whereas the expression type in the AST is 'function_named_parameters'.
 export const TypeMap: Record<SupportedDataType, string> = {
   function_named_parameters: 'map_param',

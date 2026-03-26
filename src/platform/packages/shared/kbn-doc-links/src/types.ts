@@ -29,6 +29,7 @@ export interface DocLinks {
   readonly elasticStackGetStarted: string;
   readonly apiReference: string;
   readonly serverlessReleaseNotes: string;
+  readonly hostedCloudReleaseNotes: string;
   readonly upgrade: {
     readonly upgradingStackOnPrem: string;
     readonly upgradingStackOnCloud: string;
@@ -358,6 +359,7 @@ export interface DocLinks {
     readonly createEsqlRuleType: string;
     readonly ruleUiAdvancedParams: string;
     readonly entityAnalytics: {
+      readonly api: string;
       readonly riskScorePrerequisites: string;
       readonly entityRiskScoring: string;
       readonly assetCriticality: string;
@@ -453,6 +455,7 @@ export interface DocLinks {
     elasticManagedLlm: string;
     elasticManagedLlmUsageCost: string;
     elasticServerlessSearchManagedLlmUsageCost: string;
+    downsamplingConcepts: string;
   }>;
   readonly alerting: Readonly<{
     authorization: string;

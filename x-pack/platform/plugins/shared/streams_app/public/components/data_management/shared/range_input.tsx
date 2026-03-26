@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiCheckbox, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiCheckbox, EuiToolTip, EuiFormPrepend } from '@elastic/eui';
 import type { EuiComboBoxProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RangeCondition } from '@kbn/streamlang';
@@ -150,7 +150,7 @@ export const RangeInput: React.FC<RangeInputProps> = ({
         defaultMessage: 'Include',
       })}
     >
-      <span>
+      <EuiFormPrepend>
         <EuiCheckbox
           id={`${dataTestSubj}-from-inclusive`}
           checked={fromInclusive}
@@ -161,7 +161,7 @@ export const RangeInput: React.FC<RangeInputProps> = ({
             defaultMessage: 'Inc',
           })}
         />
-      </span>
+      </EuiFormPrepend>
     </EuiToolTip>
   ) as unknown as EuiComboBoxProps<string>['prepend'];
 
@@ -171,7 +171,7 @@ export const RangeInput: React.FC<RangeInputProps> = ({
         defaultMessage: 'Include',
       })}
     >
-      <span>
+      <EuiFormPrepend>
         <EuiCheckbox
           id={`${dataTestSubj}-to-inclusive`}
           checked={toInclusive}
@@ -182,7 +182,7 @@ export const RangeInput: React.FC<RangeInputProps> = ({
             defaultMessage: 'Inc',
           })}
         />
-      </span>
+      </EuiFormPrepend>
     </EuiToolTip>
   ) as unknown as EuiComboBoxProps<string>['prepend'];
 

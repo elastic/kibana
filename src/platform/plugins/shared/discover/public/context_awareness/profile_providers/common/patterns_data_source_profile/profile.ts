@@ -38,7 +38,11 @@ export const createPatternsDataSourceProfileProvider = (
           (acc, column) =>
             Object.assign(acc, {
               [column]: (props: DataGridCellValueElementProps) =>
-                getPatternCellRenderer(props.row, props.columnId, props.isDetails, rowHeight),
+                getPatternCellRenderer(
+                  props.row.flattened[props.columnId],
+                  props.isDetails,
+                  rowHeight
+                ),
             }),
           {}
         );
@@ -50,9 +54,9 @@ export const createPatternsDataSourceProfileProvider = (
       },
     getAdditionalCellActions:
       (prev, { context }) =>
-      () => {
+      (params) => {
         return [
-          ...prev(),
+          ...prev(params),
           {
             id: 'patterns-action-view-docs-in-discover',
             getDisplayName: () =>
@@ -90,12 +94,19 @@ export const createPatternsDataSourceProfileProvider = (
                 esql: `FROM ${index}\n  | WHERE MATCH(${categoryField}, "${pattern}", {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})\n  | LIMIT ${DOC_LIMIT}`,
               };
 
-              const discoverLink = services.locator.getRedirectUrl({
-                query,
-                timeRange: executeContext.timeRange,
-                hideChart: false,
-              });
-              window.open(discoverLink, '_blank');
+              if (params.actions?.openInNewTab) {
+                params.actions.openInNewTab({
+                  query,
+                  timeRange: executeContext.timeRange,
+                });
+              } else {
+                const discoverLink = services.locator.getRedirectUrl({
+                  query,
+                  timeRange: executeContext.timeRange,
+                  hideChart: false,
+                });
+                window.open(discoverLink, '_blank');
+              }
             },
           },
         ];
