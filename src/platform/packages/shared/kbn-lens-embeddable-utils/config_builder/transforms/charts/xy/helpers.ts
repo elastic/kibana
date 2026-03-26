@@ -7,20 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { XYDataLayerConfig, XYLayerConfig } from '@kbn/lens-common';
-import { isEsqlTableTypeDataset } from '../../../utils';
+import type { XYDataLayerConfig, XYLayerConfig, XYPersistedLayerConfig } from '@kbn/lens-common';
 import type {
-  DataLayerType,
-  ReferenceLineLayerType,
   AnnotationLayerType,
+  DataLayerType,
   LayerTypeESQL,
   LayerTypeNoESQL,
+  ReferenceLineLayerType,
 } from '../../../schema/charts/xy';
+import { isEsqlTableTypeDataset } from '../../../utils';
 import {
-  XY_ANNOTATION_LAYER_TYPES,
-  XY_REFERENCE_LAYER_TYPES,
-  XY_DATA_LAYER_TYPES,
   AVAILABLE_XY_LAYER_TYPES,
+  XY_ANNOTATION_LAYER_TYPES,
+  XY_DATA_LAYER_TYPES,
+  XY_REFERENCE_LAYER_TYPES,
 } from './constants';
 
 type XYLayer = DataLayerType | ReferenceLineLayerType | AnnotationLayerType;
@@ -63,9 +63,11 @@ export function isAPIXYLayer(layer: unknown): layer is XYLayer {
 }
 
 export function isAPIesqlXYLayer(layer: XYLayer): layer is LayerTypeESQL {
-  return isEsqlTableTypeDataset(layer.dataset);
+  return 'dataset' in layer && isEsqlTableTypeDataset(layer.dataset);
 }
 
-export function isLensStateDataLayer(layer: XYLayerConfig): layer is XYDataLayerConfig {
+export function isLensStateDataLayer(
+  layer: XYLayerConfig | XYPersistedLayerConfig
+): layer is XYDataLayerConfig {
   return layer.layerType === 'data' || !('layerType' in layer);
 }

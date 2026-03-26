@@ -1,5 +1,5 @@
 {
-  "sha1": "f05654b498c98fd4322b42f18d00d55e87f599f0",
+  "sha1": "156ea3233aa35c96cdd79940f907e787916f11f2",
   "tests": [
     {
       "id": "b2eaaaa0cf33c26-d5cddc6b883a994",
@@ -30,8 +30,8 @@
       }
     },
     {
-      "id": "b2eaaaa0cf33c26-d1958b5e6fc896e",
-      "title": "Workflows Import/Export API should detect conflicts via check-conflicts endpoint",
+      "id": "b2eaaaa0cf33c26-c2d7d16a55f13e8",
+      "title": "Workflows Import/Export API should detect conflicts",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -53,7 +53,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
-        "line": 98,
+        "line": 95,
         "column": 10
       }
     },
@@ -67,7 +67,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
-        "line": 124,
+        "line": 121,
         "column": 10
       }
     },
@@ -81,7 +81,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
-        "line": 151,
+        "line": 148,
         "column": 10
       }
     },
@@ -95,14 +95,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
-        "line": 164,
+        "line": 161,
         "column": 10
       }
     },
     {
       "id": "fedda44db506679-b402fd1accda876",
       "title": "Workflow execution concurrency control cancel-in-progress strategy cancels previous executions and completes the latest",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -121,14 +121,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/concurrency_control.spec.ts",
-        "line": 111,
+        "line": 110,
         "column": 14
       }
     },
     {
       "id": "fedda44db506679-f33c86dd5c9b2b6",
       "title": "Workflow execution concurrency control drop strategy drops new executions until there is an already running execution",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -147,7 +147,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/concurrency_control.spec.ts",
-        "line": 143,
+        "line": 142,
         "column": 14
       }
     },
@@ -173,7 +173,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/scheduled_workflow.spec.ts",
-        "line": 85,
+        "line": 65,
         "column": 12
       }
     },
@@ -199,13 +199,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/scheduled_workflow.spec.ts",
-        "line": 135,
+        "line": 110,
         "column": 12
       }
     },
     {
-      "id": "337190238aab48d-8ab74f66c94ddfa",
-      "title": "Scheduled workflow execution scheduled executions do not overlap when a previous run is still in progress",
+      "id": "337190238aab48d-2ebbbceb81e94d9",
+      "title": "Scheduled workflow execution scheduled executions do not overlap",
       "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
@@ -225,7 +225,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/scheduled_workflow.spec.ts",
-        "line": 163,
+        "line": 138,
         "column": 12
       }
     },
@@ -329,7 +329,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/scheduled_workflow_save_update.spec.ts",
-        "line": 45,
+        "line": 46,
         "column": 12
       }
     }
