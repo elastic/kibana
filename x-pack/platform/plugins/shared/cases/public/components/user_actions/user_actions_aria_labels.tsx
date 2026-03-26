@@ -25,6 +25,7 @@ export const getUserActionAriaLabel = (type: keyof typeof UserActionTypes) => {
     category: i18n.CATEGORY,
     customFields: i18n.CUSTOM_FIELDS,
     observables: i18n.OBSERVABLES,
+    extended_fields: i18n.EXTENDED_FIELDS,
   };
 
   switch (type) {
