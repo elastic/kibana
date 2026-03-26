@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type OpenAI from 'openai';
 import { defer, identity } from 'rxjs';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import type { InferenceConnectorAdapter } from '../../types';
@@ -12,10 +13,15 @@ import {
   parseInlineFunctionCalls,
   wrapWithSimulatedFunctionCalling,
 } from '../../simulated_function_calling';
-import { isNativeFunctionCallingSupported, handleConnectorResponse } from '../../utils';
+import {
+  isNativeFunctionCallingSupported,
+  handleConnectorStreamResponse,
+  handleConnectorDataResponse,
+} from '../../utils';
 import type { OpenAIRequest } from './types';
 import { messagesToOpenAI, toolsToOpenAI, toolChoiceToOpenAI } from './to_openai';
 import { processOpenAIStream } from './process_openai_stream';
+import { processOpenAIResponse } from './process_openai_response';
 import { emitTokenCountEstimateIfMissing } from './emit_token_count_if_missing';
 import { getTemperatureIfValid } from '../../utils/get_temperature';
 
@@ -32,11 +38,14 @@ export const openAIAdapter: InferenceConnectorAdapter = {
     logger,
     abortSignal,
     metadata,
+    timeout,
+    stream = false,
   }) => {
     const connector = executor.getConnector();
+
     const useSimulatedFunctionCalling =
       functionCalling === 'auto'
-        ? !isNativeFunctionCallingSupported(executor.getConnector())
+        ? !isNativeFunctionCallingSupported(connector)
         : functionCalling === 'simulated';
 
     let request: OpenAIRequest;
@@ -49,39 +58,62 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         tools,
       });
       request = {
-        stream: true,
+        stream,
         ...getTemperatureIfValid(temperature, { connector, modelName }),
         model: modelName,
         messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
       };
     } else {
+      const openAiTools = toolsToOpenAI(tools);
+      const hasTools = Array.isArray(openAiTools) && openAiTools.length > 0;
+
       request = {
-        stream: true,
+        stream,
         ...getTemperatureIfValid(temperature, { connector, modelName }),
         model: modelName,
         messages: messagesToOpenAI({ system, messages }),
-        tool_choice: toolChoiceToOpenAI(toolChoice),
-        tools: toolsToOpenAI(tools),
+        // Some OpenAI-compatible gateways (notably for Anthropic models) reject tool calling
+        // params when the tools list is empty. Only forward tools/tool_choice when tools exist.
+        ...(hasTools
+          ? {
+              tool_choice: toolChoiceToOpenAI(toolChoice, { connector, tools }),
+              tools: openAiTools,
+            }
+          : {}),
       };
     }
 
-    return defer(() => {
+    const connectorResult$ = defer(() => {
       return executor.invoke({
         subAction: 'stream',
         subActionParams: {
           body: JSON.stringify(request),
           signal: abortSignal,
-          stream: true,
+          stream,
           ...(metadata?.connectorTelemetry
             ? { telemetryMetadata: metadata.connectorTelemetry }
             : {}),
+          ...(typeof timeout === 'number' && isFinite(timeout) ? { timeout } : {}),
         },
       });
-    }).pipe(
-      handleConnectorResponse({ processStream: eventSourceStreamIntoObservable }),
-      processOpenAIStream(),
-      emitTokenCountEstimateIfMissing({ request }),
-      useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
-    );
+    });
+
+    if (stream) {
+      return connectorResult$.pipe(
+        handleConnectorStreamResponse({ processStream: eventSourceStreamIntoObservable }),
+        processOpenAIStream(),
+        emitTokenCountEstimateIfMissing({ request }),
+        useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
+      );
+    } else {
+      return connectorResult$.pipe(
+        handleConnectorDataResponse({
+          parseData: (data) => data as OpenAI.ChatCompletion,
+        }),
+        processOpenAIResponse(),
+        emitTokenCountEstimateIfMissing({ request }),
+        useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
+      );
+    }
   },
 };

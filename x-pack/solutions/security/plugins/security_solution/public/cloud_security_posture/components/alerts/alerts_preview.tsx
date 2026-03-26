@@ -17,7 +17,7 @@ import type {
   AlertsByStatus,
   ParsedAlertsData,
 } from '../../../overview/components/detection_response/alerts_by_status/types';
-import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
+import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
 import { getSeverityColor } from '../../../detections/components/alerts_kpis/severity_level_panel/helpers';
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
@@ -64,12 +64,10 @@ export const AlertsPreview = ({
   alertsData,
   isPreviewMode,
   openDetailsPanel,
-  isLinkEnabled,
 }: {
   alertsData: ParsedAlertsData;
-  isPreviewMode?: boolean;
+  isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
-  isLinkEnabled: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -101,32 +99,31 @@ export const AlertsPreview = ({
 
   const hasNonClosedAlerts = totalAlertsCount > 0;
 
-  const goToEntityInsightTab = useCallback(() => {
-    openDetailsPanel({
-      tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-      subTab: CspInsightLeftPanelSubTab.ALERTS,
-    });
-  }, [openDetailsPanel]);
+  const goToEntityInsightTab = useCallback(
+    () =>
+      openDetailsPanel({
+        tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+        subTab: CspInsightLeftPanelSubTab.ALERTS,
+      }),
+    [openDetailsPanel]
+  );
 
   const link = useMemo(
-    () =>
-      isLinkEnabled
-        ? {
-            callback: goToEntityInsightTab,
-            tooltip: (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.right.insights.alerts.alertsTooltip"
-                defaultMessage="Show all alerts"
-              />
-            ),
-          }
-        : undefined,
-    [isLinkEnabled, goToEntityInsightTab]
+    () => ({
+      callback: goToEntityInsightTab,
+      tooltip: (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.insights.alerts.alertsTooltip"
+          defaultMessage="Show all alerts"
+        />
+      ),
+    }),
+    [goToEntityInsightTab]
   );
   return (
     <ExpandablePanel
       header={{
-        iconType: !isPreviewMode && hasNonClosedAlerts ? 'arrowStart' : '',
+        iconType: !isPreviewMode && hasNonClosedAlerts ? 'chevronLimitLeft' : '',
         title: (
           <EuiText
             size="xs"

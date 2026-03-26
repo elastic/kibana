@@ -6,28 +6,33 @@
  */
 
 import { isSupportedConnectorType } from '@kbn/inference-common';
-import {
+import type {
   BufferFlushEvent,
   ChatCompletionChunkEvent,
-  ChatCompletionErrorCode,
   ChatCompletionErrorEvent,
-  concatenateChatCompletionChunks,
   ConversationCreateEvent,
   FunctionDefinition,
-  isChatCompletionError,
   MessageAddEvent,
   StreamingChatResponseEvent,
+} from '@kbn/observability-ai-assistant-plugin/common';
+import {
+  ChatCompletionErrorCode,
+  concatenateChatCompletionChunks,
+  isChatCompletionError,
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import type { ObservabilityAIAssistantScreenContext } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { throwSerializedChatCompletionErrors } from '@kbn/observability-ai-assistant-plugin/common/utils/throw_serialized_chat_completion_errors';
-import { Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { streamIntoObservable } from '@kbn/observability-ai-assistant-plugin/server';
-import { ToolingLog } from '@kbn/tooling-log';
-import axios, { AxiosInstance, AxiosResponse, isAxiosError, AxiosRequestConfig } from 'axios';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios';
+import axios, { isAxiosError } from 'axios';
 import { omit, pick, remove } from 'lodash';
 import pRetry from 'p-retry';
+import type { OperatorFunction, Observable } from 'rxjs';
 import {
   concatMap,
   defer,
@@ -35,19 +40,18 @@ import {
   from,
   lastValueFrom,
   of,
-  OperatorFunction,
   retry,
   switchMap,
   timer,
   toArray,
   catchError,
-  Observable,
   throwError,
 } from 'rxjs';
-import { format, parse, UrlObject } from 'url';
+import type { UrlObject } from 'url';
+import { format, parse } from 'url';
 import { inspect } from 'util';
 import type { ObservabilityAIAssistantAPIClientRequestParamsOf } from '@kbn/observability-ai-assistant-plugin/public';
-import { EvaluationResult } from './types';
+import type { EvaluationResult } from './types';
 
 // eslint-disable-next-line spaced-comment
 /// <reference types="@kbn/ambient-ftr-types"/>
@@ -171,6 +175,7 @@ export class KibanaClient {
           pathname: '/internal/observability_ai_assistant/kb/setup',
           query: {
             inference_id: '.elser-2-elasticsearch',
+            wait_until_complete: true,
           },
         });
         this.log.info('Knowledge base is ready');
@@ -294,14 +299,16 @@ export class KibanaClient {
     >(): OperatorFunction<Buffer, Exclude<T, ChatCompletionErrorEvent>> {
       return (source$) => {
         const processed$ = source$.pipe(
-          concatMap((buffer: Buffer) =>
-            buffer
+          concatMap((buffer: Buffer) => {
+            return buffer
               .toString('utf-8')
               .split('\n')
               .map((line) => line.trim())
               .filter(Boolean)
-              .map((line) => JSON.parse(line) as T | BufferFlushEvent)
-          ),
+              .map((line) => {
+                return JSON.parse(line) as T | BufferFlushEvent;
+              });
+          }),
           throwSerializedChatCompletionErrors(),
           retry({
             count: 1,
@@ -519,6 +526,8 @@ export class KibanaClient {
         };
       },
       evaluate: async ({ messages, conversationId, errors }, criteria) => {
+        const criteriaCount = criteria.length;
+
         const message = await chat('evaluate', {
           connectorIdOverride: evaluationConnectorId,
           systemMessage: `You are a critical assistant for evaluating conversations with the Elastic Observability AI Assistant,
@@ -527,7 +536,15 @@ export class KibanaClient {
                 Your goal is to verify whether a conversation between the user and the assistant matches the given criteria.
 
                 For each criterion, calculate a score. Explain your score, by describing what the assistant did right, and describing and quoting what the
-                assistant did wrong, where it could improve, and what the root cause was in case of a failure.`,
+                assistant did wrong, where it could improve, and what the root cause was in case of a failure.
+                
+                ### Scoring Contract
+
+                * You MUST call the function "scores" exactly once.  
+                * The "criteria" array in the arguments MUST contain **one object for EVERY criterion**.  
+                  * If a criterion cannot be satisfied, still include it with \`"score": 0\` and a short \`"reasoning"\`.  
+                * Do NOT omit, merge, or reorder indices.  
+                * Do NOT place the scores in normal text; only in the "scores" function call.`,
           messages: [
             {
               '@timestamp': new Date().toString(),
@@ -557,12 +574,14 @@ export class KibanaClient {
                 properties: {
                   criteria: {
                     type: 'array',
+                    minLength: criteriaCount,
+                    maxLength: criteriaCount,
                     items: {
                       type: 'object',
                       properties: {
                         index: {
                           type: 'number',
-                          description: 'The number of the criterion',
+                          description: 'The index number of the criterion',
                         },
                         score: {
                           type: 'number',
@@ -593,28 +612,35 @@ export class KibanaClient {
           }
         ).criteria;
 
-        const scores = scoredCriteria
-          .map(({ index, score, reasoning }) => {
-            return {
-              criterion: criteria[index],
-              score,
-              reasoning,
-            };
-          })
-          .concat({
-            score: errors.length === 0 ? 1 : 0,
-            criterion: 'The conversation did not encounter any errors',
-            reasoning: errors.length
-              ? `The following errors occurred: ${errors.map((error) => error.error.message)}`
-              : 'No errors occurred',
-          });
+        const scoredMap = new Map(scoredCriteria.map((c) => [c.index, c] as const));
+
+        // Although very rare, the LLM judge can sometimes skip evaluation of certain criteria.
+        // The fallback default score is 0, with self-explanatory reasoning.
+        const scores = criteria.map((criterion, idx) => {
+          const criterionScore = scoredMap.get(idx);
+          return {
+            criterion,
+            score: criterionScore?.score ?? 0,
+            reasoning: criterionScore
+              ? criterionScore.reasoning
+              : 'No score returned by LLM judge, defaulting to 0.',
+          };
+        });
+
+        scores.push({
+          score: errors.length === 0 ? 1 : 0,
+          criterion: 'The conversation did not encounter any errors',
+          reasoning: errors.length
+            ? `The following errors occurred: ${errors.map((error) => error.error.message)}`
+            : 'No errors occurred',
+        });
 
         const result: EvaluationResult = {
           name: currentTitle,
           category: firstSuiteName,
           conversationId,
           messages,
-          passed: scoredCriteria.every(({ score }) => score >= 1),
+          passed: scores.every(({ score }) => score === 1),
           scores,
           errors,
         };

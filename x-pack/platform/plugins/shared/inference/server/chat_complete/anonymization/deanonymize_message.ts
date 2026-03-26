@@ -1,0 +1,145 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Message, ChatCompletionEvent, AnonymizationOutput } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
+import type { ChatCompletionChunkEvent } from '@kbn/inference-common/src/chat_complete/events';
+import { ChatCompletionEventType } from '@kbn/inference-common/src/chat_complete/events';
+import type { OperatorFunction } from 'rxjs';
+import { mergeMap, filter, of, identity, map } from 'rxjs';
+import { deanonymize } from './deanonymize';
+
+export function deanonymizeMessage<T extends ChatCompletionEvent>(
+  anonymization: AnonymizationOutput
+): OperatorFunction<T, T>;
+
+export function deanonymizeMessage(
+  anonymization: AnonymizationOutput
+): OperatorFunction<ChatCompletionEvent, ChatCompletionEvent> {
+  if (!anonymization.anonymizations.length) {
+    if (!anonymization.replacementsId) {
+      return identity;
+    }
+
+    return (source$) =>
+      source$.pipe(
+        map((event) => {
+          if (
+            event.type !== ChatCompletionEventType.ChatCompletionChunk &&
+            event.type !== ChatCompletionEventType.ChatCompletionMessage
+          ) {
+            return event;
+          }
+
+          return {
+            ...event,
+            metadata: {
+              ...event.metadata,
+              anonymization: {
+                ...event.metadata?.anonymization,
+                replacementsId: anonymization.replacementsId,
+              },
+            },
+          };
+        })
+      );
+  }
+
+  const metadata = anonymization.replacementsId
+    ? {
+        anonymization: {
+          replacementsId: anonymization.replacementsId,
+        },
+      }
+    : undefined;
+
+  return (source$) => {
+    return source$.pipe(
+      // Filter out original chunk events (we recreate a single deanonymized chunk later)
+      filter(
+        (event): event is Exclude<ChatCompletionEvent, ChatCompletionChunkEvent> =>
+          event.type !== ChatCompletionEventType.ChatCompletionChunk
+      ),
+      // Process message events and create a new chunk plus the message
+      mergeMap((event) => {
+        if (event.type === ChatCompletionEventType.ChatCompletionMessage) {
+          // Create assistant message structure for deanonymization
+          const message = {
+            content: event.content,
+            toolCalls: event.toolCalls,
+            role: MessageRole.Assistant,
+          } satisfies Message;
+
+          const {
+            message: { content: deanonymizedContent, toolCalls: deanonymizedToolCalls },
+            deanonymizations,
+          } = deanonymize(message, anonymization.anonymizations);
+
+          // Create deanonymized input messages metadata
+          const deanonymizedInput = anonymization.messages.map((msg) => {
+            const deanonymization = deanonymize(msg, anonymization.anonymizations);
+            return {
+              message: deanonymization.message,
+              deanonymizations: deanonymization.deanonymizations,
+            };
+          });
+
+          // Create deanonymized output metadata
+          const deanonymizedOutput = {
+            message: {
+              content: deanonymizedContent,
+              toolCalls: deanonymizedToolCalls,
+              role: MessageRole.Assistant,
+            } as Message,
+            deanonymizations,
+          };
+
+          // Create a new chunk with the complete deanonymized content
+          const completeChunk: ChatCompletionChunkEvent = {
+            type: ChatCompletionEventType.ChatCompletionChunk,
+            content: deanonymizedContent,
+            tool_calls: (deanonymizedToolCalls ?? []).map((tc, idx) => {
+              let args = '';
+              try {
+                args = JSON.stringify(tc.function.arguments) || '';
+              } catch {
+                args = String(tc.function.arguments ?? '');
+              }
+              return {
+                index: idx,
+                toolCallId: tc.toolCallId,
+                function: {
+                  name: tc.function.name,
+                  arguments: args,
+                },
+              };
+            }),
+            deanonymized_input: deanonymizedInput,
+            deanonymized_output: deanonymizedOutput,
+            metadata,
+          };
+
+          // Create deanonymized message event
+          const deanonymizedMsg = {
+            ...event,
+            content: deanonymizedContent,
+            toolCalls: deanonymizedToolCalls,
+            deanonymized_input: deanonymizedInput,
+            deanonymized_output: deanonymizedOutput,
+            metadata,
+          };
+
+          // Emit new chunk first, then message
+          return of(completeChunk, deanonymizedMsg);
+        }
+
+        // Pass through other events unchanged
+        return of(event);
+      })
+    );
+  };
+}

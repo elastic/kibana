@@ -15,14 +15,15 @@ import {
   EuiSelect,
   EuiSwitch,
 } from '@elastic/eui';
-import { UrlFormat } from '@kbn/field-formats-plugin/common';
+import type { UrlFormat } from '@kbn/field-formats-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { context as contextType, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
-import { CoreStart } from '@kbn/core/public';
+import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import { context as contextType } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 import React, { Fragment } from 'react';
 import { FormatEditorSamples } from '../../samples';
 import { DefaultFormatEditor } from '../default/default';
-import { FormatEditorProps } from '../types';
+import type { FormatEditorProps } from '../types';
 import { formatId } from './constants';
 
 interface OnChangeParam {
@@ -223,6 +224,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           error={error}
         >
           <EuiFieldText
+            isInvalid={!!error}
             data-test-subj="urlEditorUrlTemplate"
             value={formatParams.urlTemplate || ''}
             onChange={(e) => {
@@ -253,6 +255,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           error={error}
         >
           <EuiFieldText
+            isInvalid={!!error}
             data-test-subj="urlEditorLabelTemplate"
             value={formatParams.labelTemplate || ''}
             onChange={(e) => {

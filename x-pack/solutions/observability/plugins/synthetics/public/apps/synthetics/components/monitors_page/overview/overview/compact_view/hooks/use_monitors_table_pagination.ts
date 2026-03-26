@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Criteria } from '@elastic/eui';
+import type { Criteria } from '@elastic/eui';
 import { useState } from 'react';
-import { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
+import type { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
 
 const findMonitors = (monitors: OverviewStatusMetaData[], pageIndex: number, pageSize: number) => {
   let pageOfItems;

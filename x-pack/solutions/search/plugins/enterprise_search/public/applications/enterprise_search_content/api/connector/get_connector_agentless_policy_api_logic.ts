@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { Agent } from '@kbn/fleet-plugin/common';
+import type { Agent } from '@kbn/fleet-plugin/common';
 
-import { createApiLogic, Actions } from '../../../shared/api_logic/create_api_logic';
+import type { Actions } from '../../../shared/api_logic/create_api_logic';
+import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface GetConnectorAgentlessPolicyApiArgs {

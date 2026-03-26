@@ -31,6 +31,7 @@ export const outdatedDocumentsSearchRead: ModelStage<
     const progress = setProgressTotal(state.progress, res.right.totalHits);
     return {
       ...state,
+      pitId: res.right.pitId,
       controlState: 'OUTDATED_DOCUMENTS_SEARCH_TRANSFORM',
       outdatedDocuments: res.right.outdatedDocuments,
       lastHitSortValue: res.right.lastHitSortValue,
@@ -69,6 +70,7 @@ export const outdatedDocumentsSearchRead: ModelStage<
     // and can proceed to the next step
     return {
       ...state,
+      pitId: res.right.pitId,
       logs,
       controlState: 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT',
     };

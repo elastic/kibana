@@ -7,7 +7,6 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { i18n } from '@kbn/i18n';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 import { APP_ID, TIMELINE_FEATURE_ID } from '../constants';
 import { type BaseKibanaFeatureConfig } from '../types';
@@ -25,7 +24,6 @@ export const getTimelineBaseKibanaFeature = (
   ),
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.security,
-  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [TIMELINE_FEATURE_ID, 'kibana'],
   catalogue: [APP_ID],
   privileges: {

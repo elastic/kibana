@@ -8,7 +8,8 @@
  */
 
 import type { UpdatableFileMetadata } from '../../../../common/types';
-import { setupIntegrationEnvironment, TestEnvironmentUtils } from '../../../test_utils';
+import type { TestEnvironmentUtils } from '../../../test_utils';
+import { setupIntegrationEnvironment } from '../../../test_utils';
 
 describe('File kind HTTP API', () => {
   let fileKind: string;
@@ -382,5 +383,220 @@ describe('File kind HTTP API', () => {
         fileId: id,
       });
     }
+  });
+
+  describe('MIME type validation', () => {
+    test('should allow files with permitted MIME types', async () => {
+      // Test PNG (allowed)
+      const pngResult = await request
+        .post(root, `/api/files/files/${fileKind}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .send({
+          name: 'test.png',
+          mimeType: 'image/png',
+          alt: 'test image',
+          meta: {},
+        })
+        .expect(200);
+
+      expect(pngResult.body.file.mimeType).toBe('image/png');
+
+      // Test JPEG (allowed)
+      const jpegResult = await request
+        .post(root, `/api/files/files/${fileKind}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .send({
+          name: 'test.jpg',
+          mimeType: 'image/jpeg',
+          alt: 'test image',
+          meta: {},
+        })
+        .expect(200);
+
+      expect(jpegResult.body.file.mimeType).toBe('image/jpeg');
+
+      // Test PDF (allowed)
+      const pdfResult = await request
+        .post(root, `/api/files/files/${fileKind}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .send({
+          name: 'document.pdf',
+          mimeType: 'application/pdf',
+          alt: 'test document',
+          meta: {},
+        })
+        .expect(200);
+
+      expect(pdfResult.body.file.mimeType).toBe('application/pdf');
+    });
+
+    test('should reject files with forbidden MIME types', async () => {
+      // Test video file rejection (not in allowed list)
+      const videoResult = await request
+        .post(root, `/api/files/files/${fileKind}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .send({
+          name: 'test.mp4',
+          mimeType: 'video/mp4',
+          alt: 'test video',
+          meta: {},
+        })
+        .expect(400);
+
+      expect(videoResult.body.message).toBe('File type is not supported');
+
+      // Test executable file rejection (not in allowed list)
+      const exeResult = await request
+        .post(root, `/api/files/files/${fileKind}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .send({
+          name: 'malware.exe',
+          mimeType: 'application/x-msdownload',
+          alt: 'executable file',
+          meta: {},
+        })
+        .expect(400);
+
+      expect(exeResult.body.message).toBe('File type is not supported');
+
+      // Test XML file rejection (not in allowed list)
+      const xmlResult = await request
+        .post(root, `/api/files/files/${fileKind}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .send({
+          name: 'config.xml',
+          mimeType: 'text/xml',
+          alt: 'xml file',
+          meta: {},
+        })
+        .expect(400);
+
+      expect(xmlResult.body.message).toBe('File type is not supported');
+    });
+
+    test('should allow files with no MIME type when restrictions exist', async () => {
+      // Undefined MIME type should be allowed (validation only applies when MIME type is provided)
+      const result = await request
+        .post(root, `/api/files/files/${fileKind}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .send({
+          name: 'test',
+          alt: 'test file',
+          meta: {},
+        })
+        .expect(200);
+
+      expect(result.body.file.mimeType).toBeUndefined();
+    });
+  });
+
+  describe('file extension validation on download', () => {
+    test('should reject download with mismatched file extension', async () => {
+      const { id } = await createFile({
+        name: 'image.png',
+        mimeType: 'image/png',
+      });
+
+      await request
+        .put(root, `/api/files/files/${fileKind}/${id}/blob`)
+        .set('Content-Type', 'application/octet-stream')
+        .set('x-elastic-internal-origin', 'files-test')
+        .send('image data')
+        .expect(200);
+
+      // Try to download with wrong extension (PDF extension for PNG file)
+      const result = await request
+        .get(root, `/api/files/files/${fileKind}/${id}/blob/document.pdf`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .expect(400);
+
+      expect(result.body.message).toBe('File extension does not match file type');
+    });
+
+    test('should allow download with matching file extension', async () => {
+      const { id } = await createFile({
+        name: 'image.png',
+        mimeType: 'image/png',
+      });
+
+      await request
+        .put(root, `/api/files/files/${fileKind}/${id}/blob`)
+        .set('Content-Type', 'application/octet-stream')
+        .set('x-elastic-internal-origin', 'files-test')
+        .send('image data')
+        .expect(200);
+
+      const result = await request
+        .get(root, `/api/files/files/${fileKind}/${id}/blob/image.png`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .expect(200);
+
+      expect(result.body.toString()).toBe('image data');
+    });
+
+    test('should allow download with no file extension', async () => {
+      const { id } = await createFile({
+        name: 'README',
+        mimeType: 'text/plain',
+      });
+
+      await request
+        .put(root, `/api/files/files/${fileKind}/${id}/blob`)
+        .set('Content-Type', 'application/octet-stream')
+        .set('x-elastic-internal-origin', 'files-test')
+        .send('readme content')
+        .expect(200);
+
+      // Download without extension should work (no validation performed)
+      await request
+        .get(root, `/api/files/files/${fileKind}/${id}/blob/README`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .expect(200);
+    });
+
+    test('should handle multiple extensions correctly', async () => {
+      const { id } = await createFile({
+        name: 'archive.tar.gz',
+        mimeType: 'application/gzip',
+      });
+
+      await request
+        .put(root, `/api/files/files/${fileKind}/${id}/blob`)
+        .set('Content-Type', 'application/octet-stream')
+        .set('x-elastic-internal-origin', 'files-test')
+        .send('compressed data')
+        .expect(200);
+
+      // Should use the last extension (.gz) for validation
+      await request
+        .get(root, `/api/files/files/${fileKind}/${id}/blob/archive.tar.gz`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .expect(200);
+    });
+
+    test('should be case insensitive for file extensions', async () => {
+      const { id } = await createFile({
+        name: 'image.png',
+        mimeType: 'image/png',
+      });
+
+      await request
+        .put(root, `/api/files/files/${fileKind}/${id}/blob`)
+        .set('Content-Type', 'application/octet-stream')
+        .set('x-elastic-internal-origin', 'files-test')
+        .send('image data')
+        .expect(200);
+
+      // Both lowercase and uppercase extensions should work
+      await request
+        .get(root, `/api/files/files/${fileKind}/${id}/blob/image.PNG`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .expect(200);
+
+      await request
+        .get(root, `/api/files/files/${fileKind}/${id}/blob/image.Png`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .expect(200);
+    });
   });
 });

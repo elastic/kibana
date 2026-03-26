@@ -63,6 +63,14 @@ export const EQL_SHARD_FAILURE_MESSAGE = (
         },
       });
 
+export const ESQL_SHARD_FAILURE_MESSAGE = (shardFailuresMessage: string) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.esqlRuleType.esqlShardFailures', {
+    defaultMessage: `The ES|QL event query was only executed on the available shards. The query failed to run successfully on the following shards: {shardFailures}`,
+    values: {
+      shardFailures: shardFailuresMessage,
+    },
+  });
+
 export const FIND_THRESHOLD_BUCKETS_DESCRIPTION = (afterBucket?: string) =>
   afterBucket
     ? i18n.translate(

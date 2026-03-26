@@ -143,7 +143,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
     const sortFieldDirection: { [key: string]: string } = {};
     sortFieldDirection[sortField] = sortDirection;
 
-    const { data } = useMisconfigurationFindings({
+    const { data, isLoading } = useMisconfigurationFindings({
       query: buildMisconfigurationEntityFlyoutPreviewQuery(field, value, currentFilter),
       sort: [sortFieldDirection],
       enabled: true,
@@ -231,7 +231,13 @@ export const MisconfigurationFindingsDetailsTable = memo(
         width: `${linkWidth}`,
         render: (rule: CspBenchmarkRuleMetadata, finding: MisconfigurationFindingDetailFields) => (
           <EuiButtonIcon
-            iconType="expand"
+            aria-label={i18n.translate(
+              'xpack.securitySolution.flyout.left.insights.misconfigurations.previewButtonAriaLabel',
+              {
+                defaultMessage: 'Preview finding details',
+              }
+            )}
+            iconType="maximize"
             onClick={() => {
               uiMetricService.trackUiMetric(
                 METRIC_TYPE.CLICK,
@@ -314,7 +320,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
                 defaultMessage: 'Misconfigurations ',
               }
             )}
-            <EuiIcon type={'popout'} />
+            <EuiIcon type="external" />
           </SecuritySolutionLinkAnchor>
           <EuiSpacer size="xl" />
           <DistributionBar stats={misconfigurationStats} />
@@ -327,6 +333,13 @@ export const MisconfigurationFindingsDetailsTable = memo(
             onChange={onTableChange}
             data-test-subj={'securitySolutionFlyoutMisconfigurationFindingsTable'}
             sorting={sorting}
+            loading={isLoading}
+            tableCaption={i18n.translate(
+              'xpack.securitySolution.flyout.left.insights.misconfigurations.tableCaption',
+              {
+                defaultMessage: 'Misconfiguration findings',
+              }
+            )}
           />
         </EuiPanel>
       </>

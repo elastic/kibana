@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
-import {
-  EuiDescribedFormGroup,
-  EuiDescribedFormGroupProps,
-  EuiSwitchProps,
-  EuiSwitch,
-  EuiSpacer,
-} from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React, { useState } from 'react';
+import type { EuiDescribedFormGroupProps, EuiSwitchProps } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiSwitch, EuiSpacer } from '@elastic/eui';
 
 export interface SwitchProps
   extends Omit<EuiSwitchProps, 'children' | 'checked' | 'value' | 'onChange'> {

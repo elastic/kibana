@@ -7,18 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { LATEST_VERSION, CONTENT_ID } from '../constants';
-
 export type { LinksContentType } from '../types';
 
 export type {
   LinkType,
   LinksLayoutType,
-  LinkOptions,
-  Link,
   LinksItem,
   LinksCrudTypes,
-  LinksAttributes,
   LinksSearchOut,
 } from './latest';
 

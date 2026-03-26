@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -9,11 +9,9 @@
   },
   "include": ["**/*.ts"],
   "kbn_references": [
-    "@kbn/core",
-    "@kbn/actions-plugin",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/utility-types",
-    "@kbn/inference-common"
+    "@kbn/inference-common",
+    "@kbn/core"
   ],
   "exclude": [
     "target/**/*"

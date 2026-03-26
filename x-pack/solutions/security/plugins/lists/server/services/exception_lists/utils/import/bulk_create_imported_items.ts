@@ -6,10 +6,10 @@
  */
 
 import { has } from 'lodash/fp';
-import { SavedObjectsBulkCreateObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsBulkCreateObject, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { ExceptionListSoSchema } from '../../../../schemas/saved_objects/exceptions_list_so_schema';
-import { ImportResponse } from '../../import_exception_list_and_items';
+import type { ExceptionListSoSchema } from '../../../../schemas/saved_objects/exceptions_list_so_schema';
+import type { ImportResponse } from '../../import_exception_list_and_items';
 
 /**
  * Helper to bulk create exception list items

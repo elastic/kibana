@@ -1,0 +1,24 @@
+openapi: 3.0.0
+info:
+  title: Install privileged access detection package
+  version: "2023-10-31"
+paths:
+  /api/entity_analytics/privileged_user_monitoring/pad/install:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: InstallPrivilegedAccessDetectionPackage
+      summary: Installs the privileged access detection package for the Entity Analytics privileged user monitoring experience
+
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message
+                properties:
+                  message:
+                    type: string

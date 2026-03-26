@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { CSSObject } from '@emotion/react';
+import type { CSSObject } from '@emotion/react';
 import { useEuiTheme } from '../../hooks';
 
 export const useButtonStyles = () => {
@@ -94,7 +94,7 @@ export const useButtonStyles = () => {
         textDecoration: 'none',
       },
       '&.isExpanded': {
-        color: colors.ghost,
+        color: colors.textGhost,
         background: colors.backgroundFilledAccentSecondary,
         '&:hover, &:focus': {
           background: `${colors.backgroundFilledAccentSecondary}`,

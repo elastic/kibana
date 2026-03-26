@@ -8,39 +8,50 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TracksOverlays } from '@kbn/presentation-containers';
-import {
-  apiCanAccessViewMode,
-  apiPublishesDataViews,
-  apiPublishesUnifiedSearch,
-  apiPublishesTitle,
+import type { TracksOverlays } from '@kbn/presentation-util';
+import type {
   CanAccessViewMode,
   EmbeddableApiContext,
-  getInheritedViewMode,
   HasParentApi,
   PublishesDataViews,
   PublishesWritableUnifiedSearch,
   PublishesWritableDescription,
   PublishesWritableTitle,
   PublishesUnifiedSearch,
+  IsCustomizable,
+  PublishesWritableHideBorder,
 } from '@kbn/presentation-publishing';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import {
+  apiCanAccessViewMode,
+  apiPublishesDataViews,
+  apiPublishesUnifiedSearch,
+  apiPublishesTitle,
+  getInheritedViewMode,
+  apiCanBeCustomized,
+} from '@kbn/presentation-publishing';
+
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { openCustomizePanelFlyout } from './open_customize_panel';
 import { ACTION_CUSTOMIZE_PANEL } from './constants';
 
 export type CustomizePanelActionApi = CanAccessViewMode &
+  IsCustomizable &
   Partial<
     PublishesDataViews &
       PublishesWritableUnifiedSearch &
       PublishesWritableDescription &
       PublishesWritableTitle &
+      PublishesWritableHideBorder &
       HasParentApi<Partial<PublishesUnifiedSearch & TracksOverlays>>
   >;
 
 export const isApiCompatibleWithCustomizePanelAction = (
   api: unknown | null
 ): api is CustomizePanelActionApi =>
-  apiCanAccessViewMode(api) && (apiPublishesDataViews(api) || apiPublishesTitle(api));
+  apiCanBeCustomized(api) &&
+  apiCanAccessViewMode(api) &&
+  (apiPublishesDataViews(api) || apiPublishesTitle(api));
 
 export class CustomizePanelAction implements Action<EmbeddableApiContext> {
   public type = ACTION_CUSTOMIZE_PANEL;

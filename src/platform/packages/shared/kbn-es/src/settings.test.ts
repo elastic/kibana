@@ -16,6 +16,8 @@ const mockSettings = [
   'xpack.security.authc.realms.jwt.jwt1.client_authentication.shared_secret=jwt_secret',
   'xpack.security.http.ssl.keystore.secure_password=some_password',
   'discovery.type=single-node',
+  'telemetry.secret_token=token',
+  'telemetry.api_key=key',
 ];
 
 test('`parseSettings` parses and returns all settings by default', () => {
@@ -26,6 +28,8 @@ test('`parseSettings` parses and returns all settings by default', () => {
     ['xpack.security.authc.realms.jwt.jwt1.client_authentication.shared_secret', 'jwt_secret'],
     ['xpack.security.http.ssl.keystore.secure_password', 'some_password'],
     ['discovery.type', 'single-node'],
+    ['telemetry.secret_token', 'token'],
+    ['telemetry.api_key', 'key'],
   ]);
 });
 
@@ -37,6 +41,8 @@ test('`parseSettings` parses and returns all settings with `SettingsFilter.All` 
     ['xpack.security.authc.realms.jwt.jwt1.client_authentication.shared_secret', 'jwt_secret'],
     ['xpack.security.http.ssl.keystore.secure_password', 'some_password'],
     ['discovery.type', 'single-node'],
+    ['telemetry.secret_token', 'token'],
+    ['telemetry.api_key', 'key'],
   ]);
 });
 
@@ -45,6 +51,8 @@ test('`parseSettings` parses and returns only secure settings with `SettingsFilt
     ['xpack.security.authc.realms.oidc.oidc1.rp.client_secret', 'secret'],
     ['xpack.security.authc.realms.jwt.jwt1.client_authentication.shared_secret', 'jwt_secret'],
     ['xpack.security.http.ssl.keystore.secure_password', 'some_password'],
+    ['telemetry.secret_token', 'token'],
+    ['telemetry.api_key', 'key'],
   ]);
 });
 

@@ -12,8 +12,8 @@ import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { HistogramPoint } from '../../../../../../../../../common/runtime_types/monitor';
-import { ClientPluginsStart } from '../../../../../../../../plugin';
+import type { HistogramPoint } from '../../../../../../../../../common/runtime_types/monitor';
+import type { ClientPluginsStart } from '../../../../../../../../plugin';
 const seriesHasDownValues = (series: HistogramPoint[] | null): boolean => {
   return series ? series.some((point) => !!point.down) : false;
 };
@@ -91,7 +91,7 @@ export const MonitorBarSeries = ({ histogramSeries, minInterval }: MonitorBarSer
         />
       }
     >
-      <EuiText color="success">
+      <EuiText color="success" tabIndex={0}>
         {i18n.translate('xpack.synthetics.monitorBarSeries.TextLabel', { defaultMessage: '--' })}
       </EuiText>
     </EuiToolTip>

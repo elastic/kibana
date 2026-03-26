@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useAppContext } from '../app_context';
@@ -14,9 +14,11 @@ import { useAppContext } from '../app_context';
 export const DiscoverLink = ({
   indexName,
   asButton = false,
+  fill = true,
 }: {
   indexName: string;
   asButton?: boolean;
+  fill?: boolean;
 }) => {
   const { url } = useAppContext();
   const discoverLocator = url?.locators.get('DISCOVER_APP_LOCATOR');
@@ -39,13 +41,20 @@ export const DiscoverLink = ({
     />
   );
   if (asButton) {
-    link = (
+    link = fill ? (
       <EuiButton fill onClick={onClick} iconType="discoverApp" data-test-subj="discoverButtonLink">
         <FormattedMessage
           id="xpack.idxMgmt.goToDiscover.discoverIndexButtonLabel"
           defaultMessage="Discover index"
         />
       </EuiButton>
+    ) : (
+      <EuiButtonEmpty onClick={onClick} iconType="discoverApp" data-test-subj="discoverButtonLink">
+        <FormattedMessage
+          id="xpack.idxMgmt.goToDiscover.discoverIndexButtonLabel"
+          defaultMessage="Discover index"
+        />
+      </EuiButtonEmpty>
     );
   }
 

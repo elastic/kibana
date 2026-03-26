@@ -6,11 +6,14 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
+// important to use css from @emotion/css, as @emotion/react version returns
+// serialized styles instead of pure class names
+import { css } from '@emotion/css';
 
 import { useKibana } from '../../../../../..';
 import { useForm } from '../../../../shared_imports';
 import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
-import { Field } from '../../../../types';
+import type { Field } from '../../../../types';
 import { fieldSerializer, fieldDeserializer } from '../../../../lib';
 import { ModalConfirmationDeleteFields } from '../modal_confirmation_delete_fields';
 import { EditField } from './edit_field';
@@ -19,7 +22,7 @@ import { useUpdateField } from './use_update_field';
 export const defaultFlyoutProps = {
   'data-test-subj': 'mappingsEditorFieldEdit',
   'aria-labelledby': 'mappingsEditorFieldEditTitle',
-  className: 'mappingsEditor__editField',
+  className: css({ minWidth: '680px' }),
   maxWidth: 720,
 };
 

@@ -6,19 +6,17 @@
  */
 
 import * as rt from 'io-ts';
-import { IToasts } from '@kbn/core/public';
-import { IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-import { InvokeCreator } from 'xstate';
+import type { IToasts } from '@kbn/core/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import { fromCallback, fromObservable } from 'xstate';
 import * as Either from 'fp-ts/Either';
 import { identity, pipe } from 'fp-ts/function';
 import { map } from 'rxjs';
 import { createPlainError, formatErrors } from '../../../../common/runtime_types';
-import {
-  LogViewReference,
-  logViewReferenceRT,
-  PersistedLogViewReference,
-} from '../../../../common/log_views';
-import { LogViewContext, LogViewEvent } from './types';
+import type { LogViewReference, PersistedLogViewReference } from '../../../../common/log_views';
+import { logViewReferenceRT } from '../../../../common/log_views';
+import type { LogViewContext, LogViewEvent } from './types';
 
 export const defaultLogViewKey = 'logView';
 const defaultLegacySourceIdKey = 'sourceId';
@@ -32,7 +30,7 @@ interface LogViewUrlStateDependencies {
 
 export const updateContextInUrl =
   ({ urlStateStorage, logViewKey = defaultLogViewKey }: LogViewUrlStateDependencies) =>
-  (context: LogViewContext, _event: LogViewEvent) => {
+  ({ context }: { context: LogViewContext; event: LogViewEvent }) => {
     if (!('logViewReference' in context)) {
       throw new Error('Missing keys from context needed to sync to the URL');
     }
@@ -42,15 +40,13 @@ export const updateContextInUrl =
     });
   };
 
-export const initializeFromUrl =
-  ({
-    logViewKey = defaultLogViewKey,
-    sourceIdKey = defaultLegacySourceIdKey,
-    toastsService,
-    urlStateStorage,
-  }: LogViewUrlStateDependencies): InvokeCreator<LogViewContext, LogViewEvent> =>
-  (_context, _event) =>
-  (send) => {
+export const initializeFromUrl = ({
+  logViewKey = defaultLogViewKey,
+  sourceIdKey = defaultLegacySourceIdKey,
+  toastsService,
+  urlStateStorage,
+}: LogViewUrlStateDependencies) =>
+  fromCallback<LogViewEvent, LogViewContext>(({ sendBack }) => {
     const logViewReference = getLogViewReferenceFromUrl({
       logViewKey,
       sourceIdKey,
@@ -58,11 +54,11 @@ export const initializeFromUrl =
       urlStateStorage,
     });
 
-    send({
+    sendBack({
       type: 'INITIALIZED_FROM_URL',
       logViewReference,
     });
-  };
+  });
 
 export const getLogViewReferenceFromUrl = ({
   logViewKey,
@@ -100,25 +96,25 @@ export const getLogViewReferenceFromUrl = ({
 
 // NOTE: Certain navigations within the Logs solution will remove the logView URL key,
 // we want to ensure the logView key is present in the URL at all times by monitoring for it's removal.
-export const listenForUrlChanges =
-  ({
-    urlStateStorage,
-    logViewKey = defaultLogViewKey,
-  }: {
-    urlStateStorage: LogViewUrlStateDependencies['urlStateStorage'];
-    logViewKey?: LogViewUrlStateDependencies['logViewKey'];
-  }): InvokeCreator<LogViewContext, LogViewEvent> =>
-  (context, event) => {
-    return urlStateStorage
+export const listenForUrlChanges = ({
+  urlStateStorage,
+  logViewKey = defaultLogViewKey,
+}: {
+  urlStateStorage: LogViewUrlStateDependencies['urlStateStorage'];
+  logViewKey?: LogViewUrlStateDependencies['logViewKey'];
+}) =>
+  fromObservable<LogViewEvent, LogViewContext>(() =>
+    urlStateStorage
       .change$(logViewKey)
       .pipe(
-        map((value) =>
-          value === undefined || value === null
-            ? { type: 'LOG_VIEW_URL_KEY_REMOVED' }
-            : { type: 'LOG_VIEW_URL_KEY_CHANGED' }
+        map(
+          (value): LogViewEvent =>
+            value === undefined || value === null
+              ? { type: 'LOG_VIEW_URL_KEY_REMOVED' }
+              : { type: 'LOG_VIEW_URL_KEY_CHANGED' }
         )
-      );
-  };
+      )
+  );
 
 const logViewStateInUrlRT = rt.union([logViewReferenceRT, rt.null]);
 const sourceIdStateInUrl = rt.union([rt.string, rt.null]);

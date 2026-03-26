@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import type { UseQueryResult } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { ServerError } from '@kbn/cases-plugin/public/types';
 import { loadActionTypes } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { IHttpFetchError, HttpSetup } from '@kbn/core-http-browser';
 
 import type { ActionType } from '@kbn/actions-plugin/common';
-import { HttpSetup } from '@kbn/core-http-browser';
-import { IToasts } from '@kbn/core-notifications-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
 import { GenerativeAIForSecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import * as i18n from '../translations';
 

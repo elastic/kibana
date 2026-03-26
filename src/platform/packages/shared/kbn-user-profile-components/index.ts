@@ -16,7 +16,7 @@ export { UserAvatarTip } from './src/user_avatar_tip';
 export { UserToolTip } from './src/user_tooltip';
 export { UserProfilesSelectable } from './src/user_profiles_selectable';
 export { UserProfilesPopover } from './src/user_profiles_popover';
-export { getUserDisplayName } from './src/user_profile';
+export { getUserDisplayName, isValidUserProfileAvatarColor } from './src/user_profile';
 export type {
   UserProfile,
   UserProfileUserInfo,

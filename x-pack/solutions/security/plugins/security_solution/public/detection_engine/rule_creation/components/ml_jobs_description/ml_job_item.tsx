@@ -37,11 +37,11 @@ const MlJobItemComponent: FC<{
         <MlAuditIcon message={job.auditMessage} />
       </div>
       <EuiFlexGroup justifyContent="flexStart">
-        <EuiFlexItem grow={false} style={{ marginRight: '0' }}>
+        <EuiFlexItem grow={false} css={{ marginRight: '0' }}>
           <MlJobStatusBadge job={job} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{switchComponent}</EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ marginLeft: '0' }} data-test-subj="mlJobActionLabel">
+        <EuiFlexItem grow={false} css={{ marginLeft: '0' }} data-test-subj="mlJobActionLabel">
           {isStarted ? i18n.ML_STOP_JOB_LABEL : i18n.ML_RUN_JOB_LABEL}
         </EuiFlexItem>
       </EuiFlexGroup>

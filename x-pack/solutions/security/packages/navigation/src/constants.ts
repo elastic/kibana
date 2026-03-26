@@ -29,4 +29,13 @@ export enum SecurityGroupName {
   assets = 'securityGroup:assets',
   entityAnalytics = 'securityGroup:entityAnalytics',
   machineLearning = 'securityGroup:machineLearning',
+  launchpad = 'securityGroup:launchpad',
+
+  // TODO: https://github.com/elastic/kibana/issues/242434
+  // Investigate possibility of using `detections` instead
+  alertDetections = 'securityGroup:alertDetections',
 }
+
+/** This Kibana Advanced Setting allows users to enable/disable the Alerts and Attacks Alignment feature */
+export const ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING =
+  'securitySolution:enableAlertsAndAttacksAlignment' as const;

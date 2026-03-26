@@ -11,7 +11,6 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { LATEST_MANIFEST_FORMAT_VERSION } from '@kbn/product-doc-common';
 import { createIndex } from './create_index';
-import { internalElserInferenceId } from '../../../../common/consts';
 
 const LEGACY_SEMANTIC_TEXT_VERSION = '1.0.0';
 
@@ -76,7 +75,7 @@ describe('createIndex', () => {
     });
   });
 
-  it('rewrites the inference_id attribute of semantic_text fields in the mapping', async () => {
+  it('does not override the inference_id attribute of semantic_text fields in the mapping', async () => {
     const mappings: MappingTypeMapping = {
       properties: {
         semantic: {
@@ -99,16 +98,17 @@ describe('createIndex', () => {
 
     expect(esClient.indices.create).toHaveBeenCalledWith(
       expect.objectContaining({
+        index: '.some-index',
         mappings: {
           properties: {
-            semantic: {
-              type: 'semantic_text',
-              inference_id: internalElserInferenceId,
-            },
-            bool: {
-              type: 'boolean',
-            },
+            bool: { type: 'boolean' },
+            semantic: { inference_id: '.elser', type: 'semantic_text' },
           },
+        },
+        settings: {
+          auto_expand_replicas: '0-1',
+          'index.mapping.semantic_text.use_legacy_format': true,
+          number_of_shards: 1,
         },
       })
     );

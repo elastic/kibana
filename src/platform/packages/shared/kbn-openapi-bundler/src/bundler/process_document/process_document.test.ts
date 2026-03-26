@@ -8,9 +8,9 @@
  */
 
 import { RefResolver } from '../ref_resolver';
-import { Document } from '../document';
+import type { Document } from '../document';
 import { processDocument } from './process_document';
-import { DocumentNodeProcessor } from './document_processors/types/document_node_processor';
+import type { DocumentNodeProcessor } from './document_processors/types/document_node_processor';
 
 jest.mock('../ref_resolver');
 
@@ -431,6 +431,14 @@ describe('processDocument', () => {
             expect(context).toEqual({
               resolvedDocument,
               isRootNode: false,
+              parent: {
+                isRootNode: true,
+                parentKey: '',
+                parentNode: {
+                  childNode: {},
+                },
+                resolvedDocument,
+              },
               parentKey: 'childNode',
               parentNode: resolvedDocument.document,
             });
@@ -445,6 +453,14 @@ describe('processDocument', () => {
             expect(context).toEqual({
               resolvedDocument,
               isRootNode: false,
+              parent: {
+                isRootNode: true,
+                parentKey: '',
+                parentNode: {
+                  childNode: {},
+                },
+                resolvedDocument,
+              },
               parentKey: 'childNode',
               parentNode: resolvedDocument.document,
             });
@@ -457,6 +473,14 @@ describe('processDocument', () => {
             expect(context).toEqual({
               resolvedDocument,
               isRootNode: false,
+              parent: {
+                isRootNode: true,
+                parentKey: '',
+                parentNode: {
+                  childNode: {},
+                },
+                resolvedDocument,
+              },
               parentKey: 'childNode',
               parentNode: resolvedDocument.document,
             });
@@ -497,6 +521,16 @@ describe('processDocument', () => {
             expect(context).toEqual({
               resolvedDocument,
               isRootNode: false,
+              parent: {
+                isRootNode: true,
+                parent: undefined,
+                parentKey: '',
+                parentNode: {
+                  node: referencingNode,
+                  refNode: referencedNode,
+                },
+                resolvedDocument,
+              },
               parentKey: 'node',
               parentNode: resolvedDocument.document,
             });

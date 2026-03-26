@@ -21,12 +21,14 @@ export const DATA_TEST_SUBJ_DEMO_ENV_BUTTON = 'goToDemoEnvButton';
 /**
  * Test Subject name for the sample data accordion button.
  */
-export const DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_BUTTON = 'showSampleDataButton';
+// @wildemat - Deprecated. Sample data accordion was removed.
+// DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_BUTTON = 'showSampleDataButton';
 
 /**
  * Test Subject name for the sample data accordion button.
  */
-export const DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_ACCORDION = 'showSampleDataAccordion';
+// @wildemat - Deprecated. Sample data accordion was removed.
+// DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_ACCORDION = 'showSampleDataAccordion';
 
 /**
  * Metric name for counting number of clicks of the Demo Environment button.
@@ -36,4 +38,5 @@ export const METRIC_CLICK_DEMO_ENV_BUTTON = 'sample_data__demo_env_button';
 /**
  * Metric name for counting number of clicks of the sample data accordion button.
  */
-export const METRIC_CLICK_SHOW_SAMPLE_DATA_BUTTON = 'sample_data__show_sample_data_button';
+// @wildemat - Deprecated. Sample data accordion was removed.
+// METRIC_CLICK_SHOW_SAMPLE_DATA_BUTTON = 'sample_data__show_sample_data_button';

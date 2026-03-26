@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { LegacyRequest, Cluster, Bucket } from '../../types';
+import type { LegacyRequest, Cluster, Bucket } from '../../types';
 import { LOGSTASH } from '../../../common/constants';
 import { createQuery } from '../create_query';
 import { LogstashClusterMetric } from '../metrics';

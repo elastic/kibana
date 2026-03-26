@@ -5,6 +5,45 @@
     "functions": [
       {
         "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+        "id": "def-public.checkIndex",
+        "type": "Function",
+        "tags": [],
+        "label": "checkIndex",
+        "description": [],
+        "signature": [
+          "({\n  abortController,\n  formatBytes,\n  formatNumber,\n  httpFetch,\n  indexName,\n  onCheckCompleted,\n  pattern,\n  onLoadMappingsSuccess,\n  onLoadMappingsStart,\n  onLoadUnallowedValuesSuccess,\n  onLoadUnallowedValuesStart,\n  onStart,\n  onSuccess,\n  onError,\n  isLastCheck = false,\n  batchId = uuidv4(),\n  checkAllStartTime = Date.now(),\n  isCheckAll = false,\n}: ",
+          "CheckIndexProps",
+          ") => Promise<void>"
+        ],
+        "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/utils/check_index.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.checkIndex.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  abortController,\n  formatBytes,\n  formatNumber,\n  httpFetch,\n  indexName,\n  onCheckCompleted,\n  pattern,\n  onLoadMappingsSuccess,\n  onLoadMappingsStart,\n  onLoadUnallowedValuesSuccess,\n  onLoadUnallowedValuesStart,\n  onStart,\n  onSuccess,\n  onError,\n  isLastCheck = false,\n  batchId = uuidv4(),\n  checkAllStartTime = Date.now(),\n  isCheckAll = false,\n}",
+            "description": [],
+            "signature": [
+              "CheckIndexProps"
+            ],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/utils/check_index.ts",
+            "lineNumber": 65,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ecs-data-quality-dashboard",
         "id": "def-public.DATA_QUALITY_PROMPT_CONTEXT_PILL",
         "type": "Function",
         "tags": [],
@@ -14,6 +53,8 @@
           "(indexName: string) => string"
         ],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
+        "lineNumber": 59,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,6 +69,8 @@
               "string"
             ],
             "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
+            "lineNumber": 59,
+            "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -49,6 +92,8 @@
           "React.NamedExoticComponent<Props>"
         ],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/index.tsx",
+        "lineNumber": 171,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -64,6 +109,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -83,6 +130,8 @@
           "(phase: string) => string"
         ],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/utils/get_ilm_phase_description.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -97,6 +146,8 @@
               "string"
             ],
             "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/utils/get_ilm_phase_description.ts",
+            "lineNumber": 13,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -106,7 +157,532 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+        "id": "def-public.AllowedValue",
+        "type": "Interface",
+        "tags": [],
+        "label": "AllowedValue",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.AllowedValue.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.AllowedValue.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.AllowedValue.expected_event_types",
+            "type": "Array",
+            "tags": [],
+            "label": "expected_event_types",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.AllowedValue.beta",
+            "type": "string",
+            "tags": [],
+            "label": "beta",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+        "id": "def-public.IncompatibleFieldMappingItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "IncompatibleFieldMappingItem",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+        "lineNumber": 134,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.IncompatibleFieldMappingItem.fieldName",
+            "type": "string",
+            "tags": [],
+            "label": "fieldName",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 135,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.IncompatibleFieldMappingItem.expectedValue",
+            "type": "string",
+            "tags": [],
+            "label": "expectedValue",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.IncompatibleFieldMappingItem.actualValue",
+            "type": "string",
+            "tags": [],
+            "label": "actualValue",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 137,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.IncompatibleFieldMappingItem.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+        "id": "def-public.IncompatibleFieldValueItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "IncompatibleFieldValueItem",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+        "lineNumber": 146,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.IncompatibleFieldValueItem.fieldName",
+            "type": "string",
+            "tags": [],
+            "label": "fieldName",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 147,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.IncompatibleFieldValueItem.expectedValues",
+            "type": "Array",
+            "tags": [],
+            "label": "expectedValues",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 148,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.IncompatibleFieldValueItem.actualValues",
+            "type": "Array",
+            "tags": [],
+            "label": "actualValues",
+            "description": [],
+            "signature": [
+              "ActualIncompatibleValue",
+              "[]"
+            ],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.IncompatibleFieldValueItem.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 150,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+        "id": "def-public.PartitionedFieldMetadata",
+        "type": "Interface",
+        "tags": [],
+        "label": "PartitionedFieldMetadata",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+        "lineNumber": 100,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.PartitionedFieldMetadata.all",
+            "type": "Array",
+            "tags": [],
+            "label": "all",
+            "description": [],
+            "signature": [
+              "EnrichedFieldMetadata",
+              "[]"
+            ],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.PartitionedFieldMetadata.custom",
+            "type": "Array",
+            "tags": [],
+            "label": "custom",
+            "description": [],
+            "signature": [
+              "CustomFieldMetadata",
+              "[]"
+            ],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.PartitionedFieldMetadata.ecsCompliant",
+            "type": "Array",
+            "tags": [],
+            "label": "ecsCompliant",
+            "description": [],
+            "signature": [
+              "EcsCompliantFieldMetadata",
+              "[]"
+            ],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.PartitionedFieldMetadata.incompatible",
+            "type": "Array",
+            "tags": [],
+            "label": "incompatible",
+            "description": [],
+            "signature": [
+              "IncompatibleFieldMetadata",
+              "[]"
+            ],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.PartitionedFieldMetadata.sameFamily",
+            "type": "Array",
+            "tags": [],
+            "label": "sameFamily",
+            "description": [],
+            "signature": [
+              "SameFamilyFieldMetadata",
+              "[]"
+            ],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+        "id": "def-public.SameFamilyFieldItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "SameFamilyFieldItem",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+        "lineNumber": 153,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.SameFamilyFieldItem.fieldName",
+            "type": "string",
+            "tags": [],
+            "label": "fieldName",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 154,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.SameFamilyFieldItem.expectedValue",
+            "type": "string",
+            "tags": [],
+            "label": "expectedValue",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 155,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.SameFamilyFieldItem.actualValue",
+            "type": "string",
+            "tags": [],
+            "label": "actualValue",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 156,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.SameFamilyFieldItem.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 157,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+        "id": "def-public.StorageResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "StorageResult",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/ecs-data-quality-dashboard",
+            "scope": "public",
+            "docId": "kibKbnEcsDataQualityDashboardPluginApi",
+            "section": "def-public.StorageResult",
+            "text": "StorageResult"
+          },
+          " extends ",
+          "StorageResultBase"
+        ],
+        "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+        "lineNumber": 334,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.StorageResult.incompatibleFieldMappingItems",
+            "type": "Array",
+            "tags": [],
+            "label": "incompatibleFieldMappingItems",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ecs-data-quality-dashboard",
+                "scope": "public",
+                "docId": "kibKbnEcsDataQualityDashboardPluginApi",
+                "section": "def-public.IncompatibleFieldMappingItem",
+                "text": "IncompatibleFieldMappingItem"
+              },
+              "[]"
+            ],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 335,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.StorageResult.incompatibleFieldValueItems",
+            "type": "Array",
+            "tags": [],
+            "label": "incompatibleFieldValueItems",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ecs-data-quality-dashboard",
+                "scope": "public",
+                "docId": "kibKbnEcsDataQualityDashboardPluginApi",
+                "section": "def-public.IncompatibleFieldValueItem",
+                "text": "IncompatibleFieldValueItem"
+              },
+              "[]"
+            ],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 336,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.StorageResult.sameFamilyFieldItems",
+            "type": "Array",
+            "tags": [],
+            "label": "sameFamilyFieldItems",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ecs-data-quality-dashboard",
+                "scope": "public",
+                "docId": "kibKbnEcsDataQualityDashboardPluginApi",
+                "section": "def-public.SameFamilyFieldItem",
+                "text": "SameFamilyFieldItem"
+              },
+              "[]"
+            ],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 337,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+        "id": "def-public.UnallowedValueCount",
+        "type": "Interface",
+        "tags": [],
+        "label": "UnallowedValueCount",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+        "lineNumber": 119,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.UnallowedValueCount.fieldName",
+            "type": "string",
+            "tags": [],
+            "label": "fieldName",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.UnallowedValueCount.count",
+            "type": "number",
+            "tags": [],
+            "label": "count",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {
@@ -117,6 +693,8 @@
         "label": "DATA_QUALITY_DASHBOARD_CONVERSATION_ID",
         "description": [],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
+        "lineNumber": 293,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -129,6 +707,8 @@
         "label": "DATA_QUALITY_PROMPT_CONTEXT_PILL_TOOLTIP",
         "description": [],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
+        "lineNumber": 65,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -143,6 +723,8 @@
           "The subtitle displayed on the Data Quality dashboard"
         ],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
+        "lineNumber": 73,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -155,6 +737,8 @@
         "label": "DATA_QUALITY_SUGGESTED_USER_PROMPT",
         "description": [],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
+        "lineNumber": 80,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -170,6 +754,8 @@
           "\"https://www.elastic.co/guide/en/ecs/current/ecs-field-reference.html\""
         ],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/constants.ts",
+        "lineNumber": 70,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -187,6 +773,8 @@
           "\"https://www.elastic.co/guide/en/ecs/current/ecs-reference.html\""
         ],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/constants.ts",
+        "lineNumber": 74,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -201,6 +789,8 @@
           "The label displayed for the `ILM phase` combo box on the Data Quality dashboard"
         ],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
+        "lineNumber": 179,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -215,6 +805,8 @@
           "The tooltip for the `ILM phase` combo box on the Data Quality Dashboard"
         ],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
+        "lineNumber": 163,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -230,8 +822,62 @@
           "\"https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html\""
         ],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/constants.ts",
+        "lineNumber": 75,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+        "id": "def-public.OnCheckCompleted",
+        "type": "Type",
+        "tags": [],
+        "label": "OnCheckCompleted",
+        "description": [],
+        "signature": [
+          "(param: { batchId: string; isCheckAll: boolean; isLastCheck: boolean; checkAllStartTime: number; error: string | null; formatBytes: (value: number | undefined) => string; formatNumber: (value: number | undefined) => string; indexName: string; partitionedFieldMetadata: ",
+          {
+            "pluginId": "@kbn/ecs-data-quality-dashboard",
+            "scope": "public",
+            "docId": "kibKbnEcsDataQualityDashboardPluginApi",
+            "section": "def-public.PartitionedFieldMetadata",
+            "text": "PartitionedFieldMetadata"
+          },
+          " | null; pattern: string; requestTime?: number | undefined; }) => void"
+        ],
+        "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+        "lineNumber": 213,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.OnCheckCompleted.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "param",
+            "description": [],
+            "signature": [
+              "{ batchId: string; isCheckAll: boolean; isLastCheck: boolean; checkAllStartTime: number; error: string | null; formatBytes: (value: number | undefined) => string; formatNumber: (value: number | undefined) => string; indexName: string; partitionedFieldMetadata: ",
+              {
+                "pluginId": "@kbn/ecs-data-quality-dashboard",
+                "scope": "public",
+                "docId": "kibKbnEcsDataQualityDashboardPluginApi",
+                "section": "def-public.PartitionedFieldMetadata",
+                "text": "PartitionedFieldMetadata"
+              },
+              " | null; pattern: string; requestTime?: number | undefined; }"
+            ],
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/types.ts",
+            "lineNumber": 213,
+            "columnNumber": 33,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -244,6 +890,8 @@
           "The placeholder for the `ILM phase` combo box on the Data Quality Dashboard"
         ],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
+        "lineNumber": 215,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

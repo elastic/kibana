@@ -60,14 +60,7 @@ export function uncovertMetricNames(byDateBucketResponse: { buckets: MetricNameB
   for (const metricName of LISTING_METRICS_NAMES) {
     unconverted[metricName] = {
       buckets: byDateBucketResponse.buckets.map((bucket) => {
-        const {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          key_as_string,
-          key,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          doc_count,
-          ...rest
-        } = bucket;
+        const { key_as_string, key, doc_count, ...rest } = bucket;
         const metrics = Object.entries(rest).reduce((accum, [k, value]) => {
           if (k.startsWith(`${CONVERTED_TOKEN}${metricName}`)) {
             const name = k.split('__')[1];

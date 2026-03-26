@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/server';
+import type { Plugin, CoreSetup } from '@kbn/core/server';
 
-import { PluginSetupContract as ActionsSetup } from '@kbn/actions-plugin/server';
-import { AlertingServerSetup } from '@kbn/alerting-plugin/server';
-import {
+import type { PluginSetupContract as ActionsSetup } from '@kbn/actions-plugin/server';
+import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';

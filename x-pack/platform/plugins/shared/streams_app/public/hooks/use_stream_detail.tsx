@@ -6,12 +6,17 @@
  */
 
 import React from 'react';
-import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
-import { Streams } from '@kbn/streams-schema';
+import { getSegments, Streams } from '@kbn/streams-schema';
 import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
+import { getAncestorsAndSelf } from '@kbn/streams-schema';
+import { isHttpFetchError } from '@kbn/server-route-repository-client';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
+import { useStreamsAppBreadcrumbs } from './use_streams_app_breadcrumbs';
+import { useStreamsAppParams } from './use_streams_app_params';
 import { useKibana } from './use_kibana';
+import { StreamNotFoundPrompt } from '../components/stream_not_found_prompt';
 
 export interface StreamDetailContextProviderProps {
   name: string;
@@ -19,7 +24,7 @@ export interface StreamDetailContextProviderProps {
 }
 
 export interface StreamDetailContextValue {
-  definition: Streams.ingest.all.GetResponse;
+  definition: Streams.all.GetResponse;
   loading: boolean;
   refresh: () => void;
 }
@@ -44,6 +49,7 @@ export function StreamDetailContextProvider({
     value: definition,
     loading,
     refresh,
+    error,
   } = useStreamsAppFetch(
     async ({ signal }) => {
       return streamsRepositoryClient
@@ -68,11 +74,39 @@ export function StreamDetailContextProvider({
             };
           }
 
-          throw new Error('Stream detail only supports IngestStreams.');
+          if (Streams.QueryStream.GetResponse.is(response)) {
+            return response;
+          }
+
+          throw new Error('Stream detail only supports Ingest and Query streams.');
         });
     },
     [streamsRepositoryClient, name, canManage]
   );
+
+  const {
+    path: { key },
+  } = useStreamsAppParams('/{key}', true);
+
+  useStreamsAppBreadcrumbs(() => {
+    if (!definition || !Streams.WiredStream.Definition.is(definition.stream)) {
+      return [{ title: key, path: `/{key}`, params: { path: { key } } }];
+    }
+    // Build breadcrumbs for each segment in the hierarchy for wired streams
+    const ids = getAncestorsAndSelf(key);
+
+    // Helper to get the display name for a stream ID in the breadcrumb
+    const getBreadcrumbTitle = (id: string): string => {
+      const segments = getSegments(id);
+      return segments[segments.length - 1];
+    };
+
+    return ids.map((id) => ({
+      title: getBreadcrumbTitle(id),
+      path: `/{key}`,
+      params: { path: { key: id } },
+    }));
+  }, [key, definition]);
 
   const context = React.useMemo(
     // useMemo cannot be used conditionally after the definition narrowing, the assertion is to narrow correctly the context value
@@ -89,6 +123,10 @@ export function StreamDetailContextProvider({
     );
   }
 
+  if (!definition && error && isHttpFetchError(error) && error.body?.statusCode === 404) {
+    return <StreamNotFoundPrompt streamName={name} />;
+  }
+
   if (!definition) {
     return null;
   }
@@ -102,4 +140,19 @@ export function useStreamDetail() {
     throw new Error('useStreamDetail must be used within a StreamDetailContextProvider');
   }
   return ctx;
+}
+
+export function useStreamDetailAsIngestStream() {
+  const ctx = useStreamDetail();
+  if (
+    !Streams.WiredStream.GetResponse.is(ctx.definition) &&
+    !Streams.ClassicStream.GetResponse.is(ctx.definition)
+  ) {
+    throw new Error('useStreamDetailAsIngestStream can only be used with IngestStreams');
+  }
+  return ctx as {
+    definition: Streams.ingest.all.GetResponse;
+    loading: boolean;
+    refresh: () => void;
+  };
 }

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiLink } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { NavigationSource } from '../../../../services/telemetry';
 import { FAILURE_STORE_SELECTOR } from '../../../../../common/constants';
@@ -15,13 +16,11 @@ import {
   useRedirectLink,
 } from '../../../../hooks';
 
-export const ErrorStacktraceLink = ({
-  errorType,
-  children,
-}: {
-  errorType: string;
-  children?: React.ReactNode;
-}) => {
+const ButtonStyles = ({ euiTheme }: UseEuiTheme) => ({
+  fontWeight: euiTheme.font.weight.bold,
+});
+
+export const ErrorStacktraceLink = ({ errorType }: { errorType: string }) => {
   const { datasetDetails, timeRange } = useDatasetQualityDetailsState();
   const query = { language: 'kuery', query: `error.type: "${errorType}"` };
   const { sendTelemetry } = useDatasetDetailsRedirectLinkTelemetry({
@@ -30,25 +29,30 @@ export const ErrorStacktraceLink = ({
   });
 
   const { linkProps } = useRedirectLink({
-    dataStreamStat: datasetDetails,
+    dataStreamStat: datasetDetails.rawName,
     query,
     sendTelemetry,
     timeRangeConfig: timeRange,
     selector: FAILURE_STORE_SELECTOR,
+    external: true,
   });
 
   return (
-    <EuiBadge color="hollow">
-      <strong>{errorType}</strong>
-      <EuiLink
-        external
-        {...linkProps}
-        color="primary"
-        data-test-subj={`datasetQualityTableDetailsLink-${datasetDetails.name}`}
-        target="_blank"
-      >
-        {children}
-      </EuiLink>
-    </EuiBadge>
+    <EuiButton
+      color="text"
+      iconType="popout"
+      iconSide="right"
+      target="_blank"
+      size="s"
+      role="link"
+      element="a"
+      data-test-subj={`datasetQualityTableDetailsLink-${datasetDetails.name}`}
+      textProps={{
+        css: ButtonStyles,
+      }}
+      {...linkProps}
+    >
+      {errorType}
+    </EuiButton>
   );
 };

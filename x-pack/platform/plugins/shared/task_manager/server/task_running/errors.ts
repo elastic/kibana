@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { isUnauthorizedError } from '@kbn/es-errors';
+
 import { TaskErrorSource } from '../../common';
 
 export { TaskErrorSource };
@@ -67,6 +70,10 @@ function isTaskRunError(error: Error | DecoratedError): error is DecoratedError 
 export function getErrorSource(error: Error | DecoratedError): TaskErrorSource | undefined {
   if (isTaskRunError(error) && error[source]) {
     return error[source];
+  }
+
+  if (isUnauthorizedError(error)) {
+    return TaskErrorSource.USER;
   }
 }
 

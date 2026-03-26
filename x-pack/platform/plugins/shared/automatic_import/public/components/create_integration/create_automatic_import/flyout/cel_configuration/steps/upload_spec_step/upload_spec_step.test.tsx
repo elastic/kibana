@@ -82,13 +82,20 @@ describe('UploadSpecStep', () => {
             target: { value: 'testDataStreamTitle' },
           });
         });
+        const validSpec = JSON.stringify({
+          openapi: '3.0.0',
+          paths: { '/test': { get: {} } },
+        });
         const filepicker = result.getByTestId('apiDefinitionFilePicker');
         await act(async () => {
           fireEvent.change(filepicker, {
-            target: { files: [new File(['...'], 'test.json', { type: 'application/json' })] },
+            target: { files: [new File([validSpec], 'test.json', { type: 'application/json' })] },
           });
         });
-        await waitFor(() => expect(filepicker).toHaveAttribute('data-loading', 'false'));
+        // Wait for the file to be fully processed and button to become enabled
+        await waitFor(() => expect(result.queryByTestId('analyzeApiButton')).toBeEnabled(), {
+          timeout: 3000,
+        });
       });
 
       it('analyze button re-enabled', () => {

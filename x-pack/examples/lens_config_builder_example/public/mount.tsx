@@ -17,14 +17,13 @@ export const mount =
     const [core, plugins] = await coreSetup.getStartServices();
     const { App } = await import('./app');
 
-    const dataViews = plugins.data.indexPatterns;
-    const { formula } = await plugins.lens.stateHelperApi();
+    const dataViews = plugins.data.dataViews;
 
     const i18nCore = core.i18n;
 
     const reactElement = (
       <i18nCore.Context>
-        <App core={core} plugins={plugins} dataViews={dataViews} formula={formula} />~
+        <App core={core} plugins={plugins} dataViews={dataViews} />~
       </i18nCore.Context>
     );
 

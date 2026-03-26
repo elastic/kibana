@@ -6,17 +6,23 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { EuiBreadcrumb } from '@elastic/eui';
-import { AppLeaveHandler, ApplicationStart } from '@kbn/core-application-browser';
-import { ChromeStart } from '@kbn/core-chrome-browser';
-import { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { EuiBreadcrumb } from '@elastic/eui';
+import type { AppLeaveHandler, ApplicationStart } from '@kbn/core-application-browser';
+import type { ChromeStart } from '@kbn/core-chrome-browser';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { useRef, useCallback, useMemo, useState } from 'react';
-import { SharePublicStart } from '@kbn/share-plugin/public/plugin';
-import { LensAppLocator, LensAppLocatorParams } from '../../common/locator/locator';
-import { VisualizeEditorContext } from '../types';
-import { LensDocument } from '../persistence';
-import { RedirectToOriginProps } from './types';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
+import type {
+  VisualizeEditorContext,
+  LensAppLocator,
+  LensAppLocatorParams,
+  LensDocument,
+} from '@kbn/lens-common';
+// Avoid importing Dashboard public constants here to prevent lens -> dashboard cycles.
+const DASHBOARDS_APP_ID = 'dashboards';
+const DASHBOARDS_VISUALIZATIONS_TAB_PATH = '#/list/visualizations';
+import type { RedirectToOriginProps } from './types';
 
 const VISUALIZE_APP_ID = 'visualize';
 
@@ -79,7 +85,7 @@ export function setBreadcrumbsTitle(
   }
 ) {
   const breadcrumbs: EuiBreadcrumb[] = [];
-  if (isFromLegacyEditor && originatingAppName && redirectToOrigin) {
+  if ((isFromLegacyEditor || originatingAppName) && originatingAppName && redirectToOrigin) {
     breadcrumbs.push({
       onClick: () => {
         redirectToOrigin();
@@ -87,15 +93,19 @@ export function setBreadcrumbsTitle(
       text: originatingAppName,
     });
   }
-  if (!isByValueMode) {
+  if (!isByValueMode && !originatingAppName) {
     breadcrumbs.push({
-      href: application.getUrlForApp(VISUALIZE_APP_ID),
+      href: application.getUrlForApp(DASHBOARDS_APP_ID, {
+        path: DASHBOARDS_VISUALIZATIONS_TAB_PATH,
+      }),
       onClick: (e) => {
-        application.navigateToApp(VISUALIZE_APP_ID, { path: '/' });
+        application.navigateToApp(DASHBOARDS_APP_ID, {
+          path: DASHBOARDS_VISUALIZATIONS_TAB_PATH,
+        });
         e.preventDefault();
       },
-      text: i18n.translate('xpack.lens.breadcrumbsTitle', {
-        defaultMessage: 'Visualize Library',
+      text: i18n.translate('xpack.lens.breadcrumbsDashboardsTitle', {
+        defaultMessage: 'Dashboards',
       }),
     });
   }
@@ -109,7 +119,9 @@ export function setBreadcrumbsTitle(
     // the serverless navigation is not yet aware of the byValue/originatingApp context
     serverless.setBreadcrumbs(currentDocBreadcrumb);
   } else {
-    chrome.setBreadcrumbs(breadcrumbs);
+    chrome.setBreadcrumbs(breadcrumbs, {
+      project: { value: breadcrumbs, absolute: true },
+    });
   }
 }
 

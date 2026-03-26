@@ -55,11 +55,9 @@ function updateClusterUuidInLogstashStats(
   clusterUuid: string,
   payload: Array<Record<string, any>>
 ) {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   return payload.map(({ stack_stats, ...item }) => {
     const { logstash } = stack_stats;
     if (logstash) {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { cluster_stats } = logstash;
       cluster_stats.monitoringClusterUuid = clusterUuid;
     }
@@ -132,7 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
       let localXPack: Record<string, unknown>;
       let monitoring: Array<Record<string, unknown>>;
 
-      const archive = 'x-pack/test/functional/es_archives/monitoring/multicluster';
+      const archive = 'x-pack/platform/test/fixtures/es_archives/monitoring/multicluster';
       const fromTimestamp = '2017-08-15T21:00:00.000Z';
       const toTimestamp = '2017-08-16T00:00:00.000Z';
 
@@ -210,7 +208,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('with basic cluster and reporting and canvas usage info', () => {
-      const archive = 'x-pack/test/functional/es_archives/monitoring/basic_6.3.x';
+      const archive = 'x-pack/platform/test/fixtures/es_archives/monitoring/basic_6.3.x';
       const fromTimestamp = '2018-07-23T22:54:59.087Z';
       const toTimestamp = '2018-07-23T22:55:05.933Z';
       before(async () => {
@@ -239,7 +237,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Telemetry caching', () => {
-      const archive = 'x-pack/test/functional/es_archives/monitoring/basic_6.3.x';
+      const archive = 'x-pack/platform/test/fixtures/es_archives/monitoring/basic_6.3.x';
       const fromTimestamp = '2018-07-23T22:54:59.087Z';
       const toTimestamp = '2018-07-23T22:55:05.933Z';
 

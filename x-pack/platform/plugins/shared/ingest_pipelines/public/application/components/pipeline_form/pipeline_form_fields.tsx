@@ -6,28 +6,26 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  useIsWithinBreakpoints,
   EuiText,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { BulkRequestPanel } from './bulk_request_panel';
-import { CollapsiblePanel, CollapsiblePanelRenderProps } from './collapsible_panel';
-import { Processor } from '../../../../common/types';
+import type { CollapsiblePanelRenderProps } from './collapsible_panel';
+import { CollapsiblePanel } from './collapsible_panel';
+import type { Processor } from '../../../../common/types';
 
 import { getFormRow, getUseField, Field, JsonEditorField } from '../../../shared_imports';
 
-import {
-  ProcessorsEditorContextProvider,
-  OnUpdateHandler,
-  OnDoneLoadJsonHandler,
-  PipelineEditor,
-} from '../pipeline_editor';
+import type { OnUpdateHandler, OnDoneLoadJsonHandler } from '../pipeline_editor';
+import { ProcessorsEditorContextProvider, PipelineEditor } from '../pipeline_editor';
 
 interface Props {
   processors: Processor[];
@@ -46,6 +44,18 @@ const FormRow = getFormRow({ titleTag: 'h3' });
 
 const COLUMN_MAX_WIDTH = 420;
 
+const useStyles = () => {
+  const shouldHaveFixedWidth = useIsWithinBreakpoints(['l', 'xl']);
+
+  return {
+    flexItem: shouldHaveFixedWidth
+      ? css`
+          max-width: ${COLUMN_MAX_WIDTH}px;
+        `
+      : undefined,
+  };
+};
+
 export const PipelineFormFields: React.FunctionComponent<Props> = ({
   processors,
   onFailure,
@@ -57,7 +67,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
   canEditName,
   isEditing,
 }) => {
-  const shouldHaveFixedWidth = useIsWithinBreakpoints(['l', 'xl']);
+  const styles = useStyles();
 
   return (
     <>
@@ -122,7 +132,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
           </ProcessorsEditorContextProvider>
         </EuiFlexItem>
 
-        <EuiFlexItem css={shouldHaveFixedWidth ? { maxWidth: COLUMN_MAX_WIDTH } : {}}>
+        <EuiFlexItem css={styles.flexItem}>
           <CollapsiblePanel
             title={
               <EuiText size="s">

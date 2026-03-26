@@ -1,46 +1,81 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AnnotationDescriptionList Initialization with annotation. 1`] = `
-<EuiDescriptionList
-  columnWidths={
-    Array [
-      3,
-      7,
-    ]
-  }
+<dl
+  class="euiDescriptionList emotion-euiDescriptionList-column-left-s-s"
   data-test-subj="mlAnnotationDescriptionList"
-  listItems={
-    Array [
-      Object {
-        "description": "farequote",
-        "title": "Job ID",
-      },
-      Object {
-        "description": "February 9th 2016, 13:56:17",
-        "title": "Start",
-      },
-      Object {
-        "description": "February 9th 2016, 18:19:28",
-        "title": "End",
-      },
-      Object {
-        "description": "January 2nd 2019, 08:18:17",
-        "title": "Created",
-      },
-      Object {
-        "description": "<user unknown>",
-        "title": "Created by",
-      },
-      Object {
-        "description": "January 2nd 2019, 08:18:17",
-        "title": "Last modified",
-      },
-      Object {
-        "description": "<user unknown>",
-        "title": "Modified by",
-      },
-    ]
-  }
-  type="column"
-/>
+  data-type="column"
+  style="grid-template-columns: 3fr 7fr;"
+>
+  <dt
+    class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+  >
+    Job ID
+  </dt>
+  <dd
+    class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+  >
+    farequote
+  </dd>
+  <dt
+    class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+  >
+    Start
+  </dt>
+  <dd
+    class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+  >
+    February 9th 2016, 13:56:17
+  </dd>
+  <dt
+    class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+  >
+    End
+  </dt>
+  <dd
+    class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+  >
+    February 9th 2016, 18:19:28
+  </dd>
+  <dt
+    class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+  >
+    Created
+  </dt>
+  <dd
+    class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+  >
+    January 2nd 2019, 08:18:17
+  </dd>
+  <dt
+    class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+  >
+    Created by
+  </dt>
+  <dd
+    class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+  >
+    &lt;user unknown&gt;
+  </dd>
+  <dt
+    class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+  >
+    Last modified
+  </dt>
+  <dd
+    class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+  >
+    January 2nd 2019, 08:18:17
+  </dd>
+  <dt
+    class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+  >
+    Modified by
+  </dt>
+  <dd
+    class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+  >
+    &lt;user unknown&gt;
+  </dd>
+</dl>
 `;

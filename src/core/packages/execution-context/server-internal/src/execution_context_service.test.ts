@@ -7,15 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTimeout as timer } from 'timers/promises';
 import { BehaviorSubject } from 'rxjs';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import {
-  ExecutionContextService,
-  InternalExecutionContextSetup,
-} from './execution_context_service';
-
-const delay = (ms: number = 100) => new Promise((resolve) => setTimeout(resolve, ms));
+import type { InternalExecutionContextSetup } from './execution_context_service';
+import { ExecutionContextService } from './execution_context_service';
 
 describe('ExecutionContextService', () => {
   describe('setup', () => {
@@ -36,8 +33,9 @@ describe('ExecutionContextService', () => {
             name: 'name-a',
             id: 'id-a',
             description: 'description-a',
+            space: 'awesome-space',
           });
-          await delay(500);
+          await timer(500);
           return service.get();
         });
 
@@ -48,7 +46,7 @@ describe('ExecutionContextService', () => {
             id: 'id-b',
             description: 'description-b',
           });
-          await delay(100);
+          await timer(100);
           return service.get();
         });
 
@@ -63,6 +61,7 @@ describe('ExecutionContextService', () => {
             id: 'id-a',
             description: 'description-a',
             child: undefined,
+            space: 'awesome-space',
           },
 
           {
@@ -131,7 +130,7 @@ describe('ExecutionContextService', () => {
             id: 'id-a',
             description: 'description-a',
           });
-          await delay(100);
+          await timer(100);
           return disabledService.get();
         });
 
@@ -149,7 +148,7 @@ describe('ExecutionContextService', () => {
             description: 'description-a',
           },
           async () => {
-            await delay(10);
+            await timer(10);
             return service.get();
           }
         );
@@ -162,7 +161,7 @@ describe('ExecutionContextService', () => {
             description: 'description-b',
           },
           async () => {
-            await delay(50);
+            await timer(50);
             return service.get();
           }
         );
@@ -198,7 +197,7 @@ describe('ExecutionContextService', () => {
             description: 'description-a',
           },
           async () => {
-            await delay(10);
+            await timer(10);
             return service.get();
           }
         );
@@ -215,7 +214,7 @@ describe('ExecutionContextService', () => {
             description: 'description-a',
           },
           async () => {
-            await delay(50);
+            await timer(50);
             return service.get();
           }
         );
@@ -228,7 +227,7 @@ describe('ExecutionContextService', () => {
             description: 'description-b',
           },
           async () => {
-            await delay(10);
+            await timer(10);
             return service.get();
           }
         );
@@ -260,7 +259,7 @@ describe('ExecutionContextService', () => {
             description: 'description-a',
           },
           async () => {
-            await delay(10);
+            await timer(10);
             return service.withContext(
               {
                 type: 'type-b',
@@ -303,7 +302,7 @@ describe('ExecutionContextService', () => {
             description: 'description-b',
           },
           async () => {
-            await delay(10);
+            await timer(10);
             return service.get();
           }
         );
@@ -333,7 +332,7 @@ describe('ExecutionContextService', () => {
             description: 'description-a',
           },
           async () => {
-            await delay(10);
+            await timer(10);
             throw error;
           }
         );
@@ -374,7 +373,7 @@ describe('ExecutionContextService', () => {
             description: 'description-b',
           },
           async () => {
-            await delay(10);
+            await timer(10);
             return service.get();
           }
         );
@@ -470,7 +469,7 @@ describe('ExecutionContextService', () => {
             id: 'id-a',
             description: 'description-a',
           });
-          await delay(100);
+          await timer(100);
           return service.get();
         });
       }

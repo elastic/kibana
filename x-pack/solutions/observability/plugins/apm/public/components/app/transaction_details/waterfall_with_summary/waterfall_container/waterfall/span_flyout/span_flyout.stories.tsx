@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, dedot } from '@kbn/apm-synthtrace-client';
+import { apm, dedot } from '@kbn/synthtrace-client';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { StoryFn } from '@storybook/react';
 import type { ComponentProps, ComponentType } from 'react';
@@ -67,8 +67,8 @@ export default {
         http: {
           get: async (): Promise<SpanDetailsApiReturnType> => {
             return {
-              span: dedot(data.spanEvent, {}) as Span,
-              parentTransaction: dedot(data.parentTransaction, {}) as Transaction,
+              span: dedot(data.spanEvent, {}) as unknown as Span,
+              parentTransaction: dedot(data.parentTransaction, {}) as unknown as Transaction,
             };
           },
         },
@@ -94,8 +94,8 @@ export const TransactionSpan: StoryFn<Args> = () => {
       spanLinksCount={{ linkedChildren: 0, linkedParents: 0 }}
       parentTransactionId={data.spanEvent['parent.id']}
       onClose={() => {}}
-      start="fake-time"
-      end="fake-time"
+      rangeFrom="now-15m"
+      rangeTo="now"
     />
   );
 };

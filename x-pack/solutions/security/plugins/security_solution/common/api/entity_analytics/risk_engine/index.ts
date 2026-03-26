@@ -17,3 +17,4 @@ export * from './entity_calculation_route.gen';
 export * from './get_risk_engine_privileges.gen';
 export * from './engine_cleanup_route.gen';
 export * from './engine_configure_saved_object_route.gen';
+export * from './engine_schedule_now_route.gen';

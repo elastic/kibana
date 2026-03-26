@@ -19,7 +19,7 @@ import {
 
 import { TextField } from '../../../components';
 import { fieldValidators } from '../../../helpers';
-import { FormConfig } from '../../types';
+import type { FormConfig } from '../../types';
 import { UseField } from '../use_field';
 import { UseArray } from '../use_array';
 import { FormWrapper } from './form_utils';
@@ -77,7 +77,7 @@ export function Basic() {
                       {items.length > 1 && (
                         <EuiFlexItem grow={false}>
                           <EuiButtonIcon
-                            iconType="minusInCircle"
+                            iconType="minusCircle"
                             onClick={() => removeItem(id)}
                             aria-label="Remove item"
                           />
@@ -160,7 +160,7 @@ const MyFormComponent = () => {
                     {items.length > 1 && (
                       <EuiFlexItem grow={false}>
                         <EuiButtonIcon
-                          iconType="minusInCircle"
+                          iconType="minusCircle"
                           onClick={() => removeItem(id)}
                           aria-label="Remove item"
                         />

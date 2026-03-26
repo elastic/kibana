@@ -9,7 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
-import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
@@ -52,9 +52,10 @@ export const registerBulkGetRoute = (
           schema.object({
             type: schema.string(),
             id: schema.string(),
-            fields: schema.maybe(schema.arrayOf(schema.string())),
-            namespaces: schema.maybe(schema.arrayOf(schema.string())),
-          })
+            fields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+            namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+          }),
+          { maxSize: 10_000 }
         ),
       },
     },

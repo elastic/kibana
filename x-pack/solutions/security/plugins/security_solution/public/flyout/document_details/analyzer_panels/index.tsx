@@ -8,10 +8,11 @@
 import React, { useCallback } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { cellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
 import type { DocumentDetailsAnalyzerPanelKey } from '../shared/constants/panel_keys';
+import { DocumentDetailsPreviewPanelKey } from '../shared/constants/panel_keys';
 import { DetailsPanel } from '../../../resolver/view/details_panel';
 import type { NodeEventOnClick } from '../../../resolver/view/panels/node_events_of_type';
-import { DocumentDetailsPreviewPanelKey } from '../shared/constants/panel_keys';
 import { ALERT_PREVIEW_BANNER, EVENT_PREVIEW_BANNER } from '../preview/constants';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 
@@ -52,10 +53,11 @@ export const AnalyzerPanel: React.FC<AnalyzerPanelProps> = ({ resolverComponentI
 
   return (
     <FlyoutBody>
-      <div style={{ marginTop: '-15px' }}>
+      <div css={{ marginTop: '-15px' }}>
         <DetailsPanel
           resolverComponentInstanceID={resolverComponentInstanceID}
           nodeEventOnClick={openPreview}
+          renderCellActions={cellActionRenderer}
         />
       </div>
     </FlyoutBody>

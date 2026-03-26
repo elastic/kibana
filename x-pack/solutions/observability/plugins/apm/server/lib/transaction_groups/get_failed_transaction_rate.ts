@@ -6,6 +6,11 @@
  */
 import type { BoolQuery } from '@kbn/es-query';
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import {
+  calculateFailedTransactionRate,
+  getOutcomeAggregation,
+} from '@kbn/apm-data-access-plugin/server/utils';
+import { getFailedTransactionRateTimeSeries } from '../helpers/transaction_error_rate';
 import type { ApmServiceTransactionDocumentType } from '../../../common/document_type';
 import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
 import type { RollupInterval } from '../../../common/rollup';
@@ -13,11 +18,6 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import type { Coordinate } from '../../../typings/timeseries';
 import type { APMEventClient } from '../helpers/create_es_client/create_apm_event_client';
-import {
-  calculateFailedTransactionRate,
-  getFailedTransactionRateTimeSeries,
-  getOutcomeAggregation,
-} from '../helpers/transaction_error_rate';
 
 export async function getFailedTransactionRate({
   environment,

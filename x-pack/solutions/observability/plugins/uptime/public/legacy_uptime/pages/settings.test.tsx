@@ -11,21 +11,18 @@ import { render } from '../lib/helper/rtl_helpers';
 import { fireEvent, waitFor } from '@testing-library/react';
 import * as alertApi from '../state/api/alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
+import { createMockConnectorType } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 describe('settings', () => {
   describe('form', () => {
     beforeAll(() => {
       jest.spyOn(alertApi, 'fetchActionTypes').mockImplementation(async () => [
-        {
-          enabled: true,
-          enabledInConfig: true,
-          enabledInLicense: true,
+        createMockConnectorType({
           id: '.slack',
           minimumLicenseRequired: 'gold',
           name: 'Slack',
           supportedFeatureIds: ['uptime'],
-          isSystemActionType: false,
-        },
+        }),
       ]);
     });
 

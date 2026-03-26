@@ -9,10 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { useKibanaContextForPlugin } from './use_kibana';
 
 export const useSavedViewsNotifier = () => {
-  const { notifications } = useKibanaContextForPlugin();
+  const {
+    services: { notifications },
+  } = useKibanaContextForPlugin();
 
   const deleteViewFailure = (message?: string) => {
-    notifications.toasts.danger({
+    notifications.toasts.addDanger({
       toastLifeTimeMs: 3000,
       title:
         message ||
@@ -23,7 +25,7 @@ export const useSavedViewsNotifier = () => {
   };
 
   const getViewFailure = (message?: string) => {
-    notifications.toasts.danger({
+    notifications.toasts.addDanger({
       toastLifeTimeMs: 3000,
       title:
         message ||
@@ -34,7 +36,7 @@ export const useSavedViewsNotifier = () => {
   };
 
   const upsertViewFailure = (message?: string) => {
-    notifications.toasts.danger({
+    notifications.toasts.addDanger({
       toastLifeTimeMs: 3000,
       title:
         message ||

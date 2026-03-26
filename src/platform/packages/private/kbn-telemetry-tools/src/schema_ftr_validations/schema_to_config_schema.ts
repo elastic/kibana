@@ -14,16 +14,27 @@ import { get, merge } from 'lodash';
 import type { AllowedSchemaTypes } from '@kbn/usage-collection-plugin/server';
 
 /**
+ * Meta information that can be attached to the Telemetry Schema to describe it
+ */
+export interface TelemetrySchemaMeta {
+  /** The root _meta attrobute */
+  _meta?: {
+    /** The description of the collected field */
+    description?: string;
+  };
+}
+
+/**
  * Type that defines all the possible values that the Telemetry Schema accepts.
  * These types definitions are helping to identify earlier the possible missing `properties` nesting when
  * manually defining the schemas.
  */
 export type TelemetrySchemaValue =
-  | {
+  | ({
       type: AllowedSchemaTypes | 'pass_through' | string;
-    }
-  | { type: 'array'; items: TelemetrySchemaValue }
-  | TelemetrySchemaObject;
+    } & TelemetrySchemaMeta)
+  | ({ type: 'array'; items: TelemetrySchemaValue } & TelemetrySchemaMeta)
+  | (TelemetrySchemaObject & TelemetrySchemaMeta);
 
 export interface TelemetrySchemaObject {
   properties: Record<string, TelemetrySchemaValue>;
@@ -146,8 +157,11 @@ export function assertTelemetryPayload(
   try {
     ossTelemetryValidationSchema.validate(stats);
   } catch (err) {
-    // "[path.to.key]: definition for this key is missing"
-    const [, pathToKey] = err.message.match(/^\[(.*)\]\: definition for this key is missing/) ?? [];
+    // "[path.to.key]: Additional properties are not allowed ('key' was unexpected)"
+    const [, pathToKey] =
+      err.message.match(
+        /^\[(.*)\]\: Additional properties are not allowed \('[^']+' was unexpected\)/
+      ) ?? [];
     if (pathToKey) {
       err.message += `. Received \`${JSON.stringify(get(stats, pathToKey))}\``;
     }

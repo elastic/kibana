@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { ManagementSetup } from '@kbn/management-plugin/public';
-import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
-import { RemoteClustersPluginSetup } from '@kbn/remote-clusters-plugin/public';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
+import type { RemoteClustersPluginSetup } from '@kbn/remote-clusters-plugin/public';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 
 export interface PluginDependencies {
   usageCollection: UsageCollectionSetup;

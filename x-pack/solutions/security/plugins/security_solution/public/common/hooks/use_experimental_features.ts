@@ -12,6 +12,9 @@ import { getExperimentalAllowedValues } from '../../../common/experimental_featu
 
 const allowedExperimentalValues = getExperimentalAllowedValues();
 
+const useEnableExperimental = (): ExperimentalFeatures =>
+  useSelector(({ app: { enableExperimental } }: State) => enableExperimental);
+
 export const useIsExperimentalFeatureEnabled = (feature: keyof ExperimentalFeatures): boolean => {
   const enableExperimental = useEnableExperimental();
 
@@ -22,6 +25,3 @@ export const useIsExperimentalFeatureEnabled = (feature: keyof ExperimentalFeatu
   }
   return enableExperimental[feature];
 };
-
-export const useEnableExperimental = (): ExperimentalFeatures =>
-  useSelector(({ app: { enableExperimental } }: State) => enableExperimental);

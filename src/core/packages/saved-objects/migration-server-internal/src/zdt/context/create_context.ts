@@ -35,7 +35,12 @@ export const createContext = ({
     kibanaVersion,
     indexPrefix,
     types,
-    typeVirtualVersions: getVirtualVersionMap(types.map((type) => typeRegistry.getType(type)!)),
+    typeVirtualVersions: getVirtualVersionMap({
+      types: types.map((type) => typeRegistry.getType(type)!),
+      // we store this Map(type=>modelVersion) in the meta
+      // with this flag we default to 10.0.0 for types that do NOT define modelVersions
+      useModelVersionsOnly: true,
+    }),
     elasticsearchClient,
     typeRegistry,
     serializer,

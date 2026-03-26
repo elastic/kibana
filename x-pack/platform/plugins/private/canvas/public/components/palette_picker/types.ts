@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ColorPalette } from '../../../common/lib/palettes';
+import type { ColorPalette } from '../../../common/lib/palettes';
 
 export type CustomColorPalette = ColorPalette<'custom'>;
 

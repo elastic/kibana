@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { Action, FrequentCompatibilityChangeAction } from '.';
-import { UiActionsPublicSetup, UiActionsPublicStart } from './plugin';
+import type { Action, FrequentCompatibilityChangeAction } from '.';
+import type { UiActionsPublicSetup, UiActionsPublicStart } from './plugin';
 import { plugin as pluginInitializer } from '.';
 
 export type Setup = jest.Mocked<UiActionsPublicSetup>;
@@ -24,7 +24,6 @@ const createSetupContract = (): Setup => {
     detachAction: jest.fn(),
     registerAction: jest.fn(),
     registerActionAsync: jest.fn(),
-    registerTrigger: jest.fn(),
     unregisterAction: jest.fn(),
   };
   return setupContract;
@@ -43,7 +42,6 @@ const createStartContract = (): Start => {
     getAction: jest.fn(),
     hasAction: jest.fn(),
     getTrigger: jest.fn(),
-    hasTrigger: jest.fn(),
     getTriggerActions: jest.fn(async (id: string) => []),
     getTriggerCompatibleActions: jest.fn((triggerId: string, context: object) =>
       Promise.resolve([] as Array<Action<object>>)
@@ -54,7 +52,6 @@ const createStartContract = (): Start => {
     ),
     registerAction: jest.fn(),
     registerActionAsync: jest.fn(),
-    registerTrigger: jest.fn(),
   };
 
   return startContract;

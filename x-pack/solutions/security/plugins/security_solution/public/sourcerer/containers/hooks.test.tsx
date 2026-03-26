@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, waitFor, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 import { useSourcererDataView } from '.';
@@ -16,22 +16,23 @@ import type { RouteSpyState } from '../../common/utils/route/types';
 import {
   DEFAULT_DATA_VIEW_ID,
   DEFAULT_INDEX_PATTERN,
+  SECURITY_FEATURE_ID,
   SecurityPageName,
 } from '../../../common/constants';
-import { useUserInfo, initialState as userInfoState } from '../../detections/components/user_info';
+import { initialState as userInfoState, useUserInfo } from '../../detections/components/user_info';
 import {
+  createMockStore,
   mockGlobalState,
   mockSourcererState,
   TestProviders,
-  createMockStore,
 } from '../../common/mock';
 import type { SelectedDataView } from '../store/model';
-import { SourcererScopeName } from '../store/model';
 import * as source from '../../common/containers/source/use_data_view';
 import { sourcererActions } from '../store';
 import { useInitializeUrlParam, useUpdateUrlParam } from '../../common/utils/global_query_string';
 import { createSourcererDataView } from './create_sourcerer_data_view';
 import { useInitSourcerer } from './use_init_sourcerer';
+import { PageScope } from '../../data_view_manager/constants';
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
@@ -69,91 +70,93 @@ const mockCreateSourcererDataView = jest.fn(() => {
   errToReturn.name = 'AbortError';
   throw errToReturn;
 });
+const mockUseKibana = () => ({
+  services: {
+    application: {
+      capabilities: {
+        [SECURITY_FEATURE_ID]: {
+          crud: true,
+        },
+      },
+    },
+    data: {
+      dataViews: {
+        get: mockSearch.mockImplementation(
+          async (dataViewId: string, displayErrors?: boolean, refreshFields = false) =>
+            Promise.resolve({
+              id: dataViewId,
+              matchedIndices: refreshFields ? ['hello', 'world', 'refreshed'] : ['hello', 'world'],
+              fields: [
+                {
+                  name: 'bytes',
+                  type: 'number',
+                  esTypes: ['long'],
+                  aggregatable: true,
+                  searchable: true,
+                  count: 10,
+                  readFromDocValues: true,
+                  scripted: false,
+                  isMapped: true,
+                },
+                {
+                  name: 'ssl',
+                  type: 'boolean',
+                  esTypes: ['boolean'],
+                  aggregatable: true,
+                  searchable: true,
+                  count: 20,
+                  readFromDocValues: true,
+                  scripted: false,
+                  isMapped: true,
+                },
+                {
+                  name: '@timestamp',
+                  type: 'date',
+                  esTypes: ['date'],
+                  aggregatable: true,
+                  searchable: true,
+                  count: 30,
+                  readFromDocValues: true,
+                  scripted: false,
+                  isMapped: true,
+                },
+              ],
+              getIndexPattern: () => 'hello*,world*,refreshed*',
+              getRuntimeMappings: () => ({
+                myfield: {
+                  type: 'keyword',
+                },
+              }),
+              toSpec: () => ({
+                id: dataViewId,
+              }),
+            })
+        ),
+        getExistingIndices: jest.fn(() => [] as string[]),
+      },
+      indexPatterns: {
+        getTitles: jest.fn().mockImplementation(() => Promise.resolve(mockPatterns)),
+      },
+    },
+    notifications: {},
+  },
+});
 
 jest.mock('../../common/lib/kibana', () => ({
   useToasts: () => ({
     addError: mockAddError,
     addSuccess: jest.fn(),
     addWarning: mockAddWarning,
+    addInfo: jest.fn(),
     remove: jest.fn(),
   }),
-  useKibana: () => ({
-    services: {
-      application: {
-        capabilities: {
-          siemV2: {
-            crud: true,
-          },
-        },
-      },
-      data: {
-        dataViews: {
-          get: mockSearch.mockImplementation(
-            async (dataViewId: string, displayErrors?: boolean, refreshFields = false) =>
-              Promise.resolve({
-                id: dataViewId,
-                matchedIndices: refreshFields
-                  ? ['hello', 'world', 'refreshed']
-                  : ['hello', 'world'],
-                fields: [
-                  {
-                    name: 'bytes',
-                    type: 'number',
-                    esTypes: ['long'],
-                    aggregatable: true,
-                    searchable: true,
-                    count: 10,
-                    readFromDocValues: true,
-                    scripted: false,
-                    isMapped: true,
-                  },
-                  {
-                    name: 'ssl',
-                    type: 'boolean',
-                    esTypes: ['boolean'],
-                    aggregatable: true,
-                    searchable: true,
-                    count: 20,
-                    readFromDocValues: true,
-                    scripted: false,
-                    isMapped: true,
-                  },
-                  {
-                    name: '@timestamp',
-                    type: 'date',
-                    esTypes: ['date'],
-                    aggregatable: true,
-                    searchable: true,
-                    count: 30,
-                    readFromDocValues: true,
-                    scripted: false,
-                    isMapped: true,
-                  },
-                ],
-                getIndexPattern: () => 'hello*,world*,refreshed*',
-                getRuntimeMappings: () => ({
-                  myfield: {
-                    type: 'keyword',
-                  },
-                }),
-                toSpec: () => ({
-                  id: dataViewId,
-                }),
-              })
-          ),
-          getExistingIndices: jest.fn(() => [] as string[]),
-        },
-        indexPatterns: {
-          getTitles: jest.fn().mockImplementation(() => Promise.resolve(mockPatterns)),
-        },
-      },
-      notifications: {},
-    },
-  }),
+  useKibana: () => mockUseKibana(),
   useUiSetting$: jest.fn().mockImplementation(() => [mockPatterns]),
 }));
 
-describe('Sourcerer Hooks', () => {
+// WARN: skipping this test as data view picker is the new default implementation.
+// See https://github.com/elastic/security-team/issues/11959
+describe.skip('Sourcerer Hooks', () => {
   let store = createMockStore();
 
   const StoreProvider: React.FC<React.PropsWithChildren> = ({ children }) => (
@@ -250,7 +253,7 @@ describe('Sourcerer Hooks', () => {
     const selectedDataViewId = 'security-solution-default';
     (useInitializeUrlParam as jest.Mock).mockImplementation((_, onInitialize) =>
       onInitialize({
-        [SourcererScopeName.default]: {
+        [PageScope.default]: {
           id: selectedDataViewId,
           selectedPatterns,
         },
@@ -263,7 +266,7 @@ describe('Sourcerer Hooks', () => {
 
     expect(mockDispatch).toHaveBeenCalledWith(
       sourcererActions.setSelectedDataView({
-        id: SourcererScopeName.default,
+        id: PageScope.default,
         selectedDataViewId,
         selectedPatterns,
       })
@@ -282,7 +285,7 @@ describe('Sourcerer Hooks', () => {
     });
 
     expect(updateUrlParam).toHaveBeenCalledWith({
-      [SourcererScopeName.default]: {
+      [PageScope.default]: {
         id: DEFAULT_DATA_VIEW_ID,
         selectedPatterns: DEFAULT_INDEX_PATTERN,
       },
@@ -393,7 +396,7 @@ describe('Sourcerer Hooks', () => {
       signalIndexName: mockSourcererState.signalIndexName,
       isSignalIndexExists: true,
     }));
-    const { rerender } = renderHook(() => useInitSourcerer(SourcererScopeName.detections), {
+    const { rerender } = renderHook(() => useInitSourcerer(PageScope.alerts), {
       wrapper: StoreProvider,
     });
     await waitFor(() => new Promise((resolve) => resolve(null)));
@@ -401,7 +404,7 @@ describe('Sourcerer Hooks', () => {
     expect(mockDispatch.mock.calls[3][0]).toEqual({
       type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
       payload: {
-        id: 'detections',
+        id: 'alerts',
         selectedDataViewId: mockSourcererState.defaultDataView.id,
         selectedPatterns: [mockSourcererState.signalIndexName],
       },
@@ -424,8 +427,8 @@ describe('Sourcerer Hooks', () => {
         ...mockGlobalState.sourcerer,
         sourcererScopes: {
           ...mockGlobalState.sourcerer.sourcererScopes,
-          [SourcererScopeName.timeline]: {
-            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+          [PageScope.timeline]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
             selectedDataViewId: 'different-id',
           },
         },
@@ -460,7 +463,7 @@ describe('Sourcerer Hooks', () => {
         expect(mockIndexFieldsSearch).toHaveBeenCalledWith({
           dataViewId: mockSourcererState.defaultDataView.id,
           needToBeInit: false,
-          scopeId: SourcererScopeName.default,
+          scopeId: PageScope.default,
         });
       });
     });
@@ -472,8 +475,8 @@ describe('Sourcerer Hooks', () => {
           ...mockGlobalState.sourcerer,
           sourcererScopes: {
             ...mockGlobalState.sourcerer.sourcererScopes,
-            [SourcererScopeName.default]: {
-              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+            [PageScope.default]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[PageScope.default],
               selectedPatterns: [],
               missingPatterns: [],
             },
@@ -489,7 +492,7 @@ describe('Sourcerer Hooks', () => {
         expect(mockIndexFieldsSearch).toHaveBeenCalledWith({
           dataViewId: mockSourcererState.defaultDataView.id,
           needToBeInit: true,
-          scopeId: SourcererScopeName.default,
+          scopeId: PageScope.default,
         });
       });
     });
@@ -505,8 +508,8 @@ describe('Sourcerer Hooks', () => {
           ],
           sourcererScopes: {
             ...mockGlobalState.sourcerer.sourcererScopes,
-            [SourcererScopeName.timeline]: {
-              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+            [PageScope.timeline]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
               selectedDataViewId: 'something-weird',
               selectedPatterns: [],
               missingPatterns: [],
@@ -523,7 +526,7 @@ describe('Sourcerer Hooks', () => {
         expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
           dataViewId: 'something-weird',
           needToBeInit: true,
-          scopeId: SourcererScopeName.timeline,
+          scopeId: PageScope.timeline,
           skipScopeUpdate: false,
         });
       });
@@ -540,8 +543,8 @@ describe('Sourcerer Hooks', () => {
           ],
           sourcererScopes: {
             ...mockGlobalState.sourcerer.sourcererScopes,
-            [SourcererScopeName.timeline]: {
-              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+            [PageScope.timeline]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
               selectedDataViewId: 'something-weird',
               selectedPatterns: ['ohboy'],
               missingPatterns: [],
@@ -558,7 +561,7 @@ describe('Sourcerer Hooks', () => {
         expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
           dataViewId: 'something-weird',
           needToBeInit: true,
-          scopeId: SourcererScopeName.timeline,
+          scopeId: PageScope.timeline,
           skipScopeUpdate: true,
         });
       });
@@ -579,8 +582,8 @@ describe('Sourcerer Hooks', () => {
           ],
           sourcererScopes: {
             ...mockGlobalState.sourcerer.sourcererScopes,
-            [SourcererScopeName.timeline]: {
-              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+            [PageScope.timeline]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
               selectedDataViewId: 'something-weird',
               selectedPatterns: [],
               missingPatterns: [],
@@ -597,7 +600,7 @@ describe('Sourcerer Hooks', () => {
         expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
           dataViewId: 'something-weird',
           needToBeInit: false,
-          scopeId: SourcererScopeName.timeline,
+          scopeId: PageScope.timeline,
         });
       });
     });
@@ -611,8 +614,8 @@ describe('Sourcerer Hooks', () => {
           ...mockGlobalState.sourcerer,
           sourcererScopes: {
             ...mockGlobalState.sourcerer.sourcererScopes,
-            [SourcererScopeName.default]: {
-              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+            [PageScope.default]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[PageScope.default],
               selectedPatterns: [
                 '-packetbeat-*',
                 'endgame-*',
@@ -629,12 +632,9 @@ describe('Sourcerer Hooks', () => {
         },
       });
 
-      const { result, rerender } = renderHook<SelectedDataView, SourcererScopeName>(
-        useSourcererDataView,
-        {
-          wrapper: StoreProvider,
-        }
-      );
+      const { result, rerender } = renderHook<SelectedDataView, PageScope>(useSourcererDataView, {
+        wrapper: StoreProvider,
+      });
       await waitFor(() => new Promise((resolve) => resolve(null)));
       rerender();
       await waitFor(() =>
@@ -665,7 +665,7 @@ describe('Sourcerer Hooks', () => {
       await act(async () => {
         store.dispatch(
           sourcererActions.setSelectedDataView({
-            id: SourcererScopeName.default,
+            id: PageScope.default,
             selectedDataViewId: 'security-solution-default',
             selectedPatterns: testPatterns,
           })
@@ -682,15 +682,15 @@ describe('Sourcerer Hooks', () => {
 
 describe('getScopeFromPath', () => {
   it('should return default scope', async () => {
-    expect(getScopeFromPath('/')).toBe(SourcererScopeName.default);
-    expect(getScopeFromPath('/exceptions')).toBe(SourcererScopeName.default);
-    expect(getScopeFromPath('/rules')).toBe(SourcererScopeName.default);
-    expect(getScopeFromPath('/rules/create')).toBe(SourcererScopeName.default);
+    expect(getScopeFromPath('/')).toBe(PageScope.default);
+    expect(getScopeFromPath('/exceptions')).toBe(PageScope.default);
+    expect(getScopeFromPath('/rules')).toBe(PageScope.default);
+    expect(getScopeFromPath('/rules/create')).toBe(PageScope.default);
   });
 
   it('should return detections scope', async () => {
-    expect(getScopeFromPath('/alerts')).toBe(SourcererScopeName.detections);
-    expect(getScopeFromPath('/rules/id/foo')).toBe(SourcererScopeName.detections);
-    expect(getScopeFromPath('/rules/id/foo/edit')).toBe(SourcererScopeName.detections);
+    expect(getScopeFromPath('/alerts')).toBe(PageScope.alerts);
+    expect(getScopeFromPath('/rules/id/foo')).toBe(PageScope.alerts);
+    expect(getScopeFromPath('/rules/id/foo/edit')).toBe(PageScope.alerts);
   });
 });

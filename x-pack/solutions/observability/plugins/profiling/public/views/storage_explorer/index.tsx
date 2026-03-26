@@ -96,7 +96,7 @@ export function StorageExplorerView() {
     <ProfilingAppPageTemplate
       hideSearchBar
       pageTitle={i18n.translate('xpack.profiling.storageExplorer.title', {
-        defaultMessage: 'Storage Explorer',
+        defaultMessage: 'Storage explorer',
       })}
       showBetaBadge
     >

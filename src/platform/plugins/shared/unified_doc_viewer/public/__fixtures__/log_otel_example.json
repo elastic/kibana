@@ -1,0 +1,191 @@
+{
+  "_index": ".ds-logs-generic.otel-default-2025.07.01-000001",
+  "_id": "AZfxAm_cQ-QXUdk801Pf",
+  "_version": 1,
+  "_source": {
+    "@timestamp": "2025-07-09T21:05:44.149Z",
+    "attributes": {
+      "destination.address": "172.20.0.24",
+      "event.name": "proxy.access",
+      "server.address": "172.20.0.21:8080",
+      "source.address": "172.20.0.25",
+      "upstream.cluster": "frontend",
+      "upstream.host": "172.20.0.24:8080",
+      "url.full": "http://frontend-proxy:8080/api/cart?sessionId=52a54596-aa71-47cf-a1cc-8abd1a6a3378&currencyCode=USD",
+      "url.path": "/api/cart?sessionId=52a54596-aa71-47cf-a1cc-8abd1a6a3378&currencyCode=USD",
+      "url.query": "-",
+      "url.template": "-",
+      "user_agent.original": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/136.0.0.0 Safari/537.36"
+    },
+    "body": {
+      "text": "[2025-07-09T21:05:44.149Z] \"GET /api/cart?sessionId=52a54596-aa71-47cf-a1cc-8abd1a6a3378&currencyCode=USD HTTP/1.1\" 200 - via_upstream - \"-\" 0 24 6 5 \"-\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/136.0.0.0 Safari/537.36\" \"5a727eca-a59e-9c28-b809-1e7eb03665ea\" \"frontend-proxy:8080\" \"172.20.0.24:8080\" frontend 172.20.0.21:39520 172.20.0.21:8080 172.20.0.25:45974 - -\n"
+    },
+    "data_stream": {
+      "dataset": "generic.otel",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event_name": "proxy.access",
+    "observed_timestamp": "1970-01-01T00:00:00.000Z",
+    "resource": {
+      "attributes": {
+        "cluster_name": "",
+        "log_name": "otel_envoy_access_log",
+        "node_name": "",
+        "service.name": "frontend-proxy",
+        "zone_name": ""
+      }
+    },
+    "span_id": "be5615386630228b",
+    "trace_id": "bf919a3dcbc602bcf52e65118b362d49"
+  },
+  "fields": {
+    "attributes.source.address": [
+      "172.20.0.25"
+    ],
+    "upstream.cluster": [
+      "frontend"
+    ],
+    "resource.attributes.log_name": [
+      "otel_envoy_access_log"
+    ],
+    "body.text": [
+      "[2025-07-09T21:05:44.149Z] \"GET /api/cart?sessionId=52a54596-aa71-47cf-a1cc-8abd1a6a3378&currencyCode=USD HTTP/1.1\" 200 - via_upstream - \"-\" 0 24 6 5 \"-\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/136.0.0.0 Safari/537.36\" \"5a727eca-a59e-9c28-b809-1e7eb03665ea\" \"frontend-proxy:8080\" \"172.20.0.24:8080\" frontend 172.20.0.21:39520 172.20.0.21:8080 172.20.0.25:45974 - -\n"
+    ],
+    "attributes.user_agent.original": [
+      "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/136.0.0.0 Safari/537.36"
+    ],
+    "server.address": [
+      "172.20.0.21:8080"
+    ],
+    "url.query": [
+      "-"
+    ],
+    "url.template": [
+      "-"
+    ],
+    "attributes.url.full.text": [
+      "http://frontend-proxy:8080/api/cart?sessionId=52a54596-aa71-47cf-a1cc-8abd1a6a3378&currencyCode=USD"
+    ],
+    "attributes.event.name": [
+      "proxy.access"
+    ],
+    "destination.address": [
+      "172.20.0.24"
+    ],
+    "attributes.user_agent.original.text": [
+      "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/136.0.0.0 Safari/537.36"
+    ],
+    "attributes.destination.address": [
+      "172.20.0.24"
+    ],
+    "user_agent.original": [
+      "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/136.0.0.0 Safari/537.36"
+    ],
+    "observed_timestamp": [
+      "1970-01-01T00:00:00.000Z"
+    ],
+    "attributes.url.path": [
+      "/api/cart?sessionId=52a54596-aa71-47cf-a1cc-8abd1a6a3378&currencyCode=USD"
+    ],
+    "attributes.upstream.cluster": [
+      "frontend"
+    ],
+    "log_name": [
+      "otel_envoy_access_log"
+    ],
+    "span_id": [
+      "be5615386630228b"
+    ],
+    "event.name": [
+      "proxy.access"
+    ],
+    "span.id": [
+      "be5615386630228b"
+    ],
+    "data_stream.type": [
+      "logs"
+    ],
+    "attributes.url.full": [
+      "http://frontend-proxy:8080/api/cart?sessionId=52a54596-aa71-47cf-a1cc-8abd1a6a3378&currencyCode=USD"
+    ],
+    "url.path": [
+      "/api/cart?sessionId=52a54596-aa71-47cf-a1cc-8abd1a6a3378&currencyCode=USD"
+    ],
+    "upstream.host": [
+      "172.20.0.24:8080"
+    ],
+    "event_name": [
+      "proxy.access"
+    ],
+    "resource.attributes.service.name.text": [
+      "frontend-proxy"
+    ],
+    "resource.attributes.service.name": [
+      "frontend-proxy"
+    ],
+    "attributes.server.address": [
+      "172.20.0.21:8080"
+    ],
+    "attributes.url.query": [
+      "-"
+    ],
+    "zone_name": [
+      ""
+    ],
+    "resource.attributes.node_name": [
+      ""
+    ],
+    "source.address": [
+      "172.20.0.25"
+    ],
+    "attributes.url.template": [
+      "-"
+    ],
+    "trace.id": [
+      "bf919a3dcbc602bcf52e65118b362d49"
+    ],
+    "resource.attributes.cluster_name": [
+      ""
+    ],
+    "url.full": [
+      "http://frontend-proxy:8080/api/cart?sessionId=52a54596-aa71-47cf-a1cc-8abd1a6a3378&currencyCode=USD"
+    ],
+    "cluster_name": [
+      ""
+    ],
+    "trace_id": [
+      "bf919a3dcbc602bcf52e65118b362d49"
+    ],
+    "service.name": [
+      "frontend-proxy"
+    ],
+    "attributes.upstream.host": [
+      "172.20.0.24:8080"
+    ],
+    "data_stream.namespace": [
+      "default"
+    ],
+    "node_name": [
+      ""
+    ],
+    "message": [
+      "[2025-07-09T21:05:44.149Z] \"GET /api/cart?sessionId=52a54596-aa71-47cf-a1cc-8abd1a6a3378&currencyCode=USD HTTP/1.1\" 200 - via_upstream - \"-\" 0 24 6 5 \"-\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/136.0.0.0 Safari/537.36\" \"5a727eca-a59e-9c28-b809-1e7eb03665ea\" \"frontend-proxy:8080\" \"172.20.0.24:8080\" frontend 172.20.0.21:39520 172.20.0.21:8080 172.20.0.25:45974 - -\n"
+    ],
+    "attributes.event.name.text": [
+      "proxy.access"
+    ],
+    "@timestamp": [
+      "2025-07-09T21:05:44.149Z"
+    ],
+    "resource.attributes.zone_name": [
+      ""
+    ],
+    "data_stream.dataset": [
+      "generic.otel"
+    ],
+    "event.dataset": [
+      "generic.otel"
+    ]
+  }
+}

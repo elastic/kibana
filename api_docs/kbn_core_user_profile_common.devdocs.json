@@ -34,6 +34,8 @@
           "<D>"
         ],
         "path": "src/core/packages/user-profile/common/src/user_profile.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,6 +49,8 @@
               "\nUnique ID for of the user profile."
             ],
             "path": "src/core/packages/user-profile/common/src/user_profile.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -60,6 +64,8 @@
               "\nIndicates whether user profile is enabled or not."
             ],
             "path": "src/core/packages/user-profile/common/src/user_profile.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -76,6 +82,8 @@
               "UserProfileUserInfo"
             ],
             "path": "src/core/packages/user-profile/common/src/user_profile.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -92,6 +100,8 @@
               "{ [P in keyof D]?: D[P] | undefined; }"
             ],
             "path": "src/core/packages/user-profile/common/src/user_profile.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -108,6 +118,8 @@
           "\nBasic user information returned in user profile."
         ],
         "path": "src/core/packages/user-profile/common/src/user_profile.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -121,6 +133,8 @@
               "\nUsername of the user."
             ],
             "path": "src/core/packages/user-profile/common/src/user_profile.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -137,6 +151,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/user-profile/common/src/user_profile.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -153,6 +169,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/user-profile/common/src/user_profile.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -174,6 +192,8 @@
           "UserProfileUserInfo"
         ],
         "path": "src/core/packages/user-profile/common/src/user_profile.ts",
+        "lineNumber": 72,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -190,6 +210,8 @@
               "readonly string[]"
             ],
             "path": "src/core/packages/user-profile/common/src/user_profile.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -203,6 +225,8 @@
               "\nName of the Elasticsearch security realm that was used to authenticate user."
             ],
             "path": "src/core/packages/user-profile/common/src/user_profile.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -219,6 +243,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/user-profile/common/src/user_profile.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -241,6 +267,8 @@
           "<D>"
         ],
         "path": "src/core/packages/user-profile/common/src/user_profile.ts",
+        "lineNumber": 91,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -257,6 +285,8 @@
               "UserProfileUserInfoWithSecurity"
             ],
             "path": "src/core/packages/user-profile/common/src/user_profile.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -273,6 +303,8 @@
               "L"
             ],
             "path": "src/core/packages/user-profile/common/src/user_profile.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -295,6 +327,8 @@
           "{ [x: string]: unknown; }"
         ],
         "path": "src/core/packages/user-profile/common/src/user_profile.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -312,6 +346,8 @@
           "{ [x: string]: string; }"
         ],
         "path": "src/core/packages/user-profile/common/src/user_profile.ts",
+        "lineNumber": 67,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

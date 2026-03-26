@@ -26,6 +26,8 @@
           ">"
         ],
         "path": "src/platform/plugins/private/vis_types/heatmap/public/vis_type/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
               "HeatmapTypeProps"
             ],
             "path": "src/platform/plugins/private/vis_types/heatmap/public/vis_type/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -79,6 +83,8 @@
           "\"visualization:visualize:legacyHeatmapChartsLibrary\""
         ],
         "path": "src/platform/plugins/private/vis_types/heatmap/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -18,6 +18,7 @@ interface MultiSelectAutocompleteProps {
   field: FieldHook;
   fullWidth?: boolean;
   dataTestSubj?: string;
+  ariaLabel?: string;
 }
 
 const FIELD_COMBO_BOX_WIDTH = 410;
@@ -30,6 +31,7 @@ export const MultiSelectAutocompleteComponent: React.FC<MultiSelectAutocompleteP
   field,
   fullWidth = false,
   dataTestSubj,
+  ariaLabel,
 }: MultiSelectAutocompleteProps) => {
   const comboBoxRef = useRef<EuiComboBox<unknown>>();
   const fieldEuiFieldProps = useMemo(
@@ -42,8 +44,9 @@ export const MultiSelectAutocompleteComponent: React.FC<MultiSelectAutocompleteP
       ...(fullWidth ? {} : { style: { width: `${FIELD_COMBO_BOX_WIDTH}px` } }),
       isDisabled,
       ref: comboBoxRef,
+      'aria-label': ariaLabel ?? field.label,
     }),
-    [browserFields, isDisabled, fullWidth, comboBoxRef]
+    [browserFields, isDisabled, fullWidth, comboBoxRef, ariaLabel, field.label]
   );
 
   /**

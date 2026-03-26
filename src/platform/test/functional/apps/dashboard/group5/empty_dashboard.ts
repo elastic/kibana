@@ -9,14 +9,13 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardVisualizations = getService('dashboardVisualizations');
-  const dashboardExpect = getService('dashboardExpect');
   const { dashboard } = getPageObjects(['dashboard']);
 
   describe('empty dashboard', () => {
@@ -45,22 +44,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should open add panel when add button is clicked', async () => {
-      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.clickAddFromLibrary();
       const isAddPanelOpen = await dashboardAddPanel.isAddPanelOpen();
       expect(isAddPanelOpen).to.be(true);
       await testSubjects.click('euiFlyoutCloseButton');
     });
 
     it('should add new visualization from dashboard', async () => {
-      await dashboardVisualizations.createAndAddMarkdown({
-        name: 'Dashboard Test Markdown',
-        markdown: 'Markdown text',
-      });
-      await dashboardExpect.markdownWithValuesExists(['Markdown text']);
+      const originalPanelCount = await dashboard.getPanelCount();
+      await dashboardVisualizations.createAndAddVega('Dashboard Test Vega');
+      expect(await dashboard.getPanelCount()).to.eql(originalPanelCount + 1);
     });
 
     it('should open editor menu when editor button is clicked', async () => {
-      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.openAddPanelFlyout();
       await testSubjects.existOrFail('dashboardPanelSelectionFlyout');
     });
   });

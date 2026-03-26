@@ -47,7 +47,7 @@ describe('bulkCreate', () => {
         type: ConnectorTypes.none,
         fields: null,
       },
-      settings: { syncAlerts: true },
+      settings: { syncAlerts: true, extractObservables: true },
       severity: CaseSeverity.LOW,
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [{ uid: '1' }],
@@ -125,6 +125,7 @@ describe('bulkCreate', () => {
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": true,
                 "syncAlerts": true,
               },
               "severity": "low",
@@ -135,6 +136,8 @@ describe('bulkCreate', () => {
               "title": "Super Bad Security Issue",
               "totalAlerts": 0,
               "totalComment": 0,
+              "totalEvents": 0,
+              "total_observables": 0,
               "updated_at": "2019-11-25T21:54:48.952Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -170,6 +173,7 @@ describe('bulkCreate', () => {
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": true,
                 "syncAlerts": true,
               },
               "severity": "critical",
@@ -180,6 +184,8 @@ describe('bulkCreate', () => {
               "title": "Super Bad Security Issue",
               "totalAlerts": 0,
               "totalComment": 0,
+              "totalEvents": 0,
+              "total_observables": 0,
               "updated_at": "2019-11-25T21:54:48.952Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -251,12 +257,14 @@ describe('bulkCreate', () => {
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": true,
                 "syncAlerts": true,
               },
               "severity": "low",
               "status": "open",
               "tags": Array [],
               "title": "My Case",
+              "total_observables": 0,
               "updated_at": null,
               "updated_by": null,
             },
@@ -291,12 +299,14 @@ describe('bulkCreate', () => {
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": true,
                 "syncAlerts": true,
               },
               "severity": "critical",
               "status": "open",
               "tags": Array [],
               "title": "My Case",
+              "total_observables": 0,
               "updated_at": null,
               "updated_by": null,
             },
@@ -1251,7 +1261,7 @@ describe('bulkCreate', () => {
               customFields: [],
               description: 'This is a brand new case of a bad meanie defacing data',
               owner: 'securitySolution',
-              settings: { syncAlerts: true },
+              settings: { syncAlerts: true, extractObservables: true },
               severity: 'low',
               tags: ['defacement'],
               title: 'Super Bad Security Issue',
@@ -1285,7 +1295,7 @@ describe('bulkCreate', () => {
               customFields: [],
               description: 'This is a brand new case of a bad meanie defacing data',
               owner: 'securitySolution',
-              settings: { syncAlerts: true },
+              settings: { syncAlerts: true, extractObservables: true },
               severity: 'low',
               tags: ['defacement'],
               title: 'Super Bad Security Issue',
@@ -1300,6 +1310,101 @@ describe('bulkCreate', () => {
           },
         ],
       });
+    });
+  });
+
+  describe('Template usage stats', () => {
+    const clientArgs = createCasesClientMockArgs();
+    const casesClient = createCasesClientMock();
+    casesClient.configure.get = jest.fn().mockResolvedValue([]);
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('increments template usage stats when cases are created with a template', async () => {
+      const caseSOWithTemplate = {
+        ...caseSO,
+        attributes: { ...caseSO.attributes, template: { id: 'tmpl-1', version: 1 } },
+      };
+
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSOWithTemplate],
+      });
+
+      await bulkCreate({ cases: getCases() }, clientArgs, casesClient);
+
+      expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledWith(
+        'tmpl-1'
+      );
+    });
+
+    it('increments stats once per unique template ID', async () => {
+      const caseSOWithTemplate1 = {
+        ...caseSO,
+        id: 'case-1',
+        attributes: { ...caseSO.attributes, template: { id: 'tmpl-1', version: 1 } },
+      };
+      const caseSOWithTemplate2 = {
+        ...caseSO,
+        id: 'case-2',
+        attributes: { ...caseSO.attributes, template: { id: 'tmpl-1', version: 1 } },
+      };
+      const caseSOWithTemplate3 = {
+        ...caseSO,
+        id: 'case-3',
+        attributes: { ...caseSO.attributes, template: { id: 'tmpl-2', version: 1 } },
+      };
+
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSOWithTemplate1, caseSOWithTemplate2, caseSOWithTemplate3],
+      });
+
+      await bulkCreate(
+        { cases: [getCases()[0], getCases()[0], getCases()[0]] },
+        clientArgs,
+        casesClient
+      );
+
+      expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledTimes(2);
+      expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledWith(
+        'tmpl-1'
+      );
+      expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledWith(
+        'tmpl-2'
+      );
+    });
+
+    it('does not increment template usage stats when no template is provided', async () => {
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+
+      await bulkCreate({ cases: getCases() }, clientArgs, casesClient);
+
+      expect(clientArgs.services.templatesService.incrementUsageStats).not.toHaveBeenCalled();
+    });
+
+    it('does not fail case creation when template stats update fails', async () => {
+      const caseSOWithTemplate = {
+        ...caseSO,
+        attributes: { ...caseSO.attributes, template: { id: 'tmpl-1', version: 1 } },
+      };
+
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSOWithTemplate],
+      });
+
+      clientArgs.services.templatesService.incrementUsageStats.mockRejectedValueOnce(
+        new Error('stats update failed')
+      );
+
+      await expect(
+        bulkCreate({ cases: getCases() }, clientArgs, casesClient)
+      ).resolves.not.toThrow();
+      expect(clientArgs.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to update template usage stats')
+      );
     });
   });
 });

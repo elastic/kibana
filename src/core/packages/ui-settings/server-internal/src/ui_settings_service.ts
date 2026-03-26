@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { firstValueFrom, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { mapToObject } from '@kbn/std';
 
 import type { Logger } from '@kbn/logging';
@@ -22,8 +23,10 @@ import type {
   UiSettingsParams,
   UiSettingsScope,
 } from '@kbn/core-ui-settings-common';
-import { UiSettingsConfigType, uiSettingsConfig as uiConfigDefinition } from './ui_settings_config';
-import { UiSettingsClient, UiSettingsClientFactory, UiSettingsGlobalClient } from './clients';
+import type { UiSettingsConfigType } from './ui_settings_config';
+import { uiSettingsConfig as uiConfigDefinition } from './ui_settings_config';
+import type { UiSettingsClient, UiSettingsGlobalClient } from './clients';
+import { UiSettingsClientFactory } from './clients';
 import type {
   InternalUiSettingsServicePreboot,
   InternalUiSettingsServiceSetup,
@@ -32,7 +35,7 @@ import type {
 import type { InternalUiSettingsRequestHandlerContext } from './internal_types';
 import { uiSettingsType, uiSettingsGlobalType } from './saved_objects';
 import { registerRoutes, registerInternalRoutes } from './routes';
-import { getCoreSettings } from './settings';
+import { getCoreSettings, getGlobalCoreSettings } from './settings';
 import { UiSettingsDefaultsClient } from './clients/ui_settings_defaults_client';
 
 export interface SetupDeps {
@@ -57,6 +60,7 @@ export class UiSettingsService
   private readonly uiSettingsDefaults = new Map<string, UiSettingsParams>();
   private readonly uiSettingsGlobalDefaults = new Map<string, UiSettingsParams>();
   private overrides: Record<string, any> = {};
+  private globalOverrides: Record<string, any> = {};
   private allowlist: Set<string> | null = null;
 
   constructor(private readonly coreContext: CoreContext) {
@@ -69,8 +73,9 @@ export class UiSettingsService
   public async preboot(): Promise<InternalUiSettingsServicePreboot> {
     this.log.debug('Prebooting ui settings service');
 
-    const { overrides, experimental } = await firstValueFrom(this.config$);
+    const { overrides, globalOverrides, experimental } = await firstValueFrom(this.config$);
     this.overrides = overrides;
+    this.globalOverrides = globalOverrides;
 
     this.register(
       getCoreSettings({
@@ -79,6 +84,8 @@ export class UiSettingsService
         defaultTheme: experimental?.defaultTheme as ThemeName,
       })
     );
+
+    this.registerGlobal(getGlobalCoreSettings());
 
     return {
       createDefaultsClient: () =>
@@ -95,6 +102,7 @@ export class UiSettingsService
 
     const config = await firstValueFrom(this.config$);
     this.overrides = config.overrides;
+    this.globalOverrides = config.globalOverrides;
     savedObjects.registerType(uiSettingsType);
     savedObjects.registerType(uiSettingsGlobalType);
 
@@ -147,7 +155,7 @@ export class UiSettingsService
         defaults: isNamespaceScope
           ? mapToObject(this.uiSettingsDefaults)
           : mapToObject(this.uiSettingsGlobalDefaults),
-        overrides: isNamespaceScope ? this.overrides : {},
+        overrides: isNamespaceScope ? this.overrides : this.globalOverrides,
         log: this.log,
       };
       return UiSettingsClientFactory.create(options) as ClientType<T>;
@@ -246,6 +254,12 @@ export class UiSettingsService
       // overrides might contain UiSettings for a disabled plugin
       if (definition?.schema) {
         definition.schema.validate(value, {}, `ui settings overrides [${key}]`);
+      }
+    }
+    for (const [key, value] of Object.entries(this.globalOverrides)) {
+      const definition = this.uiSettingsGlobalDefaults.get(key);
+      if (definition?.schema) {
+        definition.schema.validate(value, {}, `global ui settings overrides [${key}]`);
       }
     }
   }

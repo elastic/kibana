@@ -40,8 +40,9 @@ import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { VisDataContext } from '../../contexts/vis_data_context';
 import { BUCKET_TYPES } from '../../../../common/enums';
 import type { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
-import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
-import { TimeseriesVisParams } from '../../../types';
+import type { PanelConfigProps } from './types';
+import { PANEL_CONFIG_TABS } from './types';
+import type { TimeseriesVisParams } from '../../../types';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 import { panelConfigContainerStyles } from './_panel_config';
 

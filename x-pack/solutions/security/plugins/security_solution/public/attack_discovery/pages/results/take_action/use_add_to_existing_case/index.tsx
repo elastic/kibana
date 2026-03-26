@@ -8,7 +8,7 @@
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentWithoutOwner } from '@kbn/cases-plugin/public/types';
 import { useAssistantContext } from '@kbn/elastic-assistant';
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import { getOriginalAlertIds, type Replacements } from '@kbn/elastic-assistant-common';
 import { useCallback } from 'react';
 
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -59,8 +59,9 @@ export const useAddToExistingCase = ({
         type: AttachmentType.user,
       }));
 
-      const alertAttachments = alertIds.map<CaseAttachmentWithoutOwner>((alertId) => ({
-        alertId: replacements != null ? replacements[alertId] ?? alertId : alertId,
+      const originalAlertIds = getOriginalAlertIds({ alertIds, replacements });
+      const alertAttachments = originalAlertIds.map<CaseAttachmentWithoutOwner>((alertId) => ({
+        alertId,
         index: alertsIndexPattern ?? '',
         rule: {
           id: null,

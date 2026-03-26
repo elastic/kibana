@@ -11,14 +11,17 @@ import supertest from 'supertest';
 import { kibanaPackageJson } from '@kbn/repo-info';
 import type { IRouter, RouteRegistrar } from '@kbn/core-http-server';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
-import { createConfigService, createHttpService } from '@kbn/core-http-server-mocks';
-import { HttpService, HttpServerSetup } from '@kbn/core-http-server-internal';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import { createConfigService } from '@kbn/core-http-server-mocks';
+import type { HttpService, HttpServerSetup } from '@kbn/core-http-server-internal';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { schema } from '@kbn/config-schema';
-import { IConfigServiceMock } from '@kbn/config-mocks';
-import { Logger } from '@kbn/logging';
+import type { IConfigServiceMock } from '@kbn/config-mocks';
+import type { Logger } from '@kbn/logging';
 import { loggerMock } from '@kbn/logging-mocks';
 import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
+import { createInternalHttpService } from '../utilities';
 
 const actualVersion = kibanaPackageJson.version;
 const versionHeader = 'kbn-version';
@@ -32,6 +35,7 @@ const internalProductQueryParam = 'elasticInternalOrigin';
 const setupDeps = {
   context: contextServiceMock.createSetupContract(),
   executionContext: executionContextServiceMock.createInternalSetupContract(),
+  userActivity: userActivityServiceMock.createInternalSetupContract(),
 };
 
 const testConfig: Parameters<typeof createConfigService>[0] = {
@@ -63,8 +67,11 @@ describe('core lifecycle handlers', () => {
   beforeEach(async () => {
     const configService = createConfigService(testConfig);
     logger = loggerMock.create();
-    server = createHttpService({ configService, logger });
-    await server.preboot({ context: contextServiceMock.createPrebootContract() });
+    server = createInternalHttpService({ configService, logger });
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
     const serverSetup = await server.setup(setupDeps);
     router = serverSetup.createRouter('/');
     innerServer = serverSetup.server;
@@ -270,8 +277,11 @@ describe('core lifecycle handlers', () => {
           restrictInternalApis: true,
         },
       });
-      server = createHttpService({ configService });
-      await server.preboot({ context: contextServiceMock.createPrebootContract() });
+      server = createInternalHttpService({ configService });
+      await server.preboot({
+        context: contextServiceMock.createPrebootContract(),
+        docLinks: docLinksServiceMock.createSetupContract(),
+      });
       const serverSetup = await server.setup(setupDeps);
       router = serverSetup.createRouter('/');
       innerServer = serverSetup.server;
@@ -348,9 +358,12 @@ describe('core lifecycle handlers with restrict internal routes enforced', () =>
   beforeEach(async () => {
     logger = loggerMock.create();
     const configService = createConfigService({ server: { restrictInternalApis: true } });
-    server = createHttpService({ configService, logger });
+    server = createInternalHttpService({ configService, logger });
 
-    await server.preboot({ context: contextServiceMock.createPrebootContract() });
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
     const serverSetup = await server.setup(setupDeps);
     router = serverSetup.createRouter('/');
     innerServer = serverSetup.server;
@@ -427,8 +440,11 @@ describe('core lifecycle handlers with no strict client version check', () => {
         },
       },
     });
-    server = createHttpService({ configService, logger, buildNum: 1234 });
-    await server.preboot({ context: contextServiceMock.createPrebootContract() });
+    server = createInternalHttpService({ configService, logger, buildNum: 1234 });
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
     const serverSetup = await server.setup(setupDeps);
     router = serverSetup.createRouter('/');
     router.get(

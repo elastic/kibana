@@ -29,12 +29,13 @@ export interface ModelDeploymentSettings {
       min: number;
       max: number;
       static?: number;
+      maxThreads: number;
     }
   >;
 }
 
 export interface NLPSettings {
-  modelDeployment: ModelDeploymentSettings;
+  modelDeployment?: ModelDeploymentSettings;
 }
 
 export interface ConfigSchema {

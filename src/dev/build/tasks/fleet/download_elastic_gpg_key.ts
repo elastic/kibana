@@ -9,7 +9,7 @@
 
 import Path from 'path';
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 import { downloadToDisk } from '../../lib';
 

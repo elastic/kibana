@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactNode, MouseEventHandler } from 'react';
-import PropTypes from 'prop-types';
+import type { ReactNode, MouseEventHandler } from 'react';
+import React from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -50,7 +50,7 @@ export const ArgSimpleForm: React.FunctionComponent<Props> = ({
       )}
 
       {!required && (
-        <EuiToolTip position="top" content={strings.getRemoveAriaLabel()}>
+        <EuiToolTip position="top" content={strings.getRemoveAriaLabel()} disableScreenReaderOutput>
           <EuiButtonIcon
             color="text"
             onClick={onRemove}
@@ -63,11 +63,4 @@ export const ArgSimpleForm: React.FunctionComponent<Props> = ({
       )}
     </EuiFlexGroup>
   );
-};
-
-ArgSimpleForm.propTypes = {
-  children: PropTypes.node,
-  required: PropTypes.bool,
-  valueMissing: PropTypes.bool,
-  onRemove: PropTypes.func.isRequired,
 };

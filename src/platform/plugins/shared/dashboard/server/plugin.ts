@@ -7,33 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/server';
-import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import { SharePluginStart } from '@kbn/share-plugin/server';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/server';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/server';
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
+import type {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+  RequestHandlerContext,
+} from '@kbn/core/server';
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import { registerAccessControl } from '@kbn/content-management-access-control-server';
+import { once } from 'lodash';
 import {
   initializeDashboardTelemetryTask,
   scheduleDashboardTelemetry,
   TASK_ID,
 } from './usage/dashboard_telemetry_collection_task';
 import { getUISettings } from './ui_settings';
-import { DashboardStorage } from './content_management';
 import { capabilitiesProvider } from './capabilities_provider';
-import { DashboardPluginSetup, DashboardPluginStart } from './types';
+import type { DashboardPluginSetup, DashboardPluginStart } from './types';
 import { createDashboardSavedObjectType } from './dashboard_saved_object';
-import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
-import { registerAPIRoutes } from './api';
+import { registerRoutes, read } from './api';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
+import { setKibanaServices } from './kibana_services';
+import { scanDashboards } from './scan_dashboards';
+import { registerDashboardDrilldown } from './dashboard_drilldown/register_dashboard_drilldown';
+import { getDashboardStateSchema } from './api/dashboard_state_schemas';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -42,20 +57,21 @@ interface SetupDeps {
   contentManagement: ContentManagementServerSetup;
 }
 
-interface StartDeps {
+export interface StartDeps {
+  embeddable: EmbeddableStart;
   taskManager: TaskManagerStartContract;
   usageCollection?: UsageCollectionStart;
   savedObjectsTagging?: SavedObjectTaggingStart;
   share?: SharePluginStart;
+  security?: SecurityPluginStart;
 }
 
 export class DashboardPlugin
   implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps, StartDeps>
 {
-  private contentClient?: ReturnType<ContentManagementServerSetup['register']>['contentClient'];
   private readonly logger: Logger;
 
-  constructor(private initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
@@ -69,21 +85,6 @@ export class DashboardPlugin
         },
       })
     );
-
-    void core.getStartServices().then(([_, { savedObjectsTagging }]) => {
-      const { contentClient } = plugins.contentManagement.register({
-        id: CONTENT_ID,
-        storage: new DashboardStorage({
-          throwOnResultValidationError: this.initializerContext.env.mode.dev,
-          logger: this.logger.get('storage'),
-          savedObjectsTagging,
-        }),
-        version: {
-          latest: LATEST_VERSION,
-        },
-      });
-      this.contentClient = contentClient;
-    });
 
     plugins.contentManagement.favorites.registerFavoriteType('dashboard');
 
@@ -124,17 +125,26 @@ export class DashboardPlugin
 
     core.uiSettings.register(getUISettings());
 
-    registerAPIRoutes({
+    registerRoutes(core.http);
+
+    void registerAccessControl({
       http: core.http,
-      contentManagement: plugins.contentManagement,
-      logger: this.logger,
+      isAccessControlEnabled: core.savedObjects.isAccessControlEnabled(),
+      getStartServices: () =>
+        core.getStartServices().then(([_, { security }]) => ({
+          security,
+        })),
     });
+
+    registerDashboardDrilldown(plugins.embeddable);
 
     return {};
   }
 
   public start(core: CoreStart, plugins: StartDeps) {
     this.logger.debug('dashboard: Started');
+
+    setKibanaServices(plugins, this.logger);
 
     if (plugins.share) {
       plugins.share.url.locators.create(
@@ -159,8 +169,19 @@ export class DashboardPlugin
         });
     }
 
+    // Do not call getDashboardStateSchema when registering plugin.
+    // Plugin is registered during setup and before all plugins have reigistered embeddable schemas.
+    // Instead, use once to only call getDashboardStateSchema the first time client is executed.
+    const getCachedDashboardStateSchema = once(() => {
+      return getDashboardStateSchema(false);
+    });
+
     return {
-      getContentClient: () => this.contentClient,
+      scanDashboards,
+      client: {
+        read: (requestCtx: RequestHandlerContext, id: string) =>
+          read(requestCtx, getCachedDashboardStateSchema(), id),
+      },
     };
   }
 

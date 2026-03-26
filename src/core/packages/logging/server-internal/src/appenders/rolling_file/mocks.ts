@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { Layout } from '@kbn/logging';
 import type { RollingFileContext } from './rolling_file_context';
 import type { RollingFileManager } from './rolling_file_manager';

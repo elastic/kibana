@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { putLicense } from '../../../lib/license';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../helpers';
 
 export function registerLicenseRoute({

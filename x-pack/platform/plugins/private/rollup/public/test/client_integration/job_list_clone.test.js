@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import { mockHttpRequest, pageHelpers } from './helpers';
+import React from 'react';
+import { fireEvent, screen, within } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { Provider } from 'react-redux';
+import { Route, Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 
-import { act } from 'react-dom/test-utils';
+import { mockHttpRequest, wrapComponent } from './helpers';
 import { JOB_TO_CLONE, JOB_CLONE_INDEX_PATTERN_CHECK } from './helpers/constants';
-import { getRouter } from '../../crud_app/services/routing';
-import { setHttp } from '../../crud_app/services';
+import { registerRouter, setHttp } from '../../crud_app/services';
+import { createRollupJobsStore } from '../../crud_app/store';
+import { JobList } from '../../crud_app/sections';
 import { coreMock } from '@kbn/core/public/mocks';
 
 jest.mock('../../kibana_services', () => {
@@ -21,58 +27,63 @@ jest.mock('../../kibana_services', () => {
   };
 });
 
-const { setup } = pageHelpers.jobList;
-
 describe('Smoke test cloning an existing rollup job from job list', () => {
-  let table;
-  let find;
-  let component;
-  let exists;
   let startMock;
+  let history;
 
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-    startMock = coreMock.createStart();
-    setHttp(startMock.http);
-  });
+  const renderJobList = () => {
+    const store = createRollupJobsStore();
+    history = createMemoryHistory({ initialEntries: ['/'] });
 
-  afterAll(() => {
-    jest.useRealTimers();
-  });
+    registerRouter({ history });
+
+    const WrappedJobList = wrapComponent(JobList);
+
+    renderWithI18n(
+      <Provider store={store}>
+        <Router history={history}>
+          <Route path="/" component={WrappedJobList} />
+        </Router>
+      </Provider>
+    );
+  };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    startMock = coreMock.createStart();
+    setHttp(startMock.http);
+
     mockHttpRequest(startMock.http, {
       jobs: JOB_TO_CLONE,
       indxPatternVldtResp: JOB_CLONE_INDEX_PATTERN_CHECK,
     });
+    renderJobList();
 
-    await act(async () => {
-      ({ find, exists, table, component } = setup());
-    });
-
-    component.update();
-  });
-
-  afterEach(() => {
-    startMock.http.get.mockClear();
+    // Initial load settles.
+    await screen.findByTestId('rollupDeprecationCallout');
   });
 
   it('should navigate to create view with default values set', async () => {
-    const router = getRouter();
-    const { rows } = table.getMetaData('rollupJobsListTable');
-    const button = rows[0].columns[1].reactWrapper.find('button');
+    const jobId = JOB_TO_CLONE.jobs[0].config.id;
 
-    expect(exists('rollupJobDetailFlyout')).toBe(false); // make sure it is not shown
+    expect(screen.queryByTestId('rollupJobDetailFlyout')).not.toBeInTheDocument();
 
-    button.simulate('click');
+    const rows = await screen.findAllByTestId('jobTableRow');
+    const firstRow = rows[0];
+    const idCell = within(firstRow).getByTestId('jobTableCell-id');
+    fireEvent.click(within(idCell).getByText(jobId));
 
-    expect(exists('rollupJobDetailFlyout')).toBe(true);
-    expect(exists('jobActionMenuButton')).toBe(true);
+    expect(await screen.findByTestId('rollupJobDetailFlyout')).toBeInTheDocument();
 
-    find('jobActionMenuButton').simulate('click');
+    fireEvent.click(screen.getByTestId('jobActionMenuButton'));
 
-    expect(router.history.location.pathname).not.toBe(`/create`);
-    find('jobCloneActionContextMenu').simulate('click');
-    expect(router.history.location.pathname).toBe(`/create`);
+    expect(history.location.pathname).not.toBe(`/create`);
+
+    // Context menu renders inside a popover; wait for a stable UI boundary before clicking.
+    const contextMenu = await screen.findByTestId('jobActionContextMenu');
+    fireEvent.click(within(contextMenu).getByText('Clone job'));
+
+    expect(contextMenu).toBeInTheDocument();
+    expect(history.location.pathname).toBe(`/create`);
   });
 });

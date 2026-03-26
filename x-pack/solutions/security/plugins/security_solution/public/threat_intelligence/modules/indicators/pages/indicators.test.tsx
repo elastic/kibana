@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { IndicatorsPage } from './indicators';
 import { useAggregatedIndicators } from '../hooks/use_aggregated_indicators';
 import { useIndicators } from '../hooks/use_indicators';
@@ -75,7 +75,6 @@ describe('<IndicatorsPage />', () => {
 
   it('should render SIEM Search Bar', () => {
     const { queryByTestId } = render(<IndicatorsPage />, { wrapper: TestProvidersComponent });
-    screen.debug();
     expect(queryByTestId('SiemSearchBar')).toBeInTheDocument();
   });
 

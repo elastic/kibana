@@ -29,6 +29,7 @@ import {
   isExistingModel,
   isModelDownloadItem,
   isNLPModelItem,
+  isRerankModelItem,
 } from '../../../common/types/trained_models';
 import { useEnabledFeatures, useMlServerInfo } from '../contexts/ml';
 import { getUserConfirmationProvider } from './force_stop_dialog';
@@ -156,7 +157,7 @@ export function useModelActions({
             defaultMessage: 'Training data can be viewed when data frame analytics job exists.',
           }
         ),
-        icon: 'visTable',
+        icon: 'table',
         type: 'icon',
         available: (item) => isDFAModelItem(item) && !!item.metadata?.analytics_config?.id,
         enabled: (item) => isDFAModelItem(item) && item.origin_job_exists === true,
@@ -203,6 +204,7 @@ export function useModelActions({
           await navigateToPath(path, false);
         },
       },
+      // @ts-expect-error type icon or button is correct
       {
         name: i18n.translate('xpack.ml.inference.modelsList.startModelDeploymentActionLabel', {
           defaultMessage: 'Start deployment',
@@ -215,7 +217,6 @@ export function useModelActions({
         ),
         'data-test-subj': 'mlModelsTableRowStartDeploymentAction',
         icon: 'play',
-        // @ts-ignore
         type: isMobileLayout ? 'icon' : 'button',
         isPrimary: true,
         color: 'success',
@@ -234,6 +235,8 @@ export function useModelActions({
           return canStartStopTrainedModels && !isModelBeingDeployed;
         },
         available: (item) => {
+          if (isRerankModelItem(item)) return false;
+
           return (
             isNLPModelItem(item) ||
             (canCreateTrainedModels &&
@@ -269,11 +272,12 @@ export function useModelActions({
           }
         ),
         'data-test-subj': 'mlModelsTableRowUpdateDeploymentAction',
-        icon: 'documentEdit',
+        icon: 'pencil',
         type: 'icon',
         isPrimary: false,
         available: (item) =>
           isNLPModelItem(item) &&
+          !isRerankModelItem(item) &&
           canStartStopTrainedModels &&
           !isLoading &&
           !!item.stats?.deployment_stats?.some((v) => v.state === DEPLOYMENT_STATE.STARTED),
@@ -367,6 +371,7 @@ export function useModelActions({
           return canStartStopTrainedModels;
         },
       },
+      // @ts-expect-error type icon or button is correct
       {
         name: i18n.translate('xpack.ml.inference.modelsList.testModelActionLabel', {
           defaultMessage: 'Test',
@@ -376,7 +381,6 @@ export function useModelActions({
         }),
         'data-test-subj': 'mlModelsTableRowTestAction',
         icon: 'inputOutput',
-        // @ts-ignore
         type: isMobileLayout ? 'icon' : 'button',
         isPrimary: true,
         available: (item) => isTestable(item, true),
@@ -399,7 +403,7 @@ export function useModelActions({
           defaultMessage: 'Analyze data drift',
         }),
         'data-test-subj': 'mlModelsAnalyzeDataDriftAction',
-        icon: 'visTagCloud',
+        icon: 'chartTagCloud',
         type: 'icon',
         isPrimary: true,
         available: (item) => {
@@ -426,6 +430,7 @@ export function useModelActions({
           await navigateToPath(path, false);
         },
       },
+      // @ts-expect-error type icon or button is correct
       {
         name: (model) => {
           return isModelDownloadItem(model) && model.state === MODEL_STATE.DOWNLOADING ? (
@@ -472,7 +477,6 @@ export function useModelActions({
         },
         'data-test-subj': 'mlModelsTableRowDeleteAction',
         icon: 'trash',
-        // @ts-ignore
         type: isMobileLayout ? 'icon' : 'button',
         color: 'danger',
         isPrimary: false,

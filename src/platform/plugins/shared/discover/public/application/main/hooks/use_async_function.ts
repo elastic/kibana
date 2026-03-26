@@ -10,14 +10,14 @@
 import type { AsyncState } from 'react-use/lib/useAsyncFn';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import useLatest from 'react-use/lib/useLatest';
-import type { FnReturningPromise } from 'react-use/lib/util';
+import type { FunctionReturningPromise } from 'react-use/lib/misc/types';
 
 type NarrowAsyncState<TState extends AsyncState<unknown>> = Exclude<
   TState,
   { error?: undefined; value?: undefined }
 >;
 
-export const useAsyncFunction = <T extends FnReturningPromise>(
+export const useAsyncFunction = <T extends FunctionReturningPromise>(
   asyncFunction: T,
   initialState: AsyncState<Awaited<ReturnType<T>>> = { loading: true }
 ) => {

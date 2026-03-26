@@ -20,10 +20,12 @@ import { GRAPH_PREVIEW_TEST_ID } from './test_ids';
 import { GraphPreview } from './graph_preview';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useNavigateToGraphVisualization } from '../../shared/hooks/use_navigate_to_graph_visualization';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
+import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
 
 /**
- * Graph preview under Overview, Visualizations. It shows a graph representation of entities.
+ * Graph preview under Overview, Visualizations. It shows a graph representation of entities,
+ * or an upsell message when the required license is not met.
  */
 export const GraphPreviewContainer: React.FC = () => {
   const renderingId = useGeneratedHtmlId();
@@ -33,14 +35,14 @@ export const GraphPreviewContainer: React.FC = () => {
     eventId,
     indexName,
     scopeId,
-    isPreview,
+    isRulePreview,
     isPreviewMode,
     dataFormattedForFieldBrowser,
   } = useDocumentDetailsContext();
 
   const allowFlyoutExpansion = useMemo(
-    () => !isPreviewMode && !isPreview,
-    [isPreview, isPreviewMode]
+    () => !isPreviewMode && !isRulePreview,
+    [isRulePreview, isPreviewMode]
   );
 
   const { navigateToGraphVisualization } = useNavigateToGraphVisualization({
@@ -53,13 +55,16 @@ export const GraphPreviewContainer: React.FC = () => {
   const {
     eventIds,
     timestamp = new Date().toISOString(),
-    hasGraphRepresentation,
+    shouldShowGraph,
     isAlert,
   } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
     dataFormattedForFieldBrowser,
   });
+
+  // Show upsell when event has graph data but license is insufficient (ESS only)
+  const GraphVisualizationUpsell = useUpsellingComponent('graph_visualization');
 
   // TODO: default start and end might not capture the original event
   const { isLoading, isError, data } = useFetchGraphData({
@@ -71,16 +76,21 @@ export const GraphPreviewContainer: React.FC = () => {
       },
     },
     options: {
-      enabled: hasGraphRepresentation,
+      enabled: shouldShowGraph,
       refetchOnWindowFocus: false,
     },
   });
 
   useEffect(() => {
-    if (hasGraphRepresentation) {
+    if (shouldShowGraph) {
       uiMetricService.trackUiMetric(METRIC_TYPE.LOADED, GRAPH_PREVIEW);
     }
-  }, [hasGraphRepresentation, renderingId]);
+  }, [shouldShowGraph, renderingId]);
+
+  // Nothing to render when graph is not available and there is no upsell
+  if (!shouldShowGraph && !GraphVisualizationUpsell) {
+    return null;
+  }
 
   return (
     <ExpandablePanel
@@ -111,29 +121,30 @@ export const GraphPreviewContainer: React.FC = () => {
             )}
           />
         ),
-        iconType: allowFlyoutExpansion ? 'arrowStart' : 'indexMapping',
-        ...(allowFlyoutExpansion && {
-          link: {
-            callback: navigateToGraphVisualization,
-            tooltip: (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.right.visualizations.graphPreview.graphPreviewOpenGraphTooltip"
-                defaultMessage="Expand graph"
-              />
-            ),
-          },
-        }),
+        iconType: allowFlyoutExpansion ? 'arrowStart' : undefined,
+        ...(allowFlyoutExpansion &&
+          shouldShowGraph && {
+            link: {
+              callback: navigateToGraphVisualization,
+              tooltip: (
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.right.visualizations.graphPreview.graphPreviewOpenGraphTooltip"
+                  defaultMessage="Expand graph"
+                />
+              ),
+            },
+          }),
       }}
       data-test-subj={GRAPH_PREVIEW_TEST_ID}
-      content={
-        !isLoading && !isError
-          ? {
-              paddingSize: 'none',
-            }
-          : undefined
-      }
+      content={{
+        paddingSize: 'none',
+      }}
     >
-      <GraphPreview isLoading={isLoading} isError={isError} data={data} />
+      {shouldShowGraph ? (
+        <GraphPreview isLoading={isLoading} isError={isError} data={data} />
+      ) : (
+        GraphVisualizationUpsell && <GraphVisualizationUpsell />
+      )}
     </ExpandablePanel>
   );
 };

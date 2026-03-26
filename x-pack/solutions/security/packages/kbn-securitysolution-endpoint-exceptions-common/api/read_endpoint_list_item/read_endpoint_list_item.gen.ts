@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import {
   ExceptionListItemId,
@@ -38,4 +38,4 @@ export type ReadEndpointListItemRequestQueryInput = z.input<
 >;
 
 export type ReadEndpointListItemResponse = z.infer<typeof ReadEndpointListItemResponse>;
-export const ReadEndpointListItemResponse = z.array(EndpointListItem);
+export const ReadEndpointListItemResponse = EndpointListItem;

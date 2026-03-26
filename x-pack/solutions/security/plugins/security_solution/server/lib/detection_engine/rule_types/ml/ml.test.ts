@@ -51,7 +51,9 @@ describe('ml_executor', () => {
     mlMock = mlPluginServerMock.createSetupContract();
     mlMock.jobServiceProvider.mockReturnValue({
       jobsSummary: jobsSummaryMock,
+      // @ts-expect-error upgrade typescript v5.9.3
       forceStartDatafeeds: forceStartDatafeedsMock,
+      // @ts-expect-error upgrade typescript v5.9.3
       stopDatafeeds: stopDatafeedsMock,
     });
     ruleServices = createPersistenceExecutorOptionsMock();
@@ -96,10 +98,8 @@ describe('ml_executor', () => {
       isAlertSuppressionActive: true,
       scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
     });
-    expect(ruleExecutionLogger.warn).toHaveBeenCalled();
-    expect(ruleExecutionLogger.warn.mock.calls[0][0]).toContain(
-      'Machine learning job(s) are not started'
-    );
+    expect(ruleExecutionLogger.debug).toHaveBeenCalled();
+    expect(ruleExecutionLogger.debug.mock.calls[0][0]).toContain('ML jobs are not started');
     expect(result.warningMessages.length).toEqual(1);
   });
 
@@ -120,10 +120,8 @@ describe('ml_executor', () => {
       isAlertSuppressionActive: true,
       scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
     });
-    expect(ruleExecutionLogger.warn).toHaveBeenCalled();
-    expect(ruleExecutionLogger.warn.mock.calls[0][0]).toContain(
-      'Machine learning job(s) are not started'
-    );
+    expect(ruleExecutionLogger.debug).toHaveBeenCalled();
+    expect(ruleExecutionLogger.debug.mock.calls[0][0]).toContain('ML jobs are not started');
     expect(result.warningMessages.length).toEqual(1);
   });
 

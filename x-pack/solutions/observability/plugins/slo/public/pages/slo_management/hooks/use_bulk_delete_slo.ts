@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { BulkDeleteResponse, SLODefinitionResponse } from '@kbn/slo-schema';
-import { useMutation } from '@tanstack/react-query';
+import type { BulkDeleteResponse, SLODefinitionResponse } from '@kbn/slo-schema';
+import { useMutation } from '@kbn/react-query';
 import { useKibana } from '../../../hooks/use_kibana';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useBulkOperation } from '../context/bulk_operation';

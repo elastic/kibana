@@ -19,7 +19,6 @@ assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
 
 export const STORAGE_STATE = path.join(__dirname, process.env.ARTIFACTS_FOLDER, '.auth/user.json');
 
-// eslint-disable-next-line import/no-default-export
 export default defineConfig({
   testDir: './',
   outputDir: './.playwright',
@@ -72,7 +71,7 @@ export default defineConfig({
       testMatch: '*stateful/*.spec.ts',
       use: {
         ...devices['Desktop Chrome'],
-        viewport: { width: 1920, height: 1200 },
+        viewport: { width: 1920, height: 2400 },
         storageState: STORAGE_STATE,
         launchOptions: {
           logger: {

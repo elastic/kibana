@@ -34,6 +34,7 @@ const UserCommentPropertyActionsComponent: React.FC<Props> = ({
   const { showDeletionModal, onModalOpen, onConfirm, onCancel } = useDeletePropertyAction({
     onDelete,
   });
+  const buttonRef = React.useRef<HTMLAnchorElement>(null);
 
   const { canUseEditor, actionConfig } = useLensOpenVisualization({
     comment: commentContent ?? '',
@@ -93,13 +94,18 @@ const UserCommentPropertyActionsComponent: React.FC<Props> = ({
 
   return (
     <>
-      <UserActionPropertyActions isLoading={isLoading} propertyActions={propertyActions} />
+      <UserActionPropertyActions
+        isLoading={isLoading}
+        propertyActions={propertyActions}
+        buttonRef={buttonRef}
+      />
       {showDeletionModal ? (
         <DeleteAttachmentConfirmationModal
           title={i18n.DELETE_COMMENT_TITLE}
           confirmButtonText={i18n.DELETE}
           onCancel={onCancel}
           onConfirm={onConfirm}
+          focusButtonRef={buttonRef}
         />
       ) : null}
     </>

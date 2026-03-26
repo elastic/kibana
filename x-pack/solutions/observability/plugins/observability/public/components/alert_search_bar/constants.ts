@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import {
   ALERT_STATUS_ACTIVE,
@@ -13,7 +13,7 @@ import {
   ALERT_STATUS_UNTRACKED,
   ALERT_STATUS,
 } from '@kbn/rule-data-utils';
-import { AlertStatusFilter } from '../../../common/typings';
+import type { AlertStatusFilter } from '../../../common/typings';
 import { ALERT_STATUS_ALL } from '../../../common/constants';
 
 export const EMPTY_FILTERS: Filter[] = [];

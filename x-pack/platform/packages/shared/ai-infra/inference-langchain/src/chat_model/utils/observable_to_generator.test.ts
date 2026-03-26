@@ -39,6 +39,30 @@ describe('toAsyncIterator', () => {
       }
     }).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong"`);
 
-    expect(output).toEqual([1, 2, 3]);
+    // Fail-fast behavior: queued values are discarded when error occurs
+    expect(output).toEqual([]);
+  });
+
+  it('throws an error when the source observable errors while iterator is waiting', async () => {
+    const obs$ = new Observable<number>((subscriber) => {
+      subscriber.next(1);
+      subscriber.next(2);
+
+      // Delay before erroring, so the iterator will be waiting for the next value
+      setTimeout(() => {
+        subscriber.error(new Error('delayed error'));
+      }, 10);
+    });
+
+    const output: number[] = [];
+    const iterator = toAsyncIterator(obs$);
+
+    await expect(async () => {
+      for await (const event of iterator) {
+        output.push(event);
+      }
+    }).rejects.toThrowErrorMatchingInlineSnapshot(`"delayed error"`);
+
+    expect(output).toEqual([1, 2]);
   });
 });

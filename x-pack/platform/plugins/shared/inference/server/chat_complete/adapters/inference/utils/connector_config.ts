@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { InferenceConnector } from '@kbn/inference-common';
 import {
-  InferenceConnector,
   InferenceConnectorType,
   InferenceEndpointProvider,
   elasticModelIds,

@@ -837,6 +837,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
               <Fragment>
                 <EuiSpacer size="s" />
                 <EuiCallOut
+                  announceOnMount
                   title={getExtendedRoleDeprecationNotice(role)}
                   color="warning"
                   iconType="warning"
@@ -869,7 +870,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiIconTip
-                      type="iInCircle"
+                      type="info"
                       color="subdued"
                       content={
                         <FormattedMessage

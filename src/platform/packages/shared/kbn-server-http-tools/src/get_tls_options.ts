@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ServerOptions as TLSOptions } from 'https';
-import { ISslConfig } from './types';
+import type { ServerOptions as TLSOptions } from 'https';
+import type { ISslConfig } from './types';
 
 /**
  * Converts Kibana `SslConfig` into `TLSOptions` that are accepted by the Hapi server,

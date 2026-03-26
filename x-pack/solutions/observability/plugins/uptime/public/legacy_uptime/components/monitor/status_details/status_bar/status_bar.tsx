@@ -29,7 +29,7 @@ import {
   TAGS_LABEL,
   URL_LABEL,
 } from '../../../../../../common/translations/translations';
-import { MonitorLocations } from '../../../../../../common/runtime_types/monitor';
+import type { MonitorLocations } from '../../../../../../common/runtime_types/monitor';
 import { formatAvailabilityValue } from '../availability_reporting/availability_reporting';
 import { MonitorRedirects } from './monitor_redirects';
 import { MonitorTags } from '../../../common/monitor_tags';

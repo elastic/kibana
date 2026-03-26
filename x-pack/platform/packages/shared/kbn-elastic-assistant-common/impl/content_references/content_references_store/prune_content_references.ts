@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ContentReferences, ContentReference } from '../../schemas';
+import type { ContentReferences, ContentReference } from '../../schemas';
 import { getContentReferenceId } from '../references/utils';
-import { ContentReferencesStore, ContentReferenceBlock } from '../types';
+import type { ContentReferencesStore, ContentReferenceBlock } from '../types';
 
 /**
  * Returnes a pruned copy of the ContentReferencesStore and content.

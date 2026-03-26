@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
-import {
-  DATA_DATASETS_INDEX_PATTERNS_UNIQUE,
-  DataPatternName,
-  DataTelemetryType,
-} from './constants';
+import type { DataPatternName, DataTelemetryType } from './constants';
+import { DATA_DATASETS_INDEX_PATTERNS_UNIQUE } from './constants';
 
 /**
  * Common counters for the {@link DataTelemetryDocument}s
@@ -208,16 +205,11 @@ export async function getDataTelemetry(esClient: ElasticsearchClient) {
         '*.mappings.properties.data_stream.properties.dataset.value',
       ],
     };
-    const indicesStatsParams: {
-      index: string | string[] | undefined;
-      level: 'cluster' | 'indices' | 'shards' | undefined;
-      metric: string[];
-      filter_path: string[];
-    } = {
+    const indicesStatsParams = {
       // GET <index>/_stats/docs,store?level=indices&filter_path=indices.*.total
       index,
-      level: 'indices',
-      metric: ['docs', 'store'],
+      level: 'indices' as const,
+      metric: ['docs', 'store'] as ('docs' | 'store')[],
       filter_path: ['indices.*.total'],
     };
     const [indexMappings, indexStats] = await Promise.all([
@@ -243,7 +235,7 @@ export async function getDataTelemetry(esClient: ElasticsearchClient) {
           indexMappings[name]?.mappings?.properties?.data_stream?.properties?.type?.value,
       };
 
-      const stats = (indexStats?.indices || {})[name];
+      const stats = (indexStats?.indices ?? {})[name];
       if (stats) {
         return {
           ...baseIndexInfo,

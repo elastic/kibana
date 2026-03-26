@@ -11,7 +11,8 @@ import React, { Fragment, useState, useEffect, useMemo, useCallback } from 'reac
 
 import { EuiSpacer, EuiButtonEmpty, EuiFlexItem, EuiFormErrorText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { NumberRow, NumberRowModel } from './number_row';
+import type { NumberRowModel } from './number_row';
+import { NumberRow } from './number_row';
 import {
   parse,
   EMPTY_STRING,

@@ -8,6 +8,7 @@
  */
 
 import {
+  EuiHighlight,
   EuiIcon,
   EuiLink,
   EuiScreenReaderOnly,
@@ -19,11 +20,9 @@ import React, { useCallback, useMemo } from 'react';
 
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from '@kbn/presentation-publishing';
-import {
-  CustomizePanelActionApi,
-  isApiCompatibleWithCustomizePanelAction,
-} from '../../panel_actions/customize_panel_action';
+import type { ViewMode } from '@kbn/presentation-publishing';
+import type { CustomizePanelActionApi } from '../../panel_actions/customize_panel_action';
+import { isApiCompatibleWithCustomizePanelAction } from '../../panel_actions/customize_panel_action';
 import { openCustomizePanelFlyout } from '../../panel_actions/customize_panel_action/open_customize_panel';
 
 export const PresentationPanelTitle = ({
@@ -33,6 +32,7 @@ export const PresentationPanelTitle = ({
   hideTitle,
   panelTitle,
   panelDescription,
+  titleHighlight,
 }: {
   api: unknown;
   headerId: string;
@@ -40,6 +40,7 @@ export const PresentationPanelTitle = ({
   panelTitle?: string;
   panelDescription?: string;
   viewMode?: ViewMode;
+  titleHighlight?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -55,17 +56,26 @@ export const PresentationPanelTitle = ({
 
     const titleStyles = css`
       ${euiTextTruncate()};
-      font-weight: ${euiTheme.font.weight.bold};
+      font-weight: ${euiTheme.font.weight.medium};
 
       .kbnGridPanel--active & {
         pointer-events: none; // prevent drag event from triggering onClick
       }
     `;
 
+    const titleContent =
+      titleHighlight && panelTitle ? (
+        <EuiHighlight strict={false} highlightAll search={titleHighlight}>
+          {panelTitle ?? ''}
+        </EuiHighlight>
+      ) : (
+        panelTitle
+      );
+
     if (viewMode !== 'edit' || !isApiCompatibleWithCustomizePanelAction(api)) {
       return (
         <span data-test-subj="embeddablePanelTitle" css={titleStyles}>
-          {panelTitle}
+          {titleContent}
         </span>
       );
     }
@@ -81,10 +91,10 @@ export const PresentationPanelTitle = ({
         })}
         data-test-subj="embeddablePanelTitle"
       >
-        {panelTitle}
+        {titleContent}
       </EuiLink>
     );
-  }, [onClick, hideTitle, panelTitle, viewMode, api, euiTheme]);
+  }, [onClick, hideTitle, panelTitle, viewMode, api, euiTheme, titleHighlight]);
 
   const describedPanelTitleElement = useMemo(() => {
     if (hideTitle) return null;
@@ -111,6 +121,7 @@ export const PresentationPanelTitle = ({
             column-gap: ${euiTheme.size.xs};
             align-items: center;
           `}
+          tabIndex={0}
         >
           {!hideTitle ? (
             <h2
@@ -137,7 +148,7 @@ export const PresentationPanelTitle = ({
             </h2>
           ) : null}
           <EuiIcon
-            type="iInCircle"
+            type="info"
             color="subdued"
             data-test-subj="embeddablePanelTitleDescriptionIcon"
             tabIndex={0}

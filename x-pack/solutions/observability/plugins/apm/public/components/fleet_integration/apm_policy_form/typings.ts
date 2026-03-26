@@ -38,7 +38,8 @@ export interface BasicSettingRow {
     | 'bytes'
     | 'storageSize'
     | 'duration'
-    | 'yaml';
+    | 'yaml'
+    | 'secret';
   key: string;
   rowTitle?: string;
   rowDescription?: string;

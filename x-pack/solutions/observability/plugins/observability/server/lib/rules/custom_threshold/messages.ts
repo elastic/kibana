@@ -16,8 +16,9 @@ import {
   NOT_BETWEEN_TEXT,
 } from '../../../../common/i18n';
 import { convertToBuiltInComparators, formatDurationFromTimeUnitChar } from '../../../../common';
-import { Evaluation } from './lib/evaluate_rule';
-import { formatAlertResult, FormattedEvaluation } from './lib/format_alert_result';
+import type { Evaluation } from './lib/evaluate_rule';
+import type { FormattedEvaluation } from './lib/format_alert_result';
+import { formatAlertResult } from './lib/format_alert_result';
 import { CUSTOM_EQUATION_I18N } from './translations';
 import { UNGROUPED_FACTORY_KEY } from './constants';
 

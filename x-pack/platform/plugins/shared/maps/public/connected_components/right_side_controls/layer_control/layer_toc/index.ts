@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AnyAction } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
+import type { AnyAction } from 'redux';
+import type { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { LayerTOC } from './layer_toc';
 import {
@@ -17,7 +17,7 @@ import {
 } from '../../../../actions';
 import { getLayerList } from '../../../../selectors/map_selectors';
 import { getIsReadOnly, getOpenTOCDetails } from '../../../../selectors/ui_selectors';
-import { MapStoreState } from '../../../../reducers/store';
+import type { MapStoreState } from '../../../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {
   return {

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpStart } from '@kbn/core/public';
-import { SavedQuery } from './types';
+import type { HttpStart } from '@kbn/core/public';
+import type { SavedQuery } from './types';
 import type { SavedQueryAttributes } from '../../../common';
 import { SAVED_QUERY_BASE_URL } from '../../../common/constants';
 

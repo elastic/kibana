@@ -11,12 +11,12 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { CoreStart, KibanaExecutionContext } from '@kbn/core/public';
-import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
-import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
+import type { CoreStart, KibanaExecutionContext } from '@kbn/core/public';
+import { VisualizationContainer } from '@kbn/visualizations-common';
+import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { TableVisRenderValue } from './table_vis_fn';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { TableVisRenderValue } from './table_vis_fn';
 
 const TableVisualizationComponent = lazy(() => import('./components/table_visualization'));
 

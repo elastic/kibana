@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { RANGE_SLIDER_CONTROL } from '../../../common';
+import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 
 export const DataControlEditorStrings = {
   manageControl: {
@@ -91,49 +91,34 @@ export const DataControlEditorStrings = {
         i18n.translate('controls.controlGroup.manageControl.displaySettings.titleInputTitle', {
           defaultMessage: 'Label',
         }),
-      getWidthInputTitle: () =>
-        i18n.translate('controls.controlGroup.manageControl.displaySettings.widthInputTitle', {
-          defaultMessage: 'Minimum width',
-        }),
-      getGrowSwitchTitle: () =>
-        i18n.translate('controls.controlGroup.manageControl.displaySettings.growSwitchTitle', {
-          defaultMessage: 'Expand width to fit available space',
-        }),
-    },
-    controlTypeSettings: {
-      getFormGroupTitle: (type: string) =>
-        i18n.translate('controls.controlGroup.manageControl.controlTypeSettings.formGroupTitle', {
-          defaultMessage: '{controlType} settings',
-          values: { controlType: type },
-        }),
-      getFormGroupDescription: (type: string) =>
-        i18n.translate(
-          'controls.controlGroup.manageControl.controlTypeSettings.formGroupDescription',
-          {
-            defaultMessage: 'Custom settings for your {controlType} control.',
-            values: { controlType: type.toLocaleLowerCase() },
-          }
-        ),
     },
     getSaveChangesTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.saveChangesTitle', {
         defaultMessage: 'Save',
       }),
+    getOnSaveError: () =>
+      i18n.translate('controls.controlGroup.manageControl.onSaveError', {
+        defaultMessage: 'Error saving the control',
+      }),
     getCancelTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.cancelTitle', {
         defaultMessage: 'Cancel',
       }),
-    getDeleteButtonTitle: () =>
-      i18n.translate('controls.controlGroup.management.delete', {
-        defaultMessage: 'Delete control',
+    getAdditionalSettingsTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.additionalSettingsTitle', {
+        defaultMessage: `Additional settings`,
       }),
-  },
-  management: {
-    controlWidth: {
-      getWidthSwitchLegend: () =>
-        i18n.translate('controls.controlGroup.management.layout.controlWidthLegend', {
-          defaultMessage: 'Change control size',
-        }),
-    },
+    getUseGlobalFiltersTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.useGlobalFilters', {
+        defaultMessage: 'Use global filters',
+      }),
+    getIgnoreValidationsTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.ignoreValidations.title', {
+        defaultMessage: 'Validate user selections',
+      }),
+    getIgnoreValidationsTooltip: () =>
+      i18n.translate('controls.controlGroup.manageControl.ignoreValidations.tooltip', {
+        defaultMessage: 'Highlight control selections that result in no data.',
+      }),
   },
 };

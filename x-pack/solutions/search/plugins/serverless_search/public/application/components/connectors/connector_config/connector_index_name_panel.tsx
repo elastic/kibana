@@ -6,8 +6,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
-import { Connector } from '@kbn/search-connectors';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { Connector } from '@kbn/search-connectors';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import React, { useEffect, useState } from 'react';
 import { isValidIndexName } from '../../../../utils/validate_index_name';
 import { UPDATE_LABEL } from '../../../../../common/i18n_string';

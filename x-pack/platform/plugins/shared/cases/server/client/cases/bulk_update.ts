@@ -44,6 +44,8 @@ import {
   fillMissingCustomFields,
   getClosedInfoForUpdate,
   getDurationForUpdate,
+  getInProgressInfoForUpdate,
+  getTimingMetricsForUpdate,
 } from './utils';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
@@ -187,12 +189,13 @@ async function getAlertComments({
   const idsOfCasesToSync = casesToSync.map(({ updateReq }) => updateReq.id);
 
   // getAllCaseComments will by default get all the comments, unless page or perPage fields are set
-  return caseService.getAllCaseComments({
+  return (await caseService.getAllCaseComments({
     id: idsOfCasesToSync,
     options: {
       filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, AttachmentType.alert),
     },
-  });
+    mode: 'legacy',
+  })) as SavedObjectsFindResponse<AttachmentAttributes>;
 }
 
 /**
@@ -514,7 +517,7 @@ export const bulkUpdate = async (
       alertsService,
     });
 
-    const commentsMap = await attachmentService.getter.getCaseCommentStats({
+    const commentsMap = await attachmentService.getter.getCaseAttatchmentStats({
       caseIds,
     });
 
@@ -525,11 +528,14 @@ export const bulkUpdate = async (
         return flattenCases;
       }
 
-      const { userComments: totalComment, alerts: totalAlerts } = commentsMap.get(
-        updatedCase.id
-      ) ?? {
+      const {
+        userComments: totalComment,
+        alerts: totalAlerts,
+        events: totalEvents,
+      } = commentsMap.get(updatedCase.id) ?? {
         userComments: 0,
         alerts: 0,
+        events: 0,
       };
 
       flattenCases.push(
@@ -537,6 +543,7 @@ export const bulkUpdate = async (
           savedObject: mergeOriginalSOWithUpdatedSO(originalCase, updatedCase),
           totalComment,
           totalAlerts,
+          totalEvents,
         })
       );
       return flattenCases;
@@ -655,6 +662,17 @@ const createPatchCasesPayload = ({
             status: trimmedCaseAttributes.status,
             closedAt: updatedDt,
             createdAt: originalCase.attributes.created_at,
+          }),
+          ...getInProgressInfoForUpdate({
+            status: trimmedCaseAttributes.status,
+            stateTransitionTimestamp: updatedDt,
+            inProgressAt: originalCase.attributes.in_progress_at,
+          }),
+          ...getTimingMetricsForUpdate({
+            status: trimmedCaseAttributes.status,
+            stateTransitionTimestamp: updatedDt,
+            createdAt: originalCase.attributes.created_at,
+            inProgressAt: originalCase.attributes.in_progress_at,
           }),
           updated_at: updatedDt,
           updated_by: user,

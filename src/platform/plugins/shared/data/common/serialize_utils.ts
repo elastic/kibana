@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MultiFieldKey, RangeKey, SerializedRangeKey } from './search';
-import { SerializedMultiFieldKey } from './search/aggs/buckets/multi_field_key';
-import { RawValue, SerializableField } from './serializable_field';
+import type { SerializedRangeKey } from './search';
+import { MultiFieldKey, RangeKey } from './search';
+import type { SerializedMultiFieldKey } from './search/aggs/buckets/multi_field_key';
+import type { RawValue } from './serializable_field';
+import { SerializableField } from './serializable_field';
 
 /**
  * All available serialized forms of complex/instance fields. Excludes non-complex/primitive fields.
