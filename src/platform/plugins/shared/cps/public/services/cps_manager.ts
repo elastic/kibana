@@ -10,7 +10,7 @@
 import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import type { ProjectRouting } from '@kbn/es-query';
-import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
+import { BehaviorSubject, combineLatest, map } from 'rxjs';
 import {
   type CPSAppAccessResolver,
   type ICPSManager,
