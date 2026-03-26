@@ -1,13 +1,15 @@
 ---
 navigation_title: "SharePoint Server"
+type: reference
+description: "Use the SharePoint Server connector to search and retrieve documents, list items, folders, and site pages from an on-premises SharePoint Server instance."
 applies_to:
-  stack: preview
+  stack: preview 9.4
   serverless: preview
 ---
 
 # SharePoint Server connector [sharepoint-server-action-type]
 
-The SharePoint Server connector communicates with SharePoint Server (on-premises) through its native REST API (`/_api/`).
+Use the SharePoint Server connector to search and retrieve documents, list items, folders, and site pages from an on-premises SharePoint Server instance. It communicates with SharePoint Server through its native REST API (`/_api/`).
 
 ## Create connectors in {{kib}} [define-sharepoint-server-ui]
 
