@@ -63,7 +63,8 @@ Use this skill when:
 ### 6. Document Findings
 - Record the hypothesis, data explored, queries used, and results
 - Classify findings: confirmed threat, suspicious (needs more data), or benign
-- For confirmed findings, cross-reference the alert-analysis skill for triage and the detection-engineering skill for rule creation
+- For confirmed threats, create a case using 'platform.core.cases' to track the investigation
+- Cross-reference the alert-analysis skill for triage and the detection-engineering skill for rule creation
 
 ## Query Templates
 
@@ -204,5 +205,6 @@ FROM logs-endpoint.events.process-*
     platformCoreTools.search,
     platformCoreTools.listIndices,
     platformCoreTools.getIndexMapping,
+    platformCoreTools.cases,
   ],
 });
