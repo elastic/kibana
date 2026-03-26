@@ -95,12 +95,19 @@ const EMPTY_DASHBOARD_STATE: Readonly<Omit<Required<DashboardState>, 'project_ro
 
 /**
  * Converts a DashboardAttachment to a DashboardState.
+ * Uses provided values from the attachment, falling back to defaults for missing fields.
  */
 export const attachmentToDashboardState = ({
-  data: { title, description, panels = [] },
+  data: { panels = [], filters, pinned_panels, access_control, options, ...rest },
 }: DashboardAttachment): DashboardState => ({
   ...EMPTY_DASHBOARD_STATE,
-  title,
-  description,
+  ...rest,
+  options: {
+    ...EMPTY_DASHBOARD_STATE.options,
+    ...options,
+  },
   panels: normalizeWidgets(panels),
+  ...(filters && { filters: filters as DashboardState['filters'] }),
+  ...(pinned_panels && { pinned_panels: pinned_panels as DashboardState['pinned_panels'] }),
+  ...(access_control && { access_control: access_control as DashboardState['access_control'] }),
 });

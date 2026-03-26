@@ -35,21 +35,24 @@ export const isLensAttributes = (
 export const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | undefined => {
   // TODO: update this when LENS_EMBEDDABLE_TYPE is moved to @kbn/lens-common
   if (panel.type === 'lens') {
-    const attributes = (
-      panel.config as { attributes?: LensApiSchemaType | LensAttributes } | undefined
-    )?.attributes;
+    const panelConfig = panel.config as
+      | { attributes?: LensApiSchemaType | LensAttributes }
+      | undefined;
+    const attributes = panelConfig?.attributes;
 
     if (isLensAttributes(attributes)) {
       try {
-        const visualization = new LensConfigBuilder().toAPIFormat(attributes) as unknown as Record<
-          string,
-          unknown
-        >;
+        const apiFormatAttributes = new LensConfigBuilder().toAPIFormat(
+          attributes
+        ) as unknown as Record<string, unknown>;
 
         return {
           type: 'lens',
           uid: panel.uid ?? '',
-          config: visualization,
+          config: {
+            ...panelConfig,
+            attributes: apiFormatAttributes,
+          },
           grid: panel.grid,
         };
       } catch {
@@ -94,15 +97,19 @@ export const toAttachmentWidget = (
 
 /**
  * Converts a DashboardState to DashboardAttachmentData.
+ * Preserves all dashboard state fields for full round-trip support.
  */
 export const dashboardStateToAttachment = (state: DashboardState): DashboardAttachmentData => {
   return {
-    title: state.title ?? '',
-    description: state.description ?? '',
+    ...state,
     panels: state.panels
       .map(toAttachmentWidget)
       .filter(
         (widget): widget is DashboardAttachmentData['panels'][number] => widget !== undefined
       ),
+
+    filters: state.filters as DashboardAttachmentData['filters'],
+    pinned_panels: state.pinned_panels as DashboardAttachmentData['pinned_panels'],
+    access_control: state.access_control as DashboardAttachmentData['access_control'],
   };
 };
