@@ -148,7 +148,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             body: {
               fields: {
                 '@timestamp': new Date().toISOString(),
-                'message': 'Payment request received',
+                message: 'Payment request received',
                 'log.level': 'info',
                 'service.name': serviceName,
                 'trace.id': logData.traceId,
