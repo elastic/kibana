@@ -388,7 +388,7 @@ describe('config validation', () => {
       expect(() => {
         validateConfig(connectorType, config, { configurationUtilities: configUtils });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating connector type config: error validation webhook action config: target url \\"http://token.not.in.allowlist/oauth\\" is not added to the Kibana config xpack.actions.allowedHosts"`
+        `"error validating action type config: error validation webhook action config: target url \\"http://token.not.in.allowlist/oauth\\" is not added to the Kibana config xpack.actions.allowedHosts"`
       );
     });
 
