@@ -58,7 +58,6 @@ import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer'
 import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { registerSignificantEventsInferenceFeatures } from './register_significant_events_inference_features';
 
-
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
