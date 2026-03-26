@@ -86,7 +86,7 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
 
   const createRuleButton = (
     <EuiButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={onButtonClick}
       fill

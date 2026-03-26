@@ -14,33 +14,10 @@ import { GRAPH_CALLOUT_TEST_ID, GRAPH_CALLOUT_LINK_TEST_ID } from '../test_ids';
 
 const mockLinks = {
   integrationUrl: '/app/integrations/browse/security/asset_inventory',
-  entityStoreUrl: '/app/security/entity_analytics_entity_store',
   discoverUrl: '/app/discover',
 };
 
 describe('Callout', () => {
-  describe('missingAllRequirements variant', () => {
-    it('renders with correct title', () => {
-      const config = getCalloutConfig('missingAllRequirements', mockLinks);
-      render(<Callout {...config} />);
-
-      expect(screen.getByTestId(GRAPH_CALLOUT_TEST_ID)).toBeInTheDocument();
-      expect(screen.getByText('Enrich graph experience')).toBeInTheDocument();
-    });
-
-    it('renders two links with correct text opening in new tabs', () => {
-      const config = getCalloutConfig('missingAllRequirements', mockLinks);
-      render(<Callout {...config} />);
-
-      const links = screen.getAllByTestId(GRAPH_CALLOUT_LINK_TEST_ID);
-      expect(links).toHaveLength(2);
-      expect(links[0]).toHaveTextContent('Install Cloud Asset Discovery');
-      expect(links[0]).toHaveAttribute('target', '_blank');
-      expect(links[1]).toHaveTextContent('Enable Entity Store');
-      expect(links[1]).toHaveAttribute('target', '_blank');
-    });
-  });
-
   describe('uninstalledIntegration variant', () => {
     it('renders with correct title', () => {
       const config = getCalloutConfig('uninstalledIntegration', mockLinks);
@@ -56,25 +33,6 @@ describe('Callout', () => {
 
       const link = screen.getByTestId(GRAPH_CALLOUT_LINK_TEST_ID);
       expect(link).toHaveTextContent('Install Cloud Asset Discovery');
-      expect(link).toHaveAttribute('target', '_blank');
-    });
-  });
-
-  describe('disabledEntityStore variant', () => {
-    it('renders with correct title', () => {
-      const config = getCalloutConfig('disabledEntityStore', mockLinks);
-      render(<Callout {...config} />);
-
-      expect(screen.getByTestId(GRAPH_CALLOUT_TEST_ID)).toBeInTheDocument();
-      expect(screen.getByText('Enrich graph experience')).toBeInTheDocument();
-    });
-
-    it('renders link with correct text opening in a new tab', () => {
-      const config = getCalloutConfig('disabledEntityStore', mockLinks);
-      render(<Callout {...config} />);
-
-      const link = screen.getByTestId(GRAPH_CALLOUT_LINK_TEST_ID);
-      expect(link).toHaveTextContent('Enable Entity Store');
       expect(link).toHaveAttribute('target', '_blank');
     });
   });
