@@ -18,7 +18,12 @@ import type {
   MemoryVersionRecord,
 } from '../../../lib/memory';
 import { MemoryServiceImpl } from '../../../lib/memory';
+import { QUESTIONS_ANSWERED_TRIGGER_ID } from '../../../lib/memory/triggers';
 import type { StreamsServer } from '../../../types';
+import {
+  MEMORY_UPDATE_TASK_TYPE,
+  type MemoryUpdateTaskParams,
+} from '../../../lib/tasks/task_definitions/memory_update';
 
 const getMemoryService = (server: StreamsServer, logger: Logger) => {
   return new MemoryServiceImpl({
@@ -450,15 +455,54 @@ const answerQuestionRoute = createServerRoute({
     path: z.object({ id: z.string() }),
     body: z.object({ answer: z.string() }),
   }),
-  handler: async ({ params, request, server, logger }): Promise<MemoryQuestion> => {
+  handler: async ({
+    params,
+    request,
+    server,
+    logger,
+    getScopedClients,
+  }): Promise<MemoryQuestion> => {
     const memory = getMemoryService(server, logger);
     const spaceId = DEFAULT_SPACE_ID;
 
-    return memory.answerQuestion({
+    const answered = await memory.answerQuestion({
       id: params.path.id,
       answer: params.body.answer,
       space: spaceId,
     });
+
+    // Schedule a background task to run the questions-answered trigger
+    try {
+      const { taskClient } = await getScopedClients({ request });
+
+      const taskId = `memory_update_question_${params.path.id}`;
+
+      await taskClient.schedule<MemoryUpdateTaskParams>({
+        task: {
+          type: MEMORY_UPDATE_TASK_TYPE,
+          id: taskId,
+          space: '*',
+        },
+        params: {
+          triggerId: QUESTIONS_ANSWERED_TRIGGER_ID,
+          payload: {
+            questionId: params.path.id,
+            question: answered.question,
+            answer: params.body.answer,
+            relatedEntryIds: answered.related_entries,
+          },
+        },
+        request,
+      });
+
+      logger.info(
+        `Scheduled memory update task "${taskId}" for trigger "${QUESTIONS_ANSWERED_TRIGGER_ID}"`
+      );
+    } catch (err) {
+      logger.warn(`Failed to schedule memory update task: ${(err as Error).message}`);
+    }
+
+    return answered;
   },
 });
 

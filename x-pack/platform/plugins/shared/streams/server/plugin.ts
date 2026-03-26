@@ -53,6 +53,13 @@ import { FeatureService } from './lib/streams/feature/feature_service';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { ModelSettingsConfigService } from './lib/saved_objects/significant_events/model_settings_config_service';
+import {
+  MemoryTriggerRegistry,
+  questionsAnsweredTrigger,
+  kiDeletedTrigger,
+  discoveryCompletedTrigger,
+  chatLearningTrigger,
+} from './lib/memory/triggers';
 import { TaskService } from './lib/tasks/task_service';
 import { InsightService } from './lib/significant_events/insights/client/insight_service';
 import { baseFields } from './lib/streams/component_templates/logs_layer';
@@ -377,6 +384,14 @@ export class StreamsPlugin
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
       this.server.inference = plugins.inference;
       this.server.taskManager = plugins.taskManager;
+
+      // Set up memory trigger registry with all built-in triggers
+      const memoryTriggerRegistry = new MemoryTriggerRegistry({ logger: this.logger });
+      memoryTriggerRegistry.register(questionsAnsweredTrigger);
+      memoryTriggerRegistry.register(kiDeletedTrigger);
+      memoryTriggerRegistry.register(discoveryCompletedTrigger);
+      memoryTriggerRegistry.register(chatLearningTrigger);
+      this.server.memoryTriggerRegistry = memoryTriggerRegistry;
     }
 
     this.spacesStart = plugins.spaces;

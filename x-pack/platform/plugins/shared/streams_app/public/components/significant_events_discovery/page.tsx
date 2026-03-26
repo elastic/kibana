@@ -66,7 +66,7 @@ export function SignificantEventsDiscoveryPage() {
     [streams.streamsRepositoryClient]
   );
 
-  const isMemoryEnabled = settingsFetch.value?.useMemory ?? false;
+  const isMemoryEnabled = settingsFetch.loading ? true : settingsFetch.value?.useMemory ?? false;
 
   useStreamsAppBreadcrumbs(() => {
     return [

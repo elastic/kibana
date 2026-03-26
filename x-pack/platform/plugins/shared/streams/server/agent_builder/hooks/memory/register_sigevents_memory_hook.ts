@@ -11,7 +11,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { AfterToolCallHookContext } from '@kbn/agent-builder-server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server/types';
 import type { RegisterMemoryHooksDeps } from './types';
-import { sigeventsSynthesisPrompt } from './sigevents_synthesis_prompt';
+import { sigeventsSynthesisPrompt, parseSynthesisResponse } from './sigevents_synthesis_prompt';
 
 /**
  * Registers a non-blocking afterToolCall hook that synthesizes knowledge indicators
@@ -54,18 +54,21 @@ export const registerSigeventsMemoryHook = (
               return;
             }
 
-            for (const { streamName, indicators } of streamGroups) {
-              const memoryPath = `architecture/${streamName}/overview`;
+            const allEntries = await memory.listAll({ space: spaceId });
 
-              const existing = await memory.getByPath({
-                path: memoryPath,
-                space: spaceId,
-              });
+            for (const { streamName, indicators: streamIndicators } of streamGroups) {
+              const existingEntries = allEntries
+                .filter(
+                  (e) =>
+                    e.path.startsWith(`architecture/${streamName}/`) ||
+                    e.path.startsWith(`operations/${streamName}/`)
+                )
+                .map((e) => ({ path: e.path, title: e.title, content: e.content }));
 
               const prompt = sigeventsSynthesisPrompt({
                 streamName,
-                indicators: JSON.stringify(indicators, null, 2),
-                existingMemory: existing?.content,
+                indicators: JSON.stringify(streamIndicators, null, 2),
+                existingEntries: existingEntries.length > 0 ? existingEntries : undefined,
               });
 
               const { chatModel } = await modelProvider.getDefaultModel();
@@ -76,33 +79,68 @@ export const registerSigeventsMemoryHook = (
                   ? response.content
                   : JSON.stringify(response.content);
 
-              if (!synthesized || synthesized.length < 50) {
+              if (!synthesized || synthesized.length < 20) {
                 logger.debug(`Skipping empty synthesis for stream ${streamName}`);
+                continue;
+              }
+
+              const pages = parseSynthesisResponse(synthesized);
+              if (pages.length === 0) {
+                logger.debug(`No valid wiki pages parsed for stream ${streamName}`);
                 continue;
               }
 
               const user = `agent:${context.agentId ?? 'system'}`;
 
-              if (existing) {
-                await memory.update({
-                  id: existing.id,
-                  content: synthesized,
+              for (const page of pages) {
+                const existing = await memory.getByPath({
+                  path: page.path,
                   space: spaceId,
-                  user,
-                  changeSummary: `Updated architecture overview from knowledge indicators`,
                 });
-              } else {
-                await memory.create({
-                  path: memoryPath,
-                  title: `${streamName} - Architecture Overview`,
-                  content: synthesized,
-                  tags: ['architecture', 'auto-generated', streamName],
-                  space: spaceId,
-                  user,
-                });
+
+                if (existing) {
+                  await memory.update({
+                    id: existing.id,
+                    content: page.content,
+                    title: page.title,
+                    space: spaceId,
+                    user,
+                    changeSummary: 'Updated from knowledge indicators',
+                  });
+                } else {
+                  await memory.create({
+                    path: page.path,
+                    title: page.title,
+                    content: page.content,
+                    tags: [...page.tags, 'auto-generated'],
+                    space: spaceId,
+                    user,
+                  });
+                }
               }
 
-              logger.debug(`Synthesized memory for stream: ${streamName}`);
+              logger.debug(`Synthesized ${pages.length} wiki pages for stream: ${streamName}`);
+            }
+
+            // Schedule question generation to review the updated memory
+            if (deps.scheduleMemoryTask) {
+              try {
+                await deps.scheduleMemoryTask(
+                  'discovery-completed',
+                  {
+                    insights: streamGroups.flatMap((g) => g.indicators),
+                    source: 'ki-exploration-hook',
+                  },
+                  context.toolHandlerContext.request
+                );
+                logger.debug('Scheduled memory update task for question generation');
+              } catch (scheduleError) {
+                logger.debug(
+                  `Failed to schedule memory update task (non-fatal): ${
+                    (scheduleError as Error).message
+                  }`
+                );
+              }
             }
           } catch (error) {
             logger.warn(

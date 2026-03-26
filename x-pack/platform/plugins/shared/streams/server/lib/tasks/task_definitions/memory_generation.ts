@@ -6,10 +6,12 @@
  */
 
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
-import { MessageRole } from '@kbn/inference-common';
+import { MessageRole, createPrompt } from '@kbn/inference-common';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { Insight } from '@kbn/streams-schema';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
+import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
+import { z } from '@kbn/zod/v4';
 import type { TaskContext } from '.';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskParams } from '../types';
@@ -17,7 +19,10 @@ import { getErrorMessage } from '../../streams/errors/parse_error';
 import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
 import type { MemoryQuestionCategory } from '../../memory';
 import { MemoryServiceImpl } from '../../memory';
-import { sigeventsSynthesisPrompt } from '../../../agent_builder/hooks/memory/sigevents_synthesis_prompt';
+import {
+  sigeventsSynthesisPrompt,
+  parseSynthesisResponse,
+} from '../../../agent_builder/hooks/memory/sigevents_synthesis_prompt';
 
 export interface MemoryGenerationTaskParams {
   insights: Insight[];
@@ -78,20 +83,28 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
 
                 for (const { streamName, streamInsights } of streamGroups) {
-                  const memoryPath = `architecture/${streamName}/overview`;
                   const spaceId = 'default';
 
-                  const existing = await memory.getByPath({
-                    path: memoryPath,
-                    space: spaceId,
-                  });
+                  // Gather existing entries under this stream's namespace
+                  const allEntries = await memory.listAll({ space: spaceId });
+                  const existingEntries = allEntries
+                    .filter(
+                      (e) =>
+                        e.path.startsWith(`architecture/${streamName}/`) ||
+                        e.path.startsWith(`operations/${streamName}/`)
+                    )
+                    .map((e) => ({
+                      path: e.path,
+                      title: e.title,
+                      content: e.content,
+                    }));
 
                   const indicators = JSON.stringify(streamInsights, null, 2);
 
                   const prompt = sigeventsSynthesisPrompt({
                     streamName,
                     indicators,
-                    existingMemory: existing?.content,
+                    existingEntries: existingEntries.length > 0 ? existingEntries : undefined,
                   });
 
                   const response = await boundInferenceClient.chatComplete({
@@ -100,33 +113,51 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
 
                   const synthesized = response.content;
 
-                  if (!synthesized || synthesized.length < 50) {
+                  if (!synthesized || synthesized.length < 20) {
                     taskLogger.debug(`Skipping empty synthesis for stream ${streamName}`);
+                    continue;
+                  }
+
+                  const pages = parseSynthesisResponse(synthesized);
+                  if (pages.length === 0) {
+                    taskLogger.debug(`No valid wiki pages parsed for stream ${streamName}`);
                     continue;
                   }
 
                   const user = 'agent:memory_generation';
 
-                  if (existing) {
-                    await memory.update({
-                      id: existing.id,
-                      content: synthesized,
+                  for (const page of pages) {
+                    const existing = await memory.getByPath({
+                      path: page.path,
                       space: spaceId,
-                      user,
-                      changeSummary: 'Updated architecture overview from discovery insights',
                     });
-                  } else {
-                    await memory.create({
-                      path: memoryPath,
-                      title: `${streamName} - Architecture Overview`,
-                      content: synthesized,
-                      tags: ['architecture', 'auto-generated', streamName],
-                      space: spaceId,
-                      user,
-                    });
+
+                    if (existing) {
+                      await memory.update({
+                        id: existing.id,
+                        content: page.content,
+                        title: page.title,
+                        space: spaceId,
+                        user,
+                        changeSummary: 'Updated from discovery insights',
+                      });
+                    } else {
+                      await memory.create({
+                        path: page.path,
+                        title: page.title,
+                        content: page.content,
+                        tags: [...page.tags, 'auto-generated'],
+                        space: spaceId,
+                        user,
+                      });
+                    }
+
+                    taskLogger.debug(`Wrote wiki page: ${page.path}`);
                   }
 
-                  taskLogger.debug(`Synthesized memory for stream: ${streamName}`);
+                  taskLogger.info(
+                    `Synthesized ${pages.length} wiki pages for stream: ${streamName}`
+                  );
                 }
 
                 // Second pass: generate open questions about memory quality and gaps
@@ -136,6 +167,7 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
                     inferenceClient: boundInferenceClient,
                     spaceId: 'default',
                     logger: taskLogger,
+                    insights,
                   });
                 } catch (questionError) {
                   taskLogger.warn(
@@ -188,57 +220,199 @@ interface GenerateQuestionsParams {
   inferenceClient: BoundInferenceClient;
   spaceId: string;
   logger: TaskContext['logger'];
+  insights: Insight[];
 }
 
-const QUESTION_GENERATION_PROMPT = `You are a knowledge base quality analyst. Review the following memory entries and identify issues.
+const questionGenerationPrompt = createPrompt({
+  name: 'memory_question_generation',
+  input: z.object({
+    entry_index: z.string(),
+    trigger_context: z.string(),
+    existing_questions: z.string(),
+  }),
+})
+  .version({
+    system: {
+      mustache: {
+        template: [
+          'You are a knowledge base quality analyst for an observability platform.',
+          'Your job is to review memory entries and identify genuine issues that need human input.',
+          '',
+          'Use the `read_entry` tool to read the full content of individual entries.',
+          'You MUST read at least a few entries before submitting questions — do not guess from titles alone.',
+          '',
+          'Look for:',
+          '- **quality** issues: overlapping/contradictory entries, confusing structure, entries that should be merged',
+          '- **gap** issues: missing knowledge, incomplete entries, references to unknown concepts or services',
+          '',
+          'IMPORTANT: Do NOT submit questions that duplicate or overlap with existing open questions (listed below).',
+          '',
+          'When done, call `submit_questions` with all genuine NEW issues found.',
+          'If everything looks good, call `submit_questions` with an empty array.',
+        ].join('\n'),
+      },
+    },
+    template: {
+      mustache: {
+        template: [
+          '## Memory entry index',
+          '{{entry_index}}',
+          '',
+          '## Trigger context',
+          '{{trigger_context}}',
+          '',
+          '## Existing open questions (do NOT duplicate these)',
+          '{{existing_questions}}',
+          '',
+          'Read entries that look relevant, cross-reference them, and identify genuine quality or gap issues.',
+        ].join('\n'),
+      },
+    },
+    tools: {
+      read_entry: {
+        description:
+          'Read the full content of a memory entry by its ID. Use this to inspect entries before flagging issues.',
+        schema: {
+          type: 'object' as const,
+          properties: {
+            entry_id: {
+              type: 'string' as const,
+              description: 'The ID of the memory entry to read',
+            },
+          },
+          required: ['entry_id'] as const,
+        },
+      },
+      submit_questions: {
+        description:
+          'Submit the list of identified quality or gap questions. Call this once when done analyzing.',
+        schema: {
+          type: 'object' as const,
+          properties: {
+            questions: {
+              type: 'array' as const,
+              items: {
+                type: 'object' as const,
+                properties: {
+                  question: {
+                    type: 'string' as const,
+                    description: 'A clear question for the user about the issue',
+                  },
+                  category: {
+                    type: 'string' as const,
+                    enum: ['quality', 'gap'],
+                    description: 'Either "quality" or "gap"',
+                  },
+                  related_entry_ids: {
+                    type: 'array' as const,
+                    items: { type: 'string' as const },
+                    description: 'Array of entry IDs involved in this issue',
+                  },
+                },
+                required: ['question', 'category', 'related_entry_ids'] as const,
+              },
+            },
+          },
+          required: ['questions'] as const,
+        },
+      },
+    },
+  })
+  .get();
 
-For each issue found, output a JSON object on its own line with these fields:
-- "question": A clear question for the user about the issue
-- "category": Either "quality" (overlapping entries, contradictions, confusing structure) or "gap" (missing knowledge, incomplete entries, references to unknown concepts)
-- "related_entry_ids": Array of entry IDs involved
-
-Only flag genuine issues. If everything looks good, output nothing.
-
-## Memory entries
-`;
+interface SubmittedQuestion {
+  question: string;
+  category: MemoryQuestionCategory;
+  related_entry_ids: string[];
+}
 
 const generateQuestions = async ({
   memory,
   inferenceClient,
   spaceId,
   logger,
+  insights,
 }: GenerateQuestionsParams) => {
   const entries = await memory.listAll({ space: spaceId });
   if (entries.length < 2) {
-    // Not enough entries to find quality issues
     return;
   }
 
-  const entrySummaries = entries
-    .map(
-      (e) =>
-        `[${e.id}] ${e.path} — "${e.title}" (${e.content.length} chars, tags: ${e.tags.join(
-          ', '
-        )}):\n${e.content.substring(0, 500)}`
-    )
-    .join('\n\n---\n\n');
+  const entryIndex = entries
+    .map((e) => `- [${e.id}] ${e.path} — "${e.title}" (tags: ${e.tags.join(', ')})`)
+    .join('\n');
 
-  const response = await inferenceClient.chatComplete({
-    messages: [{ role: MessageRole.User, content: QUESTION_GENERATION_PROMPT + entrySummaries }],
+  const triggerContext =
+    insights.length > 0
+      ? `This review was triggered after discovery found ${insights.length} insight(s):\n${insights
+          .map((i) => `- ${i.title ?? i.description ?? 'Untitled insight'}`)
+          .join('\n')}`
+      : 'This review was triggered after memory synthesis.';
+
+  const existingQuestions = await memory.getOpenQuestions({ space: spaceId, size: 50 });
+  const existingQuestionsText =
+    existingQuestions.length > 0
+      ? existingQuestions.map((q) => `- [${q.category}] ${q.question}`).join('\n')
+      : 'None';
+
+  const entryMap = new Map(entries.map((e) => [e.id, e]));
+
+  let submittedQuestions: SubmittedQuestion[] = [];
+
+  await executeAsReasoningAgent({
+    inferenceClient,
+    prompt: questionGenerationPrompt,
+    input: {
+      entry_index: entryIndex,
+      trigger_context: triggerContext,
+      existing_questions: existingQuestionsText,
+    },
+    maxSteps: 8,
+    finalToolChoice: { function: 'submit_questions' },
+    toolCallbacks: {
+      read_entry: async (toolCall) => {
+        const { entry_id: entryId } = toolCall.function.arguments;
+        const entry = entryMap.get(entryId);
+        if (!entry) {
+          return {
+            response: { error: `Entry ${entryId} not found` },
+          };
+        }
+        return {
+          response: {
+            id: entry.id,
+            path: entry.path,
+            title: entry.title,
+            tags: entry.tags,
+            content: entry.content,
+          },
+        };
+      },
+      submit_questions: async (toolCall) => {
+        const { questions } = toolCall.function.arguments;
+        submittedQuestions = (questions ?? [])
+          .filter(
+            (q) =>
+              typeof q.question === 'string' &&
+              (q.category === 'quality' || q.category === 'gap') &&
+              Array.isArray(q.related_entry_ids)
+          )
+          .map((q) => ({
+            question: q.question!,
+            category: q.category as MemoryQuestionCategory,
+            related_entry_ids: q.related_entry_ids!,
+          }));
+        return {
+          response: { accepted: submittedQuestions.length },
+        };
+      },
+    },
   });
 
-  const responseText = response.content;
-  if (!responseText || responseText.trim().length < 10) {
-    logger.debug('No quality issues found in memory');
-    return;
-  }
+  logger.debug(`Agent submitted ${submittedQuestions.length} quality/gap questions`);
 
-  const questions = parseQuestions(responseText);
-  logger.debug(`Found ${questions.length} quality/gap questions in memory`);
-
-  for (const q of questions) {
-    // Validate that referenced entry IDs actually exist
-    const validIds = q.related_entry_ids.filter((id) => entries.some((e) => e.id === id));
+  for (const q of submittedQuestions) {
+    const validIds = q.related_entry_ids.filter((id) => entryMap.has(id));
 
     await memory.createQuestion({
       question: q.question,
@@ -250,52 +424,6 @@ const generateQuestions = async ({
     });
   }
 };
-
-interface ParsedQuestion {
-  question: string;
-  category: MemoryQuestionCategory;
-  related_entry_ids: string[];
-}
-
-const parseQuestions = (text: string): ParsedQuestion[] => {
-  const results: ParsedQuestion[] = [];
-
-  // Try parsing as JSON array first
-  try {
-    const jsonMatch = text.match(/\[[\s\S]*\]/);
-    if (jsonMatch) {
-      const parsed = JSON.parse(jsonMatch[0]);
-      if (Array.isArray(parsed)) {
-        return parsed.filter(isValidQuestion);
-      }
-    }
-  } catch {
-    // Fall through to line-by-line parsing
-  }
-
-  // Try parsing each line as a JSON object
-  for (const line of text.split('\n')) {
-    const trimmed = line.trim();
-    if (!trimmed.startsWith('{')) continue;
-    try {
-      const obj = JSON.parse(trimmed);
-      if (isValidQuestion(obj)) {
-        results.push(obj);
-      }
-    } catch {
-      // skip unparseable lines
-    }
-  }
-
-  return results;
-};
-
-const isValidQuestion = (obj: unknown): obj is ParsedQuestion =>
-  typeof obj === 'object' &&
-  obj !== null &&
-  typeof (obj as ParsedQuestion).question === 'string' &&
-  ((obj as ParsedQuestion).category === 'quality' || (obj as ParsedQuestion).category === 'gap') &&
-  Array.isArray((obj as ParsedQuestion).related_entry_ids);
 
 const groupInsightsByStream = (insights: Insight[]): StreamInsightsGroup[] => {
   const byStream = new Map<string, Insight[]>();

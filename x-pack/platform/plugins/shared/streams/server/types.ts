@@ -32,6 +32,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { ConsoleStart as ConsoleServerStart } from '@kbn/console-plugin/server';
 import type { StreamsConfig } from '../common/config';
+import type { MemoryTriggerRegistry } from './lib/memory/triggers';
 
 export interface StreamsServer {
   core: CoreStart;
@@ -43,6 +44,7 @@ export interface StreamsServer {
   inference: InferenceServerStart;
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
+  memoryTriggerRegistry?: MemoryTriggerRegistry;
 }
 
 export interface ElasticsearchAccessorOptions {

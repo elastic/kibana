@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { sigeventsSynthesisPrompt } from '../../../agent_builder/hooks/memory/sigevents_synthesis_prompt';
+import {
+  sigeventsSynthesisPrompt,
+  parseSynthesisResponse,
+} from '../../../agent_builder/hooks/memory/sigevents_synthesis_prompt';
 import type { MemoryUpdateTrigger } from './types';
 
 export const DISCOVERY_COMPLETED_TRIGGER_ID = 'discovery-completed';
@@ -53,50 +56,67 @@ export const discoveryCompletedTrigger: MemoryUpdateTrigger = {
       `Processing ${insights.length} insights across ${streamGroups.length} streams for memory synthesis`
     );
 
+    const allEntries = await memory.listAll({ space: spaceId });
+
     for (const { streamName, streamInsights } of streamGroups) {
       try {
-        const memoryPath = `architecture/${streamName}/overview`;
-
-        const existing = await memory.getByPath({
-          path: memoryPath,
-          space: spaceId,
-        });
+        const existingEntries = allEntries
+          .filter(
+            (e) =>
+              e.path.startsWith(`architecture/${streamName}/`) ||
+              e.path.startsWith(`operations/${streamName}/`)
+          )
+          .map((e) => ({ path: e.path, title: e.title, content: e.content }));
 
         const prompt = sigeventsSynthesisPrompt({
           streamName,
           indicators: JSON.stringify(streamInsights, null, 2),
-          existingMemory: existing?.content,
+          existingEntries: existingEntries.length > 0 ? existingEntries : undefined,
         });
 
         const synthesized = await output(prompt);
 
-        if (!synthesized || synthesized.length < 50) {
+        if (!synthesized || synthesized.length < 20) {
           logger.debug(`Skipping empty synthesis for stream ${streamName}`);
+          continue;
+        }
+
+        const pages = parseSynthesisResponse(synthesized);
+        if (pages.length === 0) {
+          logger.debug(`No valid wiki pages parsed for stream ${streamName}`);
           continue;
         }
 
         const user = 'system:discovery-completed-trigger';
 
-        if (existing) {
-          await memory.update({
-            id: existing.id,
-            content: synthesized,
+        for (const page of pages) {
+          const existing = await memory.getByPath({
+            path: page.path,
             space: spaceId,
-            user,
-            changeSummary: 'Updated architecture overview from discovery insights',
           });
-        } else {
-          await memory.create({
-            path: memoryPath,
-            title: `${streamName} - Architecture Overview`,
-            content: synthesized,
-            tags: ['architecture', 'auto-generated', streamName],
-            space: spaceId,
-            user,
-          });
+
+          if (existing) {
+            await memory.update({
+              id: existing.id,
+              content: page.content,
+              title: page.title,
+              space: spaceId,
+              user,
+              changeSummary: 'Updated from discovery insights',
+            });
+          } else {
+            await memory.create({
+              path: page.path,
+              title: page.title,
+              content: page.content,
+              tags: [...page.tags, 'auto-generated'],
+              space: spaceId,
+              user,
+            });
+          }
         }
 
-        logger.debug(`Synthesized memory for stream: ${streamName}`);
+        logger.debug(`Synthesized ${pages.length} wiki pages for stream: ${streamName}`);
       } catch (error) {
         logger.warn(
           `Failed to synthesize memory for stream ${streamName}: ${(error as Error).message}`

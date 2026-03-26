@@ -1,0 +1,145 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
+import type { TaskContext } from '.';
+import { cancellableTask } from '../cancellable_task';
+import type { TaskParams } from '../types';
+import { getErrorMessage } from '../../streams/errors/parse_error';
+import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
+import { MemoryServiceImpl } from '../../memory';
+import { MemoryTriggerRegistry } from '../../memory/triggers';
+import {
+  questionsAnsweredTrigger,
+  kiDeletedTrigger,
+  discoveryCompletedTrigger,
+  chatLearningTrigger,
+} from '../../memory/triggers';
+
+export interface MemoryUpdateTaskParams {
+  triggerId: string;
+  payload: Record<string, unknown>;
+}
+
+export interface MemoryUpdateTaskResult {
+  triggerId: string;
+  success: boolean;
+}
+
+export const MEMORY_UPDATE_TASK_TYPE = 'streams_memory_update';
+
+export function createStreamsMemoryUpdateTask(taskContext: TaskContext) {
+  return {
+    [MEMORY_UPDATE_TASK_TYPE]: {
+      createTaskRunner: (runContext) => {
+        return {
+          run: cancellableTask(
+            async () => {
+              if (!runContext.fakeRequest) {
+                throw new Error('Request is required to run this task');
+              }
+
+              const { triggerId, payload, _task } = runContext.taskInstance
+                .params as TaskParams<MemoryUpdateTaskParams>;
+
+              const taskLogger = taskContext.logger.get('memory_update');
+
+              taskLogger.info(
+                `Starting memory update task for trigger "${triggerId}" (task ${runContext.taskInstance.id})`
+              );
+
+              const {
+                taskClient,
+                inferenceClient,
+                modelSettingsClient,
+                uiSettingsClient,
+                insightClient,
+                scopedClusterClient,
+              } = await taskContext.getScopedClients({
+                request: runContext.fakeRequest,
+              });
+
+              const settings = await modelSettingsClient.getSettings();
+              const connectorId = await resolveConnectorId({
+                connectorId: settings.connectorIdDiscovery,
+                uiSettingsClient,
+                logger: taskLogger,
+              });
+
+              taskLogger.info(
+                `Resolved connector ${connectorId} for memory update trigger "${triggerId}"`
+              );
+
+              const boundInferenceClient = inferenceClient.bindTo({ connectorId });
+
+              const memory = new MemoryServiceImpl({
+                logger: taskLogger.get('memory'),
+                esClient: taskContext.getInternalEsClient(),
+              });
+
+              // Create a local trigger registry for this task execution
+              const registry = new MemoryTriggerRegistry({ logger: taskLogger });
+              registry.register(questionsAnsweredTrigger);
+              registry.register(kiDeletedTrigger);
+              registry.register(discoveryCompletedTrigger);
+              registry.register(chatLearningTrigger);
+
+              try {
+                taskLogger.info(
+                  `Executing trigger "${triggerId}" with payload keys: ${Object.keys(payload).join(
+                    ', '
+                  )}`
+                );
+
+                await registry.execute(triggerId, {
+                  memory,
+                  spaceId: 'default',
+                  logger: taskLogger,
+                  inferenceClient: boundInferenceClient,
+                  esClient: scopedClusterClient.asCurrentUser,
+                  insightClient,
+                  payload,
+                });
+
+                taskLogger.info(`Memory update trigger "${triggerId}" completed successfully`);
+
+                await taskClient.complete<MemoryUpdateTaskParams, MemoryUpdateTaskResult>(
+                  _task,
+                  { triggerId, payload },
+                  { triggerId, success: true }
+                );
+              } catch (error) {
+                const errorMessage = getErrorMessage(error);
+
+                if (
+                  errorMessage.includes('ERR_CANCELED') ||
+                  errorMessage.includes('Request was aborted')
+                ) {
+                  taskLogger.info(`Memory update trigger "${triggerId}" was canceled`);
+                  return getDeleteTaskRunResult();
+                }
+
+                taskLogger.error(`Memory update trigger "${triggerId}" failed: ${errorMessage}`);
+
+                await taskClient.fail<MemoryUpdateTaskParams>(
+                  _task,
+                  { triggerId, payload },
+                  errorMessage
+                );
+
+                return getDeleteTaskRunResult();
+              }
+            },
+            runContext,
+            taskContext
+          ),
+        };
+      },
+    },
+  } satisfies TaskDefinitionRegistry;
+}

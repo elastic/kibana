@@ -62,6 +62,25 @@ export function MemoryTab() {
 
   const openQuestions = questionsData?.questions ?? [];
   const isSearchActive = searchQuery.length >= 2;
+  const [questionsExpanded, setQuestionsExpanded] = useState(false);
+
+  const entryTitleMap = useMemo(() => {
+    const map = new Map<string, string>();
+    const walk = (nodes: MemoryTreeNode[]) => {
+      for (const node of nodes) {
+        if (node.id) {
+          map.set(node.id, node.title);
+        }
+        if (node.children) {
+          walk(node.children);
+        }
+      }
+    };
+    if (treeData?.tree) {
+      walk(treeData.tree);
+    }
+    return map;
+  }, [treeData]);
 
   const treeItems = useMemo(() => {
     if (!treeData?.tree) return [];
@@ -78,25 +97,51 @@ export function MemoryTab() {
       {openQuestions.length > 0 && (
         <>
           <EuiCallOut
-            title={i18n.translate('xpack.streams.memory.questions.calloutTitle', {
-              defaultMessage:
-                '{count} open {count, plural, one {question} other {questions}} about memory',
-              values: { count: openQuestions.length },
-            })}
-            iconType="questionInCircle"
+            announceOnMount={false}
+            title={
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  {i18n.translate('xpack.streams.memory.questions.calloutTitle', {
+                    defaultMessage:
+                      '{count} open {count, plural, one {question} other {questions}} about memory',
+                    values: { count: openQuestions.length },
+                  })}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="s"
+                    flush="left"
+                    iconType={questionsExpanded ? 'arrowDown' : 'arrowRight'}
+                    onClick={() => setQuestionsExpanded((prev) => !prev)}
+                  >
+                    {questionsExpanded
+                      ? i18n.translate('xpack.streams.memory.questions.collapse', {
+                          defaultMessage: 'Hide',
+                        })
+                      : i18n.translate('xpack.streams.memory.questions.expand', {
+                          defaultMessage: 'Show',
+                        })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+            iconType="help"
             color="primary"
           >
-            <EuiFlexGroup direction="column" gutterSize="m">
-              {openQuestions.map((q) => (
-                <QuestionCard
-                  key={q.id}
-                  question={q}
-                  onAnswer={(answer) => answerQuestion.mutate({ id: q.id, answer })}
-                  onDismiss={() => dismissQuestion.mutate(q.id)}
-                  onSelectEntry={setSelectedEntryId}
-                />
-              ))}
-            </EuiFlexGroup>
+            {questionsExpanded && (
+              <EuiFlexGroup direction="column" gutterSize="m">
+                {openQuestions.map((q) => (
+                  <QuestionCard
+                    key={q.id}
+                    question={q}
+                    onAnswer={(answer) => answerQuestion.mutate({ id: q.id, answer })}
+                    onDismiss={() => dismissQuestion.mutate(q.id)}
+                    onSelectEntry={setSelectedEntryId}
+                    entryTitleMap={entryTitleMap}
+                  />
+                ))}
+              </EuiFlexGroup>
+            )}
           </EuiCallOut>
           <EuiSpacer size="m" />
         </>
@@ -355,7 +400,7 @@ function EntryFlyout({
                     <EuiButton
                       fill
                       onClick={handleSave}
-                      isLoading={updateEntry.isPending}
+                      isLoading={updateEntry.isLoading}
                       data-test-subj="streamsMemorySaveButton"
                     >
                       {i18n.translate('xpack.streams.memory.saveButton', {
@@ -518,7 +563,7 @@ function HistoryFlyout({
               e.stopPropagation();
               handleRollback(record.version);
             }}
-            isLoading={rollbackEntry.isPending}
+            isLoading={rollbackEntry.isLoading}
           >
             {i18n.translate('xpack.streams.memory.history.rollbackButton', {
               defaultMessage: 'Rollback',
@@ -775,11 +820,13 @@ function QuestionCard({
   onAnswer,
   onDismiss,
   onSelectEntry,
+  entryTitleMap,
 }: {
   question: MemoryQuestion;
   onAnswer: (answer: string) => void;
   onDismiss: () => void;
   onSelectEntry: (id: string) => void;
+  entryTitleMap: Map<string, string>;
 }) {
   const [answerText, setAnswerText] = useState('');
   const [showAnswerInput, setShowAnswerInput] = useState(false);
@@ -829,7 +876,9 @@ function QuestionCard({
                 {question.related_entries.map((entryId) => (
                   <EuiFlexItem key={entryId} grow={false}>
                     <EuiLink onClick={() => onSelectEntry(entryId)}>
-                      <EuiText size="xs">{entryId}</EuiText>
+                      <EuiText size="xs">
+                        {entryTitleMap.get(entryId) ?? entryId.substring(0, 8)}
+                      </EuiText>
                     </EuiLink>
                   </EuiFlexItem>
                 ))}

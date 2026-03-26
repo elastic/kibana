@@ -8,10 +8,15 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { GetScopedClients } from '../routes/types';
 import type { StreamsServer } from '../types';
 import type { ModelSettingsConfigClient } from '../lib/saved_objects/significant_events/model_settings_config_client';
 import { MemoryServiceImpl } from '../lib/memory';
+import {
+  MEMORY_UPDATE_TASK_TYPE,
+  type MemoryUpdateTaskParams,
+} from '../lib/tasks/task_definitions/memory_update';
 import { registerAgentBuilderTools } from './tools/register_tools';
 import { registerMemoryTools } from './tools/register_memory_tools';
 import { registerMemoryContextHook } from './hooks/memory/register_memory_context_hook';
@@ -68,6 +73,25 @@ export const registerStreamsAgentBuilder = ({
     spaces: getSpaces(),
   });
 
+  const scheduleMemoryTask = async (
+    triggerId: string,
+    payload: Record<string, unknown>,
+    request: KibanaRequest
+  ) => {
+    const { taskClient } = await getScopedClients({ request });
+    const taskId = `memory_update_${triggerId}_${Date.now()}`;
+    await taskClient.schedule<MemoryUpdateTaskParams>({
+      task: {
+        type: MEMORY_UPDATE_TASK_TYPE,
+        id: taskId,
+        space: '*',
+      },
+      params: { triggerId, payload },
+      request,
+    });
+    logger.info(`Scheduled memory update task "${taskId}" for trigger "${triggerId}"`);
+  };
+
   registerMemoryContextHook(agentBuilder, {
     logger,
     getMemoryServices,
@@ -84,6 +108,7 @@ export const registerStreamsAgentBuilder = ({
     logger,
     getMemoryServices,
     isMemoryEnabled,
+    scheduleMemoryTask,
   });
 
   agentBuilder.skills.register(streamExplorationSkill);

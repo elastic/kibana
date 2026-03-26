@@ -6,6 +6,9 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { InsightClient } from '../../significant_events/insights/client/insight_client';
 import type { MemoryService } from '../types';
 
 /**
@@ -37,6 +40,19 @@ export interface MemoryUpdateContext {
    * require LLM calls should skip or degrade gracefully.
    */
   output?: OutputFunction;
+  /**
+   * Bound inference client for reasoning agent triggers.
+   * Provides access to chatComplete/prompt with a specific connector.
+   */
+  inferenceClient?: BoundInferenceClient;
+  /**
+   * Elasticsearch client for triggers that need to run ES|QL or other queries.
+   */
+  esClient?: ElasticsearchClient;
+  /**
+   * Insight client for triggers that need to read insights/KIs.
+   */
+  insightClient?: InsightClient;
 }
 
 /**
