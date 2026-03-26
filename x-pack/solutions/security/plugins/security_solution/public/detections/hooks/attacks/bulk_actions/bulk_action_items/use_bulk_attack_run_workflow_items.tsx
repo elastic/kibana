@@ -18,6 +18,7 @@ import { useAttacksPrivileges } from '../use_attacks_privileges';
 import type { AttackContentPanelConfig, BulkAttackActionItems } from '../types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import type { AttacksActionTelemetrySource } from '../../../../../common/lib/telemetry';
+import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 
 export interface UseBulkAttackRunWorkflowItemsProps {
   /** Source of the action for telemetry */
@@ -43,6 +44,12 @@ export const useBulkAttackRunWorkflowItems = ({
     [loading, hasIndexWrite, hasAttackIndexWrite, workflowUIEnabled, canExecuteWorkflow]
   );
 
+  const handleExecute = useCallback(() => {
+    if (telemetrySource) {
+      telemetry?.reportEvent(AttacksEventTypes.WorkflowRunTriggered, { source: telemetrySource });
+    }
+  }, [telemetry, telemetrySource]);
+
   const renderContent = useCallback(
     ({ alertItems, closePopoverMenu }: RenderContentPanelProps) => {
       const alertIds = alertItems.flatMap(({ _id, ecs }) =>
@@ -52,12 +59,11 @@ export const useBulkAttackRunWorkflowItems = ({
         <AlertWorkflowsPanel
           alertIds={alertIds}
           onClose={closePopoverMenu}
-          telemetry={telemetry}
-          telemetrySource={telemetrySource}
+          onExecute={handleExecute}
         />
       );
     },
-    [telemetry, telemetrySource]
+    [handleExecute]
   );
 
   const items = useMemo(

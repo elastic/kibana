@@ -28,9 +28,6 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import * as i18n from '../translations';
-import type { TelemetryServiceStart } from '../../../../common/lib/telemetry/telemetry_service';
-import { AttacksEventTypes } from '../../../../common/lib/telemetry';
-import type { AttacksActionTelemetrySource } from '../../../../common/lib/telemetry';
 
 export interface AlertWorkflowsPanelProps {
   /** Array and alert ids and their respective indices */
@@ -39,19 +36,11 @@ export interface AlertWorkflowsPanelProps {
     _index: string;
   }[];
   onClose: () => void;
-  /** Optional telemetry service for reporting events */
-  telemetry?: TelemetryServiceStart;
-  /** Optional source of the action for telemetry */
-  telemetrySource?: AttacksActionTelemetrySource;
+  onExecute?: () => void;
 }
 
 /** A panel that lets users select and execute a workflow against one or more alerts. **/
-export const AlertWorkflowsPanel = ({
-  alertIds,
-  onClose,
-  telemetry,
-  telemetrySource,
-}: AlertWorkflowsPanelProps) => {
+export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkflowsPanelProps) => {
   const {
     services: { application, rendering },
   } = useKibana<{ application: ApplicationStart; rendering: RenderingService }>();
@@ -64,9 +53,7 @@ export const AlertWorkflowsPanel = ({
   const handleExecuteClick = useCallback(() => {
     if (!selectedId) return;
     setIsLoading(true);
-    if (telemetrySource) {
-      telemetry?.reportEvent(AttacksEventTypes.WorkflowRunTriggered, { source: telemetrySource });
-    }
+    onExecute?.();
 
     const inputsPayload: AlertTriggerInput = {
       event: {
@@ -123,8 +110,7 @@ export const AlertWorkflowsPanel = ({
     workflowTriggerFailed,
     rendering,
     onClose,
-    telemetry,
-    telemetrySource,
+    onExecute,
     alertIds,
   ]);
 
