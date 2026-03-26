@@ -16,9 +16,9 @@ import type {
   TriggerEventHandlerParams,
 } from '@kbn/workflows-extensions/server';
 import type { ResolveMatchingWorkflowSubscriptionsParams } from './resolve_workflow_subscriptions';
+import type { WorkflowsManagementApi } from '../api/workflows_management_api';
 import { validateWorkflowForExecution } from '../connectors/workflows/validate_workflow_for_execution';
 import { type TriggerEventsDataStreamClient, writeTriggerEvent } from '../trigger_events_log';
-import type { WorkflowsManagementApi } from '../workflows_management/workflows_management_api';
 
 const SCHEDULE_CONCURRENCY = 20;
 
