@@ -96,12 +96,12 @@ describe('getCreateRuleMenuItem', () => {
     });
 
     describe('Nested Items', () => {
-      it('should have "Create rule" item for ES|QL rules', () => {
+      it('should have "Create v2 ES|QL rule" item for ES|QL rules', () => {
         const menuItem = getCreateRuleMenu();
         const createRuleItem = menuItem.items?.find((item) => item.id === 'create-rule');
 
         expect(createRuleItem).toBeDefined();
-        expect(createRuleItem?.label).toBe('Create rule');
+        expect(createRuleItem?.label).toBe('Create v2 ES|QL rule');
         expect(createRuleItem?.testId).toBe('discoverCreateRuleButton');
         expect(createRuleItem?.iconType).toBe('bell');
         expect(createRuleItem?.order).toBe(1);
@@ -109,46 +109,16 @@ describe('getCreateRuleMenuItem', () => {
         expect(typeof createRuleItem?.run).toBe('function');
       });
 
-      it('should have "Create legacy rules" submenu with legacy items', () => {
+      it('should have "Create v1 rules" submenu that starts empty (populated at merge time)', () => {
         const menuItem = getCreateRuleMenu();
         const legacyRulesItem = menuItem.items?.find((item) => item.id === 'legacy-rules');
 
         expect(legacyRulesItem).toBeDefined();
-        expect(legacyRulesItem?.label).toBe('Create legacy rules');
+        expect(legacyRulesItem?.label).toBe('Create v1 rules');
         expect(legacyRulesItem?.testId).toBe('discoverLegacyRulesButton');
         expect(legacyRulesItem?.order).toBe(2);
         expect(legacyRulesItem?.items).toBeDefined();
-        expect(legacyRulesItem?.items?.length).toBeGreaterThan(0);
-      });
-
-      it('should include "Search threshold rule" in legacy items when ES_QUERY_ID is authorized', () => {
-        const menuItem = getCreateRuleMenu();
-        const legacyRulesItem = menuItem.items?.find((item) => item.id === 'legacy-rules');
-        const searchThresholdItem = legacyRulesItem?.items?.find(
-          (item) => item.id === 'legacy-search-threshold'
-        );
-
-        expect(searchThresholdItem).toBeDefined();
-        expect(searchThresholdItem?.label).toBe('Search threshold rule');
-        expect(searchThresholdItem?.testId).toBe('discoverLegacySearchThresholdButton');
-        expect(searchThresholdItem?.iconType).toBe('bell');
-        expect(searchThresholdItem?.run).toBeDefined();
-      });
-
-      it('should include "Manage rules and connectors" in legacy items', () => {
-        const menuItem = getCreateRuleMenu();
-        const legacyRulesItem = menuItem.items?.find((item) => item.id === 'legacy-rules');
-        const manageRulesItem = legacyRulesItem?.items?.find(
-          (item) => item.id === 'manage-rules-connectors'
-        );
-
-        expect(manageRulesItem).toBeDefined();
-        expect(manageRulesItem?.label).toBe('Manage rules and connectors');
-        expect(manageRulesItem?.testId).toBe('discoverManageRulesButton');
-        expect(manageRulesItem?.iconType).toBe('tableOfContents');
-        expect(manageRulesItem?.href).toBe(
-          '/app/management/insightsAndAlerting/triggersActions/rules'
-        );
+        expect(legacyRulesItem?.items).toHaveLength(0);
       });
 
       it('should not include "Search threshold rule" when ES_QUERY_ID is not authorized', () => {

@@ -6,9 +6,9 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { validateEsqlQuery } from './validation';
+import { validateEsqlQuery, validateMinDuration } from './validation';
 import { durationSchema } from './common';
-import { MAX_CONSECUTIVE_BREACHES } from './constants';
+import { MAX_CONSECUTIVE_BREACHES, MIN_SCHEDULE_INTERVAL } from './constants';
 
 /** Primitives */
 
@@ -47,9 +47,16 @@ const metadataSchema = z
 
 /** Schedule (required) */
 
+const scheduleEverySchema = durationSchema.superRefine((value, ctx) => {
+  const error = validateMinDuration(value, MIN_SCHEDULE_INTERVAL);
+  if (error) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: error });
+  }
+});
+
 const scheduleSchema = z
   .object({
-    every: durationSchema.describe('Execution interval, e.g. 1m, 5m.'),
+    every: scheduleEverySchema.describe('Execution interval, e.g. 1m, 5m.'),
     lookback: durationSchema
       .optional()
       .describe('Lookback window for the query (can also be expressed in ES|QL).'),

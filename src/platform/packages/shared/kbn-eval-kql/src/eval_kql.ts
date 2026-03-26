@@ -54,14 +54,6 @@ function visitIs(node: KqlFunctionNode, context: Record<string, any>): boolean {
     return false; // Path does not exist in context
   }
 
-  if (Array.isArray(contextValue)) {
-    return contextValue.some((element) => matchValue(element, rightLiteral));
-  }
-
-  return matchValue(contextValue, rightLiteral);
-}
-
-function matchValue(contextValue: any, rightLiteral: unknown): boolean {
   if ((rightLiteral as KqlWildcardNode).type === KQL_NODE_TYPE_WILDCARD) {
     return isWildcardIsMatch(contextValue, rightLiteral as KqlWildcardNode);
   }

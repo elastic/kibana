@@ -7,7 +7,13 @@
 
 export * from './rule_data_schema';
 export * from './constants';
-export { validateDuration, validateEsqlQuery } from './validation';
+export {
+  validateDuration,
+  validateMaxDuration,
+  validateMinDuration,
+  validateEsqlQuery,
+  parseDurationToMs,
+} from './validation';
 export * from './notification_policy_data_schema';
 export type { NotificationPolicyResponse } from './notification_policy_response';
 export * from './alert_action_schema';

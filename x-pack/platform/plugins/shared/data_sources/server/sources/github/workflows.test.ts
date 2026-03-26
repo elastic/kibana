@@ -10,10 +10,9 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
   getWorkflowYaml,
-  loadWorkflowsThroughProductionPath,
+  loadWorkflowsFromConnectorSpec,
   type ProcessedWorkflow,
 } from '../workflow.test_helpers';
-import { githubDataSource } from './data_type';
 
 const CONNECTOR_NAME = 'fake-github-connector';
 const CONNECTOR_ID = 'fake-github-connector-uuid';
@@ -22,9 +21,9 @@ describe('github workflows', () => {
   let fixture: WorkflowRunFixture;
   let workflows: ProcessedWorkflow[];
 
-  beforeAll(async () => {
-    workflows = await loadWorkflowsThroughProductionPath(githubDataSource, {
-      stackConnectorId: CONNECTOR_NAME,
+  beforeAll(() => {
+    workflows = loadWorkflowsFromConnectorSpec('.github', {
+      connectorName: CONNECTOR_NAME,
     });
   });
 
@@ -71,7 +70,7 @@ describe('github workflows', () => {
   describe('search workflow', () => {
     it('routes to searchCode and forwards parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml(workflows, 'source.search'),
+        workflowYaml: getWorkflowYaml(workflows, 'github.search'),
         inputs: {
           search_type: 'searchCode',
           query: 'handleError language:typescript',
@@ -99,7 +98,7 @@ describe('github workflows', () => {
 
     it('routes to searchIssues and forwards parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml(workflows, 'source.search'),
+        workflowYaml: getWorkflowYaml(workflows, 'github.search'),
         inputs: {
           search_type: 'searchIssues',
           query: 'is:open label:bug',
@@ -133,7 +132,7 @@ describe('github workflows', () => {
   describe('list workflow', () => {
     it('routes to listIssues and forwards repository and pagination parameters', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml(workflows, 'source.list'),
+        workflowYaml: getWorkflowYaml(workflows, 'github.list'),
         inputs: {
           list_type: 'listIssues',
           owner: 'elastic',
@@ -164,7 +163,7 @@ describe('github workflows', () => {
 
     it('routes to listPullRequests and forwards repository and pagination parameters', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml(workflows, 'source.list'),
+        workflowYaml: getWorkflowYaml(workflows, 'github.list'),
         inputs: {
           list_type: 'listPullRequests',
           owner: 'elastic',
@@ -197,7 +196,7 @@ describe('github workflows', () => {
   describe('get workflow', () => {
     it('routes to getIssue and forwards parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml(workflows, 'source.get'),
+        workflowYaml: getWorkflowYaml(workflows, 'github.get'),
         inputs: {
           resource_type: 'getIssue',
           owner: 'elastic',
@@ -225,7 +224,7 @@ describe('github workflows', () => {
 
     it('routes to pullRequestRead and forwards method selector to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml(workflows, 'source.get'),
+        workflowYaml: getWorkflowYaml(workflows, 'github.get'),
         inputs: {
           resource_type: 'pullRequestRead',
           owner: 'elastic',
@@ -257,7 +256,7 @@ describe('github workflows', () => {
   describe('who_am_i workflow', () => {
     it('calls getMe and forwards parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml(workflows, 'source.who_am_i'),
+        workflowYaml: getWorkflowYaml(workflows, 'github.who_am_i'),
         inputs: {},
       });
 

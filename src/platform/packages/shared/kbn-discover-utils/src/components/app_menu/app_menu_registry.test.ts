@@ -519,6 +519,54 @@ describe('AppMenuRegistry', () => {
     });
   });
 
+  describe('deleteItem', () => {
+    it('should remove a registered item by ID', () => {
+      const item: DiscoverAppMenuItemType = {
+        id: 'to-delete',
+        order: 1,
+        label: 'Delete Me',
+        iconType: 'trash',
+        run: jest.fn(),
+      };
+
+      registry.registerItem(item);
+      expect(registry.getItem('to-delete')).toBeDefined();
+
+      registry.deleteItem('to-delete');
+      expect(registry.getItem('to-delete')).toBeUndefined();
+
+      const config = registry.getAppMenuConfig();
+      expect(config.items).toHaveLength(0);
+    });
+
+    it('should not throw when deleting a non-existent item', () => {
+      expect(() => registry.deleteItem('non-existent')).not.toThrow();
+    });
+
+    it('should only remove the specified item, leaving others intact', () => {
+      registry.registerItem({
+        id: 'keep',
+        order: 1,
+        label: 'Keep',
+        iconType: 'check',
+        run: jest.fn(),
+      });
+      registry.registerItem({
+        id: 'remove',
+        order: 2,
+        label: 'Remove',
+        iconType: 'trash',
+        run: jest.fn(),
+      });
+
+      registry.deleteItem('remove');
+
+      const config = registry.getAppMenuConfig();
+      expect(config.items).toHaveLength(1);
+      expect(config.items?.[0].id).toBe('keep');
+    });
+  });
+
   describe('mergePopoverItems', () => {
     it('should merge popover items from source menu into target submenu', () => {
       const targetMenu: DiscoverAppMenuItemType = {
