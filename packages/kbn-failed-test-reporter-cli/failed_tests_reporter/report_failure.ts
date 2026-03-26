@@ -304,6 +304,9 @@ async function updateScoutFailureIssue(
   let newErrorMessage: string | undefined;
   if (failure.errorMessage && previousFailureBody) {
     const currentErrorMsg = truncateFailureBody(failure.errorMessage).trim();
+    // Current error.message from CI is raw. The issue's first code block is usually already
+    // redacted (we redact on create), but older issues may still hold raw text. Redacting
+    // previous again is idempotent.
     const redactedPrevious = redactSensitiveGithubFailureText(previousFailureBody);
     const redactedCurrent = redactSensitiveGithubFailureText(currentErrorMsg);
     if (!redactedPrevious.includes(redactedCurrent)) {
