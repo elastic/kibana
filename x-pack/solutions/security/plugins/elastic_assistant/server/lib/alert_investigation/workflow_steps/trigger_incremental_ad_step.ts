@@ -55,6 +55,7 @@ export const triggerIncrementalAdStep = createServerStepDefinition({
           case_id: caseId,
           triggered: false,
           alert_count: alertIds.length,
+          summary: `*Not enough data to generate Attack Discovery — only ${alertIds.length} alert(s), minimum ${min_new_alerts} required.*`,
           reason: `Only ${alertIds.length} alerts, need at least ${min_new_alerts}`,
         },
       };
