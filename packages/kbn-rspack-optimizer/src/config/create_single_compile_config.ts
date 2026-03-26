@@ -434,6 +434,7 @@ export async function createSingleCompileConfig(
     },
 
     optimization: {
+      removeAvailableModules: dist,
       moduleIds: dist ? 'deterministic' : 'named',
       chunkIds: dist ? 'deterministic' : 'named',
       // Match legacy webpack optimizer's more conservative chunk splitting

@@ -220,7 +220,7 @@ async function runWatchBuild(
 
     const watching = compiler.watch(
       {
-        aggregateTimeout: 300,
+        aggregateTimeout: 50,
         ignored: /node_modules/,
       },
       (err, stats) => {
@@ -284,40 +284,52 @@ async function runWatchBuild(
           return;
         }
 
-        // Subsequent rebuilds: single concise line with changed chunk info
+        // Subsequent rebuilds
         isFirstBuild = false;
-        const result = processStats(stats, log, { quiet: true });
-        const rebuildTime = result.compilationTime?.toFixed(1) ?? '?';
+        const hasErrors = stats.hasErrors();
 
-        if (result.success) {
-          let changedCount = 0;
-          let changedSize = 0;
-          for (const asset of result.assets ?? []) {
-            const prev = previousAssetSizes.get(asset.name);
-            if (prev === undefined || prev !== asset.size) {
-              changedCount++;
-              changedSize += asset.size;
-            }
+        if (hasErrors) {
+          const timings = stats.toJson({ timings: true, assets: false, errors: false, warnings: false, modules: false, chunks: false });
+          const rebuildTime = timings.time ? (timings.time / 1000).toFixed(1) : '?';
+          const result = processStats(stats, log, { quiet: true });
+          if (hmrServer && result.errors?.length) {
+            hmrServer.broadcastErrors(result.errors);
           }
-
-          // Update baseline for next rebuild
-          previousAssetSizes.clear();
-          for (const asset of result.assets ?? []) {
-            previousAssetSizes.set(asset.name, asset.size);
-          }
+          log?.error(`Rebuild failed in ${rebuildTime}s - waiting for changes...`);
+        } else {
+          const timings = stats.toJson({ timings: true, assets: false, errors: false, warnings: false, modules: false, chunks: false });
+          const rebuildTime = timings.time ? (timings.time / 1000).toFixed(1) : '?';
 
           copyBundlesToPluginDirs(repoRoot, log, true);
           if (stats.hash && hmrServer) {
             hmrServer.broadcast(stats.hash);
           }
-          log?.success(
-            `Rebuilt in ${rebuildTime}s (${changedCount} chunks updated, ${formatSize(changedSize)} changed)`
+
+          const isVerbose = typeof log?.getWriters === 'function' && log.getWriters().some(
+            (w) => 'level' in w && (w as { level?: { flags?: { debug?: boolean } } }).level?.flags?.debug
           );
-        } else {
-          if (hmrServer && result.errors?.length) {
-            hmrServer.broadcastErrors(result.errors);
+
+          if (isVerbose) {
+            const result = processStats(stats, log, { quiet: true });
+            let changedCount = 0;
+            let changedSize = 0;
+            for (const asset of result.assets ?? []) {
+              const prev = previousAssetSizes.get(asset.name);
+              if (prev === undefined || prev !== asset.size) {
+                changedCount++;
+                changedSize += asset.size;
+              }
+            }
+            previousAssetSizes.clear();
+            for (const asset of result.assets ?? []) {
+              previousAssetSizes.set(asset.name, asset.size);
+            }
+            log?.debug(
+              `Rebuilt in ${rebuildTime}s (${changedCount} chunks updated, ${formatSize(changedSize)} changed)`
+            );
+          } else {
+            log?.success(`Rebuilt in ${rebuildTime}s`);
           }
-          log?.error(`Rebuild failed in ${rebuildTime}s - waiting for changes...`);
         }
       }
     );
