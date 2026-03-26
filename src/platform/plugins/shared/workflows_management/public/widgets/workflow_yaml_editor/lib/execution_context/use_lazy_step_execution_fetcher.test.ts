@@ -10,17 +10,18 @@
 import { renderHook } from '@testing-library/react';
 import type { QueryClient } from '@kbn/react-query';
 import { ExecutionStatus } from '@kbn/workflows/types/v1';
+import { useWorkflowsApi } from '@kbn/workflows-ui';
 import { useLazyStepExecutionFetcher } from './use_lazy_step_execution_fetcher';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { createStartServicesMock, createUseKibanaMockValue } from '../../../../mocks';
 import { createMockStepExecutionDto } from '../../../../shared/test_utils/mock_workflow_factories';
 import {
   createQueryClientWrapper,
   createTestQueryClient,
 } from '../../../../shared/test_utils/query_client_wrapper';
 
-jest.mock('../../../../hooks/use_kibana');
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+jest.mock('@kbn/workflows-ui', () => ({
+  useWorkflowsApi: jest.fn(),
+}));
+const mockUseWorkflowsApi = useWorkflowsApi as jest.MockedFunction<typeof useWorkflowsApi>;
 
 jest.mock('@kbn/workflows', () => ({
   isTerminalStatus: jest.fn((status: ExecutionStatus) =>
@@ -29,14 +30,14 @@ jest.mock('@kbn/workflows', () => ({
 }));
 
 describe('useLazyStepExecutionFetcher', () => {
-  let mockHttpGet: jest.Mock;
+  let mockGetStepExecution: jest.Mock;
   let queryClient: QueryClient;
 
   beforeEach(() => {
-    const services = createStartServicesMock();
-    mockHttpGet = jest.fn();
-    (services.http.get as jest.Mock) = mockHttpGet;
-    mockUseKibana.mockReturnValue(createUseKibanaMockValue(services));
+    mockGetStepExecution = jest.fn();
+    mockUseWorkflowsApi.mockReturnValue({
+      getStepExecution: mockGetStepExecution,
+    } as any);
     queryClient = createTestQueryClient();
   });
 
@@ -52,7 +53,7 @@ describe('useLazyStepExecutionFetcher', () => {
 
     const data = await result.current.current('step-1');
     expect(data).toBeNull();
-    expect(mockHttpGet).not.toHaveBeenCalled();
+    expect(mockGetStepExecution).not.toHaveBeenCalled();
   });
 
   it('returns null when stepId is not found in stepExecutions', async () => {
@@ -66,7 +67,7 @@ describe('useLazyStepExecutionFetcher', () => {
 
     const data = await result.current.current('step-1');
     expect(data).toBeNull();
-    expect(mockHttpGet).not.toHaveBeenCalled();
+    expect(mockGetStepExecution).not.toHaveBeenCalled();
   });
 
   it('fetches from API when cache is empty', async () => {
@@ -77,7 +78,7 @@ describe('useLazyStepExecutionFetcher', () => {
       status: ExecutionStatus.COMPLETED,
       state: null,
     };
-    mockHttpGet.mockResolvedValue(apiResponse);
+    mockGetStepExecution.mockResolvedValue(apiResponse);
 
     const { result } = renderHook(
       () => useLazyStepExecutionFetcher('exec-1', [createMockStepExecutionDto()]),
@@ -86,7 +87,7 @@ describe('useLazyStepExecutionFetcher', () => {
 
     const data = await result.current.current('step-1');
 
-    expect(mockHttpGet).toHaveBeenCalledWith('/api/workflowExecutions/exec-1/steps/doc-1');
+    expect(mockGetStepExecution).toHaveBeenCalledWith('exec-1', 'doc-1');
     expect(data).toEqual({
       output: apiResponse.output,
       error: apiResponse.error,
@@ -118,7 +119,7 @@ describe('useLazyStepExecutionFetcher', () => {
 
     const data = await result.current.current('step-1');
 
-    expect(mockHttpGet).not.toHaveBeenCalled();
+    expect(mockGetStepExecution).not.toHaveBeenCalled();
     expect(data).toEqual({
       output: cachedData.output,
       error: cachedData.error,
@@ -145,7 +146,7 @@ describe('useLazyStepExecutionFetcher', () => {
     };
 
     queryClient.setQueryData(['stepExecution', 'exec-1', 'doc-1'], cachedData);
-    mockHttpGet.mockResolvedValue(freshData);
+    mockGetStepExecution.mockResolvedValue(freshData);
 
     const { result } = renderHook(
       () =>
@@ -157,7 +158,7 @@ describe('useLazyStepExecutionFetcher', () => {
 
     const data = await result.current.current('step-1');
 
-    expect(mockHttpGet).toHaveBeenCalled();
+    expect(mockGetStepExecution).toHaveBeenCalled();
     expect(data).toEqual({
       output: freshData.output,
       error: freshData.error,
@@ -168,7 +169,7 @@ describe('useLazyStepExecutionFetcher', () => {
   });
 
   it('returns null when the HTTP request fails', async () => {
-    mockHttpGet.mockRejectedValue(new Error('Network error'));
+    mockGetStepExecution.mockRejectedValue(new Error('Network error'));
 
     const { result } = renderHook(
       () => useLazyStepExecutionFetcher('exec-1', [createMockStepExecutionDto()]),
@@ -180,7 +181,7 @@ describe('useLazyStepExecutionFetcher', () => {
   });
 
   it('returns null when the HTTP response is falsy', async () => {
-    mockHttpGet.mockResolvedValue(null);
+    mockGetStepExecution.mockResolvedValue(null);
 
     const { result } = renderHook(
       () => useLazyStepExecutionFetcher('exec-1', [createMockStepExecutionDto()]),

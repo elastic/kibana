@@ -12,6 +12,14 @@ import React from 'react';
 import { CancelExecutionButton } from './cancel_execution_button';
 import { TestWrapper } from '../../../shared/test_utils';
 
+const mockCancelExecution = jest.fn();
+
+jest.mock('@kbn/workflows-ui', () => ({
+  useWorkflowsApi: () => ({
+    cancelExecution: mockCancelExecution,
+  }),
+}));
+
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
 }));
@@ -27,7 +35,6 @@ jest.mock('../../../hooks/use_telemetry', () => ({
 const { useKibana } = jest.requireMock('@kbn/kibana-react-plugin/public');
 
 describe('CancelExecutionButton', () => {
-  const mockHttpPost = jest.fn();
   const mockAddSuccess = jest.fn();
   const mockAddError = jest.fn();
 
@@ -39,10 +46,9 @@ describe('CancelExecutionButton', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockHttpPost.mockResolvedValue({});
+    mockCancelExecution.mockResolvedValue({});
     useKibana.mockReturnValue({
       services: {
-        http: { post: mockHttpPost },
         notifications: {
           toasts: { addSuccess: mockAddSuccess, addError: mockAddError },
         },
@@ -73,7 +79,6 @@ describe('CancelExecutionButton', () => {
   it('disables the button when user lacks cancelWorkflowExecution capability', () => {
     useKibana.mockReturnValue({
       services: {
-        http: { post: mockHttpPost },
         notifications: {
           toasts: { addSuccess: mockAddSuccess, addError: mockAddError },
         },
@@ -100,7 +105,7 @@ describe('CancelExecutionButton', () => {
     fireEvent.click(screen.getByTestId('cancelExecutionButton'));
 
     await waitFor(() => {
-      expect(mockHttpPost).toHaveBeenCalledWith('/api/workflowExecutions/exec-123/cancel');
+      expect(mockCancelExecution).toHaveBeenCalledWith('exec-123');
     });
 
     await waitFor(() => {
@@ -132,7 +137,7 @@ describe('CancelExecutionButton', () => {
 
   it('shows error toast on failed cancellation', async () => {
     const apiError = new Error('Network error');
-    mockHttpPost.mockRejectedValueOnce(apiError);
+    mockCancelExecution.mockRejectedValueOnce(apiError);
 
     renderComponent();
     fireEvent.click(screen.getByTestId('cancelExecutionButton'));
@@ -147,7 +152,7 @@ describe('CancelExecutionButton', () => {
 
   it('reports failed cancellation telemetry with error', async () => {
     const apiError = new Error('Network error');
-    mockHttpPost.mockRejectedValueOnce(apiError);
+    mockCancelExecution.mockRejectedValueOnce(apiError);
 
     renderComponent();
     fireEvent.click(screen.getByTestId('cancelExecutionButton'));

@@ -12,12 +12,14 @@ import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
 import type { MockServices, MockStore } from '../../__mocks__/store.mock';
 import { initialWorkflowsState } from '../slice';
 
-// Mock searchWorkflows from @kbn/workflows-ui
-jest.mock('@kbn/workflows-ui', () => ({
-  searchWorkflows: jest.fn(),
-}));
+const mockGetWorkflows = jest.fn();
 
-const { searchWorkflows } = jest.requireMock('@kbn/workflows-ui');
+// Mock WorkflowApi class used by the thunk
+jest.mock('@kbn/workflows-ui', () => ({
+  WorkflowApi: jest.fn().mockImplementation(() => ({
+    getWorkflows: mockGetWorkflows,
+  })),
+}));
 
 // Mock normalizeFieldsToJsonSchema
 jest.mock('@kbn/workflows/spec/lib/field_conversion', () => ({
@@ -52,11 +54,11 @@ describe('loadWorkflowsThunk', () => {
       total: 2,
     };
 
-    searchWorkflows.mockResolvedValue(mockSearchResponse);
+    mockGetWorkflows.mockResolvedValue(mockSearchResponse);
 
     const result = await store.dispatch(loadWorkflowsThunk());
 
-    expect(searchWorkflows).toHaveBeenCalledWith(mockServices.http, {
+    expect(mockGetWorkflows).toHaveBeenCalledWith({
       size: 1000,
       page: 1,
     });
@@ -90,7 +92,7 @@ describe('loadWorkflowsThunk', () => {
       total: 1,
     };
 
-    searchWorkflows.mockResolvedValue(mockSearchResponse);
+    mockGetWorkflows.mockResolvedValue(mockSearchResponse);
 
     await store.dispatch(loadWorkflowsThunk());
 
@@ -113,7 +115,7 @@ describe('loadWorkflowsThunk', () => {
       total: 0,
     };
 
-    searchWorkflows.mockResolvedValue(mockSearchResponse);
+    mockGetWorkflows.mockResolvedValue(mockSearchResponse);
 
     const result = await store.dispatch(loadWorkflowsThunk());
 
@@ -130,7 +132,7 @@ describe('loadWorkflowsThunk', () => {
       total: undefined,
     };
 
-    searchWorkflows.mockResolvedValue(mockSearchResponse);
+    mockGetWorkflows.mockResolvedValue(mockSearchResponse);
 
     const result = await store.dispatch(loadWorkflowsThunk());
 
@@ -147,7 +149,7 @@ describe('loadWorkflowsThunk', () => {
       message: 'Bad Request',
     };
 
-    searchWorkflows.mockRejectedValue(error);
+    mockGetWorkflows.mockRejectedValue(error);
 
     const result = await store.dispatch(loadWorkflowsThunk());
 
@@ -165,7 +167,7 @@ describe('loadWorkflowsThunk', () => {
   it('should show toast and dispatch initialWorkflowsState on error with message property', async () => {
     const error = new Error('Network Error');
 
-    searchWorkflows.mockRejectedValue(error);
+    mockGetWorkflows.mockRejectedValue(error);
 
     const result = await store.dispatch(loadWorkflowsThunk());
 
@@ -179,7 +181,7 @@ describe('loadWorkflowsThunk', () => {
   it('should show toast with default message on error without message', async () => {
     const error = {};
 
-    searchWorkflows.mockRejectedValue(error);
+    mockGetWorkflows.mockRejectedValue(error);
 
     const result = await store.dispatch(loadWorkflowsThunk());
 

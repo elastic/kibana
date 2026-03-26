@@ -11,11 +11,6 @@ import { act, renderHook } from '@testing-library/react';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import { useExportWithReferences } from './use_export_with_references';
 
-const mockHttp = {
-  post: jest.fn(),
-  get: jest.fn(),
-};
-
 const mockNotifications = {
   toasts: {
     addSuccess: jest.fn(),
@@ -26,10 +21,17 @@ const mockNotifications = {
 
 const mockReportWorkflowExported = jest.fn();
 
+const mockApi = {
+  exportWorkflows: jest.fn(),
+};
+
+jest.mock('@kbn/workflows-ui', () => ({
+  useWorkflowsApi: () => mockApi,
+}));
+
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({
     services: {
-      http: mockHttp,
       notifications: mockNotifications,
     },
   }),
@@ -121,7 +123,7 @@ describe('useExportWithReferences', () => {
         result.current.startExport(workflows);
       });
 
-      expect(mockExportWorkflows).toHaveBeenCalledWith(workflows, mockHttp);
+      expect(mockExportWorkflows).toHaveBeenCalledWith(workflows, mockApi);
       expect(mockNotifications.toasts.addSuccess).toHaveBeenCalled();
       expect(mockReportWorkflowExported).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -193,7 +195,7 @@ describe('useExportWithReferences', () => {
       });
 
       expect(result.current.exportModalState).toBeNull();
-      expect(mockExportWorkflows).toHaveBeenCalledWith([mainWorkflow], mockHttp);
+      expect(mockExportWorkflows).toHaveBeenCalledWith([mainWorkflow], mockApi);
       expect(mockReportWorkflowExported).toHaveBeenCalledWith(
         expect.objectContaining({ referenceResolution: 'ignore' })
       );
@@ -224,7 +226,7 @@ describe('useExportWithReferences', () => {
       expect(result.current.exportModalState).toBeNull();
       expect(mockExportWorkflows).toHaveBeenCalledWith(
         [mainWorkflow, referencedWorkflow],
-        mockHttp
+        mockApi
       );
       expect(mockReportWorkflowExported).toHaveBeenCalledWith(
         expect.objectContaining({ referenceResolution: 'add_direct' })
@@ -264,7 +266,7 @@ describe('useExportWithReferences', () => {
       expect(mockResolveAllReferences).toHaveBeenCalled();
       expect(mockExportWorkflows).toHaveBeenCalledWith(
         [mainWorkflow, referencedWorkflow, transitiveWorkflow],
-        mockHttp
+        mockApi
       );
       expect(mockReportWorkflowExported).toHaveBeenCalledWith(
         expect.objectContaining({ referenceResolution: 'add_all' })

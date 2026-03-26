@@ -14,6 +14,15 @@ import { loadExecutionThunk } from './load_execution_thunk';
 import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
 import type { MockServices, MockStore } from '../../__mocks__/store.mock';
 
+const mockGetExecution = jest.fn();
+
+// Mock the WorkflowApi class so loadExecutionThunk uses our mock
+jest.mock('@kbn/workflows-ui', () => ({
+  WorkflowApi: jest.fn().mockImplementation(() => ({
+    getExecution: mockGetExecution,
+  })),
+}));
+
 // Mock the computation utility
 jest.mock('../utils/computation', () => ({
   performComputation: jest.fn(() => ({
@@ -57,19 +66,20 @@ describe('loadExecutionThunk', () => {
   });
 
   it('should load execution successfully', async () => {
-    mockServices.http.get.mockResolvedValue(mockExecution);
+    mockGetExecution.mockResolvedValue(mockExecution);
 
     const result = await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
 
-    expect(mockServices.http.get).toHaveBeenCalledWith('/api/workflowExecutions/exec-1', {
-      query: { includeInput: false, includeOutput: false },
+    expect(mockGetExecution).toHaveBeenCalledWith('exec-1', {
+      includeInput: false,
+      includeOutput: false,
     });
     expect(result.type).toBe('detail/loadExecutionThunk/fulfilled');
     expect(result.payload).toEqual(mockExecution);
   });
 
   it('should set execution in the store on success', async () => {
-    mockServices.http.get.mockResolvedValue(mockExecution);
+    mockGetExecution.mockResolvedValue(mockExecution);
 
     await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
 
@@ -79,7 +89,7 @@ describe('loadExecutionThunk', () => {
 
   it('should compute execution data for a new execution id', async () => {
     const { performComputation } = jest.requireMock('../utils/computation');
-    mockServices.http.get.mockResolvedValue(mockExecution);
+    mockGetExecution.mockResolvedValue(mockExecution);
 
     await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
 
@@ -95,7 +105,7 @@ describe('loadExecutionThunk', () => {
       message: 'Not Found',
     };
 
-    mockServices.http.get.mockRejectedValue(error);
+    mockGetExecution.mockRejectedValue(error);
 
     const result = await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
 
@@ -111,7 +121,7 @@ describe('loadExecutionThunk', () => {
       message: 'Network Error',
     };
 
-    mockServices.http.get.mockRejectedValue(error);
+    mockGetExecution.mockRejectedValue(error);
 
     const result = await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
 
@@ -125,7 +135,7 @@ describe('loadExecutionThunk', () => {
   it('should handle error without message', async () => {
     const error = {};
 
-    mockServices.http.get.mockRejectedValue(error);
+    mockGetExecution.mockRejectedValue(error);
 
     const result = await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
 

@@ -12,11 +12,21 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import { useWorkflowsApi } from '@kbn/workflows-ui';
 import { useChildWorkflowExecutions } from './use_child_workflow_executions';
-import { useKibana } from '../../../hooks/use_kibana';
 
-jest.mock('../../../hooks/use_kibana');
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+jest.mock('@kbn/workflows-ui', () => ({
+  useWorkflowsApi: jest.fn(),
+}));
+const mockUseWorkflowsApi = useWorkflowsApi as jest.MockedFunction<typeof useWorkflowsApi>;
+
+jest.mock('@kbn/workflows', () => ({
+  ...jest.requireActual('@kbn/workflows'),
+  isExecuteSyncStepType: jest.fn(() => false),
+  isTerminalStatus: jest.fn((status: string) =>
+    ['completed', 'failed', 'skipped'].includes(status)
+  ),
+}));
 
 const createWrapper = (queryClient: QueryClient) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) =>
@@ -42,7 +52,7 @@ const createMockExecution = (overrides?: Partial<WorkflowExecutionDto>): Workflo
 });
 
 describe('useChildWorkflowExecutions', () => {
-  let mockHttpGet: jest.Mock;
+  let mockGetChildrenExecutions: jest.Mock;
   let queryClient: QueryClient;
 
   const childExecutionResponse = [
@@ -57,10 +67,10 @@ describe('useChildWorkflowExecutions', () => {
   ];
 
   beforeEach(() => {
-    mockHttpGet = jest.fn().mockResolvedValue(childExecutionResponse);
-    mockUseKibana.mockReturnValue({
-      services: { http: { get: mockHttpGet } },
-    } as never);
+    mockGetChildrenExecutions = jest.fn().mockResolvedValue(childExecutionResponse);
+    mockUseWorkflowsApi.mockReturnValue({
+      getChildrenExecutions: mockGetChildrenExecutions,
+    } as any);
     queryClient = new QueryClient({
       defaultOptions: {
         queries: { retry: false },
@@ -78,7 +88,7 @@ describe('useChildWorkflowExecutions', () => {
     });
 
     expect(result.current.childExecutions.size).toBe(0);
-    expect(mockHttpGet).not.toHaveBeenCalled();
+    expect(mockGetChildrenExecutions).not.toHaveBeenCalled();
   });
 
   it('should not fetch when parentExecution is null', () => {
@@ -87,7 +97,7 @@ describe('useChildWorkflowExecutions', () => {
     });
 
     expect(result.current.childExecutions.size).toBe(0);
-    expect(mockHttpGet).not.toHaveBeenCalled();
+    expect(mockGetChildrenExecutions).not.toHaveBeenCalled();
   });
 
   it('should fetch child executions when parentExecution is provided', async () => {
@@ -101,7 +111,7 @@ describe('useChildWorkflowExecutions', () => {
       expect(result.current.childExecutions.size).toBe(1);
     });
 
-    expect(mockHttpGet).toHaveBeenCalledWith('/api/workflowExecutions/exec-1/childExecutions');
+    expect(mockGetChildrenExecutions).toHaveBeenCalledWith('exec-1');
     expect(result.current.childExecutions.get('step-exec-1')).toEqual(
       expect.objectContaining({
         workflowId: 'child-wf-1',
@@ -111,7 +121,7 @@ describe('useChildWorkflowExecutions', () => {
   });
 
   it('should return an empty map when API returns no results', async () => {
-    mockHttpGet.mockResolvedValue([]);
+    mockGetChildrenExecutions.mockResolvedValue([]);
     const execution = createMockExecution();
 
     const { result } = renderHook(() => useChildWorkflowExecutions(execution), {
@@ -126,7 +136,7 @@ describe('useChildWorkflowExecutions', () => {
   });
 
   it('should key child executions by parentStepExecutionId', async () => {
-    mockHttpGet.mockResolvedValue([
+    mockGetChildrenExecutions.mockResolvedValue([
       {
         parentStepExecutionId: 'step-a',
         workflowId: 'wf-a',

@@ -9,17 +9,18 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import type { QueryClient } from '@kbn/react-query';
+import { useWorkflowsApi } from '@kbn/workflows-ui';
 import { useWorkflowExecution } from './use_workflow_execution';
-import { useKibana } from '../../../hooks/use_kibana';
-import { createStartServicesMock, createUseKibanaMockValue } from '../../../mocks';
 import { createQueryClientWrapper, createTestQueryClient } from '../../../shared/test_utils';
 
-jest.mock('../../../hooks/use_kibana');
+jest.mock('@kbn/workflows-ui', () => ({
+  useWorkflowsApi: jest.fn(),
+}));
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseWorkflowsApi = useWorkflowsApi as jest.MockedFunction<typeof useWorkflowsApi>;
 
 describe('useWorkflowExecution', () => {
-  let mockHttpGet: jest.Mock;
+  let mockGetExecution: jest.Mock;
   let queryClient: QueryClient;
 
   const executionResponse = {
@@ -30,10 +31,10 @@ describe('useWorkflowExecution', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    const services = createStartServicesMock();
-    mockHttpGet = jest.fn().mockResolvedValue(executionResponse);
-    (services.http.get as jest.Mock) = mockHttpGet;
-    mockUseKibana.mockReturnValue(createUseKibanaMockValue(services));
+    mockGetExecution = jest.fn().mockResolvedValue(executionResponse);
+    mockUseWorkflowsApi.mockReturnValue({
+      getExecution: mockGetExecution,
+    } as any);
     queryClient = createTestQueryClient();
   });
 
@@ -48,7 +49,10 @@ describe('useWorkflowExecution', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(mockHttpGet).toHaveBeenCalledWith('/api/workflowExecutions/exec-1', { query: {} });
+    expect(mockGetExecution).toHaveBeenCalledWith('exec-1', {
+      includeInput: undefined,
+      includeOutput: undefined,
+    });
     expect(result.current.data).toEqual(executionResponse);
   });
 
@@ -58,7 +62,7 @@ describe('useWorkflowExecution', () => {
     });
 
     expect(result.current.isFetching).toBe(false);
-    expect(mockHttpGet).not.toHaveBeenCalled();
+    expect(mockGetExecution).not.toHaveBeenCalled();
   });
 
   it('should not fetch when enabled is false', () => {
@@ -68,7 +72,7 @@ describe('useWorkflowExecution', () => {
     );
 
     expect(result.current.isFetching).toBe(false);
-    expect(mockHttpGet).not.toHaveBeenCalled();
+    expect(mockGetExecution).not.toHaveBeenCalled();
   });
 
   it('should pass includeInput and includeOutput as query params', async () => {
@@ -84,13 +88,14 @@ describe('useWorkflowExecution', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(mockHttpGet).toHaveBeenCalledWith('/api/workflowExecutions/exec-1', {
-      query: { includeInput: true, includeOutput: false },
+    expect(mockGetExecution).toHaveBeenCalledWith('exec-1', {
+      includeInput: true,
+      includeOutput: false,
     });
   });
 
   it('should handle HTTP errors', async () => {
-    mockHttpGet.mockRejectedValue(new Error('Not found'));
+    mockGetExecution.mockRejectedValue(new Error('Not found'));
 
     const { result } = renderHook(() => useWorkflowExecution({ executionId: 'exec-1' }), {
       wrapper: createQueryClientWrapper(queryClient),
@@ -114,10 +119,9 @@ describe('useWorkflowExecution', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    const query = mockHttpGet.mock.calls[0][1].query;
-    // undefined should NOT appear in query (source uses `!= null`)
-    expect(query).not.toHaveProperty('includeInput');
-    // false should appear (it is not null/undefined)
-    expect(query).toHaveProperty('includeOutput', false);
+    expect(mockGetExecution).toHaveBeenCalledWith('exec-1', {
+      includeInput: undefined,
+      includeOutput: false,
+    });
   });
 });

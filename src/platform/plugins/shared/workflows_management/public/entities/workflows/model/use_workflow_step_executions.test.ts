@@ -9,17 +9,18 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import type { QueryClient } from '@kbn/react-query';
+import { useWorkflowsApi } from '@kbn/workflows-ui';
 import { useWorkflowStepExecutions } from './use_workflow_step_executions';
-import { useKibana } from '../../../hooks/use_kibana';
-import { createStartServicesMock, createUseKibanaMockValue } from '../../../mocks';
 import { createQueryClientWrapper, createTestQueryClient } from '../../../shared/test_utils';
 
-jest.mock('../../../hooks/use_kibana');
+jest.mock('@kbn/workflows-ui', () => ({
+  useWorkflowsApi: jest.fn(),
+}));
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseWorkflowsApi = useWorkflowsApi as jest.MockedFunction<typeof useWorkflowsApi>;
 
 describe('useWorkflowStepExecutions', () => {
-  let mockHttpGet: jest.Mock;
+  let mockGetWorkflowStepExecutions: jest.Mock;
   let queryClient: QueryClient;
 
   const stepExecutionsResponse = {
@@ -32,10 +33,10 @@ describe('useWorkflowStepExecutions', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    const services = createStartServicesMock();
-    mockHttpGet = jest.fn().mockResolvedValue(stepExecutionsResponse);
-    (services.http.get as jest.Mock) = mockHttpGet;
-    mockUseKibana.mockReturnValue(createUseKibanaMockValue(services));
+    mockGetWorkflowStepExecutions = jest.fn().mockResolvedValue(stepExecutionsResponse);
+    mockUseWorkflowsApi.mockReturnValue({
+      getWorkflowStepExecutions: mockGetWorkflowStepExecutions,
+    } as any);
     queryClient = createTestQueryClient();
   });
 
@@ -50,8 +51,9 @@ describe('useWorkflowStepExecutions', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(mockHttpGet).toHaveBeenCalledWith('/api/workflowExecutions/wf-1/steps', {
-      query: { page: undefined, size: 100 },
+    expect(mockGetWorkflowStepExecutions).toHaveBeenCalledWith('wf-1', {
+      page: undefined,
+      size: 100,
     });
     expect(result.current.data).toEqual(stepExecutionsResponse);
   });
@@ -62,7 +64,7 @@ describe('useWorkflowStepExecutions', () => {
     });
 
     expect(result.current.isFetching).toBe(false);
-    expect(mockHttpGet).not.toHaveBeenCalled();
+    expect(mockGetWorkflowStepExecutions).not.toHaveBeenCalled();
   });
 
   it('should include stepId in query when provided', async () => {
@@ -73,8 +75,10 @@ describe('useWorkflowStepExecutions', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(mockHttpGet).toHaveBeenCalledWith('/api/workflowExecutions/wf-1/steps', {
-      query: { stepId: 'fetch_data', page: undefined, size: 100 },
+    expect(mockGetWorkflowStepExecutions).toHaveBeenCalledWith('wf-1', {
+      stepId: 'fetch_data',
+      page: undefined,
+      size: 100,
     });
   });
 
@@ -86,13 +90,14 @@ describe('useWorkflowStepExecutions', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(mockHttpGet).toHaveBeenCalledWith('/api/workflowExecutions/wf-1/steps', {
-      query: { page: 2, size: 50 },
+    expect(mockGetWorkflowStepExecutions).toHaveBeenCalledWith('wf-1', {
+      page: 2,
+      size: 50,
     });
   });
 
   it('should handle HTTP errors', async () => {
-    mockHttpGet.mockRejectedValue(new Error('Server error'));
+    mockGetWorkflowStepExecutions.mockRejectedValue(new Error('Server error'));
 
     const { result } = renderHook(() => useWorkflowStepExecutions({ workflowId: 'wf-1' }), {
       wrapper: createQueryClientWrapper(queryClient),
