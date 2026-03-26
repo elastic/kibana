@@ -124,9 +124,12 @@ describe('getPipeline', () => {
     const pipelineSource = fs.readFileSync(pullRequestPipeline, 'utf8');
     const cancelablePipelines = [
       ...new Set(
-        [...pipelineSource.matchAll(/getPipeline\(\s*'([^']+\.yml)'\s*,\s*cancelable\s*\)/gs)].map(
-          ([, filename]) => path.resolve(repoRoot, filename)
-        )
+        [
+          ...pipelineSource.matchAll(/getPipeline\(\s*'([^']+\.yml)'\s*,\s*cancelable\s*\)/gs),
+          ...pipelineSource.matchAll(
+            /getPipeline\(\s*'([^']+\.yml)'\s*,\s*\{\s*\.\.\.cancelable,\s*gateServerlessStepsToMainPrBase:\s*true\s*\}\s*\)/gs
+          ),
+        ].map(([, filename]) => path.resolve(repoRoot, filename))
       ),
     ];
 
@@ -148,9 +151,12 @@ describe('getPipeline', () => {
     // Collect all cancelable pipeline files
     const cancelablePipelines = [
       ...new Set(
-        [...pipelineSource.matchAll(/getPipeline\(\s*'([^']+\.yml)'\s*,\s*cancelable\s*\)/gs)].map(
-          ([, filename]) => path.resolve(repoRoot, filename)
-        )
+        [
+          ...pipelineSource.matchAll(/getPipeline\(\s*'([^']+\.yml)'\s*,\s*cancelable\s*\)/gs),
+          ...pipelineSource.matchAll(
+            /getPipeline\(\s*'([^']+\.yml)'\s*,\s*\{\s*\.\.\.cancelable,\s*gateServerlessStepsToMainPrBase:\s*true\s*\}\s*\)/gs
+          ),
+        ].map(([, filename]) => path.resolve(repoRoot, filename))
       ),
     ];
 

@@ -9,16 +9,20 @@
 
 import { execFileSync } from 'child_process';
 import fs from 'fs';
-import { load as loadYaml } from 'js-yaml';
+import { dump as dumpYaml, load as loadYaml } from 'js-yaml';
 
 export function emitPipeline(pipelineSteps: string[]) {
   const pipelineStr = [...new Set(pipelineSteps)].join('\n');
   console.log(pipelineStr);
 }
 
+const SERVERLESS_CYPRESS_PR_IF = 'build.pull_request.base_branch == "main"';
+
 export interface GetPipelineOptions {
   removeSteps?: boolean;
   cancelOnGateFailure?: boolean;
+  /** If set, command steps whose `key` contains `serverless` get `if` so they run only when the PR targets `main`. */
+  gateServerlessStepsToMainPrBase?: boolean;
 }
 
 function isObj(x: unknown): x is Record<string, unknown> {
@@ -104,16 +108,50 @@ function registerCancelOnGateFailureMetadata(keys: string[]) {
   }
 }
 
+function isServerlessKeyedStep(step: Record<string, unknown>): boolean {
+  return typeof step.key === 'string' && /serverless/i.test(step.key);
+}
+
+function applyGateServerlessStepsToMainPrBase(filename: string, doc: unknown): void {
+  const steps = getSteps(filename, doc);
+
+  const walk = (stepList: unknown[]) => {
+    for (const step of stepList) {
+      if (!isObj(step)) {
+        continue;
+      }
+
+      if (typeof step.group === 'string' && Array.isArray(step.steps)) {
+        walk(step.steps as unknown[]);
+        continue;
+      }
+
+      if (isCommandStep(step) && isServerlessKeyedStep(step) && step.if === undefined) {
+        step.if = SERVERLESS_CYPRESS_PR_IF;
+      }
+    }
+  };
+
+  walk(steps);
+}
+
 export const getPipeline = (filename: string, options?: boolean | GetPipelineOptions) => {
   const opts: GetPipelineOptions =
     typeof options === 'boolean' ? { removeSteps: options } : { removeSteps: true, ...options };
 
   const str = fs.readFileSync(filename).toString();
 
-  if (opts.cancelOnGateFailure) {
+  if (opts.cancelOnGateFailure || opts.gateServerlessStepsToMainPrBase) {
     const doc = loadYaml(str);
-    const keys = extractStepKeys(filename, doc);
-    registerCancelOnGateFailureMetadata(keys);
+    if (opts.gateServerlessStepsToMainPrBase) {
+      applyGateServerlessStepsToMainPrBase(filename, doc);
+    }
+    if (opts.cancelOnGateFailure) {
+      const keys = extractStepKeys(filename, doc);
+      registerCancelOnGateFailureMetadata(keys);
+    }
+    const outStr = opts.gateServerlessStepsToMainPrBase ? dumpYaml(doc) : str;
+    return opts.removeSteps ? outStr.replace(/^steps:/, '') : outStr;
   }
 
   return opts.removeSteps ? str.replace(/^steps:/, '') : str;

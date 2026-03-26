@@ -299,10 +299,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       ALL_UI_TEST_SUITES
     ) {
       pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/cypress_burn.yml',
-          cancelable
-        )
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/cypress_burn.yml', {
+          ...cancelable,
+          gateServerlessStepsToMainPrBase: true,
+        })
       );
     }
 
@@ -320,10 +320,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       ALL_UI_TEST_SUITES
     ) {
       pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/defend_workflows.yml',
-          cancelable
-        )
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/defend_workflows.yml', {
+          ...cancelable,
+          gateServerlessStepsToMainPrBase: true,
+        })
       );
     }
 
@@ -363,37 +363,40 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       ALL_UI_TEST_SUITES
     ) {
       pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/ai_assistant.yml',
-          cancelable
-        )
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/ai_assistant.yml', {
+          ...cancelable,
+          gateServerlessStepsToMainPrBase: true,
+        })
       );
       pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/ai4dsoc.yml', cancelable)
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/ai4dsoc.yml', {
+          ...cancelable,
+          gateServerlessStepsToMainPrBase: true,
+        })
       );
       pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/automatic_import.yml',
-          cancelable
-        )
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/automatic_import.yml', {
+          ...cancelable,
+          gateServerlessStepsToMainPrBase: true,
+        })
       );
       pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/detection_engine.yml',
-          cancelable
-        )
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/detection_engine.yml', {
+          ...cancelable,
+          gateServerlessStepsToMainPrBase: true,
+        })
       );
       pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/entity_analytics.yml',
-          cancelable
-        )
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/entity_analytics.yml', {
+          ...cancelable,
+          gateServerlessStepsToMainPrBase: true,
+        })
       );
       pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/rule_management.yml',
-          cancelable
-        )
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/rule_management.yml', {
+          ...cancelable,
+          gateServerlessStepsToMainPrBase: true,
+        })
       );
     }
 
@@ -463,7 +466,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       ALL_UI_TEST_SUITES
     ) {
       pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/explore.yml', cancelable)
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/explore.yml', {
+          ...cancelable,
+          gateServerlessStepsToMainPrBase: true,
+        })
       );
     }
 
@@ -530,10 +536,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       ALL_UI_TEST_SUITES
     ) {
       pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/investigations.yml',
-          cancelable
-        )
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/investigations.yml', {
+          ...cancelable,
+          gateServerlessStepsToMainPrBase: true,
+        })
       );
     }
 
@@ -549,10 +555,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       !GITHUB_PR_LABELS.includes('ci:skip-cypress-osquery')
     ) {
       pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/osquery_cypress.yml',
-          cancelable
-        )
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/osquery_cypress.yml', {
+          ...cancelable,
+          gateServerlessStepsToMainPrBase: true,
+        })
       );
     }
 
@@ -570,7 +576,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(
         getPipeline(
           '.buildkite/pipelines/pull_request/security_solution/cloud_security_posture.yml',
-          cancelable
+          { ...cancelable, gateServerlessStepsToMainPrBase: true }
         )
       );
     }
@@ -590,7 +596,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(
         getPipeline(
           '.buildkite/pipelines/pull_request/security_solution/cspm_agentless_scout.yml',
-          cancelable
+          { ...cancelable, gateServerlessStepsToMainPrBase: true }
         )
       );
     }
@@ -601,10 +607,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       ALL_UI_TEST_SUITES
     ) {
       pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/gen_ai_evals.yml',
-          cancelable
-        )
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/gen_ai_evals.yml', {
+          ...cancelable,
+          gateServerlessStepsToMainPrBase: true,
+        })
       );
     }
 
@@ -629,10 +635,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       ALL_UI_TEST_SUITES
     ) {
       pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/asset_inventory.yml',
-          cancelable
-        )
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/asset_inventory.yml', {
+          ...cancelable,
+          gateServerlessStepsToMainPrBase: true,
+        })
       );
     }
 
