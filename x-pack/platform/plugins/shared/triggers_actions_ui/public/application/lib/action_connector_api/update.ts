@@ -22,6 +22,8 @@ const rewriteBodyRes: RewriteRequestCase<
   is_missing_secrets: isMissingSecrets,
   is_system_action: isSystemAction,
   is_connector_type_deprecated: isConnectorTypeDeprecated,
+  auth_mode: authMode,
+  user_auth_status: userAuthStatus,
   ...res
 }) => ({
   ...res,
@@ -31,6 +33,8 @@ const rewriteBodyRes: RewriteRequestCase<
   isMissingSecrets,
   isSystemAction,
   isConnectorTypeDeprecated,
+  ...(authMode !== undefined ? { authMode } : {}),
+  ...(userAuthStatus !== undefined ? { userAuthStatus } : {}),
 });
 
 export async function updateActionConnector({

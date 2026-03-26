@@ -370,6 +370,7 @@ describe('create()', () => {
         isSystemAction: false,
         isDeprecated: false,
         isConnectorTypeDeprecated: false,
+        userAuthStatus: 'not_applicable',
       });
 
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
@@ -538,6 +539,7 @@ describe('create()', () => {
         isSystemAction: false,
         isDeprecated: false,
         isConnectorTypeDeprecated: false,
+        userAuthStatus: 'not_applicable',
       });
 
       expect(authTypeRegistry.get).toHaveBeenCalledWith('basic');
@@ -600,6 +602,7 @@ describe('create()', () => {
         isDeprecated: false,
         isConnectorTypeDeprecated: false,
         authMode: 'per-user',
+        userAuthStatus: 'not_applicable',
       });
 
       expect(authTypeRegistry.get).toHaveBeenCalledWith('oauth_authorization_code');
@@ -651,6 +654,7 @@ describe('create()', () => {
         isSystemAction: false,
         isDeprecated: false,
         isConnectorTypeDeprecated: false,
+        userAuthStatus: 'not_applicable',
       });
 
       expect(authTypeRegistry.get).not.toHaveBeenCalled();

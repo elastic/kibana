@@ -28,6 +28,7 @@ describe('fetchConnector', () => {
       is_system_action: false,
       referenced_by_count: 0,
       is_connector_type_deprecated: false,
+      user_auth_status: 'not_applicable',
       secrets: {},
       config: {},
     };

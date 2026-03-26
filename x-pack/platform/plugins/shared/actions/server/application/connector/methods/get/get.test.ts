@@ -410,6 +410,7 @@ describe('get()', () => {
         isDeprecated: false,
         isConnectorTypeDeprecated: false,
         authMode: 'shared',
+        userAuthStatus: 'not_applicable',
       });
 
       expect(getConnectorSoMock).toHaveBeenCalledWith({
