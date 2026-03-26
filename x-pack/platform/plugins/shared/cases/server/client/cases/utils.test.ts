@@ -6,6 +6,8 @@
  */
 
 import { omit } from 'lodash';
+import type { CaseError } from '../../common/error';
+import { isCaseError } from '../../common/error';
 
 import {
   comment as commentObj,
@@ -101,8 +103,27 @@ describe('utils', () => {
       );
     });
 
-    it('returns undefined for unknown custom close reasons', () => {
-      expect(getCloseReasonIfValid('my custom reason')).toBeUndefined();
+    it('throws a CaseError with status 400 for unknown close reasons', () => {
+      let thrown: unknown;
+      try {
+        getCloseReasonIfValid('my custom reason');
+      } catch (e) {
+        thrown = e;
+      }
+      expect(isCaseError(thrown)).toBe(true);
+      expect((thrown as CaseError).message).toContain('Invalid close reason: "my custom reason"');
+      expect((thrown as CaseError).boomify().output.statusCode).toBe(400);
+    });
+
+    it('throws a CaseError with status 400 when the reason is not in the custom set', () => {
+      let thrown: unknown;
+      try {
+        getCloseReasonIfValid('unknown_reason', new Set(['allowed_reason']));
+      } catch (e) {
+        thrown = e;
+      }
+      expect(isCaseError(thrown)).toBe(true);
+      expect((thrown as CaseError).boomify().output.statusCode).toBe(400);
     });
 
     it('returns undefined for empty values', () => {

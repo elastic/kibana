@@ -6,11 +6,13 @@
  */
 
 import { isEmpty, uniqBy } from 'lodash';
+import Boom from '@hapi/boom';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { v4 } from 'uuid';
+import { createCaseError } from '../../common/error';
 import type {
   ActionConnector,
   Attachment,
@@ -81,7 +83,12 @@ export const getCloseReasonIfValid = (
   const isDefaultCaseCloseReason = DefaultCloseReasonRt.is(closeReason);
   const isCustomCaseCloseReason = customCloseReasons.has(closeReason);
 
-  return isDefaultCaseCloseReason || isCustomCaseCloseReason ? closeReason : undefined;
+  if (!isDefaultCaseCloseReason && !isCustomCaseCloseReason) {
+    const message = i18n.INVALID_CLOSE_REASON(closeReason);
+    throw createCaseError({ message, error: Boom.badRequest(message) });
+  }
+
+  return closeReason;
 };
 
 type LatestPushInfo = { index: number; pushedInfo: ExternalService | null } | null;
