@@ -70,7 +70,7 @@ export interface MetricsESQLResponse {
 export interface ParsedMetricItem {
   metricName: string;
   dataStream: string;
-  isDataStream: boolean;
+  readonly isDataStream: boolean;
   readonly units: NullableMetricUnit[];
   readonly metricTypes: MappingTimeSeriesMetricType[];
   readonly fieldTypes: ES_FIELD_TYPES[];

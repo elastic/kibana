@@ -21,8 +21,9 @@ import type { UnifiedHistogramServices } from '@kbn/unified-histogram/types';
  * or the user lacks permissions.
  */
 export const useStreamsNavigation = (services: UnifiedHistogramServices) => {
-  const canNavigate = Boolean(
-    services.discoverShared?.features.registry.getById('streams')
+  const canNavigate = useMemo(
+    () => Boolean(services.discoverShared?.features.registry.getById('streams')),
+    [services.discoverShared]
   );
 
   const locator = useMemo(

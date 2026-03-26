@@ -35,6 +35,11 @@ export const enrichWithDataStreamInfo = async (
   }
 
   try {
+    // Single _resolve/index call for all unique source names.
+    // showAllIndices covers hidden backing indices (.ds-*) for correct
+    // data stream detection. The comma-joined pattern is unlikely to be
+    // a problem in practice because of the quantity of unique sources,
+    // but if it ever is, we'll address it then.
     const resolved = await dataViews.getIndices({
       pattern: [...uniqueNames].join(','),
       showAllIndices: true,
