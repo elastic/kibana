@@ -16,7 +16,6 @@ import { mockSearchHit } from '../../shared/mocks/mock_search_hit';
 import { TestProvidersComponent } from '../../../../common/mock';
 import {
   HEADER_EVENT_TITLE_TEST_ID,
-  HEADER_TIMESTAMP_TEST_ID,
   SEVERITY_VALUE_TEST_ID,
 } from '../../../../flyout_v2/document/components/test_ids';
 
@@ -52,7 +51,7 @@ describe('<EventHeaderTitle />', () => {
   });
 
   it('should render component', () => {
-    const { getByTestId } = renderHeader({
+    const { getByTestId, getByText } = renderHeader({
       ...mockContextValue,
       searchHit: createSearchHit({
         'event.kind': ['event'],
@@ -64,7 +63,7 @@ describe('<EventHeaderTitle />', () => {
 
     expect(getByTestId(EVENT_HEADER_TEXT_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(SEVERITY_VALUE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(HEADER_TIMESTAMP_TEST_ID)).toHaveTextContent('Jan 1, 2020 @ 00:00:00.000');
+    expect(getByText('Jan 1, 2020 @ 00:00:00.000')).toBeInTheDocument();
   });
 
   it('should render corret title if event.kind is alert', () => {

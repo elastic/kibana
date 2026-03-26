@@ -26,10 +26,7 @@ import { Assignees } from './assignees';
 import { DocumentSeverity } from '../../../../flyout_v2/document/components/severity';
 import { FlyoutTitle } from '../../../../flyout_v2/shared/components/flyout_title';
 import { getDocumentTitle } from '../../../../flyout_v2/document/utils/get_header_title';
-import {
-  HEADER_TITLE_TEST_ID,
-  HEADER_TIMESTAMP_TEST_ID,
-} from '../../../../flyout_v2/document/components/test_ids';
+import { HEADER_TITLE_TEST_ID } from '../../../../flyout_v2/document/components/test_ids';
 import { AlertHeaderBlock } from '../../../shared/components/alert_header_block';
 
 // minWidth for each block, allows to switch for a 1 row 4 blocks to 2 rows with 2 block each
@@ -46,17 +43,10 @@ export const AlertHeaderTitle = memo(() => {
   const { eventId, scopeId, isRulePreview, refetchFlyoutData, getFieldsData, searchHit } =
     useDocumentDetailsContext();
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
-  const ruleId = useMemo(() => {
-    const value = getFieldValue(hit, ALERT_RULE_UUID);
-    return typeof value === 'string' ? value : null;
-  }, [hit]);
+  const ruleId = useMemo(() => getFieldValue(hit, ALERT_RULE_UUID) as string, [hit]);
   const href = useRuleDetailsLink({ ruleId: !isRulePreview ? ruleId : null }, urlParamOverride);
   const title = useMemo(() => getDocumentTitle(hit), [hit]);
-  const timestamp = useMemo(() => {
-    const value = getFieldValue(hit, TIMESTAMP);
-    return typeof value === 'string' ? value : null;
-  }, [hit]);
-  const timestampDate = useMemo(() => (timestamp ? new Date(timestamp) : null), [timestamp]);
+  const timestamp = useMemo(() => getFieldValue(hit, TIMESTAMP) as string, [hit]);
   const ruleTitle = useMemo(
     () =>
       href ? (
@@ -128,14 +118,8 @@ export const AlertHeaderTitle = memo(() => {
   return (
     <>
       <DocumentSeverity hit={hit} />
-      {timestampDate && (
-        <>
-          <EuiSpacer size="m" />
-          <span data-test-subj={HEADER_TIMESTAMP_TEST_ID}>
-            <PreferenceFormattedDate value={timestampDate} />
-          </span>
-        </>
-      )}
+      <EuiSpacer size="m" />
+      {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
       <EuiSpacer size="xs" />
       {ruleTitle}
       <EuiSpacer size="m" />

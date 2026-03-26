@@ -14,7 +14,6 @@ import { ALERT_RULE_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { HeaderTitle } from './components/header_title';
 import { DocumentSeverity } from './components/severity';
-import { HEADER_TIMESTAMP_TEST_ID } from './components/test_ids';
 import { useKibana } from '../../common/lib/kibana';
 import { getRuleDetailsUrl } from '../../common/components/link_to';
 import { PreferenceFormattedDate } from '../../common/components/formatted_date';
@@ -29,11 +28,7 @@ export interface HeaderProps {
 export const Header: FC<HeaderProps> = memo(({ hit }) => {
   const { services } = useKibana();
 
-  const timestamp = useMemo(() => {
-    const value = getFieldValue(hit, TIMESTAMP);
-    return typeof value === 'string' ? value : null;
-  }, [hit]);
-  const timestampDate = useMemo(() => (timestamp ? new Date(timestamp) : null), [timestamp]);
+  const timestamp = useMemo(() => getFieldValue(hit, TIMESTAMP) as string, [hit]);
   const ruleId = useMemo(
     () => (getFieldValue(hit, ALERT_RULE_UUID) as string | null) ?? null,
     [hit]
@@ -51,14 +46,8 @@ export const Header: FC<HeaderProps> = memo(({ hit }) => {
   return (
     <>
       <DocumentSeverity hit={hit} />
-      {timestampDate && (
-        <>
-          <EuiSpacer size="m" />
-          <span data-test-subj={HEADER_TIMESTAMP_TEST_ID}>
-            <PreferenceFormattedDate value={timestampDate} />
-          </span>
-        </>
-      )}
+      <EuiSpacer size="m" />
+      {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
       <EuiSpacer size="xs" />
       <HeaderTitle hit={hit} titleHref={ruleDetailsHref} />
     </>

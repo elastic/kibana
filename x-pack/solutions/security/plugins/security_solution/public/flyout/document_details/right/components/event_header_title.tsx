@@ -15,10 +15,7 @@ import { PreferenceFormattedDate } from '../../../../common/components/formatted
 import { DocumentSeverity } from '../../../../flyout_v2/document/components/severity';
 import { FlyoutTitle } from '../../../../flyout_v2/shared/components/flyout_title';
 import { getDocumentTitle } from '../../../../flyout_v2/document/utils/get_header_title';
-import {
-  HEADER_EVENT_TITLE_TEST_ID,
-  HEADER_TIMESTAMP_TEST_ID,
-} from '../../../../flyout_v2/document/components/test_ids';
+import { HEADER_EVENT_TITLE_TEST_ID } from '../../../../flyout_v2/document/components/test_ids';
 
 /**
  * Event details flyout right section header
@@ -27,23 +24,13 @@ export const EventHeaderTitle = memo(() => {
   const { searchHit } = useDocumentDetailsContext();
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
   const title = useMemo(() => getDocumentTitle(hit), [hit]);
-  const timestamp = useMemo(() => {
-    const value = getFieldValue(hit, TIMESTAMP);
-    return typeof value === 'string' ? value : null;
-  }, [hit]);
-  const timestampDate = useMemo(() => (timestamp ? new Date(timestamp) : null), [timestamp]);
+  const timestamp = useMemo(() => getFieldValue(hit, TIMESTAMP) as string, [hit]);
 
   return (
     <>
       <DocumentSeverity hit={hit} />
-      {timestampDate && (
-        <>
-          <EuiSpacer size="m" />
-          <span data-test-subj={HEADER_TIMESTAMP_TEST_ID}>
-            <PreferenceFormattedDate value={timestampDate} />
-          </span>
-        </>
-      )}
+      <EuiSpacer size="m" />
+      {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
       <EuiSpacer size="xs" />
       <FlyoutTitle
         title={title}

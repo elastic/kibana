@@ -28,7 +28,6 @@ import { mockSearchHit } from '../../shared/mocks/mock_search_hit';
 import { TestProviders } from '../../../../common/mock';
 import {
   HEADER_TITLE_TEST_ID,
-  HEADER_TIMESTAMP_TEST_ID,
   SEVERITY_VALUE_TEST_ID,
 } from '../../../../flyout_v2/document/components/test_ids';
 
@@ -73,11 +72,11 @@ describe('<AlertHeaderTitle />', () => {
   });
 
   it('should render component', () => {
-    const { getByTestId, queryByTestId } = renderHeader(mockContextValue);
+    const { getByTestId, getByText, queryByTestId } = renderHeader(mockContextValue);
 
     expect(getByTestId(HEADER_TEXT_TEST_ID)).toHaveTextContent('rule-name');
     expect(getByTestId(SEVERITY_VALUE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(HEADER_TIMESTAMP_TEST_ID)).toHaveTextContent('Jan 1, 2020 @ 00:00:00.000');
+    expect(getByText('Jan 1, 2020 @ 00:00:00.000')).toBeInTheDocument();
     expect(getByTestId(ALERT_SUMMARY_PANEL_TEST_ID)).toBeInTheDocument();
 
     expect(getByTestId(STATUS_TITLE_TEST_ID)).toHaveTextContent('Status');
