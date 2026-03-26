@@ -594,9 +594,9 @@ export const WorkflowYAMLEditor = ({
 
   const editorCommands: EditorCommand[] = useMemo(
     () => [
-      { id: 'foldAll', label: 'Collapse all' },
-      { id: 'unfoldAll', label: 'Expand all' },
-      { id: 'find', label: 'Find and Replace' },
+      { id: 'foldAll', label: 'Collapse all', iconType: 'minusInCircle' },
+      { id: 'unfoldAll', label: 'Expand all', iconType: 'plusInCircle' },
+      { id: 'find', label: 'Find and Replace', iconType: 'search' },
     ],
     []
   );

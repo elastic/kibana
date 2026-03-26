@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiSelectableOption, UseEuiTheme } from '@elastic/eui';
+import type { EuiSelectableOption, IconType, UseEuiTheme } from '@elastic/eui';
 import {
   EuiBetaBadge,
   EuiButtonEmpty,
@@ -41,6 +41,8 @@ import {
 export interface EditorCommand {
   id: string;
   label: string;
+  iconType: IconType;
+  description?: string;
 }
 
 export interface JumpToStepEntry {
@@ -93,7 +95,8 @@ export function ActionsMenu({
       setOptions(nextOptions);
     }
   }, [defaultOptions, currentPath]);
-  const renderActionOption = (option: ActionOptionData, searchValue: string) => {
+  const renderActionOption = (rawOption: EuiSelectableOption, searchValue: string) => {
+    const option = rawOption as unknown as ActionOptionData;
     const shouldUseGroupStyle = isActionGroup(option);
     return (
       <EuiFlexGroup alignItems="center" css={styles.actionOption}>
@@ -164,8 +167,84 @@ export function ActionsMenu({
     );
   };
 
+  const displayOptions: EuiSelectableOption[] = useMemo(() => {
+    const result: EuiSelectableOption[] = [];
+
+    if (currentPath.length === 0) {
+      result.push({ label: 'Add step', isGroupLabel: true });
+    }
+    for (const opt of options) {
+      result.push(opt as unknown as EuiSelectableOption);
+    }
+
+    if (searchTerm.length > 0 && currentPath.length === 0) {
+      result.push({
+        label: i18n.translate('workflows.actionsMenu.viewAllSteps', {
+          defaultMessage: 'View all steps',
+        }),
+        id: '__viewAll',
+        iconType: 'arrowRight',
+      } as unknown as EuiSelectableOption);
+    }
+
+    if (currentPath.length === 0) {
+      const term = searchTerm.trim().toLowerCase();
+      const filteredCmds = (commands ?? []).filter(
+        (cmd) => !term || cmd.label.toLowerCase().includes(term)
+      );
+      if (filteredCmds.length > 0) {
+        result.push({ label: 'Commands', isGroupLabel: true });
+        for (const cmd of filteredCmds) {
+          result.push({
+            id: `__cmd:${cmd.id}`,
+            label: cmd.label,
+            iconType: cmd.iconType,
+            description: cmd.description ?? '',
+          } as unknown as EuiSelectableOption);
+        }
+      }
+
+      if (searchTerm.trimStart().startsWith('#')) {
+        const jumpTerm = term.slice(1).trim();
+        const filteredJumps = (jumpToStepEntries ?? []).filter(
+          (entry) => !jumpTerm || entry.id.toLowerCase().includes(jumpTerm)
+        );
+        if (filteredJumps.length > 0) {
+          result.push({ label: 'Jump to a step', isGroupLabel: true });
+          for (const entry of filteredJumps) {
+            result.push({
+              id: `__jump:${entry.id}`,
+              label: entry.label,
+              iconType: 'pin',
+              description: '',
+            } as unknown as EuiSelectableOption);
+          }
+        }
+      }
+    }
+
+    return result;
+  }, [options, searchTerm, commands, jumpToStepEntries, currentPath]);
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleChange = (_: Array<ActionOptionData>, __: any, selectedOption: ActionOptionData) => {
+  const handleChange = (_: any, __: any, selectedOption: any) => {
+    const optionId: string = selectedOption?.id ?? '';
+
+    if (optionId === '__viewAll') {
+      setSearchTerm('');
+      setOptions(defaultOptions);
+      return;
+    }
+    if (optionId.startsWith('__cmd:')) {
+      onCommandSelected?.(optionId.slice(6));
+      return;
+    }
+    if (optionId.startsWith('__jump:')) {
+      const entry = jumpToStepEntries?.find((e) => e.id === optionId.slice(7));
+      if (entry) onJumpToStep?.(entry.lineStart);
+      return;
+    }
+
     if (isActionGroup(selectedOption)) {
       setCurrentPath([...currentPath, selectedOption.id]);
       setSearchTerm('');
@@ -224,18 +303,9 @@ export function ActionsMenu({
   const isActionSearchMatch = (option: ActionOptionData, normalizedTerm: string) =>
     getActionMatchRank(option, normalizedTerm) <= MAX_ACTION_MATCH_RANK;
 
-  const optionMatcher = ({
-    option,
-    searchValue,
-    normalizedSearchValue,
-  }: {
-    option: ActionOptionData;
-    searchValue: string;
-    normalizedSearchValue: string;
-  }) => {
-    const term = searchValue.trim().toLowerCase() || normalizedSearchValue;
-    return isActionSearchMatch(option, term);
-  };
+  // Filtering is handled by handleSearchChange + displayOptions;
+  // override EuiSelectable's built-in matcher so it doesn't double-filter.
+  const optionMatcher = () => true;
 
   const handleSearchChange = (searchValue: string) => {
     setSearchTerm(searchValue);
@@ -262,9 +332,11 @@ export function ActionsMenu({
 
   return (
     <EuiSelectable
-      aria-label="Selectable example with custom list items"
+      aria-label={i18n.translate('workflows.actionsMenu.ariaLabel', {
+        defaultMessage: 'Actions menu',
+      })}
       searchable
-      options={options as EuiSelectableOption<ActionOptionData>[]}
+      options={displayOptions}
       onChange={handleChange}
       optionMatcher={optionMatcher}
       searchProps={{
@@ -313,160 +385,12 @@ export function ActionsMenu({
             <EuiFlexItem>{search}</EuiFlexItem>
           </EuiFlexGroup>
 
-          <EuiTitle size="xxxs" css={styles.sectionLabel}>
-            <h4>
-              <FormattedMessage id="workflows.actionsMenu.addStep" defaultMessage="Add step" />
-            </h4>
-          </EuiTitle>
           {list}
-          {searchTerm.length > 0 && currentPath.length === 0 && (
-            <EuiFlexGroup
-              css={styles.viewAllSteps}
-              justifyContent="spaceBetween"
-              alignItems="center"
-            >
-              <EuiButtonEmpty
-                size="xs"
-                iconType="arrowRight"
-                iconSide="right"
-                onClick={() => {
-                  setSearchTerm('');
-                  setOptions(defaultOptions);
-                }}
-              >
-                <FormattedMessage
-                  id="workflows.actionsMenu.viewAllSteps"
-                  defaultMessage="View all steps"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexGroup>
-          )}
-          <CommandsAndStepsSection
-            searchTerm={searchTerm}
-            commands={commands}
-            jumpToStepEntries={jumpToStepEntries}
-            onCommandSelected={onCommandSelected}
-            onJumpToStep={onJumpToStep}
-          />
         </>
       )}
     </EuiSelectable>
   );
 }
-
-function CommandsAndStepsSection({
-  searchTerm,
-  commands,
-  jumpToStepEntries,
-  onCommandSelected,
-  onJumpToStep,
-}: {
-  searchTerm: string;
-  commands?: EditorCommand[];
-  jumpToStepEntries?: JumpToStepEntry[];
-  onCommandSelected?: (commandId: string) => void;
-  onJumpToStep?: (lineNumber: number) => void;
-}) {
-  const styles = useMemoCss(sectionStyles);
-
-  const term = searchTerm.trim().toLowerCase();
-  const isJumpToStepSearch = searchTerm.trimStart().startsWith('#');
-
-  const filteredCommands = useMemo(
-    () => (commands ?? []).filter((cmd) => !term || cmd.label.toLowerCase().includes(term)),
-    [commands, term]
-  );
-
-  const jumpTerm = isJumpToStepSearch ? term.slice(1).trim() : '';
-  const filteredSteps = useMemo(
-    () =>
-      isJumpToStepSearch
-        ? (jumpToStepEntries ?? []).filter(
-            (entry) => !jumpTerm || entry.id.toLowerCase().includes(jumpTerm)
-          )
-        : [],
-    [jumpToStepEntries, jumpTerm, isJumpToStepSearch]
-  );
-
-  if (filteredCommands.length === 0 && filteredSteps.length === 0) return null;
-
-  return (
-    <div css={styles.container}>
-      {filteredCommands.length > 0 && (
-        <>
-          <EuiTitle size="xxxs" css={styles.sectionTitle}>
-            <h4>
-              <FormattedMessage
-                id="workflows.actionsMenu.commandsSection"
-                defaultMessage="Commands"
-              />
-            </h4>
-          </EuiTitle>
-          {filteredCommands.map((cmd) => (
-            <button
-              key={cmd.id}
-              type="button"
-              css={styles.entry}
-              onClick={() => onCommandSelected?.(cmd.id)}
-            >
-              <EuiHighlight search={searchTerm}>{cmd.label}</EuiHighlight>
-            </button>
-          ))}
-        </>
-      )}
-      {filteredSteps.length > 0 && (
-        <>
-          <EuiTitle size="xxxs" css={styles.sectionTitle}>
-            <h4>
-              <FormattedMessage
-                id="workflows.actionsMenu.jumpToStepSection"
-                defaultMessage="Jump to a step"
-              />
-            </h4>
-          </EuiTitle>
-          {filteredSteps.map((entry) => (
-            <button
-              key={entry.id}
-              type="button"
-              css={styles.entry}
-              onClick={() => onJumpToStep?.(entry.lineStart)}
-            >
-              <EuiHighlight search={searchTerm}>{entry.label}</EuiHighlight>
-            </button>
-          ))}
-        </>
-      )}
-    </div>
-  );
-}
-
-const sectionStyles = {
-  container: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      paddingBottom: euiTheme.size.s,
-    }),
-  sectionTitle: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      padding: `${euiTheme.size.s} ${euiTheme.size.m} ${euiTheme.size.xxs}`,
-      color: euiTheme.colors.textSubdued,
-      borderTop: euiTheme.border.thin,
-    }),
-  entry: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      display: 'block',
-      width: '100%',
-      textAlign: 'left',
-      padding: `${euiTheme.size.xs} ${euiTheme.size.m}`,
-      background: 'none',
-      border: 'none',
-      cursor: 'pointer',
-      fontSize: euiTheme.size.m,
-      color: euiTheme.colors.textParagraph,
-      '&:hover': {
-        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-      },
-    }),
-};
 
 const componentStyles = {
   selectable: ({ euiTheme }: UseEuiTheme) =>
@@ -486,17 +410,6 @@ const componentStyles = {
   header: ({ euiTheme }: UseEuiTheme) =>
     css({
       padding: euiTheme.size.m,
-    }),
-  sectionLabel: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      padding: `${euiTheme.size.s} ${euiTheme.size.m} ${euiTheme.size.xs}`,
-      color: euiTheme.colors.textSubdued,
-      borderTop: euiTheme.border.thin,
-    }),
-  viewAllSteps: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      padding: `${euiTheme.size.xs} ${euiTheme.size.m}`,
-      borderTop: euiTheme.border.thin,
     }),
   actionOption: css({
     gap: '12px',
