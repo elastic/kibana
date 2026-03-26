@@ -190,6 +190,15 @@ export const restoreEnvSnapshot = async ({
   const systemIndicesFlag = parseRepeatableFlag(flags['system-indices']);
   const systemIndices = systemIndicesFlag.length > 0 ? systemIndicesFlag : DEFAULT_SYSTEM_INDICES;
 
+  for (const pattern of systemIndices) {
+    if (!pattern.startsWith('.kibana')) {
+      throw new Error(
+        `--system-indices patterns must start with ".kibana", got "${pattern}". ` +
+          `Only .kibana system indices are supported for restore.`
+      );
+    }
+  }
+
   log.info(`Restore: ${snapshotName} | ES: ${config.esUrl}`);
   log.info(`GCS bucket: ${gcsBucket} | Base path: ${gcsBasePath}`);
   log.info(`Data indices: ${[logsIndex, ...alertIndices].join(', ')}`);
