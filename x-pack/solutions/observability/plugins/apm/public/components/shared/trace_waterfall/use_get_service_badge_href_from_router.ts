@@ -21,7 +21,11 @@ export function useGetServiceBadgeHrefFromRouter(): WaterfallGetServiceBadgeHref
     (serviceName: string) => {
       return router.link('/services/{serviceName}/overview', {
         path: { serviceName },
-        query: { ...query, serviceGroup: '' },
+        query: {
+          ...query,
+          kuery: '',
+          serviceGroup: '',
+        },
       });
     },
     [query, router]

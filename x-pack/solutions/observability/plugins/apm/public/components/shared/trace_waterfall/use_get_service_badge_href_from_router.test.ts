@@ -19,7 +19,9 @@ describe('useGetServiceBadgeHrefFromRouter', () => {
   const defaultQuery = {
     rangeFrom: 'now-15m',
     rangeTo: 'now',
-    environment: 'ENVIRONMENT_ALL',
+    environment: 'production',
+    comparisonEnabled: true,
+    transactionName: 'GET /api/orders',
     serviceGroup: 'my-group',
   };
 
@@ -47,11 +49,11 @@ describe('useGetServiceBadgeHrefFromRouter', () => {
 
     expect(mockLink).toHaveBeenCalledWith('/services/{serviceName}/overview', {
       path: { serviceName: 'my-service' },
-      query: expect.objectContaining({ rangeFrom: 'now-15m', rangeTo: 'now' }),
+      query: { ...defaultQuery, kuery: '', serviceGroup: '' },
     });
   });
 
-  it('preserves existing query params when building the href', () => {
+  it('preserves rangeFrom, rangeTo, environment and comparisonEnabled from the current route', () => {
     const { result } = renderHook(() => useGetServiceBadgeHrefFromRouter());
 
     result.current('my-service');
@@ -62,13 +64,14 @@ describe('useGetServiceBadgeHrefFromRouter', () => {
         query: expect.objectContaining({
           rangeFrom: 'now-15m',
           rangeTo: 'now',
-          environment: 'ENVIRONMENT_ALL',
+          environment: 'production',
+          comparisonEnabled: true,
         }),
       })
     );
   });
 
-  it('resets serviceGroup to empty string regardless of current value', () => {
+  it('resets kuery and serviceGroup regardless of current values', () => {
     const { result } = renderHook(() => useGetServiceBadgeHrefFromRouter());
 
     result.current('my-service');
@@ -76,7 +79,7 @@ describe('useGetServiceBadgeHrefFromRouter', () => {
     expect(mockLink).toHaveBeenCalledWith(
       expect.any(String),
       expect.objectContaining({
-        query: expect.objectContaining({ serviceGroup: '' }),
+        query: expect.objectContaining({ kuery: '', serviceGroup: '' }),
       })
     );
   });
