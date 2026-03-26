@@ -10,6 +10,7 @@
 /* eslint-disable no-console */
 /* global __KBN_HMR_PORT__, __webpack_hash__ */
 
+var LOG_PREFIX = '[@kbn/rspack-optimizer][hmr]';
 var lastHash;
 var overlayElement = null;
 
@@ -121,7 +122,7 @@ if (module.hot) {
       var data = JSON.parse(event.data);
 
       if (data.errors && data.errors.length > 0) {
-        console.error('[HMR] Build failed with ' + data.errors.length + ' error(s)');
+        console.error(LOG_PREFIX + ' Build failed with ' + data.errors.length + ' error(s)');
         showOverlay(data.errors);
         return;
       }
@@ -130,6 +131,9 @@ if (module.hot) {
 
       hideOverlay();
 
+      var lastTime = data.time;
+      var lastFiles = data.files;
+
       upToDate(data.hash);
       if (upToDate()) return;
 
@@ -137,17 +141,22 @@ if (module.hot) {
         .check({ ignoreDeclined: true, ignoreUnaccepted: true })
         .then(function (updatedModules) {
           if (!updatedModules || updatedModules.length === 0) {
-            console.log('[HMR] Nothing to update – reloading page');
+            console.log(LOG_PREFIX + ' Nothing to update \u2013 reloading page');
             window.location.reload();
             return;
           }
-          console.log('[HMR] Updated', updatedModules.length, 'module(s)');
+          var fileLabel = lastFiles && lastFiles.length > 0
+            ? lastFiles.map(function (f) { return f.split('/').pop(); }).join(', ')
+            : '';
+          var timeLabel = lastTime ? ' in ' + lastTime + 's' : '';
+          var prefix = fileLabel ? fileLabel + ' \u2192 ' : '';
+          console.log(LOG_PREFIX + ' ' + prefix + 'Updated ' + updatedModules.length + ' module(s)' + timeLabel);
           if (!upToDate()) {
             module.hot.check({ ignoreDeclined: true, ignoreUnaccepted: true });
           }
         })
         .catch(function (err) {
-          console.warn('[HMR] Update failed, reloading page:', err);
+          console.warn(LOG_PREFIX + ' Update failed, reloading page:', err);
           window.location.reload();
         });
     } catch (e) {
@@ -159,5 +168,5 @@ if (module.hot) {
     // EventSource auto-reconnects; nothing to do
   };
 
-  console.log('[HMR] Connected to SSE server on port ' + __KBN_HMR_PORT__);
+  console.log(LOG_PREFIX + ' Connected on port ' + __KBN_HMR_PORT__);
 }

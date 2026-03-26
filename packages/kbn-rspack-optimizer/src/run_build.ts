@@ -302,7 +302,12 @@ async function runWatchBuild(
 
           copyBundlesToPluginDirs(repoRoot, log, true);
           if (stats.hash && hmrServer) {
-            hmrServer.broadcast(stats.hash);
+            const changedFiles = compiler.modifiedFiles
+              ? [...compiler.modifiedFiles]
+                  .filter((f) => /\.\w+$/.test(f))
+                  .map((f) => f.replace(repoRoot + '/', ''))
+              : [];
+            hmrServer.broadcast(stats.hash, rebuildTime, changedFiles);
           }
 
           const isVerbose = typeof log?.getWriters === 'function' && log.getWriters().some(

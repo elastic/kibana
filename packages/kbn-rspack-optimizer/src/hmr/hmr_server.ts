@@ -60,8 +60,8 @@ export class HmrServer {
     return this.assignedPort;
   }
 
-  broadcast(hash: string): void {
-    const payload = `data: ${JSON.stringify({ hash })}\n\n`;
+  broadcast(hash: string, time?: string, files?: string[]): void {
+    const payload = `data: ${JSON.stringify({ hash, time, files })}\n\n`;
     for (const client of this.clients) {
       client.write(payload);
     }

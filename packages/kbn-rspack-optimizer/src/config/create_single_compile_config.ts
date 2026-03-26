@@ -746,9 +746,9 @@ ${coreRegistrations}
 window.__kbnPluginsLoaded = Promise.all([
 ${pluginImports}
 ]).then(() => {
-  console.log('[rspack] All plugins loaded');
+  console.log('[@kbn/rspack-optimizer] All plugins loaded');
 }).catch(err => {
-  console.error('[rspack] Failed to load plugins:', err);
+  console.error('[@kbn/rspack-optimizer] Failed to load plugins:', err);
   throw err;
 });
 
