@@ -83,13 +83,15 @@ describe('useGetEndpointScriptsList hook', () => {
         os: ['windows'],
         fileType: ['script'],
         category: ['dataCollection'],
+        searchTerms: ['test search'],
       })
     );
 
     expect(apiMocks.responseProvider.getScriptsList).toHaveBeenCalledWith(
       expect.objectContaining({
         query: expect.objectContaining({
-          kuery: 'platform:"windows" AND fileType:"script" AND tags:"dataCollection"',
+          kuery:
+            'platform:"windows" AND fileType:"script" AND tags:"dataCollection" AND (name:"*test*search*" OR updatedBy:"*test*search*" OR fileHash:"*test*search*")',
         }),
       })
     );
@@ -101,6 +103,7 @@ describe('useGetEndpointScriptsList hook', () => {
         os: ['linux', 'windows'],
         fileType: ['script', 'archive'],
         category: ['dataCollection', 'userManagement'],
+        searchTerms: ['test search', 'another search term'],
       })
     );
 
@@ -108,7 +111,7 @@ describe('useGetEndpointScriptsList hook', () => {
       expect.objectContaining({
         query: expect.objectContaining({
           kuery:
-            '(platform:"linux" OR platform:"windows") AND (fileType:"script" OR fileType:"archive") AND (tags:"dataCollection" OR tags:"userManagement")',
+            '(platform:"linux" OR platform:"windows") AND (fileType:"script" OR fileType:"archive") AND (tags:"dataCollection" OR tags:"userManagement") AND ((name:"*test*search*" OR updatedBy:"*test*search*" OR fileHash:"*test*search*") OR (name:"*another*search*term*" OR updatedBy:"*another*search*term*" OR fileHash:"*another*search*term*"))',
         }),
       })
     );

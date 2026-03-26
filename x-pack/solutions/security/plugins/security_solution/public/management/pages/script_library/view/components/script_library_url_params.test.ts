@@ -14,6 +14,7 @@ describe('#scriptLibraryFiltersFromUrlParams', () => {
       fileType: [],
       category: [],
       os: [],
+      searchTerms: [],
     });
   });
 
@@ -23,7 +24,7 @@ describe('#scriptLibraryFiltersFromUrlParams', () => {
         os: ['windows', 'linux'],
         fileType: ['archive', 'script'],
         category: ['discovery', 'userManagement'],
-
+        searchTerms: ['test'],
         page: 2,
         pageSize: 20,
         sortField: 'updatedBy',
@@ -33,7 +34,7 @@ describe('#scriptLibraryFiltersFromUrlParams', () => {
       os: ['linux', 'windows'],
       fileType: ['archive', 'script'],
       category: ['discovery', 'userManagement'],
-
+      searchTerms: ['test'],
       page: 2,
       pageSize: 20,
       sortField: 'updatedBy',
@@ -51,6 +52,7 @@ describe('#scriptLibraryFiltersFromUrlParams', () => {
       fileType: ['script'],
       category: [],
       os: [],
+      searchTerms: [],
     });
   });
 
@@ -64,6 +66,7 @@ describe('#scriptLibraryFiltersFromUrlParams', () => {
       fileType: [],
       category: [],
       os: ['windows'],
+      searchTerms: [],
     });
   });
 
@@ -77,6 +80,7 @@ describe('#scriptLibraryFiltersFromUrlParams', () => {
       fileType: [],
       category: ['discovery'],
       os: [],
+      searchTerms: [],
     });
   });
 
@@ -87,12 +91,13 @@ describe('#scriptLibraryFiltersFromUrlParams', () => {
         pageSize: 0,
         sortField: 'createdBy',
         sortDirection: 'asc',
+        searchTerms: ['test'],
       })
     ).toEqual({
       category: [],
       fileType: [],
       os: [],
-
+      searchTerms: ['test'],
       sortField: 'createdBy',
       sortDirection: 'asc',
     });
@@ -101,6 +106,7 @@ describe('#scriptLibraryFiltersFromUrlParams', () => {
   it('should ignore invalid sorting URL params', () => {
     expect(
       scriptLibraryFiltersFromUrlParams({
+        searchTerms: ['test'],
         page: 12,
         pageSize: 50,
         sortField: 'invalid_field' as ScriptLibraryUrlParams['sortField'],
@@ -110,7 +116,7 @@ describe('#scriptLibraryFiltersFromUrlParams', () => {
       category: [],
       fileType: [],
       os: [],
-
+      searchTerms: ['test'],
       page: 12,
       pageSize: 50,
     });
@@ -119,13 +125,14 @@ describe('#scriptLibraryFiltersFromUrlParams', () => {
   it('should handle partial URL params', () => {
     expect(
       scriptLibraryFiltersFromUrlParams({
+        searchTerms: ['test'],
         page: 1,
       })
     ).toEqual({
       category: [],
       fileType: [],
       os: [],
-
+      searchTerms: ['test'],
       page: 1,
     });
   });
