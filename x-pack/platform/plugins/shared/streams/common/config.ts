@@ -13,6 +13,9 @@ export const configSchema = schema.object({
     enabled: schema.boolean({ defaultValue: false }),
     stream_definitions: schema.arrayOf(schema.any(), { defaultValue: [] }),
   }),
+  significantEvents: schema.object({
+    useMemory: schema.maybe(schema.boolean()),
+  }),
 });
 
 export type StreamsConfig = TypeOf<typeof configSchema>;

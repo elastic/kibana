@@ -48,6 +48,7 @@ import type {
 } from './types';
 import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
+import { ModelSettingsConfigClientImpl } from './lib/saved_objects/significant_events/model_settings_config_client';
 import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wired_stream_views';
 import { FeatureService } from './lib/streams/feature/feature_service';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
@@ -369,6 +370,24 @@ export class StreamsPlugin
         })
         .catch((error) => {
           this.logger.error(`Error preconfiguring streams: ${error}`);
+        });
+    }
+
+    if (this.config.significantEvents.useMemory !== undefined) {
+      core
+        .getStartServices()
+        .then(async ([coreStart]) => {
+          const soClient = coreStart.savedObjects.getUnsafeInternalClient();
+          const modelSettingsClient = new ModelSettingsConfigClientImpl(soClient, this.logger);
+          await modelSettingsClient.updateSettings({
+            useMemory: this.config.significantEvents.useMemory,
+          });
+          this.logger.info(
+            `Preconfigured significantEvents.useMemory: ${this.config.significantEvents.useMemory}`
+          );
+        })
+        .catch((error) => {
+          this.logger.error(`Error preconfiguring significant events settings: ${error}`);
         });
     }
 

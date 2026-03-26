@@ -6,22 +6,21 @@
  */
 
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
-import { MessageRole } from '@kbn/inference-common';
-import type { Insight } from '@kbn/streams-schema';
+import type { BaseFeature, GeneratedSignificantEventQuery, Insight } from '@kbn/streams-schema';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
+import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import type { TaskContext } from '.';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskParams } from '../types';
 import { getErrorMessage } from '../../streams/errors/parse_error';
 import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
 import { MemoryServiceImpl } from '../../memory';
-import {
-  sigeventsSynthesisPrompt,
-  parseSynthesisResponse,
-} from '../../../agent_builder/hooks/memory/sigevents_synthesis_prompt';
+import { MemorySynthesisPrompt } from './memory_generation_prompt';
 
 export interface MemoryGenerationTaskParams {
-  insights: Insight[];
+  insights?: Insight[];
+  features?: BaseFeature[];
+  queries?: Array<{ streamName: string; query: GeneratedSignificantEventQuery }>;
 }
 
 export interface MemoryGenerationTaskResult {
@@ -41,7 +40,7 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
                 throw new Error('Request is required to run this task');
               }
 
-              const { insights, _task } = runContext.taskInstance
+              const { insights, features, queries, _task } = runContext.taskInstance
                 .params as TaskParams<MemoryGenerationTaskParams>;
 
               const { taskClient, inferenceClient, modelSettingsClient, uiSettingsClient } =
@@ -51,15 +50,24 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
 
               const taskLogger = taskContext.logger.get('memory_generation');
 
-              if (!insights || insights.length === 0) {
-                taskLogger.debug('No insights provided, skipping memory generation');
+              const streamGroups = groupInputsByStream({ insights, features, queries });
+
+              if (streamGroups.length === 0) {
+                taskLogger.info('No inputs provided, skipping memory generation');
                 await taskClient.complete<MemoryGenerationTaskParams, MemoryGenerationTaskResult>(
                   _task,
-                  { insights },
+                  { insights, features, queries },
                   { streamsProcessed: 0 }
                 );
                 return;
               }
+
+              taskLogger.info(
+                `Starting memory generation: ${streamGroups.length} stream(s), ` +
+                  `${insights?.length ?? 0} insight(s), ` +
+                  `${features?.length ?? 0} feature(s), ` +
+                  `${queries?.length ?? 0} query/queries`
+              );
 
               const settings = await modelSettingsClient.getSettings();
               const connectorId = await resolveConnectorId({
@@ -67,7 +75,7 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
                 uiSettingsClient,
                 logger: taskLogger,
               });
-              taskLogger.debug(`Using connector ${connectorId} for memory generation`);
+              taskLogger.info(`Using connector ${connectorId} for memory generation`);
 
               const memory = new MemoryServiceImpl({
                 logger: taskLogger.get('memory'),
@@ -75,90 +83,142 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
               });
 
               try {
-                const streamGroups = groupInsightsByStream(insights);
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
 
-                for (const { streamName, streamInsights } of streamGroups) {
+                for (const { streamName, indicators } of streamGroups) {
                   const spaceId = 'default';
 
-                  // Gather existing entries under this stream's namespace
+                  taskLogger.info(
+                    `Processing stream "${streamName}" with ${indicators.length} indicator(s) via reasoning agent`
+                  );
+
+                  const indicatorSummaries = buildIndicatorSummaries(indicators);
+
                   const allEntries = await memory.listAll({ space: spaceId });
-                  const existingEntries = allEntries
-                    .filter(
-                      (e) =>
-                        e.path.startsWith(`architecture/${streamName}/`) ||
-                        e.path.startsWith(`operations/${streamName}/`)
-                    )
-                    .map((e) => ({
-                      path: e.path,
-                      title: e.title,
-                      content: e.content,
-                    }));
+                  const existingEntries = allEntries.filter(
+                    (e) =>
+                      e.path.startsWith(`architecture/${streamName}/`) ||
+                      e.path.startsWith(`operations/${streamName}/`)
+                  );
 
-                  const indicators = JSON.stringify(streamInsights, null, 2);
-
-                  const prompt = sigeventsSynthesisPrompt({
-                    streamName,
-                    indicators,
-                    existingEntries: existingEntries.length > 0 ? existingEntries : undefined,
-                  });
-
-                  const response = await boundInferenceClient.chatComplete({
-                    messages: [{ role: MessageRole.User, content: prompt }],
-                  });
-
-                  const synthesized = response.content;
-
-                  if (!synthesized || synthesized.length < 20) {
-                    taskLogger.debug(`Skipping empty synthesis for stream ${streamName}`);
-                    continue;
-                  }
-
-                  const pages = parseSynthesisResponse(synthesized);
-                  if (pages.length === 0) {
-                    taskLogger.debug(`No valid wiki pages parsed for stream ${streamName}`);
-                    continue;
-                  }
-
-                  const user = 'agent:memory_generation';
-
-                  for (const page of pages) {
-                    const existing = await memory.getByPath({
-                      path: page.path,
-                      space: spaceId,
-                    });
-
-                    if (existing) {
-                      await memory.update({
-                        id: existing.id,
-                        content: page.content,
-                        title: page.title,
-                        space: spaceId,
-                        user,
-                        changeSummary: 'Updated from discovery insights',
-                      });
-                    } else {
-                      await memory.create({
-                        path: page.path,
-                        title: page.title,
-                        content: page.content,
-                        tags: [...page.tags, 'auto-generated'],
-                        space: spaceId,
-                        user,
-                      });
-                    }
-
-                    taskLogger.debug(`Wrote wiki page: ${page.path}`);
-                  }
+                  const existingPages =
+                    existingEntries.length > 0
+                      ? existingEntries
+                          .map((e) => `- **${e.path}** — ${e.title}`)
+                          .join('\n')
+                      : 'No existing pages for this stream.';
 
                   taskLogger.info(
-                    `Synthesized ${pages.length} wiki pages for stream: ${streamName}`
+                    `Found ${existingEntries.length} existing memory entries for stream "${streamName}"`
+                  );
+
+                  let pagesWritten = 0;
+
+                  const response = await executeAsReasoningAgent({
+                    inferenceClient: boundInferenceClient,
+                    prompt: MemorySynthesisPrompt,
+                    input: {
+                      streamName,
+                      indicatorCount: indicators.length,
+                      indicatorSummaries,
+                      existingPages,
+                    },
+                    maxSteps: 10,
+                    toolCallbacks: {
+                      get_indicator_details: async (toolCall) => {
+                        const { index } = toolCall.function.arguments;
+                        taskLogger.info(
+                          `Stream "${streamName}": agent requesting indicator details for index ${index}`
+                        );
+
+                        if (typeof index !== 'number' || index < 0 || index >= indicators.length) {
+                          return {
+                            response: {
+                              error: `Invalid index ${index}. Valid range: 0-${indicators.length - 1}`,
+                            },
+                          };
+                        }
+
+                        return {
+                          response: indicators[index] as Record<string, unknown>,
+                        };
+                      },
+
+                      read_memory_page: async (toolCall) => {
+                        const { path } = toolCall.function.arguments;
+                        taskLogger.info(
+                          `Stream "${streamName}": agent reading memory page "${path}"`
+                        );
+
+                        const entry = await memory.getByPath({ path, space: spaceId });
+                        if (!entry) {
+                          return {
+                            response: { error: `No page found at path "${path}"` },
+                          };
+                        }
+
+                        return {
+                          response: {
+                            path: entry.path,
+                            title: entry.title,
+                            content: entry.content,
+                          },
+                        };
+                      },
+
+                      write_memory_page: async (toolCall) => {
+                        const { path, title, content, tags } = toolCall.function.arguments;
+                        const user = 'agent:memory_generation';
+
+                        const existing = await memory.getByPath({ path, space: spaceId });
+
+                        if (existing) {
+                          await memory.update({
+                            id: existing.id,
+                            content,
+                            title,
+                            space: spaceId,
+                            user,
+                            changeSummary: 'Updated from discovery indicators',
+                          });
+                          taskLogger.info(`Updated existing wiki page: ${path}`);
+                        } else {
+                          await memory.create({
+                            path,
+                            title,
+                            content,
+                            tags: [...(tags ?? []), 'auto-generated'],
+                            space: spaceId,
+                            user,
+                          });
+                          taskLogger.info(`Created new wiki page: ${path}`);
+                        }
+
+                        pagesWritten++;
+
+                        return {
+                          response: {
+                            success: true,
+                            action: existing ? 'updated' : 'created',
+                            path,
+                          },
+                        };
+                      },
+                    },
+                  });
+
+                  taskLogger.info(
+                    `Reasoning agent completed for stream "${streamName}": ${pagesWritten} page(s) written, response length: ${response.content.length}`
                   );
                 }
 
+                taskLogger.info(
+                  `Memory generation completed: processed ${streamGroups.length} stream(s)`
+                );
+
                 await taskClient.complete<MemoryGenerationTaskParams, MemoryGenerationTaskResult>(
                   _task,
-                  { insights },
+                  { insights, features, queries },
                   { streamsProcessed: streamGroups.length }
                 );
               } catch (error) {
@@ -175,7 +235,7 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
 
                 await taskClient.fail<MemoryGenerationTaskParams>(
                   _task,
-                  { insights },
+                  { insights, features, queries },
                   errorMessage
                 );
 
@@ -191,31 +251,83 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
   } satisfies TaskDefinitionRegistry;
 }
 
-interface StreamInsightsGroup {
+interface StreamIndicatorsGroup {
   streamName: string;
-  streamInsights: Insight[];
+  indicators: unknown[];
 }
 
-const groupInsightsByStream = (insights: Insight[]): StreamInsightsGroup[] => {
-  const byStream = new Map<string, Insight[]>();
+const groupInputsByStream = ({
+  insights,
+  features,
+  queries,
+}: Pick<MemoryGenerationTaskParams, 'insights' | 'features' | 'queries'>): StreamIndicatorsGroup[] => {
+  const byStream = new Map<string, unknown[]>();
 
-  for (const insight of insights) {
+  const addToStream = (streamName: string, item: unknown) => {
+    const existing = byStream.get(streamName) ?? [];
+    existing.push(item);
+    byStream.set(streamName, existing);
+  };
+
+  for (const insight of insights ?? []) {
     const streamNames = new Set<string>();
     for (const evidence of insight.evidence ?? []) {
       if (evidence.stream_name) {
         streamNames.add(evidence.stream_name);
       }
     }
-
     for (const streamName of streamNames) {
-      const existing = byStream.get(streamName) ?? [];
-      existing.push(insight);
-      byStream.set(streamName, existing);
+      addToStream(streamName, insight);
     }
   }
 
-  return Array.from(byStream.entries()).map(([streamName, streamInsights]) => ({
+  for (const feature of features ?? []) {
+    addToStream(feature.stream_name, feature);
+  }
+
+  for (const { streamName, query } of queries ?? []) {
+    addToStream(streamName, query);
+  }
+
+  return Array.from(byStream.entries()).map(([streamName, indicators]) => ({
     streamName,
-    streamInsights,
+    indicators,
   }));
+};
+
+/**
+ * Build concise one-line summaries for each indicator so the LLM can
+ * decide which ones to fetch details for. The index matches the array
+ * position used by the `get_indicator_details` tool.
+ */
+const buildIndicatorSummaries = (indicators: unknown[]): string => {
+  return indicators
+    .map((indicator, index) => {
+      const item = indicator as Record<string, unknown>;
+
+      // Insight: has impact + evidence array
+      if ('impact' in item && 'evidence' in item) {
+        const title = String(item.title ?? 'Untitled insight');
+        const impact = String(item.impact ?? 'unknown');
+        return `[${index}] **Insight** (${impact}): ${title}`;
+      }
+
+      // Feature: has type + stream_name + confidence
+      if ('type' in item && 'stream_name' in item && 'confidence' in item) {
+        const title = String(item.title ?? item.id ?? 'Untitled feature');
+        const type = String(item.type ?? 'unknown');
+        const subtype = item.subtype ? `/${item.subtype}` : '';
+        return `[${index}] **Feature** (${type}${subtype}): ${title}`;
+      }
+
+      // Query: has esql + severity_score
+      if ('esql' in item && 'severity_score' in item) {
+        const title = String(item.title ?? 'Untitled query');
+        const severity = String(item.severity_score ?? '?');
+        return `[${index}] **Query** (severity ${severity}): ${title}`;
+      }
+
+      return `[${index}] **Unknown indicator**: ${JSON.stringify(item).slice(0, 100)}`;
+    })
+    .join('\n');
 };

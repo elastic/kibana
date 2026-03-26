@@ -33,6 +33,8 @@ import {
   FEATURES_IDENTIFICATION_TASK_TYPE,
   getFeaturesIdentificationTaskId,
 } from './features_identification';
+import type { MemoryGenerationTaskParams } from './memory_generation';
+import { MEMORY_GENERATION_TASK_TYPE } from './memory_generation';
 import type { SignificantEventsQueriesGenerationTaskParams } from './significant_events_queries_generation';
 import {
   getSignificantEventsQueriesGenerationTaskId,
@@ -147,6 +149,50 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                   { streamName, from, to, steps, saveQueries },
                   { featuresTaskResult, queriesTaskResult }
                 );
+
+                // Schedule memory generation from discovered features and queries
+                const memoryParams: MemoryGenerationTaskParams = {};
+
+                if (
+                  featuresTaskResult?.status === TaskStatus.Completed &&
+                  featuresTaskResult.features.length > 0
+                ) {
+                  memoryParams.features = featuresTaskResult.features;
+                }
+
+                if (
+                  queriesTaskResult?.status === TaskStatus.Completed &&
+                  queriesTaskResult.queries.length > 0
+                ) {
+                  memoryParams.queries = queriesTaskResult.queries.map((query) => ({
+                    streamName,
+                    query,
+                  }));
+                }
+
+                const hasMemoryInputs =
+                  (memoryParams.features?.length ?? 0) > 0 ||
+                  (memoryParams.queries?.length ?? 0) > 0;
+
+                if (hasMemoryInputs && runContext.fakeRequest) {
+                  try {
+                    await taskClient.schedule<MemoryGenerationTaskParams>({
+                      task: {
+                        type: MEMORY_GENERATION_TASK_TYPE,
+                        id: MEMORY_GENERATION_TASK_TYPE,
+                        space: '*',
+                      },
+                      params: memoryParams,
+                      request: runContext.fakeRequest,
+                    });
+                  } catch (scheduleError) {
+                    taskContext.logger
+                      .get('onboarding')
+                      .warn(
+                        `Failed to schedule memory generation: ${getErrorMessage(scheduleError)}`
+                      );
+                  }
+                }
               } catch (error) {
                 // Get connector info for error enrichment (use rule generation connector; fallback to default)
                 let errorMessage = getErrorMessage(error);
