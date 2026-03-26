@@ -1,5 +1,5 @@
 {
-  "sha1": "9073d080a8e6d891aa7ad893685622310b58fb19",
+  "sha1": "70febdf67d8a80be7d4f6d07abad467465534bcd",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -1769,7 +1769,7 @@
     {
       "id": "fdca40135eb0f87-90187f54e2e3a3a",
       "title": "Stream data retention - updating failure store should edit failure store successfully for classic streams",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1778,14 +1778,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 60,
+        "line": 61,
         "column": 7
       }
     },
     {
       "id": "fdca40135eb0f87-e067c96dd606e40",
       "title": "Stream data retention - updating failure store should disable failure store for classic streams",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1794,14 +1794,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 76,
+        "line": 77,
         "column": 7
       }
     },
     {
       "id": "fdca40135eb0f87-af8c6198fedd7c4",
       "title": "Stream data retention - updating failure store should enable failure store for classic streams",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1810,28 +1810,28 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 89,
+        "line": 90,
         "column": 7
       }
     },
     {
       "id": "fdca40135eb0f87-1e0b24aaf005b82",
       "title": "Stream data retention - updating failure store should be able to disable lifecycle for classic if is not serverless",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 105,
+        "line": 106,
         "column": 7
       }
     },
     {
       "id": "fdca40135eb0f87-eb9876f48853485",
       "title": "Stream data retention - updating failure store should inherit failure store for classic streams",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1840,14 +1840,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 128,
+        "line": 129,
         "column": 7
       }
     },
     {
       "id": "fdca40135eb0f87-62f745668288e26",
       "title": "Stream data retention - updating failure store should edit failure store successfully for wired streams",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1856,14 +1856,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 149,
+        "line": 150,
         "column": 7
       }
     },
     {
       "id": "fdca40135eb0f87-88fc42e9ab1cf7f",
       "title": "Stream data retention - updating failure store should disable failure store for wired streams",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1872,14 +1872,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 165,
+        "line": 166,
         "column": 7
       }
     },
     {
       "id": "fdca40135eb0f87-0a9a4ab8715dfb6",
       "title": "Stream data retention - updating failure store should enable failure store for wired streams",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1888,28 +1888,28 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 181,
+        "line": 182,
         "column": 7
       }
     },
     {
       "id": "fdca40135eb0f87-70ccfeaea8d42d9",
       "title": "Stream data retention - updating failure store should be able to disable lifecycle for wired streams on ESS",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 202,
+        "line": 203,
         "column": 7
       }
     },
     {
       "id": "fdca40135eb0f87-b7373a0624e307a",
       "title": "Stream data retention - updating failure store should inherit failure store for child wired streams",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1918,14 +1918,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 225,
+        "line": 226,
         "column": 7
       }
     },
     {
       "id": "fdca40135eb0f87-b153942a7c6716b",
       "title": "Stream data retention - updating failure store should not inherit failure store for root wired streams",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1934,14 +1934,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 244,
+        "line": 245,
         "column": 7
       }
     },
     {
       "id": "fdca40135eb0f87-47ea8018ad86f69",
       "title": "Stream data retention - updating failure store should set failure store retention to different value than main retention",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1950,14 +1950,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 256,
+        "line": 257,
         "column": 7
       }
     },
     {
       "id": "fdca40135eb0f87-4c350e9a6f29374",
       "title": "Stream data retention - updating failure store should persist failure store retention across page reload",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1966,14 +1966,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 278,
+        "line": 279,
         "column": 7
       }
     },
     {
       "id": "fdca40135eb0f87-32738bf14fc677a",
       "title": "Stream data retention - updating failure store should cancel failure store retention edit",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1982,14 +1982,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 294,
+        "line": 295,
         "column": 7
       }
     },
     {
       "id": "fdca40135eb0f87-6a00929c70c16fe",
       "title": "Stream data retention - updating failure store should show failure store disabled state",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1998,7 +1998,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 317,
+        "line": 318,
         "column": 7
       }
     },
