@@ -8,8 +8,7 @@
 import { EuiBadge, EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { SuggestedRulesFlyout } from './suggested_rules_flyout';
+import React, { useEffect, useRef, useState } from 'react';
 
 type TextColor = 'blue' | 'green' | 'pink';
 
@@ -140,20 +139,7 @@ export function AiOnboardingPanel({ onStartListening }: AiOnboardingPanelProps) 
   const { euiTheme } = useEuiTheme();
   const [entries, setEntries] = useState<TerminalEntry[]>([]);
   const [isComplete, setIsComplete] = useState(false);
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
-  const [isEnabling, setIsEnabling] = useState(false);
-  const [isEnabled, setIsEnabled] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  const handleEnable = useCallback(() => {
-    if (isEnabling || isEnabled) return;
-    setIsEnabling(true);
-    setTimeout(() => {
-      setIsEnabling(false);
-      setIsEnabled(true);
-      setIsFlyoutOpen(false);
-    }, 3000);
-  }, [isEnabling, isEnabled]);
 
   useEffect(() => {
     const timers: ReturnType<typeof setTimeout>[] = [];
@@ -304,7 +290,7 @@ export function AiOnboardingPanel({ onStartListening }: AiOnboardingPanelProps) 
                       'xpack.streams.significantEvents.onboarding.completeStatusText',
                       {
                         defaultMessage:
-                          '1,293 Knowledge indicators were generated. Create rules and start discovering Significant events.',
+                          '1,293 Knowledge indicators were generated. Start discovering Significant events.',
                       }
                     )
                   : i18n.translate('xpack.streams.significantEvents.onboarding.loadingStatusText', {
@@ -316,12 +302,10 @@ export function AiOnboardingPanel({ onStartListening }: AiOnboardingPanelProps) 
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        {/* Right: changes based on animation/enable state */}
-        {isEnabled ? (
-          // Final state: single "Start listening" primary CTA
+        {/* Right: loading while animating, "Start discovering" once done */}
+        {isComplete ? (
           <EuiButton
             size="s"
-            fill
             onClick={onStartListening}
             data-test-subj="streamsSignificantEventsStartListeningButton"
           >
@@ -329,42 +313,7 @@ export function AiOnboardingPanel({ onStartListening }: AiOnboardingPanelProps) 
               defaultMessage: 'Start discovering',
             })}
           </EuiButton>
-        ) : isComplete ? (
-          // Complete but not yet enabled: two action buttons
-          <EuiFlexGroup gutterSize="s" responsive={false} wrap={false} justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                fill
-                isLoading={isEnabling}
-                isDisabled={isEnabling}
-                onClick={handleEnable}
-                data-test-subj="streamsSignificantEventsCreateRulesButton"
-              >
-                {isEnabling
-                  ? i18n.translate('xpack.streams.significantEvents.onboarding.loadingButton', {
-                      defaultMessage: 'Loading',
-                    })
-                  : i18n.translate('xpack.streams.significantEvents.onboarding.createRulesButton', {
-                      defaultMessage: 'Create rules',
-                    })}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                isDisabled={isEnabling}
-                data-test-subj="streamsSignificantEventsReviewResultsButton"
-                onClick={() => !isEnabling && setIsFlyoutOpen(true)}
-              >
-                {i18n.translate('xpack.streams.significantEvents.onboarding.reviewResultsButton', {
-                  defaultMessage: 'Review results',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
         ) : (
-          // Still animating: disabled "Preparing your setup" button
           <EuiButton size="s" isLoading isDisabled>
             {i18n.translate('xpack.streams.significantEvents.onboarding.preparingStatusText', {
               defaultMessage: 'Preparing your setup ...',
@@ -372,15 +321,6 @@ export function AiOnboardingPanel({ onStartListening }: AiOnboardingPanelProps) 
           </EuiButton>
         )}
       </div>
-
-      {isFlyoutOpen && (
-        <SuggestedRulesFlyout
-          onClose={() => setIsFlyoutOpen(false)}
-          onEnable={handleEnable}
-          isEnabling={isEnabling}
-          isEnabled={isEnabled}
-        />
-      )}
     </>
   );
 }

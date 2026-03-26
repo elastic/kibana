@@ -510,7 +510,7 @@ function EventRow({
 
 export function SignificantEventsDetectedView({ isLoading = false }: { isLoading?: boolean }) {
   const { euiTheme, colorMode } = useEuiTheme();
-  const [isSummaryExpanded, setIsSummaryExpanded] = useState(true);
+  const [isSummaryExpanded, setIsSummaryExpanded] = useState(false);
   const [isHistogramOpen, setIsHistogramOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<SignificantEvent | null>(null);
 
@@ -636,7 +636,7 @@ export function SignificantEventsDetectedView({ isLoading = false }: { isLoading
          * Header: arrow toggle + "Summary" label.
          * Body: two inner bordered cards side-by-side.
          */}
-        <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+        <EuiPanel hasBorder hasShadow={false} paddingSize="s">
           {/* Collapsible header — no separator, gap 16px */}
           <button
             type="button"
@@ -646,11 +646,12 @@ export function SignificantEventsDetectedView({ isLoading = false }: { isLoading
               align-items: center;
               gap: ${euiTheme.size.base};
               width: 100%;
+              min-height: 24px;
               background: none;
               border: none;
               padding: 0;
               cursor: pointer;
-              margin-bottom: ${isSummaryExpanded ? euiTheme.size.base : '0'};
+              margin-bottom: ${isSummaryExpanded ? euiTheme.size.s : '0'};
             `}
           >
             <EuiIcon type={isSummaryExpanded ? 'arrowDown' : 'arrowRight'} size="s" aria-hidden />
@@ -794,7 +795,7 @@ export function SignificantEventsDetectedView({ isLoading = false }: { isLoading
           )}
         </EuiPanel>
         {/* Histogram — collapsible, closed by default, always rendered for consistent spacing */}
-        <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+        <EuiPanel hasBorder hasShadow={false} paddingSize="s">
           <button
             type="button"
             onClick={() => setIsHistogramOpen((v) => !v)}
@@ -803,6 +804,7 @@ export function SignificantEventsDetectedView({ isLoading = false }: { isLoading
               align-items: center;
               gap: ${euiTheme.size.base};
               width: 100%;
+              min-height: 24px;
               background: none;
               border: none;
               padding: 0;
