@@ -73,10 +73,12 @@ export function DateRangePickerControl() {
 
   const controlRef = useRef<HTMLDivElement>(null);
   const wasEditingRef = useRef(false);
+  const wasClearedRef = useRef(false);
 
   /** Focus the button when transitioning from editing to idle. */
   useEffect(() => {
     if (wasEditingRef.current && !isEditing) {
+      wasClearedRef.current = false;
       buttonRef.current?.focus();
     }
     wasEditingRef.current = isEditing;
@@ -84,7 +86,7 @@ export function DateRangePickerControl() {
 
   useSelectTextPartsWithArrowKeys({
     inputRef,
-    isActive: isEditing,
+    isActive: isEditing && !wasClearedRef.current,
     // TODO this is simply increasing/decreasing integers,
     // ideally we could make this "smart" so it knows what's being modified e.g. day of the month
     onModifyPart: ({ text: currentText, part, action }) => {
@@ -107,6 +109,7 @@ export function DateRangePickerControl() {
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextValue = event.target.value;
+    if (nextValue === '') wasClearedRef.current = true;
     setText(nextValue);
     onInputChange?.(nextValue);
   };
