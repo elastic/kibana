@@ -105,11 +105,17 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
         </EuiFlexItem>
         {item.serviceName && (
           <EuiFlexItem grow={false} style={{ maxWidth: '30%', flexShrink: 0 }}>
-            {/* TODO review how to prevent row click action when cmd+click */}
             <EuiBadge
               color="hollow"
               data-test-subj="apmBarDetailsServiceNameBadge"
               href={getServiceBadgeHref?.(item.serviceName!) as any}
+              {...(getServiceBadgeHref
+                ? ({
+                    onClick(e: React.SyntheticEvent) {
+                      e.stopPropagation(); // prevents triggering row click when navigating to service
+                    },
+                  } as object)
+                : {})}
               aria-label={
                 getServiceBadgeHref
                   ? i18n.translate('xpack.apm.trace.barDetails.serviceBadge.ariaLabel', {

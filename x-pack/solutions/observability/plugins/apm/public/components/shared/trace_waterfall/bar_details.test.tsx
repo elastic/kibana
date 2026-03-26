@@ -546,6 +546,27 @@ describe('BarDetails', () => {
       });
     });
 
+    describe('when getServiceBadgeHref is provided in context and badge is clicked', () => {
+      it('stops propagation to prevent triggering the row click', async () => {
+        const user = userEvent.setup();
+        const parentClickHandler = jest.fn();
+
+        (useTraceWaterfallContext as jest.Mock).mockReturnValue({
+          getServiceBadgeHref: (serviceName: string) => `/services/${serviceName}/overview`,
+        });
+
+        const { getByTestId } = render(
+          <div onClick={parentClickHandler} onKeyDown={() => {}}>
+            <BarDetails item={{ ...mockItem, serviceName: 'my-service' }} left={10} />
+          </div>
+        );
+
+        await user.click(getByTestId('apmBarDetailsServiceNameBadge'));
+
+        expect(parentClickHandler).not.toHaveBeenCalled();
+      });
+    });
+
     describe('when getServiceBadgeHref is not provided in context', () => {
       beforeEach(() => {
         (useTraceWaterfallContext as jest.Mock).mockReturnValue({
