@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { merge, of, filter, tap, EMPTY } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
+import { merge, of, filter, tap, finalize, EMPTY } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -14,6 +15,11 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
 import type { ChatEvent, ConversationAction } from '@kbn/agent-builder-common';
+import {
+  TimelineEventType,
+  ConversationMode,
+  conversationToExecutionConversation,
+} from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
@@ -37,6 +43,7 @@ import {
 } from './utils';
 import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
+import { getTriggerHookForMode } from './trigger_hooks';
 import { withConverseSpan } from '../../tracing';
 import type { MeteringService } from '../metering';
 import type { AgentExecution, SerializedExecutionError } from './types';
@@ -92,6 +99,7 @@ export const handleAgentExecution = async ({
     browserApiTools,
     configurationOverrides,
     action,
+    conversationMode,
   } = execution.agentParams;
 
   const { logger, runAgent, trackingService, analyticsService, meteringService } = deps;
@@ -111,6 +119,46 @@ export const handleAgentExecution = async ({
     autoCreateConversationWithId,
     conversationClient,
   });
+
+  // --- Multi-user POC: persist user message event and run trigger hook ---
+  const effectiveConversationId =
+    conversation.operation === 'CREATE' ? conversation.id : conversationId;
+
+  if (
+    conversationMode === 'group' &&
+    storeConversation &&
+    effectiveConversationId &&
+    conversation.operation !== 'CREATE'
+  ) {
+    // Build and persist UserMessageEvent
+    const userMessageEvent = {
+      id: uuidv4(),
+      timestamp: new Date().toISOString(),
+      type: TimelineEventType.user_message as const,
+      user: conversation.user,
+      message: nextInput.message ?? '',
+    };
+
+    await conversationClient.appendEvent(effectiveConversationId, userMessageEvent);
+
+    // Run trigger hook
+    const triggerHook = getTriggerHookForMode(ConversationMode.group);
+    const executionConversation = conversationToExecutionConversation(conversation);
+    const triggerResult = await triggerHook(
+      { conversation: executionConversation, newEvents: [userMessageEvent] },
+      { request }
+    );
+
+    if (!triggerResult.invoke) {
+      // Return empty completed observable — message already persisted
+      logger.debug('Trigger hook returned invoke: false, skipping agent execution');
+      return of<ChatEvent>();
+    }
+
+    // Set current execution ID so other clients can follow
+    await conversationClient.setCurrentExecutionId(effectiveConversationId, execution.executionId);
+  }
+  // --- End multi-user POC ---
 
   // Emit conversation ID for new conversations (only when persisting)
   const conversationIdEvent$ =
@@ -156,8 +204,6 @@ export const handleAgentExecution = async ({
     : EMPTY;
 
   // Merge all event streams
-  const effectiveConversationId =
-    conversation.operation === 'CREATE' ? conversation.id : conversationId;
   const modelProvider = getConnectorProvider(chatModel.getConnector());
 
   return withConverseSpan({ agentId, conversationId: effectiveConversationId }, () =>
@@ -212,6 +258,14 @@ export const handleAgentExecution = async ({
         modelProvider,
         conversationId: effectiveConversationId,
         executionId: execution.executionId,
+      }),
+      // Clear current execution ID when execution completes (multi-user POC)
+      finalize(() => {
+        if (conversationMode === 'group' && effectiveConversationId) {
+          conversationClient.clearCurrentExecutionId(effectiveConversationId).catch((err) => {
+            logger.warn(`Failed to clear current_execution_id: ${err}`);
+          });
+        }
       })
     )
   );

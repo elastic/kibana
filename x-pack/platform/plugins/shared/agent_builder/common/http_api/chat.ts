@@ -32,6 +32,8 @@ export interface ChatRequestBodyPayload {
   action?: ConversationAction;
   /** Force a specific execution mode. When omitted, the server auto-detects. */
   _execution_mode?: 'local' | 'task_manager';
+  /** Conversation mode. Defaults to 'user'. Only used when creating a new conversation. */
+  conversation_mode?: 'user' | 'group';
 }
 
 export type ChatResponse = Omit<

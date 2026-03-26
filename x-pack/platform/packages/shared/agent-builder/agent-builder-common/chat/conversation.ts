@@ -279,6 +279,14 @@ export interface Conversation {
    * Keeps track of which prompts have been answered and the response.
    */
   state?: ConversationInternalState;
+  /**
+   * Timeline events (new format). Present when stored in timeline format.
+   */
+  events?: TimelineEvent[];
+  /**
+   * ID of the currently running execution, if any.
+   */
+  current_execution_id?: string;
 }
 
 /**

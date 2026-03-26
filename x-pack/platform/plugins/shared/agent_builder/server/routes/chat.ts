@@ -172,6 +172,14 @@ export function registerChatRoutes({
         },
       })
     ),
+    conversation_mode: schema.maybe(
+      schema.oneOf([schema.literal('user'), schema.literal('group')], {
+        meta: {
+          description:
+            'Conversation mode. Defaults to "user". Only used when creating a new conversation.',
+        },
+      })
+    ),
     _execution_mode: schema.maybe(
       schema.oneOf([schema.literal('local'), schema.literal('task_manager')], {
         meta: {
@@ -231,6 +239,7 @@ export function registerChatRoutes({
       configuration_overrides: configurationOverrides,
       action,
       _execution_mode: executionMode,
+      conversation_mode: conversationMode,
     } = payload;
 
     const useTaskManager =
@@ -248,6 +257,9 @@ export function registerChatRoutes({
         browserApiTools,
         configurationOverrides,
         action,
+        conversationMode: conversationMode as
+          | import('@kbn/agent-builder-common').ConversationMode
+          | undefined,
         nextInput: {
           message: input,
           prompts,

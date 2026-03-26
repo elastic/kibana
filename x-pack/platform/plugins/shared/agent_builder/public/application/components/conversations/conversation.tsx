@@ -47,6 +47,7 @@ import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { useConversationContext } from '../../context/conversation/conversation_context';
 import { StaleAttachmentsPanel } from './stale_attachments_panel';
 import { useStaleAttachments } from '../../hooks/use_stale_attachments_check';
+import { useFollowRemoteExecution } from '../../hooks/use_follow_remote_execution';
 
 export const Conversation: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
@@ -64,6 +65,7 @@ export const Conversation: React.FC<{}> = () => {
   const { staleAttachments, scheduleStaleCheck } = useStaleAttachments(conversationId);
   const [dismissStaleAttachments, setDismissStaleAttachments] = useState(false);
   useSendPredefinedInitialMessage();
+  useFollowRemoteExecution();
 
   useNavigationAbort({
     onAppLeave,

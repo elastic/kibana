@@ -39,6 +39,7 @@ const storageSettings = {
       conversation_mode: types.keyword({}),
       execution_state: types.keyword({}),
       queued_trigger: types.keyword({}),
+      current_execution_id: types.keyword({}),
     },
   },
 } satisfies IndexStorageSettings;
@@ -61,6 +62,7 @@ export interface ConversationProperties {
   conversation_mode?: ConversationMode;
   execution_state?: ConversationExecutionState;
   queued_trigger?: string;
+  current_execution_id?: string;
 }
 
 export type ConversationStorageSettings = typeof storageSettings;

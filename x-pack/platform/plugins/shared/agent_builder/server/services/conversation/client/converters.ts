@@ -126,12 +126,18 @@ function deserializeStepResults(rounds: PersistentConversationRound[]): Conversa
 export const fromEs = (document: Document): Conversation => {
   const base = convertBaseFromEs(document);
 
+  // Common fields for all return paths
+  const events = document._source!.events ?? [];
+  const currentExecutionId = document._source!.current_execution_id ?? undefined;
+
   // New format: if `events` field is present, convert timeline events to rounds
   if (document._source!.events && document._source!.events.length > 0) {
     const rounds = timelineEventsToRounds(document._source!.events);
     return {
       ...base,
       rounds,
+      events,
+      current_execution_id: currentExecutionId,
       ...(document._source!.attachments &&
         document._source!.attachments.length > 0 && {
           attachments: document._source!.attachments,
@@ -164,6 +170,8 @@ export const fromEs = (document: Document): Conversation => {
     return {
       ...base,
       rounds: roundsWithRefs,
+      events,
+      current_execution_id: currentExecutionId,
       attachments: existingAttachments,
       ...(document._source!.state && { state: document._source!.state }),
     };
@@ -173,6 +181,8 @@ export const fromEs = (document: Document): Conversation => {
     return {
       ...base,
       rounds: roundsWithRefs,
+      events,
+      current_execution_id: currentExecutionId,
       ...(attachmentsForRefs.length > 0 && { attachments: attachmentsForRefs }),
       ...(document._source!.state && { state: document._source!.state }),
     };
@@ -181,6 +191,8 @@ export const fromEs = (document: Document): Conversation => {
   return {
     ...base,
     rounds: roundsWithRefs,
+    events,
+    current_execution_id: currentExecutionId,
     ...(document._source!.state && { state: document._source!.state }),
   };
 };

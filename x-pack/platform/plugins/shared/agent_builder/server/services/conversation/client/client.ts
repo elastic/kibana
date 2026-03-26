@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { ConversationWithoutRounds } from '@kbn/agent-builder-common';
+import type { ConversationWithoutRounds, TimelineEvent } from '@kbn/agent-builder-common';
 import {
   type UserIdAndName,
   type Conversation,
@@ -29,6 +29,7 @@ import {
   updateConversation,
   type Document,
 } from './converters';
+import { conversationIndexName } from './storage';
 
 export interface ConversationClient {
   get(conversationId: string): Promise<Conversation>;
@@ -37,6 +38,12 @@ export interface ConversationClient {
   update(conversation: ConversationUpdateRequest): Promise<Conversation>;
   list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
   delete(conversationId: string): Promise<boolean>;
+  /** Append a timeline event to the conversation's events array via ES script update. */
+  appendEvent(conversationId: string, event: TimelineEvent): Promise<void>;
+  /** Set the current execution ID on the conversation document. */
+  setCurrentExecutionId(conversationId: string, executionId: string): Promise<void>;
+  /** Clear the current execution ID on the conversation document. */
+  clearCurrentExecutionId(conversationId: string): Promise<void>;
 }
 
 export const createClient = ({
@@ -51,24 +58,28 @@ export const createClient = ({
   user: UserIdAndName;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
-  return new ConversationClientImpl({ storage, user, space });
+  return new ConversationClientImpl({ storage, esClient, user, space });
 };
 
 class ConversationClientImpl implements ConversationClient {
   private readonly space: string;
   private readonly storage: ConversationStorage;
+  private readonly esClient: ElasticsearchClient;
   private readonly user: UserIdAndName;
 
   constructor({
     storage,
+    esClient,
     user,
     space,
   }: {
     storage: ConversationStorage;
+    esClient: ElasticsearchClient;
     user: UserIdAndName;
     space: string;
   }) {
     this.storage = storage;
+    this.esClient = esClient;
     this.user = user;
     this.space = space;
   }
@@ -196,6 +207,37 @@ class ConversationClientImpl implements ConversationClient {
 
     const { result } = await this.storage.getClient().delete({ id: conversationId });
     return result === 'deleted';
+  }
+
+  async appendEvent(conversationId: string, event: TimelineEvent): Promise<void> {
+    await this.esClient.update({
+      index: conversationIndexName,
+      id: conversationId,
+      script: {
+        source: `
+          if (ctx._source.events == null) { ctx._source.events = []; }
+          ctx._source.events.add(params.event);
+        `,
+        lang: 'painless',
+        params: { event },
+      },
+    });
+  }
+
+  async setCurrentExecutionId(conversationId: string, executionId: string): Promise<void> {
+    await this.esClient.update({
+      index: conversationIndexName,
+      id: conversationId,
+      doc: { current_execution_id: executionId },
+    });
+  }
+
+  async clearCurrentExecutionId(conversationId: string): Promise<void> {
+    await this.esClient.update({
+      index: conversationIndexName,
+      id: conversationId,
+      doc: { current_execution_id: null },
+    });
   }
 
   private async _get(conversationId: string): Promise<Document | undefined> {

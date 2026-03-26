@@ -6,7 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { Observable } from 'rxjs';
 import path from 'node:path';
+import type { ServerSentEvent } from '@kbn/sse-utils';
+import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import type {
@@ -19,6 +22,7 @@ import { publicApiPath } from '../../common/constants';
 export function registerConversationRoutes({
   router,
   getInternalServices,
+  coreSetup,
   logger,
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -167,6 +171,70 @@ export function registerConversationRoutes({
           body: {
             success: status,
           },
+        });
+      })
+    );
+
+  // Follow active execution for a conversation (SSE) — multi-user POC
+  router.versioned
+    .get({
+      path: `${publicApiPath}/conversations/{conversation_id}/follow_execution`,
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+      access: 'internal',
+      summary: 'Follow active execution for a conversation',
+      options: {
+        tags: ['conversation'],
+        timeout: { idleSocket: 300_000 },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            params: schema.object({
+              conversation_id: schema.string(),
+            }),
+          },
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const [, { cloud }] = await coreSetup.getStartServices();
+        const { conversations: conversationsService, execution: executionService } =
+          getInternalServices();
+        const { conversation_id: conversationId } = request.params;
+
+        const client = await conversationsService.getScopedClient({ request });
+        const conversation = await client.get(conversationId);
+
+        if (!conversation.current_execution_id) {
+          return response.ok({ body: { message: 'No active execution' } });
+        }
+
+        const events$ = executionService.followExecution(conversation.current_execution_id);
+
+        const abortController = new AbortController();
+        request.events.aborted$.subscribe(() => abortController.abort());
+
+        return response.ok({
+          headers: {
+            'Content-Type': cloud?.isCloudEnabled
+              ? 'application/octet-stream'
+              : 'text/event-stream',
+            'Content-Encoding': 'identity',
+            'Cache-Control': 'no-cache',
+            Connection: 'keep-alive',
+            'Transfer-Encoding': 'chunked',
+            'X-Content-Type-Options': 'nosniff',
+            'X-Accel-Buffering': 'no',
+          },
+          body: observableIntoEventSourceStream(events$ as unknown as Observable<ServerSentEvent>, {
+            signal: abortController.signal,
+            flushThrottleMs: 100,
+            logger,
+          }),
         });
       })
     );

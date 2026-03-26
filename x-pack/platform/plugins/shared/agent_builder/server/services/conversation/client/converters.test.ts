@@ -105,6 +105,8 @@ describe('conversation model converters', () => {
         },
         created_at: '2024-09-04T06:44:17.944Z',
         updated_at: '2025-08-04T06:44:19.123Z',
+        events: [],
+        current_execution_id: undefined,
         rounds: [
           {
             id: 'round-1',
@@ -170,6 +172,8 @@ describe('conversation model converters', () => {
         },
         created_at: '2024-09-04T06:44:17.944Z',
         updated_at: '2025-08-04T06:44:19.123Z',
+        events: [],
+        current_execution_id: undefined,
         rounds: [
           {
             id: 'round-legacy',

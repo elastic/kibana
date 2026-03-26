@@ -8,7 +8,12 @@
 import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { agentBuilderDefaultAgentId, ConversationRoundStatus } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAgentId,
+  ConversationRoundStatus,
+  timelineEventsToRounds,
+} from '@kbn/agent-builder-common';
+import type { ConversationRound, TimelineEvent } from '@kbn/agent-builder-common';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ErrorPromptType } from '../components/common/prompt/error_prompt';
 import { queryKeys } from '../query_keys';
@@ -39,6 +44,8 @@ export const useConversation = () => {
     // Disable query if we are on a new conversation or if there is a message currently being sent
     // Otherwise a refetch will overwrite our optimistic updates
     enabled: Boolean(conversationId) && !isSendingMessage,
+    // Poll every 3s to pick up other users' messages (multi-user POC)
+    refetchInterval: isSendingMessage ? false : 3000,
     queryFn: () => {
       if (!conversationId) {
         return Promise.reject(new Error('Invalid conversation id'));
@@ -132,6 +139,23 @@ export const useConversationRounds = () => {
   const { pendingMessage, error, errorSteps } = useSendMessage();
 
   const conversationRounds = useMemo(() => {
+    // If events are available (new timeline format), use them
+    // This shows standalone user messages that didn't trigger agent responses
+    const events = conversation?.events;
+    if (events && events.length > 0) {
+      const rounds = eventsToDisplayRounds(events);
+      if (Boolean(error) && pendingMessage) {
+        const pendingRound = createNewRound({
+          userMessage: pendingMessage,
+          roundId: '',
+          steps: errorSteps,
+        });
+        return [...rounds, pendingRound];
+      }
+      return rounds;
+    }
+
+    // Fallback to rounds
     const rounds = conversation?.rounds ?? [];
     if (Boolean(error) && pendingMessage) {
       const pendingRound = createNewRound({
@@ -142,9 +166,42 @@ export const useConversationRounds = () => {
       return [...rounds, pendingRound];
     }
     return rounds;
-  }, [conversation?.rounds, error, errorSteps, pendingMessage]);
+  }, [conversation?.rounds, conversation?.events, error, errorSteps, pendingMessage]);
 
   return conversationRounds;
+};
+
+/**
+ * Convert timeline events to round-like display items.
+ * User messages without an agent response become rounds with an empty response.
+ */
+const eventsToDisplayRounds = (events: TimelineEvent[]): ConversationRound[] => {
+  const rounds = timelineEventsToRounds(events);
+
+  // Check if there's a trailing user message (no agent response yet)
+  const lastEvent = events[events.length - 1];
+  if (lastEvent && lastEvent.type === 'user_message') {
+    rounds.push({
+      id: `standalone-${lastEvent.id}`,
+      status: ConversationRoundStatus.completed,
+      input: {
+        message: lastEvent.message,
+      },
+      steps: [],
+      response: { message: '' },
+      started_at: lastEvent.timestamp,
+      time_to_first_token: 0,
+      time_to_last_token: 0,
+      model_usage: {
+        connector_id: '',
+        llm_calls: 0,
+        input_tokens: 0,
+        output_tokens: 0,
+      },
+    });
+  }
+
+  return rounds;
 };
 
 // Returns a flattened list of all steps across all rounds.

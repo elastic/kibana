@@ -91,6 +91,32 @@ export class ChatService {
     });
   }
 
+  /**
+   * Follow an active execution on a conversation (multi-user POC).
+   * Connects to the SSE follow_execution endpoint.
+   */
+  followExecution({
+    conversationId,
+    signal,
+  }: {
+    conversationId: string;
+    signal?: AbortSignal;
+  }): Observable<ChatEvent> {
+    return defer(() => {
+      return this.http.fetch(`${publicApiPath}/conversations/${conversationId}/follow_execution`, {
+        method: 'GET',
+        signal,
+        asResponse: true,
+        rawResponse: true,
+        version: '2023-10-31',
+      });
+    }).pipe(
+      // @ts-expect-error SseEvent mixin issue
+      httpResponseIntoObservable<ChatEvent>(),
+      unwrapAgentBuilderErrors()
+    );
+  }
+
   private converse(signal: AbortSignal | undefined, payload: ChatRequestBodyPayload) {
     return defer(() => {
       return this.http.post(`${publicApiPath}/converse/async`, {

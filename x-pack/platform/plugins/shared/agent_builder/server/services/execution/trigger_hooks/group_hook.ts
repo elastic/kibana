@@ -5,20 +5,26 @@
  * 2.0.
  */
 
-import { isUserMessageEvent } from '@kbn/agent-builder-common';
+import { isUserMessageEvent, isAgentResponseEvent } from '@kbn/agent-builder-common';
 import type { AgentTriggerHook } from './types';
 
 /**
- * Group conversation trigger hook: only triggers agent execution
- * when the last user message contains '@agent'.
+ * Group conversation trigger hook:
+ * - Always triggers on the first message (no prior agent response in conversation)
+ * - Otherwise triggers only when the last user message contains '@agent'
  */
-export const groupTriggerHook: AgentTriggerHook = async ({ newEvents }) => {
-  // Find the last user message in the new events
+export const groupTriggerHook: AgentTriggerHook = async ({ conversation, newEvents }) => {
+  // Always trigger if this is the first message (no prior agent response)
+  const hasAgentResponse = conversation.timeline.some(isAgentResponseEvent);
+  if (!hasAgentResponse) {
+    return { invoke: true };
+  }
+
+  // Otherwise, trigger only on @agent mention
   const lastUserMessage = [...newEvents].reverse().find(isUserMessageEvent);
   if (!lastUserMessage) {
     return { invoke: false };
   }
 
-  const trigger = lastUserMessage.message.includes('@agent');
-  return { invoke: trigger };
+  return { invoke: lastUserMessage.message.includes('@agent') };
 };
