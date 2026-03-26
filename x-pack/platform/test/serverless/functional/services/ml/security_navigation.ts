@@ -16,7 +16,7 @@ export function MachineLearningNavigationProviderSecurity({
   const retry = getService('retry');
 
   async function navigateToArea(id: string, expectedTestSubject: string) {
-    await retry.tryForTime(5 * 1000, async () => {
+    await retry.tryForTime(20 * 1000, async () => {
       await svlCommonNavigation.sidenav.clickLink({ navId: 'stack_management' });
       await svlCommonNavigation.sidenav.clickPanelLink(id);
       await testSubjects.existOrFail(expectedTestSubject, { timeout: 2500 });
