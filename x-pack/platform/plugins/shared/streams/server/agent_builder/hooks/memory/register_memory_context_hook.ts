@@ -73,8 +73,8 @@ export const registerMemoryContextHook = (
             const memoryPrefix = [
               '<memory_context>',
               'The following entries from shared memory may be relevant to this conversation.',
-              'You have access to memory tools (memory_search, memory_read, memory_write, memory_patch, memory_list, memory_delete).',
-              'If the user reports that information in memory is wrong, use memory_patch to fix it.',
+              'If the sig_events_memory skill is loaded, you have access to memory tools to read, write, and update these entries.',
+              'If the user reports that information in memory is wrong, use the memory patch tool to fix it.',
               'If you learn something new and noteworthy, offer to save it to memory.',
               '',
               memoryBlock,
