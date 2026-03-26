@@ -292,7 +292,14 @@ export function useWorkflowActions() {
     RunStepCommand & { triggerTab?: WorkflowStepTriggerTab }
   >({
     mutationKey: ['POST', 'workflows', 'stepId', 'run'],
-    mutationFn: (params: RunStepCommand) => api.testStep(params),
+    mutationFn: (params: RunStepCommand) =>
+      api.testStep({
+        workflowYaml: params.workflowYaml,
+        stepId: params.stepId,
+        workflowId: params.workflowId,
+        executionContext: params.executionContext,
+        contextOverride: params.contextOverride,
+      }),
     onSuccess: ({ workflowExecutionId }, variables) => {
       // Report telemetry for successful step test run
       telemetry.reportWorkflowStepTestRunInitiated({
