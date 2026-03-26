@@ -2033,7 +2033,7 @@
                 "section": "def-public.ControlPanelsState",
                 "text": "ControlPanelsState"
               },
-              "<Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; available_options?: string[] | undefined; } & { selected_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>> | undefined"
+              "<Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; available_options?: string[] | undefined; } & { selected_options: string[]; single_select: boolean; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
             "lineNumber": 219,
@@ -2231,8 +2231,8 @@
                 "pluginId": "@kbn/lens-common",
                 "scope": "common",
                 "docId": "kibKbnLensCommonPluginApi",
-                "section": "def-common.XYState",
-                "text": "XYState"
+                "section": "def-common.XYPersistedState",
+                "text": "XYPersistedState"
               },
               "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
@@ -2985,8 +2985,8 @@
                 "pluginId": "@kbn/lens-common",
                 "scope": "common",
                 "docId": "kibKbnLensCommonPluginApi",
-                "section": "def-common.XYState",
-                "text": "XYState"
+                "section": "def-common.XYPersistedState",
+                "text": "XYPersistedState"
               },
               "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
@@ -3755,8 +3755,8 @@
                     "pluginId": "@kbn/lens-common",
                     "scope": "common",
                     "docId": "kibKbnLensCommonPluginApi",
-                    "section": "def-common.XYState",
-                    "text": "XYState"
+                    "section": "def-common.XYPersistedState",
+                    "text": "XYPersistedState"
                   },
                   "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
                   {
@@ -5029,8 +5029,8 @@
                 "pluginId": "@kbn/lens-common",
                 "scope": "common",
                 "docId": "kibKbnLensCommonPluginApi",
-                "section": "def-common.XYState",
-                "text": "XYState"
+                "section": "def-common.XYPersistedState",
+                "text": "XYPersistedState"
               },
               "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
               {
