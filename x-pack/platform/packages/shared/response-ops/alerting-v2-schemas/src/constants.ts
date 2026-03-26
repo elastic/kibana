@@ -20,4 +20,4 @@ export const MIN_SCHEDULE_INTERVAL = '1m';
  * short intervals (e.g. 5s) without inflating test duration.
  * TODO: Make this configurable via plugin config so operators can tighten it.
  */
-export const MIN_SCHEDULE_INTERVAL_TECHNICAL = '1s';
+export const MIN_SCHEDULE_INTERVAL_TECHNICAL = '5s';

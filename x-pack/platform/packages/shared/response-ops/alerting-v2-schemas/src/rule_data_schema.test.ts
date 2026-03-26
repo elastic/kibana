@@ -202,19 +202,19 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('accepts schedule.every of exactly 1s (technical minimum)', () => {
+    it('accepts schedule.every of exactly 5s (technical minimum)', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        schedule: { every: '1s' },
+        schedule: { every: '5s' },
       });
 
       expect(result.success).toBe(true);
     });
 
-    it('rejects schedule.every below 1s (500ms)', () => {
+    it('rejects schedule.every below 5s (1s)', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        schedule: { every: '500ms' },
+        schedule: { every: '1s' },
       });
 
       expect(result.success).toBe(false);
@@ -738,8 +738,8 @@ describe('updateRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('rejects schedule.every below 1s (500ms)', () => {
-      const result = updateRuleDataSchema.safeParse({ schedule: { every: '500ms' } });
+    it('rejects schedule.every below 5s (1s)', () => {
+      const result = updateRuleDataSchema.safeParse({ schedule: { every: '1s' } });
       expect(result.success).toBe(false);
     });
 
