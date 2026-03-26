@@ -28,7 +28,7 @@ import {
   isGenerateConfigAction,
   isValidateConfigAction,
 } from './actions_lens';
-import { createGenerateConfigPrompt } from './prompts';
+import { createGenerateConfigPrompt, esqlAdditionalInstructions } from './prompts';
 
 // Regex to extract JSON from markdown code blocks
 const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
@@ -135,8 +135,7 @@ export const createVisualizationGraph = (
         events,
         logger,
         esClient: esClient.asCurrentUser,
-        additionalInstructions:
-          'Use human-readable column aliases in STATS/EVAL (e.g. `Unique Visitors` not `unique_visitors`). Wrap multi-word aliases in backticks.',
+        additionalInstructions: esqlAdditionalInstructions,
       });
 
       if (!generateEsqlResponse.query) {

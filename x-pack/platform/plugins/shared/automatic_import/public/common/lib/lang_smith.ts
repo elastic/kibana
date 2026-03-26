@@ -30,8 +30,16 @@ export const getLangSmithOptions = (
   if (!sessionStorageTraceOptions) {
     return;
   }
+
+  const { langSmithProject, langSmithApiKey } = sessionStorageTraceOptions;
+
+  // Only return options when both fields are filled in; empty strings are not valid credentials.
+  if (!langSmithProject || !langSmithApiKey) {
+    return;
+  }
+
   return {
-    projectName: sessionStorageTraceOptions.langSmithProject,
-    apiKey: sessionStorageTraceOptions.langSmithApiKey,
+    projectName: langSmithProject,
+    apiKey: langSmithApiKey,
   };
 };

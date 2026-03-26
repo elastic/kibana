@@ -11,8 +11,7 @@ import type { SplitProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
-// https://github.com/elastic/kibana/issues/258476
-apiTest.describe.skip(
+apiTest.describe(
   'Streamlang to ES|QL - Split Processor',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -121,7 +120,8 @@ apiTest.describe.skip(
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(1);
-      expect(esqlResult.documents[0]).toStrictEqual(expect.objectContaining({ tags: ['single'] }));
+      // ES|QL returns a scalar (not array) when SPLIT finds no delimiter
+      expect(esqlResult.documents[0]).toStrictEqual(expect.objectContaining({ tags: 'single' }));
     });
 
     apiTest(

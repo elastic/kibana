@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import type { ElasticsearchServiceStart, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchServiceStart,
+  Logger,
+  SavedObjectsServiceStart,
+  UiSettingsServiceStart,
+} from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { getSkillEntryPath } from '../runner/store/volumes/skills/utils';
 import { createSkillRegistry } from './skill_registry';
@@ -54,6 +60,8 @@ export interface SkillServiceStartDeps {
   spaces?: SpacesPluginStart;
   logger: Logger;
   getToolRegistry: (opts: { request: KibanaRequest }) => Promise<ToolRegistry>;
+  uiSettings: UiSettingsServiceStart;
+  savedObjects: SavedObjectsServiceStart;
 }
 
 export const createSkillService = (): SkillService => {
@@ -100,6 +108,8 @@ class SkillServiceImpl implements SkillService {
     spaces,
     logger,
     getToolRegistry,
+    uiSettings,
+    savedObjects,
   }: SkillServiceStartDeps): SkillServiceStart {
     const validated = Promise.all(
       [...this.skills.values()].map((skill) => validateSkillDefinition(skill))
@@ -117,11 +127,16 @@ class SkillServiceImpl implements SkillService {
           logger,
         });
         const toolRegistry = await getToolRegistry({ request });
+        const soClient = savedObjects.getScopedClient(request);
+        const experimentalFeaturesEnabled = await uiSettings
+          .asScopedToClient(soClient)
+          .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
 
         return createSkillRegistry({
           builtinProvider,
           persistedProvider,
           toolRegistry,
+          experimentalFeaturesEnabled,
         });
       },
       registerSkill: (skill) => {

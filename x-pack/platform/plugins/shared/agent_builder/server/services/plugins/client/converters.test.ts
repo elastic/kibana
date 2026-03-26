@@ -318,6 +318,25 @@ describe('plugin converters', () => {
       });
       expect(result.name).toBe('my-plugin');
     });
+
+    it('includes id when provided', () => {
+      const result = parsedArchiveToCreateRequest({
+        parsedArchive: baseArchive,
+        sourceUrl: 'https://example.com/plugin.zip',
+        skillIds: [],
+        id: 'pre-generated-uuid',
+      });
+      expect(result.id).toBe('pre-generated-uuid');
+    });
+
+    it('leaves id undefined when not provided', () => {
+      const result = parsedArchiveToCreateRequest({
+        parsedArchive: baseArchive,
+        sourceUrl: 'https://example.com/plugin.zip',
+        skillIds: [],
+      });
+      expect(result.id).toBeUndefined();
+    });
   });
 
   describe('updateRequestToEs', () => {
@@ -419,6 +438,7 @@ describe('plugin converters', () => {
         name: 'test-plugin',
         version: '1.0.0',
         description: 'A test plugin',
+        readonly: false,
         manifest: {
           author: { name: 'Test Author', email: 'test@example.com' },
           homepage: 'https://example.com',
@@ -446,6 +466,13 @@ describe('plugin converters', () => {
       const result = toPluginDefinition(persisted);
 
       expect(result.source_url).toBeUndefined();
+    });
+
+    it('sets readonly to false for persisted plugins', () => {
+      const persisted = fromEs(createPluginDocument());
+      const result = toPluginDefinition(persisted);
+
+      expect(result.readonly).toBe(false);
     });
   });
 });

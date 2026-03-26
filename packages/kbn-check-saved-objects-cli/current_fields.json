@@ -441,6 +441,7 @@
     "install_started_at",
     "install_status",
     "install_version",
+    "installed_as_dependency",
     "installed_es",
     "installed_es.deferred",
     "installed_es.id",
@@ -449,6 +450,7 @@
     "installed_kibana",
     "installed_kibana_space_id",
     "internal",
+    "is_dependency_of",
     "keep_policies_up_to_date",
     "latest_executed_state",
     "latest_install_failed_attempts",
@@ -1113,6 +1115,7 @@
     "provider"
   ],
   "security-rule": [
+    "deprecated",
     "name",
     "risk_score",
     "rule_id",

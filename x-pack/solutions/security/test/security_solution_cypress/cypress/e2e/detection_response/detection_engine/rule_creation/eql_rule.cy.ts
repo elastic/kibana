@@ -99,7 +99,8 @@ describe('EQL Rule - Rule Creation', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('EQL query validation', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/259231
+  describe.skip('EQL query validation', () => {
     const rule = getEqlRule();
 
     it('validates missing data source', () => {

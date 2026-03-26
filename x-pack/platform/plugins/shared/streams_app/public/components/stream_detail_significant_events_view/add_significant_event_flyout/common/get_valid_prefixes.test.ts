@@ -9,6 +9,7 @@ import type { Streams } from '@kbn/streams-schema';
 import { getValidPrefixes } from './get_valid_prefixes';
 
 const makeClassicDefinition = (name: string): Streams.ClassicStream.Definition => ({
+  type: 'classic',
   name,
   description: '',
   updated_at: new Date().toISOString(),
@@ -22,6 +23,7 @@ const makeClassicDefinition = (name: string): Streams.ClassicStream.Definition =
 });
 
 const makeWiredDefinition = (name: string): Streams.WiredStream.Definition => ({
+  type: 'wired',
   name,
   description: '',
   updated_at: new Date().toISOString(),

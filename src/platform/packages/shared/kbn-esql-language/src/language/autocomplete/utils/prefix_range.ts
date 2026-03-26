@@ -106,7 +106,11 @@ export function attachReplacementRanges(
       return [resolvedSuggestion];
     }
 
-    const overlapRange = CONTAINS_WHITESPACE_REGEX.test(suggestion.text)
+    // getOverlapRange is only needed for suggestions whose internal whitespace is
+    // part of the typed sequence, such as "IS NOT NULL" after "IS NO|". Using
+    // trimEnd() keeps trailing formatting whitespace from routing otherwise-normal
+    // suggestions through the overlap path.
+    const overlapRange = CONTAINS_WHITESPACE_REGEX.test(suggestion.text.trimEnd())
       ? getOverlapRange(innerText, suggestion.text)
       : undefined;
     const effectiveRange = overlapRange ?? { start: range.start, end: range.end };
