@@ -9,12 +9,12 @@ applies_to:
 
 # Knowledge base artifact settings for AI Assistants [ai-assistant-settings-kb]
 
-The `xpack.productDocBase` settings configure how {{kib}} reaches the artifact repository used to install and update knowledge base artifacts (Elastic product documentation and Security Labs) for the AI assistants. Most deployments use the default base URL of the artifact repository and only need outbound access to Elastic’s CDN. Change these settings when you use a private mirror, local files, a proxy, or otherwise cannot rely on the default host.
+The `xpack.productDocBase` settings configure how {{kib}} reaches [Elastic’s public artifact repository](https://kibana-knowledge-base-artifacts.elastic.co/), from which {{kib}} lists and downloads knowledge base artifacts for AI Assistants. Most deployments use the default base URL of the artifact repository and only need outbound access to Elastic’s CDN. 
 
 `xpack.productDocBase.artifactRepositoryUrl`
-:   The base URL of the artifact repository from which {{kib}} lists and downloads knowledge base artifacts for AI Assistants. Defaults to `https://kibana-knowledge-base-artifacts.elastic.co`, Elastic’s public artifact host. Leave the default when {{kib}} can reach that base URL over the internet. 
+:   The base URL of the artifact repository from which {{kib}} lists and downloads knowledge base artifacts for AI Assistants. Defaults to `https://kibana-knowledge-base-artifacts.elastic.co`, Elastic’s public artifact host URL. Leave the default when {{kib}} can reach that base URL over the internet. 
 
-    If the default host is unreachable or not permitted, set `xpack.productDocBase.artifactRepositoryUrl` to the HTTP or HTTPS base URL of a repository you operate that mirrors Elastic’s artifacts, for example, a private mirror or internal endpoint in a restricted or isolated network.
+    If the default host is unreachable or not permitted, set `xpack.productDocBase.artifactRepositoryUrl` to the HTTP or HTTPS base URL of a repository you operate that mirrors Elastic’s artifacts, for example, a private mirror or internal endpoint in a restricted or isolated network. 
 
     {applies_to}`self: ga 9.1+` To read artifacts from a directory on the filesystem of the host where {{kib}} runs, use a `file://` base URL (for example `file:///path/to/artifacts`). 
 
@@ -29,6 +29,8 @@ The `xpack.productDocBase` settings configure how {{kib}} reaches the artifact r
 
     Data type: `string` (URI)
 
-$$$configuring-product-doc-for-airgap$$$
 
-% Installing the AI Assistant knowledge base content requires network access to Elastic’s [public artifact URL](https://kibana-knowledge-base-artifacts.elastic.co/). If {{kib}} can't reach that host, which is common for deployments in air-gapped or restricted networks, you must mirror the knowledge base artifact repository and deploy it manually. Refer to [Host a knowledge base artifact repo for AI assistants](docs-content://explore-analyze/ai-features/ai-chat-experiences/ai-assistant-host-doc-artifacts.md) for instructions.
+% When Kibana can't use Elastic’s public artifact URL, which is common for deployments in air-gapped or restricted networks, you must deploy the knowledge base artifact repository manually. Refer to [Host a knowledge base artifact repo for AI assistants](docs-content://explore-analyze/ai-features/ai-chat-experiences/ai-assistant-host-doc-artifacts.md) to learn more.
+
+
+$$$configuring-product-doc-for-airgap$$$
