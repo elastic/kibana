@@ -107,6 +107,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const { customizationContext, runtimeStateManager } = props;
   const services = useDiscoverServices();
   const { core, dataViews, chrome, data } = services;
+  const isCpsEnabled = Boolean(services.cps?.cpsManager);
   const history = useHistory();
   const dispatch = useInternalStateDispatch();
   const rootProfileState = useRootProfile();
@@ -247,6 +248,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   }
 
   if (
+    !isCpsEnabled &&
     !mainRouteInitializationState.value.hasESData &&
     !mainRouteInitializationState.value.hasUserDataView
   ) {

@@ -22,6 +22,7 @@ import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import {
   coreServices,
+  cpsService,
   dataService,
   dataViewEditorService,
   embeddableService,
@@ -148,6 +149,8 @@ export const DashboardAppNoDataPage = ({
 };
 
 export const isDashboardAppInNoDataState = async () => {
+  if (cpsService?.cpsManager) return false;
+
   const hasUserDataView = await dataService.dataViews.hasData.hasUserDataView().catch(() => false);
   if (hasUserDataView) return false;
 

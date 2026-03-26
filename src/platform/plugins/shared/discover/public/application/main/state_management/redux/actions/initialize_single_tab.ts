@@ -156,7 +156,9 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
 
     const profileDataViewsExist = profileDataViews.length > 0;
     const locationStateHasDataViewSpec = Boolean(dataViewSpec);
+    const isCpsEnabled = Boolean(services.cps?.cpsManager);
     const canAccessWithoutPersistedDataView =
+      isCpsEnabled ||
       isEsqlMode ||
       tabHasInitialAdHocDataViewSpec ||
       peristedTabHasAdHocDataView ||

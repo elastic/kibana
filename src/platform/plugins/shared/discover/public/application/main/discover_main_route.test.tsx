@@ -57,7 +57,8 @@ jest.mock('../../context_awareness', () => {
 function getServicesMock(
   hasESData = true,
   hasUserDataView = true,
-  locationState?: MainHistoryLocationState
+  locationState?: MainHistoryLocationState,
+  isCpsEnabled = false
 ) {
   const dataViewsMock = discoverServiceMock.data.dataViews;
   dataViewsMock.hasData = {
@@ -73,6 +74,7 @@ function getServicesMock(
     },
     replace: jest.fn(),
   });
+  discoverServiceMock.cps = isCpsEnabled ? ({ cpsManager: {} } as never) : undefined;
   return discoverServiceMock;
 }
 
@@ -81,11 +83,13 @@ const setupComponent = ({
   hasUserDataView = true,
   locationState,
   onAppLeave = jest.fn(),
+  isCpsEnabled = false,
 }: {
   hasESData?: boolean;
   hasUserDataView?: boolean;
   locationState?: MainHistoryLocationState;
   onAppLeave?: AppMountParameters['onAppLeave'];
+  isCpsEnabled?: boolean;
 } = {}) => {
   const props: MainRouteProps = {
     customizationCallbacks: [],
@@ -95,7 +99,9 @@ const setupComponent = ({
 
   renderWithI18n(
     <MemoryRouter>
-      <DiscoverTestProvider services={getServicesMock(hasESData, hasUserDataView, locationState)}>
+      <DiscoverTestProvider
+        services={getServicesMock(hasESData, hasUserDataView, locationState, isCpsEnabled)}
+      >
         <DiscoverMainRoute {...props} />
       </DiscoverTestProvider>
     </MemoryRouter>
@@ -152,6 +158,14 @@ describe('DiscoverMainRoute', () => {
     await waitForLoad();
 
     expect(screen.getByTestId('kbnNoDataPage')).toBeVisible();
+  });
+
+  test('renders the main app when CPS is enabled with no local data or data views', async () => {
+    setupComponent({ hasESData: false, hasUserDataView: false, isCpsEnabled: true });
+
+    await waitForLoad();
+
+    expect(screen.queryByTestId('kbnNoDataPage')).not.toBeInTheDocument();
   });
 
   test('renders no data view when hasESData=true & hasUserDataView=false', async () => {
