@@ -28,6 +28,7 @@ import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema } from '../color';
 import { filterSchema } from '../filter';
 import { builderEnums } from '../enums';
+import { cornerPositionSchema, positionSchema } from '../alignments';
 
 /**
  * Statistical functions that can be displayed in chart legend for data series
@@ -132,10 +133,23 @@ const sharedAxisSchema = {
       { meta: { description: 'Axis grid lines configuration' } }
     )
   ),
-  label_orientation: schema.maybe(
-    builderEnums.orientation({
-      meta: { description: 'Orientation of the axis labels' },
-    })
+  labels: schema.maybe(
+    schema.object(
+      {
+        /**
+         * Orientation of the axis labels. Possible values:
+         * - 'horizontal': Labels aligned horizontally
+         * - 'vertical': Labels aligned vertically
+         * - 'angled': Labels at an angle
+         */
+        orientation: builderEnums.orientation({
+          meta: {
+            description: 'Orientation of the axis labels',
+          },
+        }),
+      },
+      { meta: { description: 'Label configuration' } }
+    )
   ),
 };
 
@@ -274,16 +288,9 @@ const xySharedSettings = {
         schema.object(
           {
             ...sharedLegendSchema,
-            inside: schema.maybe(schema.literal(false)),
+            placement: schema.maybe(schema.literal('outside')),
             layout: schema.maybe(schema.literal('list')),
-            position: schema.maybe(
-              schema.oneOf([
-                schema.literal('top'),
-                schema.literal('bottom'),
-                schema.literal('left'),
-                schema.literal('right'),
-              ])
-            ),
+            position: schema.maybe(positionSchema()),
             size: schema.maybe(
               schema.oneOf([
                 schema.literal('small'),
@@ -303,20 +310,14 @@ const xySharedSettings = {
         schema.object(
           {
             ...sharedLegendSchema,
-            inside: schema.literal(true),
+            placement: schema.literal('inside'),
             columns: schema.maybe(
               schema.number({ min: 1, max: 5, meta: { description: 'Number of legend columns' } })
             ),
-            alignment: schema.maybe(
-              schema.oneOf(
-                [
-                  schema.literal('top_right'),
-                  schema.literal('bottom_right'),
-                  schema.literal('top_left'),
-                  schema.literal('bottom_left'),
-                ],
-                { meta: { description: 'Legend alignment inside the chart' } }
-              )
+            position: schema.maybe(
+              cornerPositionSchema({
+                meta: { description: 'Legend position inside the chart' },
+              })
             ),
           },
           {
@@ -550,7 +551,7 @@ const referenceLineLayerShared = {
     })
   ),
   color: schema.maybe(staticColorSchema),
-  decoration_position: schema.maybe(
+  position: schema.maybe(
     schema.oneOf([schema.literal('auto'), schema.literal('left'), schema.literal('right')], {
       meta: { description: 'Position of the icon and label relative to the reference line' },
     })
