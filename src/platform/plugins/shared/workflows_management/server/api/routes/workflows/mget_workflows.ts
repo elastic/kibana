@@ -13,8 +13,8 @@ import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
-import { WorkflowManagementAuditLog } from '../utils/workflow_audit_logging';
 import { withLicenseCheck } from '../utils/with_license_check';
+import { WorkflowManagementAuditLog } from '../utils/workflow_audit_logging';
 
 export function registerMgetWorkflowsRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
