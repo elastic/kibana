@@ -165,49 +165,57 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
   );
 
   // EUI's flyout manager fires onClose with a synthetic MouseEvent('navigation')
-  // for both cascade closes (tab switch unmount) and back-button clicks. We only
-  // want to suppress state clearing during cascade closes — not back-button clicks.
+  // in two scenarios: cascade close (tab switch unmount) and back-button click.
+  // We must preserve restorable state during cascade close but honor back-button.
   //
-  // To distinguish the two: during a cascade close the component is unmounting, so
-  // isMountedRef.current will be false. During a back-button click the component is
-  // still alive, so isMountedRef.current will be true.
+  // The trick: when we receive a 'navigation' event, we defer the state clearing
+  // to a useEffect. During a cascade close the component is unmounting, so React
+  // will not run new effects — the deferred clear never commits and the restorable
+  // state is preserved. During a back-button click the component stays alive, the
+  // effect runs on the next render, and the state is properly cleared.
   //
   // See: https://github.com/elastic/eui/blob/v113.3.0/packages/eui/src/components/flyout/manager/flyout_managed.tsx
-  const isMountedRef = useRef(false);
-  useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
+  const pendingExitRef = useRef(false);
+  const pendingChildCloseRef = useRef(false);
+  const [, setFlushPendingClose] = useState(0);
 
-  const isCascadeClose = useCallback(
-    (event: Event | React.BaseSyntheticEvent) =>
-      event.type === 'navigation' && !isMountedRef.current,
-    []
-  );
+  useEffect(() => {
+    if (pendingExitRef.current) {
+      pendingExitRef.current = false;
+      setShowFullScreenWaterfall(false);
+      clearActiveFlyout();
+    }
+    if (pendingChildCloseRef.current) {
+      pendingChildCloseRef.current = false;
+      clearActiveFlyout();
+    }
+  });
 
   const onExitFullScreen = useCallback<NonNullable<EuiFlyoutProps['onClose']>>(
     (event) => {
-      if (isCascadeClose(event)) {
+      if (event.type === 'navigation') {
+        pendingExitRef.current = true;
+        setFlushPendingClose((n) => n + 1);
         return;
       }
 
       setShowFullScreenWaterfall(false);
       clearActiveFlyout();
     },
-    [isCascadeClose, setShowFullScreenWaterfall, clearActiveFlyout]
+    [setShowFullScreenWaterfall, clearActiveFlyout]
   );
 
   const onCloseFlyout = useCallback<NonNullable<EuiFlyoutProps['onClose']>>(
     (event) => {
-      if (isCascadeClose(event)) {
+      if (event.type === 'navigation') {
+        pendingChildCloseRef.current = true;
+        setFlushPendingClose((n) => n + 1);
         return;
       }
 
       clearActiveFlyout();
     },
-    [isCascadeClose, clearActiveFlyout]
+    [clearActiveFlyout]
   );
 
   const actions = useMemo(
