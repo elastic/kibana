@@ -6,11 +6,11 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useGetServiceBadgeHref } from './use_get_service_badge_href';
+import { useGetServiceBadgeHrefFromRouter } from './use_get_service_badge_href_from_router';
 import * as useApmRouterModule from '../../../hooks/use_apm_router';
 import * as useApmParamsModule from '../../../hooks/use_apm_params';
 
-describe('useGetServiceBadgeHref', () => {
+describe('useGetServiceBadgeHrefFromRouter', () => {
   const mockLink = jest.fn();
 
   const mockUseApmRouter = jest.spyOn(useApmRouterModule, 'useApmRouter');
@@ -35,13 +35,13 @@ describe('useGetServiceBadgeHref', () => {
   });
 
   it('returns a function', () => {
-    const { result } = renderHook(() => useGetServiceBadgeHref());
+    const { result } = renderHook(() => useGetServiceBadgeHrefFromRouter());
 
     expect(typeof result.current).toBe('function');
   });
 
   it('calls router.link with the correct service overview route and service name', () => {
-    const { result } = renderHook(() => useGetServiceBadgeHref());
+    const { result } = renderHook(() => useGetServiceBadgeHrefFromRouter());
 
     result.current('my-service');
 
@@ -52,7 +52,7 @@ describe('useGetServiceBadgeHref', () => {
   });
 
   it('preserves existing query params when building the href', () => {
-    const { result } = renderHook(() => useGetServiceBadgeHref());
+    const { result } = renderHook(() => useGetServiceBadgeHrefFromRouter());
 
     result.current('my-service');
 
@@ -69,7 +69,7 @@ describe('useGetServiceBadgeHref', () => {
   });
 
   it('resets serviceGroup to empty string regardless of current value', () => {
-    const { result } = renderHook(() => useGetServiceBadgeHref());
+    const { result } = renderHook(() => useGetServiceBadgeHrefFromRouter());
 
     result.current('my-service');
 
@@ -82,7 +82,7 @@ describe('useGetServiceBadgeHref', () => {
   });
 
   it('returns the href produced by router.link', () => {
-    const { result } = renderHook(() => useGetServiceBadgeHref());
+    const { result } = renderHook(() => useGetServiceBadgeHrefFromRouter());
 
     const href = result.current('checkout-service');
 

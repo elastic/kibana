@@ -10,7 +10,7 @@ import type { WaterfallGetServiceBadgeHref } from '../../../../common/waterfall/
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 
-export function useGetServiceBadgeHref(): WaterfallGetServiceBadgeHref {
+export function useGetServiceBadgeHrefFromRouter(): WaterfallGetServiceBadgeHref {
   const router = useApmRouter();
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',

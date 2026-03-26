@@ -13,7 +13,7 @@ import type { TraceItem } from '../../../../../../common/waterfall/unified_trace
 import { fromQuery, toQuery } from '../../../../shared/links/url_helpers';
 import { TraceWaterfall } from '../../../../shared/trace_waterfall';
 import { useErrorClickHandler } from '../../../../shared/trace_waterfall/use_error_click_handler';
-import { useGetServiceBadgeHref } from '../../../../shared/trace_waterfall/use_get_service_badge_href';
+import { useGetServiceBadgeHrefFromRouter } from '../../../../shared/trace_waterfall/use_get_service_badge_href_from_router';
 import { UnifiedWaterfallFlyout } from './waterfall/unified_waterfall_flyout';
 
 interface Props {
@@ -64,7 +64,7 @@ export function UnifiedWaterfallContainer({
 }: Props) {
   const history = useHistory();
   const handleErrorClick = useErrorClickHandler(traceItems);
-  const getServiceBadgeHref = useGetServiceBadgeHref();
+  const getServiceBadgeHref = useGetServiceBadgeHrefFromRouter();
 
   const handleNodeClick = (id: string, options?: { flyoutDetailTab?: string }) => {
     toggleFlyout({
