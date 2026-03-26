@@ -776,7 +776,7 @@ export const QueryBarTopRow = React.memo(
             disabled={props.isDisabled || noTimeFieldNameDisabled}
             width="full"
             compressed
-            collapsed={false}
+            collapsed="never"
             showTimeWindowButtons
             presets={commonlyUsedRanges}
             recent={recentlyUsedRanges}
