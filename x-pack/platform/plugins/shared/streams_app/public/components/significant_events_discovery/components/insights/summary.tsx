@@ -12,7 +12,6 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLink,
   EuiPanel,
   EuiText,
@@ -26,6 +25,7 @@ import { TaskStatus } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { Insight, InsightImpactLevel } from '@kbn/streams-schema';
+import { AssetImage } from '../../../asset_image';
 import { useInsightsDiscoveryApi } from '../../../../hooks/use_insights_discovery_api';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useTaskPolling } from '../../../../hooks/use_task_polling';
@@ -235,11 +235,11 @@ if (task?.status === TaskStatus.InProgress && previousStatus !== TaskStatus.InPr
           defaultMessage: 'Discovered',
         }),
         width: '150px',
-  render: (generatedAt: string) => (
-    <EuiText size="s" color="subdued">
-      {moment(generatedAt).fromNow()}
-    </EuiText>
-  ),
+        render: (generatedAt: string) => (
+          <EuiText size="s" color="subdued">
+            {formatGeneratedAt(generatedAt)}
+          </EuiText>
+        ),
       },
     ],
     [handleSelectInsight, handleCloseFlyout, selectedInsight]
@@ -302,7 +302,7 @@ if (task?.status === TaskStatus.InProgress && previousStatus !== TaskStatus.InPr
   return (
     <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
       <EuiFlexItem grow={false}>
-        <EuiPanel color="subdued">
+        <EuiPanel color="subdued" paddingSize="l">
           <EuiFlexGroup
             direction="column"
             alignItems="center"
@@ -310,7 +310,7 @@ if (task?.status === TaskStatus.InProgress && previousStatus !== TaskStatus.InPr
             style={{ minHeight: '30vh', minWidth: '40vh' }}
           >
             <EuiFlexItem grow={false}>
-              <EuiIcon type="createAdvancedJob" size="xxl" aria-hidden={true} />
+              <AssetImage type="significantEventsEmptyState" size="m" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiTitle size="s">
@@ -319,7 +319,7 @@ if (task?.status === TaskStatus.InProgress && previousStatus !== TaskStatus.InPr
                     'xpack.streams.sigEventsDiscovery.insightsTab.significantEventsFoundTitle',
                     {
                       defaultMessage:
-                        '{count} significant {count, plural, one {event} other {events}} detected',
+                        '{count} {count, plural, one {event} other {events}} detected',
                       values: { count },
                     }
                   )}
