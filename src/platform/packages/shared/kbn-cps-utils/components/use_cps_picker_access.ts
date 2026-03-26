@@ -22,6 +22,8 @@ interface UseCpsPickerAccessParams {
   cpsManager?: ICPSManager;
 }
 
+const cleanupResolver = () => ProjectRoutingAccess.DISABLED;
+
 /**
  * Registers a CPS picker access resolver for the current app.
  * Automatically cleans up (sets DISABLED) on unmount.
@@ -44,7 +46,7 @@ export const useCpsPickerAccess = ({
     cpsManager.registerAppAccess(currentAppId, resolver);
 
     return () => {
-      cpsManager.registerAppAccess(currentAppId, () => ProjectRoutingAccess.DISABLED);
+      cpsManager.registerAppAccess(currentAppId, cleanupResolver);
     };
   }, [resolver, cpsManager, currentAppId]);
 };
