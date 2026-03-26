@@ -18,6 +18,7 @@ const TriggerAdInputSchema = z.object({
   case_id: z.string(),
   alert_ids: z.union([z.array(z.string()), z.string()]),
   index_pattern: z.string().default('.alerts-security.alerts-default'),
+  connector_id: z.string().optional(),
   min_new_alerts: z.number().default(2),
 });
 
@@ -25,7 +26,7 @@ const TriggerAdOutputSchema = z.object({
   case_id: z.string(),
   triggered: z.boolean(),
   alert_count: z.number(),
-  summary: z.string().optional(),
+  summary: z.string(),
   reason: z.string().optional(),
 });
 
@@ -34,18 +35,19 @@ export const triggerIncrementalAdStep = createServerStepDefinition({
   category: StepCategory.Kibana,
   label: 'Trigger Incremental Attack Discovery',
   description:
-    'Generates an Attack Discovery summary for a case and returns it for attachment. ' +
-    'In production, this calls the AD generation API. In the spike, it produces a structured summary from alert metadata.',
+    'Generates an Attack Discovery for a case. When a connector_id is provided, calls the AD generation API. ' +
+    'Otherwise generates a metadata-based summary from alert entities.',
   documentation: {
     details:
-      'Receives case_id + alert_ids. Fetches alerts, extracts entities, builds a summary. ' +
-      'The summary can be attached to the case via cases.addComment in the workflow.',
+      'Receives case_id + alert_ids. With connector_id: calls POST /api/attack_discovery/_generate. ' +
+      'Without connector_id: fetches alerts, extracts entities, builds structured summary.',
     examples: [],
   },
   inputSchema: TriggerAdInputSchema,
   outputSchema: TriggerAdOutputSchema,
   handler: async (context) => {
-    const { min_new_alerts, index_pattern: indexPattern } = context.input;
+    const { min_new_alerts, index_pattern: indexPattern, connector_id: connectorId } =
+      context.input;
     const caseId = String(context.input.case_id);
     const alertIds = parseArrayInput(context.input.alert_ids);
 
@@ -61,23 +63,91 @@ export const triggerIncrementalAdStep = createServerStepDefinition({
       };
     }
 
-    // Fetch alerts and extract entities for summary
+    // If connector_id provided, call the real AD generation API
+    if (connectorId) {
+      try {
+        const request = context.contextManager.getFakeRequest();
+        const kibanaUrl =
+          context.contextManager.getContext()?.kibanaUrl ?? 'http://localhost:5601';
+
+        context.logger.info(
+          `Calling AD generation API for case ${caseId} with connector ${connectorId} and ${alertIds.length} alerts`
+        );
+
+        // Build a filter that limits AD to only the alerts in this case
+        const filter = {
+          bool: {
+            must: [{ ids: { values: alertIds } }],
+          },
+        };
+
+        const adResponse = await fetch(`${kibanaUrl}/api/attack_discovery/_generate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'kbn-xsrf': 'true',
+            'elastic-api-version': '2023-10-31',
+            Authorization: request.headers.authorization as string,
+          },
+          body: JSON.stringify({
+            alertsIndexPattern: indexPattern,
+            anonymizationFields: [],
+            apiConfig: {
+              connectorId,
+              actionTypeId: '.bedrock',
+            },
+            filter,
+            size: alertIds.length,
+            subAction: 'invokeAI',
+          }),
+        });
+
+        if (adResponse.ok) {
+          const adResult = await adResponse.json();
+          context.logger.info(
+            `AD generation succeeded for case ${caseId}: ${adResult.attackDiscoveries?.length ?? 0} discoveries`
+          );
+
+          const discoveries = adResult.attackDiscoveries ?? [];
+          const summary = discoveries.length > 0
+            ? discoveries.map((d: { title: string; summaryMarkdown: string }) =>
+                `### ${d.title}\n${d.summaryMarkdown}`
+              ).join('\n\n')
+            : '*No attack discoveries generated from the provided alerts.*';
+
+          return {
+            output: {
+              case_id: caseId,
+              triggered: true,
+              alert_count: alertIds.length,
+              summary: `## Attack Discovery\n\n${summary}`,
+            },
+          };
+        }
+
+        context.logger.warn(
+          `AD generation API returned ${adResponse.status}, falling back to metadata summary`
+        );
+      } catch (err) {
+        context.logger.warn(
+          `AD generation API call failed: ${err instanceof Error ? err.message : err}. Falling back to metadata summary`
+        );
+      }
+    }
+
+    // Fallback: generate summary from alert metadata
     const esClient = context.contextManager.getScopedEsClient();
     const logger = adaptWorkflowLogger(context.logger);
     const alerts = await fetchAlertsByIds({ esClient, indexPattern, alertIds, logger });
-
     const extraction = extractEntitiesFromAlerts({ alerts, logger });
 
-    // Build rule breakdown
     const ruleNames = new Map<string, number>();
     for (const alert of alerts) {
       const ruleName =
-        (alert._source['kibana.alert.rule.name'] as string) ??
-        'Unknown Rule';
+        (alert._source['kibana.alert.rule.name'] as string) ?? 'Unknown Rule';
       ruleNames.set(ruleName, (ruleNames.get(ruleName) ?? 0) + 1);
     }
 
-    // Build entity summary
     const entityByType = new Map<string, Set<string>>();
     for (const entity of extraction.entities) {
       if (!entityByType.has(entity.typeKey)) {
@@ -86,7 +156,6 @@ export const triggerIncrementalAdStep = createServerStepDefinition({
       entityByType.get(entity.typeKey)!.add(entity.value);
     }
 
-    // Generate markdown summary
     const lines: string[] = [
       `## Attack Discovery Summary`,
       ``,
@@ -109,13 +178,13 @@ export const triggerIncrementalAdStep = createServerStepDefinition({
       `3. Check threat intelligence for extracted IOCs`,
       ``,
       `---`,
-      `*Generated by Alert Investigation Pipeline*`,
+      `*Generated by Alert Investigation Pipeline (metadata-based, no LLM connector configured)*`,
     ];
 
     const summary = lines.join('\n');
 
     context.logger.info(
-      `Generated Attack Discovery for case ${caseId}: ${alertIds.length} alerts, ${ruleNames.size} rules, ${extraction.entities.length} entities`
+      `Generated metadata-based AD for case ${caseId}: ${alertIds.length} alerts, ${ruleNames.size} rules`
     );
 
     return {
