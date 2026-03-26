@@ -78,8 +78,8 @@ jest.mock('../../../../agent_builder/hooks/use_agent_builder_attachment', () => 
   }),
 }));
 
-jest.mock('../hooks/use_inference_connectors', () => ({
-  useLoadInferenceConnectors: () => mockUseLoadInferenceConnectors(),
+jest.mock('@kbn/inference-connectors', () => ({
+  useLoadConnectors: () => mockUseLoadInferenceConnectors(),
 }));
 
 describe('EntityHighlights', () => {
@@ -108,16 +108,13 @@ describe('EntityHighlights', () => {
     settings: { client: { get: jest.fn() } },
   };
   const defaultLoadConnectors = {
-    data: {
-      hasConnectors: true,
-      connectors: [
-        {
-          connectorId: 'connector-1',
-          name: 'Test Connector',
-          actionTypeId: '.gen-ai',
-        },
-      ],
-    },
+    data: [
+      {
+        id: 'connector-1',
+        name: 'Test Connector',
+        actionTypeId: '.gen-ai',
+      },
+    ],
   };
   const defaultSpaceId = 'default';
   const defaultStoredAssistantConnectorId = ['connector-1', jest.fn()];
