@@ -102,9 +102,7 @@ export function getExportObjectTypeMeta() {
     config: {
       integration: {
         export: {
-          // Note: additional “as-code” export formats can be added as separate export integrations,
-          // e.g. `exportSourceDashboardHcl`, and should be included here to get draft-mode callouts.
-          exportSourceDashboard: { draftModeCallOut: true },
+          exportSourceDashboard: {},
           pdfReports: { draftModeCallOut: true },
           imageReports: { draftModeCallOut: true },
         },

@@ -8,7 +8,7 @@
  */
 
 import React, { type FC, useState, Fragment, useMemo, useCallback, useRef, useEffect } from 'react';
-import { Global, css } from '@emotion/react';
+import { Global } from '@emotion/react';
 import {
   EuiWrappingPopover,
   EuiListGroup,
@@ -18,7 +18,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFormRow,
-  EuiSpacer,
   EuiText,
   EuiTitle,
   EuiButton,
@@ -30,7 +29,6 @@ import {
   type EuiSwitchEvent,
   EuiSwitch,
   EuiHorizontalRule,
-  euiFullHeight,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InjectedIntl } from '@kbn/i18n-react';
@@ -43,19 +41,6 @@ import {
 } from '../context';
 import type { ExportShareConfig, ExportShareDerivativesConfig } from '../../types';
 import { DraftModeCallout } from '../common/draft_mode_callout';
-
-const flyoutBodyCss = css`
-  ${euiFullHeight()}
-  .euiFlyoutBody__overflow {
-    ${euiFullHeight()}
-    min-height: 0;
-  }
-
-  .euiFlyoutBody__overflowContent {
-    ${euiFullHeight()}
-    min-height: 0;
-  }
-`;
 
 export const ExportMenu: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
   return (
@@ -163,7 +148,7 @@ export function ManagedFlyout({
     if (exportIntegration.config.renderTotalHitsSizeWarning) {
       const totalHits: number = (sharingData.totalHits as number) || 0;
       const warning = exportIntegration.config.renderTotalHitsSizeWarning(totalHits);
-      return warning ? <EuiFlexItem grow={false}>{warning}</EuiFlexItem> : null;
+      return warning ? <EuiFlexItem>{warning}</EuiFlexItem> : null;
     }
     return null;
   }, [exportIntegration.config, sharingData.totalHits]);
@@ -199,18 +184,12 @@ export function ManagedFlyout({
             />
           </h2>
         </EuiTitle>
-        {exportIntegration.config.flyoutHeaderContent ? (
-          <React.Fragment>
-            <EuiSpacer size="s" />
-            {exportIntegration.config.flyoutHeaderContent}
-          </React.Fragment>
-        ) : null}
       </EuiFlyoutHeader>
-      <EuiFlyoutBody data-test-subj="exportItemDetailsFlyoutBody" css={flyoutBodyCss}>
-        <EuiFlexGroup css={{ height: '100%' }} direction="column">
+      <EuiFlyoutBody data-test-subj="exportItemDetailsFlyoutBody">
+        <EuiFlexGroup direction="column">
           <Fragment>
             {exportIntegration.config.renderLayoutOptionSwitch && (
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem>
                 <LayoutOptionsSwitch
                   usePrintLayout={usePrintLayout}
                   printLayoutChange={(evt) => setPrintLayout(evt.target.checked)}
@@ -220,7 +199,7 @@ export function ManagedFlyout({
           </Fragment>
           <Fragment>
             {exportIntegration?.config.copyAssetURIConfig && publicAPIEnabled && (
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem>
                 <EuiFormRow
                   label={
                     <EuiText size="s">
@@ -230,12 +209,12 @@ export function ManagedFlyout({
                   fullWidth
                 >
                   <EuiFlexGroup direction="column">
-                    <EuiFlexItem grow={false}>
+                    <EuiFlexItem>
                       <EuiText size="s" color="subdued">
                         {exportIntegration.config.copyAssetURIConfig.helpText}
                       </EuiText>
                     </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
+                    <EuiFlexItem>
                       <EuiCodeBlock
                         data-test-subj="exportAssetValue"
                         css={{ overflowWrap: 'break-word' }}
@@ -260,7 +239,7 @@ export function ManagedFlyout({
           <Fragment>{exportIntegration.config.generateAssetComponent}</Fragment>
           <Fragment>
             {publicAPIEnabled && isDirty && draftModeCallout && (
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem>
                 <DraftModeCallout
                   {...draftModeCalloutContent}
                   {...(onSave && {
@@ -456,9 +435,6 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
           data-test-subj="exportItemDetailsFlyout"
           size="s"
           onClose={flyoutOnCloseHandler}
-          aria-label={i18n.translate('share.export.flyoutAriaLabel', {
-            defaultMessage: 'Export item details',
-          })}
           css={() => ({
             ['--euiFixedHeadersOffset']: 0,
             isolation: 'isolate', // ensures that tooltips within this flyout render as should
