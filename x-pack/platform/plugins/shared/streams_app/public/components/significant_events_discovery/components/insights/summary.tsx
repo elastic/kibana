@@ -94,10 +94,11 @@ export function Summary({ count }: { count: number }) {
     const previousStatus = previousTaskStatusRef.current;
     previousTaskStatusRef.current = task?.status;
 
-    if (task?.status === TaskStatus.InProgress && previousStatus !== TaskStatus.InProgress) {
-      setInsights(null);
-      return;
-    }
+if (task?.status === TaskStatus.InProgress && previousStatus !== TaskStatus.InProgress) {
+  setInsights(null);
+  setSelectedInsight(null); // <-- add this
+  return;
+}
 
     if (task?.status === TaskStatus.Failed) {
       notifications.toasts.addError(getFormattedError(new Error(task.error)), {
