@@ -59,7 +59,9 @@ describe('getFilteredLinks', () => {
 
     expect(result).toContainEqual(expect.objectContaining({ id: SecurityPageName.aiValue }));
     expect(result).toContainEqual(mockManagementLinks);
-    expect(mockGetManagementFilteredLinks).toHaveBeenCalledWith(mockCore, mockPlugins);
+    expect(mockGetManagementFilteredLinks).toHaveBeenCalledWith(mockCore, mockPlugins, {
+      experimentalFeatures: undefined,
+    });
   });
 
   it('includes all base links in the result', async () => {
@@ -93,7 +95,9 @@ describe('getFilteredLinks', () => {
     await getFilteredLinks(mockCore, mockPlugins);
 
     expect(mockGetManagementFilteredLinks).toHaveBeenCalledTimes(1);
-    expect(mockGetManagementFilteredLinks).toHaveBeenCalledWith(mockCore, mockPlugins);
+    expect(mockGetManagementFilteredLinks).toHaveBeenCalledWith(mockCore, mockPlugins, {
+      experimentalFeatures: undefined,
+    });
   });
 
   describe('`securitySolution:enableAlertsAndAttacksAlignment` setting', () => {

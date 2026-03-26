@@ -173,7 +173,7 @@ export const ArtifactsPage = memo(() => {
 
   const onTabClick = useCallback((tab: AdministrationSubTab) => {
     history.push(getPathForTab(tab));
-  }, [history, getPathForTab]);
+  }, [history]);
 
   return (
     <AdministrationListPage

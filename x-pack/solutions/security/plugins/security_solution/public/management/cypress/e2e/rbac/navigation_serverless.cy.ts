@@ -35,7 +35,6 @@ describe(
       loadPage('/app/security');
       ServerlessHeaders.showMoreItems();
       cy.get(MenuButtonSelector).click();
-      cy.get(allPages[0].selector).click();
 
       for (const selector of uniqueNavSelectors) {
         cy.get(selector);

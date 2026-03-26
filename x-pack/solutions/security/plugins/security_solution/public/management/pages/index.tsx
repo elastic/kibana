@@ -135,34 +135,40 @@ export const ManagementContainer = memo(() => {
           path={MANAGEMENT_ROUTING_ENDPOINT_EXCEPTIONS_PATH}
           component={ArtifactsPage}
           hasPrivilege={canReadEndpointExceptions}
+          exact
         />
       )}
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH}
         component={ArtifactsPage}
         hasPrivilege={canReadTrustedApplications}
+        exact
       />
       {trustedDevicesEnabled && (
         <PrivilegedRoute
           path={MANAGEMENT_ROUTING_TRUSTED_DEVICES_PATH}
           component={ArtifactsPage}
           hasPrivilege={canReadTrustedDevices}
+          exact
         />
       )}
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH}
         component={ArtifactsPage}
         hasPrivilege={canReadEventFilters}
+        exact
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
         component={ArtifactsPage}
         hasPrivilege={canReadHostIsolationExceptions}
+        exact
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_BLOCKLIST_PATH}
         component={ArtifactsPage}
         hasPrivilege={canReadBlocklist}
+        exact
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH}

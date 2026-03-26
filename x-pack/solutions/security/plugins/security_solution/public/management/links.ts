@@ -36,7 +36,10 @@ import {
   SCRIPT_LIBRARY,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
-import type { ExperimentalFeatures } from '../../common/experimental_features';
+import {
+  allowedExperimentalValues,
+  type ExperimentalFeatures,
+} from '../../common/experimental_features';
 import type { LinkItem } from '../common/links/types';
 import type { StartPlugins } from '../types';
 import { links as notesLink } from '../notes/links';
@@ -317,8 +320,9 @@ export const getManagementFilteredLinks = async (
 
   const filtered = excludeLinks(linksToExclude);
   const experimentalFeatures = params?.experimentalFeatures ?? {
-    endpointExceptionsMovedUnderManagement: false,
-    trustedDevices: true,
+    endpointExceptionsMovedUnderManagement:
+      allowedExperimentalValues.endpointExceptionsMovedUnderManagement,
+    trustedDevices: allowedExperimentalValues.trustedDevices,
   };
 
   const artifactsPath = canReadAnyArtifact
