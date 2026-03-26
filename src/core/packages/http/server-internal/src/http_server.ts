@@ -39,7 +39,6 @@ import type {
   OnPreAuthHandler,
   OnPreResponseHandler,
   OnPreRoutingHandler,
-  RouteConfigOptions,
   RouteMethod,
   RouterDeprecatedApiDetails,
   RouterRoute,
@@ -401,7 +400,7 @@ export class HttpServer {
   }
 
   private getAuthOption(
-    authRequired: RouteConfigOptions<any>['authRequired'] | 'minimal' = true
+    authRequired: boolean | 'optional' | 'minimal' = true
   ): undefined | false | { mode: 'required' | 'try' } {
     if (this.authRegistered === false) return undefined;
 
@@ -618,7 +617,7 @@ export class HttpServer {
       app.measureElu = stop;
       // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
       // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
-      app.traceId = apm.currentTraceIds['trace.id'];
+      app.traceId = apm.currentTraceIds['trace.id'] ?? trace.getActiveSpan()?.spanContext().traceId;
       app.span = apm.startSpan('pre-route handler middlewares');
       app.httpSpan = trace.getActiveSpan();
       app.otelSubSpan = this.createSubspan('pre-route handler middlewares');
@@ -992,7 +991,7 @@ export class HttpServer {
     const { tags, body = {}, timeout, deprecated } = route.options;
     const { accepts: allow, override, maxBytes, output, parse } = body;
 
-    const authRequired = this.getSecurity(route)?.authc?.enabled ?? route.options.authRequired;
+    const authRequired = this.getSecurity(route)?.authc?.enabled;
 
     const kibanaRouteOptions: KibanaRouteOptions = {
       xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),

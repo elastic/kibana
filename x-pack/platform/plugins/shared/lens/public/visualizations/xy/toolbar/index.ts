@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { XYState } from '@kbn/lens-common';
+import type { XYVisualizationState } from '@kbn/lens-common';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
 export function updateLayer(
-  state: XYState,
-  layer: UnwrapArray<XYState['layers']>,
+  state: XYVisualizationState,
+  layer: UnwrapArray<XYVisualizationState['layers']>,
   index: number
-): XYState {
+): XYVisualizationState {
   return {
     ...state,
     layers: state.layers.map((l, i) => (i === index ? layer : l)),

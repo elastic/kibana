@@ -47,7 +47,11 @@
           },
           ", ",
           "AIMessageChunk",
-          ">"
+          "<",
+          "MessageStructure",
+          "<",
+          "MessageToolSet",
+          ">>>"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
         "lineNumber": 81,
@@ -460,7 +464,11 @@
               "BaseLanguageModelInput",
               ", ",
               "AIMessageChunk",
-              ", ",
+              "<",
+              "MessageStructure",
+              "<",
+              "MessageToolSet",
+              ">>, ",
               {
                 "pluginId": "@kbn/inference-langchain",
                 "scope": "common",
@@ -1044,7 +1052,11 @@
             "signature": [
               "(baseMessages: ",
               "BaseMessage",
-              "[], options: this[\"ParsedCallOptions\"], runManager?: ",
+              "<",
+              "MessageStructure",
+              "<",
+              "MessageToolSet",
+              ">, string>[], options: this[\"ParsedCallOptions\"], runManager?: ",
               "CallbackManagerForLLMRun",
               " | undefined) => Promise<",
               "ChatResult",
@@ -1065,7 +1077,11 @@
                 "description": [],
                 "signature": [
                   "BaseMessage",
-                  "[]"
+                  "<",
+                  "MessageStructure",
+                  "<",
+                  "MessageToolSet",
+                  ">, string>[]"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
                 "lineNumber": 223,
@@ -1122,7 +1138,11 @@
             "signature": [
               "(baseMessages: ",
               "BaseMessage",
-              "[], options: this[\"ParsedCallOptions\"], runManager?: ",
+              "<",
+              "MessageStructure",
+              "<",
+              "MessageToolSet",
+              ">, string>[], options: this[\"ParsedCallOptions\"], runManager?: ",
               "CallbackManagerForLLMRun",
               " | undefined) => AsyncGenerator<",
               "ChatGenerationChunk",
@@ -1143,7 +1163,11 @@
                 "description": [],
                 "signature": [
                   "BaseMessage",
-                  "[]"
+                  "<",
+                  "MessageStructure",
+                  "<",
+                  "MessageToolSet",
+                  ">, string>[]"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
                 "lineNumber": 273,
@@ -1218,7 +1242,11 @@
               "BaseLanguageModelInput",
               ", { raw: ",
               "BaseMessage",
-              "; parsed: RunOutput; }, ",
+              "<",
+              "MessageStructure",
+              "<",
+              "MessageToolSet",
+              ">, string>; parsed: RunOutput; }, ",
               "RunnableConfig",
               "<Record<string, any>>>; }"
             ],
