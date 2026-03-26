@@ -1036,6 +1036,7 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
     if (ecsMappingArrayState.isDirty && !deepEqual(parsedMapping, ecsMapping)) {
       setValueRoot('ecs_mapping', parsedMapping, {
         shouldTouch: true,
+        shouldDirty: true,
       });
     }
   }, [setValueRoot, formValue, ecsMappingArrayState.isDirty, ecsMapping]);
