@@ -7,11 +7,27 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { AcknowledgeActionButton } from './acknowledge_action_button';
+import { useCreateAlertAction } from '../../../hooks/use_create_alert_action';
+
+jest.mock('../../../hooks/use_create_alert_action');
+
+const useCreateAlertActionMock = jest.mocked(useCreateAlertAction);
+const mockServices = { http: {} as any };
 
 describe('AcknowledgeActionButton', () => {
+  const mutate = jest.fn();
+  beforeEach(() => {
+    mutate.mockReset();
+    useCreateAlertActionMock.mockReturnValue({
+      mutate,
+      isLoading: false,
+    } as any);
+  });
+
   it('renders Unacknowledge when lastAckAction is undefined (treated as acknowledged)', () => {
-    render(<AcknowledgeActionButton />);
+    render(<AcknowledgeActionButton http={mockServices.http} />);
     expect(screen.getByTestId('alertEpisodeAcknowledgeActionButton')).toHaveTextContent(
       'Acknowledge'
     );
@@ -23,7 +39,7 @@ describe('AcknowledgeActionButton', () => {
   });
 
   it('renders Unacknowledge when lastAckAction is ack', () => {
-    render(<AcknowledgeActionButton lastAckAction="ack" />);
+    render(<AcknowledgeActionButton lastAckAction="ack" http={mockServices.http} />);
     expect(screen.getByTestId('alertEpisodeAcknowledgeActionButton')).toHaveTextContent(
       'Unacknowledge'
     );
@@ -35,7 +51,7 @@ describe('AcknowledgeActionButton', () => {
   });
 
   it('renders Acknowledge when lastAckAction is unack', () => {
-    render(<AcknowledgeActionButton lastAckAction="unack" />);
+    render(<AcknowledgeActionButton lastAckAction="unack" http={mockServices.http} />);
     expect(screen.getByTestId('alertEpisodeAcknowledgeActionButton')).toHaveTextContent(
       'Acknowledge'
     );
@@ -44,5 +60,25 @@ describe('AcknowledgeActionButton', () => {
         .getByTestId('alertEpisodeAcknowledgeActionButton')
         .querySelector('[data-euiicon-type="checkCircle"]')
     ).toBeInTheDocument();
+  });
+
+  it('calls ack route mutation on click', async () => {
+    const user = userEvent.setup();
+    render(
+      <AcknowledgeActionButton
+        lastAckAction="unack"
+        episodeId="ep-1"
+        groupHash="gh-1"
+        http={mockServices.http}
+      />
+    );
+
+    await user.click(screen.getByTestId('alertEpisodeAcknowledgeActionButton'));
+
+    expect(mutate).toHaveBeenCalledWith({
+      groupHash: 'gh-1',
+      actionType: 'ack',
+      body: { episode_id: 'ep-1' },
+    });
   });
 });

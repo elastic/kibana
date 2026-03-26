@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiListGroup, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { HttpStart } from '@kbn/core-http-browser';
 import { AcknowledgeActionButton } from './acknowledge_action_button';
 import { SnoozeActionButton } from './snooze_action_button';
 import type { EpisodeAction } from '../../../types/episode_action';
@@ -15,9 +16,10 @@ import { ResolveActionButton } from './deactivate_action_button';
 
 export interface AlertEpisodeActionsCellProps {
   episodeAction?: EpisodeAction;
+  http: HttpStart;
 }
 
-export function AlertEpisodeActionsCell({ episodeAction }: AlertEpisodeActionsCellProps) {
+export function AlertEpisodeActionsCell({ episodeAction, http }: AlertEpisodeActionsCellProps) {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
 
   return (
@@ -29,10 +31,19 @@ export function AlertEpisodeActionsCell({ episodeAction }: AlertEpisodeActionsCe
       justifyContent="flexEnd"
     >
       <EuiFlexItem grow={false}>
-        <AcknowledgeActionButton lastAckAction={episodeAction?.lastAckAction} />
+        <AcknowledgeActionButton
+          lastAckAction={episodeAction?.lastAckAction}
+          episodeId={episodeAction?.episodeId}
+          groupHash={episodeAction?.groupHash}
+          http={http}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <SnoozeActionButton lastSnoozeAction={episodeAction?.lastSnoozeAction} />
+        <SnoozeActionButton
+          lastSnoozeAction={episodeAction?.lastSnoozeAction}
+          groupHash={episodeAction?.groupHash}
+          http={http}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPopover
@@ -64,7 +75,11 @@ export function AlertEpisodeActionsCell({ episodeAction }: AlertEpisodeActionsCe
           panelPaddingSize="s"
         >
           <EuiListGroup gutterSize="none" bordered={false} flush={true} size="l">
-            <ResolveActionButton lastDeactivateAction={episodeAction?.lastDeactivateAction} />
+            <ResolveActionButton
+              lastDeactivateAction={episodeAction?.lastDeactivateAction}
+              groupHash={episodeAction?.groupHash}
+              http={http}
+            />
           </EuiListGroup>
         </EuiPopover>
       </EuiFlexItem>

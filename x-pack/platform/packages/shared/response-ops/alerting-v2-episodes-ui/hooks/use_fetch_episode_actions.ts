@@ -10,6 +10,7 @@ import { useQuery } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { EpisodeAction } from '../types/episode_action';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
+import { queryKeys } from '../query_keys';
 
 const ALERT_ACTIONS_DATA_STREAM = '.alert-actions';
 
@@ -53,7 +54,7 @@ export interface UseFetchEpisodeActionsOptions {
 
 export const useFetchEpisodeActions = ({ episodeIds, services }: UseFetchEpisodeActionsOptions) => {
   const { data, isLoading } = useQuery({
-    queryKey: ['fetchEpisodeActions', episodeIds],
+    queryKey: queryKeys.actions(episodeIds),
     queryFn: async ({ signal }) => {
       const query = buildBulkGetAlertActionsQuery(episodeIds);
       const result = await executeEsqlQuery({

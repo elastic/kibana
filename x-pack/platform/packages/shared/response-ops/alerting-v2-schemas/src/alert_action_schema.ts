@@ -24,6 +24,7 @@ const tagActionSchema = z.object({
 
 const snoozeActionSchema = z.object({
   action_type: z.literal('snooze').describe('Snoozes an alert.'),
+  expiry: z.string().optional().describe('ISO datetime when snooze should expire.'),
 });
 
 const unsnoozeActionSchema = z.object({
@@ -39,6 +40,39 @@ const deactivateActionSchema = z.object({
   action_type: z.literal('deactivate').describe('Deactivates an alert.'),
   reason: z.string().describe('Reason for deactivating the alert.'),
 });
+
+export const createAckAlertActionBodySchema = ackActionSchema.omit({ action_type: true }).strict();
+export type CreateAckAlertActionBody = z.infer<typeof createAckAlertActionBodySchema>;
+
+export const createUnackAlertActionBodySchema = unackActionSchema
+  .omit({ action_type: true })
+  .strict();
+export type CreateUnackAlertActionBody = z.infer<typeof createUnackAlertActionBodySchema>;
+
+export const createTagAlertActionBodySchema = tagActionSchema.omit({ action_type: true }).strict();
+export type CreateTagAlertActionBody = z.infer<typeof createTagAlertActionBodySchema>;
+
+export const createSnoozeAlertActionBodySchema = snoozeActionSchema
+  .omit({ action_type: true })
+  .strict();
+export type CreateSnoozeAlertActionBody = z.infer<typeof createSnoozeAlertActionBodySchema>;
+
+export const createUnsnoozeAlertActionBodySchema = unsnoozeActionSchema
+  .omit({ action_type: true })
+  .strict();
+export type CreateUnsnoozeAlertActionBody = z.infer<typeof createUnsnoozeAlertActionBodySchema>;
+
+export const createActivateAlertActionBodySchema = activateActionSchema
+  .omit({ action_type: true })
+  .strict();
+export type CreateActivateAlertActionBody = z.infer<typeof createActivateAlertActionBodySchema>;
+
+export const createDeactivateAlertActionBodySchema = deactivateActionSchema
+  .omit({
+    action_type: true,
+  })
+  .strict();
+export type CreateDeactivateAlertActionBody = z.infer<typeof createDeactivateAlertActionBodySchema>;
 
 export const createAlertActionBodySchema = z
   .discriminatedUnion('action_type', [

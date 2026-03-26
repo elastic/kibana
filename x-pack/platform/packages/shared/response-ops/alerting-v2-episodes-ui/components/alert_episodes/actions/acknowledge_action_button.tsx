@@ -8,13 +8,25 @@
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { HttpStart } from '@kbn/core-http-browser';
+import { useCreateAlertAction } from '../../../hooks/use_create_alert_action';
 
 export interface AcknowledgeActionButtonProps {
   lastAckAction?: string | null;
+  episodeId?: string;
+  groupHash?: string | null;
+  http: HttpStart;
 }
 
-export function AcknowledgeActionButton({ lastAckAction }: AcknowledgeActionButtonProps) {
+export function AcknowledgeActionButton({
+  lastAckAction,
+  episodeId,
+  groupHash,
+  http,
+}: AcknowledgeActionButtonProps) {
   const isAcknowledged = lastAckAction === 'ack';
+  const actionType = isAcknowledged ? 'unack' : 'ack';
+  const createAlertActionMutation = useCreateAlertAction(http);
 
   const label = isAcknowledged
     ? i18n.translate('xpack.alertingV2.episodesUi.acknowledgeAction.unacknowledge', {
@@ -30,7 +42,18 @@ export function AcknowledgeActionButton({ lastAckAction }: AcknowledgeActionButt
       color="text"
       fill={false}
       iconType={isAcknowledged ? 'crossCircle' : 'checkCircle'}
-      onClick={() => {}}
+      onClick={() => {
+        if (!episodeId || !groupHash) {
+          return;
+        }
+        createAlertActionMutation.mutate({
+          groupHash,
+          actionType,
+          body: { episode_id: episodeId },
+        });
+      }}
+      isLoading={createAlertActionMutation.isLoading}
+      isDisabled={!episodeId || !groupHash}
       data-test-subj="alertEpisodeAcknowledgeActionButton"
     >
       {label}

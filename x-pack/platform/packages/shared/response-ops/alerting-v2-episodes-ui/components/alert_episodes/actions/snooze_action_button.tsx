@@ -8,17 +8,26 @@
 import React, { useState } from 'react';
 import { EuiButton, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { HttpStart } from '@kbn/core-http-browser';
 import { AlertEpisodeSnoozeForm } from './alert_episode_snooze_form';
+import { useCreateAlertAction } from '../../../hooks/use_create_alert_action';
 
 export interface SnoozeActionButtonProps {
   lastSnoozeAction?: string | null;
+  groupHash?: string | null;
+  http: HttpStart;
 }
 
-export function SnoozeActionButton({ lastSnoozeAction }: SnoozeActionButtonProps) {
+export function SnoozeActionButton({
+  lastSnoozeAction,
+  groupHash,
+  http,
+}: SnoozeActionButtonProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const isSnoozed = lastSnoozeAction === 'snooze';
   const togglePopover = () => setIsPopoverOpen((prev) => !prev);
   const closePopover = () => setIsPopoverOpen(false);
+  const createAlertActionMutation = useCreateAlertAction(http);
 
   const label = isSnoozed
     ? i18n.translate('xpack.alertingV2.episodesUi.snoozeAction.unsnooze', {
@@ -41,6 +50,8 @@ export function SnoozeActionButton({ lastSnoozeAction }: SnoozeActionButtonProps
           fill={false}
           iconType={isSnoozed ? 'bell' : 'bellSlash'}
           onClick={togglePopover}
+          isDisabled={!groupHash}
+          isLoading={createAlertActionMutation.isLoading}
           data-test-subj="alertEpisodeSnoozeActionButton"
         >
           {label}
@@ -54,10 +65,26 @@ export function SnoozeActionButton({ lastSnoozeAction }: SnoozeActionButtonProps
     >
       <AlertEpisodeSnoozeForm
         isSnoozed={isSnoozed}
-        onApplySnooze={() => {
+        onApplySnooze={(expiry) => {
+          if (!groupHash) {
+            return;
+          }
+          createAlertActionMutation.mutate({
+            groupHash,
+            actionType: 'snooze',
+            body: { expiry },
+          });
           closePopover();
         }}
         onCancelSnooze={() => {
+          if (!groupHash) {
+            return;
+          }
+          createAlertActionMutation.mutate({
+            groupHash,
+            actionType: 'unsnooze',
+            body: {},
+          });
           closePopover();
         }}
       />

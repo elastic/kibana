@@ -9,10 +9,25 @@ import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { render, screen, waitFor } from '@testing-library/react';
 import { SnoozeActionButton } from './snooze_action_button';
+import { useCreateAlertAction } from '../../../hooks/use_create_alert_action';
+
+jest.mock('../../../hooks/use_create_alert_action');
+
+const useCreateAlertActionMock = jest.mocked(useCreateAlertAction);
+const mockServices = { http: {} as any };
 
 describe('SnoozeActionButton', () => {
+  const mutate = jest.fn();
+  beforeEach(() => {
+    mutate.mockReset();
+    useCreateAlertActionMock.mockReturnValue({
+      mutate,
+      isLoading: false,
+    } as any);
+  });
+
   it('renders Snooze with bellSlash when not snoozed', () => {
-    render(<SnoozeActionButton lastSnoozeAction={null} />);
+    render(<SnoozeActionButton lastSnoozeAction={null} http={mockServices.http} />);
     expect(screen.getByTestId('alertEpisodeSnoozeActionButton')).toHaveTextContent('Snooze');
     expect(
       screen
@@ -22,7 +37,7 @@ describe('SnoozeActionButton', () => {
   });
 
   it('renders Unsnooze with bell when snoozed', () => {
-    render(<SnoozeActionButton lastSnoozeAction="snooze" />);
+    render(<SnoozeActionButton lastSnoozeAction="snooze" http={mockServices.http} />);
     expect(screen.getByTestId('alertEpisodeSnoozeActionButton')).toHaveTextContent('Unsnooze');
     expect(
       screen
@@ -33,7 +48,7 @@ describe('SnoozeActionButton', () => {
 
   it('opens popover with snooze form content on click', async () => {
     const user = userEvent.setup();
-    render(<SnoozeActionButton lastSnoozeAction={null} />);
+    render(<SnoozeActionButton lastSnoozeAction={null} groupHash="gh-1" http={mockServices.http} />);
 
     await user.click(screen.getByTestId('alertEpisodeSnoozeActionButton'));
 
@@ -44,7 +59,7 @@ describe('SnoozeActionButton', () => {
 
   it('closes popover after clicking Apply', async () => {
     const user = userEvent.setup();
-    render(<SnoozeActionButton lastSnoozeAction={null} />);
+    render(<SnoozeActionButton lastSnoozeAction={null} groupHash="gh-1" http={mockServices.http} />);
 
     await user.click(screen.getByTestId('alertEpisodeSnoozeActionButton'));
     await user.click(screen.getByRole('button', { name: 'Apply' }));
@@ -56,7 +71,9 @@ describe('SnoozeActionButton', () => {
 
   it('shows cancel snooze and closes popover after click when snoozed', async () => {
     const user = userEvent.setup();
-    render(<SnoozeActionButton lastSnoozeAction="snooze" />);
+    render(
+      <SnoozeActionButton lastSnoozeAction="snooze" groupHash="gh-1" http={mockServices.http} />
+    );
 
     await user.click(screen.getByTestId('alertEpisodeSnoozeActionButton'));
 
@@ -68,5 +85,19 @@ describe('SnoozeActionButton', () => {
     await waitFor(() =>
       expect(screen.queryByTestId('alertEpisodeSnoozeForm')).not.toBeInTheDocument()
     );
+  });
+
+  it('calls snooze route mutation when applying from popover', async () => {
+    const user = userEvent.setup();
+    render(<SnoozeActionButton lastSnoozeAction={null} groupHash="gh-1" http={mockServices.http} />);
+
+    await user.click(screen.getByTestId('alertEpisodeSnoozeActionButton'));
+    await user.click(screen.getByRole('button', { name: 'Apply' }));
+
+    expect(mutate).toHaveBeenCalledWith({
+      groupHash: 'gh-1',
+      actionType: 'snooze',
+      body: { expiry: expect.any(String) },
+    });
   });
 });

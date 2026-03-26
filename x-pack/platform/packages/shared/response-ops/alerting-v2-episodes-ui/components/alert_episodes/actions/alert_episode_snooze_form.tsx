@@ -89,7 +89,7 @@ export const ALERT_EPISODE_COMMON_SNOOZE_TIMES: Array<{
 
 interface AlertEpisodeSnoozeFormProps {
   isSnoozed: boolean;
-  onApplySnooze: (snoozedUntil: string) => void;
+  onApplySnooze: (expiry: string) => void;
   onCancelSnooze: () => void;
 }
 

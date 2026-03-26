@@ -1,0 +1,45 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { HttpStart } from '@kbn/core-http-browser';
+import { useMutation, useQueryClient } from '@kbn/react-query';
+import { queryKeys } from '../query_keys';
+
+const INTERNAL_ALERTING_V2_ALERT_API_PATH = '/internal/alerting/v2/alerts';
+
+type AlertActionRouteType =
+  | 'ack'
+  | 'unack'
+  | 'tag'
+  | 'snooze'
+  | 'unsnooze'
+  | 'activate'
+  | 'deactivate';
+
+interface CreateAlertActionParams {
+  groupHash: string;
+  actionType: AlertActionRouteType;
+  body?: Record<string, unknown>;
+}
+
+export const useCreateAlertAction = (http: HttpStart) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ groupHash, actionType, body = {} }: CreateAlertActionParams) => {
+      await http.post(
+        `${INTERNAL_ALERTING_V2_ALERT_API_PATH}/${groupHash}/action/_${actionType}`,
+        {
+          body: JSON.stringify(body),
+        }
+      );
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.all });
+    },
+  });
+};

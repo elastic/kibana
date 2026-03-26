@@ -8,13 +8,23 @@
 import React from 'react';
 import { EuiListGroupItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { HttpStart } from '@kbn/core-http-browser';
+import { useCreateAlertAction } from '../../../hooks/use_create_alert_action';
 
 export interface ResolveActionButtonProps {
   lastDeactivateAction?: string | null;
+  groupHash?: string | null;
+  http: HttpStart;
 }
 
-export function ResolveActionButton({ lastDeactivateAction }: ResolveActionButtonProps) {
+export function ResolveActionButton({
+  lastDeactivateAction,
+  groupHash,
+  http,
+}: ResolveActionButtonProps) {
   const isDeactivated = lastDeactivateAction === 'deactivate';
+  const actionType = isDeactivated ? 'activate' : 'deactivate';
+  const createAlertActionMutation = useCreateAlertAction(http);
 
   const label = isDeactivated
     ? i18n.translate('xpack.alertingV2.episodesUi.resolveAction.activate', {
@@ -31,7 +41,21 @@ export function ResolveActionButton({ lastDeactivateAction }: ResolveActionButto
       label={label}
       size="s"
       iconType={iconType}
-      onClick={() => {}}
+      onClick={() => {
+        if (!groupHash) {
+          return;
+        }
+        createAlertActionMutation.mutate({
+          groupHash,
+          actionType,
+          body: {
+            reason: i18n.translate('xpack.alertingV2.episodesUi.resolveAction.reason', {
+              defaultMessage: 'Updated from episodes actions UI',
+            }),
+          },
+        });
+      }}
+      isDisabled={!groupHash}
       data-test-subj="alertingEpisodeActionsResolveActionButton"
     />
   );

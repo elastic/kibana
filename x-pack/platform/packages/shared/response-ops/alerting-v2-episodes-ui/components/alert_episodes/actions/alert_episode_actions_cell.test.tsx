@@ -9,10 +9,23 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AlertEpisodeActionsCell } from './alert_episode_actions_cell';
+import { useCreateAlertAction } from '../../../hooks/use_create_alert_action';
+
+jest.mock('../../../hooks/use_create_alert_action');
+
+const useCreateAlertActionMock = jest.mocked(useCreateAlertAction);
+const mockServices = { http: {} as any };
 
 describe('AlertEpisodeActionsCell', () => {
+  beforeEach(() => {
+    useCreateAlertActionMock.mockReturnValue({
+      mutate: jest.fn(),
+      isLoading: false,
+    } as any);
+  });
+
   it('renders acknowledge, snooze, and more-actions controls', () => {
-    render(<AlertEpisodeActionsCell />);
+    render(<AlertEpisodeActionsCell http={mockServices.http} />);
     expect(screen.getByTestId('alertEpisodeAcknowledgeActionButton')).toBeInTheDocument();
     expect(screen.getByTestId('alertEpisodeSnoozeActionButton')).toBeInTheDocument();
     expect(screen.getByTestId('alertingEpisodeActionsMoreButton')).toBeInTheDocument();
@@ -22,6 +35,7 @@ describe('AlertEpisodeActionsCell', () => {
     const user = userEvent.setup();
     render(
       <AlertEpisodeActionsCell
+        http={mockServices.http}
         episodeAction={{
           episodeId: 'e1',
           ruleId: 'r1',
@@ -36,13 +50,14 @@ describe('AlertEpisodeActionsCell', () => {
     await user.click(screen.getByTestId('alertingEpisodeActionsMoreButton'));
     expect(
       await screen.findByTestId('alertingEpisodeActionsResolveActionButton')
-    ).toHaveTextContent('Deactivate');
+    ).toHaveTextContent('Unresolve');
   });
 
   it('shows Activate in popover when episode is deactivated', async () => {
     const user = userEvent.setup();
     render(
       <AlertEpisodeActionsCell
+        http={mockServices.http}
         episodeAction={{
           episodeId: 'e1',
           ruleId: 'r1',
@@ -57,6 +72,6 @@ describe('AlertEpisodeActionsCell', () => {
     await user.click(screen.getByTestId('alertingEpisodeActionsMoreButton'));
     expect(
       await screen.findByTestId('alertingEpisodeActionsResolveActionButton')
-    ).toHaveTextContent('Activate');
+    ).toHaveTextContent('Resolve');
   });
 });
