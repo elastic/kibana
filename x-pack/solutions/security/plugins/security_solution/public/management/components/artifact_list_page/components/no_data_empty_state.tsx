@@ -57,7 +57,7 @@ export const NoDataEmptyState = memo<{
         {canCreateItems ? (
           <EmptyPrompt
             data-test-subj={dataTestSubj}
-            iconType="plusInCircle"
+            iconType="plusCircle"
             title={<h2 data-test-subj={getTestId('title')}>{titleLabel}</h2>}
             body={
               <div data-test-subj={getTestId('aboutInfo')}>

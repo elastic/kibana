@@ -173,7 +173,7 @@ pageLoadAssetSize:
   share: 58677
   slo: 40437
   snapshotRestore: 22068
-  spaces: 30016
+  spaces: 28871
   stackAlerts: 31499
   stackConnectors: 85421
   streams: 10000
@@ -210,5 +210,5 @@ pageLoadAssetSize:
   visualizations: 52210
   watcher: 10485
   workflowsExtensions: 89850
-  workflowsManagement: 25000
-  workplaceAIApp: 65547
+  workflowsManagement: 30804
+  workplaceAIApp: 73317
