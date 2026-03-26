@@ -76,6 +76,13 @@ jest.mock('../../utils/is_attack_discovery_alert', () => ({
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 
+jest.mock(
+  '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items',
+  () => ({
+    useAttackRunWorkflowContextMenuItems: jest.fn(() => ({ items: [], panels: [] })),
+  })
+);
+
 const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
 
 /** helper function to open the popover */
