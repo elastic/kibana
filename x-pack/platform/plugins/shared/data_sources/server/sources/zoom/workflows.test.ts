@@ -10,10 +10,9 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
   getWorkflowYaml,
-  loadWorkflowsThroughProductionPath,
+  loadWorkflowsFromConnectorSpec,
   type ProcessedWorkflow,
 } from '../workflow.test_helpers';
-import { zoomDataSource } from './data_type';
 
 const CONNECTOR_NAME = 'fake-zoom-connector';
 const CONNECTOR_ID = 'fake-zoom-connector-uuid';
@@ -22,9 +21,9 @@ describe('zoom workflows', () => {
   let fixture: WorkflowRunFixture;
   let workflows: ProcessedWorkflow[];
 
-  beforeAll(async () => {
-    workflows = await loadWorkflowsThroughProductionPath(zoomDataSource, {
-      stackConnectorId: CONNECTOR_NAME,
+  beforeAll(() => {
+    workflows = loadWorkflowsFromConnectorSpec('.zoom', {
+      connectorName: CONNECTOR_NAME,
     });
   });
 

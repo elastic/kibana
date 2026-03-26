@@ -8,6 +8,7 @@
 import { EntityStorePlugin } from './plugin';
 
 export { useInstallEntityStoreV2 } from './hooks/useInstallEntityStoreV2';
+export { FF_ENABLE_ENTITY_STORE_V2, ENTITY_STORE_ROUTES } from '../common';
 
 export function plugin() {
   return new EntityStorePlugin();
