@@ -85,7 +85,8 @@ export const CorrelationsOverview = memo(
       showSameSourceAlerts ||
       showAlertsBySession ||
       showCases ||
-      showSuppressedAlerts;
+      showSuppressedAlerts ||
+      showRelatedAttacks;
 
     const ruleType = getFieldValue(hit, ALERT_RULE_TYPE) as Type | undefined;
 
