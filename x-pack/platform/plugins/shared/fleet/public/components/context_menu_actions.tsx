@@ -27,6 +27,7 @@ type Props = {
   isOpen?: boolean;
   isManaged?: boolean;
   onChange?: (isOpen: boolean) => void;
+  ariaLabel?: string;
 } & (
   | {
       items: EuiContextMenuPanelProps['items'];
@@ -36,7 +37,7 @@ type Props = {
     }
 );
 
-export const ContextMenuActions = React.memo<Props>(({ button, onChange, isOpen, ...props }) => {
+export const ContextMenuActions = React.memo<Props>(({ button, onChange, isOpen, ariaLabel, ...props }) => {
   const [isOpenState, setIsOpenState] = useState(false);
   const handleCloseMenu = useCallback(() => {
     if (onChange) {
@@ -62,9 +63,12 @@ export const ContextMenuActions = React.memo<Props>(({ button, onChange, isOpen,
       isDisabled={props.isManaged}
       iconType="boxesVertical"
       onClick={handleToggleMenu}
-      aria-label={i18n.translate('xpack.fleet.genericActionsMenuText', {
-        defaultMessage: 'Actions',
-      })}
+      aria-label={
+        ariaLabel ??
+        i18n.translate('xpack.fleet.genericActionsMenuText', {
+          defaultMessage: 'Actions',
+        })
+      }
       data-test-subj="agentActionsBtn"
     />
   );
