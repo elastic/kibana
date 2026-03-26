@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
+import { css } from '@emotion/react';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
@@ -364,19 +365,30 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         )}
 
         {!doesDataExist ? (
-          <NoDataEmptyState
-            onAdd={handleOpenCreateFlyoutClick}
-            onImport={handleImport}
-            titleNoEntriesLabel={labels.emptyStateTitleNoEntries}
-            titleLabel={labels.emptyStateTitle}
-            aboutInfo={labels.emptyStateInfo}
-            primaryButtonLabel={labels.emptyStatePrimaryButtonLabel}
-            importButtonLabel={labels.emptyStateImportButtonLabel}
-            backComponent={backButtonEmptyComponent}
-            data-test-subj={getTestId('emptyState')}
-            secondaryAboutInfo={secondaryPageInfo}
-            canCreateItems={allowCardCreateAction}
-          />
+          <div
+            css={css`
+              > * {
+                justify-content: flex-start;
+                padding-top: calc((100vh - 140px) / 6);
+                box-sizing: border-box;
+              }
+            `}
+          >
+            <NoDataEmptyState
+              onAdd={handleOpenCreateFlyoutClick}
+              onImport={handleImport}
+              titleNoEntriesLabel={labels.emptyStateTitleNoEntries}
+              titleLabel={labels.emptyStateTitle}
+              aboutInfo={labels.emptyStateInfo}
+              primaryButtonLabel={labels.emptyStatePrimaryButtonLabel}
+              importButtonLabel={labels.emptyStateImportButtonLabel}
+              backComponent={backButtonEmptyComponent}
+              data-test-subj={getTestId('emptyState')}
+              secondaryAboutInfo={secondaryPageInfo}
+              canCreateItems={allowCardCreateAction}
+              isAddDisabled={isFlyoutOpened || isImportFlyoutOpened}
+            />
+          </div>
         ) : (
           <>
             <EuiFlexGroup direction="row" alignItems="center" gutterSize="m">
