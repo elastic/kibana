@@ -20,6 +20,7 @@ import {
 import { useEaseDetailsContext } from './context';
 import { TAKE_ACTION_BUTTON_TEST_ID } from './components/take_action_button';
 import { mockDataAsNestedObject } from '../document_details/shared/mocks/mock_data_as_nested_object';
+import { mockSearchHit } from '../document_details/shared/mocks/mock_search_hit';
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn().mockReturnValue({ closeLeftPanel: jest.fn() }),
@@ -88,6 +89,7 @@ describe('EasePanel', () => {
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
       getFieldsData: jest.fn(),
       investigationFields: [],
+      searchHit: mockSearchHit,
     });
 
     const { getByTestId, queryByTestId } = render(

@@ -17,8 +17,10 @@ import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import { buildWorkflowContext } from './build_workflow_context';
+import type { StepExecutionRuntimeFactory } from './step_execution_runtime_factory';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
+import type { ScopeData } from './workflow_scope_stack';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -57,7 +59,7 @@ export class WorkflowExecutionRuntimeManager {
 
   private workflowExecutionState: WorkflowExecutionState;
   private entryTransactionId?: string;
-  private workflowTransaction?: any; // APM transaction instance
+  private workflowTransaction?: agent.Transaction; // APM transaction instance
   private workflowGraph: WorkflowGraph;
   private nextNodeId: string | undefined;
   private coreStart?: CoreStart;
@@ -123,12 +125,19 @@ export class WorkflowExecutionRuntimeManager {
 
   public navigateToNextNode(): void {
     const currentNodeId = this.workflowExecution.currentNodeId;
-    const currentNodeIndex = this.topologicalOrder.findIndex((nodeId) => nodeId === currentNodeId);
-    if (currentNodeIndex < this.topologicalOrder.length - 1) {
-      this.nextNodeId = this.topologicalOrder[currentNodeIndex + 1];
-      return;
+    this.nextNodeId = this.nodeAfter(currentNodeId);
+  }
+
+  public navigateToAfterNode(nodeId: string): void {
+    this.nextNodeId = this.nodeAfter(nodeId);
+  }
+
+  private nodeAfter(nodeId: string | undefined): string | undefined {
+    const index = this.topologicalOrder.findIndex((id) => id === nodeId);
+    if (index >= 0 && index < this.topologicalOrder.length - 1) {
+      return this.topologicalOrder[index + 1];
     }
-    this.nextNodeId = undefined;
+    return undefined;
   }
 
   public getCurrentNodeScope(): StackFrame[] {
@@ -195,15 +204,94 @@ export class WorkflowExecutionRuntimeManager {
     }
 
     const scopeStack = WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack);
+
+    if (scopeStack.isEmpty()) {
+      return;
+    }
+
     const entered = currentNode.type.replace(/^exit-/, 'enter-');
 
-    if (entered !== scopeStack.getCurrentScope()?.nodeType) {
+    if (entered !== scopeStack.getCurrentScope().nodeType) {
       return;
     }
 
     this.workflowExecutionState.updateWorkflowExecution({
       scopeStack: WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack).exitScope()
         .stackFrames,
+    });
+  }
+
+  public setWorkflowOutputs(outputs: Record<string, unknown>): void {
+    this.workflowExecutionState.updateWorkflowExecution({
+      context: {
+        ...(this.workflowExecution.context || {}),
+        output: outputs,
+      },
+    });
+  }
+
+  public setWorkflowStatus(status: ExecutionStatus): void {
+    this.workflowExecutionState.updateWorkflowExecution({ status });
+  }
+
+  /**
+   * Sets workflow status to CANCELLED with a reason (and cancelledAt, cancelledBy).
+   * Use when workflow.output has status: 'cancelled' or when cancelling with a specific message.
+   */
+  public setWorkflowCancelled(reason: string): void {
+    const cancelledAt = new Date().toISOString();
+    this.workflowExecutionState.updateWorkflowExecution({
+      status: ExecutionStatus.CANCELLED,
+      cancellationReason: reason,
+      cancelledAt,
+      cancelledBy: 'workflow',
+    });
+  }
+
+  /**
+   * Pops scopes from the scope stack, finishing each one, until {@link shouldStop}
+   * returns true for the current scope (or the stack is exhausted when no predicate
+   * is provided).
+   *
+   * @param inclusive — when true the scope that matches {@link shouldStop} is also
+   *   popped and finished. Defaults to false (stop *before* the matching scope).
+   *
+   * Used by:
+   * - loop.break — stop at and *include* the enclosing loop enter node (inclusive)
+   * - loop.continue — stop *before* the enclosing loop enter node (exclusive)
+   * - workflow.output / workflow.fail — unwind the entire stack (no predicate)
+   */
+  public unwindScopes(
+    stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
+    shouldStop?: (scope: ScopeData) => boolean,
+    { inclusive = false }: { inclusive?: boolean } = {}
+  ): void {
+    let scopeStack = WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack);
+
+    while (!scopeStack.isEmpty()) {
+      const currentScope = scopeStack.getCurrentScope();
+      const matched = shouldStop?.(currentScope) ?? false;
+      if (matched && !inclusive) {
+        break;
+      }
+
+      scopeStack = scopeStack.exitScope();
+
+      const scopeStepRuntime = stepExecutionRuntimeFactory.createStepExecutionRuntime({
+        nodeId: currentScope.nodeId,
+        stackFrames: scopeStack.stackFrames,
+      });
+      if (scopeStepRuntime.stepExecutionExists()) {
+        scopeStepRuntime.finishStep();
+      }
+
+      if (matched && inclusive) {
+        break;
+      }
+    }
+
+    this.workflowExecutionState.updateWorkflowExecution({
+      scopeStack: scopeStack.stackFrames,
     });
   }
 

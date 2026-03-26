@@ -99,6 +99,7 @@ describe('LifecycleSummary', () => {
   }): Streams.ingest.all.GetResponse =>
     ({
       stream: {
+        type: 'wired' as const,
         name,
         description: '',
         updated_at: new Date().toISOString(),
@@ -137,6 +138,7 @@ describe('LifecycleSummary', () => {
       },
       effective_settings: {},
       inherited_fields: {},
+      data_stream_exists: true,
       dashboards: [],
       queries: [],
       rules: [],

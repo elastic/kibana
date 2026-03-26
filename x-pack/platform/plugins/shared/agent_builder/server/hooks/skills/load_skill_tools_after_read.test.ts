@@ -63,8 +63,11 @@ const createMockSkill = (
   description: 'A test skill',
   content: 'skill content',
   readonly: true,
+  basePath: 'skills/platform',
   getRegistryTools: jest.fn().mockReturnValue([]),
   getInlineTools: jest.fn().mockReturnValue([]),
+  referencedContentCount: 0,
+  experimental: false,
   ...overrides,
 });
 

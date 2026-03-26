@@ -13,9 +13,11 @@ import {
   DataSetGraphNodeSchema,
   ElasticsearchGraphNodeSchema,
   KibanaGraphNodeSchema,
+  WaitForInputGraphNodeSchema,
   WaitGraphNodeSchema,
   WorkflowExecuteAsyncGraphNodeSchema,
   WorkflowExecuteGraphNodeSchema,
+  WorkflowOutputGraphNodeSchema,
 } from './base';
 import {
   EnterConditionBranchNodeSchema,
@@ -23,7 +25,13 @@ import {
   ExitConditionBranchNodeSchema,
   ExitIfNodeSchema,
 } from './branching_nodes';
-import { EnterForeachNodeSchema, ExitForeachNodeSchema } from './loop_nodes';
+import { LoopBreakNodeSchema, LoopContinueNodeSchema } from './flow_control_nodes';
+import {
+  EnterForeachNodeSchema,
+  EnterWhileNodeSchema,
+  ExitForeachNodeSchema,
+  ExitWhileNodeSchema,
+} from './loop_nodes';
 import {
   EnterContinueNodeSchema,
   EnterFallbackPathNodeSchema,
@@ -41,6 +49,14 @@ import {
   StepLevelOnFailureNodeSchema,
   WorkflowLevelOnFailureNodeSchema,
 } from './on_failure_nodes';
+import {
+  EnterCaseBranchNodeSchema,
+  EnterDefaultBranchNodeSchema,
+  EnterSwitchNodeSchema,
+  ExitCaseBranchNodeSchema,
+  ExitDefaultBranchNodeSchema,
+  ExitSwitchNodeSchema,
+} from './switch_nodes';
 
 const GraphNodeUnionSchema = z.discriminatedUnion('type', [
   AtomicGraphNodeSchema,
@@ -48,14 +64,18 @@ const GraphNodeUnionSchema = z.discriminatedUnion('type', [
   ElasticsearchGraphNodeSchema,
   KibanaGraphNodeSchema,
   WaitGraphNodeSchema,
+  WaitForInputGraphNodeSchema,
   WorkflowExecuteGraphNodeSchema,
   WorkflowExecuteAsyncGraphNodeSchema,
+  WorkflowOutputGraphNodeSchema,
   EnterIfNodeSchema,
   ExitIfNodeSchema,
   EnterConditionBranchNodeSchema,
   ExitConditionBranchNodeSchema,
   EnterForeachNodeSchema,
   ExitForeachNodeSchema,
+  EnterWhileNodeSchema,
+  ExitWhileNodeSchema,
   EnterRetryNodeSchema,
   ExitRetryNodeSchema,
   EnterContinueNodeSchema,
@@ -71,6 +91,14 @@ const GraphNodeUnionSchema = z.discriminatedUnion('type', [
   OnFailureNodeSchema,
   StepLevelOnFailureNodeSchema,
   WorkflowLevelOnFailureNodeSchema,
+  EnterSwitchNodeSchema,
+  EnterCaseBranchNodeSchema,
+  ExitCaseBranchNodeSchema,
+  EnterDefaultBranchNodeSchema,
+  ExitDefaultBranchNodeSchema,
+  ExitSwitchNodeSchema,
+  LoopBreakNodeSchema,
+  LoopContinueNodeSchema,
 ]);
 
 export type GraphNodeUnion = z.infer<typeof GraphNodeUnionSchema>;

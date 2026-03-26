@@ -58,8 +58,8 @@ apiTest.describe(
     apiTest(
       'Should extract properly extract host with pagination',
       async ({ apiClient, esClient }) => {
-        const expectedResultCount = 22;
-        const expectedPageCount = 5;
+        const expectedResultCount = 20;
+        const expectedPageCount = 4;
 
         const extractionResponse = await apiClient.post(
           ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('host'),
@@ -91,7 +91,7 @@ apiTest.describe(
         });
 
         expect(entities.hits.hits).toHaveLength(expectedResultCount);
-        // it's deterministic because of the MD5 id
+        // it's deterministic because of the SHA-256 id
         // manually checking object until we have a snapshot matcher
         expect(entities.hits.hits).toMatchObject(expectedHostEntities);
       }

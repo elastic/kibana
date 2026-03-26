@@ -6,13 +6,16 @@
  */
 import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import type { StreamQuery } from '@kbn/streams-schema';
-import { streamQueryInputSchema, upsertStreamQueryRequestSchema } from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
+import { streamQuerySchema, upsertStreamQueryRequestSchema } from '@kbn/streams-schema';
+import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { QueryNotFoundError } from '../../lib/streams/errors/query_not_found_error';
+import {
+  EsqlQueryValidationError,
+  validateEsqlQueryForStreamOrThrow,
+} from '../../lib/significant_events/validate_esql_query';
 import { createServerRoute } from '../create_server_route';
 import { assertEnterpriseLicense } from '../utils/assert_enterprise_license';
-import { assertFeatureNotChanged } from '../utils/assert_feature_not_changed';
 
 export interface ListQueriesResponse {
   queries: StreamQuery[];
@@ -36,6 +39,7 @@ const listQueriesRoute = createServerRoute({
     description:
       'Fetches all queries linked to a stream that are visible to the current user in the current space.',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },
@@ -73,6 +77,7 @@ const upsertQueryRoute = createServerRoute({
     summary: 'Upsert a query to a stream',
     description: 'Adds a query to a stream. Noop if the query is already present on the stream.',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },
@@ -97,18 +102,17 @@ const upsertQueryRoute = createServerRoute({
     await assertEnterpriseLicense(licensing);
 
     const definition = await streamsClient.getStream(streamName);
-    await assertFeatureNotChanged({
-      queryClient,
-      streamName,
-      queries: [{ id: queryId, feature: body.feature }],
+
+    validateEsqlQueryForStreamOrThrow({
+      esqlQuery: body.esql.query,
+      stream: definition,
     });
+
     await queryClient.upsert(definition, {
       id: queryId,
       title: body.title,
-      feature: body.feature,
-      kql: {
-        query: body.kql.query,
-      },
+      description: body.description,
+      esql: body.esql,
       severity_score: body.severity_score,
       evidence: body.evidence,
     });
@@ -126,6 +130,7 @@ const deleteQueryRoute = createServerRoute({
     summary: 'Remove a query from a stream',
     description: 'Remove a query from a stream. Noop if the query is not found on the stream.',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },
@@ -174,6 +179,7 @@ const bulkQueriesRoute = createServerRoute({
     summary: 'Bulk update queries',
     description: 'Bulk update queries of a stream. Can add new queries and delete existing ones.',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },
@@ -190,7 +196,7 @@ const bulkQueriesRoute = createServerRoute({
       operations: z.array(
         z.union([
           z.object({
-            index: streamQueryInputSchema,
+            index: streamQuerySchema,
           }),
           z.object({
             delete: z.object({ id: z.string() }),
@@ -215,10 +221,26 @@ const bulkQueriesRoute = createServerRoute({
 
     const definition = await streamsClient.getStream(streamName);
 
-    const indexOperations = operations.flatMap((op) =>
-      'index' in op ? [{ id: op.index.id, feature: op.index.feature }] : []
-    );
-    await assertFeatureNotChanged({ queryClient, streamName, queries: indexOperations });
+    const validationErrors: Array<{ id: string; message: string }> = [];
+    for (const operation of operations) {
+      if ('index' in operation && operation.index) {
+        try {
+          validateEsqlQueryForStreamOrThrow({
+            esqlQuery: operation.index.esql.query,
+            stream: definition,
+          });
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          validationErrors.push({ id: operation.index.id, message });
+        }
+      }
+    }
+
+    if (validationErrors.length > 0) {
+      throw new EsqlQueryValidationError('One or more ES|QL queries are invalid', {
+        errors: validationErrors,
+      });
+    }
 
     await queryClient.bulk(definition, operations);
 

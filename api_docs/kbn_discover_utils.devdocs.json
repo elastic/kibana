@@ -5720,7 +5720,7 @@
             "label": "color",
             "description": [],
             "signature": [
-              "\"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"risk\" | \"neutral\" | undefined"
+              "\"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "lineNumber": 22,
@@ -6589,7 +6589,7 @@
         "label": "DataGridDensity",
         "description": [],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
-        "lineNumber": 27,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8282,10 +8282,10 @@
         "label": "SEARCH_EMBEDDABLE_TYPE",
         "description": [],
         "signature": [
-          "\"search\""
+          "\"discover_session\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
-        "lineNumber": 22,
+        "lineNumber": 25,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8302,7 +8302,7 @@
           "\"discover:searchOnPageLoad\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
-        "lineNumber": 23,
+        "lineNumber": 26,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8427,7 +8427,7 @@
           "\"discover:showFieldStatistics\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
-        "lineNumber": 24,
+        "lineNumber": 27,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8444,7 +8444,7 @@
           "\"discover:showMultiFields\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
-        "lineNumber": 25,
+        "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8461,7 +8461,7 @@
           "\"discover:sort:defaultOrder\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
-        "lineNumber": 26,
+        "lineNumber": 29,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

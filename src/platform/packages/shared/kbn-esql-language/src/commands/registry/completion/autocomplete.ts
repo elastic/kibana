@@ -8,13 +8,18 @@
  */
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import { isFunctionExpression, isLiteral } from '../../../ast/is';
+import { isFunctionExpression, isLiteral } from '@elastic/esql';
+import type {
+  ESQLAstCompletionCommand,
+  ESQLAstAllCommands,
+  ESQLMap,
+  ESQLCommandOption,
+  ESQLSingleAstItem,
+} from '@elastic/esql/types';
 import { suggestForExpression } from '../../definitions/utils';
-import type * as ast from '../../../types';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
 import { EDITOR_MARKER } from '../../definitions/constants';
-import type { ESQLAstCompletionCommand, ESQLAstAllCommands } from '../../../types';
 import {
   pipeCompleteItem,
   assignCompletionItem,
@@ -28,8 +33,6 @@ import {
   getLiteralsSuggestions,
 } from '../../definitions/utils';
 import {
-  findFinalWord,
-  handleFragment,
   columnExists,
   createInferenceEndpointToCompletionItem,
   withAutoSuggest,
@@ -42,8 +45,9 @@ import {
   type ICommandContext,
   type ICommandCallbacks,
 } from '../types';
-import { getFunctionDefinition } from '../../definitions/utils/functions';
 import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
+
+const ENDS_WITH_NON_WHITESPACE = /\S$/;
 
 export enum CompletionPosition {
   AFTER_COMPLETION = 'after_completion',
@@ -59,14 +63,14 @@ function getPosition(
   query: string,
   command: ESQLAstAllCommands,
   isExistingColumn: boolean
-): { position: CompletionPosition | undefined; expressionRoot?: ast.ESQLSingleAstItem } {
+): { position: CompletionPosition | undefined; expressionRoot?: ESQLSingleAstItem } {
   const { prompt, targetField } = command as ESQLAstCompletionCommand;
 
   const arg1 = command.args[1];
-  let paramsMap: ast.ESQLMap | undefined;
+  let paramsMap: ESQLMap | undefined;
 
   if (arg1 && 'type' in arg1 && arg1.type === 'option') {
-    paramsMap = (arg1 as ast.ESQLCommandOption).args[0] as ast.ESQLMap;
+    paramsMap = (arg1 as ESQLCommandOption).args[0] as ESQLMap;
 
     if (paramsMap && paramsMap.incomplete && !paramsMap.text) {
       return { position: CompletionPosition.AFTER_WITH_KEYWORD };
@@ -109,6 +113,7 @@ export async function autocomplete(
   cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
   const innerText = query.substring(0, cursorPosition);
+  const hasTypedFragment = ENDS_WITH_NON_WHITESPACE.test(innerText);
   const { prompt } = command as ESQLAstCompletionCommand;
   const isExistingColumn = columnExists(prompt?.text, context);
   const { position, expressionRoot } = getPosition(innerText, command, isExistingColumn);
@@ -158,25 +163,14 @@ export async function autocomplete(
       );
 
       const fieldsAndFunctionsSuggestions = uniqBy(allSuggestions, 'label');
-
-      const suggestions = await handleFragment(
-        innerText,
-        (fragment) => Boolean(columnExists(fragment, context) || getFunctionDefinition(fragment)),
-        (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
-          return fieldsAndFunctionsSuggestions.map((suggestion) => {
-            return withAutoSuggest({
-              ...suggestion,
-              text: `${suggestion.text} `,
-              rangeToReplace,
-            });
-          });
-        },
-        () => []
+      const suggestions = fieldsAndFunctionsSuggestions.map((suggestion) =>
+        withAutoSuggest({
+          ...suggestion,
+          text: `${suggestion.text} `,
+        })
       );
 
-      const lastWord = findFinalWord(innerText);
-
-      if (!lastWord) {
+      if (!hasTypedFragment) {
         suggestions.push({
           ...buildConstantsDefinitions(
             [promptSnippetText],

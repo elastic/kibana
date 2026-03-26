@@ -30,7 +30,6 @@ import type { TextBasedLayer } from '@kbn/lens-common';
 import type { LensApiState, MetricState } from '../schema';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { LensAttributes } from '../types';
-import type { LensApiFilterType } from '../schema/filter';
 
 const dataView = 'test-dataview';
 
@@ -77,6 +76,7 @@ describe('getDatasetIndex', () => {
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
+        "esqlQuery": "from test_index | limit 10",
         "index": "test_index",
         "timeFieldName": undefined,
       }
@@ -247,7 +247,8 @@ describe('buildDatasourceStates', () => {
             label: 'test',
             column: 'test',
             fit: false,
-            alignments: { labels: 'left', value: 'left' },
+            labels: { alignment: 'left' },
+            value: { alignment: 'left' },
           },
         ],
         sampling: 1,
@@ -268,7 +269,7 @@ describe('buildDatasourceStates', () => {
                     "fieldName": "test",
                   },
                 ],
-                "index": "test",
+                "index": "test-ef03ee470d96c0a475dca463e351acd1ad966fa7997b95884750639034d53f21",
                 "query": Object {
                   "esql": "from test | limit 10",
                 },
@@ -279,6 +280,8 @@ describe('buildDatasourceStates', () => {
         },
         "usedDataviews": Object {
           "layer_0": Object {
+            "dataSourceType": "esql",
+            "esqlQuery": "from test | limit 10",
             "index": "test",
             "timeFieldName": undefined,
             "type": "adHocDataView",
@@ -518,24 +521,41 @@ describe('filtersAndQueryToLensState', () => {
           label: 'test',
           column: 'test',
           fit: false,
-          alignments: { labels: 'left', value: 'left' },
+          labels: { alignment: 'left' },
+          value: { alignment: 'left' },
         },
       ],
       sampling: 1,
       ignore_global_filters: false,
       filters: [
-        { language: 'kuery', query: 'category: "shoes"' },
-        { language: 'lucene', query: 'price > 100' },
-      ] as LensApiFilterType[],
+        {
+          type: 'condition',
+          data_view_id: 'dv-1',
+          condition: { field: 'category', operator: 'is', value: 'shoes' },
+        },
+        {
+          type: 'dsl',
+          data_view_id: 'dv-1',
+          dsl: { query: { match_all: {} } },
+        },
+      ],
     };
 
-    const result = filtersAndQueryToLensState(apiState);
+    const result = filtersAndQueryToLensState(apiState, []);
 
     expect(result.query).toEqual({ esql: 'from test | limit 10' });
     expect(result.filters).toHaveLength(2);
-    for (const [index, filter] of Object.entries(result.filters ?? [])) {
-      expect(filter).toEqual({ meta: {}, ...apiState.filters?.[index as unknown as number] });
-    }
+    expect(result.references).toHaveLength(1);
+    expect(result.filters).toMatchObject([
+      {
+        meta: { index: 'filter-ref-dv-1' },
+        query: { match_phrase: { category: 'shoes' } },
+      },
+      {
+        meta: { index: 'filter-ref-dv-1' },
+        query: { match_all: {} },
+      },
+    ]);
   });
 
   test('handles missing filters and query gracefully', () => {
@@ -553,31 +573,90 @@ describe('filtersAndQueryToLensState', () => {
           label: 'test',
           column: 'test',
           fit: false,
-          alignments: { labels: 'left', value: 'left' },
+          labels: { alignment: 'left' },
+          value: { alignment: 'left' },
         },
       ],
       sampling: 1,
       ignore_global_filters: false,
     };
 
-    const result = filtersAndQueryToLensState(apiState);
+    const result = filtersAndQueryToLensState(apiState, []);
 
     expect(result.query).toEqual({ esql: 'from test | limit 10' });
+    expect(result.filters).toEqual([]);
+    expect(result.references).toEqual([]);
+  });
+
+  test('extracts filter data view references when applicable', () => {
+    const apiState: LensApiState = {
+      type: 'metric',
+      title: 'test metric',
+      dataset: {
+        type: 'esql',
+        query: 'from test | limit 10',
+      },
+      metrics: [
+        {
+          type: 'primary',
+          operation: 'value',
+          label: 'test',
+          column: 'test',
+          fit: false,
+          labels: { alignment: 'left' },
+          value: { alignment: 'left' },
+        },
+      ],
+      sampling: 1,
+      ignore_global_filters: false,
+      filters: [
+        {
+          type: 'condition',
+          data_view_id: 'dv-1',
+          condition: { field: 'category', operator: 'is', value: 'shoes' },
+        },
+      ],
+    };
+
+    const existingReferences = [{ type: 'index-pattern', id: 'dv-1', name: 'layer_ref' }];
+    const result = filtersAndQueryToLensState(apiState, existingReferences);
+
+    expect(result.filters).toHaveLength(1);
+    expect(result.references).toHaveLength(1);
+    expect(result.filters[0].meta.index).toEqual('filter-ref-dv-1');
+    expect(result.references[0]).toMatchObject({
+      type: 'index-pattern',
+      id: 'dv-1',
+      name: 'filter-ref-dv-1',
+    });
   });
 });
 
 describe('filtersAndQueryToApiFormat', () => {
   test('converts Lens state filters and query to API format', () => {
     const lensState: LensAttributes = {
+      references: [{ type: 'index-pattern', id: 'dv-1', name: 'ref_1' }],
       state: {
         filters: [
           {
-            query: { language: 'kuery', query: 'category: "electronics"' },
-            meta: { disabled: false },
+            meta: {
+              type: 'phrase',
+              key: 'category',
+              index: 'ref_1',
+              disabled: false,
+              params: { query: 'electronics' },
+            },
+            query: { match_phrase: { category: 'electronics' } },
           },
           {
-            query: { language: 'lucene', query: 'price:[100 TO *]' },
-            meta: { negate: true },
+            meta: {
+              type: 'phrase',
+              key: 'price',
+              index: 'ref_1',
+              negate: true,
+              params: { query: 'price:[100 TO *]' },
+            },
+            query: { match_phrase: { price: 'price:[100 TO *]' } },
           },
         ] as Filter[],
         query: { language: 'kuery', query: 'brand: "apple"' } as Query,
@@ -590,12 +669,25 @@ describe('filtersAndQueryToApiFormat', () => {
       Object {
         "filters": Array [
           Object {
-            "language": "kuery",
-            "query": "category: \\"electronics\\"",
+            "condition": Object {
+              "field": "category",
+              "operator": "is",
+              "value": "electronics",
+            },
+            "data_view_id": "dv-1",
+            "disabled": false,
+            "type": "condition",
           },
           Object {
-            "language": "lucene",
-            "query": "price:[100 TO *]",
+            "condition": Object {
+              "field": "price",
+              "negate": true,
+              "operator": "is",
+              "value": "price:[100 TO *]",
+            },
+            "data_view_id": "dv-1",
+            "negate": true,
+            "type": "condition",
           },
         ],
         "query": Object {

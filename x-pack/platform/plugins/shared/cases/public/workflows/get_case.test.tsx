@@ -11,7 +11,7 @@ import { getCaseStepDefinition } from './get_case';
 describe('getCaseStepDefinition', () => {
   it('returns a public step definition with expected metadata', () => {
     expect(getCaseStepDefinition.id).toBe('cases.getCase');
-    expect(getCaseStepDefinition.actionsMenuGroup).toBe('kibana');
+    expect(getCaseStepDefinition.category).toBe('kibana');
     expect(getCaseStepDefinition.documentation?.examples?.length).toBeGreaterThan(0);
   });
 

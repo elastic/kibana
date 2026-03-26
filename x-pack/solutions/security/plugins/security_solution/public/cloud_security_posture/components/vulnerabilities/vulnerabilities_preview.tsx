@@ -22,7 +22,7 @@ import {
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
+import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
@@ -136,7 +136,7 @@ export const VulnerabilitiesPreview = ({
   return (
     <ExpandablePanel
       header={{
-        iconType: !isPreviewMode && hasVulnerabilitiesFindings ? 'arrowStart' : '',
+        iconType: !isPreviewMode && hasVulnerabilitiesFindings ? 'chevronLimitLeft' : '',
         title: (
           <EuiTitle
             css={css`

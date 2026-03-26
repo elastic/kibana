@@ -137,6 +137,20 @@ ${Object.entries(connectorInfo.examples.params || {})
       };
     }
 
+    // Human-in-the-loop wait
+    if (connectorType === 'waitForInput') {
+      return {
+        name: 'Wait For Input',
+        description: 'Pause execution until external input is provided (human-in-the-loop)',
+        documentation: 'Configure the message displayed to the user when waiting for input',
+        examples: {
+          params: {
+            message: 'Please approve before continuing',
+          },
+        },
+      };
+    }
+
     // Wait/delay connectors
     if (connectorType.includes('wait')) {
       return {

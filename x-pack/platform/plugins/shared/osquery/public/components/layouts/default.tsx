@@ -6,6 +6,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
+
 export const containerCss = ({ euiTheme }: UseEuiTheme) => ({
   minHeight: `calc(100vh - ${parseFloat(euiTheme.size.xxxl) * 2}px)`,
   background: euiTheme.colors.emptyShade,
@@ -18,6 +19,19 @@ export const wrapperCss = {
   flexDirection: 'column' as const,
   flex: 1,
 };
+
+export const fullWidthContentCss = ({ euiTheme }: UseEuiTheme) => ({
+  padding: `0 ${euiTheme.size.l}`,
+  flex: 1,
+  minWidth: 0,
+});
+
+export const fullWidthFormContentCss = (theme: UseEuiTheme) => ({
+  ...fullWidthContentCss(theme),
+  maxWidth: 1200,
+  margin: '0 auto',
+  width: '100%',
+});
 
 export const navCss = ({ euiTheme }: UseEuiTheme) => ({
   background: euiTheme.colors.emptyShade,

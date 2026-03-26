@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/security-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-security'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/security-plugin'
+  title: '@kbn/security-plugin'
   description: Moon project for @kbn/security-plugin
   channel: ''
   owner: '@elastic/kibana-security'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/security
+  sourceRoot: x-pack/platform/plugins/shared/security
 dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/features-plugin'
@@ -103,6 +102,8 @@ dependsOn:
   - '@kbn/lazy-object'
   - '@kbn/scout'
   - '@kbn/mock-idp-utils'
+  - '@kbn/core-user-activity-server'
+  - '@kbn/core-user-activity-server-mocks'
 tags:
   - plugin
   - prod
@@ -119,14 +120,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

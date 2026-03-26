@@ -8,6 +8,7 @@
  */
 
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
+import type { LegacyMetricState } from './legacy_metric';
 import { legacyMetricStateSchema } from './legacy_metric';
 
 describe('Legacy Metric Schema', () => {
@@ -17,12 +18,14 @@ describe('Legacy Metric Schema', () => {
       type: 'dataView',
       id: 'test-data-view',
     },
-  };
+  } satisfies Partial<LegacyMetricState>;
 
   const defaultValues = {
     sampling: 1,
     ignore_global_filters: false,
-  };
+  } satisfies Partial<LegacyMetricState>;
+
+  type LegacyMetricInput = Omit<LegacyMetricState, keyof typeof defaultValues>;
 
   describe('metric configuration', () => {
     it('validates base count metric operation', () => {
@@ -33,11 +36,12 @@ describe('Legacy Metric Schema', () => {
           field: 'test_field',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
-      };
+      } satisfies LegacyMetricInput;
 
       const validated = legacyMetricStateSchema.validate(input);
       expect(validated.metric.size).toBeUndefined();
-      expect(validated.metric.alignments).toBeUndefined();
+      expect(validated.metric.labels).toBeUndefined();
+      expect(validated.metric.values).toBeUndefined();
       expect(validated.metric.apply_color_to).toBeUndefined();
       expect(validated.metric.color).toBeUndefined();
     });
@@ -50,12 +54,14 @@ describe('Legacy Metric Schema', () => {
           field: 'test_field',
           size: 's',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-          alignments: {
-            labels: 'bottom',
-            value: 'right',
+          labels: {
+            alignment: 'bottom',
+          },
+          values: {
+            alignment: 'right',
           },
         },
-      };
+      } satisfies LegacyMetricInput;
 
       const validated = legacyMetricStateSchema.validate(input);
       expect(validated).toEqual({ ...defaultValues, ...input });
@@ -67,19 +73,20 @@ describe('Legacy Metric Schema', () => {
         metric: {
           operation: 'average',
           field: 'temperature',
-          alignments: { labels: 'top', value: 'left' },
+          labels: { alignment: 'top' },
+          values: { alignment: 'left' },
           size: 'l',
           apply_color_to: 'value',
           color: {
             type: 'dynamic',
             range: 'absolute',
             steps: [
-              { type: 'from', from: 0, color: '#blue' },
-              { type: 'to', to: 100, color: '#red' },
+              { lt: 0, color: 'blue' },
+              { gte: 0, lte: 100, color: 'red' },
             ],
           },
         },
-      };
+      } satisfies LegacyMetricInput;
 
       const validated = legacyMetricStateSchema.validate(input);
       expect(validated).toEqual({ ...defaultValues, ...input });
@@ -90,10 +97,11 @@ describe('Legacy Metric Schema', () => {
     it('throws on missing metric operation', () => {
       const input = {
         ...baseLegacyMetricConfig,
+        // @ts-expect-error
         metric: {
           field: 'test_field',
         },
-      };
+      } satisfies LegacyMetricInput;
 
       expect(() => legacyMetricStateSchema.validate(input)).toThrow();
     });
@@ -104,11 +112,12 @@ describe('Legacy Metric Schema', () => {
         metric: {
           operation: 'count',
           field: 'test_field',
-          alignments: {
-            labels: 'invalid',
+          labels: {
+            // @ts-expect-error
+            alignment: 'invalid',
           },
         },
-      };
+      } satisfies LegacyMetricInput;
 
       expect(() => legacyMetricStateSchema.validate(input)).toThrow();
     });
@@ -132,17 +141,18 @@ describe('Legacy Metric Schema', () => {
         metric: {
           operation: 'sum',
           field: 'sales',
+          // @ts-expect-error
           apply_color_to: 'invalid',
           color: {
             type: 'dynamic',
             range: 'absolute',
             steps: [
-              { type: 'from', from: 0, color: '#blue' },
-              { type: 'to', to: 100, color: '#red' },
+              { lt: 0, color: 'blue' },
+              { gte: 0, lte: 100, color: 'red' },
             ],
           },
         },
-      };
+      } satisfies LegacyMetricInput;
 
       expect(() => legacyMetricStateSchema.validate(input)).toThrow();
     });
@@ -153,19 +163,18 @@ describe('Legacy Metric Schema', () => {
         metric: {
           operation: 'sum',
           field: 'sales',
-          apply_color_to: 'invalid',
+          apply_color_to: 'background',
           color: {
             type: 'dynamic',
+            // @ts-expect-error
             range: 'percentage',
-            min: 0,
-            max: 100,
             steps: [
-              { type: 'from', from: 0, color: '#blue' },
-              { type: 'to', to: 100, color: '#red' },
+              { lt: 0, color: 'blue' },
+              { gte: 0, lte: 100, color: 'red' },
             ],
           },
         },
-      };
+      } satisfies LegacyMetricInput;
 
       expect(() => legacyMetricStateSchema.validate(input)).toThrow();
     });
@@ -182,21 +191,21 @@ describe('Legacy Metric Schema', () => {
           field: 'sales',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           size: 'xl',
-          alignments: {
-            labels: 'bottom',
-            value: 'right',
+          labels: {
+            alignment: 'bottom',
           },
+          values: { alignment: 'right' },
           apply_color_to: 'background',
           color: {
             type: 'dynamic',
             range: 'absolute',
             steps: [
-              { type: 'from', from: 0, color: '#blue' },
-              { type: 'to', to: 100, color: '#red' },
+              { lt: 0, color: 'blue' },
+              { gte: 0, lte: 100, color: 'red' },
             ],
           },
         },
-      };
+      } satisfies LegacyMetricInput;
 
       const validated = legacyMetricStateSchema.validate(input);
       expect(validated).toEqual({
@@ -216,12 +225,10 @@ describe('Legacy Metric Schema', () => {
           operation: 'value',
           column: 'unique_count',
           size: 'xxl',
-          alignments: {
-            labels: 'top',
-            value: 'center',
-          },
+          labels: { alignment: 'top' },
+          values: { alignment: 'center' },
         },
-      };
+      } satisfies LegacyMetricInput;
 
       const validated = legacyMetricStateSchema.validate(input);
       expect(validated).toEqual({ ...defaultValues, ...input });

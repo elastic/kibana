@@ -42,7 +42,11 @@ import {
   getLensStateLayer,
   getDatasourceLayers,
 } from './utils';
-import { fromColorByValueAPIToLensState, fromColorByValueLensStateToAPI } from '../coloring';
+import {
+  fromColorByValueAPIToLensState,
+  fromColorByValueLensStateToAPI,
+  isColorByValueAbsolute,
+} from '../coloring';
 import { isEsqlTableTypeDataset } from '../../utils';
 
 const ACCESSOR = 'legacy_metric_accessor';
@@ -55,8 +59,8 @@ function buildVisualizationState(config: LegacyMetricState): LegacyMetricVisuali
     layerType: 'data',
     accessor: ACCESSOR,
     size: layer.metric.size,
-    titlePosition: layer.metric.alignments?.labels,
-    textAlign: layer.metric.alignments?.value,
+    titlePosition: layer.metric.labels?.alignment,
+    textAlign: layer.metric.values?.alignment,
     ...(layer.metric.apply_color_to && layer.metric.color
       ? {
           colorMode: layer.metric.apply_color_to === 'background' ? 'Background' : 'Labels',
@@ -97,10 +101,16 @@ function reverseBuildVisualizationState(
     }
 
     if (visualization.titlePosition || visualization.textAlign) {
-      props.metric.alignments = {
-        ...(visualization.titlePosition ? { labels: visualization.titlePosition } : {}),
-        ...(visualization.textAlign ? { value: visualization.textAlign } : {}),
-      };
+      if (visualization.titlePosition) {
+        props.metric.labels = {
+          alignment: visualization.titlePosition,
+        };
+      }
+      if (visualization.textAlign) {
+        props.metric.values = {
+          alignment: visualization.textAlign,
+        };
+      }
     }
 
     if (visualization.colorMode && visualization.colorMode !== 'None' && visualization.palette) {
@@ -108,7 +118,7 @@ function reverseBuildVisualizationState(
         visualization.colorMode === 'Background' ? 'background' : 'value';
 
       const colorByValue = fromColorByValueLensStateToAPI(visualization.palette);
-      if (colorByValue?.range === 'absolute') {
+      if (isColorByValueAbsolute(colorByValue)) {
         props.metric.color = colorByValue;
       }
     }
@@ -133,7 +143,7 @@ function buildFormBasedLayer(layer: LegacyMetricStateNoESQL): FormBasedPersisted
 }
 
 function getValueColumns(layer: LegacyMetricStateESQL) {
-  return [getValueColumn(ACCESSOR, layer.metric.column, 'number')];
+  return [getValueColumn(ACCESSOR, layer.metric, 'number')];
 }
 
 type LegacyMetricAttributes = Extract<
@@ -171,7 +181,7 @@ export function fromAPItoLensState(
       datasourceStates: layers,
       internalReferences,
       visualization,
-      adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
+      adHocDataViews,
     },
   };
 }
