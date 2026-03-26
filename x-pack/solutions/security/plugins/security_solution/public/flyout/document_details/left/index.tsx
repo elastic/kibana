@@ -17,7 +17,7 @@ import { PanelContent } from './content';
 import type { LeftPanelTabType } from './tabs';
 import * as tabs from './tabs';
 import { getField } from '../shared/utils';
-import { EventKind } from '../shared/constants/event_kinds';
+import { EventKind } from '../../../flyout_v2/document/constants/event_kinds';
 import { useDocumentDetailsContext } from '../shared/context';
 import type { DocumentDetailsProps } from '../shared/types';
 import { DocumentEventTypes } from '../../../common/lib/telemetry/types';

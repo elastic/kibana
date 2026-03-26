@@ -13,11 +13,14 @@ import { RulesSavedObjectService } from './rules_saved_object_service';
 export function createRulesSavedObjectService(): {
   rulesSavedObjectService: RulesSavedObjectService;
   mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  mockFindByIds: jest.SpyInstance;
 } {
   const mockSavedObjectsClient = savedObjectsClientMock.create();
   const mockSpaces = spacesMock.createStart();
 
   const rulesSavedObjectService = new RulesSavedObjectService(mockSavedObjectsClient, mockSpaces);
 
-  return { rulesSavedObjectService, mockSavedObjectsClient };
+  const mockFindByIds = jest.spyOn(rulesSavedObjectService, 'findByIds').mockResolvedValue([]);
+
+  return { rulesSavedObjectService, mockSavedObjectsClient, mockFindByIds };
 }

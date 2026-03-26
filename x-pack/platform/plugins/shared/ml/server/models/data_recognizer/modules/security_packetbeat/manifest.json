@@ -13,51 +13,51 @@
   },
   "jobs": [
     {
-      "id": "packetbeat_dns_tunneling",
-      "file": "packetbeat_dns_tunneling.json"
+      "id": "packetbeat_dns_tunneling_ea",
+      "file": "packetbeat_dns_tunneling_ea.json"
     },
     {
-      "id": "packetbeat_rare_dns_question",
-      "file": "packetbeat_rare_dns_question.json"
+      "id": "packetbeat_rare_dns_question_ea",
+      "file": "packetbeat_rare_dns_question_ea.json"
     },
     {
-      "id": "packetbeat_rare_server_domain",
-      "file": "packetbeat_rare_server_domain.json"
+      "id": "packetbeat_rare_server_domain_ea",
+      "file": "packetbeat_rare_server_domain_ea.json"
     },
     {
-      "id": "packetbeat_rare_urls",
-      "file": "packetbeat_rare_urls.json"
+      "id": "packetbeat_rare_urls_ea",
+      "file": "packetbeat_rare_urls_ea.json"
     },
     {
-      "id": "packetbeat_rare_user_agent",
-      "file": "packetbeat_rare_user_agent.json"
+      "id": "packetbeat_rare_user_agent_ea",
+      "file": "packetbeat_rare_user_agent_ea.json"
     }
   ],
   "datafeeds": [
     {
-      "id": "datafeed-packetbeat_dns_tunneling",
-      "file": "datafeed_packetbeat_dns_tunneling.json",
-      "job_id": "packetbeat_dns_tunneling"
+      "id": "datafeed-packetbeat_dns_tunneling_ea",
+      "file": "datafeed_packetbeat_dns_tunneling_ea.json",
+      "job_id": "packetbeat_dns_tunneling_ea"
     },
     {
-      "id": "datafeed-packetbeat_rare_dns_question",
-      "file": "datafeed_packetbeat_rare_dns_question.json",
-      "job_id": "packetbeat_rare_dns_question"
+      "id": "datafeed-packetbeat_rare_dns_question_ea",
+      "file": "datafeed_packetbeat_rare_dns_question_ea.json",
+      "job_id": "packetbeat_rare_dns_question_ea"
     },
     {
-      "id": "datafeed-packetbeat_rare_server_domain",
-      "file": "datafeed_packetbeat_rare_server_domain.json",
-      "job_id": "packetbeat_rare_server_domain"
+      "id": "datafeed-packetbeat_rare_server_domain_ea",
+      "file": "datafeed_packetbeat_rare_server_domain_ea.json",
+      "job_id": "packetbeat_rare_server_domain_ea"
     },
     {
-      "id": "datafeed-packetbeat_rare_urls",
-      "file": "datafeed_packetbeat_rare_urls.json",
-      "job_id": "packetbeat_rare_urls"
+      "id": "datafeed-packetbeat_rare_urls_ea",
+      "file": "datafeed_packetbeat_rare_urls_ea.json",
+      "job_id": "packetbeat_rare_urls_ea"
     },
     {
-      "id": "datafeed-packetbeat_rare_user_agent",
-      "file": "datafeed_packetbeat_rare_user_agent.json",
-      "job_id": "packetbeat_rare_user_agent"
+      "id": "datafeed-packetbeat_rare_user_agent_ea",
+      "file": "datafeed_packetbeat_rare_user_agent_ea.json",
+      "job_id": "packetbeat_rare_user_agent_ea"
     }
   ],
   "tags": [

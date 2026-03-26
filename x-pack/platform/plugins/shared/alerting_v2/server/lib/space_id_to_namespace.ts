@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import { SavedObjectsUtils } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 export function spaceIdToNamespace(spaces?: SpacesPluginStart, spaceId?: string) {
   return spaces && spaceId ? spaces.spacesService.spaceIdToNamespace(spaceId) : undefined;
 }
+
+export const savedObjectNamespacesToSpaceId = (namespaces?: string[]): string =>
+  SavedObjectsUtils.namespaceIdToString(namespaces?.[0]);

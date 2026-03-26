@@ -8,6 +8,7 @@
 import { inject, injectable } from 'inversify';
 import type { RulesSavedObjectServiceContract } from '../../services/rules_saved_object_service/rules_saved_object_service';
 import { RulesSavedObjectServiceInternalToken } from '../../services/rules_saved_object_service/tokens';
+import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
 import type {
   DispatcherPipelineState,
   DispatcherStep,
@@ -33,14 +34,13 @@ export class FetchRulesStep implements DispatcherStep {
       return { type: 'continue', data: { rules: new Map() } };
     }
 
-    const result = await this.rulesSavedObjectService.bulkGetByIds(uniqueRuleIds);
+    const result = await this.rulesSavedObjectService.findByIds(uniqueRuleIds);
     const rules = new Map<RuleId, Rule>();
 
     for (const doc of result) {
-      if ('error' in doc) continue;
-
       rules.set(doc.id, {
         id: doc.id,
+        spaceId: savedObjectNamespacesToSpaceId(doc.namespaces),
         name: doc.attributes.metadata.name,
         description: doc.attributes.metadata.owner ?? '',
         labels: doc.attributes.metadata.labels ?? [],

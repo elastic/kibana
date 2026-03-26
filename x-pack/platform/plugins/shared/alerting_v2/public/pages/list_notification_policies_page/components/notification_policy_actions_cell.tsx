@@ -35,6 +35,7 @@ interface NotificationPolicyActionsCellProps {
   onDisable: (id: string) => void;
   onSnooze: (id: string, snoozedUntil: string) => void;
   onCancelSnooze: (id: string) => void;
+  onUpdateApiKey: (id: string) => void;
   isStateLoading: boolean;
   isDisabled?: boolean;
 }
@@ -48,6 +49,7 @@ export const NotificationPolicyActionsCell = ({
   onDisable,
   onSnooze,
   onCancelSnooze,
+  onUpdateApiKey,
   isStateLoading,
   isDisabled = false,
 }: NotificationPolicyActionsCellProps) => {
@@ -122,12 +124,23 @@ export const NotificationPolicyActionsCell = ({
           },
         },
         {
+          name: i18n.translate('xpack.alertingV2.notificationPoliciesList.action.updateApiKey', {
+            defaultMessage: 'Update API key',
+          }),
+          icon: 'key',
+          onClick: () => {
+            closePopover();
+            onUpdateApiKey(policy.id);
+          },
+        },
+        {
           name: i18n.translate('xpack.alertingV2.notificationPoliciesList.action.delete', {
             defaultMessage: 'Delete',
           }),
           icon: 'trash',
           css: css`
             color: ${euiTheme.colors.textDanger};
+            padding: ${euiTheme.size.s};
           `,
           onClick: () => {
             closePopover();
@@ -181,6 +194,7 @@ export const NotificationPolicyActionsCell = ({
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           iconType="pencil"
+          color="text"
           aria-label={i18n.translate(
             'xpack.alertingV2.notificationPoliciesList.action.edit.description',
             { defaultMessage: 'Edit this notification policy' }
@@ -206,6 +220,7 @@ export const NotificationPolicyActionsCell = ({
           button={
             <EuiButtonIcon
               iconType="boxesHorizontal"
+              color="text"
               aria-label={i18n.translate('xpack.alertingV2.notificationPoliciesList.action.more', {
                 defaultMessage: 'More actions',
               })}

@@ -7,20 +7,20 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const notificationPolicyDestinationSchema = schema.oneOf([
-  schema.object({
-    type: schema.literal('workflow'),
-    id: schema.string(),
-  }),
-]);
+export const notificationPolicyDestinationSchema = schema.object({
+  type: schema.literal('workflow'),
+  id: schema.string(),
+});
 
 export const notificationPolicySavedObjectAttributesSchema = schema.object({
   name: schema.string(),
   description: schema.string(),
   enabled: schema.boolean(),
-  destinations: schema.arrayOf(notificationPolicyDestinationSchema),
+  destinations: schema.arrayOf(notificationPolicyDestinationSchema, { minSize: 1, maxSize: 20 }),
   matcher: schema.maybe(schema.nullable(schema.string())),
-  groupBy: schema.maybe(schema.nullable(schema.arrayOf(schema.string()))),
+  groupBy: schema.maybe(
+    schema.nullable(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 10 }))
+  ),
   throttle: schema.maybe(
     schema.nullable(
       schema.object({

@@ -44,6 +44,7 @@ describe('partitionStream', () => {
   const createMockDefinition = (
     routing: Streams.WiredStream.Definition['ingest']['wired']['routing'] = []
   ): Streams.WiredStream.Definition => ({
+    type: 'wired',
     name: 'logs.test',
     description: 'Test stream',
     updated_at: '2024-01-01T00:00:00Z',

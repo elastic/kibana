@@ -56,7 +56,7 @@ describe('FetchPoliciesStep', () => {
     expect(policy?.throttle).toBeUndefined();
     expect(policy?.snoozedUntil).toBeNull();
 
-    expect(mockFindAllDecrypted).toHaveBeenCalledTimes(1);
+    expect(mockFindAllDecrypted).toHaveBeenCalledWith({ filter: { enabled: true } });
   });
 
   it('returns empty map when no policies exist', async () => {
@@ -125,6 +125,6 @@ describe('FetchPoliciesStep', () => {
     expect(result.data?.policies?.size).toBe(2);
     expect(result.data?.policies?.get('p1')?.apiKey).toBe('key-1');
     expect(result.data?.policies?.get('p2')?.apiKey).toBe('key-2');
-    expect(mockFindAllDecrypted).toHaveBeenCalledTimes(1);
+    expect(mockFindAllDecrypted).toHaveBeenCalledWith({ filter: { enabled: true } });
   });
 });

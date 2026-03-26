@@ -60,6 +60,7 @@ export const NotificationPolicySnoozePopover = ({
   ) : (
     <EuiButtonIcon
       iconType="bell"
+      color="text"
       aria-label={i18n.translate('xpack.alertingV2.notificationPolicy.snooze.ariaLabel', {
         defaultMessage: 'Snooze notification policy',
       })}

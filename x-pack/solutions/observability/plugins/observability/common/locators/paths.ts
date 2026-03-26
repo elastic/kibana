@@ -10,6 +10,7 @@ export const ROOT_PATH = '/' as const;
 export const LANDING_PATH = '/landing' as const;
 export const OVERVIEW_PATH = '/overview' as const;
 export const ALERTS_PATH = '/alerts' as const;
+export const ALERTING_V2_PATH = '/alerts-v2' as const;
 export const ALERT_DETAIL_PATH = '/alerts/:alertId' as const;
 export const EXPLORATORY_VIEW_PATH = '/exploratory-view' as const; // has been moved to its own app. Keeping around for redirecting purposes.
 export const RULES_PATH = '/alerts/rules' as const;

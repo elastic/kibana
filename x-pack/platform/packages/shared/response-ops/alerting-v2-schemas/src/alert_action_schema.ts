@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 const ackActionSchema = z.object({
   action_type: z.literal('ack').describe('Acknowledges an alert.'),
@@ -20,11 +20,6 @@ const unackActionSchema = z.object({
 const tagActionSchema = z.object({
   action_type: z.literal('tag').describe('Adds tags to an alert.'),
   tags: z.array(z.string()).describe('List of tags to add to the alert.'),
-});
-
-const untagActionSchema = z.object({
-  action_type: z.literal('untag').describe('Removes tags from an alert.'),
-  tags: z.array(z.string()).describe('List of tags to remove from the alert.'),
 });
 
 const snoozeActionSchema = z.object({
@@ -50,14 +45,13 @@ export const createAlertActionBodySchema = z
     ackActionSchema,
     unackActionSchema,
     tagActionSchema,
-    untagActionSchema,
     snoozeActionSchema,
     unsnoozeActionSchema,
     activateActionSchema,
     deactivateActionSchema,
   ])
   .describe(
-    'Request body for creating a single alert action. One of: ack, unack, tag, untag, snooze, unsnooze, activate, deactivate.'
+    'Request body for creating a single alert action. One of: ack, unack, tag, snooze, unsnooze, activate, deactivate.'
   );
 
 export type CreateAlertActionBody = z.infer<typeof createAlertActionBodySchema>;
@@ -118,6 +112,7 @@ export const bulkGetAlertActionsResponseSchema = z
         .enum(['snooze', 'unsnooze'])
         .nullable()
         .describe('The last snooze action, or null if none.'),
+      tags: z.array(z.string()).nullable().describe('The tags for the alert, or null if none.'),
     })
   )
   .describe('Response body for bulk getting alert actions by episode IDs.');

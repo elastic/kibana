@@ -93,6 +93,21 @@ jest.mock('../../hooks/use_unsnooze_notification_policy', () => ({
   }),
 }));
 
+const mockUpdateNotificationPolicyApiKey = jest.fn();
+jest.mock('../../hooks/use_update_notification_policy_api_key', () => ({
+  useUpdateNotificationPolicyApiKey: () => ({
+    mutate: mockUpdateNotificationPolicyApiKey,
+  }),
+}));
+
+const mockBulkAction = jest.fn();
+jest.mock('../../hooks/use_bulk_action_notification_policies', () => ({
+  useBulkActionNotificationPolicies: () => ({
+    mutate: mockBulkAction,
+    isLoading: false,
+  }),
+}));
+
 jest.mock('../../hooks/use_fetch_workflow', () => ({
   useFetchWorkflow: (...args: unknown[]) => mockUseFetchWorkflow(...args),
 }));
@@ -203,5 +218,31 @@ describe('ListNotificationPoliciesPage', () => {
     renderPage();
 
     expect(screen.getByText('1 workflow')).not.toBeNull();
+  });
+
+  it('renders the policy description below the name', () => {
+    renderPage();
+
+    expect(screen.getByText('Policy One')).not.toBeNull();
+    expect(screen.getByText('Policy description')).not.toBeNull();
+  });
+
+  it('renders columns in the correct order', () => {
+    renderPage();
+
+    const columnHeaders = screen
+      .getAllByRole('columnheader')
+      .map((header) => header.textContent?.trim())
+      .filter(Boolean);
+
+    expect(columnHeaders).toEqual([
+      'Name',
+      'Destinations',
+      'Last update',
+      'Updated by',
+      'State',
+      'Notify',
+      'Actions',
+    ]);
   });
 });

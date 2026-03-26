@@ -51,6 +51,7 @@ export function buildNotificationGroups(matched: readonly MatchedPair[]): Notifi
     if (!groupMap.has(notificationGroupId)) {
       groupMap.set(notificationGroupId, {
         id: notificationGroupId,
+        spaceId: policy.spaceId,
         ruleId: episode.rule_id,
         policyId: policy.id,
         destinations: policy.destinations,

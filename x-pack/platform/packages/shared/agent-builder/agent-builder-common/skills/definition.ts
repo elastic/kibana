@@ -82,6 +82,10 @@ export interface PersistedSkillCreateRequest {
    */
   name: string;
   /**
+   * Base path for the skill (optional)
+   */
+  base_path?: string;
+  /**
    * Description of what the skill does.
    */
   description: string;
@@ -111,6 +115,10 @@ export interface PersistedSkillUpdateRequest {
    * Updated name.
    */
   name?: string;
+  /**
+   * Base path for the skill (optional)
+   */
+  base_path?: string;
   /**
    * Updated description.
    */

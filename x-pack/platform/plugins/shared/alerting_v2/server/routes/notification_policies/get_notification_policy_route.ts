@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { Request, Response } from '@kbn/core-di-server';
 import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { NotificationPolicyClient } from '../../lib/notification_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';

@@ -14,12 +14,13 @@ export const getBulkGetAlertActionsQuery = (episodeIds: string[]): EsqlRequest =
   return esql`
     FROM ${ALERT_ACTIONS_DATA_STREAM}
     | WHERE episode_id IN (${episodeIdValues})
-    | WHERE action_type IN ("ack", "unack", "deactivate", "activate", "snooze", "unsnooze")
+    | WHERE action_type IN ("ack", "unack", "deactivate", "activate", "snooze", "tag", "unsnooze")
     | STATS
+        tags = LAST(tags, @timestamp) WHERE action_type IN ("tag"),
         last_ack_action = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack"),
         last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
         last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze")
       BY episode_id, rule_id, group_hash
-    | KEEP episode_id, rule_id, group_hash, last_ack_action, last_deactivate_action, last_snooze_action
+    | KEEP episode_id, rule_id, group_hash, last_ack_action, last_deactivate_action, last_snooze_action, tags
   `.toRequest();
 };

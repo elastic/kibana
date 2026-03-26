@@ -10,6 +10,7 @@ import { Route } from '@kbn/core-di-server';
 import { CreateRuleRoute } from '../routes/rules/create_rule_route';
 import { UpdateRuleRoute } from '../routes/rules/update_rule_route';
 import { GetRulesRoute } from '../routes/rules/get_rules_route';
+import { BulkGetRulesRoute } from '../routes/rules/get_rules_bulk_route';
 import { GetRuleRoute } from '../routes/rules/get_rule_route';
 import { DeleteRuleRoute } from '../routes/rules/delete_rule_route';
 import { BulkDeleteRulesRoute } from '../routes/rules/bulk_delete_rules_route';
@@ -27,12 +28,14 @@ import { ListNotificationPoliciesRoute } from '../routes/notification_policies/l
 import { SnoozeNotificationPolicyRoute } from '../routes/notification_policies/snooze_notification_policy_route';
 import { UnsnoozeNotificationPolicyRoute } from '../routes/notification_policies/unsnooze_notification_policy_route';
 import { UpdateNotificationPolicyRoute } from '../routes/notification_policies/update_notification_policy_route';
+import { UpdateNotificationPolicyApiKeyRoute } from '../routes/notification_policies/update_notification_policy_api_key_route';
 import { DeleteNotificationPolicyRoute } from '../routes/notification_policies/delete_notification_policy_route';
 
 export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(CreateRuleRoute);
   bind(Route).toConstantValue(UpdateRuleRoute);
   bind(Route).toConstantValue(GetRulesRoute);
+  bind(Route).toConstantValue(BulkGetRulesRoute);
   bind(Route).toConstantValue(GetRuleRoute);
   bind(Route).toConstantValue(DeleteRuleRoute);
   bind(Route).toConstantValue(BulkDeleteRulesRoute);
@@ -44,6 +47,7 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(CreateNotificationPolicyRoute);
   bind(Route).toConstantValue(GetNotificationPolicyRoute);
   bind(Route).toConstantValue(UpdateNotificationPolicyRoute);
+  bind(Route).toConstantValue(UpdateNotificationPolicyApiKeyRoute);
   bind(Route).toConstantValue(DeleteNotificationPolicyRoute);
   bind(Route).toConstantValue(ListNotificationPoliciesRoute);
   bind(Route).toConstantValue(EnableNotificationPolicyRoute);
