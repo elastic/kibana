@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { GetFieldsData } from './hooks/use_get_fields_data';
 import {
   getField,
   getFieldArray,
-  getEventTitle,
-  getAlertTitle,
   mergeLegacyIdentityWhenStoreEntityMissing,
   resolveHostNameForEntityInsights,
   resolveUserNameForEntityInsights,
@@ -57,36 +56,6 @@ describe('getFieldArray', () => {
   });
 });
 
-describe('getEventTitle', () => {
-  it('should return event title based on category when event kind is event', () => {
-    expect(
-      getEventTitle({
-        eventKind: 'event',
-        eventCategory: 'process',
-        getFieldsData: (field: string) => (field === 'process.name' ? 'process name' : ''),
-      })
-    ).toBe('process name');
-  });
-
-  it('should return External alert details when event kind is alert', () => {
-    expect(
-      getEventTitle({ eventKind: 'alert', eventCategory: null, getFieldsData: jest.fn() })
-    ).toBe('External alert details');
-  });
-
-  it('should return generic event details when event kind is not event or alert', () => {
-    expect(
-      getEventTitle({ eventKind: 'metric', eventCategory: null, getFieldsData: jest.fn() })
-    ).toBe('Metric details');
-  });
-
-  it('should return Event details when event kind is null', () => {
-    expect(getEventTitle({ eventKind: null, eventCategory: null, getFieldsData: jest.fn() })).toBe(
-      'Event details'
-    );
-  });
-});
-
 const emptyGetFieldsData: GetFieldsData = () => [];
 
 describe('resolveUserNameForEntityInsights', () => {
@@ -127,16 +96,6 @@ describe('resolveHostNameForEntityInsights', () => {
     expect(resolveHostNameForEntityInsights({ 'host.id': 'uuid-host' }, emptyGetFieldsData)).toBe(
       'uuid-host'
     );
-  });
-});
-
-describe('getAlertTitle', () => {
-  it('should return Document details when ruleName is undefined', () => {
-    expect(getAlertTitle({ ruleName: undefined })).toBe('Document details');
-  });
-
-  it('should return ruleName when ruleName is defined', () => {
-    expect(getAlertTitle({ ruleName: 'test rule' })).toBe('test rule');
   });
 });
 
