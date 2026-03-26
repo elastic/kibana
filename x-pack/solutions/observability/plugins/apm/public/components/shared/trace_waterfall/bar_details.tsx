@@ -119,7 +119,9 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
                 <EuiFlexItem grow={false}>
                   <AgentIcon agentName={item.agentName} size="m" role="presentation" />
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>{item.serviceName}</EuiFlexItem>
+                <EuiFlexItem grow={false} className="eui-textTruncate">
+                  <span className="eui-textTruncate">{item.serviceName}</span>
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiBadge>
           </EuiFlexItem>
