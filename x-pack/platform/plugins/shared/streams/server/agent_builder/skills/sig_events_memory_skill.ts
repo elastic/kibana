@@ -58,5 +58,9 @@ export const createSigEventsMemorySkill = (options: MemoryToolsOptions) =>
     - Never delete entries without explicit user confirmation
     </best_practices>
   `),
-    getInlineTools: () => createMemoryTools(options).map(({ tags, ...rest }) => rest),
+    getInlineTools: () =>
+      createMemoryTools(options).map(({ tags, id, ...rest }) => ({
+        ...rest,
+        id: id.replaceAll('.', '_'),
+      })),
   });

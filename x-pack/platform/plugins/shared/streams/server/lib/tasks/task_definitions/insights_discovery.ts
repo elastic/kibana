@@ -21,6 +21,8 @@ import { formatInferenceProviderError } from '../../../routes/utils/create_conne
 import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
 import type { MemoryGenerationTaskParams } from './memory_generation';
 import { MEMORY_GENERATION_TASK_TYPE } from './memory_generation';
+import { MemoryServiceImpl } from '../../memory';
+import { createMemoryDiscoveryTools } from '../../significant_events/memory_discovery_tools';
 
 export interface InsightsDiscoveryTaskResult {
   insights: Insight[];
@@ -71,6 +73,16 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
               taskLogger.debug(`Using connector ${connectorId} for discovery`);
               const boundInferenceClient = inferenceClient.bindTo({ connectorId });
 
+              const memoryTools = settings.useMemory
+                ? createMemoryDiscoveryTools({
+                    memoryService: new MemoryServiceImpl({
+                      logger: taskLogger.get('memory'),
+                      esClient: scopedClusterClient.asCurrentUser,
+                    }),
+                    spaceId: 'default',
+                  })
+                : undefined;
+
               try {
                 const result = await generateInsights({
                   streamsClient,
@@ -80,6 +92,13 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                   signal: runContext.abortController.signal,
                   logger: taskLogger,
                   streamNames,
+                  memoryTools: memoryTools
+                    ? {
+                        tools: memoryTools.tools,
+                        callbacks: memoryTools.callbacks,
+                        systemPromptSnippet: memoryTools.promptSnippet,
+                      }
+                    : undefined,
                 });
 
                 taskContext.telemetry.trackInsightsGenerated({

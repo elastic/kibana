@@ -218,9 +218,13 @@ export class StreamsPlugin
             return undefined;
           }
         },
-      }).catch((err) => {
-        this.logger.error(`Failed to register agent builder: ${err.message}`);
-      });
+      })
+        .then(({ ensureMemorySkillRegistered }) => {
+          this.server!.ensureMemorySkillRegistered = ensureMemorySkillRegistered;
+        })
+        .catch((err) => {
+          this.logger.error(`Failed to register agent builder: ${err.message}`);
+        });
     }
 
     const telemetryClient = this.ebtTelemetryService.getClient();
@@ -382,6 +386,9 @@ export class StreamsPlugin
           await modelSettingsClient.updateSettings({
             useMemory: this.config.significantEvents.useMemory,
           });
+          if (this.config.significantEvents.useMemory) {
+            this.server?.ensureMemorySkillRegistered?.();
+          }
           this.logger.info(
             `Preconfigured significantEvents.useMemory: ${this.config.significantEvents.useMemory}`
           );

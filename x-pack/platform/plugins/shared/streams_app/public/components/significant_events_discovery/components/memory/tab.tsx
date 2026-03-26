@@ -69,9 +69,20 @@ export function MemoryTab() {
 
   return (
     <>
-      <EuiFlexGroup gutterSize="l">
+      <EuiFlexGroup
+        gutterSize="l"
+        className={css`
+          min-height: 0;
+        `}
+      >
         {/* Left column: search + tree/search results */}
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem
+          grow={2}
+          className={css`
+            overflow-y: auto;
+            min-height: 0;
+          `}
+        >
           <EuiFieldSearch
             placeholder={i18n.translate('xpack.streams.memory.searchPlaceholder', {
               defaultMessage: 'Search memory entries...',

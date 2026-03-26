@@ -60,57 +60,72 @@ export const registerStreamsAgentBuilder = async ({
 
   agentBuilder.skills.register(streamExplorationSkill);
 
-  if (await isMemoryEnabled()) {
-    const getMemoryServices = () => ({
-      memory: getMemoryService(),
-      spaces: getSpaces(),
+  // Hooks are always registered — they check isMemoryEnabled() at runtime and no-op when disabled.
+  const getMemoryServices = () => ({
+    memory: getMemoryService(),
+    spaces: getSpaces(),
+  });
+
+  const scheduleMemoryTask = async (
+    triggerId: string,
+    payload: Record<string, unknown>,
+    request: KibanaRequest
+  ) => {
+    const { taskClient } = await getScopedClients({ request });
+    const taskId = `memory_update_${triggerId}_${Date.now()}`;
+    await taskClient.schedule<MemoryUpdateTaskParams>({
+      task: {
+        type: MEMORY_UPDATE_TASK_TYPE,
+        id: taskId,
+        space: '*',
+      },
+      params: { triggerId, payload },
+      request,
     });
+    logger.info(`Scheduled memory update task "${taskId}" for trigger "${triggerId}"`);
+  };
 
-    const scheduleMemoryTask = async (
-      triggerId: string,
-      payload: Record<string, unknown>,
-      request: KibanaRequest
-    ) => {
-      const { taskClient } = await getScopedClients({ request });
-      const taskId = `memory_update_${triggerId}_${Date.now()}`;
-      await taskClient.schedule<MemoryUpdateTaskParams>({
-        task: {
-          type: MEMORY_UPDATE_TASK_TYPE,
-          id: taskId,
-          space: '*',
-        },
-        params: { triggerId, payload },
-        request,
-      });
-      logger.info(`Scheduled memory update task "${taskId}" for trigger "${triggerId}"`);
-    };
+  registerMemoryContextHook(agentBuilder, {
+    logger,
+    getMemoryServices,
+    isMemoryEnabled,
+  });
 
-    registerMemoryContextHook(agentBuilder, {
-      logger,
-      getMemoryServices,
-      isMemoryEnabled,
-    });
+  registerMemoryLearningHook(agentBuilder, {
+    logger,
+    getMemoryServices,
+    isMemoryEnabled,
+  });
 
-    registerMemoryLearningHook(agentBuilder, {
-      logger,
-      getMemoryServices,
-      isMemoryEnabled,
-    });
+  registerSigeventsMemoryHook(agentBuilder, {
+    logger,
+    getMemoryServices,
+    isMemoryEnabled,
+    scheduleMemoryTask,
+  });
 
-    registerSigeventsMemoryHook(agentBuilder, {
-      logger,
-      getMemoryServices,
-      isMemoryEnabled,
-      scheduleMemoryTask,
-    });
+  // The memory skill is registered lazily — only once useMemory is enabled.
+  // This avoids exposing the skill to the agent when memory is not configured.
+  // Call ensureMemorySkillRegistered() after enabling the useMemory setting.
+  let memorySkillRegistered = false;
 
+  const ensureMemorySkillRegistered = () => {
+    if (memorySkillRegistered) {
+      return;
+    }
+    memorySkillRegistered = true;
     agentBuilder.skills.register(
       createSigEventsMemorySkill({
         getMemoryService,
         getSecurity: () => server.core.security,
       })
     );
+    logger.info('Memory skill registered (useMemory is enabled)');
+  };
 
-    logger.info('Memory skill and hooks registered (useMemory is enabled)');
+  if (await isMemoryEnabled()) {
+    ensureMemorySkillRegistered();
   }
+
+  return { ensureMemorySkillRegistered };
 };

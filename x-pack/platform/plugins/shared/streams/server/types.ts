@@ -45,6 +45,7 @@ export interface StreamsServer {
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
   memoryTriggerRegistry?: MemoryTriggerRegistry;
+  ensureMemorySkillRegistered?: () => void;
 }
 
 export interface ElasticsearchAccessorOptions {

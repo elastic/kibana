@@ -74,6 +74,11 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
     });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await modelSettingsClient.updateSettings(params.body);
+
+    if (params.body.useMemory) {
+      server.ensureMemorySkillRegistered?.();
+    }
+
     return { success: true };
   },
 });

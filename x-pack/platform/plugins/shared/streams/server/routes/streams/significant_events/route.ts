@@ -22,6 +22,8 @@ import { assertSignificantEventsAccess } from '../../utils/assert_significant_ev
 import { createConnectorSSEError } from '../../utils/create_connector_sse_error';
 import { getRequestAbortSignal } from '../../utils/get_request_abort_signal';
 import { resolveConnectorId } from '../../utils/resolve_connector_id';
+import { MemoryServiceImpl } from '../../../lib/memory';
+import { createMemoryDiscoveryTools } from '../../../lib/significant_events/memory_discovery_tools';
 
 // Make sure strings are expected for input, but still converted to a
 // Date, without breaking the OpenAPI generator
@@ -200,6 +202,7 @@ const generateSignificantEventsRoute = createServerRoute({
       soClient,
       featureClient,
       scopedClusterClient,
+      modelSettingsClient,
     } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
@@ -210,6 +213,17 @@ const generateSignificantEventsRoute = createServerRoute({
       uiSettingsClient,
       logger,
     });
+
+    const settings = await modelSettingsClient.getSettings();
+    const memoryTools = settings.useMemory
+      ? createMemoryDiscoveryTools({
+          memoryService: new MemoryServiceImpl({
+            logger: logger.get('memory'),
+            esClient: scopedClusterClient.asCurrentUser,
+          }),
+          spaceId: 'default',
+        })
+      : undefined;
 
     // Get connector info for error enrichment
     const [connector, definition, { significantEventsPromptOverride }] = await Promise.all([
@@ -233,6 +247,7 @@ const generateSignificantEventsRoute = createServerRoute({
           logger: logger.get('significant_events'),
           signal: getRequestAbortSignal(request),
           esClient: scopedClusterClient.asCurrentUser,
+          memoryTools,
         }
       )
     ).pipe(
