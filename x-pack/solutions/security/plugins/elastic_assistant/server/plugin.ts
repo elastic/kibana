@@ -49,6 +49,7 @@ import type { ConfigSchema } from './config_schema';
 import { attackDiscoveryAlertFieldMap } from './lib/attack_discovery/schedules/fields';
 import { ATTACK_DISCOVERY_ALERTS_CONTEXT } from './lib/attack_discovery/schedules/constants';
 import { getAttackDiscoveryDataGeneratorRuleType } from './lib/attack_discovery/data_generator_rule/definition';
+import { WorkflowInitService } from './lib/alert_investigation/workflow_init';
 
 interface FeatureFlagDefinition {
   featureFlagName: string;
@@ -72,6 +73,7 @@ export class ElasticAssistantPlugin
 {
   private readonly logger: Logger;
   private assistantService: AIAssistantService | undefined;
+  private workflowInitService: WorkflowInitService | undefined;
   private pluginStop$: Subject<void>;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private readonly config: ConfigSchema;
@@ -158,6 +160,14 @@ export class ElasticAssistantPlugin
         logger: this.logger,
       });
     }
+
+    // Initialize WorkflowInitService for lazy per-space workflow management
+    // WorkflowsManagement is an optional dependency — service handles undefined gracefully
+    this.workflowInitService = new WorkflowInitService(
+      this.logger.get('workflowInit'),
+      ((plugins as Record<string, unknown>).workflowsManagement as { management?: unknown } | undefined)
+        ?.management as ConstructorParameters<typeof WorkflowInitService>[1]
+    );
 
     // The featureFlags service is not available in the core setup, so we need
     // to wait for the start services to be available to read the feature flags.

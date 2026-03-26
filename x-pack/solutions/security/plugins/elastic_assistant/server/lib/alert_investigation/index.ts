@@ -9,6 +9,7 @@ export { registerPipelineWorkflowSteps } from './workflow_steps';
 export { deduplicateAlerts } from './deduplication';
 export { extractEntitiesFromAlerts } from './entity_extraction';
 export { matchAlertsToCases } from './case_matching';
+export { WorkflowInitService } from './workflow_init';
 export type {
   ExtractedEntity,
   CaseMatchScore,
