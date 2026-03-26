@@ -61,9 +61,7 @@ const mockMonitorPair = (id: string) => ({
 
 const createMockRouteContextWithFleet = (existingAgentPolicyIds: string[]) => {
   const base = createMockRouteContext();
-  const getByIds = jest
-    .fn()
-    .mockResolvedValue(existingAgentPolicyIds.map((id) => ({ id })));
+  const getByIds = jest.fn().mockResolvedValue(existingAgentPolicyIds.map((id) => ({ id })));
   base.routeContext.server = {
     ...base.routeContext.server,
     fleet: { agentPolicyService: { getByIds } },

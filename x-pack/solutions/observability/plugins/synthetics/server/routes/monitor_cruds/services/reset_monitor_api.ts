@@ -118,8 +118,7 @@ export class ResetMonitorAPI {
       return this.forceReset(monitors, allPrivateLocations, spaceId);
     }
 
-    const validLocationIds =
-      await this.getLocationIdsWithExistingAgentPolicy(allPrivateLocations);
+    const validLocationIds = await this.getLocationIdsWithExistingAgentPolicy(allPrivateLocations);
     return this.defaultReset(monitors, allPrivateLocations, spaceId, validLocationIds);
   }
 

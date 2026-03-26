@@ -27,7 +27,9 @@ export const UnhealthyCountBadge = ({ item }: { item: { id: string; label: strin
   const unhealthyConfigIds = getUnhealthyConfigIdsForLocation(item.id);
   const href = history.createHref({
     pathname: '/monitors',
-    search: `?locations=${JSON.stringify([item.label])}&configIds=${JSON.stringify(unhealthyConfigIds)}`,
+    search: `?locations=${JSON.stringify([item.label])}&configIds=${JSON.stringify(
+      unhealthyConfigIds
+    )}`,
   });
 
   const badge = (
@@ -46,7 +48,11 @@ export const UnhealthyCountBadge = ({ item }: { item: { id: string; label: strin
 
   return (
     <EuiFlexItem grow={false}>
-      <EuiPopover button={badge} isOpen={isPopoverOpen} closePopover={() => setIsPopoverOpen(false)}>
+      <EuiPopover
+        button={badge}
+        isOpen={isPopoverOpen}
+        closePopover={() => setIsPopoverOpen(false)}
+      >
         <EuiText size="s">
           <FormattedMessage
             id="xpack.synthetics.privateLocations.missingIntegrations.popover"
@@ -59,11 +65,7 @@ export const UnhealthyCountBadge = ({ item }: { item: { id: string; label: strin
           />
         </EuiText>
         <EuiSpacer size="s" />
-        <EuiButton
-          size="s"
-          data-test-subj="syntheticsViewUnhealthyMonitorsButton"
-          href={href}
-        >
+        <EuiButton size="s" data-test-subj="syntheticsViewUnhealthyMonitorsButton" href={href}>
           {VIEW_MONITORS_LABEL}
         </EuiButton>
       </EuiPopover>

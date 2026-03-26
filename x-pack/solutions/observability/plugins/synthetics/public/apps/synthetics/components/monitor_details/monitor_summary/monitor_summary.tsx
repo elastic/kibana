@@ -52,55 +52,55 @@ export const MonitorSummary = () => {
   return (
     <>
       <MissingIntegrationCallout configId={configId} />
-    <MonitorPendingWrapper>
-      <MonitorMWsCallout />
-      <SummaryPanel dateLabel={dateLabel} from={from} to={to} />
-      <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="m" wrap={true} direction={isMediumDevice ? 'column' : 'row'}>
-        <EuiFlexItem grow={false} css={{ minWidth: 260 }}>
-          <MonitorDetailsPanelContainer />
-        </EuiFlexItem>
-        <EuiFlexItem grow={3}>
-          <EuiPanel hasShadow={false} paddingSize="m" hasBorder>
-            <EuiFlexGroup alignItems="center" gutterSize="m">
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xs">
-                  <h3>{DURATION_TREND_LABEL}</h3>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText color="subdued" size="s">
-                  {dateLabel}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <MonitorDurationTrend from={from} to={to} />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <MonitorStatusPanel
-        from={'now-24h'}
-        to={'now'}
-        brushable={false}
-        showViewHistoryButton={true}
-      />
-      <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="m" wrap={true}>
-        <EuiFlexItem css={{ minWidth: 430 }}>
-          <LastTestRun />
-        </EuiFlexItem>
-        <EuiFlexItem css={{ minWidth: 260 }}>
-          <MonitorAlerts dateLabel={dateLabel} from={from} to={to} />
-          <EuiSpacer size="m" />
-          <StepDurationPanel legendPosition="bottom" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <LoadWhenInView placeholderTitle={LAST_10_TEST_RUNS}>
-        <TestRunsTable paginable={false} from={from} to={to} />
-      </LoadWhenInView>
-    </MonitorPendingWrapper>
+      <MonitorPendingWrapper>
+        <MonitorMWsCallout />
+        <SummaryPanel dateLabel={dateLabel} from={from} to={to} />
+        <EuiSpacer size="m" />
+        <EuiFlexGroup gutterSize="m" wrap={true} direction={isMediumDevice ? 'column' : 'row'}>
+          <EuiFlexItem grow={false} css={{ minWidth: 260 }}>
+            <MonitorDetailsPanelContainer />
+          </EuiFlexItem>
+          <EuiFlexItem grow={3}>
+            <EuiPanel hasShadow={false} paddingSize="m" hasBorder>
+              <EuiFlexGroup alignItems="center" gutterSize="m">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xs">
+                    <h3>{DURATION_TREND_LABEL}</h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText color="subdued" size="s">
+                    {dateLabel}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <MonitorDurationTrend from={from} to={to} />
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <MonitorStatusPanel
+          from={'now-24h'}
+          to={'now'}
+          brushable={false}
+          showViewHistoryButton={true}
+        />
+        <EuiSpacer size="m" />
+        <EuiFlexGroup gutterSize="m" wrap={true}>
+          <EuiFlexItem css={{ minWidth: 430 }}>
+            <LastTestRun />
+          </EuiFlexItem>
+          <EuiFlexItem css={{ minWidth: 260 }}>
+            <MonitorAlerts dateLabel={dateLabel} from={from} to={to} />
+            <EuiSpacer size="m" />
+            <StepDurationPanel legendPosition="bottom" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <LoadWhenInView placeholderTitle={LAST_10_TEST_RUNS}>
+          <TestRunsTable paginable={false} from={from} to={to} />
+        </LoadWhenInView>
+      </MonitorPendingWrapper>
     </>
   );
 };

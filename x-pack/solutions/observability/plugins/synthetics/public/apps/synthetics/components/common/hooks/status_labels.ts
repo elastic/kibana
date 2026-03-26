@@ -15,7 +15,8 @@ export const STATUS_LABELS: Record<
   [LocationHealthStatusValue.MissingPackagePolicy]: i18n.translate(
     'xpack.synthetics.monitorHealth.status.missingPackagePolicy',
     {
-      defaultMessage: 'The Fleet package policy for this monitor and private location pair does not exist.',
+      defaultMessage:
+        'The Fleet package policy for this monitor and private location pair does not exist.',
     }
   ),
   [LocationHealthStatusValue.MissingAgentPolicy]: i18n.translate(
@@ -51,7 +52,7 @@ export const getStatusLabel = (status: LocationHealthStatusValue): string | unde
 };
 
 export const RESET_FIXABLE_STATUSES = new Set([
-  LocationHealthStatusValue.MissingPackagePolicy,  
+  LocationHealthStatusValue.MissingPackagePolicy,
   LocationHealthStatusValue.AgentPolicyMismatch,
 ]);
 
