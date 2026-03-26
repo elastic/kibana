@@ -43782,6 +43782,9 @@ paths:
                       type: boolean
                     name:
                       type: string
+                    otel_exporter_config_yaml:
+                      nullable: true
+                      type: string
                     preset:
                       enum:
                         - balanced
@@ -43928,6 +43931,9 @@ paths:
                       nullable: true
                       type: string
                     name:
+                      type: string
+                    otel_exporter_config_yaml:
+                      nullable: true
                       type: string
                     preset:
                       enum:
@@ -44087,6 +44093,9 @@ paths:
                     is_preconfigured:
                       type: boolean
                     name:
+                      type: string
+                    otel_exporter_config_yaml:
+                      nullable: true
                       type: string
                     proxy_id:
                       nullable: true
@@ -44287,6 +44296,9 @@ paths:
                     key:
                       type: string
                     name:
+                      type: string
+                    otel_exporter_config_yaml:
+                      nullable: true
                       type: string
                     partition:
                       enum:
@@ -68211,6 +68223,9 @@ components:
           type: boolean
         name:
           type: string
+        otel_exporter_config_yaml:
+          nullable: true
+          type: string
         preset:
           enum:
             - balanced
@@ -68427,6 +68442,9 @@ components:
         key:
           type: string
         name:
+          type: string
+        otel_exporter_config_yaml:
+          nullable: true
           type: string
         partition:
           enum:
@@ -68659,6 +68677,9 @@ components:
           type: boolean
         name:
           type: string
+        otel_exporter_config_yaml:
+          nullable: true
+          type: string
         proxy_id:
           nullable: true
           type: string
@@ -68802,6 +68823,9 @@ components:
           nullable: true
           type: string
         name:
+          type: string
+        otel_exporter_config_yaml:
+          nullable: true
           type: string
         preset:
           enum:
@@ -68970,6 +68994,9 @@ components:
         is_preconfigured:
           type: boolean
         name:
+          type: string
+        otel_exporter_config_yaml:
+          nullable: true
           type: string
         preset:
           enum:
@@ -69187,6 +69214,9 @@ components:
         key:
           type: string
         name:
+          type: string
+        otel_exporter_config_yaml:
+          nullable: true
           type: string
         partition:
           enum:
@@ -69419,6 +69449,9 @@ components:
           type: boolean
         name:
           type: string
+        otel_exporter_config_yaml:
+          nullable: true
+          type: string
         proxy_id:
           nullable: true
           type: string
@@ -69562,6 +69595,9 @@ components:
           nullable: true
           type: string
         name:
+          type: string
+        otel_exporter_config_yaml:
+          nullable: true
           type: string
         preset:
           enum:
