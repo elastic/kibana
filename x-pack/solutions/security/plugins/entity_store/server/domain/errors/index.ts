@@ -16,3 +16,4 @@ export { EntitiesNotFoundError } from './entities_not_found_error';
 export { MixedEntityTypesError } from './mixed_entity_types_error';
 export { ResolutionSearchTruncatedError } from './resolution_search_truncated_error';
 export { ResolutionUpdateError } from './resolution_update_error';
+export { EntityAlreadyExistsError } from './entity_already_exists';
