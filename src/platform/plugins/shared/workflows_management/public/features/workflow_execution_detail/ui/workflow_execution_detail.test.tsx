@@ -79,8 +79,22 @@ jest.mock('./workflow_step_execution_details', () => ({
   },
 }));
 
+type UseStepExecutionParams = Parameters<
+  typeof import('../model/use_step_execution').useStepExecution
+>;
+/** Subset of useQuery result; tests override via mockReturnValue */
+interface UseStepExecutionQueryStub {
+  data: unknown;
+  isLoading: boolean;
+}
+
+const mockUseStepExecution = jest.fn<UseStepExecutionQueryStub, UseStepExecutionParams>(() => ({
+  data: undefined,
+  isLoading: false,
+}));
+
 jest.mock('../model/use_step_execution', () => ({
-  useStepExecution: jest.fn(() => ({ data: undefined, isLoading: false })),
+  useStepExecution: (...args: UseStepExecutionParams) => mockUseStepExecution(...args),
 }));
 
 const mockChildExecutions = new Map();
@@ -451,41 +465,61 @@ describe('WorkflowExecutionDetail', () => {
   });
 });
 
-describe('WorkflowExecutionDetail - pausedStepDef resolution', () => {
+describe('WorkflowExecutionDetail - resume input resolution', () => {
   let mockRemoveQueries: jest.Mock;
 
-  const waitingStepExecution = {
+  const defaultWaitingLightweightStep = {
     id: 'step-exec-1',
     stepId: 'request_approval',
     stepType: 'waitForInput',
     status: ExecutionStatus.WAITING_FOR_INPUT,
     startedAt: '2024-01-01T00:00:00Z',
     globalExecutionIndex: 0,
+    // input absent: polling uses includeInput: false
+  } as const;
+
+  // Polling returns lightweight steps without input (includeInput: false).
+  // Resume copy is loaded via useStepExecution(pausedStepId) — not from workflowDefinition.
+  // We still embed nested `if` / `foreach` shapes below so regressions in flat stepExecutions
+  // detection do not go unnoticed when YAML nesting matches real workflows.
+  const makeWaitingExecution = (options?: {
+    steps?: WorkflowYaml['steps'];
+    stepExecutions?: WorkflowExecutionDto['stepExecutions'];
+  }): WorkflowExecutionDto => {
+    const stepExecutions = options?.stepExecutions ?? [defaultWaitingLightweightStep as any];
+    return {
+      spaceId: 'default',
+      id: 'exec-waiting',
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      error: null,
+      isTestRun: false,
+      startedAt: '2024-01-01T00:00:00Z',
+      finishedAt: '',
+      workflowId: 'workflow-1',
+      workflowName: 'Test Workflow',
+      workflowDefinition: {
+        version: '1',
+        name: 'test',
+        enabled: true,
+        triggers: [],
+        steps: options?.steps ?? [],
+      } as WorkflowYaml,
+      stepId: undefined,
+      stepExecutions,
+      duration: 0,
+      triggeredBy: 'manual',
+      yaml: 'version: "1"',
+    };
   };
 
-  const waitingExecution = (steps: WorkflowYaml['steps']): WorkflowExecutionDto => ({
-    spaceId: 'default',
-    id: 'exec-waiting',
-    status: ExecutionStatus.WAITING_FOR_INPUT,
-    error: null,
-    isTestRun: false,
-    startedAt: '2024-01-01T00:00:00Z',
-    finishedAt: '',
-    workflowId: 'workflow-1',
-    workflowName: 'Test Workflow',
-    workflowDefinition: {
-      version: '1',
-      name: 'test',
-      enabled: true,
-      triggers: [],
-      steps,
-    } as WorkflowYaml,
-    stepId: undefined,
-    stepExecutions: [waitingStepExecution as any],
-    duration: 0,
-    triggeredBy: 'manual',
-    yaml: 'version: "1"',
-  });
+  /** First hook invocation is always the paused-step fetch (see workflow_execution_detail). */
+  const expectPausedStepFetchArgs = (executionId: string, pausedStepExecutionId: string) => {
+    expect(mockUseStepExecution.mock.calls[0]).toEqual([
+      executionId,
+      pausedStepExecutionId,
+      ExecutionStatus.WAITING_FOR_INPUT,
+    ]);
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -497,9 +531,14 @@ describe('WorkflowExecutionDetail - pausedStepDef resolution', () => {
       setSelectedStepExecution: mockSetSelectedStepExecution,
       selectedStepExecutionId: 'step-exec-1',
     } as any);
+    mockUseWorkflowExecutionPolling.mockReturnValue({
+      workflowExecution: makeWaitingExecution(),
+      isLoading: false,
+      error: null,
+    });
   });
 
-  it('resolves resumeMessage and resumeSchema for a top-level waitForInput step', () => {
+  it('passes resumeMessage and resumeSchema for a top-level waitForInput (fetch-driven)', () => {
     const steps: WorkflowYaml['steps'] = [
       {
         name: 'request_approval',
@@ -510,11 +549,22 @@ describe('WorkflowExecutionDetail - pausedStepDef resolution', () => {
         },
       } as any,
     ];
-
     mockUseWorkflowExecutionPolling.mockReturnValue({
-      workflowExecution: waitingExecution(steps),
+      workflowExecution: makeWaitingExecution({ steps }),
       isLoading: false,
       error: null,
+    });
+
+    mockUseStepExecution.mockReturnValue({
+      data: {
+        id: 'step-exec-1',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        input: {
+          message: 'Top-level approval required',
+          schema: { type: 'object', properties: { approved: { type: 'boolean' } } },
+        },
+      },
+      isLoading: false,
     });
 
     render(
@@ -523,11 +573,27 @@ describe('WorkflowExecutionDetail - pausedStepDef resolution', () => {
       </TestWrapper>
     );
 
+    expectPausedStepFetchArgs('exec-waiting', 'step-exec-1');
     expect(mockStepExecutionDetailsProps.current.resumeMessage).toBe('Top-level approval required');
     expect(mockStepExecutionDetailsProps.current.resumeSchema).toMatchObject({ type: 'object' });
   });
 
-  it('resolves resumeMessage and resumeSchema for a waitForInput step nested inside if', () => {
+  it('passes undefined resumeMessage and resumeSchema when the paused-step fetch returns no data', () => {
+    // Default mock returns { data: undefined } — no data yet from the fetch.
+    mockUseStepExecution.mockReturnValue({ data: undefined, isLoading: true });
+
+    render(
+      <TestWrapper>
+        <WorkflowExecutionDetail executionId="exec-waiting" onClose={jest.fn()} />
+      </TestWrapper>
+    );
+
+    expectPausedStepFetchArgs('exec-waiting', 'step-exec-1');
+    expect(mockStepExecutionDetailsProps.current.resumeMessage).toBeUndefined();
+    expect(mockStepExecutionDetailsProps.current.resumeSchema).toBeUndefined();
+  });
+
+  it('passes resumeMessage and resumeSchema when waitForInput is nested under if in YAML (fetch-driven)', () => {
     const steps: WorkflowYaml['steps'] = [
       {
         name: 'should_ask',
@@ -545,11 +611,22 @@ describe('WorkflowExecutionDetail - pausedStepDef resolution', () => {
         ],
       } as any,
     ];
-
     mockUseWorkflowExecutionPolling.mockReturnValue({
-      workflowExecution: waitingExecution(steps),
+      workflowExecution: makeWaitingExecution({ steps }),
       isLoading: false,
       error: null,
+    });
+
+    mockUseStepExecution.mockReturnValue({
+      data: {
+        id: 'step-exec-1',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        input: {
+          message: 'Nested approval required',
+          schema: { type: 'object', properties: { severity: { type: 'string' } } },
+        },
+      },
+      isLoading: false,
     });
 
     render(
@@ -558,11 +635,82 @@ describe('WorkflowExecutionDetail - pausedStepDef resolution', () => {
       </TestWrapper>
     );
 
+    expectPausedStepFetchArgs('exec-waiting', 'step-exec-1');
     expect(mockStepExecutionDetailsProps.current.resumeMessage).toBe('Nested approval required');
     expect(mockStepExecutionDetailsProps.current.resumeSchema).toMatchObject({ type: 'object' });
   });
 
-  it('resolves resumeSchema for a waitForInput step nested inside foreach', () => {
+  it('targets the WAITING_FOR_INPUT row when earlier steps in stepExecutions are already finished', () => {
+    const stepExecutions = [
+      {
+        id: 'step-exec-done',
+        stepId: 'hello_world',
+        stepType: 'console',
+        status: ExecutionStatus.COMPLETED,
+        startedAt: '2024-01-01T00:00:00Z',
+        globalExecutionIndex: 0,
+      } as any,
+      {
+        id: 'step-exec-waiting',
+        stepId: 'request_approval',
+        stepType: 'waitForInput',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        startedAt: '2024-01-01T00:00:01Z',
+        globalExecutionIndex: 1,
+      } as any,
+    ];
+    mockUseWorkflowExecutionPolling.mockReturnValue({
+      workflowExecution: makeWaitingExecution({ stepExecutions }),
+      isLoading: false,
+      error: null,
+    });
+    mockUseWorkflowUrlState.mockReturnValue({
+      activeTab: 'executions',
+      setSelectedStepExecution: mockSetSelectedStepExecution,
+      selectedStepExecutionId: 'step-exec-waiting',
+    } as any);
+
+    mockUseStepExecution.mockReturnValue({
+      data: {
+        id: 'step-exec-waiting',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        input: { message: 'Blocked on second step' },
+      },
+      isLoading: false,
+    });
+
+    render(
+      <TestWrapper>
+        <WorkflowExecutionDetail executionId="exec-waiting" onClose={jest.fn()} />
+      </TestWrapper>
+    );
+
+    expectPausedStepFetchArgs('exec-waiting', 'step-exec-waiting');
+    expect(mockStepExecutionDetailsProps.current.resumeMessage).toBe('Blocked on second step');
+  });
+
+  it('passes only resumeMessage when schema is absent from the paused-step input', () => {
+    mockUseStepExecution.mockReturnValue({
+      data: {
+        id: 'step-exec-1',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        input: { message: 'Approve?' },
+      },
+      isLoading: false,
+    });
+
+    render(
+      <TestWrapper>
+        <WorkflowExecutionDetail executionId="exec-waiting" onClose={jest.fn()} />
+      </TestWrapper>
+    );
+
+    expectPausedStepFetchArgs('exec-waiting', 'step-exec-1');
+    expect(mockStepExecutionDetailsProps.current.resumeMessage).toBe('Approve?');
+    expect(mockStepExecutionDetailsProps.current.resumeSchema).toBeUndefined();
+  });
+
+  it('passes resumeSchema and evaluated message for waitForInput nested under foreach in YAML', () => {
     const steps: WorkflowYaml['steps'] = [
       {
         name: 'process_each_item',
@@ -580,11 +728,38 @@ describe('WorkflowExecutionDetail - pausedStepDef resolution', () => {
         ],
       } as any,
     ];
-
+    const stepExecutions = [
+      {
+        id: 'step-exec-foreach-alpha',
+        stepId: 'request_approval',
+        stepType: 'waitForInput',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        startedAt: '2024-01-01T00:00:00Z',
+        globalExecutionIndex: 2,
+      } as any,
+    ];
     mockUseWorkflowExecutionPolling.mockReturnValue({
-      workflowExecution: waitingExecution(steps),
+      workflowExecution: makeWaitingExecution({ steps, stepExecutions }),
       isLoading: false,
       error: null,
+    });
+    mockUseWorkflowUrlState.mockReturnValue({
+      activeTab: 'executions',
+      setSelectedStepExecution: mockSetSelectedStepExecution,
+      selectedStepExecutionId: 'step-exec-foreach-alpha',
+    } as any);
+
+    // Engine stores the Liquid-rendered message on stepExecution.input; UI must not re-parse YAML.
+    mockUseStepExecution.mockReturnValue({
+      data: {
+        id: 'step-exec-foreach-alpha',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        input: {
+          message: 'Approve item alpha',
+          schema: { type: 'object', properties: { approved: { type: 'boolean' } } },
+        },
+      },
+      isLoading: false,
     });
 
     render(
@@ -593,6 +768,7 @@ describe('WorkflowExecutionDetail - pausedStepDef resolution', () => {
       </TestWrapper>
     );
 
+    expectPausedStepFetchArgs('exec-waiting', 'step-exec-foreach-alpha');
     expect(mockStepExecutionDetailsProps.current.resumeSchema).toMatchObject({ type: 'object' });
     expect(mockStepExecutionDetailsProps.current.resumeMessage).toBe(
       'Approve item {{ foreach.item }}'

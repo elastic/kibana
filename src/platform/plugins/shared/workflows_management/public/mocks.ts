@@ -13,6 +13,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
 import { serverlessMock } from '@kbn/serverless/public/mocks';
@@ -28,6 +29,7 @@ export const createStartServicesMock = () => ({
   serverless: serverlessMock.createStart(),
   storage: new Storage(localStorage),
   dataViews: dataViewPluginMocks.createStartContract(),
+  kql: kqlPluginMock.createStartContract(),
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
   unifiedSearch: unifiedSearchPluginMock.createStartContract(),
   data: dataPluginMock.createStartContract(),

@@ -224,10 +224,7 @@ describe('useExportWithReferences', () => {
       });
 
       expect(result.current.exportModalState).toBeNull();
-      expect(mockExportWorkflows).toHaveBeenCalledWith(
-        [mainWorkflow, referencedWorkflow],
-        mockApi
-      );
+      expect(mockExportWorkflows).toHaveBeenCalledWith([mainWorkflow, referencedWorkflow], mockApi);
       expect(mockReportWorkflowExported).toHaveBeenCalledWith(
         expect.objectContaining({ referenceResolution: 'add_direct' })
       );

@@ -73,7 +73,7 @@ describe('getCompletionItemProvider', () => {
 
     it('should have correct trigger characters', () => {
       const provider = getCompletionItemProvider(getState);
-      expect(provider.triggerCharacters).toEqual(['@', '.', ' ', '|', '{']);
+      expect(provider.triggerCharacters).toEqual(['@', '.', ' ', '"', "'", '(', ':', '|', '{']);
     });
   });
 
@@ -136,18 +136,12 @@ describe('getCompletionItemProvider', () => {
       );
     });
 
-    it('should deduplicate suggestions by label, preferring snippets', async () => {
+    it('should deduplicate duplicate keys across YAML providers, preferring snippets', async () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { getSuggestions } = require('./suggestions/get_suggestions');
-      getSuggestions.mockReturnValueOnce([
-        {
-          label: 'alert',
-          insertText: 'alert snippet',
-          insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-        },
-      ]);
+      getSuggestions.mockReturnValueOnce([]);
 
-      const yamlProvider: monaco.languages.CompletionItemProvider = {
+      const yamlProviderPlain: monaco.languages.CompletionItemProvider = {
         provideCompletionItems: jest.fn().mockResolvedValue({
           suggestions: [
             {
@@ -159,7 +153,21 @@ describe('getCompletionItemProvider', () => {
         }),
       };
 
-      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
+      const yamlProviderSnippet: monaco.languages.CompletionItemProvider = {
+        provideCompletionItems: jest.fn().mockResolvedValue({
+          suggestions: [
+            {
+              label: 'alert',
+              insertText: 'alert snippet',
+              insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            },
+          ],
+          incomplete: false,
+        }),
+      };
+
+      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProviderPlain);
+      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProviderSnippet);
 
       const provider = getCompletionItemProvider(getState);
       const result = await provider.provideCompletionItems!(
@@ -169,7 +177,6 @@ describe('getCompletionItemProvider', () => {
         {} as monaco.CancellationToken
       );
 
-      // Should have only one suggestion (the one with snippet)
       expect(result?.suggestions).toHaveLength(1);
       expect(result?.suggestions?.[0].label).toBe('alert');
       expect(result?.suggestions?.[0].insertTextRules).toBe(
@@ -177,7 +184,7 @@ describe('getCompletionItemProvider', () => {
       );
     });
 
-    it('should keep workflow suggestion when YAML also returns same key with snippet', async () => {
+    it('should keep workflow suggestion details when both sources return snippets for same key', async () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { getSuggestions } = require('./suggestions/get_suggestions');
       getSuggestions.mockReturnValueOnce([
@@ -218,7 +225,7 @@ describe('getCompletionItemProvider', () => {
       expect(result?.suggestions?.[0].insertText).toBe('workflow alert snippet');
     });
 
-    it('should keep workflow suggestion when YAML has snippet for same key', async () => {
+    it('should keep workflow suggestion when YAML has snippet for same key (workflow wins)', async () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { getSuggestions } = require('./suggestions/get_suggestions');
       getSuggestions.mockReturnValueOnce([
