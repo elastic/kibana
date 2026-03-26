@@ -37,8 +37,6 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 
 /**
  * The fetch status of a Unified Histogram request
@@ -66,8 +64,6 @@ export interface UnifiedHistogramServices {
   dataViews: DataViewsPublicPluginStart;
   fieldsMetadata?: FieldsMetadataPublicStart;
   analytics?: AnalyticsServiceStart;
-  share?: SharePluginStart;
-  discoverShared?: DiscoverSharedPublicStart;
 }
 
 /**

@@ -11,6 +11,9 @@ import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
+
 interface ChartSectionActions {
   openInNewTab?: (params: {
     query?: Query | AggregateQuery;
@@ -35,6 +38,11 @@ export interface UnifiedMetricsGridProps extends ChartSectionProps {
    * Optional callback used to push toolbar breakdown selections back to Discover app state.
    */
   onBreakdownFieldChange?: (fieldName?: string) => void;
+  /**
+   * Optional plugin services injected by the host application.
+   * Enables additional features such as Streams app navigation.
+   */
+  externalServices?: ExternalServices;
 }
 
 export interface Dimension {
@@ -110,4 +118,9 @@ export interface Metric {
   readonly units: NullableMetricUnit[];
   readonly metricTypes: MappingTimeSeriesMetricType[];
   readonly fieldTypes: ES_FIELD_TYPES[];
+}
+
+export interface ExternalServices {
+  share?: SharePluginStart;
+  discoverShared?: DiscoverSharedPublicStart;
 }

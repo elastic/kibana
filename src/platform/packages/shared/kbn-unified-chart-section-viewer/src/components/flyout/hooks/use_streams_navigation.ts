@@ -10,7 +10,7 @@
 import { useCallback, useMemo } from 'react';
 import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { isCCSRemoteIndexName } from '@kbn/es-query';
-import type { UnifiedHistogramServices } from '@kbn/unified-histogram/types';
+import type { ExternalServices } from '../../../types';
 
 /**
  * Encapsulates Streams app navigation logic: permission gating, CCS filtering,
@@ -20,15 +20,15 @@ import type { UnifiedHistogramServices } from '@kbn/unified-histogram/types';
  * to the given stream, or `undefined` when the name is invalid (wildcard, CCS)
  * or the user lacks permissions.
  */
-export const useStreamsNavigation = (services: UnifiedHistogramServices) => {
+export const useStreamsNavigation = (externalServices?: ExternalServices) => {
   const canNavigate = useMemo(
-    () => Boolean(services.discoverShared?.features.registry.getById('streams')),
-    [services.discoverShared]
+    () => Boolean(externalServices?.discoverShared?.features.registry.getById('streams')),
+    [externalServices?.discoverShared]
   );
 
   const locator = useMemo(
-    () => services.share?.url.locators.get(STREAMS_APP_LOCATOR_ID),
-    [services.share]
+    () => externalServices?.share?.url.locators.get(STREAMS_APP_LOCATOR_ID),
+    [externalServices?.share]
   );
 
   const getStreamUrl = useCallback(

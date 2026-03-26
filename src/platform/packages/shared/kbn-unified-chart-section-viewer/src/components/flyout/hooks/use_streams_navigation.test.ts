@@ -8,18 +8,18 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type { UnifiedHistogramServices } from '@kbn/unified-histogram/types';
+import type { ExternalServices } from '../../../types';
 import { useStreamsNavigation } from './use_streams_navigation';
 
 const mockGetRedirectUrl = jest.fn((params: { name: string }) => `/app/streams/${params.name}`);
 
-const createMockServices = ({
+const createMockExternalServices = ({
   hasStreamsFeature = false,
   hasLocator = true,
 }: {
   hasStreamsFeature?: boolean;
   hasLocator?: boolean;
-} = {}): UnifiedHistogramServices =>
+} = {}): ExternalServices =>
   ({
     share: hasLocator
       ? {
@@ -33,11 +33,13 @@ const createMockServices = ({
     discoverShared: {
       features: {
         registry: {
-          getById: jest.fn((id: string) => (hasStreamsFeature && id === 'streams' ? {} : undefined)),
+          getById: jest.fn((id: string) =>
+            hasStreamsFeature && id === 'streams' ? {} : undefined
+          ),
         },
       },
     },
-  } as unknown as UnifiedHistogramServices);
+  } as unknown as ExternalServices);
 
 describe('useStreamsNavigation', () => {
   beforeEach(() => {
@@ -47,7 +49,7 @@ describe('useStreamsNavigation', () => {
   describe('canNavigate', () => {
     it('returns true when streams feature is registered', () => {
       const { result } = renderHook(() =>
-        useStreamsNavigation(createMockServices({ hasStreamsFeature: true }))
+        useStreamsNavigation(createMockExternalServices({ hasStreamsFeature: true }))
       );
 
       expect(result.current.canNavigate).toBe(true);
@@ -55,7 +57,7 @@ describe('useStreamsNavigation', () => {
 
     it('returns false when streams feature is not registered', () => {
       const { result } = renderHook(() =>
-        useStreamsNavigation(createMockServices({ hasStreamsFeature: false }))
+        useStreamsNavigation(createMockExternalServices({ hasStreamsFeature: false }))
       );
 
       expect(result.current.canNavigate).toBe(false);
@@ -65,7 +67,7 @@ describe('useStreamsNavigation', () => {
   describe('getStreamUrl', () => {
     it('returns a URL for a valid data stream when user has permissions', () => {
       const { result } = renderHook(() =>
-        useStreamsNavigation(createMockServices({ hasStreamsFeature: true }))
+        useStreamsNavigation(createMockExternalServices({ hasStreamsFeature: true }))
       );
 
       expect(result.current.getStreamUrl('metrics-system.cpu-default')).toBe(
@@ -75,7 +77,7 @@ describe('useStreamsNavigation', () => {
 
     it('returns undefined when user lacks permissions', () => {
       const { result } = renderHook(() =>
-        useStreamsNavigation(createMockServices({ hasStreamsFeature: false }))
+        useStreamsNavigation(createMockExternalServices({ hasStreamsFeature: false }))
       );
 
       expect(result.current.getStreamUrl('metrics-system.cpu-default')).toBeUndefined();
@@ -83,7 +85,9 @@ describe('useStreamsNavigation', () => {
 
     it('returns undefined when locator is unavailable', () => {
       const { result } = renderHook(() =>
-        useStreamsNavigation(createMockServices({ hasStreamsFeature: true, hasLocator: false }))
+        useStreamsNavigation(
+          createMockExternalServices({ hasStreamsFeature: true, hasLocator: false })
+        )
       );
 
       expect(result.current.getStreamUrl('metrics-system.cpu-default')).toBeUndefined();
@@ -91,7 +95,7 @@ describe('useStreamsNavigation', () => {
 
     it('returns undefined for an empty string', () => {
       const { result } = renderHook(() =>
-        useStreamsNavigation(createMockServices({ hasStreamsFeature: true }))
+        useStreamsNavigation(createMockExternalServices({ hasStreamsFeature: true }))
       );
 
       expect(result.current.getStreamUrl('')).toBeUndefined();
@@ -99,7 +103,7 @@ describe('useStreamsNavigation', () => {
 
     it('returns undefined for wildcard patterns', () => {
       const { result } = renderHook(() =>
-        useStreamsNavigation(createMockServices({ hasStreamsFeature: true }))
+        useStreamsNavigation(createMockExternalServices({ hasStreamsFeature: true }))
       );
 
       expect(result.current.getStreamUrl('metrics-*')).toBeUndefined();
@@ -107,7 +111,7 @@ describe('useStreamsNavigation', () => {
 
     it('returns undefined for CCS remote index names', () => {
       const { result } = renderHook(() =>
-        useStreamsNavigation(createMockServices({ hasStreamsFeature: true }))
+        useStreamsNavigation(createMockExternalServices({ hasStreamsFeature: true }))
       );
 
       expect(
@@ -117,7 +121,7 @@ describe('useStreamsNavigation', () => {
 
     it('returns a URL for a local data stream even when CCS names exist elsewhere', () => {
       const { result } = renderHook(() =>
-        useStreamsNavigation(createMockServices({ hasStreamsFeature: true }))
+        useStreamsNavigation(createMockExternalServices({ hasStreamsFeature: true }))
       );
 
       expect(result.current.getStreamUrl('metrics-local-default')).toBe(

@@ -22,8 +22,7 @@ import React, { useCallback, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
-import type { UnifiedHistogramServices } from '@kbn/unified-histogram/types';
-import type { ParsedMetricItem } from '../../types';
+import type { ParsedMetricItem, ExternalServices } from '../../types';
 import { MetricFlyoutBody } from './metrics_flyout_body';
 import { useFlyoutA11y } from './hooks/use_flyout_a11y';
 import { useFieldsMetadataContext } from '../../context/fields_metadata';
@@ -32,14 +31,14 @@ interface MetricInsightsFlyoutProps {
   metricItem: ParsedMetricItem;
   esqlQuery?: string;
   onClose: () => void;
-  services: UnifiedHistogramServices;
+  externalServices?: ExternalServices;
 }
 
 export const MetricInsightsFlyout = ({
   metricItem,
   esqlQuery,
   onClose,
-  services,
+  externalServices,
 }: MetricInsightsFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
   const defaultWidth = euiTheme.base * 34;
@@ -119,7 +118,7 @@ export const MetricInsightsFlyout = ({
           metricItem={metricItem}
           esqlQuery={esqlQuery}
           description={fieldsMetadata[metricItem.metricName]?.description}
-          services={services}
+          externalServices={externalServices}
         />
       </EuiFlyoutBody>
     </EuiFlyout>

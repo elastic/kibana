@@ -31,6 +31,7 @@ export const MetricsExperienceGrid = ({
   onFilter,
   actions,
   services,
+  externalServices,
   fetch$: discoverFetch$,
   fetchParams,
   isComponentVisible,
@@ -159,6 +160,7 @@ export const MetricsExperienceGrid = ({
         metricItems={filteredMetricItems}
         activeDimensions={activeDimensions}
         services={services}
+        externalServices={externalServices}
         discoverFetch$={discoverFetch$}
         fetchParams={fetchParams}
         onBrushEnd={onBrushEnd}

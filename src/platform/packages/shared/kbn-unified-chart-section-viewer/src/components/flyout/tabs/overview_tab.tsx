@@ -24,25 +24,24 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import type { UnifiedHistogramServices } from '@kbn/unified-histogram/types';
 import { getUnitLabel } from '../../../common/utils';
 import { TabTitleAndDescription, MetricTypeBadge, BadgeGroup, DataStreamLink } from '../components';
 import { useStreamsNavigation } from '../hooks/use_streams_navigation';
 import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from '../utils';
-import type { Dimension, ParsedMetricItem } from '../../../types';
+import type { Dimension, ParsedMetricItem, ExternalServices } from '../../../types';
 import { OverviewTabMetadata } from './overview_tab_metadata';
 
 interface OverviewTabProps {
   metricItem: ParsedMetricItem;
   description?: string;
-  services: UnifiedHistogramServices;
+  externalServices?: ExternalServices;
 }
 
 const DEFAULT_PAGINATION_SIZE = 20;
 
-export const OverviewTab = ({ metricItem, description, services }: OverviewTabProps) => {
+export const OverviewTab = ({ metricItem, description, externalServices }: OverviewTabProps) => {
   const { euiTheme } = useEuiTheme();
-  const { getStreamUrl } = useStreamsNavigation(services);
+  const { getStreamUrl } = useStreamsNavigation(externalServices);
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_PAGINATION_SIZE);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);

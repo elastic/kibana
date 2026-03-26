@@ -28,7 +28,7 @@ import { useMetricsExperienceState } from './context/metrics_experience_state_pr
 
 export type MetricsGridProps = Pick<
   UnifiedMetricsGridProps,
-  'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions'
+  'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions' | 'externalServices'
 > & {
   dimensions: Dimension[];
   searchTerm?: string;
@@ -50,6 +50,7 @@ export const MetricsGrid = ({
   dimensions,
   whereStatements,
   services,
+  externalServices,
   columns,
   fetchParams,
   discoverFetch$,
@@ -166,7 +167,7 @@ export const MetricsGrid = ({
           metricItem={expandedMetric.metricItem}
           esqlQuery={expandedMetric.esqlQuery}
           onClose={handleCloseFlyout}
-          services={services}
+          externalServices={externalServices}
         />
       )}
     </FieldsMetadataProvider>
