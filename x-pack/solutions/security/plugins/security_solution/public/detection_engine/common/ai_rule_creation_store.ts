@@ -27,8 +27,8 @@ export class AiRuleCreationService {
     this.formSyncSubject.next(true);
   };
 
-  public reset(): void {
+  public reset = (): void => {
     this.aiRuleSubject.next(null);
     this.formSyncSubject.next(false);
-  }
+  };
 }

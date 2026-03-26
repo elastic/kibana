@@ -34,7 +34,7 @@ Use this skill when the user asks to:
 - Edit an existing rule's fields (e.g., "change the severity to high", "update the query", "set the interval to 10m", "add tags to the rule")
 - Modify rule logic or metadata (e.g., "add MITRE ATT&CK mappings", "change the index patterns", "update the description", "add new terms to the query")
 
-This covers all rule types: ES|QL, EQL, KQL, threshold, machine learning, new terms, indicator match, and saved query rules.
+This covers the rule type ES|QL. Do not create a rule with a rule type other than ES|QL. Only create ES|QL rules.
 
 ## ⚠️ IMPORTANT: "The Rule" Always Means the Rule Attachment
 
