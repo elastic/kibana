@@ -29,7 +29,9 @@ export class StatusUserActionBuilder extends UserActionBuilder {
     parameters.attributes.payload = {
       ...parameters.attributes.payload,
       ...(shouldLogCloseReasonSyncMessage ? { closeReason: args.payload.closeReason } : {}),
-      ...(args.payload.syncedAlerts != null ? { syncedAlerts: args.payload.syncedAlerts } : {}),
+      ...(args.payload.syncedAlertCount != null
+        ? { syncedAlertCount: args.payload.syncedAlertCount }
+        : {}),
     };
     const getMessage = (id?: string) =>
       shouldLogCloseReasonSyncMessage

@@ -127,16 +127,16 @@ export class UserActionPersister {
       return acc;
     }, {});
   }
-  // Returns a new UserActionsDict with syncedAlertsCount added to status actions
+  // Returns a new UserActionsDict with syncedAlertCountCount added to status actions
   public addSyncedAlertsCountToUserActions({
     userActionsDict,
-    syncedAlertsCountByCaseId,
+    syncedAlertCountCountByCaseId,
   }: AddSyncedAlertsCountToUserActionsParams): UserActionsDict {
     return Object.keys(userActionsDict).reduce<UserActionsDict>((acc, caseId) => {
-      const syncedAlertsCount = syncedAlertsCountByCaseId.get(caseId);
+      const syncedAlertCountCount = syncedAlertCountCountByCaseId.get(caseId);
       const userActions = userActionsDict[caseId];
 
-      if (syncedAlertsCount == null) {
+      if (syncedAlertCountCount == null) {
         acc[caseId] = userActions;
         return acc;
       }
@@ -154,7 +154,7 @@ export class UserActionPersister {
               ...userAction.parameters.attributes,
               payload: {
                 ...userAction.parameters.attributes.payload,
-                syncedAlerts: syncedAlertsCount,
+                syncedAlertCount: syncedAlertCountCount,
               },
             },
           },

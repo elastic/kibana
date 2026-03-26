@@ -323,7 +323,7 @@ describe('UserActionPersister', () => {
 
       const updatedUserActionsDict = persister.addSyncedAlertsCountToUserActions({
         userActionsDict,
-        syncedAlertsCountByCaseId: new Map([['1', 3]]),
+        syncedAlertCountCountByCaseId: new Map([['1', 3]]),
       });
 
       const statusAction = updatedUserActionsDict['1'].find(
@@ -332,7 +332,7 @@ describe('UserActionPersister', () => {
 
       expect(statusAction?.parameters.attributes.payload).toEqual({
         status: 'closed',
-        syncedAlerts: 3,
+        syncedAlertCount: 3,
       });
       expect(updatedUserActionsDict['2']).toEqual(userActionsDict['2']);
     });

@@ -54,7 +54,7 @@ export interface BuilderParameters {
         status: CaseStatuses;
         closeReason?: string;
         syncAlerts?: boolean;
-        syncedAlerts?: number;
+        syncedAlertCount?: number;
       };
     };
   };
@@ -368,7 +368,7 @@ export type UserActionsDict = Record<string, UserActionEvent[]>;
 
 export interface AddSyncedAlertsCountToUserActionsParams {
   userActionsDict: UserActionsDict;
-  syncedAlertsCountByCaseId: Map<string, number>;
+  syncedAlertCountCountByCaseId: Map<string, number>;
 }
 
 export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {

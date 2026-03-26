@@ -51,7 +51,7 @@ describe('createStatusUserActionBuilder ', () => {
 
   it('renders close reason details when provided by status user action', () => {
     const userAction = getUserAction('status', UserActionActions.update, {
-      payload: { status: CaseStatuses.closed, closeReason: 'false_positive', syncedAlerts: 2 },
+      payload: { status: CaseStatuses.closed, closeReason: 'false_positive', syncedAlertCount: 2 },
     });
     const builder = createStatusUserActionBuilder({
       ...builderArgs,
@@ -95,7 +95,11 @@ describe('createStatusUserActionBuilder ', () => {
 
   it('renders custom close reason values as-is', () => {
     const userAction = getUserAction('status', UserActionActions.update, {
-      payload: { status: CaseStatuses.closed, closeReason: 'my custom reason', syncedAlerts: 1 },
+      payload: {
+        status: CaseStatuses.closed,
+        closeReason: 'my custom reason',
+        syncedAlertCount: 1,
+      },
     });
     const builder = createStatusUserActionBuilder({
       ...builderArgs,

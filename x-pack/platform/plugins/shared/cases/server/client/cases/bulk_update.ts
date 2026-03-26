@@ -297,16 +297,16 @@ async function updateAlerts({
     return new Map<string, number>();
   }
 
-  const syncedAlertsCountByCaseId = new Map<string, number>();
+  const syncedAlertCountCountByCaseId = new Map<string, number>();
 
   await Promise.all(
     Array.from(alertsToUpdateByCaseId.entries()).map(async ([caseId, alertsToUpdate]) => {
       const updatedAlertsCount = await alertsService.updateAlertsStatus(alertsToUpdate);
-      syncedAlertsCountByCaseId.set(caseId, updatedAlertsCount);
+      syncedAlertCountCountByCaseId.set(caseId, updatedAlertsCount);
     })
   );
 
-  return syncedAlertsCountByCaseId;
+  return syncedAlertCountCountByCaseId;
 }
 
 function partitionPatchRequest(
@@ -562,7 +562,7 @@ export const bulkUpdate = async (
     });
 
     // Update the alert's status to match any case status or sync settings changes
-    const syncedAlertsCountByCaseId = await updateAlerts({
+    const syncedAlertCountCountByCaseId = await updateAlerts({
       casesWithStatusChangedAndSynced,
       casesWithSyncSettingChangedToOn,
       caseService,
@@ -572,7 +572,7 @@ export const bulkUpdate = async (
 
     userActionsDict = userActionService.creator.addSyncedAlertsCountToUserActions({
       userActionsDict,
-      syncedAlertsCountByCaseId,
+      syncedAlertCountCountByCaseId,
     });
 
     const commentsMap = await attachmentService.getter.getCaseAttatchmentStats({
@@ -605,7 +605,7 @@ export const bulkUpdate = async (
             totalEvents,
           }),
           patchCaseStats: {
-            numberOfAlertsWithStatusSynced: syncedAlertsCountByCaseId.get(updatedCase.id) ?? 0,
+            numberOfAlertsWithStatusSynced: syncedAlertCountCountByCaseId.get(updatedCase.id) ?? 0,
           },
         };
 
