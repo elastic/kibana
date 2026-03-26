@@ -43,10 +43,21 @@ export const buildQualityCaseDescription = (
     .filter(Boolean)
     .join('\n\n');
 
-  const totalIncompatibleIndices = categories.reduce(
-    (sum, category) => sum + category.items.filter((item) => item.status === 'incompatible').length,
-    0
-  );
+  // Count unique incompatible indices across all categories
+  const uniqueIncompatibleIndices = new Set<string>();
+  categories.forEach((category) => {
+    category.items
+      .filter((item) => item.status === 'incompatible')
+      .forEach((item) => {
+        uniqueIncompatibleIndices.add(item.indexName);
+      });
+  });
+  const totalIncompatibleIndices = uniqueIncompatibleIndices.size;
+
+  // Count categories with incompatible indices
+  const categoriesWithIssues = categories.filter((category) =>
+    category.items.some((item) => item.status === 'incompatible')
+  ).length;
 
   return i18n.translate('xpack.securitySolution.siemReadiness.quality.caseDescription.template', {
     defaultMessage: `Review the Data Quality Dashboard to identify and resolve ECS compatibility issues:
@@ -55,7 +66,7 @@ export const buildQualityCaseDescription = (
 
 ## Indices with ECS Compatibility Issues
 
-{totalIncompatibleIndices, plural, one {# data source has} other {# data sources have}} ECS compatibility issues that need attention:
+{totalIncompatibleIndices, plural, one {# index} other {# indices}} across {categoriesWithIssues, plural, one {# category} other {# categories}} {totalIncompatibleIndices, plural, one {has} other {have}} ECS compatibility issues that need attention:
 
 {categoryDetails}
 
@@ -70,6 +81,7 @@ Schema errors can stop rules, dashboards, and correlations from working correctl
     values: {
       dataQualityDashboardUrl,
       totalIncompatibleIndices,
+      categoriesWithIssues,
       categoryDetails,
     },
   });

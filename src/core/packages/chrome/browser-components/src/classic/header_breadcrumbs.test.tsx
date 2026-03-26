@@ -1,0 +1,42 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import '@testing-library/jest-dom';
+import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { HeaderBreadcrumbs } from './header_breadcrumbs';
+
+describe('HeaderBreadcrumbs', () => {
+  it('renders breadcrumbs', async () => {
+    const { rerender } = render(<HeaderBreadcrumbs breadcrumbs={[{ text: 'First' }]} />);
+
+    expect(await screen.findByLabelText('Breadcrumbs')).toHaveTextContent('First');
+
+    rerender(<HeaderBreadcrumbs breadcrumbs={[{ text: 'First' }, { text: 'Second' }]} />);
+
+    expect(await screen.findByLabelText('Breadcrumbs')).toHaveTextContent('FirstSecond');
+
+    rerender(<HeaderBreadcrumbs breadcrumbs={[]} />);
+
+    expect(await screen.findByLabelText('Breadcrumbs')).toHaveTextContent('Kibana');
+  });
+
+  it('forces the last breadcrumb inactivity', async () => {
+    render(
+      <HeaderBreadcrumbs
+        breadcrumbs={[{ text: 'First' }, { text: 'Last', href: '/something', onClick: jest.fn() }]}
+      />
+    );
+
+    const lastBreadcrumb = await screen.findByTitle('Last');
+
+    expect(lastBreadcrumb).not.toHaveAttribute('href');
+    expect(lastBreadcrumb.tagName).not.toBe('a');
+  });
+});

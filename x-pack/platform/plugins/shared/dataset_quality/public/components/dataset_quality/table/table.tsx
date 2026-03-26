@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
+import { css } from '@emotion/react';
+import React, { useState } from 'react';
 import {
   EuiBasicTable,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiHorizontalRule,
+  EuiLiveAnnouncer,
   EuiSpacer,
   EuiText,
+  useEuiOverflowScroll,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import {
   fullDatasetNameDescription,
   fullDatasetNameLabel,
@@ -43,8 +48,41 @@ export const Table = () => {
     toggleFullDatasetNames,
   } = useDatasetQualityTable();
 
+  const [liveAnnouncement, setLiveAnnouncement] = useState<string>('');
+  const overflowXScrollStyles = useEuiOverflowScroll('x');
+
+  useUpdateEffect(() => {
+    const fullDatasetNamesState = showFullDatasetNames
+      ? i18n.translate('xpack.datasetQuality.tableUpdated.fullDatasetNamesState.shown', {
+          defaultMessage: 'shown',
+        })
+      : i18n.translate('xpack.datasetQuality.tableUpdated.fullDatasetNamesState.hidden', {
+          defaultMessage: 'hidden',
+        });
+
+    const inactiveDatasetsState = showInactiveDatasets
+      ? i18n.translate('xpack.datasetQuality.tableUpdated.inactiveDatasetsState.shown', {
+          defaultMessage: 'shown',
+        })
+      : i18n.translate('xpack.datasetQuality.tableUpdated.inactiveDatasetsState.hidden', {
+          defaultMessage: 'hidden',
+        });
+
+    setLiveAnnouncement(
+      i18n.translate('xpack.datasetQuality.tableUpdated.combined', {
+        defaultMessage:
+          'Table updated. Full dataset names are {fullDatasetNamesState}. Inactive datasets are {inactiveDatasetsState}.',
+        values: {
+          fullDatasetNamesState,
+          inactiveDatasetsState,
+        },
+      })
+    );
+  }, [showFullDatasetNames, showInactiveDatasets]);
+
   return (
     <>
+      <EuiLiveAnnouncer>{liveAnnouncement}</EuiLiveAnnouncer>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiText size="xs">
           <FormattedMessage
@@ -77,6 +115,12 @@ export const Table = () => {
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" css={{ height: 2 }} />
       <EuiBasicTable
+        css={css`
+          ${overflowXScrollStyles};
+        `}
+        tableCaption={i18n.translate('xpack.datasetQuality.tableCaption', {
+          defaultMessage: 'Dataset quality table',
+        })}
         tableLayout="auto"
         sorting={sort}
         onChange={onTableChange}

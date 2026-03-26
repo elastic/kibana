@@ -7,16 +7,18 @@
 
 import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { AutomaticImportV2PluginRequestHandlerContext } from '../types';
 import { buildAutomaticImportResponse } from './utils';
+import { withAvailability } from './with_availability';
 import { AUTOMATIC_IMPORT_API_PRIVILEGES } from '../feature';
 import {
-  UploadSamplesToDataStreamRequestBody,
   UploadSamplesToDataStreamRequestParams,
   DeleteDataStreamRequestParams,
   ReanalyzeDataStreamRequestParams,
   ReanalyzeDataStreamRequestBody,
+  UploadSamplesToDataStreamRequestBody,
+  UpdateDataStreamPipelineRequestBody,
 } from '../../common';
 
 const isSecurityExceptionError = (err: unknown): boolean => {
@@ -40,6 +42,7 @@ export const registerDataStreamRoutes = (
 ) => {
   uploadSamplesRoute(router, logger);
   deleteDataStreamRoute(router, logger);
+  updateDataStreamPipelineRoute(router, logger);
   getDataStreamResultsRoute(router, logger);
   reanalyzeDataStreamRoute(router, logger);
 };
@@ -68,21 +71,54 @@ const uploadSamplesRoute = (
           },
         },
       },
-      async (context, request, response) => {
+      withAvailability(async (context, request, response) => {
         try {
           const automaticImportv2 = await context.automaticImportv2;
           const automaticImportService = automaticImportv2.automaticImportService;
           const currentUser = await automaticImportv2.getCurrentUser();
           const esClient = automaticImportv2.esClient;
           const { integration_id: integrationId, data_stream_id: dataStreamId } = request.params;
-          const { samples, originalSource } = request.body;
+          const { samples, sourceIndex, originalSource } = request.body;
+
+          let rawSamples: string[];
+          if (sourceIndex) {
+            const searchResult = await esClient.search({
+              index: sourceIndex,
+              size: 100,
+              _source: ['event.original'],
+              query: {
+                function_score: {
+                  query: { exists: { field: 'event.original' } },
+                  functions: [{ random_score: {} }],
+                },
+              },
+            });
+            const hits = searchResult.hits.hits ?? [];
+            rawSamples = hits.flatMap((hit) => {
+              const original = (hit._source as { event?: { original?: string } } | undefined)?.event
+                ?.original;
+              return typeof original === 'string' && original.length > 0 ? [original] : [];
+            });
+
+            if (rawSamples.length === 0) {
+              return response.badRequest({
+                body: 'No documents with event.original found in the specified index.',
+              });
+            }
+          } else if (samples && samples.length > 0) {
+            rawSamples = samples;
+          } else {
+            return response.badRequest({
+              body: 'Either samples or sourceIndex must be provided.',
+            });
+          }
+
           const result = await automaticImportService.addSamplesToDataStream({
             integrationId,
             dataStreamId,
-            rawSamples: samples,
+            rawSamples,
             originalSource,
-            authenticatedUser: currentUser,
-            esClient,
+            createdBy: currentUser.username,
           });
           return response.ok({ body: result });
         } catch (err) {
@@ -99,7 +135,7 @@ const uploadSamplesRoute = (
             body: err,
           });
         }
-      }
+      })
     );
 
 const deleteDataStreamRoute = (
@@ -125,13 +161,12 @@ const deleteDataStreamRoute = (
           },
         },
       },
-      async (context, request, response) => {
+      withAvailability(async (context, request, response) => {
         try {
           const automaticImportv2 = await context.automaticImportv2;
           const automaticImportService = automaticImportv2.automaticImportService;
           const { integration_id: integrationId, data_stream_id: dataStreamId } = request.params;
-          const esClient = automaticImportv2.esClient;
-          await automaticImportService.deleteDataStream(integrationId, dataStreamId, esClient);
+          await automaticImportService.deleteDataStream(integrationId, dataStreamId);
           return response.ok();
         } catch (err) {
           logger.error(`deleteDataStreamRoute: Caught error:`, err);
@@ -141,7 +176,64 @@ const deleteDataStreamRoute = (
             body: err,
           });
         }
-      }
+      })
+    );
+
+const updateDataStreamPipelineRoute = (
+  router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
+  logger: Logger
+) =>
+  router.versioned
+    .patch({
+      access: 'internal',
+      path: '/api/automatic_import_v2/integrations/{integration_id}/data_streams/{data_stream_id}',
+      security: {
+        authz: {
+          requiredPrivileges: [`${AUTOMATIC_IMPORT_API_PRIVILEGES.MANAGE}`],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: buildRouteValidationWithZod(DeleteDataStreamRequestParams),
+            body: buildRouteValidationWithZod(UpdateDataStreamPipelineRequestBody),
+          },
+        },
+      },
+      withAvailability(async (context, request, response) => {
+        try {
+          const automaticImportv2 = await context.automaticImportv2;
+          const automaticImportService = automaticImportv2.automaticImportService;
+          const { integration_id: integrationId, data_stream_id: dataStreamId } = request.params;
+          const { ingest_pipeline: ingestPipeline } = request.body;
+
+          const updatedResults = await automaticImportService.updateDataStreamPipeline({
+            integrationId,
+            dataStreamId,
+            ingestPipeline,
+            internalEsClient: automaticImportv2.internalEsClient,
+            fieldsMetadataClient: automaticImportv2.fieldsMetadataClient,
+          });
+
+          return response.ok({ body: updatedResults });
+        } catch (err) {
+          logger.error(`updateDataStreamPipelineRoute: Caught error: ${err}`);
+          const automaticImportResponse = buildAutomaticImportResponse(response);
+          const message = err instanceof Error ? err.message : String(err);
+          const isBadRequestError =
+            message.includes('Invalid ingest pipeline') ||
+            message.includes('No samples found') ||
+            message.includes('Unexpected token');
+
+          return automaticImportResponse.error({
+            statusCode: isBadRequestError ? 400 : 500,
+            body: message,
+          });
+        }
+      })
     );
 
 const getDataStreamResultsRoute = (
@@ -167,7 +259,7 @@ const getDataStreamResultsRoute = (
           },
         },
       },
-      async (context, request, response) => {
+      withAvailability(async (context, request, response) => {
         try {
           const automaticImportv2 = await context.automaticImportv2;
           const automaticImportService = automaticImportv2.automaticImportService;
@@ -188,7 +280,7 @@ const getDataStreamResultsRoute = (
               : 500;
           return automaticImportResponse.error({ statusCode, body: err });
         }
-      }
+      })
     );
 
 const reanalyzeDataStreamRoute = (
@@ -215,7 +307,7 @@ const reanalyzeDataStreamRoute = (
           },
         },
       },
-      async (context, request, response) => {
+      withAvailability(async (context, request, response) => {
         try {
           const automaticImportv2 = await context.automaticImportv2;
           const automaticImportService = automaticImportv2.automaticImportService;
@@ -241,5 +333,5 @@ const reanalyzeDataStreamRoute = (
             body: err,
           });
         }
-      }
+      })
     );

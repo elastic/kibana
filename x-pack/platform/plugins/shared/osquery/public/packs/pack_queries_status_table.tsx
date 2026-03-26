@@ -33,6 +33,7 @@ import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/co
 import { FilterStateStore } from '@kbn/es-query';
 import { removeMultilines } from '../../common/utils/build_query/remove_multilines';
 import { useKibana } from '../common/lib/kibana';
+import { useSpaceId } from '../common/hooks/use_space_id';
 import { ScheduledQueryErrorsTable } from './scheduled_query_errors_table';
 import { usePackQueryLastResults } from './use_pack_query_last_results';
 import { usePackQueryErrors } from './use_pack_query_errors';
@@ -60,14 +61,14 @@ export enum ViewResultsActionButtonType {
 }
 
 interface ViewResultsInDiscoverActionProps {
-  actionId: string;
+  actionId?: string;
   buttonType: ViewResultsActionButtonType;
   endDate?: string;
   startDate?: string;
   mode?: string;
 }
 
-function getLensAttributes(
+export function getLensAttributes(
   logsDataView: LogsDataView,
   actionId: string
 ): TypedLensByValueInput['attributes'] {
@@ -194,12 +195,12 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
         lensService?.navigateToPrefilledEditor(
           {
             id: '',
-            timeRange: {
+            time_range: {
               from: startDate ?? 'now-1d',
               to: endDate ?? 'now',
               mode: mode ?? (startDate || endDate) ? 'absolute' : 'relative',
             },
-            attributes: getLensAttributes(logsDataView, actionId),
+            attributes: getLensAttributes(logsDataView, actionId ?? ''),
           },
           {
             openInNewTab: true,
@@ -328,7 +329,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
 export const ViewResultsInDiscoverAction = React.memo(ViewResultsInDiscoverActionComponent);
 
 interface ScheduledQueryExpandedContentProps {
-  actionId: string;
+  actionId?: string;
   agentIds?: string[];
   interval: number;
 }
@@ -350,13 +351,13 @@ const ScheduledQueryExpandedContent = React.memo<ScheduledQueryExpandedContentPr
 ScheduledQueryExpandedContent.displayName = 'ScheduledQueryExpandedContent';
 
 interface ScheduledQueryLastResultsProps {
-  actionId: string;
+  actionId?: string;
   queryId?: string;
   interval: number;
 }
 
 interface ScheduledQueryErrorsProps {
-  actionId: string;
+  actionId?: string;
   queryId: string;
   interval: number;
   toggleErrors: (payload: { queryId: string; interval: number }) => void;
@@ -504,19 +505,18 @@ const ErrorsColumnResults: React.FC<ScheduledQueryErrorsProps> = ({
   );
 };
 
-const getPackActionId = (actionId: string, packName: string) => `pack_${packName}_${actionId}`;
+const getPackActionId = (queryId: string, packName: string, spaceId?: string) =>
+  spaceId ? `pack_${spaceId}--${packName}_${queryId}` : undefined;
 
 interface PackViewInActionProps {
-  item: {
-    id: string;
-    interval: number;
-  };
-  packName: string;
+  actionId?: string;
+  interval: number;
 }
 
-const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({ item, packName }) => {
-  const { id, interval } = item;
-  const actionId = getPackActionId(id, packName);
+const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
+  actionId,
+  interval,
+}) => {
   const { data: lastResultsData } = usePackQueryLastResults({
     actionId,
     interval,
@@ -542,9 +542,7 @@ const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({ it
 
 const PackViewInDiscoverAction = React.memo(PackViewInDiscoverActionComponent);
 
-const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({ item, packName }) => {
-  const { id, interval } = item;
-  const actionId = getPackActionId(id, packName);
+const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({ actionId, interval }) => {
   const { data: lastResultsData } = usePackQueryLastResults({
     actionId,
     interval,
@@ -581,9 +579,15 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   data,
   packName,
 }) => {
+  const spaceId = useSpaceId();
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, ReturnType<typeof ScheduledQueryExpandedContent>>
   >({});
+
+  const actionIdForQuery = useCallback(
+    (queryId: string) => getPackActionId(queryId, packName, spaceId),
+    [packName, spaceId]
+  );
 
   const renderQueryColumn = useCallback((query: string, item: PackQueryFormData) => {
     const singleLine = removeMultilines(query);
@@ -606,7 +610,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
       } else {
         itemIdToExpandedRowMapValues[queryId] = (
           <ScheduledQueryExpandedContent
-            actionId={getPackActionId(queryId, packName)}
+            actionId={actionIdForQuery(queryId)}
             agentIds={agentIds}
             interval={interval}
           />
@@ -615,51 +619,52 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
       setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
     },
-    [agentIds, itemIdToExpandedRowMap, packName]
+    [agentIds, itemIdToExpandedRowMap, actionIdForQuery]
   );
 
   const renderLastResultsColumn = useCallback(
     (item: PackQueryFormData) => (
-      <ScheduledQueryLastResults
-        actionId={getPackActionId(item.id, packName)}
-        interval={item.interval}
-      />
+      <ScheduledQueryLastResults actionId={actionIdForQuery(item.id)} interval={item.interval} />
     ),
-    [packName]
+    [actionIdForQuery]
   );
   const renderDocsColumn = useCallback(
     (item: PackQueryFormData) => (
-      <DocsColumnResults actionId={getPackActionId(item.id, packName)} interval={item.interval} />
+      <DocsColumnResults actionId={actionIdForQuery(item.id)} interval={item.interval} />
     ),
-    [packName]
+    [actionIdForQuery]
   );
   const renderAgentsColumn = useCallback(
     (item: PackQueryFormData) => (
-      <AgentsColumnResults actionId={getPackActionId(item.id, packName)} interval={item.interval} />
+      <AgentsColumnResults actionId={actionIdForQuery(item.id)} interval={item.interval} />
     ),
-    [packName]
+    [actionIdForQuery]
   );
   const renderErrorsColumn = useCallback(
     (item: PackQueryFormData) => (
       <ErrorsColumnResults
         queryId={item.id}
         interval={item.interval}
-        actionId={getPackActionId(item.id, packName)}
+        actionId={actionIdForQuery(item.id)}
         toggleErrors={toggleErrors}
         expanded={!!itemIdToExpandedRowMap[item.id]}
       />
     ),
-    [itemIdToExpandedRowMap, packName, toggleErrors]
+    [itemIdToExpandedRowMap, actionIdForQuery, toggleErrors]
   );
 
   const renderDiscoverResultsAction = useCallback(
-    (item: PackQueryFormData) => <PackViewInDiscoverAction item={item} packName={packName} />,
-    [packName]
+    (item: PackQueryFormData) => (
+      <PackViewInDiscoverAction actionId={actionIdForQuery(item.id)} interval={item.interval} />
+    ),
+    [actionIdForQuery]
   );
 
   const renderLensResultsAction = useCallback(
-    (item: PackQueryFormData) => <PackViewInLensAction item={item} packName={packName} />,
-    [packName]
+    (item: PackQueryFormData) => (
+      <PackViewInLensAction actionId={actionIdForQuery(item.id)} interval={item.interval} />
+    ),
+    [actionIdForQuery]
   );
 
   const getItemId = useCallback((item: PackQueryFormData) => item.id ?? '', []);

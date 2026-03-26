@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import type { GrokCollection } from '@kbn/grok-ui';
 import type { UseFormSetValue } from 'react-hook-form';
 import { useWatch } from 'react-hook-form';
-import type { GrokProcessorResult } from '@kbn/grok-heuristics';
+import type { GrokProcessor } from '@kbn/streamlang';
 import type { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { useAbortController } from '@kbn/react-hooks';
 import { isNoSuggestionsError } from '../utils/no_suggestions_error';
@@ -29,7 +29,7 @@ import { useStreamDetail } from '../../../../../../../hooks/use_stream_detail';
 import { selectPreviewRecords } from '../../../../state_management/simulation_state_machine/selectors';
 import { useSimulatorSelector } from '../../../../state_management/stream_enrichment_state_machine';
 import type { GrokFormState, ProcessorFormState } from '../../../../types';
-import { AdditionalChargesCallout } from './additional_charges_callout';
+import { AdditionalChargesCallout } from '../../../../../shared/additional_charges_callout';
 import { GenerateSuggestionButton } from '../../../../../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
 import { useGrokPatternSuggestion } from './use_grok_pattern_suggestion';
 import type { AIFeatures } from '../../../../../../../hooks/use_ai_features';
@@ -221,7 +221,7 @@ export const GrokPatternAISuggestions = ({
 };
 
 export interface GrokPatternSuggestionProps {
-  grokProcessor: GrokProcessorResult;
+  grokProcessor: GrokProcessor;
   simulationResult: APIReturnType<'POST /internal/streams/{name}/processing/_simulate'>;
   onAccept(): void;
   onDismiss(): void;

@@ -14,8 +14,8 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod';
-import { isNonEmptyString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { isNonEmptyString } from '@kbn/zod-helpers/v4';
 
 import { NonEmptyString } from '@kbn/openapi-common/schemas/primitives.gen';
 import { ExceptionListItemEntryArray } from './exception_list_item_entry.gen';

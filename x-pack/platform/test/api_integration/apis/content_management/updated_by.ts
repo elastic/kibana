@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
             title: 'Sample dashboard',
           });
 
-        expect(createResponse.status).to.be(200);
+        expect(createResponse.status).to.be(201);
         expect(createResponse.body.data).to.be.ok();
         expect(createResponse.body.meta).to.not.have.key('updated_by');
 
@@ -69,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('updated_by is with profile_id', async () => {
-        expect(createResponse.status).to.be(200);
+        expect(createResponse.status).to.be(201);
         expect(createResponse.body.data).to.be.ok();
         expect(createResponse.body.meta).to.have.key('updated_by');
         expect(createResponse.body.meta.updated_by).to.be(interactiveUser.uid);

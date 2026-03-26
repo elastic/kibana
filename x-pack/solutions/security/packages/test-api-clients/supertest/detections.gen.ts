@@ -50,6 +50,10 @@ import type {
 import type { ReadAlertsMigrationStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/read_signals_migration_status/read_signals_migration_status.gen';
 import type { ReadRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/read_rule/read_rule_route.gen';
 import type {
+  ReadRuleExecutionResultsRequestParamsInput,
+  ReadRuleExecutionResultsRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/read_rule_execution_results_route.gen';
+import type {
   RulePreviewRequestQueryInput,
   RulePreviewRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_preview/rule_preview.gen';
@@ -98,6 +102,12 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  /**
+      * Creates an index for Elastic Security alerts. Calling this API is not
+required for the detection engine to function properly. You can create
+rules and alerts without calling this API.
+
+      */
   createAlertsIndex(kibanaSpace: string = 'default') {
     return supertest
       .post(getRouteUrlForSpace('/api/detection_engine/index', kibanaSpace))
@@ -437,6 +447,22 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
+  readRuleExecutionResults(props: ReadRuleExecutionResultsProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams(
+            '/internal/detection_engine/rules/{ruleId}/execution/results',
+            props.params
+          ),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
   /**
    * List all unique tags from all detection rules.
    */
@@ -604,11 +630,11 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
 
   return {
     ...securitySolutionApiServiceFactory(supertestService),
-    withUser: (user: { username: string; password: string }) => {
+    withUser: (user: { username: string; password?: string }) => {
       const kbnUrl = formatUrl({ ...config.get('servers.kibana'), auth: false });
 
       return securitySolutionApiServiceFactory(
-        supertest_.agent(kbnUrl).auth(user.username, user.password)
+        supertest_.agent(kbnUrl).auth(user.username, user.password ?? 'changeme')
       );
     },
   };
@@ -659,6 +685,10 @@ export interface ReadAlertsMigrationStatusProps {
 }
 export interface ReadRuleProps {
   query: ReadRuleRequestQueryInput;
+}
+export interface ReadRuleExecutionResultsProps {
+  params: ReadRuleExecutionResultsRequestParamsInput;
+  body: ReadRuleExecutionResultsRequestBodyInput;
 }
 export interface RulePreviewProps {
   query: RulePreviewRequestQueryInput;

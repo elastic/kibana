@@ -8,6 +8,8 @@
  */
 
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
+import type { ColorByValueType } from '../color';
+import type { GaugeState } from './gauge';
 import { gaugeStateSchema } from './gauge';
 
 describe('Gauge Schema', () => {
@@ -17,12 +19,14 @@ describe('Gauge Schema', () => {
       type: 'dataView' as const,
       id: 'test-data-view',
     },
-  };
+  } satisfies Partial<GaugeState>;
 
   const defaultValues = {
     sampling: 1,
     ignore_global_filters: false,
-  };
+  } satisfies Partial<GaugeState>;
+
+  type GaugeInput = Omit<GaugeState, keyof typeof defaultValues>;
 
   it('validates minimal configuration', () => {
     const input = {
@@ -32,33 +36,32 @@ describe('Gauge Schema', () => {
         field: 'test_field',
         empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
       },
-    };
+    } satisfies GaugeInput;
 
     const validated = gaugeStateSchema.validate(input);
     expect(validated).toEqual({ ...defaultValues, ...input });
   });
 
   it('validates full configuration with bullet shape', () => {
-    const colorByValueConfig = [
+    const colorByValueConfig: ColorByValueType[] = [
       {
         type: 'dynamic',
         range: 'absolute',
         steps: [
-          { type: 'from', from: 0, color: '#blue' },
-          { type: 'to', to: 100, color: '#red' },
+          { lt: 0, color: 'blue' },
+          { gte: 100, color: 'red' },
         ],
       },
       {
         type: 'dynamic',
         range: 'percentage',
-        min: 0,
-        max: 100,
         steps: [
-          { type: 'from', from: 0, color: '#blue' },
-          { type: 'to', to: 100, color: '#red' },
+          { lt: 0, color: 'blue' },
+          { gte: 100, color: 'red' },
         ],
       },
     ];
+
     for (const color of colorByValueConfig) {
       const input = {
         ...baseGaugeConfig,
@@ -67,10 +70,10 @@ describe('Gauge Schema', () => {
           operation: 'sum' as const,
           field: 'performance_score',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-          title: 'Score',
+          title: { text: 'Score' },
           sub_title: 'with 80% target',
           color,
-          ticks: 'bands' as const,
+          ticks: { mode: 'bands' as const },
           min: {
             operation: 'static_value' as const,
             value: 0,
@@ -88,7 +91,7 @@ describe('Gauge Schema', () => {
           type: 'bullet' as const,
           direction: 'vertical' as const,
         },
-      };
+      } satisfies GaugeInput;
 
       const validated = gaugeStateSchema.validate(input);
       expect(validated).toEqual({ ...defaultValues, ...input });
@@ -101,12 +104,12 @@ describe('Gauge Schema', () => {
       metric: {
         operation: 'average' as const,
         field: 'cpu_usage',
-        ticks: 'auto' as const,
+        ticks: { mode: 'auto' as const },
       },
       shape: {
         type: 'circle' as const,
       },
-    };
+    } satisfies GaugeInput;
 
     const validated = gaugeStateSchema.validate(input);
     expect(validated).toEqual({ ...defaultValues, ...input });
@@ -122,15 +125,15 @@ describe('Gauge Schema', () => {
       },
       shape: {
         type: 'bullet' as const,
+        direction: 'horizontal' as const,
       },
-    };
+    } satisfies GaugeInput;
 
     const validated = gaugeStateSchema.validate(input);
     expect(validated.shape).toEqual({
       type: 'bullet',
       direction: 'horizontal',
     });
-    // ticks default is only applied when explicitly set, not when omitted
     expect(validated.metric.ticks).toBeUndefined();
   });
 
@@ -146,7 +149,7 @@ describe('Gauge Schema', () => {
         column: 'score' as const,
         sub_title: 'Performance',
       },
-    };
+    } satisfies GaugeInput;
 
     const validated = gaugeStateSchema.validate(input);
     expect(validated).toEqual({ ...defaultValues, ...input });
@@ -163,17 +166,17 @@ describe('Gauge Schema', () => {
       metric: {
         operation: 'value' as const,
         column: 'score',
-        title: 'Score',
+        title: { text: 'Score' },
         sub_title: 'with 80% target',
         color: {
           type: 'dynamic',
           range: 'absolute',
           steps: [
-            { type: 'from', from: 0, color: '#blue' },
-            { type: 'to', to: 100, color: '#red' },
+            { lt: 0, color: 'blue' },
+            { gte: 100, color: 'red' },
           ],
         },
-        ticks: 'bands' as const,
+        ticks: { mode: 'bands' as const },
         min: {
           operation: 'value' as const,
           column: 'min',
@@ -191,7 +194,7 @@ describe('Gauge Schema', () => {
         type: 'bullet' as const,
         direction: 'vertical' as const,
       },
-    };
+    } satisfies GaugeInput;
 
     const validated = gaugeStateSchema.validate(input);
     expect(validated).toEqual({ ...defaultValues, ...input });
@@ -209,6 +212,7 @@ describe('Gauge Schema', () => {
         operation: 'value' as const,
         column: 'score',
         min: {
+          // @ts-expect-error
           operation: 'static' as const,
           value: 5,
         },
@@ -217,7 +221,7 @@ describe('Gauge Schema', () => {
         type: 'bullet' as const,
         direction: 'vertical' as const,
       },
-    };
+    } satisfies GaugeInput;
 
     expect(() => gaugeStateSchema.validate(input)).toThrow();
   });
@@ -235,14 +239,16 @@ describe('Gauge Schema', () => {
   it('throws on invalid shape type', () => {
     const input = {
       ...baseGaugeConfig,
+      // @ts-expect-error
       metric: {
         operation: 'count' as const,
         field: 'test_field',
       },
       shape: {
-        type: 'invalid' as const,
+        // @ts-expect-error
+        type: 'invalid',
       },
-    };
+    } satisfies GaugeInput;
 
     expect(() => gaugeStateSchema.validate(input)).toThrow();
   });
@@ -253,9 +259,12 @@ describe('Gauge Schema', () => {
       metric: {
         operation: 'count' as const,
         field: 'test_field',
-        ticks: 'invalid' as const,
+        ticks: {
+          // @ts-expect-error
+          style: 'invalid',
+        },
       },
-    };
+    } satisfies GaugeInput;
 
     expect(() => gaugeStateSchema.validate(input)).toThrow();
   });

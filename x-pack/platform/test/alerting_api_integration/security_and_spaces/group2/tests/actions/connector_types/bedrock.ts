@@ -140,7 +140,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: Field \"apiUrl\": Required`,
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at apiUrl`,
             });
           });
       });
@@ -183,7 +183,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type secrets: 2 errors:\n [1]: Field \"accessKey\": Required;\n [2]: Field \"secret\": Required`,
+              message: `error validating connector type secrets: ✖ Invalid input: expected string, received undefined\n  → at accessKey\n✖ Invalid input: expected string, received undefined\n  → at secret`,
             });
           });
       });
@@ -204,7 +204,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type secrets: Field \"accessKey\": Required`,
+              message: `error validating connector type secrets: ✖ Invalid input: expected string, received undefined\n  → at accessKey`,
             });
           });
       });
@@ -225,7 +225,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type secrets: Field \"secret\": Required`,
+              message: `error validating connector type secrets: ✖ Invalid input: expected string, received undefined\n  → at secret`,
             });
           });
       });
@@ -261,7 +261,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
           expect(body).to.eql({
             status: 'error',
             connector_id: bedrockActionId,
-            message: `error validating action params: Field \"subAction\": Required`,
+            message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subAction`,
             retry: false,
             errorSource: TaskErrorSource.USER,
           });
@@ -623,7 +623,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             status: 'error',
             connector_id: bedrockActionId,
             errorSource: TaskErrorSource.USER,
-            message: `error validating action params: Field \"subAction\": Required`,
+            message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subAction`,
             retry: false,
           });
         });

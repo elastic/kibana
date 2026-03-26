@@ -68,6 +68,8 @@ export class WorkflowGraph {
       '', // Try the exact step ID first
       'enterForeach_',
       'enterCondition_',
+      'enterWhile_',
+      'enterSwitch_',
     ];
 
     for (const prefix of nodePrefixes) {

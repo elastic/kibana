@@ -22,7 +22,10 @@ import {
   FEATURE_TAGS,
   FEATURE_META,
   FEATURE_EXPIRES_AT,
+  FEATURE_EXCLUDED_AT,
   FEATURE_ID,
+  FEATURE_FILTER,
+  FEATURE_EVIDENCE_DOC_IDS,
 } from './fields';
 
 export const featureStorageSettings = {
@@ -39,11 +42,14 @@ export const featureStorageSettings = {
       [FEATURE_PROPERTIES]: types.object({ enabled: false }),
       [FEATURE_CONFIDENCE]: types.long(),
       [FEATURE_EVIDENCE]: types.keyword(),
+      [FEATURE_EVIDENCE_DOC_IDS]: types.keyword(),
       [FEATURE_STATUS]: types.keyword(),
       [FEATURE_LAST_SEEN]: types.date(),
       [FEATURE_TAGS]: types.keyword(),
       [FEATURE_META]: types.object({ enabled: false }),
       [FEATURE_EXPIRES_AT]: types.date(),
+      [FEATURE_EXCLUDED_AT]: types.date(),
+      [FEATURE_FILTER]: types.object({ enabled: false }),
     },
   },
 } satisfies IndexStorageSettings;

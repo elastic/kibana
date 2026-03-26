@@ -10,6 +10,7 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 
 export const NO_INDEX_PATTERNS: DataView[] = [];
 export const ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY = 'searchBarParams';
+export const RULE_DETAILS_ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY = 'ruleDetailsSearchBarParams';
 export const NON_SIEM_CONSUMERS = Object.values(AlertConsumers).filter(
   (fid) => fid !== AlertConsumers.SIEM
 );
