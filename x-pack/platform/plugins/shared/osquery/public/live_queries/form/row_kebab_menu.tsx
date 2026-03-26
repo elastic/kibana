@@ -9,7 +9,8 @@ import React, { useCallback, useState, useMemo } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AddToCaseWrapper } from '../../cases/add_to_cases';
+import { AddToCaseContextProvider } from '../../cases/add_to_cases';
+import { AddToCaseButton } from '../../cases/add_to_cases_button';
 import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
 import type { AddToTimelineHandler } from '../../types';
 
@@ -23,7 +24,7 @@ interface RowKebabMenuProps {
   onViewQuery: () => void;
 }
 
-export const RowKebabMenu: React.FC<RowKebabMenuProps> = React.memo(
+const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
   ({ row, actionId, agentIds, addToTimeline, scheduleId, executionCount, onViewQuery }) => {
     const [isOpen, setIsOpen] = useState(false);
     const close = useCallback(() => setIsOpen(false), []);
@@ -59,7 +60,7 @@ export const RowKebabMenu: React.FC<RowKebabMenuProps> = React.memo(
           : []),
         ...(actionId
           ? [
-              <AddToCaseWrapper
+              <AddToCaseButton
                 key="case"
                 actionId={actionId}
                 agentIds={agentIds}
@@ -110,5 +111,23 @@ export const RowKebabMenu: React.FC<RowKebabMenuProps> = React.memo(
     );
   }
 );
+
+RowKebabMenuContent.displayName = 'RowKebabMenuContent';
+
+/**
+ * Wraps CasesContext above the popover so the case selector modal
+ * survives when the popover closes and unmounts its content.
+ */
+export const RowKebabMenu: React.FC<RowKebabMenuProps> = React.memo((props) => {
+  if (!props.actionId && !props.scheduleId) {
+    return <RowKebabMenuContent {...props} />;
+  }
+
+  return (
+    <AddToCaseContextProvider>
+      <RowKebabMenuContent {...props} />
+    </AddToCaseContextProvider>
+  );
+});
 
 RowKebabMenu.displayName = 'RowKebabMenu';
