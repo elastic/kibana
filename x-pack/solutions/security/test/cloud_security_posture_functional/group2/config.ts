@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
 import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const baseConfig = await readConfigFile(require.resolve('../group1/config.ts'));
+  const baseConfig = await readConfigFile(require.resolve('../config.base.ts'));
+
   return {
     ...baseConfig.getAll(),
-    testFiles: [resolve(__dirname, './pages')],
+    testFiles: [require.resolve('.')],
     junit: {
-      reportName: 'X-Pack Cloud Security Posture Functional Tests - Group 2',
+      reportName: 'X-Pack Cloud Security Posture Functional Tests - Group 2 (Findings)',
     },
   };
 }

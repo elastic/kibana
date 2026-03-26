@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*"],
+  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*","test/scout/**/*"],
   "kbn_references": [
     "@kbn/css-utils",
     "@kbn/core",
@@ -20,6 +20,7 @@
     "@kbn/core-http-server",
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-saved-objects-server",
+    "@kbn/scout",
   ],
   "exclude": ["target/**/*"]
 }
