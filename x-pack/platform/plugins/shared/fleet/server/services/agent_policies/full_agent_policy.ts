@@ -170,7 +170,8 @@ export async function getFullAgentPolicy(
       agentInputs,
       dataOutput,
       packageInfoCache,
-      dataOutputProxy
+      dataOutputProxy,
+      logger
     );
   }
 

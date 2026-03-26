@@ -1386,6 +1386,54 @@ describe('generateOtelcolConfig', () => {
 
       expect(result.extensions?.['beatsauth/default']).toEqual({});
     });
+
+    it('should always include beatsauth in extensions and exporter auth even when config is empty', () => {
+      // Verifies comment D: an empty beatsauth is a valid no-op that keeps the
+      // Beats-compatible transport layer active. The extension and auth.authenticator
+      // reference must always be present, regardless of SSL/proxy configuration.
+      const result = generateOtelcolConfig(inputs, defaultOutput);
+
+      expect(result.extensions).toHaveProperty('beatsauth/default');
+      expect(result.exporters?.['elasticsearch/default']).toEqual(
+        expect.objectContaining({
+          auth: { authenticator: 'beatsauth/default' },
+        })
+      );
+      expect(result.service?.extensions).toContain('beatsauth/default');
+    });
+
+    it('should use secrets.ssl.key when present, ignoring plain ssl.key', () => {
+      const outputWithSecretKey: Output = {
+        ...defaultOutput,
+        ssl: {
+          key: 'plain-key-should-be-ignored',
+        },
+        secrets: {
+          ssl: { key: { id: 'secret-id-abc123' } },
+        },
+      };
+
+      const result = generateOtelcolConfig(inputs, outputWithSecretKey);
+
+      expect(result.extensions?.['beatsauth/default']).toEqual({
+        secrets: { ssl: { key: { id: 'secret-id-abc123' } } },
+      });
+    });
+
+    it('should include secrets.ssl.key in beatsauth when only secret key is set', () => {
+      const outputWithSecretOnly: Output = {
+        ...defaultOutput,
+        secrets: {
+          ssl: { key: { id: 'my-secret-id' } },
+        },
+      };
+
+      const result = generateOtelcolConfig(inputs, outputWithSecretOnly);
+
+      expect(result.extensions?.['beatsauth/default']).toEqual({
+        secrets: { ssl: { key: { id: 'my-secret-id' } } },
+      });
+    });
   });
 
   describe('otel_exporter_config_yaml merging', () => {

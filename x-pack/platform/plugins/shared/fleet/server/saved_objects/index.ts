@@ -803,6 +803,16 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '9': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                otel_exporter_config_yaml: { type: 'text' },
+              },
+            },
+          ],
+        },
       },
       migrations: {
         '7.13.0': migrateOutputToV7130,

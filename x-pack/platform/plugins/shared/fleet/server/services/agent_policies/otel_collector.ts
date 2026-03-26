@@ -7,6 +7,8 @@
 
 import { load } from 'js-yaml';
 
+import type { Logger } from '@kbn/logging';
+
 import type { FleetProxy, Output, TemplateAgentPolicyInput } from '../../types';
 import type {
   FullAgentPolicyInput,
@@ -32,7 +34,8 @@ export function generateOtelcolConfig(
   inputs: FullAgentPolicyInput[] | TemplateAgentPolicyInput[],
   dataOutput?: Output,
   packageInfoCache?: Map<string, PackageInfo>,
-  proxy?: FleetProxy
+  proxy?: FleetProxy,
+  logger?: Logger
 ): OTelCollectorConfig {
   const otelConfigs: OTelCollectorConfig[] = inputs
     .filter((input) => input.type === OTEL_COLLECTOR_INPUT_TYPE)
@@ -133,7 +136,7 @@ export function generateOtelcolConfig(
   }
 
   const config = mergeOtelcolConfigs(otelConfigs);
-  return attachOtelcolExporter(config, dataOutput, proxy);
+  return attachOtelcolExporter(config, dataOutput, proxy, logger);
 }
 
 function generateOtelTypeTransforms(
@@ -386,9 +389,15 @@ function buildBeatsauthConfig(output: Output, proxy?: FleetProxy): Record<string
   if (output.ssl?.certificate_authorities?.length)
     ssl.certificate_authorities = output.ssl.certificate_authorities;
   if (output.ssl?.certificate) ssl.certificate = output.ssl.certificate;
-  if (output.ssl?.key) ssl.key = output.ssl.key;
+  // Prefer the secrets-stored key over the plain-text key, mirroring full_agent_policy.ts behaviour
+  if (output.ssl?.key && !output.secrets?.ssl?.key) ssl.key = output.ssl.key;
   if (output.ssl?.verification_mode) ssl.verification_mode = output.ssl.verification_mode;
   if (Object.keys(ssl).length > 0) config.ssl = ssl;
+
+  // If the SSL key is stored as a Kibana secret, include it under the secrets namespace
+  if (output.secrets?.ssl?.key) {
+    config.secrets = { ssl: { key: output.secrets.ssl.key } };
+  }
 
   if (proxy) {
     config.proxy_url = proxy.url;
@@ -401,13 +410,14 @@ function buildBeatsauthConfig(output: Output, proxy?: FleetProxy): Record<string
 function attachOtelcolExporter(
   config: OTelCollectorConfig,
   dataOutput?: Output,
-  proxy?: FleetProxy
+  proxy?: FleetProxy,
+  logger?: Logger
 ): OTelCollectorConfig {
   if (!dataOutput) {
     return config;
   }
 
-  const { extensions, exporters } = generateOtelcolExporter(dataOutput, proxy);
+  const { extensions, exporters } = generateOtelcolExporter(dataOutput, proxy, logger);
   config.connectors = {
     ...config.connectors,
     forward: {},
@@ -450,24 +460,34 @@ function attachOtelcolExporter(
   return config;
 }
 
-function parseOtelExporterConfigYaml(yaml: string | null | undefined): Record<string, unknown> {
+function parseOtelExporterConfigYaml(
+  yaml: string | null | undefined,
+  logger?: Logger
+): Record<string, unknown> {
   if (!yaml) return {};
   try {
     const parsed = load(yaml);
     if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
       return parsed as Record<string, unknown>;
     }
+    logger?.warn(
+      'otel_exporter_config_yaml did not parse to an object, skipping extra exporter config'
+    );
     return {};
-  } catch {
+  } catch (e) {
     // Malformed YAML — skip extra config rather than crashing policy generation.
     // The UI validates YAML before saving; this path is only reachable via direct API writes.
+    logger?.warn(
+      `Failed to parse otel_exporter_config_yaml, skipping extra exporter config: ${e.message}`
+    );
     return {};
   }
 }
 
 function generateOtelcolExporter(
   dataOutput: Output,
-  proxy?: FleetProxy
+  proxy?: FleetProxy,
+  logger?: Logger
 ): {
   extensions: Record<OTelCollectorComponentID, any>;
   exporters: Record<OTelCollectorComponentID, any>;
@@ -476,7 +496,13 @@ function generateOtelcolExporter(
     case outputType.Elasticsearch: {
       const outputID = getOutputIdForAgentPolicy(dataOutput);
       const beatsauthID = `beatsauth/${outputID}`;
-      const extraExporterConfig = parseOtelExporterConfigYaml(dataOutput.otel_exporter_config_yaml);
+      const extraExporterConfig = parseOtelExporterConfigYaml(
+        dataOutput.otel_exporter_config_yaml,
+        logger
+      );
+      // beatsauth is always included, even when empty (no SSL/proxy configured).
+      // An empty beatsauth extension is a valid no-op that ensures the Beats-compatible
+      // HTTP transport layer is always active, consistent with the issue spec and Hybrid Agent behaviour.
       return {
         extensions: {
           [beatsauthID]: buildBeatsauthConfig(dataOutput, proxy),
