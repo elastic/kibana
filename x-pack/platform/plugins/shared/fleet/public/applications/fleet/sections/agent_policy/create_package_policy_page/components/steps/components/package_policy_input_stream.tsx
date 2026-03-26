@@ -33,6 +33,7 @@ import { useQuery } from '@kbn/react-query';
 import {
   DATASET_VAR_NAME,
   DATA_STREAM_TYPE_VAR_NAME,
+  USE_APM_VAR_NAME,
 } from '../../../../../../../../../common/constants';
 
 import { sendGetDataStreams, useStartServices } from '../../../../../../../../hooks';
@@ -43,6 +44,8 @@ import {
   getPolicyTemplateInputDefinition,
   registryInputAllowsDynamicSignalTypes,
   isInputOnlyPolicyTemplate,
+  DATA_STREAM_USE_APM_VAR,
+  shouldIncludeUseAPMVar,
 } from '../../../../../../../../../common/services';
 
 import type {
@@ -206,32 +209,56 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       ? streamVarGroupSelections
       : varGroupSelections;
 
-    // Split vars into required and advanced, filtering by var_group visibility
+    // Whether use_apm is already present in the package schema. If so, it will be
+    // rendered through the normal var flow and we don't need to inject it.
+    const isUseAPMVarInSchema = useMemo(
+      () => (packageInputStream.vars ?? []).some((v) => v.name === USE_APM_VAR_NAME),
+      [packageInputStream]
+    );
+
+    // Split vars into required and advanced, filtering by var_group visibility.
     const [requiredVars, advancedVars] = useMemo(() => {
       const _requiredVars: RegistryVarsEntry[] = [];
       const _advancedVars: RegistryVarsEntry[] = [];
 
-      if (packageInputStream.vars && packageInputStream.vars.length) {
-        packageInputStream.vars.forEach((varDef) => {
-          // Check if var should be shown based on var_group selections
-          // Use effective var_groups (stream-level if present, otherwise package-level)
-          if (
-            effectiveVarGroups &&
-            effectiveVarGroups.length > 0 &&
-            !shouldShowVar(varDef.name, effectiveVarGroups, effectiveVarGroupSelections)
-          ) {
-            return; // Skip this var, it's hidden by var_group selection
-          }
+      const schemaVars = packageInputStream.vars ?? [];
+      const varsToProcess =
+        !isUseAPMVarInSchema &&
+        shouldIncludeUseAPMVar(
+          packageInputStream.input,
+          customDataStreamTypeVarValue,
+          dynamicSignalTypes
+        )
+          ? [...schemaVars, DATA_STREAM_USE_APM_VAR]
+          : schemaVars;
 
-          if (isAdvancedVar(varDef, effectiveVarGroups, effectiveVarGroupSelections)) {
-            _advancedVars.push(varDef);
-          } else {
-            _requiredVars.push(varDef);
-          }
-        });
-      }
+      varsToProcess.forEach((varDef) => {
+        // Check if var should be shown based on var_group selections
+        // Use effective var_groups (stream-level if present, otherwise package-level)
+        if (
+          effectiveVarGroups &&
+          effectiveVarGroups.length > 0 &&
+          !shouldShowVar(varDef.name, effectiveVarGroups, effectiveVarGroupSelections)
+        ) {
+          return; // Skip this var, it's hidden by var_group selection
+        }
+
+        if (isAdvancedVar(varDef, effectiveVarGroups, effectiveVarGroupSelections)) {
+          _advancedVars.push(varDef);
+        } else {
+          _requiredVars.push(varDef);
+        }
+      });
+
       return [_requiredVars, _advancedVars];
-    }, [packageInputStream, effectiveVarGroups, effectiveVarGroupSelections]);
+    }, [
+      packageInputStream,
+      effectiveVarGroups,
+      effectiveVarGroupSelections,
+      customDataStreamTypeVarValue,
+      dynamicSignalTypes,
+      isUseAPMVarInSchema,
+    ]);
 
     // Errors state
     const hasErrors = forceShowErrors && validationHasErrors(inputStreamValidationResults);
@@ -526,15 +553,31 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                               idSelected={customDataStreamTypeVarValue}
                               options={dataStreamTypeOptions}
                               onChange={(type: string) => {
-                                updatePackagePolicyInputStream({
-                                  vars: {
-                                    ...packagePolicyInputStream.vars,
-                                    [DATA_STREAM_TYPE_VAR_NAME]: {
-                                      type: 'string',
-                                      value: type,
-                                    },
+                                const updatedVars: typeof packagePolicyInputStream.vars = {
+                                  ...packagePolicyInputStream.vars,
+                                  [DATA_STREAM_TYPE_VAR_NAME]: {
+                                    type: 'string',
+                                    value: type,
                                   },
-                                });
+                                };
+                                // When switching to a type that needs use_apm, seed it with
+                                // its default if the var isn't in the schema and the user
+                                // hasn't set a value yet.
+                                if (
+                                  !isUseAPMVarInSchema &&
+                                  !updatedVars[USE_APM_VAR_NAME] &&
+                                  shouldIncludeUseAPMVar(
+                                    packageInputStream.input,
+                                    type,
+                                    dynamicSignalTypes
+                                  )
+                                ) {
+                                  updatedVars[USE_APM_VAR_NAME] = {
+                                    type: 'bool',
+                                    value: DATA_STREAM_USE_APM_VAR.default,
+                                  };
+                                }
+                                updatePackagePolicyInputStream({ vars: updatedVars });
                               }}
                               name="dataStreamType"
                             />
