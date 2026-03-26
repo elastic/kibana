@@ -991,6 +991,7 @@ paths:
       tags:
         - Security Lists API
     post:
+      deprecated: true
       description: Create `.lists` and `.items` data streams in the relevant space.
       operationId: CreateListIndex
       responses:
