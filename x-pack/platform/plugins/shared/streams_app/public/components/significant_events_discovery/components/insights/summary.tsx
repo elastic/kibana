@@ -234,11 +234,11 @@ export function Summary({ count }: { count: number }) {
           defaultMessage: 'Discovered',
         }),
         width: '150px',
-        render: (generatedAt: string) => (
-          <EuiText size="s" color="subdued">
-            {formatGeneratedAt(generatedAt)}
-          </EuiText>
-        ),
+  render: (generatedAt: string) => (
+    <EuiText size="s" color="subdued">
+      {moment(generatedAt).fromNow()}
+    </EuiText>
+  ),
       },
     ],
     [handleSelectInsight, handleCloseFlyout, selectedInsight]
