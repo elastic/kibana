@@ -49,11 +49,17 @@ describe('AutomaticImportService Integration Tests', () => {
     await kbnRoot.preboot();
     const coreSetup = await kbnRoot.setup();
 
+    const mockAnalytics = {
+      reportEvent: jest.fn(),
+      registerEventType: jest.fn(),
+    } as any;
+
     automaticImportService = new AutomaticImportService(
       kbnRoot.logger,
       coreSetup.savedObjects,
       taskManagerSetupStub,
-      coreSetup as unknown as CoreSetup<AutomaticImportV2PluginStartDependencies>
+      coreSetup as unknown as CoreSetup<AutomaticImportV2PluginStartDependencies>,
+      mockAnalytics
     );
 
     // Start Kibana after registering SO types in service constructor
@@ -68,7 +74,12 @@ describe('AutomaticImportService Integration Tests', () => {
   beforeEach(async () => {
     const internalRepo = coreStart.savedObjects.createInternalRepository();
     const savedObjectsClient = internalRepo as unknown as SavedObjectsClient;
-    await automaticImportService.initialize(savedObjectsClient, taskManagerStartStub);
+    const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
+    await automaticImportService.initialize(
+      savedObjectsClient,
+      taskManagerStartStub,
+      internalEsClient
+    );
   });
 
   it('getDataStreamResults returns results only when status is completed', async () => {

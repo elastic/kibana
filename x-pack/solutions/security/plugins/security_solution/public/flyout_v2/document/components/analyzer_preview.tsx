@@ -93,7 +93,7 @@ export const AnalyzerPreview = memo(
         <EuiSkeletonText
           data-test-subj={ANALYZER_PREVIEW_LOADING_TEST_ID}
           contentAriaLabel={i18n.translate(
-            'xpack.securitySolution.flyout.right.visualizations.analyzerPreview.loadingAriaLabel',
+            'xpack.securitySolution.flyout.document.visualizations.analyzerPreview.loadingAriaLabel',
             {
               defaultMessage: 'analyzer preview',
             }
@@ -105,7 +105,7 @@ export const AnalyzerPreview = memo(
     if (!showAnalyzerTree) {
       return (
         <FormattedMessage
-          id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.errorDescription"
+          id="xpack.securitySolution.flyout.document.visualizations.analyzerPreview.errorDescription"
           defaultMessage="An error is preventing this alert from being analyzed."
         />
       );
@@ -116,7 +116,7 @@ export const AnalyzerPreview = memo(
         items={items}
         display="compressed"
         aria-label={i18n.translate(
-          'xpack.securitySolution.flyout.right.visualizations.analyzerPreview.treeViewAriaLabel',
+          'xpack.securitySolution.flyout.document.visualizations.analyzerPreview.treeViewAriaLabel',
           {
             defaultMessage: 'Analyzer preview',
           }

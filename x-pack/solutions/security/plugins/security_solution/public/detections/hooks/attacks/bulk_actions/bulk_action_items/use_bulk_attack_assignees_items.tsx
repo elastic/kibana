@@ -91,17 +91,17 @@ export const useBulkAttackAssigneesItems = ({
       {
         key: 'manage-attack-assignees',
         'data-test-subj': 'attack-assignees-context-menu-item',
-        name: i18n.ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
+        name: i18n.ATTACK_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
         panel: 2,
-        label: i18n.ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
+        label: i18n.ATTACK_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
         disableOnQuery: true,
         disable: false,
       },
       {
         key: 'remove-all-attack-assignees',
         'data-test-subj': 'remove-attack-assignees-menu-item',
-        name: i18n.REMOVE_ALERT_ASSIGNEES_CONTEXT_MENU_TITLE,
-        label: i18n.REMOVE_ALERT_ASSIGNEES_CONTEXT_MENU_TITLE,
+        name: i18n.REMOVE_ATTACK_ASSIGNEES_CONTEXT_MENU_TITLE,
+        label: i18n.REMOVE_ATTACK_ASSIGNEES_CONTEXT_MENU_TITLE,
         disableOnQuery: true,
         onClick: onRemoveAllAssignees,
         disable: alertAssignments ? isEmpty(alertAssignments) : false,
@@ -119,7 +119,7 @@ export const useBulkAttackAssigneesItems = ({
   const TitleContent = useMemo(
     () => (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>{i18n.ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{i18n.ATTACK_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE}</EuiFlexItem>
       </EuiFlexGroup>
     ),
     []

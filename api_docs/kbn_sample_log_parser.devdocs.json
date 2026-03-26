@@ -408,7 +408,7 @@
         "label": "StreamLogGenerator",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/types.ts",
-        "lineNumber": 12,
+        "lineNumber": 13,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -421,7 +421,7 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/types.ts",
-            "lineNumber": 13,
+            "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -439,7 +439,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/types.ts",
-            "lineNumber": 14,
+            "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -455,7 +455,7 @@
                   "number"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/types.ts",
-                "lineNumber": 14,
+                "lineNumber": 15,
                 "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,

@@ -25,14 +25,15 @@ export const FORMAT_TIME_ONLY = 'HH:mm';
 /** Date format without year, used when start and end fall in the same year (e.g. "Feb 3, 14:30") */
 export const FORMAT_NO_YEAR = 'MMM D, HH:mm';
 
-/** Delimiter between start and end when the user types a range (e.g. "now-1d to now") */
-export const DATE_RANGE_INPUT_DELIMITER = 'to';
+/** Delimiter between start and end when the user types a range (e.g. "now-1d - now") */
+export const DATE_RANGE_INPUT_DELIMITER = '-';
 
 /** Delimiter used in the display text between start and end (e.g. "Feb 3 → Feb 10") */
 export const DATE_RANGE_DISPLAY_DELIMITER = '→';
 
 /** Maps single-character date-math units to their full English names (e.g. "d" → "day") */
 export const UNIT_SHORT_TO_FULL_MAP: Record<string, string> = {
+  ms: 'millisecond',
   s: 'second',
   m: 'minute',
   h: 'hour',
@@ -42,14 +43,27 @@ export const UNIT_SHORT_TO_FULL_MAP: Record<string, string> = {
   y: 'year',
 };
 
-/** Reverse of {@link UNIT_SHORT_TO_FULL_MAP}, also includes plural forms (e.g. "days" → "d") */
-export const UNIT_FULL_TO_SHORT_MAP: Record<string, string> = Object.entries(
-  UNIT_SHORT_TO_FULL_MAP
-).reduce((acc, [short, full]) => {
-  acc[full] = short;
-  acc[`${full}s`] = short;
-  return acc;
-}, {} as Record<string, string>);
+/**
+ * Maps each date-math offset unit to the unit used for rounding (`/X` suffix).
+ *
+ * Sub-day units promote one step up (`ms→s`, `s→m`, `m→h`), except `h→h`
+ * which keeps the hour boundary. Day-and-above units all normalise to `/d`.
+ */
+export const ROUND_UNIT_MAP: Record<string, string> = {
+  ms: 's',
+  s: 'm',
+  m: 'm',
+  h: 'h',
+  d: 'd',
+  w: 'd',
+  M: 'd',
+  y: 'd',
+};
+
+/**
+ * CSS selector for the infinite-scroll calendar scroller (`data-calendar-scroller` attribute in Calendar).
+ */
+export const CALENDAR_SCROLLER_SELECTOR = '[data-calendar-scroller]';
 
 /** Selector for focusable elements */
 export const FOCUSABLE_SELECTOR =

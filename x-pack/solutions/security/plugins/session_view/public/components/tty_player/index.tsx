@@ -192,7 +192,7 @@ export const TTYPlayer = ({
               isSelected={true}
               display="fill"
               isLoading={isFetching}
-              iconType="apmTrace"
+              iconType="chartWaterfall"
               onClick={onClose}
               size="m"
               aria-label={TOGGLE_TTY_PLAYER}
@@ -215,7 +215,7 @@ export const TTYPlayer = ({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="list" disabled={true}>
+            <EuiButton iconType="listBullet" disabled={true}>
               {DETAIL_PANEL}
             </EuiButton>
           </EuiFlexItem>

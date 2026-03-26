@@ -23,6 +23,7 @@ export interface LayoutDimensions {
   sidebarWidth: number;
   applicationTopBarHeight: number;
   applicationBottomBarHeight: number;
+  applicationMarginTop: number;
   applicationMarginBottom: number;
   applicationMarginRight: number;
 }
