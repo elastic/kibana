@@ -277,48 +277,10 @@ describe('Workflow Steps - Error Scenarios', () => {
     });
   });
 
-  describe('tagProcessedAlertsStep - Error Handling', () => {
-    it('should fail fast on >50% bulk update failures (systemic issue)', async () => {
+  describe('tagProcessedAlertsStep - updateByQuery', () => {
+    it('should tag alerts via updateByQuery using IDs filter', async () => {
       const mockEsClient = {
-        bulk: jest.fn().mockResolvedValue({
-          errors: true,
-          items: [
-            { update: { _id: 'alert-1', error: { reason: 'index_readonly_exception' } } },
-            { update: { _id: 'alert-2', error: { reason: 'index_readonly_exception' } } },
-            { update: { status: 200 } }, // Only 1 success out of 3
-          ],
-        }),
-      } as unknown as ElasticsearchClient;
-
-      const context = createMockContext({
-        input: {
-          alert_ids: ['alert-1', 'alert-2', 'alert-3'],
-          index_pattern: '.alerts-security.alerts-default',
-        },
-        contextManager: {
-          getScopedEsClient: jest.fn().mockReturnValue(mockEsClient),
-        },
-      });
-
-      await expect(tagProcessedAlertsStep.handler(context)).rejects.toThrow(/Bulk tag operation failed/);
-      await expect(tagProcessedAlertsStep.handler(context)).rejects.toThrow(/67%/);
-
-      // Should log failure details
-      expect(context.logger.error).toHaveBeenCalled();
-    });
-
-    it('should warn on 10-50% failures but continue', async () => {
-      const mockEsClient = {
-        bulk: jest.fn().mockResolvedValue({
-          errors: true,
-          items: [
-            { update: { _id: 'alert-1', error: { reason: 'conflict' } } }, // 1 failure
-            { update: { _id: 'alert-2', status: 200 } },
-            { update: { _id: 'alert-3', status: 200 } },
-            { update: { _id: 'alert-4', status: 200 } },
-            { update: { _id: 'alert-5', status: 200 } },
-          ],
-        }),
+        updateByQuery: jest.fn().mockResolvedValue({ updated: 5 }),
       } as unknown as ElasticsearchClient;
 
       const context = createMockContext({
@@ -333,27 +295,21 @@ describe('Workflow Steps - Error Scenarios', () => {
 
       const result = await tagProcessedAlertsStep.handler(context);
 
-      // Should succeed but warn (20% failure rate)
-      expect(result.output.tagged_count).toBe(4);
-      expect(context.logger.warn).toHaveBeenCalledWith(expect.stringContaining('Partial failure'));
-      expect(context.logger.warn).toHaveBeenCalledWith(expect.stringContaining('20%'));
+      expect(result.output.tagged_count).toBe(5);
+      expect(mockEsClient.updateByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: '.alerts-security.alerts-default',
+          query: { ids: { values: ['alert-1', 'alert-2', 'alert-3', 'alert-4', 'alert-5'] } },
+        })
+      );
     });
 
-    it('should succeed with no warnings on <10% failures', async () => {
-      const mockEsClient = {
-        bulk: jest.fn().mockResolvedValue({
-          errors: true,
-          items: Array.from({ length: 100 }, (_, i) =>
-            i < 5
-              ? { update: { _id: `alert-${i}`, error: { reason: 'timeout' } } }
-              : { update: { _id: `alert-${i}`, status: 200 } }
-          ),
-        }),
-      } as unknown as ElasticsearchClient;
+    it('should return 0 for empty alert IDs', async () => {
+      const mockEsClient = {} as unknown as ElasticsearchClient;
 
       const context = createMockContext({
         input: {
-          alert_ids: Array.from({ length: 100 }, (_, i) => `alert-${i}`),
+          alert_ids: [],
           index_pattern: '.alerts-security.alerts-default',
         },
         contextManager: {
@@ -362,11 +318,31 @@ describe('Workflow Steps - Error Scenarios', () => {
       });
 
       const result = await tagProcessedAlertsStep.handler(context);
+      expect(result.output.tagged_count).toBe(0);
+    });
 
-      // 5% failure - should log errors but not warn
-      expect(result.output.tagged_count).toBe(95);
-      expect(context.logger.error).toHaveBeenCalledTimes(5); // First 5 failures logged
-      expect(context.logger.warn).not.toHaveBeenCalled(); // No warning for <10%
+    it('should filter out empty strings from alert IDs', async () => {
+      const mockEsClient = {
+        updateByQuery: jest.fn().mockResolvedValue({ updated: 2 }),
+      } as unknown as ElasticsearchClient;
+
+      const context = createMockContext({
+        input: {
+          alert_ids: ['alert-1', '', 'alert-2', ''],
+          index_pattern: '.alerts-security.alerts-default',
+        },
+        contextManager: {
+          getScopedEsClient: jest.fn().mockReturnValue(mockEsClient),
+        },
+      });
+
+      const result = await tagProcessedAlertsStep.handler(context);
+      expect(result.output.tagged_count).toBe(2);
+      expect(mockEsClient.updateByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: { ids: { values: ['alert-1', 'alert-2'] } },
+        })
+      );
     });
   });
 
