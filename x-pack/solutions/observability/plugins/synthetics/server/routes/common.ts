@@ -246,6 +246,7 @@ export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
     projects,
     schedules,
     monitorQueryIds,
+    configIds,
   } = monitorQuery;
 
   return (
@@ -257,7 +258,8 @@ export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
     !!status?.length ||
     !!projects?.length ||
     !!schedules?.length ||
-    !!monitorQueryIds?.length
+    !!monitorQueryIds?.length ||
+    !!configIds?.length
   );
 };
 
