@@ -10,8 +10,8 @@ import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server
 import { inject, injectable } from 'inversify';
 import { Request, Response } from '@kbn/core-di-server';
 import type { RouteSecurity } from '@kbn/core-http-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { bulkOperationParamsSchema } from '@kbn/alerting-v2-schemas';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { bulkOperationParamsSchema, bulkOperationResponseSchema } from '@kbn/alerting-v2-schemas';
 import type { BulkOperationParams } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
@@ -27,12 +27,25 @@ export class BulkDeleteRulesRoute {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.write],
     },
   };
-  static options = { access: 'internal' } as const;
+  static options = {
+    access: 'internal',
+    summary: 'Delete rules in bulk',
+    tags: ['oas-tag:alerting-v2'],
+  } as const;
   static validate = {
     request: {
       body: buildRouteValidationWithZod(bulkOperationParamsSchema),
     },
-  } as const;
+    response: {
+      200: {
+        body: () => bulkOperationResponseSchema,
+        description: 'Indicates a successful call.',
+      },
+      400: {
+        description: 'Indicates an invalid schema or parameters.',
+      },
+    },
+  };
 
   constructor(
     @inject(Request)

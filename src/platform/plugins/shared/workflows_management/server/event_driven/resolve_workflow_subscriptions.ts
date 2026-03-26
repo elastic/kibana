@@ -10,7 +10,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import { workflowMatchesTriggerCondition } from './filter_workflows_by_trigger_condition';
-import type { WorkflowsManagementApi } from '../workflows_management/workflows_management_api';
+import type { WorkflowsManagementApi } from '../api/workflows_management_api';
 
 export interface ResolveMatchingWorkflowSubscriptionsParams {
   triggerId: string;

@@ -260,6 +260,12 @@ exports.EcsCustomPropertyMappings = {
                       update_alerts_duration_ms: {
                         type: 'long',
                       },
+                      alerts_candidate_count: {
+                        type: 'long',
+                      },
+                      alerts_suppressed_count: {
+                        type: 'long',
+                      },
                     },
                   },
                 },
