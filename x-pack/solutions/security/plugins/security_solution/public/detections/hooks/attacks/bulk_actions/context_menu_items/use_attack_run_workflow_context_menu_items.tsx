@@ -16,7 +16,8 @@ import type {
 } from '../types';
 
 export interface UseAttackRunWorkflowContextMenuItemsProps extends BaseAttackContextMenuItemsProps {
-  attacksForWorkflowRun: BaseAttackProps[];
+  /** Attacks to run the workflow against. Each must have an index to be eligible. */
+  attacksForWorkflowRun: Omit<BaseAttackProps, 'relatedAlertIds'>[];
 }
 
 export const useAttackRunWorkflowContextMenuItems = ({

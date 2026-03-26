@@ -36,6 +36,7 @@ export interface AlertWorkflowsPanelProps {
     _index: string;
   }[];
   onClose: () => void;
+  /** Optional callback invoked when workflow execution is triggered. */
   onExecute?: () => void;
 }
 
