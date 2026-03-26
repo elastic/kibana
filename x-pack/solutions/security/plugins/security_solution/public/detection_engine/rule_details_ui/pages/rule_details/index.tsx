@@ -936,7 +936,10 @@ export const RuleDetailsPage = connector(
                     >
                       <>
                         {newExecutionResultsTableEnabled ? (
-                          <ExecutionResultsPocTable ruleId={ruleId} />
+                          <ExecutionResultsPocTable
+                            ruleId={ruleId}
+                            onFilterByExecutionId={() => navigateToAlertsTab()}
+                          />
                         ) : (
                           <ExecutionLogTable
                             ruleId={ruleId}

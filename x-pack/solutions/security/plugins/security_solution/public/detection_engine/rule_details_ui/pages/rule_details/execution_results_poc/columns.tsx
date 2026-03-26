@@ -1,0 +1,142 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
+import * as i18n from './translations';
+import { ExecutionStatusIndicator } from '../../../../rule_monitoring';
+import { FormattedDate } from '../../../../../common/components/formatted_date';
+import { RuleDurationFormat } from '../execution_log_table/rule_duration_format';
+import { TableHeaderTooltipCell } from '../../../../rule_management_ui/components/rules_table/table_header_tooltip_cell';
+import {
+  RULE_EXECUTION_TYPE_BACKFILL,
+  RULE_EXECUTION_TYPE_STANDARD,
+} from '../../../../../common/translations';
+import type {
+  RuleExecutionStatus,
+  UnifiedExecutionResult,
+  UnifiedExecutionStatus,
+} from '../../../../../../common/api/detection_engine/rule_monitoring';
+
+const UNIFIED_TO_RULE_STATUS: Record<UnifiedExecutionStatus, RuleExecutionStatus> = {
+  success: 'succeeded',
+  warning: 'partial failure',
+  failure: 'failed',
+};
+
+interface GetColumnsArgs {
+  onFilterByExecutionId: (executionId: string, executionStart: string) => void;
+  onViewDetails: (item: UnifiedExecutionResult) => void;
+}
+
+export const getColumns = ({
+  onFilterByExecutionId,
+  onViewDetails,
+}: GetColumnsArgs): Array<EuiBasicTableColumn<UnifiedExecutionResult>> => [
+  {
+    field: 'outcome.status',
+    name: (
+      <TableHeaderTooltipCell
+        title={i18n.COLUMN_STATUS}
+        tooltipContent={i18n.COLUMN_STATUS_TOOLTIP}
+      />
+    ),
+    render: (_: unknown, record: UnifiedExecutionResult) => (
+      <ExecutionStatusIndicator
+        status={UNIFIED_TO_RULE_STATUS[record.outcome.status]}
+        showTooltip={true}
+      />
+    ),
+    width: '10%',
+  },
+  {
+    field: 'backfill',
+    name: (
+      <TableHeaderTooltipCell
+        title={i18n.COLUMN_RUN_TYPE}
+        tooltipContent={i18n.COLUMN_RUN_TYPE_TOOLTIP}
+      />
+    ),
+    render: (_: unknown, record: UnifiedExecutionResult) => {
+      const typeStr = record.backfill ? RULE_EXECUTION_TYPE_BACKFILL : RULE_EXECUTION_TYPE_STANDARD;
+      return <EuiText size="s">{typeStr}</EuiText>;
+    },
+    width: '10%',
+  },
+  {
+    field: 'execution_start',
+    name: (
+      <TableHeaderTooltipCell
+        title={i18n.COLUMN_TIMESTAMP}
+        tooltipContent={i18n.COLUMN_TIMESTAMP_TOOLTIP}
+      />
+    ),
+    render: (value: string) => <FormattedDate value={value} fieldName="execution_start" />,
+    sortable: true,
+    width: '15%',
+  },
+  {
+    field: 'execution_duration_ms',
+    name: (
+      <TableHeaderTooltipCell
+        title={i18n.COLUMN_DURATION}
+        tooltipContent={i18n.COLUMN_DURATION_TOOLTIP}
+      />
+    ),
+    render: (value: number | null) =>
+      value != null ? <RuleDurationFormat duration={value} /> : <span>{'—'}</span>,
+    sortable: true,
+    width: '10%',
+  },
+  {
+    field: 'metrics.alert_counts.new',
+    name: (
+      <TableHeaderTooltipCell
+        title={i18n.COLUMN_ALERTS_CREATED}
+        tooltipContent={i18n.COLUMN_ALERTS_CREATED_TOOLTIP}
+      />
+    ),
+    render: (_: unknown, record: UnifiedExecutionResult) => record.metrics.alert_counts?.new ?? 0,
+    width: '10%',
+  },
+  {
+    field: 'outcome.message',
+    name: (
+      <TableHeaderTooltipCell
+        title={i18n.COLUMN_MESSAGE}
+        tooltipContent={i18n.COLUMN_MESSAGE_TOOLTIP}
+      />
+    ),
+    render: (_: unknown, record: UnifiedExecutionResult) => record.outcome.message ?? '—',
+    width: '35%',
+  },
+  {
+    name: i18n.COLUMN_ACTIONS,
+    actions: [
+      {
+        name: i18n.ACTION_FILTER_BY_EXECUTION_ID,
+        description: i18n.ACTION_FILTER_BY_EXECUTION_ID,
+        icon: 'filter',
+        type: 'icon',
+        onClick: (item: UnifiedExecutionResult) => {
+          if (item.execution_uuid) {
+            onFilterByExecutionId(item.execution_uuid, item.execution_start);
+          }
+        },
+      },
+      {
+        name: i18n.ACTION_VIEW_DETAILS,
+        description: i18n.ACTION_VIEW_DETAILS,
+        icon: 'maximize',
+        type: 'icon',
+        onClick: onViewDetails,
+      },
+    ],
+    width: '10%',
+  },
+];

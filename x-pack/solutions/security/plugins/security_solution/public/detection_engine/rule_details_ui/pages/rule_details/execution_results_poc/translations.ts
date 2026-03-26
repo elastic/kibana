@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.tableCaption',
+  {
+    defaultMessage: 'Execution results',
+  }
+);
+
 export const COLUMN_STATUS = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.statusColumn',
   {
