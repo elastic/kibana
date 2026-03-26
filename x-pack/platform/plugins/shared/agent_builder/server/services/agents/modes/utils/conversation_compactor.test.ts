@@ -6,8 +6,13 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
+import {
+  ChatEventType,
+  ConversationRoundStatus,
+  ConversationRoundStepType,
+} from '@kbn/agent-builder-common';
 import type { CompactionStructuredData, CompactionSummary } from '@kbn/agent-builder-common';
+import type { AgentEventEmitterFn } from '@kbn/agent-builder-server';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
 import type { ContextBudget } from './context_budget';
@@ -475,5 +480,135 @@ describe('compactConversation', () => {
     expect(result.tokensBefore).toBeGreaterThan(0);
     expect(result.tokensAfter).toBeDefined();
     expect(result.summarizedRoundCount).toBeGreaterThan(0);
+  });
+
+  describe('event emission', () => {
+    const compactionBudget: ContextBudget = {
+      totalBudget: 500,
+      historyBudget: 375,
+      triggerThreshold: 100,
+    };
+
+    const noCompactionBudget: ContextBudget = {
+      totalBudget: 128000,
+      historyBudget: 96000,
+      triggerThreshold: 72000,
+    };
+
+    let mockEventEmitter: jest.MockedFunction<AgentEventEmitterFn>;
+
+    beforeEach(() => {
+      mockEventEmitter = jest.fn();
+    });
+
+    it('should not emit events when compaction is not triggered', async () => {
+      // Empty conversation never triggers compaction
+      const conversation = createMockConversation([]);
+
+      await compactConversation({
+        processedConversation: conversation,
+        chatModel: createMockChatModel(),
+        contextBudget: noCompactionBudget,
+        logger: mockLogger,
+        eventEmitter: mockEventEmitter,
+      });
+
+      expect(mockEventEmitter).not.toHaveBeenCalled();
+    });
+
+    it('should emit compactionStarted before compactionCompleted when compaction is triggered', async () => {
+      const rounds = [
+        createMockRound('r1', 2000, 3),
+        createMockRound('r2', 2000, 3),
+        createMockRound('r3', 2000, 3),
+        createMockRound('recent-1', 200),
+        createMockRound('recent-2', 200),
+      ];
+      const conversation = createMockConversation(rounds);
+
+      await compactConversation({
+        processedConversation: conversation,
+        chatModel: createMockChatModel(),
+        contextBudget: compactionBudget,
+        logger: mockLogger,
+        eventEmitter: mockEventEmitter,
+      });
+
+      expect(mockEventEmitter).toHaveBeenCalledTimes(2);
+
+      const [startedCall, completedCall] = mockEventEmitter.mock.calls;
+      expect(startedCall[0].type).toBe(ChatEventType.compactionStarted);
+      expect(completedCall[0].type).toBe(ChatEventType.compactionCompleted);
+
+      // Verify ordering via invocation order
+      const startedOrder = mockEventEmitter.mock.invocationCallOrder[0];
+      const completedOrder = mockEventEmitter.mock.invocationCallOrder[1];
+      expect(startedOrder).toBeLessThan(completedOrder);
+    });
+
+    it('should emit compactionStarted with correct token_count_before', async () => {
+      const rounds = [
+        createMockRound('r1', 2000, 2),
+        createMockRound('r2', 2000, 1),
+        createMockRound('recent-1', 200),
+        createMockRound('recent-2', 200),
+      ];
+      const conversation = createMockConversation(rounds);
+
+      const result = await compactConversation({
+        processedConversation: conversation,
+        chatModel: createMockChatModel(),
+        contextBudget: compactionBudget,
+        logger: mockLogger,
+        eventEmitter: mockEventEmitter,
+      });
+
+      const startedEvent = mockEventEmitter.mock.calls[0][0];
+      expect(startedEvent.type).toBe(ChatEventType.compactionStarted);
+      expect((startedEvent as any).data.token_count_before).toBe(result.tokensBefore);
+    });
+
+    it('should emit compactionCompleted with correct token_count_after and summarized_round_count', async () => {
+      const rounds = [
+        createMockRound('r1', 2000, 2),
+        createMockRound('r2', 2000, 1),
+        createMockRound('recent-1', 200),
+        createMockRound('recent-2', 200),
+      ];
+      const conversation = createMockConversation(rounds);
+
+      const result = await compactConversation({
+        processedConversation: conversation,
+        chatModel: createMockChatModel(),
+        contextBudget: compactionBudget,
+        logger: mockLogger,
+        eventEmitter: mockEventEmitter,
+      });
+
+      const completedEvent = mockEventEmitter.mock.calls[1][0];
+      expect(completedEvent.type).toBe(ChatEventType.compactionCompleted);
+      expect((completedEvent as any).data.token_count_after).toBe(result.tokensAfter);
+      expect((completedEvent as any).data.summarized_round_count).toBe(result.summarizedRoundCount);
+    });
+
+    it('should not emit events when eventEmitter is not provided', async () => {
+      const rounds = [
+        createMockRound('r1', 2000, 3),
+        createMockRound('r2', 2000, 3),
+        createMockRound('recent-1', 200),
+        createMockRound('recent-2', 200),
+      ];
+      const conversation = createMockConversation(rounds);
+
+      // No eventEmitter passed — should not throw
+      const result = await compactConversation({
+        processedConversation: conversation,
+        chatModel: createMockChatModel(),
+        contextBudget: compactionBudget,
+        logger: mockLogger,
+      });
+
+      expect(result.compactionTriggered).toBe(true);
+    });
   });
 });
