@@ -6,6 +6,7 @@ This file contains the Gherkin templates for optional test plan sections, and th
 
 ## Contents
 
+- [Coverage guidance](#coverage-guidance)
 - [Optional section templates](#optional-section-templates)
   - [Multi-space scenarios](#multi-space-scenarios)
   - [Multi-tenant scenarios](#multi-tenant-scenarios)
@@ -15,6 +16,35 @@ This file contains the Gherkin templates for optional test plan sections, and th
 - [Tags](#tags)
 - [Priority levels](#priority-levels)
 - [Formatting for GitHub comments](#formatting-for-github-comments)
+
+---
+
+## Coverage guidance
+
+These are functional test plans. Do not include performance, accessibility, security, i18n, or visual regression testing — those belong to dedicated test suites outside this skill's scope.
+
+For each feature area in the plan, apply the testing types marked as **Required** for that feature type. Apply **Recommended** types when the sources (issue, PRs, Figma) provide enough context to write meaningful scenarios. **Conditional** types apply only when the specific condition is met.
+
+| Testing type | Description | When to apply |
+|---|---|---|
+| **Positive** | Feature works as expected under correct conditions | Always required |
+| **Negative** | Feature behaves correctly under incorrect conditions — invalid inputs, insufficient permissions, empty states, missing data | Always required — at least one per feature area |
+| **Edge cases** | Behaviour at the boundaries of the domain — limits, extreme values, empty collections, maximum allowed inputs | Required when the feature has explicit limits or boundary conditions; recommended otherwise |
+| **State-based** | Behaviour depends on prior state — session state, dismissed UI elements, previously saved configuration | Required when the feature has persistent or session-based state |
+| **Error handling** | Feature degrades gracefully when an external dependency fails — API timeout, unavailable service, unexpected response | Required when the feature makes calls to external APIs or services |
+
+**Applying this in practice:**
+
+| Feature type | Positive | Negative | Edge cases | State-based | Error handling |
+|---|---|---|---|---|---|
+| Read / display data | Required | Required | Recommended | Conditional | Conditional |
+| Write / modify data | Required | Required | Required | Conditional | Required |
+| Settings / configuration | Required | Required | Required | Conditional | Conditional |
+| Permissions / RBAC | Required | Required | Recommended | Conditional | Rarely applicable |
+| Features with explicit limits | Required | Required | Required | Conditional | Conditional |
+| Dismissible / session UI elements | Required | Recommended | Rarely applicable | Required | Rarely applicable |
+
+If a required testing type has no applicable scenario for a given feature area — for example, a read-only display feature with no external API calls — note it explicitly in Known Limitations rather than leaving it uncovered silently.
 
 ---
 

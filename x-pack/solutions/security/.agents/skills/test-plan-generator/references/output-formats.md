@@ -54,6 +54,7 @@ Before saving the draft to `.agents/tmp/`, review every scenario in the test pla
 
 **Per-section checks (after writing all scenarios in a section):**
 - [ ] Scenarios are coherent as a set — they collectively cover the acceptance criteria for this area
+- [ ] Each required testing type from the coverage guidance in `references/optional-scenarios.md` is represented — at minimum, positive and negative scenarios are present, or there is a documented reason in Known Limitations why a required type does not apply
 - [ ] No two scenarios test the same thing with different wording
 - [ ] No scenario tests something not described in the issue, sub-issues, linked PRs, or Figma designs
 - [ ] Scenarios are ordered by priority: P0 first, then P1, then P2
