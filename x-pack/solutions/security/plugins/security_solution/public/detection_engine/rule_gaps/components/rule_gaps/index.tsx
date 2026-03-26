@@ -253,7 +253,12 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
     totalItemCount: Math.min(totalItemCount, MaxItemCount),
   };
 
-  const columns = getGapsTableColumns(ruleId, enabled, canManualRunRules, gapReasonDetectionEnabled);
+  const columns = getGapsTableColumns(
+    ruleId,
+    enabled,
+    canManualRunRules,
+    gapReasonDetectionEnabled
+  );
 
   const onRefreshCallback = () => {
     refetch();
