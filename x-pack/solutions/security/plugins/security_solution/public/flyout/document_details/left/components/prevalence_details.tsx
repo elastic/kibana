@@ -82,14 +82,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
  * This is a thin wrapper that provides values from context and passes the old-flyout CellActions as renderCellActions.
  */
 export const PrevalenceDetails: React.FC = () => {
-  const { storage, uiSettings, serverless } = useKibana().services;
-  const isServerless = !!serverless;
-  const isColdAndFrozenTiersExcluded = uiSettings.get<boolean>(
-    EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE
-  );
-
-  const { investigationFields, scopeId, searchHit, dataAsNestedObject } =
-    useDocumentDetailsContext();
+  const { investigationFields, scopeId, searchHit } = useDocumentDetailsContext();
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
   return (
