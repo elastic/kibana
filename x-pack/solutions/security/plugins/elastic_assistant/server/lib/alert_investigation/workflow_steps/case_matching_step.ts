@@ -19,21 +19,20 @@ const CaseMatchingInputSchema = z.object({
   index_pattern: z.string().default('.alerts-security.alerts-default'),
 });
 
+const AlertGroupSchema = z.object({
+  group_id: z.string(),
+  alert_ids: z.array(z.string()),
+  primary_host: z.string(),
+  primary_user: z.string(),
+  existing_case_id: z.string().optional(),
+});
+
 const CaseMatchingOutputSchema = z.object({
   cases_created: z.number(),
   alerts_grouped: z.number(),
-  affected_case_ids: z.array(z.string()),
-  alert_ids_by_case: z.record(z.string(), z.array(z.string())),
-  // alert_groups as native array for forEach consumption
-  alert_groups: z.array(
-    z.object({
-      group_id: z.string(),
-      alert_ids: z.array(z.string()),
-      primary_host: z.string(),
-      primary_user: z.string(),
-    })
-  ),
-  // Same data as JSON string — workaround if forEach can't resolve complex arrays
+  new_groups: z.array(AlertGroupSchema),
+  existing_groups: z.array(AlertGroupSchema),
+  alert_groups: z.array(AlertGroupSchema),
   alert_groups_json: z.string(),
 });
 
@@ -42,11 +41,12 @@ export const caseMatchingStep = createServerStepDefinition({
   category: StepCategory.Kibana,
   label: 'Match Alerts to Cases',
   description:
-    'Groups alerts by shared entities (host, user) and outputs alert_groups for forEach case creation.',
+    'Groups alerts by shared entities and matches against existing cases. ' +
+    'Outputs new_groups (need case creation) and existing_groups (attach to existing case).',
   documentation: {
     details:
-      'Fetches alerts by ID, extracts entities, groups by host+user overlap. ' +
-      'Outputs alert_groups array for use with forEach to create one case per group.',
+      'Searches for existing cases tagged alert-investigation-pipeline with matching host/user titles. ' +
+      'Alerts matching an existing case go to existing_groups with existing_case_id set.',
     examples: [],
   },
   inputSchema: CaseMatchingInputSchema,
@@ -57,18 +57,16 @@ export const caseMatchingStep = createServerStepDefinition({
     const { index_pattern: indexPattern } = context.input;
     const leaderAlertIds = parseArrayInput(context.input.leader_alert_ids);
 
+    type AlertGroup = z.infer<typeof AlertGroupSchema>;
+
     const emptyOutput = {
       output: {
         cases_created: 0,
         alerts_grouped: 0,
-        affected_case_ids: [] as string[],
-        alert_ids_by_case: {} as Record<string, string[]>,
-        alert_groups: [] as Array<{
-          group_id: string;
-          alert_ids: string[];
-          primary_host: string;
-          primary_user: string;
-        }>,
+        new_groups: [] as AlertGroup[],
+        existing_groups: [] as AlertGroup[],
+        alert_groups: [] as AlertGroup[],
+        alert_groups_json: '[]',
       },
     };
 
@@ -77,21 +75,14 @@ export const caseMatchingStep = createServerStepDefinition({
       return emptyOutput;
     }
 
-    // Fetch alerts and extract entities directly (avoids liquid template serialization issues)
-    const alerts = await fetchAlertsByIds({
-      esClient,
-      indexPattern,
-      alertIds: leaderAlertIds,
-      logger,
-    });
-
+    // Fetch alerts and extract entities
+    const alerts = await fetchAlertsByIds({ esClient, indexPattern, alertIds: leaderAlertIds, logger });
     if (alerts.length === 0) {
       context.logger.warn('No alerts found for the given IDs');
       return emptyOutput;
     }
 
     const extractionResult = extractEntitiesFromAlerts({ alerts, logger });
-
     context.logger.info(
       `Extracted ${extractionResult.entities.length} entities from ${alerts.length} alerts`
     );
@@ -124,7 +115,6 @@ export const caseMatchingStep = createServerStepDefinition({
           break;
         }
       }
-
       const groupId = existingGroupId ?? `group-${groupCounter++}`;
       if (!groupAlertSets.has(groupId)) {
         groupAlertSets.set(groupId, new Set());
@@ -136,7 +126,7 @@ export const caseMatchingStep = createServerStepDefinition({
       }
     }
 
-    // Track primary host/user per group for case titles
+    // Track primary host/user per group
     const groupContext = new Map<string, { hosts: Set<string>; users: Set<string> }>();
     for (const entity of extractionResult.entities) {
       const alertGroup = alertToGroup.get(entity.alertId);
@@ -149,44 +139,84 @@ export const caseMatchingStep = createServerStepDefinition({
       if (entity.typeKey === 'user') ctx.users.add(entity.value);
     }
 
-    // Build outputs
-    const alertIdsByCase: Record<string, string[]> = {};
-    const affectedCaseIds: string[] = [];
-    const alertGroups: Array<{
-      group_id: string;
-      alert_ids: string[];
-      primary_host: string;
-      primary_user: string;
-    }> = [];
+    // Search for existing cases tagged with alert-investigation-pipeline
+    // Case titles follow pattern: "Investigation - {host} / {user}"
+    let existingCases: Array<{ id: string; title: string }> = [];
+    try {
+      const fakeRequest = context.contextManager.getFakeRequest();
+      const kibanaUrl = context.contextManager.getContext()?.kibanaUrl ?? 'http://localhost:5601';
+      const headers: Record<string, string> = { 'kbn-xsrf': 'true' };
+      if (fakeRequest.headers.authorization) {
+        headers.Authorization = fakeRequest.headers.authorization as string;
+      }
+
+      const casesResponse = await fetch(
+        `${kibanaUrl}/api/cases/_find?tags=alert-investigation-pipeline&perPage=100&sortOrder=desc&status=open`,
+        { headers }
+      );
+
+      if (casesResponse.ok) {
+        const casesData = await casesResponse.json();
+        existingCases = (casesData.cases ?? []).map((c: { id: string; title: string }) => ({
+          id: c.id,
+          title: c.title,
+        }));
+        context.logger.info(`Found ${existingCases.length} existing pipeline cases`);
+      }
+    } catch (err) {
+      context.logger.warn(`Could not query existing cases: ${err instanceof Error ? err.message : err}`);
+    }
+
+    // Build alert groups and match to existing cases
+    const newGroups: AlertGroup[] = [];
+    const existingGroups: AlertGroup[] = [];
+    const allGroups: AlertGroup[] = [];
 
     for (const [groupId, alertSet] of groupAlertSets) {
-      if (alertSet.size > 0) {
-        const ids = [...alertSet];
-        alertIdsByCase[groupId] = ids;
-        affectedCaseIds.push(groupId);
+      if (alertSet.size === 0) continue;
 
-        const ctx = groupContext.get(groupId);
-        alertGroups.push({
-          group_id: groupId,
-          alert_ids: ids,
-          primary_host: ctx?.hosts.values().next().value ?? 'unknown',
-          primary_user: ctx?.users.values().next().value ?? 'unknown',
-        });
+      const ids = [...alertSet];
+      const ctx = groupContext.get(groupId);
+      const primaryHost = ctx?.hosts.values().next().value ?? 'unknown';
+      const primaryUser = ctx?.users.values().next().value ?? 'unknown';
+
+      // Try to match to existing case by title pattern
+      const expectedTitle = `Investigation - ${primaryHost} / ${primaryUser}`;
+      const matchedCase = existingCases.find(
+        (c) => c.title.toLowerCase() === expectedTitle.toLowerCase()
+      );
+
+      const group: AlertGroup = {
+        group_id: groupId,
+        alert_ids: ids,
+        primary_host: primaryHost,
+        primary_user: primaryUser,
+        existing_case_id: matchedCase?.id,
+      };
+
+      allGroups.push(group);
+      if (matchedCase) {
+        existingGroups.push(group);
+        context.logger.info(
+          `Matched ${ids.length} alerts to existing case ${matchedCase.id} (${expectedTitle})`
+        );
+      } else {
+        newGroups.push(group);
       }
     }
 
     context.logger.info(
-      `Case matching: ${alerts.length} alerts grouped into ${alertGroups.length} case groups`
+      `Case matching: ${alerts.length} alerts → ${allGroups.length} groups (${newGroups.length} new, ${existingGroups.length} existing)`
     );
 
     return {
       output: {
-        cases_created: alertGroups.length,
+        cases_created: newGroups.length,
         alerts_grouped: leaderAlertIds.length,
-        affected_case_ids: affectedCaseIds,
-        alert_ids_by_case: alertIdsByCase,
-        alert_groups: alertGroups,
-        alert_groups_json: JSON.stringify(alertGroups),
+        new_groups: newGroups,
+        existing_groups: existingGroups,
+        alert_groups: allGroups,
+        alert_groups_json: JSON.stringify(allGroups),
       },
     };
   },
