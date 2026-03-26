@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+// TEMPORARY: narrowed to failure_store.spec.ts for flaky test runner validation.
+// Revert this change before merging.
 import { createPlaywrightConfig } from '@kbn/scout';
 
-export default createPlaywrightConfig({
+const config = createPlaywrightConfig({
   testDir: './tests',
   runGlobalSetup: true,
 });
+
+export default { ...config, testMatch: '**/failure_store.spec.ts' };
