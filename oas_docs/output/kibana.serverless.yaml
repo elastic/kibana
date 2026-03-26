@@ -55902,6 +55902,7 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     post:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
