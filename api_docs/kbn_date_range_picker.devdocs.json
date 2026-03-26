@@ -24,7 +24,7 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
-        "lineNumber": 160,
+        "lineNumber": 162,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -46,7 +46,7 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
-            "lineNumber": 163,
+            "lineNumber": 165,
             "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
@@ -69,7 +69,7 @@
           "() => DateRangePickerInternalContextValue"
         ],
         "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_context.tsx",
-        "lineNumber": 127,
+        "lineNumber": 134,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -109,6 +109,96 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/date-range-picker",
+        "id": "def-public.AutoRefreshSettings",
+        "type": "Interface",
+        "tags": [],
+        "label": "AutoRefreshSettings",
+        "description": [
+          "Auto-refresh configuration stored in picker settings."
+        ],
+        "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/types.ts",
+        "lineNumber": 83,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.AutoRefreshSettings.isEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isEnabled",
+            "description": [
+              "\nWhen true, shows the play/pause button and allows the timer to run (controlled with `isPaused`).\nToggled from Settings, not from the append control."
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/types.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.AutoRefreshSettings.isPaused",
+            "type": "boolean",
+            "tags": [],
+            "label": "isPaused",
+            "description": [
+              "\nWhen `isEnabled` is true, whether the refresh interval timer is running (`false`) or paused (`true`)."
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/types.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.AutoRefreshSettings.interval",
+            "type": "number",
+            "tags": [
+              "default"
+            ],
+            "label": "interval",
+            "description": [
+              "\nRefresh interval in milliseconds."
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/types.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.AutoRefreshSettings.intervalUnit",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "intervalUnit",
+            "description": [
+              "\nThe unit used to display the interval count in the Settings panel.\nAuto-determined from `interval` when absent."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/date-range-picker",
+                "scope": "public",
+                "docId": "kibKbnDateRangePickerPluginApi",
+                "section": "def-public.AutoRefreshIntervalUnit",
+                "text": "AutoRefreshIntervalUnit"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/types.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/date-range-picker",
         "id": "def-public.DateRangePickerContextValue",
         "type": "Interface",
         "tags": [],
@@ -117,7 +207,7 @@
           "Public context value exposed to consumers via `useDateRangePickerContext`."
         ],
         "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_context.tsx",
-        "lineNumber": 46,
+        "lineNumber": 47,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -132,7 +222,7 @@
               "Current input text"
             ],
             "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_context.tsx",
-            "lineNumber": 48,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -147,7 +237,7 @@
               "Whether the current input is invalid"
             ],
             "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_context.tsx",
-            "lineNumber": 50,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -165,7 +255,7 @@
               "(value: string) => void"
             ],
             "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_context.tsx",
-            "lineNumber": 52,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -181,7 +271,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_context.tsx",
-                "lineNumber": 53,
+                "lineNumber": 54,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -205,7 +295,7 @@
               " | undefined, textOverride?: string | undefined) => void"
             ],
             "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_context.tsx",
-            "lineNumber": 54,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -222,7 +312,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_context.tsx",
-                "lineNumber": 60,
+                "lineNumber": 61,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -239,7 +329,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_context.tsx",
-                "lineNumber": 60,
+                "lineNumber": 61,
                 "columnNumber": 41,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -270,7 +360,7 @@
           "TimeRangeBounds"
         ],
         "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
-        "lineNumber": 149,
+        "lineNumber": 151,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -288,7 +378,7 @@
               "Date | null"
             ],
             "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
-            "lineNumber": 150,
+            "lineNumber": 152,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -306,7 +396,7 @@
               "Date | null"
             ],
             "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
-            "lineNumber": 152,
+            "lineNumber": 154,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -321,7 +411,7 @@
               "Text representation of the time range"
             ],
             "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
-            "lineNumber": 154,
+            "lineNumber": 156,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -336,7 +426,7 @@
               "Whether the time range is invalid"
             ],
             "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
-            "lineNumber": 156,
+            "lineNumber": 158,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1173,6 +1263,26 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerProps.onRefresh",
+            "type": "Function",
+            "tags": [],
+            "label": "onRefresh",
+            "description": [
+              "Fires at the end of each auto-refresh interval while `settings.autoRefresh` exists, is enabled and timer is unpaused."
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+            "lineNumber": 147,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1187,7 +1297,7 @@
           "User-facing settings exposed by the date range picker settings panel."
         ],
         "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/types.ts",
-        "lineNumber": 80,
+        "lineNumber": 106,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1204,7 +1314,32 @@
               "\nWhen true, relative time ranges round to the nearest full unit\n(e.g. minute, hour, day)."
             ],
             "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/types.ts",
-            "lineNumber": 82,
+            "lineNumber": 108,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerSettings.autoRefresh",
+            "type": "Object",
+            "tags": [],
+            "label": "autoRefresh",
+            "description": [
+              "\nAuto-refresh preferences. The Settings “Refresh every” row and the toolbar play/pause control\nare shown only when both this and `DateRangePickerProps.onRefresh` are set."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/date-range-picker",
+                "scope": "public",
+                "docId": "kibKbnDateRangePickerPluginApi",
+                "section": "def-public.AutoRefreshSettings",
+                "text": "AutoRefreshSettings"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/types.ts",
+            "lineNumber": 114,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1312,7 +1447,27 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/date-range-picker",
+        "id": "def-public.AutoRefreshIntervalUnit",
+        "type": "Type",
+        "tags": [],
+        "label": "AutoRefreshIntervalUnit",
+        "description": [
+          "Time unit for the auto-refresh interval."
+        ],
+        "signature": [
+          "\"m\" | \"s\" | \"h\""
+        ],
+        "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/types.ts",
+        "lineNumber": 80,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "server": {

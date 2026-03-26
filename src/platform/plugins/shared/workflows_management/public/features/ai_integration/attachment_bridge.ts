@@ -13,10 +13,7 @@ import { isToolUiEvent } from '@kbn/agent-builder-common';
 import type { monaco } from '@kbn/monaco';
 import type { ProposalTracker } from './proposal_tracker';
 import type { ProposalManager } from './proposed_changes';
-import {
-  WORKFLOW_YAML_CHANGED_EVENT,
-  WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
-} from '../../../common/agent_builder/constants';
+import { WORKFLOW_YAML_CHANGED_EVENT } from '../../../common/agent_builder/constants';
 
 export interface WorkflowYamlChangedPayload {
   proposalId: string;
@@ -25,6 +22,7 @@ export interface WorkflowYamlChangedPayload {
   workflowId?: string;
   name?: string;
   attachmentVersion?: number;
+  toolId?: string;
 }
 
 export const baseProposalId = (hunkId: string): string => {
@@ -52,6 +50,9 @@ export class AttachmentBridge {
     null;
   private processedProposals = new Set<string>();
   private onError: (err: unknown) => void = () => {};
+  private onProposalReceived:
+    | ((params: { proposalId: string; toolId: string; workflowId?: string }) => void)
+    | undefined;
   private workflowId: string | undefined;
 
   start(
@@ -59,12 +60,21 @@ export class AttachmentBridge {
     proposalManager: ProposalManager,
     editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>,
     tracker: ProposalTracker,
-    options?: { onError?: (err: unknown) => void; workflowId?: string }
+    options?: {
+      onError?: (err: unknown) => void;
+      workflowId?: string;
+      onProposalReceived?: (params: {
+        proposalId: string;
+        toolId: string;
+        workflowId?: string;
+      }) => void;
+    }
   ): void {
     this.proposalManager = proposalManager;
     this.editorRef = editorRef;
     this.tracker = tracker;
     this.onError = options?.onError ?? (() => {});
+    this.onProposalReceived = options?.onProposalReceived;
     this.workflowId = options?.workflowId;
 
     this.subscription = chat$.subscribe((event) => {
@@ -110,7 +120,7 @@ export class AttachmentBridge {
     const manager = this.proposalManager;
     if (!manager || !this.tracker) return;
 
-    const { proposalId, beforeYaml, afterYaml, attachmentVersion, workflowId } = payload;
+    const { proposalId, beforeYaml, afterYaml, attachmentVersion, workflowId, toolId } = payload;
 
     if (this.workflowId && workflowId && workflowId !== this.workflowId) return;
 
@@ -120,15 +130,23 @@ export class AttachmentBridge {
     }
     this.processedProposals.add(proposalId);
 
+    const resolvedToolId = toolId ?? 'unknown';
+
     this.tracker.setRecord({
       proposalId,
       status: 'pending',
       beforeYaml,
       afterYaml,
-      toolId: WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
+      toolId: resolvedToolId,
       attachmentVersion: attachmentVersion ?? 0,
     });
 
     manager.applyAfterYaml(afterYaml);
+
+    this.onProposalReceived?.({
+      proposalId,
+      toolId: resolvedToolId,
+      workflowId,
+    });
   }
 }
