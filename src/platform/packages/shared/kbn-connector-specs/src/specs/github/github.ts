@@ -39,6 +39,10 @@ import type {
   SearchRepositoriesInput,
   SearchUsersInput,
 } from './types';
+import getWorkflow from './workflows/get.yaml';
+import listWorkflow from './workflows/list.yaml';
+import searchWorkflow from './workflows/search.yaml';
+import whoAmIWorkflow from './workflows/who_am_i.yaml';
 import {
   GetMeInputSchema,
   ListToolsInputSchema,
@@ -463,4 +467,6 @@ export const GithubConnector: ConnectorSpec = {
       });
     },
   },
+
+  agentBuilderWorkflows: [getWorkflow, listWorkflow, searchWorkflow, whoAmIWorkflow],
 };

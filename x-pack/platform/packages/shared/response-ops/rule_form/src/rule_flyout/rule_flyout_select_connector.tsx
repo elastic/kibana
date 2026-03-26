@@ -33,7 +33,7 @@ export const RuleFlyoutSelectConnector = ({ onClose }: RuleFlyoutSelectConnector
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
-              iconType="arrowLeft"
+              iconType="chevronSingleLeft"
               onClick={onClose}
               aria-label={RULE_FLYOUT_HEADER_BACK_TEXT}
               color="text"
@@ -51,7 +51,7 @@ export const RuleFlyoutSelectConnector = ({ onClose }: RuleFlyoutSelectConnector
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiButtonEmpty
-          iconType="arrowLeft"
+          iconType="chevronSingleLeft"
           onClick={onClose}
           data-test-subj="ruleFlyoutSelectConnectorBackButton"
         >

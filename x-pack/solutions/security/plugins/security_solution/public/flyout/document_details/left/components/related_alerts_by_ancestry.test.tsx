@@ -15,16 +15,20 @@ import {
   CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID,
 } from './test_ids';
 import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
-import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_related_alerts_by_ancestry';
+import { useFetchRelatedAlertsByAncestry } from '../../../../flyout_v2/document/hooks/use_fetch_related_alerts_by_ancestry';
 import {
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../../flyout_v2/shared/components/test_ids';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
-jest.mock('../../shared/hooks/use_fetch_related_alerts_by_ancestry');
+jest.mock('../../../../flyout_v2/document/hooks/use_fetch_related_alerts_by_ancestry');
 jest.mock('../hooks/use_paginated_alerts');
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+
+const useAlertsPrivilegesMock = useAlertsPrivileges as jest.Mock;
 
 const documentId = 'documentId';
 const indices = ['index1'];
@@ -50,6 +54,12 @@ const renderRelatedAlertsByAncestry = () =>
   );
 
 describe('<RelatedAlertsByAncestry />', () => {
+  beforeEach(() => {
+    useAlertsPrivilegesMock.mockReturnValue({
+      hasAlertsRead: true,
+    });
+  });
+
   it('should render many related alerts correctly', () => {
     (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
       loading: false,
