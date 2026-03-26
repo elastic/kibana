@@ -34,9 +34,9 @@ const recoveredComparatorToI18n = (
 ) => {
   switch (comparator) {
     case COMPARATORS.BETWEEN:
-      return currentValue < threshold[0] ? BELOW_TEXT : ABOVE_TEXT;
+      return currentValue <= threshold[0] ? BELOW_TEXT : ABOVE_TEXT;
     case COMPARATORS.BETWEEN_INCLUSIVE:
-      return currentValue < threshold[0] ? BELOW_TEXT : ABOVE_TEXT;
+      return currentValue < threshold[0] ? BELOW_OR_EQ_TEXT : ABOVE_OR_EQ_TEXT;
     case COMPARATORS.NOT_BETWEEN:
       return BETWEEN_TEXT;
     case COMPARATORS.NOT_BETWEEN_INCLUSIVE:

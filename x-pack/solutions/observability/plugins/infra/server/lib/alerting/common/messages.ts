@@ -58,11 +58,19 @@ const recoveredComparatorToI18n = (
   const aboveText = i18n.translate('xpack.infra.metrics.alerting.threshold.aboveRecovery', {
     defaultMessage: 'above',
   });
+  const belowOrEqText = i18n.translate(
+    'xpack.infra.metrics.alerting.threshold.belowOrEqualRecovery',
+    { defaultMessage: 'below or equal' }
+  );
+  const aboveOrEqText = i18n.translate(
+    'xpack.infra.metrics.alerting.threshold.aboveOrEqualRecovery',
+    { defaultMessage: 'above or equal' }
+  );
   switch (comparator) {
     case COMPARATORS.BETWEEN:
-      return currentValue < threshold[0] ? belowText : aboveText;
+      return currentValue <= threshold[0] ? belowText : aboveText;
     case COMPARATORS.BETWEEN_INCLUSIVE:
-      return currentValue < threshold[0] ? belowText : aboveText;
+      return currentValue < threshold[0] ? belowOrEqText : aboveOrEqText;
     case COMPARATORS.NOT_BETWEEN:
       return i18n.translate('xpack.infra.metrics.alerting.threshold.betweenRecovery', {
         defaultMessage: 'between',
