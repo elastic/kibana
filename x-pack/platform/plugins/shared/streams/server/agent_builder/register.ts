@@ -12,7 +12,6 @@ import type { GetScopedClients } from '../routes/types';
 import type { ModelSettingsConfigClient } from '../lib/saved_objects/significant_events/model_settings_config_client';
 import { MemoryServiceImpl } from '../lib/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
-import { registerMemoryContextHook } from './hooks/memory/register_memory_context_hook';
 import { streamExplorationSkill } from './skills/stream_exploration_skill';
 import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
 
@@ -49,17 +48,6 @@ export const registerStreamsAgentBuilder = async ({
   };
 
   agentBuilder.skills.register(streamExplorationSkill);
-
-  // Hooks are always registered — they check isMemoryEnabled() at runtime and no-op when disabled.
-  const getMemoryServices = () => ({
-    memory: getMemoryService(),
-  });
-
-  registerMemoryContextHook(agentBuilder, {
-    logger,
-    getMemoryServices,
-    isMemoryEnabled,
-  });
 
   // The memory skill is registered lazily — only once useMemory is enabled.
   // This avoids exposing the skill to the agent when memory is not configured.
