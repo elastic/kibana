@@ -160,7 +160,8 @@ export async function getMaxTimestampFromData({
 }
 
 export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> {
-  const { esClient, log, repository, snapshotName, patterns, concurrency } = config;
+  const { esClient, log, repository, snapshotName, patterns, concurrency, onTempIndicesReady } =
+    config;
 
   const result: LoadResult = {
     success: false,
@@ -214,6 +215,15 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
     result.restoredIndices = restoredIndices;
 
     const aliasMap = await getTempIndexAliases({ esClient, log });
+
+    if (onTempIndicesReady) {
+      await onTempIndicesReady({
+        esClient,
+        log,
+        tempIndices: restoredIndices,
+        originalIndices: indicesToRestore,
+      });
+    }
 
     result.maxTimestamp = await getMaxTimestampFromData({
       esClient,

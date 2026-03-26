@@ -49,6 +49,12 @@ export interface RestoreConfig extends BaseConfig {
 export interface ReplayConfig extends BaseConfig {
   patterns: string[];
   concurrency?: number;
+  onTempIndicesReady?: (params: {
+    esClient: Client;
+    log: ToolingLog;
+    tempIndices: string[];
+    originalIndices: string[];
+  }) => Promise<void>;
 }
 
 // Create configuration

@@ -11,15 +11,10 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
 import { getConnectionConfig } from '../lib/get_connection_config';
 import { createSnapshot, generateGcsBasePath, registerGcsRepository } from '../lib/gcs';
-import {
-  GCS_BUCKET,
-  DEFAULT_ALERT_INDICES,
-  DEFAULT_SYSTEM_INDICES,
-  DEFAULT_ENV_SNAPSHOT_LOGS_INDEX,
-} from '../lib/constants';
+import { GCS_BUCKET, STREAMS_REGISTRY_PATTERN } from '../lib/constants';
 import {
   resolvePatterns,
-  parseRepeatableFlag,
+  parseCommonSnapshotFlags,
   validateIndexPrivileges,
 } from '../lib/snapshot_utils';
 
@@ -35,11 +30,17 @@ async function fetchMapping(
   return response[indexName]?.mappings;
 }
 
-async function captureSystemIndex(
-  esClient: Client,
-  log: ToolingLog,
-  sourceIndex: string
-): Promise<string> {
+async function captureSystemIndex({
+  esClient,
+  log,
+  sourceIndex,
+  query,
+}: {
+  esClient: Client;
+  log: ToolingLog;
+  sourceIndex: string;
+  query?: Record<string, unknown>;
+}): Promise<string> {
   const snapshotIndex = toSnapshotName(sourceIndex);
 
   const mappings = await fetchMapping(esClient, sourceIndex);
@@ -57,7 +58,7 @@ async function captureSystemIndex(
   const result = await esClient.reindex(
     {
       wait_for_completion: true,
-      source: { index: sourceIndex },
+      source: { index: sourceIndex, ...(query && { query }) },
       dest: { index: snapshotIndex },
     },
     { requestTimeout: 30 * 60 * 1000 }
@@ -96,29 +97,8 @@ export async function captureEnvSnapshot({
     auth: { username: config.username, password: config.password },
   });
 
-  const snapshotName = String(flags['snapshot-name'] || '');
   const runId = String(flags['run-id'] || moment().format('YYYY-MM-DD'));
-
-  const systemIndicesFlag = parseRepeatableFlag(flags['system-indices']);
-  const systemIndices = systemIndicesFlag.length > 0 ? systemIndicesFlag : DEFAULT_SYSTEM_INDICES;
-
-  const alertIndicesFlag = parseRepeatableFlag(flags['alert-indices']);
-  const alertIndices = alertIndicesFlag.length > 0 ? alertIndicesFlag : DEFAULT_ALERT_INDICES;
-
-  const logsIndex = String(flags['logs-index'] ?? DEFAULT_ENV_SNAPSHOT_LOGS_INDEX);
-
-  if (!snapshotName) {
-    throw new Error('Required: --snapshot-name <name>');
-  }
-
-  for (const pattern of systemIndices) {
-    if (!pattern.startsWith('.kibana')) {
-      throw new Error(
-        `--system-indices patterns must start with ".kibana", got "${pattern}". ` +
-          `Use --indices for non-system indices.`
-      );
-    }
-  }
+  const { snapshotName, systemIndices, alertIndices, logsIndex } = parseCommonSnapshotFlags(flags);
 
   log.info(`Snapshot: ${snapshotName} | Run: ${runId} | ES: ${config.esUrl}`);
 
@@ -137,9 +117,12 @@ export async function captureEnvSnapshot({
 
   const capturedSystemIndices: string[] = [];
   for (const idx of resolvedSystemIndices) {
+    const isStreamsRegistry = idx.startsWith(STREAMS_REGISTRY_PATTERN.replace('*', ''));
+    const query = isStreamsRegistry ? { ids: { values: [logsIndex] } } : undefined;
+
     let snapshotIndex: string;
     try {
-      snapshotIndex = await captureSystemIndex(esClient, log, idx);
+      snapshotIndex = await captureSystemIndex({ esClient, log, sourceIndex: idx, query });
     } catch (err) {
       if (err?.meta?.body?.error?.type === 'security_exception') {
         throw new Error(

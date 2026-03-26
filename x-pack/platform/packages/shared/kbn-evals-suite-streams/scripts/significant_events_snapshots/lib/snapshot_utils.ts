@@ -7,11 +7,49 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import {
+  DEFAULT_ALERT_INDICES,
+  DEFAULT_SYSTEM_INDICES,
+  DEFAULT_ENV_SNAPSHOT_LOGS_INDEX,
+} from './constants';
 
 export const parseRepeatableFlag = (value: unknown): string[] => {
   if (!value) return [];
   if (Array.isArray(value)) return value.map(String);
   return [String(value)];
+};
+
+export interface CommonSnapshotFlags {
+  snapshotName: string;
+  systemIndices: string[];
+  alertIndices: string[];
+  logsIndex: string;
+}
+
+export const parseCommonSnapshotFlags = (flags: Record<string, unknown>): CommonSnapshotFlags => {
+  const snapshotName = String(flags['snapshot-name'] || '');
+  if (!snapshotName) {
+    throw new Error('Required: --snapshot-name <name>');
+  }
+
+  const systemIndicesFlag = parseRepeatableFlag(flags['system-indices']);
+  const systemIndices = systemIndicesFlag.length > 0 ? systemIndicesFlag : DEFAULT_SYSTEM_INDICES;
+
+  for (const pattern of systemIndices) {
+    if (!pattern.startsWith('.kibana')) {
+      throw new Error(
+        `--system-indices patterns must start with ".kibana", got "${pattern}". ` +
+          `Only .kibana system indices are supported.`
+      );
+    }
+  }
+
+  const alertIndicesFlag = parseRepeatableFlag(flags['alert-indices']);
+  const alertIndices = alertIndicesFlag.length > 0 ? alertIndicesFlag : DEFAULT_ALERT_INDICES;
+
+  const logsIndex = String(flags['logs-index'] || DEFAULT_ENV_SNAPSHOT_LOGS_INDEX);
+
+  return { snapshotName, systemIndices, alertIndices, logsIndex };
 };
 
 export async function resolvePatterns(
