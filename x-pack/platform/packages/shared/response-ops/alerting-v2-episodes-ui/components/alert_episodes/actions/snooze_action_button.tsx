@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiButton } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiButton, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AlertEpisodeSnoozeForm } from './alert_episode_snooze_form';
 
 export interface SnoozeActionButtonProps {
   lastSnoozeAction?: string | null;
 }
 
 export function SnoozeActionButton({ lastSnoozeAction }: SnoozeActionButtonProps) {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const isSnoozed = lastSnoozeAction === 'snooze';
+  const togglePopover = () => setIsPopoverOpen((prev) => !prev);
+  const closePopover = () => setIsPopoverOpen(false);
 
   const label = isSnoozed
     ? i18n.translate('xpack.alertingV2.episodesUi.snoozeAction.unsnooze', {
@@ -25,15 +29,38 @@ export function SnoozeActionButton({ lastSnoozeAction }: SnoozeActionButtonProps
       });
 
   return (
-    <EuiButton
-      size="s"
-      color="text"
-      fill={false}
-      iconType={isSnoozed ? 'bell' : 'bellSlash'}
-      onClick={() => {}}
-      data-test-subj="alertEpisodeSnoozeActionButton"
+    <EuiPopover
+      aria-label={i18n.translate('xpack.alertingV2.episodesUi.snoozeAction.popoverAriaLabel', {
+        defaultMessage: 'Snooze actions',
+      })}
+      data-test-subj="alertEpisodeSnoozeActionPopover"
+      button={
+        <EuiButton
+          size="s"
+          color="text"
+          fill={false}
+          iconType={isSnoozed ? 'bell' : 'bellSlash'}
+          onClick={togglePopover}
+          data-test-subj="alertEpisodeSnoozeActionButton"
+        >
+          {label}
+        </EuiButton>
+      }
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      anchorPosition="downLeft"
+      panelPaddingSize="m"
+      panelStyle={{ width: 320 }}
     >
-      {label}
-    </EuiButton>
+      <AlertEpisodeSnoozeForm
+        isSnoozed={isSnoozed}
+        onApplySnooze={() => {
+          closePopover();
+        }}
+        onCancelSnooze={() => {
+          closePopover();
+        }}
+      />
+    </EuiPopover>
   );
 }
