@@ -63,7 +63,7 @@ describe('EndpointScriptEditForm', () => {
       'Path to executable file (only for archive files)',
       'Name',
       'Operating systems',
-      'Types',
+      'Categories',
       'Description',
       'Instructions',
       'Examples',
@@ -288,7 +288,7 @@ describe('EndpointScriptEditForm', () => {
     });
 
     it.each([
-      ['tags', 'Types optional'],
+      ['tags', 'Categories optional'],
       ['description', 'Description optional'],
       ['instructions', 'Instructions optional'],
       ['example', 'Examples optional'],
