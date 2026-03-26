@@ -9,6 +9,7 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { ProfileProviderServices } from '../profile_provider_services';
+import { DocumentType } from '../../profiles';
 import { createSecurityDocumentProfileProviders } from './security_profile_providers';
 
 const createRecord = (flattened: DataTableRecord['flattened']): DataTableRecord =>
@@ -28,9 +29,10 @@ const getDocViewerResult = (record: DataTableRecord) => {
     docViewsRegistry: jest.fn((r) => r),
   };
   const prev = jest.fn().mockReturnValue(prevDocViewer);
-  const result = enhancedProvider.profile.getDocViewer!(prev)({ record } as Parameters<
-    ReturnType<typeof enhancedProvider.profile.getDocViewer>
-  >[0]);
+  const getDocViewer = enhancedProvider.profile.getDocViewer!(prev, {
+    context: { type: DocumentType.Default },
+  });
+  const result = getDocViewer({ actions: {}, record } as Parameters<typeof getDocViewer>[0]);
   return { result, prevRenderHeader };
 };
 
