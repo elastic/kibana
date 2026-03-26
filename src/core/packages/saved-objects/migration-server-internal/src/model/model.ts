@@ -1207,6 +1207,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           controlState: 'FATAL',
           reason: FATAL_REASON_REQUEST_ENTITY_TOO_LARGE,
         };
+      } else if (isTypeof(res.left, 'unavailable_shards_exception')) {
+        // Not all shard copies are active. Retry indefinitely with exponential
+        // backoff until shards become available, matching wait_for_task_completion_timeout.
+        return delayRetryState(stateP, res.left.message, Number.MAX_SAFE_INTEGER);
       }
       throwBadResponse(stateP, res.left);
     }
@@ -1497,6 +1501,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           controlState: 'FATAL',
           reason: FATAL_REASON_REQUEST_ENTITY_TOO_LARGE,
         };
+      } else if (isTypeof(left, 'unavailable_shards_exception')) {
+        // Not all shard copies are active. Retry indefinitely with exponential
+        // backoff until shards become available, matching wait_for_task_completion_timeout.
+        return delayRetryState(stateP, left.message, Number.MAX_SAFE_INTEGER);
       } else if (
         isTypeof(left, 'target_index_had_write_block') ||
         isTypeof(left, 'index_not_found_exception')
