@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useContext, useState, useMemo } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { AddToCaseContextProvider } from '../../cases/add_to_cases';
 import { AddToCaseButton } from '../../cases/add_to_cases_button';
+import { CasesAttachmentWrapperContext } from '../../shared_components/attachments/pack_queries_attachment_wrapper';
 import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
 import type { AddToTimelineHandler } from '../../types';
 
@@ -26,6 +27,7 @@ interface RowKebabMenuProps {
 
 const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
   ({ row, actionId, agentIds, addToTimeline, scheduleId, executionCount, onViewQuery }) => {
+    const isCasesAttachment = useContext(CasesAttachmentWrapperContext);
     const [isOpen, setIsOpen] = useState(false);
     const close = useCallback(() => setIsOpen(false), []);
     const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
@@ -58,7 +60,7 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
               />,
             ]
           : []),
-        ...(actionId
+        ...(!isCasesAttachment && actionId
           ? [
               <AddToCaseButton
                 key="case"
