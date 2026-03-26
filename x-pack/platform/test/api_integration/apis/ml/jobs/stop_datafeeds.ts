@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { JOB_STATE, DATAFEED_STATE } from '@kbn/ml-plugin/common/constants/states';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
@@ -180,9 +180,9 @@ export default ({ getService }: FtrProviderContext) => {
             await ml.api.waitForDatafeedState(id, DATAFEED_STATE.STOPPED, 4 * 60 * 1000);
           }
 
-          // check jobs are still open
+          // check jobs are now closed
           for (const id of testData.jobIds) {
-            await ml.api.waitForJobState(id, JOB_STATE.OPENED);
+            await ml.api.waitForJobState(id, JOB_STATE.CLOSED);
           }
         });
       }
@@ -211,9 +211,9 @@ export default ({ getService }: FtrProviderContext) => {
             await ml.api.waitForDatafeedState(id, DATAFEED_STATE.STOPPED, 4 * 60 * 1000);
           }
 
-          // check jobs are still open
+          // check jobs are still closed
           for (const id of testData.jobIds) {
-            await ml.api.waitForJobState(id, JOB_STATE.OPENED);
+            await ml.api.waitForJobState(id, JOB_STATE.CLOSED);
           }
         });
       }
