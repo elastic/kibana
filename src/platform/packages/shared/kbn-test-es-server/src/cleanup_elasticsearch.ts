@@ -7,16 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { runKibanaServer } from './run_kibana_server';
-export { runElasticsearch } from './run_elasticsearch';
-export { cleanupElasticsearch } from '@kbn/test-es-server';
-export * from './run_ftr';
-export {
-  parseRawFlags,
-  getArgValue,
-  remapPluginPaths,
-  getKibanaCliArg,
-  getKibanaCliLoggers,
-} from './kibana_cli_args';
-export { initLogsDir } from './logs_dir';
-export { applyFipsOverrides, fipsIsEnabled } from './fips';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { extractAndArchiveLogs } from '@kbn/es/src/utils';
+import type { ICluster } from './test_es_cluster';
+
+export async function cleanupElasticsearch(
+  node: ICluster,
+  isServerless: boolean,
+  logsDir: string | undefined,
+  log: ToolingLog
+): Promise<void> {
+  await node.cleanup();
+
+  if (isServerless) {
+    await extractAndArchiveLogs({ outputFolder: logsDir, log });
+  }
+}

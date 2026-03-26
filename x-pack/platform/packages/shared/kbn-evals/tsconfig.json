@@ -2,11 +2,7 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node",
-      "@kbn/ambient-common-types"
-    ]
+    "types": ["jest", "node", "@kbn/ambient-common-types"]
   },
   "include": [
     "**/*.ts"
@@ -29,7 +25,7 @@
     "@kbn/repo-info",
     "@kbn/std",
     "@kbn/kbn-client",
-    "@kbn/test",
+    "@kbn/test-es-server",
     "@kbn/inference-prompt-utils",
     "@kbn/tracing-utils",
   ]
