@@ -273,6 +273,8 @@ async function runWatchBuild(
               hmrServer.broadcast(stats.hash);
             }
             log?.info('Watching for changes... (Ctrl+C to stop)');
+          } else if (hmrServer && result.errors?.length) {
+            hmrServer.broadcastErrors(result.errors);
           }
 
           resolve({
@@ -312,6 +314,9 @@ async function runWatchBuild(
             `Rebuilt in ${rebuildTime}s (${changedCount} chunks updated, ${formatSize(changedSize)} changed)`
           );
         } else {
+          if (hmrServer && result.errors?.length) {
+            hmrServer.broadcastErrors(result.errors);
+          }
           log?.error(`Rebuild failed in ${rebuildTime}s - waiting for changes...`);
         }
       }
@@ -350,9 +355,12 @@ function processStats(
     // eslint-disable-next-line no-console
     console.error(output);
 
+    const errorInfo = stats.toJson({ errors: true, warnings: false, assets: false, modules: false, chunks: false });
+    const errorMessages = errorInfo.errors?.map((e) => e.message) ?? [];
+
     return {
       success: false,
-      errors: ['Build failed with errors - see output above'],
+      errors: errorMessages.length > 0 ? errorMessages : ['Build failed with errors - see output above'],
       duration,
     };
   }

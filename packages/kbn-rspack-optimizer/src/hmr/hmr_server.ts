@@ -67,6 +67,13 @@ export class HmrServer {
     }
   }
 
+  broadcastErrors(errors: string[]): void {
+    const payload = `data: ${JSON.stringify({ errors })}\n\n`;
+    for (const client of this.clients) {
+      client.write(payload);
+    }
+  }
+
   close(): Promise<void> {
     for (const client of this.clients) {
       client.end();

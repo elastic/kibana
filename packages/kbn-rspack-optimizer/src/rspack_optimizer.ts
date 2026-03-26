@@ -157,8 +157,8 @@ export class RspackOptimizer {
                 log.info('Watching for changes...');
               }
             } else {
-              this.phase$.next('error');
-              this.ready$.next(false);
+              this.phase$.next('issue');
+              this.ready$.next(true);
               log.error('Build errors:');
               for (const error of message.errors ?? []) {
                 log.error(error);

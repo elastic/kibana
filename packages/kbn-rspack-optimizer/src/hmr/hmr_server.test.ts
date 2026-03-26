@@ -101,6 +101,30 @@ describe('HmrServer', () => {
     expect(() => server.broadcast('afterDisconnect')).not.toThrow();
   });
 
+  it('broadcastErrors() sends error events to connected clients', async () => {
+    server = new HmrServer();
+    const port = await server.start();
+    const { res, data } = await connectClient(port);
+
+    await new Promise((r) => setTimeout(r, 50));
+
+    server.broadcastErrors(['Syntax Error in foo.tsx', 'Missing import in bar.ts']);
+
+    await new Promise((r) => setTimeout(r, 50));
+
+    const combined = data.join('');
+    expect(combined).toContain('"errors":["Syntax Error in foo.tsx","Missing import in bar.ts"]');
+
+    res.destroy();
+  });
+
+  it('broadcastErrors() with no connected clients does not throw', async () => {
+    server = new HmrServer();
+    await server.start();
+
+    expect(() => server.broadcastErrors(['some error'])).not.toThrow();
+  });
+
   it('close() tears down cleanly', async () => {
     server = new HmrServer();
     const port = await server.start();
