@@ -45,6 +45,7 @@ const RulesPage = () => {
     http,
     notifications: { toasts },
     ruleTypeRegistry,
+    cps,
   } = useKibana().services;
   const useUnifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
 
@@ -246,6 +247,7 @@ const RulesPage = () => {
           toasts={toasts}
           registeredRuleTypes={ruleTypeRegistry.list()}
           filteredRuleTypes={[]}
+          cps={cps}
         />
       )}
     </>
