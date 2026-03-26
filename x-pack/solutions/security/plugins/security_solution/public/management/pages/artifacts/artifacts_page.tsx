@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import { EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -171,9 +171,9 @@ export const ArtifactsPage = memo(() => {
   const effectiveSelectedIndex =
     visibleTabs.length > 0 && selectedTabIndex >= 0 ? selectedTabIndex : 0;
 
-  const onTabClick = (tab: AdministrationSubTab) => {
+  const onTabClick = useCallback((tab: AdministrationSubTab) => {
     history.push(getPathForTab(tab));
-  };
+  }, [history, getPathForTab]);
 
   return (
     <AdministrationListPage
