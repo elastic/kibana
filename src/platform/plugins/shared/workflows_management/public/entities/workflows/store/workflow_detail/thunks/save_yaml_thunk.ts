@@ -17,6 +17,7 @@ import { queryClient } from '../../../../../shared/lib/query_client';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
 import {
+  selectAiAssisted,
   selectWorkflow,
   selectWorkflowDefinition,
   selectWorkflowId,
@@ -49,6 +50,8 @@ export const saveYamlThunk = createAsyncThunk<
           },
         });
 
+    const isAiAssisted = selectAiAssisted(getState());
+
     try {
       const state = getState();
       const yamlString = selectYamlString(state);
@@ -77,6 +80,7 @@ export const saveYamlThunk = createAsyncThunk<
           isBulkAction: false,
           error: undefined,
           origin: 'workflow_detail',
+          aiAssisted: isAiAssisted,
         });
 
         // For consistency, dispatch the loadWorkflow thunk to update the workflow in the store to the latest version from the API
@@ -92,6 +96,7 @@ export const saveYamlThunk = createAsyncThunk<
           error: undefined,
           editorType: 'yaml', // Saving YAML always comes from YAML editor
           origin: 'workflow_detail',
+          aiAssisted: isAiAssisted,
         });
 
         // Update the workflow in the store
@@ -133,12 +138,14 @@ export const saveYamlThunk = createAsyncThunk<
           isBulkAction: false,
           error: errorObj,
           origin: 'workflow_detail',
+          aiAssisted: isAiAssisted,
         });
       } else {
         telemetry.reportWorkflowCreated({
           workflowDefinition: errorWorkflowDefinition || undefined,
           error: errorObj,
           origin: 'workflow_detail',
+          aiAssisted: isAiAssisted,
         });
       }
 
