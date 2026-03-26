@@ -8,7 +8,6 @@
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { get } from 'lodash/fp';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import {
   GRAPH_ACTOR_ENTITY_FIELDS,
   GRAPH_TARGET_ENTITY_FIELDS,
@@ -17,7 +16,7 @@ import type { GetFieldsData } from './use_get_fields_data';
 import { getField, getFieldArray } from '../utils';
 import { useBasicDataFromDetailsData } from './use_basic_data_from_details_data';
 import { useHasGraphVisualizationLicense } from '../../../../common/hooks/use_has_graph_visualization_license';
-import { ENABLE_GRAPH_VISUALIZATION_SETTING } from '../../../../../common/constants';
+import { useEntityStoreStatus } from '../../../../entity_analytics/components/entity_store/hooks/use_entity_store';
 
 export interface UseGraphPreviewParams {
   /**
@@ -66,9 +65,14 @@ export interface UseGraphPreviewResult {
 
   /**
    * Boolean indicating if graph visualization is fully available
-   * Combines: data availability (event ids, actor ids and action) + valid license + feature enabled in settings
+   * Combines: data availability (event ids, actor ids and action) + valid license + entity store running
    */
   shouldShowGraph: boolean;
+
+  /**
+   * Boolean indicating if the event has all required data fields for graph visualization
+   */
+  hasGraphData: boolean;
 
   /**
    * Boolean indicating if the event is an alert or not
@@ -108,19 +112,20 @@ export const useGraphPreview = ({
   // Check if user license is high enough to access graph visualization
   const hasRequiredLicense = useHasGraphVisualizationLicense();
 
-  // Check if graph visualization feature is enabled in UI settings
-  const [isGraphFeatureEnabled] = useUiSetting$<boolean>(ENABLE_GRAPH_VISUALIZATION_SETTING);
+  // Check if entity store is running
+  const { data: entityStoreStatus } = useEntityStoreStatus();
+  const isEntityStoreRunning = entityStoreStatus?.status === 'running';
 
   // Check if graph has all required data fields for graph visualization
-  const hasGraphRepresentation =
+  const hasGraphData =
     Boolean(timestamp) &&
     Boolean(action?.length) &&
     eventIds.length > 0 &&
     actorIds.length > 0 &&
     targetIds.length > 0;
 
-  // Combine all conditions: data availability + license + feature flag
-  const shouldShowGraph = hasGraphRepresentation && hasRequiredLicense && isGraphFeatureEnabled;
+  // Combine all conditions: data availability + license + entity store running
+  const shouldShowGraph = hasGraphData && hasRequiredLicense && isEntityStoreRunning;
 
   const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 
@@ -131,6 +136,7 @@ export const useGraphPreview = ({
     action,
     targetIds,
     shouldShowGraph,
+    hasGraphData,
     isAlert,
   };
 };

@@ -8,6 +8,7 @@
  */
 
 import type { URL } from 'url';
+import type { Span as OTelSpan } from '@opentelemetry/api';
 import type { RequestApplicationState, RouteOptionsApp } from '@hapi/hapi';
 import type { Observable } from 'rxjs';
 import type { Span } from 'elastic-apm-node';
@@ -42,9 +43,14 @@ export interface KibanaRequestState extends RequestApplicationState {
   requestUuid: string;
   rewrittenUrl?: URL;
   traceId?: string;
+  /** The top HTTP Otel Span for this request. */
+  httpSpan?: OTelSpan;
+  /** The OTel sub-span: used to group the pre-route handlers, the route handler, and the post-route handlers. */
+  otelSubSpan?: OTelSpan;
+  /** The Elastic APM span to group the pre-route handlers, the route handler, and the post-route handlers. */
   span?: Span | null;
   authzResult?: Record<string, boolean>;
-  measureElu?: () => void;
+  measureElu?: (httpSpan?: OTelSpan) => void;
   startTime: number;
   redactedSessionId?: string;
 }
@@ -57,7 +63,10 @@ export type KibanaRequestRouteOptions<Method extends RouteMethod> = (Method exte
   | 'get'
   | 'options'
   ? Required<Omit<RouteConfigOptions<Method>, 'body'>>
-  : Required<RouteConfigOptions<Method>>) & { security?: RouteSecurity };
+  : Required<RouteConfigOptions<Method>>) & {
+  security?: RouteSecurity;
+  authRequired: boolean | 'optional';
+};
 
 /**
  * Request specific route information exposed to a handler.
