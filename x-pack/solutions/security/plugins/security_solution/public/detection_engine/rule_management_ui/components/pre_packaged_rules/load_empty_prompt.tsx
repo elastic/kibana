@@ -8,9 +8,9 @@
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { memo } from 'react';
 import styled from 'styled-components';
-import { useUserData } from '../../../../detections/components/user_info';
 import { AddElasticRulesButton } from './add_elastic_rules_button';
 import * as i18n from './translations';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
   align-self: center; /* Corrects horizontal centering in IE11 */
@@ -19,7 +19,7 @@ const EmptyPrompt = styled(EuiEmptyPrompt)`
 EmptyPrompt.displayName = 'EmptyPrompt';
 
 const PrePackagedRulesPromptComponent = () => {
-  const [{ loading, canUserCRUD }] = useUserData();
+  const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
   return (
     <EmptyPrompt
       data-test-subj="rulesEmptyPrompt"
@@ -29,7 +29,7 @@ const PrePackagedRulesPromptComponent = () => {
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false}>
             <AddElasticRulesButton
-              isDisabled={!canUserCRUD || loading}
+              isDisabled={!canReadRules}
               fill={true}
               data-test-subj="add-elastc-rules-empty-empty-prompt-button"
               showBadge={false}

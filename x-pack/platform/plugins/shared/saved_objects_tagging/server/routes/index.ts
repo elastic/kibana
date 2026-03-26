@@ -18,7 +18,7 @@ import {
   registerGetAssignableTypesRoute,
 } from './assignments';
 import { registerInternalFindTagsRoute, registerInternalBulkDeleteRoute } from './internal';
-import { TagsPluginRouter } from '../types';
+import type { TagsPluginRouter } from '../types';
 
 export const registerRoutes = ({ router }: { router: TagsPluginRouter }) => {
   // tags API

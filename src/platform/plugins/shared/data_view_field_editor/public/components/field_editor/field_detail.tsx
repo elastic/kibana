@@ -79,7 +79,7 @@ const geti18nTexts = (): {
   },
 });
 
-export const FieldDetail = ({}) => {
+export const FieldDetail = ({ isDisabled }: { isDisabled?: boolean }) => {
   const { links, fieldTypeToProcess } = useFieldEditorContext();
   const i18nTexts = geti18nTexts();
   return (
@@ -88,22 +88,24 @@ export const FieldDetail = ({}) => {
       <FormRow
         title={i18nTexts.customLabel.title}
         description={i18nTexts.customLabel.description}
+        disabled={isDisabled}
         formFieldPath="__meta__.isCustomLabelVisible"
         data-test-subj="customLabelRow"
         withDividerRule
       >
-        <CustomLabelField />
+        <CustomLabelField disabled={isDisabled} />
       </FormRow>
 
       {/* Set custom description */}
       <FormRow
         title={i18nTexts.customDescription.title}
         description={i18nTexts.customDescription.description}
+        disabled={isDisabled}
         formFieldPath="__meta__.isCustomDescriptionVisible"
         data-test-subj="customDescriptionRow"
         withDividerRule
       >
-        <CustomDescriptionField />
+        <CustomDescriptionField disabled={isDisabled} />
       </FormRow>
 
       {/* Set value */}
@@ -111,11 +113,12 @@ export const FieldDetail = ({}) => {
         <FormRow
           title={i18nTexts.value.title}
           description={i18nTexts.value.description}
+          disabled={isDisabled}
           formFieldPath="__meta__.isValueVisible"
           data-test-subj="valueRow"
           withDividerRule
         >
-          <ScriptField links={links} />
+          <ScriptField links={links} disabled={isDisabled} />
         </FormRow>
       )}
 
@@ -123,11 +126,12 @@ export const FieldDetail = ({}) => {
       <FormRow
         title={i18nTexts.format.title}
         description={i18nTexts.format.description}
+        disabled={isDisabled}
         formFieldPath="__meta__.isFormatVisible"
         data-test-subj="formatRow"
         withDividerRule
       >
-        <FormatField />
+        <FormatField disabled={isDisabled} />
       </FormRow>
 
       {/* Advanced settings */}
@@ -136,11 +140,12 @@ export const FieldDetail = ({}) => {
         <FormRow
           title={i18nTexts.popularity.title}
           description={i18nTexts.popularity.description}
+          disabled={isDisabled}
           formFieldPath="__meta__.isPopularityVisible"
           data-test-subj="popularityRow"
           withDividerRule
         >
-          <PopularityField />
+          <PopularityField disabled={isDisabled} />
         </FormRow>
       </AdvancedParametersSection>
     </>

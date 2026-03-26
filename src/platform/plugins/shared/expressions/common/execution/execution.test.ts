@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { lastValueFrom, of } from 'rxjs';
-import { scan } from 'rxjs';
+import { lastValueFrom, of, scan } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { Execution } from './execution';
-import { parseExpression, ExpressionAstExpression } from '../ast';
+import type { ExpressionAstExpression } from '../ast';
+import { parseExpression } from '../ast';
 import { createUnitTestExecutor } from '../test_helpers';
-import { ExpressionFunctionDefinition } from '..';
+import type { ExpressionFunctionDefinition } from '..';
 import { ExecutionContract } from './execution_contract';
-import { ExpressionValueBoxed } from '../expression_types';
+import type { ExpressionValueBoxed } from '../expression_types';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 
 beforeAll(() => {
   if (typeof performance === 'undefined') {
@@ -363,6 +364,22 @@ describe('Execution', () => {
       const { result } = await run('introspectContext key="abortSignal"');
 
       expect(result).toHaveProperty('result.aborted', false);
+    });
+
+    test('does not throw error when aborted with AbortReason.CANCELED', async () => {
+      const execution = createExecution('add val=1');
+      execution.start(1);
+
+      // Simulate user cancellation
+      execution.cancel(AbortReason.CANCELED);
+
+      const { result } = await lastValueFrom(execution.result);
+
+      // Should return an abort error value, not throw
+      expect(result).toEqual({
+        type: 'num',
+        value: 2,
+      });
     });
   });
 

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { CommonlyUsed } from '../../page_objects/time_picker';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { CommonlyUsed } from '../../page_objects/time_picker';
 
 export function DashboardCustomizePanelProvider({ getService, getPageObject }: FtrProviderContext) {
   const log = getService('log');

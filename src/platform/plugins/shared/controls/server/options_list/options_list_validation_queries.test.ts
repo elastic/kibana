@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 
-import { OptionsListRequestBody } from '../../common/options_list/types';
+import type { OptionsListRequestBody } from '../../common/options_list/types';
 import { getValidationAggregationBuilder } from './options_list_validation_queries';
 
 describe('options list queries', () => {
@@ -41,7 +41,6 @@ describe('options list queries', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'coolTestField',
-        allowExpensiveQueries: true,
       };
       expect(
         validationAggBuilder.buildAggregation(optionsListRequestBodyMock)
@@ -53,7 +52,7 @@ describe('options list queries', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'coolTestField',
-        allowExpensiveQueries: true,
+
         selectedOptions: ['coolOption1', 'coolOption2', 'coolOption3'],
       };
       expect(validationAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -93,7 +92,7 @@ describe('options list queries', () => {
           type: 'string',
           subType: { nested: { path: 'path.to.nested' } },
         } as unknown as FieldSpec,
-        allowExpensiveQueries: true,
+
         selectedOptions: ['coolOption1', 'coolOption2', 'coolOption3'],
       };
       expect(validationAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -151,7 +150,7 @@ describe('options list queries', () => {
         validationAggBuilder.parse(rawSearchResponseMock, {
           size: 10,
           fieldName: 'coolTestField',
-          allowExpensiveQueries: true,
+
           fieldSpec: { type: 'string' } as FieldSpec,
         })
       ).toMatchInlineSnapshot(`
@@ -187,7 +186,6 @@ describe('options list queries', () => {
             subType: { nested: { path: 'path.to.nested' } },
           } as unknown as FieldSpec,
           fieldName: 'coolTestField',
-          allowExpensiveQueries: true,
         })
       ).toMatchInlineSnapshot(`
         Array [

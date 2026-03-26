@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { Action } from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import { AbstractExploreDataAction } from './abstract_explore_data_action';
 
 export const ACTION_EXPLORE_DATA = 'ACTION_EXPLORE_DATA';

@@ -13,7 +13,7 @@ import {
   getSampleDataCardMockDataSet,
 } from '@kbn/home-sample-data-card';
 
-import { SampleDataTabServices } from './services';
+import type { SampleDataTabServices } from './services';
 
 /**
  * Parameters drawn from the Storybook arguments collection that customize a component story.
@@ -24,13 +24,14 @@ export type Params = Record<keyof ReturnType<typeof getStoryArgTypes>, any>;
  * Returns Storybook-compatible service abstractions for the `SampleDataCard` Provider.
  */
 export const getStoryServices = (params: Params) => {
+  const cardServices = getSampleDataCardStoryServices(params);
   const services: SampleDataTabServices = {
+    ...cardServices,
     fetchSampleDataSets: async () => {
       const data = getSampleDataCardMockDataSet(params);
       return [data, data, data];
     },
     logClick: () => {},
-    ...getSampleDataCardStoryServices(params),
   };
 
   return services;

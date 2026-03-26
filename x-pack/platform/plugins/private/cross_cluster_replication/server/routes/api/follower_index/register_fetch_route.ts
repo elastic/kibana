@@ -7,7 +7,7 @@
 
 import { deserializeListFollowerIndices } from '../../../../common/services/follower_index_serialization';
 import { addBasePath } from '../../../services';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 /**
  * Returns a list of all follower indices

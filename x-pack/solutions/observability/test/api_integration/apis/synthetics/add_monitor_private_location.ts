@@ -6,19 +6,20 @@
  */
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  ConfigKey,
+import type {
   HTTPFields,
+  MonitorFields,
   PrivateLocation,
   ServiceLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
+import { ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { omit } from 'lodash';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import expect from '@kbn/expect';
 import { getDevLocation } from '@kbn/synthetics-plugin/server/synthetics_service/get_service_locations';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
 import { PrivateLocationTestService } from './services/private_location_test_service';
@@ -37,6 +38,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     let _httpMonitorJson: HTTPFields;
     let httpMonitorJson: HTTPFields;
+    let _browserMonitorJson: MonitorFields;
+    let browserMonitorJson: MonitorFields;
     const monitorTestService = new SyntheticsMonitorTestService(getService);
     const testPrivateLocations = new PrivateLocationTestService(getService);
     const security = getService('security');
@@ -46,14 +49,16 @@ export default function ({ getService }: FtrProviderContext) {
       await testPrivateLocations.installSyntheticsPackage();
 
       _httpMonitorJson = getFixtureJson('http_monitor');
+      _browserMonitorJson = getFixtureJson('browser_monitor');
     });
 
     beforeEach(() => {
       httpMonitorJson = _httpMonitorJson;
+      browserMonitorJson = _browserMonitorJson;
     });
 
     it('add a test private location', async () => {
-      pvtLoc = await testPrivateLocations.addPrivateLocation();
+      pvtLoc = await testPrivateLocations.createPrivateLocation();
       testFleetPolicyID = pvtLoc.agentPolicyId;
 
       const apiResponse = await supertestAPI.get(SYNTHETICS_API_URLS.SERVICE_LOCATIONS);
@@ -64,6 +69,47 @@ export default function ({ getService }: FtrProviderContext) {
       ];
 
       expect(apiResponse.body.locations).eql(testResponse);
+    });
+
+    it('rejects browser timeout below 30s in private locations', async () => {
+      const monitor = {
+        ...browserMonitorJson,
+        name: `Browser timeout too low ${uuidv4()}`,
+        timeout: '29',
+        locations: [omit(pvtLoc, ['spaces'])],
+      };
+
+      const apiResponse = await supertestAPI
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+        .set('kbn-xsrf', 'true')
+        .send(monitor)
+        .expect(400);
+
+      expect(apiResponse.body.message).eql(
+        'Browser monitor timeout for private locations is invalid'
+      );
+      expect(apiResponse.body.attributes.details).to.contain('Timeout of 29 seconds is too low');
+    });
+
+    it('allows browser timeout at 30s in private locations', async () => {
+      const monitor = {
+        ...browserMonitorJson,
+        name: `Browser timeout ok ${uuidv4()}`,
+        timeout: '30',
+        locations: [omit(pvtLoc, ['spaces'])],
+      };
+
+      const apiResponse = await supertestAPI
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+        .set('kbn-xsrf', 'true')
+        .send(monitor)
+        .expect(200);
+
+      await supertestAPI
+        .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+        .set('kbn-xsrf', 'true')
+        .send({ ids: [apiResponse.body.id] })
+        .expect(200);
     });
 
     it('handles spaces', async () => {
@@ -93,6 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
             ...monitor,
             [ConfigKey.NAMESPACE]: formatKibanaNamespace(SPACE_ID),
             url: apiResponse.body.url,
+            spaces: [SPACE_ID],
           })
         );
         monitorId = apiResponse.body.id;
@@ -102,12 +149,11 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         const packagePolicy = policyResponse.body.items.find(
-          (pkgPolicy: PackagePolicy) =>
-            pkgPolicy.id === monitorId + '-' + pvtLoc.id + `-${SPACE_ID}`
+          (pkgPolicy: PackagePolicy) => pkgPolicy.id === monitorId + '-' + pvtLoc.id
         );
 
         expect(packagePolicy.policy_id).eql(testFleetPolicyID);
-        expect(packagePolicy.name).eql(`${monitor.name}-Test private location 0-${SPACE_ID}`);
+        expect(packagePolicy.name).eql(`${monitor.name}-Test private location 0`);
         comparePolicies(
           packagePolicy,
           getTestSyntheticsPolicy({
@@ -116,6 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
             location: { id: pvtLoc.id },
             namespace: formatKibanaNamespace(SPACE_ID),
             spaceId: SPACE_ID,
+            packageVersion: testPrivateLocations.installedVersion,
           })
         );
         await supertestWithoutAuth

@@ -5,23 +5,28 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
+import { useSelector } from 'react-redux';
 import { CORRELATIONS_DETAILS_TEST_ID } from './test_ids';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
 import { RelatedAlertsBySameSourceEvent } from './related_alerts_by_same_source_event';
 import { RelatedCases } from './related_cases';
-import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
-import { useShowRelatedAlertsByAncestry } from '../../shared/hooks/use_show_related_alerts_by_ancestry';
-import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_alerts';
+import { useShowRelatedCases } from '../../../../flyout_v2/document/hooks/use_show_related_cases';
+import { useShowRelatedAlertsByAncestry } from '../../../../flyout_v2/document/hooks/use_show_related_alerts_by_ancestry';
+import { useShowSuppressedAlerts } from '../../../../flyout_v2/document/hooks/use_show_suppressed_alerts';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
-import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
+import { useShowRelatedAlertsBySameSourceEvent } from '../../../../flyout_v2/document/hooks/use_show_related_alerts_by_same_source_event';
+import { useShowRelatedAlertsBySession } from '../../../../flyout_v2/document/hooks/use_show_related_alerts_by_session';
 import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
 import { SuppressedAlerts } from './suppressed_alerts';
-import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
-import { isActiveTimeline } from '../../../../helpers';
+import { RelatedAttacks } from './related_attacks';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { sourcererSelectors } from '../../../../sourcerer/store';
+import { useShowRelatedAttacks } from '../../../../flyout_v2/document/hooks/use_show_related_attacks';
 
 export const CORRELATIONS_TAB_ID = 'correlations';
 
@@ -29,31 +34,38 @@ export const CORRELATIONS_TAB_ID = 'correlations';
  * Correlations displayed in the document details expandable flyout left section under the Insights tab
  */
 export const CorrelationsDetails: React.FC = () => {
-  const { dataAsNestedObject, eventId, getFieldsData, scopeId, isPreview } =
+  const { dataAsNestedObject, eventId, scopeId, isRulePreview, searchHit } =
     useDocumentDetailsContext();
 
-  const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline(scopeId));
+  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
-  const { show: showAlertsByAncestry, documentId } = useShowRelatedAlertsByAncestry({
-    getFieldsData,
-    dataAsNestedObject,
-    eventId,
-    isPreview,
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const oldSecurityDefaultPatterns =
+    useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
+  const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();
+  const securityDefaultPatterns = newDataViewPickerEnabled
+    ? experimentalSecurityDefaultIndexPatterns
+    : oldSecurityDefaultPatterns;
+
+  const { show: showAlertsByAncestry, ancestryDocumentId } = useShowRelatedAlertsByAncestry({
+    hit,
+    isRulePreview,
   });
   const { show: showSameSourceAlerts, originalEventId } = useShowRelatedAlertsBySameSourceEvent({
-    eventId,
-    getFieldsData,
+    hit,
   });
-  const { show: showAlertsBySession, entityId } = useShowRelatedAlertsBySession({ getFieldsData });
-  const showCases = useShowRelatedCases({ getFieldsData });
+  const { show: showAlertsBySession, entityId } = useShowRelatedAlertsBySession({ hit });
+  const showCases = useShowRelatedCases({ hit });
   const { show: showSuppressedAlerts, alertSuppressionCount } = useShowSuppressedAlerts({
-    getFieldsData,
+    hit,
   });
+  const { show: showRelatedAttacks, attackIds } = useShowRelatedAttacks({ hit });
 
   const canShowAtLeastOneInsight =
     showAlertsByAncestry ||
     showSameSourceAlerts ||
     showAlertsBySession ||
+    showRelatedAttacks ||
     showCases ||
     showSuppressedAlerts;
 
@@ -66,7 +78,7 @@ export const CorrelationsDetails: React.FC = () => {
               <SuppressedAlerts
                 alertSuppressionCount={alertSuppressionCount}
                 dataAsNestedObject={dataAsNestedObject}
-                isPreview={isPreview}
+                showInvestigateInTimeline={!isRulePreview}
               />
             </EuiFlexItem>
           )}
@@ -92,10 +104,15 @@ export const CorrelationsDetails: React.FC = () => {
           {showAlertsByAncestry && (
             <EuiFlexItem>
               <RelatedAlertsByAncestry
-                indices={selectedPatterns}
+                indices={securityDefaultPatterns}
                 scopeId={scopeId}
-                documentId={documentId}
+                documentId={ancestryDocumentId}
               />
+            </EuiFlexItem>
+          )}
+          {showRelatedAttacks && (
+            <EuiFlexItem>
+              <RelatedAttacks attackIds={attackIds} scopeId={scopeId} eventId={eventId} />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

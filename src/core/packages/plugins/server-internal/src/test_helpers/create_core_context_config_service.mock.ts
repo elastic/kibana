@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IConfigService } from '@kbn/config';
+import type { IConfigService } from '@kbn/config';
 import { configServiceMock } from '@kbn/config-mocks';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { fromRoot } from '@kbn/repo-info';
@@ -22,7 +22,6 @@ export const createCoreContextConfigServiceMock = (): IConfigService => {
         return {
           shardTimeout: duration(30, 's'),
           requestTimeout: duration(30, 's'),
-          pingTimeout: duration(30, 's'),
           someOtherProps: 'unused',
         };
       case 'path':

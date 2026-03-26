@@ -17,7 +17,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { lazy, Suspense, useEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import type { FC } from 'react';
 
 import type { ScopedHistory } from '@kbn/core/public';
@@ -86,6 +86,7 @@ export const EditSpace: FC<PageProps> = ({
   const [isLoadingRoles, setIsLoadingRoles] = useState(true);
   const selectedTabId = getSelectedTabId(Boolean(capabilities?.roles?.view), _selectedTabId);
   const isSecurityEnabled = Boolean(license?.isEnabled());
+  const rolesLoadedForSpaceRef = useRef<string | null>(null);
   const [tabs, selectedTabContent] = useTabs({
     space,
     features,
@@ -149,20 +150,18 @@ export const EditSpace: FC<PageProps> = ({
       });
 
       setIsLoadingRoles(false);
+      rolesLoadedForSpaceRef.current = spaceId;
     };
 
-    if (isRoleManagementEnabled && !state.roles.size && !state.fetchRolesError) {
+    const shouldLoadRoles =
+      isRoleManagementEnabled &&
+      rolesLoadedForSpaceRef.current !== spaceId &&
+      !state.fetchRolesError;
+
+    if (shouldLoadRoles) {
       getRoles();
     }
-  }, [
-    dispatch,
-    invokeClient,
-    spaceId,
-    logger,
-    state.roles,
-    state.fetchRolesError,
-    isRoleManagementEnabled,
-  ]);
+  }, [dispatch, invokeClient, spaceId, logger, state.fetchRolesError, isRoleManagementEnabled]);
 
   useEffect(() => {
     const _getFeatures = async () => {

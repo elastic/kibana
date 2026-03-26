@@ -11,7 +11,7 @@ jest.mock('../../../../../utils/create_ml_inference_pipeline', () => ({
   }),
 }));
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { addSubPipelineToIndexSpecificMlPipeline } from '../../../../../utils/create_ml_inference_pipeline';
 

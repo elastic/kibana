@@ -450,11 +450,7 @@ export const formattedSearchStrategyResponse = {
               aggs: { timestamp: { max: { field: '@timestamp' } } },
             },
             host_ip: {
-              terms: {
-                script: { source: "doc['host.ip']", lang: 'painless' },
-                size: 10,
-                order: { timestamp: 'desc' },
-              },
+              terms: { field: 'host.ip', value_type: 'ip', size: 10, order: { timestamp: 'desc' } },
               aggs: { timestamp: { max: { field: '@timestamp' } } },
             },
             host_mac: {
@@ -623,10 +619,8 @@ export const expectedDsl = {
     },
     host_ip: {
       terms: {
-        script: {
-          source: "doc['host.ip']",
-          lang: 'painless',
-        },
+        field: 'host.ip',
+        value_type: 'ip',
         size: 10,
         order: {
           timestamp: 'desc',

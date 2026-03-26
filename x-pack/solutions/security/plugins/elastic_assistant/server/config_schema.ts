@@ -5,14 +5,14 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { ELASTICSEARCH_ELSER_INFERENCE_ID } from './ai_assistant_data_clients/knowledge_base/field_maps_configuration';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
 export interface ConfigSchema {
   elserInferenceId: string;
   responseTimeout: number;
 }
 export const configSchema = schema.object({
-  elserInferenceId: schema.string({ defaultValue: ELASTICSEARCH_ELSER_INFERENCE_ID }),
+  elserInferenceId: schema.string({ defaultValue: defaultInferenceEndpoints.ELSER }),
   responseTimeout: schema.number({
     defaultValue: 10 * 60 * 1000, // 10 minutes
   }),

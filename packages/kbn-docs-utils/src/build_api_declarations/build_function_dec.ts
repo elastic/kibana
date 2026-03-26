@@ -7,19 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   FunctionDeclaration,
   MethodDeclaration,
   ConstructorDeclaration,
   MethodSignature,
   ConstructSignatureDeclaration,
+  CallSignatureDeclaration,
 } from 'ts-morph';
 
 import { buildApiDecsForParameters } from './build_parameter_decs';
-import { ApiDeclaration, TypeKind } from '../types';
+import type { ApiDeclaration } from '../types';
+import { TypeKind } from '../types';
 import { getJSDocReturnTagComment, getJSDocs } from './js_doc_utils';
 import { buildBasicApiDeclaration } from './build_basic_api_declaration';
-import { BuildApiDecOpts } from './types';
+import type { BuildApiDecOpts } from './types';
 
 /**
  * Takes the various function-like node declaration types and converts them into an ApiDeclaration.
@@ -30,7 +32,8 @@ export function buildFunctionDec(
     | FunctionDeclaration
     | MethodDeclaration
     | ConstructorDeclaration
-    | MethodSignature,
+    | MethodSignature
+    | CallSignatureDeclaration,
   opts: BuildApiDecOpts
 ): ApiDeclaration {
   const fn = {

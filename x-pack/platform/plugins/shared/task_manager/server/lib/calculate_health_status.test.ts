@@ -10,6 +10,7 @@ import { HealthStatus } from '../monitoring';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { calculateHealthStatus } from './calculate_health_status';
 import { cloneDeep } from 'lodash';
+import { ApiKeyType } from '../config';
 
 const now = '2023-05-09T13:00:00.000Z';
 Date.now = jest.fn().mockReturnValue(new Date(now));
@@ -24,6 +25,10 @@ const config = {
   enabled: true,
   index: 'foo',
   max_attempts: 9,
+  invalidate_api_key_task: {
+    interval: '5m',
+    removalDelay: '1h',
+  },
   poll_interval: 3000,
   version_conflict_threshold: 80,
   request_capacity: 1000,
@@ -58,6 +63,7 @@ const config = {
     update_by_query: 1000,
   },
   auto_calculate_default_ech_capacity: false,
+  api_key_type: ApiKeyType.ES,
 };
 
 const getStatsWithTimestamp = ({

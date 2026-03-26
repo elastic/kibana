@@ -7,7 +7,7 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useMetricsExplorerData } from './use_metrics_explorer_data';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { waitFor, act, renderHook } from '@testing-library/react';

@@ -25,9 +25,9 @@ import { css } from '@emotion/react';
 
 import { ChartLegendItem } from './chart_legend_item';
 import { NoData } from './no_data';
-import { PatternRollup, SelectedIndex } from '../../../types';
+import type { PatternRollup, SelectedIndex } from '../../../types';
 import { useDataQualityContext } from '../../../data_quality_context';
-import { FlattenedBucket } from '../types';
+import type { FlattenedBucket } from '../types';
 import { getPathToFlattenedBucketMap } from './utils/get_path_to_flattened_bucket_map';
 import { getLayersMultiDimensional } from './utils/get_layers_multi_dimensional';
 import { getLegendItems } from './utils/get_legend_items';

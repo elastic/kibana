@@ -20,15 +20,15 @@ import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/pu
 import type { CasesPublicSetup } from '@kbn/cases-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public/types';
 import type { ChangePointDetectionSharedComponent } from '../shared_components';
 
 import type { LogCategorizationEmbeddableWrapperProps } from '../components/log_categorization/log_categorization_for_embeddable/log_categorization_for_discover_wrapper';
 
 export interface AiopsPluginSetupDeps {
   embeddable: EmbeddableSetup;
-  cases: CasesPublicSetup;
+  cases?: CasesPublicSetup;
   licensing: LicensingPluginSetup;
-
   uiActions: UiActionsSetup;
 }
 
@@ -46,11 +46,12 @@ export interface AiopsPluginStartDeps {
   embeddable: EmbeddableStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   usageCollection: UsageCollectionSetup;
+  cps?: CPSPluginStart;
 }
 
 export type AiopsPluginSetup = void;
 export interface AiopsPluginStart {
-  getPatternAnalysisAvailable: () => Promise<(dataView: DataView) => Promise<boolean>>;
+  getPatternAnalysisAvailable: () => Promise<(dataView: DataView) => boolean>;
   PatternAnalysisComponent: React.ComponentType<LogCategorizationEmbeddableWrapperProps>;
   ChangePointDetectionComponent: ChangePointDetectionSharedComponent;
 }

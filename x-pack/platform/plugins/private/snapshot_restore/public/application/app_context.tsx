@@ -6,12 +6,12 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { i18n } from '@kbn/i18n';
+import type { i18n } from '@kbn/i18n';
 
-import { CoreStart, ScopedHistory, IUiSettingsClient } from '@kbn/core/public';
+import type { CoreStart, ScopedHistory, IUiSettingsClient } from '@kbn/core/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
-import { ClientConfigType } from '../types';
-import { HttpService, UiMetricService } from './services';
+import type { ClientConfigType } from '../types';
+import type { HttpService, UiMetricService } from './services';
 
 const AppContext = createContext<AppDependencies | undefined>(undefined);
 

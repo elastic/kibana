@@ -8,8 +8,8 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: ReadEndpointListItem
-      summary: Get an endpoint exception list item
-      description: Get the details of an endpoint exception list item using the `id` or `item_id` field.
+      summary: Get an Elastic Endpoint rule exception list item
+      description: Get the details of an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
       parameters:
         - name: id
           in: query
@@ -29,9 +29,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '../model/endpoint_list_common.schema.yaml#/components/schemas/EndpointListItem'
+                $ref: '../model/endpoint_list_common.schema.yaml#/components/schemas/EndpointListItem'
         400:
           description: Invalid input data
           content:

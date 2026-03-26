@@ -9,7 +9,8 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { Page, PageProps } from './components/page';
+import type { PageProps } from './components/page';
+import { Page } from './components/page';
 
 export const render = (container: HTMLElement, props: PageProps) => {
   ReactDOM.render(React.createElement(Page, props), container);

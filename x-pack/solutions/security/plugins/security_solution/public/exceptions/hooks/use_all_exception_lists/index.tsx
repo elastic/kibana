@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
-import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import type { Rule } from '../../../detection_engine/rule_management/logic';
-import { fetchRules } from '../../../detection_engine/rule_management/api/api';
+import type { ExceptionListSchema, ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { findRuleExceptionReferences } from '../../../detection_engine/rule_management/api/api';
+
+export interface ExceptionListRuleReference {
+  name: string;
+  id: string;
+  rule_id: string;
+  exceptions_list: ListArray;
+}
+
 export interface ExceptionListInfo extends ExceptionListSchema {
-  rules: Rule[];
+  rules: ExceptionListRuleReference[];
 }
 
 export type UseAllExceptionListsReturn = [
@@ -21,13 +29,11 @@ export type UseAllExceptionListsReturn = [
 ];
 
 /**
- * Hook for preparing exception lists table info. For now, we need to do a table scan
- * of all rules to figure out which exception lists are used in what rules. This is very
- * slow, however, there is an issue open that would push all this work to Kiaban/ES and
- * speed things up a ton - https://github.com/elastic/kibana/issues/85173
+ * Hook for preparing exception lists table info. Uses the server-side
+ * _find_references endpoint to query rules by exception list reference
+ * via Elasticsearch hasReference, instead of loading all rules client-side.
  *
  * @param exceptionLists ExceptionListSchema(s) to evaluate
- *
  */
 export const useAllExceptionLists = ({
   exceptionLists,
@@ -39,42 +45,9 @@ export const useAllExceptionLists = ({
   const [exceptionsListsInfo, setExceptionsListInfo] = useState<Record<string, ExceptionListInfo>>(
     {}
   );
+  const { read: canReadRules } = useUserPrivileges().rulesPrivileges.rules;
 
-  const handleExceptionsInfo = useCallback(
-    (rules: Rule[]): Record<string, ExceptionListInfo> => {
-      const listsSkeleton = exceptionLists.reduce<Record<string, ExceptionListInfo>>(
-        (acc, { id, ...rest }) => {
-          acc[id] = {
-            ...rest,
-            id,
-            rules: [],
-          };
-
-          return acc;
-        },
-        {}
-      );
-
-      return rules.reduce<Record<string, ExceptionListInfo>>((acc, rule) => {
-        const ruleExceptionLists = rule.exceptions_list;
-
-        if (ruleExceptionLists != null && ruleExceptionLists.length > 0) {
-          ruleExceptionLists.forEach((ex) => {
-            const list = acc[ex.id];
-            if (list != null) {
-              acc[ex.id] = {
-                ...list,
-                rules: [...list.rules, rule],
-              };
-            }
-          });
-        }
-
-        return acc;
-      }, listsSkeleton);
-    },
-    [exceptionLists]
-  );
+  const listKey = useMemo(() => exceptionLists.map((l) => l.id).join(','), [exceptionLists]);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -91,24 +64,38 @@ export const useAllExceptionLists = ({
       try {
         setLoading(true);
 
-        const { data: rules } = await fetchRules({
-          pagination: {
-            page: 1,
-            perPage: 10000,
-          },
-          signal: abortCtrl.signal,
-        });
+        const listsById = exceptionLists.reduce<Record<string, ExceptionListInfo>>((acc, list) => {
+          acc[list.id] = { ...list, rules: [] };
+          return acc;
+        }, {});
 
-        const updatedLists = handleExceptionsInfo(rules);
+        if (canReadRules) {
+          const { references } = await findRuleExceptionReferences({
+            lists: exceptionLists.map((list) => ({
+              id: list.id,
+              listId: list.list_id,
+              namespaceType: list.namespace_type,
+            })),
+            signal: abortCtrl.signal,
+          });
 
-        const lists = Object.keys(updatedLists).map<ExceptionListInfo>(
-          (listKey) => updatedLists[listKey]
-        );
-
-        setExceptions(lists);
-        setExceptionsListInfo(updatedLists);
+          for (const refRecord of references) {
+            for (const [, refData] of Object.entries(refRecord)) {
+              if (listsById[refData.id]) {
+                listsById[refData.id].rules = refData.referenced_rules.map((rule) => ({
+                  name: rule.name,
+                  id: rule.id,
+                  rule_id: rule.rule_id,
+                  exceptions_list: rule.exception_lists,
+                }));
+              }
+            }
+          }
+        }
 
         if (isSubscribed) {
+          setExceptions(Object.values(listsById));
+          setExceptionsListInfo(listsById);
           setLoading(false);
         }
       } catch (error) {
@@ -124,7 +111,7 @@ export const useAllExceptionLists = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [exceptionLists.length, handleExceptionsInfo]);
+  }, [canReadRules, listKey, exceptionLists]);
 
   return [loading, exceptions, exceptionsListsInfo];
 };

@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggType, AggTypeConfig } from './agg_type';
-import { IAggConfig } from './agg_config';
+import type { AggTypeConfig } from './agg_type';
+import { AggType } from './agg_type';
+import type { IAggConfig } from './agg_config';
 
 describe('AggType Class', () => {
   describe('constructor', () => {

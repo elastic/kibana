@@ -29,7 +29,9 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskPriority, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { AdHocTaskRunner } from './ad_hoc_task_runner';
+import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import type { TaskRunnerContext } from './types';
+import { ApiKeyType } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import type { ContextOpts } from '../lib/alerting_event_logger/alerting_event_logger';
@@ -67,6 +69,7 @@ import {
   ALERT_INSTANCE_ID,
   ALERT_SEVERITY_IMPROVING,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_UUID,
@@ -82,6 +85,7 @@ import {
   ALERT_TIME_RANGE,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  ALERT_MUTED,
   SPACE_IDS,
   TAGS,
   VERSION,
@@ -98,6 +102,7 @@ import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance
 import { updateGaps } from '../lib/rule_gaps/update/update_gaps';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
+import { backfillInitiator } from '../../common/constants';
 
 jest.mock('../lib/rule_gaps/update/update_gaps');
 const UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
@@ -186,6 +191,7 @@ const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType
   usageCounter: mockUsageCounter,
   isServerless: false,
   getEventLogClient: jest.fn(),
+  apiKeyType: ApiKeyType.ES,
 };
 
 const mockedTaskInstance: ConcreteTaskInstance = {
@@ -287,6 +293,7 @@ describe('Ad Hoc Task Runner', () => {
         duration: '1h',
         enabled: true,
         end: '2024-03-01T05:00:00.000Z',
+        initiator: backfillInitiator.USER,
         rule: {
           name: 'test',
           tags: [],
@@ -409,6 +416,10 @@ describe('Ad Hoc Task Runner', () => {
   afterAll(() => fakeTimer.restore());
 
   test('successfully executes the task', async () => {
+    const addFrameworkMetricsSpy = jest.spyOn(
+      RuleMonitoringService.prototype,
+      'addFrameworkMetrics'
+    );
     ruleTypeWithAlerts.executor.mockImplementation(
       async ({
         services: executorServices,
@@ -438,6 +449,10 @@ describe('Ad Hoc Task Runner', () => {
 
     const runnerResult = await taskRunner.run();
     expect(runnerResult).toEqual({ state: {}, runAt: new Date('1970-01-01T00:00:00.000Z') });
+    expect(addFrameworkMetricsSpy).toHaveBeenCalledWith({
+      total_search_duration_ms: 23423,
+    });
+    addFrameworkMetricsSpy.mockRestore();
     await taskRunner.cleanup();
 
     // Verify all the expected calls were made before calling the rule executor
@@ -512,10 +527,12 @@ describe('Ad Hoc Task Runner', () => {
           [ALERT_ACTION_GROUP]: 'default',
           [ALERT_DURATION]: 0,
           [ALERT_FLAPPING]: false,
+          [ALERT_MUTED]: false,
           [ALERT_FLAPPING_HISTORY]: [true],
           [ALERT_INSTANCE_ID]: '1',
           [ALERT_SEVERITY_IMPROVING]: false,
           [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+          [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
           [ALERT_PENDING_RECOVERED_COUNT]: 0,
           [ALERT_CONSECUTIVE_MATCHES]: 1,
           [ALERT_RULE_CATEGORY]: 'My test rule',
@@ -574,6 +591,48 @@ describe('Ad Hoc Task Runner', () => {
       `rule test:rule-id: 'test' has 1 active alerts: [{"instanceId":"1","actionGroup":"default"}]`
     );
     expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  test('passes consumer metrics to AlertingEventLogger', async () => {
+    const consumerMetrics = {
+      alerts_candidate_count: 100,
+      total_enrichment_duration_ms: 50,
+    };
+    ruleTypeWithAlerts.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string,
+        RuleAlertData
+      >) => {
+        executorServices.ruleMonitoringService?.setMetrics(consumerMetrics);
+        return { state: {} };
+      }
+    );
+
+    const taskRunner = new AdHocTaskRunner({
+      context: taskRunnerFactoryInitializerParams,
+      internalSavedObjectsRepository,
+      taskInstance: mockedTaskInstance,
+    });
+
+    await taskRunner.run();
+    await taskRunner.cleanup();
+
+    expect(alertingEventLogger.done).toHaveBeenCalledWith(
+      expect.objectContaining({
+        consumerMetrics,
+        backfill: {
+          id: mockedAdHocRunSO.id,
+          start: schedule1.runAt,
+          interval: schedule1.interval,
+        },
+      })
+    );
   });
 
   test('should schedule actions for rule with actions', async () => {
@@ -900,8 +959,13 @@ describe('Ad Hoc Task Runner', () => {
     expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
       AD_HOC_RUN_SAVED_OBJECT_TYPE,
       'abc',
-      { refresh: false, namespace: undefined }
+      { refresh: true, namespace: undefined }
     );
+
+    // Verify that updateGaps was called after delete
+    const deleteCallOrder = internalSavedObjectsRepository.delete.mock.invocationCallOrder[0];
+    const updateGapsCallOrder = mockUpdateGaps.mock.invocationCallOrder[0];
+    expect(updateGapsCallOrder).toBeGreaterThan(deleteCallOrder);
 
     expect(mockUpdateGaps).toHaveBeenCalledWith({
       ruleId: RULE_ID,
@@ -920,6 +984,7 @@ describe('Ad Hoc Task Runner', () => {
       savedObjectsRepository: internalSavedObjectsRepository,
       backfillClient: taskRunnerFactoryInitializerParams.backfillClient,
       actionsClient,
+      initiator: backfillInitiator.USER,
     });
 
     testAlertingEventLogCalls({
@@ -981,7 +1046,7 @@ describe('Ad Hoc Task Runner', () => {
       expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
         'abc',
-        { refresh: false, namespace: undefined }
+        { refresh: true, namespace: undefined }
       );
 
       testAlertingEventLogCalls({
@@ -1043,7 +1108,7 @@ describe('Ad Hoc Task Runner', () => {
       expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
         'abc',
-        { refresh: false, namespace: undefined }
+        { refresh: true, namespace: undefined }
       );
 
       testAlertingEventLogCalls({
@@ -1105,7 +1170,7 @@ describe('Ad Hoc Task Runner', () => {
       expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
         'abc',
-        { refresh: false, namespace: undefined }
+        { refresh: true, namespace: undefined }
       );
 
       testAlertingEventLogCalls({
@@ -1169,7 +1234,7 @@ describe('Ad Hoc Task Runner', () => {
       expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
         'abc',
-        { refresh: false, namespace: undefined }
+        { refresh: true, namespace: undefined }
       );
 
       testAlertingEventLogCalls({
@@ -1326,7 +1391,7 @@ describe('Ad Hoc Task Runner', () => {
       expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
         'abc',
-        { refresh: false, namespace: undefined }
+        { refresh: true, namespace: undefined }
       );
 
       testAlertingEventLogCalls({
@@ -1402,7 +1467,7 @@ describe('Ad Hoc Task Runner', () => {
         backfillRunAt: schedule1.runAt,
         backfillInterval: schedule1.interval,
       });
-      expect(logger.debug).toHaveBeenCalledTimes(4);
+      expect(logger.debug).toHaveBeenCalledTimes(6);
       expect(logger.debug).nthCalledWith(
         1,
         `Executing ad hoc run for rule test:rule-id for runAt ${schedule1.runAt}`
@@ -1418,6 +1483,14 @@ describe('Ad Hoc Task Runner', () => {
       expect(logger.debug).nthCalledWith(
         4,
         `skipping persisting alerts for rule test:rule-id: 'test': rule execution has been cancelled.`
+      );
+      expect(logger.debug).nthCalledWith(
+        5,
+        `no scheduling of actions for rule test:rule-id: 'test': rule execution has been cancelled.`
+      );
+      expect(logger.debug).nthCalledWith(
+        6,
+        `skipping updating alerts for rule test:rule-id: 'test': rule execution has been cancelled.`
       );
       expect(logger.error).not.toHaveBeenCalled();
     });
@@ -1475,7 +1548,7 @@ describe('Ad Hoc Task Runner', () => {
       expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
         mockedAdHocRunSO.id,
-        { namespace: undefined, refresh: false }
+        { namespace: undefined, refresh: true }
       );
 
       testAlertingEventLogCalls({
@@ -1484,7 +1557,7 @@ describe('Ad Hoc Task Runner', () => {
         backfillRunAt: schedule2.runAt,
         backfillInterval: schedule2.interval,
       });
-      expect(logger.debug).toHaveBeenCalledTimes(4);
+      expect(logger.debug).toHaveBeenCalledTimes(6);
       expect(logger.debug).nthCalledWith(
         1,
         `Executing ad hoc run for rule test:rule-id for runAt ${schedule2.runAt}`
@@ -1500,6 +1573,14 @@ describe('Ad Hoc Task Runner', () => {
       expect(logger.debug).nthCalledWith(
         4,
         `skipping persisting alerts for rule test:rule-id: 'test': rule execution has been cancelled.`
+      );
+      expect(logger.debug).nthCalledWith(
+        5,
+        `no scheduling of actions for rule test:rule-id: 'test': rule execution has been cancelled.`
+      );
+      expect(logger.debug).nthCalledWith(
+        6,
+        `skipping updating alerts for rule test:rule-id: 'test': rule execution has been cancelled.`
       );
       expect(logger.error).not.toHaveBeenCalled();
     });
@@ -1696,6 +1777,7 @@ describe('Ad Hoc Task Runner', () => {
           rule_type_run_duration_ms: 0,
           total_run_duration_ms: expect.any(Number),
           trigger_actions_duration_ms: 0,
+          update_alerts_duration_ms: 0,
         },
       });
     } else if (status === 'warning') {
@@ -1731,6 +1813,7 @@ describe('Ad Hoc Task Runner', () => {
           rule_type_run_duration_ms: 0,
           total_run_duration_ms: 0,
           trigger_actions_duration_ms: 0,
+          update_alerts_duration_ms: 0,
         },
       });
     } else if (status === 'skip') {
@@ -1767,6 +1850,7 @@ describe('Ad Hoc Task Runner', () => {
           rule_type_run_duration_ms: 0,
           total_run_duration_ms: expect.any(Number),
           trigger_actions_duration_ms: 0,
+          update_alerts_duration_ms: 0,
         },
       });
     }

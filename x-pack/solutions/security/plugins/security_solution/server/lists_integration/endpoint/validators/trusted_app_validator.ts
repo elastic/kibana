@@ -15,7 +15,8 @@ import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
-import {} from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client_types';
+import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
+import { TRUSTED_PROCESS_DESCENDANTS_TAG } from '../../../../common/endpoint/service/artifacts/constants';
 import { BaseValidator } from './base_validator';
 import type { ExceptionItemLikeOptions } from '../types';
 import type { TrustedAppConditionEntry as ConditionEntry } from '../../../../common/endpoint/types';
@@ -187,6 +188,26 @@ const TrustedAppDataSchema = schema.object(
   { unknowns: 'ignore' }
 );
 
+/**
+ * Schema to validate Trusted Apps in Advanced mode
+ */
+const TrustedAppAdvancedModeDataSchema = schema.object(
+  {
+    entries: schema.arrayOf(
+      schema.object(
+        {
+          field: schema.string(),
+        },
+        { unknowns: 'ignore' }
+      ),
+      { minSize: 1 }
+    ),
+  },
+  {
+    unknowns: 'ignore',
+  }
+);
+
 export class TrustedAppValidator extends BaseValidator {
   static isTrustedApp(item: { listId: string }): boolean {
     return item.listId === ENDPOINT_ARTIFACT_LISTS.trustedApps.id;
@@ -200,6 +221,21 @@ export class TrustedAppValidator extends BaseValidator {
     return super.validateHasPrivilege('canReadTrustedApplications');
   }
 
+  async validatePreImport(items: PromiseFromStreams): Promise<void> {
+    await this.validateHasWritePrivilege();
+
+    await this.validatePreImportItems(items, async (item) => {
+      // import specific validations
+      await this.validateImportOwnerSpaceIds(item); // instead of validateCreateOwnerSpaceIds
+      await this.validateCanCreateGlobalArtifacts(item);
+      await this.removeInvalidPolicyIds(item); // instead of validateByPolicyItem
+
+      // usual validators from pre-create
+      await this.validateTrustedAppData(item);
+      await this.validateCanCreateByPolicyArtifacts(item);
+    });
+  }
+
   async validatePreCreateItem(
     item: CreateExceptionListItemOptions
   ): Promise<CreateExceptionListItemOptions> {
@@ -207,8 +243,8 @@ export class TrustedAppValidator extends BaseValidator {
     await this.validateTrustedAppData(item);
     await this.validateCanCreateByPolicyArtifacts(item);
     await this.validateByPolicyItem(item);
-    await this.validateCreateOwnerSpaceIds(item);
     await this.validateCanCreateGlobalArtifacts(item);
+    await this.validateCreateOwnerSpaceIds(item);
 
     return item;
   }
@@ -270,7 +306,31 @@ export class TrustedAppValidator extends BaseValidator {
     await this.validateBasicData(item);
 
     try {
-      TrustedAppDataSchema.validate(item, { os: item.osTypes[0] });
+      const isTAAdvancedModeFeatureFlagEnabled =
+        this.endpointAppContext.experimentalFeatures.trustedAppsAdvancedMode;
+      const isTAProcessDescendantsFeatureFlagEnabled =
+        this.endpointAppContext.experimentalFeatures.filterProcessDescendantsForTrustedAppsEnabled;
+      const isAdvancedMode = item.tags.includes('form_mode:advanced');
+      const hasProcessDescendants = item.tags.includes(TRUSTED_PROCESS_DESCENDANTS_TAG);
+
+      // Validate that the feature flags are enabled if the related features are used
+      if (!isTAAdvancedModeFeatureFlagEnabled && isAdvancedMode) {
+        throw new Error('Trusted apps advanced mode feature is not enabled');
+      }
+      if (!isTAProcessDescendantsFeatureFlagEnabled && hasProcessDescendants) {
+        throw new Error('Trusted apps process descendants feature is not enabled');
+      }
+      // Validate that process descendants is only used in advanced mode
+      if (!isAdvancedMode && hasProcessDescendants) {
+        throw new Error('Process descendants feature is only allowed on advanced mode');
+      }
+
+      // Validate with the correct schema depending on the mode
+      if (isTAAdvancedModeFeatureFlagEnabled && isAdvancedMode) {
+        TrustedAppAdvancedModeDataSchema.validate(item);
+      } else {
+        TrustedAppDataSchema.validate(item, { os: item.osTypes[0] });
+      }
     } catch (error) {
       throw new EndpointArtifactExceptionValidationError(error.message);
     }

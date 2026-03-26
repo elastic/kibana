@@ -7,12 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { NavigationPublicPluginSetup } from '@kbn/navigation-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { NavigationPublicPluginSetup } from '@kbn/navigation-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 export interface AppPluginDependenciesSetup {
   navigation: NavigationPublicPluginSetup;
 }
+
 export interface AppPluginDependenciesStart {
   data: DataPublicPluginStart;
+}
+
+export interface SessionNotificationsGlobalApi {
+  getSessionIds: () => Array<string | undefined>;
+  clearSessionIds: () => void;
 }

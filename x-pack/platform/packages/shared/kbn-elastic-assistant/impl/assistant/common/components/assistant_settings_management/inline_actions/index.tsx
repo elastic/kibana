@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiTableActionsColumnType } from '@elastic/eui';
+import type { EuiTableActionsColumnType } from '@elastic/eui';
 import { useCallback } from 'react';
 import * as i18n from './translations';
 

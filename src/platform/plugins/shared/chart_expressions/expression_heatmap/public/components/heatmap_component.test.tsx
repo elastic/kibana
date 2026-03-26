@@ -8,16 +8,13 @@
  */
 
 import React from 'react';
-import {
-  Settings,
-  TooltipType,
-  Heatmap,
+import type {
   GeometryValue,
   XYChartSeriesIdentifier,
-  Tooltip,
   TooltipAction,
   TooltipValue,
 } from '@elastic/charts';
+import { Settings, TooltipType, Heatmap, Tooltip } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
@@ -26,10 +23,10 @@ import type { Datatable } from '@kbn/expressions-plugin/public';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
-import { HeatmapRenderProps, HeatmapArguments } from '../../common';
+import type { HeatmapRenderProps, HeatmapArguments } from '../../common';
 import HeatmapComponent from './heatmap_component';
-import { LegendSize } from '@kbn/visualizations-plugin/common';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { LegendSize } from '@kbn/chart-expressions-common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 const actWithTimeout = (action: Function, timer: number = 1) =>
   act(

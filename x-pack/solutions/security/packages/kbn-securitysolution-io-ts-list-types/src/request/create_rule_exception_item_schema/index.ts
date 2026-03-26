@@ -8,26 +8,28 @@
 import * as t from 'io-ts';
 import { DefaultUuid } from '@kbn/securitysolution-io-ts-types';
 
-import {
+import type {
   CreateCommentsArray,
+  EntriesArray,
+  ItemId,
+  NamespaceType,
+  OsTypeArray,
+  Tags,
+  ExpireTimeOrUndefined,
+} from '../../common';
+import {
   DefaultCreateCommentsArray,
   description,
-  EntriesArray,
   exceptionListItemType,
-  ItemId,
   meta,
-  NamespaceType,
   namespaceType,
   nonEmptyEntriesArray,
-  OsTypeArray,
   osTypeArrayOrUndefined,
-  Tags,
   tags,
   name,
-  ExpireTimeOrUndefined,
   expireTimeOrUndefined,
 } from '../../common';
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import type { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 
 export const createRuleExceptionListItemSchema = t.intersection([
   t.exact(

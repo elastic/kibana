@@ -81,14 +81,19 @@ export const referenceUsedPkgs = TsProjectRule.create('referenceUsedPkgs', {
           continue;
         }
 
-        if (!Array.isArray(options)) {
-          usedTsProjects.add(options);
-          continue;
-        }
+        const forcedArrOptions = Array.isArray(options) ? options : [options];
+        for (const opt of forcedArrOptions) {
+          // avoid partial matches like kbn/es matching kbn/esql
+          const prefix = opt.rootImportReq.endsWith('/')
+            ? opt.rootImportReq
+            : opt.rootImportReq + '/';
 
-        for (const opt of options) {
-          if (req.full.startsWith(opt.rootImportReq)) {
-            usedTsProjects.add(opt);
+          if (req.full === opt.rootImportReq || req.full.startsWith(prefix)) {
+            if (opt !== tsProject) {
+              // skip self-imports
+              usedTsProjects.add(opt);
+            }
+            // stop after first match as before
             break;
           }
         }

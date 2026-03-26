@@ -15,6 +15,8 @@
       "label": "ObservabilityAIAssistantAppPublicSetup",
       "description": [],
       "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/public/types.ts",
+      "lineNumber": 44,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -29,6 +31,8 @@
       "label": "ObservabilityAIAssistantAppPublicStart",
       "description": [],
       "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/public/types.ts",
+      "lineNumber": 38,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -45,6 +49,8 @@
             "[] | undefined; completeInBackground: boolean; onStartAnalysisClick: () => void; onStopAnalysisClick: () => void; onResetAnalysisClick: () => void; onClearAnalysisClick: () => void; onCompleteInBackgroundClick: () => void; loading: boolean; error?: Error | undefined; }>"
           ],
           "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/public/types.ts",
+          "lineNumber": 39,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -60,6 +66,8 @@
                 "P"
               ],
               "path": "node_modules/@types/react/ts5.0/index.d.ts",
+              "lineNumber": 630,
+              "columnNumber": 10,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -75,38 +83,7 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "observabilityAIAssistantApp",
-        "id": "def-server.CHANGES_FUNCTION_NAME",
-        "type": "string",
-        "tags": [],
-        "label": "CHANGES_FUNCTION_NAME",
-        "description": [],
-        "signature": [
-          "\"changes\""
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/server/functions/changes/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistantApp",
-        "id": "def-server.QUERY_FUNCTION_NAME",
-        "type": "string",
-        "tags": [],
-        "label": "QUERY_FUNCTION_NAME",
-        "description": [],
-        "signature": [
-          "\"query\""
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/server/functions/query/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": [],
     "start": {
       "parentPluginId": "observabilityAIAssistantApp",
@@ -116,6 +93,8 @@
       "label": "ObservabilityAIAssistantAppServerStart",
       "description": [],
       "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/server/types.ts",
+      "lineNumber": 42,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -130,6 +109,8 @@
       "label": "ObservabilityAIAssistantAppServerSetup",
       "description": [],
       "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/server/types.ts",
+      "lineNumber": 44,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],

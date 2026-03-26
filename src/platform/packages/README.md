@@ -37,7 +37,7 @@ then run `yarn kbn bootstrap` from the plugin directory.
 Run the following command from the root of the Kibana repo:
 
 ```
-node scripts/generate package @kbn/<PACKAGE_NAME> --web --owner @elastic/<TEAM_NAME>
+node scripts/generate package @kbn/<PACKAGE_NAME> --owner @elastic/<TEAM_NAME>
 ```
 
 

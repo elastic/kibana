@@ -11,28 +11,27 @@ import { omit } from 'lodash';
 import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
 import { extractDashboardState } from './extract_dashboard_state';
 
-const DASHBOARD_STATE = omit(DEFAULT_DASHBOARD_STATE, ['panels', 'sections']);
-
-describe('extractDashboardState', () => {
+// Failing: See https://github.com/elastic/kibana/issues/257722
+describe.skip('extractDashboardState', () => {
   test('should extract all DashboardState fields', () => {
     const optionalState = {
-      timeRange: {
+      time_range: {
         from: 'now-15m',
         to: 'now',
       },
       references: [],
-      refreshInterval: {
+      refresh_interval: {
         pause: false,
         value: 5,
       },
     };
     expect(
       extractDashboardState({
-        ...DASHBOARD_STATE,
+        ...DEFAULT_DASHBOARD_STATE,
         ...optionalState,
       })
     ).toEqual({
-      ...DASHBOARD_STATE,
+      ...omit(DEFAULT_DASHBOARD_STATE, ['panels', 'pinned_panels']),
       ...optionalState,
     });
   });

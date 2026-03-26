@@ -7,21 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { schema } from '@kbn/config-schema';
-import {
-  type KibanaProject as SolutionId,
-  KIBANA_PROJECTS as VALID_SOLUTION_IDS,
-} from '@kbn/projects-solutions-groups';
+import { KIBANA_PROJECTS as VALID_SOLUTION_IDS } from '@kbn/projects-solutions-groups';
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
-import type { ResolveIndexResponse } from '@kbn/esql-types';
+import {
+  type ResolveIndexResponse,
+  type ESQLRegistrySolutionId,
+  REGISTRY_EXTENSIONS_ROUTE,
+  ESQL_CLASSIC_SOLUTION_ID,
+} from '@kbn/esql-types';
 import type { ESQLExtensionsRegistry } from '../extensions_registry';
 
+const VALID_REGISTRY_SOLUTION_IDS: readonly string[] = [
+  ...VALID_SOLUTION_IDS,
+  ESQL_CLASSIC_SOLUTION_ID,
+];
+
 /**
- * Type guard to check if a string is a valid SolutionId.
+ * Type guard to check if a string is a valid ESQLRegistrySolutionId.
  * @param str The string to check.
- * @returns True if the string is a valid SolutionId, false otherwise.
+ * @returns True if the string is a valid ESQLRegistrySolutionId, false otherwise.
  */
-function isSolutionId(str: string): str is SolutionId {
-  return VALID_SOLUTION_IDS.includes(str as SolutionId);
+function isRegistrySolutionId(str: string): str is ESQLRegistrySolutionId {
+  return VALID_REGISTRY_SOLUTION_IDS.includes(str);
 }
 
 /**
@@ -39,7 +46,7 @@ export const registerESQLExtensionsRoute = (
 ) => {
   router.get(
     {
-      path: '/internal/esql_registry/extensions/{solutionId}/{query}',
+      path: `${REGISTRY_EXTENSIONS_ROUTE}{solutionId}/{query}`,
       security: {
         authz: {
           enabled: false,
@@ -53,10 +60,11 @@ export const registerESQLExtensionsRoute = (
               schema.literal('es'),
               schema.literal('oblt'),
               schema.literal('security'),
-              schema.literal('chat'),
+              schema.literal('workplaceai'),
+              schema.literal('classic'),
             ],
             {
-              defaultValue: 'oblt', // Default to 'oblt' if no solutionId is provided
+              defaultValue: 'classic',
             }
           ),
           query: schema.string(),
@@ -68,20 +76,43 @@ export const registerESQLExtensionsRoute = (
       const client = core.elasticsearch.client.asCurrentUser;
       const { query, solutionId } = request.params;
       try {
-        const sources = (await client.indices.resolveIndex({
+        const localSources = (await client.indices.resolveIndex({
           name: '*',
           expand_wildcards: 'open',
         })) as ResolveIndexResponse;
-        // Validate solutionId
-        const validSolutionId = isSolutionId(solutionId) ? solutionId : 'oblt'; // No solutionId provided, or invalid
-        // return the recommended queries for now, we will add more extensions later
+
+        const ccsSources = (await client.indices.resolveIndex({
+          name: '*:*',
+          expand_wildcards: 'open',
+        })) as ResolveIndexResponse;
+
+        const sources = {
+          indices: [...(localSources.indices ?? []), ...(ccsSources.indices ?? [])],
+          aliases: [...(localSources.aliases ?? []), ...(ccsSources.aliases ?? [])],
+          data_streams: [...(localSources.data_streams ?? []), ...(ccsSources.data_streams ?? [])],
+        };
+
+        const validSolutionId = isRegistrySolutionId(solutionId)
+          ? solutionId
+          : ESQL_CLASSIC_SOLUTION_ID;
+
         const recommendedQueries = extensionsRegistry.getRecommendedQueries(
           query,
           sources,
           validSolutionId
         );
+
+        const recommendedFields = extensionsRegistry.getRecommendedFields(
+          query,
+          sources,
+          validSolutionId
+        );
+
         return response.ok({
-          body: recommendedQueries,
+          body: {
+            recommendedQueries,
+            recommendedFields,
+          },
         });
       } catch (error) {
         logger.get().debug(error);

@@ -14,7 +14,7 @@ import type { CustomizationCallback } from '@kbn/discover-plugin/public';
 import type { UseUnifiedHistogramProps } from '@kbn/unified-histogram';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { useCallback } from 'react';
-import { EsqlInTimelineTrigger } from '../../../../../../app/actions/constants';
+import { SECURITY_ESQL_IN_TIMELINE_HISTOGRAM_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { useKibana } from '../../../../../../common/lib/kibana';
 
 export type WithPreventableEvent<T> = T & {
@@ -67,9 +67,7 @@ export const useHistogramCustomization = () => {
       }
 
       if (filters && filters.length > 0) {
-        const applyFilterTrigger = uiActions.getTrigger(EsqlInTimelineTrigger.HISTOGRAM_TRIGGER);
-
-        await applyFilterTrigger.exec({
+        await uiActions.executeTriggerActions(SECURITY_ESQL_IN_TIMELINE_HISTOGRAM_TRIGGER, {
           filters,
           timeFieldName: eventData.timeFieldName,
         });

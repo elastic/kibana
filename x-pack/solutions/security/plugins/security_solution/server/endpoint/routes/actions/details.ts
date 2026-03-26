@@ -37,7 +37,6 @@ export const registerActionDetailsRoutes = (
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -47,7 +46,7 @@ export const registerActionDetailsRoutes = (
         },
       },
       withEndpointAuthz(
-        { all: ['canReadSecuritySolution'] },
+        { all: ['canAccessEndpointActionsLogManagement'] },
         endpointContext.logFactory.get('hostIsolationDetails'),
         getActionDetailsRequestHandler(endpointContext)
       )

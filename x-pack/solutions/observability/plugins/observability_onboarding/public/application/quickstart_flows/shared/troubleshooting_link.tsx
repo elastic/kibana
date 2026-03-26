@@ -14,7 +14,7 @@ export function TroubleshootingLink() {
     <EuiFlexGroup alignItems="center" justifyContent="center">
       <EuiButtonEmpty
         data-test-subj="observabilityOnboardingTroubleshootingLinkTroubleshootingButton"
-        iconType="help"
+        iconType="question"
         color="primary"
         href="https://www.elastic.co/guide/en/observability/current/logs-troubleshooting.html"
         target="_blank"

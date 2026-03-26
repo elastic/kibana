@@ -11,32 +11,17 @@ import React, { useEffect, useMemo, useCallback } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { of, map, filter } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
-import {
-  convertFieldsToFallbackFields,
-  getAllFallbackFields,
-  getAssociatedSmartFieldsAsString,
-  SmartFieldFallbackTooltip,
-} from '@kbn/unified-field-list';
 import type { DataVisualizerTableItem } from '@kbn/data-visualizer-plugin/public/application/common/components/stats_table/types';
-import type { DataVisualizerTableState } from '@kbn/data-visualizer-plugin/common/types';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
-
 import type { NormalSamplingOption, FieldStatisticsTableProps } from './types';
-export type { FieldStatisticsTableProps };
 
 const statsTableCss = css({
   width: '100%',
   height: '100%',
   overflowY: 'auto',
 });
-
-const fallBacklastReloadRequestTime$ = new BehaviorSubject(0);
-const fallbackTotalHits = of(undefined);
 
 export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps) => {
   const {
@@ -46,49 +31,22 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
     query,
     columns,
     filters,
-    stateContainer,
     onAddFilter,
     trackUiMetric,
     searchSessionId,
-    additionalFieldGroups,
     timeRange,
+    lastReloadRequestTime,
+    hideAggregatedPreview,
+    totalHits,
+    updateState,
   } = props;
 
-  const visibleFields = useMemo(
-    () =>
-      convertFieldsToFallbackFields({
-        // If `_source` is in the columns, we should exclude it for Field Statistics
-        fields: columns.filter((col) => col !== '_source'),
-        additionalFieldGroups,
-      }),
-    [additionalFieldGroups, columns]
-  );
-  const allFallbackFields = useMemo(
-    () => getAllFallbackFields(additionalFieldGroups),
-    [additionalFieldGroups]
-  );
-  const renderFieldName = useCallback(
-    (fieldName: string, item: DataVisualizerTableItem) => {
-      const displayName = item.displayName ?? item.fieldName;
-      const isDerivedAsPartOfSmartField = allFallbackFields.includes(fieldName);
-      const associatedSmartFields = isDerivedAsPartOfSmartField
-        ? getAssociatedSmartFieldsAsString(fieldName, additionalFieldGroups)
-        : '';
+  // If `_source` is in the columns, we should exclude it for Field Statistics
+  const visibleFieldNames = useMemo(() => columns.filter((col) => col !== '_source'), [columns]);
 
-      return (
-        <>
-          {displayName}
-          {isDerivedAsPartOfSmartField ? (
-            <>
-              {' '}
-              <SmartFieldFallbackTooltip associatedSmartFields={associatedSmartFields} />
-            </>
-          ) : null}
-        </>
-      );
-    },
-    [additionalFieldGroups, allFallbackFields]
-  );
+  const renderFieldName = useCallback((_: string, item: DataVisualizerTableItem) => {
+    return <>{item.displayName ?? item.fieldName}</>;
+  }, []);
 
   const services = useDiscoverServices();
 
@@ -100,34 +58,6 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
   }, [services.data]);
 
   const dataVisualizerService = services.dataVisualizer;
-
-  // State from Discover we want the embeddable to reflect
-  const showPreviewByDefault = useMemo(
-    () => (stateContainer ? !stateContainer.appState.getState().hideAggregatedPreview : true),
-    [stateContainer]
-  );
-
-  const lastReloadRequestTime$ = useMemo(() => {
-    return stateContainer?.dataState?.refetch$
-      ? stateContainer?.dataState?.refetch$.pipe(
-          map(() => {
-            return Date.now();
-          })
-        )
-      : fallBacklastReloadRequestTime$;
-  }, [stateContainer]);
-
-  const totalHitsComplete$ = useMemo(() => {
-    return stateContainer
-      ? stateContainer.dataState.data$.totalHits$.pipe(
-          filter((d) => d.fetchStatus === 'complete'),
-          map((d) => d?.result)
-        )
-      : fallbackTotalHits;
-  }, [stateContainer]);
-
-  const totalDocuments = useObservable(totalHitsComplete$);
-  const lastReloadRequestTime = useObservable(lastReloadRequestTime$);
 
   useEffect(() => {
     // Track should only be called once when component is loaded
@@ -144,15 +74,6 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
     [searchSessionId]
   );
 
-  const updateState = useCallback(
-    (changes: Partial<DataVisualizerTableState>) => {
-      if (changes.showDistributions !== undefined && stateContainer) {
-        stateContainer.appState.update({ hideAggregatedPreview: !changes.showDistributions }, true);
-      }
-    },
-    [stateContainer]
-  );
-
   if (!dataVisualizerService) return null;
 
   return (
@@ -164,13 +85,13 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
         filters={filters}
         esqlQuery={isEsqlMode && isOfAggregateQueryType(query) ? query : undefined}
         query={query}
-        visibleFieldNames={visibleFields}
+        visibleFieldNames={visibleFieldNames}
         sessionId={searchSessionId}
-        totalDocuments={totalDocuments}
+        totalDocuments={totalHits}
         samplingOption={samplingOption}
         lastReloadRequestTime={lastReloadRequestTime}
         onAddFilter={onAddFilter}
-        showPreviewByDefault={showPreviewByDefault}
+        showPreviewByDefault={!hideAggregatedPreview}
         onTableUpdate={updateState}
         renderFieldName={renderFieldName}
         isEsqlMode={isEsqlMode}

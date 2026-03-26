@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ReactNode, useMemo } from 'react';
+import type { ReactNode } from 'react';
+import React, { useMemo } from 'react';
 
 import {
   EuiBadge,
@@ -26,9 +27,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { Connector, ConnectorStatus, ElasticsearchIndex } from '@kbn/search-connectors';
+import type { Connector, ElasticsearchIndex } from '@kbn/search-connectors';
+import { ConnectorStatus } from '@kbn/search-connectors';
 
-import { GetConnectorAgentlessPolicyApiResponse } from '../../api/connector/get_connector_agentless_policy_api_logic';
+import type { GetConnectorAgentlessPolicyApiResponse } from '../../api/connector/get_connector_agentless_policy_api_logic';
 import {
   CONNECTOR_DETAIL_TAB_PATH,
   CONNECTOR_INTEGRATION_DETAIL_PATH,

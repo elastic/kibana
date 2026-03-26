@@ -9,8 +9,9 @@
 
 import { createParser } from 'eventsource-parser';
 import { Observable, throwError } from 'rxjs';
-import { createSSEInternalError, ServerSentEvent, ServerSentEventError } from '@kbn/sse-utils';
-import { ServerSentErrorEvent } from '@kbn/sse-utils/src/errors';
+import type { ServerSentEvent } from '@kbn/sse-utils';
+import { createSSEInternalError, ServerSentEventError } from '@kbn/sse-utils';
+import type { ServerSentErrorEvent } from '@kbn/sse-utils/src/errors';
 
 export interface StreamedHttpResponse {
   response?: { body: ReadableStream<Uint8Array> | null | undefined };

@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  Aggregators,
-  CustomThresholdExpressionMetric,
-} from '../../../../common/custom_threshold_rule/types';
+import type { CustomThresholdExpressionMetric } from '../../../../common/custom_threshold_rule/types';
+import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 import { createFormatterForMetric } from './create_formatter_for_metric';
 
 describe('createFormatterForMetric()', () => {

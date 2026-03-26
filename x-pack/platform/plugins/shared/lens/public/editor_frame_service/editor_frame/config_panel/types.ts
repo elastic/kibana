@@ -7,38 +7,37 @@
 
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
-import { PublishingSubject } from '@kbn/presentation-publishing';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { LensInspector } from '../../../lens_inspector_service';
-import type { TypedLensSerializedState } from '../../../react_embeddable/types';
-import type { IndexPatternServiceAPI } from '../../../data_views_service/service';
-
-import {
+import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type {
+  TypedLensSerializedState,
   Visualization,
   FramePublicAPI,
   DatasourceDimensionEditorProps,
-  DatasourceMap,
-  VisualizationMap,
   UserMessagesGetter,
   AddLayerFunction,
   RegisterLibraryAnnotationGroupFunction,
   StateSetter,
   DragDropOperation,
   VisualizationDimensionGroupConfig,
-} from '../../../types';
+  LensInspector,
+} from '@kbn/lens-common';
+import type { IndexPatternServiceAPI } from '../../../data_views_service/service';
 
-export interface ConfigPanelWrapperProps {
+export interface TextBasedQueryState {
+  /** Whether the query has errors from the last run attempt */
+  hasErrors: boolean;
+  /** Whether the query has been modified but not yet submitted */
+  isQueryPendingSubmit: boolean;
+}
+
+export interface LensConfigPanelBaseProps {
   framePublicAPI: FramePublicAPI;
-  datasourceMap: DatasourceMap;
-  visualizationMap: VisualizationMap;
   core: DatasourceDimensionEditorProps['core'];
-  dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
   indexPatternService?: IndexPatternServiceAPI;
-  uiActions: UiActionsStart;
   getUserMessages?: UserMessagesGetter;
-  hideLayerHeader?: boolean;
   setIsInlineFlyoutVisible?: (status: boolean) => void;
   onlyAllowSwitchToSubtypes?: boolean;
   attributes?: TypedLensSerializedState['attributes'];
@@ -52,25 +51,19 @@ export interface ConfigPanelWrapperProps {
   parentApi?: unknown;
   panelId?: string;
   closeFlyout?: () => void;
-  canEditTextBasedQuery?: boolean;
   editorContainer?: HTMLElement;
+  /** Callback to report text-based query state changes */
+  onTextBasedQueryStateChange?: (state: TextBasedQueryState) => void;
 }
 
-export interface LayerPanelProps {
-  attributes?: TypedLensSerializedState['attributes'];
-  /** Embeddable output observable, useful for dashboard flyout  */
-  dataLoading$?: PublishingSubject<boolean | undefined>;
-  /** Contains the active data, necessary for some panel configuration such as coloring */
-  lensAdapters?: ReturnType<LensInspector['getInspectorAdapters']>;
-  data: DataPublicPluginStart;
-  updateSuggestion?: (attrs: TypedLensSerializedState['attributes']) => void;
-  /** Set the attributes state */
-  setCurrentAttributes?: (attrs: TypedLensSerializedState['attributes']) => void;
+export interface ConfigPanelWrapperProps extends LensConfigPanelBaseProps {
+  dataViews: DataViewsPublicPluginStart;
+  uiActions: UiActionsStart;
+  hideLayerHeader?: boolean;
+}
+
+export interface LayerPanelProps extends LensConfigPanelBaseProps {
   visualizationState: unknown;
-  datasourceMap: DatasourceMap;
-  visualizationMap: VisualizationMap;
-  framePublicAPI: FramePublicAPI;
-  core: DatasourceDimensionEditorProps['core'];
   activeVisualization: Visualization;
   dimensionGroups: VisualizationDimensionGroupConfig[];
   layerId: string;
@@ -90,15 +83,17 @@ export interface LayerPanelProps {
     dontSyncLinkedDimensions?: boolean
   ) => void;
   updateDatasourceAsync: (datasourceId: string | undefined, newState: unknown) => void;
-  updateAll: (
-    datasourceId: string | undefined,
-    newDatasourcestate: unknown,
-    newVisualizationState: unknown
-  ) => void;
+  // Dispatches a single intent so reducer can apply datasource + visualization updates atomically.
+  updateAll: (payload: {
+    datasourceId: string | undefined;
+    newDatasourceState: unknown;
+    layerId: string;
+    groupId: string;
+    columnId: string;
+  }) => void;
   onRemoveLayer: (layerId: string) => void;
   onCloneLayer: () => void;
   onRemoveDimension: (props: { columnId: string; layerId: string }) => void;
-  registerNewLayerRef: (layerId: string, instance: HTMLDivElement | null) => void;
   toggleFullscreen: () => void;
   onEmptyDimensionAdd: (columnId: string, group: { groupId: string }) => void;
   onChangeIndexPattern: (args: {
@@ -107,16 +102,7 @@ export interface LayerPanelProps {
     datasourceId?: string;
     visualizationId?: string;
   }) => void;
-  indexPatternService?: IndexPatternServiceAPI;
-  getUserMessages?: UserMessagesGetter;
   displayLayerSettings: boolean;
-  setIsInlineFlyoutVisible?: (status: boolean) => void;
-  onlyAllowSwitchToSubtypes?: boolean;
-  panelId?: string;
-  parentApi?: unknown;
-  closeFlyout?: () => void;
-  canEditTextBasedQuery?: boolean;
-  editorContainer?: HTMLElement;
 }
 
 export interface LayerDatasourceDropProps {

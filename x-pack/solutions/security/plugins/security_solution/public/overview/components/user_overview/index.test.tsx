@@ -56,6 +56,8 @@ describe('User Summary Component', () => {
     userName: 'testUserName',
     indexPatterns: [],
     jobNameById: {},
+    scopeId: 'testScopeId',
+    isFlyoutOpen: false,
   };
 
   beforeEach(() => {

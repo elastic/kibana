@@ -9,7 +9,7 @@
 
 export {
   initTransform,
-  getContentManagmentServicesTransforms,
+  getContentManagementServicesTransforms,
   compileServiceDefinitions,
 } from './lib';
 

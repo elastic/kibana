@@ -11,7 +11,7 @@ import React from 'react';
 import { TestProviders } from '../../../../../common/mock';
 import { UserHostWorkingDir } from './user_host_working_dir';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
-import { CellActionsWrapper } from '../../../../../common/components/drag_and_drop/cell_actions_wrapper';
+import { SecurityCellActions } from '../../../../../common/components/cell_actions';
 
 jest.mock('../../../../../common/lib/kibana');
 
@@ -23,19 +23,27 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('../../../../../common/components/drag_and_drop/cell_actions_wrapper', () => {
+jest.mock('../../../../../common/components/cell_actions', () => {
   return {
-    CellActionsWrapper: jest.fn(),
+    SecurityCellActions: jest.fn(),
+    CellActionsMode: {
+      HOVER_DOWN: 'hover-down',
+      HOVER_RIGHT: 'hover-right',
+      INLINE: 'inline',
+    },
+    SecurityCellActionsTrigger: {
+      DEFAULT: 'default',
+    },
   };
 });
 
-const MockedCellActionsWrapper = jest.fn(({ children }) => {
-  return <div data-test-subj="mock-cell-action-wrapper">{children}</div>;
+const MockedSecurityCellActions = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-security-cell-actions">{children}</div>;
 });
 
 describe('UserHostWorkingDir', () => {
   beforeEach(() => {
-    (CellActionsWrapper as unknown as jest.Mock).mockImplementation(MockedCellActionsWrapper);
+    (SecurityCellActions as unknown as jest.Mock).mockImplementation(MockedSecurityCellActions);
   });
   const mount = useMountAppended();
 
@@ -259,7 +267,7 @@ describe('UserHostWorkingDir', () => {
       expect(wrapper.text()).toEqual('[user-name-123]custom separator[host-name-123]');
     });
 
-    test('it renders a draggable `user.domain` field (by default) when userDomain is provided, and userDomainField is NOT specified as a prop', () => {
+    test('it renders `user.domain` field (by default) when userDomain is provided, and userDomainField is NOT specified as a prop', () => {
       const wrapper = mount(
         <TestProviders>
           <div>
@@ -276,10 +284,10 @@ describe('UserHostWorkingDir', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="render-content-user.domain"]').exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="user.domain-tooltip"]').exists()).toBe(true);
     });
 
-    test('it renders a draggable with an overridden field name when userDomain is provided, and userDomainField is also specified as a prop', () => {
+    test('it renders with an overridden field name when userDomain is provided, and userDomainField is also specified as a prop', () => {
       const wrapper = mount(
         <TestProviders>
           <div>
@@ -297,12 +305,10 @@ describe('UserHostWorkingDir', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="render-content-overridden.field.name"]').exists()).toBe(
-        true
-      );
+      expect(wrapper.find('[data-test-subj="overridden.field.name-tooltip"]').exists()).toBe(true);
     });
 
-    test('it renders a draggable `user.name` field (by default) when userName is provided, and userNameField is NOT specified as a prop', () => {
+    test('it renders a `user.name` field (by default) when userName is provided, and userNameField is NOT specified as a prop', () => {
       const wrapper = mount(
         <TestProviders>
           <div>
@@ -319,10 +325,10 @@ describe('UserHostWorkingDir', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="render-content-user.name"]').exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="user.name-tooltip"]').exists()).toBe(true);
     });
 
-    test('it renders a draggable with an overridden field name when userName is provided, and userNameField is also specified as a prop', () => {
+    test('it renders with an overridden field name when userName is provided, and userNameField is also specified as a prop', () => {
       const wrapper = mount(
         <TestProviders>
           <div>
@@ -363,9 +369,11 @@ describe('UserHostWorkingDir', () => {
         </TestProviders>
       );
 
-      expect(MockedCellActionsWrapper).toHaveBeenCalledWith(
+      expect(MockedSecurityCellActions).toHaveBeenCalledWith(
         expect.objectContaining({
-          scopeId: 'some_scope',
+          metadata: expect.objectContaining({
+            scopeId: 'some_scope',
+          }),
         }),
         {}
       );

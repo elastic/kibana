@@ -10,7 +10,7 @@ import {
   mockSingleIndexStatsResponse,
 } from '../../../__mocks__/fetch_indices.mock';
 
-import { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 
 import { mapIndexStats } from './map_index_stats';
 

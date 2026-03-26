@@ -6,10 +6,13 @@
  */
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { IKbnUrlStateStorage, ISessionStorageStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { OperationType, SeriesType } from '@kbn/lens-plugin/public';
+import type {
+  IKbnUrlStateStorage,
+  ISessionStorageStateStorage,
+} from '@kbn/kibana-utils-plugin/public';
+import type { OperationType, SeriesType } from '@kbn/lens-plugin/public';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
-import { ChartTimeRange } from '../header/last_updated';
+import type { ChartTimeRange } from '../header/last_updated';
 import type {
   AppDataType,
   ReportViewType,
@@ -18,7 +21,7 @@ import type {
   URLReportDefinition,
 } from '../types';
 import { convertToShortUrl } from '../configurations/exploratory_view_url';
-import { URL_KEYS } from '../configurations/constants/url_constants';
+import type { URL_KEYS } from '../configurations/constants/url_constants';
 import { trackTelemetryOnApply } from '../utils/telemetry';
 
 export interface SeriesContextValue {

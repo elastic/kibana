@@ -13,28 +13,25 @@ import {
   ENDPOINT_SECURITY_EXECUTE_PRIVILEGE,
   ENDPOINT_SECURITY_SUB_ACTIONS_EXECUTE_PRIVILEGE,
 } from '@kbn/actions-plugin/server/feature';
-import { MicrosoftDefenderEndpointConnector } from './microsoft_defender_endpoint';
-
 import type {
   MicrosoftDefenderEndpointConfig,
   MicrosoftDefenderEndpointSecrets,
-} from '../../../common/microsoft_defender_endpoint/types';
+} from '@kbn/connector-schemas/microsoft_defender_endpoint';
 import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  SUB_ACTION,
   MicrosoftDefenderEndpointConfigSchema,
   MicrosoftDefenderEndpointSecretsSchema,
-} from '../../../common/microsoft_defender_endpoint/schema';
-import {
-  MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
-  MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
-  MICROSOFT_DEFENDER_ENDPOINT_TITLE,
-} from '../../../common/microsoft_defender_endpoint/constants';
+} from '@kbn/connector-schemas/microsoft_defender_endpoint';
+import { MicrosoftDefenderEndpointConnector } from './microsoft_defender_endpoint';
 
 export const getMicrosoftDefenderEndpointConnectorType = (): SubActionConnectorType<
   MicrosoftDefenderEndpointConfig,
   MicrosoftDefenderEndpointSecrets
 > => ({
-  id: MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
-  name: MICROSOFT_DEFENDER_ENDPOINT_TITLE,
+  id: CONNECTOR_ID,
+  name: CONNECTOR_NAME,
   getService: (params) => new MicrosoftDefenderEndpointConnector(params),
   schema: {
     config: MicrosoftDefenderEndpointConfigSchema,
@@ -51,7 +48,7 @@ export const getMicrosoftDefenderEndpointConnectorType = (): SubActionConnectorT
     const privileges = [ENDPOINT_SECURITY_EXECUTE_PRIVILEGE];
     if (
       args?.source === ActionExecutionSourceType.HTTP_REQUEST &&
-      args?.params?.subAction !== MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.TEST_CONNECTOR
+      args?.params?.subAction !== SUB_ACTION.TEST_CONNECTOR
     ) {
       privileges.push(ENDPOINT_SECURITY_SUB_ACTIONS_EXECUTE_PRIVILEGE);
     }

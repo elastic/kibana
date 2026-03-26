@@ -6,10 +6,11 @@
  */
 
 import {
+  SLO_DATA_VIEW_ID_FIELD,
   SLO_ID_FIELD,
   SLO_INSTANCE_ID_FIELD,
   SLO_REVISION_FIELD,
-} from '../../../../common/field_names/slo';
+} from '../../../../common/burn_rate_rule/field_names';
 
 export const sloRuleFieldMap = {
   [SLO_ID_FIELD]: {
@@ -23,6 +24,11 @@ export const sloRuleFieldMap = {
     required: false,
   },
   [SLO_INSTANCE_ID_FIELD]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [SLO_DATA_VIEW_ID_FIELD]: {
     type: 'keyword',
     array: false,
     required: false,

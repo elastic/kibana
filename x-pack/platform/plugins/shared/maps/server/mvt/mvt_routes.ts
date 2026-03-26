@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import { Stream } from 'stream';
-import { IncomingHttpHeaders } from 'http';
+import type { Stream } from 'stream';
+import type { IncomingHttpHeaders } from 'http';
 import { schema } from '@kbn/config-schema';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { CoreStart, KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
-import { IRouter } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { errors } from '@elastic/elasticsearch';
 import type { SearchMvtRequest } from '@elastic/elasticsearch/lib/api/types';
-import {
-  APP_ID,
-  MVT_GETTILE_API_PATH,
-  MVT_GETGRIDTILE_API_PATH,
-  RENDER_AS,
-} from '../../common/constants';
+import type { RENDER_AS } from '../../common/constants';
+import { APP_ID, MVT_GETTILE_API_PATH, MVT_GETGRIDTILE_API_PATH } from '../../common/constants';
 import { getAggsTileRequest, getHitsTileRequest } from '../../common/mvt_request_body';
 
 type SearchMvtRequestBody = Omit<SearchMvtRequest, 'index' | 'x' | 'y' | 'field' | 'zoom'>;

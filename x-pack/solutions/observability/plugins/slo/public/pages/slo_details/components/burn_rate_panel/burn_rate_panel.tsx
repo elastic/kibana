@@ -7,12 +7,13 @@
 
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { ErrorRateChart } from '../../../../components/slo/error_rate_chart';
 import { useFetchSloBurnRates } from '../../../../hooks/use_fetch_slo_burn_rates';
-import { BurnRateWindow, useFetchBurnRateWindows } from '../../hooks/use_fetch_burn_rate_windows';
+import type { BurnRateWindow } from '../../hooks/use_fetch_burn_rate_windows';
+import { useFetchBurnRateWindows } from '../../hooks/use_fetch_burn_rate_windows';
 import { BurnRateStatus } from './burn_rate_status';
 import { getStatus } from './utils';
 

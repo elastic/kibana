@@ -302,6 +302,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           })}
         >
           <EuiComboBox
+            isInvalid={!timeZoneValid}
             options={TIMEZONE_OPTIONS}
             onChange={(opt) => setSelectedTimeZone(opt)}
             selectedOptions={selectedTimeZone}

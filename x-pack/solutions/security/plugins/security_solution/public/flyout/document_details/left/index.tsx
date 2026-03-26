@@ -9,7 +9,6 @@ import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { DocumentDetailsLeftPanelKey } from '../shared/constants/panel_keys';
 import { useKibana } from '../../../common/lib/kibana';
@@ -18,7 +17,7 @@ import { PanelContent } from './content';
 import type { LeftPanelTabType } from './tabs';
 import * as tabs from './tabs';
 import { getField } from '../shared/utils';
-import { EventKind } from '../shared/constants/event_kinds';
+import { EventKind } from '../../../flyout_v2/document/constants/event_kinds';
 import { useDocumentDetailsContext } from '../shared/context';
 import type { DocumentDetailsProps } from '../shared/types';
 import { DocumentEventTypes } from '../../../common/lib/telemetry/types';
@@ -33,11 +32,8 @@ export const LeftPanelNotesTab: LeftPanelPaths = 'notes';
 export const LeftPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel } = useExpandableFlyoutApi();
-  const { eventId, indexName, scopeId, getFieldsData, isPreview } = useDocumentDetailsContext();
+  const { eventId, indexName, scopeId, getFieldsData, isRulePreview } = useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
-  );
   const {
     notesPrivileges: { read: canSeeNotes },
   } = useUserPrivileges();
@@ -47,14 +43,14 @@ export const LeftPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
       eventKind === EventKind.signal
         ? [tabs.insightsTab, tabs.investigationTab, tabs.responseTab]
         : [tabs.insightsTab];
-    if (canSeeNotes && !securitySolutionNotesDisabled && !isPreview) {
+    if (canSeeNotes && !isRulePreview) {
       tabList.push(tabs.notesTab);
     }
-    if (!isPreview) {
+    if (!isRulePreview) {
       return [tabs.visualizeTab, ...tabList];
     }
     return tabList;
-  }, [eventKind, isPreview, canSeeNotes, securitySolutionNotesDisabled]);
+  }, [eventKind, isRulePreview, canSeeNotes]);
 
   const selectedTabId = useMemo(() => {
     const defaultTab = tabsDisplayed[0].id;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { SEARCH_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { PLAYGROUND_SAVED_OBJECT_TYPE } from '../../common';
 import { playgroundAttributesSchema } from './schema/v1/v1';

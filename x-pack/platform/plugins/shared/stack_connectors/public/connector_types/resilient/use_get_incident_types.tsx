@@ -6,8 +6,8 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { HttpSetup, ToastsApi } from '@kbn/core/public';
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import type { HttpSetup, ToastsApi } from '@kbn/core/public';
+import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { getIncidentTypes } from './api';
 import * as i18n from './translations';
 

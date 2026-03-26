@@ -21,7 +21,7 @@
       "spaces",
       "savedObjectsTaggingOss"
     ],
-    "requiredBundles": [],
+    "requiredBundles": ["kibanaUtils"],
     "extraPublicDirs": [
       "common"
     ]

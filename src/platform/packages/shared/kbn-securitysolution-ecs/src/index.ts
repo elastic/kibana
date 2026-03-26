@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AgentEcs } from './agent';
+import type { AgentEcs } from './agent';
 import type { AuditdEcs } from './auditd';
 import type { CloudEcs } from './cloud';
 import type { CodeSignature, FileEcs } from './file';

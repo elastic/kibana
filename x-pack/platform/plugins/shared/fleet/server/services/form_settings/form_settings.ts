@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { load } from 'js-yaml';
 import { type Props, schema } from '@kbn/config-schema';
-import { stringifyZodError } from '@kbn/zod-helpers';
+import { stringifyZodError } from '@kbn/zod-helpers/v4';
 
 import type { SettingsConfig, SettingsSection } from '../../../common/settings/types';
 import { AGENT_POLICY_ADVANCED_SETTINGS } from '../../../common/settings';
@@ -69,11 +70,23 @@ export function _getSettingsValuesForAgentPolicy(
     }
 
     const val = agentPolicy.advanced_settings?.[setting.api_field.name];
-    if (val !== undefined) {
-      settingsValues[setting.name] = val;
+    if (val !== undefined && val !== '') {
+      settingsValues[setting.name] = convertValue(val, setting.type);
     }
   });
   return settingsValues;
+}
+
+function convertValue(val: any, type?: string) {
+  if (type === 'yaml') {
+    const valJs = load(val);
+    if (valJs.agent?.internal) {
+      return valJs.agent.internal;
+    } else {
+      return valJs;
+    }
+  }
+  return val;
 }
 
 export function getSettings(settingSection: SettingsSection) {

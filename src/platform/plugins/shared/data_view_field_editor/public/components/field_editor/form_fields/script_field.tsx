@@ -13,13 +13,14 @@ import type { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiLink, EuiCode } from '@elastic/eui';
-import { PainlessLang, PainlessContext, monaco } from '@kbn/monaco';
+import type { PainlessContext } from '@kbn/monaco';
+import { PainlessLang, monaco } from '@kbn/monaco';
 
+import type { RuntimeType } from '../../../shared_imports';
 import {
   UseField,
   useFormData,
   useBehaviorSubject,
-  RuntimeType,
   CodeEditor,
   useFormContext,
 } from '../../../shared_imports';
@@ -29,11 +30,12 @@ import { useFieldPreviewContext } from '../../preview';
 import { schema } from '../form_schema';
 import type { FieldFormInternal } from '../field_editor';
 import { useStateSelector } from '../../../state_utils';
-import { PreviewState } from '../../preview/types';
+import type { PreviewState } from '../../preview/types';
 
 interface Props {
   links: { runtimePainless: string };
   placeholder?: string;
+  disabled?: boolean;
 }
 
 const mapReturnTypeToPainlessContext = (runtimeType: RuntimeType): PainlessContext => {
@@ -62,7 +64,7 @@ const isLoadingPreviewSelector = (state: PreviewState) => state.isLoadingPreview
 const isPreviewAvailableSelector = (state: PreviewState) => state.isPreviewAvailable;
 const concreteFieldsSelector = (state: PreviewState) => state.concreteFields;
 
-const ScriptFieldComponent = ({ links, placeholder }: Props) => {
+const ScriptFieldComponent = ({ links, placeholder, disabled }: Props) => {
   const {
     validation: { setScriptEditorValidation },
   } = useFieldPreviewContext();
@@ -288,6 +290,7 @@ const ScriptFieldComponent = ({ links, placeholder }: Props) => {
                   suggest: {
                     snippetsPreventQuickSuggestions: false,
                   },
+                  readOnly: disabled,
                 }}
                 data-test-subj="scriptField"
                 aria-label={i18n.translate(

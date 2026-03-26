@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IndexSettings } from '@kbn/index-management-plugin/common';
+import type { IndexSettings } from '@kbn/index-management-plugin/common';
 
 import { API_BASE_PATH } from '../constants';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export function settingsApi(getService: FtrProviderContext['getService']) {
   const supertest = getService('supertest');

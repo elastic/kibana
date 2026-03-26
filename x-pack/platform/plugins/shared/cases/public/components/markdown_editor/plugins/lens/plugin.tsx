@@ -31,13 +31,15 @@ import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import type { TimeRange } from '@kbn/data-plugin/common';
+import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DRAFT_COMMENT_STORAGE_ID, ID } from './constants';
 import { CommentEditorContext } from '../../context';
 import { useLensDraftComment } from './use_lens_draft_comment';
 import { VISUALIZATION } from './translations';
 import { useIsMainApplication } from '../../../../common/hooks';
-import { convertToAbsoluteTimeRange } from '../../../visualizations/actions/convert_to_absolute_time_range';
+import { convertToAbsoluteTimeRange } from '../../../attachments/lens/actions/convert_to_absolute_time_range';
 
 const DEFAULT_TIMERANGE: TimeRange = {
   from: 'now-7d',
@@ -87,7 +89,13 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   }, [clearDraftComment, currentAppId, embeddable, onCancel]);
 
   const handleAdd = useCallback(
-    (attributes: Record<string, unknown>, timeRange?: TimeRange) => {
+    (_attributes: Record<string, unknown>, timeRange?: TimeRange) => {
+      // For now, Lens attributes can come in either the API format or the internal format
+      // depending on the value of the lens.apiFormat feature flag
+      const attributes = isLensAPIFormat(_attributes)
+        ? new LensConfigBuilder().fromAPIFormat(_attributes)
+        : _attributes;
+
       onSave(
         `!{${ID}${JSON.stringify({
           timeRange: convertToAbsoluteTimeRange(timeRange),
@@ -105,10 +113,16 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
 
   const handleUpdate = useCallback(
     (
-      attributes: Record<string, unknown>,
+      _attributes: Record<string, unknown>,
       timeRange: TimeRange | undefined,
       position: EuiMarkdownAstNodePosition
     ) => {
+      // For now, Lens attributes can come in either the API format or the internal format
+      // depending on the value of the lens.apiFormat feature flag
+      const attributes = isLensAPIFormat(_attributes)
+        ? new LensConfigBuilder().fromAPIFormat(_attributes)
+        : _attributes;
+
       markdownContext.replaceNode(
         position,
         `!{${ID}${JSON.stringify({
@@ -169,7 +183,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
         lensAttributes || node?.attributes
           ? {
               id: '',
-              timeRange,
+              time_range: timeRange,
               attributes: (lensAttributes || node?.attributes) as LensSavedObjectAttributes,
             }
           : undefined,
@@ -246,13 +260,14 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     if (currentAppId) {
       incomingEmbeddablePackage = embeddable
         ?.getStateTransfer()
-        .getIncomingEmbeddablePackage(currentAppId, true) as LensIncomingEmbeddablePackage;
+        .getIncomingEmbeddablePackage(currentAppId, true);
     }
 
-    if (
-      incomingEmbeddablePackage?.type === 'lens' &&
-      incomingEmbeddablePackage?.serializedState?.rawState?.attributes
-    ) {
+    const lensEmbeddablePackage = incomingEmbeddablePackage?.find(
+      (pkg) => pkg.type === 'lens'
+    ) as LensIncomingEmbeddablePackage;
+
+    if (lensEmbeddablePackage && lensEmbeddablePackage?.serializedState?.attributes) {
       const lensTime = timefilter.getTime();
       const newTimeRange =
         lensTime?.from && lensTime?.to
@@ -267,7 +282,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
 
       if (draftComment?.position) {
         handleUpdate(
-          incomingEmbeddablePackage.serializedState.rawState.attributes,
+          lensEmbeddablePackage.serializedState.attributes,
           newTimeRange,
           draftComment.position
         );
@@ -275,7 +290,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
       }
 
       if (draftComment) {
-        handleAdd(incomingEmbeddablePackage.serializedState.rawState.attributes, newTimeRange);
+        handleAdd(lensEmbeddablePackage.serializedState.attributes, newTimeRange);
       }
     }
   }, [embeddable, storage, timefilter, currentAppId, handleAdd, handleUpdate, draftComment]);

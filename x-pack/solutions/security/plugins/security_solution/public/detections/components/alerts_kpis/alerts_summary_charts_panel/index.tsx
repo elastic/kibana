@@ -78,6 +78,7 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
         hideSubtitle
         showInspectButton={false}
         toggleStatus={isExpanded}
+        toggleAriaLabel={i18n.CHARTS_TITLE}
         toggleQuery={toggleQuery}
       />
       {isExpanded && (

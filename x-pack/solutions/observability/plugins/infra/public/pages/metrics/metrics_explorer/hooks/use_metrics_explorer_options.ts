@@ -11,6 +11,8 @@ import createContainer from 'constate';
 import type { TimeRange } from '@kbn/es-query';
 import type { Dispatch, SetStateAction } from 'react';
 import { useState, useEffect, useMemo } from 'react';
+import deepEqual from 'fast-deep-equal';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import {
   type MetricsExplorerChartOptions,
   type MetricsExplorerOptions,
@@ -129,6 +131,14 @@ const getDefaultTimeRange = ({ from, to }: TimeRange) => {
 export const useMetricsExplorerOptions = () => {
   const TIME_DEFAULTS = { from: 'now-1h', to: 'now' };
   const [getTime] = useKibanaTimefilterTime(TIME_DEFAULTS);
+  const { services } = useKibanaContextForPlugin();
+
+  const {
+    data: {
+      query: { queryString: queryStringService },
+    },
+  } = services;
+
   const { from, to } = getTime();
 
   const [options, setOptions] = useStateWithLocalStorage<MetricsExplorerOptions>(
@@ -168,6 +178,18 @@ export const useMetricsExplorerOptions = () => {
       setPrefillOptions({ metrics, groupBy, filterQuery });
     }
   }, [options, prefillContext]);
+
+  useEffect(() => {
+    if (options.filterQuery && !deepEqual(queryStringService.getQuery(), options.filterQuery)) {
+      queryStringService.setQuery({
+        query: options.filterQuery,
+        language: 'kuery',
+      });
+    }
+    if (!options.filterQuery) {
+      queryStringService.clearQuery();
+    }
+  }, [queryStringService, options.filterQuery]);
 
   return {
     defaultViewState: {

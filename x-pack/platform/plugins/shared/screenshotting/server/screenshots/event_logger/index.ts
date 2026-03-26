@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { Logger, LogMeta } from '@kbn/core/server';
-import { ConfigType } from '@kbn/screenshotting-server';
+import type { Logger, LogMeta } from '@kbn/core/server';
+import type { ConfigType } from '@kbn/screenshotting-server';
 import apm from 'elastic-apm-node';
+import { type Span as OtelSpan, SpanStatusCode, trace } from '@opentelemetry/api';
 import { v4 as uuidv4 } from 'uuid';
-import { CaptureResult } from '..';
+import type { CaptureResult } from '..';
 import { PLUGIN_ID } from '../../../common';
-import { ElementPosition } from '../get_element_position_data';
+import type { ElementPosition } from '../get_element_position_data';
 import type { Screenshot } from '../types';
 
 export enum Actions {
@@ -171,11 +172,17 @@ export class EventLogger {
    *
    * @returns {ScreenshottingEndFn}
    */
+  // Manual OTel span management: withActiveSpan can't be used here because the span must outlive the synchronous return.
   public startTransaction(
     action: Transactions.SCREENSHOTTING | Transactions.PDF
   ): TransactionEndFn {
     const transaction = apm.startTransaction(action, PLUGIN_ID);
     this.transactions[action] = transaction;
+
+    const tracer = trace.getTracer(PLUGIN_ID);
+    const otelSpan: OtelSpan = tracer.startSpan(action, {
+      attributes: { 'transaction.type': PLUGIN_ID },
+    });
 
     this.startTiming(action);
     this.logEvent(action, 'start', { action });
@@ -185,9 +192,14 @@ export class EventLogger {
         const labelField = label as keyof SimpleEvent;
         const labelValue = labels[labelField];
         transaction.setLabel(label, labelValue, false);
+        if (labelValue !== undefined) {
+          otelSpan.setAttribute(label, labelValue);
+        }
       });
 
       transaction.end();
+      otelSpan.setStatus({ code: SpanStatusCode.OK });
+      otelSpan.end();
 
       this.logEvent(action, 'complete', { ...labels, action }, this.timings[action]);
     };

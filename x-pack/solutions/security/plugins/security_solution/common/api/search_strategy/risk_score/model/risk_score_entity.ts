@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { EntityType } from '../../../../entity_analytics/types';
 
 export const riskScoreEntity = z.nativeEnum(EntityType);
+export const riskScoreEntityArray = z.array(z.nativeEnum(EntityType));

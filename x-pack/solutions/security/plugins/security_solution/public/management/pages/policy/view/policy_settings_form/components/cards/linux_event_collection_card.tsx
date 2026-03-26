@@ -12,22 +12,21 @@ import type { PolicyFormComponentCommonProps } from '../../types';
 import type { UIPolicyConfig } from '../../../../../../../../common/endpoint/types';
 import type { EventFormOption, SupplementalEventFormOption } from '../event_collection_card';
 import { EventCollectionCard } from '../event_collection_card';
+import { useIsExperimentalFeatureEnabled } from '../../../../../../../common/hooks/use_experimental_features';
 
-const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.LINUX>> = [
+const DNS_OPTION: EventFormOption<OperatingSystem.LINUX> = {
+  name: i18n.translate('xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.dns', {
+    defaultMessage: 'DNS',
+  }),
+  protectionField: 'dns',
+};
+
+const BASE_OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.LINUX>> = [
   {
     name: i18n.translate('xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.file', {
       defaultMessage: 'File',
     }),
     protectionField: 'file',
-  },
-  {
-    name: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.network',
-      {
-        defaultMessage: 'Network',
-      }
-    ),
-    protectionField: 'network',
   },
   {
     name: i18n.translate(
@@ -37,6 +36,15 @@ const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.LINUX>> = [
       }
     ),
     protectionField: 'process',
+  },
+  {
+    name: i18n.translate(
+      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.network',
+      {
+        defaultMessage: 'Network',
+      }
+    ),
+    protectionField: 'network',
   },
 ];
 
@@ -93,6 +101,15 @@ export type LinuxEventCollectionCardProps = PolicyFormComponentCommonProps;
 
 export const LinuxEventCollectionCard = memo<LinuxEventCollectionCardProps>(
   ({ onChange, mode, ...restProps }) => {
+    const isLinuxDnsEnabled = useIsExperimentalFeatureEnabled('linuxDnsEvents');
+
+    const options = useMemo(() => {
+      if (isLinuxDnsEnabled) {
+        return [DNS_OPTION, ...BASE_OPTIONS];
+      }
+      return BASE_OPTIONS;
+    }, [isLinuxDnsEnabled]);
+
     const supplementalOptions = useMemo(() => {
       if (mode === 'edit') {
         return SUPPLEMENTAL_OPTIONS;
@@ -130,7 +147,7 @@ export const LinuxEventCollectionCard = memo<LinuxEventCollectionCardProps>(
         os={OperatingSystem.LINUX}
         selection={restProps.policy.linux.events}
         supplementalOptions={supplementalOptions}
-        options={OPTIONS}
+        options={options}
       />
     );
   }

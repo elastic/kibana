@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import { CSSObject } from '@emotion/react';
+import type { CSSObject } from '@emotion/react';
 
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -25,6 +25,8 @@ export const useStyles = () => {
     const ellipsis: CSSObject = {
       overflow: 'hidden',
       textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      minWidth: 0,
     };
 
     return {

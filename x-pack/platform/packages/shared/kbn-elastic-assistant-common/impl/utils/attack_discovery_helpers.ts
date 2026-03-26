@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttackDiscovery } from '../..';
+import type { AttackDiscovery, Replacements } from '../..';
 import * as i18n from './translations';
 
 export const RECONNAISSANCE = 'Reconnaissance';
@@ -82,12 +82,11 @@ export interface TacticMetadata {
   name: string;
 }
 
-export const getTacticMetadata = (attackDiscovery: AttackDiscovery): TacticMetadata[] =>
+export const getTacticMetadata = (
+  mitreAttackTactics: AttackDiscovery['mitreAttackTactics']
+): TacticMetadata[] =>
   MITRE_ATTACK_TACTICS_SUBSET.map((tactic, i) => ({
-    detected:
-      attackDiscovery.mitreAttackTactics === undefined
-        ? false
-        : attackDiscovery.mitreAttackTactics.includes(tactic),
+    detected: mitreAttackTactics === undefined ? false : mitreAttackTactics.includes(tactic),
     name: getTacticLabel(tactic),
     index: i,
   }));
@@ -97,3 +96,24 @@ export const getTacticMetadata = (attackDiscovery: AttackDiscovery): TacticMetad
  * This function replaces them with actual newlines
  */
 export const replaceNewlineLiterals = (markdown: string): string => markdown.replace(/\\n/g, '\n');
+
+export const getOriginalAlertIds = ({
+  alertIds,
+  replacements,
+}: {
+  alertIds: AttackDiscovery['alertIds'];
+  replacements?: Replacements;
+}) => {
+  return alertIds.map((alertId) =>
+    replacements != null ? replacements[alertId] ?? alertId : alertId
+  );
+};
+
+export const transformInternalReplacements = (
+  internal: Array<{ value: string; uuid: string }>
+): Record<string, string> => {
+  return internal.reduce<Record<string, string>>(
+    (acc, r) => (r.uuid != null && r.value != null ? { ...acc, [r.uuid]: r.value } : acc),
+    {}
+  );
+};

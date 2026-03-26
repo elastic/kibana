@@ -8,7 +8,6 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import { EuiSpacer } from '@elastic/eui';
 import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
 import { ProtectionSettingCardSwitch } from '../protection_setting_card_switch';
 import { NotifyUserOption } from '../notify_user_option';
@@ -105,7 +104,6 @@ export const RansomwareProtectionCard = React.memo<RansomwareProtectionCardProps
           osList={RANSOMEWARE_OS_VALUES}
           data-test-subj={getTestId('notifyUser')}
         />
-        <EuiSpacer size="m" />
       </SettingCard>
     );
   }

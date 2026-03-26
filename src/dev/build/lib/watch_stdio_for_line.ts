@@ -8,7 +8,7 @@
  */
 
 import { Transform } from 'stream';
-import { ExecaChildProcess } from 'execa';
+import type { ExecaChildProcess } from 'execa';
 
 import { createPromiseFromStreams, createSplitStream, createMapStream } from '@kbn/utils';
 

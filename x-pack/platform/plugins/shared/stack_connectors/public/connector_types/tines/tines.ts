@@ -11,8 +11,8 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { TINES_CONNECTOR_ID, TINES_TITLE, SUB_ACTION } from '../../../common/tines/constants';
-import type { TinesConfig, TinesSecrets } from '../../../common/tines/types';
+import { CONNECTOR_ID, CONNECTOR_NAME, SUB_ACTION } from '@kbn/connector-schemas/tines/constants';
+import type { TinesConfig, TinesSecrets } from '@kbn/connector-schemas/tines';
 import type { TinesExecuteActionParams } from './types';
 
 interface ValidationErrors {
@@ -29,8 +29,8 @@ export function getConnectorType(): ConnectorTypeModel<
   TinesExecuteActionParams
 > {
   return {
-    id: TINES_CONNECTOR_ID,
-    actionTypeTitle: TINES_TITLE,
+    id: CONNECTOR_ID,
+    actionTypeTitle: CONNECTOR_NAME,
     iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.translate('xpack.stackConnectors.security.tines.config.selectMessageText', {
       defaultMessage: 'Send events to a Story.',
@@ -60,14 +60,8 @@ export function getConnectorType(): ConnectorTypeModel<
       } else {
         if (!subActionParams?.webhook?.storyId) {
           errors.story.push(translations.STORY_REQUIRED);
-        } else {
-          if (!subActionParams?.webhook?.id) {
-            errors.webhook.push(translations.WEBHOOK_REQUIRED);
-          } else if (!subActionParams?.webhook?.path) {
-            errors.webhook.push(translations.WEBHOOK_PATH_REQUIRED);
-          } else if (!subActionParams?.webhook?.secret) {
-            errors.webhook.push(translations.WEBHOOK_SECRET_REQUIRED);
-          }
+        } else if (!subActionParams?.webhook?.id) {
+          errors.webhook.push(translations.WEBHOOK_REQUIRED);
         }
       }
 

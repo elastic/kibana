@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
+import { ecsFieldMap, ecsNestedFieldNames } from '@kbn/alerts-as-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { isPlainObject, isArray } from 'lodash';
@@ -18,6 +18,7 @@ import { isValidNumericType } from './ecs_types_validators/is_valid_numeric_type
 import { isValidBooleanType } from './ecs_types_validators/is_valid_boolean_type';
 import { isValidLongType } from './ecs_types_validators/is_valid_long_type';
 import {
+  ALERT_ORIGINAL_DATA_STREAM,
   ALERT_ORIGINAL_EVENT,
   ALERT_THRESHOLD_RESULT,
 } from '../../../../../../common/field_maps/field_names';
@@ -112,6 +113,17 @@ const computeIsEcsCompliant = (value: SourceField, path: string) => {
   // if path consists of dot-notation, ensure each path within it is ECS compliant (object or flattened)
   if (path.includes('.') && !validateDottedPathInEcsMappings(path)) {
     return false;
+  }
+
+  // Check if this is a nested field - nested fields must contain objects, not primitives
+  // Note: nested fields are excluded from ecsFieldMap to prevent composite mapping conflicts,
+  // so we check against ecsNestedFieldNames separately
+  if (ecsNestedFieldNames.has(path)) {
+    // For nested fields, the value must be an object or an array of objects (not strings/primitives)
+    if (isArray(value)) {
+      return value.every((item) => isPlainObject(item));
+    }
+    return isPlainObject(value);
   }
 
   const isEcsField = getIsEcsField(path);
@@ -247,20 +259,24 @@ const internalTraverseAndMutateDoc = <T extends SourceFieldRecord>({
     }
 
     // We're keeping the field, but maybe we want to copy it to a different field as well
-    if (!deleted && fullPath.split('.')[0] === 'event' && topLevel) {
-      // The value might have changed above when we `set` after traversing an array
-      const valueRefetch = document[key];
-      const newKey = `${ALERT_ORIGINAL_EVENT}${fullPath.replace('event', '')}`;
-      if (isPlainObject(valueRefetch)) {
-        const flattenedObject = flattenWithPrefix(newKey, valueRefetch);
-        for (const [k, v] of Object.entries(flattenedObject)) {
-          fieldsToAdd.push({ key: k, value: v });
+    if (!deleted && topLevel) {
+      const topLevelPath = getTopLevelPath(fullPath);
+
+      if (pathNeedsCopying(topLevelPath)) {
+        // The value might have changed above when we `set` after traversing an array
+        const valueRefetch = document[key];
+        const newKey = getCopyDestinationPath(fullPath, topLevelPath);
+        if (isPlainObject(valueRefetch)) {
+          const flattenedObject = flattenWithPrefix(newKey, valueRefetch);
+          for (const [k, v] of Object.entries(flattenedObject)) {
+            fieldsToAdd.push({ key: k, value: v });
+          }
+        } else {
+          fieldsToAdd.push({
+            key: newKey,
+            value: valueRefetch,
+          });
         }
-      } else {
-        fieldsToAdd.push({
-          key: `${ALERT_ORIGINAL_EVENT}${fullPath.replace('event', '')}`,
-          value: valueRefetch,
-        });
       }
     }
   });
@@ -304,4 +320,43 @@ const traverseArray = ({
       return true;
     }
   });
+};
+
+const getTopLevelPath = (fullPath: string): string => fullPath.split('.')[0];
+
+/**
+ *
+ * A map of ECS namespaces to their additional alerting namespaces. In cases
+ * where the alert metadata may overwrite this source data, or where there is
+ * not an appropriate mapping in ECS, we copy those fields to these additional
+ * locations so as to preserve them and (with mappings) make them search/filterable.
+ */
+const alertingNamespaceCopyMap = {
+  event: ALERT_ORIGINAL_EVENT,
+  data_stream: ALERT_ORIGINAL_DATA_STREAM,
+};
+
+/**
+ *
+ * @param topLevelPath The top-level path to the field in the document
+ * @returns whether the path needs to be copied to an additional location
+ */
+const pathNeedsCopying = (
+  topLevelPath: string
+): topLevelPath is keyof typeof alertingNamespaceCopyMap =>
+  topLevelPath in alertingNamespaceCopyMap;
+
+/**
+ *
+ * @param fullPath The full path to the field in the document
+ * @param topLevelPath The initial path/namespace of `fullPath`, i.e. `fullPath.startsWith(topLevelPath)`
+ * @returns the full destination path to copy the field into
+ */
+const getCopyDestinationPath = (
+  fullPath: string,
+  topLevelPath: keyof typeof alertingNamespaceCopyMap
+): string => {
+  const copyPathRoot = alertingNamespaceCopyMap[topLevelPath];
+
+  return `${copyPathRoot}${fullPath.replace(topLevelPath, '')}`;
 };

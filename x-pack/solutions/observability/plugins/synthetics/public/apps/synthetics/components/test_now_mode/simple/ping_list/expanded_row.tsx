@@ -18,7 +18,7 @@ import {
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { HttpResponseBody, Ping } from '../../../../../../../common/runtime_types';
+import type { HttpResponseBody, Ping } from '../../../../../../../common/runtime_types';
 import { PingRedirects } from './ping_redirects';
 import { PingHeaders } from './headers';
 

@@ -44,9 +44,14 @@ export const getScheduleNotificationResponseActionsService =
           responseAction.actionTypeId === ResponseActionTypesEnum['.osquery'] &&
           osqueryCreateActionService
         ) {
-          await osqueryResponseAction(responseAction, osqueryCreateActionService, {
-            alerts,
-          });
+          await osqueryResponseAction(
+            responseAction,
+            osqueryCreateActionService,
+            endpointAppContextService,
+            {
+              alerts,
+            }
+          );
         }
         if (responseAction.actionTypeId === ResponseActionTypesEnum['.endpoint']) {
           // We currently support only automated response actions for Elastic Defend. This will
@@ -58,6 +63,13 @@ export const getScheduleNotificationResponseActionsService =
           if (alertsFromElasticDefend.length > 0) {
             await endpointResponseAction(responseAction, endpointAppContextService, {
               alerts: alertsFromElasticDefend,
+            }).catch((error) => {
+              endpointAppContextService
+                .createLogger('getScheduleNotificationResponseActionsService')
+                .error(
+                  `Unexpected failure of Endpoint automated response actions: ${error.message}`,
+                  { error }
+                );
             });
           }
         }

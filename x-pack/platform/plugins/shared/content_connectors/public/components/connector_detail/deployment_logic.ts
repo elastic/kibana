@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 import type { Connector } from '@kbn/search-connectors';
 
-import {
-  GenerateConfigApiActions,
-  GenerateConfigApiLogic,
-} from '../../api/connector/generate_connector_config_api_logic';
-import { APIKeyResponse, HttpError, Status } from '../../../common/types/api';
+import type { GenerateConfigApiActions } from '../../api/connector/generate_connector_config_api_logic';
+import { GenerateConfigApiLogic } from '../../api/connector/generate_connector_config_api_logic';
+import type { APIKeyResponse, HttpError } from '../../../common/types/api';
+import { Status } from '../../../common/types/api';
 
 export interface DeploymentLogicValues {
   generateConfigurationError: HttpError;

@@ -10,10 +10,10 @@
 import { type Observable, firstValueFrom } from 'rxjs';
 import type { IRouter, SavedObjectsClient } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { RequestHandler } from '@kbn/core-http-server';
+import type { RequestHandler } from '@kbn/core-http-server';
 import { labelsSchema } from '../config/telemetry_labels';
 import type { TelemetryConfigType } from '../config';
-import { v2 } from '../../common/types';
+import type { v2 } from '../../common/types';
 import {
   FetchTelemetryConfigRoutePathBasedV2,
   FetchTelemetryConfigRoute,
@@ -99,8 +99,12 @@ export function registerTelemetryConfigRoutes({
     .get({
       access: 'internal',
       path: FetchTelemetryConfigRoute,
-      options: { authRequired: 'optional' },
       security: {
+        authc: {
+          enabled: 'optional',
+          reason:
+            'Telemetry config must be accessible regardless of authentication state to determine opt-in status',
+        },
         authz: {
           enabled: false,
           reason: 'This route is opted out from authorization',

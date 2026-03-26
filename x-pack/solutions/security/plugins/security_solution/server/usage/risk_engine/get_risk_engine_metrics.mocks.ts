@@ -34,7 +34,7 @@ export const getStatsResultMock = ({ size }: { size: number }): IndicesStatsResp
   _shards: { total: 2, successful: 1, failed: 0 },
   _all: {
     primaries: {
-      docs: { count: 200000, deleted: 0 },
+      docs: { count: 200000, deleted: 0, total_size_in_bytes: 2 },
       shard_stats: { total_count: 1 },
       store: {
         size_in_bytes: size,

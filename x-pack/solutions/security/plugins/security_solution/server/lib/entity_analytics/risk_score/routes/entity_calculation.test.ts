@@ -19,13 +19,19 @@ import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import { calculateAndPersistRiskScoresMock } from '../calculate_and_persist_risk_scores.mock';
 import { riskScoreEntityCalculationRoute } from './entity_calculation';
 import { riskEnginePrivilegesMock } from '../../risk_engine/routes/risk_engine_privileges.mock';
+import type {
+  MockClients,
+  SecuritySolutionRequestHandlerContextMock,
+} from '../../../detection_engine/routes/__mocks__/request_context';
 
 jest.mock('../get_risk_inputs_index');
 jest.mock('../risk_score_service');
 
 describe('entity risk score calculation route', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let clients: MockClients;
+  let context: SecuritySolutionRequestHandlerContextMock;
+
   let logger: ReturnType<typeof loggerMock.create>;
   let mockRiskScoreService: ReturnType<typeof riskScoreServiceMock.create>;
   const entityAnalyticsConfig = {
@@ -60,6 +66,11 @@ describe('entity risk score calculation route', () => {
     (riskScoreServiceFactory as jest.Mock).mockReturnValue(mockRiskScoreService);
 
     riskScoreEntityCalculationRoute(server.router, getStartServicesMock, logger);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   const buildRequest = (overrides: object = {}) => {
@@ -111,14 +122,18 @@ describe('entity risk score calculation route', () => {
       const request = buildRequest({ identifier_type: undefined });
       const result = await server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith('identifier_type: Required');
+      expect(result.badRequest).toHaveBeenCalledWith(
+        'identifier_type: Invalid option: expected one of "host"|"user"|"service"|"generic"'
+      );
     });
 
     it('requires a parameter for the entity identifier', async () => {
       const request = buildRequest({ identifier: undefined });
       const result = await server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith('identifier: Required');
+      expect(result.badRequest).toHaveBeenCalledWith(
+        'identifier: Invalid input: expected string, received undefined'
+      );
     });
 
     it('returns an error if no entity analytics configuration is found', async () => {

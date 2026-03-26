@@ -5,9 +5,47 @@
  * 2.0.
  */
 
-import { FieldType, InferenceProvider } from '../types/types';
+import type { InferenceProvider } from '../types/types';
+import { FieldType } from '../types/types';
 
 export const mockProviders: InferenceProvider[] = [
+  {
+    service: 'openai',
+    name: 'OpenAI',
+    task_types: ['completion', 'text_embedding'],
+    configurations: {
+      api_key: {
+        default_value: null,
+        description: `API Key for the provider you're connecting to.`,
+        label: 'API Key',
+        required: true,
+        sensitive: true,
+        updatable: true,
+        type: FieldType.STRING,
+        supported_task_types: ['completion', 'text_embedding'],
+      },
+      model_id: {
+        default_value: null,
+        description: 'The name of the model to use for the inference task.',
+        label: 'Model ID',
+        required: true,
+        sensitive: false,
+        updatable: true,
+        type: FieldType.STRING,
+        supported_task_types: ['completion', 'text_embedding'],
+      },
+      'rate_limit.requests_per_minute': {
+        default_value: null,
+        description: 'Minimize the number of rate limit errors.',
+        label: 'Rate Limit',
+        required: false,
+        sensitive: false,
+        updatable: true,
+        type: FieldType.INTEGER,
+        supported_task_types: ['completion', 'text_embedding'],
+      },
+    },
+  },
   {
     service: 'hugging_face',
     name: 'Hugging Face',

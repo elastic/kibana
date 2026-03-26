@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { inspect } from 'util';
-
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+import { delay } from '@kbn/test-jest-helpers';
 
 const returnTrue = () => true;
 
@@ -48,6 +47,7 @@ interface Options<T> {
   description?: string;
   retryDelay?: number;
   retryCount?: number;
+  initialDelay?: number;
 }
 
 export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
@@ -61,7 +61,12 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
     accept = returnTrue,
     retryDelay = 502,
     retryCount,
+    initialDelay,
   } = options;
+
+  if (typeof initialDelay === 'number') {
+    await delay(initialDelay);
+  }
 
   const start = Date.now();
   const criticalWebDriverErrors = ['NoSuchSessionError', 'NoSuchWindowError'];

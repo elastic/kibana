@@ -1,0 +1,35 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "../../../../../typings/**/*",
+    "__jest__/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
+    "public/**/*.json",
+    "server/**/*.json"
+  ],
+  "kbn_references": [
+    "@kbn/security-plugin",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/core",
+    "@kbn/upgrade-assistant-pkg-server",
+    "@kbn/utility-types",
+    "@kbn/config-schema",
+    "@kbn/core-http-server-utils",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/i18n",
+    "@kbn/upgrade-assistant-pkg-common",
+    "@kbn/std",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

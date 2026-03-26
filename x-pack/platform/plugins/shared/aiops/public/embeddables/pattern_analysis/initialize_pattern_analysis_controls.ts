@@ -7,25 +7,26 @@
 
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import type {
-  PatternAnalysisComponentApi,
-  PatternAnalysisEmbeddableRuntimeState,
-  PatternAnalysisEmbeddableState,
-} from './types';
+import type { PatternAnalysisComponentApi } from './types';
+import type { PatternAnalysisEmbeddableState } from '../../../common/embeddables/pattern_analysis/types';
 
-type PatternAnalysisEmbeddableCustomState = Omit<
+type PatternAnalysisState = Pick<
   PatternAnalysisEmbeddableState,
-  'timeRange' | 'title' | 'description' | 'hidePanelTitles'
+  | 'dataViewId'
+  | 'fieldName'
+  | 'minimumTimeRangeOption'
+  | 'randomSamplerMode'
+  | 'randomSamplerProbability'
 >;
 
-export const initializePatternAnalysisControls = (state: PatternAnalysisEmbeddableRuntimeState) => {
+export const initializePatternAnalysisControls = (state: PatternAnalysisEmbeddableState) => {
   const dataViewId = new BehaviorSubject(state.dataViewId);
   const fieldName = new BehaviorSubject(state.fieldName);
   const minimumTimeRangeOption = new BehaviorSubject(state.minimumTimeRangeOption);
   const randomSamplerMode = new BehaviorSubject(state.randomSamplerMode);
   const randomSamplerProbability = new BehaviorSubject(state.randomSamplerProbability);
 
-  const updateUserInput = (update: PatternAnalysisEmbeddableCustomState) => {
+  const updateUserInput = (update: PatternAnalysisEmbeddableState) => {
     dataViewId.next(update.dataViewId);
     fieldName.next(update.fieldName);
     minimumTimeRangeOption.next(update.minimumTimeRangeOption);
@@ -33,7 +34,7 @@ export const initializePatternAnalysisControls = (state: PatternAnalysisEmbeddab
     randomSamplerProbability.next(update.randomSamplerProbability);
   };
 
-  const serializePatternAnalysisChartState = (): PatternAnalysisEmbeddableCustomState => {
+  const serializePatternAnalysisChartState = (): PatternAnalysisState => {
     return {
       dataViewId: dataViewId.getValue(),
       fieldName: fieldName.getValue(),
@@ -43,14 +44,13 @@ export const initializePatternAnalysisControls = (state: PatternAnalysisEmbeddab
     };
   };
 
-  const patternAnalysisControlsComparators: StateComparators<PatternAnalysisEmbeddableCustomState> =
-    {
-      dataViewId: 'referenceEquality',
-      fieldName: 'referenceEquality',
-      minimumTimeRangeOption: 'referenceEquality',
-      randomSamplerMode: 'referenceEquality',
-      randomSamplerProbability: 'referenceEquality',
-    };
+  const patternAnalysisControlsComparators: StateComparators<PatternAnalysisState> = {
+    dataViewId: 'referenceEquality',
+    fieldName: 'referenceEquality',
+    minimumTimeRangeOption: 'referenceEquality',
+    randomSamplerMode: 'referenceEquality',
+    randomSamplerProbability: 'referenceEquality',
+  };
 
   return {
     patternAnalysisControlsApi: {

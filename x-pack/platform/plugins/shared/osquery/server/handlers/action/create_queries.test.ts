@@ -9,8 +9,11 @@ import { createDynamicQueries } from './create_queries';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
+import type { SavedObjectsClient } from '@kbn/core/server';
 
 describe('create queries', () => {
+  const spaceId = 'default';
+  const mockSavedObjectsClient = {} as unknown as SavedObjectsClient;
   const defualtQueryParams = {
     interval: 3600,
     platform: 'linux',
@@ -62,6 +65,8 @@ describe('create queries', () => {
           },
         } as unknown as ParsedTechnicalFields & { _index: string },
         osqueryContext: {} as OsqueryAppContext,
+        spaceId,
+        spaceScopedClient: mockSavedObjectsClient,
       });
       expect(queries[0].query).toBe(`SELECT * FROM processes where pid=${pid};`);
       expect(queries[0].error).toBe(undefined);
@@ -79,6 +84,8 @@ describe('create queries', () => {
           process: { pid },
         } as unknown as ParsedTechnicalFields & { _index: string },
         osqueryContext: {} as OsqueryAppContext,
+        spaceId,
+        spaceScopedClient: mockSavedObjectsClient,
       });
       expect(queries[0].query).toBe(`SELECT * FROM processes where pid=${pid};`);
       expect(queries[0].error).toBe(undefined);
@@ -91,6 +98,8 @@ describe('create queries', () => {
           process: {},
         } as unknown as ParsedTechnicalFields & { _index: string },
         osqueryContext: {} as OsqueryAppContext,
+        spaceId,
+        spaceScopedClient: mockSavedObjectsClient,
       });
       expect(queries[0].query).toBe('SELECT * FROM processes where pid={{process.pid}};');
       expect(queries[0].error).toBe(PARAMETER_NOT_FOUND);
@@ -100,6 +109,8 @@ describe('create queries', () => {
         params: mockedQueriesParams,
         agents: [TEST_AGENT],
         osqueryContext: {} as OsqueryAppContext,
+        spaceId,
+        spaceScopedClient: mockSavedObjectsClient,
       });
       expect(queries[0].query).toBe('SELECT * FROM processes where pid={{process.pid}};');
       expect(queries[0].agents).toContain(TEST_AGENT);
@@ -114,6 +125,8 @@ describe('create queries', () => {
         params: mockedSingleQueryParams,
         agents: [TEST_AGENT],
         osqueryContext: {} as OsqueryAppContext,
+        spaceId,
+        spaceScopedClient: mockSavedObjectsClient,
       });
       expect(queries[0].query).toBe('SELECT * FROM processes where pid={{process.pid}};');
       expect(queries[0].agents).toContain(TEST_AGENT);

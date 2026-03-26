@@ -16,13 +16,12 @@ import type {
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
 import type { AlertsFiltersExpression } from '@kbn/response-ops-alerts-filters-form/types';
-import type { PresentationContainer } from '@kbn/presentation-containers';
+import type { PresentationContainer } from '@kbn/presentation-publishing';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EmbeddableAlertsTablePublicSetup {}
@@ -42,7 +41,6 @@ export interface EmbeddableAlertsTablePublicStartDependencies {
   application: CoreStart['application'];
   licensing: LicensingPluginStart;
   settings: SettingsStart;
-  cases: CasesPublicStart;
 }
 
 export type EmbeddableAlertsTableSerializedState = SerializedTitles &

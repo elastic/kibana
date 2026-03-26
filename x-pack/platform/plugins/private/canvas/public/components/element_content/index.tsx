@@ -8,8 +8,9 @@
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { getSelectedPage, getPageById, getSelectedElementId } from '../../state/selectors/workpad';
-import { ElementContent as Component, Props as ComponentProps } from './element_content';
-import { State } from '../../../types';
+import type { Props as ComponentProps } from './element_content';
+import { ElementContent as Component } from './element_content';
+import type { State } from '../../../types';
 import { getCanvasExpressionService } from '../../services/canvas_expressions_service';
 
 export type Props = Omit<ComponentProps, 'renderFunction' | 'backgroundColor'>;

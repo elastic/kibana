@@ -14,18 +14,17 @@ import {
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
 } from '@kbn/elastic-assistant-common';
 
-import {
+import type {
   AnonymizationFieldResponse,
   AnonymizationFieldsBulkActionSkipResult,
   AnonymizationFieldsBulkCrudActionResponse,
   AnonymizationFieldsBulkCrudActionResults,
   BulkCrudActionSummary,
-  PerformAnonymizationFieldsBulkActionRequestBody,
   PerformAnonymizationFieldsBulkActionResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas';
+import { PerformAnonymizationFieldsBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { ANONYMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
-import { ElasticAssistantPluginRouter } from '../../types';
+import type { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import {
   getUpdateScript,
@@ -34,7 +33,7 @@ import {
   transformToCreateScheme,
   transformToUpdateScheme,
 } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
-import {
+import type {
   EsAnonymizationFieldsSchema,
   UpdateAnonymizationFieldSchema,
 } from '../../ai_assistant_data_clients/anonymization_fields/types';
@@ -145,17 +144,6 @@ export const bulkActionAnonymizationFieldsRoute = (
       ): Promise<IKibanaResponse<PerformAnonymizationFieldsBulkActionResponse>> => {
         const { body } = request;
         const assistantResponse = buildResponse(response);
-
-        const operationsCount =
-          (body?.update ? body.update?.length : 0) +
-          (body?.create ? body.create?.length : 0) +
-          (body?.delete ? body.delete?.ids?.length ?? 0 : 0);
-        if (operationsCount > ANONYMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE) {
-          return assistantResponse.error({
-            body: `More than ${ANONYMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE} ids sent for bulk edit action.`,
-            statusCode: 400,
-          });
-        }
 
         const abortController = new AbortController();
 

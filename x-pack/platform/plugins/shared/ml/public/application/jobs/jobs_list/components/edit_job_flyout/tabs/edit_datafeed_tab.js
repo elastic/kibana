@@ -87,7 +87,7 @@ export class EditDatafeedTab extends Component {
         <EuiSpacer size="m" />
         {datafeedRunning && (
           <>
-            <EuiCallOut color="warning">
+            <EuiCallOut announceOnMount color="warning">
               <FormattedMessage
                 id="xpack.ml.jobsList.editJobFlyout.datafeed.readOnlyCalloutText"
                 defaultMessage="Datafeed settings cannot be edited while the datafeed is running. Please stop the job if you wish to edit these settings."

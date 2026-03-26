@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogsSharedPluginCoreSetup } from '../types';
+import type { LogsSharedPluginCoreSetup } from '../types';
 import { getLogSourcesSettingDeprecationInfo } from './log_sources_setting';
 
 export const registerDeprecations = ({ core }: { core: LogsSharedPluginCoreSetup }) => {

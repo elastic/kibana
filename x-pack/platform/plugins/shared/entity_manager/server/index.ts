@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core-plugins-server';
-import { EntityManagerConfig } from '../common/config';
-import { EntityManagerServerPluginSetup, EntityManagerServerPluginStart, config } from './plugin';
-import { EntityManagerRouteRepository } from './routes';
+import type { PluginInitializerContext } from '@kbn/core-plugins-server';
+import type { EntityManagerConfig } from '../common/config';
+import type { EntityManagerServerPluginSetup, EntityManagerServerPluginStart } from './plugin';
+import { config } from './plugin';
+import type { EntityManagerRouteRepository } from './routes';
 
 export type {
   EntityManagerConfig,
@@ -17,14 +18,6 @@ export type {
   EntityManagerRouteRepository,
 };
 export { config };
-
-export {
-  CREATE_ENTITY_TYPE_DEFINITION_PRIVILEGE,
-  CREATE_ENTITY_SOURCE_DEFINITION_PRIVILEGE,
-  READ_ENTITY_TYPE_DEFINITION_PRIVILEGE,
-  READ_ENTITY_SOURCE_DEFINITION_PRIVILEGE,
-  READ_ENTITIES_PRIVILEGE,
-} from './lib/v2/constants';
 
 export const plugin = async (context: PluginInitializerContext<EntityManagerConfig>) => {
   const { EntityManagerServerPlugin } = await import('./plugin');

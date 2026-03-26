@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { EntityType } from '../../../../../common/search_strategy';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import type { RiskScoresCalculationResponse } from '../../../../../common/api/entity_analytics';
@@ -77,6 +77,8 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
       pageSize,
       alertSampleSizePerShard,
       filter: userFilter,
+      excludeAlertStatuses,
+      excludeAlertTags,
     } = entityAnalyticsConfig;
 
     if (!enabled) {
@@ -115,6 +117,8 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
       runtimeMappings,
       weights: [],
       alertSampleSizePerShard,
+      excludeAlertStatuses,
+      excludeAlertTags,
       afterKeys,
       returnScores: true,
       refresh,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IAggConfig } from '../agg_config';
+import type { IAggConfig } from '../agg_config';
 import { BaseParamType } from './base';
 
 export interface OptionedValueProp {

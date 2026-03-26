@@ -5,16 +5,16 @@
  * 2.0.
  */
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { schema } from '@kbn/config-schema';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
-import { AgentPolicyInfo } from '../../../../common/types';
-import { SyntheticsRestApiRouteFactory } from '../../types';
-import { PrivateLocation, SyntheticsPrivateLocations } from '../../../../common/runtime_types';
+import type { AgentPolicyInfo } from '../../../../common/types';
+import type { SyntheticsRestApiRouteFactory } from '../../types';
+import type { PrivateLocation, SyntheticsPrivateLocations } from '../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
 import type { SyntheticsPrivateLocationsAttributes } from '../../../runtime_types/private_locations';
-import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import type { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { allLocationsToClientContract } from './helpers';
 
 export const getPrivateLocationsRoute: SyntheticsRestApiRouteFactory<

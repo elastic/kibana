@@ -8,13 +8,14 @@
  */
 
 import {
-  getTranslation,
+  formatList,
+  getIsInitialized,
   getLocale,
-  translate,
+  getTranslation,
+  handleIntlError,
   init,
   load,
-  handleIntlError,
-  getIsInitialized,
+  translate,
 } from './src/core';
 
 import {
@@ -30,6 +31,7 @@ const i18n = {
   getTranslation,
   getLocale,
   translate,
+  formatList,
   init,
   load,
   handleIntlError,
