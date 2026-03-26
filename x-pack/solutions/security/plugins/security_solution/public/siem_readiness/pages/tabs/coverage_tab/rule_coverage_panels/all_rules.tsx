@@ -25,7 +25,7 @@ import {
   useSiemReadinessApi,
 } from '@kbn/siem-readiness';
 import { IntegrationSelectablePopover } from '../../../components/integrations_selectable_popover';
-import { createIntegrationStatusMapFromSets } from '../utils/integration_status_utils';
+import { createIntegrationStatusMapFromSets } from '../create_integration_status_maps';
 
 export const AllRuleCoveragePanel: React.FC = () => {
   const { euiTheme } = useEuiTheme();

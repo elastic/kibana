@@ -27,7 +27,7 @@ import { useSiemReadinessCases } from '../../../hooks/use_siem_readiness_cases';
 import { useBasePath } from '../../../../common/lib/kibana';
 import { IntegrationSelectablePopover } from '../../components/integrations_selectable_popover';
 import { ViewCasesButton } from '../../components/view_cases_button';
-import { createIntegrationStatusMapFromPackages } from './utils/integration_status_utils';
+import { createIntegrationStatusMapFromPackages } from './create_integration_status_maps';
 
 const CATEGORY_ORDER = ['Endpoint', 'Identity', 'Network', 'Cloud', 'Application/SaaS'] as const;
 

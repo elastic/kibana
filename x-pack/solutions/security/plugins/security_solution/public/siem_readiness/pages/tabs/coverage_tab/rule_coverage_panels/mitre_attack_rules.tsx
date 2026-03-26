@@ -23,7 +23,7 @@ import {
   useDetectionRulesByIntegration,
 } from '@kbn/siem-readiness';
 import { IntegrationSelectablePopover } from '../../../components/integrations_selectable_popover';
-import { createIntegrationStatusMapFromSets } from '../utils/integration_status_utils';
+import { createIntegrationStatusMapFromSets } from '../create_integration_status_maps';
 
 interface DetectionRule {
   rule_id?: string;
