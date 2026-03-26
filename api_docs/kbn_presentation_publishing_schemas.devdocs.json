@@ -52,6 +52,90 @@
     "objects": [
       {
         "parentPluginId": "@kbn/presentation-publishing-schemas",
+        "id": "def-server.BY_REF_SCHEMA_META",
+        "type": "Object",
+        "tags": [],
+        "label": "BY_REF_SCHEMA_META",
+        "description": [],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing_schemas/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing-schemas",
+            "id": "def-server.BY_REF_SCHEMA_META.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing_schemas/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing-schemas",
+            "id": "def-server.BY_REF_SCHEMA_META.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing_schemas/index.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing-schemas",
+        "id": "def-server.BY_VALUE_SCHEMA_META",
+        "type": "Object",
+        "tags": [],
+        "label": "BY_VALUE_SCHEMA_META",
+        "description": [],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing_schemas/index.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing-schemas",
+            "id": "def-server.BY_VALUE_SCHEMA_META.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing_schemas/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing-schemas",
+            "id": "def-server.BY_VALUE_SCHEMA_META.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing_schemas/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing-schemas",
         "id": "def-server.serializedTimeRangeSchema",
         "type": "Object",
         "tags": [],
