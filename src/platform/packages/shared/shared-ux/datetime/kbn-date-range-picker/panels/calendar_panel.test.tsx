@@ -279,10 +279,10 @@ describe('CalendarPanel', () => {
       ).toBeTruthy();
     });
 
-    it('is disabled when initialized with dates but no changes made', () => {
+    it('is enabled when initialized with a valid date range', () => {
       renderWithEuiTheme(<CalendarPanel />);
 
-      expect(screen.getByRole('button', { name: 'Apply' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Apply' })).not.toBeDisabled();
     });
 
     it('becomes enabled after both dates are selected', () => {

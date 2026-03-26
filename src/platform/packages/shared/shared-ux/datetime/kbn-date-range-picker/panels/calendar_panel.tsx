@@ -34,7 +34,7 @@ export function CalendarPanel() {
   const saveAsPresetCheckboxId = useGeneratedHtmlId({ prefix: 'saveAsPreset' });
 
   const [pendingFrom, setPendingFrom] = useState<Date | null>(null);
-  const [hasChanges, setHasChanges] = useState(false);
+
   const [saveAsPreset, setSaveAsPreset] = useState(false);
 
   const originalTextRef = useRef(text);
@@ -64,14 +64,6 @@ export function CalendarPanel() {
       );
     }
   }, [setText, timePrecision]);
-
-  const hasTimeRangeChanged = useMemo(() => {
-    if (!timeRange.startDate || !timeRange.endDate) return false;
-    return (
-      timeRange.startDate.getTime() !== timeSourceRef.current.startDate?.getTime() ||
-      timeRange.endDate.getTime() !== timeSourceRef.current.endDate?.getTime()
-    );
-  }, [timeRange.startDate, timeRange.endDate]);
 
   const restoreOriginalText = useCallback(() => {
     setText(originalTextRef.current);
@@ -112,8 +104,6 @@ export function CalendarPanel() {
 
   const handleRangeChange = useCallback(
     (newRange: DateRange | undefined) => {
-      setHasChanges(true);
-
       // Complete range visible — user is starting a new selection
       if (!pendingFrom && calendarRange?.from && calendarRange?.to) {
         const fromChanged = newRange?.from?.getTime() !== calendarRange.from.getTime();
@@ -141,8 +131,7 @@ export function CalendarPanel() {
   );
 
   const isRangeComplete = Boolean(calendarRange?.from && calendarRange?.to);
-  const isApplyDisabled =
-    !(hasChanges || hasTimeRangeChanged) || !isRangeComplete || !absoluteRange;
+  const isApplyDisabled = !isRangeComplete || !absoluteRange;
 
   const onApply = useCallback(() => {
     if (!absoluteRange) return;
