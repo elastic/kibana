@@ -15,6 +15,7 @@ export const SEARCH_AI_LAKE_PACKAGES = [
   'elastic_security',
   'google_secops',
   'microsoft_sentinel',
+  'ibm_qradar',
   'sentinel_one',
   'splunk',
 ];
