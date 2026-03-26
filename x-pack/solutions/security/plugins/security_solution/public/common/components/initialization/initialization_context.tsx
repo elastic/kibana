@@ -44,12 +44,9 @@ export const InitializationProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const requestInitialization = useCallback(
     async (flows: InitializationFlowId[]) => {
-      const newFlows = flows.filter((id) => {
-        if (inflightRef.current.has(id)) return false;
-        // Skip flows that have already settled (success or terminal error).
-        if (settledStateRef.current[id]) return false;
-        return true;
-      });
+      const newFlows = flows.filter(
+        (id) => !inflightRef.current.has(id) && !settledStateRef.current[id]
+      );
 
       if (newFlows.length === 0) {
         return;
