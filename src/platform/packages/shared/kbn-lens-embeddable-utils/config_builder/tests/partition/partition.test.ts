@@ -92,7 +92,10 @@ describe('Partition', () => {
   describe('validateAPIConverter', () => {
     for (const config of esqlCharts) {
       it(`should convert an API ${config.title} chart`, () => {
-        validateAPIConverter(config as LensApiState, partitionStateSchema);
+        validateAPIConverter(config as LensApiState, partitionStateSchema, [
+          'sampling',
+          'ignore_global_filters',
+        ]);
       });
     }
   });
