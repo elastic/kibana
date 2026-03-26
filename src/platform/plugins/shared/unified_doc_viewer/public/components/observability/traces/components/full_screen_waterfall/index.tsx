@@ -255,7 +255,7 @@ export const FullScreenWaterfall = ({
           dataTestSubj="traceWaterfallDocumentFlyout"
           onCloseFlyout={(event) => {
             setHighlightedSpanId(undefined);
-            onCloseFlyout?.(event);
+            onCloseFlyout(event);
           }}
           activeSection={activeSection}
           skipNextEventReport={skipNextEventReport}
