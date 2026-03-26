@@ -61,11 +61,15 @@ type KIFeatureExtractionEvaluator = Evaluator<
   KIFeatureExtractionOutput
 >;
 
-const getFeaturesFromOutput = (output: KIFeatureExtractionOutput | undefined): BaseFeature[] => {
+export const getFeaturesFromOutput = (output: unknown): BaseFeature[] => {
   if (!output) {
     return [];
   }
-  return Array.isArray(output) ? output : output.features ?? [];
+  if (Array.isArray(output)) {
+    return output;
+  }
+  const record = output as Record<string, unknown>;
+  return (record.features as BaseFeature[]) ?? [];
 };
 
 /**

@@ -10,7 +10,6 @@ import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import type { BaseFeature } from '@kbn/streams-schema';
 import type { GcsConfig } from '../../../src/data_generators/replay';
 import {
   SIGEVENTS_SNAPSHOT_RUN,
@@ -19,7 +18,10 @@ import {
   replaySignificantEventsSnapshot,
 } from '../../../src/data_generators/replay';
 import { evaluate } from '../../../src/evaluate';
-import { createKIFeatureExtractionEvaluators } from '../../../src/evaluators/ki_feature_extraction/evaluators';
+import {
+  createKIFeatureExtractionEvaluators,
+  getFeaturesFromOutput,
+} from '../../../src/evaluators/ki_feature_extraction/evaluators';
 import { createCorrectnessEvaluators } from '../../../src/evaluators/correctness_evaluators';
 import {
   getActiveDatasets,
@@ -150,8 +152,7 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
                   return `Identify key infrastructure features from log data. Failure domain: ${meta.failure_domain}, failure mode: ${meta.failure_mode}`;
                 },
                 extractResponse: (output) => {
-                  const features = ((output as Record<string, unknown>)?.features ??
-                    []) as BaseFeature[];
+                  const features = getFeaturesFromOutput(output);
                   return features
                     .map(
                       (f) =>
