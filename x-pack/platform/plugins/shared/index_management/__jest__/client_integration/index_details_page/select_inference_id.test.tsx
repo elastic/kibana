@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import {
   Form,
@@ -22,12 +23,6 @@ const INFERENCE_LOCATOR = 'SEARCH_INFERENCE_ENDPOINTS';
 
 const createMockLocator = () => ({
   useUrl: jest.fn().mockReturnValue('https://redirect.me/to/inference_endpoints'),
-});
-
-const mockIsAtLeast = jest.fn((level: string) => {
-  // Default: enterprise license, so all levels return true
-  // Individual tests can override this mock implementation
-  return true;
 });
 
 jest.mock('../../../public/application/app_context', () => ({
@@ -101,6 +96,7 @@ const mockResendRequest = jest.fn();
 const MockInferenceFlyoutWrapper = ({
   onFlyoutClose,
   onSubmitSuccess,
+  allowedTaskTypes,
 }: {
   onFlyoutClose: () => void;
   onSubmitSuccess: (id: string) => void;
@@ -108,6 +104,7 @@ const MockInferenceFlyoutWrapper = ({
   toasts?: unknown;
   isEdit?: boolean;
   enforceAdaptiveAllocations?: boolean;
+  allowedTaskTypes?: InferenceTaskType[];
 }) => (
   <div data-test-subj="inference-flyout-wrapper">
     <button data-test-subj="mock-flyout-close" onClick={onFlyoutClose}>
@@ -116,6 +113,9 @@ const MockInferenceFlyoutWrapper = ({
     <button data-test-subj="mock-flyout-submit" onClick={() => onSubmitSuccess('new-endpoint-id')}>
       Submit
     </button>
+    {allowedTaskTypes && (
+      <div data-test-subj="mock-allowed-task-types">{allowedTaskTypes.join(',')}</div>
+    )}
   </div>
 );
 
@@ -135,13 +135,6 @@ const DEFAULT_ENDPOINTS: InferenceAPIConfigResponse[] = [
   { inference_id: 'endpoint-1', task_type: 'text_embedding' },
   { inference_id: 'endpoint-2', task_type: 'sparse_embedding' },
 ] as InferenceAPIConfigResponse[];
-
-jest.mock('../../../public/hooks/use_license', () => ({
-  useLicense: jest.fn(() => ({
-    isLoading: false,
-    isAtLeast: mockIsAtLeast,
-  })),
-}));
 
 function TestFormWrapper({
   children,
@@ -234,8 +227,6 @@ beforeEach(() => {
     '../../../public/application/services/api'
   );
   useLoadInferenceEndpoints.mockReset();
-  // Reset to default: enterprise license (all levels return true)
-  mockIsAtLeast.mockImplementation(() => true);
 });
 
 afterEach(async () => {
@@ -374,6 +365,20 @@ describe('SelectInferenceId', () => {
       await actClick(await screen.findByTestId('createInferenceEndpointButton'));
 
       expect(await screen.findByTestId('inference-flyout-wrapper')).toBeInTheDocument();
+    });
+
+    it('SHOULD pass allowedTaskTypes to restrict endpoint creation to compatible types', async () => {
+      render(
+        <TestFormWrapper>
+          <SelectInferenceId {...defaultProps} />
+        </TestFormWrapper>
+      );
+
+      await actClick(await screen.findByTestId('inferenceIdButton'));
+      await actClick(await screen.findByTestId('createInferenceEndpointButton'));
+
+      const allowedTaskTypes = await screen.findByTestId('mock-allowed-task-types');
+      expect(allowedTaskTypes).toHaveTextContent('text_embedding,sparse_embedding');
     });
 
     describe('AND flyout close is triggered', () => {
@@ -570,7 +575,7 @@ describe('SelectInferenceId', () => {
     });
 
     describe('AND .elser-2-elastic is available', () => {
-      it('SHOULD prioritize .elser-2-elastic over other endpoints IF has enterprise license', async () => {
+      it('SHOULD prioritize .elser-2-elastic over other endpoints', async () => {
         setupMocks([
           { inference_id: '.elser-2-elastic', task_type: 'sparse_embedding' },
           { inference_id: '.preconfigured-elser', task_type: 'sparse_embedding' },
@@ -587,29 +592,6 @@ describe('SelectInferenceId', () => {
 
         const button = screen.getByTestId('inferenceIdButton');
         expect(button).toHaveTextContent('.elser-2-elastic');
-      });
-
-      it('SHOULD fall back to .preconfigured-elser instead of .elser-2-elastic IF has NO enterprise license', async () => {
-        // Mock license to return false for enterprise
-        mockIsAtLeast.mockImplementation((level: string) => level !== 'enterprise');
-
-        setupMocks([
-          { inference_id: '.elser-2-elastic', task_type: 'sparse_embedding' },
-          { inference_id: '.preconfigured-elser', task_type: 'sparse_embedding' },
-          { inference_id: 'endpoint-1', task_type: 'text_embedding' },
-        ] as InferenceAPIConfigResponse[]);
-
-        render(
-          <TestFormWrapper initialValue="">
-            <SelectInferenceId {...defaultProps} />
-          </TestFormWrapper>
-        );
-
-        await flushPendingTimers();
-
-        const button = await screen.findByTestId('inferenceIdButton');
-        expect(button).toHaveTextContent('.preconfigured-elser');
-        expect(button).not.toHaveTextContent('.elser-2-elastic');
       });
     });
   });
