@@ -12,8 +12,7 @@ import deepEqual from 'react-fast-compare';
 import type { OptionsListDSLControlState, OptionsListSelection } from '@kbn/controls-schemas';
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
-
-import { OPTIONS_LIST_DEFAULT_SORT } from '@kbn/controls-constants';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 
 function areSelectedOptionsEqual(
   a: OptionsListSelection[] | undefined,
@@ -32,10 +31,10 @@ export const selectionComparators: StateComparators<
 };
 
 export const defaultSelectionState = {
-  exclude: false,
-  exists_selected: false,
-  selected_options: [],
-  sort: OPTIONS_LIST_DEFAULT_SORT,
+  exclude: DEFAULT_DSL_OPTIONS_LIST_STATE.exclude,
+  exists_selected: DEFAULT_DSL_OPTIONS_LIST_STATE.exists_selected,
+  selected_options: DEFAULT_DSL_OPTIONS_LIST_STATE.selected_options,
+  sort: DEFAULT_DSL_OPTIONS_LIST_STATE.sort,
 };
 
 export type SelectionsState = Pick<
@@ -45,10 +44,7 @@ export type SelectionsState = Pick<
 
 export function initializeSelectionsManager(initialState: SelectionsState) {
   const selectionsManager = initializeStateManager<SelectionsState>(
-    {
-      ...initialState,
-      selected_options: initialState.selected_options ?? [],
-    },
+    initialState,
     defaultSelectionState,
     selectionComparators
   );

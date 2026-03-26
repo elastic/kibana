@@ -392,7 +392,7 @@
           "\nSO client for FTR.\n"
         ],
         "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
-        "lineNumber": 142,
+        "lineNumber": 143,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -408,7 +408,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
-            "lineNumber": 148,
+            "lineNumber": 149,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -430,7 +430,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
-                "lineNumber": 148,
+                "lineNumber": 149,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -447,7 +447,7 @@
                   "KbnClientRequester"
                 ],
                 "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
-                "lineNumber": 148,
+                "lineNumber": 149,
                 "columnNumber": 49,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -469,7 +469,7 @@
               "() => Promise<MigrateResponse>"
             ],
             "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
-            "lineNumber": 150,
+            "lineNumber": 151,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -489,7 +489,7 @@
               "<Attributes extends Record<string, any>>(options: GetOptions) => Promise<SavedObjectResponse<Attributes>>"
             ],
             "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
-            "lineNumber": 165,
+            "lineNumber": 166,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -505,7 +505,7 @@
                   "GetOptions"
                 ],
                 "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
-                "lineNumber": 168,
+                "lineNumber": 169,
                 "columnNumber": 60,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -529,7 +529,7 @@
               "<Attributes, unknown>>"
             ],
             "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
-            "lineNumber": 181,
+            "lineNumber": 182,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -545,7 +545,7 @@
                   "FindOptions"
                 ],
                 "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
-                "lineNumber": 184,
+                "lineNumber": 185,
                 "columnNumber": 61,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -567,7 +567,7 @@
               "<Attributes extends Record<string, any>>(options: IndexOptions<Attributes>) => Promise<SavedObjectResponse<Attributes>>"
             ],
             "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
-            "lineNumber": 197,
+            "lineNumber": 210,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -583,7 +583,7 @@
                   "IndexOptions<Attributes>"
                 ],
                 "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
-                "lineNumber": 200,
+                "lineNumber": 213,
                 "columnNumber": 63,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -605,7 +605,7 @@
               "<Attributes extends Record<string, any>>(options: UpdateOptions<Attributes>) => Promise<SavedObjectResponse<Attributes>>"
             ],
             "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
-            "lineNumber": 221,
+            "lineNumber": 232,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -621,7 +621,7 @@
                   "UpdateOptions<Attributes>"
                 ],
                 "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
-                "lineNumber": 224,
+                "lineNumber": 235,
                 "columnNumber": 63,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -643,7 +643,7 @@
               "(options: GetOptions) => Promise<unknown>"
             ],
             "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
-            "lineNumber": 243,
+            "lineNumber": 256,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -659,7 +659,7 @@
                   "GetOptions"
                 ],
                 "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
-                "lineNumber": 246,
+                "lineNumber": 259,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -679,7 +679,7 @@
               "(options: CleanOptions) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
-            "lineNumber": 260,
+            "lineNumber": 273,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -695,7 +695,7 @@
                   "CleanOptions"
                 ],
                 "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
-                "lineNumber": 260,
+                "lineNumber": 273,
                 "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -715,7 +715,7 @@
               "(options?: { space?: string | undefined; } | undefined) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
-            "lineNumber": 277,
+            "lineNumber": 290,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -728,7 +728,7 @@
                 "label": "options",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
-                "lineNumber": 277,
+                "lineNumber": 290,
                 "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -744,7 +744,7 @@
                       "string | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
-                    "lineNumber": 277,
+                    "lineNumber": 290,
                     "columnNumber": 46,
                     "deprecated": false,
                     "trackAdoption": false
@@ -765,7 +765,7 @@
               "(options: DeleteObjectsOptions) => Promise<{ deleted: number; missing: number; }>"
             ],
             "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
-            "lineNumber": 282,
+            "lineNumber": 295,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -781,7 +781,7 @@
                   "DeleteObjectsOptions"
                 ],
                 "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client_saved_objects.ts",
-                "lineNumber": 282,
+                "lineNumber": 295,
                 "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
