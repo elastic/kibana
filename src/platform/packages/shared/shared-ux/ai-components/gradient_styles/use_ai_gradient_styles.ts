@@ -10,7 +10,9 @@
 import { css, type SerializedStyles } from '@emotion/react';
 import { type UseEuiTheme, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { useMemo } from 'react';
-import type { AiButtonVariant } from './types';
+
+/** Visual variants that affect AI gradient colors. */
+export type AiButtonVariant = 'accent' | 'base' | 'empty' | 'outlined';
 
 /** Options for the AI button gradient hooks. */
 export interface AiButtonGradientOptions {
@@ -166,6 +168,24 @@ const outlinedBorderGradientCss = (
   }
 `;
 
+const iconFillGradientCss = ({
+  gradientUrl,
+  disabledColor,
+}: {
+  gradientUrl: string;
+  disabledColor: string;
+}): SerializedStyles => css`
+  & .euiIcon,
+  & .euiIcon [fill]:not([fill='none']) {
+    fill: ${gradientUrl} !important;
+  }
+  &&:disabled .euiIcon,
+  &&:disabled .euiIcon [fill]:not([fill='none']) {
+    fill: ${disabledColor} !important;
+    color: ${disabledColor} !important;
+  }
+`;
+
 const resolveVariantStyles = (
   variant: AiButtonVariant,
   euiTheme: UseEuiTheme['euiTheme'],
@@ -305,17 +325,10 @@ export const useSvgAiGradient = ({ variant }: AiButtonGradientOptions = {}): Svg
 
     const iconGradientCss =
       variant !== 'accent'
-        ? css`
-            & .euiIcon,
-            & .euiIcon [fill]:not([fill='none']) {
-              fill: ${gradientUrl} !important;
-            }
-            &&:disabled .euiIcon,
-            &&:disabled .euiIcon [fill]:not([fill='none']) {
-              fill: ${euiTheme.colors.textDisabled} !important;
-              color: ${euiTheme.colors.textDisabled} !important;
-            }
-          `
+        ? iconFillGradientCss({
+            gradientUrl,
+            disabledColor: euiTheme.colors.textDisabled,
+          })
         : undefined;
 
     const labelColors = getLabelColors(euiTheme.colors);
