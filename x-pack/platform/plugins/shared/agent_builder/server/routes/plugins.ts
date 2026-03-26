@@ -76,11 +76,11 @@ export function registerPluginsRoutes({ router, getInternalServices, logger }: R
       },
       wrapHandler(async (ctx, request, response) => {
         const { plugins: pluginService } = getInternalServices();
-        const client = await pluginService.getScopedClient({ request });
-        const plugins = await client.list();
+        const registry = pluginService.getRegistry({ request });
+        const plugins = await registry.list();
         return response.ok<ListPluginsResponse>({
           body: {
-            results: plugins.map(toPluginDefinition),
+            results: plugins,
           },
         });
       }, featureFlagConfig)
@@ -117,10 +117,10 @@ export function registerPluginsRoutes({ router, getInternalServices, logger }: R
       wrapHandler(async (ctx, request, response) => {
         const { pluginId } = request.params;
         const { plugins: pluginService } = getInternalServices();
-        const client = await pluginService.getScopedClient({ request });
-        const plugin = await client.get(pluginId);
+        const registry = pluginService.getRegistry({ request });
+        const plugin = await registry.get(pluginId);
         return response.ok<GetPluginResponse>({
-          body: toPluginDefinition(plugin),
+          body: plugin,
         });
       }, featureFlagConfig)
     );
