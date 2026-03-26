@@ -302,7 +302,7 @@ function convertAxisSettingsToAPIFormat(
     ...convertXExtent(config.xExtent),
     ...(config.labelsOrientation?.x != null
       ? {
-          label: {
+          labels: {
             orientation: Object.entries(orientationDictionary).find(
               ([_, value]) => value === config.labelsOrientation?.x
             )?.[0] as 'horizontal' | 'vertical' | 'angled' | undefined,
@@ -338,7 +338,7 @@ function convertAxisSettingsToAPIFormat(
     ...convertExtendsToAPIFormat(config.yLeftExtent),
     ...(config.labelsOrientation?.yLeft != null
       ? {
-          label: {
+          labels: {
             orientation: Object.entries(orientationDictionary).find(
               ([_, value]) => value === config.labelsOrientation?.yLeft
             )?.[0] as 'horizontal' | 'vertical' | 'angled' | undefined,
@@ -373,7 +373,7 @@ function convertAxisSettingsToAPIFormat(
     ...convertExtendsToAPIFormat(config.yRightExtent),
     ...(config.labelsOrientation?.yRight != null
       ? {
-          label: {
+          labels: {
             orientation: Object.entries(orientationDictionary).find(
               ([_, value]) => value === config.labelsOrientation?.yRight
             )?.[0] as 'horizontal' | 'vertical' | 'angled' | undefined,
