@@ -7,17 +7,28 @@
 
 import { useCallback } from 'react';
 import { useQueryClient } from '@kbn/react-query';
+import { SML_SEARCH_DEFAULT_SIZE } from '../../../../../../../../services/sml/constants';
 import { queryKeys } from '../../../../../../../query_keys';
 import { useAgentBuilderServices } from '../../../../../../../hooks/use_agent_builder_service';
+import { useExperimentalFeatures } from '../../../../../../../hooks/use_experimental_features';
 
 export const usePrefetchSml = () => {
   const queryClient = useQueryClient();
   const { smlService } = useAgentBuilderServices();
+  const experimentalFeaturesEnabled = useExperimentalFeatures();
 
   return useCallback(() => {
+    if (!experimentalFeaturesEnabled) {
+      return;
+    }
     queryClient.prefetchQuery({
-      queryKey: queryKeys.sml.search('*'),
-      queryFn: () => smlService.search({ query: '*', size: 20 }),
+      queryKey: queryKeys.sml.search('*', true),
+      queryFn: () =>
+        smlService.search({
+          query: '*',
+          size: SML_SEARCH_DEFAULT_SIZE,
+          skipContent: true,
+        }),
     });
-  }, [queryClient, smlService]);
+  }, [experimentalFeaturesEnabled, queryClient, smlService]);
 };

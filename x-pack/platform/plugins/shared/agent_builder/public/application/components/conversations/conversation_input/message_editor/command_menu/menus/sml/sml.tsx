@@ -18,19 +18,18 @@ import type { CommandMenuListOption } from '../components/command_menu_list';
 export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
   ({ query, onSelect }, ref) => {
     const { euiTheme } = useEuiTheme();
-    const { results, isLoading } = useSmlSearch(query);
+    const { results, isLoading } = useSmlSearch(query, { skipContent: true });
     const { type, title } = useMemo(() => getSmlMenuHighlightSearchStrings(query), [query]);
 
     const options: CommandMenuListOption[] = useMemo(
       () =>
         results.map((item) => {
-          const typeLabel = item.attachment_type;
+          const typeLabel = item.type;
           const titlePlain = item.title;
-          const accessibilityLabel = `${typeLabel}/${titlePlain}`;
 
           return {
-            key: item.chunk_id,
-            label: accessibilityLabel,
+            key: item.id,
+            label: `${typeLabel}/${titlePlain}`,
             renderLabel: (
               <span
                 css={css`
@@ -58,21 +57,16 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
       [euiTheme.font.weight.medium, results, title, type]
     );
 
-    const resultByKey = useMemo(() => new Map(results.map((r) => [r.chunk_id, r])), [results]);
-
     const handleSelect = useCallback(
       (option: CommandMenuListOption) => {
-        const item = resultByKey.get(option.key);
-        const typeLabel = item?.attachment_type ?? '';
-        const titlePlain = item?.title ?? option.label;
         onSelect({
           commandId: CommandId.Sml,
-          label: `${typeLabel}/${titlePlain}`,
+          label: option.label,
           id: option.key,
           metadata: {},
         });
       },
-      [onSelect, resultByKey]
+      [onSelect]
     );
 
     return (

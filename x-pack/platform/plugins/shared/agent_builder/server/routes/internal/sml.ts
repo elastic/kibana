@@ -10,11 +10,14 @@ import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import { internalApiPath } from '../../../common/constants';
+import {
+  SML_HTTP_SEARCH_QUERY_MAX_LENGTH,
+  type SmlSearchHttpResponse,
+} from '../../../common/http_api/sml';
 import { AGENT_BUILDER_READ_SECURITY } from '../route_security';
-import type { SmlSearchHttpResponse } from '../../../common/http_api/sml';
 
-/** Max length of the search string (bounds request size and ES query payload). */
-const SML_SEARCH_QUERY_MAX_LENGTH = 512;
+/** Max page size for SML HTTP search (separate from default UI size). */
+const SML_SEARCH_SIZE_MAX = 1000;
 
 export function registerInternalSmlRoutes({
   router,
@@ -28,8 +31,9 @@ export function registerInternalSmlRoutes({
       path: `${internalApiPath}/sml/_search`,
       validate: {
         body: schema.object({
-          query: schema.string({ minLength: 1, maxLength: SML_SEARCH_QUERY_MAX_LENGTH }),
-          size: schema.maybe(schema.number({ min: 1, max: 50 })),
+          query: schema.string({ minLength: 1, maxLength: SML_HTTP_SEARCH_QUERY_MAX_LENGTH }),
+          size: schema.maybe(schema.number({ min: 1, max: SML_SEARCH_SIZE_MAX })),
+          skip_content: schema.maybe(schema.boolean()),
         }),
       },
       options: { access: 'internal' },
@@ -38,11 +42,11 @@ export function registerInternalSmlRoutes({
     wrapHandler(
       async (ctx, request, response) => {
         const { sml } = getInternalServices();
-        const { query, size } = request.body;
+        const { query, size, skip_content: skipContent } = request.body;
         const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
         const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
 
-        const searchResult = await sml.search({
+        const { results, total } = await sml.search({
           query,
           size,
           spaceId,
@@ -51,14 +55,14 @@ export function registerInternalSmlRoutes({
         });
 
         const body: SmlSearchHttpResponse = {
-          total: searchResult.total,
-          results: searchResult.results.map((hit) => ({
-            chunk_id: hit.id,
-            attachment_id: hit.origin_id,
-            attachment_type: hit.type,
+          total,
+          results: results.map((hit) => ({
+            id: hit.id,
+            type: hit.type,
+            origin_id: hit.origin_id,
             title: hit.title,
-            content: hit.content,
             score: hit.score,
+            content: skipContent ? undefined : hit.content,
           })),
         };
 

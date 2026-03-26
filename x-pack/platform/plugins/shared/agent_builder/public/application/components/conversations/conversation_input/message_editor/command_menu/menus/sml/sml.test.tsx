@@ -6,23 +6,24 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { Sml } from './sml';
+import { CommandId } from '../../types';
 
 const defaultMockResults = [
   {
-    chunk_id: 'chunk-1',
-    attachment_id: 'att-1',
-    attachment_type: 'visualization',
+    id: 'chunk-1',
+    origin_id: 'att-1',
+    type: 'visualization',
     title: 'Pacific Sales',
     content: 'content',
     score: 1,
   },
   {
-    chunk_id: 'chunk-2',
-    attachment_id: 'att-2',
-    attachment_type: 'visualization',
+    id: 'chunk-2',
+    origin_id: 'att-2',
+    type: 'visualization',
     title: 'Atlantic Metrics',
     content: 'content',
     score: 0.9,
@@ -34,7 +35,7 @@ let mockUseSmlSearchReturn: {
   total: number;
   isLoading: boolean;
   isError: boolean;
-  error: null;
+  error: Error | null;
 } = {
   results: defaultMockResults,
   total: defaultMockResults.length,
@@ -81,5 +82,52 @@ describe('Sml', () => {
     renderWithProvider(<Sml query="" onSelect={jest.fn()} />);
 
     expect(screen.getByTestId('smlMenu-loading')).toBeInTheDocument();
+  });
+
+  it('calls onSelect with SML command id, chunk id, and type/title label when a row is clicked', () => {
+    const onSelect = jest.fn();
+    renderWithProvider(<Sml query="" onSelect={onSelect} />);
+
+    fireEvent.click(screen.getByText('Pacific Sales'));
+
+    expect(onSelect).toHaveBeenCalledTimes(1);
+    expect(onSelect).toHaveBeenCalledWith({
+      commandId: CommandId.Sml,
+      id: 'chunk-1',
+      label: 'visualization/Pacific Sales',
+      metadata: {},
+    });
+  });
+
+  it('shows default empty list when search errors with no results (errors surface via toast from useSmlSearch)', () => {
+    mockUseSmlSearchReturn = {
+      results: [],
+      total: 0,
+      isLoading: false,
+      isError: true,
+      error: new Error('network'),
+    };
+
+    renderWithProvider(<Sml query="" onSelect={jest.fn()} />);
+
+    expect(screen.queryByTestId('smlMenu-loading')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('smlMenuError')).not.toBeInTheDocument();
+    expect(screen.getByText('No matching results')).toBeInTheDocument();
+  });
+
+  it('still lists cached results when useSmlSearch reports error', () => {
+    mockUseSmlSearchReturn = {
+      results: defaultMockResults,
+      total: defaultMockResults.length,
+      isLoading: false,
+      isError: true,
+      error: new Error('stale'),
+    };
+
+    const { container } = renderWithProvider(<Sml query="" onSelect={jest.fn()} />);
+
+    expect(container.textContent).toContain('visualization/Pacific Sales');
+    expect(screen.queryByTestId('smlMenu-loading')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('smlMenuError')).not.toBeInTheDocument();
   });
 });

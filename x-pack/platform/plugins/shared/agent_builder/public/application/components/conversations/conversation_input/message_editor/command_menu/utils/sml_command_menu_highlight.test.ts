@@ -34,4 +34,25 @@ describe('getSmlMenuHighlightSearchStrings', () => {
       title: 'test',
     });
   });
+
+  it('uses only the first slash so extra slashes stay in the title segment', () => {
+    expect(getSmlMenuHighlightSearchStrings('a/b/c')).toEqual({
+      type: 'a',
+      title: 'b/c',
+    });
+  });
+
+  it('treats a leading slash as empty type and remainder as title', () => {
+    expect(getSmlMenuHighlightSearchStrings('/foo')).toEqual({
+      type: '',
+      title: 'foo',
+    });
+  });
+
+  it('treats a trailing slash as empty title after trim', () => {
+    expect(getSmlMenuHighlightSearchStrings('foo/')).toEqual({
+      type: 'foo',
+      title: '',
+    });
+  });
 });

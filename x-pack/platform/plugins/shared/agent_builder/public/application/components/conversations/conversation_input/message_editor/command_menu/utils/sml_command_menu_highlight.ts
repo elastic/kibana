@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-/**
- * Search strings for {@link @elastic/eui#EuiHighlight} on SML command-menu rows (type / title).
- * The menu treats trailing `*` as a prefix wildcard; the highlighter matches literals only, so
- * those suffixes are stripped when building these values.
- */
 export interface SmlMenuHighlightSearchStrings {
   readonly type: string;
   readonly title: string;
@@ -34,8 +29,8 @@ const parseSlashQueryParts = (keyword: string): SmlMenuHighlightSearchStrings =>
 };
 
 /**
- * Builds `search` props for two {@link @elastic/eui#EuiHighlight} instances (attachment type vs title)
- * from the raw SML menu query (`type/title`, optional `*` before `/`).
+ * Builds `search` props for two {@link @elastic/eui#EuiHighlight} instances
+ * from the raw SML menu query (`type/title`).
  */
 export const getSmlMenuHighlightSearchStrings = (
   rawQuery: string

@@ -99,22 +99,13 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
       },
     }));
 
-    const renderOption = (option: EuiSelectableOption) => {
-      const row = option as CommandMenuListSelectableRow;
-      return row.renderLabel ?? row.label;
-    };
-
     const containerStyles = css`
       width: ${menuWidth}px;
-      /* EuiHighlight uses EuiMark (<mark>); clear fill so list row background stays distinct */
-      mark {
-        background-color: transparent;
-      }
     `;
 
     const activeHighlightStyles = css`
       .euiSelectableListItem:nth-child(${activeIndex + 1}) {
-        background-color: ${euiTheme.colors.backgroundLightPrimary};
+        background-color: ${euiTheme.focus.backgroundColor};
       }
     `;
 
@@ -148,7 +139,9 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
         <EuiSelectable
           options={selectableOptions}
           singleSelection
-          renderOption={renderOption}
+          renderOption={(option: CommandMenuListSelectableRow) =>
+            option.renderLabel ?? option.label
+          }
           listProps={{
             showIcons: false,
             bordered: false,

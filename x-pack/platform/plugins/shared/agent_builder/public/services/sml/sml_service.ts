@@ -9,6 +9,7 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import type { SmlSearchHttpResponse } from '../../../common/http_api/sml';
 import { internalApiPath } from '../../../common/constants';
 
+/** Browser client for Agent Builder internal SML search (`/internal/agent_builder/sml/_search`). */
 export class SmlService {
   private readonly http: HttpSetup;
 
@@ -16,11 +17,16 @@ export class SmlService {
     this.http = http;
   }
 
-  async search(params: { query: string; size?: number }): Promise<SmlSearchHttpResponse> {
+  async search(params: {
+    query: string;
+    size: number;
+    skipContent?: boolean;
+  }): Promise<SmlSearchHttpResponse> {
     return await this.http.post<SmlSearchHttpResponse>(`${internalApiPath}/sml/_search`, {
       body: JSON.stringify({
         query: params.query,
-        size: params.size ?? 20,
+        size: params.size,
+        ...(params.skipContent === true ? { skip_content: true } : {}),
       }),
     });
   }

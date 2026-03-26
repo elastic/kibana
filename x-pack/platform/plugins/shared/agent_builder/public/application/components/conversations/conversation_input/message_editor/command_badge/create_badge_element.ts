@@ -27,6 +27,7 @@ export const createCommandBadgeElement = (data: CommandBadgeData): HTMLSpanEleme
   const sequence = getCommandDefinition(data.commandId)?.sequence ?? '';
   const displayText = `${sequence}${data.label}`;
 
+  // Inner label wrapper for truncation + baseline alignment.
   const labelSpan = document.createElement('span');
   labelSpan.setAttribute(COMMAND_BADGE_LABEL_ATTRIBUTE, 'true');
   labelSpan.textContent = displayText;

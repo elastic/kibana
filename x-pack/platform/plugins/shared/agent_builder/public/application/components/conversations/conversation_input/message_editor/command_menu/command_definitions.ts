@@ -5,10 +5,16 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { Skills } from './menus/skills';
 import { Sml } from './menus/sml';
 import type { CommandDefinition } from './types';
 import { CommandId } from './types';
+
+const semanticKnowledgeCommandName = i18n.translate(
+  'xpack.agentBuilder.conversationInput.commandMenu.semanticKnowledgeCommandName',
+  { defaultMessage: 'Semantic knowledge' }
+);
 
 // When adding a new command, also add its data prefetch hook to use_command_menu_prefetch.ts
 const COMMAND_DEFINITIONS: readonly CommandDefinition[] = [
@@ -17,7 +23,7 @@ const COMMAND_DEFINITIONS: readonly CommandDefinition[] = [
     id: CommandId.Sml,
     scheme: 'sml',
     sequence: '@',
-    name: 'Semantic knowledge',
+    name: semanticKnowledgeCommandName,
     menuComponent: Sml,
   },
 ];
