@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { combineLatest, merge, startWith } from 'rxjs';
+import { combineLatest, merge, skip, startWith } from 'rxjs';
 import {
   connectToQueryState,
   noSearchSessionStorageCapabilityMessage,
@@ -173,6 +173,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
       // When projectRouting changes, mark non-active tabs for refetch and trigger data fetch
       const cpsProjectRoutingSubscription = services.cps?.cpsManager
         ?.getProjectRouting$()
+        .pipe(skip(1)) // It's a BehaviorSubject, so skip the initial emit to avoid extra fetch
         .subscribe(() => {
           dispatch(internalStateActions.markNonActiveTabsForRefetch());
           addLog('[tab_sync] projectRouting changes triggers data fetching');
