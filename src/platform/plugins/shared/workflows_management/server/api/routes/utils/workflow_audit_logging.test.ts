@@ -110,11 +110,30 @@ describe('WorkflowManagementAuditLog', () => {
       const { context, log } = createAuditContext();
       await WorkflowManagementAuditLog.logWorkflowDeleted(context, { id: 'd-1' });
       expect(log.mock.calls[0][0].event.type).toEqual(['deletion']);
+      expect(log.mock.calls[0][0].message).toBe('User deleted workflow [id=d-1]');
+
+      const { context: cBulk, log: lBulk } = createAuditContext();
+      await WorkflowManagementAuditLog.logWorkflowDeleted(cBulk, {
+        id: 'd-2',
+        viaBulkDelete: true,
+      });
+      expect(lBulk.mock.calls[0][0].message).toContain('via bulk delete');
+      expect(lBulk.mock.calls[0][0].message).toContain('[id=d-2]');
 
       const { context: c2, log: l2 } = createAuditContext();
       await WorkflowManagementAuditLog.logWorkflowDeleteFailed(c2, { id: 'd-1', error: err });
       expect(l2.mock.calls[0][0].event.type).toEqual(['deletion']);
       expect(l2.mock.calls[0][0].event.outcome).toBe('failure');
+      expect(l2.mock.calls[0][0].message).toContain('User failed to delete workflow [id=d-1]');
+      expect(l2.mock.calls[0][0].message).not.toContain('bulk delete');
+
+      const { context: c3, log: l3 } = createAuditContext();
+      await WorkflowManagementAuditLog.logWorkflowDeleteFailed(c3, {
+        id: 'd-2',
+        error: err,
+        viaBulkDelete: true,
+      });
+      expect(l3.mock.calls[0][0].message).toContain('via bulk delete');
     });
 
     it('logBulkWorkflowDeleteResults and logBulkWorkflowDeleteFailed', async () => {
@@ -125,9 +144,12 @@ describe('WorkflowManagementAuditLog', () => {
       });
       expect(log).toHaveBeenCalledTimes(3);
       expect(log.mock.calls[0][0].event.action).toBe(WorkflowManagementAuditActions.DELETE);
+      expect(log.mock.calls[0][0].message).toContain('via bulk delete');
       expect(log.mock.calls[0][0].message).toContain('[id=w1]');
+      expect(log.mock.calls[1][0].message).toContain('via bulk delete');
       expect(log.mock.calls[1][0].message).toContain('[id=w2]');
       expect(log.mock.calls[2][0].event.outcome).toBe('failure');
+      expect(log.mock.calls[2][0].message).toContain('via bulk delete');
       expect(log.mock.calls[2][0].message).toContain('[id=w3]');
 
       const { context: c2, log: l2 } = createAuditContext();

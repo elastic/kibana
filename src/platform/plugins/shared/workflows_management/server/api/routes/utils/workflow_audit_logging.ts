@@ -153,30 +153,29 @@ export class WorkflowManagementAuditLog {
 
   static async logWorkflowDeleted(
     context: WorkflowsRequestHandlerContext,
-    params: { id: string }
+    params: { id: string; viaBulkDelete?: boolean }
   ): Promise<void> {
+    const { id, viaBulkDelete } = params;
+    const message = viaBulkDelete
+      ? `User deleted workflow via bulk delete [id=${id}]`
+      : `User deleted workflow [id=${id}]`;
     await writeAudit(
       context,
-      successEvent(
-        WorkflowManagementAuditActions.DELETE,
-        'deletion',
-        `User deleted workflow [id=${params.id}]`
-      )
+      successEvent(WorkflowManagementAuditActions.DELETE, 'deletion', message)
     );
   }
 
   static async logWorkflowDeleteFailed(
     context: WorkflowsRequestHandlerContext,
-    params: { id: string; error: unknown }
+    params: { id: string; error: unknown; viaBulkDelete?: boolean }
   ): Promise<void> {
+    const { id, error, viaBulkDelete } = params;
+    const message = viaBulkDelete
+      ? `User failed to delete workflow via bulk delete [id=${id}]`
+      : `User failed to delete workflow [id=${id}]`;
     await writeAudit(
       context,
-      failureEvent(
-        WorkflowManagementAuditActions.DELETE,
-        `User failed to delete workflow [id=${params.id}]`,
-        params.error,
-        'deletion'
-      )
+      failureEvent(WorkflowManagementAuditActions.DELETE, message, error, 'deletion')
     );
   }
 
@@ -191,12 +190,13 @@ export class WorkflowManagementAuditLog {
     }
   ): Promise<void> {
     for (const id of params.successfulIds) {
-      await WorkflowManagementAuditLog.logWorkflowDeleted(context, { id });
+      await WorkflowManagementAuditLog.logWorkflowDeleted(context, { id, viaBulkDelete: true });
     }
     for (const f of params.failures) {
       await WorkflowManagementAuditLog.logWorkflowDeleteFailed(context, {
         id: f.id,
         error: new Error(f.error),
+        viaBulkDelete: true,
       });
     }
   }
