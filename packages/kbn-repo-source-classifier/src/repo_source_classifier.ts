@@ -164,8 +164,13 @@ export class RepoSourceClassifier {
 
     if (
       pkgId === '@kbn/test' ||
+<<<<<<< add-kbn-test-kibana-server
       pkgId === '@kbn/test-subj-selector' ||
       pkgId === '@kbn/test-kibana-server'
+=======
+      pkgId === '@kbn/test-es-server' ||
+      pkgId === '@kbn/test-subj-selector'
+>>>>>>> main
     ) {
       return 'common package';
     }

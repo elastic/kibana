@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { runElasticsearch, cleanupElasticsearch } from './run_elasticsearch';
+export { runElasticsearch } from './run_elasticsearch';
+export { cleanupElasticsearch } from '@kbn/test-es-server';
 export * from './run_ftr';
 export {
   getArgValue,
