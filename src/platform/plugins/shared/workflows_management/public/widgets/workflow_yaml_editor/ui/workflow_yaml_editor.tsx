@@ -718,7 +718,12 @@ export const WorkflowYAMLEditor = ({
       </div>
       {(isAgentBuilderAvailable || isDevelopment) && !isExecutionYaml && (
         <div
-          css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
+          css={{
+            position: 'absolute',
+            top: euiTheme.size.xxs,
+            right: euiTheme.size.m,
+            zIndex: euiTheme.levels.content,
+          }}
         >
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             {isAgentBuilderAvailable && (

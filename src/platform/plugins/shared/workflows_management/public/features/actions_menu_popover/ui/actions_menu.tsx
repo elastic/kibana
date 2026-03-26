@@ -59,6 +59,9 @@ export interface ActionsMenuProps {
   onJumpToStep?: (lineNumber: number) => void;
 }
 
+const STEPS_PREFIX = 'Steps: ';
+const MAX_VISIBLE_STEPS = 7;
+
 export function ActionsMenu({
   onActionSelected,
   commands,
@@ -95,7 +98,43 @@ export function ActionsMenu({
       setOptions(nextOptions);
     }
   }, [defaultOptions, currentPath]);
+
   const renderActionOption = (rawOption: EuiSelectableOption, searchValue: string) => {
+    const optionId = String((rawOption as unknown as Record<string, unknown>).id ?? '');
+    const effectiveSearch = searchValue.startsWith(STEPS_PREFIX)
+      ? searchValue.slice(STEPS_PREFIX.length).trim()
+      : searchValue.startsWith('#')
+      ? searchValue.slice(1).trim()
+      : searchValue;
+
+    if (optionId.startsWith('__cmd:') || optionId.startsWith('__jump:')) {
+      return (
+        <EuiText size="s">
+          <EuiHighlight search={effectiveSearch}>{rawOption.label}</EuiHighlight>
+        </EuiText>
+      );
+    }
+
+    if (optionId === '__viewAll' || optionId === '__viewExisting') {
+      return (
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+          gutterSize="xs"
+          css={styles.viewAllLink}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="primary">
+              {rawOption.label}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="arrowRight" size="s" color="primary" aria-hidden={true} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
     const option = rawOption as unknown as ActionOptionData;
     const shouldUseGroupStyle = isActionGroup(option);
     return (
@@ -129,7 +168,7 @@ export function ActionsMenu({
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiTitle size="xxxs" css={styles.actionTitle}>
                   <h6>
-                    <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+                    <EuiHighlight search={effectiveSearch}>{option.label}</EuiHighlight>
                   </h6>
                 </EuiTitle>
                 {option.stability === 'tech_preview' && (
@@ -159,7 +198,7 @@ export function ActionsMenu({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="xs" className="eui-displayBlock" css={styles.actionDescription}>
-              <EuiHighlight search={searchValue}>{option.description || ''}</EuiHighlight>
+              <EuiHighlight search={effectiveSearch}>{option.description || ''}</EuiHighlight>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -169,56 +208,99 @@ export function ActionsMenu({
 
   const displayOptions: EuiSelectableOption[] = useMemo(() => {
     const result: EuiSelectableOption[] = [];
+    const term = searchTerm.trim().toLowerCase();
+    const isStepsMode = searchTerm.startsWith(STEPS_PREFIX);
+    const isHashMode = !isStepsMode && searchTerm.trimStart().startsWith('#');
+    const hasSearch = term.length > 0;
 
-    if (currentPath.length === 0) {
-      result.push({ label: 'Add step', isGroupLabel: true });
-    }
-    for (const opt of options) {
-      result.push(opt as unknown as EuiSelectableOption);
-    }
-
-    if (searchTerm.length > 0 && currentPath.length === 0) {
-      result.push({
-        label: i18n.translate('workflows.actionsMenu.viewAllSteps', {
-          defaultMessage: 'View all steps',
-        }),
-        id: '__viewAll',
-        iconType: 'arrowRight',
-      } as unknown as EuiSelectableOption);
+    // Inside a sub-group: show only group options
+    if (currentPath.length > 0) {
+      for (const opt of options) {
+        result.push(opt as unknown as EuiSelectableOption);
+      }
+      return result;
     }
 
-    if (currentPath.length === 0) {
-      const term = searchTerm.trim().toLowerCase();
-      const filteredCmds = (commands ?? []).filter(
-        (cmd) => !term || cmd.label.toLowerCase().includes(term)
+    // # mode: show only jump-to-step entries
+    if (isHashMode) {
+      const jumpTerm = term.slice(1).trim();
+      const filteredJumps = (jumpToStepEntries ?? []).filter(
+        (entry) => !jumpTerm || entry.id.toLowerCase().includes(jumpTerm)
       );
-      if (filteredCmds.length > 0) {
-        result.push({ label: 'Commands', isGroupLabel: true });
-        for (const cmd of filteredCmds) {
+      if (filteredJumps.length > 0) {
+        result.push({ label: 'Jump to a step', isGroupLabel: true });
+        for (const entry of filteredJumps) {
           result.push({
-            id: `__cmd:${cmd.id}`,
-            label: cmd.label,
-            iconType: cmd.iconType,
-            description: cmd.description ?? '',
+            id: `__jump:${entry.id}`,
+            label: entry.label,
+            className: 'compactOption',
           } as unknown as EuiSelectableOption);
         }
       }
+      return result;
+    }
 
-      if (searchTerm.trimStart().startsWith('#')) {
-        const jumpTerm = term.slice(1).trim();
-        const filteredJumps = (jumpToStepEntries ?? []).filter(
-          (entry) => !jumpTerm || entry.id.toLowerCase().includes(jumpTerm)
-        );
-        if (filteredJumps.length > 0) {
-          result.push({ label: 'Jump to a step', isGroupLabel: true });
-          for (const entry of filteredJumps) {
-            result.push({
-              id: `__jump:${entry.id}`,
-              label: entry.label,
-              iconType: 'pin',
-              description: '',
-            } as unknown as EuiSelectableOption);
-          }
+    // "Steps: X" mode: show ALL matching step options without limit
+    if (isStepsMode) {
+      result.push({ label: 'Add step', isGroupLabel: true });
+      for (const opt of options) {
+        result.push(opt as unknown as EuiSelectableOption);
+      }
+      return result;
+    }
+
+    // Normal mode
+    result.push({ label: 'Add step', isGroupLabel: true });
+    const visibleOptions = hasSearch ? options.slice(0, MAX_VISIBLE_STEPS) : options;
+    for (const opt of visibleOptions) {
+      result.push(opt as unknown as EuiSelectableOption);
+    }
+
+    if (hasSearch && options.length > MAX_VISIBLE_STEPS) {
+      result.push({
+        label: i18n.translate('workflows.actionsMenu.viewAllSteps', {
+          defaultMessage: 'View all steps to add',
+        }),
+        id: '__viewAll',
+        className: 'compactOption',
+      } as unknown as EuiSelectableOption);
+    }
+
+    const filteredCmds = (commands ?? []).filter(
+      (cmd) => !term || cmd.label.toLowerCase().includes(term)
+    );
+    if (filteredCmds.length > 0) {
+      result.push({ label: 'Commands', isGroupLabel: true });
+      for (const cmd of filteredCmds) {
+        result.push({
+          id: `__cmd:${cmd.id}`,
+          label: cmd.label,
+          className: 'compactOption',
+        } as unknown as EuiSelectableOption);
+      }
+    }
+
+    if (hasSearch) {
+      const filteredJumps = (jumpToStepEntries ?? []).filter(
+        (entry) => entry.id.toLowerCase().includes(term) || entry.label.toLowerCase().includes(term)
+      );
+      if (filteredJumps.length > 0) {
+        result.push({ label: 'Jump to a step', isGroupLabel: true });
+        for (const entry of filteredJumps) {
+          result.push({
+            id: `__jump:${entry.id}`,
+            label: entry.label,
+            className: 'compactOption',
+          } as unknown as EuiSelectableOption);
+        }
+        if ((jumpToStepEntries ?? []).length > filteredJumps.length) {
+          result.push({
+            label: i18n.translate('workflows.actionsMenu.viewAllExistingSteps', {
+              defaultMessage: 'View all existing steps',
+            }),
+            id: '__viewExisting',
+            className: 'compactOption',
+          } as unknown as EuiSelectableOption);
         }
       }
     }
@@ -231,8 +313,12 @@ export function ActionsMenu({
     const optionId: string = selectedOption?.id ?? '';
 
     if (optionId === '__viewAll') {
-      setSearchTerm('');
-      setOptions(defaultOptions);
+      const currentQuery = searchTerm.trim();
+      setSearchTerm(`${STEPS_PREFIX}${currentQuery}`);
+      return;
+    }
+    if (optionId === '__viewExisting') {
+      setSearchTerm('#');
       return;
     }
     if (optionId.startsWith('__cmd:')) {
@@ -309,6 +395,27 @@ export function ActionsMenu({
 
   const handleSearchChange = (searchValue: string) => {
     setSearchTerm(searchValue);
+
+    if (searchValue.startsWith(STEPS_PREFIX)) {
+      const query = searchValue.slice(STEPS_PREFIX.length).trim().toLowerCase();
+      if (query.length === 0) {
+        setOptions(flatOptions);
+      } else {
+        const matches = flatOptions
+          .filter((option) => isActionSearchMatch(option, query))
+          .sort((a, b) => {
+            const rankDiff = getActionMatchRank(a, query) - getActionMatchRank(b, query);
+            return rankDiff !== 0 ? rankDiff : a.label.localeCompare(b.label);
+          });
+        setOptions(matches);
+      }
+      return;
+    }
+
+    if (searchValue.trimStart().startsWith('#')) {
+      return;
+    }
+
     if (searchValue.length > 0) {
       const term = searchValue.trim().toLowerCase();
       if (term.length === 0) {
@@ -319,10 +426,7 @@ export function ActionsMenu({
         .filter((option) => isActionSearchMatch(option, term))
         .sort((a, b) => {
           const rankDiff = getActionMatchRank(a, term) - getActionMatchRank(b, term);
-          if (rankDiff !== 0) {
-            return rankDiff;
-          }
-          return a.label.localeCompare(b.label);
+          return rankDiff !== 0 ? rankDiff : a.label.localeCompare(b.label);
         });
       setOptions(matches);
     } else {
@@ -349,8 +453,8 @@ export function ActionsMenu({
         onChange: handleSearchChange,
       }}
       listProps={{
-        rowHeight: 64,
         showIcons: false,
+        isVirtualized: false,
       }}
       renderOption={renderActionOption}
       css={styles.selectable}
@@ -400,11 +504,23 @@ const componentStyles = {
         paddingBlock: euiTheme.size.m,
         paddingInline: '16px',
       },
+      '& .euiSelectableListItem.compactOption': {
+        paddingBlock: euiTheme.size.s,
+      },
+      '& .euiSelectableList': {
+        maxHeight: '420px',
+        overflowY: 'auto',
+      },
+      '& .euiSelectableList__groupLabel': {
+        borderBottom: euiTheme.border.thin,
+      },
+      '& .euiSelectableList__groupLabel ~ .euiSelectableList__groupLabel': {
+        marginTop: '24px',
+      },
     }),
   title: css({
     display: 'flex',
     alignItems: 'flex-start',
-    // to avoid layout shift when the header is button
     minHeight: '24px',
   }),
   header: ({ euiTheme }: UseEuiTheme) =>
@@ -414,6 +530,15 @@ const componentStyles = {
   actionOption: css({
     gap: '12px',
   }),
+  viewAllLink: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      cursor: 'pointer',
+      width: '100%',
+      color: euiTheme.colors.primaryText,
+      '& .euiIcon': {
+        color: euiTheme.colors.primaryText,
+      },
+    }),
   iconOuter: ({ euiTheme }: UseEuiTheme) =>
     css({
       width: '40px',
@@ -450,6 +575,6 @@ const componentStyles = {
       lineHeight: euiFontSize(euiThemeContext, 's').lineHeight,
     }),
   techPreviewBadge: css({
-    marginBottom: '-4px', // to align with the action title
+    marginBottom: '-4px',
   }),
 };

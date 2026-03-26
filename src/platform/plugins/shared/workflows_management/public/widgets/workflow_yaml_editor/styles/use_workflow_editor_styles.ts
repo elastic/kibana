@@ -23,6 +23,9 @@ export const useWorkflowEditorStyles = () => {
     actionsMenuPopoverPanel: ({ euiTheme }: UseEuiTheme) =>
       css({
         minInlineSize: '600px',
+        maxInlineSize: '600px',
+        maxBlockSize: '520px',
+        overflowY: 'auto',
         borderRadius: euiTheme.border.radius.medium,
       }),
 

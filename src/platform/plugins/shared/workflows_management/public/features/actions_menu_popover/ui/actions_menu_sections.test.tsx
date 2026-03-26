@@ -9,8 +9,7 @@
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { IntlProvider } from '@kbn/i18n-react';
-import type { EditorCommand, JumpToStepEntry } from './actions_menu';
+import { I18nProvider } from '@kbn/i18n-react';
 
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
@@ -37,7 +36,13 @@ jest.mock('../../../../common/schema', () => ({
   getAllConnectors: jest.fn().mockReturnValue([]),
 }));
 
-const { ActionsMenu } = jest.requireActual('./actions_menu');
+jest.mock('../lib/get_action_options', () => ({
+  getActionOptions: jest.fn().mockReturnValue([]),
+  flattenOptions: jest.fn().mockReturnValue([]),
+}));
+
+import type { EditorCommand, JumpToStepEntry } from './actions_menu';
+import { ActionsMenu } from './actions_menu';
 
 const mockCommands: EditorCommand[] = [
   { id: 'foldAll', label: 'Collapse all', iconType: 'minusInCircle' },
@@ -48,6 +53,7 @@ const mockCommands: EditorCommand[] = [
 const mockSteps: JumpToStepEntry[] = [
   { id: 'step_one', label: '#step_one', lineStart: 5 },
   { id: 'step_two', label: '#step_two', lineStart: 15 },
+  { id: 'alert_step', label: '#alert_step', lineStart: 25 },
 ];
 
 describe('ActionsMenu - Commands and Jump to Step sections', () => {
@@ -60,7 +66,7 @@ describe('ActionsMenu - Commands and Jump to Step sections', () => {
   });
 
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
-    <IntlProvider locale="en">{children}</IntlProvider>
+    <I18nProvider>{children}</I18nProvider>
   );
 
   it('renders commands section on initial open (no search)', () => {
@@ -96,7 +102,7 @@ describe('ActionsMenu - Commands and Jump to Step sections', () => {
     expect(onCommandSelected).toHaveBeenCalledWith('foldAll');
   });
 
-  it('shows jump-to-step entries only when search starts with #', () => {
+  it('shows jump-to-step entries when search matches step names', () => {
     render(
       <ActionsMenu
         onActionSelected={onActionSelected}
@@ -111,11 +117,54 @@ describe('ActionsMenu - Commands and Jump to Step sections', () => {
     expect(screen.queryByText('Jump to a step')).not.toBeInTheDocument();
 
     const searchInput = screen.getByRole('searchbox');
+    fireEvent.change(searchInput, { target: { value: 'step' } });
+
+    expect(screen.getByText('Jump to a step')).toBeInTheDocument();
+    expect(screen.getByTitle('#step_one')).toBeInTheDocument();
+    expect(screen.getByTitle('#step_two')).toBeInTheDocument();
+  });
+
+  it('shows all jump entries when searching with # prefix', () => {
+    render(
+      <ActionsMenu
+        onActionSelected={onActionSelected}
+        commands={mockCommands}
+        jumpToStepEntries={mockSteps}
+        onCommandSelected={onCommandSelected}
+        onJumpToStep={onJumpToStep}
+      />,
+      { wrapper: Wrapper }
+    );
+
+    const searchInput = screen.getByRole('searchbox');
     fireEvent.change(searchInput, { target: { value: '#' } });
 
     expect(screen.getByText('Jump to a step')).toBeInTheDocument();
-    expect(screen.getByText('#step_one')).toBeInTheDocument();
-    expect(screen.getByText('#step_two')).toBeInTheDocument();
+    expect(screen.getByTitle('#step_one')).toBeInTheDocument();
+    expect(screen.getByTitle('#step_two')).toBeInTheDocument();
+    expect(screen.getByTitle('#alert_step')).toBeInTheDocument();
+    expect(screen.queryByText('Commands')).not.toBeInTheDocument();
+    expect(screen.queryByText('Add step')).not.toBeInTheDocument();
+  });
+
+  it('filters jump entries with # prefix search', () => {
+    render(
+      <ActionsMenu
+        onActionSelected={onActionSelected}
+        commands={mockCommands}
+        jumpToStepEntries={mockSteps}
+        onCommandSelected={onCommandSelected}
+        onJumpToStep={onJumpToStep}
+      />,
+      { wrapper: Wrapper }
+    );
+
+    const searchInput = screen.getByRole('searchbox');
+    fireEvent.change(searchInput, { target: { value: '#alert' } });
+
+    expect(screen.getByTitle('#alert_step')).toBeInTheDocument();
+    expect(screen.queryByTitle('#step_one')).not.toBeInTheDocument();
+    expect(screen.queryByTitle('#step_two')).not.toBeInTheDocument();
   });
 
   it('calls onJumpToStep with correct line when a step entry is clicked', () => {
@@ -133,7 +182,7 @@ describe('ActionsMenu - Commands and Jump to Step sections', () => {
     const searchInput = screen.getByRole('searchbox');
     fireEvent.change(searchInput, { target: { value: '#step' } });
 
-    fireEvent.click(screen.getByText('#step_two'));
+    fireEvent.click(screen.getByTitle('#step_two'));
     expect(onJumpToStep).toHaveBeenCalledWith(15);
   });
 
@@ -142,5 +191,65 @@ describe('ActionsMenu - Commands and Jump to Step sections', () => {
 
     expect(screen.queryByText('Commands')).not.toBeInTheDocument();
     expect(screen.queryByText('Jump to a step')).not.toBeInTheDocument();
+  });
+
+  it('shows "View all existing steps" when search matches some but not all steps', () => {
+    render(
+      <ActionsMenu
+        onActionSelected={onActionSelected}
+        commands={mockCommands}
+        jumpToStepEntries={mockSteps}
+        onCommandSelected={onCommandSelected}
+        onJumpToStep={onJumpToStep}
+      />,
+      { wrapper: Wrapper }
+    );
+
+    const searchInput = screen.getByRole('searchbox');
+    fireEvent.change(searchInput, { target: { value: 'alert' } });
+
+    expect(screen.getByTitle('#alert_step')).toBeInTheDocument();
+    expect(screen.getByTitle('View all existing steps')).toBeInTheDocument();
+  });
+
+  it('does not show "View all existing steps" when all steps match', () => {
+    render(
+      <ActionsMenu
+        onActionSelected={onActionSelected}
+        commands={mockCommands}
+        jumpToStepEntries={mockSteps}
+        onCommandSelected={onCommandSelected}
+        onJumpToStep={onJumpToStep}
+      />,
+      { wrapper: Wrapper }
+    );
+
+    const searchInput = screen.getByRole('searchbox');
+    fireEvent.change(searchInput, { target: { value: 'step' } });
+
+    expect(screen.queryByTitle('View all existing steps')).not.toBeInTheDocument();
+  });
+
+  it('clicking "View all existing steps" switches to # mode', () => {
+    render(
+      <ActionsMenu
+        onActionSelected={onActionSelected}
+        commands={mockCommands}
+        jumpToStepEntries={mockSteps}
+        onCommandSelected={onCommandSelected}
+        onJumpToStep={onJumpToStep}
+      />,
+      { wrapper: Wrapper }
+    );
+
+    const searchInput = screen.getByRole('searchbox');
+    fireEvent.change(searchInput, { target: { value: 'alert' } });
+
+    fireEvent.click(screen.getByTitle('View all existing steps'));
+
+    expect((searchInput as HTMLInputElement).value).toBe('#');
+    expect(screen.getByTitle('#step_one')).toBeInTheDocument();
+    expect(screen.getByTitle('#step_two')).toBeInTheDocument();
+    expect(screen.getByTitle('#alert_step')).toBeInTheDocument();
   });
 });
