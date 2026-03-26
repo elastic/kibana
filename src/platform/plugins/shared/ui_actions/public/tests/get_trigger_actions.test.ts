@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ActionInternal, ActionDefinition } from '../actions';
+import { ON_OPEN_PANEL_MENU } from '../../common/trigger_ids';
+import type { ActionDefinition } from '../actions';
+import { ActionInternal } from '../actions';
 import { uiActionsPluginMock } from '../mocks';
 
 const action1: ActionDefinition = {
@@ -28,26 +30,21 @@ test('returns actions set on trigger', async () => {
   const { setup, doStart } = uiActionsPluginMock.createPlugin();
   setup.registerAction(action1);
   setup.registerAction(action2);
-  setup.registerTrigger({
-    description: 'foo',
-    id: 'trigger',
-    title: 'baz',
-  });
 
   const start = doStart();
-  const list0 = await start.getTriggerActions('trigger');
+  const list0 = await start.getTriggerActions(ON_OPEN_PANEL_MENU);
 
   expect(list0).toHaveLength(0);
 
-  setup.addTriggerAction('trigger', action1);
-  const list1 = await start.getTriggerActions('trigger');
+  setup.addTriggerAction(ON_OPEN_PANEL_MENU, action1);
+  const list1 = await start.getTriggerActions(ON_OPEN_PANEL_MENU);
 
   expect(list1).toHaveLength(1);
   expect(list1[0]).toBeInstanceOf(ActionInternal);
   expect(list1[0].id).toBe(action1.id);
 
-  setup.addTriggerAction('trigger', action2);
-  const list2 = await start.getTriggerActions('trigger');
+  setup.addTriggerAction(ON_OPEN_PANEL_MENU, action2);
+  const list2 = await start.getTriggerActions(ON_OPEN_PANEL_MENU);
 
   expect(list2).toHaveLength(2);
   expect(!!list2.find(({ id }: { id: string }) => id === 'action1')).toBe(true);

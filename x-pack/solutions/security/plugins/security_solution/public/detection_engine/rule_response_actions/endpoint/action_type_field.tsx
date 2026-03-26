@@ -44,19 +44,15 @@ const ActionTypeFieldComponent = ({
       },
     },
   } = useKibana().services;
-
-  const automatedProcessActionsEnabled = useIsExperimentalFeatureEnabled(
-    'automatedProcessActionsEnabled'
+  const isAutomatedRunScriptEnabled = useIsExperimentalFeatureEnabled(
+    'responseActionsEndpointAutomatedRunScript'
   );
 
-  const enabledActions = useMemo(
-    () =>
-      [
-        ...ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS,
-        ...(automatedProcessActionsEnabled ? ['kill-process', 'suspend-process'] : []),
-      ] as ['isolate', 'kill-process', 'suspend-process'],
-    [automatedProcessActionsEnabled]
-  );
+  const enabledActions = useMemo(() => {
+    return ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.filter((command) => {
+      return command !== 'runscript' || isAutomatedRunScriptEnabled;
+    });
+  }, [isAutomatedRunScriptEnabled]);
 
   const fieldOptions = useMemo(
     () =>

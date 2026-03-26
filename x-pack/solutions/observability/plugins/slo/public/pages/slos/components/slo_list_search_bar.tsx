@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/react';
-import { Query } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { observabilityAppId } from '@kbn/observability-plugin/public';
 import React, { useEffect } from 'react';

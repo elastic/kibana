@@ -1,0 +1,124 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { EuiCallOut } from '@elastic/eui';
+import type { StreamQuery } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
+import React, { useEffect, useState } from 'react';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { SignificantEventsGeneratedTable } from './significant_events_generated_table';
+import { AiFlowEmptyState } from './empty_state';
+import { AiFlowWaitingForGeneration } from './waiting_for_generation';
+
+interface Props {
+  isGenerating: boolean;
+  isBeingCanceled: boolean;
+  isSchedulingGenerationTask: boolean;
+  generatedQueries: StreamQuery[];
+  onEditQuery: (query: StreamQuery) => void;
+  stopGeneration: () => void;
+  definition: Streams.all.Definition;
+  isSubmitting: boolean;
+  setQueries: (queries: StreamQuery[]) => void;
+  setCanSave: (canSave: boolean) => void;
+  dataViews: DataView[];
+  taskStatus?: string;
+  taskError?: string;
+}
+
+export function GeneratedFlowForm({
+  isGenerating,
+  isBeingCanceled,
+  isSchedulingGenerationTask,
+  generatedQueries,
+  onEditQuery,
+  stopGeneration,
+  setQueries,
+  definition,
+  setCanSave,
+  isSubmitting,
+  dataViews,
+  taskStatus,
+  taskError,
+}: Props) {
+  const [selectedQueries, setSelectedQueries] = useState<StreamQuery[]>([]);
+  const [isEditingQueries, setIsEditingQueries] = useState(false);
+
+  const onSelectionChange = (selectedItems: StreamQuery[]) => {
+    setSelectedQueries(selectedItems);
+    setQueries(selectedItems);
+  };
+
+  useEffect(() => {
+    setCanSave(!isEditingQueries && selectedQueries.length > 0);
+  }, [selectedQueries, isEditingQueries, setCanSave]);
+
+  if (!isGenerating && (taskStatus === 'failed' || taskStatus === 'stale')) {
+    const isFailed = taskStatus === 'failed';
+    return (
+      <EuiCallOut
+        announceOnMount
+        title={
+          isFailed
+            ? i18n.translate(
+                'xpack.streams.streamDetailView.addSignificantEventFlyout.generationFailedTitle',
+                { defaultMessage: 'Generation failed' }
+              )
+            : i18n.translate(
+                'xpack.streams.streamDetailView.addSignificantEventFlyout.generationStaleTitle',
+                { defaultMessage: 'Generation timed out' }
+              )
+        }
+        color={isFailed ? 'danger' : 'warning'}
+        iconType={isFailed ? 'error' : 'warning'}
+      >
+        {isFailed
+          ? taskError
+          : i18n.translate(
+              'xpack.streams.streamDetailView.addSignificantEventFlyout.generationStaleDescription',
+              { defaultMessage: 'The generation task took too long and was marked as stale.' }
+            )}
+      </EuiCallOut>
+    );
+  }
+
+  if (generatedQueries.length === 0) {
+    return isGenerating ? (
+      <AiFlowWaitingForGeneration
+        stopGeneration={stopGeneration}
+        isBeingCanceled={isBeingCanceled}
+        isSchedulingGenerationTask={isSchedulingGenerationTask}
+      />
+    ) : (
+      <AiFlowEmptyState />
+    );
+  }
+
+  return (
+    <>
+      <SignificantEventsGeneratedTable
+        setIsEditingQueries={setIsEditingQueries}
+        isSubmitting={isSubmitting}
+        generatedQueries={generatedQueries}
+        onEditQuery={onEditQuery}
+        selectedQueries={selectedQueries}
+        onSelectionChange={onSelectionChange}
+        definition={definition}
+        dataViews={dataViews}
+      />
+      {isGenerating && (
+        <AiFlowWaitingForGeneration
+          stopGeneration={stopGeneration}
+          hasInitialResults={true}
+          isBeingCanceled={isBeingCanceled}
+          isSchedulingGenerationTask={isSchedulingGenerationTask}
+        />
+      )}
+    </>
+  );
+}

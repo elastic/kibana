@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { StartServicesAccessor } from '@kbn/core/public';
-import { DataPublicPluginStart, DataStartDependencies } from '../../types';
+import type { StartServicesAccessor } from '@kbn/core/public';
+import type { DataPublicPluginStart, DataStartDependencies } from '../../types';
 import { getEqlFn } from '../../../common/search/expressions/eql';
-import { UiSettingsCommon } from '../../../common';
+import type { UiSettingsCommon } from '../../../common';
 
 /**
  * This is some glue code that takes in `core.getStartServices`, extracts the dependencies
@@ -33,11 +33,11 @@ export function getEql({
 }) {
   return getEqlFn({
     getStartDependencies: async () => {
-      const [core, , { search, indexPatterns }] = await getStartServices();
+      const [core, { dataViews }, { search }] = await getStartServices();
       return {
         uiSettingsClient: core.uiSettings as unknown as UiSettingsCommon,
         search: search.search,
-        dataViews: indexPatterns,
+        dataViews,
       };
     },
   });

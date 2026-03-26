@@ -15,8 +15,9 @@ import { ADJUST_THROUGHPUT_INTERVAL } from '../lib/create_managed_configuration'
 import type { TaskManagerStartContract } from '../plugin';
 import { TaskManagerPlugin } from '../plugin';
 import { coreMock } from '@kbn/core/server/mocks';
-import type { TaskManagerConfig } from '../config';
-import { BulkUpdateError } from '../lib/bulk_update_error';
+import { ApiKeyType, type TaskManagerConfig } from '../config';
+import { BulkUpdateError } from '../lib/errors';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 const mockTaskTypeRunFn = jest.fn();
 const mockCreateTaskRunner = jest.fn();
@@ -67,6 +68,10 @@ describe('managed configuration', () => {
     kibanas_per_partition: 2,
     capacity: 10,
     max_attempts: 9,
+    invalidate_api_key_task: {
+      interval: '5m',
+      removalDelay: '1h',
+    },
     poll_interval: 3000,
     allow_reading_invalid_state: false,
     version_conflict_threshold: 80,
@@ -101,6 +106,7 @@ describe('managed configuration', () => {
       update_by_query: 1000,
     },
     auto_calculate_default_ech_capacity: false,
+    api_key_type: ApiKeyType.ES,
   };
 
   async function runSetTimeout0() {
@@ -135,7 +141,9 @@ describe('managed configuration', () => {
         esStart.client.asInternalUser as unknown as Client
       );
       coreStart.savedObjects.createInternalRepository.mockReturnValue(savedObjectsClient);
-      taskManagerStart = await taskManager.start(coreStart, {});
+      taskManagerStart = await taskManager.start(coreStart, {
+        licensing: licensingMock.createStart(),
+      });
 
       // force rxjs timers to fire when they are scheduled for setTimeout(0) as the
       // sinon fake timers cause them to stall. We need to do this a few times for the
@@ -233,7 +241,9 @@ describe('managed configuration', () => {
         esStart.client.asInternalUser as unknown as Client
       );
       coreStart.savedObjects.createInternalRepository.mockReturnValue(savedObjectsClient);
-      taskManagerStart = taskManager.start(coreStart, {});
+      taskManagerStart = taskManager.start(coreStart, {
+        licensing: licensingMock.createStart(),
+      });
 
       // force rxjs timers to fire when they are scheduled for setTimeout(0) as the
       // sinon fake timers cause them to stall. We need to do this a few times for the
@@ -335,7 +345,9 @@ describe('managed configuration', () => {
         esStart.client.asInternalUser as unknown as Client
       );
       coreStart.savedObjects.createInternalRepository.mockReturnValue(savedObjectsClient);
-      taskManagerStart = await taskManager.start(coreStart, {});
+      taskManagerStart = await taskManager.start(coreStart, {
+        licensing: licensingMock.createStart(),
+      });
 
       // force rxjs timers to fire when they are scheduled for setTimeout(0) as the
       // sinon fake timers cause them to stall. We need to do this a few times for the
@@ -420,7 +432,9 @@ describe('managed configuration', () => {
         esStart.client.asInternalUser as unknown as Client
       );
       coreStart.savedObjects.createInternalRepository.mockReturnValue(savedObjectsClient);
-      taskManagerStart = await taskManager.start(coreStart, {});
+      taskManagerStart = await taskManager.start(coreStart, {
+        licensing: licensingMock.createStart(),
+      });
 
       // force rxjs timers to fire when they are scheduled for setTimeout(0) as the
       // sinon fake timers cause them to stall

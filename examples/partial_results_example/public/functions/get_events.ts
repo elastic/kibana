@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable, fromEvent, merge } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { fromEvent, merge } from 'rxjs';
 import { distinct, map, pluck, scan, take } from 'rxjs';
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 

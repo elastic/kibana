@@ -20,7 +20,7 @@ export function MissingCredentialsCallout(props: Props) {
         defaultMessage: 'Missing credentials',
       })}
       color="primary"
-      iconType="iInCircle"
+      iconType="info"
     >
       {i18n.translate('xpack.observabilityAiAssistant.missingCredentialsCallout.description', {
         defaultMessage:

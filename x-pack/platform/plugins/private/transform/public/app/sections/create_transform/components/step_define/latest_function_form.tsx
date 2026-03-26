@@ -100,7 +100,7 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
             />
           )}
           {latestFunctionService.sortFieldOptions.length === 0 && (
-            <EuiCallOut color="danger" iconType="warning" size="m">
+            <EuiCallOut announceOnMount={false} color="danger" iconType="warning" size="m">
               <p>
                 <FormattedMessage
                   id="xpack.transform.stepDefineForm.sortFieldOptionsEmptyError"
@@ -110,7 +110,7 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
                   {(copy: () => void) => (
                     <EuiButtonIcon
                       onClick={copy}
-                      iconType="copyClipboard"
+                      iconType="copy"
                       aria-label={copyToClipboardDescription}
                     />
                   )}

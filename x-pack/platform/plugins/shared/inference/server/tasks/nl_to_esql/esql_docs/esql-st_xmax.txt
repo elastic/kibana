@@ -1,6 +1,6 @@
 # ST_XMAX
 
-The ST_XMAX function extracts the maximum value of the x coordinates from the supplied geometry.
+Extracts the maximum value of the `x` coordinates from the supplied geometry. For geometries of type `geo_point` or `geo_shape`, this is equivalent to extracting the maximum `longitude` value.
 
 ## Syntax
 
@@ -10,11 +10,11 @@ The ST_XMAX function extracts the maximum value of the x coordinates from the su
 
 #### point
 
-This is an expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. The function returns `null` if the point is `null`.
+Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If the value is `null`, the function returns `null`.
 
 ## Examples
 
-Here's an example of how to use the ST_XMAX function:
+Extract the minimum and maximum x and y coordinates from the city boundary of the airport with abbreviation "CPH":
 
 ```esql
 FROM airport_city_boundaries
@@ -24,4 +24,6 @@ FROM airport_city_boundaries
 | KEEP abbrev, airport, xmin, xmax, ymin, ymax
 ```
 
-In this example, the ST_XMAX function is used to extract the maximum x coordinate from the envelope of the 'city_boundary' field.
+## Limitations
+
+- Spatial types are not supported in the `SORT` processing command. Specifying a column of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape` as a sort parameter will result in an error.

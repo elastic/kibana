@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { UseMutationOptions } from '@tanstack/react-query';
-import { useMutation } from '@tanstack/react-query';
+import type { UseMutationOptions } from '@kbn/react-query';
+import { useMutation } from '@kbn/react-query';
 import { BOOTSTRAP_PREBUILT_RULES_URL } from '../../../../../../common/api/detection_engine';
 import type { BootstrapPrebuiltRulesResponse } from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import { PREBUILT_RULES_PACKAGE_NAME } from '../../../../../../common/detection_engine/constants';
@@ -14,6 +14,7 @@ import { useInvalidateFetchPrebuiltRulesInstallReviewQuery } from './use_fetch_p
 import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
 import { useInvalidateFetchPrebuiltRulesUpgradeReviewQuery } from './use_fetch_prebuilt_rules_upgrade_review_query';
 import { useInvalidateFindRulesQuery } from '../use_find_rules_query';
+import { useInvalidateFetchPrebuiltRuleBaseVersionQuery } from './use_fetch_prebuilt_rule_base_version_query';
 
 export const BOOTSTRAP_PREBUILT_RULES_KEY = ['POST', BOOTSTRAP_PREBUILT_RULES_URL];
 
@@ -24,6 +25,7 @@ export const useBootstrapPrebuiltRulesMutation = (
   const invalidatePrebuiltRulesInstallReview = useInvalidateFetchPrebuiltRulesInstallReviewQuery();
   const invalidatePrebuiltRulesUpdateReview = useInvalidateFetchPrebuiltRulesUpgradeReviewQuery();
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
+  const invalidateFetchPrebuiltRuleBaseVerison = useInvalidateFetchPrebuiltRuleBaseVersionQuery();
 
   return useMutation(() => bootstrapPrebuiltRules(), {
     ...options,
@@ -42,6 +44,7 @@ export const useBootstrapPrebuiltRulesMutation = (
         invalidatePrePackagedRulesStatus();
         invalidatePrebuiltRulesInstallReview();
         invalidatePrebuiltRulesUpdateReview();
+        invalidateFetchPrebuiltRuleBaseVerison();
       }
 
       const hasRuleUpdates =

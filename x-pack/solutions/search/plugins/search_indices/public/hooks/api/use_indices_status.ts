@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
-import type { UseQueryResult } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 
 import { GET_STATUS_ROUTE } from '../../../common/routes';
 import type { IndicesStatusResponse } from '../../../common/types';

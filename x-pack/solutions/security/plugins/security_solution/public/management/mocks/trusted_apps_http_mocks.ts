@@ -7,7 +7,7 @@
 
 import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import {
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
+  ENDPOINT_ARTIFACT_LISTS,
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
@@ -20,6 +20,7 @@ import type {
   CreateExceptionListItemSchema,
   DeleteExceptionListItemSchema,
   ExceptionListSchema,
+  ImportExceptionsResponseSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getTrustedAppsListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import type { ResponseProvidersInterface } from '../../common/mock/endpoint/http_handler_mock_factory';
@@ -65,7 +66,7 @@ export const trustedAppsGetListHttpMocks =
         const perPage = apiQueryParams.per_page ?? 10;
         const data = Array.from({ length: Math.min(perPage, 50) }, () =>
           generator.generate({
-            list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+            list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
             os_types: ['windows'],
             tags: [GLOBAL_ARTIFACT_TAG],
           })
@@ -117,7 +118,7 @@ export const trustedAppPutHttpMocks = httpHandlerMockFactory<TrustedAppPutHttpMo
         created_by: 'elastic',
         updated_at: '2021-10-13T16:02:55.856Z',
         updated_by: 'elastic',
-        list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+        list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
         _version: 'abc',
         tie_breaker_id: '1111',
       };
@@ -184,6 +185,33 @@ export const trustedAppsDeleteOneHttpMocks =
     },
   ]);
 
+export type TrustedAppsImportListHttpMocksInterface = ResponseProvidersInterface<{
+  trustedAppImportList: (options: HttpFetchOptionsWithPath) => ImportExceptionsResponseSchema;
+}>;
+
+/**
+ * HTTP mocks that support importing Trusted Apps list
+ */
+export const trustedAppsImportListHttpMocks =
+  httpHandlerMockFactory<TrustedAppsImportListHttpMocksInterface>([
+    {
+      id: 'trustedAppImportList',
+      path: `${EXCEPTION_LIST_URL}/_import`,
+      method: 'post',
+      handler: (): ImportExceptionsResponseSchema => {
+        return {
+          errors: [],
+          success: true,
+          success_count: 3,
+          success_exception_lists: true,
+          success_count_exception_lists: 1,
+          success_exception_list_items: true,
+          success_count_exception_list_items: 2,
+        };
+      },
+    },
+  ]);
+
 export type TrustedAppPostHttpMocksInterface = ResponseProvidersInterface<{
   trustedAppCreate: (options: HttpFetchOptionsWithPath) => ExceptionListItemSchema;
 }>;
@@ -237,6 +265,7 @@ export type TrustedAppsAllHttpMocksInterface = FleetGetEndpointPackagePolicyList
   TrustedAppsGetOneHttpMocksInterface &
   TrustedAppPutHttpMocksInterface &
   TrustedAppsDeleteOneHttpMocksInterface &
+  TrustedAppsImportListHttpMocksInterface &
   TrustedAppPostHttpMocksInterface &
   TrustedAppsPostCreateListHttpMockInterface;
 /** Use this HTTP mock when wanting to mock the API calls done by the Trusted Apps Http service */
@@ -247,6 +276,7 @@ export const trustedAppsAllHttpMocks = composeHttpHandlerMocks<TrustedAppsAllHtt
   trustedAppPostHttpMocks,
   trustedAppsPostCreateListHttpMock,
   trustedAppsDeleteOneHttpMocks,
+  trustedAppsImportListHttpMocks,
   fleetGetEndpointPackagePolicyListHttpMock,
   fleetGetAgentPolicyListHttpMock,
 ]);

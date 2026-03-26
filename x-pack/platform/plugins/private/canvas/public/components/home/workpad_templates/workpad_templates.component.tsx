@@ -8,15 +8,10 @@
 import React from 'react';
 import { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiInMemoryTable,
-  EuiBasicTableColumn,
-  EuiButtonEmpty,
-  EuiSearchBarProps,
-  SearchFilterConfig,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiSearchBarProps, SearchFilterConfig } from '@elastic/eui';
+import { EuiInMemoryTable, EuiButtonEmpty } from '@elastic/eui';
 
-import { CanvasTemplate } from '../../../../types';
+import type { CanvasTemplate } from '../../../../types';
 import { tagsRegistry } from '../../../lib/tags_registry';
 import { TagList } from '../../tag_list';
 
@@ -116,6 +111,7 @@ export const WorkpadTemplates = ({ templates, onCreateWorkpad }: Props) => {
       }}
       pagination={true}
       data-test-subj="canvasTemplatesTable"
+      tableCaption={strings.getTableCaption()}
     />
   );
 };
@@ -127,6 +123,10 @@ const strings = {
       values: {
         templateName,
       },
+    }),
+  getTableCaption: () =>
+    i18n.translate('xpack.canvas.workpadTemplates.table.caption', {
+      defaultMessage: 'Workpad templates',
     }),
   getTableDescriptionColumnTitle: () =>
     i18n.translate('xpack.canvas.workpadTemplates.table.descriptionColumnTitle', {

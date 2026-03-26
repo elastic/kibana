@@ -11,11 +11,16 @@ import * as api from './api';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { sourcererSelectors } from '../../../../common/store';
+import {
+  signalIndexNameSelector,
+  signalIndexOutdatedSelector,
+} from '../../../../data_view_manager/redux/selectors';
 
 jest.mock('./api');
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 jest.mock('../../../../timelines/components/timeline/tabs/esql');
+jest.mock('../../../../data_view_manager/redux/selectors');
 
 describe('useSignalIndex', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
@@ -153,6 +158,9 @@ describe('useSignalIndex', () => {
       .spyOn(sourcererSelectors, 'signalIndexName')
       .mockReturnValue('mock-signal-index-from-sourcerer');
     jest.spyOn(sourcererSelectors, 'signalIndexMappingOutdated').mockReturnValue(false);
+    jest.spyOn(sourcererSelectors, 'signalIndexMappingOutdated').mockReturnValue(false);
+    jest.mocked(signalIndexOutdatedSelector).mockReturnValue(false);
+    jest.mocked(signalIndexNameSelector).mockReturnValue('mock-signal-index-from-sourcerer');
 
     const { result } = renderHook(() => useSignalIndex(), {
       wrapper: TestProvidersWithPrivileges,

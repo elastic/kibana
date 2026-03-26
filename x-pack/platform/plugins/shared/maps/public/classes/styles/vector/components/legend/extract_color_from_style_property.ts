@@ -7,7 +7,7 @@
 
 import { getColorRampCenterColor, getColorPalette } from '../../../color_palettes';
 import { COLOR_MAP_TYPE, STYLE_TYPE } from '../../../../../../common/constants';
-import {
+import type {
   ColorDynamicOptions,
   ColorStylePropertyDescriptor,
 } from '../../../../../../common/descriptor_types';

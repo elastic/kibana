@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PreDragActions } from '@hello-pangea/dnd';
+import type { PreDragActions } from '@hello-pangea/dnd';
 
 declare module '@hello-pangea/dnd' {
   export * from '@hello-pangea/dnd';

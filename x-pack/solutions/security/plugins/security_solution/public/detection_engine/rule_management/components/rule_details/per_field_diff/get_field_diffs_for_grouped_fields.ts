@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import stringify from 'json-stable-stringify';
 import type {
   RuleSchedule,
   SimpleRuleSchedule,
 } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
 import { toSimpleRuleSchedule } from '../../../../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import type {
-  AllFieldsDiff,
+  AllThreeWayFieldsDiff,
   RuleFieldsDiffWithDataSource,
   RuleFieldsDiffWithEqlQuery,
   RuleFieldsDiffWithEsqlQuery,
@@ -20,6 +19,7 @@ import type {
   ThreeWayDiff,
 } from '../../../../../../common/api/detection_engine';
 import type { FieldDiff } from '../../../model/rule_details/rule_field_diff';
+import { stringifyWithExpandedEmpties } from '../three_way_diff/comparison_side/utils';
 
 export const sortAndStringifyJson = (fieldValue: unknown): string => {
   if (!fieldValue) {
@@ -29,7 +29,7 @@ export const sortAndStringifyJson = (fieldValue: unknown): string => {
   if (typeof fieldValue === 'string') {
     return fieldValue;
   }
-  return stringify(fieldValue, { space: 2 });
+  return stringifyWithExpandedEmpties(fieldValue);
 };
 
 export const getFieldDiffsForDataSource = (
@@ -241,7 +241,7 @@ export const getFieldDiffsForEsqlQuery = (
 };
 
 export const getFieldDiffsForThreatQuery = (
-  threatQuery: AllFieldsDiff['threat_query']
+  threatQuery: AllThreeWayFieldsDiff['threat_query']
 ): FieldDiff[] => {
   const currentQuery = sortAndStringifyJson(threatQuery.current_version?.query);
   const targetQuery = sortAndStringifyJson(threatQuery.target_version?.query);
@@ -355,7 +355,7 @@ const getFieldDiffsForSimpleRuleSchedule = (
 };
 
 export const getFieldDiffsForRuleNameOverride = (
-  ruleNameOverrideThreeWayDiff: AllFieldsDiff['rule_name_override']
+  ruleNameOverrideThreeWayDiff: AllThreeWayFieldsDiff['rule_name_override']
 ): FieldDiff[] => {
   const currentFieldName = sortAndStringifyJson(
     ruleNameOverrideThreeWayDiff.current_version?.field_name
@@ -377,7 +377,7 @@ export const getFieldDiffsForRuleNameOverride = (
 };
 
 export const getFieldDiffsForTimestampOverride = (
-  timestampOverrideThreeWayDiff: AllFieldsDiff['timestamp_override']
+  timestampOverrideThreeWayDiff: AllThreeWayFieldsDiff['timestamp_override']
 ): FieldDiff[] => {
   const currentFieldName = sortAndStringifyJson(
     timestampOverrideThreeWayDiff.current_version?.field_name
@@ -415,7 +415,7 @@ export const getFieldDiffsForTimestampOverride = (
 };
 
 export const getFieldDiffsForTimelineTemplate = (
-  timelineTemplateThreeWayDiff: AllFieldsDiff['timeline_template']
+  timelineTemplateThreeWayDiff: AllThreeWayFieldsDiff['timeline_template']
 ): FieldDiff[] => {
   const currentTimelineId = sortAndStringifyJson(
     timelineTemplateThreeWayDiff.current_version?.timeline_id
@@ -453,7 +453,7 @@ export const getFieldDiffsForTimelineTemplate = (
 };
 
 export const getFieldDiffsForBuildingBlock = (
-  buildingBlockThreeWayDiff: AllFieldsDiff['building_block']
+  buildingBlockThreeWayDiff: AllThreeWayFieldsDiff['building_block']
 ): FieldDiff[] => {
   const currentType = sortAndStringifyJson(buildingBlockThreeWayDiff.current_version?.type);
   const targetType = sortAndStringifyJson(buildingBlockThreeWayDiff.target_version?.type);
@@ -471,7 +471,7 @@ export const getFieldDiffsForBuildingBlock = (
 };
 
 export const getFieldDiffsForThreshold = (
-  thresholdThreeWayDiff: AllFieldsDiff['threshold']
+  thresholdThreeWayDiff: AllThreeWayFieldsDiff['threshold']
 ): FieldDiff[] => {
   const currentField = sortAndStringifyJson(thresholdThreeWayDiff.current_version?.field);
   const targetField = sortAndStringifyJson(thresholdThreeWayDiff.target_version?.field);

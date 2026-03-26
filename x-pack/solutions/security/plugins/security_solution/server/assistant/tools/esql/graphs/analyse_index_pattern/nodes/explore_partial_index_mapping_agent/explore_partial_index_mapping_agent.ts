@@ -12,18 +12,19 @@ import type { CreateLlmInstance } from '../../../../utils/common';
 import type { AnalyzeIndexPatternAnnotation } from '../../state';
 import { getInspectIndexMappingTool } from '../../../../tools/inspect_index_mapping_tool/inspect_index_mapping_tool';
 
-export const getExplorePartialIndexMappingAgent = ({
+export const getExplorePartialIndexMappingAgent = async ({
   createLlmInstance,
   esClient,
 }: {
   createLlmInstance: CreateLlmInstance;
   esClient: ElasticsearchClient;
 }) => {
-  const llm = createLlmInstance();
+  const llm = await createLlmInstance();
   const tool = getInspectIndexMappingTool({
     esClient,
     indexPattern: 'placeholder',
   });
+
   const llmWithTools = llm.bindTools([tool]);
 
   return async (state: typeof AnalyzeIndexPatternAnnotation.State) => {

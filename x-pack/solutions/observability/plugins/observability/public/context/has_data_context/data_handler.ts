@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataHandler, ObservabilityFetchDataPlugins } from '../../typings/fetch_overview_data';
+import type { DataHandler, ObservabilityFetchDataPlugins } from '../../typings/fetch_overview_data';
 
 const dataHandlers: Partial<Record<ObservabilityFetchDataPlugins, DataHandler>> = {};
 

@@ -7,7 +7,7 @@
 
 import { ensureDirSync, createSync } from '../util';
 import { createAgentInput } from './agent';
-import { CelInput, InputType } from '../../common';
+import type { CelInput, InputType } from '../../common';
 import { render } from 'nunjucks';
 
 jest.mock('../util', () => ({

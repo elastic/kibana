@@ -13,9 +13,9 @@ import {
   ReadKnowledgeBaseRequestParams,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { buildResponse } from '../../lib/build_response';
-import { ElasticAssistantPluginRouter } from '../../types';
+import type { ElasticAssistantPluginRouter } from '../../types';
 
 /**
  * Get the status of the Knowledge Base index, pipeline, and resources (collection of documents)
@@ -60,6 +60,7 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
           const loadedSecurityLabsDocsCount = await kbDataClient.getLoadedSecurityLabsDocsCount();
           const userDataExists = await kbDataClient.isUserDataExists();
           const productDocumentationStatus = await kbDataClient.getProductDocumentationStatus();
+          const defendInsightsExists = await kbDataClient.isDefendInsightsDocsLoaded();
 
           return response.ok({
             body: {
@@ -67,6 +68,7 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
               is_setup_in_progress: kbDataClient.isSetupInProgress,
               is_setup_available: setupAvailable,
               security_labs_exists: securityLabsExists,
+              defend_insights_exists: defendInsightsExists,
               // If user data exists, we should have at least one document in the Security Labs index
               user_data_exists: userDataExists || !!loadedSecurityLabsDocsCount,
               product_documentation_status: productDocumentationStatus,

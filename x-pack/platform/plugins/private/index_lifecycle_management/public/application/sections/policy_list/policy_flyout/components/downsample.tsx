@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { PhaseWithDownsample } from '../../../../../../common/types';
+import type { PhaseWithDownsample } from '../../../../../../common/types';
 import { i18nTexts } from '../../../edit_policy/i18n_texts';
 import { ActionDescription } from './action_description';
 import type { ActionComponentProps } from './types';

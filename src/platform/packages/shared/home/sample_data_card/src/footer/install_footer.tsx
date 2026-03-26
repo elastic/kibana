@@ -20,12 +20,12 @@ import type { UseInstallParams } from '../hooks';
  */
 export type Props = Pick<SampleDataSet, 'id' | 'name'> & UseInstallParams;
 
-const addingLabel = i18n.translate('homePackages.sampleDataCard.addingButtonLabel', {
-  defaultMessage: 'Adding',
+const installingLabel = i18n.translate('homePackages.sampleDataCard.installingButtonLabel', {
+  defaultMessage: 'Installing',
 });
 
-const addLabel = i18n.translate('homePackages.sampleDataCard.addButtonLabel', {
-  defaultMessage: 'Add data',
+const installLabel = i18n.translate('homePackages.sampleDataCard.installButtonLabel', {
+  defaultMessage: 'Install data',
 });
 
 /**
@@ -35,30 +35,35 @@ export const InstallFooter = (params: Props) => {
   const [install, isInstalling] = useInstall(params);
   const { id, name } = params;
 
-  const addingAriaLabel = i18n.translate('homePackages.sampleDataCard.addingButtonAriaLabel', {
-    defaultMessage: 'Adding {datasetName}',
-    values: {
-      datasetName: name,
-    },
-  });
+  const installingAriaLabel = i18n.translate(
+    'homePackages.sampleDataCard.installingButtonAriaLabel',
+    {
+      defaultMessage: 'Installing {datasetName}',
+      values: {
+        datasetName: name,
+      },
+    }
+  );
 
-  const addAriaLabel = i18n.translate('homePackages.sampleDataCard.addButtonAriaLabel', {
-    defaultMessage: 'Add {datasetName}',
+  const installAriaLabel = i18n.translate('homePackages.sampleDataCard.installButtonAriaLabel', {
+    defaultMessage: 'Install {datasetName}',
     values: {
       datasetName: name,
     },
   });
 
   return (
-    <EuiFlexGroup justifyContent="flexEnd">
+    <EuiFlexGroup justifyContent="flexStart">
       <EuiFlexItem grow={false}>
         <EuiButton
+          color="text"
           isLoading={isInstalling}
           onClick={install}
+          iconType="download"
           data-test-subj={`addSampleDataSet${id}`}
-          aria-label={isInstalling ? addingAriaLabel : addAriaLabel}
+          aria-label={isInstalling ? installingAriaLabel : installAriaLabel}
         >
-          {isInstalling ? addingLabel : addLabel}
+          {isInstalling ? installingLabel : installLabel}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>

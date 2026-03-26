@@ -6,4 +6,5 @@
  */
 
 export { getCellRendererForGivenRecord } from './cell_renderers';
-export { createSecuritySolutionDiscoverAppWrapperGetter } from './app_wrapper';
+export { AlertFlyoutHeader } from './alert_flyout_header_component';
+export { AlertFlyoutOverviewTab } from './alert_flyout_overview_tab_component';

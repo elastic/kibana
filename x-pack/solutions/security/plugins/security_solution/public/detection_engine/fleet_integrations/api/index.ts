@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './api_client_interface';
+export type * from './api_client_interface';
 export * from './api_client';

@@ -36,6 +36,13 @@ const flyoutHistoryButtonTooltip = i18n.translate(
   }
 );
 
+const flyoutHistoryButtonAriaLabel = i18n.translate(
+  'xpack.securitySolution.flyout.right.header.flyoutHistoryButtonAriaLabel',
+  {
+    defaultMessage: 'Show history',
+  }
+);
+
 export interface HistoryProps {
   /**
    * A list of flyouts that have been opened
@@ -92,6 +99,7 @@ export const FlyoutHistory: FC<HistoryProps> = memo(({ history }) => {
               onClick={togglePopover}
               size="m"
               iconType={'clockCounter'}
+              aria-label={flyoutHistoryButtonAriaLabel}
               data-test-subj={FLYOUT_HISTORY_BUTTON_TEST_ID}
             />
           </EuiToolTip>
@@ -100,6 +108,7 @@ export const FlyoutHistory: FC<HistoryProps> = memo(({ history }) => {
         closePopover={togglePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
+        aria-label={flyoutHistoryButtonTooltip}
       >
         <EuiContextMenuPanel
           size="s"

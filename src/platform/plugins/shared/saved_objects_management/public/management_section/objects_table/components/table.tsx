@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApplicationStart, IBasePath } from '@kbn/core/public';
+import type { ApplicationStart, IBasePath } from '@kbn/core/public';
 import React, { PureComponent, Fragment } from 'react';
 import moment from 'moment';
+import type {
+  EuiTableFieldDataColumnType,
+  EuiTableActionsColumnType,
+  QueryType,
+  CriteriaWithPagination,
+} from '@elastic/eui';
 import {
   EuiSearchBar,
   EuiBasicTable,
@@ -23,18 +29,14 @@ import {
   EuiSwitch,
   EuiFormRow,
   EuiText,
-  EuiTableFieldDataColumnType,
-  EuiTableActionsColumnType,
-  QueryType,
-  CriteriaWithPagination,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
-import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
-import { SavedObjectWithMetadata } from '../../../types';
-import {
+import type { SavedObjectWithMetadata } from '../../../types';
+import type {
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementAction,
   SavedObjectsManagementColumnServiceStart,
@@ -70,6 +72,7 @@ export interface TableProps {
   onShowRelationships: (object: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
   initialQuery?: QueryType;
+  deleteButtonRef?: React.RefObject<HTMLButtonElement>;
 }
 
 interface TableState {
@@ -146,7 +149,7 @@ export class Table extends PureComponent<TableProps, TableState> {
               }
             )}
           >
-            <span>-</span>
+            <span tabIndex={0}>-</span>
           </EuiToolTip>
         );
       }
@@ -155,7 +158,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       if (updatedAt.diff(moment(), 'days') > -7) {
         return (
           <EuiToolTip content={updatedAt.format('LL LT')}>
-            <span>
+            <span tabIndex={0}>
               <FormattedRelative value={new Date(dateTime).getTime()} />
             </span>
           </EuiToolTip>
@@ -163,7 +166,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       }
       return (
         <EuiToolTip content={updatedAt.format('LL LT')}>
-          <span>{updatedAt.format('LL')}</span>
+          <span tabIndex={0}>{updatedAt.format('LL')}</span>
         </EuiToolTip>
       );
     };
@@ -203,6 +206,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       columnRegistry,
       taggingApi,
       allowedTypes,
+      deleteButtonRef,
     } = this.props;
 
     const cappedTotalItemCount = Math.min(totalItemCount, MAX_PAGINATED_ITEM);
@@ -434,6 +438,7 @@ export class Table extends PureComponent<TableProps, TableState> {
                       )
                 }
                 data-test-subj="savedObjectsManagementDelete"
+                buttonRef={deleteButtonRef}
               >
                 <FormattedMessage
                   id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
@@ -504,6 +509,9 @@ export class Table extends PureComponent<TableProps, TableState> {
             onChange={onTableChange}
             rowProps={(item) => ({
               'data-test-subj': `savedObjectsTableRow row-${item.id}`,
+            })}
+            tableCaption={i18n.translate('savedObjectsManagement.objectsTable.table.tableCaption', {
+              defaultMessage: 'Saved objects list',
             })}
           />
         </div>

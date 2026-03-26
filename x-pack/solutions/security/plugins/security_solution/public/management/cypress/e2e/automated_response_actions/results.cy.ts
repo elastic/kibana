@@ -49,7 +49,8 @@ describe('Results', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, (
     }
   });
 
-  describe('see results when has RBAC', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/244642
+  describe.skip('see results when has RBAC', () => {
     before(() => {
       login(ROLE.soc_manager);
     });

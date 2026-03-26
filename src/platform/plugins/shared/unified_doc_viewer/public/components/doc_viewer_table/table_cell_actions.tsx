@@ -8,40 +8,62 @@
  */
 
 import React from 'react';
-import { EuiDataGridColumnCellActionProps, copyToClipboard } from '@elastic/eui';
+import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { IToasts } from '@kbn/core/public';
-import { FieldRow } from './field_row';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import {
+  shouldShowFieldFilterExistAction,
+  shouldShowFieldFilterInOutActions,
+} from '@kbn/unified-doc-viewer/utils/should_show_field_filter_actions';
+import type { IToasts } from '@kbn/core/public';
+import type { FieldRow } from './field_row';
 
 interface TableActionsProps {
   Component: EuiDataGridColumnCellActionProps['Component'];
   row: FieldRow | undefined; // as we pass `rows[rowIndex]` it's safer to assume that `row` prop can be undefined
   isEsqlMode: boolean | undefined;
+  columns?: string[];
+  hideFilteringOnComputedColumns?: boolean;
 }
 
-function isFilterInOutPairDisabled(
-  row: FieldRow | undefined,
-  onFilter: DocViewFilterFn | undefined
-): boolean {
+type CheckFilterParams = Pick<TableActionsProps, 'row' | 'hideFilteringOnComputedColumns'> & {
+  onFilter: DocViewFilterFn | undefined;
+};
+
+function isFilterDisabledDueToIgnoredReason({ row, onFilter }: CheckFilterParams): boolean {
   if (!row) {
     return false;
   }
-  const { dataViewField, ignoredReason } = row;
 
-  return Boolean(onFilter && (!dataViewField || !dataViewField.filterable || ignoredReason));
+  const { ignoredReason } = row;
+  return Boolean(onFilter && ignoredReason);
 }
 
-export function getFilterInOutPairDisabledWarning(
-  row: FieldRow | undefined,
-  onFilter: DocViewFilterFn | undefined
-): string | undefined {
-  if (!row || !isFilterInOutPairDisabled(row, onFilter)) {
+function isFilterInOutPairDisabled(params: CheckFilterParams): boolean {
+  const { row, onFilter, hideFilteringOnComputedColumns } = params;
+  if (!row) {
+    return false;
+  }
+
+  return (
+    !shouldShowFieldFilterInOutActions({
+      dataViewField: row.dataViewField,
+      onFilter,
+      hideFilteringOnComputedColumns,
+    }) || isFilterDisabledDueToIgnoredReason(params)
+  );
+}
+
+export function getFilterInOutPairDisabledWarning(params: CheckFilterParams): string | undefined {
+  const { row } = params;
+  if (!row || !isFilterInOutPairDisabled(params)) {
     return undefined;
   }
-  const { dataViewField, ignoredReason } = row;
 
-  if (ignoredReason) {
+  const { dataViewField } = row;
+
+  if (isFilterDisabledDueToIgnoredReason(params)) {
     return i18n.translate(
       'unifiedDocViewer.docViews.table.ignoredValuesCanNotBeSearchedWarningMessage',
       {
@@ -59,13 +81,6 @@ export function getFilterInOutPairDisabledWarning(
       )
     : undefined;
 }
-
-const esqlMultivalueFilteringDisabled = i18n.translate(
-  'unifiedDocViewer.docViews.table.esqlMultivalueFilteringDisabled',
-  {
-    defaultMessage: 'Multivalue filtering is not supported in ES|QL',
-  }
-);
 
 const Copy: React.FC<Omit<TableActionsProps, 'isEsqlMode'> & { toasts: IToasts }> = ({
   Component,
@@ -131,6 +146,7 @@ const FilterIn: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | undef
   row,
   isEsqlMode,
   onFilter,
+  hideFilteringOnComputedColumns,
 }) => {
   if (!row) {
     return null;
@@ -146,20 +162,23 @@ const FilterIn: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | undef
     }
   );
 
-  if (!onFilter) {
+  if (
+    isFilterInOutPairDisabled({
+      row,
+      onFilter,
+      hideFilteringOnComputedColumns,
+    })
+  ) {
     return null;
   }
-
-  const filteringDisabled = isEsqlMode && Array.isArray(flattenedValue);
 
   return (
     <Component
       data-test-subj={`addFilterForValueButton-${name}`}
       iconType="plusInCircle"
-      disabled={filteringDisabled || isFilterInOutPairDisabled(row, onFilter)}
-      title={filteringDisabled ? esqlMultivalueFilteringDisabled : filterAddLabel}
+      title={filterAddLabel}
       flush="left"
-      onClick={() => onFilter(dataViewField, flattenedValue, '+')}
+      onClick={() => onFilter!(dataViewField, flattenedValue, '+')}
     >
       {filterAddLabel}
     </Component>
@@ -171,6 +190,7 @@ const FilterOut: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | unde
   row,
   isEsqlMode,
   onFilter,
+  hideFilteringOnComputedColumns,
 }) => {
   if (!row) {
     return null;
@@ -186,45 +206,45 @@ const FilterOut: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | unde
     }
   );
 
-  if (!onFilter) {
+  if (
+    isFilterInOutPairDisabled({
+      row,
+      onFilter,
+      hideFilteringOnComputedColumns,
+    })
+  ) {
     return null;
   }
-
-  const filteringDisabled = isEsqlMode && Array.isArray(flattenedValue);
 
   return (
     <Component
       data-test-subj={`addFilterOutValueButton-${name}`}
       iconType="minusInCircle"
-      disabled={filteringDisabled || isFilterInOutPairDisabled(row, onFilter)}
-      title={filteringDisabled ? esqlMultivalueFilteringDisabled : filterOutLabel}
+      title={filterOutLabel}
       flush="left"
-      onClick={() => onFilter(dataViewField, flattenedValue, '-')}
+      onClick={() => onFilter!(dataViewField, flattenedValue, '-')}
     >
       {filterOutLabel}
     </Component>
   );
 };
 
-function isFilterExistsDisabled(
-  row: FieldRow | undefined,
-  onFilter: DocViewFilterFn | undefined
-): boolean {
+function isFilterExistsDisabled(params: CheckFilterParams): boolean {
+  const { row, onFilter, hideFilteringOnComputedColumns } = params;
   if (!row) {
     return false;
   }
-  const { dataViewField } = row;
 
-  return Boolean(
-    onFilter && (!dataViewField || !dataViewField.filterable || dataViewField.scripted)
-  );
+  return !shouldShowFieldFilterExistAction({
+    dataViewField: row.dataViewField,
+    onFilter,
+    hideFilteringOnComputedColumns,
+  });
 }
 
-export function getFilterExistsDisabledWarning(
-  row: FieldRow | undefined,
-  onFilter: DocViewFilterFn | undefined
-): string | undefined {
-  if (!row || !isFilterExistsDisabled(row, onFilter)) {
+export function getFilterExistsDisabledWarning(params: CheckFilterParams): string | undefined {
+  const { row } = params;
+  if (!row || !isFilterExistsDisabled(params)) {
     return undefined;
   }
   const { dataViewField } = row;
@@ -242,6 +262,8 @@ export function getFilterExistsDisabledWarning(
 const FilterExist: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | undefined }> = ({
   Component,
   row,
+  isEsqlMode,
+  hideFilteringOnComputedColumns,
   onFilter,
 }) => {
   if (!row) {
@@ -256,7 +278,13 @@ const FilterExist: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | un
     { defaultMessage: 'Filter for field present' }
   );
 
-  if (!onFilter) {
+  if (
+    isFilterExistsDisabled({
+      row,
+      onFilter,
+      hideFilteringOnComputedColumns,
+    })
+  ) {
     return null;
   }
 
@@ -264,21 +292,28 @@ const FilterExist: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | un
     <Component
       data-test-subj={`addExistsFilterButton-${name}`}
       iconType="filter"
-      disabled={isFilterExistsDisabled(row, onFilter)}
       title={filterExistsLabel}
       flush="left"
-      onClick={() => onFilter('_exists_', name, '+')}
+      onClick={() => onFilter!('_exists_', name, '+')}
     >
       {filterExistsLabel}
     </Component>
   );
 };
 
+// Toggle column
+const toggleColumnLabel = i18n.translate(
+  'unifiedDocViewer.docViews.table.toggleColumnTableButtonTooltip',
+  {
+    defaultMessage: 'Toggle column in table',
+  }
+);
+
 const ToggleColumn: React.FC<
   TableActionsProps & {
     onToggleColumn: ((field: string) => void) | undefined;
   }
-> = ({ Component, row, onToggleColumn }) => {
+> = ({ Component, columns, row, onToggleColumn }) => {
   if (!row) {
     return null;
   }
@@ -289,18 +324,12 @@ const ToggleColumn: React.FC<
     return null;
   }
 
-  // Toggle column
-  const toggleColumnLabel = i18n.translate(
-    'unifiedDocViewer.docViews.table.toggleColumnTableButtonTooltip',
-    {
-      defaultMessage: 'Toggle column in table',
-    }
-  );
+  const isColumnAdded = columns?.includes(name);
 
   return (
     <Component
       data-test-subj={`toggleColumnButton-${name}`}
-      iconType="listAdd"
+      iconType={isColumnAdded ? 'cross' : 'plusInCircle'}
       title={toggleColumnLabel}
       flush="left"
       onClick={() => onToggleColumn(name)}
@@ -312,12 +341,16 @@ const ToggleColumn: React.FC<
 
 export function getFieldCellActions({
   rows,
+  columns,
   isEsqlMode,
+  hideFilteringOnComputedColumns,
   onFilter,
   onToggleColumn,
 }: {
   rows: FieldRow[];
+  columns?: string[];
   isEsqlMode: boolean | undefined;
+  hideFilteringOnComputedColumns?: boolean;
   onFilter?: DocViewFilterFn;
   onToggleColumn: ((field: string) => void) | undefined;
 }) {
@@ -331,6 +364,7 @@ export function getFieldCellActions({
                 Component={Component}
                 isEsqlMode={isEsqlMode}
                 onFilter={onFilter}
+                hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
               />
             );
           },
@@ -342,6 +376,7 @@ export function getFieldCellActions({
             return (
               <ToggleColumn
                 row={rows[rowIndex]}
+                columns={columns}
                 Component={Component}
                 isEsqlMode={isEsqlMode}
                 onToggleColumn={onToggleColumn}
@@ -356,11 +391,13 @@ export function getFieldCellActions({
 export function getFieldValueCellActions({
   rows,
   isEsqlMode,
+  hideFilteringOnComputedColumns,
   onFilter,
   toasts,
 }: {
   rows: FieldRow[];
   isEsqlMode: boolean | undefined;
+  hideFilteringOnComputedColumns?: boolean;
   onFilter?: DocViewFilterFn;
   toasts: IToasts;
 }) {
@@ -373,6 +410,7 @@ export function getFieldValueCellActions({
               Component={Component}
               isEsqlMode={isEsqlMode}
               onFilter={onFilter}
+              hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
             />
           );
         },
@@ -383,6 +421,7 @@ export function getFieldValueCellActions({
               Component={Component}
               isEsqlMode={isEsqlMode}
               onFilter={onFilter}
+              hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
             />
           );
         },

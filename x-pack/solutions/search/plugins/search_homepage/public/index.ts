@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
-
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { SearchHomepagePlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {

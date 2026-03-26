@@ -9,8 +9,8 @@ import { merge } from 'lodash';
 import path from 'path';
 import { load as loadYaml } from 'js-yaml';
 import { readFileSync } from 'fs';
-import type { YamlRoleDefinitions } from '@kbn/test-suites-serverless/shared/lib';
-import { samlAuthentication } from '@kbn/security-solution-plugin/public/management/cypress/support/saml_authentication';
+import { samlAuthentication } from '@kbn/cypress-test-helper/src/auth/saml_auth';
+import type { YamlRoleDefinitions } from './lib';
 import { setupUserDataLoader } from './support/setup_data_loader_tasks';
 import { getFailedSpecVideos } from './support/filter_videos';
 
@@ -56,7 +56,6 @@ export const getCypressBaseConfig = (
         specPattern: './cypress/e2e/**/*.cy.ts',
         experimentalRunAllSpecs: true,
         experimentalMemoryManagement: true,
-        numTestsKeptInMemory: 3,
         setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
           setupUserDataLoader(on, config, { roleDefinitions, additionalRoleName: 'viewer' });
           samlAuthentication(on, config);

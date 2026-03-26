@@ -18,7 +18,7 @@
       "_cluster/stats",
       "_cluster/stats/nodes/{node_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cluster-stats.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-stats",
     "availability": {
       "stack": true,
       "serverless": false

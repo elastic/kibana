@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CoreSetup, KibanaRequest, Plugin } from '@kbn/core/server';
+import type { CoreSetup, KibanaRequest, Plugin } from '@kbn/core/server';
 
 export class HealthGatewayStatusPlugin implements Plugin<void, void> {
   public setup(core: CoreSetup) {

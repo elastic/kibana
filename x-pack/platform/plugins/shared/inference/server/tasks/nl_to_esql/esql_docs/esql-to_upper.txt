@@ -1,6 +1,6 @@
 # TO_UPPER
 
-The TO_UPPER function converts the input string to uppercase.
+Returns a new string with all characters in the input string converted to upper case.
 
 ## Syntax
 
@@ -10,18 +10,13 @@ The TO_UPPER function converts the input string to uppercase.
 
 #### str
 
-The string expression that you want to convert to uppercase.
+String expression to be converted to upper case. If the value is `null`, the function returns `null`. The input can be a single-valued or multi-valued column or expression.
 
 ## Examples
+
+Converts the contents of the `message` column to upper case and stores the result in a new column called `message_upper`:
 
 ```esql
 ROW message = "Some Text"
 | EVAL message_upper = TO_UPPER(message)
-```
-
-```esql
-FROM employees
-| KEEP first_name, last_name
-| EVAL first_name_upper = TO_UPPER(first_name)
-| EVAL last_name_upper = TO_UPPER(last_name)
 ```

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useRef } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useRef } from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
 
 export interface Props {

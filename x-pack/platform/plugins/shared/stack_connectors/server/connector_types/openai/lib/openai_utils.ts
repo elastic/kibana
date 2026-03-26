@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OPENAI_CHAT_URL, OPENAI_LEGACY_COMPLETION_URL } from '../../../../common/openai/constants';
+import { OPENAI_CHAT_URL, OPENAI_LEGACY_COMPLETION_URL } from '@kbn/connector-schemas/openai';
 
 const APIS_ALLOWING_STREAMING = new Set<string>([OPENAI_CHAT_URL, OPENAI_LEGACY_COMPLETION_URL]);
 

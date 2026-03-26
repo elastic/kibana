@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
+import type { CSSObject } from '@emotion/react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import {
@@ -15,6 +16,7 @@ import {
   ENVIRONMENT_ALL,
 } from '../../../../common/environment_filter_values';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import type { Environment } from '../../../../common/environment_rt';
 import { useEnvironmentSelect } from './use_environment_select';
@@ -58,6 +60,10 @@ export function EnvironmentSelect({
   rangeFrom,
   rangeTo,
   onChange,
+  fullWidth: fullWidthProp,
+  compressed,
+  hideLabel,
+  cssOverride,
 }: {
   environment: Environment;
   availableEnvironments: Environment[];
@@ -66,7 +72,13 @@ export function EnvironmentSelect({
   rangeFrom: string;
   rangeTo: string;
   onChange: (value: string) => void;
+  fullWidth?: boolean;
+  compressed?: boolean;
+  hideLabel?: boolean;
+  cssOverride?: CSSObject;
 }) {
+  const { isSmall } = useBreakpoints();
+  const fullWidth = fullWidthProp ?? isSmall;
   const [searchValue, setSearchValue] = useState('');
   const [selectedOption, setSelectedOption] = useState<Array<EuiComboBoxOptionOption<string>>>([
     {
@@ -133,28 +145,35 @@ export function EnvironmentSelect({
 
   return (
     <EuiFormRow
-      aria-label={i18n.translate(
-        'xpack.apm.environmentSelect.selectenvironmentComboBox.ariaLabel',
-        { defaultMessage: 'Select environment' }
-      )}
       error={i18n.translate('xpack.apm.filter.environment.error', {
         defaultMessage: '{value} is not a valid environment',
         values: { value: searchValue },
       })}
-      css={{ minWidth: '256px' }}
+      fullWidth={fullWidth}
+      css={[!fullWidth ? { minWidth: '160px', maxWidth: '240px' } : undefined, cssOverride]}
       isInvalid={isInvalid}
     >
       <EuiComboBox
+        aria-label={i18n.translate(
+          'xpack.apm.environmentSelect.selectenvironmentComboBox.ariaLabel',
+          { defaultMessage: 'Select environment' }
+        )}
+        compressed={compressed}
         data-test-subj="environmentFilter"
+        fullWidth={fullWidth}
         async
         isClearable={false}
         isInvalid={isInvalid}
         placeholder={i18n.translate('xpack.apm.filter.environment.placeholder', {
           defaultMessage: 'Select environment',
         })}
-        prepend={i18n.translate('xpack.apm.filter.environment.label', {
-          defaultMessage: 'Environment',
-        })}
+        prepend={
+          hideLabel
+            ? undefined
+            : i18n.translate('xpack.apm.filter.environment.label', {
+                defaultMessage: 'Environment',
+              })
+        }
         singleSelection={{ asPlainText: true }}
         options={options}
         selectedOptions={selectedOption}

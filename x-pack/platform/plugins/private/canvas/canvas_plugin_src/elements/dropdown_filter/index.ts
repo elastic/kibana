@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElementFactory } from '../../../types';
+import type { ElementFactory } from '../../../types';
 
 export const dropdownFilter: ElementFactory = () => ({
   name: 'dropdownFilter',

@@ -8,9 +8,9 @@
  */
 
 /* eslint-disable-next-line @kbn/eslint/module_migration */
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import type * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { createParser } from '../grammar';
-import { Parser, ParseResult } from '../../../ace_migration/types';
+import type { Parser, ParseResult } from '../../../ace_migration/types';
 
 export class XJsonWorker {
   constructor(private ctx: monaco.worker.IWorkerContext) {}

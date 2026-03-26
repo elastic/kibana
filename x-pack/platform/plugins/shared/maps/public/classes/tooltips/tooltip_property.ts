@@ -6,11 +6,11 @@
  */
 
 import _ from 'lodash';
-import { ReactNode } from 'react';
-import { GeoJsonProperties, Geometry } from 'geojson';
-import { Filter } from '@kbn/es-query';
-import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
-import { RawValue } from '../../../common/constants';
+import type { ReactNode } from 'react';
+import type { GeoJsonProperties, Geometry } from 'geojson';
+import type { Filter } from '@kbn/es-query';
+import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import type { RawValue } from '../../../common/constants';
 import type { TooltipFeature } from '../../../common/descriptor_types';
 
 export interface ITooltipProperty {

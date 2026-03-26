@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { transparentize } from '@elastic/eui';
-import { CSSObject } from '@emotion/react';
+import type { CSSObject } from '@emotion/react';
 import { useEuiTheme } from '../../hooks';
 
 interface StylesDeps {

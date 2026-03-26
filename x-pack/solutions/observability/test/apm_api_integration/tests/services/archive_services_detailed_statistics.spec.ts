@@ -6,13 +6,13 @@
  */
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { ApmApiError } from '../../common/apm_api_supertest';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { ApmApiError } from '../../common/apm_api_supertest';
 
 type ServicesDetailedStatisticsReturn =
   APIReturnType<'POST /internal/apm/services/detailed_statistics'>;

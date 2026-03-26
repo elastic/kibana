@@ -10,7 +10,7 @@ import { createKnowledgeBaseEntry } from './create_knowledge_base_entry';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { getKnowledgeBaseEntry } from './get_knowledge_base_entry';
-import { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
+import type { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
 import {
   getKnowledgeBaseEntryMock,
   getCreateKnowledgeBaseEntrySchemaMock,
@@ -73,7 +73,7 @@ describe('createKnowledgeBaseEntry', () => {
         updated_at: '2024-01-28T04:20:02.394Z',
         updated_by: 'my_profile_uid',
         namespace: 'test',
-        users: [{ id: 'my_profile_uid', name: 'my_username' }],
+        users: [{ id: 'my_profile_uid', name: 'elastic' }],
         type: 'document',
         semantic_text: 'test',
         source: 'test',
@@ -125,7 +125,7 @@ describe('createKnowledgeBaseEntry', () => {
         updated_at: '2024-01-28T04:20:02.394Z',
         updated_by: 'my_profile_uid',
         namespace: 'test',
-        users: [{ id: 'my_profile_uid', name: 'my_username' }],
+        users: [{ id: 'my_profile_uid', name: 'elastic' }],
         query_description: 'test',
         type: 'index',
         name: 'test',

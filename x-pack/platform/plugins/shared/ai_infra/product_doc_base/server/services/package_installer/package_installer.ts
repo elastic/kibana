@@ -7,14 +7,23 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ResourceType } from '@kbn/product-doc-common';
 import {
   getArtifactName,
   getProductDocIndexName,
+  getSecurityLabsArtifactName,
+  getSecurityLabsIndexName,
   DocumentationProduct,
   type ProductName,
+  ResourceTypes,
 } from '@kbn/product-doc-common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { cloneDeep } from 'lodash';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import { i18n } from '@kbn/i18n';
+import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import type { ProductDocInstallClient } from '../doc_install_status';
+import type { SecurityLabsStatusResponse } from '../doc_manager/types';
 import {
   downloadToDisk,
   openZipArchive,
@@ -22,24 +31,45 @@ import {
   loadManifestFile,
   ensureDefaultElserDeployed,
   type ZipArchive,
+  ensureInferenceDeployed,
+  isLegacySemanticTextVersion,
 } from './utils';
 import { majorMinor, latestVersion } from './utils/semver';
 import {
   validateArtifactArchive,
   fetchArtifactVersions,
+  fetchSecurityLabsVersions,
   createIndex,
   populateIndex,
 } from './steps';
 
+import { overrideInferenceSettings } from './steps/create_index';
+import { LATEST_PRODUCT_VERSION } from '../../../common/consts';
 interface PackageInstallerOpts {
   artifactsFolder: string;
   logger: Logger;
   esClient: ElasticsearchClient;
   productDocClient: ProductDocInstallClient;
   artifactRepositoryUrl: string;
+  artifactRepositoryProxyUrl?: string;
   kibanaVersion: string;
   elserInferenceId?: string;
+  isServerless?: boolean;
 }
+// Process each product (elasticsearch and kibana)
+const OPEN_API_SPEC_PRODUCTS: Array<{
+  productName: 'elasticsearch' | 'kibana';
+  indexName: string;
+}> = [
+  {
+    productName: DocumentationProduct.elasticsearch as 'elasticsearch',
+    indexName: '.kibana_ai_openapi_spec_elasticsearch',
+  },
+  {
+    productName: DocumentationProduct.kibana as 'kibana',
+    indexName: '.kibana_ai_openapi_spec_kibana',
+  },
+];
 
 export class PackageInstaller {
   private readonly log: Logger;
@@ -47,8 +77,10 @@ export class PackageInstaller {
   private readonly esClient: ElasticsearchClient;
   private readonly productDocClient: ProductDocInstallClient;
   private readonly artifactRepositoryUrl: string;
+  private readonly artifactRepositoryProxyUrl?: string;
   private readonly currentVersion: string;
-  private readonly elserInferenceId?: string;
+  private readonly elserInferenceId: string;
+  private readonly isServerless: boolean;
 
   constructor({
     artifactsFolder,
@@ -56,30 +88,47 @@ export class PackageInstaller {
     esClient,
     productDocClient,
     artifactRepositoryUrl,
+    artifactRepositoryProxyUrl,
     elserInferenceId,
     kibanaVersion,
+    isServerless,
   }: PackageInstallerOpts) {
     this.esClient = esClient;
     this.productDocClient = productDocClient;
     this.artifactsFolder = artifactsFolder;
     this.artifactRepositoryUrl = artifactRepositoryUrl;
+    this.artifactRepositoryProxyUrl = artifactRepositoryProxyUrl;
     this.currentVersion = majorMinor(kibanaVersion);
     this.log = logger;
     this.elserInferenceId = elserInferenceId || defaultInferenceEndpoints.ELSER;
+    this.isServerless = isServerless ?? false;
   }
 
+  private async getInferenceInfo(inferenceId?: string) {
+    if (!inferenceId) {
+      return;
+    }
+    const inferenceEndpoints = await this.esClient.inference.get({
+      inference_id: inferenceId,
+    });
+    return Array.isArray(inferenceEndpoints.endpoints) && inferenceEndpoints.endpoints.length > 0
+      ? inferenceEndpoints.endpoints[0]
+      : undefined;
+  }
   /**
    * Make sure that the currently installed doc packages are up to date.
    * Will not upgrade products that are not already installed
    */
-  async ensureUpToDate({}: {}) {
-    const [repositoryVersions, installStatuses] = await Promise.all([
+  async ensureUpToDate(params: { inferenceId: string; forceUpdate?: boolean }) {
+    const { inferenceId, forceUpdate } = params;
+    const inferenceInfo = await this.getInferenceInfo(inferenceId);
+    const [repositoryVersions, installStatuses, openapiSpecInstallStatus] = await Promise.all([
       fetchArtifactVersions({
         artifactRepositoryUrl: this.artifactRepositoryUrl,
       }),
-      this.productDocClient.getInstallationStatus(),
+      this.productDocClient.getInstallationStatus({ inferenceId }),
+      this.productDocClient.getOpenapiSpecInstallationStatus({ inferenceId }),
     ]);
-
     const toUpdate: Array<{
       productName: ProductName;
       productVersion: string;
@@ -92,8 +141,18 @@ export class PackageInstaller {
       if (!availableVersions || !availableVersions.length) {
         return;
       }
-      const selectedVersion = selectVersion(this.currentVersion, availableVersions);
-      if (productState.version !== selectedVersion) {
+      // Serverless/"latest" zip file has a special versioning strategy
+      // where we track by last date modified in the bucket
+      const shouldInstallLatest = this.isServerless;
+      const selectedVersion = selectVersion(
+        this.currentVersion,
+        availableVersions,
+        shouldInstallLatest
+      );
+      if (productState.version !== selectedVersion || Boolean(forceUpdate)) {
+        this.log.info(
+          `Updating product [${productName}] from version [${productState.version}] to version [${selectedVersion}]`
+        );
         toUpdate.push({
           productName: productName as ProductName,
           productVersion: selectedVersion,
@@ -105,26 +164,57 @@ export class PackageInstaller {
       await this.installPackage({
         productName,
         productVersion,
+        customInference: inferenceInfo,
+      });
+    }
+
+    const openAPISpecVersionToUpgradeTo = selectVersion(
+      this.currentVersion,
+      repositoryVersions.openapi,
+      this.isServerless
+    );
+
+    // Upgrade to newest version of OpenAPI Spec if possile
+    if (
+      forceUpdate ||
+      openapiSpecInstallStatus.version !== openAPISpecVersionToUpgradeTo ||
+      openAPISpecVersionToUpgradeTo === LATEST_PRODUCT_VERSION
+    ) {
+      await this.installOpenAPISpec({
+        version: openAPISpecVersionToUpgradeTo,
+        inferenceId,
       });
     }
   }
 
-  async installAll({}: {}) {
+  async installAll(params: { inferenceId?: string } = {}) {
+    const { inferenceId } = params;
     const repositoryVersions = await fetchArtifactVersions({
       artifactRepositoryUrl: this.artifactRepositoryUrl,
+      artifactRepositoryProxyUrl: this.artifactRepositoryProxyUrl,
     });
     const allProducts = Object.values(DocumentationProduct) as ProductName[];
+    const inferenceInfo = await this.getInferenceInfo(inferenceId);
+
     for (const productName of allProducts) {
       const availableVersions = repositoryVersions[productName];
+
       if (!availableVersions || !availableVersions.length) {
         this.log.warn(`No version found for product [${productName}]`);
         continue;
       }
-      const selectedVersion = selectVersion(this.currentVersion, availableVersions);
+
+      const shouldInstallLatest = this.isServerless;
+      const selectedVersion = selectVersion(
+        this.currentVersion,
+        availableVersions,
+        shouldInstallLatest
+      );
 
       await this.installPackage({
         productName,
         productVersion: selectedVersion,
+        customInference: inferenceInfo,
       });
     }
   }
@@ -132,40 +222,69 @@ export class PackageInstaller {
   async installPackage({
     productName,
     productVersion,
+    customInference,
   }: {
     productName: ProductName;
     productVersion: string;
+    customInference?: InferenceInferenceEndpointInfo;
   }) {
+    const inferenceId = customInference?.inference_id ?? this.elserInferenceId;
+
     this.log.info(
-      `Starting installing documentation for product [${productName}] and version [${productVersion}]`
+      `Starting installing documentation for product [${productName}] and version [${productVersion}] with inference ID [${inferenceId}]`
     );
 
-    productVersion = majorMinor(productVersion);
+    // Artifact name will always be {doc}-latest.zip,
+    // but we store the last modified date in productVersion for tracking (e.g. "latest-2026-01-27T23:25:54.727Z")
+    // so that's the artifact product version we will use
+    const artifactProductVersion = this.isServerless ? productVersion : majorMinor(productVersion);
+    const artifactFileNameVersion = this.isServerless
+      ? LATEST_PRODUCT_VERSION
+      : majorMinor(productVersion);
 
-    await this.uninstallPackage({ productName });
+    await this.uninstallPackage({ productName, inferenceId });
 
     let zipArchive: ZipArchive | undefined;
     try {
       await this.productDocClient.setInstallationStarted({
         productName,
-        productVersion,
+        productVersion: artifactProductVersion,
+        inferenceId,
       });
 
-      if (this.elserInferenceId === defaultInferenceEndpoints.ELSER) {
+      if (customInference && !isImpliedDefaultElserInferenceId(customInference?.inference_id)) {
+        if (customInference?.task_type !== 'text_embedding') {
+          throw new Error(
+            `Inference [${inferenceId}]'s task type ${customInference?.task_type} is not supported. Please use a model with task type 'text_embedding'.`
+          );
+        }
+        await ensureInferenceDeployed({
+          client: this.esClient,
+          inferenceId,
+        });
+      }
+
+      if (!customInference || isImpliedDefaultElserInferenceId(customInference?.inference_id)) {
         await ensureDefaultElserDeployed({
           client: this.esClient,
         });
       }
 
-      const artifactFileName = getArtifactName({ productName, productVersion });
+      const artifactFileName = getArtifactName({
+        productName,
+        productVersion: artifactFileNameVersion,
+        inferenceId: customInference?.inference_id ?? this.elserInferenceId,
+      });
       const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
-      const artifactPath = `${this.artifactsFolder}/${artifactFileName}`;
+      const artifactPathAtVolume = `${this.artifactsFolder}/${artifactFileName}`;
+      this.log.debug(`Downloading from [${artifactUrl}] to [${artifactPathAtVolume}]`);
+      const artifactFullPath = await downloadToDisk(
+        artifactUrl,
+        artifactPathAtVolume,
+        this.artifactRepositoryProxyUrl
+      );
 
-      this.log.debug(`Downloading from [${artifactUrl}] to [${artifactPath}]`);
-      await downloadToDisk(artifactUrl, artifactPath);
-
-      zipArchive = await openZipArchive(artifactPath);
-
+      zipArchive = await openZipArchive(artifactFullPath);
       validateArtifactArchive(zipArchive);
 
       const [manifest, mappings] = await Promise.all([
@@ -174,14 +293,16 @@ export class PackageInstaller {
       ]);
 
       const manifestVersion = manifest.formatVersion;
-      const indexName = getProductDocIndexName(productName);
+      const indexName = getProductDocIndexName(productName, customInference?.inference_id);
+
+      const modifiedMappings = cloneDeep(mappings);
+      overrideInferenceSettings(modifiedMappings, inferenceId!);
 
       await createIndex({
         indexName,
-        mappings,
+        mappings: modifiedMappings, // Mappings will be overridden by the inference ID and inference type
         manifestVersion,
         esClient: this.esClient,
-        elserInferenceId: this.elserInferenceId,
         log: this.log,
       });
 
@@ -191,27 +312,45 @@ export class PackageInstaller {
         archive: zipArchive,
         esClient: this.esClient,
         log: this.log,
-        elserInferenceId: this.elserInferenceId,
+        inferenceId,
       });
-      await this.productDocClient.setInstallationSuccessful(productName, indexName);
+      await this.productDocClient.setInstallationSuccessful(productName, indexName, inferenceId);
 
       this.log.info(
         `Documentation installation successful for product [${productName}] and version [${productVersion}]`
       );
     } catch (e) {
+      let message = e.message;
+      if (message.includes('End of central directory record signature not found.')) {
+        message = i18n.translate('aiInfra.productDocBase.packageInstaller.noArtifactAvailable', {
+          values: {
+            productName,
+            productVersion,
+            inferenceId,
+          },
+          defaultMessage:
+            'No documentation artifact available for product [{productName}]/[{productVersion}] for Inference ID [{inferenceId}]. Please select a different model or contact your administrator.',
+        });
+      }
       this.log.error(
-        `Error during documentation installation of product [${productName}]/[${productVersion}] : ${e.message}`
+        `Error during documentation installation of product [${productName}]/[${productVersion}] : ${message}`
       );
 
-      await this.productDocClient.setInstallationFailed(productName, e.message);
+      await this.productDocClient.setInstallationFailed(productName, message, inferenceId);
       throw e;
     } finally {
       zipArchive?.close();
     }
   }
 
-  async uninstallPackage({ productName }: { productName: ProductName }) {
-    const indexName = getProductDocIndexName(productName);
+  async uninstallPackage({
+    productName,
+    inferenceId,
+  }: {
+    productName: ProductName;
+    inferenceId?: string;
+  }) {
+    const indexName = getProductDocIndexName(productName, inferenceId);
     await this.esClient.indices.delete(
       {
         index: indexName,
@@ -219,19 +358,518 @@ export class PackageInstaller {
       { ignore: [404] }
     );
 
-    await this.productDocClient.setUninstalled(productName);
+    await this.productDocClient.setUninstalled(productName, inferenceId);
   }
 
-  async uninstallAll() {
+  async uninstallAll(params: { inferenceId?: string; resourceType?: ResourceType } = {}) {
+    const { inferenceId, resourceType } = params;
     const allProducts = Object.values(DocumentationProduct);
     for (const productName of allProducts) {
-      await this.uninstallPackage({ productName });
+      await this.productDocClient.setUninstallationStarted(productName, inferenceId);
+      await this.uninstallPackage({ productName, inferenceId });
+    }
+    if (resourceType === ResourceTypes.openapiSpec || !resourceType) {
+      await this.uninstallOpenAPISpec({ inferenceId });
+    }
+  }
+
+  // Security Labs methods
+
+  /**
+   * Install Security Labs content from the CDN.
+   */
+  async installSecurityLabs({
+    version,
+    inferenceId,
+  }: {
+    version?: string;
+    inferenceId?: string;
+  }): Promise<void> {
+    const effectiveInferenceId = inferenceId || this.elserInferenceId;
+
+    this.log.info(
+      `Starting Security Labs installation${
+        version ? ` for version [${version}]` : ''
+      } with inference ID [${effectiveInferenceId}]`
+    );
+
+    // Uninstall existing Security Labs content first
+    await this.uninstallSecurityLabs({ inferenceId: effectiveInferenceId });
+
+    let zipArchive: ZipArchive | undefined;
+    let selectedVersion: string | undefined;
+    try {
+      // Ensure ELSER is deployed
+      await ensureDefaultElserDeployed({
+        client: this.esClient,
+      });
+
+      // Determine version to install
+      selectedVersion = version;
+      if (!selectedVersion) {
+        const availableVersions = await fetchSecurityLabsVersions({
+          artifactRepositoryUrl: this.artifactRepositoryUrl,
+          artifactRepositoryProxyUrl: this.artifactRepositoryProxyUrl,
+        });
+        if (availableVersions.length === 0) {
+          throw new Error('No Security Labs versions available');
+        }
+        // Select the latest version
+        selectedVersion = availableVersions.sort().reverse()[0];
+      }
+
+      await this.productDocClient.setSecurityLabsInstallationStarted({
+        version: selectedVersion,
+        inferenceId: effectiveInferenceId,
+      });
+
+      const artifactFileName = getSecurityLabsArtifactName({
+        version: selectedVersion,
+        inferenceId: effectiveInferenceId,
+      });
+      const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
+      const artifactPath = `${this.artifactsFolder}/${artifactFileName}`;
+
+      this.log.debug(`Downloading Security Labs from [${artifactUrl}] to [${artifactPath}]`);
+      const downloadedFullPath = await downloadToDisk(
+        artifactUrl,
+        artifactPath,
+        this.artifactRepositoryProxyUrl
+      );
+
+      zipArchive = await openZipArchive(downloadedFullPath);
+      validateArtifactArchive(zipArchive);
+
+      const [manifest, mappings] = await Promise.all([
+        loadManifestFile(zipArchive),
+        loadMappingFile(zipArchive),
+      ]);
+
+      const manifestVersion = manifest.formatVersion;
+      const indexName = getSecurityLabsIndexName(effectiveInferenceId);
+
+      const modifiedMappings = cloneDeep(mappings);
+      overrideInferenceSettings(modifiedMappings, effectiveInferenceId);
+
+      await createIndex({
+        indexName,
+        mappings: modifiedMappings,
+        manifestVersion,
+        esClient: this.esClient,
+        log: this.log,
+      });
+
+      await populateIndex({
+        indexName,
+        manifestVersion,
+        archive: zipArchive,
+        esClient: this.esClient,
+        log: this.log,
+        inferenceId: effectiveInferenceId,
+      });
+
+      await this.productDocClient.setSecurityLabsInstallationSuccessful({
+        version: selectedVersion,
+        indexName,
+        inferenceId: effectiveInferenceId,
+      });
+
+      this.log.info(`Security Labs installation successful for version [${selectedVersion}]`);
+    } catch (e) {
+      let message = e.message;
+      if (message.includes('End of central directory record signature not found.')) {
+        message = i18n.translate(
+          'aiInfra.productDocBase.packageInstaller.noSecurityLabsArtifactAvailable',
+          {
+            values: { inferenceId: effectiveInferenceId },
+            defaultMessage:
+              'No Security Labs artifact available for Inference ID [{inferenceId}]. Please contact your administrator.',
+          }
+        );
+      }
+      this.log.error(`Error during Security Labs installation: ${message}`);
+      await this.productDocClient.setSecurityLabsInstallationFailed({
+        version: selectedVersion,
+        failureReason: message,
+        inferenceId: effectiveInferenceId,
+      });
+      throw e;
+    } finally {
+      zipArchive?.close();
+    }
+  }
+
+  /**
+   * Uninstall Security Labs content.
+   */
+  async uninstallSecurityLabs({ inferenceId }: { inferenceId?: string }): Promise<void> {
+    const indexName = getSecurityLabsIndexName(inferenceId);
+    await this.esClient.indices.delete(
+      {
+        index: indexName,
+      },
+      { ignore: [404] }
+    );
+    if (inferenceId) {
+      await this.productDocClient.setSecurityLabsUninstalled(inferenceId);
+    }
+    this.log.info(`Security Labs content uninstalled from index [${indexName}]`);
+  }
+
+  /**
+   * Get the installation status of Security Labs content.
+   */
+  async getSecurityLabsStatus({
+    inferenceId,
+  }: {
+    inferenceId?: string;
+  }): Promise<SecurityLabsStatusResponse> {
+    try {
+      const effectiveInferenceId = inferenceId ?? this.elserInferenceId;
+      const status = await this.productDocClient.getSecurityLabsInstallationStatus({
+        inferenceId: effectiveInferenceId,
+      });
+
+      // Compute latest version (best-effort) for UX and auto-update checks.
+      let repoLatestVersion: string | undefined;
+      try {
+        const versions = await fetchSecurityLabsVersions({
+          artifactRepositoryUrl: this.artifactRepositoryUrl,
+        });
+        if (versions.length > 0) {
+          repoLatestVersion = versions.slice().sort().reverse()[0];
+        }
+      } catch (e) {
+        // ignore
+      }
+
+      const installedVersion = status.version;
+      const isUpdateAvailable =
+        status.status === 'installed' &&
+        Boolean(installedVersion) &&
+        Boolean(repoLatestVersion) &&
+        installedVersion !== repoLatestVersion;
+
+      // If we have a saved-object based status, return it (augmented with update info).
+      // (Backwards compatibility: if not found, fall back to index existence checks below.)
+      if (status.status !== 'uninstalled' || status.version || status.failureReason) {
+        return { ...status, latestVersion: repoLatestVersion, isUpdateAvailable };
+      }
+
+      const indexName = getSecurityLabsIndexName(effectiveInferenceId);
+      const exists = await this.esClient.indices.exists({ index: indexName });
+      if (!exists) return { status: 'uninstalled' };
+
+      const countResponse = await this.esClient.count({ index: indexName });
+      if (countResponse.count === 0) return { status: 'uninstalled' };
+
+      // Unknown version (legacy install), but installed.
+      return { status: 'installed', latestVersion: repoLatestVersion };
+    } catch (error) {
+      this.log.error(`Error checking Security Labs status: ${error.message}`);
+      return {
+        status: 'error',
+        failureReason: error.message,
+      };
+    }
+  }
+
+  /**
+   * Ensure Security Labs content is up to date, if currently installed.
+   */
+  async ensureSecurityLabsUpToDate(params: { inferenceId: string; forceUpdate?: boolean }) {
+    const { inferenceId, forceUpdate } = params;
+    const status = await this.productDocClient.getSecurityLabsInstallationStatus({ inferenceId });
+    if (status.status !== 'installed') {
+      return;
+    }
+
+    const availableVersions = await fetchSecurityLabsVersions({
+      artifactRepositoryUrl: this.artifactRepositoryUrl,
+    });
+    if (availableVersions.length === 0) {
+      return;
+    }
+    const latest = availableVersions.sort().reverse()[0];
+    const installedVersion = status.version;
+
+    if (!forceUpdate && installedVersion && installedVersion === latest) {
+      return;
+    }
+
+    await this.installSecurityLabs({ version: latest, inferenceId });
+  }
+
+  // OpenAPI Spec methods
+
+  /**
+   * Install OpenAPI Spec content from the artifact repository.
+   */
+  async installOpenAPISpec({
+    version,
+    inferenceId,
+  }: {
+    version?: string;
+    inferenceId?: string;
+  }): Promise<void> {
+    const effectiveInferenceId = inferenceId || this.elserInferenceId;
+    const stackVersion = version || this.currentVersion;
+
+    this.log.info(
+      `Starting OpenAPI Spec installation for version [${stackVersion}] with inference ID [${effectiveInferenceId}]`
+    );
+
+    let zipArchive: ZipArchive | undefined;
+    try {
+      await this.uninstallOpenAPISpec({ inferenceId: effectiveInferenceId });
+
+      // Ensure ELSER is deployed
+      await ensureDefaultElserDeployed({
+        client: this.esClient,
+      });
+
+      // Build artifact name
+      const inferenceIdSuffix = isImpliedDefaultElserInferenceId(effectiveInferenceId)
+        ? ''
+        : `--${effectiveInferenceId}`;
+      const artifactFileName = `kb-product-doc-openapi-${stackVersion}${inferenceIdSuffix}.zip`;
+      const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
+      const artifactPath = `${this.artifactsFolder}/${artifactFileName}`;
+
+      this.log.debug(`Downloading OpenAPI artifact from [${artifactUrl}] to [${artifactPath}]`);
+      const downloadedFullPath = await downloadToDisk(artifactUrl, artifactPath);
+
+      zipArchive = await openZipArchive(downloadedFullPath);
+      validateArtifactArchive(zipArchive);
+
+      for (const { productName, indexName: unmodifiedIndexName } of OPEN_API_SPEC_PRODUCTS) {
+        this.log.info(`Installing OpenAPI spec for ${productName}`);
+
+        await this.productDocClient.setOpenapiSpecInstallationStarted({
+          productName,
+          productVersion: stackVersion,
+          inferenceId: effectiveInferenceId,
+        });
+
+        // Load manifest and mappings from product folder
+        const manifestPath = `${productName}/manifest.json`;
+        const mappingsPath = `${productName}/mappings.json`;
+
+        if (!zipArchive.hasEntry(manifestPath) || !zipArchive.hasEntry(mappingsPath)) {
+          throw new Error(
+            `Missing required files for ${productName}: ${manifestPath} or ${mappingsPath} not found in archive`
+          );
+        }
+
+        const [manifestBuffer, mappingsBuffer] = await Promise.all([
+          zipArchive.getEntryContent(manifestPath),
+          zipArchive.getEntryContent(mappingsPath),
+        ]);
+
+        const manifest = JSON.parse(manifestBuffer.toString('utf-8'));
+        const mappings = JSON.parse(mappingsBuffer.toString('utf-8'));
+
+        const manifestVersion = manifest.formatVersion;
+        const modifiedMappings = cloneDeep(mappings);
+        overrideInferenceSettings(modifiedMappings, effectiveInferenceId);
+
+        const indexName = `${unmodifiedIndexName}${
+          !isImpliedDefaultElserInferenceId(effectiveInferenceId) ? `-${effectiveInferenceId}` : ''
+        }`;
+        // Create index
+        await createIndex({
+          indexName,
+          mappings: modifiedMappings,
+          manifestVersion,
+          esClient: this.esClient,
+          log: this.log,
+        });
+
+        // Populate index from product's content folder
+        const contentPrefix = `${productName}/content/`;
+        const contentEntries = zipArchive
+          .getEntryPaths()
+          .filter(
+            (path) =>
+              path.startsWith(contentPrefix) && path.match(/^.*\/content\/content-[0-9]+\.ndjson$/)
+          );
+
+        if (contentEntries.length === 0) {
+          throw new Error(`No content files found for ${productName} in archive`);
+        }
+
+        for (const entryPath of contentEntries) {
+          this.log.debug(`Indexing content for entry ${entryPath}`);
+          const contentBuffer = await zipArchive.getEntryContent(entryPath);
+          await this.indexContentFile({
+            indexName,
+            esClient: this.esClient,
+            contentBuffer,
+            manifestVersion,
+            inferenceId: effectiveInferenceId,
+          });
+        }
+
+        await this.productDocClient.setOpenapiSpecInstallationSuccessful({
+          productName,
+          productVersion: stackVersion,
+          indexName,
+          inferenceId: effectiveInferenceId,
+        });
+
+        this.log.info(`OpenAPI Spec installation successful for ${productName}`);
+      }
+
+      this.log.info(`OpenAPI Spec installation successful for version [${stackVersion}]`);
+    } catch (e) {
+      let message = e.message;
+      if (message.includes('End of central directory record signature not found.')) {
+        message = i18n.translate(
+          'aiInfra.productDocBase.packageInstaller.noOpenApiSpecArtifactAvailable',
+          {
+            values: { inferenceId: effectiveInferenceId, version: stackVersion },
+            defaultMessage:
+              'No OpenAPI Spec artifact available for version [{version}] and Inference ID [{inferenceId}]. Please contact your administrator.',
+          }
+        );
+      }
+      this.log.error(`Error during OpenAPI Spec installation: ${message}`);
+      // Mark both products as failed
+      for (const productName of [DocumentationProduct.elasticsearch, DocumentationProduct.kibana]) {
+        await this.productDocClient.setOpenapiSpecInstallationFailed({
+          productName: productName as 'elasticsearch' | 'kibana',
+          productVersion: stackVersion,
+          failureReason: message,
+          inferenceId: effectiveInferenceId,
+        });
+      }
+      throw e;
+    } finally {
+      zipArchive?.close();
+    }
+  }
+
+  async uninstallOpenAPISpec({ inferenceId }: { inferenceId?: string }): Promise<void> {
+    for (const { indexName } of OPEN_API_SPEC_PRODUCTS) {
+      this.log.info(`Uninstalling OpenAPI Spec from index [${indexName}]`);
+      await this.esClient.indices.delete({ index: indexName }, { ignore: [404] });
+      await this.productDocClient.setOpenapiSpecUninstalled(inferenceId);
+    }
+  }
+
+  private async indexContentFile({
+    indexName,
+    esClient,
+    contentBuffer,
+    manifestVersion,
+    inferenceId,
+  }: {
+    indexName: string;
+    esClient: ElasticsearchClient;
+    contentBuffer: Buffer;
+    manifestVersion: string;
+    inferenceId: string;
+  }): Promise<void> {
+    const legacySemanticText = isLegacySemanticTextVersion(manifestVersion);
+
+    const fileContent = contentBuffer.toString('utf-8');
+    const lines = fileContent.split('\n');
+
+    const documents = lines
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0)
+      .map((line) => JSON.parse(line))
+      .map((doc) => this.rewriteInferenceId(doc, inferenceId, legacySemanticText));
+
+    const operations: Array<{ index: { _index: string } } | Record<string, any>> = [];
+    for (const document of documents) {
+      operations.push({ index: { _index: indexName } }, document);
+    }
+
+    const response = await esClient.bulk({
+      refresh: false,
+      operations,
+    });
+
+    if (response.errors) {
+      const error =
+        response.items.find((item) => item.index?.error)?.index?.error ?? 'unknown error';
+      throw new Error(`Error indexing documents: ${JSON.stringify(error)}`);
+    }
+  }
+
+  private rewriteInferenceId(
+    document: Record<string, any>,
+    inferenceId: string,
+    legacySemanticText: boolean
+  ): Record<string, any> {
+    // Clone the document to avoid mutating the original
+    const clonedDoc = { ...document };
+
+    if (legacySemanticText) {
+      // For legacy semantic text, modify fields directly on the document
+      Object.values(clonedDoc).forEach((field: any) => {
+        if (field?.inference) {
+          field.inference.inference_id = inferenceId;
+        }
+      });
+    } else {
+      // For non-legacy semantic text, modify fields within _inference_fields
+      if (clonedDoc._inference_fields) {
+        // Clone _inference_fields to avoid mutation issues
+        clonedDoc._inference_fields = { ...clonedDoc._inference_fields };
+        Object.values(clonedDoc._inference_fields).forEach((field: any) => {
+          if (field?.inference) {
+            field.inference = { ...field.inference, inference_id: inferenceId };
+          }
+        });
+      }
+    }
+
+    return clonedDoc;
+  }
+
+  /**
+   * Get the installation status of OpenAPI Spec content.
+   */
+  async getOpenApiSpecStatus({
+    inferenceId,
+  }: {
+    inferenceId?: string;
+  }): Promise<SecurityLabsStatusResponse> {
+    try {
+      const effectiveInferenceId = inferenceId ?? this.elserInferenceId;
+      const status = await this.productDocClient.getOpenapiSpecInstallationStatus({
+        inferenceId: effectiveInferenceId,
+      });
+
+      return status;
+    } catch (error) {
+      this.log.error(`Error checking OpenAPI Spec status: ${error.message}`);
+      return {
+        status: 'error',
+        failureReason: error.message,
+      };
     }
   }
 }
 
-const selectVersion = (currentVersion: string, availableVersions: string[]): string => {
-  return availableVersions.includes(currentVersion)
+const selectVersion = (
+  currentVersion: string,
+  availableVersions: string[],
+  isServerless: boolean
+): string => {
+  const latestAvailableVersion = availableVersions.includes(currentVersion)
     ? currentVersion
-    : latestVersion(availableVersions);
+    : latestVersion(availableVersions, currentVersion);
+
+  if (isServerless) {
+    const latestServerlessVersions = availableVersions.filter((version) =>
+      version.includes(LATEST_PRODUCT_VERSION)
+    );
+    return latestServerlessVersions.length > 0
+      ? latestServerlessVersions[0]
+      : latestAvailableVersion;
+  }
+  return latestAvailableVersion;
 };

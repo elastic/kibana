@@ -8,8 +8,14 @@
  */
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { LinksAttributes, LinksItem } from '../../../../common/content_management';
-import { LinksCreateOptions, LinksSavedObjectAttributes } from './types';
+import type { Reference } from '@kbn/content-management-utils/src/types';
+import type { LinksItem } from '../../../../common/content_management';
+import type { Link, LinksState, StoredLink, StoredLinksState } from './types';
+import {
+  extractReferences,
+  injectReferences,
+} from '../../../../common/embeddable/transforms/references';
+import { getOptions } from '../../../../common/embeddable/transforms/get_options';
 
 type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;
@@ -21,27 +27,53 @@ interface PartialLinksItem {
 }
 
 export function savedObjectToItem(
-  savedObject: SavedObject<LinksSavedObjectAttributes>,
-  partial: false
-): LinksItem;
-
-export function savedObjectToItem(
-  savedObject: PartialSavedObject<LinksSavedObjectAttributes>,
-  partial: true
-): PartialLinksItem;
-
-export function savedObjectToItem(
-  savedObject:
-    | SavedObject<LinksSavedObjectAttributes>
-    | PartialSavedObject<LinksSavedObjectAttributes>,
-  partial: boolean /* partial arg is used to enforce the correct savedObject type */
+  savedObject: SavedObject<StoredLinksState> | PartialSavedObject<StoredLinksState>
 ): LinksItem | PartialLinksItem {
-  return savedObject;
+  const { references, attributes, ...rest } = savedObject;
+
+  const links = injectReferences(
+    transformLegacyLinks<StoredLink[]>(attributes.links ?? []),
+    savedObject.references
+  );
+
+  return {
+    ...rest,
+    attributes: {
+      ...attributes,
+      links: links.map(
+        (link) =>
+          ({
+            ...link,
+            ...(link.options && { options: getOptions(link.type, link.options) }),
+          } as Link)
+      ),
+    },
+    references: (references ?? []).filter(({ type }) => type === 'tag'),
+  };
 }
 
-export function itemToSavedObject(item: {
-  attributes: LinksAttributes;
-  references?: LinksCreateOptions['references'];
-}) {
-  return item as SavedObject<LinksSavedObjectAttributes>;
+export function itemToAttributes(state: LinksState): {
+  attributes: StoredLinksState;
+  references: Reference[];
+} {
+  const transformedLinks = transformLegacyLinks<Link[]>(state.links ?? []);
+  const { links, references } = extractReferences(transformedLinks ?? []);
+  return {
+    attributes: {
+      ...state,
+      links,
+    },
+    references,
+  };
 }
+
+// 9.3.0 state stored links with an `order` property instead of deriving their
+// order from their array position
+const transformLegacyLinks = <T extends Link[] | StoredLink[]>(
+  links: Array<T[number] & { order?: number; id?: string }>
+) =>
+  links
+    .sort((linkA, linkB) => {
+      return (linkA.order ?? 0) - (linkB.order ?? 0);
+    })
+    .map(({ order, id, ...link }) => link) as T;

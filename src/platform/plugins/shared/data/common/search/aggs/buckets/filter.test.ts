@@ -11,7 +11,7 @@ import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import moment from 'moment';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 
 describe('Filter Agg', () => {
   let aggConfigs: AggConfigs;

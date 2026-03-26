@@ -1,0 +1,57 @@
+{
+  "attributes": {
+    "title": "This is used to test that when an object is unshared from all space, inbound aliases for all spaces are removed"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "alias_delete_exclusive",
+  "managed": false,
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzU3LDFd"
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object in all spaces"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "all_spaces",
+  "managed": false,
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzU1LDFd"
+}
+
+{
+  "attributes": {
+    "title": "This object only exists to test the second assertion for spacesWithMatchingOrigins in get_shareable_references"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "space_1_only_matching_origin",
+  "managed": false,
+  "originId": "space_1_only",
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzQ4LDFd"
+}
+
+{
+  "attributes": {
+    "title": "This object only exists to test the third assertion for spacesWithMatchingOrigins in get_shareable_references"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "space_2_only_matching_origin",
+  "managed": false,
+  "originId": "space_2_only",
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzUwLDFd"
+}

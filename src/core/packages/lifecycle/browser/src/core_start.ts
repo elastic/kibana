@@ -10,6 +10,7 @@
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { CoreDiServiceStart } from '@kbn/core-di';
 import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
@@ -17,7 +18,6 @@ import type { FatalErrorsStart } from '@kbn/core-fatal-errors-browser';
 import type { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { DeprecationsServiceStart } from '@kbn/core-deprecations-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
-import type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ChromeStart } from '@kbn/core-chrome-browser';
@@ -55,11 +55,8 @@ export interface CoreStart {
   featureFlags: FeatureFlagsStart;
   /** {@link HttpStart} */
   http: HttpStart;
-  /**
-   * {@link SavedObjectsStart}
-   * @deprecated See https://github.com/elastic/kibana/issues/149098
-   */
-  savedObjects: SavedObjectsStart;
+  /** {@link CoreDiServiceStart} */
+  injection: CoreDiServiceStart;
   /** {@link I18nStart} */
   i18n: I18nStart;
   /** {@link NotificationsStart} */

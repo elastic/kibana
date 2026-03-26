@@ -13,7 +13,8 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('pipelines', () => {
-    const archive = 'x-pack/test/functional/es_archives/monitoring/logstash/changing_pipelines';
+    const archive =
+      'x-pack/platform/test/fixtures/es_archives/monitoring/logstash/changing_pipelines';
     const timeRange = {
       min: '2019-11-04T15:40:44.855Z',
       max: '2019-11-04T15:50:38.667Z',

@@ -20,6 +20,7 @@ import {
   addToSearchAfterReturn,
   getUnprocessedExceptionsWarnings,
   getMaxSignalsWarning,
+  getTotalHitsValue,
   mergeReturns,
 } from '../../utils/utils';
 import type { SuppressionBucket } from './wrap_suppressed_alerts';
@@ -217,6 +218,7 @@ export const groupAndBulkCreate = async ({
       }
       toReturn.searchAfterTimes.push(searchDuration);
       toReturn.errors.push(...searchErrors);
+      toReturn.totalEventsFound = getTotalHitsValue(searchResult.hits.total);
 
       const eventsByGroupResponseWithAggs =
         searchResult as EventGroupingMultiBucketAggregationResult;
@@ -283,7 +285,7 @@ export const groupAndBulkCreate = async ({
         });
         addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
         sharedParams.ruleExecutionLogger.debug(
-          `created ${bulkCreateResult.createdItemsCount} signals`
+          `Alerts bulk creation completed: ${bulkCreateResult.createdItemsCount}`
         );
       } else {
         const bulkCreateResult = await bulkCreate({
@@ -299,7 +301,7 @@ export const groupAndBulkCreate = async ({
           },
         });
         sharedParams.ruleExecutionLogger.debug(
-          `created ${bulkCreateResult.createdItemsCount} signals`
+          `Alerts bulk creation completed: ${bulkCreateResult.createdItemsCount}`
         );
       }
 

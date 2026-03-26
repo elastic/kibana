@@ -5,30 +5,24 @@
  * 2.0.
  */
 
-import {
-  AppMountParameters,
-  CoreSetup,
-  CoreStart,
-  DEFAULT_APP_CATEGORIES,
-  Plugin,
-} from '@kbn/core/public';
+import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { appCategories, appIds } from '@kbn/management-cards-navigation';
-import { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { QueryClient, MutationCache, QueryCache } from '@tanstack/react-query';
-import { of } from 'rxjs';
-import { createIndexMappingsDocsLinkContent as createIndexMappingsContent } from './application/components/index_management/index_mappings_docs_link';
-import { createIndexOverviewContent } from './application/components/index_management/index_overview_content';
+import { QueryClient, MutationCache, QueryCache } from '@kbn/react-query';
+import { combineLatest, map, of } from 'rxjs';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { docLinks } from '../common/doc_links';
-import {
+import type {
   ServerlessSearchPluginSetup,
   ServerlessSearchPluginSetupDependencies,
   ServerlessSearchPluginStart,
   ServerlessSearchPluginStartDependencies,
 } from './types';
-import { createIndexDocumentsContent } from './application/components/index_documents/documents_tab';
 import { getErrorCode, getErrorMessage, isKibanaServerError } from './utils/get_error_message';
-import { navigationTree } from './navigation_tree';
+import { createNavigationTree } from './navigation_tree';
+import { WEB_CRAWLERS_LABEL } from '../common/i18n_string';
 
 export class ServerlessSearchPlugin
   implements
@@ -75,27 +69,17 @@ export class ServerlessSearchPlugin
     });
 
     core.application.register({
-      id: 'serverlessElasticsearch',
-      title: i18n.translate('xpack.serverlessSearch.app.elasticsearch.title', {
-        defaultMessage: 'Elasticsearch',
-      }),
+      id: 'serverlessHomeRedirect',
+      title: homeTitle,
+      appRoute: '/app/elasticsearch',
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      appRoute: '/app/elasticsearch/getting_started',
-      async mount({ element, history }: AppMountParameters) {
-        const { renderApp } = await import('./application/elasticsearch');
-        const [coreStart, services] = await core.getStartServices();
-        docLinks.setDocLinks(coreStart.docLinks.links);
+      visibleIn: [],
+      async mount({}: AppMountParameters) {
+        const [coreStart] = await core.getStartServices();
         coreStart.chrome.docTitle.change(homeTitle);
-        let user: AuthenticatedUser | undefined;
-        try {
-          const response = await coreStart.security.authc.getCurrentUser();
-          user = response;
-        } catch {
-          user = undefined;
-        }
-
-        return await renderApp(element, coreStart, { history, user, ...services }, queryClient);
+        coreStart.application.navigateToApp('searchHomepage');
+        return () => {};
       },
     });
 
@@ -109,7 +93,7 @@ export class ServerlessSearchPlugin
       appRoute: '/app/connectors',
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      visibleIn: [],
+      visibleIn: ['globalSearch'],
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application/connectors');
         const [coreStart, services] = await core.getStartServices();
@@ -120,40 +104,20 @@ export class ServerlessSearchPlugin
       },
     });
 
-    const webCrawlersTitle = i18n.translate('xpack.serverlessSearch.app.webCrawlers.title', {
-      defaultMessage: 'Web Crawlers',
-    });
-
     core.application.register({
       id: 'serverlessWebCrawlers',
-      title: webCrawlersTitle,
+      title: WEB_CRAWLERS_LABEL,
       appRoute: '/app/web_crawlers',
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      visibleIn: [],
+      visibleIn: ['globalSearch'],
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application/web_crawlers');
         const [coreStart, services] = await core.getStartServices();
-        coreStart.chrome.docTitle.change(webCrawlersTitle);
+        coreStart.chrome.docTitle.change(WEB_CRAWLERS_LABEL);
         docLinks.setDocLinks(coreStart.docLinks.links);
 
         return await renderApp(element, coreStart, { history, ...services }, queryClient);
-      },
-    });
-
-    const { searchIndices } = setupDeps;
-    core.application.register({
-      id: 'serverlessHomeRedirect',
-      title: homeTitle,
-      appRoute: '/app/elasticsearch',
-      euiIconType: 'logoElastic',
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      visibleIn: [],
-      async mount({}: AppMountParameters) {
-        const [coreStart] = await core.getStartServices();
-        coreStart.chrome.docTitle.change(homeTitle);
-        coreStart.application.navigateToApp(searchIndices.startAppId);
-        return () => {};
       },
     });
 
@@ -164,12 +128,18 @@ export class ServerlessSearchPlugin
     core: CoreStart,
     services: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
-    const { serverless, management, indexManagement, security } = services;
-    serverless.setProjectHome(services.searchIndices.startRoute);
+    const { serverless, management, security } = services;
     const aiAssistantIsEnabled = core.application.capabilities.observabilityAIAssistant?.show;
 
-    const navigationTree$ = of(navigationTree(core.application));
-    serverless.initNavigation('es', navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
+    const chatExperience$ = core.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
+
+    const navigationTree$ = combineLatest([of(core.application), chatExperience$]).pipe(
+      map(([application, chatExperience]) => {
+        const showAiAssistant = chatExperience !== AIChatExperience.Agent;
+        return createNavigationTree({ ...application, showAiAssistant });
+      })
+    );
+    serverless.initNavigation('es', navigationTree$);
 
     const extendCardNavDefinitions = serverless.getNavigationCards(
       security.authz.isRoleManagementEnabled(),
@@ -178,7 +148,7 @@ export class ServerlessSearchPlugin
             observabilityAiAssistantManagement: {
               category: appCategories.OTHER,
               title: i18n.translate('xpack.serverlessSearch.aiAssistantManagementTitle', {
-                defaultMessage: 'AI Assistant Settings',
+                defaultMessage: 'AI Assistant',
               }),
               description: i18n.translate(
                 'xpack.serverlessSearch.aiAssistantManagementDescription',
@@ -199,13 +169,6 @@ export class ServerlessSearchPlugin
       extendCardNavDefinitions,
     });
 
-    indexManagement?.extensionsService.setIndexMappingsContent(createIndexMappingsContent(core));
-    indexManagement?.extensionsService.addIndexDetailsTab(
-      createIndexDocumentsContent(core, services)
-    );
-    indexManagement?.extensionsService.setIndexOverviewContent(
-      createIndexOverviewContent(core, services)
-    );
     return {};
   }
 

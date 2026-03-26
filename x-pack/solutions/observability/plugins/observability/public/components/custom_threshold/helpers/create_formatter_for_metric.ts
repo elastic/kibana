@@ -6,7 +6,7 @@
  */
 
 import numeral from '@elastic/numeral';
-import { CustomThresholdExpressionMetric } from '../../../../common/custom_threshold_rule/types';
+import type { CustomThresholdExpressionMetric } from '../../../../common/custom_threshold_rule/types';
 import { createFormatter } from '../../../../common/custom_threshold_rule/formatters';
 import { metricToFormat } from './metric_to_format';
 

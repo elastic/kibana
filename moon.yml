@@ -1,0 +1,22 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: 'kibana'
+layer: unknown
+owners:
+  defaultOwner: '@elastic/kibana-operations'
+language: unknown
+project:
+  title: 'kibana'
+  description: Moon project for Kibana
+  sourceRoot: .
+
+# These will be root level tasks, invoked with `moon run kibana:<task-name>`
+tasks:
+  build:
+    options:
+      cache: false
+  bootstrap:
+    script: yarn kbn bootstrap
+
+workspace:
+  inheritedTasks:
+    include: []

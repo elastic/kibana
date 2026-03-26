@@ -10,7 +10,7 @@ import Boom from '@hapi/boom';
 import type { Type } from '@kbn/config-schema';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
-import type { LicenseCheck } from '@kbn/licensing-plugin/server';
+import type { LicenseCheck } from '@kbn/licensing-types';
 
 import { defineInvalidateApiKeysRoutes } from './invalidate';
 import { routeDefinitionParamsMock } from '../index.mock';
@@ -109,7 +109,7 @@ describe('Invalidate API keys', () => {
           'request body'
         )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[request body.apiKeys.0.unknown]: definition for this key is missing"`
+        `"[request body.apiKeys.0.unknown]: Additional properties are not allowed ('unknown' was unexpected)"`
       );
     });
   });

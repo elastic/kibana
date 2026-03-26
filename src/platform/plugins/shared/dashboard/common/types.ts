@@ -7,79 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reference } from '@kbn/content-management-utils';
-import type { SerializableRecord, Writable } from '@kbn/utility-types';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import type { RefreshInterval } from '@kbn/data-plugin/public';
-import type { ControlGroupSerializedState } from '@kbn/controls-plugin/common';
+import type { DashboardState, DashboardPinnedPanelsState, DashboardPinnedPanel } from '../server';
 
-import type { DashboardPanelMap, DashboardSectionMap } from './dashboard_container/types';
-import type {
-  DashboardAttributes,
-  DashboardOptions,
-  DashboardPanel,
-  DashboardSection,
-} from '../server/content_management';
+export type { DashboardState, DashboardPinnedPanelsState, DashboardPinnedPanel };
 
+/**
+ * Capabilities object for the Dashboard application.
+ * Defines the permissions available for dashboard operations.
+ */
 export interface DashboardCapabilities {
+  /** Whether the user can see write controls (edit, save, etc.). */
   showWriteControls: boolean;
+  /** Whether the user can create new dashboards. */
   createNew: boolean;
+  /** Whether the user can view dashboards. */
   show: boolean;
+  /** Additional capability flags. */
   [key: string]: boolean;
 }
 
 /**
- * A partially parsed version of the Dashboard Attributes used for inject and extract logic for both the Dashboard Container and the Dashboard Saved Object.
+ * Parameters for the dashboard locator.
+ * Used to navigate to a specific dashboard with optional state.
  */
-export interface ParsedDashboardAttributesWithType {
-  id: string;
-  panels: DashboardPanelMap;
-  sections: DashboardSectionMap;
-  type: 'dashboard';
-}
-
-export interface DashboardAttributesAndReferences {
-  attributes: DashboardAttributes;
-  references: Reference[];
-}
-
-export type DashboardSettings = Writable<DashboardOptions> & {
-  description?: DashboardAttributes['description'];
-  tags: string[];
-  timeRestore: DashboardAttributes['timeRestore'];
-  title: DashboardAttributes['description'];
-};
-
-export interface DashboardState extends DashboardSettings {
-  query: Query;
-  filters: Filter[];
-  timeRange?: TimeRange;
-  refreshInterval?: RefreshInterval;
-  viewMode: ViewMode;
-  panels: DashboardPanelMap;
-  sections: DashboardSectionMap;
-
-  /**
-   * Temporary. Currently Dashboards are in charge of providing references to all of their children.
-   * Eventually this will be removed in favour of the Dashboard injecting references serverside.
-   */
-  references?: Reference[];
-
-  /**
-   * Serialized control group state.
-   * Contains state loaded from dashboard saved object
-   */
-  controlGroupInput?: ControlGroupSerializedState;
-}
-
 export type DashboardLocatorParams = Partial<
-  Omit<DashboardState, 'panels' | 'sections'> & {
-    controlGroupInput?: DashboardState['controlGroupInput'] & SerializableRecord;
-
-    panels: Array<DashboardPanel | DashboardSection>;
-
-    references?: DashboardState['references'] & SerializableRecord;
+  Omit<DashboardState, 'filters'> & {
+    /**
+     * Filters to apply. Pinned-ness is encoded on each filter (`$state.store`).
+     */
+    filters?: Filter[];
+    viewMode?: ViewMode;
 
     /**
      * If provided, the dashboard with this id will be loaded. If not given, new, unsaved dashboard will be loaded.
@@ -102,5 +62,11 @@ export type DashboardLocatorParams = Partial<
      * (Background search)
      */
     searchSessionId?: string;
+
+    /**
+     * Set to pass state from solution to embeddables.
+     * See PassThroughContext presentation container interface for details
+     */
+    passThroughContext?: SerializableRecord;
   }
 >;

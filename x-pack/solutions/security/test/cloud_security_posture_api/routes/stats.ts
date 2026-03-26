@@ -5,11 +5,9 @@
  * 2.0.
  */
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import {
-  BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-} from '@kbn/cloud-security-posture-plugin/common/constants';
-import {
+import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '@kbn/cloud-security-posture-plugin/common/constants';
+import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS } from '@kbn/cloud-security-posture-common';
+import type {
   BenchmarkData,
   Cluster,
   ComplianceDashboardData,
@@ -17,7 +15,7 @@ import {
   PostureTrend,
 } from '@kbn/cloud-security-posture-plugin/common/types_old';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 import {
   getBenchmarkScoreMockData,
   kspmComplianceDashboardDataMockV1,
@@ -65,12 +63,15 @@ export default function (providerContext: FtrProviderContext) {
   const log = getService('log');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const cspSecurity = CspSecurityCommonProvider(providerContext);
-  const findingsIndex = new EsIndexDataProvider(es, LATEST_FINDINGS_INDEX_DEFAULT_NS);
+  const findingsIndex = new EsIndexDataProvider(
+    es,
+    CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS
+  );
   const benchmarkScoreIndex = new EsIndexDataProvider(es, BENCHMARK_SCORE_INDEX_DEFAULT_NS);
 
-  // Failing: See https://github.com/elastic/kibana/issues/214191
-  describe.skip('GET /internal/cloud_security_posture/stats', () => {
-    describe('CSPM Compliance Dashboard Stats API', async () => {
+  describe('GET /internal/cloud_security_posture/stats', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/257437
+    describe.skip('CSPM Compliance Dashboard Stats API', async () => {
       beforeEach(async () => {
         await findingsIndex.deleteAll();
         await benchmarkScoreIndex.deleteAll();
@@ -109,7 +110,6 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         const resBenchmarks = removeRealtimeBenchmarkFields(res.benchmarks);
-
         const trends = removeRealtimeCalculatedFields(res.trend);
 
         expect({

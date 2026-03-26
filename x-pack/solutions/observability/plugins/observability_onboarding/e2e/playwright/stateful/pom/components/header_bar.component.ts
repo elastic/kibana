@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 
 export class HeaderBar {
   page: Page;

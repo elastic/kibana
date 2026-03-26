@@ -11,11 +11,16 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import { INDICES_APP_ID } from '../../common';
 import { CREATE_INDEX_PATH } from '../routes';
 
+export interface CreateIndexLocatorParams extends SerializableRecord {
+  workflow?: string;
+}
 export class CreateIndexLocatorDefinition implements LocatorDefinition<SerializableRecord> {
-  public readonly getLocation = async () => {
+  public readonly getLocation = async (params: CreateIndexLocatorParams) => {
+    const path = `${CREATE_INDEX_PATH}${params.workflow ? `?workflow=${params.workflow}` : ''}`;
+
     return {
       app: INDICES_APP_ID,
-      path: CREATE_INDEX_PATH,
+      path,
       state: {},
     };
   };

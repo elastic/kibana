@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { SlmPolicy } from '../../../../../../../common/types';
+import type { SlmPolicy } from '../../../../../../../common/types';
 import { FormattedDateTime } from '../../../../../components';
 import { linkToSnapshot } from '../../../../../services/navigation';
 import { useServices } from '../../../../../app_context';

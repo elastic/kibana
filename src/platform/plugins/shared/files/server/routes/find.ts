@@ -8,10 +8,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { FilesClient } from '../../common/files_client';
-import { FileJSON } from '../../common';
+import type { FilesClient } from '../../common/files_client';
+import type { FileJSON } from '../../common';
 import { FILES_MANAGE_PRIVILEGE } from '../../common/constants';
-import { FILES_API_ROUTES, CreateRouteDefinition } from './api_routes';
+import type { CreateRouteDefinition } from './api_routes';
+import { FILES_API_ROUTES } from './api_routes';
 import { page, pageSize, fileMeta } from './common_schemas';
 import type { CreateHandler, FilesRouter } from './types';
 
@@ -20,8 +21,14 @@ const method = 'post' as const;
 const string64 = schema.string({ minLength: 1, maxLength: 64 });
 const string256 = schema.string({ minLength: 1, maxLength: 256 });
 
-export const stringOrArrayOfStrings = schema.oneOf([string64, schema.arrayOf(string64)]);
-export const nameStringOrArrayOfNameStrings = schema.oneOf([string256, schema.arrayOf(string256)]);
+export const stringOrArrayOfStrings = schema.oneOf([
+  string64,
+  schema.arrayOf(string64, { maxSize: 100 }),
+]);
+export const nameStringOrArrayOfNameStrings = schema.oneOf([
+  string256,
+  schema.arrayOf(string256, { maxSize: 100 }),
+]);
 
 export function toArrayOrUndefined(val?: string | string[]): undefined | string[] {
   if (val == null) return undefined;

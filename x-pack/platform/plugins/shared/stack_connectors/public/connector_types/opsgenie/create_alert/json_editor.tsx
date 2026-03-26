@@ -8,11 +8,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { isEmpty } from 'lodash';
 import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import type { OpsgenieCreateAlertParams } from '../../../../server/connector_types';
+import type { CreateAlertParams as OpsgenieCreateAlertParams } from '@kbn/connector-schemas/opsgenie';
 import * as i18n from './translations';
-import { CreateAlertProps } from '.';
+import type { CreateAlertProps } from '.';
 import { decodeCreateAlert } from './schema';
-import { isDecodeError } from '../schema_utils';
+import { isDecodeError } from '../../lib/schema_utils';
 
 export type JsonEditorProps = Pick<
   CreateAlertProps,

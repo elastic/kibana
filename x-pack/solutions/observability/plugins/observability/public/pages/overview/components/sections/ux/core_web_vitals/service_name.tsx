@@ -29,7 +29,7 @@ export function ServiceName({ name }: Props) {
         <EuiIconTip
           color="text"
           aria-label={SERVICE_LABEL_HELP}
-          type="questionInCircle"
+          type="question"
           content={SERVICE_LABEL_HELP}
         />
       </EuiText>

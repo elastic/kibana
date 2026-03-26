@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UseGenAIConnectorsResult } from '../use_genai_connectors';
+import type { UseGenAIConnectorsResult } from '../use_genai_connectors';
 
 export function useGenAIConnectors(): UseGenAIConnectorsResult {
   return {
@@ -15,5 +15,7 @@ export function useGenAIConnectors(): UseGenAIConnectorsResult {
     selectedConnector: 'foo',
     selectConnector: (id: string) => {},
     reloadConnectors: () => {},
+    getConnector: () => undefined,
+    isConnectorSelectionRestricted: false,
   };
 }

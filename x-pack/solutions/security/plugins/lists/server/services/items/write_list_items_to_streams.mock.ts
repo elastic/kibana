@@ -12,7 +12,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { LIST_ID, LIST_ITEM_INDEX } from '../../../common/constants.mock';
 import { getSearchListItemMock } from '../../schemas/elastic_response/search_es_list_item_schema.mock';
 
-import {
+import type {
   ExportListItemsToStreamOptions,
   GetResponseOptions,
   WriteNextResponseOptions,

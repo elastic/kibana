@@ -7,20 +7,21 @@
 
 import { UIM_CLUSTER_ADD, UIM_CLUSTER_UPDATE } from '../constants';
 import { trackUserRequest } from './ui_metric';
-import { sendGet, sendPost, sendPut, sendDelete, SendGetOptions } from './http';
-import { Cluster } from '../../../common/lib';
+import type { SendGetOptions } from './http';
+import { sendGet, sendPost, sendPut, sendDelete } from './http';
+import type { ClusterPayload } from '../../../common/lib';
 
 export async function loadClusters(options?: SendGetOptions) {
   return await sendGet(undefined, options);
 }
 
-export async function addCluster(cluster: Cluster) {
+export async function addCluster(cluster: ClusterPayload) {
   const request = sendPost('', cluster);
 
   return await trackUserRequest(request, UIM_CLUSTER_ADD);
 }
 
-export async function editCluster(cluster: Cluster) {
+export async function editCluster(cluster: ClusterPayload) {
   const { name, ...rest } = cluster;
   const request = sendPut(name, rest);
 

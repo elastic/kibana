@@ -8,12 +8,13 @@
  */
 
 import { serviceContractMock } from './service_contract.mock';
+import { lazyObject } from '@kbn/lazy-object';
 
 const createSetupContractMock = () => {
-  return {
+  return lazyObject({
     register: jest.fn(),
     getBrandingFor: jest.fn(),
-  };
+  });
 };
 
 const createStartContractMock = () => {

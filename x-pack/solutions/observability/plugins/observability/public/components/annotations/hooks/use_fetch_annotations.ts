@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { useQuery } from '@kbn/react-query';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { Annotation } from '../../../../common/annotations';
 import { useKibana } from '../../../utils/kibana_react';
 

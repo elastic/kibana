@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ListSchema } from '.';
+import type { ListSchema } from '.';
 import {
   DATE_NOW,
   DESCRIPTION,
@@ -26,12 +26,10 @@ export const getListResponseMock = (): ListSchema => ({
   created_at: DATE_NOW,
   created_by: USER,
   description: DESCRIPTION,
-  deserializer: undefined,
   id: LIST_ID,
   immutable: IMMUTABLE,
   meta: META,
   name: NAME,
-  serializer: undefined,
   tie_breaker_id: TIE_BREAKER,
   type: TYPE,
   updated_at: DATE_NOW,

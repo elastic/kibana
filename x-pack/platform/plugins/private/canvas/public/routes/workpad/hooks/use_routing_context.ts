@@ -9,7 +9,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { getWorkpad } from '../../../state/selectors/workpad';
-import { WorkpadPageRouteParams, WorkpadRoutingContextType } from '..';
+import type { WorkpadPageRouteParams, WorkpadRoutingContextType } from '..';
 import {
   createTimeInterval,
   isValidTimeInterval,

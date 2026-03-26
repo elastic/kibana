@@ -6,7 +6,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { Stats } from './types';
+import type { Stats } from './types';
 
 class MapAdapter extends EventEmitter {
   private stats?: Stats;

@@ -37,17 +37,15 @@ export const RANDOM_SAMPLER_SEED = 3867412;
 export const useLogRateAnalysisBarColors = () => {
   const { euiTheme } = useEuiTheme();
   return {
-    barColor: euiTheme.flags.hasVisColorAdjustment
-      ? euiTheme.colors.vis.euiColorVis0
-      : euiTheme.colors.vis.euiColorVis0,
-    barHighlightColor: euiTheme.flags.hasVisColorAdjustment
-      ? 'orange'
-      : euiTheme.colors.vis.euiColorVis8,
+    barColor: euiTheme.colors.vis.euiColorVis0,
+    barHighlightColor: euiTheme.colors.vis.euiColorVis8,
   };
 };
 
-/**  */
-export const EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE = 'aiopsLogRateAnalysisEmbeddable' as const;
+//
+// Do not change constant value - part of public REST APIs
+//
+export const EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE = 'aiops_log_rate_analysis' as const;
 
 /**  */
 export const LOG_RATE_ANALYSIS_DATA_VIEW_REF_NAME = 'aiopsLogRateAnalysisEmbeddableDataViewId';

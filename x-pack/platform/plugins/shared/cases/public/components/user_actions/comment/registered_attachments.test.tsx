@@ -95,11 +95,13 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
     createRegisteredAttachmentUserActionBuilder(userActionBuilderArgs).build();
 
     expect(getAttachmentViewProps).toHaveBeenCalled();
-    expect(getAttachmentViewObject).toBeCalledWith({
-      ...viewProps,
-      attachmentId: attachment.id,
-      caseData: { id: builderArgs.caseData.id, title: builderArgs.caseData.title },
-    });
+    expect(getAttachmentViewObject).toBeCalledWith(
+      expect.objectContaining({
+        ...viewProps,
+        attachmentId: attachment.id,
+        caseData: { id: builderArgs.caseData.id, title: builderArgs.caseData.title },
+      })
+    );
   });
 
   it('builds the buttons correctly', async () => {

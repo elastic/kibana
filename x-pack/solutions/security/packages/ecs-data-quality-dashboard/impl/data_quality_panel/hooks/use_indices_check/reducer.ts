@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import {
+import type {
   IndicesGetMappingIndexMappingRecord,
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import {
+import type {
   PartitionedFieldMetadata,
   UnallowedValueCount,
   UnallowedValueSearchResult,
 } from '../../types';
-import { MappingsError } from '../../utils/fetch_mappings';
-import { UnallowedValuesError } from '../../utils/fetch_unallowed_values';
-import { UseIndicesCheckState } from './types';
+import type { MappingsError } from '../../utils/fetch_mappings';
+import type { UnallowedValuesError } from '../../utils/fetch_unallowed_values';
+import type { UseIndicesCheckState } from './types';
 
 type Action = { data: { indexName: string } } & (
   | {

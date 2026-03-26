@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ValuesType } from 'utility-types';
+import type { ValuesType } from 'utility-types';
 
 // work around a TypeScript limitation described in https://stackoverflow.com/posts/49511416
 

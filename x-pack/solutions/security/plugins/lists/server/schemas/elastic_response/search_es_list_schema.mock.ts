@@ -22,18 +22,16 @@ import {
 } from '../../../common/constants.mock';
 import { getShardMock } from '../common/get_shard.mock';
 
-import { SearchEsListSchema } from './search_es_list_schema';
+import type { SearchEsListSchema } from './search_es_list_schema';
 
 export const getSearchEsListMock = (): SearchEsListSchema => ({
   '@timestamp': DATE_NOW,
   created_at: DATE_NOW,
   created_by: USER,
   description: DESCRIPTION,
-  deserializer: undefined,
   immutable: IMMUTABLE,
   meta: META,
   name: NAME,
-  serializer: undefined,
   tie_breaker_id: TIE_BREAKER,
   type: TYPE,
   updated_at: DATE_NOW,

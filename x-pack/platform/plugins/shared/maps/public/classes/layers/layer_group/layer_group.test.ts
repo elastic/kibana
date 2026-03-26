@@ -6,9 +6,10 @@
  */
 
 import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
-import { LayerDescriptor } from '../../../../common/descriptor_types';
+import type { LayerDescriptor } from '../../../../common/descriptor_types';
 import { LayerGroup } from './layer_group';
-import { AbstractLayer, ILayer } from '../layer';
+import type { ILayer } from '../layer';
+import { AbstractLayer } from '../layer';
 import type { ISource } from '../../sources/source';
 
 describe('getMinZoom', () => {

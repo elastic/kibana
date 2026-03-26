@@ -88,6 +88,14 @@ export function getFieldTypeName(type?: string) {
       return i18n.translate('fieldUtils.fieldNameIcons.histogramFieldAriaLabel', {
         defaultMessage: 'Histogram',
       });
+    case KNOWN_FIELD_TYPES.EXPONENTIAL_HISTOGRAM:
+      return i18n.translate('fieldUtils.fieldNameIcons.exponentialHistogramFieldAriaLabel', {
+        defaultMessage: 'Exponential histogram',
+      });
+    case KNOWN_FIELD_TYPES.TDIGEST:
+      return i18n.translate('fieldUtils.fieldNameIcons.tdigestFieldAriaLabel', {
+        defaultMessage: 'T-Digest',
+      });
     case KNOWN_FIELD_TYPES.IP:
       return i18n.translate('fieldUtils.fieldNameIcons.ipAddressFieldAriaLabel', {
         defaultMessage: 'IP address',
@@ -151,6 +159,10 @@ export function getFieldTypeName(type?: string) {
     case KNOWN_FIELD_TYPES.VERSION:
       return i18n.translate('fieldUtils.fieldNameIcons.versionFieldAriaLabel', {
         defaultMessage: 'Version',
+      });
+    case KNOWN_FIELD_TYPES.NULL:
+      return i18n.translate('fieldUtils.fieldNameIcons.nullFieldAriaLabel', {
+        defaultMessage: 'Null',
       });
     default:
       // If you see a typescript error here, that's a sign that there are missing switch cases ^^

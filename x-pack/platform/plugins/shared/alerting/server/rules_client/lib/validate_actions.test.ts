@@ -334,4 +334,22 @@ describe('validateActions', () => {
       '"Failed to validate actions due to the following error: Endpoint security connectors cannot be used as alerting actions"'
     );
   });
+
+  it('should return error message if the action is configured only for workflows', async () => {
+    getBulkMock.mockResolvedValueOnce([
+      { actionTypeId: 'test.workflowsConnector', name: 'test name' },
+    ]);
+    listTypesMock.mockResolvedValueOnce([
+      {
+        id: 'test.workflowsConnector',
+        name: 'Foobar',
+        supportedFeatureIds: ['workflows'],
+      },
+    ]);
+    await expect(
+      validateActions(context as unknown as RulesClientContext, ruleType, data, false)
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      '"Failed to validate actions due to the following error: This type of connector cannot be used as alerting actions"'
+    );
+  });
 });

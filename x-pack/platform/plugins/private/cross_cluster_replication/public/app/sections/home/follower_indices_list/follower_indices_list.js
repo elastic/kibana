@@ -75,8 +75,11 @@ export class FollowerIndicesList extends PureComponent {
           search: '',
         });
       } else {
+        // Preserve existing query params (e.g., waitForActive)
+        const searchParams = new URLSearchParams(history.location.search);
+        searchParams.set('name', lastFollowerIndexId);
         history.replace({
-          search: `?name=${encodeURIComponent(lastFollowerIndexId)}`,
+          search: `?${searchParams.toString()}`,
         });
       }
     }
@@ -111,7 +114,7 @@ export class FollowerIndicesList extends PureComponent {
           <EuiButton
             {...reactRouterNavigate(this.props.history, `/follower_indices/add`)}
             fill
-            iconType="plusInCircle"
+            iconType="plusCircle"
             data-test-subj="createFollowerIndexButton"
           >
             <FormattedMessage

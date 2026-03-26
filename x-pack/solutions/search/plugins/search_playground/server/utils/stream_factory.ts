@@ -45,9 +45,7 @@ export function streamFactory(logger: Logger, isCloud: boolean = false): StreamF
 
   const cloudProxyBufferSize = 4096;
 
-  const flushPayload = isCloud
-    ? DELIMITER + '10: "' + repeat('0', cloudProxyBufferSize * 2) + '"' + DELIMITER
-    : undefined;
+  const flushPayload = isCloud ? `: keepalive ${repeat('0', cloudProxyBufferSize)}\n\n` : undefined;
   let currentBufferSize = 0;
 
   const flushBufferIfNeeded = () => {
@@ -174,6 +172,7 @@ export function streamFactory(logger: Logger, isCloud: boolean = false): StreamF
       'Cache-Control': 'no-cache',
       Connection: 'keep-alive',
       'Transfer-Encoding': 'chunked',
+      'Content-Type': 'text/event-stream; charset=utf-8',
     },
   };
 

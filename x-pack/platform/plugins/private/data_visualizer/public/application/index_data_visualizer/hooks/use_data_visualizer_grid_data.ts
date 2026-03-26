@@ -71,7 +71,7 @@ export const useDataVisualizerGridData = (
 ) => {
   const loadIndexDataStartTime = useRef<number | undefined>(window.performance.now());
   const { services } = useDataVisualizerKibana();
-  const { uiSettings, data, security, executionContext, analytics } = services;
+  const { uiSettings, data, security, executionContext, analytics, cps } = services;
 
   const parentExecutionContext = useObservable(executionContext?.context$);
 
@@ -240,7 +240,7 @@ export const useDataVisualizerGridData = (
           return;
         }
         const fieldName = field.displayName !== undefined ? field.displayName : field.name;
-        if (!OMIT_FIELDS.includes(fieldName)) {
+        if (field.type !== SUPPORTED_FIELD_TYPES.UNKNOWN && !OMIT_FIELDS.includes(fieldName)) {
           if (
             field.aggregatable === true &&
             !NON_AGGREGATABLE_FIELD_TYPES.has(field.type) &&
@@ -260,6 +260,7 @@ export const useDataVisualizerGridData = (
         searchQuery,
         sessionId: searchSessionId,
         index: currentDataView.title,
+        projectRouting: cps?.cpsManager?.getProjectRouting(),
         timeFieldName: currentDataView.timeFieldName,
         runtimeFieldMap: currentDataView.getRuntimeMappings(),
         aggregatableFields,
@@ -279,6 +280,7 @@ export const useDataVisualizerGridData = (
       browserSessionSeed,
       input.timeRange?.from,
       input.timeRange?.to,
+      cps,
     ]
   );
 

@@ -26,12 +26,15 @@ export enum ROLES {
   detections_admin = 'detections_admin',
   platform_engineer = 'platform_engineer',
   // ESS roles
+  admin = 'admin',
   reader = 'reader',
   hunter = 'hunter',
   hunter_no_actions = 'hunter_no_actions',
   no_risk_engine_privileges = 'no_risk_engine_privileges',
   timeline_none = 'timeline_none',
   notes_none = 'notes_none',
+  rules_read_exceptions_all = 'rules_read_exceptions_all',
+  rules_read_exceptions_read = 'rules_read_exceptions_read',
 }
 
 /**
