@@ -7,11 +7,12 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { getEuidSourceFields, getFieldEvaluationsEsql } from '@kbn/entity-store/common/domain/euid';
 
 import { LOOKBACK_WINDOW, COMPOSITE_PAGE_SIZE } from '../constants';
 import type { CompositeAfterKey, CompositeBucket } from '../types';
 
-const USER_IDENTITY_FIELDS = euid.getEuidSourceFields('user').requiresOneOf;
+const USER_IDENTITY_FIELDS = getEuidSourceFields('user').requiresOneOf;
 
 /**
  * Builds the composite aggregation query structure shared by all integrations.
@@ -29,8 +30,8 @@ export function buildCompositeAggQueryBase(
           { range: { '@timestamp': { gte: LOOKBACK_WINDOW, lt: 'now' } } },
           ...integrationFilters,
           { term: { 'event.outcome': 'success' } },
-          euid.getEuidDslDocumentsContainsIdFilter('user'),
-          euid.getEuidDslDocumentsContainsIdFilter('host'),
+          euid.dsl.getEuidDocumentsContainsIdFilter('user'),
+          euid.dsl.getEuidDocumentsContainsIdFilter('host'),
         ],
       },
     },
@@ -87,12 +88,12 @@ export function buildBucketUserFilter(buckets: CompositeBucket[]): QueryDslQuery
  * Each integration provides its index pattern and WHERE clause lines.
  */
 export function buildAccessEsqlQuery(indexPattern: string, whereClause: string): string {
-  const userFieldEvals = euid.getFieldEvaluationsEsql('user');
+  const userFieldEvals = getFieldEvaluationsEsql('user');
   const userFieldEvalsLine = userFieldEvals ? `| EVAL ${userFieldEvals}\n` : '';
-  const userIdEval = euid.getEuidEsqlEvaluation('user', { withTypeId: false });
-  const userIdFilter = euid.getEuidEsqlDocumentsContainsIdFilter('user');
-  const hostIdFilter = euid.getEuidEsqlDocumentsContainsIdFilter('host');
-  const hostIdEval = euid.getEuidEsqlEvaluation('host', { withTypeId: false });
+  const userIdEval = euid.esql.getEuidEvaluation('user', { withTypeId: false });
+  const userIdFilter = euid.esql.getEuidDocumentsContainsIdFilter('user');
+  const hostIdFilter = euid.esql.getEuidDocumentsContainsIdFilter('host');
+  const hostIdEval = euid.esql.getEuidEvaluation('host', { withTypeId: false });
 
   return `FROM ${indexPattern}
 | WHERE ${whereClause}
