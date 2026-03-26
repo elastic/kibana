@@ -97,6 +97,7 @@ export const GridSectionTitle = React.memo(
     );
 
     const handleKeyDown = useCallback(
+      /** Prevents default drag from firing on key down and forces toggle instead */
       (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' || e.key === ' ') {
           toggleIsCollapsed();
@@ -115,7 +116,7 @@ export const GridSectionTitle = React.memo(
               defaultMessage: 'Toggle collapse',
             })}
             iconType={'arrowDown'}
-            onKeyDown={readOnly ? undefined : handleKeyDown}
+            onKeyDown={handleKeyDown}
             size="m"
             id={`kbnGridSectionTitle-${sectionId}`}
             aria-controls={`kbnGridSection-${sectionId}`}

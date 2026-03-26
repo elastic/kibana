@@ -30,7 +30,6 @@ export interface GridSectionHeaderProps {
 
 export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderProps) => {
   const collapseButtonRef = useRef<HTMLButtonElement | null>(null);
-  const lastTouchStartTimeRef = useRef<number>(0);
 
   const { gridLayoutStateManager } = useGridLayoutContext();
   const startDrag = useGridLayoutSectionEvents({ sectionId });
@@ -44,7 +43,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
   const [panelCount, setPanelCount] = useState<number>(
     Object.keys(gridLayoutStateManager.gridLayout$.getValue()[sectionId]?.panels ?? {}).length
   );
-  const hasDraggedHeaderRef = useRef(false);
+  const hasBeenDragged = useRef<boolean>(false);
 
   useEffect(() => {
     return () => {
@@ -80,38 +79,12 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
     return Boolean(target.closest('[data-no-drag]'));
   };
 
-  const handleHeaderClick = useCallback(
-    (e: React.MouseEvent<HTMLElement>) => {
-      if (shouldIgnoreHeaderClick(e.target)) return;
-      toggleIsCollapsed();
-    },
-    [toggleIsCollapsed]
-  );
-
   const handleSectionDragStart = useCallback(
     (e: UserInteractionEvent) => {
       if (shouldIgnoreHeaderClick(e.target)) return;
       startDrag(e);
     },
     [startDrag]
-  );
-
-  const handleSectionMouseDown = useCallback(
-    (e: React.MouseEvent<HTMLElement>) => {
-      // Touch gestures can generate a subsequent synthetic mouse event (notably in mobile emulation),
-      // which would start a second interaction and cause the "click" toggle to run twice.
-      if (Date.now() - lastTouchStartTimeRef.current < 700) return;
-      handleSectionDragStart(e);
-    },
-    [handleSectionDragStart]
-  );
-
-  const handleSectionTouchStart = useCallback(
-    (e: React.TouchEvent<HTMLElement>) => {
-      lastTouchStartTimeRef.current = Date.now();
-      handleSectionDragStart(e);
-    },
-    [handleSectionDragStart]
   );
 
   useEffect(() => {
@@ -164,8 +137,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
       const handleFirstDrag = () => {
         collapseSectionOnDrag();
         setIsActive(true);
-        hasDraggedHeaderRef.current = true;
-
+        hasBeenDragged.current = true;
         const width = headerRef.getBoundingClientRect().width;
         headerRef.style.width = `${width}px`;
         headerRef.style.position = 'fixed';
@@ -183,26 +155,23 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
 
       switch (type) {
         case 'init':
-          hasDraggedHeaderRef.current = false;
+          hasBeenDragged.current = false;
           break;
-
         case 'update':
-          if (!hasDraggedHeaderRef.current) {
+          if (!hasBeenDragged.current) {
             handleFirstDrag();
           }
           headerRef.style.transform = `translate(${event!.translate.left}px, ${
             event!.translate.top
           }px)`;
           break;
-
         case 'finish':
-          const isClick = !hasDraggedHeaderRef.current;
-          if (isClick) {
+          setIsActive(false);
+          if (!hasBeenDragged.current) {
+            // if no drag occurred, then this is a click event
             toggleIsCollapsed();
           }
-
-          setIsActive(false);
-          hasDraggedHeaderRef.current = false;
+          hasBeenDragged.current = false;
           resetHeaderStyles();
           break;
       }
@@ -273,9 +242,15 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
         ref={(element: HTMLDivElement | null) => {
           gridLayoutStateManager.headerRefs.current[sectionId] = element;
         }}
-        onMouseDown={readOnly ? undefined : handleSectionMouseDown}
-        onTouchStart={readOnly ? undefined : handleSectionTouchStart}
-        onClick={readOnly ? handleHeaderClick : undefined}
+        onMouseDown={readOnly ? toggleIsCollapsed : handleSectionDragStart}
+        onTouchStart={readOnly ? toggleIsCollapsed : handleSectionDragStart}
+        onTouchEnd={(e) => {
+          // prevents both `onMouseDown` and `onTouchStart` from firing during touch events
+          if (!shouldIgnoreHeaderClick(e.target)) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }}
       >
         <GridSectionTitle
           sectionId={sectionId}
@@ -331,12 +306,12 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
                     <EuiButtonIcon
                       iconType="move"
                       color="text"
-                      onKeyDown={handleSectionDragStart}
                       className="kbnGridSection--dragHandle"
                       aria-label={i18n.translate('kbnGridLayout.section.moveRow', {
                         defaultMessage: 'Move section',
                       })}
                       data-test-subj={`kbnGridSectionHeader-${sectionId}--dragHandle`}
+                      onKeyDown={handleSectionDragStart}
                     />
                   </EuiFlexItem>
                 </>
@@ -378,7 +353,6 @@ const styles = {
           }
         : {
             userSelect: 'none',
-            touchAction: 'none',
             '&:hover': {
               cursor: 'move',
               backgroundColor: `${transparentize(euiTheme.colors.vis.euiColorVis0, 0.1)}`,
@@ -392,8 +366,6 @@ const styles = {
       },
       '.kbnGridSection--dragHandle': {
         cursor: 'move',
-        touchAction: 'none',
-        pointerEvents: 'none',
         '&:active, &:hover, &:focus': {
           transform: 'none !important', // prevent "bump up" that EUI adds on hover
           backgroundColor: 'transparent',
@@ -418,18 +390,11 @@ const styles = {
       // these styles ensure that dragged sections are rendered **above** everything else + the move icon stays visible
       '&.kbnGridSectionHeader--active': {
         zIndex: euiTheme.levels.modal,
-        pointerEvents: 'auto',
-        userSelect: 'none',
         backgroundColor: euiTheme.colors.backgroundBasePlain,
         '.kbnGridSection--dragHandle': {
           cursor: 'move',
-          userSelect: 'none',
           opacity: 1,
-          pointerEvents: 'none',
         },
-      },
-      '&.kbnGridSectionHeader--active button, &.kbnGridSectionHeader--active a': {
-        pointerEvents: 'none',
       },
     }),
 };
