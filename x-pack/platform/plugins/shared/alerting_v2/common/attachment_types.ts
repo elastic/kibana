@@ -131,6 +131,8 @@ export const notificationPolicyAttachmentDataSchema = z.object({
   groupBy: z.array(z.string()).optional(),
   throttle: z.object({ interval: z.string() }).optional(),
   workflow: notificationPolicyWorkflowSchema,
+  validationStatus: z.enum(['pending', 'valid', 'invalid']).optional(),
+  validationErrors: z.array(z.string()).optional(),
 });
 
 export type NotificationPolicyAttachmentData = z.infer<

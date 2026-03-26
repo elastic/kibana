@@ -30,7 +30,7 @@ Signal rules (\`kind: "signal"\`) never trigger notifications.
 
 ## How Matching Works
 
-Policies match based on rule \`metadata.labels\`. A policy with matcher \`environment: production\` only fires for rules whose labels include that value. When setting up notifications for a new rule, the rule's labels must align with the policy's matchers.
+Policies evaluate a KQL matcher expression against a context that includes \`rule.labels\`, \`rule.name\`, \`rule.id\`, \`episode_status\`, and other fields. The most common pattern is matching on \`rule.labels\` — for example, a matcher of \`rule.labels : "notify:high-cpu"\` only fires for rules whose \`metadata.labels\` include \`"notify:high-cpu"\`. When setting up notifications for a new rule, the rule's labels must align with the policy's matcher.
 
 ## Episode Lifecycle
 

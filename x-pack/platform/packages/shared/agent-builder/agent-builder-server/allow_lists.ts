@@ -73,8 +73,10 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.alertingV2}.discover_data_sources`,
   `${internalNamespaces.alertingV2}.describe_data_source`,
   `${internalNamespaces.alertingV2}.propose_rule`,
-  `${internalNamespaces.alertingV2}.propose_notification_policy`,
-  `${internalNamespaces.alertingV2}.get_notification_context`,
+  `${internalNamespaces.alertingV2}.get_notification_policy_context`,
+  `${internalNamespaces.alertingV2}.draft_notification_policy`,
+  `${internalNamespaces.alertingV2}.validate_notification_policy`,
+  `${internalNamespaces.alertingV2}.finalize_notification_policy`,
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];
@@ -122,6 +124,16 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // O11Y
   'observability.log-search',
+
+  // Alerting V2
+  'data-discovery',
+  'alert-rule-creation',
+  'alert-rule-tuning',
+  'alert-investigation',
+  'alert-episodes',
+  'alerting-rules-overview',
+  'notification-policy-management',
+  'workflow-trigger-investigation',
 ] as const;
 
 export type AgentBuilderBuiltinSkill = (typeof AGENT_BUILDER_BUILTIN_SKILLS)[number];

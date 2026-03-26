@@ -24,8 +24,10 @@ import { proposeRuleTool } from './propose_rule_tool';
 import { getConnectorsTool } from './get_connectors_tool';
 import { listWorkflowsTool } from './list_workflows_tool';
 import { validateWorkflowTool } from './validate_workflow_tool';
-import { proposeNotificationPolicyTool } from './propose_notification_policy_tool';
-import { getNotificationContextTool } from './get_notification_context_tool';
+import { getNotificationPolicyContextTool } from './get_notification_policy_context_tool';
+import { draftNotificationPolicyTool } from './draft_notification_policy_tool';
+import { validateNotificationPolicyTool } from './validate_notification_policy_tool';
+import { finalizeNotificationPolicyTool } from './finalize_notification_policy_tool';
 
 export const registerTools = ({
   agentBuilder,
@@ -51,10 +53,12 @@ export const registerTools = ({
   agentBuilder.tools.register(explainRuleQueryTool(getScopedServices));
   agentBuilder.tools.register(validateEsqlQueryTool());
 
-  // P3 — notification policies
+  // P3 — notification policy pipeline
   agentBuilder.tools.register(listNotificationPoliciesTool(getScopedServices));
-  agentBuilder.tools.register(proposeNotificationPolicyTool(workflowsApi));
-  agentBuilder.tools.register(getNotificationContextTool(getScopedServices, workflowsApi));
+  agentBuilder.tools.register(getNotificationPolicyContextTool(getScopedServices, workflowsApi));
+  agentBuilder.tools.register(draftNotificationPolicyTool());
+  agentBuilder.tools.register(validateNotificationPolicyTool(workflowsApi));
+  agentBuilder.tools.register(finalizeNotificationPolicyTool());
 
   // P4 — data discovery & profiling
   agentBuilder.tools.register(discoverDataSourcesTool());

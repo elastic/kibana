@@ -29,6 +29,8 @@ export interface RoundAttachmentReferencesProps {
   fallbackAttachments?: Attachment[];
   actorFilter?: AttachmentRefActor[];
   justifyContent?: EuiFlexGroupProps['justifyContent'];
+  responseMessage?: string;
+  conversationId?: string;
 }
 
 interface ResolvedReference {
@@ -91,13 +93,43 @@ const buildFallbackVersionedAttachments = (attachments: Attachment[]): Versioned
   }));
 };
 
+const getAlreadyRenderedIds = (responseMessage?: string): Set<string> => {
+  if (!responseMessage) return new Set<string>();
+  const ids = new Set<string>();
+  const tagPattern = /render_attachment[^>]*\bid="([^"]+)"/g;
+  let match;
+  while ((match = tagPattern.exec(responseMessage)) !== null) {
+    ids.add(match[1]);
+  }
+  return ids;
+};
+
+/**
+ * Lazy-loaded wrapper for auto-rendering inline attachment content.
+ * Separated into its own component so the hooks it needs don't crash
+ * the parent RoundAttachmentReferences when rendered outside the
+ * required context providers (e.g. from RoundInput).
+ */
+const AutoRenderInlineAttachment = React.lazy(() =>
+  import('./auto_render_inline_attachment').then((m) => ({
+    default: m.AutoRenderInlineAttachment,
+  }))
+);
+
 export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps> = ({
   attachmentRefs,
   conversationAttachments,
   fallbackAttachments,
   actorFilter,
   justifyContent = 'flexStart',
+  responseMessage,
+  conversationId,
 }) => {
+  const alreadyRenderedIds = useMemo(
+    () => getAlreadyRenderedIds(responseMessage),
+    [responseMessage]
+  );
+
   const resolvedReferences = useMemo((): ResolvedReference[] => {
     const fallbackVersioned = fallbackAttachments?.length
       ? buildFallbackVersionedAttachments(fallbackAttachments)
@@ -175,16 +207,50 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
       aria-label={labels.attachments}
       data-test-subj="agentBuilderRoundAttachmentReferences"
     >
-      {resolvedReferences.map((ref) => (
-        <EuiFlexItem
-          css={attachmentItemStyles}
-          key={`${ref.attachment.id}-v${ref.version}-${ref.actor}`}
-        >
-          <EuiText color="subdued" size="xs">
-            {labels.attachmentAdded(ref.attachment.description ?? '')}
-          </EuiText>
-        </EuiFlexItem>
-      ))}
+      {resolvedReferences.map((ref) => {
+        const isAlreadyRendered = alreadyRenderedIds.has(ref.attachment.id);
+        const versionData = ref.attachment.versions.find((v) => v.version === ref.version);
+
+        if (!isAlreadyRendered && versionData && conversationId) {
+          return (
+            <EuiFlexItem key={`${ref.attachment.id}-v${ref.version}-${ref.actor}`}>
+              <React.Suspense
+                fallback={
+                  <EuiText color="subdued" size="xs">
+                    {labels.attachmentAdded(ref.attachment.description ?? '')}
+                  </EuiText>
+                }
+              >
+                <AutoRenderInlineAttachment
+                  attachmentId={ref.attachment.id}
+                  attachmentType={ref.attachment.type}
+                  data={versionData.data}
+                  hidden={ref.attachment.hidden}
+                  origin={ref.attachment.origin}
+                  version={ref.version}
+                  conversationId={conversationId}
+                  fallbackDescription={ref.attachment.description ?? ''}
+                />
+              </React.Suspense>
+            </EuiFlexItem>
+          );
+        }
+
+        if (isAlreadyRendered) {
+          return null;
+        }
+
+        return (
+          <EuiFlexItem
+            css={attachmentItemStyles}
+            key={`${ref.attachment.id}-v${ref.version}-${ref.actor}`}
+          >
+            <EuiText color="subdued" size="xs">
+              {labels.attachmentAdded(ref.attachment.description ?? '')}
+            </EuiText>
+          </EuiFlexItem>
+        );
+      })}
     </EuiFlexGroup>
   );
 };

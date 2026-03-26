@@ -17,27 +17,28 @@ import {
   getAllConnectors,
 } from '@kbn/workflows-management-plugin/common/schema';
 import type { ScopedServicesFactory } from '../scoped_services';
+import { AVAILABLE_PLACEHOLDERS } from './lib/generate_notification_workflow_yaml';
 
-const getNotificationContextSchema = z.object({});
+const schema = z.object({});
 
-export const getNotificationContextTool = (
+export const getNotificationPolicyContextTool = (
   getScopedServices: ScopedServicesFactory,
   workflowsApi: WorkflowsManagementApi
-): BuiltinToolDefinition<typeof getNotificationContextSchema> => ({
-  id: `${internalNamespaces.alertingV2}.get_notification_context`,
+): BuiltinToolDefinition<typeof schema> => ({
+  id: `${internalNamespaces.alertingV2}.get_notification_policy_context`,
   type: ToolType.builtin,
   description:
-    'Fetch all context needed to propose a notification policy in one call. Returns three sections:\n' +
-    '- policies: existing notification policies that route alert episodes to workflows.\n' +
-    '- workflows: existing workflow definitions (used by notification policies to orchestrate ' +
-    'notifications). Pass a workflowId here to propose_notification_policy with source "existing".\n' +
-    '- connectors: configured third-party integrations like Slack, email, PagerDuty (used inside ' +
-    'workflow YAML via the connector-id step field to send messages). Each connector includes ' +
-    'withParams describing the required/optional fields for the "with" block in workflow YAML. ' +
-    'Do NOT pass a connectorId to propose_notification_policy — connectors belong inside the ' +
-    'workflow YAML, not at the policy level.',
+    'Fetch all context needed to draft a notification policy. Returns:\n' +
+    '- policies: existing notification policies (reuse one if it already matches the rule).\n' +
+    '- workflows: existing workflows that notification policies can route to. ' +
+    'Pass a workflowId to draft_notification_policy with source "existing".\n' +
+    '- connectors: configured integrations (Slack, email, PagerDuty, etc.) with their ' +
+    'withParams describing the fields you must provide in the messages parameter of ' +
+    'draft_notification_policy.\n' +
+    '- placeholders: available template placeholders for message content ' +
+    '(e.g. {ruleId}, {episodeId}) — the server expands them to Liquid syntax automatically.',
   tags: ['alerting', 'notifications'],
-  schema: getNotificationContextSchema,
+  schema,
   handler: async (_params, { spaceId, request }) => {
     const { notificationPolicyClient } = await getScopedServices(request);
 
@@ -84,6 +85,10 @@ export const getNotificationContextTool = (
         name: instance.name,
         actionTypeId: type,
         stepTypes,
+        _usedFor:
+          'Pass this connectorId and the first stepType to draft_notification_policy ' +
+          'in the connector field. Use the withParams field names as keys in the messages ' +
+          'parameter to specify what to send for each episode status.',
         ...(withParams ? { withParams } : {}),
       }));
     });
@@ -101,23 +106,33 @@ export const getNotificationContextTool = (
             },
             workflows: {
               _usedFor:
-                'Workflows orchestrate notifications. A notification policy references a workflow ' +
-                'by its workflowId. Pass workflowId to propose_notification_policy with ' +
-                'source "existing", or create an inline workflow with source "inline".',
+                'Workflows orchestrate notifications. A notification policy references a ' +
+                'workflow by its workflowId. Pass workflowId to draft_notification_policy ' +
+                'with source "existing" to reuse one.',
               count: workflows.length,
               total: workflowsResult.total,
               items: workflows,
             },
             connectors: {
               _usedFor:
-                'Connectors are third-party integrations (Slack, email, PagerDuty, etc.). ' +
-                'They are used INSIDE workflow YAML via the "connector-id" step field. ' +
-                'Each connector includes "withParams" listing the fields for the step "with" block. ' +
-                'Do NOT pass a connectorId to propose_notification_policy — it expects a workflowId.',
+                'Connectors are third-party integrations (Slack, email, PagerDuty). ' +
+                'Pass the connectorId and type to draft_notification_policy in the ' +
+                'connector field. Use the withParams names as keys in the messages object.',
               count: connectors.length,
               totalAvailable: connectorsResult.totalConnectors,
               items: connectors,
             },
+            placeholders: {
+              _usedFor:
+                'Use these placeholders in message values passed to draft_notification_policy. ' +
+                'The server expands them to the correct Liquid template syntax automatically.',
+              items: AVAILABLE_PLACEHOLDERS,
+            },
+            _instruction:
+              'You now have the context needed to draft a notification policy. ' +
+              'If the user specified a channel, call draft_notification_policy immediately. ' +
+              'If not, ask which channel they prefer based on the available connectors above, ' +
+              'then call draft_notification_policy. Do NOT summarize this raw context to the user.',
           },
         },
       ],

@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, EuiPanel, useEuiTheme } from '@elastic/eui';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { RuleAttachment } from '../../../common/attachment_types';
-import { ruleFormClientApi$ } from '../../services/rule_form_client_api';
-import { mapAttachmentToFormValues } from './map_attachment_to_form_values';
 
 const KIND_LABELS: Record<string, string> = {
   alert: 'Alert',
@@ -28,13 +26,6 @@ const truncateQuery = (query: string): string => {
 export const RuleInlineContent = ({ attachment }: AttachmentRenderProps<RuleAttachment>) => {
   const { euiTheme } = useEuiTheme();
   const { data } = attachment;
-
-  useEffect(() => {
-    const api = ruleFormClientApi$.getValue();
-    if (api) {
-      api.setFormValues(mapAttachmentToFormValues(data), data.evaluation.query.base);
-    }
-  }, [data]);
 
   const badgeStyles = css({
     display: 'flex',

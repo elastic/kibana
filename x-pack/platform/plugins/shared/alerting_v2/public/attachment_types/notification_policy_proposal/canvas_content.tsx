@@ -30,17 +30,19 @@ import type { EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { useForm, FormProvider, Controller, useWatch } from 'react-hook-form';
-import type {
-  AttachmentRenderProps,
-  CanvasRenderCallbacks,
-} from '@kbn/agent-builder-browser/attachments';
+import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { HttpStart, NotificationsStart, ApplicationStart } from '@kbn/core/public';
 import { toCreatePayload } from '../../components/notification_policy/form/form_utils';
 import {
   FREQUENCY_OPTIONS,
   THROTTLE_INTERVAL_PATTERN,
 } from '../../components/notification_policy/form/constants';
-import { INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../../constants';
+import {
+  INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH,
+  MANAGEMENT_APP_ID,
+  ALERTING_V2_MANAGEMENT_PATH,
+} from '../../constants';
+import { mapAttachmentToFormValues } from './map_attachment_to_form_values';
 import type { NotificationPolicyFormState } from '../../components/notification_policy/form/types';
 import type { NotificationPolicyAttachment } from '../../../common/attachment_types';
 
@@ -55,8 +57,7 @@ export interface NotificationPolicyCanvasContentProps
   http: HttpStart;
   notifications: NotificationsStart;
   application: ApplicationStart;
-  closeCanvas: CanvasRenderCallbacks['closeCanvas'];
-  openSidebarConversation?: CanvasRenderCallbacks['openSidebarConversation'];
+  closeCanvas: () => void;
   WorkflowEditor: ComponentType<StandaloneWorkflowEditorProps>;
 }
 
@@ -66,6 +67,7 @@ export const NotificationPolicyCanvasContent = ({
   notifications,
   application,
   closeCanvas,
+  openSidebarConversation,
   WorkflowEditor,
 }: NotificationPolicyCanvasContentProps) => {
   const { data } = attachment;
@@ -136,6 +138,15 @@ export const NotificationPolicyCanvasContent = ({
     }
   }, [data, http, notifications, closeCanvas, methods]);
 
+  const handleEditInPolicies = useCallback(async () => {
+    const formValues = mapAttachmentToFormValues(data);
+    await application.navigateToApp(MANAGEMENT_APP_ID, {
+      path: `${ALERTING_V2_MANAGEMENT_PATH}/notification_policies/create`,
+      state: { initialValues: formValues },
+    });
+    openSidebarConversation?.();
+  }, [application, data, openSidebarConversation]);
+
   const policyTab: EuiTabbedContentTab = useMemo(
     () => ({
       id: 'policy',
@@ -145,6 +156,22 @@ export const NotificationPolicyCanvasContent = ({
       content: (
         <>
           <EuiSpacer size="m" />
+          <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                iconType="popout"
+                iconSide="right"
+                onClick={handleEditInPolicies}
+              >
+                {i18n.translate(
+                  'xpack.alertingVTwo.attachments.notificationPolicy.canvas.editInPolicies',
+                  { defaultMessage: 'Edit in notification policies' }
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
           <FormProvider {...methods}>
             <EuiSplitPanel.Outer borderRadius="m" hasShadow={true} hasBorder={true}>
               <EuiSplitPanel.Inner color="subdued">
@@ -352,22 +379,22 @@ export const NotificationPolicyCanvasContent = ({
         </>
       ),
     }),
-    [methods, frequency]
+    [methods, frequency, handleEditInPolicies]
   );
 
-  const handleEditInWorkflows = useCallback(() => {
+  const handleEditInWorkflows = useCallback(async () => {
     if (data.workflow.source === 'existing') {
-      application.navigateToApp(WORKFLOWS_APP_ID, {
+      await application.navigateToApp(WORKFLOWS_APP_ID, {
         path: data.workflow.id,
-        openInNewTab: true,
       });
     } else {
-      application.navigateToApp(WORKFLOWS_APP_ID, {
+      await application.navigateToApp(WORKFLOWS_APP_ID, {
         path: '/create',
         state: { initialYaml: data.workflow.yaml },
       });
     }
-  }, [application, data.workflow]);
+    openSidebarConversation?.();
+  }, [application, data.workflow, openSidebarConversation]);
 
   const workflowTab: EuiTabbedContentTab = useMemo(
     () => ({

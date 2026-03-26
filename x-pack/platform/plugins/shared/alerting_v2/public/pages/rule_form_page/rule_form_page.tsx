@@ -30,7 +30,6 @@ import { ruleKeys } from '../../hooks/query_key_factory';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { paths } from '../../constants';
 import { createUpdateRuleFormTool } from '../../agent_builder/update_rule_form_tool';
-import { ruleFormClientApi$ } from '../../services/rule_form_client_api';
 
 const DEFAULT_QUERY = 'FROM logs-*\n| LIMIT 1';
 
@@ -52,7 +51,12 @@ export const RuleFormPage = () => {
   } else if (cloneFromId) {
     content = <FetchedRuleFormPage ruleId={cloneFromId} mode="clone" />;
   } else {
-    content = <RuleFormPageContent />;
+    content = (
+      <RuleFormPageContent
+        initialValues={locationState?.initialValues}
+        initialQuery={locationState?.initialQuery}
+      />
+    );
   }
 
   return (
@@ -155,11 +159,6 @@ const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPa
     }
     setFormKey((k) => k + 1);
   }, []);
-
-  useEffect(() => {
-    ruleFormClientApi$.next({ setFormValues });
-    return () => ruleFormClientApi$.next(undefined);
-  }, [setFormValues]);
 
   useEffect(() => {
     if (!agentBuilder) {

@@ -46,7 +46,6 @@ export const registerNotificationPolicyProposalAttachment = ({
           notifications={notifications}
           application={application}
           closeCanvas={callbacks.closeCanvas}
-          openSidebarConversation={callbacks.openSidebarConversation}
           WorkflowEditor={WorkflowEditor}
         />
       ),

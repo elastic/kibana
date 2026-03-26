@@ -133,8 +133,9 @@ export const createUpdateRuleFormTool = (
 ): BrowserApiToolDefinition<UpdateRuleFormParams> => ({
   id: 'alerting_v2_update_rule_form',
   description:
-    'Update the rule configuration form currently open in rule management. ' +
-    'Only include the fields that need to change. The form will be updated in place.',
+    'PREFERRED method for rule changes — updates the rule form the user currently has open. ' +
+    'Call this instead of propose_rule whenever it is available. ' +
+    'Only include the fields that need to change. The form will be updated in place without a page reload.',
   schema: updateRuleFormSchema,
   handler: (params) => {
     const formValues = mapParamsToFormValues(params);

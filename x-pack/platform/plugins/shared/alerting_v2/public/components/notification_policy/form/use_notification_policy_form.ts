@@ -19,20 +19,27 @@ import type { NotificationPolicyFormState } from './types';
 
 interface UseNotificationPolicyFormParams {
   initialValues?: NotificationPolicyResponse;
+  initialFormState?: Partial<NotificationPolicyFormState>;
   onSubmitCreate: (data: CreateNotificationPolicyData) => void;
   onSubmitUpdate: (id: string, data: UpdateNotificationPolicyBody) => void;
 }
 
 export const useNotificationPolicyForm = ({
   initialValues,
+  initialFormState,
   onSubmitCreate,
   onSubmitUpdate,
 }: UseNotificationPolicyFormParams) => {
   const isEditMode = !!initialValues;
 
   const defaultValues = useMemo(
-    () => (initialValues ? toFormState(initialValues) : DEFAULT_FORM_STATE),
-    [initialValues]
+    () =>
+      initialValues
+        ? toFormState(initialValues)
+        : initialFormState
+        ? { ...DEFAULT_FORM_STATE, ...initialFormState }
+        : DEFAULT_FORM_STATE,
+    [initialValues, initialFormState]
   );
 
   const methods = useForm<NotificationPolicyFormState>({

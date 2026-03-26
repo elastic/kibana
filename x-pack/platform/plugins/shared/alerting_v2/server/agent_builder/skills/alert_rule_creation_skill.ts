@@ -8,7 +8,6 @@
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools/constants';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import { alertWorkflowExample } from '../referenced_content/alert_workflow_example';
 import { notificationPoliciesReference } from '../referenced_content/notification_policies';
 
 export const alertRuleCreationSkill = defineSkillType({
@@ -33,11 +32,12 @@ The typical rule creation journey has five phases. The user may enter at any pha
 
 ## Hard Rules
 
-- **ALWAYS use the browser tool for refinements when available.** If the user asks to change the rule and the \`alerting_v2_update_rule_form\` browser tool is in your tool list, you MUST call it to update the form directly. This is the PRIMARY way to apply changes when the user has the rule form page open. Do NOT fall back to \`${internalNamespaces.alertingV2}.propose_rule\` as the only action — the browser tool updates the form instantly.
-- **ALWAYS propose, never create directly.** Call \`${internalNamespaces.alertingV2}.propose_rule\` to present rule configurations and \`${internalNamespaces.alertingV2}.propose_notification_policy\` to present notification setups (which bundle both the workflow and the policy in one attachment). Never output raw YAML or raw rule specs in the chat — always use the propose tools so the user gets interactive attachment cards. NEVER call \`${internalNamespaces.alertingV2}.create_rule\` unless the user explicitly says "skip the preview" or "just create it."
+- **ALWAYS propose first.** The INITIAL rule must always be created via \`${internalNamespaces.alertingV2}.propose_rule\`. This gives the user an interactive attachment card in the chat. For notifications, use the 4-step pipeline: \`get_notification_policy_context\` → \`draft_notification_policy\` → \`validate_notification_policy\` → \`finalize_notification_policy\`. Never output raw YAML or raw rule specs in the chat. NEVER call \`${internalNamespaces.alertingV2}.create_rule\` unless the user explicitly says "skip the preview" or "just create it."
+- **Use browser tools for SUBSEQUENT refinements.** After the initial proposal, when the user asks to change the rule and \`alerting_v2_update_rule_form\` is in your tool list, call it with only the changed fields — this updates the open form instantly without a page reload. The same applies to \`alerting_v2_update_notification_policy_form\` for notification policy changes. Fall back to propose/finalize tools only when the corresponding browser tool is NOT in your tool list.
 - **ALWAYS reuse attachment IDs.** When refining a previously proposed rule, pass the \`attachment_id\` from the prior \`propose_rule\` result. This updates the existing attachment in-place.
 - **ALWAYS describe first.** Call \`${internalNamespaces.alertingV2}.describe_data_source\` with \`extract_knowledge_indicators: true\` before constructing any query or rule config.
 - **Act, don't instruct.** When you have enough information to build a rule, call the tool immediately. Do not tell the user what you "would" do or list steps you "will" follow.
+- **NEVER stop mid-pipeline.** The notification policy pipeline (\`get_notification_policy_context\` → \`draft_notification_policy\` → \`validate_notification_policy\` → \`finalize_notification_policy\`) must run to completion in a single turn. After calling \`draft\`, you MUST immediately call \`validate\`, then \`finalize\` — do NOT respond to the user between these calls. Only present results after \`finalize\` returns.
 - **Do NOT add timestamp filters to rule queries.** The rule engine automatically applies a time-range filter based on the configured \`lookback\` window. Never include \`WHERE @timestamp >= ?_tstart\` or similar timestamp conditions in the query — they are injected internally at execution time.
 
 ## Execution Flow
@@ -66,53 +66,58 @@ Render the attachment from \`_renderInstructions\` as the first line of your res
 
 **Iterate if needed** — When the user asks for changes to the rule:
 
-1. Check your available tools. If \`alerting_v2_update_rule_form\` is listed, the user has the rule form page open. Call it FIRST with only the changed fields — this updates the form instantly in the browser. Then also call \`${internalNamespaces.alertingV2}.propose_rule\` with the full updated spec and pass \`attachment_id\` to keep the chat attachment in sync.
-2. If \`alerting_v2_update_rule_form\` is NOT in your tool list, call \`${internalNamespaces.alertingV2}.propose_rule\` with the full updated spec and the prior \`attachment_id\`.
-3. Only omit \`attachment_id\` when building a completely different rule from scratch.
-4. Use \`${internalNamespaces.alertingV2}.create_rule\` only if the user explicitly says to skip the preview.
+**Default: use the browser tool.** If \`alerting_v2_update_rule_form\` is in your tool list, call it with ONLY the changed fields. This is the fast, non-disruptive path — the form updates in-place without a page reload. Do NOT also call \`${internalNamespaces.alertingV2}.propose_rule\` unless the change is so fundamental that the chat attachment needs updating (e.g. completely different query or kind).
+
+**Fallback: propose tool only.** If \`alerting_v2_update_rule_form\` is NOT in your tool list (the user does not have the rule form open), call \`${internalNamespaces.alertingV2}.propose_rule\` with the full updated spec and the prior \`attachment_id\`. Only omit \`attachment_id\` when building a completely different rule from scratch. Use \`${internalNamespaces.alertingV2}.create_rule\` only if the user explicitly says to skip the preview.
+
+When the user asks for changes to the **notification policy**:
+
+**Default: use the browser tool.** If \`alerting_v2_update_notification_policy_form\` is in your tool list, call it with ONLY the changed fields.
+
+**Fallback: pipeline only.** If the browser tool is NOT available, re-run the draft → validate → finalize pipeline with the updated parameters and the same \`draft_id\`.
 
 ## Set Up Notifications (Phase 3)
 
-This section applies whenever the user mentions notifications, alerts, getting notified, or configuring how a rule sends messages. **Act immediately — do not explain concepts first.** The \`propose_notification_policy\` tool bundles both the workflow and the notification policy into a single attachment, so you only need **one tool call** to propose.
+This section applies whenever the user mentions notifications, alerts, getting notified, or configuring how a rule sends messages. **Act immediately — do not explain concepts first.**
+
+Notifications use a **4-step pipeline**. Call each tool in order — the server generates workflow YAML automatically from your structured parameters. You never write YAML directly.
 
 **Step 1: Gather context.**
-Call \`${internalNamespaces.alertingV2}.get_notification_context\`. This single call returns all existing notification policies, workflows, and configured connectors. Analyze the results:
+Call \`${internalNamespaces.alertingV2}.get_notification_policy_context\`. This returns existing policies, workflows, connectors (with \`withParams\` describing required fields), and available message placeholders. Analyze the results:
 
-→ **Policies exist that match the rule**: Present them briefly and ask if the user wants to reuse one. If yes, update the rule's labels to match that policy's matchers. Done.
+→ **Policies exist that match the rule**: Present them briefly and ask if the user wants to reuse one. If yes, update the rule's labels to match that policy's matchers. Done — skip the remaining steps.
 
-→ **Reusable workflows exist** (workflows with manual triggers): Ask the user if they want to route to one. If yes, note the workflow ID and name — you'll pass them as \`workflow: { source: "existing", id: "<id>", name: "<name>" }\`. Skip to step 3.
+→ **Reusable workflows exist**: Ask the user if they want to route to one. If yes, note the \`workflowId\` and name for the draft step.
 
-→ **No matching policies and no reusable workflows**: You need to build an inline workflow. Use the connectors from the context response to determine what channels are available:
-  - If the user already said where they want to be notified (e.g. "Slack"), find the matching connector from the context results.
-  - If the user hasn't specified a channel, suggest the available options based on the connectors list (e.g. "I see you have Slack and email connectors configured — which would you prefer?"). Do NOT ask a generic question without mentioning the actual available options.
-  - If no connectors are configured at all, tell the user to set one up in Stack Management > Connectors before proceeding.
+→ **No matching policies and no reusable workflows**: You need a new workflow. Use the connectors list to determine what channels are available:
+  - If the user already said where they want to be notified (e.g. "Slack"), find the matching connector.
+  - If the user hasn't specified a channel, suggest the available options from the connectors list (e.g. "I see you have Slack and email connectors — which would you prefer?").
+  - If no connectors are configured, tell the user to set one up in Stack Management > Connectors.
 
-**Step 2: Build an inline workflow.**
-Once you know the target connector, use the data already returned by \`get_notification_context\` — each connector item includes \`withParams\` listing every field for the step's \`with\` block (name, type, required).
+**Step 2: Draft the notification policy.**
+Call \`${internalNamespaces.alertingV2}.draft_notification_policy\` with structured parameters:
 
-1. Read the alert workflow template via \`filestore.read\` with path \`skills/platform/alerting/alert-rule-creation/alert-workflow-example.md\`. This contains complete examples for Slack, Email, and PagerDuty workflows with the correct inputs schema and connector step patterns.
-2. Build the workflow YAML using the template as a base. The workflow **MUST** include:
-   - A \`manual\` trigger (NOT \`alert\` or \`scheduled\` — the Dispatcher invokes via manual trigger)
-   - The full \`inputs\` schema accepting the notification payload (id, ruleId, policyId, groupKey, episodes) — copy this exactly from the template
-   - Connector steps with the correct \`type\`, \`connector-id\` (the \`connectorId\` from step 1 context results), and \`with\` fields matching the connector's \`withParams\` (use exactly the field names and types listed there — do NOT guess)
-   - A \`foreach\` loop over \`{{ inputs.episodes | json }}\` with \`if\` conditions on \`foreach.item.episode_status\`
+- \`policy\`: name, description, **policy_matcher** (required), group_by, throttle_interval
+- \`workflow\`: either \`{ source: "existing", workflow_id, name }\` or \`{ source: "new", name, connector: { connectorId, type }, notify_on: ["active", "recovering"], messages: { ... } }\`
 
-The \`propose_notification_policy\` tool validates the workflow YAML server-side. If it returns \`workflowValidationErrors\`, fix the YAML and re-propose with the same \`attachment_id\`.
+**CRITICAL — you MUST always provide a \`policy_matcher\`.** Notification policies match alert episodes to workflows using a KQL matcher expression. Without a matcher, the policy matches ALL episodes (catch-all), which is almost never what the user wants.
 
-**Step 3: Propose the notification policy (one tool call).**
-Call \`${internalNamespaces.alertingV2}.propose_notification_policy\` with:
+**How to construct the matcher:**
+1. Derive a label from the rule being created. Use a short, descriptive slug based on the rule's purpose or name — e.g. for a "High CPU Usage" rule, use \`"notify:high-cpu-usage"\`. Prefer the format \`"notify:<kebab-case-rule-slug>"\`.
+2. Set \`policy_matcher\` to \`rule.labels : "notify:<slug>"\`. For example: \`rule.labels : "notify:high-cpu-usage"\`.
+3. When \`finalize_notification_policy\` runs, it automatically extracts \`rule.labels\` values from the matcher and adds them to any active rule attachments in the conversation. This links the rule and policy together — you do NOT need to manually add labels to the rule.
 
-- \`name\`: descriptive (e.g. "Notify on [rule name] via [channel]")
-- \`description\`: what the policy does
-- \`matcher\`: match the rule's labels (e.g. \`data.labels : "environment:production"\`)
-- \`group_by\` and \`throttle_interval\`: optional, based on the rule's grouping fields
-- \`workflow\`: either:
-  - \`{ source: "existing", id: "<workflow_id>", name: "<workflow_name>" }\` — for an existing workflow
-  - \`{ source: "inline", name: "<name>", yaml: "<yaml>", connector_types: [...], is_valid: true/false }\` — for a new workflow built in step 2
+You can combine multiple conditions: \`rule.labels : "notify:high-cpu" AND rule.labels : "team:ops"\`.
 
-This single tool call creates one attachment that bundles both the workflow and the notification policy. The user can preview both in a tabbed canvas and create both with one click.
+For new workflows, provide \`messages\` keyed by episode status. Each value is an object whose keys match the connector's \`withParams\` field names (e.g. for Slack: \`{ "active": { "message": "Alert {ruleId} fired — episode {episodeId} is now active" } }\`). Use placeholders like \`{ruleId}\`, \`{episodeId}\`, \`{episodeStatus}\` — the server expands them automatically.
 
-Render the attachment from \`_renderInstructions\` and briefly explain what was proposed.
+The server generates the full workflow YAML. You do NOT write YAML.
+
+**Step 3: Validate.**
+Call \`${internalNamespaces.alertingV2}.validate_notification_policy\` with the \`draftId\` from step 2. If validation fails, call \`draft_notification_policy\` again with the same \`draft_id\` and corrected parameters, then re-validate.
+
+**Step 4: Finalize.**
+Call \`${internalNamespaces.alertingV2}.finalize_notification_policy\` with the \`draftId\`. This reveals the attachment to the user. Render the attachment from \`_renderInstructions\` as the first line of your response and briefly explain what was proposed.
 
 See the [notification-policies-reference](./notification-policies-reference.md) for background on how policies and workflows relate.
 
@@ -133,11 +138,6 @@ Consult the [query-building-reference](./query-building-reference.md) for field-
       name: 'notification-policies-reference',
       relativePath: '.',
       content: notificationPoliciesReference,
-    },
-    {
-      name: 'alert-workflow-example',
-      relativePath: '.',
-      content: alertWorkflowExample,
     },
     {
       name: 'query-building-reference',
@@ -191,13 +191,14 @@ FROM logs-* | STATS doc_count = COUNT(*) | WHERE doc_count == 0
   getRegistryTools: () => [
     platformCoreTools.listIndices,
     platformCoreTools.indexExplorer,
-    `${internalNamespaces.alertingV2}.describe_data_source`,
-    `${internalNamespaces.alertingV2}.propose_rule`,
-    `${internalNamespaces.alertingV2}.create_rule`,
-    `${internalNamespaces.alertingV2}.validate_esql_query`,
-    `${internalNamespaces.alertingV2}.explain_rule_query`,
-    `${internalNamespaces.alertingV2}.get_notification_context`,
-    `${internalNamespaces.alertingV2}.propose_notification_policy`,
-    'platform.workflows.validate_workflow',
+    // `${internalNamespaces.alertingV2}.describe_data_source`,
+    // `${internalNamespaces.alertingV2}.propose_rule`,
+    // `${internalNamespaces.alertingV2}.create_rule`,
+    // `${internalNamespaces.alertingV2}.validate_esql_query`,
+    // `${internalNamespaces.alertingV2}.explain_rule_query`,
+    `${internalNamespaces.alertingV2}.get_notification_policy_context`,
+    `${internalNamespaces.alertingV2}.draft_notification_policy`,
+    `${internalNamespaces.alertingV2}.validate_notification_policy`,
+    `${internalNamespaces.alertingV2}.finalize_notification_policy`,
   ],
 });
