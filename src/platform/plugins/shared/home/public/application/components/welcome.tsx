@@ -90,7 +90,7 @@ export const Welcome: React.FC<WelcomeProps> = ({ urlBasePath, onSkip }: Welcome
                 ${euiShadowM}
               `}
             >
-              <EuiIcon type="logoElastic" size="xxl" />
+              <EuiIcon type="logoElastic" size="xxl" aria-hidden={true} />
             </span>
             <EuiTitle size="l">
               <h1>

@@ -38,7 +38,7 @@ export const BulkOperationPopover = (props: BulkOperationPopoverProps) => {
         <EuiButtonEmpty
           size="xs"
           iconSide="right"
-          iconType={canModifySelectedRules ? 'arrowDown' : undefined}
+          iconType={canModifySelectedRules ? 'chevronSingleDown' : undefined}
           disabled={!canModifySelectedRules}
           aria-label={SELECT_SHOW_BULK_ACTIONS_ARIA_LABEL}
           data-test-subj="showBulkActionButton"
