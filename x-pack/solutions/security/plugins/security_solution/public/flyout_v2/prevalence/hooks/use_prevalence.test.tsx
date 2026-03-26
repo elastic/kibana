@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { usePrevalence } from './use_prevalence';
 import { mockSearchHit } from '../../../flyout/document_details/shared/mocks/mock_search_hit';
-import { useHighlightedFields } from './use_highlighted_fields';
+import { useHighlightedFields } from '../../document/hooks/use_highlighted_fields';
 import {
   FIELD_NAMES_AGG_KEY,
   HOSTS_AGG_KEY,
@@ -17,7 +17,7 @@ import {
   USERS_AGG_KEY,
 } from './use_fetch_prevalence';
 
-jest.mock('./use_highlighted_fields');
+jest.mock('../../document/hooks/use_highlighted_fields');
 jest.mock('./use_fetch_prevalence');
 
 const interval = {

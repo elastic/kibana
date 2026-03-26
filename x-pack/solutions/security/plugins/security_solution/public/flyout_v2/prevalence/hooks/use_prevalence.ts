@@ -7,8 +7,8 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useMemo } from 'react';
-import { useHighlightedFields } from './use_highlighted_fields';
-import { convertHighlightedFieldsToPrevalenceFilters } from '../utils/highlighted_fields_helpers';
+import { useHighlightedFields } from '../../document/hooks/use_highlighted_fields';
+import { convertHighlightedFieldsToPrevalenceFilters } from '../../document/utils/highlighted_fields_helpers';
 import type { AggregationValue } from './use_fetch_prevalence';
 import {
   EVENT_KIND_AGG_KEY,
@@ -19,14 +19,32 @@ import {
   USER_NAME_AGG_KEY,
   USERS_AGG_KEY,
 } from './use_fetch_prevalence';
-import { EventKind } from '../constants/event_kinds';
+import { EventKind } from '../../document/constants/event_kinds';
 
 export interface PrevalenceData {
+  /**
+   * Field name
+   */
   field: string;
+  /**
+   * Values for the field
+   */
   values: string[];
+  /**
+   * Count of alert documents
+   */
   alertCount: number;
+  /**
+   * Count of non-alert documents
+   */
   docCount: number;
+  /**
+   * Prevalence for hosts, calculated as the number of unique hosts with the field/value pair divided by the total number of unique hosts in the environment
+   */
   hostPrevalence: number;
+  /**
+   * Prevalence for users, calculated as the number of unique users with the field/value pair divided by the total number of unique users in the environment
+   */
   userPrevalence: number;
 }
 export interface UsePrevalenceParams {
