@@ -59401,6 +59401,7 @@ paths:
       summary: Export stream content
       tags:
         - streams
+      x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -59445,6 +59446,7 @@ paths:
       summary: Import content into a stream
       tags:
         - streams
+      x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
