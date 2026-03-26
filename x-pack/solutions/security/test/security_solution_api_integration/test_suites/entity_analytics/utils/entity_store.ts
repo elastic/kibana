@@ -265,6 +265,7 @@ export const EntityStoreUtils = (
 
   const installEntityStoreV2 = async (body: any = { entityTypes: ['user', 'host'] }) => {
     const supertest = getService('supertest');
+    const retry = getService('retry');
 
     const res = enableEntityStoreV2(body);
 
@@ -272,12 +273,15 @@ export const EntityStoreUtils = (
     if (namespace !== 'default') {
       maintainersUrl = `/s/${namespace}${maintainersUrl}`;
     }
-    await supertest
-      .post(maintainersUrl)
-      .set('kbn-xsrf', 'true')
-      .set('x-elastic-internal-origin', 'Kibana')
-      .send({})
-      .expect(200);
+
+    await retry.try(async () => {
+      await supertest
+        .post(maintainersUrl)
+        .set('kbn-xsrf', 'true')
+        .set('x-elastic-internal-origin', 'Kibana')
+        .send({})
+        .expect(200);
+    });
 
     return res;
   };

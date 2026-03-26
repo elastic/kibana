@@ -6,13 +6,12 @@
  */
 
 import expect from 'expect';
-import { hashEuid } from '@kbn/entity-store/server';
+import { getLatestEntitiesIndexName, hashEuid } from '@kbn/entity-store/server';
 import type { Entity } from '@kbn/entity-store/common';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { EntityStoreUtils } from '../../utils';
 
 const ASSET_CRITICALITY_CSV_UPLOAD_V2_URL = '/internal/asset_criticality/upload_csv_v2';
-const LATEST_INDEX = '.entities.v2.latest.security_default';
 
 const entities = [
   {
@@ -86,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
         contentType: 'text/csv',
       });
 
-  describe('@ess @serverless @serverlessQA testtest Asset Criticality CSV Upload V2', () => {
+  describe('@ess @serverless @serverlessQA Asset Criticality CSV Upload V2', () => {
     before(async () => {
       await entityStoreUtils.enableEntityStoreV2();
 
@@ -95,7 +94,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { entity: _entityFromDoc, ...restDoc } = entity.doc;
         const docId = hashEuid(entity.id);
         return [
-          { index: { _index: LATEST_INDEX, _id: docId } },
+          { index: { _index: getLatestEntitiesIndexName('default'), _id: docId } },
           {
             '@timestamp': new Date().toISOString(),
             entity: {
