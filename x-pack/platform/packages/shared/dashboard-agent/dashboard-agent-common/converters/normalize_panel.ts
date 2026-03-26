@@ -10,10 +10,10 @@ import type { AttachmentPanel } from '../types';
 
 const LENS_EMBEDDABLE_TYPE = 'lens';
 
-export type VisualizationContent = {
+export interface VisualizationContent {
   type: string;
   config: Record<string, unknown>;
-};
+}
 
 /** Panel input that may or may not have a uid assigned yet */
 export type DashboardPanelInput = Omit<AttachmentPanel, 'uid'> & { uid?: string };
