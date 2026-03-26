@@ -13,5 +13,6 @@ export type {
   FindNotificationPoliciesParams,
   FindNotificationPoliciesResponse,
   SnoozeNotificationPolicyParams,
+  UpdateNotificationPolicyApiKeyParams,
   UpdateNotificationPolicyParams,
 } from './types';

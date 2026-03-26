@@ -6,32 +6,35 @@
  */
 
 import Boom from '@hapi/boom';
-import { schema } from '@kbn/config-schema';
-import type { TypeOf } from '@kbn/config-schema';
 import { Request, Response } from '@kbn/core-di-server';
 import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { NotificationPolicyClient } from '../../lib/notification_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
 
-const sortFieldSchema = schema.oneOf([
-  schema.literal('name'),
-  schema.literal('createdAt'),
-  schema.literal('updatedAt'),
-  schema.literal('createdByUsername'),
-  schema.literal('updatedByUsername'),
+const sortFieldSchema = z.enum([
+  'name',
+  'createdAt',
+  'updatedAt',
+  'createdByUsername',
+  'updatedByUsername',
 ]);
 
-const listNotificationPoliciesQuerySchema = schema.object({
-  page: schema.maybe(schema.number({ min: 1 })),
-  perPage: schema.maybe(schema.number({ min: 1, max: 100 })),
-  search: schema.maybe(schema.string()),
-  destinationType: schema.maybe(schema.string()),
-  createdBy: schema.maybe(schema.string()),
-  enabled: schema.maybe(schema.boolean()),
-  sortField: schema.maybe(sortFieldSchema),
-  sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+const listNotificationPoliciesQuerySchema = z.object({
+  page: z.coerce.number().min(1).optional(),
+  perPage: z.coerce.number().min(1).max(100).optional(),
+  search: z.string().optional(),
+  destinationType: z.string().optional(),
+  createdBy: z.string().optional(),
+  enabled: z
+    .enum(['true', 'false'])
+    .transform((v) => v === 'true')
+    .optional(),
+  sortField: sortFieldSchema.optional(),
+  sortOrder: z.enum(['asc', 'desc']).optional(),
 });
 
 @injectable()
@@ -46,7 +49,7 @@ export class ListNotificationPoliciesRoute {
   static options = { access: 'internal' } as const;
   static validate = {
     request: {
-      query: listNotificationPoliciesQuerySchema,
+      query: buildRouteValidationWithZod(listNotificationPoliciesQuerySchema),
     },
   } as const;
 
@@ -54,7 +57,7 @@ export class ListNotificationPoliciesRoute {
     @inject(Request)
     private readonly request: KibanaRequest<
       unknown,
-      TypeOf<typeof listNotificationPoliciesQuerySchema>,
+      z.infer<typeof listNotificationPoliciesQuerySchema>,
       unknown
     >,
     @inject(Response) private readonly response: KibanaResponseFactory,

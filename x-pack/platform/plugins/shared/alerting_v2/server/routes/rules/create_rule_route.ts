@@ -6,24 +6,26 @@
  */
 
 import Boom from '@hapi/boom';
-import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import type { Logger as KibanaLogger } from '@kbn/logging';
 import { inject, injectable } from 'inversify';
 import { Logger } from '@kbn/core-di';
 import type { RouteHandler } from '@kbn/core-di-server';
 import { Request, Response } from '@kbn/core-di-server';
-import type { TypeOf } from '@kbn/config-schema';
 import type { RouteSecurity } from '@kbn/core-http-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { createRuleDataSchema } from '@kbn/alerting-v2-schemas';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { z } from '@kbn/zod/v4';
+import { createRuleDataSchema, ruleResponseSchema } from '@kbn/alerting-v2-schemas';
 import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
 
-const createRuleParamsSchema = schema.object({
-  id: schema.maybe(schema.string()),
+const createRuleParamsSchema = z.object({
+  id: z
+    .string()
+    .optional()
+    .describe('An optional identifier for the rule. If omitted, an ID is generated automatically.'),
 });
 
 @injectable()
@@ -35,19 +37,32 @@ export class CreateRuleRoute implements RouteHandler {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.write],
     },
   };
-  static options = { access: 'internal' } as const;
+  static options = {
+    access: 'internal',
+    summary: 'Create a rule',
+    tags: ['oas-tag:alerting-v2'],
+  } as const;
   static validate = {
     request: {
       body: buildRouteValidationWithZod(createRuleDataSchema),
-      params: createRuleParamsSchema,
+      params: buildRouteValidationWithZod(createRuleParamsSchema),
     },
-  } as const;
+    response: {
+      200: {
+        body: () => ruleResponseSchema,
+        description: 'Indicates a successful call.',
+      },
+      400: {
+        description: 'Indicates an invalid schema or parameters.',
+      },
+    },
+  };
 
   constructor(
     @inject(Logger) private readonly logger: KibanaLogger,
     @inject(Request)
     private readonly request: KibanaRequest<
-      TypeOf<typeof createRuleParamsSchema>,
+      z.infer<typeof createRuleParamsSchema>,
       unknown,
       CreateRuleData
     >,

@@ -35,7 +35,7 @@ export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
               />
             }
             color="success"
-            iconType="checkInCircleFilled"
+            iconType="checkCircleFill"
           />
         )}
         {saveState === SAVE_STATE.FAILED && (

@@ -35,6 +35,7 @@ interface NotificationPolicyActionsCellProps {
   onDisable: (id: string) => void;
   onSnooze: (id: string, snoozedUntil: string) => void;
   onCancelSnooze: (id: string) => void;
+  onUpdateApiKey: (id: string) => void;
   isStateLoading: boolean;
   isDisabled?: boolean;
 }
@@ -48,6 +49,7 @@ export const NotificationPolicyActionsCell = ({
   onDisable,
   onSnooze,
   onCancelSnooze,
+  onUpdateApiKey,
   isStateLoading,
   isDisabled = false,
 }: NotificationPolicyActionsCellProps) => {
@@ -119,6 +121,16 @@ export const NotificationPolicyActionsCell = ({
             } else {
               onEnable(policy.id);
             }
+          },
+        },
+        {
+          name: i18n.translate('xpack.alertingV2.notificationPoliciesList.action.updateApiKey', {
+            defaultMessage: 'Update API key',
+          }),
+          icon: 'key',
+          onClick: () => {
+            closePopover();
+            onUpdateApiKey(policy.id);
           },
         },
         {

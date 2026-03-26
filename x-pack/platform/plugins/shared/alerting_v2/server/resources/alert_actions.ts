@@ -7,7 +7,7 @@
 
 import type { IlmPolicy } from '@elastic/elasticsearch/lib/api/types';
 import type { MappingsDefinition } from '@kbn/es-mappings';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ResourceDefinition } from './types';
 
 export const ALERT_ACTIONS_DATA_STREAM = '.alert-actions';
