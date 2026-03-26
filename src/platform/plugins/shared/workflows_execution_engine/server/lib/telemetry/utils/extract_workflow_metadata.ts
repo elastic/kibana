@@ -8,6 +8,10 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
+import {
+  isManualTrigger,
+  type ManualTrigger,
+} from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 
 /**
  * Determines if a step is a connector step by checking if it has a 'connector-id' field.
@@ -185,7 +189,10 @@ export function extractWorkflowMetadata(
   const hasAlertTriggers = triggers.some((trigger) => trigger?.type === 'alert');
 
   // Count inputs
-  const inputCount = Object.keys(workflow.inputs?.properties ?? {}).length;
+  const manualTrigger = workflow.triggers?.find((trigger) => isManualTrigger(trigger)) as
+    | ManualTrigger
+    | undefined;
+  const inputCount = Object.keys(manualTrigger?.inputs?.properties ?? {}).length;
 
   // Extract settings
   const enabled = Boolean(workflow.enabled);
