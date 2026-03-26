@@ -86,7 +86,7 @@ export interface IdentitySourceFields {
   identitySourceFields: string[];
 }
 
-export type { Entity } from './domain/definitions/entity.gen';
+export type { Entity, AssetCriticalityLevel } from './domain/definitions/entity.gen';
 
 export {
   ENTITY_LATEST,
