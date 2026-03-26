@@ -22,13 +22,7 @@ import { mergeAllMetricsWithChartDimensionSchema } from './shared';
 
 const legacyMetricStateMetricOptionsSchema = {
   /**
-   * Size of the legacy metric label and value. Possible values:
-   * - 'xs': Extra small
-   * - 's': Small
-   * - 'm': Medium (default)
-   * - 'l': Large
-   * - 'xl': Extra large
-   * - 'xxl': Double extra large
+   * Font scale for the legacy metric label and value.
    */
   size: schema.maybe(
     schema.oneOf(

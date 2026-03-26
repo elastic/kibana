@@ -1132,7 +1132,7 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
       breakdown_by: {
         operation: 'terms',
         fields: ['clientip'],
-        size: 9,
+        limit: 9,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -1217,7 +1217,7 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
       breakdown_by: {
         operation: 'terms',
         fields: ['clientip'],
-        size: 9,
+        limit: 9,
         other_bucket: {
           include_documents_without_field: false,
         },

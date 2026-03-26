@@ -52,7 +52,7 @@ describe('Pie/Donut Schema', () => {
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
           ],
@@ -76,7 +76,7 @@ describe('Pie/Donut Schema', () => {
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
           ],
@@ -106,7 +106,7 @@ describe('Pie/Donut Schema', () => {
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
           ],
@@ -114,7 +114,7 @@ describe('Pie/Donut Schema', () => {
             nested: false,
             truncate_after_lines: 2,
             visible: 'show',
-            size: 'xlarge',
+            size: 'xl',
           },
           label_position: 'inside',
           donut_hole: 'small',
@@ -144,17 +144,17 @@ describe('Pie/Donut Schema', () => {
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['subcategory'],
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['brand'],
             },
           ],
@@ -176,7 +176,7 @@ describe('Pie/Donut Schema', () => {
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
               color: {
                 mode: 'categorical',
@@ -236,13 +236,13 @@ describe('Pie/Donut Schema', () => {
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['region'],
               collapse_by: 'sum',
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
           ],
@@ -289,7 +289,7 @@ describe('Pie/Donut Schema', () => {
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
           ],
@@ -312,7 +312,7 @@ describe('Pie/Donut Schema', () => {
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
           ],
@@ -337,7 +337,7 @@ describe('Pie/Donut Schema', () => {
               group_by: [
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['category'],
                 },
               ],
@@ -358,12 +358,12 @@ describe('Pie/Donut Schema', () => {
               group_by: [
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['category'],
                 },
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['subcategory'],
                 },
               ],
@@ -384,17 +384,17 @@ describe('Pie/Donut Schema', () => {
               group_by: [
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['category'],
                 },
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['subcategory'],
                 },
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['brand'],
                 },
               ],
@@ -415,29 +415,29 @@ describe('Pie/Donut Schema', () => {
               group_by: [
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['region'],
                   collapse_by: 'sum',
                 },
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['country'],
                   collapse_by: 'avg',
                 },
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['category'],
                 },
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['subcategory'],
                 },
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['brand'],
                 },
               ],
@@ -458,22 +458,22 @@ describe('Pie/Donut Schema', () => {
               group_by: [
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['category'],
                 },
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['subcategory'],
                 },
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['brand'],
                 },
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['region'],
                 },
               ],
@@ -522,7 +522,7 @@ describe('Pie/Donut Schema', () => {
               group_by: [
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['category'],
                 },
               ],
@@ -548,12 +548,12 @@ describe('Pie/Donut Schema', () => {
               group_by: [
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['category'],
                 },
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['subcategory'],
                 },
               ],
@@ -579,7 +579,7 @@ describe('Pie/Donut Schema', () => {
               group_by: [
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['region'],
                   collapse_by: 'sum',
                 },
@@ -593,12 +593,12 @@ describe('Pie/Donut Schema', () => {
                 },
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['category'],
                 },
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['subcategory'],
                 },
               ],
@@ -624,17 +624,17 @@ describe('Pie/Donut Schema', () => {
               group_by: [
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['category'],
                 },
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['subcategory'],
                 },
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['brand'],
                 },
               ],
@@ -666,23 +666,23 @@ describe('Pie/Donut Schema', () => {
               group_by: [
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['region'],
                   collapse_by: 'sum',
                 },
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['category'],
                 },
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['subcategory'],
                 },
                 {
                   operation: 'terms',
-                  size: 5,
+                  limit: 5,
                   fields: ['brand'],
                 },
               ],

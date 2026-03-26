@@ -35,6 +35,7 @@ import {
 import type { HeatmapStateESQL, HeatmapStateNoESQL } from '../../../schema/charts/heatmap';
 import { getValueApiColumn } from '../../columns/esql_column';
 import type { LensApiAllMetricOperations } from '../../../schema/metric_ops';
+import { fromLensStateLegendSizeToAPI } from '../legend_sizes';
 
 function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapState['legend'] {
   return {
@@ -42,7 +43,7 @@ function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapSta
     position: legend.position,
     ...stripUndefined<HeatmapState['legend']>({
       truncate_after_lines: getLegendTruncateAfterLines(legend),
-      size: legend.legendSize,
+      size: fromLensStateLegendSizeToAPI(legend.legendSize),
     }),
   };
 }

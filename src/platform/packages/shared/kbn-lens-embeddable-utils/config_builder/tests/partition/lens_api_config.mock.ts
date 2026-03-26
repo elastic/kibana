@@ -21,7 +21,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -67,7 +67,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -114,7 +114,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -157,7 +157,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -202,7 +202,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -246,7 +246,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -264,7 +264,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -305,7 +305,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -323,7 +323,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -365,7 +365,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -383,7 +383,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -421,7 +421,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -441,7 +441,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -493,7 +493,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -511,7 +511,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -564,7 +564,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -582,7 +582,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -636,7 +636,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -681,7 +681,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -695,7 +695,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -739,7 +739,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -757,7 +757,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -770,7 +770,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['clientip'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -811,7 +811,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -862,7 +862,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -875,7 +875,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['clientip'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -916,7 +916,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -929,7 +929,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -942,7 +942,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['clientip'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -983,7 +983,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -1034,7 +1034,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -1047,7 +1047,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['clientip'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -1089,7 +1089,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -1140,7 +1140,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -1178,7 +1178,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -1231,7 +1231,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['geo.dest'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -1271,7 +1271,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -1443,7 +1443,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },
@@ -1457,7 +1457,7 @@ export const esqlCharts = [
       {
         operation: 'terms',
         fields: ['tags.keyword'],
-        size: 3,
+        limit: 3,
         other_bucket: {
           include_documents_without_field: false,
         },

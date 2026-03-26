@@ -106,7 +106,7 @@ export const comprehensiveTagcloudWithAdHocDataView = {
   tag_by: {
     operation: 'terms',
     fields: ['geo.dest'],
-    size: 10,
+    limit: 10,
     other_bucket: {
       include_documents_without_field: false,
     },
@@ -169,7 +169,7 @@ export const comprehensiveTagcloudWithDataView = {
   tag_by: {
     operation: 'terms',
     fields: ['geo.dest'],
-    size: 10,
+    limit: 10,
     other_bucket: {
       include_documents_without_field: false,
     },

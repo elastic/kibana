@@ -15,13 +15,13 @@ import type {
   TypedLensSerializedState,
 } from '@kbn/lens-common';
 import { HEATMAP_GRID_NAME, LENS_HEATMAP_ID } from '@kbn/lens-common';
-import type { LegendSize } from '@kbn/chart-expressions-common';
 import type {
   HeatmapGridConfigResult,
   HeatmapLegendConfigResult,
 } from '@kbn/lens-common/visualizations/heatmap/types';
 
 import { DEFAULT_LAYER_ID } from '../../../constants';
+import { fromAPILegendSizeToState } from '../legend_sizes';
 import { getSharedChartAPIToLensState, stripUndefined } from '../utils';
 import type { HeatmapState } from '../../../schema';
 import { fromColorByValueAPIToLensState } from '../../coloring';
@@ -83,7 +83,7 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
       type: 'heatmap_legend',
       ...stripUndefined<HeatmapLegendConfigResult>({
         maxLines: layer.legend?.truncate_after_lines,
-        legendSize: layer.legend?.size as LegendSize,
+        legendSize: fromAPILegendSizeToState(layer.legend?.size),
         shouldTruncate: Boolean(layer.legend?.truncate_after_lines),
       }),
     },

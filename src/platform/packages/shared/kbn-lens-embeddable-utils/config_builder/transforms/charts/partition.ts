@@ -41,6 +41,7 @@ import {
   getSharedChartLensStateToAPI,
   stripUndefined,
 } from './utils';
+import { fromAPILegendSizeToState, fromLensStateLegendSizeToAPI } from './legend_sizes';
 import { addLayerColumn, groupIsNotCollapsed, isEsqlTableTypeDataset } from '../../utils';
 import { fromMetricAPItoLensState } from '../columns/metric';
 import { fromBucketLensApiToLensState } from '../columns/buckets';
@@ -209,7 +210,7 @@ function convertAPILegendDisplayOption(
   const legendOptions = legend
     ? stripUndefined({
         nestedLegend: 'nested' in legend ? legend?.nested : undefined,
-        legendSize: legend?.size,
+        legendSize: fromAPILegendSizeToState(legend?.size),
         legendMaxLines: legend?.truncate_after_lines,
         truncateLegend: Boolean(legend?.truncate_after_lines),
       })
@@ -451,7 +452,7 @@ function fromLensStateToSharedPartitionAPI(
     visible: layerState.legendDisplay === 'default' ? 'auto' : layerState.legendDisplay,
     truncate_after_lines: getLegendTruncateAfterLines(layerState),
     nested: isStateWaffleChart(visualization) ? undefined : layerState.nestedLegend,
-    size: layerState.legendSize,
+    size: fromLensStateLegendSizeToAPI(layerState.legendSize),
   });
   const valueDisplay = stripUndefined({
     mode: convertStateValueDisplayToAPI(layerState.numberDisplay),

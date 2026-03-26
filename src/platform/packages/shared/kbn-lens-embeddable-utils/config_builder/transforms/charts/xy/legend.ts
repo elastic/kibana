@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LegendLayout, LegendSize, type XYLegendValue } from '@kbn/chart-expressions-common';
+import { LegendLayout, type XYLegendValue } from '@kbn/chart-expressions-common';
 import type { XYVisualizationState } from '@kbn/lens-common';
+
 import type { XYState } from '../../../schema';
+import { fromAPILegendSizeToState, fromLensStateLegendSizeToAPI } from '../legend_sizes';
 import { getLegendTruncateAfterLines, stripUndefined } from '../utils';
 
 type OutsideLegendType = Extract<Required<XYState['legend']>, { inside: false }>;
@@ -80,23 +82,6 @@ function extractAlignment(legend: XYState['legend']):
   return {};
 }
 
-function getLegendSize(
-  size: OutsideLegendType['size'] | undefined
-): XYVisualizationState['legend']['legendSize'] {
-  switch (size) {
-    case 'small':
-      return LegendSize.SMALL;
-    case 'medium':
-      return LegendSize.MEDIUM;
-    case 'large':
-      return LegendSize.LARGE;
-    case 'xlarge':
-      return LegendSize.EXTRA_LARGE;
-    default:
-      return LegendSize.AUTO;
-  }
-}
-
 export function convertLegendToStateFormat(legend: XYState['legend']): {
   legend: XYVisualizationState['legend'];
 } {
@@ -117,29 +102,12 @@ export function convertLegendToStateFormat(legend: XYState['legend']): {
         }
       : {
           position: legend?.position ?? DEFAULT_LEGEND_POSITON,
-          legendSize: legend?.size ? getLegendSize(legend.size) : undefined,
+          legendSize: fromAPILegendSizeToState(legend?.size),
           ...(legend?.layout === 'list' ? { layout: LegendLayout.List } : {}),
         }),
   };
 
   return { legend: newStateLegend };
-}
-
-function getLegendSizeAPI(
-  size: XYVisualizationState['legend']['legendSize'] | undefined
-): Pick<OutsideLegendType, 'size'> | {} {
-  switch (size) {
-    case LegendSize.SMALL:
-      return { size: 'small' };
-    case LegendSize.MEDIUM:
-      return { size: 'medium' };
-    case LegendSize.LARGE:
-      return { size: 'large' };
-    case LegendSize.EXTRA_LARGE:
-      return { size: 'xlarge' };
-    default:
-      return {};
-  }
 }
 
 // @TODO improve this check
@@ -174,8 +142,8 @@ function getLegendLayout(legend: XYVisualizationState['legend']) {
   }
   return {
     inside: false,
-    ...getLegendSizeAPI(legend.legendSize),
-    ...(legend.position ? { position: legend.position } : {}),
+    size: fromLensStateLegendSizeToAPI(legend.legendSize),
+    position: legend.position,
   };
 }
 
