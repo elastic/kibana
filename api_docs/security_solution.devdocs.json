@@ -42,7 +42,7 @@
           ">"
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-        "lineNumber": 76,
+        "lineNumber": 77,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -58,7 +58,7 @@
               "any"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-            "lineNumber": 95,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -75,7 +75,7 @@
                   "<object>"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-                "lineNumber": 95,
+                "lineNumber": 96,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -116,7 +116,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-            "lineNumber": 113,
+            "lineNumber": 114,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -143,7 +143,7 @@
                   ">"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-                "lineNumber": 114,
+                "lineNumber": 115,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -160,7 +160,7 @@
                   "SetupPlugins"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-                "lineNumber": 115,
+                "lineNumber": 116,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -191,7 +191,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-            "lineNumber": 278,
+            "lineNumber": 279,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -207,7 +207,7 @@
                   "CoreStart"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-                "lineNumber": 278,
+                "lineNumber": 279,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -224,7 +224,7 @@
                   "StartPlugins"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-                "lineNumber": 278,
+                "lineNumber": 279,
                 "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -244,7 +244,7 @@
               "() => void"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-            "lineNumber": 298,
+            "lineNumber": 299,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -276,7 +276,7 @@
               ") => Promise<void>"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-            "lineNumber": 355,
+            "lineNumber": 356,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -303,7 +303,7 @@
                   ">"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-                "lineNumber": 356,
+                "lineNumber": 357,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -320,7 +320,7 @@
                   "SetupPlugins"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-                "lineNumber": 357,
+                "lineNumber": 358,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -342,7 +342,7 @@
               ">"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-            "lineNumber": 396,
+            "lineNumber": 420,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2606,7 +2606,7 @@
           ">"
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-        "lineNumber": 165,
+        "lineNumber": 167,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2622,7 +2622,7 @@
               "any"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-            "lineNumber": 197,
+            "lineNumber": 199,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2639,7 +2639,7 @@
                   "<unknown>"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 197,
+                "lineNumber": 199,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2670,7 +2670,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-            "lineNumber": 280,
+            "lineNumber": 282,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2686,7 +2686,7 @@
                   "SecuritySolutionPluginCoreSetupDependencies"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 281,
+                "lineNumber": 283,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2703,7 +2703,7 @@
                   "SecuritySolutionPluginSetupDependencies"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 282,
+                "lineNumber": 284,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2734,7 +2734,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-            "lineNumber": 703,
+            "lineNumber": 725,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2750,7 +2750,7 @@
                   "CoreStart"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 704,
+                "lineNumber": 726,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2767,7 +2767,7 @@
                   "SecuritySolutionPluginStartDependencies"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 705,
+                "lineNumber": 727,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2787,7 +2787,7 @@
               "() => void"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-            "lineNumber": 996,
+            "lineNumber": 1018,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3569,7 +3569,7 @@
       "label": "SecuritySolutionPluginSetup",
       "description": [],
       "path": "x-pack/solutions/security/plugins/security_solution/server/plugin_contract.ts",
-      "lineNumber": 105,
+      "lineNumber": 107,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -3595,7 +3595,7 @@
             ") => void"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/server/plugin_contract.ts",
-          "lineNumber": 106,
+          "lineNumber": 108,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -3618,7 +3618,7 @@
                 }
               ],
               "path": "x-pack/solutions/security/plugins/security_solution/server/lib/product_features_service/product_features_service.ts",
-              "lineNumber": 108,
+              "lineNumber": 116,
               "columnNumber": 41,
               "deprecated": false,
               "trackAdoption": false
@@ -3638,7 +3638,7 @@
             "{ readonly previewTelemetryUrlEnabled: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsSentinelOneRunScriptEnabled: boolean; readonly responseActionsEndpointMemoryDump: boolean; readonly responseActionsEndpointRunScript: boolean; readonly responseActionsEndpointAutomatedRunScript: boolean; readonly responseActionsScriptLibraryManagement: boolean; readonly assistantModelEvaluation: boolean; readonly enableRiskScoreResetToZero: boolean; readonly enableRiskScorePrivmonModifier: boolean; readonly riskScoreAssistantToolDisabled: boolean; readonly entityDetailsHighlightsEnabled: boolean; readonly entityAnalyticsNewHomePageEnabled: boolean; readonly leadGenerationEnabled: boolean; readonly leadGenerationDetailsEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly storeGapsInEventLogEnabled: boolean; readonly filterProcessDescendantsForTrustedAppsEnabled: boolean; readonly entityStoreDisabled: boolean; readonly aiRuleCreationEnabled: boolean; readonly siemMigrationsDisabled: boolean; readonly defendInsightsPolicyResponseFailure: boolean; readonly endpointExceptionsMovedUnderManagement: boolean; readonly crowdstrikeRunScriptEnabled: boolean; readonly newDataViewPickerEnabled: boolean; readonly microsoftDefenderEndpointRunScriptEnabled: boolean; readonly trustedAppsAdvancedMode: boolean; readonly trustedDevices: boolean; readonly automaticDashboardsMigration: boolean; readonly siemReadinessDashboard: boolean; readonly microsoftDefenderEndpointCancelEnabled: boolean; readonly enableAlertsAndAttacksAlignment: boolean; readonly qradarRulesMigration: boolean; readonly kubernetesEnabled: boolean; readonly entityAnalyticsWatchlistEnabled: boolean; readonly trialCompanionEnabled: boolean; readonly linuxDnsEvents: boolean; readonly splunkV2DashboardsEnabled: boolean; readonly deHealthUIEnabled: boolean; readonly ruleHealthUIEnabled: boolean; readonly automaticTroubleshootingSkill: boolean; readonly newFlyoutSystemEnabled: boolean; readonly entityAnalyticsEntityStoreV2: boolean; }"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/server/plugin_contract.ts",
-          "lineNumber": 110,
+          "lineNumber": 112,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -3655,7 +3655,7 @@
       "label": "SecuritySolutionPluginStart",
       "description": [],
       "path": "x-pack/solutions/security/plugins/security_solution/server/plugin_contract.ts",
-      "lineNumber": 117,
+      "lineNumber": 119,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -3693,7 +3693,7 @@
         "label": "ADD_DATA_PATH",
         "description": [],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 42,
+        "lineNumber": 43,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3729,7 +3729,7 @@
           "\"/app/security\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 40,
+        "lineNumber": 41,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3780,7 +3780,7 @@
           "\"/api/detection_engine/rules/_find\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 306,
+        "lineNumber": 303,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3835,7 +3835,7 @@
           "string[]"
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 583,
+        "lineNumber": 580,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3869,7 +3869,7 @@
           "\"/manage\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 99,
+        "lineNumber": 100,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3883,7 +3883,7 @@
         "label": "RULES_FEATURE_ID",
         "description": [],
         "signature": [
-          "\"securitySolutionRulesV2\""
+          "\"securitySolutionRulesV3\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
         "lineNumber": 37,
