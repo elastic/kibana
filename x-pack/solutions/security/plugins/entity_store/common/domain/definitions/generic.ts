@@ -7,13 +7,18 @@
 
 import { newestValue } from './field_retention_operations';
 import type { EntityDefinitionWithoutId } from './entity_schema';
-import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common_fields';
+import {
+  getCommonFieldDescriptions,
+  getEntityFieldsDescriptions,
+  getEntitySourceFieldEvaluations,
+} from './common_fields';
 
 export const genericEntityDefinition: EntityDefinitionWithoutId = {
   type: 'generic',
   name: `Security 'generic' Entity Store Definition`,
   identityField: { singleField: 'entity.id', skipTypePrepend: true },
   indexPatterns: [],
+  fieldEvaluations: getEntitySourceFieldEvaluations(),
   fields: [
     // We want this to make sure it's also extracted on CCS logs extraction
     newestValue({ source: 'entity.id' }),

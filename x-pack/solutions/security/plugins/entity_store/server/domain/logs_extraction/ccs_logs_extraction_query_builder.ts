@@ -63,9 +63,6 @@ export function buildCcsLogsExtractionEsqlQuery({
 
   const parts = [];
 
-  // Because we don't have updates on remote clusters, we need to nullify the unmapped fields
-  parts.push(`SET unmapped_fields="nullify";`);
-
   // FROM and WHERE
   parts.push(
     buildExtractionSourceClause({ indexPatterns, type, fromDateISO, toDateISO, recoveryId })

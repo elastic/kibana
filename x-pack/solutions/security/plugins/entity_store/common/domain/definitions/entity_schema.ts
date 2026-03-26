@@ -51,7 +51,7 @@ const fieldEvaluationSourceSchema = z.union([
 const fieldEvaluationSchema = z.object({
   destination: z.string(),
   sources: z.array(fieldEvaluationSourceSchema),
-  fallbackValue: z.string(),
+  fallbackValue: z.string().nullable(),
   whenClauses: z.array(fieldEvaluationWhenClauseSchema),
 });
 
@@ -136,6 +136,8 @@ export const entitySchema = z.object({
   filter: z.string().optional(),
   entityTypeFallback: z.string().optional(),
   fields: z.array(fieldSchema),
+  // Optional evaluated fields applied before pre-agg overrides and STATS for all entity types.
+  fieldEvaluations: z.optional(z.array(fieldEvaluationSchema)),
   identityField: identityFieldSchema,
   indexPatterns: z.array(z.string()),
   // Optional filter (Condition from @kbn/streamlang) applied in ESQL only, right after the

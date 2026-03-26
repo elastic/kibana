@@ -231,6 +231,12 @@ describe('getEuidPainlessEvaluation', () => {
       });
     });
   });
+
+  it('emits a null literal for nullable field-evaluation fallbacks', () => {
+    const script = getEuidPainlessEvaluation(EntityType.enum.host);
+
+    expect(script).toContain('else { entity_source = null; }');
+  });
 });
 
 describe('getEuidPainlessRuntimeMapping', () => {

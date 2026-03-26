@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash';
 import { USER_TS_EXTRACTION_CASES } from '../../../test/scout/api/fixtures/user_ts_extraction_cases';
 import { getEuidFromObject } from './memory';
 import { applyWhenConditionTrueSetFields, getDocument } from './commons';
-import { applyFieldEvaluations } from './field_evaluations';
+import { applyFieldEvaluations, getFieldEvaluationsFromDefinition } from './field_evaluations';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 
 const USER = 'user' as const;
@@ -17,9 +17,9 @@ const USER = 'user' as const;
 function deriveUserMeta(doc: Record<string, unknown>) {
   const d = cloneDeep(getDocument({ _source: doc }));
   const def = getEntityDefinitionWithoutId(USER);
-  const { identityField } = def;
-  if ('fieldEvaluations' in identityField && identityField.fieldEvaluations?.length) {
-    Object.assign(d, applyFieldEvaluations(d, identityField.fieldEvaluations));
+  const fieldEvaluations = getFieldEvaluationsFromDefinition(def);
+  if (fieldEvaluations.length > 0) {
+    Object.assign(d, applyFieldEvaluations(d, fieldEvaluations));
   }
   if (def.whenConditionTrueSetFieldsPreAgg?.length) {
     applyWhenConditionTrueSetFields(d, def.whenConditionTrueSetFieldsPreAgg);

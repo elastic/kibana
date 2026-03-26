@@ -10,6 +10,7 @@ import type { EntityDefinitionWithoutId } from './entity_schema';
 import {
   getCommonFieldDescriptions,
   getEntityFieldsDescriptions,
+  getEntitySourceFieldEvaluations,
   isNotEmptyCondition,
 } from './common_fields';
 
@@ -36,6 +37,7 @@ export const hostEntityDefinition: EntityDefinitionWithoutId = {
   },
   entityTypeFallback: 'Host',
   indexPatterns: [],
+  fieldEvaluations: getEntitySourceFieldEvaluations(),
   fields: [
     newestValue({ destination: 'entity.name', source: 'host.name' }),
     oldestValue({ source: 'host.entity.id' }),

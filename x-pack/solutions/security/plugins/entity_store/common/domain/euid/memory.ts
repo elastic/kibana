@@ -16,7 +16,7 @@ import {
   getFieldValue,
   isEuidField,
 } from './commons';
-import { applyFieldEvaluations } from './field_evaluations';
+import { applyFieldEvaluations, getFieldEvaluationsFromDefinition } from './field_evaluations';
 
 /**
  * Constructs an entity id from the provided entity type and document.
@@ -43,7 +43,8 @@ export function getEuidFromObject(entityType: EntityType, doc: any) {
   }
 
   doc = getDocument(doc);
-  const { identityField } = getEntityDefinitionWithoutId(entityType);
+  const entityDefinition = getEntityDefinitionWithoutId(entityType);
+  const { identityField } = entityDefinition;
 
   if (isSingleFieldIdentity(identityField)) {
     const value = getFieldValue(doc, identityField.singleField);
@@ -56,11 +57,11 @@ export function getEuidFromObject(entityType: EntityType, doc: any) {
     return `${entityType}:${value}`;
   }
 
-  if (identityField.fieldEvaluations?.length) {
-    const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
+  const fieldEvaluations = getFieldEvaluationsFromDefinition(entityDefinition);
+  if (fieldEvaluations.length > 0) {
+    const evaluated = applyFieldEvaluations(doc, fieldEvaluations);
     doc = { ...doc, ...evaluated };
   }
-  const entityDefinition = getEntityDefinitionWithoutId(entityType);
   if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
     applyWhenConditionTrueSetFields(doc, entityDefinition.whenConditionTrueSetFieldsPreAgg);
   }

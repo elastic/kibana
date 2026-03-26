@@ -15,6 +15,7 @@ import type {
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { isEuidField } from './commons';
+import { getFieldEvaluationsFromDefinition } from './field_evaluations';
 
 /**
  * Keyword runtime field scripts must call emit(); they cannot return a value from the script root.
@@ -127,8 +128,9 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
 
   const evaluatedVars = new Map<string, string>();
   let preamble = '';
-  if (identityField.fieldEvaluations?.length) {
-    const result = buildFieldEvaluationsPreamble(identityField.fieldEvaluations);
+  const fieldEvaluations = getFieldEvaluationsFromDefinition(entityDefinition);
+  if (fieldEvaluations.length > 0) {
+    const result = buildFieldEvaluationsPreamble(fieldEvaluations);
     preamble = result.preamble + ' ';
     result.evaluatedVars.forEach((v, k) => evaluatedVars.set(k, v));
   }
@@ -299,6 +301,10 @@ function escapePainlessString(s: string): string {
   return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
+function toPainlessNullableStringLiteral(value: string | null): string {
+  return value === null ? 'null' : `"${escapePainlessString(value)}"`;
+}
+
 function destinationToVarName(destination: string): string {
   return destination.replace(/\./g, '_');
 }
@@ -338,7 +344,7 @@ function buildFieldEvaluationsPreamble(evaluations: FieldEvaluation[]): {
       first = false;
     }
     stmts.push(`  else { ${varName} = _src; }`);
-    stmts.push(`} else { ${varName} = "${escapePainlessString(ev.fallbackValue)}"; }`);
+    stmts.push(`} else { ${varName} = ${toPainlessNullableStringLiteral(ev.fallbackValue)}; }`);
     parts.push(stmts.join(' '));
   }
   const preamble = parts.join(' ');

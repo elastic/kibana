@@ -24,7 +24,6 @@ import type {
 } from '../../../common/domain/definitions/entity_schema';
 import { escapeEsqlStringLiteral } from '../../../common/esql/strings';
 import {
-  isSingleFieldIdentity,
   type EntityField,
   type EntityType,
 } from '../../../common/domain/definitions/entity_schema';
@@ -32,6 +31,7 @@ import {
   getEuidEsqlDocumentsContainsIdFilter,
   getFieldEvaluationsEsqlFromDefinition,
 } from '../../../common/domain/euid/esql';
+import { getFieldEvaluationsFromDefinition } from '../../../common/domain/euid/field_evaluations';
 
 export const ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD =
   'entity.EngineMetadata.FirstSeenLogInPage';
@@ -171,7 +171,7 @@ export function extractPaginationParams(
 }
 
 /**
- * Builds the ESQL fragment that evaluates identityField.fieldEvaluations (EVAL only).
+ * Builds the ESQL fragment that evaluates shared and identity fieldEvaluations (EVAL only).
  * Returns empty string when there are no field evaluations.
  */
 export function buildFieldEvaluations(entityDefinition: EntityDefinition): string {
@@ -431,9 +431,5 @@ function buildPaginationWhereClause(
 }
 
 export function hasFieldEvaluations(entityDefinition: EntityDefinition): boolean {
-  if (isSingleFieldIdentity(entityDefinition.identityField)) {
-    return false;
-  }
-
-  return (entityDefinition.identityField.fieldEvaluations?.length ?? 0) > 0;
+  return getFieldEvaluationsFromDefinition(entityDefinition).length > 0;
 }
