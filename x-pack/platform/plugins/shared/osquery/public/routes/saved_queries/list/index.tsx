@@ -289,7 +289,7 @@ const SavedQueriesPageComponent = () => {
       <EuiButton
         fill
         {...newQueryLinkProps}
-        iconType="plusInCircle"
+        iconType="plusCircle"
         isDisabled={!permissions.writeSavedQueries}
       >
         <FormattedMessage
