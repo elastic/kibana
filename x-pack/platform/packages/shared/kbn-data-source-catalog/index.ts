@@ -26,3 +26,5 @@ export {
 } from './src/constants';
 
 export { catalogIndexMapping } from './src/index_mapping';
+
+export { CatalogClient } from './src/catalog_client';
