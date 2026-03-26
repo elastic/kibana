@@ -114,7 +114,7 @@ const ErrorMessage = memo<{ message: string; 'data-test-subj'?: string }>(
     return (
       <EuiText textAlign="center" data-test-subj={dataTestSubj}>
         <EuiSpacer size="m" />
-        <EuiIcon type="minusInCircle" color="danger" /> {message}
+        <EuiIcon type="minusCircle" color="danger" /> {message}
         <EuiSpacer size="m" />
       </EuiText>
     );
