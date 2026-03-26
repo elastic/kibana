@@ -69,7 +69,7 @@ export const USE_CASE_OPTIONS: UseCaseOption[] = [
 ];
 
 export const INSTALL_SKILL_CMD =
-  'npx skills add elastic/agent-skills --skill elasticsearch-onboarding';
+  'npx skills add elastic/agent-skills --skill elasticsearch-onboarding -y';
 
 export const INSTALL_LINES_CURSOR = [
   'Install the elasticsearch onboarding skill:',
