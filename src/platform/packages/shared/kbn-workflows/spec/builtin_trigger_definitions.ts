@@ -73,9 +73,29 @@ export const builtInTriggerDefinitions: BaseTriggerDefinition[] = [
     description: 'Trigger a workflow when an alerting rule fires',
     schema: AlertRuleTriggerSchema,
     documentation: {
+      details:
+        'When an alert trigger fires, the event data is available via `{{ event }}` (NOT `triggers.event`). ' +
+        '`event.alerts` is an array of alert objects, `event.rule` contains the rule metadata (id, name, tags), ' +
+        'and `event.spaceId` is the space where the event was emitted.',
       examples: [
         `triggers:
   - type: alert`,
+        `# Alert-triggered workflow referencing event data in steps:
+triggers:
+  - type: alert
+steps:
+  - name: log_alert
+    type: console
+    with:
+      message: "Alert from rule: {{ event.rule.name }}"
+  - name: process_alerts
+    type: foreach
+    foreach: "{{ event.alerts }}"
+    steps:
+      - name: log_each_alert
+        type: console
+        with:
+          message: "Alert ID: {{ foreach.item._id }}"`,
       ],
     },
   },
