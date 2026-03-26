@@ -21,6 +21,7 @@ import {
 import { useAppContext } from '../../../../../app_context';
 import type { Index } from '../../../../../../../common';
 import { OverviewCard } from './overview_card';
+import { storageCardTitle } from './translations';
 
 export const StorageDetails: FunctionComponent<{
   primarySize: string;
@@ -30,15 +31,15 @@ export const StorageDetails: FunctionComponent<{
 }> = ({ primarySize, size, primary, replica }) => {
   const largeFontSize = useEuiFontSize('l').fontSize;
   const { config } = useAppContext();
+
   if (!config.enableIndexStats) {
     return null;
   }
+
   return (
     <OverviewCard
       data-test-subj="indexDetailsStorage"
-      title={i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.storage.cardTitle', {
-        defaultMessage: 'Storage',
-      })}
+      title={storageCardTitle}
       content={{
         left: (
           <EuiFlexGroup gutterSize="xs" alignItems="baseline">
@@ -85,7 +86,7 @@ export const StorageDetails: FunctionComponent<{
         left: (
           <EuiFlexGroup gutterSize="xs">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="shard" color="subdued" />
+              <EuiIcon type="shard" color="subdued" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTextColor color="subdued">

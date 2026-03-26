@@ -14,8 +14,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLoadingSpinner,
   EuiText,
   EuiTextColor,
+  EuiToolTip,
   useEuiFontSize,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -23,6 +25,8 @@ import { css } from '@emotion/react';
 import { useAppContext } from '../../../../../app_context';
 import type { Index } from '../../../../../../../common';
 import { OverviewCard } from './overview_card';
+import type { DocCountState } from './quick_stats';
+import { docCountErrorTooltip, docCountErrorLabel } from './translations';
 
 type NormalizedHealth = 'green' | 'red' | 'yellow';
 const healthToBadgeMapping: Record<
@@ -50,18 +54,66 @@ const healthToBadgeMapping: Record<
 };
 
 export const StatusDetails: FunctionComponent<{
-  documents: Index['documents'];
+  docCount: DocCountState;
   documentsDeleted: Index['documents_deleted'];
   status: Index['status'];
   health: Index['health'];
-}> = ({ documents, documentsDeleted, status, health }) => {
+}> = ({ docCount, documentsDeleted, status, health }) => {
   const largeFontSize = useEuiFontSize('l').fontSize;
   const { config } = useAppContext();
+
   if (!config.enableIndexStats || !health) {
     return null;
   }
+
   const badgeConfig = healthToBadgeMapping[health.toLowerCase() as NormalizedHealth];
   const healthBadge = <EuiBadge color={badgeConfig.color}>{badgeConfig.label}</EuiBadge>;
+
+  const renderDocCountFooter = () => {
+    if (docCount.isLoading) {
+      return <EuiLoadingSpinner size="m" />;
+    }
+
+    if (docCount.isError) {
+      return (
+        <EuiFlexGroup gutterSize="xs">
+          <EuiToolTip content={docCountErrorTooltip}>
+            <EuiFlexGroup gutterSize="xs" tabIndex={0}>
+              <EuiIcon type="warning" color="warning" aria-hidden={true} />
+              <EuiTextColor color="warning">{docCountErrorLabel}</EuiTextColor>
+            </EuiFlexGroup>
+          </EuiToolTip>
+          <EuiTextColor color="subdued">
+            {'/ '}
+            {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.status.documentsDeletedLabel', {
+              defaultMessage: '{documentsDeleted} Deleted',
+              values: { documentsDeleted },
+            })}
+          </EuiTextColor>
+        </EuiFlexGroup>
+      );
+    }
+
+    return (
+      <EuiFlexGroup gutterSize="xs">
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="documents" color="subdued" aria-hidden={true} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTextColor color="subdued">
+            {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.status.documentsLabel', {
+              defaultMessage:
+                '{documents, plural, one {# Document} other {# Documents}} / {documentsDeleted} Deleted',
+              values: {
+                documents: docCount.count,
+                documentsDeleted,
+              },
+            })}
+          </EuiTextColor>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
 
   return (
     <OverviewCard
@@ -97,25 +149,7 @@ export const StatusDetails: FunctionComponent<{
         ),
       }}
       footer={{
-        left: (
-          <EuiFlexGroup gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="documents" color="subdued" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTextColor color="subdued">
-                {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.status.documentsLabel', {
-                  defaultMessage:
-                    '{documents, plural, one {# Document} other {# Documents}} / {documentsDeleted} Deleted',
-                  values: {
-                    documents,
-                    documentsDeleted,
-                  },
-                })}
-              </EuiTextColor>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
+        left: renderDocCountFooter(),
       }}
     />
   );

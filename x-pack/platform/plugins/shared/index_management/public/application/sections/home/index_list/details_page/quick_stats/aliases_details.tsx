@@ -29,6 +29,7 @@ import {
 
 import type { Index } from '../../../../../../../common';
 import { OverviewCard } from './overview_card';
+import { aliasesCardTitle } from './translations';
 
 const MAX_VISIBLE_ALIASES = 3;
 
@@ -54,9 +55,7 @@ export const AliasesDetails: FunctionComponent<{ aliases: Index['aliases'] }> = 
     <>
       <OverviewCard
         data-test-subj="indexDetailsAliases"
-        title={i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.aliases.cardTitle', {
-          defaultMessage: 'Aliases',
-        })}
+        title={aliasesCardTitle}
         content={{
           left: (
             <EuiFlexGroup gutterSize="xs" alignItems="baseline">
@@ -112,11 +111,7 @@ export const AliasesDetails: FunctionComponent<{ aliases: Index['aliases'] }> = 
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <h2 id={flyoutTitleId}>
-                {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.aliases.cardTitle', {
-                  defaultMessage: 'Aliases',
-                })}
-              </h2>
+              <h2 id={flyoutTitleId}>{aliasesCardTitle}</h2>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
