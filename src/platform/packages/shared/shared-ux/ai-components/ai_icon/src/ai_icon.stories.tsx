@@ -15,10 +15,10 @@ const meta = {
   title: 'AI components/AiIcon',
   component: AiIcon,
   parameters: {
-    controls: { include: ['type', 'size'] },
+    controls: { include: ['iconType', 'size'] },
   },
   argTypes: {
-    type: {
+    iconType: {
       control: 'select',
       options: ['aiAssistantLogo', 'sparkles', 'productAgent'],
     },
@@ -33,8 +33,7 @@ export default meta;
 
 export const Default: StoryObj<typeof meta> = {
   args: {
-    type: 'sparkles',
+    iconType: 'sparkles',
     size: 'xl',
-    'aria-hidden': true,
   },
 };

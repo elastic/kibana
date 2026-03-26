@@ -9,8 +9,11 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
+import type { IconType } from '@elastic/eui';
 import { EuiIcon, type EuiIconProps, type IconSize } from '@elastic/eui';
 
+import type { AiButtonIconType } from '../../ai_button/src/types';
+import { AiAssistantLogo } from '../../ai_icons/ai_assistant_logo';
 import { SvgAiGradientDefs } from '../../gradient_styles/svg_ai_gradient_defs';
 import { useSvgAiGradient } from '../../gradient_styles/use_ai_gradient_styles';
 
@@ -21,19 +24,21 @@ const aiIconWrapperCss = css({
   position: 'relative',
 });
 
-export interface AiIconProps extends EuiIconProps {
-  type: 'aiAssistantLogo' | 'sparkles' | 'productAgent';
+export interface AiIconProps extends Omit<EuiIconProps, 'type'> {
+  iconType: AiButtonIconType;
   size?: IconSize;
 }
+const resolvedIconType = (iconType: AiButtonIconType): IconType =>
+  iconType === 'aiAssistantLogo' ? AiAssistantLogo : iconType;
 
-/** Renders an AI icon with a gradient fill using EUI semantic colors. */
-export const AiIcon = ({ type, size, css: userCss, ...rest }: AiIconProps) => {
-  const { gradientId, iconGradientCss, colors } = useSvgAiGradient();
+/** Renders an AI icon with a gradient fill */
+export const AiIcon = ({ iconType, size, css: userCss, ...rest }: AiIconProps) => {
+  const { gradientId, iconGradientCss, colors } = useSvgAiGradient({ variant: 'base' });
 
   return (
     <span css={[aiIconWrapperCss, iconGradientCss]}>
       <SvgAiGradientDefs gradientId={gradientId} colors={colors} />
-      <EuiIcon {...rest} type={type} size={size} css={userCss} />
+      <EuiIcon {...rest} type={resolvedIconType(iconType)} size={size} css={userCss} />
     </span>
   );
 };

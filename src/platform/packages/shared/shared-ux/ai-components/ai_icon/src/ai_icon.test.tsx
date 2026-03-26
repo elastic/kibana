@@ -34,7 +34,7 @@ beforeEach(() => {
 
 describe('<AiIcon />', () => {
   it('renders EuiIcon, gradient defs, and calls useSvgAiGradient', () => {
-    const { container } = render(<AiIcon type="sparkles" aria-hidden={true} />);
+    const { container } = render(<AiIcon iconType="sparkles" aria-hidden={true} />);
 
     expect(mockUseSvgAiGradient).toHaveBeenCalled();
     expect(screen.getByTestId('svg-ai-gradient-defs')).toBeInTheDocument();
@@ -42,7 +42,7 @@ describe('<AiIcon />', () => {
   });
 
   it('forwards props to EuiIcon', () => {
-    render(<AiIcon type="productAgent" title="Agent icon" />);
+    render(<AiIcon iconType="productAgent" title="Agent icon" />);
 
     expect(screen.getByTitle('Agent icon')).toBeInTheDocument();
   });
