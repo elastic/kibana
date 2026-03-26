@@ -9,6 +9,10 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
+import downloadWorkflow from './workflows/download.yaml';
+import listWorkflow from './workflows/list.yaml';
+import metadataWorkflow from './workflows/metadata.yaml';
+import searchWorkflow from './workflows/search.yaml';
 
 // Google Drive API constants
 const GOOGLE_DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3';
@@ -374,4 +378,6 @@ export const GoogleDriveConnector: ConnectorSpec = {
       }
     },
   },
+
+  agentBuilderWorkflows: [downloadWorkflow, listWorkflow, metadataWorkflow, searchWorkflow],
 };

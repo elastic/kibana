@@ -14,7 +14,7 @@ import type { Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { MANAGED_STREAM_NAME } from '../datasets';
-import type { ExcludeExperimentOutput } from '../../../src/evaluators/exclude';
+import type { ExcludeExperimentOutput } from '../../../src/evaluators/ki_feature_exclusion/evaluators';
 import { fetchSampleDocuments } from './fetch_sample_documents';
 
 export async function runExcludeExperiment({
