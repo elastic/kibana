@@ -223,6 +223,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         width: '20%',
       },
       {
+        field: 'name' as const,
         name: i18n.translate('xpack.securitySolution.siemReadiness.continuity.column.actions', {
           defaultMessage: 'Actions',
         }),

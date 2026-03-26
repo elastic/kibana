@@ -295,6 +295,7 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         },
       },
       {
+        field: 'indexName' as const,
         name: i18n.translate(
           'xpack.securitySolution.siemReadiness.retention.table.column.baselineRetentionFedRAMP',
           {
@@ -345,6 +346,7 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         },
       },
       {
+        field: 'indexName' as const,
         name: i18n.translate(
           'xpack.securitySolution.siemReadiness.retention.table.column.actions',
           {

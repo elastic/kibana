@@ -304,6 +304,7 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         },
       },
       {
+        field: 'indexName' as const,
         name: i18n.translate('xpack.securitySolution.siemReadiness.quality.table.column.action', {
           defaultMessage: 'Actions',
         }),
