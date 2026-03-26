@@ -140,7 +140,7 @@ const datePickerCss = css`
   max-width: 500px;
 `;
 
-const separatorCss = ({ euiTheme }: UseEuiTheme) => ({ color: euiTheme.colors.lightShade });
+const separatorCss = ({ euiTheme }: UseEuiTheme) => ({ color: euiTheme.colors.subduedText });
 const badgePaddingCss = { padding: '0 6px' };
 
 const isLiveRow = (row: UnifiedHistoryRow): row is LiveHistoryRow => row.sourceType === 'live';
@@ -346,10 +346,10 @@ const UnifiedHistoryTableComponent = () => {
     if (isScheduledRow(row) && (row.queryName || row.packName)) {
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow>{row.queryName ?? row.packName}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{row.queryName ?? row.packName}</EuiFlexItem>
           {row.packName && row.queryName && (
             <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{row.packName}</EuiBadge>
+              <EuiBadge color="hollow" iconType="package">{row.packName}</EuiBadge>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -711,6 +711,7 @@ const UnifiedHistoryTableComponent = () => {
             isPaused={isPaused}
             refreshInterval={refreshInterval}
             onRefreshChange={handleRefreshChange}
+            updateButtonProps={{ fill: false }}
             data-test-subj="history-date-picker"
           />
         </EuiFlexItem>
