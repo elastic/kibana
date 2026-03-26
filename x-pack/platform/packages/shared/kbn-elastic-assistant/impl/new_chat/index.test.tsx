@@ -48,12 +48,11 @@ describe('NewChat', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the default New Chat button with a discuss icon', () => {
+  it('renders the default New Chat button with an assistant (AiButton) icon', () => {
     render(<NewChat {...defaultProps} />);
 
-    const newChatButton = screen.getByTestId('newChat');
-
-    expect(newChatButton.querySelector('[data-euiicon-type="discuss"]')).toBeInTheDocument();
+    expect(screen.getByTestId('newChat')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Chat' })).toBeInTheDocument();
   });
 
   it('does not render the default New Chat button with a discuss icon when assistant is not visible', () => {
@@ -71,9 +70,8 @@ describe('NewChat', () => {
   it('renders the default New Chat button even if the Assistant is disabled', () => {
     render(<NewChat {...defaultProps} isAssistantEnabled={false} />);
 
-    const newChatButton = screen.getByTestId('newChat');
-
-    expect(newChatButton.querySelector('[data-euiicon-type="discuss"]')).toBeInTheDocument();
+    expect(screen.getByTestId('newChat')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Chat' })).toBeInTheDocument();
   });
 
   it('renders the default "New Chat" text when children are NOT provided', () => {
