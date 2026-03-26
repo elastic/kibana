@@ -53,7 +53,7 @@ export const ViewLink: FC<Props> = ({ item }) => {
       <EuiButtonIcon
         href={viewAnalyticsResultsLink}
         size="xs"
-        iconType="visTable"
+        iconType="table"
         aria-label={viewJobResultsButtonText}
         data-test-subj="mlOverviewAnalyticsJobViewButton"
         isDisabled={disabled}
@@ -76,7 +76,7 @@ export function useTableActions(): Array<Action<DataFrameAnalyticsListRow>> {
         defaultMessage: 'View job',
       }),
       type: 'icon',
-      icon: 'list',
+      icon: 'listBullet',
       onClick: async (item) => {
         const { url } = await mlManagementLocator?.getUrl(
           {

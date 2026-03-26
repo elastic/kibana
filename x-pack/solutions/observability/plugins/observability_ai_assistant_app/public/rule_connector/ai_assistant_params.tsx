@@ -108,7 +108,7 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
           // @ts-expect-error upgrade typescript v5.1.6
           isInvalid={errors.connector?.length > 0}
           options={connectors?.map((connector) => {
-            return { value: connector.id, text: connector.name };
+            return { value: connector.connectorId, text: connector.name };
           })}
           onChange={(event) => {
             selectConnector(event.target.value);
@@ -181,7 +181,7 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
             size="m"
             fullWidth
             color="danger"
-            iconType="minusInCircle"
+            iconType="minusCircle"
             data-test-subj="removePropmptButton"
             onClick={handleRemovePrompt}
           >
@@ -196,7 +196,7 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
             disabled={actionParams?.prompts?.length === ALERT_STATUSES.length}
             size="m"
             fullWidth
-            iconType="plusInCircle"
+            iconType="plusCircle"
             data-test-subj="addPrompButton"
             onClick={handleAddPrompt}
           >

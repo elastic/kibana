@@ -9,7 +9,8 @@
     ]
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "**/*.json"
   ],
   "exclude": [
     "target/**/*"
@@ -26,6 +27,7 @@
     "@kbn/some-dev-log",
     "@kbn/inference-tracing",
     "@kbn/repo-info",
+    "@kbn/kbn-client",
     "@kbn/test",
     "@kbn/inference-prompt-utils",
     "@kbn/tracing-utils",
