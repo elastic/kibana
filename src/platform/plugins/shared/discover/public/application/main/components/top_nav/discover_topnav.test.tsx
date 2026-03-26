@@ -14,21 +14,20 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DiscoverTopNavProps } from './discover_topnav';
 import { DiscoverTopNav } from './discover_topnav';
-import { discoverServiceMock as mockDiscoverService } from '../../../../__mocks__/services';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
+import {
+  getDiscoverInternalStateMock,
+  type InternalStateMockToolkit,
+} from '../../../../__mocks__/discover_state.mock';
 import type { SearchBarCustomization } from '../../../../customizations';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import { useDiscoverCustomization } from '../../../../customizations';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { internalStateActions } from '../../state_management/redux';
-import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import { DiscoverTopNavMenuProvider, discoverTopNavMenuContext } from './discover_topnav_menu';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-  useKibana: jest.fn(),
-}));
+let mockDiscoverService = createDiscoverServicesMock();
 
 const MockCustomSearchBar: typeof mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu =
   () => <div data-test-subj="custom-search-bar" />;
@@ -59,26 +58,39 @@ const mockDefaultCapabilities = {
   discover_v2: { save: true },
 } as unknown as typeof mockDiscoverService.capabilities;
 
-function getProps(
+async function setup(
   {
     capabilities,
   }: {
     capabilities?: Partial<typeof mockDiscoverService.capabilities>;
   } = { capabilities: mockDefaultCapabilities }
-): DiscoverTopNavProps {
+) {
+  mockDiscoverService = createDiscoverServicesMock();
   if (capabilities) {
     mockDiscoverService.capabilities = capabilities as typeof mockDiscoverService.capabilities;
   }
-  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-  stateContainer.internalState.dispatch(
-    stateContainer.injectCurrentTab(internalStateActions.setDataView)({ dataView: dataViewMock })
+
+  const toolkit = getDiscoverInternalStateMock({
+    services: mockDiscoverService,
+    persistedDataViews: [dataViewMock],
+  });
+
+  await toolkit.initializeTabs();
+  await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+
+  toolkit.internalState.dispatch(
+    internalStateActions.setDataView({
+      tabId: toolkit.getCurrentTab().id,
+      dataView: dataViewMock,
+    })
   );
 
-  return {
-    stateContainer,
+  const props: DiscoverTopNavProps = {
     savedQuery: '',
     onFieldEdited: jest.fn(),
   };
+
+  return { toolkit, props };
 }
 
 // Helper component to capture the topNavMenu from context
@@ -91,19 +103,20 @@ const TopNavMenuCapture = () => {
   return null;
 };
 
-const mockUseKibana = useKibana as jest.Mock;
-const getTestComponent = (props: DiscoverTopNavProps) =>
+const getTestComponent = ({
+  toolkit,
+  props,
+}: {
+  toolkit: InternalStateMockToolkit;
+  props: DiscoverTopNavProps;
+}) =>
   mountWithIntl(
-    <DiscoverTestProvider
-      services={mockDiscoverService}
-      stateContainer={props.stateContainer}
-      runtimeState={{ currentDataView: dataViewMock, adHocDataViews: [] }}
-    >
-      <DiscoverTopNavMenuProvider customizationContext={props.stateContainer.customizationContext}>
+    <DiscoverToolkitTestProvider toolkit={toolkit}>
+      <DiscoverTopNavMenuProvider customizationContext={toolkit.customizationContext}>
         <TopNavMenuCapture />
         <DiscoverTopNav {...props} />
       </DiscoverTopNavMenuProvider>
-    </DiscoverTestProvider>
+    </DiscoverToolkitTestProvider>
   );
 
 describe('Discover topnav component', () => {
@@ -124,16 +137,12 @@ describe('Discover topnav component', () => {
           throw new Error(`Unknown customization id: ${id}`);
       }
     });
-
-    mockUseKibana.mockReturnValue({
-      services: mockDiscoverService,
-    });
   });
 
   test('generated config of AppMenuConfig is correct when discover save permissions are assigned', async () => {
-    const props = getProps({ capabilities: { discover_v2: { save: true } } });
+    const { toolkit, props } = await setup({ capabilities: { discover_v2: { save: true } } });
     await act(async () => {
-      getTestComponent(props);
+      getTestComponent({ toolkit, props });
     });
 
     const itemIds = capturedTopNavMenu?.items?.map((item) => item.id) || [];
@@ -142,9 +151,9 @@ describe('Discover topnav component', () => {
   });
 
   test('generated config of AppMenuConfig is correct when no discover save permissions are assigned', async () => {
-    const props = getProps({ capabilities: { discover_v2: { save: false } } });
+    const { toolkit, props } = await setup({ capabilities: { discover_v2: { save: false } } });
     await act(async () => {
-      getTestComponent(props);
+      getTestComponent({ toolkit, props });
     });
 
     const itemIds = capturedTopNavMenu?.items?.map((item) => item.id) || [];
@@ -160,10 +169,10 @@ describe('Discover topnav component', () => {
         }
       });
 
-      const props = getProps();
+      const { toolkit, props } = await setup();
       let component: ReturnType<typeof mountWithIntl>;
       await act(async () => {
-        component = getTestComponent(props);
+        component = getTestComponent({ toolkit, props });
       });
 
       expect(component!.find({ 'data-test-subj': 'custom-search-bar' })).toHaveLength(1);
@@ -171,15 +180,13 @@ describe('Discover topnav component', () => {
 
     it('should render CustomDataViewPicker', async () => {
       mockUseCustomizations = true;
-      const props = getProps();
+      const { toolkit, props } = await setup();
       let component: ReturnType<typeof mountWithIntl>;
       await act(async () => {
-        component = getTestComponent(props);
+        component = getTestComponent({ toolkit, props });
       });
 
-      const topNav = component!
-        .find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu)
-        .at(0);
+      const topNav = component!.find(toolkit.services.navigation.ui.AggregateQueryTopNavMenu).at(0);
       expect(topNav.prop('dataViewPickerComponentProps')).toBeUndefined();
       const dataViewPickerOverride = mountWithIntl(
         topNav.prop('dataViewPickerOverride') as ReactElement
@@ -194,15 +201,13 @@ describe('Discover topnav component', () => {
         }
       });
 
-      const props = getProps();
+      const { toolkit, props } = await setup();
       let component: ReturnType<typeof mountWithIntl>;
       await act(async () => {
-        component = getTestComponent(props);
+        component = getTestComponent({ toolkit, props });
       });
 
-      const topNav = component!
-        .find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu)
-        .at(0);
+      const topNav = component!.find(toolkit.services.navigation.ui.AggregateQueryTopNavMenu).at(0);
       expect(topNav.prop('dataViewPickerComponentProps')).toBeUndefined();
     });
   });

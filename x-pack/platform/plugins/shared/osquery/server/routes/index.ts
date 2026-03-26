@@ -17,10 +17,14 @@ import { initPrivilegesCheckRoutes } from './privileges_check';
 import { initAssetRoutes } from './asset';
 import { initActionResultsRoutes } from './action_results';
 import { initUnifiedHistoryRoutes } from './unified_history';
+import { initScheduledResultsRoutes } from './scheduled_results';
+import { initSchemasRoutes } from './schemas';
+import type { SchemaService } from '../lib/schema_service';
 
 export const defineRoutes = (
   router: IRouter<DataRequestHandlerContext>,
-  context: OsqueryAppContext
+  context: OsqueryAppContext,
+  schemaService: SchemaService
 ) => {
   initLiveQueryRoutes(router, context);
   initStatusRoutes(router, context);
@@ -31,4 +35,6 @@ export const defineRoutes = (
   initAssetRoutes(router, context);
   initActionResultsRoutes(router, context);
   initUnifiedHistoryRoutes(router, context);
+  initScheduledResultsRoutes(router, context);
+  initSchemasRoutes(router, context, schemaService);
 };

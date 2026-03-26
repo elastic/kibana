@@ -58,10 +58,20 @@ describe('Workflow Insights', () => {
         expect(() => validateQuery(validQuery)).not.toThrow();
       });
 
-      it('should validate successfully with noisy_process_tree and policy_response_failure', () => {
+      it('should validate successfully with custom type', () => {
         const validQuery = {
           query: {
-            types: ['noisy_process_tree', 'policy_response_failure'],
+            types: ['custom'],
+          },
+        };
+
+        expect(() => validateQuery(validQuery)).not.toThrow();
+      });
+
+      it('should validate successfully with all three types', () => {
+        const validQuery = {
+          query: {
+            types: ['incompatible_antivirus', 'policy_response_failure', 'custom'],
           },
         };
 
@@ -239,7 +249,7 @@ describe('Workflow Insights', () => {
     "[body.type]: types that failed validation:
     - [body.type.0]: expected value to equal [incompatible_antivirus]
     - [body.type.1]: expected value to equal [policy_response_failure]
-    - [body.type.2]: expected value to equal [noisy_process_tree]"
+    - [body.type.2]: expected value to equal [custom]"
     `);
     });
 
@@ -333,6 +343,39 @@ describe('Workflow Insights', () => {
               },
               message_variables: ['policy_id', 'failure_reason', 'agent_version'],
             },
+          },
+        };
+
+        expect(() => validateRequest(validRequest)).not.toThrow();
+      });
+    });
+
+    describe('custom type validation in PUT requests', () => {
+      it('should validate successfully with custom type', () => {
+        const validRequest = {
+          params: {
+            insightId: 'valid-insight-id',
+          },
+          body: {
+            type: 'custom',
+            action: { type: 'refreshed' },
+          },
+        };
+
+        expect(() => validateRequest(validRequest)).not.toThrow();
+      });
+
+      it('should validate successfully with custom type and body fields', () => {
+        const validRequest = {
+          params: {
+            insightId: 'valid-insight-id',
+          },
+          body: {
+            type: 'custom',
+            message: 'Custom insight message',
+            category: 'endpoint',
+            action: { type: 'remediated', timestamp: '2024-11-29T00:00:00Z' },
+            value: 'custom-value',
           },
         };
 

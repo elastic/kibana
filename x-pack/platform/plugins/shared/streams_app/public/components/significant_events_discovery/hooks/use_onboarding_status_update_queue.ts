@@ -10,7 +10,6 @@ import { TaskStatus } from '@kbn/streams-schema';
 import pMap from 'p-map';
 import { useCallback, useRef } from 'react';
 import { useOnboardingApi } from '../../../hooks/use_onboarding_api';
-import { useAIFeatures } from '../../../hooks/use_ai_features';
 
 type StreamOnboardingStatusUpdateCallback = (
   streamName: string,
@@ -23,10 +22,7 @@ export function useOnboardingStatusUpdateQueue(
   const queue = useRef(new Set<string>([]));
   const isProcessing = useRef(false);
 
-  const aiFeatures = useAIFeatures();
-  const { getOnboardingTaskStatus } = useOnboardingApi({
-    connectorId: aiFeatures?.genAiConnectors.selectedConnector,
-  });
+  const { getOnboardingTaskStatus } = useOnboardingApi();
 
   const updateStatuses = useCallback(async (): Promise<void> => {
     await pMap(

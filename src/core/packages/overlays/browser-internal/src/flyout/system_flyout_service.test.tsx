@@ -278,6 +278,34 @@ describe('SystemFlyoutService', () => {
     });
   });
 
+  describe('closeAllFlyouts()', () => {
+    it('closes all active flyouts', () => {
+      systemFlyouts.open(<div>Flyout 1</div>);
+      systemFlyouts.open(<div>Flyout 2</div>);
+
+      expect(targetDomElement.children.length).toBe(2);
+      mockReactDomUnmount.mockClear();
+
+      service.closeAllFlyouts();
+
+      expect(mockReactDomUnmount).toHaveBeenCalledTimes(2);
+      expect(targetDomElement.children.length).toBe(0);
+    });
+
+    it('is a no-op when no flyouts are open', () => {
+      expect(() => service.closeAllFlyouts()).not.toThrow();
+      expect(mockReactDomUnmount).not.toHaveBeenCalled();
+    });
+
+    it('allows new flyouts to be opened after closing all', () => {
+      systemFlyouts.open(<div>Flyout 1</div>);
+      service.closeAllFlyouts();
+
+      expect(() => systemFlyouts.open(<div>Flyout 2</div>)).not.toThrow();
+      expect(targetDomElement.children.length).toBe(1);
+    });
+  });
+
   describe('stop()', () => {
     it('closes all active flyouts', () => {
       skipCleanup = true;

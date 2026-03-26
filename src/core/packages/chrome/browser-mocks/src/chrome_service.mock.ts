@@ -8,15 +8,12 @@
  */
 
 import { BehaviorSubject, of } from 'rxjs';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { ChromeBadge, ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type {
-  ChromeService,
   InternalChromeSetup,
   InternalChromeStart,
-} from '@kbn/core-chrome-browser-internal';
-import type { ChromeComponentsDeps } from '@kbn/core-chrome-browser-components';
+} from '@kbn/core-chrome-browser-internal-types';
 import { lazyObject } from '@kbn/lazy-object';
 import { sidebarServiceMock } from '@kbn/core-chrome-sidebar-mocks';
 
@@ -26,45 +23,12 @@ const createSetupContractMock = (): DeeplyMockedKeys<InternalChromeSetup> => {
   });
 };
 
-const mockComponentDeps = {
-  config: { isServerless: false, kibanaVersion: '1.0.0', homeHref: '/', kibanaDocLink: '/' },
-  application: {} as ChromeComponentsDeps['application'],
-  basePath: {} as ChromeComponentsDeps['basePath'],
-  docLinks: {} as ChromeComponentsDeps['docLinks'],
-  navControls: { left$: of([]), center$: of([]), right$: of([]), extension$: of([]) },
-  classic: {
-    breadcrumbs$: of([]),
-    recentlyAccessed$: of([]),
-    customNavLink$: of(undefined),
-  },
-  project: { breadcrumbs$: of([]), homeHref$: of('/'), navigation$: of({} as any) },
-  loadingCount$: of(0),
-  navLinks$: of([]),
-  customBranding$: of({} as any),
-  breadcrumbsAppendExtensions$: of([]),
-  helpMenu: {
-    menuLinks$: of([]),
-    extension$: of(undefined),
-    supportUrl$: of(''),
-    globalExtensionMenuLinks$: of([]),
-  },
-  appMenu$: of(undefined),
-  headerBanner$: of(undefined),
-  sideNav: {
-    collapsed$: of(false),
-    initialCollapsed: false,
-    onToggleCollapsed: jest.fn(),
-  },
-} satisfies ChromeComponentsDeps;
-
 const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<InternalChromeStart> = lazyObject({
-    componentDeps:
-      mockComponentDeps as unknown as DeeplyMockedKeys<InternalChromeStart>['componentDeps'],
     withProvider: jest.fn((children) => children),
     sidebar: lazyObject(sidebarServiceMock.createStartContract()),
     navLinks: lazyObject({
-      getNavLinks$: jest.fn(),
+      getNavLinks$: jest.fn().mockReturnValue(new BehaviorSubject([])),
       has: jest.fn(),
       get: jest.fn(),
       getAll: jest.fn().mockReturnValue([]),
@@ -72,7 +36,7 @@ const createStartContractMock = () => {
     recentlyAccessed: lazyObject({
       add: jest.fn(),
       get: jest.fn(),
-      get$: jest.fn(),
+      get$: jest.fn().mockReturnValue(new BehaviorSubject([])),
     }),
     docTitle: lazyObject({
       change: jest.fn(),
@@ -82,13 +46,11 @@ const createStartContractMock = () => {
       registerLeft: jest.fn(),
       registerCenter: jest.fn(),
       registerRight: jest.fn(),
-      registerExtension: jest.fn(),
-      getLeft$: jest.fn(),
-      getCenter$: jest.fn(),
-      getRight$: jest.fn(),
-      getExtension$: jest.fn(),
+      getLeft$: jest.fn().mockReturnValue(new BehaviorSubject([])),
+      getCenter$: jest.fn().mockReturnValue(new BehaviorSubject([])),
+      getRight$: jest.fn().mockReturnValue(new BehaviorSubject([])),
       setHelpMenuLinks: jest.fn(),
-      getHelpMenuLinks$: jest.fn(),
+      getHelpMenuLinks$: jest.fn().mockReturnValue(new BehaviorSubject([])),
     }),
     setIsVisible: jest.fn(),
     getIsVisible$: jest.fn().mockReturnValue(new BehaviorSubject(false)),
@@ -99,31 +61,42 @@ const createStartContractMock = () => {
     setBreadcrumbs: jest.fn(),
     sideNav: lazyObject({
       getIsCollapsed$: jest.fn().mockReturnValue(new BehaviorSubject(false)),
+      getIsCollapsed: jest.fn().mockReturnValue(false),
       setIsCollapsed: jest.fn(),
+      getWidth: jest.fn().mockReturnValue(0),
+      getWidth$: jest.fn().mockReturnValue(new BehaviorSubject(0)),
+      setWidth: jest.fn(),
     }),
     getBreadcrumbsAppendExtensions$: jest.fn().mockReturnValue(new BehaviorSubject([])),
+    getBreadcrumbsAppendExtensionsWithBadges$: jest.fn().mockReturnValue(new BehaviorSubject([])),
     setBreadcrumbsAppendExtension: jest.fn(),
     getGlobalHelpExtensionMenuLinks$: jest.fn().mockReturnValue(new BehaviorSubject([])),
     registerGlobalHelpExtensionMenuLink: jest.fn(),
     getHelpExtension$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
     setHelpExtension: jest.fn(),
+    getHelpMenuLinks$: jest.fn().mockReturnValue(new BehaviorSubject([])),
     setHelpMenuLinks: jest.fn(),
     setHelpSupportUrl: jest.fn(),
     getHelpSupportUrl$: jest.fn(() => of('https://www.elastic.co/support')),
     getCustomNavLink$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
     setCustomNavLink: jest.fn(),
     setHeaderBanner: jest.fn(),
+    getHeaderBanner$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
     hasHeaderBanner$: jest.fn().mockReturnValue(new BehaviorSubject(false)),
+    hasHeaderBanner: jest.fn().mockReturnValue(false),
     getChromeStyle$: jest.fn().mockReturnValue(new BehaviorSubject('classic')),
+    getChromeStyle: jest.fn().mockReturnValue('classic'),
     setChromeStyle: jest.fn(),
-    getActiveSolutionNavId$: jest.fn(),
+    getActiveSolutionNavId$: jest.fn().mockReturnValue(new BehaviorSubject(null)),
+    getActiveSolutionNavId: jest.fn().mockReturnValue(null),
     project: lazyObject({
       setCloudUrls: jest.fn(),
       setKibanaName: jest.fn(),
       initNavigation: jest.fn(),
       setBreadcrumbs: jest.fn(),
-      getBreadcrumbs$: jest.fn(),
-      getNavigation$: jest.fn(),
+      getBreadcrumbs$: jest.fn().mockReturnValue(new BehaviorSubject([])),
+      getNavigation$: jest.fn().mockReturnValue(new BehaviorSubject({} as any)),
+      getProjectHome$: jest.fn().mockReturnValue(of('/')),
     }),
     setGlobalFooter: jest.fn(),
     getGlobalFooter$: jest.fn().mockReturnValue(new BehaviorSubject(null)),
@@ -135,7 +108,11 @@ const createStartContractMock = () => {
   return startContract;
 };
 
-type ChromeServiceContract = PublicMethodsOf<ChromeService>;
+export interface ChromeServiceContract {
+  setup(): InternalChromeSetup;
+  start(): Promise<InternalChromeStart>;
+  stop(): void;
+}
 const createMock = () => {
   const mocked: jest.Mocked<ChromeServiceContract> = lazyObject({
     setup: jest.fn().mockReturnValue(createSetupContractMock()),

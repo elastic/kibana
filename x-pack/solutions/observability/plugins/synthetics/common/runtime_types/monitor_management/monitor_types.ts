@@ -345,6 +345,7 @@ export const EncryptedSyntheticsMonitorCodec = t.union([
 export const SyntheticsMonitorWithIdCodec = t.intersection([
   SyntheticsMonitorCodec,
   t.interface({ id: t.string, updated_at: t.string, created_at: t.string }),
+  t.partial({ spaces: t.array(t.string), spaceId: t.string, revision: t.number }),
 ]);
 
 const HeartbeatFieldsCodec = t.intersection([

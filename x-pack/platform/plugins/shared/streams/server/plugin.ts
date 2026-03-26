@@ -45,11 +45,13 @@ import type {
   StreamsPluginStartDependencies,
   StreamsServer,
 } from './types';
+import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
 import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wired_stream_views';
 import { FeatureService } from './lib/streams/feature/feature_service';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
+import { ModelSettingsConfigService } from './lib/saved_objects/significant_events/model_settings_config_service';
 import { TaskService } from './lib/tasks/task_service';
 import { InsightService } from './lib/significant_events/insights/client/insight_service';
 import { baseFields } from './lib/streams/component_templates/logs_layer';
@@ -120,6 +122,7 @@ export class StreamsPlugin
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, this.logger);
     const taskService = new TaskService(plugins.taskManager);
+    const modelSettingsConfigService = new ModelSettingsConfigService(this.logger);
 
     const getScopedClients = async ({
       request,
@@ -170,6 +173,10 @@ export class StreamsPlugin
         uiSettingsClient,
       });
 
+      const modelSettingsClient = modelSettingsConfigService.getClient({
+        soClient,
+      });
+
       return {
         scopedClusterClient,
         soClient,
@@ -184,8 +191,18 @@ export class StreamsPlugin
         licensing,
         uiSettingsClient,
         taskClient,
+        modelSettingsClient,
       };
     };
+
+    if (plugins.agentBuilder) {
+      registerStreamsAgentBuilder({
+        agentBuilder: plugins.agentBuilder,
+        getScopedClients,
+        server: this.server,
+        logger: this.logger,
+      });
+    }
 
     const telemetryClient = this.ebtTelemetryService.getClient();
 
@@ -346,6 +363,7 @@ export class StreamsPlugin
       this.server.security = plugins.security;
       this.server.actions = plugins.actions;
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
+      this.server.inference = plugins.inference;
       this.server.taskManager = plugins.taskManager;
     }
 

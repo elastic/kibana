@@ -901,7 +901,13 @@
             "signature": [
               "BaseStream",
               ".UpsertRequest<OmitWiredStreamUpsertProps<",
-              "WiredStream",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.WiredStream",
+                "text": "WiredStream"
+              },
               ".Definition>>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/stream.ts",
@@ -1176,8 +1182,8 @@
             "pluginId": "@kbn/lens-common",
             "scope": "common",
             "docId": "kibKbnLensCommonPluginApi",
-            "section": "def-common.XYState",
-            "text": "XYState"
+            "section": "def-common.XYPersistedState",
+            "text": "XYPersistedState"
           },
           "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
           {

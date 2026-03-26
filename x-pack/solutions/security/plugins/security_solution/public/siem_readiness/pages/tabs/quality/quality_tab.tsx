@@ -21,7 +21,7 @@ import {
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { useSiemReadinessApi } from '@kbn/siem-readiness';
+import { useSiemReadinessApi, CATEGORY_ORDER } from '@kbn/siem-readiness';
 import type { IndexInfo, DataQualityResultDocument, MainCategories } from '@kbn/siem-readiness';
 import {
   CategoryAccordionTable,
@@ -304,28 +304,24 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         },
       },
       {
+        field: 'indexName' as const,
         name: i18n.translate('xpack.securitySolution.siemReadiness.quality.table.column.action', {
           defaultMessage: 'Actions',
         }),
-        width: '15%',
-        render: () => {
-          const dataQualityUrl = `${basePath}/app/security/data_quality`;
-          return (
-            <div style={{ textAlign: 'right' }}>
-              <EuiButtonEmpty
-                size="xs"
-                href={dataQualityUrl}
-                target="_blank"
-                iconType="popout"
-                iconSide="right"
-              >
-                {i18n.translate('xpack.securitySolution.siemReadiness.quality.action.view', {
-                  defaultMessage: 'View Data quality',
-                })}
-              </EuiButtonEmpty>
-            </div>
-          );
-        },
+        actions: [
+          {
+            render: () => {
+              const dataQualityUrl = `${basePath}/app/security/data_quality`;
+              return (
+                <EuiButtonEmpty size="s" href={dataQualityUrl} target="_blank">
+                  {i18n.translate('xpack.securitySolution.siemReadiness.quality.action.view', {
+                    defaultMessage: 'View Data quality',
+                  })}
+                </EuiButtonEmpty>
+              );
+            },
+          },
+        ],
       },
     ],
     [basePath]
@@ -357,28 +353,6 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
           announceOnMount
         >
           <p>{(getReadinessCategories.error as Error).message}</p>
-        </EuiCallOut>
-      </>
-    );
-  }
-
-  if (categories.length === 0) {
-    return (
-      <>
-        <EuiSpacer size="m" />
-        <EuiCallOut
-          title={i18n.translate('xpack.securitySolution.siemReadiness.quality.noData.title', {
-            defaultMessage: 'No data available',
-          })}
-          color="primary"
-          iconType="iInCircle"
-          announceOnMount
-        >
-          <p>
-            {i18n.translate('xpack.securitySolution.siemReadiness.quality.noData.description', {
-              defaultMessage: 'No category data found. Please check your indices.',
-            })}
-          </p>
         </EuiCallOut>
       </>
     );
@@ -431,7 +405,7 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
               <EuiButtonEmpty
                 iconSide="right"
                 size="s"
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 onClick={handleCreateCase}
                 data-test-subj="createNewCaseButton"
               >
@@ -462,6 +436,11 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         })}
         defaultSortField="indexName"
         storageKey={SIEM_READINESS_ACCORDIONS_STORAGE_KEY}
+        isFilterActive={
+          activeCategories.length < CATEGORY_ORDER.length &&
+          (getReadinessCategoriesData?.mainCategoriesMap?.length ?? 0) > 0
+        }
+        hasUnfilteredData={(getReadinessCategoriesData?.mainCategoriesMap?.length ?? 0) > 0}
       />
     </>
   );
