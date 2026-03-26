@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   useEuiTheme,
   useGeneratedHtmlId,
+  useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import { CascadeHeaderPrimitive } from './data_cascade_header';
 import { CascadeRowPrimitive, CascadeRowHeaderSlotsScrollSyncProvider } from './data_cascade_row';
@@ -86,6 +87,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   const activeStickyRenderSlotRef = useRef<HTMLDivElement | null>(null);
   const virtualizerInstance = useRef<ReturnType<typeof useCascadeVirtualizer>>();
 
+  const isMobile = useIsWithinMaxBreakpoint('m');
   const getScrollElement = useCallback(() => scrollElementRef.current, []);
 
   // create stable callback we can use to retrieve the current value of the virtualizer elsewhere
@@ -185,13 +187,14 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
           rowInstance: row,
           virtualRow: virtualItem,
           virtualRowStyle,
+          isMobile,
           innerRef: measureElement,
           activeStickyRenderSlotRef,
           ...rowElement.props,
         }}
       />
     ),
-    [size, enableRowSelection, rowElement.props, measureElement]
+    [size, enableRowSelection, isMobile, measureElement, rowElement.props]
   );
 
   const treeGridContainerARIAAttributes = useTreeGridContainerARIAAttributes(headerId);
