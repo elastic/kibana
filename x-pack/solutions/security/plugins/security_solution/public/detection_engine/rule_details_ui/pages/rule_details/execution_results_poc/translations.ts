@@ -163,25 +163,10 @@ export const FLYOUT_GAP_DURATION = i18n.translate(
   }
 );
 
-export const FLYOUT_GAP_DURATION_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutGapDurationTooltip',
-  {
-    defaultMessage:
-      'Duration of gap in rule execution. Adjust rule look-back or see documentation for mitigating gaps.',
-  }
-);
-
 export const FLYOUT_INDEX_DURATION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutIndexDuration',
   {
     defaultMessage: 'Indexing: Total',
-  }
-);
-
-export const FLYOUT_INDEX_DURATION_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutIndexDurationTooltip',
-  {
-    defaultMessage: 'The length of time it took to index detected alerts (hh:mm:ss:SSS).',
   }
 );
 
@@ -192,24 +177,10 @@ export const FLYOUT_SEARCH_DURATION = i18n.translate(
   }
 );
 
-export const FLYOUT_SEARCH_DURATION_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutSearchDurationTooltip',
-  {
-    defaultMessage: 'The length of time it took to search for alerts (hh:mm:ss:SSS).',
-  }
-);
-
 export const FLYOUT_SCHEDULING_DELAY = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutSchedulingDelay',
   {
     defaultMessage: 'Scheduling delay',
-  }
-);
-
-export const FLYOUT_SCHEDULING_DELAY_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutSchedulingDelayTooltip',
-  {
-    defaultMessage: 'The length of time from rule scheduled till rule executed (hh:mm:ss:SSS).',
   }
 );
 
@@ -220,25 +191,10 @@ export const FLYOUT_MATCHED_INDICES = i18n.translate(
   }
 );
 
-export const FLYOUT_MATCHED_INDICES_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutMatchedIndicesTooltip',
-  {
-    defaultMessage: 'Number of indices that contained matching source events.',
-  }
-);
-
 export const FLYOUT_CANDIDATE_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutCandidateAlerts',
   {
     defaultMessage: 'Candidate alerts',
-  }
-);
-
-export const FLYOUT_CANDIDATE_ALERTS_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutCandidateAlertsTooltip',
-  {
-    defaultMessage:
-      'Number of events that matched the rule query before deduplication and filtering.',
   }
 );
 
@@ -249,39 +205,10 @@ export const FLYOUT_FROZEN_INDICES_QUERIED = i18n.translate(
   }
 );
 
-export const FLYOUT_FROZEN_INDICES_QUERIED_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutFrozenIndicesQueriedTooltip',
-  {
-    defaultMessage: 'Number of frozen-tier indices included in the search.',
-  }
-);
-
 export const FLYOUT_ALERT_INDEX_DURATION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutAlertIndexDuration',
   {
     defaultMessage: 'Indexing: Alerts',
-  }
-);
-
-export const FLYOUT_ALERT_INDEX_DURATION_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutAlertIndexDurationTooltip',
-  {
-    defaultMessage:
-      'The length of time it took to index alerts into the alerts index (hh:mm:ss:SSS).',
-  }
-);
-
-export const FLYOUT_FROM_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutFromTooltip',
-  {
-    defaultMessage: 'Start of the source event time range queried by this execution.',
-  }
-);
-
-export const FLYOUT_TO_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutToTooltip',
-  {
-    defaultMessage: 'End of the source event time range queried by this execution.',
   }
 );
 
@@ -299,6 +226,21 @@ export const FLYOUT_ACCORDION_ALERTS = i18n.translate(
   }
 );
 
+export const FLYOUT_TOOLTIP_ALERTS_CREATED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutTooltipAlertsCreated',
+  {
+    defaultMessage: 'Number of new alerts generated during this execution.',
+  }
+);
+
+export const FLYOUT_TOOLTIP_CANDIDATE_ALERTS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutTooltipCandidateAlerts',
+  {
+    defaultMessage:
+      'Number of events that matched the rule query before deduplication and filtering.',
+  }
+);
+
 export const FLYOUT_ALERTS_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutAlertsLabel',
   {
@@ -313,10 +255,54 @@ export const FLYOUT_ACCORDION_DURATION_BREAKDOWN = i18n.translate(
   }
 );
 
+export const FLYOUT_TOOLTIP_SEARCH_DURATION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutTooltipSearchDuration',
+  {
+    defaultMessage: 'The length of time it took to search for alerts (hh:mm:ss:SSS).',
+  }
+);
+
+export const FLYOUT_TOOLTIP_INDEXING_TOTAL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutTooltipIndexingTotal',
+  {
+    defaultMessage: 'The length of time it took to index detected alerts (hh:mm:ss:SSS).',
+  }
+);
+
+export const FLYOUT_TOOLTIP_INDEXING_ALERTS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutTooltipIndexingAlerts',
+  {
+    defaultMessage:
+      'The length of time it took to index alerts into the alerts index (hh:mm:ss:SSS).',
+  }
+);
+
 export const FLYOUT_ACCORDION_EXECUTION_METRICS = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutAccordionExecutionMetrics',
   {
     defaultMessage: 'Timing',
+  }
+);
+
+export const FLYOUT_TOOLTIP_GAP_DURATION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutTooltipGapDuration',
+  {
+    defaultMessage:
+      'Duration of gap in rule execution. Adjust rule look-back or see documentation for mitigating gaps.',
+  }
+);
+
+export const FLYOUT_TOOLTIP_SCHEDULING_DELAY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutTooltipSchedulingDelay',
+  {
+    defaultMessage: 'The length of time from rule scheduled till rule executed (hh:mm:ss:SSS).',
+  }
+);
+
+export const FLYOUT_TOOLTIP_EXECUTION_DURATION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutTooltipExecutionDuration',
+  {
+    defaultMessage: 'The length of time it took for the rule to run (hh:mm:ss:SSS).',
   }
 );
 
@@ -355,6 +341,20 @@ export const FLYOUT_ACCORDION_SOURCE_EVENT_TIME_RANGE = i18n.translate(
   }
 );
 
+export const FLYOUT_TOOLTIP_FROM = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutTooltipFrom',
+  {
+    defaultMessage: 'Start of the source event time range queried by this execution.',
+  }
+);
+
+export const FLYOUT_TOOLTIP_TO = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutTooltipTo',
+  {
+    defaultMessage: 'End of the source event time range queried by this execution.',
+  }
+);
+
 export const FLYOUT_FROM = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutFrom',
   {
@@ -373,6 +373,20 @@ export const FLYOUT_ACCORDION_INDICES = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutAccordionIndices',
   {
     defaultMessage: 'Indices',
+  }
+);
+
+export const FLYOUT_TOOLTIP_MATCHED_INDICES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutTooltipMatchedIndices',
+  {
+    defaultMessage: 'Number of indices that contained matching source events.',
+  }
+);
+
+export const FLYOUT_TOOLTIP_FROZEN_INDICES_QUERIED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutTooltipFrozenIndicesQueried',
+  {
+    defaultMessage: 'Number of frozen-tier indices included in the search.',
   }
 );
 
