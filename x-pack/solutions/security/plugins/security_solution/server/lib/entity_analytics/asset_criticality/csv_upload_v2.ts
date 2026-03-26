@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { Logger } from '@kbn/core/server';
+import pMap from 'p-map';
 import Papa from 'papaparse';
 import { isEmpty, toLower, trim } from 'lodash';
 import { ALL_ENTITY_TYPES, EntityType } from '@kbn/entity-store/common';
@@ -63,10 +64,14 @@ interface ProcessBatchOpts {
 type BulkUpdateObjectWithNdx = BulkUpdateObject & { ndx: number };
 
 interface ProcessRowOpts {
-  docsToUpdate: BulkUpdateObjectWithNdx[];
   entityStoreClient: EntityStoreCRUDClient;
   index: number;
   row: Record<string, unknown>;
+}
+
+interface ProcessRowResult {
+  numEntitiesMatched: number;
+  docs: BulkUpdateObjectWithNdx[];
 }
 
 interface UpdateEntityDocsOpts {
@@ -103,11 +108,10 @@ const updateEntityDocs = async ({ entityStoreClient, docs, results }: UpdateEnti
 };
 
 const processRow = async ({
-  docsToUpdate,
   entityStoreClient,
   index,
   row,
-}: ProcessRowOpts): Promise<number> => {
+}: ProcessRowOpts): Promise<ProcessRowResult> => {
   let type = row[TYPE_HEADER];
   type = typeof type === 'string' ? toLower(type) : type;
   if (!EntityType.safeParse(type).success) {
@@ -141,6 +145,7 @@ const processRow = async ({
   let iters = 0;
   let searchAfter: Array<string | number> | undefined;
   let numEntitiesMatched = 0;
+  const docs: BulkUpdateObjectWithNdx[] = [];
 
   while (true) {
     if (iters >= MAX_ITERATIONS) {
@@ -163,7 +168,7 @@ const processRow = async ({
       const entityId = entity.entity?.id;
       if (entityId) {
         numEntitiesMatched++;
-        docsToUpdate.push({
+        docs.push({
           ndx: index,
           type: type as EntityType,
           doc: {
@@ -182,7 +187,7 @@ const processRow = async ({
     iters++;
   }
 
-  return numEntitiesMatched;
+  return { numEntitiesMatched, docs };
 };
 
 const processBatch = async ({
@@ -192,24 +197,31 @@ const processBatch = async ({
   results,
   startIndex = 0,
 }: ProcessBatchOpts) => {
-  const docsToUpdate: BulkUpdateObjectWithNdx[] = [];
-  for (let i = 0; i < batch.length; i++) {
-    const row = batch[i];
-    const currIndex = startIndex + i;
-    let error: string | undefined;
-    let numEntitiesMatched = 0;
-    try {
-      numEntitiesMatched = await processRow({
-        docsToUpdate,
-        entityStoreClient,
-        index: currIndex,
-        row,
-      });
-    } catch (err) {
-      logger.error(`Error processing row ${currIndex}: ${err}`);
-      error = `Error processing row: ${err.message}`;
-    }
+  const rowResults = await pMap(
+    batch,
+    async (row, i) => {
+      const currIndex = startIndex + i;
+      let error: string | undefined;
+      let numEntitiesMatched = 0;
+      let docs: BulkUpdateObjectWithNdx[] = [];
+      try {
+        ({ numEntitiesMatched, docs } = await processRow({
+          entityStoreClient,
+          index: currIndex,
+          row,
+        }));
+      } catch (err) {
+        logger.error(`Error processing row ${currIndex}: ${err}`);
+        error = `Error processing row: ${err.message}`;
+      }
+      return { error, numEntitiesMatched, docs };
+    },
+    { concurrency: 10 }
+  );
 
+  const docsToUpdate: BulkUpdateObjectWithNdx[] = [];
+  for (const { error, numEntitiesMatched, docs } of rowResults) {
+    docsToUpdate.push(...docs);
     results.push({
       error,
       matchedEntities: numEntitiesMatched,
