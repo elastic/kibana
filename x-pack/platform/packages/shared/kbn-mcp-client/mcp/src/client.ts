@@ -22,7 +22,7 @@ import type {
   Tool,
   McpClientOptions,
 } from './types';
-import { isTextPart } from './types';
+import { isEmbeddedResourcePart, isResourceLinkPart, isTextPart } from './types';
 
 /**
  * Produces a human-readable error message from a connection error,
@@ -182,8 +182,8 @@ export class McpClient {
 
   /**
    * Call a tool on the MCP client.
-   * This method only returns text content.
-   * It does not support other content types such as images, audio, etc.
+   * This method returns text content, plus resource links and embedded resources.
+   * It does not support other content types such as images and audio.
    * @param {CallToolParams} params - The parameters for the tool call.
    */
   async callTool(params: CallToolParams): Promise<CallToolResponse> {
@@ -197,21 +197,28 @@ export class McpClient {
       arguments: params.arguments,
     });
 
-    const content = response.content as Array<ContentPart | null | undefined>;
-    const textParts = content.filter(isTextPart);
+    const content = (Array.isArray(response.content) ? response.content : []) as Array<
+      ContentPart | null | undefined
+    >;
+    const allowedParts = content.filter(
+      (part): part is ContentPart =>
+        isTextPart(part) || isResourceLinkPart(part) || isEmbeddedResourcePart(part)
+    );
+    const textParts = allowedParts.filter(isTextPart);
 
     if (response.isError) {
       // Tool execution errors are returned as text content parts
       // See https://modelcontextprotocol.io/specification/2025-11-25/server/tools#error-handling
+      const errorText = textParts.map((part) => part.text).join('\n') || 'Unknown tool error';
       throw new Error(
         `Error calling tool '${params.name}' with arguments '${JSON.stringify(
           params.arguments
-        )}': ${textParts.map((part) => part.text).join('\n')}`
+        )}': ${errorText}`
       );
     }
 
     return {
-      content: textParts,
+      content: allowedParts,
     };
   }
 }

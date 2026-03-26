@@ -10,10 +10,9 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
   getWorkflowYaml,
-  loadWorkflowsThroughProductionPath,
+  loadWorkflowsFromConnectorSpec,
   type ProcessedWorkflow,
 } from '../workflow.test_helpers';
-import { notionDataSource } from './data_type';
 
 const CONNECTOR_NAME = 'fake-notion-connector';
 const CONNECTOR_ID = 'fake-notion-connector-uuid';
@@ -22,9 +21,9 @@ describe('notion workflows', () => {
   let fixture: WorkflowRunFixture;
   let workflows: ProcessedWorkflow[];
 
-  beforeAll(async () => {
-    workflows = await loadWorkflowsThroughProductionPath(notionDataSource, {
-      stackConnectorId: CONNECTOR_NAME,
+  beforeAll(() => {
+    workflows = loadWorkflowsFromConnectorSpec('.notion', {
+      connectorName: CONNECTOR_NAME,
     });
   });
 
@@ -100,7 +99,7 @@ describe('notion workflows', () => {
   describe('search workflow', () => {
     it('forwards search parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml(workflows, 'source.search'),
+        workflowYaml: getWorkflowYaml(workflows, 'notion.search'),
         inputs: { query_string: 'meeting notes', query_object: 'page' },
       });
 

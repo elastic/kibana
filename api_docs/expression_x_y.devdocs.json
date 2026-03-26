@@ -505,7 +505,7 @@
             "label": "mode",
             "description": [],
             "signature": [
-              "\"custom\" | \"full\" | \"dataBounds\""
+              "\"full\" | \"custom\" | \"dataBounds\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "lineNumber": 87,
@@ -1174,10 +1174,10 @@
           },
           {
             "parentPluginId": "expressionXY",
-            "id": "def-common.LegendConfig.listLayoutMaxWidth",
+            "id": "def-common.LegendConfig.maxPixels",
             "type": "number",
             "tags": [],
-            "label": "listLayoutMaxWidth",
+            "label": "maxPixels",
             "description": [
               "\nMaximum label width in pixels for \"list\" layout truncation"
             ],
@@ -2683,7 +2683,7 @@
         "label": "AxisExtentMode",
         "description": [],
         "signature": [
-          "\"custom\" | \"full\" | \"dataBounds\""
+          "\"full\" | \"custom\" | \"dataBounds\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "lineNumber": 76,
@@ -3529,7 +3529,7 @@
         "label": "PointVisibility",
         "description": [],
         "signature": [
-          "\"never\" | \"auto\" | \"always\""
+          "\"auto\" | \"always\" | \"never\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "lineNumber": 79,

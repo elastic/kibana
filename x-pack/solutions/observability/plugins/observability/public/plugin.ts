@@ -43,7 +43,6 @@ import type {
 
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import {
-  getIsExperimentalFeatureEnabled,
   type TriggersAndActionsUIPublicPluginSetup,
   type TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
@@ -81,6 +80,7 @@ import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public/types';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -186,6 +186,7 @@ export interface ObservabilityPublicPluginsStart {
   savedObjectsTagging: SavedObjectTaggingPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
+  cps?: CPSPluginStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
@@ -214,16 +215,6 @@ export class Plugin
       order: 8001,
       path: ALERTS_PATH,
       visibleIn: [],
-      deepLinks: [
-        {
-          id: 'rules',
-          title: i18n.translate('xpack.observability.rulesLinkTitle', {
-            defaultMessage: 'Rules',
-          }),
-          path: RULES_PATH,
-          visibleIn: [],
-        },
-      ],
       keywords: ['alerts', 'rules'],
     },
   ];
@@ -231,6 +222,15 @@ export class Plugin
   constructor(private readonly initContext: PluginInitializerContext<ConfigSchema>) {
     this.telemetry = new TelemetryService();
   }
+
+  private canUseHistory = (history: AppMountParameters<unknown>['history']) => {
+    try {
+      history.createHref(history.location, { prependBasePath: false });
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   public setup(
     coreSetup: CoreSetup<ObservabilityPublicPluginsStart, ObservabilityPublicStart>,
@@ -280,26 +280,28 @@ export class Plugin
     const mount = async (params: AppMountParameters<unknown>) => {
       const [coreStart, pluginsStart] = await coreSetup.getStartServices();
 
-      if (getIsExperimentalFeatureEnabled('unifiedRulesPage')) {
-        const { pathname, search } = params.history.location;
+      const { pathname, search } = params.history.location;
 
-        if (pathname.startsWith(RULES_PATH)) {
-          let suffix = pathname.slice(RULES_PATH.length) || '/';
-          const isTopLevelRoute =
-            suffix === '/' || suffix === '/logs' || suffix.startsWith('/create');
-          if (!isTopLevelRoute) {
-            suffix = `/rule${suffix}`;
-          }
-          await coreStart.application.navigateToApp('rules', {
-            path: suffix + search,
-            replace: true,
-          });
-          return () => {};
+      if (pathname.startsWith(RULES_PATH)) {
+        let suffix = pathname.slice(RULES_PATH.length) || '/';
+        const isTopLevelRoute =
+          suffix === '/' || suffix === '/logs' || suffix.startsWith('/create');
+        if (!isTopLevelRoute) {
+          suffix = `/rule${suffix}`;
         }
+        await coreStart.application.navigateToApp('rules', {
+          path: suffix + search,
+          replace: true,
+        });
+        return () => {};
       }
 
       const { renderApp } = await import('./application');
       const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
+
+      if (!this.canUseHistory(params.history)) {
+        return () => {};
+      }
 
       return renderApp({
         appMountParameters: params,
@@ -523,12 +525,10 @@ export class Plugin
       )
     );
 
-    const unifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
-
     return {
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
-      useRulesLink: createUseRulesLink(unifiedRulesPage),
+      useRulesLink: createUseRulesLink(),
       rulesLocator,
       ruleDetailsLocator,
       config,
@@ -552,12 +552,10 @@ export class Plugin
       );
     });
 
-    const unifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
-
     return {
       config,
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
-      useRulesLink: createUseRulesLink(unifiedRulesPage),
+      useRulesLink: createUseRulesLink(),
     };
   }
 }

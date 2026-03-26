@@ -8,9 +8,9 @@
 import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod';
 import type { AutomaticImportV2PluginRequestHandlerContext } from '../types';
 import { buildAutomaticImportResponse } from './utils';
+import { withAvailability } from './with_availability';
 import { AUTOMATIC_IMPORT_API_PRIVILEGES } from '../feature';
 import {
   UploadSamplesToDataStreamRequestParams,
@@ -18,6 +18,7 @@ import {
   ReanalyzeDataStreamRequestParams,
   ReanalyzeDataStreamRequestBody,
   UploadSamplesToDataStreamRequestBody,
+  UpdateDataStreamPipelineRequestBody,
 } from '../../common';
 
 const isSecurityExceptionError = (err: unknown): boolean => {
@@ -46,12 +47,6 @@ export const registerDataStreamRoutes = (
   reanalyzeDataStreamRoute(router, logger);
 };
 
-const UpdateDataStreamPipelineRequestBody = z
-  .object({
-    ingest_pipeline: z.union([z.string(), z.record(z.unknown())]),
-  })
-  .strict();
-
 const uploadSamplesRoute = (
   router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
   logger: Logger
@@ -76,7 +71,7 @@ const uploadSamplesRoute = (
           },
         },
       },
-      async (context, request, response) => {
+      withAvailability(async (context, request, response) => {
         try {
           const automaticImportv2 = await context.automaticImportv2;
           const automaticImportService = automaticImportv2.automaticImportService;
@@ -123,8 +118,7 @@ const uploadSamplesRoute = (
             dataStreamId,
             rawSamples,
             originalSource,
-            authenticatedUser: currentUser,
-            esClient,
+            createdBy: currentUser.username,
           });
           return response.ok({ body: result });
         } catch (err) {
@@ -141,7 +135,7 @@ const uploadSamplesRoute = (
             body: err,
           });
         }
-      }
+      })
     );
 
 const deleteDataStreamRoute = (
@@ -167,13 +161,12 @@ const deleteDataStreamRoute = (
           },
         },
       },
-      async (context, request, response) => {
+      withAvailability(async (context, request, response) => {
         try {
           const automaticImportv2 = await context.automaticImportv2;
           const automaticImportService = automaticImportv2.automaticImportService;
           const { integration_id: integrationId, data_stream_id: dataStreamId } = request.params;
-          const esClient = automaticImportv2.esClient;
-          await automaticImportService.deleteDataStream(integrationId, dataStreamId, esClient);
+          await automaticImportService.deleteDataStream(integrationId, dataStreamId);
           return response.ok();
         } catch (err) {
           logger.error(`deleteDataStreamRoute: Caught error:`, err);
@@ -183,7 +176,7 @@ const deleteDataStreamRoute = (
             body: err,
           });
         }
-      }
+      })
     );
 
 const updateDataStreamPipelineRoute = (
@@ -210,7 +203,7 @@ const updateDataStreamPipelineRoute = (
           },
         },
       },
-      async (context, request, response) => {
+      withAvailability(async (context, request, response) => {
         try {
           const automaticImportv2 = await context.automaticImportv2;
           const automaticImportService = automaticImportv2.automaticImportService;
@@ -221,7 +214,7 @@ const updateDataStreamPipelineRoute = (
             integrationId,
             dataStreamId,
             ingestPipeline,
-            esClient: automaticImportv2.esClient,
+            internalEsClient: automaticImportv2.internalEsClient,
             fieldsMetadataClient: automaticImportv2.fieldsMetadataClient,
           });
 
@@ -240,7 +233,7 @@ const updateDataStreamPipelineRoute = (
             body: message,
           });
         }
-      }
+      })
     );
 
 const getDataStreamResultsRoute = (
@@ -266,7 +259,7 @@ const getDataStreamResultsRoute = (
           },
         },
       },
-      async (context, request, response) => {
+      withAvailability(async (context, request, response) => {
         try {
           const automaticImportv2 = await context.automaticImportv2;
           const automaticImportService = automaticImportv2.automaticImportService;
@@ -287,7 +280,7 @@ const getDataStreamResultsRoute = (
               : 500;
           return automaticImportResponse.error({ statusCode, body: err });
         }
-      }
+      })
     );
 
 const reanalyzeDataStreamRoute = (
@@ -314,7 +307,7 @@ const reanalyzeDataStreamRoute = (
           },
         },
       },
-      async (context, request, response) => {
+      withAvailability(async (context, request, response) => {
         try {
           const automaticImportv2 = await context.automaticImportv2;
           const automaticImportService = automaticImportv2.automaticImportService;
@@ -340,5 +333,5 @@ const reanalyzeDataStreamRoute = (
             body: err,
           });
         }
-      }
+      })
     );
