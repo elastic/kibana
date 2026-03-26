@@ -24,7 +24,9 @@ export const registerFindAssignableObjectsRoute = (router: TagsPluginRouter) => 
         query: schema.object({
           search: schema.maybe(schema.string()),
           max_results: schema.number({ min: 0, defaultValue: 1000 }),
-          types: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+          types: schema.maybe(
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })])
+          ),
         }),
       },
     },
