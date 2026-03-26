@@ -7,13 +7,20 @@
 
 import React, { useRef, useState } from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme, keys, useGeneratedHtmlId, useEuiFontSize } from '@elastic/eui';
+import {
+  euiTextTruncate,
+  keys,
+  useEuiFontSize,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { MessageEditorInstance } from './use_message_editor';
 import { CommandMenuContainer } from './command_menu';
 import type { CommandMenuHandle } from './command_menu';
 import {
   COMMAND_BADGE_ATTRIBUTE,
+  COMMAND_BADGE_LABEL_ATTRIBUTE,
   COMMAND_BADGE_MAX_WIDTH_CH,
   isElementCommandBadge,
 } from './command_badge';
@@ -133,6 +140,8 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   `;
   const commandBadgeStyles = css`
     [${COMMAND_BADGE_ATTRIBUTE}] {
+      display: inline-flex;
+      align-items: baseline;
       color: ${euiTheme.colors.textPrimary};
       background-color: ${euiTheme.colors.backgroundLightPrimary};
       border-radius: ${euiTheme.border.radius.small};
@@ -140,8 +149,13 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
       cursor: default;
       user-select: all;
       max-width: ${COMMAND_BADGE_MAX_WIDTH_CH}ch;
+      min-width: 0;
       vertical-align: baseline;
       line-height: inherit;
+    }
+    [${COMMAND_BADGE_ATTRIBUTE}] [${COMMAND_BADGE_LABEL_ATTRIBUTE}] {
+      min-width: 0;
+      ${euiTextTruncate('100%')}
     }
   `;
   const editorStyles = [

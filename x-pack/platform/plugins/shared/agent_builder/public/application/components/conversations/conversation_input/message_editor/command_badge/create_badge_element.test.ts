@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { createCommandBadgeElement } from './create_badge_element';
 import { CommandId } from '../command_menu/types';
 import {
   COMMAND_BADGE_ATTRIBUTE,
+  COMMAND_BADGE_LABEL_ATTRIBUTE,
   COMMAND_ID_ATTRIBUTE,
   COMMAND_METADATA_ATTRIBUTE,
 } from './attributes';
+import { createCommandBadgeElement } from './create_badge_element';
 
 describe('createBadgeElement', () => {
   it('creates a span element', () => {
@@ -93,7 +94,7 @@ describe('createBadgeElement', () => {
     expect(parsed).toEqual({ id: 'skill-1', version: '2' });
   });
 
-  it('applies EUI text truncation classes and title for skill badges', () => {
+  it('wraps label in an inner span and sets aria-label and title for hover', () => {
     const badge = createCommandBadgeElement({
       commandId: CommandId.Skill,
       label: 'Summarize',
@@ -101,12 +102,15 @@ describe('createBadgeElement', () => {
       metadata: {},
     });
 
-    expect(badge.classList.contains('eui-textTruncate')).toBe(true);
-    expect(badge.classList.contains('eui-displayInlineBlock')).toBe(true);
+    expect(badge.childElementCount).toBe(1);
+    const label = badge.firstElementChild as HTMLElement;
+    expect(label.getAttribute(COMMAND_BADGE_LABEL_ATTRIBUTE)).toBe('true');
+    expect(label.textContent).toBe('/Summarize');
+    expect(badge.getAttribute('aria-label')).toBe('/Summarize');
     expect(badge.title).toBe('/Summarize');
   });
 
-  it('applies EUI text truncation classes and title for SML badges', () => {
+  it('wraps SML label the same way', () => {
     const badge = createCommandBadgeElement({
       commandId: CommandId.Sml,
       label: 'dashboard/My chart',
@@ -114,8 +118,8 @@ describe('createBadgeElement', () => {
       metadata: {},
     });
 
-    expect(badge.classList.contains('eui-textTruncate')).toBe(true);
-    expect(badge.classList.contains('eui-displayInlineBlock')).toBe(true);
+    expect(badge.firstElementChild?.textContent).toBe('@dashboard/My chart');
+    expect(badge.getAttribute('aria-label')).toBe('@dashboard/My chart');
     expect(badge.title).toBe('@dashboard/My chart');
   });
 });

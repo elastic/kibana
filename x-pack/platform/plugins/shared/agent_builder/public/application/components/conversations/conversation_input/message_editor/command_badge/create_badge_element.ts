@@ -7,6 +7,7 @@
 
 import {
   COMMAND_BADGE_ATTRIBUTE,
+  COMMAND_BADGE_LABEL_ATTRIBUTE,
   COMMAND_ID_ATTRIBUTE,
   COMMAND_METADATA_ATTRIBUTE,
 } from './attributes';
@@ -25,8 +26,13 @@ export const createCommandBadgeElement = (data: CommandBadgeData): HTMLSpanEleme
 
   const sequence = getCommandDefinition(data.commandId)?.sequence ?? '';
   const displayText = `${sequence}${data.label}`;
-  span.textContent = displayText;
-  span.classList.add('eui-displayInlineBlock', 'eui-textTruncate');
+
+  const labelSpan = document.createElement('span');
+  labelSpan.setAttribute(COMMAND_BADGE_LABEL_ATTRIBUTE, 'true');
+  labelSpan.textContent = displayText;
+  span.appendChild(labelSpan);
+
+  span.setAttribute('aria-label', displayText);
   span.title = displayText;
 
   return span;
