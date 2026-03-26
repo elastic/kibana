@@ -113,12 +113,12 @@ describe('Pie/Donut Schema', () => {
           legend: {
             nested: false,
             truncate_after_lines: 2,
-            visible: 'show',
+            visibility: 'visible',
             size: 'xl',
           },
-          label_position: 'inside',
+          labels: { position: 'inside' },
           donut_hole: 's',
-          value_display: {
+          values: {
             mode: 'percentage',
             percent_decimals: 0,
           },
@@ -127,9 +127,9 @@ describe('Pie/Donut Schema', () => {
         const validated = pieStateSchema.validate(input);
         expect(validated.title).toBe('Sales Chart');
         expect(validated.legend?.nested).toBe(false);
-        expect(validated.label_position).toBe('inside');
         expect(validated.donut_hole).toBe('s');
-        expect(validated.value_display?.mode).toBe('percentage');
+        expect(validated.labels?.position).toBe('inside');
+        expect(validated.values?.mode).toBe('percentage');
       });
 
       it('validates configuration with multiple group_by dimensions', () => {
@@ -316,8 +316,10 @@ describe('Pie/Donut Schema', () => {
               fields: ['category'],
             },
           ],
-          // @ts-expect-error - invalid label position
-          label_position: 'invalid',
+          labels: {
+            // @ts-expect-error - invalid labels position
+            position: 'invalid',
+          },
         };
 
         expect(() => pieStateSchema.validate(input)).toThrow();
@@ -823,16 +825,16 @@ describe('Pie/Donut Schema', () => {
           ],
           legend: {
             nested: false,
-            visible: 'show',
+            visibility: 'visible',
           },
-          label_position: 'outside',
+          labels: { position: 'outside' },
           donut_hole: 'l',
         };
 
         const validated = pieStateSchema.validate(input);
         expect(validated.title).toBe('Sales Chart');
-        expect(validated.label_position).toBe('outside');
         expect(validated.donut_hole).toBe('l');
+        expect(validated.labels?.position).toBe('outside');
       });
     });
   });
