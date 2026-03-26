@@ -329,14 +329,11 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   // Remount the grid on fullscreen exit to reset internal EuiDataGrid column widths that persist from the wider viewport.
   const [gridKey, setGridKey] = useState(0);
-  const handleFullScreenChange = useCallback(
-    (isFullScreen: boolean) => {
-      if (!isFullScreen) {
-        setGridKey((k) => k + 1);
-      }
-    },
-    []
-  );
+  const handleFullScreenChange = useCallback((isFullScreen: boolean) => {
+    if (!isFullScreen) {
+      setGridKey((k) => k + 1);
+    }
+  }, []);
 
   // Auto-compute visible columns from result data when user hasn't set them manually.
   // Deduplicates osquery.* fields by their short name (second segment) — e.g.

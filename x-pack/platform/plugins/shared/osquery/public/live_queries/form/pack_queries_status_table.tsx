@@ -62,11 +62,6 @@ const queryClampFlexItemCss = {
   minWidth: 0,
 };
 
-const euiFlexItemCss = {
-  cursor: 'pointer',
-};
-
-
 // TODO fix types
 const euiBasicTableCss = {
   '.euiTableRow.euiTableRow-isExpandedRow > td > div': {
