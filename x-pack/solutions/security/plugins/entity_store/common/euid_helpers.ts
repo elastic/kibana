@@ -10,13 +10,65 @@
  * Import from here when you need euid DSL/ESQL/Painless. For entity types use common (index).
  * Do not import this file from plugin public (browser) code — it pulls in @kbn/streamlang.
  *
+ * For a **flat** browser-safe API (dynamic import), use {@link euidBrowser}.
+ *
  * @example
  * import { euid } from '@kbn/entity-store/common/euid_helpers';
  * euid.getEuidFromObject('host', doc);
  * euid.dsl.getEuidDocumentsContainsIdFilter('host');
  */
 
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import * as euidModule from './domain/euid';
+import type { IdentitySourceFields } from './constants';
+import type { EntityType } from './domain/definitions/entity_schema';
+import type { NonEcsTimelineDataRow } from './domain/euid/non_ecs_timeline_data';
+
+/**
+ * Flat EUID API surface exposed to the browser (via dynamic import) and used by flyouts / timeline.
+ * Matches the shape passed through {@link EntityStoreEuidApi}.
+ */
+export interface EntityStoreEuidApi {
+  euid: {
+    getEuidFromObject: (entityType: EntityType, doc: unknown) => string | undefined;
+    getEntityIdentifiersFromDocument: (
+      entityType: EntityType,
+      doc: unknown
+    ) => Record<string, string> | undefined;
+    getEuidFromTimelineNonEcsData: (
+      entityType: EntityType,
+      rows: readonly NonEcsTimelineDataRow[] | undefined
+    ) => string | undefined;
+    getEuidPainlessEvaluation: (entityType: EntityType) => string;
+    getEuidPainlessRuntimeMapping: (entityType: EntityType) => {
+      type: 'keyword';
+      script: { source: string };
+    };
+    getEuidDslFilterBasedOnDocument: (
+      entityType: EntityType,
+      doc: unknown,
+      options?: { includeEuidSourceFilter?: boolean }
+    ) => QueryDslQueryContainer | undefined;
+    getEuidDslDocumentsContainsIdFilter: (entityType: EntityType) => QueryDslQueryContainer;
+    /** ECS field paths that participate in EUID for this type — use for `_source` filtering / column picks. */
+    getEuidSourceFields: (entityType: EntityType) => IdentitySourceFields;
+  };
+}
+
+/**
+ * Flat helpers for browser bundles (same semantics as `euid` nested API, without ESQL).
+ * Load via dynamic import; do not add to the plugin’s synchronous public entry.
+ */
+export const euidBrowser: EntityStoreEuidApi['euid'] = {
+  getEuidFromObject: euidModule.getEuidFromObject,
+  getEntityIdentifiersFromDocument: euidModule.getEntityIdentifiersFromDocument,
+  getEuidFromTimelineNonEcsData: euidModule.getEuidFromTimelineNonEcsData,
+  getEuidPainlessEvaluation: euidModule.getEuidPainlessEvaluation,
+  getEuidPainlessRuntimeMapping: euidModule.getEuidPainlessRuntimeMapping,
+  getEuidDslFilterBasedOnDocument: euidModule.getEuidDslFilterBasedOnDocument,
+  getEuidDslDocumentsContainsIdFilter: euidModule.getEuidDslDocumentsContainsIdFilter,
+  getEuidSourceFields: euidModule.getEuidSourceFields,
+};
 
 export const euid = {
   /**
@@ -25,8 +77,19 @@ export const euid = {
    * Output: EUID string such as `user:…` / `host:…`, or `undefined` when no id can be derived.
    */
   getEuidFromObject: euidModule.getEuidFromObject,
+  /**
+   * Flat map of ECS field → scalar value for the winning identity branch (same pipeline as {@link euid.getEuidFromObject}).
+   * Use to seed flyouts, filters, and resolution when you need field-level context, not only the composed EUID string.
+   */
   getEntityIdentifiersFromDocument: euidModule.getEntityIdentifiersFromDocument,
+  /**
+   * Builds EUID from Timeline “non-ECS” row arrays (field + value[]) without importing timelines types.
+   */
   getEuidFromTimelineNonEcsData: euidModule.getEuidFromTimelineNonEcsData,
+  /**
+   * Returns which source fields are read for EUID for an entity type (`requiresOneOf`, full `identitySourceFields` list).
+   * Exposed so UIs and CRUD can request minimal `_source` or validate partial documents.
+   */
   getEuidSourceFields: euidModule.getEuidSourceFields,
 
   /**

@@ -38,9 +38,9 @@ function firstNonEmptyValue(
  * rows where leading entries are authoritative).
  */
 export function nonEcsTimelineDataToDocument(
-  rows: readonly NonEcsTimelineDataRow[] | undefined
+  rows: readonly NonEcsTimelineDataRow[] = []
 ): Record<string, string> {
-  if (rows == null || rows.length === 0) {
+  if (rows.length === 0) {
     return {};
   }
   const doc: Record<string, string> = {};
@@ -61,7 +61,7 @@ export function getEuidFromTimelineNonEcsData(
   entityType: EntityType,
   rows: readonly NonEcsTimelineDataRow[] | undefined
 ): string | undefined {
-  const doc = nonEcsTimelineDataToDocument(rows);
+  const doc = nonEcsTimelineDataToDocument(rows ?? []);
   if (Object.keys(doc).length === 0) {
     return undefined;
   }
@@ -72,7 +72,7 @@ export function getEntityIdentifiersFromTimelineNonEcsData(
   entityType: EntityType,
   rows: readonly NonEcsTimelineDataRow[] | undefined
 ): Record<string, string> | undefined {
-  const doc = nonEcsTimelineDataToDocument(rows);
+  const doc = nonEcsTimelineDataToDocument(rows ?? []);
   if (Object.keys(doc).length === 0) {
     return undefined;
   }

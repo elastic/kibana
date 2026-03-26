@@ -20,11 +20,11 @@ export type {
   SearchEntitiesFromEntityStoreResponse,
 } from './search_entities_api';
 
-export { updateEntity } from './update_entity_store_api';
+export { bulkUpdateEntities } from './bulk_update_entities_api';
 export type {
-  UpdateEntityInEntityStoreParams,
-  UpdateEntityInEntityStoreResponse,
-} from './update_entity_store_api';
+  BulkUpdateEntitiesParams,
+  BulkUpdateEntitiesResponse,
+} from './bulk_update_entities_api';
 
 /** Load the EUID API (euid, filter builders). Use when you need them; prefer useEntityStoreEuidApi() in React. */
 export const loadEuidApi = () =>

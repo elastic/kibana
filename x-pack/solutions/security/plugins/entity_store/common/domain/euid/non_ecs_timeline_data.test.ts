@@ -12,9 +12,11 @@ import {
 } from './non_ecs_timeline_data';
 
 describe('nonEcsTimelineDataToDocument', () => {
-  it('returns empty object for undefined or empty input', () => {
-    expect(nonEcsTimelineDataToDocument(undefined)).toEqual({});
+  it('returns empty object for default, empty, or rows with no usable values', () => {
+    expect(nonEcsTimelineDataToDocument()).toEqual({});
     expect(nonEcsTimelineDataToDocument([])).toEqual({});
+    expect(nonEcsTimelineDataToDocument([{ field: 'host.name' }])).toEqual({});
+    expect(nonEcsTimelineDataToDocument([{ field: 'host.name', value: undefined }])).toEqual({});
   });
 
   it('maps dotted ECS fields to flat keys', () => {

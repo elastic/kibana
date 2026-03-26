@@ -20,6 +20,11 @@ import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index'
 import { BadCRUDRequestError, EntityNotFoundError, EntityAlreadyExistsError } from '../errors';
 import { hashEuid, validateAndTransformDoc } from './utils';
 import { runWithSpan } from '../../telemetry/traces';
+import {
+  searchEntitiesV2,
+  type SearchEntitiesV2Params,
+  type SearchEntitiesV2Result,
+} from '../search_entities/search_entities';
 
 const RETRY_ON_CONFLICT = 3;
 
@@ -171,6 +176,39 @@ export class CRUDClient {
       value: tracedListEntities,
       configurable: true,
       writable: true,
+    });
+
+    const baseSearchLatestEntities = this.searchLatestEntities.bind(this);
+    const tracedSearchLatestEntities = (
+      params: SearchEntitiesV2Params
+    ): Promise<SearchEntitiesV2Result> =>
+      runWithSpan({
+        name: 'entityStore.crud.search_latest_entities',
+        namespace,
+        attributes: {
+          'entity_store.crud.operation': 'search_latest_entities',
+        },
+        cb: () => baseSearchLatestEntities(params),
+      });
+
+    Object.defineProperty(this, 'searchLatestEntities', {
+      value: tracedSearchLatestEntities,
+      configurable: true,
+      writable: true,
+    });
+  }
+
+  /**
+   * Page/search over the v2 unified LATEST entities index (normalized hits, optional JSON `filterQuery`, entity-type filter).
+   * Prefer this over ad-hoc ES calls from routes; use {@link listEntities} for cursor + KQL-style filters.
+   */
+  public async searchLatestEntities(
+    params: SearchEntitiesV2Params
+  ): Promise<SearchEntitiesV2Result> {
+    return searchEntitiesV2({
+      esClient: this.esClient,
+      namespace: this.namespace,
+      ...params,
     });
   }
 

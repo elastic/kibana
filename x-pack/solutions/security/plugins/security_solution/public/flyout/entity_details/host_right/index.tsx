@@ -13,8 +13,8 @@ import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/u
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { TableId } from '@kbn/securitysolution-data-table';
 import {
+  bulkUpdateEntities,
   FF_ENABLE_ENTITY_STORE_V2,
-  updateEntity,
   useEntityStoreEuidApi,
 } from '@kbn/entity-store/public';
 import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
@@ -222,7 +222,7 @@ export const HostPanel = ({
 
   const handleSaveAssetCriticalityViaEntityStore = useCallback(
     async (updatedRecord: Entity) => {
-      await updateEntity(http, {
+      await bulkUpdateEntities(http, {
         entityType: 'host',
         body: updatedRecord as Record<string, unknown>,
         force: true,

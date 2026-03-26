@@ -13,7 +13,6 @@ import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import { API_VERSIONS } from '../../../common/constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
-import { searchEntitiesV2 } from '../../domain/search_entities/search_entities';
 
 /** `ArrayFromString` expects a Zod schema; `EntityType` from `common/index` is type-only at runtime. */
 const entityTypeSchema = z.enum(['user', 'host', 'service', 'generic']);
@@ -48,8 +47,7 @@ export function registerSearchEntities(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, core, namespace } = entityStoreCtx;
-        const esClient = core.elasticsearch.client.asCurrentUser;
+        const { logger, crudClient } = entityStoreCtx;
 
         const {
           page = 1,
@@ -64,9 +62,7 @@ export function registerSearchEntities(router: EntityStorePluginRouter) {
         logger.debug('Entity store search entities (v2) api called');
 
         try {
-          const { records, total, inspect } = await searchEntitiesV2({
-            esClient,
-            namespace,
+          const { records, total, inspect } = await crudClient.searchLatestEntities({
             entityTypes,
             filterQuery,
             page,

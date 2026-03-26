@@ -7,10 +7,10 @@
 
 /**
  * Lightweight `@kbn/entity-store/common` barrel (webpack `common` entry).
- * Keeps page-load size small: no euid / streamlang here — use `./library` or `loadEuidApi()`.
+ * Keeps page-load size small: no euid / streamlang here — use `euid_helpers` or `loadEuidApi()`.
  *
  * @example
- * import { euid, type EntityType } from '@kbn/entity-store/common/library';
+ * import { euidBrowser, type EntityType } from '@kbn/entity-store/common/euid_helpers';
  * Public API for the entity_store plugin.
  * Exports only constants and types needed on every load (including browser).
  * For EUID translation helpers (DSL/ESQL/Painless, entity types), use common/euid_helpers.
@@ -84,6 +84,8 @@ export type EntityType = z.infer<typeof EntityType>;
 export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
 
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
+
+export type { Entity } from './domain/definitions/entity.gen';
 
 export interface IdentitySourceFields {
   /** Fields that participate in identity (EUID composition). */
