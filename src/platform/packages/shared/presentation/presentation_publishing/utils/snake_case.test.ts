@@ -33,6 +33,7 @@ describe('snake case', () => {
           cherryTomatoes: 'red',
         },
       },
+      empty: {},
     };
     expect(convertCamelCasedKeysToSnakeCase(deeplyNestedCamelCasedObject)).toEqual({
       these_are_fruits: true,
@@ -45,6 +46,7 @@ describe('snake case', () => {
           cherry_tomatoes: 'red',
         },
       },
+      empty: {},
     });
   });
 
@@ -61,6 +63,7 @@ describe('snake case', () => {
             someValue: 2,
           },
         ],
+        empty: [],
       },
       countToTen: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     };
@@ -76,6 +79,7 @@ describe('snake case', () => {
             some_value: 2,
           },
         ],
+        empty: [],
       },
       count_to_ten: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     });
