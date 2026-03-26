@@ -6,12 +6,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { validateDuration } from './validation';
+import { validateDuration, validateMaxDuration } from './validation';
+import { MAX_DURATION } from './constants';
 
 const durationSchema = z.string().superRefine((value, ctx) => {
-  const error = validateDuration(value);
-  if (error) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message: error });
+  const formatError = validateDuration(value);
+  if (formatError) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: formatError });
+    return;
+  }
+  const maxError = validateMaxDuration(value, MAX_DURATION);
+  if (maxError) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: maxError });
   }
 });
 
