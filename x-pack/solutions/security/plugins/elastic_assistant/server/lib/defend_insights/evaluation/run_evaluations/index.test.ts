@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import type { InferenceConnector } from '@kbn/inference-common';
+import { InferenceConnectorType } from '@kbn/inference-common';
 
 import { runDefendInsightsEvaluations } from '.';
 import type { DefaultDefendInsightsGraph } from '../../graphs/default_defend_insights_graph';
 import { getLlmType } from '../../../../routes/utils';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
-import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('langsmith/evaluation', () => ({
   evaluate: jest.fn(async (predict: Function) =>
@@ -34,18 +34,20 @@ jest.mock('../helpers/get_graph_input_overrides', () => ({
   getDefendInsightsGraphInputOverrides: jest.fn((input) => input.overrides ?? {}),
 }));
 
-const mockExperimentConnector = createMockConnector({
+const mockExperimentConnector: InferenceConnector = {
+  type: InferenceConnectorType.Gemini,
   name: 'Gemini 1.5 Pro 002',
-  actionTypeId: '.gemini',
+  connectorId: 'gemini-1-5-pro-002',
   config: {
     apiUrl: 'https://example.com',
     defaultModel: 'gemini-1.5-pro-002',
     gcpRegion: 'test-region',
     gcpProjectID: 'test-project-id',
   },
-  id: 'gemini-1-5-pro-002',
+  capabilities: {},
+  isInferenceEndpoint: false,
   isPreconfigured: true,
-});
+};
 
 const datasetName = 'test-dataset';
 const evaluatorConnectorId = 'test-evaluator-connector-id';
@@ -55,7 +57,7 @@ const connectors = [mockExperimentConnector];
 const projectName = 'test-lang-smith-project';
 
 const graphs: Array<{
-  connector: Connector;
+  connector: InferenceConnector;
   graph: DefaultDefendInsightsGraph;
   llmType: string | undefined;
   name: string;
@@ -64,7 +66,7 @@ const graphs: Array<{
     tracers: LangChainTracer[];
   };
 }> = connectors.map((connector) => {
-  const llmType = getLlmType(connector.actionTypeId);
+  const llmType = getLlmType(connector.type);
 
   const traceOptions = {
     projectName,

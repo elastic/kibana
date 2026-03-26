@@ -7,19 +7,34 @@
 
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { InMemoryConnector } from '@kbn/actions-plugin/server';
+import {
+  isInferenceEndpointWithMetadata,
+  isInferenceEndpointWithDisplayNameMetadata,
+} from '../../common/type_guards';
 
 const CHAT_COMPLETION_TASK_TYPE = 'chat_completion';
-const EIS_SERVICE_PROVIDER = 'elastic';
+const KIBANA_CONNECTOR_PROPERTY = 'kibana-connector';
 
 export function filterPreconfiguredEndpoints(
   endpoints: InferenceInferenceEndpointInfo[]
 ): InferenceInferenceEndpointInfo[] {
   return endpoints.filter(
     (endpoint) =>
-      endpoint.service === EIS_SERVICE_PROVIDER &&
-      // TODO: update this when endpoints have metadata to identify if they are preconfigured
-      endpoint.inference_id.startsWith('.') &&
+      isInferenceEndpointWithMetadata(endpoint) &&
+      endpoint.metadata?.heuristics?.properties?.includes(KIBANA_CONNECTOR_PROPERTY) &&
       endpoint.task_type === CHAT_COMPLETION_TASK_TYPE
+  );
+}
+
+type InMemoryConnectorWithInferenceId = InMemoryConnector & { config: { inferenceId: string } };
+
+function isConnectorWithInferenceId(
+  connector: InMemoryConnector
+): connector is InMemoryConnectorWithInferenceId {
+  return !!(
+    connector.actionTypeId === '.inference' &&
+    connector.config?.inferenceId &&
+    typeof connector.config.inferenceId === 'string'
   );
 }
 
@@ -28,13 +43,8 @@ export function findEndpointsWithoutConnectors(
   connectors: InMemoryConnector[]
 ): InferenceInferenceEndpointInfo[] {
   const existingConnectorInferenceIds = connectors
-    .filter(
-      (connector) =>
-        connector.actionTypeId === '.inference' &&
-        connector.config?.inferenceId &&
-        typeof connector.config.inferenceId === 'string'
-    )
-    .map((connector) => connector.config.inferenceId as string);
+    .filter(isConnectorWithInferenceId)
+    .map((connector) => connector.config.inferenceId);
   return endpoints.filter(
     (endpoint) => !existingConnectorInferenceIds.includes(endpoint.inference_id)
   );
@@ -71,6 +81,9 @@ const MODEL_ID_DISPLAY_NAMES: Record<string, string> = {
 };
 
 export function getConnectorNameFromEndpoint(endpoint: InferenceInferenceEndpointInfo): string {
+  if (isInferenceEndpointWithDisplayNameMetadata(endpoint)) {
+    return endpoint.metadata.display.name;
+  }
   const modelId = endpoint.service_settings?.model_id;
   if (modelId) {
     if (MODEL_ID_DISPLAY_NAMES[modelId]) {

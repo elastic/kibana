@@ -8,9 +8,11 @@
 import { i18n } from '@kbn/i18n';
 
 export const i18nTexts = {
-  moveButtonLabel: i18n.translate('xpack.ingestPipelines.pipelineEditor.item.moveButtonLabel', {
-    defaultMessage: 'Move this processor',
-  }),
+  moveButtonLabelWithName: ({ processorName }: { processorName: string }) =>
+    i18n.translate('xpack.ingestPipelines.pipelineEditor.item.moveButtonLabelWithName', {
+      defaultMessage: 'Move {processorName} processor',
+      values: { processorName },
+    }),
   editButtonLabel: i18n.translate('xpack.ingestPipelines.pipelineEditor.item.editButtonAriaLabel', {
     defaultMessage: 'Edit this processor',
   }),
@@ -26,12 +28,11 @@ export const i18nTexts = {
       defaultMessage: 'Add on failure handler',
     }
   ),
-  cancelMoveButtonLabel: i18n.translate(
-    'xpack.ingestPipelines.pipelineEditor.item.cancelMoveButtonAriaLabel',
-    {
-      defaultMessage: 'Cancel move',
-    }
-  ),
+  cancelMoveButtonLabelWithName: ({ processorName }: { processorName: string }) =>
+    i18n.translate('xpack.ingestPipelines.pipelineEditor.item.cancelMoveButtonAriaLabelWithName', {
+      defaultMessage: 'Cancel move {processorName} processor',
+      values: { processorName },
+    }),
   deleteButtonLabel: i18n.translate(
     'xpack.ingestPipelines.pipelineEditor.item.moreMenu.deleteButtonLabel',
     {
@@ -53,4 +54,56 @@ export const i18nTexts = {
     'xpack.ingestPipelines.pipelineEditor.item.descriptionPlaceholder',
     { defaultMessage: 'No description' }
   ),
+  dropZoneMoveBeforeLabel: ({
+    movingProcessor,
+    targetProcessor,
+    section,
+  }: {
+    movingProcessor: string;
+    targetProcessor: string;
+    section: string;
+  }) =>
+    i18n.translate('xpack.ingestPipelines.pipelineEditor.dropZoneButton.moveBeforeLabel', {
+      defaultMessage: 'Move {movingProcessor} before {targetProcessor} in {section}',
+      values: { movingProcessor, targetProcessor, section },
+    }),
+  dropZoneCannotMoveBeforeLabel: ({
+    movingProcessor,
+    targetProcessor,
+    section,
+  }: {
+    movingProcessor: string;
+    targetProcessor: string;
+    section: string;
+  }) =>
+    i18n.translate('xpack.ingestPipelines.pipelineEditor.dropZoneButton.cannotMoveBefore', {
+      defaultMessage: 'Cannot move {movingProcessor} before {targetProcessor} in {section}',
+      values: { movingProcessor, targetProcessor, section },
+    }),
+  dropZoneMoveAfterLabel: ({
+    movingProcessor,
+    targetProcessor,
+    section,
+  }: {
+    movingProcessor: string;
+    targetProcessor: string;
+    section: string;
+  }) =>
+    i18n.translate('xpack.ingestPipelines.pipelineEditor.dropZoneButton.moveAfterLabel', {
+      defaultMessage: 'Move {movingProcessor} after {targetProcessor} in {section}',
+      values: { movingProcessor, targetProcessor, section },
+    }),
+  dropZoneCannotMoveAfterLabel: ({
+    movingProcessor,
+    targetProcessor,
+    section,
+  }: {
+    movingProcessor: string;
+    targetProcessor: string;
+    section: string;
+  }) =>
+    i18n.translate('xpack.ingestPipelines.pipelineEditor.dropZoneButton.cannotMoveAfter', {
+      defaultMessage: 'Cannot move {movingProcessor} after {targetProcessor} in {section}',
+      values: { movingProcessor, targetProcessor, section },
+    }),
 };

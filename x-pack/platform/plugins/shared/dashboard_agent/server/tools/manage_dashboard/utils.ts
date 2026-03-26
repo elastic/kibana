@@ -8,11 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import type {
-  AttachmentPanel,
-  DashboardAttachmentData,
-  LensAttachmentPanel,
-} from '@kbn/dashboard-agent-common';
+import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import { type AttachmentVersion, getLatestVersion } from '@kbn/agent-builder-common/attachments';
@@ -37,37 +33,44 @@ export const getErrorMessage = (error: unknown): string => {
 
 const visualizationAttachmentDataSchema = z.object({
   visualization: z.record(z.string(), z.unknown()),
-  query: z.string().optional(),
 });
 
-type ResolvedPanelWithoutGrid = Omit<LensAttachmentPanel, 'grid'>;
+type ResolvedPanelWithoutGrid = Omit<AttachmentPanel, 'grid'>;
 
-const resolvePanelsFromVisualizationAttachment = (data: unknown): ResolvedPanelWithoutGrid[] => {
+const resolvePanelsFromVisualizationAttachment = (
+  data: unknown,
+  attachmentId: string
+): ResolvedPanelWithoutGrid[] => {
   const parseResult = visualizationAttachmentDataSchema.safeParse(data);
   if (!parseResult.success) {
     throw new Error('Visualization attachment does not contain a valid visualization payload.');
   }
 
-  const { visualization, query } = parseResult.data;
-  const title =
-    typeof visualization.title === 'string'
-      ? visualization.title
-      : query ?? 'Generated visualization';
+  const { visualization } = parseResult.data;
+  const lensApiState = visualization as LensApiSchemaType & { title?: string };
 
+  // Extract title to config level, keep rest in attributes to align with expected Lens API format for by-value panels.
+  const { title, ...attributes } = lensApiState;
   return [
     {
       type: 'lens',
-      panelId: uuidv4(),
-      visualization: visualization as LensApiSchemaType,
-      title,
-      ...(query ? { query } : {}),
+      uid: uuidv4(),
+      config: {
+        ...(title ? { title } : {}),
+        attributes,
+      },
+      sourceAttachmentId: attachmentId,
     },
   ];
 };
 
-const resolvePanelsFromAttachment = (type: string, data: unknown): ResolvedPanelWithoutGrid[] => {
+const resolvePanelsFromAttachment = (
+  type: string,
+  data: unknown,
+  attachmentId: string
+): ResolvedPanelWithoutGrid[] => {
   if (type === AttachmentType.visualization) {
-    return resolvePanelsFromVisualizationAttachment(data);
+    return resolvePanelsFromVisualizationAttachment(data, attachmentId);
   }
 
   throw new Error(
@@ -79,7 +82,7 @@ const resolvePanelsFromAttachment = (type: string, data: unknown): ResolvedPanel
  * Resolves attachment ids into dashboard panel entries.
  * Supports visualization attachments and dashboard-compatible panel payloads.
  */
-export const resolvePanelsFromAttachments = async ({
+export const resolvePanelsFromAttachments = ({
   attachmentInputs,
   attachments,
   logger,
@@ -87,7 +90,7 @@ export const resolvePanelsFromAttachments = async ({
   attachmentInputs?: Array<{ attachmentId: string; grid: AttachmentPanel['grid'] }>;
   attachments: AttachmentStateManager;
   logger: Logger;
-}): Promise<{ panels: AttachmentPanel[]; failures: VisualizationFailure[] }> => {
+}): { panels: AttachmentPanel[]; failures: VisualizationFailure[] } => {
   if (!attachmentInputs || attachmentInputs.length === 0) {
     return { panels: [], failures: [] };
   }
@@ -107,7 +110,11 @@ export const resolvePanelsFromAttachments = async ({
         throw new Error(`Attachment "${attachmentId}" does not have a readable version.`);
       }
 
-      const resolvedPanels = resolvePanelsFromAttachment(attachmentRecord.type, latestVersion.data);
+      const resolvedPanels = resolvePanelsFromAttachment(
+        attachmentRecord.type,
+        latestVersion.data,
+        attachmentId
+      );
       panels.push(...resolvedPanels.map((panel) => ({ ...panel, grid })));
     } catch (error) {
       const errorMessage = getErrorMessage(error);
@@ -145,7 +152,7 @@ export const getRemovedPanels = (
   const panelsToKeep: AttachmentPanel[] = [];
 
   for (const panel of panels) {
-    if (removeSet.has(panel.panelId)) {
+    if (removeSet.has(panel.uid)) {
       panelsToRemove.push(panel);
     } else {
       panelsToKeep.push(panel);

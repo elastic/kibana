@@ -24,9 +24,9 @@ export interface BaseWorkflowExecutionTelemetryParams {
    */
   spaceId: string;
   /**
-   * How the workflow was triggered: 'manual', 'scheduled', or 'alert'
+   * How the workflow was triggered: 'manual', 'scheduled', 'alert', or 'workflow-step' for sub-workflows.
    */
-  triggerType: 'manual' | 'scheduled' | 'alert';
+  triggerType: 'manual' | 'scheduled' | 'alert' | 'workflow-step';
   /**
    * Whether this is a test run
    */
@@ -35,6 +35,21 @@ export interface BaseWorkflowExecutionTelemetryParams {
    * The alert rule ID if triggered by alert. Only present when triggerType is 'alert'.
    */
   ruleId?: string;
+  /**
+   * Cross-workflow nesting depth for sub-workflow executions (1 = direct child).
+   * Only present for sub-workflow executions.
+   */
+  compositionDepth?: number;
+  /**
+   * The workflow ID of the parent workflow that invoked this sub-workflow.
+   * Only present for sub-workflow executions.
+   */
+  parentWorkflowId?: string;
+  /**
+   * Whether the parent used workflow.execute (sync) or workflow.executeAsync to start this run.
+   * Only present for sub-workflow executions when recorded on the execution context.
+   */
+  parentWorkflowInvocation?: 'sync' | 'async';
 }
 
 /**

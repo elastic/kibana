@@ -115,7 +115,14 @@ export async function extractAndUpdateSecrets(opts: {
 
   const { toCreate, toDelete, noChange } = diffSecretPaths(oldSecretPaths, updatedSecretPaths);
 
-  const secretsToCreate = toCreate.filter((secretPath) => !!secretPath.value.value);
+  // Handle the case of a secret being migrated from a different input type:
+  // the old input no longer exists in the new package, so `oldSecretPaths` is empty and `diffSecretPaths` puts
+  // the path in `toCreate`. We shouldn't create a new secret from an object value,
+  // instead, preserve the existing reference exactly as-is.
+  const secretsToCreate = toCreate.filter(
+    (secretPath) => !!secretPath.value.value && !secretPath.value.value?.isSecretRef
+  );
+  const existingSecretRefs = toCreate.filter((secretPath) => !!secretPath.value.value?.isSecretRef);
 
   const createdSecrets = await createSecrets({
     esClient,
@@ -140,6 +147,14 @@ export async function extractAndUpdateSecrets(opts: {
         return [...acc, ...secret.map(({ id }) => ({ id }))];
       }
       return [...acc, { id: secret.id }];
+    }, []),
+    // Migrated secret references (isSecretRef already set): carry them forward
+    // as tracked references without re-creating the underlying Elasticsearch secret.
+    ...existingSecretRefs.reduce((acc: SecretReference[], secretPath) => {
+      if (secretPath.value.value.ids) {
+        return [...acc, ...secretPath.value.value.ids.map((id: string) => ({ id }))];
+      }
+      return [...acc, { id: secretPath.value.value.id }];
     }, []),
   ];
 
