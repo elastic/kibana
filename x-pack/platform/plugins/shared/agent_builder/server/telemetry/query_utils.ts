@@ -221,7 +221,15 @@ export class QueryUtils {
               script: {
                 source: `
                 def source = params._source;
-                def roundsArray = source.conversation_rounds != null ? source.conversation_rounds : source.rounds;
+                def roundsArray = null;
+                if (source.events != null && source.events.size() > 0) {
+                  roundsArray = new ArrayList();
+                  for (def event : source.events) {
+                    if (event.type == 'agent_response') { roundsArray.add(event); }
+                  }
+                } else {
+                  roundsArray = source.conversation_rounds != null ? source.conversation_rounds : source.rounds;
+                }
                 def rounds = roundsArray != null ? roundsArray.size() : 0;
 
                 if (rounds <= 5) return '1-5';
@@ -240,7 +248,15 @@ export class QueryUtils {
               script: {
                 source: `
                   def source = params._source;
-                  def roundsArray = source.conversation_rounds != null ? source.conversation_rounds : source.rounds;
+                  def roundsArray = null;
+                  if (source.events != null && source.events.size() > 0) {
+                    roundsArray = new ArrayList();
+                    for (def event : source.events) {
+                      if (event.type == 'agent_response') { roundsArray.add(event); }
+                    }
+                  } else {
+                    roundsArray = source.conversation_rounds != null ? source.conversation_rounds : source.rounds;
+                  }
                   return roundsArray != null ? roundsArray.size() : 0;
                 `,
                 lang: 'painless',
@@ -252,7 +268,15 @@ export class QueryUtils {
               script: {
                 source: `
                   def source = params._source;
-                  def roundsArray = source.conversation_rounds != null ? source.conversation_rounds : source.rounds;
+                  def roundsArray = null;
+                  if (source.events != null && source.events.size() > 0) {
+                    roundsArray = new ArrayList();
+                    for (def event : source.events) {
+                      if (event.type == 'agent_response') { roundsArray.add(event); }
+                    }
+                  } else {
+                    roundsArray = source.conversation_rounds != null ? source.conversation_rounds : source.rounds;
+                  }
                   def total = 0;
                   if (roundsArray != null) {
                     for (def round : roundsArray) {
@@ -272,7 +296,15 @@ export class QueryUtils {
               script: {
                 source: `
                   def source = params._source;
-                  def roundsArray = source.conversation_rounds != null ? source.conversation_rounds : source.rounds;
+                  def roundsArray = null;
+                  if (source.events != null && source.events.size() > 0) {
+                    roundsArray = new ArrayList();
+                    for (def event : source.events) {
+                      if (event.type == 'agent_response') { roundsArray.add(event); }
+                    }
+                  } else {
+                    roundsArray = source.conversation_rounds != null ? source.conversation_rounds : source.rounds;
+                  }
                   def total = 0;
                   if (roundsArray != null) {
                     for (def round : roundsArray) {
@@ -883,7 +915,16 @@ export class QueryUtils {
             scripted_metric: {
               init_script: 'state.modelCalls = new HashMap();',
               map_script: `
-                def rounds = params._source.conversation_rounds;
+                def source = params._source;
+                def rounds = null;
+                if (source.events != null && source.events.size() > 0) {
+                  rounds = new ArrayList();
+                  for (def event : source.events) {
+                    if (event.type == 'agent_response') { rounds.add(event); }
+                  }
+                } else {
+                  rounds = source.conversation_rounds;
+                }
                 if (rounds == null) return;
                 for (def round : rounds) {
                   def modelUsage = round.model_usage;

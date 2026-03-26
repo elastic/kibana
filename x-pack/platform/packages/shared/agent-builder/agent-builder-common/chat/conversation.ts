@@ -304,6 +304,133 @@ export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;
 
 export type ConversationAction = 'regenerate';
 
+// ---------------------------------------------------------------------------
+// Multi-user conversation / timeline data model
+// ---------------------------------------------------------------------------
+
+/**
+ * Defines whether a conversation is scoped to a single user or shared (group).
+ */
+export enum ConversationMode {
+  user = 'user',
+  group = 'group',
+}
+
+/**
+ * All possible timeline event types.
+ */
+export enum TimelineEventType {
+  user_message = 'user_message',
+  agent_response = 'agent_response',
+}
+
+export type TimelineEventTypeValue = `${TimelineEventType}`;
+
+/**
+ * Base shape shared by all timeline events.
+ */
+export interface BaseTimelineEvent<
+  EventType extends TimelineEventTypeValue = TimelineEventTypeValue
+> {
+  /** Server-generated UUID */
+  id: string;
+  /** ISO8601 timestamp, used for ordering and catch-up */
+  timestamp: string;
+  /** Discriminant for the event type */
+  type: EventType;
+}
+
+/**
+ * A user message appended to the timeline.
+ */
+export interface UserMessageEvent extends BaseTimelineEvent<'user_message'> {
+  /** The user who sent the message */
+  user: UserIdAndName;
+  /** Text content of the message */
+  message: string;
+  /** @deprecated Use attachment_refs with conversation-level attachments instead */
+  attachments?: Attachment[];
+  /** References to versioned conversation-level attachments */
+  attachment_refs?: AttachmentVersionRef[];
+}
+
+/**
+ * An agent response appended to the timeline.
+ * Contains the same data as a ConversationRound except for the `input` field.
+ */
+export interface AgentResponseEvent extends BaseTimelineEvent<'agent_response'> {
+  /** Id of the agent that produced this response */
+  agent_id: string;
+  /** Current status of the response */
+  status: ConversationRoundStatus;
+  /** Persisted state to resume interrupted states */
+  state?: RoundState;
+  /** If status is awaiting_prompt, contains the current prompt request */
+  pending_prompt?: PromptRequest;
+  /** List of intermediate steps (tool calls, reasoning, compaction) */
+  steps: ConversationRoundStep[];
+  /** The final response from the assistant */
+  response: AssistantResponse;
+  /** When the response was started */
+  started_at: string;
+  /** Time it took to first token, in ms */
+  time_to_first_token: number;
+  /** Time it took to last token, in ms */
+  time_to_last_token: number;
+  /** Model usage statistics */
+  model_usage: RoundModelUsageStats;
+  /** When tracing is enabled, contains the traceId */
+  trace_id?: string | string[];
+  /** Runtime configuration overrides applied to this response */
+  configuration_overrides?: RuntimeAgentConfigurationOverrides;
+}
+
+/**
+ * Union of all timeline event types.
+ */
+export type TimelineEvent = UserMessageEvent | AgentResponseEvent;
+
+/**
+ * Type guard: is this event a UserMessageEvent?
+ */
+export const isUserMessageEvent = (event: TimelineEvent): event is UserMessageEvent => {
+  return event.type === TimelineEventType.user_message;
+};
+
+/**
+ * Type guard: is this event an AgentResponseEvent?
+ */
+export const isAgentResponseEvent = (event: TimelineEvent): event is AgentResponseEvent => {
+  return event.type === TimelineEventType.agent_response;
+};
+
+/**
+ * Execution state of a conversation.
+ */
+export type ConversationExecutionState = 'idle' | 'executing' | 'awaiting_hitl';
+
+/**
+ * Timeline-based conversation format. Replaces the rounds-based model
+ * as the canonical internal representation.
+ */
+export type TimelineConversation = Omit<Conversation, 'rounds'> & {
+  /** Ordered list of timeline events */
+  timeline: TimelineEvent[];
+  /** Whether this is a single-user or group conversation */
+  conversation_mode: ConversationMode;
+  /** Current execution state */
+  execution_state: ConversationExecutionState;
+  /** If new events arrived during execution, ID of the event to retrigger from */
+  queued_trigger?: string;
+};
+
+/**
+ * The internal format used by the execution pipeline.
+ * Currently mirrors TimelineConversation but exists as a separate type
+ * to decouple execution from storage.
+ */
+export type ExecutionConversation = TimelineConversation;
+
 // Compaction summary types
 
 /** Compact representation of a tool call in a compaction summary */

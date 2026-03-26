@@ -31,6 +31,7 @@ import {
   selectTools,
   getPendingRound,
   evictInternalEvents,
+  getRoundsFromConversation,
 } from '../utils';
 import { resolveCapabilities } from '../utils/capabilities';
 import { resolveConfiguration } from '../utils/configuration';
@@ -100,6 +101,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     experimentalFeatures,
   } = context;
 
+  const conversationRounds = getRoundsFromConversation(conversation);
+
   ensureValidInput({ input: nextInput, conversation, action });
 
   const pendingRound = getPendingRound(conversation);
@@ -135,7 +138,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // Pass action so regenerate uses the last round's original input instead of request input
   let processedConversation = await prepareConversation({
     nextInput,
-    previousRounds: conversation?.rounds ?? [],
+    previousRounds: conversationRounds,
     context,
     action,
   });

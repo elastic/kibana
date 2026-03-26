@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import type { Conversation } from '@kbn/agent-builder-common';
+import type { Conversation, ExecutionConversation } from '@kbn/agent-builder-common';
 import { VirtualFileSystem } from './filesystem';
 import { createResultStore } from './volumes/tool_results';
 import { FileSystemStore } from './store';
 import { createSkillsStore } from './volumes/skills/skills_store';
 
-export const createStore = ({ conversation }: { conversation?: Conversation }) => {
+export const createStore = ({
+  conversation,
+}: {
+  conversation?: Conversation | ExecutionConversation;
+}) => {
   const filesystem = new VirtualFileSystem();
 
   const resultStore = createResultStore({ conversation });

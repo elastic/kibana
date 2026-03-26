@@ -13,6 +13,7 @@ import type {
   CompactionStep,
   ConversationRoundStepType,
   Conversation,
+  ConversationMode,
 } from '@kbn/agent-builder-common/chat/conversation';
 
 export type ConversationCreateRequest = Omit<
@@ -20,6 +21,8 @@ export type ConversationCreateRequest = Omit<
   'id' | 'created_at' | 'updated_at' | 'user'
 > & {
   id?: string;
+  /** Optional conversation mode. Defaults to 'user'. */
+  conversation_mode?: ConversationMode;
 };
 
 export type ConversationUpdateRequest = Pick<Conversation, 'id'> &

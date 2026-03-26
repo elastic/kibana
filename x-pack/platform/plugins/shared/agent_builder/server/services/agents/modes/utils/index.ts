@@ -27,3 +27,4 @@ export {
   type CreateResultTransformerOptions,
   FS_TOOL_CALL_TOKEN_THRESHOLD,
 } from './create_result_transformer';
+export { isExecutionConversation, getRoundsFromConversation } from './conversation_format';

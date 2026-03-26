@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/logging';
 import type {
   Conversation,
   ConversationRound,
+  ExecutionConversation,
   ConverseInput,
   ChatAgentEvent,
   AgentCapabilities,
@@ -176,9 +177,10 @@ export interface AgentEventEmitter {
 
 export interface AgentParams {
   /**
-   * Current conversation
+   * Current conversation. Accepts both the legacy rounds-based format
+   * and the new timeline-based ExecutionConversation format.
    */
-  conversation?: Conversation;
+  conversation?: Conversation | ExecutionConversation;
   /**
    * The input triggering this round.
    */

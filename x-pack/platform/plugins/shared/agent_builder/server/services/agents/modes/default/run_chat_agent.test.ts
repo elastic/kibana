@@ -24,6 +24,7 @@ jest.mock('../utils', () => ({
   getPendingRound: jest.fn(),
   addRoundCompleteEvent: jest.fn(() => (source$: any) => source$),
   evictInternalEvents: jest.fn(() => (source$: any) => source$),
+  getRoundsFromConversation: jest.fn((conversation: any) => conversation?.rounds ?? []),
 }));
 
 jest.mock('../utils/create_result_transformer', () => ({

@@ -79,13 +79,29 @@ class ConversationClientImpl implements ConversationClient {
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 1000,
-      _source: ['agent_id', 'user_id', 'user_name', 'title', 'created_at', 'updated_at'],
+      _source: [
+        'agent_id',
+        'user_id',
+        'user_name',
+        'title',
+        'created_at',
+        'updated_at',
+        'conversation_mode',
+      ],
       query: {
         bool: {
           filter: [createSpaceDslFilter(this.space)],
           must: [
             {
-              term: { user_name: this.user.username },
+              bool: {
+                should: [
+                  // Owner's conversations
+                  { term: { user_name: this.user.username } },
+                  // Group conversations visible to all users
+                  { term: { conversation_mode: 'group' } },
+                ],
+                minimum_should_match: 1,
+              },
             },
             ...(agentId ? [{ term: { agent_id: agentId } }] : []),
           ],
@@ -208,6 +224,11 @@ const hasAccess = ({
   conversation: Pick<Document, '_source'>;
   user: UserIdAndName;
 }) => {
+  // Group conversations are accessible to all users
+  if (conversation._source!.conversation_mode === 'group') {
+    return true;
+  }
+  // Single-user: check owner match
   if (user.id && conversation._source!.user_id === user.id) {
     return true;
   }

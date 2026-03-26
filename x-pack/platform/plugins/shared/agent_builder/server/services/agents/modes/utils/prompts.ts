@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import type { Conversation, ConversationRound } from '@kbn/agent-builder-common';
+import type {
+  Conversation,
+  ConversationRound,
+  ExecutionConversation,
+} from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import { getRoundsFromConversation } from './conversation_format';
 
 export const getPendingRound = (
-  conversation: Conversation | undefined
+  conversation: Conversation | ExecutionConversation | undefined
 ): ConversationRound | undefined => {
-  const lastRound = conversation?.rounds[conversation.rounds.length - 1];
+  const rounds = getRoundsFromConversation(conversation);
+  const lastRound = rounds[rounds.length - 1];
   if (lastRound?.status === ConversationRoundStatus.awaitingPrompt) {
     return lastRound;
   }
