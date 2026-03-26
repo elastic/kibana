@@ -244,12 +244,14 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
         <EuiButton
           buttonRef={childTriggerARef}
           onClick={isChildFlyoutAOpen ? handleCloseChildFlyoutA : openChildFlyoutA}
+          data-test-subj={`openChildFlyoutAOverlaysButton-${title}`}
         >
           {isChildFlyoutAOpen ? 'Close child flyout A' : 'Open child flyout A'}
         </EuiButton>{' '}
         <EuiButton
           buttonRef={childTriggerBRef}
           onClick={isChildFlyoutBOpen ? handleCloseChildFlyoutB : openChildFlyoutB}
+          data-test-subj={`openChildFlyoutBOverlaysButton-${title}`}
         >
           {isChildFlyoutBOpen ? 'Close child flyout B' : 'Open child flyout B'}
         </EuiButton>
@@ -257,7 +259,11 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={handleCloseFlyout} aria-label="Close">
+            <EuiButtonEmpty
+              onClick={handleCloseFlyout}
+              aria-label="Close"
+              data-test-subj={`closeMainFlyoutOverlaysButton-${title}`}
+            >
               Close
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -349,6 +355,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
             <EuiFlexItem grow={false}>
               <FlyoutTypeSwitch
                 // switch for flyout type: push or overlay
+                title={title}
                 flyoutType={flyoutType}
                 onChange={setFlyoutType}
               />
@@ -356,6 +363,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
             <EuiFlexItem grow={false}>
               <FlyoutOwnFocusSwitch
                 // switch for ownFocus behavior
+                title={title}
                 flyoutOwnFocus={flyoutOwnFocus}
                 onChange={setFlyoutOwnFocus}
                 disabled={flyoutType === 'push'}
@@ -364,7 +372,12 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton buttonRef={triggerRef} onClick={openFlyout} disabled={isFlyoutOpen}>
+          <EuiButton
+            buttonRef={triggerRef}
+            onClick={openFlyout}
+            disabled={isFlyoutOpen}
+            data-test-subj={`openMainFlyoutOverlaysButton-${title}`}
+          >
             Open {title}
           </EuiButton>
         </EuiFlexItem>
@@ -441,7 +454,12 @@ const GlobalFlyout: React.FC<FlyoutFromOverlaysProps> = React.memo(({ overlays, 
   return (
     <EuiFlexGroup gutterSize="m" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiButton buttonRef={triggerRef} onClick={openFlyout} disabled={isFlyoutOpen}>
+        <EuiButton
+          buttonRef={triggerRef}
+          onClick={openFlyout}
+          disabled={isFlyoutOpen}
+          data-test-subj="openNonSessionFlyoutOverlaysButton"
+        >
           Open Global Flyout
         </EuiButton>
       </EuiFlexItem>

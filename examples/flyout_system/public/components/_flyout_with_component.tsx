@@ -125,6 +125,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
             <EuiFlexItem grow={false}>
               <FlyoutTypeSwitch
                 // switch for flyout type: push or overlay
+                title={title}
                 flyoutType={flyoutType}
                 onChange={setFlyoutType}
               />
@@ -132,6 +133,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
             <EuiFlexItem grow={false}>
               <FlyoutOwnFocusSwitch
                 // switch for ownFocus behavior
+                title={title}
                 flyoutOwnFocus={flyoutOwnFocus}
                 onChange={setFlyoutOwnFocus}
                 disabled={flyoutType === 'push'}
@@ -145,6 +147,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
               buttonRef={mainTriggerRef}
               disabled={isFlyoutOpen}
               onClick={handleOpenMainFlyout}
+              data-test-subj={`openMainFlyoutComponentButton-${title}`}
             >
               Open {title}
             </EuiButton>
@@ -230,6 +233,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
               buttonRef={childTriggerARef}
               onClick={handleOpenChildFlyoutA}
               disabled={isChildFlyoutAOpen}
+              data-test-subj={`openChildFlyoutComponentAButton-${title}`}
             >
               Open child flyout A
             </EuiButton>{' '}
@@ -237,6 +241,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
               buttonRef={childTriggerBRef}
               onClick={handleOpenChildFlyoutB}
               disabled={isChildFlyoutBOpen}
+              data-test-subj={`openChildFlyoutComponentBButton-${title}`}
             >
               Open child flyout B
             </EuiButton>
@@ -244,7 +249,11 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={handleCloseFlyout} aria-label="Close">
+                <EuiButtonEmpty
+                  onClick={handleCloseFlyout}
+                  aria-label="Close"
+                  data-test-subj={`closeMainFlyoutComponentButton-${title}`}
+                >
                   Close
                 </EuiButtonEmpty>
               </EuiFlexItem>
@@ -287,7 +296,11 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={handleCloseChildFlyoutA} aria-label="Close">
+                <EuiButtonEmpty
+                  onClick={handleCloseChildFlyoutA}
+                  aria-label="Close"
+                  data-test-subj={`closeChildFlyoutComponentAButton-${title}`}
+                >
                   Close
                 </EuiButtonEmpty>
               </EuiFlexItem>
@@ -330,7 +343,11 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={handleCloseChildFlyoutB} aria-label="Close">
+                <EuiButtonEmpty
+                  onClick={handleCloseChildFlyoutB}
+                  aria-label="Close"
+                  data-test-subj={`closeChildFlyoutComponentBButton-${title}`}
+                >
                   Close
                 </EuiButtonEmpty>
               </EuiFlexItem>
@@ -374,7 +391,12 @@ const GlobalFlyout: React.FC = React.memo(() => {
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiText>
-            <EuiButton buttonRef={triggerRef} disabled={isFlyoutVisible} onClick={handleOpenFlyout}>
+            <EuiButton
+                buttonRef={triggerRef}
+                disabled={isFlyoutVisible}
+                onClick={handleOpenFlyout}
+                data-test-subj="openNonSessionFlyoutComponentButton"
+              >
               Open Global Flyout
             </EuiButton>
           </EuiText>
@@ -407,7 +429,11 @@ const GlobalFlyout: React.FC = React.memo(() => {
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={flyoutOnClose} aria-label="Close">
+                <EuiButtonEmpty
+                  onClick={flyoutOnClose}
+                  aria-label="Close"
+                  data-test-subj="closeNonSessionFlyoutComponentButton"
+                >
                   Close
                 </EuiButtonEmpty>
               </EuiFlexItem>
