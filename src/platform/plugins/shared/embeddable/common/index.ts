@@ -11,7 +11,7 @@ export type { DrilldownTransforms } from './drilldowns/types';
 
 export type { EmbeddableTransforms } from '../server';
 
-export const TRANSFORM_ERROR_EMBEDDABLE_TYPE = 'transform_error';
+export const SERVER_ERROR_EMBEDDABLE_TYPE = 'server_error';
 
 export type {
   EmbeddableRegistryDefinition,

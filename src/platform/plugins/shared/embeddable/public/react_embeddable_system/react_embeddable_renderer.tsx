@@ -16,11 +16,11 @@ import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import { PresentationPanel } from '@kbn/presentation-panel-plugin/public';
 
-import { TRANSFORM_ERROR_EMBEDDABLE_TYPE } from '../../common';
+import { SERVER_ERROR_EMBEDDABLE_TYPE } from '../../common';
 import { PhaseTracker } from './phase_tracker';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import type { DefaultEmbeddableApi, EmbeddableApiRegistration } from './types';
-import type { SerializedDrilldowns, TransformErrorEmbeddableState } from '../../server';
+import type { SerializedDrilldowns } from '../../server';
 
 /**
  * Renders a component from the React Embeddable registry into a Presentation Panel.
@@ -68,13 +68,8 @@ export const EmbeddableRenderer = <
         const parentApi = getParentApi();
 
         const buildEmbeddable = async () => {
-          if (type === TRANSFORM_ERROR_EMBEDDABLE_TYPE) {
-            const originalType = (
-              parentApi.getSerializedStateForChild(uuid) as
-                | TransformErrorEmbeddableState
-                | undefined
-            )?.original_type;
-            throw new Error(`Unable to transform ${originalType ?? ''} panel config.`);
+          if (type === SERVER_ERROR_EMBEDDABLE_TYPE) {
+            throw new Error(`Panel server error`);
           }
           const factory = await getReactEmbeddableFactory<SerializedState, Api>(type);
 

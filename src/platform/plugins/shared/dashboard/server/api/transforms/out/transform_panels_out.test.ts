@@ -147,7 +147,7 @@ describe('transformPanelsOut', () => {
             "x": 0,
             "y": 0,
           },
-          "type": "transform_error",
+          "type": "server_error",
           "uid": "panel-1",
         },
       ]

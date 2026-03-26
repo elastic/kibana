@@ -17,7 +17,7 @@ import { BehaviorSubject } from 'rxjs';
 import { registerReactEmbeddableFactory } from './react_embeddable_registry';
 import { EmbeddableRenderer } from './react_embeddable_renderer';
 import type { EmbeddableFactory } from './types';
-import { TRANSFORM_ERROR_EMBEDDABLE_TYPE } from '../../common';
+import { SERVER_ERROR_EMBEDDABLE_TYPE } from '../../common';
 
 const testEmbeddableFactory: EmbeddableFactory<{ name: string; bork: string }> = {
   type: 'test',
@@ -228,7 +228,7 @@ describe('embeddable renderer', () => {
     const embeddable = render(
       <EuiThemeProvider>
         <EmbeddableRenderer
-          type={TRANSFORM_ERROR_EMBEDDABLE_TYPE}
+          type={SERVER_ERROR_EMBEDDABLE_TYPE}
           onApiAvailable={onApiAvailable}
           getParentApi={() => ({
             getSerializedStateForChild: () => ({ original_type: 'foo' }),
@@ -239,7 +239,7 @@ describe('embeddable renderer', () => {
 
     await waitFor(() => expect(embeddable.getByTestId('errorMessageMarkdown')).toBeInTheDocument());
     expect(embeddable.getByTestId('errorMessageMarkdown')).toHaveTextContent(
-      'Unable to transform foo panel config'
+      'Panel server error'
     );
   });
 

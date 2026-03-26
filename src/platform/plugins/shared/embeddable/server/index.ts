@@ -21,9 +21,9 @@ export type {
 
 export type { EmbeddableTransforms } from './embeddable_transforms/types';
 export {
-  transformErrorEmbeddableSchema,
-  type TransformErrorEmbeddableState,
-} from './embeddable_transforms/transform_error_embeddable_schema';
+  serverErrorEmbeddableSchema,
+  type ServerErrorEmbeddableState,
+} from './embeddable_transforms/server_error_embeddable_schema';
 
 export type {
   EmbeddableStateWithType,

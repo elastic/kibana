@@ -10,7 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-export const transformErrorEmbeddableSchema = schema.object({
+export const serverErrorEmbeddableSchema = schema.object({
   original_config: schema.object(
     {},
     {
@@ -21,4 +21,4 @@ export const transformErrorEmbeddableSchema = schema.object({
   error: schema.string(),
 });
 
-export type TransformErrorEmbeddableState = TypeOf<typeof transformErrorEmbeddableSchema>;
+export type ServerErrorEmbeddableState = TypeOf<typeof serverErrorEmbeddableSchema>;
