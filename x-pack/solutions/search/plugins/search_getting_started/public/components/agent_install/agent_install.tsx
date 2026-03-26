@@ -130,7 +130,10 @@ export const AgentInstallSection = () => {
             panelPaddingSize="none"
             anchorPosition="downLeft"
             data-test-subj="agentInstallLaunchPopover"
-            aria-label={'TODO - write a real label'}
+            aria-label={i18n.translate('xpack.gettingStarted.agentInstall.agentInstallPopover', {
+              defaultMessage:
+                'Select which agent to use for AI-powered help with building your search application',
+            })}
           >
             <EuiContextMenuPanel
               data-test-subj="agentInstallLaunchMenu"
