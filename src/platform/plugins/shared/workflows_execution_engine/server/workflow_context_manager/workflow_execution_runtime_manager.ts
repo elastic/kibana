@@ -59,7 +59,7 @@ export class WorkflowExecutionRuntimeManager {
 
   private workflowExecutionState: WorkflowExecutionState;
   private entryTransactionId?: string;
-  private workflowTransaction?: any; // APM transaction instance
+  private workflowTransaction?: agent.Transaction; // APM transaction instance
   private workflowGraph: WorkflowGraph;
   private nextNodeId: string | undefined;
   private coreStart?: CoreStart;
@@ -204,9 +204,14 @@ export class WorkflowExecutionRuntimeManager {
     }
 
     const scopeStack = WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack);
+
+    if (scopeStack.isEmpty()) {
+      return;
+    }
+
     const entered = currentNode.type.replace(/^exit-/, 'enter-');
 
-    if (entered !== scopeStack.getCurrentScope()?.nodeType) {
+    if (entered !== scopeStack.getCurrentScope().nodeType) {
       return;
     }
 
@@ -265,10 +270,6 @@ export class WorkflowExecutionRuntimeManager {
 
     while (!scopeStack.isEmpty()) {
       const currentScope = scopeStack.getCurrentScope();
-      if (!currentScope) {
-        break;
-      }
-
       const matched = shouldStop?.(currentScope) ?? false;
       if (matched && !inclusive) {
         break;

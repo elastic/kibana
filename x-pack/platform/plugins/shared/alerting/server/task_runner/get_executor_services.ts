@@ -87,7 +87,7 @@ export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServ
   const uiSettingsClient = context.uiSettings.asScopedToClient(savedObjectsClient);
 
   return {
-    ruleMonitoringService: opts.ruleMonitoringService.getLastRunMetricsSetters(),
+    ruleMonitoringService: opts.ruleMonitoringService.getSetters(),
     ruleResultService: opts.ruleResultService.getLastRunSetters(),
     savedObjectsClient,
     uiSettingsClient,

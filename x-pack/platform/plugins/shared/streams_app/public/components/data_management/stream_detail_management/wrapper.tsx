@@ -15,7 +15,10 @@ import useAsync from 'react-use/lib/useAsync';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import { useStreamDocCountsFetch } from '../../../hooks/use_streams_doc_counts_fetch';
+import {
+  STREAMS_HISTOGRAM_NUM_DATA_POINTS,
+  useStreamDocCountsFetch,
+} from '../../../hooks/use_streams_doc_counts_fetch';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { calculateDataQuality } from '../../../util/calculate_data_quality';
 import { FeedbackButton } from '../../feedback_button';
@@ -99,7 +102,7 @@ export function Wrapper({
     canReadFailureStore: Streams.ingest.all.GetResponse.is(definition)
       ? definition.privileges.read_failure_store
       : true,
-    numDataPoints: 25,
+    numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
   });
   const docCountsFetch = getStreamDocCounts(streamId);
 
@@ -122,6 +125,40 @@ export function Wrapper({
     countResult?.loading || failedDocsResult?.loading || degradedDocsResult.loading;
 
   const { euiTheme } = useEuiTheme();
+
+  const streamBadges: Array<{ key: string; node: ReactNode }> = [];
+  if (Streams.ClassicStream.GetResponse.is(definition)) {
+    streamBadges.push({ key: 'classic', node: <ClassicStreamBadge /> });
+  }
+  if (Streams.WiredStream.GetResponse.is(definition)) {
+    streamBadges.push({ key: 'wired', node: <WiredStreamBadge /> });
+  }
+  if (Streams.ingest.all.GetResponse.is(definition)) {
+    if (definition.index_mode === 'time_series') {
+      streamBadges.push({ key: 'timeSeries', node: <TimeSeriesBadge /> });
+    }
+    streamBadges.push({
+      key: 'lifecycle',
+      node: (
+        <LifecycleBadge
+          lifecycle={definition.effective_lifecycle}
+          dataTestSubj={`lifecycleBadge-${streamId}`}
+        />
+      ),
+    });
+  }
+  streamBadges.push({
+    key: 'quality',
+    node: (
+      <DatasetQualityIndicator
+        quality={quality}
+        isLoading={isQualityLoading}
+        verbose={true}
+        showTooltip={true}
+      />
+    ),
+  });
+
   return (
     <>
       <EuiPageHeader
@@ -134,33 +171,18 @@ export function Wrapper({
           <EuiFlexGroup
             direction="row"
             gutterSize="s"
-            alignItems="baseline"
+            alignItems="center"
             justifyContent="spaceBetween"
             wrap
           >
-            <EuiFlexGroup gutterSize="s" alignItems="baseline" wrap direction="column">
-              {streamId}
-              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap gutterSize="m">
-                <EuiFlexItem grow={true}>
-                  <EuiFlexGroup alignItems="center" gutterSize="s">
-                    {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
-                    {Streams.WiredStream.GetResponse.is(definition) && <WiredStreamBadge />}
-                    {Streams.ingest.all.GetResponse.is(definition) &&
-                      definition.index_mode === 'time_series' && <TimeSeriesBadge />}
-                    {Streams.ingest.all.GetResponse.is(definition) && (
-                      <LifecycleBadge
-                        lifecycle={definition.effective_lifecycle}
-                        dataTestSubj={`lifecycleBadge-${streamId}`}
-                      />
-                    )}
-                    <DatasetQualityIndicator
-                      quality={quality}
-                      isLoading={isQualityLoading}
-                      verbose={true}
-                      showTooltip={true}
-                    />
-                  </EuiFlexGroup>
-                </EuiFlexItem>
+            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" wrap>
+              <EuiFlexItem grow={false}>{streamId}</EuiFlexItem>
+              <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false}>
+                {streamBadges.map(({ key, node }) => (
+                  <EuiFlexItem key={key} grow={false}>
+                    {node}
+                  </EuiFlexItem>
+                ))}
               </EuiFlexGroup>
             </EuiFlexGroup>
             <EuiFlexItem>

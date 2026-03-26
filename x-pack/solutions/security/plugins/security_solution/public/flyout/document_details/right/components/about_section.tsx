@@ -53,7 +53,7 @@ export const AboutSection = memo(() => {
   const { telemetry } = useKibana().services;
   const { dataFormattedForFieldBrowser, eventId, indexName, isRulePreview, scopeId, searchHit } =
     useDocumentDetailsContext();
-  const { rulesPrivileges } = useUserPrivileges();
+  const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
   const { ruleId, ruleName } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
@@ -73,7 +73,7 @@ export const AboutSection = memo(() => {
   });
 
   const ruleSummaryDisabled =
-    isEmpty(ruleName) || isEmpty(ruleId) || isRulePreview || !rulesPrivileges?.rules.read;
+    isEmpty(ruleName) || isEmpty(ruleId) || isRulePreview || !canReadRules;
 
   const openRulePreview = useCallback(() => {
     openPreviewPanel({

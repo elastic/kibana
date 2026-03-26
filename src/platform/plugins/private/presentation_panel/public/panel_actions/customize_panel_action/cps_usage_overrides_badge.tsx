@@ -26,6 +26,8 @@ import {
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
   apiPublishesProjectRoutingOverrides,
+  apiCanAccessViewMode,
+  getInheritedViewMode,
   type ProjectRoutingOverrides,
 } from '@kbn/presentation-publishing';
 import { i18n } from '@kbn/i18n';
@@ -57,6 +59,9 @@ export class CpsUsageOverridesBadge
     const overrideValues = this.getOverrideValues(embeddable);
     if (!overrideValues || overrideValues.length === 0) throw new IncompatibleActionError();
 
+    const isViewMode =
+      apiCanAccessViewMode(embeddable) && getInheritedViewMode(embeddable) === 'view';
+
     return (
       <EuiPopover
         button={
@@ -80,30 +85,32 @@ export class CpsUsageOverridesBadge
                 {strings.badgeLabel}
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={async () => {
-                  setIsPopoverOpen(false);
-                  try {
-                    const action = await uiActions.getAction(ACTION_EDIT_PANEL);
-                    if (action) {
-                      await action.execute({
-                        ...context,
-                        trigger: triggers[ON_OPEN_PANEL_MENU],
+            {!isViewMode && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  onClick={async () => {
+                    setIsPopoverOpen(false);
+                    try {
+                      const action = await uiActions.getAction(ACTION_EDIT_PANEL);
+                      if (action) {
+                        await action.execute({
+                          ...context,
+                          trigger: triggers[ON_OPEN_PANEL_MENU],
+                        });
+                      }
+                    } catch (error) {
+                      core.notifications.toasts.addError(error, {
+                        title: strings.error,
                       });
                     }
-                  } catch (error) {
-                    core.notifications.toasts.addError(error, {
-                      title: strings.error,
-                    });
-                  }
-                }}
-                size="xs"
-                flush="right"
-              >
-                {strings.editButton}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+                  }}
+                  size="xs"
+                  flush="right"
+                >
+                  {strings.editButton}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
           {overrideValues.map((override, index) => (
             <div key={index} css={{ marginTop: index > 0 ? euiTheme.size.s : 0 }}>
@@ -166,6 +173,9 @@ const strings = {
   }),
   editButton: i18n.translate('presentationPanel.badge.cpsUsageOverrides.popover.editButton', {
     defaultMessage: 'Edit',
+  }),
+  exploreButton: i18n.translate('presentationPanel.badge.cpsUsageOverrides.popover.exploreButton', {
+    defaultMessage: 'Explore',
   }),
   error: i18n.translate('presentationPanel.badge.cpsUsageOverrides.editError', {
     defaultMessage: 'Failed to open panel configuration',

@@ -7,6 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ToolType } from '@kbn/agent-builder-common';
+import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { createConnectorLifecycleHandler } from './connector_lifecycle_handler';
 
@@ -61,9 +62,14 @@ const createMockUiSettingsClient = (connectorsEnabled = true) => ({
   }),
 });
 
+const createMockSmlService = () => ({
+  indexAttachment: jest.fn().mockResolvedValue(undefined),
+});
+
 const createMockServiceManager = (
   toolRegistry = createMockToolRegistry(),
-  uiSettingsClient = createMockUiSettingsClient()
+  uiSettingsClient = createMockUiSettingsClient(),
+  sml = createMockSmlService()
 ) => ({
   internalStart: {
     tools: {
@@ -75,8 +81,19 @@ const createMockServiceManager = (
     uiSettings: {
       asScopedToClient: jest.fn().mockReturnValue(uiSettingsClient),
     },
+    sml,
   },
 });
+
+const createMockGetStartServices = () =>
+  jest.fn().mockResolvedValue([
+    {
+      elasticsearch: { client: { asInternalUser: {} } },
+      savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) },
+    },
+    { spaces: { spacesService: { getSpaceId: jest.fn().mockReturnValue('default') } } },
+    {},
+  ]);
 
 const createBaseParams = (overrides = {}) => ({
   connectorId: 'connector-abc',
@@ -105,6 +122,7 @@ describe('createConnectorLifecycleHandler', () => {
         serviceManager: createMockServiceManager() as any,
         workflowsManagement: createMockWorkflowsManagement() as any,
         logger,
+        getStartServices: createMockGetStartServices(),
       });
 
       await handler.onPostCreate(
@@ -121,6 +139,7 @@ describe('createConnectorLifecycleHandler', () => {
         serviceManager: createMockServiceManager() as any,
         workflowsManagement: workflowsManagement as any,
         logger,
+        getStartServices: createMockGetStartServices(),
       });
 
       await handler.onPostCreate(createBaseParams({ workflowTemplates: [] }) as any);
@@ -135,6 +154,7 @@ describe('createConnectorLifecycleHandler', () => {
         serviceManager: createMockServiceManager(createMockToolRegistry(), uiSettingsClient) as any,
         workflowsManagement: workflowsManagement as any,
         logger,
+        getStartServices: createMockGetStartServices(),
       });
 
       await handler.onPostCreate(
@@ -151,6 +171,7 @@ describe('createConnectorLifecycleHandler', () => {
         serviceManager: createMockServiceManager(toolRegistry) as any,
         workflowsManagement: workflowsManagement as any,
         logger,
+        getStartServices: createMockGetStartServices(),
       });
 
       await handler.onPostCreate(
@@ -174,12 +195,63 @@ describe('createConnectorLifecycleHandler', () => {
       );
     });
 
+    it('calls sml.indexAttachment with create action after tool creation', async () => {
+      const sml = createMockSmlService();
+      const serviceManager = createMockServiceManager(
+        createMockToolRegistry(),
+        createMockUiSettingsClient(),
+        sml
+      );
+      const handler = createConnectorLifecycleHandler({
+        serviceManager: serviceManager as any,
+        workflowsManagement: createMockWorkflowsManagement() as any,
+        logger,
+        getStartServices: createMockGetStartServices(),
+      });
+
+      const params = createBaseParams({ workflowTemplates: [SIMPLE_WORKFLOW_YAML] });
+      await handler.onPostCreate(params as any);
+
+      expect(sml.indexAttachment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          originId: 'connector-abc',
+          attachmentType: AttachmentType.connector,
+          action: 'create',
+        })
+      );
+    });
+
+    it('logs warning but does not throw when sml.indexAttachment fails', async () => {
+      const sml = createMockSmlService();
+      sml.indexAttachment.mockRejectedValue(new Error('SML error'));
+      const serviceManager = createMockServiceManager(
+        createMockToolRegistry(),
+        createMockUiSettingsClient(),
+        sml
+      );
+      const handler = createConnectorLifecycleHandler({
+        serviceManager: serviceManager as any,
+        workflowsManagement: createMockWorkflowsManagement() as any,
+        logger,
+        getStartServices: createMockGetStartServices(),
+      });
+
+      await expect(
+        handler.onPostCreate(createBaseParams({ workflowTemplates: [SIMPLE_WORKFLOW_YAML] }) as any)
+      ).resolves.toBeUndefined();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('failed to index connector')
+      );
+    });
+
     it('substitutes template variables with connector ID', async () => {
       const workflowsManagement = createMockWorkflowsManagement();
       const handler = createConnectorLifecycleHandler({
         serviceManager: createMockServiceManager() as any,
         workflowsManagement: workflowsManagement as any,
         logger,
+        getStartServices: createMockGetStartServices(),
       });
 
       await handler.onPostCreate(
@@ -198,6 +270,7 @@ describe('createConnectorLifecycleHandler', () => {
         serviceManager: createMockServiceManager(toolRegistry) as any,
         workflowsManagement: workflowsManagement as any,
         logger,
+        getStartServices: createMockGetStartServices(),
       });
 
       await handler.onPostCreate(
@@ -214,6 +287,7 @@ describe('createConnectorLifecycleHandler', () => {
         serviceManager: createMockServiceManager() as any,
         workflowsManagement: workflowsManagement as any,
         logger,
+        getStartServices: createMockGetStartServices(),
       });
 
       await handler.onPostCreate(
@@ -232,6 +306,7 @@ describe('createConnectorLifecycleHandler', () => {
         serviceManager: createMockServiceManager() as any,
         workflowsManagement: workflowsManagement as any,
         logger,
+        getStartServices: createMockGetStartServices(),
       });
 
       await expect(
@@ -248,6 +323,7 @@ describe('createConnectorLifecycleHandler', () => {
         serviceManager: { internalStart: undefined } as any,
         workflowsManagement: createMockWorkflowsManagement() as any,
         logger,
+        getStartServices: createMockGetStartServices(),
       });
 
       await handler.onPostCreate(
@@ -274,25 +350,21 @@ describe('createConnectorLifecycleHandler', () => {
           tags: ['connector', 'test', 'connector:connector-abc'],
           configuration: { workflow_id: 'wf-2' },
         },
-        {
-          id: 'tool-other',
-          tags: ['connector', 'test', 'connector:other-id'],
-          configuration: { workflow_id: 'wf-other' },
-        },
       ]);
       const workflowsManagement = createMockWorkflowsManagement();
       const handler = createConnectorLifecycleHandler({
         serviceManager: createMockServiceManager(toolRegistry) as any,
         workflowsManagement: workflowsManagement as any,
         logger,
+        getStartServices: createMockGetStartServices(),
       });
 
       await handler.onPostDelete(createBaseParams({ connectorType: '.test' }) as any);
 
+      expect(toolRegistry.list).toHaveBeenCalledWith({ tags: ['connector:connector-abc'] });
       expect(toolRegistry.delete).toHaveBeenCalledTimes(2);
       expect(toolRegistry.delete).toHaveBeenCalledWith('tool-1');
       expect(toolRegistry.delete).toHaveBeenCalledWith('tool-2');
-      expect(toolRegistry.delete).not.toHaveBeenCalledWith('tool-other');
 
       expect(workflowsManagement.management.deleteWorkflows).toHaveBeenCalledWith(
         ['wf-1', 'wf-2'],
@@ -309,12 +381,67 @@ describe('createConnectorLifecycleHandler', () => {
         serviceManager: createMockServiceManager(toolRegistry) as any,
         workflowsManagement: workflowsManagement as any,
         logger,
+        getStartServices: createMockGetStartServices(),
       });
 
       await handler.onPostDelete(createBaseParams() as any);
 
       expect(toolRegistry.delete).not.toHaveBeenCalled();
       expect(workflowsManagement.management.deleteWorkflows).not.toHaveBeenCalled();
+    });
+
+    it('calls sml.indexAttachment with delete action after cleanup', async () => {
+      const sml = createMockSmlService();
+      const toolRegistry = createMockToolRegistry();
+      toolRegistry.list.mockResolvedValue([]);
+      const serviceManager = createMockServiceManager(
+        toolRegistry,
+        createMockUiSettingsClient(),
+        sml
+      );
+      const handler = createConnectorLifecycleHandler({
+        serviceManager: serviceManager as any,
+        workflowsManagement: createMockWorkflowsManagement() as any,
+        logger,
+        getStartServices: createMockGetStartServices(),
+      });
+
+      const params = createBaseParams({ connectorType: '.test' });
+      await handler.onPostDelete(params as any);
+
+      expect(sml.indexAttachment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          originId: 'connector-abc',
+          attachmentType: AttachmentType.connector,
+          action: 'delete',
+        })
+      );
+    });
+
+    it('logs warning but does not throw when SML delete fails', async () => {
+      const sml = createMockSmlService();
+      sml.indexAttachment.mockRejectedValue(new Error('SML delete error'));
+      const toolRegistry = createMockToolRegistry();
+      toolRegistry.list.mockResolvedValue([]);
+      const serviceManager = createMockServiceManager(
+        toolRegistry,
+        createMockUiSettingsClient(),
+        sml
+      );
+      const handler = createConnectorLifecycleHandler({
+        serviceManager: serviceManager as any,
+        workflowsManagement: createMockWorkflowsManagement() as any,
+        logger,
+        getStartServices: createMockGetStartServices(),
+      });
+
+      await expect(
+        handler.onPostDelete(createBaseParams({ connectorType: '.test' }) as any)
+      ).resolves.toBeUndefined();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('failed to remove connector')
+      );
     });
 
     it('logs error but does not throw on failure', async () => {
@@ -324,6 +451,7 @@ describe('createConnectorLifecycleHandler', () => {
         serviceManager: createMockServiceManager(toolRegistry) as any,
         workflowsManagement: createMockWorkflowsManagement() as any,
         logger,
+        getStartServices: createMockGetStartServices(),
       });
 
       await expect(handler.onPostDelete(createBaseParams() as any)).resolves.toBeUndefined();

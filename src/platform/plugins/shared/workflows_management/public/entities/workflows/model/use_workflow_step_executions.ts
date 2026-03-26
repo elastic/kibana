@@ -9,7 +9,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
-import { useKibana } from '../../../hooks/use_kibana';
+import { useWorkflowsApi } from '@kbn/workflows-ui';
 
 export interface StepExecutionListResult {
   results: EsWorkflowStepExecution[];
@@ -26,7 +26,7 @@ interface UseWorkflowStepExecutionsParams {
 }
 
 export function useWorkflowStepExecutions(params: UseWorkflowStepExecutionsParams) {
-  const { http } = useKibana().services;
+  const api = useWorkflowsApi();
 
   return useQuery({
     queryKey: [
@@ -41,16 +41,11 @@ export function useWorkflowStepExecutions(params: UseWorkflowStepExecutionsParam
       if (!params.workflowId) {
         return { results: [], total: 0 };
       }
-      return http.get<StepExecutionListResult>(
-        `/api/workflowExecutions/${params.workflowId}/steps`,
-        {
-          query: {
-            ...(params.stepId ? { stepId: params.stepId } : {}),
-            page: params.page,
-            size: params.size ?? 100,
-          },
-        }
-      );
+      return api.getWorkflowStepExecutions(params.workflowId, {
+        ...(params.stepId ? { stepId: params.stepId } : {}),
+        page: params.page,
+        size: params.size ?? 100,
+      });
     },
     enabled: params.workflowId !== null,
   });

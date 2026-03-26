@@ -14,7 +14,7 @@
       "taskManager",
       "dataViews",
       "security"
-  ],
+    ],
     "optionalPlugins": [
       "encryptedSavedObjects"
     ],
