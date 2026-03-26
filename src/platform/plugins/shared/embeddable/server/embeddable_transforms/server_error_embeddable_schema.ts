@@ -9,6 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { referenceSchema } from '@kbn/content-management-utils';
 
 export const serverErrorEmbeddableSchema = schema.object({
   original_config: schema.object(
@@ -17,6 +18,7 @@ export const serverErrorEmbeddableSchema = schema.object({
       unknowns: 'allow',
     }
   ),
+  original_references: schema.maybe(schema.arrayOf(referenceSchema)),
   original_type: schema.string(),
   error: schema.string(),
 });

@@ -139,6 +139,7 @@ describe('transformPanelsOut', () => {
             "original_config": Object {
               "foo": "1",
             },
+            "original_references": Array [],
             "original_type": "test",
           },
           "grid": Object {

@@ -93,6 +93,7 @@ function transformPanelProperties(
   } catch (transformOutError) {
     const errorConfig: ServerErrorEmbeddableState = {
       original_config: embeddableConfig,
+      ...(storedPanelReferences ? { original_references: storedPanelReferences } : {}),
       original_type: type,
       error: transformOutError.message,
     };
