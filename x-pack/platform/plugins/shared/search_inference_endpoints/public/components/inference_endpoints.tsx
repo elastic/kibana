@@ -72,7 +72,9 @@ export const InferenceEndpoints: React.FC = () => {
     if (isEisEnabled) {
       return endpoints.filter(
         (ep) =>
-          ep.service !== ServiceProviderKeys.elastic && !isEndpointPreconfigured(ep.inference_id)
+          ep.service !== ServiceProviderKeys.elastic &&
+          ep.service !== ServiceProviderKeys.elasticsearch &&
+          !isEndpointPreconfigured(ep.inference_id)
       );
     }
     return endpoints;

@@ -252,7 +252,7 @@ describe('InferenceEndpoints', () => {
       expect(screen.queryByText('.elser-2-elasticsearch')).not.toBeInTheDocument();
     });
 
-    it('keeps user-created non-elastic endpoints', () => {
+    it('keeps user-created third-party endpoints', () => {
       useQueryInferenceEndpoints.mockReturnValue({
         data: mixedEndpoints,
         isLoading: false,
@@ -262,7 +262,18 @@ describe('InferenceEndpoints', () => {
       renderComponent();
 
       expect(screen.getByText('my-openai-endpoint')).toBeInTheDocument();
-      expect(screen.getByText('user-elasticsearch-endpoint')).toBeInTheDocument();
+    });
+
+    it('filters out elasticsearch service endpoints', () => {
+      useQueryInferenceEndpoints.mockReturnValue({
+        data: mixedEndpoints,
+        isLoading: false,
+        refetch: mockRefetch,
+      });
+
+      renderComponent();
+
+      expect(screen.queryByText('user-elasticsearch-endpoint')).not.toBeInTheDocument();
     });
 
     it('renders clickable Add Endpoint button in empty prompt', () => {
