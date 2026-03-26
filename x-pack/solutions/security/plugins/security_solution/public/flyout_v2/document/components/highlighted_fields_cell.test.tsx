@@ -31,14 +31,14 @@ jest.mock('../../../management/hooks/agents/use_get_agent_status');
 jest.mock('@kbn/expandable-flyout');
 
 const mockedTelemetry = createTelemetryServiceMock();
-const actual = jest.requireActual('../../../common/lib/kibana');
 jest.mock('../../../common/lib/kibana', () => {
+  const kibanaActual = jest.requireActual('../../../common/lib/kibana');
   return {
-    ...actual,
+    ...kibanaActual,
     useKibana: () => ({
-      ...actual.useKibana(),
+      ...kibanaActual.useKibana(),
       services: {
-        ...actual.useKibana().services,
+        ...kibanaActual.useKibana().services,
         telemetry: mockedTelemetry,
       },
     }),

@@ -120,7 +120,14 @@ describe('useAttackEntitiesLists', () => {
                 doc_count: 2,
                 sample: {
                   hits: {
-                    hits: [{ _source: { user: { name: 'user1' } } }],
+                    hits: [
+                      {
+                        _source: {
+                          user: { name: 'user1' },
+                          host: { id: 'host-for-user1' },
+                        },
+                      },
+                    ],
                   },
                 },
               },
@@ -129,7 +136,14 @@ describe('useAttackEntitiesLists', () => {
                 doc_count: 1,
                 sample: {
                   hits: {
-                    hits: [{ _source: { user: { name: 'user2' } } }],
+                    hits: [
+                      {
+                        _source: {
+                          user: { name: 'user2' },
+                          host: { id: 'host-for-user2' },
+                        },
+                      },
+                    ],
                   },
                 },
               },
@@ -168,8 +182,16 @@ describe('useAttackEntitiesLists', () => {
     const { result } = renderHook(() => useAttackEntitiesLists());
 
     expect(result.current.userEntityIdentifiers).toEqual([
-      { 'user.name': 'user1', 'entity.namespace': 'unknown' },
-      { 'user.name': 'user2', 'entity.namespace': 'unknown' },
+      {
+        'user.name': 'user1',
+        'host.id': 'host-for-user1',
+        'entity.namespace': 'local',
+      },
+      {
+        'user.name': 'user2',
+        'host.id': 'host-for-user2',
+        'entity.namespace': 'local',
+      },
     ]);
     expect(result.current.hostEntityIdentifiers).toEqual([
       { 'host.name': 'host1' },
@@ -217,7 +239,18 @@ describe('useAttackEntitiesLists', () => {
               {
                 key: 'user:user1',
                 doc_count: 1,
-                sample: { hits: { hits: [{ _source: { user: { name: 'user1' } } }] } },
+                sample: {
+                  hits: {
+                    hits: [
+                      {
+                        _source: {
+                          user: { name: 'user1' },
+                          host: { id: 'h1' },
+                        },
+                      },
+                    ],
+                  },
+                },
               },
               {
                 key: 'user:empty',
@@ -246,7 +279,7 @@ describe('useAttackEntitiesLists', () => {
     const { result } = renderHook(() => useAttackEntitiesLists());
 
     expect(result.current.userEntityIdentifiers).toEqual([
-      { 'user.name': 'user1', 'entity.namespace': 'unknown' },
+      { 'user.name': 'user1', 'host.id': 'h1', 'entity.namespace': 'local' },
     ]);
     expect(result.current.hostEntityIdentifiers).toEqual([{ 'host.name': 'host1' }]);
   });

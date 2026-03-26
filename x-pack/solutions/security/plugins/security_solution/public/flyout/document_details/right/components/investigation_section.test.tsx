@@ -26,6 +26,24 @@ import type { UseBasicDataFromDetailsDataResult } from '../../shared/hooks/use_b
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...actual,
+    useUiSetting: jest.fn(),
+  };
+});
+
+jest.mock('@kbn/entity-store/public', () => {
+  const actual = jest.requireActual('@kbn/entity-store/public');
+  const { euidBrowser: euid } = jest.requireActual('@kbn/entity-store/common/euid_helpers');
+  return {
+    ...actual,
+    useEntityStoreEuidApi: jest.fn(() => ({ euid })),
+  };
+});
 
 jest.mock('../../../entity_details/shared/hooks/use_entity_from_store');
 
@@ -91,9 +109,11 @@ const renderInvestigationSection = (contextValue = panelContextValue) =>
 describe('<InvestigationSection />', () => {
   const mockUseExpandSection = jest.mocked(useExpandSection);
   const mockUseEntityFromStore = useEntityFromStore as jest.Mock;
+  const mockUseUiSetting = useUiSetting as jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseUiSetting.mockReturnValue(false);
     mockUseEntityFromStore.mockReturnValue({
       entityRecord: null,
       entity: null,

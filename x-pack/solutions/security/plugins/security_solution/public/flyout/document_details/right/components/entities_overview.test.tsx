@@ -19,6 +19,9 @@ import { useFirstLastSeen } from '../../../../common/containers/use_first_last_s
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
 import { mockContextValue } from '../../shared/mocks/mock_context';
+import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
+import type { GetFieldsData } from '../../shared/hooks/use_get_fields_data';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import {
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
@@ -90,6 +93,32 @@ const TITLE_TEXT_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(INSIGHTS_E
 
 const mockNavigateToLeftPanel = jest.fn();
 
+const ecsScalarOrArrayToFieldValues = (value: unknown): string[] => {
+  if (value == null) {
+    return [];
+  }
+  if (Array.isArray(value)) {
+    return value.map(String);
+  }
+  return [String(value)];
+};
+
+/**
+ * Keeps `getFieldsData('host.name' | 'user.name')` aligned with `dataAsNestedObject` so tests that
+ * override nested ECS shapes stay consistent with field accessors (matches real flyout behavior).
+ */
+const getFieldsDataForNestedObject =
+  (dataAsNestedObject: Ecs): GetFieldsData =>
+  (field: string) => {
+    if (field === 'host.name') {
+      return ecsScalarOrArrayToFieldValues(dataAsNestedObject.host?.name);
+    }
+    if (field === 'user.name') {
+      return ecsScalarOrArrayToFieldValues(dataAsNestedObject.user?.name);
+    }
+    return mockGetFieldsData(field);
+  };
+
 const renderEntitiesOverview = (contextValue: DocumentDetailsContext) =>
   render(
     <TestProviders>
@@ -141,20 +170,43 @@ describe('<EntitiesOverview />', () => {
   });
 
   it('should render user and host', () => {
-    const { getByTestId, queryByText } = renderEntitiesOverview(mockContextValue);
+    // User EUID on alert-shaped docs needs a non-IDP identity branch (e.g. host.id) alongside user.name.
+    const dataAsNestedObject = {
+      ...mockContextValue.dataAsNestedObject,
+      host: {
+        id: ['host-id-for-user-euid'],
+        name: ['host-name'],
+      },
+      user: { name: ['user1'] },
+    };
+    const contextValue = {
+      ...mockContextValue,
+      dataAsNestedObject,
+      getFieldsData: getFieldsDataForNestedObject(dataAsNestedObject),
+    } as unknown as DocumentDetailsContext;
+
+    const { getByTestId, queryByText } = renderEntitiesOverview(contextValue);
     expect(getByTestId(ENTITIES_USER_OVERVIEW_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(ENTITIES_HOST_OVERVIEW_TEST_ID)).toBeInTheDocument();
     expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
   });
 
   it('should only render user when host name is null', () => {
+    // Without host.* on the document, user identity must use an IDP-style branch (asset + module).
+    const dataAsNestedObject = {
+      ...mockContextValue.dataAsNestedObject,
+      host: {},
+      user: { name: ['user1'] },
+      event: {
+        ...mockContextValue.dataAsNestedObject.event,
+        kind: ['asset'],
+        module: ['okta'],
+      },
+    };
     const contextValue = {
       ...mockContextValue,
-      dataAsNestedObject: {
-        ...mockContextValue.dataAsNestedObject,
-        host: {},
-        user: { name: ['user1'] },
-      },
+      dataAsNestedObject,
+      getFieldsData: getFieldsDataForNestedObject(dataAsNestedObject),
     } as unknown as DocumentDetailsContext;
 
     const { queryByTestId, getByTestId, queryByText } = renderEntitiesOverview(contextValue);
@@ -165,13 +217,15 @@ describe('<EntitiesOverview />', () => {
   });
 
   it('should only render host when user name is null', () => {
+    const dataAsNestedObject = {
+      ...mockContextValue.dataAsNestedObject,
+      host: { name: ['host-name'] },
+      user: {},
+    };
     const contextValue = {
       ...mockContextValue,
-      dataAsNestedObject: {
-        ...mockContextValue.dataAsNestedObject,
-        host: { name: ['host-name'] },
-        user: {},
-      },
+      dataAsNestedObject,
+      getFieldsData: getFieldsDataForNestedObject(dataAsNestedObject),
     } as unknown as DocumentDetailsContext;
 
     const { queryByTestId, getByTestId, queryByText } = renderEntitiesOverview(contextValue);
@@ -182,13 +236,15 @@ describe('<EntitiesOverview />', () => {
   });
 
   it('should render no data message if both host name and user name are null/blank', () => {
+    const dataAsNestedObject = {
+      ...mockContextValue.dataAsNestedObject,
+      host: {},
+      user: {},
+    };
     const contextValue = {
       ...mockContextValue,
-      dataAsNestedObject: {
-        ...mockContextValue.dataAsNestedObject,
-        host: {},
-        user: {},
-      },
+      dataAsNestedObject,
+      getFieldsData: getFieldsDataForNestedObject(dataAsNestedObject),
     } as unknown as DocumentDetailsContext;
 
     const { getByText } = renderEntitiesOverview(contextValue);

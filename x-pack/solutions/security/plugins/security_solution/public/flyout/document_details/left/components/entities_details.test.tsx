@@ -206,7 +206,7 @@ describe('<EntitiesDetails />', () => {
     expect(queryByTestId(HOST_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('when fields API omits user.* but ECS slice has user.name, still renders user under entity store v2', () => {
+  it('with entity store v2, omits user and host panels when store has no entity records and fields API omits user.*', () => {
     mockUseUiSetting.mockReturnValue(true);
     mockUseEntityFromStore.mockReturnValue({
       entityRecord: null,
@@ -237,11 +237,13 @@ describe('<EntitiesDetails />', () => {
         user: { name: ['fields-api-missing-but-ecs-has-user'] },
       },
     } as DocumentDetailsContext;
-    const { queryByTestId } = renderEntitiesDetails(contextValue);
-    expect(queryByTestId(USER_TEST_ID)).toBeInTheDocument();
+    const { getByText, queryByTestId } = renderEntitiesDetails(contextValue);
+    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
+    expect(queryByTestId(USER_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(HOST_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('when entity store v2 is enabled and no entity record exists, still renders user from document when EUID cannot derive user identity', () => {
+  it('with entity store v2 and no entity records, shows empty state even when document has user.name', () => {
     mockUseUiSetting.mockReturnValue(true);
     mockUseEntityFromStore.mockReturnValue({
       entityRecord: null,
@@ -252,9 +254,9 @@ describe('<EntitiesDetails />', () => {
       error: null,
       refetch: jest.fn(),
     });
-    const { queryByText, queryByTestId } = renderEntitiesDetails(mockContextValue);
-    expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
-    expect(queryByTestId(USER_TEST_ID)).toBeInTheDocument();
+    const { getByText, queryByTestId } = renderEntitiesDetails(mockContextValue);
+    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
+    expect(queryByTestId(USER_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(HOST_TEST_ID)).not.toBeInTheDocument();
   });
 });
