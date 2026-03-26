@@ -58,6 +58,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await transform.management.assertNoTransformsFoundMessageExists();
         await transform.management.assertCreateFirstTransformButtonExists();
       } else {
+        await transform.table.waitForTransformsTableToLoad();
         await transform.management.assertTransformsTableExists();
         await transform.management.assertCreateNewTransformButtonExists();
       }
