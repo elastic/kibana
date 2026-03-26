@@ -47,7 +47,7 @@ export interface AttachedToCaseArgs {
 }
 
 export interface GetAttachmentArgs {
-  attachmentId: string;
+  savedObjectId: string;
   mode: AttachmentMode;
 }
 
@@ -88,7 +88,7 @@ export interface CountActionsAttachedToCaseArgs extends AttachedToCaseArgs {
 }
 
 export interface DeleteAttachmentArgs extends IndexRefresh {
-  attachmentIds: string[];
+  savedObjectIds: string[];
 }
 
 export interface CreateAttachmentArgs extends IndexRefresh {
@@ -106,7 +106,7 @@ export interface BulkCreateAttachments extends IndexRefresh {
 }
 
 export interface UpdateArgs {
-  attachmentId: string;
+  savedObjectId: string;
   updatedAttributes: AttachmentPatchAttributesV2;
   options?: Omit<SavedObjectsUpdateOptions<AttachmentAttributesV2>, 'upsert'>;
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import { isNotEmptyCondition } from '../../../common/domain/definitions/common_fields';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import {
@@ -13,6 +14,7 @@ import {
   type ManagedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
+import { HASH_ALG } from '../constants';
 import { BadCRUDRequestError } from '../errors';
 import { hashEuid, validateAndTransformDoc, validateDocIdentification } from './utils';
 
@@ -53,11 +55,12 @@ describe('crud_client utils', () => {
   });
 
   describe('hashEuid', () => {
-    it('returns a valid MD5 hash', () => {
+    it('returns a valid SHA-256 hash', () => {
       const hashedId = hashEuid('entity-id');
+      const expectedHash = createHash(HASH_ALG).update('entity-id').digest('hex');
 
-      expect(hashedId).toMatch(/^[a-f0-9]{32}$/);
-      expect(hashedId).toBe('169fbe0cb705d8d8811b5098d0cf4588');
+      expect(hashedId).toMatch(/^[a-f0-9]{64}$/);
+      expect(hashedId).toBe(expectedHash);
     });
   });
 

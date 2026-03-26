@@ -16,6 +16,7 @@ import type {
   EntityField,
   ManagedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
+import { HASH_ALG } from '../constants';
 import { BadCRUDRequestError } from '../errors';
 
 type CrudOperation = 'create' | 'update';
@@ -29,9 +30,7 @@ export interface ValidateDocIdentificationOptions {
 }
 
 export function hashEuid(id: string): string {
-  // EUID generation uses MD5. It is not a security-related feature.
-  // eslint-disable-next-line @kbn/eslint/no_unsafe_hash
-  return createHash('md5').update(id).digest('hex');
+  return createHash(HASH_ALG).update(id).digest('hex');
 }
 
 // validateDocIdentification checks provided and generated EUIDs. It
