@@ -12,7 +12,7 @@ import {
 } from './initialization.gen';
 
 export const INITIALIZE_SECURITY_SOLUTION_URL = '/api/security_solution/initialize' as const;
-export const INITIALIZE_SECURITY_SOLUTION_SOCKET_TIMEOUT_MS = 5 * 60 * 1000;
+export const INITIALIZE_SECURITY_SOLUTION_SOCKET_TIMEOUT_MS = 2 * 60 * 1000;
 
 // Flow IDs
 export const INITIALIZATION_FLOW_CREATE_LIST_INDICES =
