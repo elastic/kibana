@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/agent-builder-plugin'
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-genai-utils'
   - '@kbn/agent-builder-server'
   - '@kbn/dashboard-plugin'
   - '@kbn/dashboard-agent-common'
@@ -33,6 +34,9 @@ dependsOn:
   - '@kbn/deeplinks-analytics'
   - '@kbn/share-plugin'
   - '@kbn/css-utils'
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/logging'
+  - '@kbn/core-elasticsearch-server'
 tags:
   - plugin
   - prod
