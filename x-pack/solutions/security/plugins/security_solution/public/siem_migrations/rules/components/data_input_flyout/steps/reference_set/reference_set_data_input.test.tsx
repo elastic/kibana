@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { ReferenceSetDataInput } from './reference_set_data_input';
 import { getRuleMigrationStatsMock } from '../../../../__mocks__';
@@ -43,6 +43,7 @@ describe('ReferenceSetDataInput', () => {
     dataInputStep: QradarDataInputStep.ReferenceSet,
     migrationSource: MigrationSource.QRADAR,
     migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
+    onComplete: jest.fn(),
     setDataInputStep: jest.fn(),
     onMigrationCreated: jest.fn(),
     onMissingResourcesFetched: jest.fn(),
@@ -110,5 +111,44 @@ describe('ReferenceSetDataInput', () => {
       </TestProviders>
     );
     expect(queryByTestId('referenceSetsUploadDescription')).not.toBeInTheDocument();
+  });
+
+  it('does not render content when onComplete is not provided', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <ReferenceSetDataInput {...defaultProps} onComplete={undefined} />
+      </TestProviders>
+    );
+    expect(queryByTestId('referenceSetsUploadDescription')).not.toBeInTheDocument();
+    expect(queryByTestId('referenceSetsSkipButton')).not.toBeInTheDocument();
+  });
+
+  it('renders skip button when step is current', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <ReferenceSetDataInput {...defaultProps} />
+      </TestProviders>
+    );
+    expect(getByTestId('referenceSetsSkipButton')).toBeInTheDocument();
+    expect(getByTestId('referenceSetsSkipButton')).toHaveTextContent('Continue without uploading');
+  });
+
+  it('calls onComplete when skip button is clicked', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <ReferenceSetDataInput {...defaultProps} />
+      </TestProviders>
+    );
+    fireEvent.click(getByTestId('referenceSetsSkipButton'));
+    expect(defaultProps.onComplete).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not render skip button when step is not current', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <ReferenceSetDataInput {...defaultProps} dataInputStep={SplunkDataInputStep.Upload} />
+      </TestProviders>
+    );
+    expect(queryByTestId('referenceSetsSkipButton')).not.toBeInTheDocument();
   });
 });
