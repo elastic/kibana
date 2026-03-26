@@ -422,6 +422,80 @@ const CODES = Object.freeze({
     'xpack.securitySolution.endpointActionResponseCodes.memoryDump.insufficientDiskSpaceError',
     { defaultMessage: 'Host does not have sufficient disk space to capture a memory dump' }
   ),
+
+  // -----------------------------------------------------------------
+  // RUNSCRIPT CODES
+  // -----------------------------------------------------------------
+  ra_runscript_error_failure: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.runscript.errorFailure',
+    { defaultMessage: 'Unknown failure while executing runscript' }
+  ),
+  ra_runscript_success_done: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.runscript.success',
+    { defaultMessage: 'Runscript completed' }
+  ),
+  'ra_runscript_error_not-found': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.runscript.notFound',
+    { defaultMessage: 'Script not found' }
+  ),
+  'ra_runscript_error_invalid-command': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.runscript.invalidCommand',
+    { defaultMessage: 'The runscript command is invalid' }
+  ),
+  'ra_runscript_error_invalid-input': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.runscript.invalidInput',
+    { defaultMessage: 'Script action input is invalid' }
+  ),
+  'ra_runscript_error_not-permitted': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.runscript.notPermitted',
+    { defaultMessage: 'Misconfiguration - no permission to use Fleet API for script retrieval' }
+  ),
+  'ra_runscript_error_too-big': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.runscript.tooBig',
+    { defaultMessage: 'Script too large' }
+  ),
+  // DEV: was too long in queue, because of no network, other action instance was stuck, etc
+  'ra_runscript_error_queue-timeout': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.runscript.queueTimeout',
+    { defaultMessage: 'Action timed out' }
+  ),
+  'ra_runscript_error_download-failed': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.runscript.downloadFailed',
+    { defaultMessage: 'Failed to download script for execution' }
+  ),
+  'ra_runscript_error_api-unreachable': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.runscript.unreachable',
+    { defaultMessage: 'Unable to download script for execution - Fleet Server API not reachable' }
+  ),
+  'ra_runscript_error_not-enough-free-space': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.runscript.notEnoughFreeSpace',
+    { defaultMessage: 'Unable to execute script due to insufficient free space on host' }
+  ),
+  ra_runscript_error_canceled: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.runscript.canceled',
+    { defaultMessage: 'Runscript was canceled' }
+  ),
+  ra_runscript_error_processing: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.runscript.processing',
+    { defaultMessage: 'Error occurred during action processing' }
+  ),
+  'ra_runscript_error_upload-timeout': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.runscript.uploadTimeout',
+    { defaultMessage: 'Runscript failed to upload script execution output' }
+  ),
+  'ra_runscript_error_processing-timeout': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.runscript.processingTimeout',
+    { defaultMessage: 'Action processing timeout has been reached' }
+  ),
+  // DEV: reboot, etc
+  'ra_runscript_error_processing-interrupted': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.runscript.processingInterrupted',
+    { defaultMessage: 'Action has been interrupted' }
+  ),
+  'ra_runscript_error_disk-quota': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.runscript.diskQuota',
+    { defaultMessage: 'Too many actions' }
+  ),
 });
 
 /**
