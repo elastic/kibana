@@ -55,7 +55,7 @@ Include each optional section only when the evidence clearly supports it. If it 
 | Section | Include if |
 |---|---|
 | **RBAC** | Issue explicitly mentions roles, permissions, or access control |
-| **Multi-space** | Feature involves UI, data, or configuration that could differ between Kibana spaces |
+| **Multi-space** | Feature involves entities that are space-aware in Kibana — rules, cases, alerts, dashboards, saved objects, actions, or any configuration scoped to a Kibana space |
 | **Multi-tenant** | Feature involves data ingestion, index patterns, or configuration in a Serverless or ECH deployment |
 | **Upgrade** | Feature modifies stored data, index mappings, saved objects, configuration, or navigation structure |
 | **CCS** | Feature queries Elasticsearch indices — especially Alerts index or detection rules |
