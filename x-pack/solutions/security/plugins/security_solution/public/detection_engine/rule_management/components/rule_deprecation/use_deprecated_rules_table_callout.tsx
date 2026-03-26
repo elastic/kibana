@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useTimedDismissal } from '../../../../common/hooks/use_timed_dismissal';
 import { usePrebuiltRulesDeprecationReview } from '../../logic/prebuilt_rules/use_prebuilt_rules_deprecation_review';
 import { DeprecatedRulesCallout } from './deprecated_rules_callout';
@@ -18,12 +19,15 @@ import * as i18n from './translations';
 const DISMISSAL_STORAGE_KEY = 'securitySolution.deprecatedRulesCallout.dismissedAt';
 
 export const useDeprecatedRulesTableCallout = () => {
+  const isFeatureEnabled = useIsExperimentalFeatureEnabled('prebuiltRulesDeprecationUIEnabled');
   const [isModalVisible, showModal, hideModal] = useBoolState();
   const [isDismissed, dismiss] = useTimedDismissal(DISMISSAL_STORAGE_KEY);
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
-  const { data, isLoading } = usePrebuiltRulesDeprecationReview(null);
+  const { data, isLoading } = usePrebuiltRulesDeprecationReview(null, {
+    enabled: isFeatureEnabled,
+  });
 
-  if (isDismissed || isLoading || !data || data.rules.length === 0) {
+  if (!isFeatureEnabled || isDismissed || isLoading || !data || data.rules.length === 0) {
     return null;
   }
 

@@ -12,6 +12,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { DuplicateOptions } from '../../../../../common/detection_engine/rule_management/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useExecuteBulkAction } from '../../logic/bulk_actions/use_execute_bulk_action';
 import { usePrebuiltRulesDeprecationReview } from '../../logic/prebuilt_rules/use_prebuilt_rules_deprecation_review';
 import { DeprecatedRulesCallout } from './deprecated_rules_callout';
@@ -41,10 +42,11 @@ export const useDeprecatedRuleDetailsCallout = ({
     exceptions: { edit: canEditExceptions },
   } = useUserPrivileges().rulesPrivileges;
 
+  const isFeatureEnabled = useIsExperimentalFeatureEnabled('prebuiltRulesDeprecationUIEnabled');
   const isPrebuiltRule = rule?.rule_source?.type === 'external';
   const { data, isLoading } = usePrebuiltRulesDeprecationReview(
     rule?.id ? { ids: [rule.id] } : null,
-    { enabled: isPrebuiltRule }
+    { enabled: isFeatureEnabled && isPrebuiltRule }
   );
   const { executeBulkAction } = useExecuteBulkAction();
 
