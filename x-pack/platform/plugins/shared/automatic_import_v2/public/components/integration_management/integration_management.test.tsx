@@ -7,13 +7,45 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { BehaviorSubject } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import { IntegrationManagement } from './integration_management';
 
 const mockNavigateToApp = jest.fn();
+const mockNavigateToUrl = jest.fn();
+const mockGetUrlForApp = jest.fn(() => '/mock-integrations-url');
 const mockReportCancelButtonClicked = jest.fn();
 const mockReportDoneButtonClicked = jest.fn();
+
+const mockEnterpriseLicense = {
+  isAvailable: true,
+  isActive: true,
+  hasAtLeast: (licenseType: string) => licenseType === 'enterprise',
+};
+
+const mockLicense$ = new BehaviorSubject(mockEnterpriseLicense);
+
+jest.mock('react-use/lib/useObservable', () => ({
+  __esModule: true,
+  default: (obs$: { getValue?: () => unknown }) =>
+    typeof obs$?.getValue === 'function' ? obs$.getValue() : undefined,
+}));
+
+jest.mock('../../common/hooks/use_kibana', () => ({
+  useKibana: () => ({
+    services: {
+      application: {
+        navigateToApp: mockNavigateToApp,
+        getUrlForApp: mockGetUrlForApp,
+        navigateToUrl: mockNavigateToUrl,
+      },
+      licensing: {
+        license$: mockLicense$,
+      },
+    },
+  }),
+}));
 
 jest.mock('../../common', () => ({
   useGetIntegrationById: jest.fn(() => ({
@@ -25,6 +57,11 @@ jest.mock('../../common', () => ({
     services: {
       application: {
         navigateToApp: mockNavigateToApp,
+        getUrlForApp: mockGetUrlForApp,
+        navigateToUrl: mockNavigateToUrl,
+      },
+      licensing: {
+        license$: mockLicense$,
       },
     },
   }),
