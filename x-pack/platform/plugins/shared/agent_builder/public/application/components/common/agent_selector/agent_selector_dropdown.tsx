@@ -134,6 +134,7 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
   anchorPosition = 'downLeft',
   fallbackLabel,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const { agentOptions, renderAgentOption } = useAgentOptions({
@@ -153,7 +154,7 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
     ${useSelectorListStyles({ listId: agentListId })}
     &#${agentListId} .euiSelectableListItem {
       align-items: flex-start;
-      padding-bottom: 4px;
+      padding-bottom: ${euiTheme.size.xs};
     }
   `;
 
