@@ -13,6 +13,7 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { RunAgentFn } from '@kbn/agent-builder-server';
 import type { SmlTypeRegistry } from './sml_type_registry';
 import type { SmlIndexAction, SmlContext } from './types';
 import { createSmlStorage, smlIndexName } from './sml_storage';
@@ -21,6 +22,7 @@ import { isNotFoundError } from './sml_service';
 export interface SmlIndexerDeps {
   registry: SmlTypeRegistry;
   logger: Logger;
+  getRunAgent?: () => RunAgentFn;
 }
 
 export interface SmlIndexer {
@@ -39,17 +41,19 @@ export interface SmlIndexer {
   }) => Promise<void>;
 }
 
-export const createSmlIndexer = ({ registry, logger }: SmlIndexerDeps): SmlIndexer => {
-  return new SmlIndexerImpl({ registry, logger });
+export const createSmlIndexer = ({ registry, logger, getRunAgent }: SmlIndexerDeps): SmlIndexer => {
+  return new SmlIndexerImpl({ registry, logger, getRunAgent });
 };
 
 class SmlIndexerImpl implements SmlIndexer {
   private readonly registry: SmlTypeRegistry;
   private readonly logger: Logger;
+  private readonly getRunAgent?: () => RunAgentFn;
 
-  constructor({ registry, logger }: SmlIndexerDeps) {
+  constructor({ registry, logger, getRunAgent }: SmlIndexerDeps) {
     this.registry = registry;
     this.logger = logger;
+    this.getRunAgent = getRunAgent;
   }
 
   async indexAttachment({
@@ -99,6 +103,7 @@ class SmlIndexerImpl implements SmlIndexer {
       savedObjectsClient,
       logger: contextLogger,
       request,
+      runAgent: this.getRunAgent?.(),
     };
 
     this.logger.info(
