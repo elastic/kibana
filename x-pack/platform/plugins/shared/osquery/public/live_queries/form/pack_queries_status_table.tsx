@@ -48,6 +48,20 @@ const truncateTooltipTextCss = {
   },
 };
 
+const queryClampCss = {
+  cursor: 'pointer',
+  '.euiCodeBlock__code': {
+    display: '-webkit-box',
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: 'vertical' as const,
+    overflow: 'hidden',
+  },
+};
+
+const queryClampFlexItemCss = {
+  minWidth: 0,
+};
+
 const euiFlexItemCss = {
   cursor: 'pointer',
 };
@@ -99,7 +113,7 @@ interface DocsColumnResultsProps {
 const DocsColumnResults: React.FC<DocsColumnResultsProps> = ({ count, isLive }) => (
   <EuiFlexGroup gutterSize="s" alignItems="center">
     <EuiFlexItem grow={false}>
-      {count ? <EuiBadge color="hollow">{count}</EuiBadge> : '-'}
+      {count ? <EuiBadge color="hollow">{count}</EuiBadge> : '\u2014'}
     </EuiFlexItem>
     {!isLive ? (
       <EuiFlexItem grow={false} data-test-subj={'live-query-loading'}>
@@ -215,22 +229,21 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const renderQueryColumn = useCallback(
     (query: string, item: any) => {
       const singleLine = removeMultilines(query);
-      const content = singleLine.length > 55 ? `${singleLine.substring(0, 55)}...` : singleLine;
+      const content = singleLine.length > 120 ? `${singleLine.substring(0, 120)}...` : singleLine;
 
       const queryContent = (
-        <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
-          {content}
-        </EuiCodeBlock>
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+        <div css={queryClampCss} role="button" tabIndex={0} onClick={handleQueryFlyoutOpen(item)}>
+          <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
+            {content}
+          </EuiCodeBlock>
+        </div>
       );
 
       if (scheduleId && packName) {
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center" wrap={false}>
-            <EuiFlexItem
-              grow={false}
-              css={euiFlexItemWithMinWidthCss}
-              onClick={handleQueryFlyoutOpen(item)}
-            >
+            <EuiFlexItem grow={false} css={queryClampFlexItemCss}>
               {queryContent}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -242,11 +255,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         );
       }
 
-      return (
-        <EuiFlexItem css={euiFlexItemCss} onClick={handleQueryFlyoutOpen(item)}>
-          {queryContent}
-        </EuiFlexItem>
-      );
+      return queryContent;
     },
     [handleQueryFlyoutOpen, scheduleId, packName]
   );
@@ -513,7 +522,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         name: i18n.translate('xpack.osquery.pack.queriesTable.docsResultsColumnTitle', {
           defaultMessage: 'Docs',
         }),
-        width: '80px',
+        width: '60px',
         render: renderDocsColumn,
       },
       {
@@ -531,7 +540,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
               name: i18n.translate('xpack.osquery.pack.queriesTable.runAtColumnTitle', {
                 defaultMessage: 'Run at',
               }),
-              width: '180px',
+              width: '160px',
               render: renderRunAtColumn,
             },
           ]
