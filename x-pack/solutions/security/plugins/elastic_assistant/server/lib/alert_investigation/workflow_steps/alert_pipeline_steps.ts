@@ -255,9 +255,7 @@ export const tagProcessedAlertsStep = createServerStepDefinition({
   inputSchema: TagInputSchema,
   outputSchema: TagOutputSchema,
   handler: async (context) => {
-    // Use internal ES client for write access to alerts index
-    const coreStart = context.contextManager.getCoreStart();
-    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    const esClient = context.contextManager.getScopedEsClient();
     const { alert_ids: alertIds, index_pattern: indexPattern } = context.input;
 
     const validIds = alertIds.filter((id: string) => id && id.length > 0);

@@ -299,12 +299,7 @@ describe('Workflow Steps - Error Scenarios', () => {
           index_pattern: '.alerts-security.alerts-default',
         },
         contextManager: {
-          getScopedEsClient: jest.fn(),
-          getCoreStart: jest.fn().mockReturnValue({
-            elasticsearch: {
-              client: { asInternalUser: mockEsClient },
-            },
-          }),
+          getScopedEsClient: jest.fn().mockReturnValue(mockEsClient),
         },
       });
     };
@@ -314,7 +309,7 @@ describe('Workflow Steps - Error Scenarios', () => {
       const result = await tagProcessedAlertsStep.handler(context);
 
       expect(result.output.tagged_count).toBe(5);
-      const esClient = context.contextManager.getCoreStart().elasticsearch.client.asInternalUser;
+      const esClient = context.contextManager.getScopedEsClient();
       expect(esClient.updateByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           index: '.alerts-security.alerts-default',
@@ -333,7 +328,7 @@ describe('Workflow Steps - Error Scenarios', () => {
       const context = createTagContext(['alert-1', '', 'alert-2', '']);
       const result = await tagProcessedAlertsStep.handler(context);
       expect(result.output.tagged_count).toBe(2);
-      const esClient = context.contextManager.getCoreStart().elasticsearch.client.asInternalUser;
+      const esClient = context.contextManager.getScopedEsClient();
       expect(esClient.updateByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           query: { ids: { values: ['alert-1', 'alert-2'] } },
