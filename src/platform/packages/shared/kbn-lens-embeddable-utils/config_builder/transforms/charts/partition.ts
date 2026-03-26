@@ -272,15 +272,23 @@ function computeSharedPartitionLayerState(config: PartitionState) {
   };
 }
 
+const DONUT_HOLE_API_TO_EMPTY_SIZE_KEY: Record<
+  NonNullable<Exclude<PieState['donut_hole'], 'none'>>,
+  keyof typeof PARTITION_EMPTY_SIZE_RADIUS
+> = {
+  s: 'SMALL',
+  m: 'MEDIUM',
+  l: 'LARGE',
+};
+
 function getEmptySizeRatioFromDonutHoleOption(
   option: PieState['donut_hole']
 ): { emptySizeRatio: number } | {} {
   if (!option || option === 'none') {
     return {};
   }
-  const partitionEmptySizeRadiusName =
-    option.toUpperCase() as keyof typeof PARTITION_EMPTY_SIZE_RADIUS;
-  return { emptySizeRatio: PARTITION_EMPTY_SIZE_RADIUS[partitionEmptySizeRadiusName] };
+  const partitionKey = DONUT_HOLE_API_TO_EMPTY_SIZE_KEY[option];
+  return { emptySizeRatio: PARTITION_EMPTY_SIZE_RADIUS[partitionKey] };
 }
 
 type PartitionMetricItem =
@@ -663,9 +671,16 @@ function fromLensStateToPerChartSpecificAPI(visualization: LensPartitionVisualiz
   // Pie and Donut chart have the label_position and donut_hole options
   if (isStatePieChart(visualization)) {
     return stripUndefined({
-      donut_hole: Object.entries(PARTITION_EMPTY_SIZE_RADIUS)
-        .find(([key, value]) => value === vizLayer.emptySizeRatio)?.[0]
-        .toLowerCase(),
+      donut_hole: (() => {
+        const entry = Object.entries(PARTITION_EMPTY_SIZE_RADIUS).find(
+          ([, value]) => value === vizLayer.emptySizeRatio
+        );
+        const key = entry?.[0] as keyof typeof PARTITION_EMPTY_SIZE_RADIUS | undefined;
+        if (key === 'SMALL') return 's';
+        if (key === 'MEDIUM') return 'm';
+        if (key === 'LARGE') return 'l';
+        return undefined;
+      })(),
       label_position: convertStateCategoryDisplayOption(vizLayer.categoryDisplay),
     });
   }

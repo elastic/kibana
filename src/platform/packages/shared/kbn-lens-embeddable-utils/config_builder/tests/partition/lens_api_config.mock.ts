@@ -94,7 +94,7 @@ export const esqlCharts = [
     value_display: {
       mode: 'percentage',
     },
-    donut_hole: 'medium',
+    donut_hole: 'm',
     label_position: 'outside',
     query: {
       query: '',
@@ -345,7 +345,7 @@ export const esqlCharts = [
     value_display: {
       mode: 'percentage',
     },
-    donut_hole: 'medium',
+    donut_hole: 'm',
     label_position: 'outside',
     query: {
       query: '',
@@ -604,7 +604,7 @@ export const esqlCharts = [
     value_display: {
       mode: 'percentage',
     },
-    donut_hole: 'medium',
+    donut_hole: 'm',
     label_position: 'outside',
     query: {
       query: '',
@@ -1069,7 +1069,7 @@ export const esqlCharts = [
     value_display: {
       mode: 'percentage',
     },
-    donut_hole: 'medium',
+    donut_hole: 'm',
     label_position: 'outside',
     query: {
       query: '',

@@ -80,11 +80,11 @@ describe('Pie/Donut Schema', () => {
               fields: ['category'],
             },
           ],
-          donut_hole: 'medium',
+          donut_hole: 'm',
         };
 
         const validated = pieStateSchema.validate(input);
-        expect(validated.donut_hole).toBe('medium');
+        expect(validated.donut_hole).toBe('m');
       });
 
       it('validates full configuration with specific options', () => {
@@ -117,7 +117,7 @@ describe('Pie/Donut Schema', () => {
             size: 'xl',
           },
           label_position: 'inside',
-          donut_hole: 'small',
+          donut_hole: 's',
           value_display: {
             mode: 'percentage',
             percent_decimals: 0,
@@ -128,7 +128,7 @@ describe('Pie/Donut Schema', () => {
         expect(validated.title).toBe('Sales Chart');
         expect(validated.legend?.nested).toBe(false);
         expect(validated.label_position).toBe('inside');
-        expect(validated.donut_hole).toBe('small');
+        expect(validated.donut_hole).toBe('s');
         expect(validated.value_display?.mode).toBe('percentage');
       });
 
@@ -826,13 +826,13 @@ describe('Pie/Donut Schema', () => {
             visible: 'show',
           },
           label_position: 'outside',
-          donut_hole: 'large',
+          donut_hole: 'l',
         };
 
         const validated = pieStateSchema.validate(input);
         expect(validated.title).toBe('Sales Chart');
         expect(validated.label_position).toBe('outside');
-        expect(validated.donut_hole).toBe('large');
+        expect(validated.donut_hole).toBe('l');
       });
     });
   });
