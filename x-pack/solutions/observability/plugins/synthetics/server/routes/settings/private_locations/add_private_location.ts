@@ -30,7 +30,7 @@ export const PrivateLocationSchema = schema.object({
       lon: schema.number(),
     })
   ),
-  spaces: schema.maybe(schema.arrayOf(schema.string())),
+  spaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
 });
 
 export type PrivateLocationObject = TypeOf<typeof PrivateLocationSchema>;

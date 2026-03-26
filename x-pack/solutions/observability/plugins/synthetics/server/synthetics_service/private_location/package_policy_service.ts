@@ -7,6 +7,7 @@
 
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { uniqBy } from 'lodash';
 import type { SyntheticsServerSetup } from '../../types';
@@ -54,8 +55,13 @@ export class PackagePolicyService {
 
   async getByIds({ spaceId, packagePolicyIds }: { spaceId: string; packagePolicyIds: string[] }) {
     // For legacy reasons, we need to get the package policies from both the space and the default space
+    const clients =
+      spaceId === DEFAULT_SPACE_ID
+        ? [this.getSpaceSoClient(DEFAULT_SPACE_ID)]
+        : [this.getSpaceSoClient(spaceId), this.getSpaceSoClient(DEFAULT_SPACE_ID)];
+
     const ids = await Promise.all(
-      [this.getSpaceSoClient(spaceId), this.getSpaceSoClient(DEFAULT_SPACE_ID)].map((soClient) =>
+      clients.map((soClient) =>
         this.server.fleet.packagePolicyService.getByIDs(soClient, packagePolicyIds, {
           ignoreMissing: true,
         })
@@ -159,12 +165,8 @@ export class PackagePolicyService {
       )
     );
 
-    try {
-      const res = await Promise.all(promises);
-      return res.flat();
-    } catch (error) {
-      this.server.logger.error(error);
-    }
+    const res = await Promise.all(promises);
+    return res.flat();
   }
 
   // The agent policies can be in the default space or the spaceId
@@ -210,7 +212,10 @@ export class PackagePolicyService {
       if (pkgPolicy.policy_ids) {
         pkgPolicy.policy_ids?.forEach((policyId) => {
           const agentPolicy = agentPolicyById.get(policyId);
-          if (agentPolicy?.space_ids?.includes(spaceId)) {
+          if (
+            agentPolicy?.space_ids?.includes(spaceId) ||
+            agentPolicy?.space_ids?.includes(ALL_SPACES_ID)
+          ) {
             spacePackagePolicies.push(pkgPolicy);
           } else {
             defaultSpacePackagePolicies.push(pkgPolicy);

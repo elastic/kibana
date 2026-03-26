@@ -562,19 +562,20 @@ export class SyntheticsPrivateLocation {
         }
         legacyPolicyIds.forEach((id) => policyIdsToDelete.add(id));
       }
-      if (policyIdsToDelete.size > 0) {
-        const result = await this.packagePolicyService.bulkDelete({
-          policyIdsToDelete: Array.from(policyIdsToDelete),
-          spaceId,
-        });
-        const failedPolicies = result?.filter((policy) => {
-          return policy && !policy.success && policy?.statusCode !== 404;
-        });
-        if (failedPolicies?.length === policyIdsToDelete.size) {
-          throw new Error(deletePolicyError(configs[0][ConfigKey.NAME]));
-        }
-        return result;
+    }
+
+    if (policyIdsToDelete.size > 0) {
+      const result = await this.packagePolicyService.bulkDelete({
+        policyIdsToDelete: Array.from(policyIdsToDelete),
+        spaceId,
+      });
+      const failedPolicies = result?.filter((policy) => {
+        return policy && !policy.success && policy?.statusCode !== 404;
+      });
+      if (failedPolicies?.length === policyIdsToDelete.size) {
+        throw new Error(deletePolicyError(configs[0][ConfigKey.NAME]));
       }
+      return result;
     }
   }
 
