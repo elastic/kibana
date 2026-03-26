@@ -19,8 +19,8 @@ import {
   QUERY_LOCAL_STORAGE_KEY,
   START_LOCAL_STORAGE_KEY,
   useAssistantContext,
-  useLoadConnectors,
 } from '@kbn/elastic-assistant';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import type { Filter, Query } from '@kbn/es-query';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -58,10 +58,10 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     services: { uiSettings, settings },
   } = useKibana();
 
-  const { http, inferenceEnabled } = useAssistantContext();
+  const { http } = useAssistantContext();
   const { data: aiConnectors } = useLoadConnectors({
     http,
-    inferenceEnabled,
+    featureId: 'attack_discovery',
     settings,
   });
 

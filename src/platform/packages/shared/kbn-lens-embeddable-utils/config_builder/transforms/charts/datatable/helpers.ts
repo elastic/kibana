@@ -11,9 +11,34 @@ import type {
   ColumnState,
   GenericIndexPatternColumn,
   TextBasedLayerColumn,
+  DataType,
 } from '@kbn/lens-common';
-import type { ColorByValueType, ColorMappingType } from '../../../schema/color';
+import type { $Values } from 'utility-types';
 import { ACCESSOR } from './constants';
+import type { ColorByValueType, ColorMappingType } from '../../../schema/color';
+import { isColorByValueColor, isColorMappingColor } from '../../coloring';
+
+const COLOR_MODE_TO_API = {
+  text: 'value',
+  badge: 'badge',
+  cell: 'background',
+} as const;
+
+const API_TO_COLOR_MODE = {
+  value: 'text',
+  badge: 'badge',
+  background: 'cell',
+} as const;
+
+type ApiColorTarget = $Values<typeof COLOR_MODE_TO_API>;
+
+export const colorModeToApplyColorTo = (
+  mode: Exclude<NonNullable<ColumnState['colorMode']>, 'none'>
+): ApiColorTarget => COLOR_MODE_TO_API[mode];
+
+export const applyColorToToColorMode = (
+  target: ApiColorTarget
+): NonNullable<ColumnState['colorMode']> => API_TO_COLOR_MODE[target];
 
 /**
  * Checks if the column is a metric column in a formBased layer
@@ -28,10 +53,6 @@ export function isMetricColumnNoESQL(
 
   // If the column is bucketed, it is a row column (not a metric)
   return !col.isTransposed && !layerColumn.isBucketed;
-  if (col.isTransposed || layerColumn.isBucketed) {
-    return false;
-  }
-  return true;
 }
 
 /**
@@ -61,21 +82,20 @@ export function getAccessorName(
 }
 
 /**
- * Checks if the API color is of type color mapping
+ * Infers the datatype from the color configuration.
+ * - colorMapping → 'string'
+ * - colorByValue → 'number'
+ * - No color → uses the provided default
  */
-export function isColorMappingColor(color: unknown): color is ColorMappingType {
-  if (color == null) return false;
-  return (
-    typeof color === 'object' &&
-    'mode' in color &&
-    (color.mode === 'categorical' || color.mode === 'gradient')
-  );
-}
-
-/**
- * Checks if the API color is of type color by value
- */
-export function isColorByValueColor(color: unknown): color is ColorByValueType {
-  if (color == null) return false;
-  return typeof color === 'object' && 'type' in color && color.type === 'dynamic';
+export function inferDatatypeFromColor(
+  color: ColorByValueType | ColorMappingType | undefined,
+  defaultType: Extract<DataType, 'number' | 'string'>
+): Extract<DataType, 'number' | 'string'> {
+  if (isColorByValueColor(color)) {
+    return 'number';
+  }
+  if (isColorMappingColor(color)) {
+    return 'string';
+  }
+  return defaultType;
 }

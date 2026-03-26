@@ -147,6 +147,8 @@ import { RuleDefinitionSection } from '../../../rule_management/components/rule_
 import { RuleScheduleSection } from '../../../rule_management/components/rule_details/rule_schedule_section';
 import { ModifiedRuleBadge } from '../../../rule_management/components/rule_details/modified_rule_badge';
 import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
+import { AddRuleAttachmentToChatButton } from '../../../rule_creation_ui/components/add_rule_attachment_to_chat_button';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manual_rule_run/use_manual_rule_run_confirmation';
 // eslint-disable-next-line no-restricted-imports
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
@@ -154,6 +156,7 @@ import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
@@ -268,13 +271,13 @@ export const RuleDetailsPage = connector(
         isSignalIndexExists,
         isAuthenticated,
         hasEncryptionKey,
-        hasIndexRead,
         signalIndexName,
         hasIndexWrite,
         hasIndexMaintenance,
       },
     ] = useUserData();
     const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
+    const { hasAlertsRead: canReadAlerts } = useAlertsPrivileges();
     const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
       useListsConfig();
 
@@ -311,7 +314,7 @@ export const RuleDetailsPage = connector(
       }
     }, [rule, startMlJobs]);
 
-    const pageTabs = useRuleDetailsTabs({ rule, ruleId, isExistingRule, hasIndexRead });
+    const pageTabs = useRuleDetailsTabs({ rule, ruleId, isExistingRule, canReadAlerts });
 
     const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =
       useBoolState();
@@ -341,6 +344,7 @@ export const RuleDetailsPage = connector(
     );
     // TODO: Refactor license check + hasMlAdminPermissions to common check
     const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
+    const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
 
     const hasActionsPrivileges = useMemo(() => {
       if (rule?.actions != null && rule?.actions.length > 0 && isBoolean(actions.show)) {
@@ -717,6 +721,11 @@ export const RuleDetailsPage = connector(
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                          {isAgentChatExperienceEnabled && rule != null ? (
+                            <EuiFlexItem grow={false}>
+                              <AddRuleAttachmentToChatButton rule={rule} pathway="rule_details" />
+                            </EuiFlexItem>
+                          ) : null}
                           <EuiFlexItem grow={false}>
                             <EditRuleSettingButtonLink
                               ruleId={ruleId}
@@ -839,54 +848,56 @@ export const RuleDetailsPage = connector(
                         </EuiResizeObserver>
                       </RuleFieldsSectionWrapper>
                     </Route>
-                    <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
-                      <>
-                        <SiemSearchBar
-                          dataView={experimentalDataView}
-                          pollForSignalIndex={pollForSignalIndex}
-                          id={InputsModelId.global}
-                          sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
-                        />
-                        <EuiSpacer />
-                        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                          <EuiFlexItem grow={false}>
-                            <AlertsTableFilterGroup
-                              status={filterGroup}
-                              onFilterGroupChanged={onFilterGroupChangedCallback}
-                            />
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>{updatedAtValue}</EuiFlexItem>
-                        </EuiFlexGroup>
-                        <EuiSpacer size="l" />
-                        <Display show={!globalFullScreen}>
-                          <AlertsHistogramPanel
-                            filters={alertMergedFilters}
-                            signalIndexName={signalIndexName}
-                            defaultStackByOption={defaultRuleStackByOption}
-                            updateDateRange={updateDateRangeCallback}
+                    {canReadAlerts && (
+                      <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
+                        <>
+                          <SiemSearchBar
+                            dataView={experimentalDataView}
+                            pollForSignalIndex={pollForSignalIndex}
+                            id={InputsModelId.global}
+                            sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
                           />
                           <EuiSpacer />
-                        </Display>
-                        {ruleId != null && (
-                          <GroupedAlertsTable
-                            accordionButtonContent={defaultGroupTitleRenderers}
-                            accordionExtraActionGroupStats={accordionExtraActionGroupStats}
-                            dataViewSpec={oldSourcererDataViewSpec} // TODO: newDataViewPickerEnabled Should be removed after migrating to new data view picker
-                            dataView={experimentalDataView}
-                            defaultFilters={alertMergedFilters}
-                            defaultGroupingOptions={defaultGroupingOptions}
-                            from={from}
-                            globalFilters={filters}
-                            globalQuery={query}
-                            groupTakeActionItems={groupTakeActionItems}
-                            loading={loading}
-                            renderChildComponent={renderGroupedAlertTable}
-                            tableId={TableId.alertsOnRuleDetailsPage}
-                            to={to}
-                          />
-                        )}
-                      </>
-                    </Route>
+                          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                            <EuiFlexItem grow={false}>
+                              <AlertsTableFilterGroup
+                                status={filterGroup}
+                                onFilterGroupChanged={onFilterGroupChangedCallback}
+                              />
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>{updatedAtValue}</EuiFlexItem>
+                          </EuiFlexGroup>
+                          <EuiSpacer size="l" />
+                          <Display show={!globalFullScreen}>
+                            <AlertsHistogramPanel
+                              filters={alertMergedFilters}
+                              signalIndexName={signalIndexName}
+                              defaultStackByOption={defaultRuleStackByOption}
+                              updateDateRange={updateDateRangeCallback}
+                            />
+                            <EuiSpacer />
+                          </Display>
+                          {ruleId != null && (
+                            <GroupedAlertsTable
+                              accordionButtonContent={defaultGroupTitleRenderers}
+                              accordionExtraActionGroupStats={accordionExtraActionGroupStats}
+                              dataViewSpec={oldSourcererDataViewSpec} // TODO: newDataViewPickerEnabled Should be removed after migrating to new data view picker
+                              dataView={experimentalDataView}
+                              defaultFilters={alertMergedFilters}
+                              defaultGroupingOptions={defaultGroupingOptions}
+                              from={from}
+                              globalFilters={filters}
+                              globalQuery={query}
+                              groupTakeActionItems={groupTakeActionItems}
+                              loading={loading}
+                              renderChildComponent={renderGroupedAlertTable}
+                              tableId={TableId.alertsOnRuleDetailsPage}
+                              to={to}
+                            />
+                          )}
+                        </>
+                      </Route>
+                    )}
                     <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.exceptions})`}>
                       <ExceptionsViewer
                         rule={rule}

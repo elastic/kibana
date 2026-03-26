@@ -12,24 +12,28 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiWindowEvent,
+  useEuiTheme,
 } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { noop } from 'lodash/fp';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { isEqual } from 'lodash';
-import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
+import { useAssistantContext } from '@kbn/elastic-assistant';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import type { Filter } from '@kbn/es-query';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useKibana } from '../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../common/lib/telemetry';
 import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { Schedule } from '../../../attack_discovery/pages/header/schedule';
 import { FilterByAssigneesPopover } from '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover';
 import { PAGE_TITLE } from '../../pages/attacks/translations';
 import { HeaderPage } from '../../../common/components/header_page';
+import { IconSparkles } from '../../../common/icons/sparkles';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 import { Display } from '../../../explore/hosts/pages/display';
@@ -45,6 +49,7 @@ import { KPIsSection } from './kpis/kpis_section';
 
 export const CONTENT_TEST_ID = 'attacks-page-content';
 export const SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID = 'attacks-page-security-solution-page-wrapper';
+const FILTERS_SECTION_WIDTH = 480;
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -53,6 +58,11 @@ const StyledFullHeightContainer = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
+`;
+
+const VerticalDivider = styled(EuiFlexItem)`
+  align-self: stretch;
+  border-left: ${({ theme: { euiTheme } }) => euiTheme.border.thin};
 `;
 
 export interface AttacksPageContentProps {
@@ -71,13 +81,14 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
   const { globalFullScreen } = useGlobalFullScreen();
   const [selectedConnectorNames, setSelectedConnectorNames] = useState<string[]>([]);
   const {
-    services: { settings },
+    services: { settings, telemetry },
   } = useKibana();
+  const { euiTheme } = useEuiTheme();
 
-  const { http, inferenceEnabled } = useAssistantContext();
+  const { http } = useAssistantContext();
   const { data: aiConnectors } = useLoadConnectors({
     http,
-    inferenceEnabled,
+    featureId: 'attack_discovery',
     settings,
   });
   const { from } = useGlobalTime();
@@ -93,7 +104,10 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
   const [showSchedulesFlyout, setShowSchedulesFlyout] = useState<boolean>(false);
   const openSchedulesFlyout = useCallback(() => {
     setShowSchedulesFlyout(true);
-  }, []);
+    telemetry.reportEvent(AttacksEventTypes.ScheduleFlyoutOpened, {
+      source: 'attacks_page_header',
+    });
+  }, [telemetry]);
   const onCloseSchedulesFlyout = useCallback(() => setShowSchedulesFlyout(false), []);
   const [assignees, setAssignees] = useState<AssigneesIdsSelection[]>([]);
 
@@ -131,22 +145,21 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
         data-test-subj={SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID}
       >
         <Display show={!globalFullScreen}>
-          <HeaderPage title={PAGE_TITLE}>
+          <HeaderPage
+            title={
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+                <EuiFlexItem grow={false}>{PAGE_TITLE}</EuiFlexItem>
+                <EuiSpacer size="m" />
+                <EuiFlexItem
+                  grow={false}
+                  style={{ marginLeft: euiTheme.size.s, marginTop: euiTheme.size.s }}
+                >
+                  <IconSparkles />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          >
             <EuiFlexGroup gutterSize="m">
-              <EuiFlexItem>
-                <FilterByAssigneesPopover
-                  selectedUserIds={assignees}
-                  onSelectionChange={onAssigneesSelectionChange}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <ConnectorFilter
-                  aiConnectors={aiConnectors}
-                  connectorNames={aiConnectorNames}
-                  selectedConnectorNames={selectedConnectorNames}
-                  setSelectedConnectorNames={setSelectedConnectorNames}
-                />
-              </EuiFlexItem>
               <EuiFlexItem>
                 <Schedule openFlyout={openSchedulesFlyout} />
               </EuiFlexItem>
@@ -154,13 +167,38 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           </HeaderPage>
           <EuiHorizontalRule margin="none" />
           <EuiSpacer size="l" />
-          <FiltersSection
-            dataView={dataView}
-            pageFilters={pageFilters}
-            setStatusFilter={setStatusFilter}
-            setPageFilters={setPageFilters}
-            setPageFilterHandler={setPageFilterHandler}
-          />
+          <EuiFlexGroup direction="row" responsive={false} wrap={true}>
+            <EuiFlexItem grow={1} style={{ maxWidth: FILTERS_SECTION_WIDTH }}>
+              <EuiFlexGroup direction="row" responsive={false}>
+                <EuiFlexItem grow={1}>
+                  <FilterByAssigneesPopover
+                    selectedUserIds={assignees}
+                    onSelectionChange={onAssigneesSelectionChange}
+                    compressed={true}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={1}>
+                  <ConnectorFilter
+                    aiConnectors={aiConnectors}
+                    connectorNames={aiConnectorNames}
+                    selectedConnectorNames={selectedConnectorNames}
+                    setSelectedConnectorNames={setSelectedConnectorNames}
+                    compressed={true}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <VerticalDivider grow={false} aria-hidden={true} />
+            <EuiFlexItem grow={1} style={{ minWidth: FILTERS_SECTION_WIDTH }}>
+              <FiltersSection
+                dataView={dataView}
+                pageFilters={pageFilters}
+                setStatusFilter={setStatusFilter}
+                setPageFilters={setPageFilters}
+                setPageFilterHandler={setPageFilterHandler}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiSpacer size="l" />
         </Display>
 

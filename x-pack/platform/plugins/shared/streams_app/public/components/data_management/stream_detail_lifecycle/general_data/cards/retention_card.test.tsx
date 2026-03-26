@@ -77,6 +77,7 @@ describe('RetentionCard', () => {
     it('shows inherit label for wired child inheriting', () => {
       const definition: Streams.WiredStream.GetResponse = {
         stream: {
+          type: 'wired',
           name: 'logs-test.child',
           description: '',
           updated_at: new Date().toISOString(),
@@ -91,6 +92,7 @@ describe('RetentionCard', () => {
         // Effective lifecycle for wired streams must include a `from` field
         effective_lifecycle: { ilm: { policy: 'test-policy' }, from: 'logs-test' },
         effective_settings: {},
+        data_stream_exists: true,
         inherited_fields: {},
         dashboards: [],
         rules: [],
@@ -122,6 +124,7 @@ describe('RetentionCard', () => {
       // Non-inheriting wired stream: ingest.lifecycle is not inherit, effective lifecycle still ILM
       const definition: Streams.WiredStream.GetResponse = {
         stream: {
+          type: 'wired',
           name: 'logs-test.child',
           description: '',
           updated_at: new Date().toISOString(),
@@ -135,6 +138,7 @@ describe('RetentionCard', () => {
         },
         effective_lifecycle: { ilm: { policy: 'test-policy' }, from: 'logs-test' },
         effective_settings: {},
+        data_stream_exists: true,
         inherited_fields: {},
         dashboards: [],
         rules: [],

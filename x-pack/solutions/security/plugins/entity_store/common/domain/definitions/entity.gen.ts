@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type EngineMetadata = z.infer<typeof EngineMetadata>;
 export const EngineMetadata = z
@@ -31,7 +31,7 @@ export const EntityRiskLevelsEnum = EntityRiskLevels.enum;
 export type EntityField = z.infer<typeof EntityField>;
 export const EntityField = z
   .object({
-    id: z.string(),
+    id: z.string().optional(),
     name: z.string().optional(),
     type: z.string().optional(),
     sub_type: z.string().optional(),
@@ -65,6 +65,7 @@ export const EntityField = z
     lifecycle: z
       .object({
         first_seen: z.string().datetime().optional(),
+        last_seen: z.string().datetime().optional(),
         last_activity: z.string().datetime().optional(),
       })
       .strict()
@@ -76,6 +77,32 @@ export const EntityField = z
         owns: z.array(z.string()).optional(),
         accesses_frequently: z.array(z.string()).optional(),
         supervises: z.array(z.string()).optional(),
+        resolution: z
+          .object({
+            /**
+             * entity.id of the entity this one resolves to
+             */
+            resolved_to: z.string().optional(),
+            risk: z
+              .object({
+                /**
+                 * Lexical description of the resolution group's aggregated risk.
+                 */
+                calculated_level: EntityRiskLevels.optional(),
+                /**
+                 * The raw numeric value of the resolution group's aggregated risk score.
+                 */
+                calculated_score: z.number().optional(),
+                /**
+                 * The normalized numeric value of the resolution group's aggregated risk score.
+                 */
+                calculated_score_norm: z.number().min(0).max(100).optional(),
+              })
+              .strict()
+              .optional(),
+          })
+          .strict()
+          .optional(),
       })
       .strict()
       .optional(),
@@ -222,13 +249,13 @@ export type UserEntity = z.infer<typeof UserEntity>;
 export const UserEntity = z
   .object({
     '@timestamp': z.string().datetime().optional(),
-    entity: EntityField,
+    entity: EntityField.optional(),
     user: z
       .object({
         full_name: z.array(z.string()).optional(),
         domain: z.array(z.string()).optional(),
         roles: z.array(z.string()).optional(),
-        name: z.string(),
+        name: z.string().optional(),
         id: z.array(z.string()).optional(),
         email: z.array(z.string()).optional(),
         hash: z.array(z.string()).optional(),
@@ -250,13 +277,13 @@ export type HostEntity = z.infer<typeof HostEntity>;
 export const HostEntity = z
   .object({
     '@timestamp': z.string().datetime().optional(),
-    entity: EntityField,
+    entity: EntityField.optional(),
     host: z
       .object({
         hostname: z.array(z.string()).optional(),
         domain: z.array(z.string()).optional(),
         ip: z.array(z.string()).optional(),
-        name: z.string(),
+        name: z.string().optional(),
         id: z.array(z.string()).optional(),
         type: z.array(z.string()).optional(),
         mac: z.array(z.string()).optional(),
@@ -280,10 +307,10 @@ export type ServiceEntity = z.infer<typeof ServiceEntity>;
 export const ServiceEntity = z
   .object({
     '@timestamp': z.string().datetime().optional(),
-    entity: EntityField,
+    entity: EntityField.optional(),
     service: z
       .object({
-        name: z.string(),
+        name: z.string().optional(),
         risk: EntityRiskScoreRecord.optional(),
         entity: EntityField.optional(),
       })
@@ -303,7 +330,7 @@ export type GenericEntity = z.infer<typeof GenericEntity>;
 export const GenericEntity = z
   .object({
     '@timestamp': z.string().datetime().optional(),
-    entity: EntityField,
+    entity: EntityField.optional(),
     asset: Asset.optional(),
   })
   .strict();

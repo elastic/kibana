@@ -14,7 +14,6 @@ import { TaskStatus, type Streams } from '@kbn/streams-schema';
 import type { AIFeatures } from '../../hooks/use_ai_features';
 import { useStreamFeaturesApi } from '../../hooks/use_stream_features_api';
 import { useTaskPolling } from '../../hooks/use_task_polling';
-import { ConnectorListButtonBase } from '../connector_list_button/connector_list_button';
 
 interface FeatureIdentificationControlProps {
   definition: Streams.all.Definition;
@@ -81,12 +80,9 @@ export function FeatureIdentificationControl({
   }, [task?.status, refreshFeatures, onTaskStart, onTaskEnd, resetNoResultsDismissed]);
 
   const handleStartIdentification = useCallback(() => {
-    const connectorId = aiFeatures?.genAiConnectors.selectedConnector;
-    if (!connectorId) return;
-
     onTaskStart();
-    scheduleFeaturesIdentificationTask(connectorId).then(getTask);
-  }, [aiFeatures, onTaskStart, scheduleFeaturesIdentificationTask, getTask]);
+    scheduleFeaturesIdentificationTask().then(getTask);
+  }, [onTaskStart, scheduleFeaturesIdentificationTask, getTask]);
 
   const handleCancelIdentification = useCallback(() => {
     cancelTask().then(onTaskEnd);
@@ -127,13 +123,13 @@ export function FeatureIdentificationControl({
 
     case TaskStatus.InProgress:
       return isCancellingTask ? (
-        <CancellingState aiFeatures={aiFeatures} />
+        <CancellingState />
       ) : (
         <InProgressState onCancel={handleCancelIdentification} />
       );
 
     case TaskStatus.BeingCanceled:
-      return <CancellingState aiFeatures={aiFeatures} />;
+      return <CancellingState />;
 
     case TaskStatus.Failed:
       return (
@@ -187,15 +183,14 @@ interface TriggerButtonProps {
 
 function TriggerButton({ isLoading, onClick, aiFeatures }: TriggerButtonProps) {
   return (
-    <ConnectorListButtonBase
-      aiFeatures={aiFeatures}
-      buttonProps={{
-        ...COMMON_BUTTON_PROPS,
-        isLoading,
-        onClick,
-        children: IDENTIFY_FEATURES_BUTTON_LABEL,
-      }}
-    />
+    <EuiButton
+      {...COMMON_BUTTON_PROPS}
+      isLoading={isLoading}
+      onClick={onClick}
+      isDisabled={!aiFeatures?.enabled}
+    >
+      {IDENTIFY_FEATURES_BUTTON_LABEL}
+    </EuiButton>
   );
 }
 
@@ -273,21 +268,11 @@ function InProgressState({ onCancel }: InProgressStateProps) {
   );
 }
 
-interface CancellingStateProps {
-  aiFeatures: AIFeatures | null;
-}
-
-function CancellingState({ aiFeatures }: CancellingStateProps) {
+function CancellingState() {
   return (
-    <ConnectorListButtonBase
-      aiFeatures={aiFeatures}
-      buttonProps={{
-        ...COMMON_BUTTON_PROPS,
-        isDisabled: true,
-        isLoading: true,
-        children: CANCELLING_BUTTON_LABEL,
-      }}
-    />
+    <EuiButton {...COMMON_BUTTON_PROPS} isDisabled isLoading>
+      {CANCELLING_BUTTON_LABEL}
+    </EuiButton>
   );
 }
 

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { SOURCES_TYPES } from '@kbn/esql-types';
-import type { ESQLAstAllCommands } from '../../../types';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
+import { isSubQuery, isSource } from '@elastic/esql';
 import { pipeCompleteItem, commaCompleteItem, subqueryCompleteItem } from '../complete_items';
 import {
   getSourcesFromCommands,
@@ -21,7 +22,6 @@ import { withinQuotes } from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import { getOverlapRange, isRestartingExpression } from '../../definitions/utils/shared';
-import { isSubQuery, isSource } from '../../../ast/is';
 import { esqlCommandRegistry } from '../../../..';
 import {
   getIndicesBrowserSuggestion,
@@ -174,7 +174,8 @@ async function suggestAdditionalSources(
   const lastIndex = indexes[indexes.length - 1];
   const isTypingIndexName = lastIndex?.name && innerText.endsWith(lastIndex.name);
 
-  // Check for METADATA overlap (only when not typing index name)
+  // Only use overlap here to decide when to show `METADATA`.
+  // The replacement range is still handled centrally.
   if (!isTypingIndexName && getOverlapRange(innerText, METADATA_KEYWORD)) {
     return [metadataSuggestion];
   }

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/evals-suite-endpoint'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-defend-workflows'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/evals-suite-endpoint'
+  title: '@kbn/evals-suite-endpoint'
   description: Moon project for @kbn/evals-suite-endpoint
   channel: ''
   owner: '@elastic/security-defend-workflows'
-  metadata:
-    sourceRoot: x-pack/solutions/security/packages/kbn-evals-suite-endpoint
+  sourceRoot: x-pack/solutions/security/packages/kbn-evals-suite-endpoint
 dependsOn:
   - '@kbn/evals'
   - '@kbn/scout'
@@ -38,14 +37,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

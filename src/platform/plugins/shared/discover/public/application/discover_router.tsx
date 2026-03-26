@@ -15,7 +15,6 @@ import React, { useEffect } from 'react';
 import { EuiBetaBadge, EuiErrorBoundary } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { AppMountParameters, Capabilities } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { ChromeBreadcrumbsBadge } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import { ContextAppRoute } from './context';
@@ -38,13 +37,7 @@ export const DiscoverRouter = ({ services, ...routeProps }: DiscoverRouterProps)
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
         <Router history={services.history} data-test-subj="discover-react-router">
-          <RedirectAppLinks
-            coreStart={{
-              application: services.core.application,
-            }}
-          >
-            <DiscoverRoutes {...routeProps} />
-          </RedirectAppLinks>
+          <DiscoverRoutes {...routeProps} />
         </Router>
       </EuiErrorBoundary>
     </KibanaContextProvider>

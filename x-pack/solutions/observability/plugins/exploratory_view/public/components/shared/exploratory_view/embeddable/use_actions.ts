@@ -63,7 +63,7 @@ export function useActions({
       lens.navigateToPrefilledEditor(
         {
           id: '',
-          timeRange,
+          time_range: timeRange,
           attributes: lensAttributes,
         },
         {

@@ -7,15 +7,17 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
+import { EuiBadgeGroup, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { RedirectTo } from '../../redirect_to';
 import type { ManagementTabs } from './wrapper';
 import { Wrapper } from './wrapper';
+import { MissingDataStreamCallout } from './missing_data_stream_callout';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
+import { StreamOverview } from '../../stream_detail_overview';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import { StreamDetailDataQuality } from '../../stream_data_quality';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
@@ -23,6 +25,7 @@ import { StreamDetailAttachments } from '../../stream_detail_attachments';
 import { ClassicAdvancedView } from './advanced_view/classic_advanced_view';
 
 const classicStreamManagementSubTabs = [
+  'overview',
   'processing',
   'advanced',
   'dataQuality',
@@ -41,7 +44,13 @@ const tabRedirects: Record<string, { newTab: ClassicStreamManagementSubTab }> = 
   enrich: { newTab: 'processing' },
 };
 
-function isValidManagementSubTab(value: string): value is ClassicStreamManagementSubTab {
+function isValidManagementSubTab(
+  value: string,
+  overviewPageEnabled: boolean
+): value is ClassicStreamManagementSubTab {
+  if (value === 'overview' && !overviewPageEnabled) {
+    return false;
+  }
   return classicStreamManagementSubTabs.includes(value as ClassicStreamManagementSubTab);
 }
 
@@ -57,7 +66,7 @@ export function ClassicStreamDetailManagement({
   } = useStreamsAppParams('/{key}/management/{tab}');
 
   const {
-    features: { attachments },
+    features: { attachments, overviewPage },
   } = useStreamsPrivileges();
 
   const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
@@ -81,30 +90,27 @@ export function ClassicStreamDetailManagement({
           }
         />
         <StreamsAppPageTemplate.Body>
-          <EuiCallOut
-            announceOnMount
-            title={i18n.translate('xpack.streams.unmanagedStreamOverview.missingDatastream.title', {
-              defaultMessage: 'Data stream missing',
-            })}
-            color="danger"
-            iconType="error"
-          >
-            <p>
-              {i18n.translate(
-                'xpack.streams.unmanagedStreamOverview.missingDatastream.description',
-                {
-                  defaultMessage:
-                    'The underlying Elasticsearch data stream for this classic stream is missing or not accessible because the view_index_metadata privilege is missing. Make sure you have sufficient privileges and the data stream actually exists.',
-                }
-              )}
-            </p>
-          </EuiCallOut>
+          <MissingDataStreamCallout
+            streamName={definition.stream.name}
+            canManage={definition.privileges.manage}
+            canDelete={true}
+            refreshDefinition={refreshDefinition}
+          />
         </StreamsAppPageTemplate.Body>
       </>
     );
   }
 
   const tabs: ManagementTabs = {};
+
+  if (overviewPage.enabled) {
+    tabs.overview = {
+      content: <StreamOverview />,
+      label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
+        defaultMessage: 'Overview',
+      }),
+    };
+  }
 
   if (definition.data_stream_exists) {
     tabs.retention = {
@@ -194,7 +200,13 @@ export function ClassicStreamDetailManagement({
     };
   }
 
-  if (isValidManagementSubTab(tab)) {
+  if (tab === 'overview' && !overviewPage.enabled) {
+    return (
+      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'retention' } }} />
+    );
+  }
+
+  if (isValidManagementSubTab(tab, overviewPage.enabled)) {
     return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
   }
 
@@ -211,5 +223,6 @@ export function ClassicStreamDetailManagement({
     return null;
   }
 
-  return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
+  const defaultTab = overviewPage.enabled ? 'overview' : 'retention';
+  return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: defaultTab } }} />;
 }
