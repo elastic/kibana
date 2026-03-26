@@ -108,10 +108,9 @@ describe('Scout path globs', () => {
 describe('Scout path regexes', () => {
   describe('TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX', () => {
     it('matches platform plugin paths with correct groups', () => {
-      const match =
-        'src/platform/plugins/shared/my_plugin/test/scout'.match(
-          TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX
-        );
+      const match = 'src/platform/plugins/shared/my_plugin/test/scout'.match(
+        TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX
+      );
       expect(match).not.toBeNull();
       expect(match![1]).toBe('platform');
       expect(match![2]).toBeUndefined();
@@ -122,10 +121,9 @@ describe('Scout path regexes', () => {
     });
 
     it('matches solution plugin paths with correct groups', () => {
-      const match =
-        'x-pack/solutions/security/plugins/my_plugin/test/scout'.match(
-          TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX
-        );
+      const match = 'x-pack/solutions/security/plugins/my_plugin/test/scout'.match(
+        TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX
+      );
       expect(match).not.toBeNull();
       expect(match![1]).toBeUndefined();
       expect(match![2]).toBe('security');
@@ -133,18 +131,17 @@ describe('Scout path regexes', () => {
     });
 
     it('captures custom config set names', () => {
-      const match =
-        'src/platform/plugins/shared/my_plugin/test/scout_uiam_local'.match(
-          TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX
-        );
+      const match = 'src/platform/plugins/shared/my_plugin/test/scout_uiam_local'.match(
+        TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX
+      );
       expect(match).not.toBeNull();
       expect(match![6]).toBe('uiam_local');
     });
 
     it('does not match examples/ paths', () => {
-      expect(
-        TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX.test('examples/hello_world/test/scout')
-      ).toBe(false);
+      expect(TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX.test('examples/hello_world/test/scout')).toBe(
+        false
+      );
     });
   });
 
@@ -180,10 +177,9 @@ describe('Scout path regexes', () => {
 
   describe('SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX', () => {
     it('matches examples/ plugin config with custom config set', () => {
-      const match =
-        'examples/hello_world/test/scout_examples/api/playwright.config.ts'.match(
-          SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX
-        );
+      const match = 'examples/hello_world/test/scout_examples/api/playwright.config.ts'.match(
+        SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX
+      );
       expect(match).not.toBeNull();
       expect(match![1]).toBe('examples');
       expect(match![2]).toBe('hello_world');
@@ -193,10 +189,9 @@ describe('Scout path regexes', () => {
     });
 
     it('matches x-pack/examples/ plugin config', () => {
-      const match =
-        'x-pack/examples/hello_world/test/scout_examples/ui/playwright.config.ts'.match(
-          SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX
-        );
+      const match = 'x-pack/examples/hello_world/test/scout_examples/ui/playwright.config.ts'.match(
+        SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX
+      );
       expect(match).not.toBeNull();
       expect(match![1]).toBe('x-pack/examples');
       expect(match![2]).toBe('hello_world');
@@ -254,10 +249,9 @@ describe('Scout path regexes', () => {
     });
 
     it('matches core package path with correct named groups', () => {
-      const match =
-        'src/core/packages/my_package/test/scout/api/playwright.config.ts'.match(
-          SCOUT_UNIFIED_CONFIG_PATH_REGEX
-        );
+      const match = 'src/core/packages/my_package/test/scout/api/playwright.config.ts'.match(
+        SCOUT_UNIFIED_CONFIG_PATH_REGEX
+      );
       expect(match?.groups).toEqual(
         expect.objectContaining({
           platformOrCore: 'core',
@@ -314,10 +308,9 @@ describe('Scout path regexes', () => {
     });
 
     it('matches examples/ path with correct named groups', () => {
-      const match =
-        'examples/hello_world/test/scout_examples/api/playwright.config.ts'.match(
-          SCOUT_UNIFIED_CONFIG_PATH_REGEX
-        );
+      const match = 'examples/hello_world/test/scout_examples/api/playwright.config.ts'.match(
+        SCOUT_UNIFIED_CONFIG_PATH_REGEX
+      );
       expect(match?.groups).toEqual(
         expect.objectContaining({
           examplesRoot: 'examples',
@@ -350,10 +343,9 @@ describe('Scout path regexes', () => {
     });
 
     it('matches examples/ with bare scout/ (no config set)', () => {
-      const match =
-        'examples/hello_world/test/scout/api/playwright.config.ts'.match(
-          SCOUT_UNIFIED_CONFIG_PATH_REGEX
-        );
+      const match = 'examples/hello_world/test/scout/api/playwright.config.ts'.match(
+        SCOUT_UNIFIED_CONFIG_PATH_REGEX
+      );
       expect(match?.groups).toEqual(
         expect.objectContaining({
           examplesRoot: 'examples',
