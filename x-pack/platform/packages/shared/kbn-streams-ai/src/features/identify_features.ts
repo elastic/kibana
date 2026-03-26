@@ -25,6 +25,8 @@ export interface PreviouslyIdentifiedFeature {
   id: string;
   type: string;
   subtype?: string;
+  title?: string;
+  description?: string;
   properties: Record<string, unknown>;
 }
 export type { IgnoredFeature } from '@kbn/streams-schema';

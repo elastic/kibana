@@ -218,6 +218,8 @@ export async function identifyStreamFeatures({
           id: f.id,
           type: f.type,
           subtype: f.subtype,
+          title: f.title,
+          description: f.description,
           properties: f.properties,
         })),
       }));
