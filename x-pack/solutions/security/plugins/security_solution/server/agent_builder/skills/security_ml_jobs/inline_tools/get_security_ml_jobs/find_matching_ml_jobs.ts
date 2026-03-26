@@ -7,11 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import type { ScopedModel } from '@kbn/agent-builder-server';
-import type { StateType } from './graph';
-import type { ActiveMlModules } from '../get_security_ml_jobs';
-import type { EntityType } from '../../../../../../../common/api/entity_analytics';
-
-export const FIND_MATCHING_ML_JOBS_NODE = 'findMatchingMlJobsNode';
+import type { ActiveMlModules } from './get_security_ml_jobs';
+import type { EntityType } from '../../../../../../common/api/entity_analytics';
 
 interface FindMatchingMlJobsOpts {
   activeMlModules: ActiveMlModules[];
@@ -20,12 +17,20 @@ interface FindMatchingMlJobsOpts {
   prompt: string;
 }
 
-export const findMatchingMlJobsNode = async ({
+interface FindMatchingMlJobsResult {
+  recommendedJobs: Array<{
+    id: string;
+    description?: string;
+  }>;
+  recommendedStartedJobIds: string[];
+}
+
+export const findMatchingMlJobs = async ({
   activeMlModules,
   entityType,
   model,
   prompt,
-}: FindMatchingMlJobsOpts): Promise<Partial<StateType>> => {
+}: FindMatchingMlJobsOpts): Promise<FindMatchingMlJobsResult> => {
   const output = await model.chatModel.withStructuredOutput(
     z.object({ jobIds: z.array(z.string()).default([]) })
   ).invoke(`
@@ -39,13 +44,13 @@ export const findMatchingMlJobsNode = async ({
 
   const recommendedJobIds = output.jobIds ?? [];
   const securityJobsFormatted = activeMlModules.flatMap((module) => module.moduleJobs) ?? [];
-  const recommendedJobs = securityJobsFormatted.filter((job) => recommendedJobIds.includes(job.id));
-  const recommendedStartedJobIds = recommendedJobs
+  const matchedJobs = securityJobsFormatted.filter((job) => recommendedJobIds.includes(job.id));
+  const recommendedStartedJobIds = matchedJobs
     .filter((job) => job.isJobStarted)
     .map((job) => job.id);
 
   return {
-    recommendedJobs,
+    recommendedJobs: matchedJobs.map(({ id, description }) => ({ id, description })),
     recommendedStartedJobIds,
   };
 };

@@ -6,9 +6,9 @@
  */
 
 import type { ScopedModel } from '@kbn/agent-builder-server';
-import type { EntityType } from '../../../../../../../common/api/entity_analytics';
-import type { ActiveMlModules } from '../get_security_ml_jobs';
-import { findMatchingMlJobsNode } from './find_matching_ml_job_node';
+import type { EntityType } from '../../../../../../common/api/entity_analytics';
+import type { ActiveMlModules } from './get_security_ml_jobs';
+import { findMatchingMlJobs } from './find_matching_ml_jobs';
 
 const createMockModel = (invokeResult: {
   jobIds?: string[];
@@ -39,7 +39,7 @@ const createActiveMlModules = (): ActiveMlModules[] => [
   },
 ];
 
-describe('findMatchingMlJobsNode', () => {
+describe('findMatchingMlJobs', () => {
   describe('model invocation', () => {
     it('invokes with prompt containing user prompt, entity type, and available modules', async () => {
       const { model, invokeMock } = createMockModel({ jobIds: [] });
@@ -47,7 +47,7 @@ describe('findMatchingMlJobsNode', () => {
       const prompt = 'Find anomalous logins';
       const entityType = 'user' as EntityType;
 
-      await findMatchingMlJobsNode({
+      await findMatchingMlJobs({
         activeMlModules,
         entityType,
         model,
@@ -67,7 +67,7 @@ describe('findMatchingMlJobsNode', () => {
       const { model } = createMockModel({ jobIds: [] });
       const activeMlModules = createActiveMlModules();
 
-      const result = await findMatchingMlJobsNode({
+      const result = await findMatchingMlJobs({
         activeMlModules,
         entityType: 'host' as EntityType,
         model,
@@ -86,7 +86,7 @@ describe('findMatchingMlJobsNode', () => {
       });
       const activeMlModules = createActiveMlModules();
 
-      const result = await findMatchingMlJobsNode({
+      const result = await findMatchingMlJobs({
         activeMlModules,
         entityType: 'host' as EntityType,
         model,
@@ -108,7 +108,7 @@ describe('findMatchingMlJobsNode', () => {
       });
       const activeMlModules = createActiveMlModules();
 
-      const result = await findMatchingMlJobsNode({
+      const result = await findMatchingMlJobs({
         activeMlModules,
         entityType: 'host' as EntityType,
         model,
@@ -123,7 +123,7 @@ describe('findMatchingMlJobsNode', () => {
       const { model } = createMockModel({ jobIds: ['auth-login', 'invalid-id'] });
       const activeMlModules = createActiveMlModules();
 
-      const result = await findMatchingMlJobsNode({
+      const result = await findMatchingMlJobs({
         activeMlModules,
         entityType: 'host' as EntityType,
         model,
@@ -139,7 +139,7 @@ describe('findMatchingMlJobsNode', () => {
       const { model } = createMockModel({});
       const activeMlModules = createActiveMlModules();
 
-      const result = await findMatchingMlJobsNode({
+      const result = await findMatchingMlJobs({
         activeMlModules,
         entityType: 'host' as EntityType,
         model,
@@ -157,7 +157,7 @@ describe('findMatchingMlJobsNode', () => {
     it('returns empty recommendedJobs and recommendedStartedJobIds when activeMlModules is empty', async () => {
       const { model } = createMockModel({ jobIds: ['any-id'] });
 
-      const result = await findMatchingMlJobsNode({
+      const result = await findMatchingMlJobs({
         activeMlModules: [],
         entityType: 'host' as EntityType,
         model,
