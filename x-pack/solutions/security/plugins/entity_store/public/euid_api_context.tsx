@@ -9,7 +9,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { EntityStoreEuidApi } from '../common/euid_helpers';
 
 export type { NonEcsTimelineDataRow } from '../common/domain/euid/non_ecs_timeline_data';
-export type { EntityStoreEuidApi } from '../common/euid_helpers';
+export type { EntityStoreEuid, EntityStoreEuidApi } from '../common/euid_helpers';
 
 const EntityStoreEuidApiContext = createContext<EntityStoreEuidApi | null>(null);
 

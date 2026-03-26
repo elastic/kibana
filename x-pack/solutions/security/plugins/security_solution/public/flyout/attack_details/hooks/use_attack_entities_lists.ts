@@ -79,8 +79,8 @@ export const useAttackEntitiesLists = (): UseAttackEntitiesListsResult => {
       query: { ids: { values: originalAlertIds } },
       size: 0,
       runtime_mappings: {
-        [USER_EUID_RUNTIME_FIELD]: euidApi.euid.getEuidPainlessRuntimeMapping('user'),
-        [HOST_EUID_RUNTIME_FIELD]: euidApi.euid.getEuidPainlessRuntimeMapping('host'),
+        [USER_EUID_RUNTIME_FIELD]: euidApi.euid.painless.getEuidRuntimeMapping('user'),
+        [HOST_EUID_RUNTIME_FIELD]: euidApi.euid.painless.getEuidRuntimeMapping('host'),
       },
       aggs: {
         unique_users_by_euid: {

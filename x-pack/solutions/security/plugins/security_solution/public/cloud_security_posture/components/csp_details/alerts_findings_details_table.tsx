@@ -168,7 +168,7 @@ export const AlertsDetailsTable = memo(
       if (!euidApi?.euid) {
         return undefined;
       }
-      return euidApi.euid.getEuidDslFilterBasedOnDocument(entityTypeResolved, entityRecord);
+      return euidApi.euid.dsl.getEuidFilterBasedOnDocument(entityTypeResolved, entityRecord);
     }, [euidApi?.euid, entityTypeResolved, entityRecord]);
 
     const filterAlertsByEuid = Boolean(euidApi?.euid && euidEntityFilter);

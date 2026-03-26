@@ -113,7 +113,7 @@ export const buildEuidCspPreviewOptions = (
   const { entityStoreV2Enabled, legacyIdentityFields } = context;
 
   if (entityStoreV2Enabled && euidApi?.euid) {
-    const euidEntityFilter = euidApi.euid.getEuidDslFilterBasedOnDocument(
+    const euidEntityFilter = euidApi.euid.dsl.getEuidFilterBasedOnDocument(
       entityType,
       identityDocument
     );

@@ -10,5 +10,5 @@
  * Do not import this file from the plugin's main public/index.ts; use loadEuidApi() instead.
  */
 
-export { euidBrowser as euid } from '../common/euid_helpers';
+export { euid } from '../common/euid_helpers';
 export type { IdentitySourceFields } from '../common';

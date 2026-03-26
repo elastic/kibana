@@ -10,7 +10,7 @@
  * Keeps page-load size small: no euid / streamlang here — use `euid_helpers` or `loadEuidApi()`.
  *
  * @example
- * import { euidBrowser, type EntityType } from '@kbn/entity-store/common/euid_helpers';
+ * import { euid, type EntityType } from '@kbn/entity-store/common/euid_helpers';
  * Public API for the entity_store plugin.
  * Exports only constants and types needed on every load (including browser).
  * For EUID translation helpers (DSL/ESQL/Painless, entity types), use common/euid_helpers.

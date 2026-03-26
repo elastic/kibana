@@ -9,7 +9,11 @@ import { EntityStorePlugin } from './plugin';
 
 export { useInstallEntityStoreV2 } from './hooks/useInstallEntityStoreV2';
 export { EntityStoreEuidApiProvider, useEntityStoreEuidApi } from './euid_api_context';
-export type { EntityStoreEuidApi, NonEcsTimelineDataRow } from './euid_api_context';
+export type {
+  EntityStoreEuid,
+  EntityStoreEuidApi,
+  NonEcsTimelineDataRow,
+} from './euid_api_context';
 
 export { ALL_ENTITY_TYPES, EntityType } from '../common';
 export type { IdentitySourceFields } from '../common';
