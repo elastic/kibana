@@ -100,4 +100,22 @@ describe('useCpsPickerAccess', () => {
 
     expect(registerAppAccess).toHaveBeenLastCalledWith('other-app', resolver);
   });
+
+  it('resets access to DISABLED on unmount', () => {
+    const resolver = jest.fn().mockReturnValue(ProjectRoutingAccess.READONLY);
+
+    const { unmount } = renderHook(() =>
+      useCpsPickerAccess({
+        resolver,
+        currentAppId$: mockCurrentAppId$,
+        cpsManager,
+      })
+    );
+
+    unmount();
+
+    expect(registerAppAccess).toHaveBeenCalledTimes(2);
+    const cleanupResolver = registerAppAccess.mock.calls[1][1];
+    expect(cleanupResolver('any-location')).toBe(ProjectRoutingAccess.DISABLED);
+  });
 });
