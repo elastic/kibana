@@ -202,28 +202,19 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('accepts schedule.every of exactly 1m (minimum)', () => {
+    it('accepts schedule.every of exactly 1s (technical minimum)', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        schedule: { every: '1m' },
+        schedule: { every: '1s' },
       });
 
       expect(result.success).toBe(true);
     });
 
-    it('rejects schedule.every below 1m (30s)', () => {
+    it('rejects schedule.every below 1s (500ms)', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        schedule: { every: '30s' },
-      });
-
-      expect(result.success).toBe(false);
-    });
-
-    it('rejects schedule.every below 1m via cross-unit (59s)', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        schedule: { every: '59s' },
+        schedule: { every: '500ms' },
       });
 
       expect(result.success).toBe(false);
@@ -747,8 +738,8 @@ describe('updateRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('rejects schedule.every below 1m (30s)', () => {
-      const result = updateRuleDataSchema.safeParse({ schedule: { every: '30s' } });
+    it('rejects schedule.every below 1s (500ms)', () => {
+      const result = updateRuleDataSchema.safeParse({ schedule: { every: '500ms' } });
       expect(result.success).toBe(false);
     });
 

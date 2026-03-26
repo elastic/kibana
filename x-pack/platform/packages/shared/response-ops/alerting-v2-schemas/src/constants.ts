@@ -13,3 +13,11 @@ export const MAX_DURATION = '365d';
 
 /** Minimum allowed interval for schedule.every */
 export const MIN_SCHEDULE_INTERVAL = '1m';
+
+/**
+ * Technical minimum for schedule.every enforced at the schema/API level.
+ * Intentionally lower than MIN_SCHEDULE_INTERVAL to allow test suites to use
+ * short intervals (e.g. 5s) without inflating test duration.
+ * TODO: Make this configurable via plugin config so operators can tighten it.
+ */
+export const MIN_SCHEDULE_INTERVAL_TECHNICAL = '1s';

@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { validateEsqlQuery, validateMinDuration } from './validation';
 import { durationSchema } from './common';
-import { MAX_CONSECUTIVE_BREACHES, MIN_SCHEDULE_INTERVAL } from './constants';
+import { MAX_CONSECUTIVE_BREACHES, MIN_SCHEDULE_INTERVAL_TECHNICAL } from './constants';
 
 /** Primitives */
 
@@ -48,7 +48,7 @@ const metadataSchema = z
 /** Schedule (required) */
 
 const scheduleEverySchema = durationSchema.superRefine((value, ctx) => {
-  const error = validateMinDuration(value, MIN_SCHEDULE_INTERVAL);
+  const error = validateMinDuration(value, MIN_SCHEDULE_INTERVAL_TECHNICAL);
   if (error) {
     ctx.addIssue({ code: z.ZodIssueCode.custom, message: error });
   }
