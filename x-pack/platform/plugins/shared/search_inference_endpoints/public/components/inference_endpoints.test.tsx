@@ -151,6 +151,33 @@ describe('InferenceEndpoints', () => {
       expect(screen.getByTestId('allInferenceEndpointsPage')).toBeInTheDocument();
       expect(screen.queryByTestId('providerInferenceEmptyPrompt')).not.toBeInTheDocument();
     });
+
+    it('shows loading spinner while data is loading', () => {
+      useQueryInferenceEndpoints.mockReturnValue({
+        data: undefined,
+        isLoading: true,
+        refetch: mockRefetch,
+      });
+
+      renderComponent();
+
+      expect(screen.getByRole('progressbar')).toBeInTheDocument();
+      expect(screen.queryByTestId('providerInferenceEmptyPrompt')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('allInferenceEndpointsPage')).not.toBeInTheDocument();
+    });
+
+    it('does not show empty prompt when no endpoints exist', () => {
+      useQueryInferenceEndpoints.mockReturnValue({
+        data: [],
+        isLoading: false,
+        refetch: mockRefetch,
+      });
+
+      renderComponent();
+
+      expect(screen.getByTestId('allInferenceEndpointsPage')).toBeInTheDocument();
+      expect(screen.queryByTestId('providerInferenceEmptyPrompt')).not.toBeInTheDocument();
+    });
   });
 
   describe('with EIS feature flag enabled', () => {
@@ -236,6 +263,20 @@ describe('InferenceEndpoints', () => {
 
       expect(screen.getByText('my-openai-endpoint')).toBeInTheDocument();
       expect(screen.getByText('user-elasticsearch-endpoint')).toBeInTheDocument();
+    });
+
+    it('renders clickable Add Endpoint button in empty prompt', () => {
+      useQueryInferenceEndpoints.mockReturnValue({
+        data: onlyElasticEndpoints,
+        isLoading: false,
+        refetch: mockRefetch,
+      });
+
+      renderComponent();
+
+      const addButton = screen.getByTestId('addEndpointButton');
+      expect(addButton).toBeInTheDocument();
+      expect(addButton).toBeEnabled();
     });
   });
 });

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiPageTemplate, EuiButton, EuiLink } from '@elastic/eui';
-import React from 'react';
+import { EuiPageTemplate, EuiButton, EuiButtonEmpty, EuiLink } from '@elastic/eui';
+import React, { useMemo } from 'react';
 import * as i18n from '../../common/translations';
-import { PLUGIN_TITLE } from '../../common/constants';
+import { PLUGIN_TITLE, PROVIDER_INFERENCE_TITLE } from '../../common/constants';
 import { docLinks } from '../../common/doc_links';
 import { useKibana } from '../hooks/use_kibana';
+import { isElasticInferenceServiceEnabled } from '../feature_flag';
 
 interface InferenceEndpointsHeaderProps {
   onFlyoutOpen: () => void;
@@ -19,16 +20,14 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
   onFlyoutOpen,
 }) => {
   const {
-    services: { application },
+    services: { application, uiSettings },
   } = useKibana();
 
-  return (
-    <EuiPageTemplate.Header
-      data-test-subj="allInferenceEndpointsPage"
-      pageTitle={PLUGIN_TITLE}
-      description={i18n.MANAGE_INFERENCE_ENDPOINTS_LABEL}
-      bottomBorder={true}
-      rightSideItems={[
+  const isEisEnabled = isElasticInferenceServiceEnabled(uiSettings);
+
+  const rightSideItems = useMemo(() => {
+    if (isEisEnabled) {
+      return [
         <EuiButton
           iconType="plusInCircle"
           fill
@@ -37,32 +36,64 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
         >
           {i18n.ADD_ENDPOINT_LABEL}
         </EuiButton>,
-        <EuiLink
-          aria-label={i18n.API_DOCUMENTATION_LINK}
+        <EuiButtonEmpty
+          iconType="popout"
+          iconSide="right"
+          iconSize="s"
+          flush="both"
           target="_blank"
           data-test-subj="api-documentation"
           href={docLinks.createInferenceEndpoint}
-          external
         >
           {i18n.API_DOCUMENTATION_LINK}
-        </EuiLink>,
-        <EuiLink
-          aria-label={i18n.VIEW_YOUR_MODELS_LINK}
-          onClick={() => application.navigateToApp('ml', { path: 'trained_models' })}
-          data-test-subj="view-your-models"
-        >
-          {i18n.VIEW_YOUR_MODELS_LINK}
-        </EuiLink>,
-        <EuiLink
-          aria-label={i18n.EIS_DOCUMENTATION_LINK}
-          href={docLinks.elasticInferenceService}
-          target="_blank"
-          data-test-subj="eis-documentation"
-          external
-        >
-          {i18n.EIS_DOCUMENTATION_LINK}
-        </EuiLink>,
-      ]}
+        </EuiButtonEmpty>,
+      ];
+    }
+
+    return [
+      <EuiButton
+        iconType="plusInCircle"
+        fill
+        data-test-subj="add-inference-endpoint-header-button"
+        onClick={onFlyoutOpen}
+      >
+        {i18n.ADD_ENDPOINT_LABEL}
+      </EuiButton>,
+      <EuiLink
+        aria-label={i18n.API_DOCUMENTATION_LINK}
+        target="_blank"
+        data-test-subj="api-documentation"
+        href={docLinks.createInferenceEndpoint}
+        external
+      >
+        {i18n.API_DOCUMENTATION_LINK}
+      </EuiLink>,
+      <EuiLink
+        aria-label={i18n.VIEW_YOUR_MODELS_LINK}
+        onClick={() => application.navigateToApp('ml', { path: 'trained_models' })}
+        data-test-subj="view-your-models"
+      >
+        {i18n.VIEW_YOUR_MODELS_LINK}
+      </EuiLink>,
+      <EuiLink
+        aria-label={i18n.EIS_DOCUMENTATION_LINK}
+        href={docLinks.elasticInferenceService}
+        target="_blank"
+        data-test-subj="eis-documentation"
+        external
+      >
+        {i18n.EIS_DOCUMENTATION_LINK}
+      </EuiLink>,
+    ];
+  }, [isEisEnabled, onFlyoutOpen, application]);
+
+  return (
+    <EuiPageTemplate.Header
+      data-test-subj="allInferenceEndpointsPage"
+      pageTitle={isEisEnabled ? PROVIDER_INFERENCE_TITLE : PLUGIN_TITLE}
+      description={i18n.MANAGE_INFERENCE_ENDPOINTS_LABEL}
+      bottomBorder={true}
+      rightSideItems={rightSideItems}
     />
   );
 };
