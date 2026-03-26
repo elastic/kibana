@@ -2284,6 +2284,7 @@ x-pack/platform/plugins/shared/inference_endpoint @elastic/search-kibana
 
 /src/platform/test/server_integration/config.base.js @elastic/kibana-security @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/199795#discussion_r1846510782
 /src/platform/test/server_integration/__fixtures__ @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/53810
+.cycodeignore @elastic/kibana-security
 /.github/codeql @elastic/kibana-security
 /.github/workflows/codeql.yml @elastic/kibana-security
 /.github/workflows/codeql-pr.yml @elastic/kibana-security
