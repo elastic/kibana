@@ -22,8 +22,6 @@ export interface MemoryEntry {
   content: string;
   /** Parent directory path, e.g. "ops/runbooks" */
   parent_path: string;
-  /** Space ID */
-  space: string;
   /** Monotonically increasing version per entry */
   version: number;
   /** Tags for classification */
@@ -46,7 +44,6 @@ export interface MemoryVersionRecord {
   content: string;
   change_type: MemoryChangeType;
   change_summary: string;
-  space: string;
   created_at: string;
   created_by: string;
 }
@@ -84,7 +81,6 @@ export interface CreateMemoryParams {
   title: string;
   content: string;
   tags?: string[];
-  space: string;
   user: string;
 }
 
@@ -95,7 +91,6 @@ export interface UpdateMemoryParams {
   title?: string;
   tags?: string[];
   path?: string;
-  space: string;
   user: string;
   changeSummary?: string;
 }
@@ -103,7 +98,6 @@ export interface UpdateMemoryParams {
 /** Parameters for searching memory */
 export interface SearchMemoryParams {
   query: string;
-  space: string;
   tags?: string[];
   parentPath?: string;
   size?: number;
@@ -117,40 +111,28 @@ export interface MemoryServiceDeps {
 
 /**
  * Memory service interface — manages the persistent knowledge base.
+ * Memory is global (space-agnostic).
  */
 export interface MemoryService {
   // CRUD
   create(params: CreateMemoryParams): Promise<MemoryEntry>;
-  get(params: { id: string; space: string }): Promise<MemoryEntry>;
-  getByPath(params: { path: string; space: string }): Promise<MemoryEntry | undefined>;
+  get(params: { id: string }): Promise<MemoryEntry>;
+  getByPath(params: { path: string }): Promise<MemoryEntry | undefined>;
   update(params: UpdateMemoryParams): Promise<MemoryEntry>;
-  delete(params: { id: string; space: string; user: string }): Promise<void>;
-  move(params: { id: string; newPath: string; space: string; user: string }): Promise<MemoryEntry>;
+  delete(params: { id: string; user: string }): Promise<void>;
+  move(params: { id: string; newPath: string; user: string }): Promise<MemoryEntry>;
 
   // Search & browse
   search(params: SearchMemoryParams): Promise<MemorySearchResult[]>;
-  listChildren(params: { parentPath: string; space: string }): Promise<MemoryEntry[]>;
-  listAll(params: { space: string }): Promise<MemoryEntry[]>;
-  getTree(params: { space: string }): Promise<MemoryTreeNode[]>;
+  listChildren(params: { parentPath: string }): Promise<MemoryEntry[]>;
+  listAll(): Promise<MemoryEntry[]>;
+  getTree(): Promise<MemoryTreeNode[]>;
 
   // History
-  getHistory(params: {
-    entryId: string;
-    space: string;
-    size?: number;
-  }): Promise<MemoryVersionRecord[]>;
-  getVersion(params: {
-    entryId: string;
-    version: number;
-    space: string;
-  }): Promise<MemoryVersionRecord>;
-  rollback(params: {
-    entryId: string;
-    version: number;
-    space: string;
-    user: string;
-  }): Promise<MemoryEntry>;
+  getHistory(params: { entryId: string; size?: number }): Promise<MemoryVersionRecord[]>;
+  getVersion(params: { entryId: string; version: number }): Promise<MemoryVersionRecord>;
+  rollback(params: { entryId: string; version: number; user: string }): Promise<MemoryEntry>;
 
   // Recent changes across all entries
-  getRecentChanges(params: { space: string; size?: number }): Promise<MemoryVersionRecord[]>;
+  getRecentChanges(params: { size?: number }): Promise<MemoryVersionRecord[]>;
 }

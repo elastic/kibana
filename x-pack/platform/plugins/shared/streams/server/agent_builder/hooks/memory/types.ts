@@ -8,7 +8,6 @@
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server/types';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { MemoryService } from '../../../lib/memory';
 
 export interface MemoryHookSetupDeps {
@@ -17,7 +16,6 @@ export interface MemoryHookSetupDeps {
 
 export interface MemoryHookServices {
   memory: MemoryService;
-  spaces?: SpacesPluginStart;
 }
 
 export interface RegisterMemoryHooksDeps {

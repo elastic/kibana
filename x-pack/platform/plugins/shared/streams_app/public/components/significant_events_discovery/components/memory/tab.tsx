@@ -42,6 +42,8 @@ import {
   useMemoryVersion,
   useMemoryMutations,
   useRecentChanges,
+  useScrapeConversations,
+  useConsolidateMemory,
 } from './use_memory';
 import type { MemoryTreeNode, MemoryVersionRecord } from './types';
 
@@ -54,6 +56,9 @@ export function MemoryTab() {
   const { data: searchData, isLoading: isSearchLoading } = useMemorySearch(searchQuery);
 
   const { data: recentChangesData, isLoading: isRecentChangesLoading } = useRecentChanges();
+
+  const scrapeConversations = useScrapeConversations();
+  const consolidateMemory = useConsolidateMemory();
 
   const isSearchActive = searchQuery.length >= 2;
 
@@ -83,6 +88,41 @@ export function MemoryTab() {
             min-height: 0;
           `}
         >
+          <EuiFlexGroup
+            gutterSize="s"
+            responsive={false}
+            className={css`
+              flex-grow: 0;
+            `}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                iconType="refresh"
+                isLoading={scrapeConversations.isLoading}
+                onClick={() => scrapeConversations.mutate()}
+                data-test-subj="streamsMemoryScrapeButton"
+              >
+                {i18n.translate('xpack.streams.memory.scrapeButton', {
+                  defaultMessage: 'Scrape Conversations',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                iconType="broom"
+                isLoading={consolidateMemory.isLoading}
+                onClick={() => consolidateMemory.mutate()}
+                data-test-subj="streamsMemoryConsolidateButton"
+              >
+                {i18n.translate('xpack.streams.memory.consolidateButton', {
+                  defaultMessage: 'Consolidate Memory',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
           <EuiFieldSearch
             placeholder={i18n.translate('xpack.streams.memory.searchPlaceholder', {
               defaultMessage: 'Search memory entries...',

@@ -17,6 +17,7 @@ export {
   type ToolDefinitionWithSchema,
   platformCoreTools,
   platformStreamsSigEventsTools,
+  platformStreamsMemoryTools,
   attachmentTools,
   filestoreTools,
   defaultAgentToolIds,

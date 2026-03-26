@@ -13,7 +13,6 @@ import type { MemoryStorage } from './storage';
 import { createMemoryStorage } from './storage';
 import type { MemoryHistoryStorage } from './history_storage';
 import { createMemoryHistoryStorage } from './history_storage';
-import { createSpaceDslFilter } from './space_filter';
 import type {
   MemoryEntry,
   MemoryVersionRecord,
@@ -50,10 +49,10 @@ export class MemoryServiceImpl implements MemoryService {
   }
 
   async create(params: CreateMemoryParams): Promise<MemoryEntry> {
-    const { path, title, content, tags = [], space, user } = params;
+    const { path, title, content, tags = [], user } = params;
 
     // Check for duplicate path
-    const existing = await this._getByPath(path, space);
+    const existing = await this._getByPath(path);
     if (existing) {
       throw badRequest(`Memory entry at path '${path}' already exists`);
     }
@@ -66,7 +65,6 @@ export class MemoryServiceImpl implements MemoryService {
       title,
       content,
       parent_path: getParentPath(path),
-      space,
       version: 1,
       tags,
       created_at: now,
@@ -81,28 +79,22 @@ export class MemoryServiceImpl implements MemoryService {
     return entry;
   }
 
-  async get({ id, space }: { id: string; space: string }): Promise<MemoryEntry> {
-    const doc = await this._getById(id, space);
+  async get({ id }: { id: string }): Promise<MemoryEntry> {
+    const doc = await this._getById(id);
     if (!doc) {
       throw notFound(`Memory entry with id '${id}' not found`);
     }
     return doc._source;
   }
 
-  async getByPath({
-    path,
-    space,
-  }: {
-    path: string;
-    space: string;
-  }): Promise<MemoryEntry | undefined> {
-    const doc = await this._getByPath(path, space);
+  async getByPath({ path }: { path: string }): Promise<MemoryEntry | undefined> {
+    const doc = await this._getByPath(path);
     return doc?._source;
   }
 
   async update(params: UpdateMemoryParams): Promise<MemoryEntry> {
-    const { id, space, user, changeSummary } = params;
-    const doc = await this._getById(id, space);
+    const { id, user, changeSummary } = params;
+    const doc = await this._getById(id);
     if (!doc) {
       throw notFound(`Memory entry with id '${id}' not found`);
     }
@@ -140,34 +132,38 @@ export class MemoryServiceImpl implements MemoryService {
     return updatedEntry;
   }
 
-  async delete({ id, space, user }: { id: string; space: string; user: string }): Promise<void> {
-    const doc = await this._getById(id, space);
+  async delete({ id, user }: { id: string; user: string }): Promise<void> {
+    const doc = await this._getById(id);
     if (!doc) {
       throw notFound(`Memory entry with id '${id}' not found`);
     }
 
+    const now = new Date().toISOString();
     await this.storage.getClient().delete({ id: doc._id });
-    await this._writeHistory(doc._source, 'delete', `Deleted entry at ${doc._source.path}`, user);
+    await this._writeHistory(
+      { ...doc._source, updated_at: now },
+      'delete',
+      `Deleted entry at ${doc._source.path}`,
+      user
+    );
   }
 
   async move({
     id,
     newPath,
-    space,
     user,
   }: {
     id: string;
     newPath: string;
-    space: string;
     user: string;
   }): Promise<MemoryEntry> {
-    const doc = await this._getById(id, space);
+    const doc = await this._getById(id);
     if (!doc) {
       throw notFound(`Memory entry with id '${id}' not found`);
     }
 
     // Check if target path already exists
-    const existing = await this._getByPath(newPath, space);
+    const existing = await this._getByPath(newPath);
     if (existing) {
       throw badRequest(`Memory entry at path '${newPath}' already exists`);
     }
@@ -176,16 +172,15 @@ export class MemoryServiceImpl implements MemoryService {
     return this.update({
       id,
       path: newPath,
-      space,
       user,
       changeSummary: `Moved from ${oldPath} to ${newPath}`,
     });
   }
 
   async search(params: SearchMemoryParams): Promise<MemorySearchResult[]> {
-    const { query, space, tags, parentPath, size = 10 } = params;
+    const { query, tags, parentPath, size = 10 } = params;
 
-    const filters: QueryDslQueryContainer[] = [createSpaceDslFilter(space)];
+    const filters: QueryDslQueryContainer[] = [];
     if (tags && tags.length > 0) {
       filters.push({ terms: { tags } });
     }
@@ -197,7 +192,7 @@ export class MemoryServiceImpl implements MemoryService {
       track_total_hits: false,
       query: {
         bool: {
-          filter: filters,
+          ...(filters.length > 0 ? { filter: filters } : {}),
           must: [
             {
               multi_match: {
@@ -238,18 +233,12 @@ export class MemoryServiceImpl implements MemoryService {
     });
   }
 
-  async listChildren({
-    parentPath,
-    space,
-  }: {
-    parentPath: string;
-    space: string;
-  }): Promise<MemoryEntry[]> {
+  async listChildren({ parentPath }: { parentPath: string }): Promise<MemoryEntry[]> {
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       query: {
         bool: {
-          filter: [createSpaceDslFilter(space), { term: { parent_path: parentPath } }],
+          filter: [{ term: { parent_path: parentPath } }],
         },
       },
       size: 1000,
@@ -259,14 +248,10 @@ export class MemoryServiceImpl implements MemoryService {
     return response.hits.hits.map((hit) => (hit as MemoryDocument)._source);
   }
 
-  async listAll({ space }: { space: string }): Promise<MemoryEntry[]> {
+  async listAll(): Promise<MemoryEntry[]> {
     const response = await this.storage.getClient().search({
       track_total_hits: false,
-      query: {
-        bool: {
-          filter: [createSpaceDslFilter(space)],
-        },
-      },
+      query: { match_all: {} },
       size: 10000,
       sort: [{ path: { order: 'asc' } }],
     });
@@ -274,25 +259,23 @@ export class MemoryServiceImpl implements MemoryService {
     return response.hits.hits.map((hit) => (hit as MemoryDocument)._source);
   }
 
-  async getTree({ space }: { space: string }): Promise<MemoryTreeNode[]> {
-    const entries = await this.listAll({ space });
+  async getTree(): Promise<MemoryTreeNode[]> {
+    const entries = await this.listAll();
     return buildTree(entries);
   }
 
   async getHistory({
     entryId,
-    space,
     size = 50,
   }: {
     entryId: string;
-    space: string;
     size?: number;
   }): Promise<MemoryVersionRecord[]> {
     const response = await this.historyStorage.getClient().search({
       track_total_hits: false,
       query: {
         bool: {
-          filter: [createSpaceDslFilter(space), { term: { entry_id: entryId } }],
+          filter: [{ term: { entry_id: entryId } }],
         },
       },
       size,
@@ -305,21 +288,15 @@ export class MemoryServiceImpl implements MemoryService {
   async getVersion({
     entryId,
     version,
-    space,
   }: {
     entryId: string;
     version: number;
-    space: string;
   }): Promise<MemoryVersionRecord> {
     const response = await this.historyStorage.getClient().search({
       track_total_hits: false,
       query: {
         bool: {
-          filter: [
-            createSpaceDslFilter(space),
-            { term: { entry_id: entryId } },
-            { term: { version } },
-          ],
+          filter: [{ term: { entry_id: entryId } }, { term: { version } }],
         },
       },
       size: 1,
@@ -336,16 +313,14 @@ export class MemoryServiceImpl implements MemoryService {
   async rollback({
     entryId,
     version,
-    space,
     user,
   }: {
     entryId: string;
     version: number;
-    space: string;
     user: string;
   }): Promise<MemoryEntry> {
-    const targetVersion = await this.getVersion({ entryId, version, space });
-    const doc = await this._getById(entryId, space);
+    const targetVersion = await this.getVersion({ entryId, version });
+    const doc = await this._getById(entryId);
     if (!doc) {
       throw notFound(`Memory entry with id '${entryId}' not found`);
     }
@@ -372,20 +347,10 @@ export class MemoryServiceImpl implements MemoryService {
     return rolledBackEntry;
   }
 
-  async getRecentChanges({
-    space,
-    size = 20,
-  }: {
-    space: string;
-    size?: number;
-  }): Promise<MemoryVersionRecord[]> {
+  async getRecentChanges({ size = 20 }: { size?: number }): Promise<MemoryVersionRecord[]> {
     const response = await this.historyStorage.getClient().search({
       track_total_hits: false,
-      query: {
-        bool: {
-          filter: [createSpaceDslFilter(space)],
-        },
-      },
+      query: { match_all: {} },
       size,
       sort: [{ created_at: { order: 'desc' } }],
     });
@@ -395,14 +360,14 @@ export class MemoryServiceImpl implements MemoryService {
 
   // ── Private helpers ──
 
-  private async _getById(id: string, space: string): Promise<MemoryDocument | undefined> {
+  private async _getById(id: string): Promise<MemoryDocument | undefined> {
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 1,
       terminate_after: 1,
       query: {
         bool: {
-          filter: [createSpaceDslFilter(space), { term: { id } }],
+          filter: [{ term: { id } }],
         },
       },
     });
@@ -412,14 +377,14 @@ export class MemoryServiceImpl implements MemoryService {
     return response.hits.hits[0] as MemoryDocument;
   }
 
-  private async _getByPath(path: string, space: string): Promise<MemoryDocument | undefined> {
+  private async _getByPath(path: string): Promise<MemoryDocument | undefined> {
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 1,
       terminate_after: 1,
       query: {
         bool: {
-          filter: [createSpaceDslFilter(space), { term: { path } }],
+          filter: [{ term: { path } }],
         },
       },
     });
@@ -444,7 +409,6 @@ export class MemoryServiceImpl implements MemoryService {
       content: entry.content,
       change_type: changeType,
       change_summary: changeSummary,
-      space: entry.space,
       created_at: entry.updated_at,
       created_by: user,
     };

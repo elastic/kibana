@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
+import { useQuery, useMutation, useQueryClient, type UseMutationResult } from '@kbn/react-query';
 import { useKibana } from '../../../../hooks/use_kibana';
 import type { MemoryEntry, MemoryTreeNode, MemorySearchResult, MemoryVersionRecord } from './types';
 
@@ -129,4 +129,27 @@ export const useMemoryMutations = () => {
   });
 
   return { createEntry, updateEntry, deleteEntry, rollbackEntry };
+};
+
+const useMemoryTaskAction = (endpoint: string): UseMutationResult<unknown, unknown, void> => {
+  const { core } = useKibana();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () =>
+      core.http.post(endpoint, {
+        body: JSON.stringify({ action: 'schedule' }),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: memoryKeys.all });
+    },
+  });
+};
+
+export const useScrapeConversations = () => {
+  return useMemoryTaskAction(`${MEMORY_BASE}/_scrape_conversations`);
+};
+
+export const useConsolidateMemory = () => {
+  return useMemoryTaskAction(`${MEMORY_BASE}/_consolidate`);
 };

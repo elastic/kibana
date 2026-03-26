@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { platformStreamsMemoryTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
@@ -29,7 +29,7 @@ export const createMemoryWriteTool = ({
   getMemoryService,
   getSecurity,
 }: MemoryToolsOptions): BuiltinToolDefinition<typeof memoryWriteSchema> => ({
-  id: platformCoreTools.memoryWrite,
+  id: platformStreamsMemoryTools.memoryWrite,
   type: ToolType.builtin,
   description:
     'Create a new memory entry or overwrite an existing one at a path. ' +
@@ -40,7 +40,7 @@ export const createMemoryWriteTool = ({
   confirmation: { askUser: 'never' },
   handler: async ({ path, title, content, tags, change_summary: changeSummary }, context) => {
     const memoryService = getMemoryService();
-    const { spaceId, request, esClient } = context;
+    const { request, esClient } = context;
     const { username: user } = await getUserFromRequest({
       request,
       security: getSecurity(),
@@ -49,7 +49,7 @@ export const createMemoryWriteTool = ({
 
     try {
       // Check if entry exists at this path
-      const existing = await memoryService.getByPath({ path, space: spaceId });
+      const existing = await memoryService.getByPath({ path });
 
       if (existing) {
         // Overwrite existing entry
@@ -58,7 +58,6 @@ export const createMemoryWriteTool = ({
           title,
           content,
           tags,
-          space: spaceId,
           user,
           changeSummary: changeSummary ?? `Overwrote entry at ${path}`,
         });
@@ -84,7 +83,6 @@ export const createMemoryWriteTool = ({
         title,
         content,
         tags,
-        space: spaceId,
         user,
       });
 

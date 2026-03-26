@@ -23,8 +23,6 @@ export type OutputFunction = (prompt: string) => Promise<string>;
 export interface MemoryUpdateContext {
   /** The memory service instance for CRUD operations */
   memory: MemoryService;
-  /** The Kibana space ID */
-  spaceId: string;
   /** Logger scoped to the trigger */
   logger: Logger;
   /** Information about what triggered the update */

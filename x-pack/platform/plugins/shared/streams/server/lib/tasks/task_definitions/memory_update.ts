@@ -91,7 +91,6 @@ export function createStreamsMemoryUpdateTask(taskContext: TaskContext) {
 
                 await registry.execute(triggerId, {
                   memory,
-                  spaceId: 'default',
                   logger: taskLogger,
                   inferenceClient: boundInferenceClient,
                   esClient: scopedClusterClient.asCurrentUser,

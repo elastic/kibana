@@ -74,7 +74,7 @@ export class ModelSettingsConfigClientImpl implements ModelSettingsConfigClient 
       connectorIdRuleGeneration: toOptional(attributes.connectorIdRuleGeneration),
       connectorIdDiscovery: toOptional(attributes.connectorIdDiscovery),
       indexPatterns: toOptional(attributes.indexPatterns),
-      useMemory: attributes.useMemory ?? false,
+      useMemory: attributes.useMemory ?? undefined,
     };
   }
 

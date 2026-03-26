@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { platformStreamsMemoryTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
@@ -40,7 +40,7 @@ const memorySearchSchema = z.object({
 export const createMemorySearchTool = ({
   getMemoryService,
 }: MemoryToolsOptions): BuiltinToolDefinition<typeof memorySearchSchema> => ({
-  id: platformCoreTools.memorySearch,
+  id: platformStreamsMemoryTools.memorySearch,
   type: ToolType.builtin,
   description:
     'Search the shared memory for relevant entries. Returns metadata and short snippets only — ' +
@@ -50,12 +50,10 @@ export const createMemorySearchTool = ({
   tags: ['memory'],
   handler: async ({ query, tags, parent_path: parentPath, size }, context) => {
     const memoryService = getMemoryService();
-    const { spaceId } = context;
 
     try {
       const results = await memoryService.search({
         query,
-        space: spaceId,
         tags,
         parentPath,
         size,

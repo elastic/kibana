@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import type { TaskResult } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import type {
@@ -18,6 +18,18 @@ import type {
 } from '../../../lib/memory';
 import { MemoryServiceImpl } from '../../../lib/memory';
 import type { StreamsServer } from '../../../types';
+import { taskActionSchema } from '../../../lib/tasks/task_action_schema';
+import { handleTaskAction } from '../../utils/task_helpers';
+import {
+  CONVERSATION_SCRAPER_TASK_TYPE,
+  type ConversationScraperTaskParams,
+  type ConversationScraperTaskResult,
+} from '../../../lib/tasks/task_definitions/conversation_scraper';
+import {
+  MEMORY_CONSOLIDATION_TASK_TYPE,
+  type MemoryConsolidationTaskParams,
+  type MemoryConsolidationTaskResult,
+} from '../../../lib/tasks/task_definitions/memory_consolidation';
 
 const getMemoryService = (server: StreamsServer, logger: Logger) => {
   return new MemoryServiceImpl({
@@ -47,7 +59,6 @@ const createEntryRoute = createServerRoute({
   }),
   handler: async ({ params, request, server, logger }): Promise<MemoryEntry> => {
     const memory = getMemoryService(server, logger);
-    const spaceId = DEFAULT_SPACE_ID;
 
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
@@ -55,7 +66,6 @@ const createEntryRoute = createServerRoute({
     return memory.create({
       ...params.body,
       tags: params.body.tags ?? [],
-      space: spaceId,
       user,
     });
   },
@@ -77,9 +87,8 @@ const getEntryRoute = createServerRoute({
   }),
   handler: async ({ params, request, server, logger }): Promise<MemoryEntry> => {
     const memory = getMemoryService(server, logger);
-    const spaceId = DEFAULT_SPACE_ID;
 
-    return memory.get({ id: params.path.id, space: spaceId });
+    return memory.get({ id: params.path.id });
   },
 });
 
@@ -99,9 +108,8 @@ const getEntryByPathRoute = createServerRoute({
   }),
   handler: async ({ params, request, server, logger }): Promise<MemoryEntry> => {
     const memory = getMemoryService(server, logger);
-    const spaceId = DEFAULT_SPACE_ID;
 
-    const entry = await memory.getByPath({ path: params.query.path, space: spaceId });
+    const entry = await memory.getByPath({ path: params.query.path });
     if (!entry) {
       throw new Error(`Entry not found at path: ${params.query.path}`);
     }
@@ -132,7 +140,6 @@ const updateEntryRoute = createServerRoute({
   }),
   handler: async ({ params, request, server, logger }): Promise<MemoryEntry> => {
     const memory = getMemoryService(server, logger);
-    const spaceId = DEFAULT_SPACE_ID;
 
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
@@ -141,7 +148,6 @@ const updateEntryRoute = createServerRoute({
       id: params.path.id,
       ...params.body,
       changeSummary: params.body.change_summary,
-      space: spaceId,
       user,
     });
   },
@@ -163,12 +169,11 @@ const deleteEntryRoute = createServerRoute({
   }),
   handler: async ({ params, request, server, logger }): Promise<{ deleted: boolean }> => {
     const memory = getMemoryService(server, logger);
-    const spaceId = DEFAULT_SPACE_ID;
 
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
 
-    await memory.delete({ id: params.path.id, space: spaceId, user });
+    await memory.delete({ id: params.path.id, user });
     return { deleted: true };
   },
 });
@@ -190,7 +195,6 @@ const moveEntryRoute = createServerRoute({
   }),
   handler: async ({ params, request, server, logger }): Promise<MemoryEntry> => {
     const memory = getMemoryService(server, logger);
-    const spaceId = DEFAULT_SPACE_ID;
 
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
@@ -198,7 +202,6 @@ const moveEntryRoute = createServerRoute({
     return memory.move({
       id: params.path.id,
       newPath: params.body.new_path,
-      space: spaceId,
       user,
     });
   },
@@ -230,14 +233,12 @@ const searchRoute = createServerRoute({
     logger,
   }): Promise<{ results: MemorySearchResult[] }> => {
     const memory = getMemoryService(server, logger);
-    const spaceId = DEFAULT_SPACE_ID;
 
     const results = await memory.search({
       query: params.body.query,
       tags: params.body.tags,
       parentPath: params.body.parent_path,
       size: params.body.size,
-      space: spaceId,
     });
     return { results };
   },
@@ -257,9 +258,8 @@ const getTreeRoute = createServerRoute({
   params: z.object({}),
   handler: async ({ request, server, logger }): Promise<{ tree: MemoryTreeNode[] }> => {
     const memory = getMemoryService(server, logger);
-    const spaceId = DEFAULT_SPACE_ID;
 
-    const tree = await memory.getTree({ space: spaceId });
+    const tree = await memory.getTree();
     return { tree };
   },
 });
@@ -291,11 +291,9 @@ const getHistoryRoute = createServerRoute({
     logger,
   }): Promise<{ history: MemoryVersionRecord[] }> => {
     const memory = getMemoryService(server, logger);
-    const spaceId = DEFAULT_SPACE_ID;
 
     const history = await memory.getHistory({
       entryId: params.path.id,
-      space: spaceId,
       size: params.query?.size,
     });
     return { history };
@@ -321,12 +319,10 @@ const getVersionRoute = createServerRoute({
   }),
   handler: async ({ params, request, server, logger }): Promise<MemoryVersionRecord> => {
     const memory = getMemoryService(server, logger);
-    const spaceId = DEFAULT_SPACE_ID;
 
     return memory.getVersion({
       entryId: params.path.id,
       version: params.path.version,
-      space: spaceId,
     });
   },
 });
@@ -348,7 +344,6 @@ const rollbackRoute = createServerRoute({
   }),
   handler: async ({ params, request, server, logger }): Promise<MemoryEntry> => {
     const memory = getMemoryService(server, logger);
-    const spaceId = DEFAULT_SPACE_ID;
 
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
@@ -356,7 +351,6 @@ const rollbackRoute = createServerRoute({
     return memory.rollback({
       entryId: params.path.id,
       version: params.body.version,
-      space: spaceId,
       user,
     });
   },
@@ -388,13 +382,102 @@ const recentChangesRoute = createServerRoute({
     logger,
   }): Promise<{ changes: MemoryVersionRecord[] }> => {
     const memory = getMemoryService(server, logger);
-    const spaceId = DEFAULT_SPACE_ID;
 
     const changes = await memory.getRecentChanges({
-      space: spaceId,
       size: params.query?.size,
     });
     return { changes };
+  },
+});
+
+const SCRAPER_TASK_ID = 'streams_conversation_scraper_singleton';
+const CONSOLIDATION_TASK_ID = 'streams_memory_consolidation_singleton';
+
+const scrapeConversationsRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/memory/_scrape_conversations',
+  options: {
+    access: 'internal',
+    summary: 'Trigger conversation scraping for memory',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    body: taskActionSchema({}),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+  }): Promise<TaskResult<ConversationScraperTaskResult>> => {
+    const { taskClient } = await getScopedClients({ request });
+
+    const { body } = params;
+
+    const actionParams =
+      body.action === 'schedule'
+        ? ({
+            action: body.action,
+            scheduleConfig: {
+              taskType: CONVERSATION_SCRAPER_TASK_TYPE,
+              taskId: SCRAPER_TASK_ID,
+              params: {},
+              request,
+            },
+          } as const)
+        : ({ action: body.action } as const);
+
+    return handleTaskAction<ConversationScraperTaskParams, ConversationScraperTaskResult>({
+      taskClient,
+      taskId: SCRAPER_TASK_ID,
+      ...actionParams,
+    });
+  },
+});
+
+const consolidateMemoryRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/memory/_consolidate',
+  options: {
+    access: 'internal',
+    summary: 'Trigger memory consolidation and cleanup',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    body: taskActionSchema({}),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+  }): Promise<TaskResult<MemoryConsolidationTaskResult>> => {
+    const { taskClient } = await getScopedClients({ request });
+
+    const { body } = params;
+
+    const actionParams =
+      body.action === 'schedule'
+        ? ({
+            action: body.action,
+            scheduleConfig: {
+              taskType: MEMORY_CONSOLIDATION_TASK_TYPE,
+              taskId: CONSOLIDATION_TASK_ID,
+              params: {},
+              request,
+            },
+          } as const)
+        : ({ action: body.action } as const);
+
+    return handleTaskAction<MemoryConsolidationTaskParams, MemoryConsolidationTaskResult>({
+      taskClient,
+      taskId: CONSOLIDATION_TASK_ID,
+      ...actionParams,
+    });
   },
 });
 
@@ -411,4 +494,6 @@ export const internalMemoryRoutes = {
   ...getVersionRoute,
   ...rollbackRoute,
   ...recentChangesRoute,
+  ...scrapeConversationsRoute,
+  ...consolidateMemoryRoute,
 };

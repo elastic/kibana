@@ -79,7 +79,6 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                       logger: taskLogger.get('memory'),
                       esClient: scopedClusterClient.asCurrentUser,
                     }),
-                    spaceId: 'default',
                   })
                 : undefined;
 

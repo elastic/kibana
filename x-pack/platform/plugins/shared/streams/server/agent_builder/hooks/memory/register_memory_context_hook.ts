@@ -12,7 +12,6 @@ import {
   type HookHandlerResult,
 } from '@kbn/agent-builder-server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server/types';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import type { RegisterMemoryHooksDeps } from './types';
 
 const MAX_INJECTED_ENTRIES = 5;
@@ -47,12 +46,10 @@ export const registerMemoryContextHook = (
           }
 
           try {
-            const { memory, spaces } = deps.getMemoryServices();
-            const spaceId = spaces?.spacesService?.getSpaceId(context.request) ?? DEFAULT_SPACE_ID;
+            const { memory } = deps.getMemoryServices();
 
             const results = await memory.search({
               query: userMessage,
-              space: spaceId,
               size: MAX_INJECTED_ENTRIES,
             });
 
@@ -70,6 +67,9 @@ export const registerMemoryContextHook = (
               })
               .join('\n\n');
 
+            // NOTE: The memory tools referenced below are only available when the
+            // sig_events_memory skill is loaded. Without that skill the agent won't
+            // have access to these tools despite the prompt mentioning them.
             const memoryPrefix = [
               '<memory_context>',
               'The following entries from shared memory may be relevant to this conversation.',

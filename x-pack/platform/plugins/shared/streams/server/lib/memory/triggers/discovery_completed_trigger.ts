@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  sigeventsSynthesisPrompt,
-  parseSynthesisResponse,
-} from '../../../agent_builder/hooks/memory/sigevents_synthesis_prompt';
+import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
+import { SigeventsSynthesisPrompt } from '../../../agent_builder/hooks/memory/sigevents_synthesis_prompt';
 import type { MemoryUpdateTrigger } from './types';
 
 export const DISCOVERY_COMPLETED_TRIGGER_ID = 'discovery-completed';
@@ -21,8 +19,8 @@ interface DiscoveryInsight {
 
 /**
  * Trigger that fires after insights discovery completes.
- * Synthesizes new insights into memory entries using the same prompt
- * pattern as the memory_generation task.
+ * Uses a reasoning agent with memory tools to synthesize
+ * new insights into wiki pages.
  *
  * Expected payload: { insights: Array<{ title: string; evidence: Array<{ stream_name?: string }> }> }
  */
@@ -31,7 +29,7 @@ export const discoveryCompletedTrigger: MemoryUpdateTrigger = {
   description:
     'Fires after insights discovery completes. Synthesizes discovery insights into architecture overview memory entries.',
   execute: async (context) => {
-    const { memory, spaceId, logger, trigger, output } = context;
+    const { memory, logger, trigger, inferenceClient } = context;
     const { insights } = trigger.payload as {
       insights: DiscoveryInsight[];
     };
@@ -41,8 +39,8 @@ export const discoveryCompletedTrigger: MemoryUpdateTrigger = {
       return;
     }
 
-    if (!output) {
-      logger.debug('No LLM output function available — cannot synthesize insights into memory');
+    if (!inferenceClient) {
+      logger.debug('No inference client available — cannot synthesize insights into memory');
       return;
     }
 
@@ -56,67 +54,86 @@ export const discoveryCompletedTrigger: MemoryUpdateTrigger = {
       `Processing ${insights.length} insights across ${streamGroups.length} streams for memory synthesis`
     );
 
-    const allEntries = await memory.listAll({ space: spaceId });
+    const allEntries = await memory.listAll();
 
     for (const { streamName, streamInsights } of streamGroups) {
       try {
-        const existingEntries = allEntries
-          .filter(
-            (e) =>
-              e.path.startsWith(`architecture/${streamName}/`) ||
-              e.path.startsWith(`operations/${streamName}/`)
-          )
-          .map((e) => ({ path: e.path, title: e.title, content: e.content }));
+        const existingEntries = allEntries.filter(
+          (e) =>
+            e.path.startsWith(`stream/${streamName}/`) ||
+            e.path.startsWith(`architecture/${streamName}/`) ||
+            e.path.startsWith(`operations/${streamName}/`)
+        );
 
-        const prompt = sigeventsSynthesisPrompt({
-          streamName,
-          indicators: JSON.stringify(streamInsights, null, 2),
-          existingEntries: existingEntries.length > 0 ? existingEntries : undefined,
-        });
-
-        const synthesized = await output(prompt);
-
-        if (!synthesized || synthesized.length < 20) {
-          logger.debug(`Skipping empty synthesis for stream ${streamName}`);
-          continue;
-        }
-
-        const pages = parseSynthesisResponse(synthesized);
-        if (pages.length === 0) {
-          logger.debug(`No valid wiki pages parsed for stream ${streamName}`);
-          continue;
-        }
+        const existingPages =
+          existingEntries.length > 0
+            ? existingEntries.map((e) => `- **${e.path}** — ${e.title}`).join('\n')
+            : 'No existing pages for this stream.';
 
         const user = 'system:discovery-completed-trigger';
 
-        for (const page of pages) {
-          const existing = await memory.getByPath({
-            path: page.path,
-            space: spaceId,
-          });
+        await executeAsReasoningAgent({
+          inferenceClient,
+          prompt: SigeventsSynthesisPrompt,
+          input: {
+            streamName,
+            indicators: JSON.stringify(streamInsights, null, 2),
+            existingPages,
+          },
+          maxSteps: 10,
+          toolCallbacks: {
+            read_memory_page: async (toolCall) => {
+              const { path } = toolCall.function.arguments;
+              const entry = await memory.getByPath({ path });
+              if (!entry) {
+                return { response: { error: `No page found at path "${path}"` } };
+              }
+              return {
+                response: {
+                  path: entry.path,
+                  title: entry.title,
+                  content: entry.content,
+                },
+              };
+            },
 
-          if (existing) {
-            await memory.update({
-              id: existing.id,
-              content: page.content,
-              title: page.title,
-              space: spaceId,
-              user,
-              changeSummary: 'Updated from discovery insights',
-            });
-          } else {
-            await memory.create({
-              path: page.path,
-              title: page.title,
-              content: page.content,
-              tags: [...page.tags, 'auto-generated'],
-              space: spaceId,
-              user,
-            });
-          }
-        }
+            write_memory_page: async (toolCall) => {
+              const { path, title, content, tags } = toolCall.function.arguments;
 
-        logger.debug(`Synthesized ${pages.length} wiki pages for stream: ${streamName}`);
+              const existing = await memory.getByPath({ path });
+
+              if (existing) {
+                await memory.update({
+                  id: existing.id,
+                  content,
+                  title,
+                  user,
+                  changeSummary: 'Updated from discovery insights',
+                });
+                logger.info(`Updated wiki page: ${path}`);
+              } else {
+                await memory.create({
+                  path,
+                  title,
+                  content,
+                  tags: [...(tags ?? []), 'auto-generated'],
+                  user,
+                });
+                logger.info(`Created wiki page: ${path}`);
+              }
+
+              return {
+                response: {
+                  success: true,
+                  action: existing ? 'updated' : 'created',
+                  path,
+                },
+              };
+            },
+          },
+        });
+
+        logger.debug(`Reasoning agent completed synthesis for stream: ${streamName}`);
       } catch (error) {
         logger.warn(
           `Failed to synthesize memory for stream ${streamName}: ${(error as Error).message}`

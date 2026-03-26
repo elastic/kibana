@@ -33,17 +33,26 @@ export const platformCoreTools = {
   // SML tools
   smlSearch: platformCoreTool('sml_search'),
   smlAttach: platformCoreTool('sml_attach'),
-  // Memory tools
-  memorySearch: platformCoreTool('memory_search'),
-  memoryRead: platformCoreTool('memory_read'),
-  memoryWrite: platformCoreTool('memory_write'),
-  memoryPatch: platformCoreTool('memory_patch'),
-  memoryList: platformCoreTool('memory_list'),
-  memoryDelete: platformCoreTool('memory_delete'),
 } as const;
 
 export const platformStreamsSigEventsTools = {
   searchKnowledgeIndicators: `${internalNamespaces.platformStreams}.sig_events.search_kis`,
+} as const;
+
+const platformStreamsMemoryTool = <TName extends string>(
+  toolName: TName
+): `${typeof internalNamespaces.platformStreams}.memory.${TName}` => {
+  return `${internalNamespaces.platformStreams}.memory.${toolName}`;
+};
+
+export const platformStreamsMemoryTools = {
+  memorySearch: platformStreamsMemoryTool('search'),
+  memoryRead: platformStreamsMemoryTool('read'),
+  memoryWrite: platformStreamsMemoryTool('write'),
+  memoryPatch: platformStreamsMemoryTool('patch'),
+  memoryList: platformStreamsMemoryTool('list'),
+  memoryDelete: platformStreamsMemoryTool('delete'),
+  memoryRecentChanges: platformStreamsMemoryTool('recent_changes'),
 } as const;
 
 export const attachmentTools = {
@@ -90,12 +99,6 @@ export const defaultAgentToolIds = [
   platformCoreTools.getWorkflowExecutionStatus,
   platformCoreTools.smlSearch,
   platformCoreTools.smlAttach,
-  platformCoreTools.memorySearch,
-  platformCoreTools.memoryRead,
-  platformCoreTools.memoryWrite,
-  platformCoreTools.memoryPatch,
-  platformCoreTools.memoryList,
-  platformCoreTools.memoryDelete,
 ];
 
 /**

@@ -10,6 +10,7 @@ export { isReservedToolId, validateToolId, toolIdRegexp, toolIdMaxLength } from 
 export {
   platformCoreTools,
   platformStreamsSigEventsTools,
+  platformStreamsMemoryTools,
   attachmentTools,
   filestoreTools,
   activeToolsCountWarningThreshold,

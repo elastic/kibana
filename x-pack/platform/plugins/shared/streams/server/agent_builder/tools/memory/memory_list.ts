@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { platformStreamsMemoryTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
@@ -28,7 +28,7 @@ const memoryListSchema = z.object({
 export const createMemoryListTool = ({
   getMemoryService,
 }: MemoryToolsOptions): BuiltinToolDefinition<typeof memoryListSchema> => ({
-  id: platformCoreTools.memoryList,
+  id: platformStreamsMemoryTools.memoryList,
   type: ToolType.builtin,
   description:
     'Browse the memory hierarchy. Returns metadata only (no content) — ' +
@@ -38,11 +38,10 @@ export const createMemoryListTool = ({
   tags: ['memory'],
   handler: async ({ parent_path: parentPath, recursive }, context) => {
     const memoryService = getMemoryService();
-    const { spaceId } = context;
 
     try {
       if (recursive) {
-        const tree = await memoryService.getTree({ space: spaceId });
+        const tree = await memoryService.getTree();
         return {
           results: [
             {
@@ -56,11 +55,10 @@ export const createMemoryListTool = ({
 
       const entries = await memoryService.listChildren({
         parentPath: parentPath ?? '',
-        space: spaceId,
       });
 
       // Collect all parent paths to determine which entries have children
-      const allEntries = await memoryService.listAll({ space: spaceId });
+      const allEntries = await memoryService.listAll();
       const parentPaths = new Set(allEntries.map((e) => e.parent_path));
 
       return {

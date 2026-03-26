@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { platformStreamsMemoryTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
@@ -22,7 +22,7 @@ export const createMemoryDeleteTool = ({
   getMemoryService,
   getSecurity,
 }: MemoryToolsOptions): BuiltinToolDefinition<typeof memoryDeleteSchema> => ({
-  id: platformCoreTools.memoryDelete,
+  id: platformStreamsMemoryTools.memoryDelete,
   type: ToolType.builtin,
   description:
     'Delete a memory entry. The entry is removed but its version history is preserved for auditing.',
@@ -31,7 +31,7 @@ export const createMemoryDeleteTool = ({
   confirmation: { askUser: 'never' },
   handler: async ({ id, path }, context) => {
     const memoryService = getMemoryService();
-    const { spaceId, request, esClient } = context;
+    const { request, esClient } = context;
     const { username: user } = await getUserFromRequest({
       request,
       security: getSecurity(),
@@ -49,7 +49,7 @@ export const createMemoryDeleteTool = ({
       let entryPath = path;
 
       if (!entryId) {
-        const entry = await memoryService.getByPath({ path: path!, space: spaceId });
+        const entry = await memoryService.getByPath({ path: path! });
         if (!entry) {
           return {
             results: [createErrorResult({ message: `Memory entry not found at path: ${path}` })],
@@ -59,7 +59,7 @@ export const createMemoryDeleteTool = ({
         entryPath = entry.path;
       }
 
-      await memoryService.delete({ id: entryId!, space: spaceId, user });
+      await memoryService.delete({ id: entryId!, user });
 
       return {
         results: [

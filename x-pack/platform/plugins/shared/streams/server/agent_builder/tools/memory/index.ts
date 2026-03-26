@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { platformCoreTools } from '@kbn/agent-builder-common';
+import { platformStreamsMemoryTools } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createMemorySearchTool } from './memory_search';
 import { createMemoryReadTool } from './memory_read';
@@ -13,6 +13,7 @@ import { createMemoryWriteTool } from './memory_write';
 import { createMemoryPatchTool } from './memory_patch';
 import { createMemoryListTool } from './memory_list';
 import { createMemoryDeleteTool } from './memory_delete';
+import { createMemoryRecentChangesTool } from './memory_recent_changes';
 import type { MemoryToolsOptions } from './types';
 
 export type { MemoryToolsOptions } from './types';
@@ -21,12 +22,13 @@ export type { MemoryToolsOptions } from './types';
  * All memory tool IDs.
  */
 export const memoryToolIds = [
-  platformCoreTools.memorySearch,
-  platformCoreTools.memoryRead,
-  platformCoreTools.memoryWrite,
-  platformCoreTools.memoryPatch,
-  platformCoreTools.memoryList,
-  platformCoreTools.memoryDelete,
+  platformStreamsMemoryTools.memorySearch,
+  platformStreamsMemoryTools.memoryRead,
+  platformStreamsMemoryTools.memoryWrite,
+  platformStreamsMemoryTools.memoryPatch,
+  platformStreamsMemoryTools.memoryList,
+  platformStreamsMemoryTools.memoryDelete,
+  platformStreamsMemoryTools.memoryRecentChanges,
 ] as const;
 
 /**
@@ -40,5 +42,6 @@ export const createMemoryTools = (options: MemoryToolsOptions): BuiltinToolDefin
     createMemoryPatchTool(options),
     createMemoryListTool(options),
     createMemoryDeleteTool(options),
+    createMemoryRecentChangesTool(options),
   ];
 };

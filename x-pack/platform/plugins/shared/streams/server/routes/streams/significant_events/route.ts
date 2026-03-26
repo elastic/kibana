@@ -221,7 +221,6 @@ const generateSignificantEventsRoute = createServerRoute({
             logger: logger.get('memory'),
             esClient: scopedClusterClient.asCurrentUser,
           }),
-          spaceId: 'default',
         })
       : undefined;
 

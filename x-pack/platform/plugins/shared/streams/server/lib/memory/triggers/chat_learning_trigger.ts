@@ -27,7 +27,7 @@ export const chatLearningTrigger: MemoryUpdateTrigger = {
   description:
     'Fires after significant chat interactions. Extracts new learnings and persists them to memory.',
   execute: async (context) => {
-    const { memory, spaceId, logger, trigger, output } = context;
+    const { memory, logger, trigger, output } = context;
     const { conversationId, summary } = trigger.payload as {
       conversationId: string;
       agentId?: string;
@@ -39,7 +39,7 @@ export const chatLearningTrigger: MemoryUpdateTrigger = {
       return;
     }
 
-    if (!summary || summary.trim().length === 0) {
+    if (typeof summary !== 'string' || summary.trim().length === 0) {
       logger.debug('No conversation summary provided, skipping');
       return;
     }
@@ -51,7 +51,7 @@ export const chatLearningTrigger: MemoryUpdateTrigger = {
 
     logger.info(`Processing chat learning from conversation ${conversationId}`);
 
-    const tree = await memory.getTree({ space: spaceId });
+    const tree = await memory.getTree();
 
     const learningPrompt = [
       'Based on this conversation summary, identify any new facts, corrections, or insights',
@@ -90,7 +90,6 @@ export const chatLearningTrigger: MemoryUpdateTrigger = {
       try {
         const existing = await memory.getByPath({
           path: learning.path,
-          space: spaceId,
         });
 
         if (existing && learning.action === 'update') {
@@ -98,7 +97,6 @@ export const chatLearningTrigger: MemoryUpdateTrigger = {
             id: existing.id,
             content: learning.content,
             title: learning.title,
-            space: spaceId,
             user,
             changeSummary: `Updated via chat learning from conversation ${conversationId}`,
           });
@@ -108,7 +106,6 @@ export const chatLearningTrigger: MemoryUpdateTrigger = {
             title: learning.title,
             content: learning.content,
             tags: ['auto-learned'],
-            space: spaceId,
             user,
           });
         }

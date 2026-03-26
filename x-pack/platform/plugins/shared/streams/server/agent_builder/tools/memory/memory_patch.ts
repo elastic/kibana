@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { platformStreamsMemoryTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
@@ -147,7 +147,7 @@ export const createMemoryPatchTool = ({
   getMemoryService,
   getSecurity,
 }: MemoryToolsOptions): BuiltinToolDefinition<typeof memoryPatchSchema> => ({
-  id: platformCoreTools.memoryPatch,
+  id: platformStreamsMemoryTools.memoryPatch,
   type: ToolType.builtin,
   description:
     'Apply targeted edits to an existing memory entry without sending the full document. ' +
@@ -160,7 +160,7 @@ export const createMemoryPatchTool = ({
   confirmation: { askUser: 'never' },
   handler: async ({ id, path, operations, change_summary: changeSummary }, context) => {
     const memoryService = getMemoryService();
-    const { spaceId, request, esClient } = context;
+    const { request, esClient } = context;
     const { username: user } = await getUserFromRequest({
       request,
       security: getSecurity(),
@@ -175,8 +175,8 @@ export const createMemoryPatchTool = ({
 
     try {
       const entry = id
-        ? await memoryService.get({ id, space: spaceId })
-        : await memoryService.getByPath({ path: path!, space: spaceId });
+        ? await memoryService.get({ id })
+        : await memoryService.getByPath({ path: path! });
 
       if (!entry) {
         return {
@@ -232,7 +232,6 @@ export const createMemoryPatchTool = ({
       const updated = await memoryService.update({
         id: entry.id,
         content: currentContent,
-        space: spaceId,
         user,
         changeSummary,
       });

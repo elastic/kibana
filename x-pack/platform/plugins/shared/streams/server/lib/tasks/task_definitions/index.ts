@@ -16,6 +16,8 @@ import { createStreamsFeaturesIdentificationTask } from './features_identificati
 import { createStreamsOnboardingTask } from './onboarding';
 import { createStreamsMemoryGenerationTask } from './memory_generation';
 import { createStreamsMemoryUpdateTask } from './memory_update';
+import { createStreamsConversationScraperTask } from './conversation_scraper';
+import { createStreamsMemoryConsolidationTask } from './memory_consolidation';
 
 export interface TaskContext {
   logger: Logger;
@@ -33,6 +35,8 @@ export function createTaskDefinitions(taskContext: TaskContext) {
     ...createStreamsOnboardingTask(taskContext),
     ...createStreamsMemoryGenerationTask(taskContext),
     ...createStreamsMemoryUpdateTask(taskContext),
+    ...createStreamsConversationScraperTask(taskContext),
+    ...createStreamsMemoryConsolidationTask(taskContext),
   } satisfies TaskDefinitionRegistry;
 }
 

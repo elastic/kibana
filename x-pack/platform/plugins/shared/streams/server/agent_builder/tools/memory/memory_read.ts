@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { platformStreamsMemoryTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
@@ -73,7 +73,7 @@ const extractHeadingSection = (content: string, heading: string): string | undef
 export const createMemoryReadTool = ({
   getMemoryService,
 }: MemoryToolsOptions): BuiltinToolDefinition<typeof memoryReadSchema> => ({
-  id: platformCoreTools.memoryRead,
+  id: platformStreamsMemoryTools.memoryRead,
   type: ToolType.builtin,
   description:
     'Read a specific memory entry by path or ID. Supports targeted reads: ' +
@@ -83,7 +83,6 @@ export const createMemoryReadTool = ({
   tags: ['memory'],
   handler: async ({ path, id, heading, offset, limit }, context) => {
     const memoryService = getMemoryService();
-    const { spaceId } = context;
 
     if (!path && !id) {
       return {
@@ -97,8 +96,8 @@ export const createMemoryReadTool = ({
 
     try {
       const entry = id
-        ? await memoryService.get({ id, space: spaceId })
-        : await memoryService.getByPath({ path: path!, space: spaceId });
+        ? await memoryService.get({ id })
+        : await memoryService.getByPath({ path: path! });
 
       if (!entry) {
         return {

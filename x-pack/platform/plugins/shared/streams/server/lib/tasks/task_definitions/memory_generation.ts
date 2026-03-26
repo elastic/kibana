@@ -86,15 +86,13 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
 
                 for (const { streamName, indicators } of streamGroups) {
-                  const spaceId = 'default';
-
                   taskLogger.info(
                     `Processing stream "${streamName}" with ${indicators.length} indicator(s) via reasoning agent`
                   );
 
                   const indicatorSummaries = buildIndicatorSummaries(indicators);
 
-                  const allEntries = await memory.listAll({ space: spaceId });
+                  const allEntries = await memory.listAll();
                   const existingEntries = allEntries.filter(
                     (e) =>
                       e.path.startsWith(`architecture/${streamName}/`) ||
@@ -103,9 +101,7 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
 
                   const existingPages =
                     existingEntries.length > 0
-                      ? existingEntries
-                          .map((e) => `- **${e.path}** — ${e.title}`)
-                          .join('\n')
+                      ? existingEntries.map((e) => `- **${e.path}** — ${e.title}`).join('\n')
                       : 'No existing pages for this stream.';
 
                   taskLogger.info(
@@ -134,7 +130,9 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
                         if (typeof index !== 'number' || index < 0 || index >= indicators.length) {
                           return {
                             response: {
-                              error: `Invalid index ${index}. Valid range: 0-${indicators.length - 1}`,
+                              error: `Invalid index ${index}. Valid range: 0-${
+                                indicators.length - 1
+                              }`,
                             },
                           };
                         }
@@ -150,7 +148,7 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
                           `Stream "${streamName}": agent reading memory page "${path}"`
                         );
 
-                        const entry = await memory.getByPath({ path, space: spaceId });
+                        const entry = await memory.getByPath({ path });
                         if (!entry) {
                           return {
                             response: { error: `No page found at path "${path}"` },
@@ -170,14 +168,13 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
                         const { path, title, content, tags } = toolCall.function.arguments;
                         const user = 'agent:memory_generation';
 
-                        const existing = await memory.getByPath({ path, space: spaceId });
+                        const existing = await memory.getByPath({ path });
 
                         if (existing) {
                           await memory.update({
                             id: existing.id,
                             content,
                             title,
-                            space: spaceId,
                             user,
                             changeSummary: 'Updated from discovery indicators',
                           });
@@ -188,7 +185,6 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
                             title,
                             content,
                             tags: [...(tags ?? []), 'auto-generated'],
-                            space: spaceId,
                             user,
                           });
                           taskLogger.info(`Created new wiki page: ${path}`);
@@ -260,7 +256,10 @@ const groupInputsByStream = ({
   insights,
   features,
   queries,
-}: Pick<MemoryGenerationTaskParams, 'insights' | 'features' | 'queries'>): StreamIndicatorsGroup[] => {
+}: Pick<
+  MemoryGenerationTaskParams,
+  'insights' | 'features' | 'queries'
+>): StreamIndicatorsGroup[] => {
   const byStream = new Map<string, unknown[]>();
 
   const addToStream = (streamName: string, item: unknown) => {

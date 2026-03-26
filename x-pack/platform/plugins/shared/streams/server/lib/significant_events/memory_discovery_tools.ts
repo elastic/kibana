@@ -22,10 +22,8 @@ export interface MemoryDiscoveryTools {
 
 export const createMemoryDiscoveryTools = ({
   memoryService,
-  spaceId,
 }: {
   memoryService: MemoryService;
-  spaceId: string;
 }): MemoryDiscoveryTools => {
   const tools: Record<string, ToolDefinition> = {
     memory_search: {
@@ -90,7 +88,6 @@ export const createMemoryDiscoveryTools = ({
       try {
         const results = await memoryService.search({
           query,
-          space: spaceId,
           parentPath,
           size,
         });
@@ -114,9 +111,9 @@ export const createMemoryDiscoveryTools = ({
       try {
         let entry;
         if (id) {
-          entry = await memoryService.get({ id, space: spaceId });
+          entry = await memoryService.get({ id });
         } else if (path) {
-          entry = await memoryService.getByPath({ path, space: spaceId });
+          entry = await memoryService.getByPath({ path });
         }
         if (!entry) {
           return { response: { error: 'Entry not found' } };
@@ -136,7 +133,7 @@ export const createMemoryDiscoveryTools = ({
     },
     memory_list: async () => {
       try {
-        const entries = await memoryService.listAll({ space: spaceId });
+        const entries = await memoryService.listAll();
         return {
           response: {
             entries: entries.map(({ id, path, title, tags }) => ({ id, path, title, tags })),
