@@ -21,19 +21,27 @@ test.describe(
   'Hosts Page - Search',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeEach(async ({ browserAuth, pageObjects: { hostsPage } }) => {
+    test.beforeEach(async ({ browserAuth, pageObjects: { hostsPage }, page }) => {
       await browserAuth.loginAsViewer();
       await hostsPage.goToPage({
         from: DATE_WITH_HOSTS_DATA_FROM,
         to: DATE_WITH_HOSTS_DATA_TO,
       });
+
+      await test.step('verify all hosts are visible before filtering', async () => {
+        await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
+        await expect(
+          page
+            .getByTestId('infraAssetDetailsKPIcpuUsage')
+            .getByRole('progressbar', { name: 'Loading' })
+        ).toBeHidden({ timeout: EXTENDED_TIMEOUT });
+        await expect(
+          page.getByRole('listitem').getByRole('heading', { name: 'CPU Usage' })
+        ).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+      });
     });
 
     test('Search using the Hosts page search bar', async ({ pageObjects: { hostsPage } }) => {
-      await test.step('verify all hosts are visible before searching', async () => {
-        await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
-      });
-
       await test.step('search for a specific host', async () => {
         await hostsPage.filterByQueryBar(`host.name: "${HOST1_NAME}"`);
       });
@@ -67,17 +75,7 @@ test.describe(
 
     test('Filter hosts using the Cloud Provider control', async ({
       pageObjects: { hostsPage },
-      page,
     }) => {
-      await test.step('verify all hosts are visible before filtering', async () => {
-        await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
-        await expect(
-          page
-            .getByTestId('infraAssetDetailsKPIcpuUsage')
-            .getByRole('progressbar', { name: 'Loading' })
-        ).toBeHidden({ timeout: EXTENDED_TIMEOUT });
-      });
-
       await test.step('select a cloud provider option (include mode)', async () => {
         await hostsPage.openFilterControl('cloud.provider');
         await hostsPage.enableExcludeMode();
@@ -97,17 +95,7 @@ test.describe(
 
     test('Filter hosts using the Operating System control', async ({
       pageObjects: { hostsPage },
-      page,
     }) => {
-      await test.step('verify all hosts are visible before filtering', async () => {
-        await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
-        await expect(
-          page
-            .getByTestId('infraAssetDetailsKPIcpuUsage')
-            .getByRole('progressbar', { name: 'Loading' })
-        ).toBeHidden({ timeout: EXTENDED_TIMEOUT });
-      });
-
       await test.step('open the Operating System filter control', async () => {
         await hostsPage.openFilterControl('host.os.name');
         await hostsPage.enableExcludeMode();

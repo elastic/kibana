@@ -18,7 +18,6 @@ export const useDisableNotificationPolicy = () => {
   const queryClient = useQueryClient();
 
   return useMutation<NotificationPolicyResponse, Error, string>({
-    mutationKey: notificationPolicyKeys.disable(),
     mutationFn: (id) => notificationPoliciesApi.disableNotificationPolicy(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: notificationPolicyKeys.lists(), exact: false });

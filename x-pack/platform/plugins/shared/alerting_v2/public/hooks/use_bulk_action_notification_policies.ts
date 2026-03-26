@@ -45,6 +45,12 @@ const getSuccessMessage = (action: string, count: number): string => {
           'Snooze cancelled for {count} {count, plural, one {notification policy} other {notification policies}}',
         values: { count },
       });
+    case 'update_api_key':
+      return i18n.translate('xpack.alertingV2.notificationPolicy.bulkUpdateApiKeySuccess', {
+        defaultMessage:
+          'API {count, plural, one {key} other {keys}} updated for {count} {count, plural, one {notification policy} other {notification policies}}',
+        values: { count },
+      });
     default:
       return i18n.translate('xpack.alertingV2.notificationPolicy.bulkActionSuccess', {
         defaultMessage:
@@ -64,7 +70,6 @@ export const useBulkActionNotificationPolicies = () => {
     Error,
     BulkActionNotificationPoliciesBody
   >({
-    mutationKey: notificationPolicyKeys.bulkAction(),
     mutationFn: (body) => notificationPoliciesApi.bulkActionNotificationPolicies(body),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: notificationPolicyKeys.lists(), exact: false });

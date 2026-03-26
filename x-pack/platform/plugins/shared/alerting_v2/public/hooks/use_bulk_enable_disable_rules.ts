@@ -17,7 +17,6 @@ export const useBulkEnableRules = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: ruleKeys.bulkEnable(),
     mutationFn: (params: BulkOperationParams) => rulesApi.bulkEnableRules(params),
     onSuccess: (data) => {
       if (data.errors.length > 0) {
@@ -53,7 +52,6 @@ export const useBulkDisableRules = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: ruleKeys.bulkDisable(),
     mutationFn: (params: BulkOperationParams) => rulesApi.bulkDisableRules(params),
     onSuccess: (data) => {
       if (data.errors.length > 0) {

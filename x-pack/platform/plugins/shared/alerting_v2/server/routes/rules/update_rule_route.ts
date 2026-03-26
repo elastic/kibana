@@ -6,22 +6,19 @@
  */
 
 import Boom from '@hapi/boom';
-import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request, Response } from '@kbn/core-di-server';
-import type { TypeOf } from '@kbn/config-schema';
 import type { RouteSecurity } from '@kbn/core-http-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import type { z } from '@kbn/zod/v4';
+import { ruleResponseSchema } from '@kbn/alerting-v2-schemas';
 
 import { updateRuleDataSchema, type UpdateRuleData } from '../../lib/rules_client';
 import { RulesClient } from '../../lib/rules_client/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
-
-const updateRuleParamsSchema = schema.object({
-  id: schema.string(),
-});
+import { ruleIdParamsSchema } from './route_schemas';
 
 @injectable()
 export class UpdateRuleRoute {
@@ -32,18 +29,34 @@ export class UpdateRuleRoute {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.write],
     },
   };
-  static options = { access: 'internal' } as const;
+  static options = {
+    access: 'internal',
+    summary: 'Update a rule',
+    tags: ['oas-tag:alerting-v2'],
+  } as const;
   static validate = {
     request: {
       body: buildRouteValidationWithZod(updateRuleDataSchema),
-      params: updateRuleParamsSchema,
+      params: buildRouteValidationWithZod(ruleIdParamsSchema),
     },
-  } as const;
+    response: {
+      200: {
+        body: () => ruleResponseSchema,
+        description: 'Indicates a successful call.',
+      },
+      400: {
+        description: 'Indicates an invalid schema or parameters.',
+      },
+      404: {
+        description: 'Indicates a rule with the given ID does not exist.',
+      },
+    },
+  };
 
   constructor(
     @inject(Request)
     private readonly request: KibanaRequest<
-      TypeOf<typeof updateRuleParamsSchema>,
+      z.infer<typeof ruleIdParamsSchema>,
       unknown,
       UpdateRuleData
     >,

@@ -17,7 +17,6 @@ export const useDeleteNotificationPolicy = () => {
   const queryClient = useQueryClient();
 
   return useMutation<void, Error, string>({
-    mutationKey: notificationPolicyKeys.delete(),
     mutationFn: (id) => notificationPoliciesApi.deleteNotificationPolicy(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: notificationPolicyKeys.lists(), exact: false });
