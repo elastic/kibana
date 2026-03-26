@@ -33,7 +33,8 @@
       "destination.ip",
       "host.name",
       "host.id",
-      "dns_question_etld"
+      "dns_question_etld",
+      "dns.question.name"
     ]
   },
   "allow_lazy_open": true,

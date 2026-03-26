@@ -21,7 +21,8 @@
       "user.name",
       "user.id",
       "file.path",
-      "event.module"
+      "event.module",
+      "powershell.file.script_block_text"
     ]
   },
   "allow_lazy_open": true,
