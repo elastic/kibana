@@ -45,7 +45,7 @@ export const createCorrectnessEvaluators = <
   extractResponse,
   extractGroundTruth,
 }: SigeventsCorrectnessConfig<TInput, TOutput, TExpected>): Evaluator[] => {
-  let cachedAnalysis: Promise<CorrectnessAnalysis | null> | null = null;
+  const analysisCache = new Map<string, Promise<CorrectnessAnalysis | null>>();
 
   const getAnalysis = (
     input: TInput,
@@ -53,15 +53,17 @@ export const createCorrectnessEvaluators = <
     expected: TExpected,
     metadata: unknown
   ): Promise<CorrectnessAnalysis | null> => {
-    if (cachedAnalysis) {
-      return cachedAnalysis;
+    const userQuery = extractContext(input, metadata);
+    const agentResponse = extractResponse(output);
+    const groundTruth = extractGroundTruth(expected);
+    const cacheKey = `${userQuery}\0${agentResponse}\0${groundTruth}`;
+
+    const cached = analysisCache.get(cacheKey);
+    if (cached) {
+      return cached;
     }
 
-    cachedAnalysis = (async (): Promise<CorrectnessAnalysis | null> => {
-      const userQuery = extractContext(input, metadata);
-      const agentResponse = extractResponse(output);
-      const groundTruth = extractGroundTruth(expected);
-
+    const promise = (async (): Promise<CorrectnessAnalysis | null> => {
       if (!agentResponse) {
         return null;
       }
@@ -107,7 +109,8 @@ export const createCorrectnessEvaluators = <
       });
     })();
 
-    return cachedAnalysis;
+    analysisCache.set(cacheKey, promise);
+    return promise;
   };
 
   const factuality: Evaluator = {
