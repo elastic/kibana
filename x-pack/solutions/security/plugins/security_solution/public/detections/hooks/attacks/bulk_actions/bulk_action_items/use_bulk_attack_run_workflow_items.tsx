@@ -16,14 +16,26 @@ import {
 } from '../../../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { useAttacksPrivileges } from '../use_attacks_privileges';
 import type { AttackContentPanelConfig, BulkAttackActionItems } from '../types';
+import { useKibana } from '../../../../../common/lib/kibana';
+import type { AttacksActionTelemetrySource } from '../../../../../common/lib/telemetry';
+
+export interface UseBulkAttackRunWorkflowItemsProps {
+  /** Source of the action for telemetry */
+  telemetrySource?: AttacksActionTelemetrySource;
+}
 
 /**
  * Hook that provides bulk action items and panels for running workflows on attacks.
  */
-export const useBulkAttackRunWorkflowItems = (): BulkAttackActionItems => {
+export const useBulkAttackRunWorkflowItems = ({
+  telemetrySource,
+}: UseBulkAttackRunWorkflowItemsProps = {}): BulkAttackActionItems => {
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const workflowUIEnabled = useWorkflowsUIEnabledSetting();
   const { hasIndexWrite, hasAttackIndexWrite, loading } = useAttacksPrivileges();
+  const {
+    services: { telemetry },
+  } = useKibana();
 
   const canRunWorkflow = useMemo(
     () =>
@@ -31,12 +43,22 @@ export const useBulkAttackRunWorkflowItems = (): BulkAttackActionItems => {
     [loading, hasIndexWrite, hasAttackIndexWrite, workflowUIEnabled, canExecuteWorkflow]
   );
 
-  const renderContent = useCallback(({ alertItems, closePopoverMenu }: RenderContentPanelProps) => {
-    const alertIds = alertItems.flatMap(({ _id, ecs }) =>
-      ecs._index ? [{ _id, _index: ecs._index }] : []
-    );
-    return <AlertWorkflowsPanel alertIds={alertIds} onClose={closePopoverMenu} />;
-  }, []);
+  const renderContent = useCallback(
+    ({ alertItems, closePopoverMenu }: RenderContentPanelProps) => {
+      const alertIds = alertItems.flatMap(({ _id, ecs }) =>
+        ecs._index ? [{ _id, _index: ecs._index }] : []
+      );
+      return (
+        <AlertWorkflowsPanel
+          alertIds={alertIds}
+          onClose={closePopoverMenu}
+          telemetry={telemetry}
+          telemetrySource={telemetrySource}
+        />
+      );
+    },
+    [telemetry, telemetrySource]
+  );
 
   const items = useMemo(
     () =>

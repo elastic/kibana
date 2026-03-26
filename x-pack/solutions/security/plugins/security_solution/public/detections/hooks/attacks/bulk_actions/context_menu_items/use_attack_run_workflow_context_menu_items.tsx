@@ -22,8 +22,9 @@ export interface UseAttackRunWorkflowContextMenuItemsProps extends BaseAttackCon
 export const useAttackRunWorkflowContextMenuItems = ({
   attacksForWorkflowRun,
   closePopover,
+  telemetrySource,
 }: UseAttackRunWorkflowContextMenuItemsProps): BulkAttackContextMenuItems => {
-  const bulkActionItems = useBulkAttackRunWorkflowItems();
+  const bulkActionItems = useBulkAttackRunWorkflowItems({ telemetrySource });
   const attacksWithIndex = useMemo(
     () => attacksForWorkflowRun.filter((attack) => Boolean(attack.attackIndex)),
     [attacksForWorkflowRun]

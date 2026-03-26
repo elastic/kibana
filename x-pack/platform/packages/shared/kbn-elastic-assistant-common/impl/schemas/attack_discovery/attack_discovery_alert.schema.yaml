@@ -106,5 +106,5 @@ components:
           items:
             type: string
         index:
-          description: The concrete Elasticsearch index where this attack discovery alert is stored
+          description: The concrete Elasticsearch index where this attack discovery is stored
           type: string
