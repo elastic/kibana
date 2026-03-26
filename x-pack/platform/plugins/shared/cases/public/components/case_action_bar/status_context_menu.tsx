@@ -11,7 +11,7 @@ import { Status } from '@kbn/cases-components/src/status/status';
 import { CaseStatuses, caseStatuses } from '../../../common/types/domain';
 import { StatusPopoverButton } from '../status';
 import { CHANGE_STATUS } from '../all_cases/translations';
-import { useCloseCaseModal } from '../all_cases/close_case_modal';
+import { useCloseCaseModal } from '../all_cases/use_close_case_modal';
 import { useCanSyncCloseReasonToAlerts } from '../all_cases/use_can_sync_close_reason_to_alerts';
 import { useShouldDisableStatus } from '../actions/status/use_should_disable_status';
 

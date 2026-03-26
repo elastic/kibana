@@ -22,7 +22,7 @@ import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useAssigneesAction } from '../actions/assignees/use_assignees_action';
 import { EditAssigneesFlyout } from '../actions/assignees/edit_assignees_flyout';
-import { useCloseCaseModal } from './close_case_modal';
+import { useCloseCaseModal } from './use_close_case_modal';
 import { useCanSyncCloseReasonToAlerts } from './use_can_sync_close_reason_to_alerts';
 import * as i18n from './translations';
 

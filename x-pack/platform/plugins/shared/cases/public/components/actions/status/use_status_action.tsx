@@ -8,7 +8,6 @@
 import React, { useCallback } from 'react';
 import type { ToastInputFields } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import type { PatchCaseStats } from '../../../../common/types/api';
 import { useUpdateCases } from '../../../containers/use_bulk_update_case';
@@ -19,6 +18,7 @@ import { OWNER_INFO } from '../../../../common/constants';
 import { isValidOwner } from '../../../../common/utils/owner';
 
 import * as i18n from './translations';
+import { StatusToastContent } from './status_toast_content';
 import type { UseActionProps } from '../types';
 import { statuses } from '../../status';
 import { useUserPermissions } from '../../user_actions/use_user_permissions';
@@ -26,32 +26,6 @@ import { useShouldDisableStatus } from './use_should_disable_status';
 import { useKibana } from '../../../common/lib/kibana';
 import { useApplication } from '../../../common/lib/kibana/use_application';
 import { generateCaseViewPath } from '../../../common/navigation';
-
-const StatusToastContent = ({
-  summary,
-  onSeeAlertsClick,
-}: {
-  summary: string;
-  onSeeAlertsClick: () => void;
-}) => (
-  <>
-    <EuiText size="s" data-test-subj="cases-status-close-sync-summary">
-      {summary}
-    </EuiText>
-    <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          size="s"
-          onClick={onSeeAlertsClick}
-          data-test-subj="cases-status-close-sync-see-alerts"
-        >
-          {i18n.SEE_ALERTS}
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </>
-);
-StatusToastContent.displayName = 'StatusToastContent';
 
 interface GetUpdateSuccessToastParams {
   status: CaseStatuses;

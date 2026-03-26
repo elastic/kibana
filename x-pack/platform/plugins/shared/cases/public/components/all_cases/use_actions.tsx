@@ -30,7 +30,7 @@ import { useAssigneesAction } from '../actions/assignees/use_assignees_action';
 import { EditAssigneesFlyout } from '../actions/assignees/edit_assignees_flyout';
 import { useCopyIDAction } from '../actions/copy_id/use_copy_id_action';
 import { useShouldDisableStatus } from '../actions/status/use_should_disable_status';
-import { useCloseCaseModal } from './close_case_modal';
+import { useCloseCaseModal } from './use_close_case_modal';
 import { useCanSyncCloseReasonToAlerts } from './use_can_sync_close_reason_to_alerts';
 
 const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean }> = ({
