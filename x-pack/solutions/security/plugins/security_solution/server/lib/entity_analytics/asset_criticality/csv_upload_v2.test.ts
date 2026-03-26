@@ -273,6 +273,17 @@ describe('csvUploadV2', () => {
         );
       });
 
+      it('preserves numeric-looking string values (e.g., "007") as strings, not numbers', async () => {
+        const csv = 'type,user.id,criticality_level\nuser,007,high_impact\n';
+        await csvUploadV2({ entityStoreClient, fileStream: createMockStream(csv), logger });
+
+        expect(entityStoreClient.listEntities).toHaveBeenCalledWith(
+          expect.objectContaining({
+            filter: expect.arrayContaining([{ term: { 'user.id': '007' } }]),
+          })
+        );
+      });
+
       it('marks a row as failed when bulk update returns an error for one of its matched entities', async () => {
         (entityStoreClient.listEntities as jest.Mock).mockResolvedValueOnce({
           entities: [{ entity: { id: 'host:my-host-1' } }, { entity: { id: 'host:my-host-2' } }],

@@ -647,7 +647,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(firstId).not.toBe(secondId);
   });
 
-  apiTest('testtest Should return 400 for invalid kql', async ({ apiClient }) => {
+  apiTest('Should return 400 for invalid kql', async ({ apiClient }) => {
     const list = await apiClient.get(
       ENTITY_STORE_ROUTES.CRUD_GET + `?filter=${encodeURIComponent('entity.id:')}`,
       {

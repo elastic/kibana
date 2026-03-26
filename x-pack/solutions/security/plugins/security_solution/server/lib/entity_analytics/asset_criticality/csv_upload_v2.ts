@@ -14,8 +14,7 @@ import type {
   BulkObjectResponse,
   EntityStoreCRUDClient,
 } from '@kbn/entity-store/server';
-import { ENGINE_METADATA_TYPE_FIELD } from '@kbn/entity-store/server';
-import { hashEuid } from '@kbn/entity-store/server/domain/crud/utils';
+import { ENGINE_METADATA_TYPE_FIELD, hashEuid } from '@kbn/entity-store/server';
 import { AssetCriticalityLevel } from '../../../../common/api/entity_analytics/asset_criticality/common.gen';
 import type { HapiReadableStream } from '../../../types';
 
@@ -245,7 +244,7 @@ export const csvUploadV2 = async (opts: CsvUploadV2Opts): Promise<CsvUploadV2Res
   const results: CsvUploadRowResponse[] = [];
   const csvStream = Papa.parse(Papa.NODE_STREAM_INPUT, {
     header: true,
-    dynamicTyping: true,
+    dynamicTyping: false,
     skipEmptyLines: true,
     transformHeader: (header) => toLower(trim(header)), // trim header fields to prevent issues with extra spaces
     transform: (value) => (typeof value === 'string' ? trim(value) : value), // trim string values to prevent issues with extra spaces
