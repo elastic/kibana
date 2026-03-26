@@ -305,7 +305,6 @@ describe(
     });
 
     it('should open case selector modal from row kebab menu and keep it visible', () => {
-      // Navigate to the detail view of the first history entry
       cy.getBySel(UNIFIED_HISTORY_TABLE).within(() => {
         cy.get('tbody tr')
           .first()
@@ -315,21 +314,16 @@ describe(
       });
       cy.contains('Live query details');
 
-      // Open the kebab menu on the first result row
       cy.get('[data-test-subj^="packQueriesTableKebab-"]').first().click();
 
-      // Click "Add to Case" in the kebab menu
       cy.contains('Add to Case').click();
 
-      // Verify the case selector modal renders and stays visible
       cy.getBySel('all-cases-modal', { timeout: 10000 }).should('be.visible');
 
-      // Interact with the modal to prove it persists (not immediately destroyed)
       cy.getBySel('all-cases-modal').within(() => {
         cy.contains('Select case').should('be.visible');
       });
 
-      // Close the modal
       cy.getBySel('all-cases-modal-cancel-button').click();
       cy.getBySel('all-cases-modal').should('not.exist');
     });
