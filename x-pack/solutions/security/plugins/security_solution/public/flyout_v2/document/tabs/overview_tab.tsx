@@ -10,11 +10,11 @@ import { EuiHorizontalRule } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
+import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { AboutSection } from '../components/about_section';
 import { InsightsSection } from '../components/insights_section';
 import { InvestigationSection } from '../components/investigation_section';
 import { VisualizationsSection } from '../components/visualizations_section';
-import type { ResolverCellActionRenderer } from '../../../resolver/types';
 import { FlyoutMissingAlertsPrivilege } from '../../../flyout/shared/components/flyout_missing_alerts_privilege';
 import { FlyoutLoading } from '../../../flyout/shared/components/flyout_loading';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
@@ -28,7 +28,7 @@ export interface OverviewTabProps {
   /**
    * Pass cell action renderer to the analyzer graph in the visualizations section of the overview tab.
    */
-  renderCellActions: ResolverCellActionRenderer;
+  renderCellActions: CellActionRenderer;
 }
 
 /**
@@ -55,7 +55,7 @@ export const OverviewTab = memo(({ hit, renderCellActions }: OverviewTabProps) =
     <>
       <AboutSection hit={hit} />
       <EuiHorizontalRule margin="m" />
-      <InvestigationSection hit={hit} />
+      <InvestigationSection hit={hit} renderCellActions={renderCellActions} />
       <EuiHorizontalRule margin="m" />
       <VisualizationsSection hit={hit} renderCellActions={renderCellActions} />
       <EuiHorizontalRule margin="m" />

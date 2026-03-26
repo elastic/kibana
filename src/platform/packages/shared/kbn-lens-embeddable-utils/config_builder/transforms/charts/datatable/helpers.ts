@@ -13,9 +13,32 @@ import type {
   TextBasedLayerColumn,
   DataType,
 } from '@kbn/lens-common';
+import type { $Values } from 'utility-types';
 import { ACCESSOR } from './constants';
 import type { ColorByValueType, ColorMappingType } from '../../../schema/color';
 import { isColorByValueColor, isColorMappingColor } from '../../coloring';
+
+const COLOR_MODE_TO_API = {
+  text: 'value',
+  badge: 'badge',
+  cell: 'background',
+} as const;
+
+const API_TO_COLOR_MODE = {
+  value: 'text',
+  badge: 'badge',
+  background: 'cell',
+} as const;
+
+type ApiColorTarget = $Values<typeof COLOR_MODE_TO_API>;
+
+export const colorModeToApplyColorTo = (
+  mode: Exclude<NonNullable<ColumnState['colorMode']>, 'none'>
+): ApiColorTarget => COLOR_MODE_TO_API[mode];
+
+export const applyColorToToColorMode = (
+  target: ApiColorTarget
+): NonNullable<ColumnState['colorMode']> => API_TO_COLOR_MODE[target];
 
 /**
  * Checks if the column is a metric column in a formBased layer
