@@ -11,9 +11,9 @@ import { type DataTableRecord } from '@kbn/discover-utils';
 import type { Process, ProcessEvent } from '@kbn/session-view-plugin/common';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
+import type { CellActionRenderer } from '../shared/components/cell_actions';
 import type { SessionViewConfig } from '../../../common/types/session_view';
 import { DocumentFlyoutWrapper } from '../document/document_flyout_wrapper';
-import type { ResolverCellActionRenderer } from '../../resolver/types';
 import { PREFIX } from '../../flyout/shared/test_ids';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useKibana } from '../../common/lib/kibana';
@@ -46,7 +46,7 @@ export interface SessionViewProps {
   /**
    * Renderer used by Session View panels for field cell actions.
    */
-  renderCellActions: ResolverCellActionRenderer;
+  renderCellActions: CellActionRenderer;
 }
 
 /**
