@@ -12,29 +12,10 @@ import { createWorkflowLiquidEngine, LIQUID_ALLOWED_TAGS } from './create_workfl
 
 describe('createWorkflowLiquidEngine', () => {
   describe('basic functionality', () => {
-    it('returns a Liquid engine instance', () => {
+    it('returns a Liquid engine that renders templates', () => {
       const engine = createWorkflowLiquidEngine();
       expect(engine).toBeInstanceOf(Liquid);
-    });
-
-    it('renders basic template variables', () => {
-      const engine = createWorkflowLiquidEngine();
-      const result = engine.parseAndRenderSync('{{ name }}', { name: 'test' });
-      expect(result).toBe('test');
-    });
-
-    it('renders assign tag', () => {
-      const engine = createWorkflowLiquidEngine();
-      const result = engine.parseAndRenderSync('{% assign x = 1 %}{{ x }}');
-      expect(result).toBe('1');
-    });
-
-    it('renders for loop tag', () => {
-      const engine = createWorkflowLiquidEngine();
-      const result = engine.parseAndRenderSync('{% for item in items %}{{ item }}{% endfor %}', {
-        items: ['a', 'b'],
-      });
-      expect(result).toBe('ab');
+      expect(engine.parseAndRenderSync('{{ name }}', { name: 'test' })).toBe('test');
     });
   });
 
@@ -64,33 +45,34 @@ describe('createWorkflowLiquidEngine', () => {
   });
 
   describe('security: filesystem isolation', () => {
-    it('noopFs readFile throws with filepath in message', async () => {
+    const getFs = () => {
       const engine = createWorkflowLiquidEngine();
-      const fs = engine.options.fs!;
+      expect(engine.options.fs).toBeDefined();
+      return engine.options.fs!;
+    };
+
+    it('noopFs readFile throws with filepath in message', async () => {
+      const fs = getFs();
       await expect(fs.readFile!('secret.txt')).rejects.toThrow('secret.txt');
     });
 
     it('noopFs readFileSync throws with filepath in message', () => {
-      const engine = createWorkflowLiquidEngine();
-      const fs = engine.options.fs!;
+      const fs = getFs();
       expect(() => fs.readFileSync!('secret.txt')).toThrow('secret.txt');
     });
 
     it('noopFs exists returns false', async () => {
-      const engine = createWorkflowLiquidEngine();
-      const fs = engine.options.fs!;
+      const fs = getFs();
       await expect(fs.exists!('any-path')).resolves.toBe(false);
     });
 
     it('noopFs existsSync returns false', () => {
-      const engine = createWorkflowLiquidEngine();
-      const fs = engine.options.fs!;
+      const fs = getFs();
       expect(fs.existsSync!('any-path')).toBe(false);
     });
 
     it('readFile error message includes the attempted filepath', async () => {
-      const engine = createWorkflowLiquidEngine();
-      const fs = engine.options.fs!;
+      const fs = getFs();
       await expect(fs.readFile!('/etc/passwd')).rejects.toThrow('/etc/passwd');
     });
   });

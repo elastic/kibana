@@ -10,6 +10,9 @@
 import { getStepByNameFromNestedSteps } from './definition_utils';
 import type { Step } from '../spec/schema';
 
+// Step is a discriminated union (foreach | if | while | switch | ...).
+// The function under test only reads `name`, `type`, and nested arrays,
+// so we build minimal shapes and cast through `unknown` to satisfy the union.
 const waitStep = (name: string): Step =>
   ({ name, type: 'wait', duration: '1s' } as unknown as Step);
 
@@ -71,6 +74,41 @@ describe('getStepByNameFromNestedSteps', () => {
       },
     ] as unknown as Step[];
     expect(getStepByNameFromNestedSteps(steps, 'in-branch')).toBe(nested);
+  });
+
+  it('finds step inside while.steps', () => {
+    const nested = waitStep('in-while');
+    const steps = [
+      { name: 'loop', type: 'while', condition: 'true', steps: [nested] },
+    ] as unknown as Step[];
+    expect(getStepByNameFromNestedSteps(steps, 'in-while')).toBe(nested);
+  });
+
+  it('finds step inside switch.cases', () => {
+    const nested = waitStep('in-case');
+    const steps = [
+      {
+        name: 'sw',
+        type: 'switch',
+        expression: '{{ x }}',
+        cases: [{ match: 'a', steps: [nested] }],
+      },
+    ] as unknown as Step[];
+    expect(getStepByNameFromNestedSteps(steps, 'in-case')).toBe(nested);
+  });
+
+  it('finds step inside switch.default', () => {
+    const nested = waitStep('in-default');
+    const steps = [
+      {
+        name: 'sw',
+        type: 'switch',
+        expression: '{{ x }}',
+        cases: [{ match: 'a', steps: [waitStep('other')] }],
+        default: [nested],
+      },
+    ] as unknown as Step[];
+    expect(getStepByNameFromNestedSteps(steps, 'in-default')).toBe(nested);
   });
 
   it('finds step inside merge.steps', () => {

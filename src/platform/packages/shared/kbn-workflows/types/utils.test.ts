@@ -63,10 +63,11 @@ describe('types/utils', () => {
     });
 
     it('defaults tags to empty array when undefined', () => {
-      const { tags: _, ...workflowWithoutTags } = baseWorkflow;
-      const result = transformWorkflowYamlJsontoEsWorkflow(
-        workflowWithoutTags as unknown as WorkflowYaml
-      );
+      const { tags: _tags, ...workflowWithoutTags } = baseWorkflow;
+      const result = transformWorkflowYamlJsontoEsWorkflow({
+        ...workflowWithoutTags,
+        tags: undefined,
+      } satisfies Omit<WorkflowYaml, 'tags'> & { tags: undefined });
       expect(result.tags).toEqual([]);
     });
 
@@ -149,13 +150,14 @@ describe('types/utils', () => {
   });
 
   describe('isFailedBeforeSteps', () => {
+    const nonEmptyStepExecutions = [{} as WorkflowStepExecutionDto];
+
     it('returns true when FAILED with no step executions', () => {
       expect(isFailedBeforeSteps(ExecutionStatus.FAILED, [])).toBe(true);
     });
 
     it('returns false when FAILED with step executions', () => {
-      const stepExecutions = [{ id: 'step-1' }] as unknown as WorkflowStepExecutionDto[];
-      expect(isFailedBeforeSteps(ExecutionStatus.FAILED, stepExecutions)).toBe(false);
+      expect(isFailedBeforeSteps(ExecutionStatus.FAILED, nonEmptyStepExecutions)).toBe(false);
     });
 
     it('returns false when COMPLETED with no step executions', () => {
@@ -163,14 +165,14 @@ describe('types/utils', () => {
     });
 
     it('returns false when FAILED with exactly 1 step execution', () => {
-      const stepExecutions = [{ id: 's1' }] as unknown as WorkflowStepExecutionDto[];
-      expect(isFailedBeforeSteps(ExecutionStatus.FAILED, stepExecutions)).toBe(false);
+      expect(isFailedBeforeSteps(ExecutionStatus.FAILED, nonEmptyStepExecutions)).toBe(false);
     });
   });
 
   describe('step type guards', () => {
-    const makeStep = (type: string, extra: Record<string, unknown> = {}): Step =>
-      ({ name: 'test-step', type, ...extra } as unknown as Step);
+    // Step is a discriminated union — guards only inspect `type`, so we construct
+    // a minimal BaseStep-shaped object. The cast is needed because guards accept Step.
+    const makeStep = (type: string) => ({ name: 'test-step', type } as unknown as Step);
 
     it.each([
       ['isWaitStep', isWaitStep, 'wait', 'elasticsearch'],
@@ -296,11 +298,9 @@ describe('types/utils', () => {
       expect(getBuiltInStepStability('')).toBeUndefined();
     });
 
-    it('returns a stability level for a known built-in step', () => {
-      // 'wait' is a known built-in — its stability may be defined or undefined
-      // The important thing is it doesn't throw
-      const result = getBuiltInStepStability('wait');
-      expect(result === undefined || typeof result === 'string').toBe(true);
+    it('returns undefined for a known built-in step without stability', () => {
+      // 'wait' is a known built-in but has no explicit stability field
+      expect(getBuiltInStepStability('wait')).toBeUndefined();
     });
   });
 });
