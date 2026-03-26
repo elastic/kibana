@@ -74,7 +74,7 @@ const getBadgeProps = (alertStatus: AlertStatus, flapping: boolean | undefined):
       label: FLAPPING_LABEL,
       color: 'danger',
       iconProps: {
-        iconType: 'visGauge',
+        iconType: 'chartGauge',
       },
     };
   }

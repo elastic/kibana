@@ -127,7 +127,7 @@ function buildByValueAnnotationLayer(
           outside: annotation.fill === 'outside',
           color: annotation.color?.color,
           label: annotation.label ?? 'Event',
-          ...(annotation.hidden != null ? { isHidden: annotation.hidden } : {}),
+          ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),
         };
       }
       if (annotation.type === 'point') {
@@ -140,8 +140,8 @@ function buildByValueAnnotationLayer(
           },
           color: annotation.color?.color,
           label: annotation.label ?? 'Event',
-          ...(annotation.hidden != null ? { isHidden: annotation.hidden } : {}),
-          ...(annotation.text != null ? { textVisibility: annotation.text === 'label' } : {}),
+          ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),
+          ...(annotation.text?.visible != null ? { textVisibility: annotation.text.visible } : {}),
           ...(annotation.icon ? { icon: annotation.icon } : {}),
           ...(annotation.line?.stroke_width != null
             ? { lineWidth: annotation.line.stroke_width }
@@ -155,13 +155,11 @@ function buildByValueAnnotationLayer(
         filter: { type: 'kibana_query', ...annotation.query },
         label: annotation.label ?? 'Event',
         color: annotation.color?.color,
-        ...(annotation.hidden != null ? { isHidden: annotation.hidden } : {}),
+        ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),
         timeField: annotation.time_field,
         ...(annotation.extra_fields ? { extraFields: annotation.extra_fields } : {}),
-        ...(annotation.text != null ? { textVisibility: annotation.text === 'label' } : {}),
-        ...(typeof annotation.text !== 'string' && annotation.text?.type === 'field'
-          ? { textField: annotation.text.field }
-          : {}),
+        ...(annotation.text?.visible != null ? { textVisibility: annotation.text.visible } : {}),
+        ...(annotation.text?.field ? { textField: annotation.text.field } : {}),
         ...(annotation.icon ? { icon: annotation.icon } : {}),
         ...(annotation.line?.stroke_width != null
           ? { lineWidth: annotation.line.stroke_width }
@@ -184,7 +182,7 @@ function buildReferenceLineLayer(
     iconPosition: threshold.decoration_position,
     lineWidth: threshold.stroke_width,
     lineStyle: threshold.stroke_dash,
-    textVisibility: threshold.text ? threshold.text === 'label' : undefined,
+    textVisibility: threshold.text?.visible,
     fill: threshold.fill,
     color: threshold.color?.color,
     axisMode: threshold.axis,
