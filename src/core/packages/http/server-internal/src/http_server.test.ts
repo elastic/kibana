@@ -2263,7 +2263,7 @@ test('includes Server-Timing header with custom events', async () => {
   expect(response.headers['server-timing']).toBeDefined();
   const headerValue = response.headers['server-timing'];
   expect(headerValue).toMatch(
-    /apptotal;dur=[\d.]+;desc="Application Server Processing Time \(Total\)"/
+    /app-total;dur=[\d.]+;desc="Application Server Processing Time \(Total\)"/
   );
   expect(headerValue).toMatch(/test-operation;dur=[\d.]+;desc="Test operation"/);
   expect(headerValue).toContain('manual-metric;dur=42.50;desc="Manual measurement"');
