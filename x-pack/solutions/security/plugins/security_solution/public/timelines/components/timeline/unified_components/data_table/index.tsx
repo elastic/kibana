@@ -23,7 +23,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useHistory } from 'react-router-dom';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { analyzerCellActionRenderer } from '../../../../../flyout_v2/analyzer/components/cell_actions';
+import { cellActionRenderer } from '../../../../../flyout_v2/shared/components/cell_actions';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
 import { useOnExpandableFlyoutClose } from '../../../../../flyout/shared/hooks/use_on_expandable_flyout_close';
@@ -191,7 +191,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
               services,
               store,
               history,
-              children: <DocumentFlyout hit={hit} renderCellActions={analyzerCellActionRenderer} />,
+              children: <DocumentFlyout hit={hit} renderCellActions={cellActionRenderer} />,
             }),
             {
               ownFocus: false,
