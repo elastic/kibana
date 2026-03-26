@@ -16,7 +16,7 @@ type RegionMapWithoutDefaultsConfig = Omit<RegionMapState, 'sampling' | 'ignore_
 
 type RegionTerms = Extract<RegionMapState['region'], { operation: 'terms' }>;
 interface RegionMapTermsRegionBaseConfig {
-  region: Omit<RegionTerms, 'size'>;
+  region: Omit<RegionTerms, 'limit'>;
 }
 
 describe('Region Map Schema', () => {
@@ -53,7 +53,7 @@ describe('Region Map Schema', () => {
       expect(validated).toEqual({
         ...defaultValues,
         ...input,
-        region: { ...input.region, size: 5 },
+        region: { ...input.region, limit: 5 },
       });
     });
 
@@ -94,7 +94,7 @@ describe('Region Map Schema', () => {
         region: {
           operation: 'terms',
           fields: ['location'],
-          size: 5,
+          limit: 5,
           ems: {
             boundaries: 'world_countries',
             join: 'iso',
@@ -152,7 +152,12 @@ describe('Region Map Schema', () => {
 
     it('throws on missing ems join field', () => {
       const input: Omit<RegionMapWithoutDefaultsConfig, 'region'> & {
-        region: { operation: 'terms'; fields: string[]; size: number; ems: { boundaries: string } };
+        region: {
+          operation: 'terms';
+          fields: string[];
+          limit: number;
+          ems: { boundaries: string };
+        };
       } = {
         ...baseRegionMapConfig,
         metric: {
@@ -162,7 +167,7 @@ describe('Region Map Schema', () => {
         region: {
           operation: 'terms',
           fields: ['location'],
-          size: 5,
+          limit: 5,
           ems: {
             boundaries: 'world_countries',
           },
@@ -186,7 +191,7 @@ describe('Region Map Schema', () => {
         region: {
           operation: 'terms',
           fields: ['category'],
-          size: 5,
+          limit: 5,
         },
       };
       expect(() => regionMapStateSchema.validate(input)).toThrow();
@@ -206,7 +211,7 @@ describe('Region Map Schema', () => {
         region: {
           operation: 'terms',
           fields: ['geo.dest'],
-          size: 10,
+          limit: 10,
           ems: {
             boundaries: 'world_countries',
             join: 'iso-code2',

@@ -181,7 +181,7 @@ describe('Metric Schema', () => {
             operation: 'terms',
             fields: ['category'],
             columns: 3,
-            size: 5,
+            limit: 5,
           },
         };
 
@@ -301,7 +301,7 @@ describe('Metric Schema', () => {
           fields: ['category'],
           columns: 3,
           collapse_by: 'sum',
-          size: 5,
+          limit: 5,
         },
       } satisfies MetricInput;
 
@@ -309,7 +309,7 @@ describe('Metric Schema', () => {
       expect(validated).toEqual({
         ...defaultValues,
         ...input,
-        breakdown_by: { ...input.breakdown_by, size: 5 },
+        breakdown_by: { ...input.breakdown_by, limit: 5 },
       });
     });
 
@@ -534,7 +534,7 @@ describe('Metric Schema', () => {
           fields: ['category'],
           columns: 4,
           collapse_by: 'sum',
-          size: 5,
+          limit: 5,
         },
       } satisfies MetricInput;
 
@@ -542,7 +542,7 @@ describe('Metric Schema', () => {
       expect(validated).toEqual({
         ...defaultValues,
         ...input,
-        breakdown_by: { ...input.breakdown_by, size: 5 },
+        breakdown_by: { ...input.breakdown_by, limit: 5 },
       });
     });
 

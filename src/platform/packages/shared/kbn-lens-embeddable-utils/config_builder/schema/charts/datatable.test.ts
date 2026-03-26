@@ -67,14 +67,14 @@ describe('Datatable Schema', () => {
           {
             operation: 'terms',
             fields: ['geo.dest'],
-            size: 10,
+            limit: 10,
           },
         ],
         split_metrics_by: [
           {
             operation: 'terms',
             fields: ['api'],
-            size: 5,
+            limit: 5,
           },
         ],
       };
@@ -107,14 +107,14 @@ describe('Datatable Schema', () => {
           {
             operation: 'terms',
             fields: ['geo.dest'],
-            size: 10,
+            limit: 10,
           },
         ],
         split_metrics_by: [
           {
             operation: 'terms',
             fields: ['api'],
-            size: 5,
+            limit: 5,
           },
         ],
         sort_by: {
@@ -152,14 +152,14 @@ describe('Datatable Schema', () => {
           {
             operation: 'terms',
             fields: ['geo.dest'],
-            size: 10,
+            limit: 10,
           },
         ],
         split_metrics_by: [
           {
             operation: 'terms',
             fields: ['api'],
-            size: 5,
+            limit: 5,
           },
         ],
         sort_by: {
@@ -197,14 +197,14 @@ describe('Datatable Schema', () => {
           {
             operation: 'terms',
             fields: ['geo.dest'],
-            size: 10,
+            limit: 10,
           },
         ],
         split_metrics_by: [
           {
             operation: 'terms',
             fields: ['status'],
-            size: 5,
+            limit: 5,
           },
         ],
         sort_by: {
@@ -243,19 +243,19 @@ describe('Datatable Schema', () => {
           {
             operation: 'terms',
             fields: ['geo.dest'],
-            size: 10,
+            limit: 10,
           },
         ],
         split_metrics_by: [
           {
             operation: 'terms',
             fields: ['status'],
-            size: 5,
+            limit: 5,
           },
           {
             operation: 'terms',
             fields: ['product'],
-            size: 3,
+            limit: 3,
           },
         ],
         sort_by: {
@@ -286,7 +286,7 @@ describe('Datatable Schema', () => {
           {
             operation: 'terms',
             fields: ['geo.dest'],
-            size: 10,
+            limit: 10,
           },
         ],
       };
@@ -330,7 +330,7 @@ describe('Datatable Schema', () => {
           {
             operation: 'terms',
             fields: ['api'],
-            size: 5,
+            limit: 5,
           },
         ],
       };
@@ -464,7 +464,7 @@ describe('Datatable Schema', () => {
             field: 'bytes',
           },
         ],
-        rows: [{ operation: 'terms', fields: ['geo.dest'], size: 10 }],
+        rows: [{ operation: 'terms', fields: ['geo.dest'], limit: 10 }],
       };
 
       expect(() => datatableStateSchema.validate(input)).toThrow();
@@ -546,14 +546,14 @@ describe('Datatable Schema', () => {
           {
             operation: 'terms',
             fields: ['geo.dest'],
-            size: 10,
+            limit: 10,
           },
         ],
         split_metrics_by: [
           {
             operation: 'terms',
             fields: ['status'],
-            size: 5,
+            limit: 5,
           },
         ],
         sort_by: {
@@ -590,14 +590,14 @@ describe('Datatable Schema', () => {
           {
             operation: 'terms',
             fields: ['geo.dest'],
-            size: 10,
+            limit: 10,
           },
         ],
         split_metrics_by: [
           {
             operation: 'terms',
             fields: ['status'],
-            size: 5,
+            limit: 5,
           },
         ],
         sort_by: {
@@ -635,19 +635,19 @@ describe('Datatable Schema', () => {
           {
             operation: 'terms',
             fields: ['geo.dest'],
-            size: 10,
+            limit: 10,
           },
         ],
         split_metrics_by: [
           {
             operation: 'terms',
             fields: ['status'],
-            size: 5,
+            limit: 5,
           },
           {
             operation: 'terms',
             fields: ['api'],
-            size: 5,
+            limit: 5,
           },
         ],
         sort_by: {
@@ -709,7 +709,7 @@ describe('Datatable Schema', () => {
           {
             operation: 'terms',
             fields: ['geo.dest'],
-            size: 10,
+            limit: 10,
             alignment: 'right',
             width: 100,
             apply_color_to: 'value',
@@ -735,7 +735,7 @@ describe('Datatable Schema', () => {
           {
             operation: 'terms',
             fields: ['api'],
-            size: 5,
+            limit: 5,
           },
         ],
         sort_by: {
