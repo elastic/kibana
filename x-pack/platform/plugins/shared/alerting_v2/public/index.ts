@@ -8,13 +8,10 @@
 import { ContainerModule } from 'inversify';
 import { OnSetup, PluginSetup, PluginStart, Start } from '@kbn/core-di';
 import { CoreSetup } from '@kbn/core-di-browser';
-import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import { mountAlertingV2App } from './main';
-import { ALERTING_V2_APP_ID } from './constants';
 import { NotificationPoliciesApi } from './services/notification_policies_api';
 import { RulesApi } from './services/rules_api';
 import { WorkflowsApi } from './services/workflows_api';
@@ -58,18 +55,6 @@ export const module = new ContainerModule(({ bind }) => {
         dataViews: diContainer.get(PluginStart('dataViews')) as DataViewsPublicPluginStart,
         lens: diContainer.get(PluginStart('lens')) as LensPublicStart,
       });
-    });
-
-    const management = container.get(PluginSetup('management')) as ManagementSetup;
-    management.sections.section.insightsAndAlerting.registerApp({
-      id: ALERTING_V2_APP_ID,
-      title: 'Rules V2',
-      hideFromSidebar: true,
-      order: 1,
-      async mount(params) {
-        const [coreStart] = await getStartServices();
-        return mountAlertingV2App({ params, container: coreStart.injection.getContainer() });
-      },
     });
   });
 });

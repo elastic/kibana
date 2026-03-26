@@ -28,7 +28,7 @@ export class AlertingV2App {
   public static id = ALERTING_V2_APP_ID;
   public static title = 'Rules V2';
   public static appRoute = ALERTING_V2_APP_ROUTE;
-  public static visibleIn: AppDeepLinkLocations[] = ['sideNav'];
+  public static visibleIn: AppDeepLinkLocations[] = [];
   public static category = DEFAULT_APP_CATEGORIES.management;
 
   constructor(

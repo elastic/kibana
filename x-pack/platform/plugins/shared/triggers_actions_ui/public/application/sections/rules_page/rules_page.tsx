@@ -81,15 +81,6 @@ const RulesPage = () => {
     ),
   });
 
-  if (authorizedToReadAnyRules) {
-    tabs.push({
-      id: 'logs',
-      name: (
-        <FormattedMessage id="xpack.triggersActionsUI.home.logsTabTitle" defaultMessage="Logs" />
-      ),
-    });
-  }
-
   if (alertingV2Start) {
     tabs.push({
       id: 'rules_v2',
@@ -98,6 +89,15 @@ const RulesPage = () => {
           id="xpack.triggersActionsUI.home.rulesV2TabTitle"
           defaultMessage="Rules V2"
         />
+      ),
+    });
+  }
+
+  if (authorizedToReadAnyRules) {
+    tabs.push({
+      id: 'logs',
+      name: (
+        <FormattedMessage id="xpack.triggersActionsUI.home.logsTabTitle" defaultMessage="Logs" />
       ),
     });
   }
