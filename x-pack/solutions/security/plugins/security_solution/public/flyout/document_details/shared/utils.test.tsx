@@ -9,7 +9,9 @@ import type { GetFieldsData } from './hooks/use_get_fields_data';
 import {
   getField,
   getFieldArray,
+  isRiskSeverity,
   mergeLegacyIdentityWhenStoreEntityMissing,
+  normalizeRiskLevel,
   resolveHostNameForEntityInsights,
   resolveUserNameForEntityInsights,
 } from './utils';
@@ -96,6 +98,53 @@ describe('resolveHostNameForEntityInsights', () => {
     expect(resolveHostNameForEntityInsights({ 'host.id': 'uuid-host' }, emptyGetFieldsData)).toBe(
       'uuid-host'
     );
+  });
+});
+
+describe('isRiskSeverity', () => {
+  it('returns true for valid severity values', () => {
+    expect(isRiskSeverity('Unknown')).toBe(true);
+    expect(isRiskSeverity('Low')).toBe(true);
+    expect(isRiskSeverity('Moderate')).toBe(true);
+    expect(isRiskSeverity('High')).toBe(true);
+    expect(isRiskSeverity('Critical')).toBe(true);
+  });
+
+  it('returns false for unrecognised values', () => {
+    expect(isRiskSeverity('critical')).toBe(false);
+    expect(isRiskSeverity('CRITICAL')).toBe(false);
+    expect(isRiskSeverity('')).toBe(false);
+    expect(isRiskSeverity('invalid')).toBe(false);
+  });
+});
+
+describe('normalizeRiskLevel', () => {
+  it('returns null for empty or undefined input', () => {
+    expect(normalizeRiskLevel(undefined)).toBeNull();
+    expect(normalizeRiskLevel('')).toBeNull();
+  });
+
+  it('normalises lowercase input', () => {
+    expect(normalizeRiskLevel('critical')).toBe('Critical');
+    expect(normalizeRiskLevel('high')).toBe('High');
+    expect(normalizeRiskLevel('moderate')).toBe('Moderate');
+    expect(normalizeRiskLevel('low')).toBe('Low');
+    expect(normalizeRiskLevel('unknown')).toBe('Unknown');
+  });
+
+  it('normalises uppercase input', () => {
+    expect(normalizeRiskLevel('CRITICAL')).toBe('Critical');
+    expect(normalizeRiskLevel('HIGH')).toBe('High');
+  });
+
+  it('passes through already-canonical values', () => {
+    expect(normalizeRiskLevel('Critical')).toBe('Critical');
+    expect(normalizeRiskLevel('High')).toBe('High');
+  });
+
+  it('returns null for unrecognised values', () => {
+    expect(normalizeRiskLevel('extreme')).toBeNull();
+    expect(normalizeRiskLevel('none')).toBeNull();
   });
 });
 

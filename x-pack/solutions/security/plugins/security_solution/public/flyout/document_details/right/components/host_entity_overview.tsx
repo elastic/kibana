@@ -30,7 +30,8 @@ import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
-import { buildHostNamesFilter, RiskSeverity } from '../../../../../common/search_strategy';
+import type { RiskSeverity } from '../../../../../common/search_strategy';
+import { buildHostNamesFilter } from '../../../../../common/search_strategy';
 import { HOST_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -51,7 +52,7 @@ import { RiskScoreLevel } from '../../../../entity_analytics/components/severity
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
-import { getField } from '../../shared/utils';
+import { getField, isRiskSeverity, normalizeRiskLevel } from '../../shared/utils';
 import { CellActions } from '../../shared/components/cell_actions';
 import {
   FAMILY,
@@ -80,16 +81,6 @@ import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_sel
 
 const HOST_ICON = 'storage';
 const HOST_ENTITY_OVERVIEW_ID = 'host-entity-overview';
-const VALID_RISK_SEVERITIES: ReadonlyArray<RiskSeverity> = Object.values(RiskSeverity);
-
-const isRiskSeverity = (value: string): value is RiskSeverity =>
-  VALID_RISK_SEVERITIES.includes(value as RiskSeverity);
-
-const normalizeRiskLevel = (level: string | undefined): RiskSeverity | null => {
-  if (level == null || level === '') return null;
-  const normalized = level.charAt(0).toUpperCase() + level.slice(1).toLowerCase();
-  return isRiskSeverity(normalized) ? normalized : isRiskSeverity(level) ? level : null;
-};
 
 export interface HostEntityOverviewProps {
   /**

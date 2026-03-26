@@ -6,6 +6,7 @@
  */
 
 import type { GetFieldsData } from './hooks/use_get_fields_data';
+import { RiskSeverity } from '../../../../common/search_strategy';
 
 /**
  * Helper function to retrieve a field's value (used in combination with the custom hook useGetFieldsData (x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/shared/hooks/use_get_fields_data.ts)
@@ -162,5 +163,23 @@ export const resolveHostNameForEntityInsightsWithFallback = (
 ): string | undefined =>
   resolveHostNameForEntityInsights(identityFields, getFieldsData) ??
   firstNonEmptyIdentityValue(identityFields);
+
+const VALID_RISK_SEVERITIES: ReadonlyArray<RiskSeverity> = Object.values(RiskSeverity);
+
+/**
+ * Returns true when the given string is a valid {@link RiskSeverity} value.
+ */
+export const isRiskSeverity = (value: string): value is RiskSeverity =>
+  VALID_RISK_SEVERITIES.includes(value as RiskSeverity);
+
+/**
+ * Normalises a raw risk level string (e.g. 'critical', 'CRITICAL') to the
+ * canonical {@link RiskSeverity} casing, or returns null when unrecognised.
+ */
+export const normalizeRiskLevel = (level: string | undefined): RiskSeverity | null => {
+  if (level == null || level === '') return null;
+  const normalized = level.charAt(0).toUpperCase() + level.slice(1).toLowerCase();
+  return isRiskSeverity(normalized) ? normalized : isRiskSeverity(level) ? level : null;
+};
 
 export { ecsSliceToFlattenedDocument } from './utils/ecs_slice_to_flattened_document';
