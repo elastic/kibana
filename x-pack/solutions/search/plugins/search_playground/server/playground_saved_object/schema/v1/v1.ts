@@ -10,8 +10,11 @@ import { schema } from '@kbn/config-schema';
 export const playgroundAttributesSchema = schema.object({
   name: schema.string({ minLength: 1, maxLength: 50 }),
   // Common fields
-  indices: schema.arrayOf(schema.string(), { minSize: 1 }),
-  queryFields: schema.recordOf(schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })),
+  indices: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
+  queryFields: schema.recordOf(
+    schema.string(),
+    schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 })
+  ),
   elasticsearchQueryJSON: schema.string(),
   userElasticsearchQueryJSON: schema.maybe(schema.string()),
   // Chat fields
@@ -21,7 +24,7 @@ export const playgroundAttributesSchema = schema.object({
     schema.object({
       sourceFields: schema.recordOf(
         schema.string(),
-        schema.arrayOf(schema.string(), { minSize: 1 })
+        schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 })
       ),
       docSize: schema.number({ defaultValue: 3, min: 1 }),
     })

@@ -241,7 +241,7 @@ export const CascadeNestedGridImplementation: StoryObj<
     >(
       () => [
         {
-          iconType: 'arrowDown',
+          iconType: 'chevronSingleDown',
           iconSide: 'right',
           onClick: () => {
             /** Noop click handler */
@@ -416,7 +416,7 @@ export const CascadeCustomHeaderImplementation: StoryObj<
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="database" size="xl" />
+                <EuiIcon type="database" size="xl" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem grow={true}>
                 <EuiText>
@@ -515,7 +515,7 @@ export const CascadeCustomHeaderImplementation: StoryObj<
     >(
       () => [
         {
-          iconType: 'arrowDown',
+          iconType: 'chevronSingleDown',
           iconSide: 'right',
           onClick: () => {
             /** Noop click handler */
@@ -691,7 +691,7 @@ export const CascadeMultipleStatsPerRow: StoryObj<
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="database" size="xl" />
+                <EuiIcon type="database" size="xl" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem grow={true}>
                 <EuiText>
@@ -789,7 +789,7 @@ export const CascadeMultipleStatsPerRow: StoryObj<
           description={
             <EuiTextColor color="accent">
               <span>
-                <EuiIcon type="clock" color="accent" /> 70,29%
+                <EuiIcon type="clock" color="accent" aria-hidden={true} /> 70,29%
               </span>
             </EuiTextColor>
           }
@@ -799,7 +799,7 @@ export const CascadeMultipleStatsPerRow: StoryObj<
         <EuiStat title="1,554" textAlign="left" titleColor="danger" description="Good news">
           <EuiTextColor color="accent">
             <span>
-              <EuiIcon type="error" color="danger" /> 66,55%
+              <EuiIcon type="error" color="danger" aria-hidden={true} /> 66,55%
             </span>
           </EuiTextColor>
         </EuiStat>,
@@ -810,7 +810,7 @@ export const CascadeMultipleStatsPerRow: StoryObj<
           description={
             <EuiTextColor color="success">
               <span>
-                <EuiIcon type="check" color="success" /> 88,88%
+                <EuiIcon type="check" color="success" aria-hidden={true} /> 88,88%
               </span>
             </EuiTextColor>
           }
@@ -820,7 +820,7 @@ export const CascadeMultipleStatsPerRow: StoryObj<
         <EuiStat title="8,888" description="Great news" textAlign="left">
           <EuiTextColor color="success">
             <span>
-              <EuiIcon type="sortUp" /> 27,83%
+              <EuiIcon type="sortUp" aria-hidden={true} /> 27,83%
             </span>
           </EuiTextColor>
         </EuiStat>,
@@ -832,7 +832,7 @@ export const CascadeMultipleStatsPerRow: StoryObj<
     >(
       () => [
         {
-          iconType: 'arrowDown',
+          iconType: 'chevronSingleDown',
           iconSide: 'right',
           onClick: () => {
             /** Noop click handler */
@@ -1012,7 +1012,7 @@ export const CascadeCustomHeaderWithCustomRowActionsImplementation: StoryObj<
       headerTitle: (
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="securitySignal" size="xl" />
+            <EuiIcon type="radar" size="xl" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
             <EuiText>
@@ -1289,7 +1289,7 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
       headerTitle: (
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="securitySignal" size="xl" />
+            <EuiIcon type="radar" size="xl" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
             <EuiText>
@@ -1419,7 +1419,7 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
 
       return [
         {
-          iconType: 'starEmpty',
+          iconType: 'star',
           'aria-label': `favorite ${groupValue}`,
           onClick: () => {
             /** Noop Click handler for favorite */
@@ -1582,7 +1582,7 @@ export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="securitySignal" size="xl" />
+                <EuiIcon type="radar" size="xl" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem grow={true}>
                 <EuiText>
@@ -1597,7 +1597,7 @@ export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
                 <EuiFlexItem alignItems="center" gutterSize="s">
                   <EuiFilterGroup>
                     <EuiFilterButton
-                      iconType="arrowDown"
+                      iconType="chevronSingleDown"
                       onClick={() => {
                         // Handle filter button click
                       }}

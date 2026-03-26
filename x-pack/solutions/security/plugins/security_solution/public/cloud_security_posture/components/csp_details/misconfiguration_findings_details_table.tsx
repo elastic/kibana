@@ -237,7 +237,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
                 defaultMessage: 'Preview finding details',
               }
             )}
-            iconType="expand"
+            iconType="maximize"
             onClick={() => {
               uiMetricService.trackUiMetric(
                 METRIC_TYPE.CLICK,
@@ -320,7 +320,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
                 defaultMessage: 'Misconfigurations ',
               }
             )}
-            <EuiIcon type={'popout'} />
+            <EuiIcon type="external" />
           </SecuritySolutionLinkAnchor>
           <EuiSpacer size="xl" />
           <DistributionBar stats={misconfigurationStats} />

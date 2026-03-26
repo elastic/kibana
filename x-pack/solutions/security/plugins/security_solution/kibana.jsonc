@@ -17,6 +17,7 @@
     "requiredPlugins": [
       "actions",
       "alerting",
+      "anonymization",
       "cases",
       "cloud",
       "cloudDefend",
@@ -28,6 +29,7 @@
       "ecsDataQualityDashboard",
       "elasticAssistant",
       "embeddable",
+      "entityStore",
       "eventLog",
       "features",
       "fieldFormats",

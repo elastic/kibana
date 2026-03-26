@@ -45,7 +45,9 @@ export class TemplatesService {
       search,
       tags,
       author,
+      owner,
       isDeleted,
+      isEnabled,
     } = params;
 
     const { templates, total } = await this.searchTemplates({
@@ -57,7 +59,9 @@ export class TemplatesService {
       search,
       tags,
       author,
+      owner,
       isLatest: true,
+      isEnabled,
     });
 
     const searchLower = search?.toLowerCase() ?? '';
@@ -109,6 +113,8 @@ export class TemplatesService {
     search,
     tags,
     author,
+    owner,
+    isEnabled,
   }: {
     page: number;
     perPage: number;
@@ -121,6 +127,8 @@ export class TemplatesService {
     search?: string;
     tags?: string[];
     author?: string[];
+    owner?: string[];
+    isEnabled?: boolean;
   }): Promise<{ templates: Array<SavedObject<Template>>; total: number }> {
     interface SearchResult {
       hits: {
@@ -135,6 +143,9 @@ export class TemplatesService {
 
     const filters = [
       ...(isDeleted ? [] : [toElasticsearchQuery(fromKueryExpression(`NOT ${SO}.deletedAt: *`))]),
+      ...(isEnabled !== undefined
+        ? [toElasticsearchQuery(fromKueryExpression(`${SO}.isEnabled: ${isEnabled}`))]
+        : []),
       ...(templateId
         ? [toElasticsearchQuery(fromKueryExpression(`${SO}.templateId: "${templateId}"`))]
         : []),
@@ -155,6 +166,13 @@ export class TemplatesService {
         ? [
             toElasticsearchQuery(
               fromKueryExpression(author.map((a) => `${SO}.author: "${a}"`).join(' OR '))
+            ),
+          ]
+        : []),
+      ...(owner && owner.length > 0
+        ? [
+            toElasticsearchQuery(
+              fromKueryExpression(owner.map((o) => `${SO}.owner: "${o}"`).join(' OR '))
             ),
           ]
         : []),
@@ -243,6 +261,7 @@ export class TemplatesService {
         author,
         fieldCount: parsedDefinition.fields.length,
         fieldNames: parsedDefinition.fields.map((f) => f.name),
+        isEnabled: input.isEnabled ?? true,
       } as Template,
       { refresh: true }
     );
@@ -277,6 +296,9 @@ export class TemplatesService {
         author: currentTemplate.attributes.author,
         fieldCount: parsedDefinition.fields.length,
         fieldNames: parsedDefinition.fields.map((f) => f.name),
+        usageCount: currentTemplate.attributes.usageCount,
+        lastUsedAt: currentTemplate.attributes.lastUsedAt,
+        isEnabled: input.isEnabled ?? currentTemplate.attributes.isEnabled ?? true,
       },
       {
         refresh: true,
@@ -329,6 +351,28 @@ export class TemplatesService {
       .map((so) => so.attributes.author)
       .filter((a): a is string => Boolean(a));
     return [...new Set(authors)].sort();
+  }
+
+  async incrementUsageStats(templateId: string): Promise<void> {
+    const template = await this.getTemplate(templateId);
+
+    if (!template) {
+      return;
+    }
+
+    await this.dependencies.unsecuredSavedObjectsClient.bulkUpdate(
+      [
+        {
+          id: template.id,
+          type: CASE_TEMPLATE_SAVED_OBJECT,
+          attributes: {
+            usageCount: (template.attributes.usageCount ?? 0) + 1,
+            lastUsedAt: new Date().toISOString(),
+          },
+        },
+      ],
+      { refresh: false }
+    );
   }
 
   async deleteTemplate(templateId: string): Promise<void> {

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/agent-builder-genai-utils'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/workchat-eng'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/agent-builder-genai-utils'
+  title: '@kbn/agent-builder-genai-utils'
   description: Moon project for @kbn/agent-builder-genai-utils
   channel: ''
   owner: '@elastic/workchat-eng'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils
+  sourceRoot: x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils
 dependsOn:
   - '@kbn/core-http-server'
   - '@kbn/agent-builder-common'
@@ -37,6 +36,8 @@ dependsOn:
   - '@kbn/workflows-management-plugin'
   - '@kbn/workflows'
   - '@kbn/esql-language'
+  - '@kbn/datemath'
+  - '@kbn/es-query'
 tags:
   - shared-server
   - package
@@ -50,14 +51,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

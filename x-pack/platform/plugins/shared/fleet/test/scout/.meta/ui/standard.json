@@ -1,5 +1,5 @@
 {
-  "sha1": "6de6c16a3b21c16ea10dc1bc745fe8a57795ac43",
+  "sha1": "8a49119372ef3c1109e4be53a93886a758781366",
   "tests": [
     {
       "id": "0ab9aa6583f6769-b18346ef7c3b1d3",
@@ -80,7 +80,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_editor_role.spec.ts",
-        "line": 45,
+        "line": 50,
         "column": 7
       }
     },
@@ -94,7 +94,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_editor_role.spec.ts",
-        "line": 79,
+        "line": 84,
         "column": 7
       }
     },

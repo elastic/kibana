@@ -22,7 +22,11 @@ import {
   apiPublishesESQLVariables,
 } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import { ACTION_CREATE_ESQL_CONTROL } from '@kbn/controls-constants';
+import {
+  ACTION_CREATE_ESQL_CONTROL,
+  DEFAULT_ESQL_OPTIONS_LIST_STATE,
+  ESQL_CONTROL,
+} from '@kbn/controls-constants';
 import { ADD_PANEL_CONTROL_GROUP } from './constants';
 import { uiActionsService } from '../services/kibana_services';
 
@@ -48,8 +52,9 @@ export const createESQLControlAction = (): ActionDefinition<
         esqlVariables: variablesInParent,
         onSaveControl: async (controlState: OptionsListESQLControlState) => {
           const newControl = {
-            panelType: 'esqlControl',
+            panelType: ESQL_CONTROL,
             serializedState: {
+              ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
               ...controlState,
             },
           };

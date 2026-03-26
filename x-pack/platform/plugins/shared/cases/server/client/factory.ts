@@ -251,6 +251,7 @@ export class CasesClientFactory {
         unsecuredSavedObjectsClient,
         savedObjectsSerializer,
         auditLogger,
+        isCasesAttachmentsEnabled: this.options.config.attachments?.enabled === true,
       }),
       attachmentService,
       licensingService,
