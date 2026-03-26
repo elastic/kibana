@@ -61,18 +61,6 @@ export async function createConnectorFixture({
     }
   }
 
-  // .inference connectors are backed by ES inference endpoints.
-  // The inference plugin expects the endpoint ID, not the Kibana connector key.
-  if (
-    predefinedConnector.actionTypeId === '.inference' &&
-    predefinedConnector.config?.inferenceId
-  ) {
-    const endpointId = String(predefinedConnector.config.inferenceId);
-    log.info(`Using inference endpoint: ${endpointId} (from connector ${predefinedConnector.id})`);
-    await use({ ...predefinedConnector, id: endpointId });
-    return;
-  }
-
   if (process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP) {
     log.info(
       `Skipping connector setup/teardown for: ${predefinedConnector.id} (KBN_EVALS_SKIP_CONNECTOR_SETUP is set)`
