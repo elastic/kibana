@@ -1035,7 +1035,6 @@ describe('The metric threshold rule type', () => {
         groupByKeys: { host: { name: alertIdA } },
         group: [{ field: 'host.name', value: alertIdA }],
         ecsGroups: { 'host.name': alertIdA },
-        grouping: { host: { name: alertIdA } },
       });
     });
   });
