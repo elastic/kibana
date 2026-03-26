@@ -29,7 +29,7 @@ apiTest.describe(
       };
       const { query } = transpile(streamlangDSL);
       const docs = [{ tags: ['existing_tag'] }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents[0].tags).toStrictEqual(['existing_tag', 'new_tag']);
@@ -47,11 +47,11 @@ apiTest.describe(
         ],
       };
       const { query } = transpile(streamlangDSL);
-      const mappingDoc = { tags: ['initial_tag'] }; // Needed to satisfy ES|QL which needs all operand columns pre-mapped;
-      const docs = [mappingDoc, { message: 'message' }];
-      await testBed.ingest(indexName, docs);
+      // const mappingDoc = { tags: ['initial_tag'] }; // commenting out mapping docs whilst testing unmapped fields
+      const docs = [{ message: 'message' }];
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
-      expect(esqlResult.documentsOrdered[1].tags).toStrictEqual(['tag01', 'tag02']);
+      expect(esqlResult.documentsOrdered[0].tags).toStrictEqual(['tag01', 'tag02']);
     });
 
     apiTest(
@@ -70,7 +70,7 @@ apiTest.describe(
         };
         const { query } = transpile(streamlangDSL);
         const docs = [{ tags: ['existing_tag', 'new_tag'] }];
-        await testBed.ingest(indexName, docs);
+        await testBed.ingest(indexName, docs, undefined, { dynamic: false });
         const esqlResult = await esql.queryOnIndex(indexName, query);
         expect(esqlResult.documents[0].tags).toStrictEqual(['existing_tag', 'new_tag']);
       }
@@ -92,7 +92,7 @@ apiTest.describe(
         };
         const { query } = transpile(streamlangDSL);
         const docs = [{ tags: ['existing_tag'] }];
-        await testBed.ingest(indexName, docs);
+        await testBed.ingest(indexName, docs, undefined, { dynamic: false });
         const esqlResult = await esql.queryOnIndex(indexName, query);
         expect(esqlResult.documents[0].tags).toStrictEqual(['existing_tag', 'existing_tag']);
       }
@@ -118,7 +118,7 @@ apiTest.describe(
         { attributes: { should_exist: 'YES' }, tags: ['existing_tag'] },
         { attributes: { size: 2048 }, tags: ['existing_tag_01', 'existing_tag_02'] },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
       expect(esqlResult.documentsOrdered[0].tags).toStrictEqual(['existing_tag', 'new_tag']);
       expect(esqlResult.documentsOrdered[1].tags).toStrictEqual([
@@ -143,7 +143,7 @@ apiTest.describe(
         };
         const { query } = transpile(streamlangDSL);
         const docs = [{ tags: ['existing_tag'] }];
-        await testBed.ingest(indexName, docs);
+        await testBed.ingest(indexName, docs, undefined, { dynamic: false });
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         // Note how an ES|QL single element multi-valued field outputs a non-array value
@@ -173,7 +173,7 @@ apiTest.describe(
         { attributes: { should_exist: 'YES' }, tags: ['existing_tag'] },
         { attributes: { size: 2048 }, tags: ['existing_tag_01', 'existing_tag_02'] },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
       expect(esqlResult.documentsOrdered[0].tags).toBe('existing_tag');
       expect(esqlResult.documentsOrdered[1].tags).toStrictEqual([

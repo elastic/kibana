@@ -37,7 +37,7 @@ apiTest.describe(
       const { query } = transpile(streamlangDSL);
 
       const docs = [{ first_name: 'john', last_name: 'doe', email_domain: 'example.com' }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(1);
@@ -75,7 +75,7 @@ apiTest.describe(
           { first_name: 'john', last_name: 'doe', email_domain: 'example.com', has_email: true },
           { first_name: 'jane', last_name: 'smith', email_domain: 'example.com', has_email: false },
         ];
-        await testBed.ingest(indexName, docs);
+        await testBed.ingest(indexName, docs, undefined, { dynamic: false });
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         expect(esqlResult.documents).toHaveLength(2);
@@ -112,7 +112,7 @@ apiTest.describe(
           { first_name: 'john', last_name: 'doe', email_domain: 'example.com' },
           { first_name: 'jane', last_name: 'smith' },
         ];
-        await testBed.ingest(indexName, docs);
+        await testBed.ingest(indexName, docs, undefined, { dynamic: false });
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         expect(esqlResult.documents).toHaveLength(2);
@@ -149,7 +149,7 @@ apiTest.describe(
           { first_name: 'john', last_name: 'doe', email_domain: 'example.com' },
           { first_name: 'jane', last_name: 'smith' },
         ];
-        await testBed.ingest(indexName, docs);
+        await testBed.ingest(indexName, docs, undefined, { dynamic: false });
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         expect(esqlResult.documents).toHaveLength(2);

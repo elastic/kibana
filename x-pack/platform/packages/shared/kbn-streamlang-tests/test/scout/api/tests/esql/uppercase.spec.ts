@@ -30,7 +30,7 @@ apiTest.describe(
       const { query } = transpile(streamlangDSL);
 
       const docs = [{ message: 'test message 1' }, { message: 'test message 2' }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(2);
@@ -54,7 +54,7 @@ apiTest.describe(
       const { query } = transpile(streamlangDSL);
 
       const docs = [{ message: 'test message 1' }, { message: 'test message 2' }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(2);
@@ -84,7 +84,7 @@ apiTest.describe(
         { message: 'test message 1', should_uppercase: 'yes' },
         { message: 'test message 2', should_uppercase: 'no' },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(2);
@@ -117,7 +117,7 @@ apiTest.describe(
           { message: 'test message 1', should_uppercase: 'yes' },
           { message: 'test message 2', should_uppercase: 'no' },
         ];
-        await testBed.ingest(indexName, docs);
+        await testBed.ingest(indexName, docs, undefined, { dynamic: false });
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         expect(esqlResult.documents).toHaveLength(2);

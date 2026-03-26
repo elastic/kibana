@@ -86,10 +86,18 @@ export function convertDateProcessorToESQL(processor: DateProcessor): ESQLAstCom
 
   if (where) {
     const whereCondition = conditionToESQLAst(where);
+    // The else branch must have the same type (datetime) as the then branch (DATE_PARSE result).
+    // When the target field is unmapped (loaded as keyword via SET unmapped_fields="LOAD"),
+    // using it directly in a CASE causes a type conflict. Wrapping with TO_DATETIME(TO_STRING())
+    // ensures the else branch is always datetime-typed, handling both mapped datetime fields
+    // and unmapped keyword fields (TO_DATETIME(null) = null when the field is absent).
+    const elseValue = Builder.expression.func.call('TO_DATETIME', [
+      Builder.expression.func.call('TO_STRING', [toColumn]),
+    ]);
     dateProcessorAssignment = Builder.expression.func.call('CASE', [
       whereCondition,
       dateProcessorAssignment,
-      toColumn,
+      elseValue,
     ]);
   }
 

@@ -47,10 +47,27 @@ export function conditionToESQLAst(condition: Condition): ESQLSingleAstItem {
     const field = Builder.expression.column(condition.field);
 
     if ('eq' in condition) {
-      return Builder.expression.func.binary('==', [field, esqlLiteralFromAny(condition.eq)]);
+      // When comparing against a boolean, wrap the field with TO_BOOLEAN() so that unmapped
+      // fields (loaded as keyword by SET unmapped_fields="LOAD") compare correctly.
+      // TO_BOOLEAN("true") == TRUE and TO_BOOLEAN(boolField) == TRUE both work.
+      const eqVal = condition.eq;
+      if (typeof eqVal === 'boolean') {
+        return Builder.expression.func.binary('==', [
+          Builder.expression.func.call('TO_BOOLEAN', [field]),
+          esqlLiteralFromAny(eqVal),
+        ]);
+      }
+      return Builder.expression.func.binary('==', [field, esqlLiteralFromAny(eqVal)]);
     }
     if ('neq' in condition) {
-      return Builder.expression.func.binary('!=', [field, esqlLiteralFromAny(condition.neq)]);
+      const neqVal = condition.neq;
+      if (typeof neqVal === 'boolean') {
+        return Builder.expression.func.binary('!=', [
+          Builder.expression.func.call('TO_BOOLEAN', [field]),
+          esqlLiteralFromAny(neqVal),
+        ]);
+      }
+      return Builder.expression.func.binary('!=', [field, esqlLiteralFromAny(neqVal)]);
     }
     if ('gt' in condition) {
       return Builder.expression.func.binary('>', [field, esqlLiteralFromAny(condition.gt)]);

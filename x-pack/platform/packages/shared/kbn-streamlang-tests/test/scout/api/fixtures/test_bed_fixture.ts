@@ -9,20 +9,32 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ErrorCause, IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import { apiTest } from '@kbn/scout';
 
+export interface IngestOptions {
+  /**
+   * Controls dynamic field mapping on the target index.
+   * - `true` (default): auto-map all ingested fields
+   * - `false`: disable auto-mapping so fields are stored in `_source` only
+   */
+  dynamic?: boolean;
+}
+
 export interface TestBedFixture {
   testBed: {
     /**
      * Ingests documents into an index with an optional ingest pipeline.
-     * An `order_id` field is automatically added to each document to allow for deterministic sorting.
+     * An internal `order_id` field is automatically added to each document to allow for
+     * deterministic sorting. It is stripped from all results returned by this fixture.
      * @param indexName The name of the index.
      * @param documents An array of documents to ingest.
      * @param processors An optional array of ingest processors to create a pipeline.
+     * @param options Optional ingest settings (e.g. `dynamic: false` to disable auto-mapping).
      * @returns An object containing the number of ingested documents and an array of errors.
      */
     ingest: (
       indexName: string,
       documents: Array<Record<string, unknown>>,
-      processors?: IngestProcessorContainer[]
+      processors?: IngestProcessorContainer[],
+      options?: IngestOptions
     ) => Promise<{ errors: ErrorCause[]; docs: number }>;
     /**
      * Gets all documents from an index in their natural, non-deterministic order.
@@ -74,14 +86,15 @@ export const testBedFixture = apiTest.extend<TestBedFixture>({
       const ingest = async (
         indexName: string,
         documents: Array<Record<string, unknown>>,
-        processors?: IngestProcessorContainer[]
+        processors?: IngestProcessorContainer[],
+        options?: IngestOptions
       ) => {
         let pipelineId: string | undefined;
         if (processors && processors.length > 0) {
           pipelineId = await createPipeline(processors);
         }
 
-        await ensureIndexCreated(indexName, esClient);
+        await ensureIndexCreated(indexName, esClient, options?.dynamic);
         createdIndexes.add(indexName);
 
         if (!documents || documents.length === 0) {
@@ -89,7 +102,7 @@ export const testBedFixture = apiTest.extend<TestBedFixture>({
         }
 
         const body = documents
-          .map((doc, idx) => ({ ...doc, order_id: idx })) // Add order_id for deterministic sorting
+          .map((doc, idx) => ({ ...doc, order_id: idx })) // Add internal field for deterministic sorting
           .flatMap((doc) => [{ index: { _index: indexName } }, doc]);
 
         const bulkRequest: Record<string, unknown> = {
@@ -122,41 +135,54 @@ export const testBedFixture = apiTest.extend<TestBedFixture>({
           size: 1000,
         });
 
+        return response.hits.hits.map((hit) => {
+          const { order_id: _, ...rest } = hit._source as Record<string, unknown>;
+          return rest;
+        });
+      };
+
+      const getDocsRaw = async (indexName: string) => {
+        const response = await esClient.search({
+          index: indexName,
+          query: { match_all: {} },
+          size: 1000,
+        });
         return response.hits.hits.map((hit) => hit._source as Record<string, unknown>);
       };
 
       const getDocsOrdered = async (indexName: string) => {
-        const docs = await getDocs(indexName);
-        return docs.sort((a, b) => (a.order_id as number) - (b.order_id as number));
+        const docs = await getDocsRaw(indexName);
+        const sorted = docs.sort((a, b) => (a.order_id as number) - (b.order_id as number));
+        return sorted.map(({ order_id: _, ...rest }) => rest);
+      };
+
+      const flattenDoc = (doc: Record<string, unknown>): Record<string, unknown> => {
+        const result: Record<string, unknown> = {};
+
+        const flatten = (obj: Record<string, unknown>, prefix = '') => {
+          for (const [key, value] of Object.entries(obj)) {
+            const prefixedKey = prefix ? `${prefix}.${key}` : key;
+            if (value && typeof value === 'object' && !Array.isArray(value)) {
+              flatten(value as Record<string, unknown>, prefixedKey);
+            } else {
+              result[prefixedKey] = value;
+            }
+          }
+        };
+
+        flatten(doc);
+        return result;
       };
 
       const getFlattenedDocs = async (indexName: string) => {
         const docs = await getDocs(indexName);
-
-        const docsWithDottedNames = docs.map((doc) => {
-          const result: Record<string, unknown> = {};
-
-          const flatten = (obj: Record<string, unknown>, prefix = '') => {
-            for (const [key, value] of Object.entries(obj)) {
-              const prefixedKey = prefix ? `${prefix}.${key}` : key;
-              if (value && typeof value === 'object' && !Array.isArray(value)) {
-                flatten(value as Record<string, unknown>, prefixedKey);
-              } else {
-                result[prefixedKey] = value;
-              }
-            }
-          };
-
-          flatten(doc);
-          return result;
-        });
-
-        return docsWithDottedNames;
+        return docs.map(flattenDoc);
       };
 
       const getFlattenedDocsOrdered = async (indexName: string) => {
-        const docs = await getFlattenedDocs(indexName);
-        return docs.sort((a, b) => (a.order_id as number) - (b.order_id as number));
+        const docs = await getDocsRaw(indexName);
+        const sorted = docs.sort((a, b) => (a.order_id as number) - (b.order_id as number));
+        return sorted.map(({ order_id: _, ...rest }) => flattenDoc(rest));
       };
 
       const clean = async (indexName: string) => {
@@ -191,15 +217,29 @@ export const testBedFixture = apiTest.extend<TestBedFixture>({
   ],
 });
 
-async function ensureIndexCreated(indexName: string, esClient: Client) {
+async function ensureIndexCreated(indexName: string, esClient: Client, dynamic?: boolean) {
   if (await esClient.indices.exists({ index: indexName })) {
     return;
   }
 
+  // When dynamic is explicitly false, disable auto-mapping so fields are stored in _source only.
+  // This is required to genuinely exercise SET UNMAPPED_FIELDS=LOAD/NULLIFY in ES|QL queries.
+  // Default behaviour keeps auto-mapping enabled ('true') for backwards compatibility.
+  //
+  // `fake_test_prop` is always present (the testBed adds it to every document). We explicitly map it
+  // so the index is never *completely* unmapped — a fully-unmapped index triggers ES|QL's
+  // <no-fields> sentinel, which currently causes an optimizer crash with unmapped_fields="load"
+  // Having at least one mapped field avoids that code path while leaving all other fields unmapped for
+  // LOAD to resolve from _source.
   return esClient.indices.create({
     index: indexName,
     mappings: {
-      dynamic: 'true',
+      dynamic: dynamic === false ? false : 'true',
+      ...(dynamic === false && {
+        properties: {
+          fake_test_prop: { type: 'long' },
+        },
+      }),
     },
   });
 }

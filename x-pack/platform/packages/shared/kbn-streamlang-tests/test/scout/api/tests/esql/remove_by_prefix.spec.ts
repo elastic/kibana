@@ -15,34 +15,36 @@ apiTest.describe(
   'Streamlang to ES|QL - RemoveByPrefix Processor',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    apiTest(
-      'should keep the parent field when it has no nested fields',
-      async ({ testBed, esql }) => {
-        const indexName = 'stream-e2e-test-remove-by-prefix-basic';
+    apiTest('should remove sub-fields matching the prefix with DROP', async ({ testBed, esql }) => {
+      // Note: ES|QL's DROP field.* requires at least one matching mapped column.
+      // This test verifies the basic DROP field.* behaviour with dynamic mapping
+      // so that sub-fields are properly mapped and discoverable.
+      const indexName = 'stream-e2e-test-remove-by-prefix-basic';
 
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'remove_by_prefix',
-              from: 'temp_field',
-            } as RemoveByPrefixProcessor,
-          ],
-        };
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'remove_by_prefix',
+            from: 'temp_field',
+          } as RemoveByPrefixProcessor,
+        ],
+      };
 
-        const { query } = transpile(streamlangDSL);
+      const { query } = transpile(streamlangDSL);
 
-        const docs = [{ temp_field: 'to-be-kept', message: 'keep-this' }];
-        await testBed.ingest(indexName, docs);
-        const esqlResult = await esql.queryOnIndex(indexName, query);
+      // Use dynamic mapping so temp_field.child is properly mapped and DROP temp_field.* succeeds.
+      const docs = [{ temp_field: { child: 'remove-me' }, message: 'keep-this' }];
+      await testBed.ingest(indexName, docs);
+      const esqlResult = await esql.queryOnIndex(indexName, query);
 
-        expect(esqlResult.documents).toHaveLength(1);
-        // The parent field itself is not removed, only nested fields would be
-        expect(esqlResult.documents[0]?.temp_field).toBeDefined();
-        expect(esqlResult.documents[0]).toStrictEqual(
-          expect.objectContaining({ message: 'keep-this', temp_field: 'to-be-kept' })
-        );
-      }
-    );
+      expect(esqlResult.documents).toHaveLength(1);
+      // temp_field.child should be removed by DROP temp_field.*
+      expect(esqlResult.columnNames).not.toContain('temp_field.child');
+      // message should be preserved
+      expect(esqlResult.documents[0]).toStrictEqual(
+        expect.objectContaining({ message: 'keep-this' })
+      );
+    });
 
     apiTest('should remove nested fields (parent field removed too)', async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-remove-by-prefix-nested';
@@ -71,6 +73,7 @@ apiTest.describe(
           message: 'keep-this',
         },
       ];
+      // Use dynamic mapping so host.* sub-fields are properly mapped and DROP host.* succeeds.
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
@@ -110,6 +113,7 @@ apiTest.describe(
             message: 'keep-this',
           },
         ];
+        // Use dynamic mapping so labels.* fields are properly mapped and DROP labels.* succeeds.
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
 

@@ -55,7 +55,8 @@ export const esqlFixture = apiTest.extend<{}, EsqlFixture & EsqlFixtureOptions>(
   esql: [
     async ({ esClient, esqlDropNullColumns }, use) => {
       const executeEsqlQuery = async (query: string): Promise<EsqlResponse> => {
-        if (!/^\s*from\s+/i.test(query)) {
+        // Allow queries that start with a SET directive (e.g. SET unmapped_fields="LOAD";) before the FROM clause
+        if (!/^\s*(SET\s+\w+=\S+;\s*\n\s*)?from\s+/i.test(query)) {
           throw new Error('ES|QL query must start with a "from" clause.');
         }
 
@@ -86,7 +87,8 @@ export const esqlFixture = apiTest.extend<{}, EsqlFixture & EsqlFixtureOptions>(
           }
         );
 
-        const documents = response.values.map((valueRow: FieldValue[]) => {
+        // Build raw docs keyed by column name (includes order_id for sorting)
+        const rawDocuments = response.values.map((valueRow: FieldValue[]) => {
           const doc: Record<string, unknown> = {};
           response.columns.forEach((col: EsqlEsqlColumnInfo, idx: number) => {
             doc[col.name] = valueRow[idx];
@@ -94,24 +96,30 @@ export const esqlFixture = apiTest.extend<{}, EsqlFixture & EsqlFixtureOptions>(
           return doc;
         });
 
-        const nonKeywordColumnIndices = response.columns
-          .map((col, idx) => (!col.name.endsWith('.keyword') ? idx : -1))
-          .filter((idx) => idx !== -1);
-
-        const documentsWithoutKeywords = response.values.map((valueRow: FieldValue[]) => {
-          const doc: Record<string, unknown> = {};
-          nonKeywordColumnIndices.forEach((idx) => {
-            doc[response.columns[idx].name] = valueRow[idx];
-          });
-          return doc;
-        });
-
-        // Sort the results by the implicitly added order_id for deterministic testing
-        const sortById = (a: Record<string, unknown>, b: Record<string, unknown>) =>
+        const sortByOrderId = (a: Record<string, unknown>, b: Record<string, unknown>) =>
           (a.order_id as number) - (b.order_id as number);
 
-        const documentsOrdered = [...documents].sort(sortById);
-        const documentsWithoutKeywordsOrdered = [...documentsWithoutKeywords].sort(sortById);
+        const stripOrderId = ({ order_id: _, ...rest }: Record<string, unknown>) => rest;
+
+        // Non-keyword, non-internal column indices for the *WithoutKeywords collections
+        const nonKeywordColumnIndices = response.columns
+          .map((col, idx) => (!col.name.endsWith('.keyword') && col.name !== 'order_id' ? idx : -1))
+          .filter((idx) => idx !== -1);
+
+        const toDocWithoutKeywords = (raw: Record<string, unknown>): Record<string, unknown> => {
+          const doc: Record<string, unknown> = {};
+          nonKeywordColumnIndices.forEach((idx) => {
+            doc[response.columns[idx].name] = raw[response.columns[idx].name];
+          });
+          return doc;
+        };
+
+        const documents = rawDocuments.map(stripOrderId);
+        const documentsOrdered = [...rawDocuments].sort(sortByOrderId).map(stripOrderId);
+        const documentsWithoutKeywords = rawDocuments.map(toDocWithoutKeywords);
+        const documentsWithoutKeywordsOrdered = [...rawDocuments]
+          .sort(sortByOrderId)
+          .map(toDocWithoutKeywords);
 
         return {
           columns: response.columns,
@@ -130,7 +138,19 @@ export const esqlFixture = apiTest.extend<{}, EsqlFixture & EsqlFixtureOptions>(
             'queryOnIndex should not receive a query that already contains a "from" clause.'
           );
         }
-        const fullQuery = `from ${indexName} ${queryStr}`;
+
+        // If the query string starts with a SET directive (e.g. SET unmapped_fields="LOAD"\n),
+        // extract it and reposition it before the FROM clause, as ES|QL requires SET to precede FROM.
+        const setMatch = queryStr.match(/^(SET\s+\w+=\S+)\n/i);
+        let fullQuery: string;
+        if (setMatch) {
+          const setDirective = setMatch[1];
+          const pipeCommands = queryStr.slice(setMatch[0].length);
+          fullQuery = `${setDirective};\nFROM ${indexName} ${pipeCommands}`;
+        } else {
+          fullQuery = `from ${indexName} ${queryStr}`;
+        }
+
         return await executeEsqlQuery(fullQuery);
       };
 

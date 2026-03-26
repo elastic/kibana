@@ -34,7 +34,7 @@ apiTest.describe(
         const { query } = transpile(streamlangDSL);
 
         const docs = [{ message: 'An error occurred' }];
-        await testBed.ingest(indexName, docs);
+        await testBed.ingest(indexName, docs, undefined, { dynamic: false });
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         expect(esqlResult.documents).toHaveLength(1);
@@ -62,7 +62,7 @@ apiTest.describe(
         const { query } = transpile(streamlangDSL);
 
         const docs = [{ message: 'An error occurred' }];
-        await testBed.ingest(indexName, docs);
+        await testBed.ingest(indexName, docs, undefined, { dynamic: false });
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         expect(esqlResult.documents).toHaveLength(1);
@@ -88,7 +88,7 @@ apiTest.describe(
       const { query } = transpile(streamlangDSL);
 
       const docs = [{ message: 'Error code 404 found' }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(1);
@@ -112,7 +112,7 @@ apiTest.describe(
       const { query } = transpile(streamlangDSL);
 
       const docs = [{ message: 'Android.log' }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(1);
@@ -136,7 +136,7 @@ apiTest.describe(
       const { query } = transpile(streamlangDSL);
 
       const docs = [{ message: 'User alice has 3 new messages' }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(1);
@@ -164,12 +164,12 @@ apiTest.describe(
         const docWithField = { message: 'An error occurred', status: 'doc1' };
         const docWithoutField = { status: 'doc2' }; // Should be filtered out
         const docs = [docWithField, docWithoutField];
-        await testBed.ingest(indexName, docs);
+        await testBed.ingest(indexName, docs, undefined, { dynamic: false });
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         // ES|QL filters out documents with missing field when ignore_missing: false
+        // status is not referenced in the query so ES|QL does not return it as a column.
         expect(esqlResult.documents).toHaveLength(1);
-        expect(esqlResult.documents[0]).toStrictEqual(expect.objectContaining({ status: 'doc1' }));
         expect(esqlResult.documents[0]?.message).toBe('An warning occurred');
       }
     );
@@ -194,13 +194,15 @@ apiTest.describe(
       const docWithField = { message: 'An error occurred', status: 'doc1' };
       const docWithoutField = { status: 'doc2' }; // Should pass through
       const docs = [docWithField, docWithoutField];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       // Both documents should be present
-      expect(esqlResult.documents).toHaveLength(2);
-      const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
-      const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
+      // status is not referenced in the query so ES|QL does not return it as a column.
+      // Use documentsOrdered by ingestion position: [0] doc with message, [1] doc without.
+      expect(esqlResult.documentsOrdered).toHaveLength(2);
+      const doc1 = esqlResult.documentsOrdered[0];
+      const doc2 = esqlResult.documentsOrdered[1];
       expect(doc1?.message).toBe('An warning occurred');
       expect(doc2?.message).toBeNull();
     });
@@ -229,18 +231,20 @@ apiTest.describe(
         { message: 'An error occurred', event: { kind: 'test' }, status: 'doc1' },
         { message: 'An error occurred', event: { kind: 'production' }, status: 'doc2' },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      expect(esqlResult.documents).toHaveLength(2);
+      // status is not referenced in the query so ES|QL does not return it as a column.
+      // Use documentsOrdered by ingestion position: [0] event.kind=test, [1] event.kind=production.
+      expect(esqlResult.documentsOrdered).toHaveLength(2);
 
       // First doc should have message replaced (where condition matched)
-      const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
+      const doc1 = esqlResult.documentsOrdered[0];
       expect(doc1?.message).toBe('An warning occurred');
       expect(doc1?.['event.kind']).toBe('test');
 
       // Second doc should keep original message (where condition not matched)
-      const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
+      const doc2 = esqlResult.documentsOrdered[1];
       expect(doc2?.message).toBe('An error occurred');
       expect(doc2?.['event.kind']).toBe('production');
     });
@@ -282,19 +286,21 @@ apiTest.describe(
             status: 'doc2',
           },
         ];
-        await testBed.ingest(indexName, docs);
+        await testBed.ingest(indexName, docs, undefined, { dynamic: false });
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
-        expect(esqlResult.documents).toHaveLength(2);
+        // status is not referenced in the query so ES|QL does not return it as a column.
+        // Use documentsOrdered by ingestion position: [0] event.kind=test, [1] event.kind=production.
+        expect(esqlResult.documentsOrdered).toHaveLength(2);
 
         // First doc should have clean_message created (where condition matched)
-        const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
+        const doc1 = esqlResult.documentsOrdered[0];
         expect(doc1?.message).toBe('An error occurred'); // Original preserved
         expect(doc1?.clean_message).toBe('An warning occurred'); // New field created
         expect(doc1?.['event.kind']).toBe('test');
 
         // Second doc should have clean_message as empty string (where condition not matched)
-        const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
+        const doc2 = esqlResult.documentsOrdered[1];
         expect(doc2?.message).toBe('An error occurred');
         expect(doc2?.clean_message).toBe('');
         expect(doc2?.['event.kind']).toBe('production');

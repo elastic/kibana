@@ -32,7 +32,7 @@ apiTest.describe(
       const { query } = transpile(streamlangDSL);
 
       const docs = [{ source_ip: '128.232.110.120', destination_ip: '192.168.1.1' }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(1);
@@ -64,7 +64,7 @@ apiTest.describe(
             test_network_direction_field: ['private'],
           },
         ];
-        await testBed.ingest(indexName, docs);
+        await testBed.ingest(indexName, docs, undefined, { dynamic: false });
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         expect(esqlResult.documents).toHaveLength(1);
@@ -95,7 +95,7 @@ apiTest.describe(
           { source_ip: '128.232.110.120', destination_ip: '192.168.1.1' },
           { destination_ip: '192.168.1.1' },
         ];
-        await testBed.ingest(indexName, docs);
+        await testBed.ingest(indexName, docs, undefined, { dynamic: false });
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         expect(esqlResult.documents).toHaveLength(2);
@@ -132,7 +132,7 @@ apiTest.describe(
           event: { kind: 'production' },
         },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(2);

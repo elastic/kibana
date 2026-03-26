@@ -32,7 +32,7 @@ apiTest.describe(
       const { query } = transpile(streamlangDSL);
 
       const docs = [{ host: { original: 'test-host' } }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents[0]).toStrictEqual(
@@ -58,13 +58,13 @@ apiTest.describe(
 
         const { query } = transpile(streamlangDSL);
 
-        // Add `mappingDoc` to address ES|QL limitation that any column used as operand must be available as a column (pre-mapped)
-        const mappingDoc = { host: { original: 'new-host-0', renamed: 'old-host-0' } };
+        // commenting out mapping docs whilst testing unmapped fields
+        // const mappingDoc = { host: { original: 'new-host-0', renamed: 'old-host-0' } };
         const docWithMissingSource = { host: { renamed: 'old-host-1' } };
         const docWithMissingTarget = { host: { original: 'new-host-2' } }; // Should only pass through filter
         const docWithMissingFields = { message: 'message-3' };
-        const docs = [mappingDoc, docWithMissingSource, docWithMissingTarget, docWithMissingFields];
-        await testBed.ingest(indexName, docs);
+        const docs = [docWithMissingSource, docWithMissingTarget, docWithMissingFields];
+        await testBed.ingest(indexName, docs, undefined, { dynamic: false });
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         // ES|QL filters out documents failing the ignore_missing and override checks
@@ -101,7 +101,7 @@ apiTest.describe(
         docWithMissingTarget,
         docWithMissingFields,
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(2);
@@ -137,7 +137,7 @@ apiTest.describe(
         docWithMissingTarget,
         docWithMissingFields,
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(2);

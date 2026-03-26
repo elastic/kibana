@@ -21,6 +21,12 @@ export interface ESQLTranspilationOptions {
   pipeTab: BasicPrettyPrinterOptions['pipeTab'];
   sourceIndex?: string;
   limit?: number;
+  /**
+   * When set, prepends a `SET UNMAPPED_FIELDS=<strategy>` directive to the query.
+   * - `load`   — costly extraction: read unmapped fields from _source
+   * - `nullify` — cheap nullification: substitute unmapped fields with null
+   */
+  unmappedFields?: 'load' | 'nullify';
 }
 
 export interface ESQLTranspilationResult {
@@ -34,7 +40,10 @@ export const conditionToESQL = (condition: Condition): string => {
 
 export const transpile = (
   streamlang: StreamlangDSL,
-  transpilationOptions: ESQLTranspilationOptions = { pipeTab: DEFAULT_PIPE_TAB }
+  transpilationOptions: ESQLTranspilationOptions = {
+    pipeTab: DEFAULT_PIPE_TAB,
+    unmappedFields: 'load',
+  }
 ): ESQLTranspilationResult => {
   const validatedStreamlang = streamlangDSLSchema.parse(streamlang);
 
@@ -43,9 +52,17 @@ export const transpile = (
   );
 
   const commandsArray = [esqlCommandsFromStreamlang].filter(Boolean);
+  const pipeQuery = `  | ${commandsArray.join('\n|')}`;
+
+  const { unmappedFields } = transpilationOptions;
+  // ES|QL SET: the setting name must be lowercase (identifier lookup is case-sensitive),
+  // and the value must be a quoted string, e.g. SET unmapped_fields="LOAD"
+  const setDirective = unmappedFields
+    ? `SET unmapped_fields="${unmappedFields.toUpperCase()}"\n`
+    : '';
 
   return {
-    query: `  | ${commandsArray.join('\n|')}`,
+    query: `${setDirective}${pipeQuery}`,
     commands: commandsArray,
   };
 };

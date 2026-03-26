@@ -9,7 +9,6 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { DissectProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
-import { expectDefined } from '../../../utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
@@ -34,7 +33,7 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
           message: '[2025-01-01T00:00:00.000Z] [info] 127.0.0.1 - - "GET / HTTP/1.1" 200 123',
         },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
       expect(esqlResult.documents[0]).toStrictEqual(
         expect.objectContaining({
@@ -67,16 +66,15 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
       };
       const { query } = transpile(streamlangDSL);
 
-      // Ingest a doc with all operand fields to satisfy ES|QL requirement that any field used in the query must be pre-mapped (available as a column)
-      const mappingDoc = {
-        '@timestamp': '',
-        message: '',
-        log: { level: '' },
-        host: { name: '' },
-        client: { ip: '' },
-      };
+      // commenting out mapping docs whilst testing unmapped fields
+      // const mappingDoc = {
+      //   '@timestamp': '',
+      //   message: '',
+      //   log: { level: '' },
+      //   host: { name: '' },
+      //   client: { ip: '' },
+      // };
       const docs = [
-        mappingDoc,
         { expect: 'null', log: { level: 'undissected' } }, // Since log.level is an operand field in dissect pattern, but message is missing, it nullifies the field
         {
           expect: 'dissected',
@@ -85,22 +83,14 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
         },
         { expect: 'null', log: { level: 'undissected' }, message: '2025-01-01T00:00:00.000Z]' },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      // Get docs grouped by their expectation
-      const nullDocs = esqlResult.documents.filter((d) => d.expect === 'null');
-      const dissectedDocs = esqlResult.documents.filter((d) => d.expect === 'dissected');
-
-      // Test null docs have null log.level
-      nullDocs.forEach((doc) => {
-        expect(doc['log.level']).toBeNull();
-      });
-
-      // Test dissected docs have correct log.level
-      dissectedDocs.forEach((doc) => {
-        expect(doc['log.level']).toBe('dissected');
-      });
+      // expect is not referenced in the query so ES|QL does not return it as a column.
+      // Use documentsOrdered by ingestion position: [0] no-message, [1] valid match, [2] bad format.
+      expect(esqlResult.documentsOrdered[0]['log.level']).toBeNull(); // no message → dissect skipped
+      expect(esqlResult.documentsOrdered[1]['log.level']).toBe('dissected'); // valid → dissected
+      expect(esqlResult.documentsOrdered[2]['log.level']).toBeNull(); // bad format → null
     }
   );
 
@@ -121,13 +111,13 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
       };
       const { query } = transpile(streamlangDSL);
 
-      const mappingDoc = { message: '[2025-01-01T00:00:00.000Z] [info] 192.168.90.9' };
-      const docs = [mappingDoc, { log: { level: 'info' } }];
-      await testBed.ingest(indexName, docs);
+      const docWithMessage = { message: '[2025-01-01T00:00:00.000Z] [info] 192.168.90.9' };
+      const docs = [docWithMessage, { log: { level: 'info' } }];
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       // Should have filtered out the doc missing `message` field
-      expect(esqlResult.documents).toHaveLength(1); // Only the mapping doc
+      expect(esqlResult.documents).toHaveLength(1); // Only the doc with a valid message
     }
   );
 
@@ -148,7 +138,7 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
       };
       const { query } = transpile(streamlangDSL);
       const docs = [{ message: 'value1-value2' }];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
       expect(esqlResult.documents[0]).toStrictEqual(
         expect.objectContaining({
@@ -177,20 +167,22 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
         ],
       };
       const { query } = transpile(streamlangDSL);
-      const mappingDoc = { log: { level: '' } };
+      // const mappingDoc = { log: { level: '' } }; // commenting out mapping docs whilst testing unmapped fields
       const docs = [
-        mappingDoc,
         { attributes: { should_exist: 'YES' }, message: '[info]' },
         { attributes: { size: 2048 }, message: '[warn]' },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       // Find documents by their attributes
+      // attributes.should_exist is referenced in the WHERE clause so it is a column — .find() works.
       const shouldExistDoc = esqlResult.documents.find(
         (doc) => doc['attributes.should_exist'] === 'YES'
       );
-      const sizeDocs = esqlResult.documents.filter((doc) => doc['attributes.size'] === 2048);
+      // attributes.size is not referenced in the query so ES|QL does not return it as a column.
+      // Use documentsOrdered by ingestion position: [1] is the doc with attributes.size.
+      const sizeDoc = esqlResult.documentsOrdered[1];
 
       // Verify the document with should_exist has been properly dissected
       expect(shouldExistDoc).toStrictEqual(
@@ -199,10 +191,8 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
         })
       );
 
-      // Verify documents without should_exist have not been dissected
-      sizeDocs.forEach((doc) => {
-        expect(doc['log.level']).toBeNull();
-      });
+      // Verify the document without should_exist has not been dissected
+      expect(sizeDoc['log.level']).toBeNull();
     }
   );
 
@@ -249,7 +239,9 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
         { log: { severity: 3, level: 'invalid' }, message: '[warn] [3] [1024] 34.2' }, // ingest log.severity as number
         { log: { size: '4096' }, message: '[info] [4] [2048] 22.4' }, // ingest size as string
       ];
-      await testBed.ingest(indexName, [...docsToDissect, ...docsToSkip]);
+      await testBed.ingest(indexName, [...docsToDissect, ...docsToSkip], undefined, {
+        dynamic: false,
+      });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       // Group documents by their log levels
@@ -334,17 +326,16 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
       };
       const { query } = transpile(streamlangDSL);
 
-      // Mapping doc to ensure columns exist so pre-cast EVALs don't error
-      const mappingDoc = {
-        case: 'mapping',
-        message: '',
-        log: { level: '', severity: '' },
-        client: { ip: '' },
-        flags: { process: '' },
-      };
+      // commenting out mapping docs whilst testing unmapped fields
+      // const mappingDoc = {
+      //   case: 'mapping',
+      //   message: '',
+      //   log: { level: '', severity: '' },
+      //   client: { ip: '' },
+      //   flags: { process: '' },
+      // };
 
       const docs = [
-        mappingDoc,
         // Both conditions true -> dissect applies
         {
           case: 'both',
@@ -370,30 +361,27 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
         },
       ];
 
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      // Find specific documents by their case
-      const dissectedDoc = esqlResult.documents.find((d) => d.case === 'both');
-      const noMessageDoc = esqlResult.documents.find((d) => d.case === 'no_message');
-      const noWhereDoc = esqlResult.documents.find((d) => d.case === 'no_where');
-      const noneDoc = esqlResult.documents.find((d) => d.case === 'none');
+      // case is not referenced in the query so ES|QL does not return it as a column.
+      // Use documentsOrdered by ingestion position: [0] both, [1] no_message, [2] no_where, [3] none.
+      const dissectedDoc = esqlResult.documentsOrdered[0];
+      const noMessageDoc = esqlResult.documentsOrdered[1];
+      const noWhereDoc = esqlResult.documentsOrdered[2];
+      const noneDoc = esqlResult.documentsOrdered[3];
 
       // Test the properly dissected document
-      expectDefined(dissectedDoc);
       expect(dissectedDoc['log.level']).toBe('info');
       expect(dissectedDoc['client.ip']).toBe('10.1.1.1');
 
       // Test documents that should be skipped
-      expectDefined(noMessageDoc);
       expect(noMessageDoc['log.level']).toBeNull();
       expect(noMessageDoc['client.ip']).toBeNull();
 
-      expectDefined(noWhereDoc);
       expect(noWhereDoc['log.level']).toBeNull();
       expect(noWhereDoc['client.ip']).toBeNull();
 
-      expectDefined(noneDoc);
       expect(noneDoc['log.level']).toBeNull();
       expect(noneDoc['client.ip']).toBeNull();
     }
@@ -420,18 +408,18 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
       };
       const { query } = transpile(streamlangDSL);
 
-      const mappingDoc = {
-        '@timestamp': '',
-        user: { full_name: '' },
-        client: { ip: '' },
-        path: '',
-        message: '',
-        flags: { process: '' },
-        elapsed: 0,
-      };
+      // commenting out mapping docs whilst testing unmapped fields
+      // const mappingDoc = {
+      //   '@timestamp': '',
+      //   user: { full_name: '' },
+      //   client: { ip: '' },
+      //   path: '',
+      //   message: '',
+      //   flags: { process: '' },
+      //   elapsed: 0,
+      // };
 
       const docs = [
-        mappingDoc,
         // Full match; user pieces john & john, path parts part2 & part1
         {
           case: 'full',
@@ -466,17 +454,17 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
         },
       ];
 
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      // Find specific documents by their case
-      const fullDoc = esqlResult.documents.find((d) => d.case === 'full');
-      const overrideDoc = esqlResult.documents.find((d) => d.case === 'override');
-      const skipMissingDoc = esqlResult.documents.find((d) => d.case === 'skip_missing');
-      const skipWhereDoc = esqlResult.documents.find((d) => d.case === 'skip_where');
+      // case is not referenced in the query so ES|QL does not return it as a column.
+      // Use documentsOrdered by ingestion position: [0] full, [1] override, [2] skip_missing, [3] skip_where.
+      const fullDoc = esqlResult.documentsOrdered[0];
+      const overrideDoc = esqlResult.documentsOrdered[1];
+      const skipMissingDoc = esqlResult.documentsOrdered[2];
+      const skipWhereDoc = esqlResult.documentsOrdered[3];
 
       // Test the fully matched document
-      expectDefined(fullDoc);
       expect(fullDoc['@timestamp']).toBe('2025-01-01T00:00:00Z');
       expect(fullDoc['user.full_name']).toBe('john doe');
       expect(fullDoc['client.ip']).toBe('10.0.0.1');
@@ -484,7 +472,6 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
       expect(fullDoc.elapsed).toBe('9800');
 
       // Test the document with overridden values
-      expectDefined(overrideDoc);
       expect(overrideDoc['@timestamp']).toBe('2025-02-01T00:00:01Z');
       expect(overrideDoc['user.full_name']).toBe('alice alice');
       expect(overrideDoc['client.ip']).toBe('192.168.0.5');
@@ -492,18 +479,16 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
       expect(overrideDoc.elapsed).toBe('5500');
 
       // Test the document that should be skipped due to missing message
-      expectDefined(skipMissingDoc);
       expect(skipMissingDoc['user.full_name']).toBeNull();
       expect(skipMissingDoc['client.ip']).toBeNull();
       expect(skipMissingDoc.path).toBeNull();
 
       // Test the document that should be skipped due to where condition
-      expectDefined(skipWhereDoc);
+      // status is not referenced in the query so ES|QL does not return it as a column.
       expect(skipWhereDoc['user.full_name']).toBeNull();
       expect(skipWhereDoc['client.ip']).toBeNull();
       expect(skipWhereDoc.path).toBeNull();
       expect(skipWhereDoc.elapsed).toBeNull();
-      expect(skipWhereDoc.status).toBe(203); // Non operand field remains number
     }
   );
 
@@ -523,25 +508,24 @@ apiTest.describe('Streamlang to ES|QL - Dissect Processor', () => {
         ],
       };
       const { query } = transpile(streamlangDSL);
-      const mappingDoc = { size: 0, message: '' }; // Ingest size as long type
+      // const mappingDoc = { size: 0, message: '' }; // [UNMAPPED_FIELDS] NOTE: removing this doc changes test semantics —
+      // without it, 'size' is unmapped and loaded as keyword, so parseFloat still works but the field type changes
       const docs = [
-        mappingDoc,
         { case: 'dissected', size: 1.9, message: '3.14159265358979323846' },
         { case: 'skipped', size: 88.99 },
       ];
-      await testBed.ingest(indexName, docs);
+      await testBed.ingest(indexName, docs, undefined, { dynamic: false });
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      // Find specific documents by their case
-      const dissectedDoc = esqlResult.documents.find((d) => d.case === 'dissected');
-      const skippedDoc = esqlResult.documents.find((d) => d.case === 'skipped');
+      // case is not referenced in the query so ES|QL does not return it as a column.
+      // Use documentsOrdered by ingestion position: [0] dissected, [1] skipped.
+      const dissectedDoc = esqlResult.documentsOrdered[0];
+      const skippedDoc = esqlResult.documentsOrdered[1];
 
       // Test the dissected document
-      expectDefined(dissectedDoc);
       expect(parseFloat(dissectedDoc.size as string)).toBeCloseTo(3.1415);
 
       // Test the skipped document
-      expectDefined(skippedDoc);
       expect(skippedDoc.size).toBeNull();
     }
   );

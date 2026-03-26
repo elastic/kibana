@@ -179,13 +179,14 @@ apiTest.describe(
 
       expect(esqlResult.documents).toHaveLength(2);
 
-      // First doc should have tags sorted (where condition matched)
-      const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
+      // status is not referenced in the query so ES|QL does not return it as a column.
+      // Use documentsOrdered by ingestion position: [0] event.kind=test, [1] event.kind=production.
+      const doc1 = esqlResult.documentsOrdered[0];
       expect(doc1).toStrictEqual(expect.objectContaining({ tags: ['alpha', 'bravo', 'charlie'] }));
       expect(doc1?.['event.kind']).toBe('test');
 
       // Second doc: where condition not matched, processor doesn't sort
-      const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
+      const doc2 = esqlResult.documentsOrdered[1];
       expect(doc2?.tags).toStrictEqual(expect.arrayContaining(['zulu', 'xray', 'yankee']));
       expect(doc2?.tags).toHaveLength(3);
       expect(doc2?.['event.kind']).toBe('production');
@@ -233,8 +234,9 @@ apiTest.describe(
 
         expect(esqlResult.documents).toHaveLength(2);
 
-        // First doc should have sorted_tags created (where condition matched)
-        const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
+        // status is not referenced in the query so ES|QL does not return it as a column.
+        // Use documentsOrdered by ingestion position: [0] event.kind=test, [1] event.kind=production.
+        const doc1 = esqlResult.documentsOrdered[0];
         expect(doc1).toStrictEqual(
           expect.objectContaining({
             // ES|QL returns keyword fields sorted, so original order is not preserved in the result
@@ -245,7 +247,7 @@ apiTest.describe(
         expect(doc1?.['event.kind']).toBe('test');
 
         // Second doc should have sorted_tags as the original placeholder (where condition not matched)
-        const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
+        const doc2 = esqlResult.documentsOrdered[1];
         expect(doc2?.tags).toStrictEqual(expect.arrayContaining(['zulu', 'xray', 'yankee']));
         expect(doc2?.tags).toHaveLength(3);
         expect(doc2).toStrictEqual(expect.objectContaining({ sorted_tags: '' }));
@@ -276,8 +278,10 @@ apiTest.describe(
 
       // Both documents should be present
       expect(esqlResult.documents).toHaveLength(2);
-      const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
-      const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
+      // status is not referenced in the query so ES|QL does not return it as a column.
+      // Use documentsOrdered by ingestion position: [0] has tags, [1] missing tags.
+      const doc1 = esqlResult.documentsOrdered[0];
+      const doc2 = esqlResult.documentsOrdered[1];
       expect(doc1).toStrictEqual(expect.objectContaining({ tags: ['alpha', 'bravo', 'charlie'] }));
       expect(doc2).toStrictEqual(expect.objectContaining({ tags: null }));
     });

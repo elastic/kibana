@@ -65,7 +65,16 @@ function convertTinymathToESQL(node: TinymathAST): ESQLAstItem {
   if (isTinymathVariable(node)) {
     // TinyMath parses field names as variables with the field name in 'value'
     // e.g., 'price' or 'attributes.price' or 'order.item.quantity'
-    return Builder.expression.column(node.value);
+    //
+    // Cast with ::double so that unmapped fields loaded as keyword via
+    // SET unmapped_fields="LOAD" (e.g. "10" instead of 10) are coerced to
+    // numeric type before arithmetic or comparison. ::double is a no-op on
+    // fields that are already numeric, and propagates null unchanged.
+    // This is the spec-idiomatic form (see ES|QL unmapped field loading semantics doc).
+    return Builder.expression.inlineCast({
+      value: Builder.expression.column(node.value),
+      castType: 'double',
+    });
   }
 
   // Handle function
@@ -191,7 +200,13 @@ export function convertMathProcessorToESQL(processor: MathProcessor): ESQLAstCom
     ? Builder.expression.func.call('CASE', [
         conditionExpression,
         mathExpression as ESQLSingleAstItem,
-        Builder.expression.column(processor.to), // ELSE keep existing value
+        // Cast the else (keep-existing) branch to ::double to match the type
+        // produced by the then-branch. Without this, ES|QL raises a type
+        // conflict when the target field is unmapped (loaded as keyword).
+        Builder.expression.inlineCast({
+          value: Builder.expression.column(processor.to),
+          castType: 'double',
+        }),
       ])
     : mathExpression;
 
