@@ -25,6 +25,7 @@
     "@kbn/dev-cli-errors",
     "@kbn/config-schema",
     "@kbn/evals-common",
-    "@kbn/safer-lodash-set"
+    "@kbn/safer-lodash-set",
+    "@kbn/test"
   ]
 }
