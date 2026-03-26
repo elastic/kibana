@@ -66024,6 +66024,10 @@ paths:
                   additionalProperties: {}
                   description: Context overrides for the step execution.
                   type: object
+                executionContext:
+                  additionalProperties: {}
+                  description: Execution context for the step execution.
+                  type: object
                 stepId:
                   description: ID of the step to test.
                   type: string
