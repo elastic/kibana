@@ -65,44 +65,36 @@ describe('UnifiedSidebar', () => {
     it('renders for agent root route', () => {
       renderSidebar('/agents/my-agent');
       expect(screen.getByTestId('agentBuilderSidebar-conversation')).toBeInTheDocument();
-      expect(screen.queryByTestId('agentBuilderSidebar-agent')).not.toBeInTheDocument();
       expect(screen.queryByTestId('agentBuilderSidebar-manage')).not.toBeInTheDocument();
     });
 
     it('renders for conversation route', () => {
       renderSidebar('/agents/my-agent/conversations/abc-123');
       expect(screen.getByTestId('agentBuilderSidebar-conversation')).toBeInTheDocument();
-      expect(screen.queryByTestId('agentBuilderSidebar-agent')).not.toBeInTheDocument();
       expect(screen.queryByTestId('agentBuilderSidebar-manage')).not.toBeInTheDocument();
     });
-  });
 
-  describe('agent settings sidebar', () => {
     it('renders for overview route', () => {
       renderSidebar('/agents/my-agent/overview');
-      expect(screen.getByTestId('agentBuilderSidebar-agent')).toBeInTheDocument();
-      expect(screen.queryByTestId('agentBuilderSidebar-conversation')).not.toBeInTheDocument();
+      expect(screen.getByTestId('agentBuilderSidebar-conversation')).toBeInTheDocument();
       expect(screen.queryByTestId('agentBuilderSidebar-manage')).not.toBeInTheDocument();
     });
 
     it('renders for skills route', () => {
       renderSidebar('/agents/my-agent/skills');
-      expect(screen.getByTestId('agentBuilderSidebar-agent')).toBeInTheDocument();
-      expect(screen.queryByTestId('agentBuilderSidebar-conversation')).not.toBeInTheDocument();
+      expect(screen.getByTestId('agentBuilderSidebar-conversation')).toBeInTheDocument();
       expect(screen.queryByTestId('agentBuilderSidebar-manage')).not.toBeInTheDocument();
     });
 
     it('renders for plugins route', () => {
       renderSidebar('/agents/my-agent/plugins');
-      expect(screen.getByTestId('agentBuilderSidebar-agent')).toBeInTheDocument();
-      expect(screen.queryByTestId('agentBuilderSidebar-conversation')).not.toBeInTheDocument();
+      expect(screen.getByTestId('agentBuilderSidebar-conversation')).toBeInTheDocument();
       expect(screen.queryByTestId('agentBuilderSidebar-manage')).not.toBeInTheDocument();
     });
 
     it('renders for connectors route', () => {
       renderSidebar('/agents/my-agent/connectors');
-      expect(screen.getByTestId('agentBuilderSidebar-agent')).toBeInTheDocument();
-      expect(screen.queryByTestId('agentBuilderSidebar-conversation')).not.toBeInTheDocument();
+      expect(screen.getByTestId('agentBuilderSidebar-conversation')).toBeInTheDocument();
       expect(screen.queryByTestId('agentBuilderSidebar-manage')).not.toBeInTheDocument();
     });
   });
@@ -112,35 +104,30 @@ describe('UnifiedSidebar', () => {
       renderSidebar('/manage/agents');
       expect(screen.getByTestId('agentBuilderSidebar-manage')).toBeInTheDocument();
       expect(screen.queryByTestId('agentBuilderSidebar-conversation')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('agentBuilderSidebar-agent')).not.toBeInTheDocument();
     });
 
     it('renders for manage tools route', () => {
       renderSidebar('/manage/tools');
       expect(screen.getByTestId('agentBuilderSidebar-manage')).toBeInTheDocument();
       expect(screen.queryByTestId('agentBuilderSidebar-conversation')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('agentBuilderSidebar-agent')).not.toBeInTheDocument();
     });
 
     it('renders for manage skills route', () => {
       renderSidebar('/manage/skills');
       expect(screen.getByTestId('agentBuilderSidebar-manage')).toBeInTheDocument();
       expect(screen.queryByTestId('agentBuilderSidebar-conversation')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('agentBuilderSidebar-agent')).not.toBeInTheDocument();
     });
 
     it('renders for manage plugins route', () => {
       renderSidebar('/manage/plugins');
       expect(screen.getByTestId('agentBuilderSidebar-manage')).toBeInTheDocument();
       expect(screen.queryByTestId('agentBuilderSidebar-conversation')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('agentBuilderSidebar-agent')).not.toBeInTheDocument();
     });
 
     it('renders for manage connectors route', () => {
       renderSidebar('/manage/connectors');
       expect(screen.getByTestId('agentBuilderSidebar-manage')).toBeInTheDocument();
       expect(screen.queryByTestId('agentBuilderSidebar-conversation')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('agentBuilderSidebar-agent')).not.toBeInTheDocument();
     });
   });
 });

@@ -7,6 +7,7 @@
 
 import { useMutation } from '@kbn/react-query';
 import { useRef, useState, useMemo, useCallback, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import { firstValueFrom } from 'rxjs';
 import { isEqual } from 'lodash';
@@ -117,15 +118,26 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
 
   const removeError = useCallback(() => {
     setError(null);
-    setErrorSteps([]);
+    setErrorSteps((prev) => (prev.length === 0 ? prev : []));
   }, []);
 
+  const { key: locationKey } = useLocation();
+
   useEffect(() => {
-    // Clear errors any time conversation id changes - we do not persist it.
-    if (conversationId) {
-      removeError();
-    }
-  }, [conversationId, removeError]);
+    // Clear error state on every navigation. location.key is updated on every history push,
+    // including re-navigation to the same URL (e.g. clicking "New" while already on /new
+    // with an errored conversation). A conversationId-based effect was used previously but
+    // missed both that case and navigating from an errored conversation back to /new, since
+    // conversationId stays undefined for the /new route.
+    //
+    // Known gap: the old NewConversationButton (which lived inside SendMessageProvider) also
+    // cancelled any in-flight stream via cleanConversation() when clicking "New" on /new.
+    // That button was removed during the sidebar refactor and the sidebar replacement lives
+    // outside SendMessageProvider, so it cannot call cleanConversation() directly. Fixing the
+    // streaming-cancellation case properly requires a larger provider refactor —
+    // and is left as a known limitation for now.
+    removeError();
+  }, [locationKey, removeError]);
 
   const browserApiToolsMetadata = useMemo(() => {
     if (!browserApiTools) return undefined;

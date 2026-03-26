@@ -9,9 +9,7 @@ import React, { useMemo } from 'react';
 
 import { EuiFlexGroup, EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
-import { useKibana } from '../../../../hooks/use_kibana';
+import { useFeatureFlags } from '../../../../hooks/use_feature_flags';
 import { getManageNavItems } from '../../../../route_config';
 import { SidebarNavList } from '../shared/sidebar_nav_list';
 
@@ -20,27 +18,10 @@ interface ManageSidebarViewProps {
 }
 
 export const ManageSidebarView: React.FC<ManageSidebarViewProps> = ({ pathname }) => {
-  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
+  const featureFlags = useFeatureFlags();
   const { euiTheme } = useEuiTheme();
-  const {
-    services: { uiSettings },
-  } = useKibana();
-  const isConnectorsEnabled = uiSettings.get<boolean>(
-    AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID,
-    false
-  );
 
-  const navItems = useMemo(() => {
-    return getManageNavItems().filter((item) => {
-      if (item.isExperimental && !isExperimentalFeaturesEnabled) {
-        return false;
-      }
-      if (item.isConnectors && !isConnectorsEnabled) {
-        return false;
-      }
-      return true;
-    });
-  }, [isExperimentalFeaturesEnabled, isConnectorsEnabled]);
+  const navItems = useMemo(() => getManageNavItems(featureFlags), [featureFlags]);
 
   const isActive = (path: string) => pathname.startsWith(path);
 

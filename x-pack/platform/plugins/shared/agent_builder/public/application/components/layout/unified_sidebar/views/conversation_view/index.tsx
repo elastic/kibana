@@ -23,18 +23,17 @@ import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { appPaths } from '../../../../../utils/app_paths';
 import {
   getAgentIdFromPath,
   getAgentSettingsNavItems,
   getConversationIdFromPath,
 } from '../../../../../route_config';
+import { useFeatureFlags } from '../../../../../hooks/use_feature_flags';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { useValidateAgentId } from '../../../../../hooks/agents/use_validate_agent_id';
 import { useAgentBuilderAgents } from '../../../../../hooks/agents/use_agents';
 import { useLastAgentId } from '../../../../../hooks/use_last_agent_id';
-import { useKibana } from '../../../../../hooks/use_kibana';
 import { useConversationList } from '../../../../../hooks/use_conversation_list';
 import { SidebarNavList } from '../../shared/sidebar_nav_list';
 
@@ -94,28 +93,17 @@ export const ConversationSidebarView: React.FC = () => {
   const validateAgentId = useValidateAgentId();
   const { isFetched: isAgentsFetched } = useAgentBuilderAgents();
   const lastAgentId = useLastAgentId();
+  const featureFlags = useFeatureFlags();
 
   const hasSetCustomiseAccordionFirstTime = useRef(false);
 
   const { conversations = [] } = useConversationList({ agentId });
   const hasConversations = conversations.length > 0;
 
-  const {
-    services: { uiSettings },
-  } = useKibana();
-  const isConnectorsEnabled = uiSettings.get<boolean>(
-    AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID,
-    false
+  const navItems = useMemo(
+    () => getAgentSettingsNavItems(agentId, featureFlags),
+    [agentId, featureFlags]
   );
-
-  const navItems = useMemo(() => {
-    return getAgentSettingsNavItems(agentId).filter((item) => {
-      if (item.isConnectors && !isConnectorsEnabled) {
-        return false;
-      }
-      return true;
-    });
-  }, [agentId, isConnectorsEnabled]);
 
   const isActive = (path: string) => pathname === path;
 
@@ -256,6 +244,7 @@ export const ConversationSidebarView: React.FC = () => {
         arrowDisplay="left"
         forceState={isChatsOpen ? 'open' : 'closed'}
         onToggle={() => setIsChatsOpen((prev) => !prev)}
+        buttonProps={{ 'data-test-subj': 'agentBuilderSidebarChatsToggle' }}
         paddingSize="none"
         css={[accordionButtonStyles, chatsAccordionStyles]}
       >

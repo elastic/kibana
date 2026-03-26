@@ -8,35 +8,16 @@
 import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { useMemo } from 'react';
 
-import { AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { AppLayout } from './components/layout/app_layout';
 import { RootRedirect } from './components/redirects/root_redirect';
 import { LegacyConversationRedirect } from './components/redirects/legacy_conversation_redirect';
-import { allRoutes } from './route_config';
-import { useExperimentalFeatures } from './hooks/use_experimental_features';
-import { useKibana } from './hooks/use_kibana';
+import { getEnabledRoutes } from './route_config';
+import { useFeatureFlags } from './hooks/use_feature_flags';
 
 export const AgentBuilderRoutes: React.FC<{}> = () => {
-  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
-  const {
-    services: { uiSettings },
-  } = useKibana();
-  const isConnectorsEnabled = uiSettings.get<boolean>(
-    AGENT_BUILDER_CONNECTORS_ENABLED_SETTING_ID,
-    false
-  );
+  const featureFlags = useFeatureFlags();
 
-  const enabledRoutes = useMemo(() => {
-    return allRoutes.filter((route) => {
-      if (route.isExperimental && !isExperimentalFeaturesEnabled) {
-        return false;
-      }
-      if (route.isConnectors && !isConnectorsEnabled) {
-        return false;
-      }
-      return true;
-    });
-  }, [isExperimentalFeaturesEnabled, isConnectorsEnabled]);
+  const enabledRoutes = useMemo(() => getEnabledRoutes(featureFlags), [featureFlags]);
 
   return (
     <AppLayout>
