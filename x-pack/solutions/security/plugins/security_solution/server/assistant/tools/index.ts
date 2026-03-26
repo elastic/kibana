@@ -16,6 +16,7 @@ import { SECURITY_LABS_KNOWLEDGE_BASE_TOOL } from './security_labs/security_labs
 import { ENTITY_RISK_SCORE_TOOL } from './entity_risk_score/entity_risk_score';
 import { INTEGRATION_KNOWLEDGE_TOOL } from './integration_knowledge/integration_knowledge_tool';
 import { ASSET_MISCONFIGURATIONS_TOOL } from './asset_misconfigurations/asset_misconfigurations_tool';
+import { DATA_SOURCE_CATALOG_TOOL } from '../../lib/data_source_catalog/catalog_tools/data_source_catalog_tool';
 
 // any new tool should also be added to telemetry schema in
 // x-pack/solutions/security/plugins/elastic_assistant/server/lib/telemetry/event_based_telemetry.ts
@@ -31,4 +32,5 @@ export const assistantTools = [
   ENTITY_RISK_SCORE_TOOL,
   INTEGRATION_KNOWLEDGE_TOOL,
   ASSET_MISCONFIGURATIONS_TOOL,
+  DATA_SOURCE_CATALOG_TOOL,
 ];
