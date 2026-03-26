@@ -28,8 +28,7 @@ export type AugmentedListScriptsRequestQuery = Exclude<ListScriptsRequestQuery, 
 const buildDisjunctionKql = (field: string, values: string[]): string => {
   if (!values || values.length === 0) return '';
   if (values.length === 1) return `${field}:"${values[0]}"`;
-  const escapeQuotes = (value: string): string => value.replace(/\"/g, '\\"');
-  const disjunction = values.map((value) => `${field}:"${escapeQuotes(value)}"`).join(' OR ');
+  const disjunction = values.map((value) => `${field}:"${value}"`).join(' OR ');
   return `(${disjunction})`;
 };
 

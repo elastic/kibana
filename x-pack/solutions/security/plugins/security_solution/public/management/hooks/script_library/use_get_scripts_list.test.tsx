@@ -117,6 +117,23 @@ describe('useGetEndpointScriptsList hook', () => {
     );
   });
 
+  it('should construct correct KQL when special characters are present', async () => {
+    await renderReactQueryHook(() =>
+      useGetEndpointScriptsList({
+        os: ['linux', 'windows'],
+        fileType: ['script', 'archive'],
+        category: ['dataCollection', 'userManagement'],
+        searchTerms: [`\\test \\search\\`, `"another" "search" "term" \\backspace`],
+      })
+    );
+    expect.objectContaining({
+      query: expect.objectContaining({
+        kuery:
+          '(platform:"linux" OR platform:"windows") AND (fileType:"script" OR fileType:"archive") AND (tags:"dataCollection" OR tags:"userManagement") AND ((name:"*test*search*" OR updatedBy:"*test*search*" OR fileHash:"*test*search*") OR (name:"*another*search*term*" OR updatedBy:"*another*search*term*" OR fileHash:"*another*search*term*"))',
+      }),
+    });
+  });
+
   it('should construct the correct KQL query when with mixed length arrays', async () => {
     await renderReactQueryHook(() =>
       useGetEndpointScriptsList({
