@@ -57,4 +57,3 @@ steps:
         }
         with:
           {pretty: true}
-
