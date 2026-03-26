@@ -77,9 +77,7 @@ export class CatalogQuery {
     });
 
     const total =
-      typeof result.hits.total === 'number'
-        ? result.hits.total
-        : result.hits.total?.value ?? 0;
+      typeof result.hits.total === 'number' ? result.hits.total : result.hits.total?.value ?? 0;
 
     const entries = result.hits.hits
       .map((hit) => hit._source)

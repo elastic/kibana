@@ -8,10 +8,7 @@
 import type { IntegrationMetadata } from '../types';
 
 export interface PackageClientLike {
-  getInstalledPackages(params?: {
-    perPage?: number;
-    page?: number;
-  }): Promise<InstalledPackage[]>;
+  getInstalledPackages(params?: { perPage?: number; page?: number }): Promise<InstalledPackage[]>;
 }
 
 interface InstalledPackage {
