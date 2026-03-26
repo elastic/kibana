@@ -438,6 +438,7 @@ describe('plugin converters', () => {
         name: 'test-plugin',
         version: '1.0.0',
         description: 'A test plugin',
+        readonly: false,
         manifest: {
           author: { name: 'Test Author', email: 'test@example.com' },
           homepage: 'https://example.com',
@@ -465,6 +466,13 @@ describe('plugin converters', () => {
       const result = toPluginDefinition(persisted);
 
       expect(result.source_url).toBeUndefined();
+    });
+
+    it('sets readonly to false for persisted plugins', () => {
+      const persisted = fromEs(createPluginDocument());
+      const result = toPluginDefinition(persisted);
+
+      expect(result.readonly).toBe(false);
     });
   });
 });
