@@ -8,14 +8,10 @@ import expect from '@kbn/expect';
 import type TestAgent from 'supertest/lib/agent';
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
 import { ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE } from '@kbn/security-solution-plugin/common/endpoint/constants';
-import type {
-  OptInStatusMetadata,
-  ReferenceDataSavedObject,
-} from '@kbn/security-solution-plugin/server/endpoint/lib/reference_data';
 import {
-  REF_DATA_KEYS,
-  REFERENCE_DATA_SAVED_OBJECT_TYPE,
-} from '@kbn/security-solution-plugin/server/endpoint/lib/reference_data';
+  deleteEndpointExceptionsPerPolicyOptInSO,
+  findEndpointExceptionsPerPolicyOptInSO,
+} from '@kbn/security-solution-plugin/scripts/endpoint/common/per_policy_opt_in';
 import type { CustomRole } from '../../../../config/services/types';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
@@ -33,42 +29,15 @@ export default function endpointExceptionsPerPolicyOptInTests({ getService }: Ft
     .find((s) => s.startsWith('--xpack.securitySolution.enableExperimental'))
     ?.includes('endpointExceptionsMovedUnderManagement');
 
-  const OPT_IN_STATUS_DESCRIPTOR = {
-    type: REFERENCE_DATA_SAVED_OBJECT_TYPE,
-    id: REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus,
-  };
-
   const HEADERS = {
     'x-elastic-internal-origin': 'kibana',
     'Elastic-Api-Version': '1',
     'kbn-xsrf': 'true',
   };
 
-  const findOptInStatusSO = async (): Promise<
-    ReferenceDataSavedObject<OptInStatusMetadata> | undefined
-  > => {
-    const foundReferenceObjects = await kibanaServer.savedObjects.find<ReferenceDataSavedObject>({
-      type: REFERENCE_DATA_SAVED_OBJECT_TYPE,
-    });
-
-    return foundReferenceObjects.saved_objects.find(
-      (obj) => obj.id === REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus
-    )?.attributes as ReferenceDataSavedObject<OptInStatusMetadata> | undefined;
-  };
-
   describe('@ess @serverless @skipInServerlessMKI Endpoint Exceptions Per Policy Opt-In API', function () {
     beforeEach(async () => {
-      const foundReferenceDataSavedObjects = await kibanaServer.savedObjects.find({
-        type: REFERENCE_DATA_SAVED_OBJECT_TYPE,
-      });
-
-      if (
-        foundReferenceDataSavedObjects.saved_objects.find(
-          (obj) => obj.id === REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus
-        )
-      ) {
-        await kibanaServer.savedObjects.delete(OPT_IN_STATUS_DESCRIPTOR);
-      }
+      await deleteEndpointExceptionsPerPolicyOptInSO(kibanaServer);
     });
 
     if (IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED) {
@@ -107,7 +76,9 @@ export default function endpointExceptionsPerPolicyOptInTests({ getService }: Ft
 
           describe('functionality', () => {
             it('should store the opt-in status in reference data', async () => {
-              const initialOptInStatusSO = await findOptInStatusSO();
+              const initialOptInStatusSO = await findEndpointExceptionsPerPolicyOptInSO(
+                kibanaServer
+              );
               expect(initialOptInStatusSO).to.be(undefined);
 
               await superuser
@@ -115,12 +86,14 @@ export default function endpointExceptionsPerPolicyOptInTests({ getService }: Ft
                 .set(HEADERS)
                 .expect(200);
 
-              const optInStatusSO = await findOptInStatusSO();
-              expect(optInStatusSO?.metadata.status).to.be(true);
+              const optInStatusSO = await findEndpointExceptionsPerPolicyOptInSO(kibanaServer);
+              expect(optInStatusSO?.attributes.metadata.status).to.be(true);
             });
 
             it('should have an idempotent behavior', async () => {
-              const initialOptInStatusSO = await findOptInStatusSO();
+              const initialOptInStatusSO = await findEndpointExceptionsPerPolicyOptInSO(
+                kibanaServer
+              );
               expect(initialOptInStatusSO).to.be(undefined);
 
               await superuser
@@ -132,8 +105,8 @@ export default function endpointExceptionsPerPolicyOptInTests({ getService }: Ft
                 .set(HEADERS)
                 .expect(200);
 
-              const optInStatusSO = await findOptInStatusSO();
-              expect(optInStatusSO?.metadata.status).to.be(true);
+              const optInStatusSO = await findEndpointExceptionsPerPolicyOptInSO(kibanaServer);
+              expect(optInStatusSO?.attributes.metadata.status).to.be(true);
             });
           });
         });
