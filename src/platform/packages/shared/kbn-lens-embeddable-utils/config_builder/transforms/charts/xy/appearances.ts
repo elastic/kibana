@@ -37,31 +37,55 @@ type XYLensAppearanceState = Pick<
   | 'pointVisibility'
 >;
 
+const pointVisibilityAPItoState: Record<
+  'auto' | 'visible' | 'hidden',
+  'auto' | 'always' | 'never'
+> = {
+  auto: 'auto',
+  visible: 'always',
+  hidden: 'never',
+};
+
+const pointVisibilityStateToAPI: Record<
+  'auto' | 'always' | 'never',
+  'auto' | 'visible' | 'hidden'
+> = {
+  auto: 'auto',
+  always: 'visible',
+  never: 'hidden',
+};
+
 export function convertAppearanceToAPIFormat(config: XYLensAppearanceState): XYDecorations {
   return stripUndefined<XYDecorations>({
-    show_value_labels: config.valueLabels != null ? config.valueLabels === 'show' : undefined,
+    values: config.valueLabels != null ? { visible: config.valueLabels === 'show' } : undefined,
     line_interpolation:
       config.curveType != null ? curveTypeStateToAPI[config.curveType] : undefined,
     fill_opacity: config.fillOpacity,
     minimum_bar_height: config.minBarHeight,
-    show_end_zones: config.hideEndzones,
-    show_current_time_marker: config.showCurrentTimeMarker,
-    point_visibility: config.pointVisibility,
+    end_zones: config.hideEndzones != null ? { visible: config.hideEndzones } : undefined,
+    current_time_marker:
+      config.showCurrentTimeMarker != null ? { visible: config.showCurrentTimeMarker } : undefined,
+    point_visibility:
+      config.pointVisibility != null
+        ? pointVisibilityStateToAPI[config.pointVisibility]
+        : undefined,
   });
 }
 
 export function convertAppearanceToStateFormat(config: XYDecorations): XYLensAppearanceState {
   return stripUndefined<XYLensAppearanceState>({
-    valueLabels:
-      config.show_value_labels != null ? (config.show_value_labels ? 'show' : 'hide') : undefined,
+    valueLabels: config.values != null ? (config.values.visible ? 'show' : 'hide') : undefined,
     curveType:
       config.line_interpolation != null
         ? curveTypeAPItoState[config.line_interpolation]
         : undefined,
     fillOpacity: config.fill_opacity,
     minBarHeight: config.minimum_bar_height,
-    hideEndzones: config.show_end_zones,
-    showCurrentTimeMarker: config.show_current_time_marker,
-    pointVisibility: config.point_visibility,
+    hideEndzones: config.end_zones?.visible,
+    showCurrentTimeMarker: config.current_time_marker?.visible,
+    pointVisibility:
+      config.point_visibility != null
+        ? pointVisibilityAPItoState[config.point_visibility]
+        : undefined,
   });
 }

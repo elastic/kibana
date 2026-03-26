@@ -264,7 +264,7 @@ function convertReferenceLinesDecorationsToAPIFormat(
     decoration_position: yConfig.iconPosition,
     fill: yConfig.fill && yConfig.fill !== 'none' ? yConfig.fill : undefined,
     axis: yConfig.axisMode && yConfig.axisMode !== 'auto' ? yConfig.axisMode : undefined,
-    text: yConfig.textVisibility != null ? (yConfig.textVisibility ? 'label' : 'none') : undefined,
+    text: yConfig.textVisibility != null ? { visible: yConfig.textVisibility } : undefined,
   });
 }
 
@@ -381,12 +381,15 @@ function getTextConfigurationForQueryAnnotation(
     if ('textField' in annotation && annotation.textField) {
       return {
         ...textConfig,
-        text: { type: 'field', field: annotation.textField },
+        text: {
+          visible: annotation.textVisibility,
+          field: annotation.textField,
+        },
       };
     }
     return {
       ...textConfig,
-      text: annotation.textVisibility ? 'label' : 'none',
+      text: { visible: annotation.textVisibility },
     };
   }
   return textConfig;
@@ -460,7 +463,7 @@ export function buildAPIAnnotationsLayer(
           time_field: annotation.timeField!,
           ...(annotation.extraFields ? { extra_fields: annotation.extraFields } : {}),
           color: annotation.color ? fromStaticColorLensStateToAPI(annotation.color) : undefined,
-          ...(annotation.isHidden != null ? { hidden: annotation.isHidden } : {}),
+          ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
           ...getTextConfigurationForQueryAnnotation(annotation),
           ...(annotation.icon ? { icon: annotation.icon } : {}),
           // lineWidth isn't allowed to be zero, so the truthy check is valid here
@@ -483,7 +486,7 @@ export function buildAPIAnnotationsLayer(
           },
           color: annotation.color ? fromStaticColorLensStateToAPI(annotation.color) : undefined,
           fill: annotation.outside ? 'outside' : 'inside',
-          ...(annotation.isHidden != null ? { hidden: annotation.isHidden } : {}),
+          ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
           ...(annotation.label ? { label: annotation.label } : {}),
         };
       }
@@ -492,10 +495,10 @@ export function buildAPIAnnotationsLayer(
         type: 'point',
         timestamp: annotation.key.timestamp,
         color: annotation.color ? fromStaticColorLensStateToAPI(annotation.color) : undefined,
-        ...(annotation.isHidden != null ? { hidden: annotation.isHidden } : {}),
+        ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
         ...(annotation.textVisibility != null
           ? {
-              text: annotation.textVisibility ? 'label' : 'none',
+              text: { visible: annotation.textVisibility },
             }
           : {}),
         ...(annotation.label ? { label: annotation.label } : {}),
