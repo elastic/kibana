@@ -98,9 +98,13 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
           })
         ),
         description: (
-          <div>
-            <EuiBadge>{metricItem.fieldTypes?.[0] ?? ''}</EuiBadge>
-          </div>
+          <BadgeGroup
+            items={metricItem.fieldTypes ?? []}
+            isNoValue={(fieldType) => fieldType === ES_FIELD_TYPES.NULL}
+            renderItem={(fieldType, index) => (
+              <EuiBadge key={`${fieldType}-${index}`}>{fieldType}</EuiBadge>
+            )}
+          />
         ),
       },
     ];
@@ -111,12 +115,14 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
         })
       ),
       description: (
-        <BadgeGroup
-          items={metricItem.units}
-          renderItem={(unit, index) => (
-            <EuiBadge key={`${unit}-${index}`}>{getUnitLabel({ unit })}</EuiBadge>
-          )}
-        />
+        <div data-test-subj="metricsExperienceFlyoutOverviewTabMetricUnitLabel">
+          <BadgeGroup
+            items={metricItem.units ?? []}
+            renderItem={(unit, index) => (
+              <EuiBadge key={`${unit}-${index}`}>{getUnitLabel({ unit })}</EuiBadge>
+            )}
+          />
+        </div>
       ),
     });
 
@@ -127,12 +133,14 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
         })
       ),
       description: (
-        <BadgeGroup
-          items={metricItem.metricTypes}
-          renderItem={(metricType, index) => (
-            <MetricTypeBadge key={`${metricType}-${index}`} instrument={metricType} />
-          )}
-        />
+        <div data-test-subj="metricsExperienceFlyoutOverviewTabMetricTypeLabel">
+          <BadgeGroup
+            items={metricItem.metricTypes ?? []}
+            renderItem={(metricType, index) => (
+              <MetricTypeBadge key={`${metricType}-${index}`} instrument={metricType} />
+            )}
+          />
+        </div>
       ),
     });
 
