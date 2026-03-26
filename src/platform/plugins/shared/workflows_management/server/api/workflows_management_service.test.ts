@@ -334,7 +334,7 @@ describe('WorkflowsService', () => {
       const fullPageHits = Array.from({ length: 1000 }, (_, i) =>
         createHit(`wf-${i}`, '2025-01-02T00:00:00.000Z', i)
       );
-      // Return full pages so hasMore stays true; after MAX_PAGES (100) we stop
+      // Return full pages so hasMore stays true; after MAX_PAGES (50) we stop
       mockEsClient.search.mockResolvedValue({
         hits: { hits: fullPageHits, total: { value: 150000 } },
         pit_id: 'pit-123',
@@ -342,11 +342,11 @@ describe('WorkflowsService', () => {
 
       const result = await service.getWorkflowsSubscribedToTrigger('cases.updated', 'default');
 
-      expect(mockEsClient.search).toHaveBeenCalledTimes(100);
-      expect(result).toHaveLength(100000);
+      expect(mockEsClient.search).toHaveBeenCalledTimes(50);
+      expect(result).toHaveLength(50000);
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.stringMatching(
-          /getWorkflowsSubscribedToTrigger truncated at 100 pages \(100000 workflows\) for trigger cases\.updated in space default/
+          /getWorkflowsSubscribedToTrigger truncated at 50 pages \(50000 workflows\) for trigger cases\.updated in space default/
         )
       );
     });

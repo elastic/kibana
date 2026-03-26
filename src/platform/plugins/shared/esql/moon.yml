@@ -55,6 +55,7 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/es-types'
   - '@kbn/core-elasticsearch-server'
+  - '@kbn/controls-constants'
 tags:
   - plugin
   - prod
