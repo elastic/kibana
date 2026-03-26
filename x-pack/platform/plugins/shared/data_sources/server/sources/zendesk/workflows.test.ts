@@ -10,11 +10,10 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
   getWorkflowYaml,
-  loadWorkflowsThroughProductionPath,
+  loadWorkflowsFromConnectorSpec,
   registerExtensionSteps,
   type ProcessedWorkflow,
 } from '../workflow.test_helpers';
-import { zendeskDataSource } from './data_type';
 
 const CONNECTOR_NAME = 'fake-zendesk-connector';
 const CONNECTOR_ID = 'fake-zendesk-connector-uuid';
@@ -23,9 +22,9 @@ describe('zendesk workflows', () => {
   let fixture: WorkflowRunFixture;
   let workflows: ProcessedWorkflow[];
 
-  beforeAll(async () => {
-    workflows = await loadWorkflowsThroughProductionPath(zendeskDataSource, {
-      stackConnectorId: CONNECTOR_NAME,
+  beforeAll(() => {
+    workflows = loadWorkflowsFromConnectorSpec('.zendesk', {
+      connectorName: CONNECTOR_NAME,
     });
   });
 
