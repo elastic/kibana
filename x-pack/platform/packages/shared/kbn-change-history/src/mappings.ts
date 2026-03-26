@@ -11,6 +11,7 @@ import { mappings, type MappingsDefinition } from '@kbn/es-mappings';
  * Elasticsearch mappings for change history documents.
  * Uses unmapped fields for variable structures (`object.snapshot`, `object.diff.before`)
  * and flattened type for `metadata`.
+ * Do not map `kibana.space_ids` here — `@kbn/data-streams` injects reserved `kibana` mappings for all data streams.
  * For field reference @see [README.md]
  */
 export const changeHistoryMappings = {
@@ -76,12 +77,6 @@ export const changeHistoryMappings = {
       tags: mappings.keyword(),
 
       metadata: mappings.flattened(),
-
-      kibana: mappings.object({
-        properties: {
-          // space_ids: mappings.keyword(),  // <- managed upstream by `@kbn/data-streams`, please keep me commented out.
-        },
-      }),
 
       service: mappings.object({
         properties: {

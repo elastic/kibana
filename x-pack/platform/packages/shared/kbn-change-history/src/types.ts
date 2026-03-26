@@ -10,9 +10,12 @@ import type {
   Refresh,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { SpaceAwareDocument } from '@kbn/data-streams';
 
 /**
  * Represents a single document in the change history.
+ * System fields such as `kibana.space_ids` are not declared here; they are injected by
+ * `@kbn/data-streams` when indexing with a space and appear on stored documents and API responses.
  */
 export interface ChangeHistoryDocument {
   /** ISO8601 timestamp when the target object was changed (successful write confirmed). */
@@ -86,11 +89,6 @@ export interface ChangeHistoryDocument {
   /** Optional metadata about the event. Information that does not form part of the diff or ECS schema. */
   metadata?: Record<string, unknown>;
 
-  kibana?: {
-    // /** Kibana space ID that the change event belongs to. (ie `default` etc) */
-    space_ids: string;
-  };
-
   service: {
     type: 'kibana';
     /** Version of kibana that the event belongs to. */
@@ -148,10 +146,11 @@ export interface GetChangeHistoryOptions {
 
 /**
  * Result from a history query.
+ * Items always include `kibana.space_ids` for the requested space (see `@kbn/data-streams`).
  */
 export interface GetHistoryResult {
   total: number;
-  items: ChangeHistoryDocument[];
+  items: Array<SpaceAwareDocument<ChangeHistoryDocument>>;
 }
 
 /**
