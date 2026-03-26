@@ -105,6 +105,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 logger: taskLogger,
                 featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
                 searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+                request: runContext.fakeRequest,
               });
               taskLogger.debug(`Using connector ${connectorId} for knowledge indicator extraction`);
 

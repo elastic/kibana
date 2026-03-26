@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 
 /** Logs at info if the resolved connector is outside the feature allowlist; usage continues. */
@@ -14,18 +14,23 @@ export async function logIfConnectorNotInAllowlist({
   featureId,
   searchInferenceEndpoints,
   logger,
+  request,
 }: {
   resolvedConnectorId: string;
   featureId: string;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   logger: Logger;
+  request: KibanaRequest;
 }): Promise<string> {
   if (!searchInferenceEndpoints) {
     return resolvedConnectorId;
   }
 
   try {
-    const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(featureId);
+    const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
+      featureId,
+      request
+    );
     if (endpoints.length === 0) {
       return resolvedConnectorId;
     }

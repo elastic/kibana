@@ -58,6 +58,7 @@ export function registerSignificantEventsInferenceFeatures(
     featureId: string;
     featureName: string;
     featureDescription: string;
+    recommendedEndpoints: string[];
   }> = [
     {
       featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
@@ -67,6 +68,10 @@ export function registerSignificantEventsInferenceFeatures(
       featureDescription: i18n.translate('xpack.streams.inferenceFeature.kiExtractionDescription', {
         defaultMessage: 'Model used to extract Knowledge Indicators.',
       }),
+      recommendedEndpoints: [
+        '.google-gemini-3.0-flash-chat_completion',
+        '.openai-gpt-oss-120b-chat_completion',
+      ],
     },
     {
       featureId: STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
@@ -79,6 +84,10 @@ export function registerSignificantEventsInferenceFeatures(
           defaultMessage: 'Model used for Knowledge Indicator Query generation.',
         }
       ),
+      recommendedEndpoints: [
+        '.openai-gpt-5.2-chat_completion',
+        '.anthropic-claude-4.6-sonnet-chat_completion',
+      ],
     },
     {
       featureId: STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
@@ -88,6 +97,10 @@ export function registerSignificantEventsInferenceFeatures(
       featureDescription: i18n.translate('xpack.streams.inferenceFeature.discoveryDescription', {
         defaultMessage: 'Model used during Discovery and Significant Event generation.',
       }),
+      recommendedEndpoints: [
+        '.anthropic-claude-4.6-sonnet-chat_completion',
+        '.anthropic-claude-4.6-opus-chat_completion',
+      ],
     },
   ];
 
@@ -98,7 +111,7 @@ export function registerSignificantEventsInferenceFeatures(
       featureName: child.featureName,
       featureDescription: child.featureDescription,
       taskType: 'chat_completion',
-      recommendedEndpoints: [],
+      recommendedEndpoints: child.recommendedEndpoints,
     });
     if (childResult.ok) {
       logger.debug(`Registered child inference feature "${child.featureId}"`);

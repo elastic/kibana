@@ -70,6 +70,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                 logger: taskLogger,
                 featureId: STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
                 searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+                request: runContext.fakeRequest,
               });
               taskLogger.debug(`Using connector ${connectorId} for discovery`);
               const boundInferenceClient = inferenceClient.bindTo({ connectorId });

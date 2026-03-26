@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IUiSettingsClient, Logger } from '@kbn/core/server';
+import type { IUiSettingsClient, Logger, KibanaRequest } from '@kbn/core/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import { logIfConnectorNotInAllowlist } from './log_if_connector_not_in_allowlist';
 import { resolveConnectorId } from './resolve_connector_id';
@@ -16,12 +16,14 @@ export async function resolveConnectorIdAndCheckAllowlist({
   logger,
   featureId,
   searchInferenceEndpoints,
+  request,
 }: {
   connectorId?: string;
   uiSettingsClient: IUiSettingsClient;
   logger: Logger;
   featureId: string;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  request: KibanaRequest;
 }): Promise<string> {
   const resolved = await resolveConnectorId({ connectorId, uiSettingsClient, logger });
   return logIfConnectorNotInAllowlist({
@@ -29,5 +31,6 @@ export async function resolveConnectorIdAndCheckAllowlist({
     featureId,
     searchInferenceEndpoints,
     logger,
+    request,
   });
 }

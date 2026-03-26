@@ -160,6 +160,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                     logger: onboardingLogger,
                     featureId: STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
                     searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+                    request: runContext.fakeRequest,
                   });
                   onboardingLogger.debug(
                     `Using connector ${connectorIdForError} for rule generation (error enrichment)`
