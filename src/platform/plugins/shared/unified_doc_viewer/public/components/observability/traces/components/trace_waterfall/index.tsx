@@ -177,7 +177,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
   // See: https://github.com/elastic/eui/blob/v113.3.0/packages/eui/src/components/flyout/manager/flyout_managed.tsx
   const pendingExitRef = useRef(false);
   const pendingChildCloseRef = useRef(false);
-  const [, setFlushPendingClose] = useState(0);
+  const [flushToken, setFlushToken] = useState(0);
 
   useEffect(() => {
     if (pendingExitRef.current) {
@@ -189,13 +189,13 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
       pendingChildCloseRef.current = false;
       clearActiveFlyout();
     }
-  });
+  }, [flushToken, setShowFullScreenWaterfall, clearActiveFlyout]);
 
   const onExitFullScreen = useCallback<NonNullable<EuiFlyoutProps['onClose']>>(
     (event) => {
       if (event.type === 'navigation') {
         pendingExitRef.current = true;
-        setFlushPendingClose((n) => n + 1);
+        setFlushToken((n) => n + 1);
         return;
       }
 
@@ -209,7 +209,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
     (event) => {
       if (event.type === 'navigation') {
         pendingChildCloseRef.current = true;
-        setFlushPendingClose((n) => n + 1);
+        setFlushToken((n) => n + 1);
         return;
       }
 
