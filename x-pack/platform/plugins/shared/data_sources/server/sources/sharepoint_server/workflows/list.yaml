@@ -73,7 +73,11 @@ steps:
                 with:
                   result: "${{ steps.get-list-items.output }}"
             else:
-              - name: set-get-folder-contents-output
-                type: data.set
-                with:
-                  result: "${{ steps.get-folder-contents.output }}"
+              - name: set-folder-result
+                type: if
+                condition: "${{ inputs.list_action == 'getFolderContents' and inputs.path }}"
+                steps:
+                  - name: set-get-folder-contents-output
+                    type: data.set
+                    with:
+                      result: "${{ steps.get-folder-contents.output }}"
