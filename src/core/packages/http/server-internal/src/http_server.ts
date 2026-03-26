@@ -558,7 +558,10 @@ export class HttpServer {
       const safeName = event.name.replace(/[^a-zA-Z0-9_-]/g, '_');
       let metric = `${safeName};dur=${event.duration.toFixed(2)}`;
       if (event.description) {
-        const safeDesc = event.description.replace(/"/g, '\\"').slice(0, 100);
+        const safeDesc = event.description
+          .replace(/\\/g, '\\\\')
+          .replace(/"/g, '\\"')
+          .slice(0, 100);
         metric += `;desc="${safeDesc}"`;
       }
       timingMetrics.push(metric);
