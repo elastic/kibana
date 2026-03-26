@@ -13,11 +13,10 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
-  loadWorkflowsThroughProductionPath,
+  loadWorkflowsFromConnectorSpec,
   getWorkflowYaml,
   type ProcessedWorkflow,
 } from '../../workflow.test_helpers';
-import { googleDriveDataSource } from '../data_type';
 
 const CONNECTOR_NAME = 'fake-google-drive-connector';
 const CONNECTOR_ID = 'fake-gd-connector-uuid';
@@ -38,8 +37,8 @@ describe('google drive workflows (real ES)', () => {
   beforeAll(async () => {
     jest.setTimeout(5 * 60_000);
 
-    workflows = await loadWorkflowsThroughProductionPath(googleDriveDataSource, {
-      stackConnectorId: CONNECTOR_NAME,
+    workflows = loadWorkflowsFromConnectorSpec('.google_drive', {
+      connectorName: CONNECTOR_NAME,
     });
 
     esCluster = createTestEsCluster({
