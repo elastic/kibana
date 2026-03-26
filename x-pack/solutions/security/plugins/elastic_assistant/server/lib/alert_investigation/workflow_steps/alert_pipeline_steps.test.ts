@@ -33,6 +33,10 @@ describe('Workflow Steps - Error Scenarios', () => {
     rawInput: {},
     contextManager: {
       getScopedEsClient: jest.fn(),
+      getCoreStart: jest.fn().mockReturnValue({
+        elasticsearch: { client: { asInternalUser: {} } },
+      }),
+      ...overrides.contextManager,
     },
     logger: {
       debug: jest.fn(),
@@ -44,6 +48,13 @@ describe('Workflow Steps - Error Scenarios', () => {
     stepId: 'test-step',
     stepType: 'test-type',
     ...overrides,
+    contextManager: {
+      getScopedEsClient: jest.fn(),
+      getCoreStart: jest.fn().mockReturnValue({
+        elasticsearch: { client: { asInternalUser: {} } },
+      }),
+      ...overrides.contextManager,
+    },
   });
 
   describe('fetchUnprocessedAlertsStep - Error Handling', () => {
