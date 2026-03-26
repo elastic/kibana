@@ -188,6 +188,7 @@ describe('ResumeExecutionButton', () => {
       await waitFor(() => {
         expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/executions/exec-123/resume', {
           body: JSON.stringify({ input: { approved: true } }),
+          version: '2023-10-31',
         });
       });
     });
