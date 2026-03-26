@@ -69,7 +69,6 @@ export class CPSManager implements ICPSManager {
           return this.resolveAccess(this.currentAppId, this.currentLocation);
         })
       )
-      .pipe(distinctUntilChanged())
       .subscribe((access) => {
         this.applyAccess(access);
       });
