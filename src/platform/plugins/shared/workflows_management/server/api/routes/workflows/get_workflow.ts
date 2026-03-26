@@ -13,8 +13,8 @@ import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
 import { idParamSchema } from '../utils/schemas';
-import { WorkflowManagementAuditLog } from '../utils/workflow_audit_logging';
 import { withLicenseCheck } from '../utils/with_license_check';
+import { WorkflowManagementAuditLog } from '../utils/workflow_audit_logging';
 
 export function registerGetWorkflowRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
