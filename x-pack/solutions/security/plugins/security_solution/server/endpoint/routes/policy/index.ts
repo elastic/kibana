@@ -24,7 +24,6 @@ export function registerPolicyRoutes(
     .get({
       access: 'public',
       path: BASE_POLICY_RESPONSE_ROUTE,
-      options: { authRequired: true },
       security: {
         authz: {
           requiredPrivileges: ['securitySolution'],
