@@ -2410,7 +2410,9 @@
               "\nInjects the current tab ID into Redux actions"
             ],
             "signature": [
-              "<TPayload extends { tabId: string; }, TReturn>(actionCreator: (params: TPayload) => TReturn) => (payload: VoidIfEmpty<WithoutTabId<TPayload>>) => TReturn"
+              "<TPayload extends ",
+              "TabActionPayload",
+              "<object>, TReturn>(actionCreator: (params: TPayload) => TReturn) => (payload: VoidIfEmpty<WithoutTabId<TPayload>>) => TReturn"
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
             "lineNumber": 32,
@@ -2683,12 +2685,8 @@
             ],
             "signature": [
               "{ setAppState: ",
-              "ActionCreatorWithPayload",
-              "<",
-              "TabActionPayload",
-              "<Pick<",
-              "TabState",
-              ", \"appState\">>, \"internalState/setAppState\">; updateGlobalState: ",
+              "InternalStateThunkActionCreator",
+              "<[AppStatePayload], void>; updateGlobalState: ",
               "InternalStateThunkActionCreator",
               "<[GlobalStatePayload], void>; updateAppStateAndReplaceUrl: ",
               "InternalStateThunkActionCreator",
@@ -2700,9 +2698,13 @@
               "TabState",
               ", \"appState\">>, \"internalState/resetAppState\">; initializeAndSync: ",
               "InternalStateThunkActionCreator",
-              "<[{ tabId: string; }], void>; stopSyncing: ",
+              "<[",
+              "TabActionPayload",
+              "<object>], void>; stopSyncing: ",
               "InternalStateThunkActionCreator",
-              "<[{ tabId: string; }], void>; openDiscoverSession: ",
+              "<[",
+              "TabActionPayload",
+              "<object>], void>; openDiscoverSession: ",
               "AsyncThunk",
               "<void, { discoverSessionId: string; }, { state: ",
               "DiscoverInternalState",
@@ -4931,7 +4933,7 @@
                 "section": "def-public.ControlPanelsState",
                 "text": "ControlPanelsState"
               },
-              "<Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; available_options?: string[] | undefined; } & { selected_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>> & ",
+              "<Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; available_options?: string[] | undefined; } & { selected_options: string[]; single_select: boolean; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>> & ",
               {
                 "pluginId": "@kbn/utility-types",
                 "scope": "common",
@@ -5003,7 +5005,7 @@
                 "section": "def-public.ControlPanelsState",
                 "text": "ControlPanelsState"
               },
-              "<Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; available_options?: string[] | undefined; } & { selected_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>> | undefined"
+              "<Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; available_options?: string[] | undefined; } & { selected_options: string[]; single_select: boolean; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>> | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "lineNumber": 139,
