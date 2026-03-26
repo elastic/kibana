@@ -12,18 +12,12 @@ import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import type {
   MemoryEntry,
-  MemoryQuestion,
   MemoryTreeNode,
   MemorySearchResult,
   MemoryVersionRecord,
 } from '../../../lib/memory';
 import { MemoryServiceImpl } from '../../../lib/memory';
-import { QUESTIONS_ANSWERED_TRIGGER_ID } from '../../../lib/memory/triggers';
 import type { StreamsServer } from '../../../types';
-import {
-  MEMORY_UPDATE_TASK_TYPE,
-  type MemoryUpdateTaskParams,
-} from '../../../lib/tasks/task_definitions/memory_update';
 
 const getMemoryService = (server: StreamsServer, logger: Logger) => {
   return new MemoryServiceImpl({
@@ -404,134 +398,6 @@ const recentChangesRoute = createServerRoute({
   },
 });
 
-const getQuestionsRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/memory/questions',
-  options: {
-    access: 'internal',
-    summary: 'Get open memory questions',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    query: z
-      .object({
-        size: z.coerce.number().min(1).max(100).optional(),
-      })
-      .optional()
-      .default({}),
-  }),
-  handler: async ({
-    params,
-    request,
-    server,
-    logger,
-  }): Promise<{ questions: MemoryQuestion[] }> => {
-    const memory = getMemoryService(server, logger);
-    const spaceId = DEFAULT_SPACE_ID;
-
-    const questions = await memory.getOpenQuestions({
-      space: spaceId,
-      size: params.query?.size,
-    });
-    return { questions };
-  },
-});
-
-const answerQuestionRoute = createServerRoute({
-  endpoint: 'PUT /internal/streams/memory/questions/{id}/answer',
-  options: {
-    access: 'internal',
-    summary: 'Answer an open memory question',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    path: z.object({ id: z.string() }),
-    body: z.object({ answer: z.string() }),
-  }),
-  handler: async ({
-    params,
-    request,
-    server,
-    logger,
-    getScopedClients,
-  }): Promise<MemoryQuestion> => {
-    const memory = getMemoryService(server, logger);
-    const spaceId = DEFAULT_SPACE_ID;
-
-    const answered = await memory.answerQuestion({
-      id: params.path.id,
-      answer: params.body.answer,
-      space: spaceId,
-    });
-
-    // Schedule a background task to run the questions-answered trigger
-    try {
-      const { taskClient } = await getScopedClients({ request });
-
-      const taskId = `memory_update_question_${params.path.id}`;
-
-      await taskClient.schedule<MemoryUpdateTaskParams>({
-        task: {
-          type: MEMORY_UPDATE_TASK_TYPE,
-          id: taskId,
-          space: '*',
-        },
-        params: {
-          triggerId: QUESTIONS_ANSWERED_TRIGGER_ID,
-          payload: {
-            questionId: params.path.id,
-            question: answered.question,
-            answer: params.body.answer,
-            relatedEntryIds: answered.related_entries,
-          },
-        },
-        request,
-      });
-
-      logger.info(
-        `Scheduled memory update task "${taskId}" for trigger "${QUESTIONS_ANSWERED_TRIGGER_ID}"`
-      );
-    } catch (err) {
-      logger.warn(`Failed to schedule memory update task: ${(err as Error).message}`);
-    }
-
-    return answered;
-  },
-});
-
-const dismissQuestionRoute = createServerRoute({
-  endpoint: 'PUT /internal/streams/memory/questions/{id}/dismiss',
-  options: {
-    access: 'internal',
-    summary: 'Dismiss an open memory question',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    path: z.object({ id: z.string() }),
-  }),
-  handler: async ({ params, request, server, logger }): Promise<{ dismissed: boolean }> => {
-    const memory = getMemoryService(server, logger);
-    const spaceId = DEFAULT_SPACE_ID;
-
-    await memory.dismissQuestion({
-      id: params.path.id,
-      space: spaceId,
-    });
-    return { dismissed: true };
-  },
-});
-
 export const internalMemoryRoutes = {
   ...createEntryRoute,
   ...getEntryRoute,
@@ -545,7 +411,4 @@ export const internalMemoryRoutes = {
   ...getVersionRoute,
   ...rollbackRoute,
   ...recentChangesRoute,
-  ...getQuestionsRoute,
-  ...answerQuestionRoute,
-  ...dismissQuestionRoute,
 };

@@ -8,11 +8,6 @@
 export { MemoryTriggerRegistry } from './registry';
 export type { MemoryUpdateTrigger, MemoryUpdateContext, OutputFunction } from './types';
 
-export { kiDeletedTrigger, KI_DELETED_TRIGGER_ID } from './ki_deleted_trigger';
-export {
-  questionsAnsweredTrigger,
-  QUESTIONS_ANSWERED_TRIGGER_ID,
-} from './questions_answered_trigger';
 export {
   discoveryCompletedTrigger,
   DISCOVERY_COMPLETED_TRIGGER_ID,

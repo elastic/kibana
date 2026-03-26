@@ -55,8 +55,6 @@ import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_
 import { ModelSettingsConfigService } from './lib/saved_objects/significant_events/model_settings_config_service';
 import {
   MemoryTriggerRegistry,
-  questionsAnsweredTrigger,
-  kiDeletedTrigger,
   discoveryCompletedTrigger,
   chatLearningTrigger,
 } from './lib/memory/triggers';
@@ -387,8 +385,6 @@ export class StreamsPlugin
 
       // Set up memory trigger registry with all built-in triggers
       const memoryTriggerRegistry = new MemoryTriggerRegistry({ logger: this.logger });
-      memoryTriggerRegistry.register(questionsAnsweredTrigger);
-      memoryTriggerRegistry.register(kiDeletedTrigger);
       memoryTriggerRegistry.register(discoveryCompletedTrigger);
       memoryTriggerRegistry.register(chatLearningTrigger);
       this.server.memoryTriggerRegistry = memoryTriggerRegistry;

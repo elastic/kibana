@@ -122,7 +122,7 @@ export const registerSigeventsMemoryHook = (
               logger.debug(`Synthesized ${pages.length} wiki pages for stream: ${streamName}`);
             }
 
-            // Schedule question generation to review the updated memory
+            // Schedule discovery-completed trigger for additional memory processing
             if (deps.scheduleMemoryTask) {
               try {
                 await deps.scheduleMemoryTask(
@@ -133,7 +133,7 @@ export const registerSigeventsMemoryHook = (
                   },
                   context.toolHandlerContext.request
                 );
-                logger.debug('Scheduled memory update task for question generation');
+                logger.debug('Scheduled memory update task for discovery-completed trigger');
               } catch (scheduleError) {
                 logger.debug(
                   `Failed to schedule memory update task (non-fatal): ${
