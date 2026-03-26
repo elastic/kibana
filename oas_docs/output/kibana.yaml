@@ -63215,7 +63215,7 @@ paths:
       summary: Get stream list
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63252,7 +63252,7 @@ paths:
       summary: Disable streams
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63289,7 +63289,7 @@ paths:
       summary: Enable streams
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63326,7 +63326,7 @@ paths:
       summary: Resync streams
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63368,7 +63368,7 @@ paths:
       summary: Delete a stream
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63402,7 +63402,7 @@ paths:
       summary: Get a stream
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63438,7 +63438,7 @@ paths:
       summary: Create or update a stream
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63495,7 +63495,7 @@ paths:
       summary: Fork a stream
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63530,7 +63530,7 @@ paths:
       summary: Get ingest stream settings
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63718,7 +63718,7 @@ paths:
       summary: Update ingest stream settings
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63753,7 +63753,7 @@ paths:
       summary: Get query stream settings
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.4.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63805,7 +63805,7 @@ paths:
       summary: Upsert query stream settings
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.4.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63857,6 +63857,7 @@ paths:
       summary: Export stream content
       tags:
         - streams
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63901,6 +63902,7 @@ paths:
       summary: Import content into a stream
       tags:
         - streams
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63935,7 +63937,7 @@ paths:
       summary: Get stream queries
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -64026,7 +64028,7 @@ paths:
       summary: Bulk update queries
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -64073,7 +64075,7 @@ paths:
       summary: Remove a query from a stream
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -64140,7 +64142,7 @@ paths:
       summary: Upsert a query to a stream
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -64423,7 +64425,7 @@ paths:
       summary: Get stream attachments
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.3.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -64523,7 +64525,7 @@ paths:
       summary: Bulk update attachments
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.3.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -64593,7 +64595,7 @@ paths:
       summary: Unlink an attachment from a stream
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.3.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -64662,7 +64664,7 @@ paths:
       summary: Link an attachment to a stream
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.3.0
       x-metaTags:
         - content: Kibana
           name: product_name
