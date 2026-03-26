@@ -39,6 +39,7 @@ const listQueriesRoute = createServerRoute({
     description:
       'Fetches all queries linked to a stream that are visible to the current user in the current space.',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },
@@ -76,6 +77,7 @@ const upsertQueryRoute = createServerRoute({
     summary: 'Upsert a query to a stream',
     description: 'Adds a query to a stream. Noop if the query is already present on the stream.',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },
@@ -128,6 +130,7 @@ const deleteQueryRoute = createServerRoute({
     summary: 'Remove a query from a stream',
     description: 'Remove a query from a stream. Noop if the query is not found on the stream.',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },
@@ -176,6 +179,7 @@ const bulkQueriesRoute = createServerRoute({
     summary: 'Bulk update queries',
     description: 'Bulk update queries of a stream. Can add new queries and delete existing ones.',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },

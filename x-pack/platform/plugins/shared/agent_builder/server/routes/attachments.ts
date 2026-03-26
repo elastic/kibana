@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import type { ConversationRound, ToolCallStep } from '@kbn/agent-builder-common';
 import type { UpdateOriginResponse } from '@kbn/agent-builder-common/attachments';
 import { isToolCallStep, attachmentTools } from '@kbn/agent-builder-common';
+import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { RouteDependencies } from './types';
@@ -21,9 +22,11 @@ import type {
   DeleteAttachmentResponse,
   RestoreAttachmentResponse,
   RenameAttachmentResponse,
+  CheckStaleAttachmentsResponse,
 } from '../../common/http_api/attachments';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
+import { AGENT_BUILDER_READ_SECURITY } from './route_security';
 
 /**
  * Check if an attachment is referenced in any conversation round.
@@ -135,6 +138,81 @@ export function registerAttachmentRoutes({
           body: {
             results: attachments,
             total_token_estimate: stateManager.getTotalTokenEstimate(),
+          },
+        });
+      })
+    );
+
+  // Check stale status for all latest conversation attachments
+  router.versioned
+    .get({
+      path: `${publicApiPath}/conversations/{conversation_id}/attachments/stale`,
+      security: AGENT_BUILDER_READ_SECURITY,
+      access: 'public',
+      summary: 'Check attachment staleness',
+      description:
+        'Checks staleness for the latest version of all conversation attachments against their origin snapshot.',
+      options: {
+        tags: ['attachment', 'oas-tag:agent builder'],
+        availability: {
+          stability: 'experimental',
+          since: '9.4.0',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            params: schema.object({
+              conversation_id: schema.string({
+                meta: { description: 'The unique identifier of the conversation.' },
+              }),
+            }),
+          },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/attachments_stale.yaml'),
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { conversations: conversationsService, attachments: attachmentsService } =
+          getInternalServices();
+        const { conversation_id: conversationId } = request.params;
+
+        const client = await conversationsService.getScopedClient({ request });
+        const conversation = await client.get(conversationId);
+        const stateManager = createAttachmentStateManager(conversation.attachments ?? [], {
+          getTypeDefinition: attachmentsService.getTypeDefinition,
+        });
+
+        const [coreStart] = await coreSetup.getStartServices();
+        const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
+        const resolveContext: AttachmentResolveContext = {
+          request,
+          spaceId,
+          savedObjectsClient: coreStart.savedObjects.getScopedClient(request),
+        };
+
+        const staleResults = await stateManager.evaluateStalenessForActiveAttachments(
+          resolveContext
+        );
+        const staleCount = staleResults.filter((result) => result.is_stale).length;
+        for (const result of staleResults) {
+          if (!result.is_stale && result.error) {
+            logger.warn(
+              `Attachment staleness check failed for attachment "${result.id}" in conversation "${conversationId}": ${result.error}`
+            );
+          }
+        }
+        logger.debug(
+          `Attachment staleness check completed for conversation "${conversationId}" (checked=${staleResults.length}, stale=${staleCount})`
+        );
+
+        return response.ok<CheckStaleAttachmentsResponse>({
+          body: {
+            attachments: staleResults,
           },
         });
       })

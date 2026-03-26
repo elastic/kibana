@@ -36,10 +36,11 @@ const upsertRequest = ({
   fields?: FieldDefinition;
   routing?: RoutingDefinition[];
   queries?: StreamQuery[];
-}) => ({
+}): Streams.WiredStream.UpsertRequest => ({
   ...emptyAssets,
   queries,
   stream: {
+    type: 'wired',
     description: 'Test stream',
     ingest: {
       processing: { steps: [] },
@@ -402,6 +403,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               name: 'a.regular.stream',
               request: {
                 stream: {
+                  type: 'wired',
                   description: 'ok',
                   ingest: {
                     processing: { steps: [] },
@@ -419,6 +421,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               name: 'a.big.stream',
               request: {
                 stream: {
+                  type: 'wired',
                   description: 'a'.repeat(twoMB),
                   ingest: {
                     processing: { steps: [] },
@@ -591,6 +594,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 name: ROOT_STREAM_ID,
                 request: {
                   stream: {
+                    type: 'wired',
                     description: '',
                     ingest: {
                       processing: { steps: [] },
@@ -684,6 +688,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               name: ROOT_STREAM_ID,
               request: {
                 stream: {
+                  type: 'wired',
                   description: '',
                   ingest: {
                     processing: { steps: [] },
@@ -710,6 +715,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               name: 'child',
               request: {
                 stream: {
+                  type: 'wired',
                   description: '',
                   ingest: {
                     processing: { steps: [] },
@@ -754,6 +760,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               name: ROOT_STREAM_ID,
               request: {
                 stream: {
+                  type: 'wired',
                   description: '',
                   ingest: {
                     processing: { steps: [] },
