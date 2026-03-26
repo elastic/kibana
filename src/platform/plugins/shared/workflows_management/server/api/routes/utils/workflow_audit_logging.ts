@@ -69,8 +69,14 @@ async function writeAudit(
   context: WorkflowsRequestHandlerContext,
   event: AuditEvent
 ): Promise<void> {
-  const coreContext = await context.core;
-  coreContext.security.audit.logger.log(event);
+  try {
+    const coreContext = await context.core;
+    await Promise.resolve(coreContext.security.audit.logger.log(event));
+  } catch {
+    // Best-effort only: never let audit affect the HTTP response. There is no request-scoped or
+    // module-level Kibana Logger here (core context does not expose one); optional debug on failure
+    // would require plugin-injected configuration, which we avoid for this helper.
+  }
 }
 
 /** Facade for workflow management audit events (uses `context.core.security.audit.logger`). */

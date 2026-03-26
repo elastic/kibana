@@ -35,6 +35,28 @@ describe('WorkflowManagementAuditLog', () => {
   describe('when delegating to core security audit logger', () => {
     const err = new Error('boom');
 
+    it('does not throw when audit log fails (success path remains safe for callers)', async () => {
+      const context = {
+        core: Promise.resolve({
+          security: {
+            audit: {
+              logger: {
+                enabled: true,
+                log: () => {
+                  throw new Error('audit sink failed');
+                },
+                includeSavedObjectNames: false,
+              },
+            },
+          },
+        }),
+      } as unknown as WorkflowsRequestHandlerContext;
+
+      await expect(
+        WorkflowManagementAuditLog.logWorkflowCreated(context, { id: 'w-1' })
+      ).resolves.toBeUndefined();
+    });
+
     it('logWorkflowCreated (single)', async () => {
       const { context, log } = createAuditContext();
       await WorkflowManagementAuditLog.logWorkflowCreated(context, { id: 'w-1' });
