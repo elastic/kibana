@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ExtractedEntity, ObservableTypeKey, EntityExtractionConfig } from '../types';
+import { getNestedValue } from '../utils/get_nested_value';
 import { getEcsFieldMappings } from './ecs_field_mappings';
 import { validateEntity } from './entity_validators';
 
@@ -15,18 +16,6 @@ const IPV4_REGEX = /^(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d
 // Matches valid IPv6 addresses: full, compressed (::), mixed (::ffff:1.2.3.4), etc.
 const IPV6_REGEX = /^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$|^::$|^::1$|^([0-9a-fA-F]{1,4}:){1,6}(25[0-5]|2[0-4]\d|[01]?\d\d?)(\.(25[0-5]|2[0-4]\d|[01]?\d\d?)){3}$/;
 
-const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => {
-  // Check flat dotted key first (ES returns alerts with flat keys like "host.name")
-  if (path in obj) return obj[path];
-  // Fall back to nested traversal (for properly nested objects)
-  const parts = path.split('.');
-  let current: unknown = obj;
-  for (const part of parts) {
-    if (current == null || typeof current !== 'object') return undefined;
-    current = (current as Record<string, unknown>)[part];
-  }
-  return current;
-};
 
 const resolveIpType = (value: string): ObservableTypeKey | null => {
   if (IPV4_REGEX.test(value)) return 'ipv4';

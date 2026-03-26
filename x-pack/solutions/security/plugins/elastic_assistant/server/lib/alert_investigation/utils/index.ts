@@ -8,3 +8,4 @@
 export { fetchAlertsByIds } from './fetch_alerts';
 export type { AlertWithId } from './fetch_alerts';
 export { adaptWorkflowLogger } from './workflow_logger_adapter';
+export { getNestedValue } from './get_nested_value';

@@ -6,6 +6,7 @@
  */
 
 import { createHash } from 'crypto';
+import { getNestedValue } from '../utils/get_nested_value';
 
 export interface AlertFeatures {
   readonly ruleName: string;
@@ -31,18 +32,6 @@ export interface AlertFeatures {
   readonly dnsQuestionName?: string;
 }
 
-const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => {
-  // Check flat dotted key first (ES returns alerts with flat keys like "host.name")
-  if (path in obj) return obj[path];
-  // Fall back to nested traversal (for properly nested objects)
-  const parts = path.split('.');
-  let current: unknown = obj;
-  for (const part of parts) {
-    if (current == null || typeof current !== 'object') return undefined;
-    current = (current as Record<string, unknown>)[part];
-  }
-  return current;
-};
 
 const normalizeString = (value: unknown): string | undefined => {
   if (value == null) return undefined;

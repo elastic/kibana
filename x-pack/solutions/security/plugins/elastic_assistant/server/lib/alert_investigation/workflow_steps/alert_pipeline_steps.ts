@@ -11,7 +11,7 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 
 import { deduplicateAlerts } from '../deduplication';
 import { extractEntitiesFromAlerts } from '../entity_extraction';
-import { DEFAULT_PIPELINE_CONFIG } from '../types';
+import { DEFAULT_ENTITY_EXTRACTION_CONFIG } from '../types';
 import { fetchAlertsByIds, adaptWorkflowLogger } from '../utils';
 import { PIPELINE_LIMITS, SAFE_ALERTS_INDEX_PATTERN } from '../constants';
 import { LiquidArraySchema, parseArrayInput } from './workflow_schema_helpers';
@@ -211,7 +211,7 @@ export const extractEntitiesStep = createServerStepDefinition({
 
     const result = extractEntitiesFromAlerts({
       alerts,
-      config: DEFAULT_PIPELINE_CONFIG.entityExtraction,
+      config: DEFAULT_ENTITY_EXTRACTION_CONFIG,
       logger,
     });
 
