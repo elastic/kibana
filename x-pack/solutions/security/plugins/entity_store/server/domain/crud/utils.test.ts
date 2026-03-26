@@ -161,7 +161,14 @@ describe('crud_client utils', () => {
       mockGetEntityDefinition.mockReturnValue(createDefinition('user', []));
 
       const doc: Entity = { entity: { id: 'doc-id' }, user: { name: 'u' } };
-      const result = validateAndTransformDoc('update', 'user', 'default', doc, 'generated-id', true);
+      const result = validateAndTransformDoc(
+        'update',
+        'user',
+        'default',
+        doc,
+        'generated-id',
+        true
+      );
 
       expect(result.id).toBe('doc-id');
     });
