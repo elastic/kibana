@@ -1094,7 +1094,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async getCascadeLayoutScrollTop(): Promise<number> {
-    const el = await this.testSubjects.find('data-cascade-scroll-container');
+    const el = await this.testSubjects.find('dataCascadeScrollContainer');
     const scrollTop = await this.browser.execute('return arguments[0].scrollTop;', el._webElement);
 
     if (typeof scrollTop !== 'number') {
@@ -1105,7 +1105,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async scrollCascadeLayoutBy(delta: number): Promise<void> {
-    const el = await this.testSubjects.find('data-cascade-scroll-container');
+    const el = await this.testSubjects.find('dataCascadeScrollContainer');
     await this.browser.execute('arguments[0].scrollTop += arguments[1];', el._webElement, delta);
   }
 

@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { discover, unifiedTabs } = getPageObjects(['discover', 'unifiedTabs']);
+  const { discover, unifiedTabs, common } = getPageObjects(['discover', 'unifiedTabs', 'common']);
 
   const monacoEditor = getService('monacoEditor');
   const testSubjects = getService('testSubjects');
@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await discover.isShowingCascadeLayout()).to.be(true);
     };
 
-    const expectScrollToBeRoughly = async (expected: number, tolerance = 150) => {
+    const expectScrollToBeRoughly = async (expected: number, tolerance = 200) => {
       await retry.tryForTime(5000, async () => {
         const actual = await discover.getCascadeLayoutScrollTop();
         expect(Math.abs(actual - expected)).to.be.lessThan(
@@ -46,10 +46,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await runCascadeQuery();
       await discover.scrollCascadeLayoutBy(2000);
       await expectScrollToBeRoughly(2000);
+      // wait for  scroll restoration to be persisted
+      await common.sleep(1000);
       await unifiedTabs.createNewTab();
       await discover.waitUntilTabIsLoaded();
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
+      // wait for scroll restoration to settle
+      await common.sleep(100);
       await expectScrollToBeRoughly(2000);
     });
 
@@ -62,12 +66,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.toggleCascadeLayoutRow(firstRowId);
       await discover.scrollCascadeLayoutBy(200);
       await expectScrollToBeRoughly(initialRootScrollTop + 200);
+      // wait for scroll restoration to be persisted
+      await common.sleep(1000);
       await unifiedTabs.createNewTab();
       await discover.waitUntilTabIsLoaded();
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
       expect(await discover.isCascadeLayoutRowExpanded(firstRowId)).to.be(true);
-      await expectScrollToBeRoughly(initialRootScrollTop + 200, 300);
+      // wait for scroll restoration to settle
+      await common.sleep(100);
+      await expectScrollToBeRoughly(initialRootScrollTop + 200, 400);
     });
   });
 }

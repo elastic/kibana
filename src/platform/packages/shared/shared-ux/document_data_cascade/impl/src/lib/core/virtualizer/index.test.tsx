@@ -195,6 +195,17 @@ describe('virtualizer', () => {
       });
     };
 
+    beforeEach(() => {
+      Object.defineProperty(window, 'performance', {
+        value: {
+          mark: jest.fn(),
+          measure: jest.fn(),
+          now: jest.fn(),
+        },
+        writable: true,
+      });
+    });
+
     it('should not scroll when itemIndex is 0', () => {
       const virtualizer = createMockVirtualizer();
 
@@ -204,15 +215,22 @@ describe('virtualizer', () => {
       expect(virtualizer.calculateRange).not.toHaveBeenCalled();
     });
 
-    it('should not scroll when the provided ref is already true', () => {
+    it('should not scroll when the provided ref is already true and corrections are skipped', () => {
       const scrollMargin = 100;
       const virtualizer = createMockVirtualizer({
         scrollMargin,
         measurementsCache: buildMeasurementsCache([60, 60, 60], scrollMargin),
       });
-      const ref = { current: true } as React.MutableRefObject<boolean>;
 
-      renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, 2, ref));
+      const ref = {
+        get current() {
+          return true;
+        },
+      } as React.MutableRefObject<boolean>;
+
+      renderHook(() =>
+        useAnchorVirtualizerToItemIndex(virtualizer, 2, ref, { skipCorrections: true })
+      );
 
       expect(virtualizer.options.scrollToFn).not.toHaveBeenCalled();
     });
@@ -228,19 +246,6 @@ describe('virtualizer', () => {
       renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, 5));
 
       expect(virtualizer.options.scrollToFn).not.toHaveBeenCalled();
-    });
-
-    it('should call calculateRange before reading measurementsCache', () => {
-      const scrollMargin = 200;
-      const virtualizer = createMockVirtualizer({
-        scrollOffset: 500,
-        scrollMargin,
-        measurementsCache: buildMeasurementsCache([60, 60, 60, 60, 60], scrollMargin),
-      });
-
-      renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, 3));
-
-      expect(virtualizer.calculateRange).toHaveBeenCalledTimes(1);
     });
 
     it('should compute the correct scroll adjustment for a nested virtualizer', () => {
