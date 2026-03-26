@@ -1,5 +1,7 @@
 ---
 # This file is used to generate "Fleet settings" page in the product docs
+# For the schema and an example refer to the automated settings reference: 
+# https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
 
 product: Kibana
 collection: Fleet settings in Kibana
@@ -11,7 +13,7 @@ page_description: |
 
   Go to the [{{fleet}}](docs-content://reference/fleet/index.md) docs for more information about {{fleet}}.
 
-note: 'In {{ecloud}}, {{fleet}} flags are already configured. If a setting is applicable to {{ech}} environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")'
+note: 'In {{ecloud}}, {{fleet}} flags are already configured.'
 
 groups:
   - group: General {{fleet}} settings
