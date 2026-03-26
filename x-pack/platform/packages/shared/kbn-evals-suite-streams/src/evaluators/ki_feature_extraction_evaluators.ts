@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import { partition } from 'lodash';
 import { selectEvaluators } from '@kbn/evals';
-import type { BaseFeature } from '@kbn/streams-schema';
+import { type BaseFeature } from '@kbn/streams-schema';
 import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { flattenObject } from '@kbn/object-utils';
 import { createScenarioCriteriaLlmEvaluator } from './scenario_criteria_llm_evaluator';
-import { matchesEvidenceText } from './evidence_text_matching';
+import { isEvidenceGrounded } from './evidence_grounding';
 
 export const VALID_KI_FEATURE_TYPES = [
   'entity',
@@ -35,6 +36,7 @@ export interface KIFeatureExtractionEvaluationExample {
     max_confidence?: number;
     required_types?: ValidKIFeatureType[];
     forbidden_types?: ValidKIFeatureType[];
+    expect_entity_filters?: boolean;
     expected_ground_truth: string;
     expected?: string;
   };
@@ -77,7 +79,7 @@ const typeValidationEvaluator = {
   evaluate: async ({ output }) => {
     const features = getFeaturesFromOutput(output);
     if (features.length === 0) {
-      return { score: 1, explanation: 'No KI features to validate (vacuously valid)' };
+      return { score: null, explanation: 'No KI features to validate' };
     }
 
     const invalidFeatures = features.filter(
@@ -106,91 +108,6 @@ const typeValidationEvaluator = {
 } satisfies KIFeatureExtractionEvaluator;
 
 /**
- * Parses a `field.path=value` evidence string into key-value pairs.
- * Handles compound evidence like `"http.method=GET http.url=/api/users"`.
- * Returns an empty array if the string doesn't match the pattern.
- */
-function parseKeyValuePairs(evidence: string): Array<{ key: string; value: string }> {
-  const regex =
-    /([a-zA-Z_][a-zA-Z0-9_]*(?:\.(?:[a-zA-Z_][a-zA-Z0-9_]*|\d+))*)\s*=\s*([^\s]+(?:\s+(?![a-zA-Z_][a-zA-Z0-9_]*(?:\.(?:[a-zA-Z_][a-zA-Z0-9_]*|\d+))*\s*=)[^\s]+)*)/g;
-  const pairs: Array<{ key: string; value: string }> = [];
-  let match: RegExpExecArray | null;
-
-  while ((match = regex.exec(evidence)) !== null) {
-    pairs.push({ key: match[1], value: match[2] });
-  }
-
-  return pairs;
-}
-
-function getNestedValue(doc: Record<string, unknown>, path: string): unknown {
-  if (path in doc) {
-    return doc[path];
-  }
-
-  return get(doc, path);
-}
-
-/**
- * Recursively extracts all string values from a document object,
- * so direct-quote evidence can be matched against any field.
- */
-function getAllStringValues(doc: Record<string, unknown>): string[] {
-  const values: string[] = [];
-
-  const walk = (obj: unknown) => {
-    if (typeof obj === 'string') {
-      values.push(obj);
-    } else if (Array.isArray(obj)) {
-      for (const item of obj) {
-        walk(item);
-      }
-    } else if (obj !== null && typeof obj === 'object') {
-      for (const val of Object.values(obj as Record<string, unknown>)) {
-        walk(val);
-      }
-    }
-  };
-
-  walk(doc);
-  return values;
-}
-
-/**
- * Checks whether a single evidence string is grounded in the input documents.
- *
- * 1. `field.path=value` evidence: parses key-value pairs and checks that at
- *    least one pair matches a document field value.
- * 2. Direct quote evidence: checks if the text appears as a substring in any
- *    string value across all document fields.
- */
-function isEvidenceGrounded(evidence: string, documents: Array<Record<string, unknown>>): boolean {
-  const matchesStringValue = documents.some((doc) => {
-    const allValues = getAllStringValues(doc);
-    return allValues.some((val) => matchesEvidenceText(val, evidence));
-  });
-
-  if (matchesStringValue) {
-    return true;
-  }
-
-  const kvPairs = parseKeyValuePairs(evidence);
-  if (kvPairs.length > 0) {
-    const matchesDocumentKey = documents.some((doc) =>
-      kvPairs.some(({ key, value }) => {
-        const docValue = getNestedValue(doc, key);
-        return docValue !== undefined && String(docValue).includes(value);
-      })
-    );
-    if (matchesDocumentKey) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-/**
  * Checks that every evidence string in every KI is grounded in the input
  * documents — either as a `field.path=value` snippet matching a document field,
  * or as a direct quote appearing in any string value.
@@ -217,7 +134,8 @@ const evidenceGroundingEvaluator = {
         doc._source != null && typeof doc._source === 'object'
           ? (doc._source as Record<string, unknown>)
           : undefined;
-      const resolved = source ?? doc;
+      // flatten the object so we can lookup evidence keys by dotted path
+      const resolved = flattenObject(source ?? doc);
       if (id) {
         docsById.set(id, resolved);
       }
@@ -361,8 +279,8 @@ const confidenceBoundsEvaluator = {
     const features = getFeaturesFromOutput(output);
     if (features.length === 0) {
       return {
-        score: 1,
-        explanation: 'No KI features emitted — confidence bounds satisfied trivially',
+        score: null,
+        explanation: 'No KI features emitted',
       };
     }
 
@@ -399,7 +317,7 @@ const typeAssertionsEvaluator = {
     const { required_types, forbidden_types } = expected;
 
     if (!required_types?.length && !forbidden_types?.length) {
-      return { score: 1, explanation: 'No type assertions specified — skipping' };
+      return { score: null, explanation: 'No type assertions specified' };
     }
 
     const features = getFeaturesFromOutput(output);
@@ -446,6 +364,43 @@ const typeAssertionsEvaluator = {
   },
 } satisfies KIFeatureExtractionEvaluator;
 
+/**
+ * Checks that entity-type features include a `filter` condition.
+ * Only evaluated when the scenario sets `expect_entity_filters: true`.
+ */
+const filterPresenceEvaluator = {
+  name: 'filter_presence',
+  kind: 'CODE' as const,
+  evaluate: async ({ output, expected }) => {
+    if (!expected.expect_entity_filters) {
+      return { score: null, explanation: 'Entity filter evaluation not requested — skipping' };
+    }
+
+    const features = getFeaturesFromOutput(output);
+    const entities = features.filter((f) => f.type === 'entity');
+
+    if (entities.length === 0) {
+      const score = expected.required_types?.includes('entity') ? 0 : null;
+      return { score, explanation: 'No entity features' };
+    }
+
+    const [withFilter, withoutFilter] = partition(entities, ({ filter }) => Boolean(filter));
+    const score = withFilter.length / entities.length;
+    const missing = withoutFilter.map((f) => f.id);
+
+    return {
+      score,
+      explanation:
+        missing.length > 0
+          ? `${missing.length}/${entities.length} entity feature(s) missing filter: ${missing.join(
+              ', '
+            )}`
+          : 'All entity features have a filter',
+      details: { totalEntities: entities.length, withFilter: withFilter.length, missing },
+    };
+  },
+} satisfies KIFeatureExtractionEvaluator;
+
 export const createKIFeatureExtractionEvaluators = (scenarioCriteria?: {
   criteriaFn: (criteria: EvaluationCriterion[]) => Evaluator;
   criteria: EvaluationCriterion[];
@@ -456,6 +411,7 @@ export const createKIFeatureExtractionEvaluators = (scenarioCriteria?: {
     kiFeatureCountEvaluator,
     confidenceBoundsEvaluator,
     typeAssertionsEvaluator,
+    filterPresenceEvaluator,
   ]);
 
   if (!scenarioCriteria) {
