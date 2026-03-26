@@ -12,7 +12,7 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import { createUpdateDetectionService } from './update_detection';
-import type { MonitoringEntitySource } from '../../../../../../../common/api/entity_analytics';
+import type { WatchlistDataSources } from '../../../../../../../common/api/entity_analytics';
 import type { EntityStoreEntityIdsByType } from '../../../entities/service';
 import type { CorrelationMap } from '../../../entities/types';
 
@@ -40,7 +40,7 @@ type CapturedSearchRequest = SearchRequest & {
   };
 };
 
-const indexSource: MonitoringEntitySource = {
+const indexSource: WatchlistDataSources.MonitoringEntitySource = {
   id: 'index-source-1',
   type: 'index',
   name: 'test-index',
@@ -49,7 +49,7 @@ const indexSource: MonitoringEntitySource = {
   enabled: true,
 };
 
-const integrationSource: MonitoringEntitySource = {
+const integrationSource: WatchlistDataSources.MonitoringEntitySource = {
   id: 'integration-source-1',
   type: 'entity_analytics_integration',
   name: 'test-integration',

@@ -73,10 +73,13 @@ describe('createEntitySourcesService', () => {
     });
     mockListEntityStoreEntities
       .mockResolvedValueOnce({
-        user: ['user:1'],
-        host: [],
-        service: [],
-        generic: [],
+        entityIdsByType: {
+          user: ['user:1'],
+          host: [],
+          service: [],
+          generic: [],
+        },
+        correlationMap: new Map(),
       })
       .mockResolvedValueOnce({
         user: ['user:2'],
@@ -122,6 +125,7 @@ describe('createEntitySourcesService', () => {
           service: [],
           generic: [],
         },
+        correlationMap: expect.any(Map),
       },
       {
         sourceId: 'source-c',

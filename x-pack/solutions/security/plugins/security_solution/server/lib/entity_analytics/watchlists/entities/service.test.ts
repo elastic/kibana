@@ -42,10 +42,13 @@ describe('Watchlist entities service', () => {
         field: 'user.id',
       })
     ).resolves.toEqual({
-      user: ['user:jdoe'],
-      host: ['host:server-1'],
-      service: ['service:api'],
-      generic: [],
+      correlationMap: expect.any(Map),
+      entityIdsByType: {
+        user: ['user:jdoe'],
+        host: ['host:server-1'],
+        service: ['service:api'],
+        generic: [],
+      },
     });
 
     expect(esClient.search).toHaveBeenCalledTimes(2);
