@@ -26,10 +26,10 @@ export const isEsqlQueryRule = (
 
 export const convertFieldSpecToFieldOption = (
   fieldSpec: FieldSpec[],
-  shouldFilter: boolean = true
+  onlyMappedOrRuntime: boolean = true
 ): FieldOption[] => {
   return (fieldSpec ?? [])
-    .filter((spec: FieldSpec) => (shouldFilter ? spec.isMapped || spec.runtimeField : true))
+    .filter((spec: FieldSpec) => (onlyMappedOrRuntime ? spec.isMapped || spec.runtimeField : true))
     .map((spec: FieldSpec) => {
       const converted = {
         name: spec.name,
