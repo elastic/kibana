@@ -11,11 +11,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from '@kbn/shared-ux-router';
 
 jest.mock('../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      uiSettings: { get: jest.fn(() => false) },
-    },
-  }),
+  useKibana: () => ({ services: {} }),
 }));
 
 jest.mock('../../../hooks/use_navigation', () => ({
@@ -38,8 +34,8 @@ jest.mock('../../../hooks/use_conversation_list', () => ({
   useConversationList: () => ({ conversations: [], isLoading: false, refresh: jest.fn() }),
 }));
 
-jest.mock('../../../hooks/use_experimental_features', () => ({
-  useExperimentalFeatures: () => false,
+jest.mock('../../../hooks/use_feature_flags', () => ({
+  useFeatureFlags: () => ({ experimental: false, connectors: false }),
 }));
 
 jest.mock('./shared/sidebar_header', () => ({
