@@ -10,11 +10,11 @@
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { MigrationAlgorithm, TaskContext } from '../types';
 
-export type RollbackMigrationContext = {
+export interface RollbackMigrationContext {
   migrationTypes: Array<SavedObjectsType<any>>;
   migrationKibanaIndex: string;
   migrationAlgorithm: MigrationAlgorithm;
-};
+}
 
 export function getRollbackMigrationContext(ctx: TaskContext): RollbackMigrationContext {
   const { migrationTypes, migrationKibanaIndex, migrationAlgorithm } = ctx;
@@ -35,4 +35,3 @@ export function getRollbackMigrationContext(ctx: TaskContext): RollbackMigration
 
   return { migrationTypes, migrationKibanaIndex, migrationAlgorithm };
 }
-

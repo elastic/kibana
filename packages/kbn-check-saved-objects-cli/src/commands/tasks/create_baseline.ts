@@ -17,7 +17,8 @@ import type { FixtureTemplate } from '../../migrations/fixtures';
 import { getRollbackMigrationContext } from './rollback_context';
 
 export const createBaseline: Task = async (ctx, task) => {
-  const { migrationTypes, migrationKibanaIndex, migrationAlgorithm } = getRollbackMigrationContext(ctx);
+  const { migrationTypes, migrationKibanaIndex, migrationAlgorithm } =
+    getRollbackMigrationContext(ctx);
   const { baselineMappings } = ctx;
 
   const kibanaIndex = migrationKibanaIndex;

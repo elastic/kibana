@@ -15,7 +15,8 @@ import { checkDocuments } from './check_documents';
 import { getRollbackMigrationContext } from './rollback_context';
 
 export const testRollback: Task = async (ctx, task) => {
-  const { migrationTypes, migrationKibanaIndex, migrationAlgorithm } = getRollbackMigrationContext(ctx);
+  const { migrationTypes, migrationKibanaIndex, migrationAlgorithm } =
+    getRollbackMigrationContext(ctx);
   const { baselineMappings } = ctx;
 
   const previousVersionTypes = migrationTypes.map((type) =>

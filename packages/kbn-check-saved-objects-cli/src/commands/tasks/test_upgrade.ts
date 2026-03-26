@@ -14,7 +14,8 @@ import { checkDocuments } from './check_documents';
 import { getRollbackMigrationContext } from './rollback_context';
 
 export const testUpgrade: Task = async (ctx, task) => {
-  const { migrationTypes, migrationKibanaIndex, migrationAlgorithm } = getRollbackMigrationContext(ctx);
+  const { migrationTypes, migrationKibanaIndex, migrationAlgorithm } =
+    getRollbackMigrationContext(ctx);
 
   const { runMigrations, savedObjectsRepository } = await getKibanaMigratorTestKit({
     types: migrationTypes,
