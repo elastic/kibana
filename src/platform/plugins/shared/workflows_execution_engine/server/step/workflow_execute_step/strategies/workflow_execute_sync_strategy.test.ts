@@ -97,6 +97,7 @@ describe('WorkflowExecuteSyncStrategy', () => {
           spaceId: 'default',
           inputs: { param1: 'value1' },
           triggeredBy: 'workflow-step',
+          parentWorkflowInvocation: 'sync',
           parentWorkflowId: 'parent-workflow-id',
           parentWorkflowExecutionId: 'parent-exec-1',
           parentStepId: 'sync-step-1',

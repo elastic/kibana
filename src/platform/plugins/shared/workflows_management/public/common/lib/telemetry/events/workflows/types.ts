@@ -17,6 +17,11 @@ import type {
   WorkflowExecutionEventTypes,
 } from './execution/types';
 import type {
+  ReportWorkflowExportedActionParams,
+  ReportWorkflowImportedActionParams,
+  WorkflowImportExportEventTypes,
+} from './import_export/types';
+import type {
   ReportWorkflowClonedActionParams,
   ReportWorkflowCreatedActionParams,
   ReportWorkflowDeletedActionParams,
@@ -98,13 +103,16 @@ export interface WorkflowsTelemetryEventsMap {
   [WorkflowExecutionEventTypes.WorkflowRunResumed]: ReportWorkflowRunResumedActionParams;
   [WorkflowUIEventTypes.WorkflowListViewed]: ReportWorkflowListViewedActionParams;
   [WorkflowUIEventTypes.WorkflowDetailViewed]: ReportWorkflowDetailViewedActionParams;
+  [WorkflowImportExportEventTypes.WorkflowExported]: ReportWorkflowExportedActionParams;
+  [WorkflowImportExportEventTypes.WorkflowImported]: ReportWorkflowImportedActionParams;
 }
 
 export type AllWorkflowEventTypes =
   | WorkflowLifecycleEventTypes
   | WorkflowValidationEventTypes
   | WorkflowExecutionEventTypes
-  | WorkflowUIEventTypes;
+  | WorkflowUIEventTypes
+  | WorkflowImportExportEventTypes;
 
 export interface WorkflowsTelemetryEvent {
   eventType: AllWorkflowEventTypes;

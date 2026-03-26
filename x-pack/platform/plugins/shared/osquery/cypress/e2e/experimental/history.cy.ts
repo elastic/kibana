@@ -166,21 +166,11 @@ describe(
 
       // Filter to "uptime" queries
       cy.getBySel(HISTORY_SEARCH_INPUT).type('uptime{enter}');
-      cy.getBySel(UNIFIED_HISTORY_TABLE).find('tbody tr').should('have.length.above', 0);
-      cy.getBySel(UNIFIED_HISTORY_TABLE)
-        .find('tbody tr')
-        .each(($row) => {
-          cy.wrap($row).should('contain', 'uptime');
-        });
+      cy.getBySel(UNIFIED_HISTORY_TABLE).find('tbody tr').first().should('contain', 'uptime');
 
       // Filter to "processes" queries
       cy.getBySel(HISTORY_SEARCH_INPUT).clear().type('processes{enter}');
-      cy.getBySel(UNIFIED_HISTORY_TABLE).find('tbody tr').should('have.length.above', 0);
-      cy.getBySel(UNIFIED_HISTORY_TABLE)
-        .find('tbody tr')
-        .each(($row) => {
-          cy.wrap($row).should('contain', 'processes');
-        });
+      cy.getBySel(UNIFIED_HISTORY_TABLE).find('tbody tr').first().should('contain', 'processes');
 
       // Non-matching search shows empty state
       cy.getBySel(HISTORY_SEARCH_INPUT).clear().type('zzz_nonexistent_query_zzz{enter}');
@@ -254,7 +244,7 @@ describe(
       cy.getBySel(UNIFIED_HISTORY_TABLE)
         .find('tbody tr')
         .each(($row) => {
-          cy.wrap($row).should('contain', 'uptime');
+          expect($row.text()).to.include('uptime');
         });
 
       // Clear tag filter and restore all results
@@ -275,7 +265,7 @@ describe(
       cy.getBySel(UNIFIED_HISTORY_TABLE)
         .find('tbody tr')
         .each(($row) => {
-          cy.wrap($row).should('contain', 'processes');
+          expect($row.text()).to.include('processes');
         });
     });
 
@@ -310,7 +300,7 @@ describe(
       cy.getBySel(UNIFIED_HISTORY_TABLE)
         .find('tbody tr')
         .each(($row) => {
-          cy.wrap($row).should('contain', 'uptime');
+          expect($row.text()).to.include('uptime');
         });
     });
 

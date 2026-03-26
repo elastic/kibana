@@ -8,19 +8,26 @@
  */
 
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import type { JSONSchema7 } from 'json-schema';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import type { StepContext } from '@kbn/workflows';
+import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
+import { useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { ResumeExecutionModal } from './resume_execution_modal';
+import { generateSampleFromJsonSchema } from '../../../../common/lib/generate_sample_from_json_schema';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 
 interface ResumeExecutionButtonProps {
   executionId: string;
   workflowId?: string;
   resumeMessage?: string;
+  resumeSchema?: JsonModelSchemaType;
   /** When true, opens the input modal immediately on mount */
   autoOpen?: boolean;
 }
@@ -29,9 +36,11 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   executionId,
   workflowId,
   resumeMessage,
+  resumeSchema,
   autoOpen = false,
 }) => {
-  const { http, notifications } = useKibana().services;
+  const { notifications } = useKibana().services;
+  const workflowsApi = useWorkflowsApi();
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const { clearResumeParam } = useWorkflowUrlState();
   const telemetry = useTelemetry();
@@ -45,6 +54,24 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
     if (autoOpen) setIsModalOpen(true);
   }, [autoOpen]);
 
+  const contextOverride = useMemo<ContextOverrideData | undefined>(() => {
+    if (!resumeSchema) return undefined;
+    try {
+      const jsonSchema = resumeSchema as JSONSchema7;
+      const zodSchema = convertJsonSchemaToZod(jsonSchema);
+      const defaults = generateSampleFromJsonSchema(jsonSchema);
+      return {
+        schema: zodSchema,
+        stepContext: defaults as Partial<StepContext>,
+        rawJsonSchema: resumeSchema,
+      };
+    } catch {
+      // A malformed or unsupported schema must not crash the execution detail page
+      // Fall back to no context override so the modal still opens with a free form JSON editor.
+      return undefined;
+    }
+  }, [resumeSchema]);
+
   const openModal = useCallback(() => {
     modalOpenedAtRef.current = Date.now();
     setIsModalOpen(true);
@@ -57,16 +84,11 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
 
   const handleSubmit = useCallback(
     async ({ stepInputs }: { stepInputs: Record<string, unknown> }) => {
-      if (!http) {
-        throw new Error('HTTP service is unavailable');
-      }
       setIsSubmitting(true);
       const timeToSubmitMs =
         modalOpenedAtRef.current != null ? Date.now() - modalOpenedAtRef.current : undefined;
       try {
-        await http.post(`/api/workflowExecutions/${executionId}/resume`, {
-          body: JSON.stringify({ input: stepInputs }),
-        });
+        await workflowsApi.resumeExecution(executionId, { input: stepInputs });
         notifications?.toasts.addSuccess({
           title: i18n.translate(
             'workflowsManagement.executionDetail.resumeButton.successNotificationTitle',
@@ -98,7 +120,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
         setIsSubmitting(false);
       }
     },
-    [executionId, workflowId, http, notifications, telemetry, closeModal]
+    [executionId, workflowId, workflowsApi, notifications, telemetry, closeModal]
   );
 
   return (
@@ -137,6 +159,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
 
       {isModalOpen && (
         <ResumeExecutionModal
+          initialcontextOverride={contextOverride}
           resumeMessage={resumeMessage}
           onClose={closeModal}
           onSubmit={handleSubmit}
