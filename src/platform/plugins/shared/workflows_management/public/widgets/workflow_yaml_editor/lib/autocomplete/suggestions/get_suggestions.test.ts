@@ -75,6 +75,8 @@ function createMockContext(
     yamlLineCounter: null,
     scalarType: null,
     isInLiquidBlock: false,
+    isInTriggerConditionField: false,
+    triggerConditionDefinition: undefined,
     isInTriggersContext: false,
     isInScheduledTriggerWithBlock: false,
     isInStepsContext: true,

@@ -90,6 +90,8 @@ const createMockAutocompleteContext = (
     currentWorkflowId: null,
     workflowDefinition: null,
     isInLiquidBlock: false,
+    isInTriggerConditionField: false,
+    triggerConditionDefinition: undefined,
     isInScheduledTriggerWithBlock: false,
     isInStepsContext: true,
     isInTriggersContext: false,

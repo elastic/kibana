@@ -149,6 +149,7 @@ describe('WorkflowExecutionDetail', () => {
     mockUseQueryClient.mockReturnValue({
       removeQueries: mockRemoveQueries,
     } as unknown as ReturnType<typeof useQueryClient>);
+    mockUseStepExecution.mockReturnValue({ data: undefined, isLoading: false });
     mockUrlState.selectedStepExecutionId = undefined;
     mockUrlState.shouldAutoResume = false;
     mockPollingResult.workflowExecution = undefined;
@@ -274,6 +275,16 @@ describe('WorkflowExecutionDetail', () => {
             },
           ],
         }),
+      });
+
+      // The component reads resumeMessage from useStepExecution's input, not from the YAML definition
+      mockUseStepExecution.mockReturnValue({
+        data: {
+          id: 'step-exec-1',
+          status: ExecutionStatus.WAITING_FOR_INPUT,
+          input: { message: 'Please confirm' },
+        },
+        isLoading: false,
       });
 
       render(
@@ -770,9 +781,7 @@ describe('WorkflowExecutionDetail - resume input resolution', () => {
 
     expectPausedStepFetchArgs('exec-waiting', 'step-exec-foreach-alpha');
     expect(mockStepExecutionDetailsProps.current.resumeSchema).toMatchObject({ type: 'object' });
-    expect(mockStepExecutionDetailsProps.current.resumeMessage).toBe(
-      'Approve item {{ foreach.item }}'
-    );
+    expect(mockStepExecutionDetailsProps.current.resumeMessage).toBe('Approve item alpha');
   });
 });
 
