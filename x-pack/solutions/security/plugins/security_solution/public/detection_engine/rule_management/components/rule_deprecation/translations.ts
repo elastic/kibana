@@ -100,3 +100,10 @@ export const CANCEL_DELETE = i18n.translate(
     defaultMessage: 'Cancel',
   }
 );
+
+export const DUPLICATE_AND_DELETE_RULE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.deprecation.duplicateAndDeleteRule',
+  {
+    defaultMessage: 'Duplicate and delete',
+  }
+);

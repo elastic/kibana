@@ -455,11 +455,6 @@ export const RuleDetailsPage = connector(
       onUpgrade: refreshRule,
     });
 
-    const deprecationCallout = useDeprecatedRuleDetailsCallout({
-      rule,
-      confirmDeletion,
-    });
-
     const ruleStatusInfo = useMemo(() => {
       return (
         <>
@@ -597,6 +592,12 @@ export const RuleDetailsPage = connector(
       cancelRuleDuplication,
       confirmRuleDuplication,
     } = useBulkDuplicateExceptionsConfirmation();
+
+    const deprecationCallout = useDeprecatedRuleDetailsCallout({
+      rule,
+      confirmDeletion,
+      showBulkDuplicateExceptionsConfirmation: showBulkDuplicateConfirmation,
+    });
 
     const {
       isManualRuleRunConfirmationVisible,

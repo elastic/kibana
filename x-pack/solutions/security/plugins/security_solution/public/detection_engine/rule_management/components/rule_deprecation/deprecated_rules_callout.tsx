@@ -6,25 +6,21 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 interface DeprecatedRulesCalloutProps {
   title: string;
   description: string;
-  buttonLabel: string;
-  onButtonClick: () => void;
+  buttons: React.ReactNode[];
   onDismiss?: () => void;
-  isButtonDisabled?: boolean;
   dataTestSubj?: string;
 }
 
 export const DeprecatedRulesCallout: React.FC<DeprecatedRulesCalloutProps> = ({
   title,
   description,
-  buttonLabel,
-  onButtonClick,
+  buttons,
   onDismiss,
-  isButtonDisabled = false,
   dataTestSubj,
 }) => {
   return (
@@ -37,14 +33,13 @@ export const DeprecatedRulesCallout: React.FC<DeprecatedRulesCalloutProps> = ({
         data-test-subj={dataTestSubj}
       >
         <p>{description}</p>
-        <EuiButton
-          color="warning"
-          onClick={onButtonClick}
-          disabled={isButtonDisabled}
-          data-test-subj={`${dataTestSubj}-button`}
-        >
-          {buttonLabel}
-        </EuiButton>
+        <EuiFlexGroup gutterSize="s">
+          {buttons.map((button, index) => (
+            <EuiFlexItem grow={false} key={index}>
+              {button}
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
       </EuiCallOut>
       <EuiSpacer size="l" />
     </>
