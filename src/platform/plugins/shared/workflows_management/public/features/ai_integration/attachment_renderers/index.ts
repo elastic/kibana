@@ -21,7 +21,7 @@ export const registerWorkflowAttachmentRenderers = (
   attachments: AttachmentServiceStartContract,
   services: {
     core: CoreStart;
-    telemetry?: TelemetryServiceClient;
+    telemetry: TelemetryServiceClient;
   }
 ): void => {
   attachments.addAttachmentType(

@@ -54,7 +54,7 @@ interface SaveWorkflowParams {
   yaml: string;
   workflowId?: string;
   updateOrigin: CanvasRenderCallbacks['updateOrigin'];
-  telemetry?: WorkflowsBaseTelemetry;
+  telemetry: WorkflowsBaseTelemetry;
 }
 
 const saveWorkflow = async ({
@@ -70,7 +70,7 @@ const saveWorkflow = async ({
     if (workflowId) {
       const result = await workflowApi.updateWorkflow(workflowId, { yaml });
       queryClient.invalidateQueries({ queryKey: ['workflows', workflowId] });
-      telemetry?.reportWorkflowUpdated({
+      telemetry.reportWorkflowUpdated({
         workflowId,
         workflowUpdate: { yaml },
         hasValidationErrors: result.validationErrors.length > 0,
@@ -81,7 +81,7 @@ const saveWorkflow = async ({
       const result = await workflowApi.createWorkflow({ yaml });
       savedId = result.id;
       await updateOrigin(result.id);
-      telemetry?.reportWorkflowCreated({
+      telemetry.reportWorkflowCreated({
         workflowId: result.id,
         aiAssisted: true,
       });
@@ -131,7 +131,7 @@ const WorkflowYamlCanvasContent: React.FC<{
   updateOrigin: CanvasRenderCallbacks['updateOrigin'];
   application: ApplicationStart;
   isOnWorkflowPage: (workflowId: string) => boolean;
-  telemetry?: WorkflowsBaseTelemetry;
+  telemetry: WorkflowsBaseTelemetry;
 }> = ({
   attachment,
   isSidebar,
@@ -178,7 +178,7 @@ const WorkflowYamlCanvasContent: React.FC<{
     try {
       const result = await workflowApi.createWorkflow({ yaml: attachment.data.yaml });
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
-      telemetry?.reportWorkflowCreated({
+      telemetry.reportWorkflowCreated({
         workflowId: result.id,
         aiAssisted: true,
       });
@@ -282,10 +282,10 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
   telemetry: telemetryClient,
 }: {
   core: CoreStart;
-  telemetry?: TelemetryServiceClient;
+  telemetry: TelemetryServiceClient;
 }): AttachmentUIDefinition<WorkflowYamlAttachment> => {
   const { application } = core;
-  const telemetry = telemetryClient ? new WorkflowsBaseTelemetry(telemetryClient) : undefined;
+  const telemetry = new WorkflowsBaseTelemetry(telemetryClient);
   let currentAppId: string | undefined;
   let currentLocation = '';
   let appContextSub: Subscription | undefined;

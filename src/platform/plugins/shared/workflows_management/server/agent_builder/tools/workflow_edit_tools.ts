@@ -182,10 +182,10 @@ const handleEditResult = async (
   workflowName: string | undefined,
   toolId: string,
   api: WorkflowsManagementApi,
-  telemetryClient?: WorkflowsAiTelemetryClient | null
+  telemetryClient: WorkflowsAiTelemetryClient
 ) => {
   if (!result.success) {
-    telemetryClient?.reportEditResult({
+    telemetryClient.reportEditResult({
       toolId,
       conversationId: extractConversationId(context),
       editSuccess: false,
@@ -217,7 +217,7 @@ const handleEditResult = async (
 
   const validation = await runCompactValidation(result.yaml, api, context);
 
-  telemetryClient?.reportEditResult({
+  telemetryClient.reportEditResult({
     toolId,
     conversationId: extractConversationId(context),
     editSuccess: true,
@@ -247,7 +247,7 @@ const handleEditResult = async (
 export function registerWorkflowEditTools(
   agentBuilder: AgentBuilderPluginSetupContract,
   api: WorkflowsManagementApi,
-  getAiTelemetryClient?: () => WorkflowsAiTelemetryClient | null
+  aiTelemetryClient: WorkflowsAiTelemetryClient
 ): void {
   agentBuilder.tools.register({
     id: workflowTools.insertStep,
@@ -284,7 +284,7 @@ export function registerWorkflowEditTools(
         attachment.name,
         workflowTools.insertStep,
         api,
-        getAiTelemetryClient?.()
+        aiTelemetryClient
       );
     },
   });
@@ -319,7 +319,7 @@ export function registerWorkflowEditTools(
         attachment.name,
         workflowTools.modifyStep,
         api,
-        getAiTelemetryClient?.()
+        aiTelemetryClient
       );
     },
   });
@@ -355,7 +355,7 @@ export function registerWorkflowEditTools(
         attachment.name,
         workflowTools.modifyStepProperty,
         api,
-        getAiTelemetryClient?.()
+        aiTelemetryClient
       );
     },
   });
@@ -392,7 +392,7 @@ export function registerWorkflowEditTools(
         attachment.name,
         workflowTools.modifyProperty,
         api,
-        getAiTelemetryClient?.()
+        aiTelemetryClient
       );
     },
   });
@@ -423,7 +423,7 @@ export function registerWorkflowEditTools(
         attachment.name,
         workflowTools.deleteStep,
         api,
-        getAiTelemetryClient?.()
+        aiTelemetryClient
       );
     },
   });
@@ -457,7 +457,7 @@ export function registerWorkflowEditTools(
 
         const validation = await runCompactValidation(yaml, api, context);
 
-        getAiTelemetryClient?.()?.reportEditResult({
+        aiTelemetryClient.reportEditResult({
           toolId: workflowTools.replaceYaml,
           conversationId: extractConversationId(context),
           editSuccess: true,
@@ -497,7 +497,7 @@ export function registerWorkflowEditTools(
 
       const validation = await runCompactValidation(yaml, api, context);
 
-      getAiTelemetryClient?.()?.reportEditResult({
+      aiTelemetryClient.reportEditResult({
         toolId: workflowTools.replaceYaml,
         conversationId: extractConversationId(context),
         editSuccess: true,
