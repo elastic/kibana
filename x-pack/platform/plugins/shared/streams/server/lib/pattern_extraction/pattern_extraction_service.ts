@@ -58,12 +58,7 @@ export class PatternExtractionService implements IPatternExtractionService {
     payload: GrokExtractionPayload | DissectExtractionPayload
   ): Promise<GrokExtractionResult | DissectExtractionResult> {
     if (!this.enabled) {
-      switch (payload.type) {
-        case 'grok':
-          return executeTask(payload);
-        case 'dissect':
-          return executeTask(payload);
-      }
+      return executeTask(payload);
     }
     if (!this.worker) {
       throw new Error('Pattern extraction worker pool was not initialized');

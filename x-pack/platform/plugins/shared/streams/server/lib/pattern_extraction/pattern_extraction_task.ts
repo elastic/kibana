@@ -20,6 +20,9 @@ export function executeTask(payload: GrokExtractionPayload): GrokExtractionResul
 export function executeTask(payload: DissectExtractionPayload): DissectExtractionResult;
 export function executeTask(
   payload: GrokExtractionPayload | DissectExtractionPayload
+): GrokExtractionResult | DissectExtractionResult;
+export function executeTask(
+  payload: GrokExtractionPayload | DissectExtractionPayload
 ): GrokExtractionResult | DissectExtractionResult {
   switch (payload.type) {
     case 'grok': {
@@ -27,6 +30,7 @@ export function executeTask(
       return {
         type: 'grok',
         patternGroups: groups.map((group) => ({
+          // Slice messages for LLM review; extraction uses all messages for better heuristics
           messages: group.messages.slice(0, MAX_SAMPLE_MESSAGES),
           nodes: extractGrokPatternDangerouslySlow(group.messages),
         })),

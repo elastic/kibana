@@ -120,7 +120,9 @@ export const suggestProcessingPipelineRoute = createServerRoute({
         let parsingProcessor: GrokProcessor | DissectProcessor | undefined;
 
         const fieldName = getDefaultTextField(params.body.documents, PRIORITIZED_CONTENT_FIELDS);
-        const messages = extractMessagesFromField(params.body.documents, fieldName);
+        const messages = fieldName
+          ? extractMessagesFromField(params.body.documents, fieldName)
+          : [];
 
         if (messages.length > 0) {
           const candidatePromises: Array<
