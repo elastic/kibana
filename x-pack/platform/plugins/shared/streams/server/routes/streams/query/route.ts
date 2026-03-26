@@ -37,6 +37,7 @@ const readQueryStreamRoute = createServerRoute({
     summary: 'Get query stream settings',
     description: 'Fetches the query settings of a query stream definition',
     availability: {
+      since: '9.4.0',
       stability: 'experimental',
     },
   },
@@ -91,6 +92,7 @@ const upsertQueryStreamRoute = createServerRoute({
     description: 'Upserts the query settings of a query stream definition',
     summary: 'Upsert query stream settings',
     availability: {
+      since: '9.4.0',
       stability: 'experimental',
     },
   },
