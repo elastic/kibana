@@ -16,7 +16,11 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-types';
-import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
+import type {
+  NewPackagePolicy,
+  PackagePolicy,
+  UpdatePackagePolicy,
+} from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
@@ -143,6 +147,7 @@ import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
 import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrations';
 import { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
+import { SecurityCatalogService } from './lib/data_source_catalog/security_catalog_service';
 import { TelemetryConfigProvider } from '../common/telemetry_config/telemetry_config_provider';
 import { TelemetryConfigWatcher } from './endpoint/lib/policy/telemetry_watch';
 import { threatIntelligenceSearchStrategyProvider } from './threat_intelligence/search_strategy';
@@ -177,6 +182,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly telemetryEventsSender: ITelemetryEventsSender;
   private readonly asyncTelemetryEventsSender: IAsyncTelemetryEventsSender;
 
+  private readonly dataSourceCatalog: SecurityCatalogService;
   private readonly healthDiagnosticService: HealthDiagnosticService;
 
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
@@ -210,6 +216,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.config,
       this.pluginContext.logger,
       this.pluginContext.env.packageInfo.version
+    );
+    this.dataSourceCatalog = new SecurityCatalogService(
+      this.pluginContext.logger.get('data-source-catalog')
     );
 
     this.ruleMonitoringService = createRuleMonitoringService(this.config, this.logger);
@@ -577,6 +586,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     if (plugins.taskManager) {
       this.completeExternalResponseActionsTask.setup({ taskManager: plugins.taskManager });
+      this.dataSourceCatalog.setup(plugins.taskManager);
     }
 
     core
@@ -740,6 +750,22 @@ export class Plugin implements ISecuritySolutionPlugin {
     const fleetStartServices = plugins.fleet!;
 
     const { packageService } = fleetStartServices;
+
+    // Start data source catalog (async, non-blocking)
+    this.dataSourceCatalog
+      .start({
+        esClient: core.elasticsearch.client.asInternalUser,
+        packageClient: packageService?.asInternalUser,
+      })
+      .catch((err) => {
+        this.logger.get('data-source-catalog').error(`Catalog start failed: ${err}`);
+      });
+
+    if (plugins.taskManager) {
+      this.dataSourceCatalog.scheduleRefresh(plugins.taskManager).catch((err) => {
+        this.logger.get('data-source-catalog').error(`Failed to schedule refresh: ${err}`);
+      });
+    }
 
     this.licensing$ = plugins.licensing.license$;
 
@@ -960,6 +986,17 @@ export class Plugin implements ISecuritySolutionPlugin {
             this.logger
           );
           return packagePolicy;
+        }
+      );
+
+      registerIngestCallback(
+        'packagePolicyPostCreate',
+        async (newPolicy: PackagePolicy): Promise<PackagePolicy> => {
+          await this.dataSourceCatalog.refresh(
+            core.elasticsearch.client.asInternalUser,
+            packageService?.asInternalUser
+          );
+          return newPolicy;
         }
       );
     }

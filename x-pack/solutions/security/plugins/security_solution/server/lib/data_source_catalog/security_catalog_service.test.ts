@@ -7,6 +7,10 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import { SecurityCatalogService } from './security_catalog_service';
 
 jest.mock('@kbn/data-source-catalog', () => ({
@@ -16,6 +20,14 @@ jest.mock('@kbn/data-source-catalog', () => ({
     search: jest.fn().mockResolvedValue({ entries: [], total: 0 }),
   })),
 }));
+
+const mockTaskManagerSetup = {
+  registerTaskDefinitions: jest.fn(),
+} as unknown as TaskManagerSetupContract;
+
+const mockTaskManagerStart = {
+  ensureScheduled: jest.fn().mockResolvedValue(undefined),
+} as unknown as TaskManagerStartContract;
 
 describe('SecurityCatalogService', () => {
   const logger = loggingSystemMock.createLogger();
@@ -41,6 +53,7 @@ describe('SecurityCatalogService', () => {
       esClient,
       packageClient: undefined,
       patterns: ['logs-*'],
+      includeStats: true,
     });
   });
 
@@ -51,5 +64,36 @@ describe('SecurityCatalogService', () => {
     const query = service.getQuery(esClient);
     expect(query).toBeDefined();
     expect(typeof query.search).toBe('function');
+  });
+
+  it('setup() registers task definitions', () => {
+    const service = new SecurityCatalogService(logger);
+    service.setup(mockTaskManagerSetup);
+
+    expect(mockTaskManagerSetup.registerTaskDefinitions).toHaveBeenCalledTimes(1);
+    expect(mockTaskManagerSetup.registerTaskDefinitions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        'security:data-source-catalog:refresh-stats': expect.objectContaining({
+          title: 'Security Data Source Catalog Stats Refresh',
+          timeout: '5m',
+          createTaskRunner: expect.any(Function),
+        }),
+      })
+    );
+  });
+
+  it('scheduleRefresh() schedules the task', async () => {
+    const service = new SecurityCatalogService(logger);
+    await service.scheduleRefresh(mockTaskManagerStart);
+
+    expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledTimes(1);
+    expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'security:data-source-catalog:refresh-stats:1.0.0',
+        taskType: 'security:data-source-catalog:refresh-stats',
+        scope: ['securitySolution'],
+        schedule: { interval: '6h' },
+      })
+    );
   });
 });
