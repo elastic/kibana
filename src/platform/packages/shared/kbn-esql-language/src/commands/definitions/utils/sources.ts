@@ -11,6 +11,7 @@ import { SOURCES_TYPES } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import type { ESQLAstAllCommands, ESQLAstJoinCommand, ESQLSource } from '@elastic/esql/types';
 import { isAsExpression, Walker, LeafPrinter } from '@elastic/esql';
+import { getStreamNameFromViewName } from '@kbn/streams-schema';
 import type { ISuggestionItem } from '../../registry/types';
 import { pipeCompleteItem, commaCompleteItem } from '../../registry/complete_items';
 import { findFinalWord, withAutoSuggest } from './autocomplete/helpers';
@@ -100,10 +101,12 @@ export const buildViewsDefinitions = (
   views
     .filter(({ name }) => !alreadyUsed.includes(name))
     .map(({ name }) => {
+      const friendlyName = getStreamNameFromViewName(name) ?? name;
       const text = getSafeInsertSourceText(name);
       return withAutoSuggest({
-        label: name,
+        label: friendlyName,
         text,
+        filterText: friendlyName,
         kind: 'Issue',
         detail: i18n.translate('kbn-esql-language.esql.autocomplete.viewDefinition', {
           defaultMessage: 'View',
