@@ -393,16 +393,6 @@ describe('Color Schema', () => {
 
         expect(() => allColoringTypeSchema.validate(input)).toThrow();
       });
-
-      it.skip('throws on empty values array in categorical mapping', () => {
-        const input = {
-          palette: 'kibana_palette',
-          mode: 'categorical',
-          mapping: [{ values: [], color: { type: 'color_code', value: '#FF00FF' } }],
-        } satisfies ColorMappingCategoricalType;
-
-        expect(() => allColoringTypeSchema.validate(input)).toThrow();
-      });
     });
   });
 });
