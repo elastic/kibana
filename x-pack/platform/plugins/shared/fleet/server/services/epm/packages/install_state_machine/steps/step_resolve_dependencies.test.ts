@@ -26,12 +26,18 @@ import type { InstallContext } from '../_state_machine_package_install';
 
 import { stepResolveDependencies } from './step_resolve_dependencies';
 
+jest.mock('../../../../audit_logging');
 jest.mock('../../../../app_context', () => {
   return {
     appContextService: {
       getExperimentalFeatures: jest.fn(),
       getLogger: jest.fn().mockReturnValue({
         debug: jest.fn(),
+      }),
+      getLockManagerService: jest.fn().mockReturnValue({
+        withLock: jest
+          .fn()
+          .mockImplementation((_lockName: string, fn: () => Promise<void>) => fn()),
       }),
     },
   };
@@ -202,9 +208,46 @@ describe('stepResolveDependencies', () => {
     expect(mockedInstallPackage).toHaveBeenCalledWith(
       expect.objectContaining({
         pkgkey: 'dep-a-1.2.0',
+        installedAsDependencyOf: { name: 'parent', version: '1.0.0' },
         spaceId: 'default',
       })
     );
+    expect(appContextService.getLockManagerService).toHaveBeenCalled();
+  });
+
+  it('does not use lock manager when package has no requires.content', async () => {
+    await stepResolveDependencies(
+      createContext({
+        packageInstallContext: {
+          packageInfo: {
+            name: 'no-deps',
+            version: '1.0.0',
+          },
+        },
+      } as Partial<InstallContext>)
+    );
+
+    expect(appContextService.getLockManagerService).not.toHaveBeenCalled();
+    expect(mockedInstallPackage).not.toHaveBeenCalled();
+  });
+
+  it('does not use lock manager when requires.content is an empty list', async () => {
+    await stepResolveDependencies(
+      createContext({
+        packageInstallContext: {
+          packageInfo: {
+            name: 'no-deps',
+            version: '1.0.0',
+            requires: {
+              content: [],
+            },
+          },
+        },
+      } as any)
+    );
+
+    expect(appContextService.getLockManagerService).not.toHaveBeenCalled();
+    expect(mockedInstallPackage).not.toHaveBeenCalled();
   });
 
   it('updates dependency when installed version does not satisfy constraint (to_update)', async () => {
@@ -244,8 +287,85 @@ describe('stepResolveDependencies', () => {
     expect(mockedInstallPackage).toHaveBeenCalledWith(
       expect.objectContaining({
         pkgkey: 'dep-a-1.5.0',
+        installedAsDependencyOf: { name: 'parent', version: '1.0.0' },
       })
     );
+  });
+
+  it('updates is_dependency_of without touching installed_as_dependency when dependency is already installed', async () => {
+    mockedGetInstalledPackageSavedObjects.mockResolvedValue({
+      saved_objects: [],
+      total: 0,
+      per_page: 0,
+      page: 1,
+    });
+    mockedGetInstallation.mockResolvedValueOnce({
+      name: 'dep-a',
+      version: '1.2.0',
+      installed_as_dependency: false,
+      is_dependency_of: [],
+    } as any);
+
+    await stepResolveDependencies(
+      createContext({
+        packageInstallContext: {
+          packageInfo: {
+            name: 'parent',
+            version: '1.0.0',
+            requires: {
+              content: [{ package: 'dep-a', version: '^1.0.0' }],
+            },
+          },
+        },
+      } as Partial<InstallContext>)
+    );
+
+    expect(mockedInstallPackage).not.toHaveBeenCalled();
+    expect(soClient.update).toHaveBeenCalledTimes(1);
+    expect(soClient.update).toHaveBeenCalledWith(
+      'epm-packages',
+      'dep-a',
+      expect.not.objectContaining({ installed_as_dependency: expect.anything() })
+    );
+    expect(soClient.update).toHaveBeenCalledWith(
+      'epm-packages',
+      'dep-a',
+      expect.objectContaining({
+        is_dependency_of: [{ name: 'parent', version: '1.0.0' }],
+      })
+    );
+  });
+
+  it('skips SO update when parent is already in is_dependency_of for an installed dependency', async () => {
+    mockedGetInstalledPackageSavedObjects.mockResolvedValue({
+      saved_objects: [],
+      total: 0,
+      per_page: 0,
+      page: 1,
+    });
+    mockedGetInstallation.mockResolvedValueOnce({
+      name: 'dep-a',
+      version: '1.2.0',
+      installed_as_dependency: true,
+      is_dependency_of: [{ name: 'parent', version: '1.0.0' }],
+    } as any);
+
+    await stepResolveDependencies(
+      createContext({
+        packageInstallContext: {
+          packageInfo: {
+            name: 'parent',
+            version: '1.0.0',
+            requires: {
+              content: [{ package: 'dep-a', version: '^1.0.0' }],
+            },
+          },
+        },
+      } as Partial<InstallContext>)
+    );
+
+    expect(mockedInstallPackage).not.toHaveBeenCalled();
+    expect(soClient.update).not.toHaveBeenCalled();
   });
 
   it('skips installing when dependency is already installed with satisfying version', async () => {

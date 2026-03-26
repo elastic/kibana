@@ -23,6 +23,35 @@ const resolvedIconType = (iconType: AiButtonIconType): IconType =>
 // Per design: only xs uses small icon; s and m both use medium icon.
 const getSyncedIconSize = (size?: 'xs' | 's' | 'm') => (size === 'xs' ? 's' : 'm');
 
+/** Button-only HTML attributes to omit when rendering as anchor. */
+const BUTTON_ONLY_KEYS = [
+  'form',
+  'formAction',
+  'formEncType',
+  'formMethod',
+  'formNoValidate',
+  'formTarget',
+  'name',
+  'type',
+  'value',
+] as const;
+/** Anchor-only HTML attributes to omit when rendering as button. */
+const ANCHOR_ONLY_KEYS = ['href', 'target', 'rel', 'download', 'referrerPolicy', 'ping'] as const;
+
+/**
+ * Keep only the props branch that matches `hasHref`, so spreads satisfy EUI's union.
+ */
+function filterForButtonOrAnchor(
+  rest: Record<string, unknown>,
+  hasHref: boolean
+): Record<string, unknown> {
+  const filtered = { ...rest };
+  for (const k of hasHref ? BUTTON_ONLY_KEYS : ANCHOR_ONLY_KEYS) {
+    delete filtered[k];
+  }
+  return filtered;
+}
+
 export const AiButtonBase = (props: AiButtonProps) => {
   const variant: AiButtonVariant = props.variant ?? 'base';
 
@@ -47,15 +76,18 @@ export const AiButtonBase = (props: AiButtonProps) => {
       ...rest
     } = props;
 
+    const filtered = filterForButtonOrAnchor(rest, !!rest.href);
+    const iconProps = {
+      ...filtered,
+      iconType: resolvedIconType(iconType),
+      iconSize: rest.iconSize ?? getSyncedIconSize(rest.size),
+      css: [buttonCss, iconGradientCss, userCss],
+    };
+
     return (
       <>
         {svgGradientDefs}
-        <EuiButtonIcon
-          {...rest}
-          css={[buttonCss, iconGradientCss, userCss]}
-          iconSize={rest.iconSize ?? getSyncedIconSize(rest.size)}
-          iconType={resolvedIconType(iconType)}
-        />
+        <EuiButtonIcon {...iconProps} />
       </>
     );
   }
@@ -70,22 +102,22 @@ export const AiButtonBase = (props: AiButtonProps) => {
       ...rest
     } = props;
 
+    const filtered = filterForButtonOrAnchor(rest, !!rest.href);
+    const emptyProps = {
+      ...filtered,
+      iconSize: rest.iconSize ?? getSyncedIconSize(rest.size),
+      iconType: iconType ? resolvedIconType(iconType) : undefined,
+      css: [buttonCss, iconGradientCss, userCss],
+      children: <span css={labelCss}>{children}</span>,
+    };
     return (
       <>
         {svgGradientDefs}
-        <EuiButtonEmpty
-          {...rest}
-          iconSize={rest.iconSize ?? getSyncedIconSize(rest.size)}
-          iconType={iconType ? resolvedIconType(iconType) : undefined}
-          css={[buttonCss, iconGradientCss, userCss]}
-        >
-          <span css={labelCss}>{children}</span>
-        </EuiButtonEmpty>
+        <EuiButtonEmpty {...emptyProps} />
       </>
     );
   }
 
-  type EuiButtonBranchProps = Extract<AiButtonProps, { variant?: 'base' | 'accent' }>;
   const {
     variant: _variant,
     iconOnly: _iconOnly,
@@ -94,22 +126,24 @@ export const AiButtonBase = (props: AiButtonProps) => {
     iconType,
     size,
     ...rest
-  } = props as EuiButtonBranchProps;
+  } = props;
   const buttonSize: 's' | 'm' | undefined = size === 'xs' ? 's' : size;
+
+  const filtered = filterForButtonOrAnchor(rest, !!rest.href);
+  const buttonProps = {
+    ...filtered,
+    size: buttonSize,
+    iconSize: rest.iconSize ?? getSyncedIconSize(size),
+    iconType: iconType ? resolvedIconType(iconType) : undefined,
+    css: [buttonCss, iconGradientCss, size === 'xs' && euiButtonXsSizeCss, userCss],
+    fill: variant === 'accent',
+    children: <span css={labelCss}>{children}</span>,
+  };
 
   return (
     <>
       {svgGradientDefs}
-      <EuiButton
-        {...rest}
-        size={buttonSize}
-        iconSize={rest.iconSize ?? getSyncedIconSize(size)}
-        iconType={iconType ? resolvedIconType(iconType) : undefined}
-        css={[buttonCss, iconGradientCss, size === 'xs' && euiButtonXsSizeCss, userCss]}
-        fill={variant === 'accent'}
-      >
-        <span css={labelCss}>{children}</span>
-      </EuiButton>
+      <EuiButton {...buttonProps} />
     </>
   );
 };

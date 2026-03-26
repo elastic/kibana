@@ -77,7 +77,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
             text={i18n.EXCEPTION_LIST_HEADER_LINKED_RULES(linkedRules.length)}
             actions={referencedLinks}
             disableActions={false}
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             panelPaddingSize="none"
             ariaLabel={i18n.LINKED_RULES_ARIA_LABEL}
@@ -104,12 +104,12 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
       )}
       <EuiFlexItem>
         <HeaderMenu
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           dataTestSubj={`${dataTestSubj || ''}MenuActions`}
           actions={[
             {
               key: '1',
-              icon: 'exportAction',
+              icon: 'upload',
               label: i18n.EXCEPTION_LIST_HEADER_EXPORT_ACTION,
               onClick: () => {
                 if (typeof onExportList === 'function') onExportList();

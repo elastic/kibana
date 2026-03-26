@@ -14,8 +14,7 @@
  *   version: not applicable
  */
 
-import type { ZodTypeDef } from '@kbn/zod';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 /**
  * Processor options for the Elasticsearch processor.
@@ -66,16 +65,15 @@ export interface ESProcessorOptionsInput {
   tag?: string;
   [key: string]: unknown;
 }
-export const ESProcessorOptions: z.ZodType<
-  ESProcessorOptions,
-  ZodTypeDef,
-  ESProcessorOptionsInput
-> = z
+export const ESProcessorOptions: z.ZodType<ESProcessorOptions, ESProcessorOptionsInput> = z
   .object({
     /**
      * An array of items to execute if the processor fails.
      */
-    on_failure: z.array(z.lazy(() => ESProcessorItem)).optional(),
+    on_failure: z
+      .array(z.lazy(() => ESProcessorItem))
+      .max(50)
+      .optional(),
     /**
      * If true, the processor continues to the next processor if the current processor fails.
      */
@@ -87,11 +85,11 @@ export const ESProcessorOptions: z.ZodType<
     /**
      * Conditionally execute the processor.
      */
-    if: z.string().optional(),
+    if: z.string().max(4096).optional(),
     /**
      * A tag to assign to the document after processing.
      */
-    tag: z.string().optional(),
+    tag: z.string().max(256).optional(),
   })
   .catchall(z.unknown());
 
@@ -104,6 +102,6 @@ export interface ESProcessorItem {
 export interface ESProcessorItemInput {
   [key: string]: ESProcessorOptionsInput;
 }
-export const ESProcessorItem: z.ZodType<ESProcessorItem, ZodTypeDef, ESProcessorItemInput> = z
+export const ESProcessorItem: z.ZodType<ESProcessorItem, ESProcessorItemInput> = z
   .object({})
   .catchall(z.lazy(() => ESProcessorOptions));
