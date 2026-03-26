@@ -35,18 +35,12 @@ export function AlertEpisodeStatusCell({ status, episodeAction }: AlertEpisodeSt
       </EuiFlexItem>
       {isSnoozed && (
         <EuiFlexItem grow={false}>
-          <EuiBadge
-            iconType="bellSlash"
-            data-test-subj="alertEpisodeStatusCellSnoozeIndicator"
-          />
+          <EuiBadge iconType="bellSlash" data-test-subj="alertEpisodeStatusCellSnoozeIndicator" />
         </EuiFlexItem>
       )}
       {isAcknowledged && (
         <EuiFlexItem grow={false}>
-          <EuiBadge
-            iconType="checkCircle"
-            data-test-subj="alertEpisodeStatusCellAckIndicator"
-          />
+          <EuiBadge iconType="checkCircle" data-test-subj="alertEpisodeStatusCellAckIndicator" />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
