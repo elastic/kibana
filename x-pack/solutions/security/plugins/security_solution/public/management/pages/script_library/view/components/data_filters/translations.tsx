@@ -17,6 +17,9 @@ export const FILTER_NAMES = Object.freeze({
   tags: i18n.translate('xpack.securitySolution.scriptLibrary.filter.tags', {
     defaultMessage: 'Categories',
   }),
+  searchTerms: i18n.translate('xpack.securitySolution.scriptLibrary.filter.searchTerm', {
+    defaultMessage: 'Search by script name, updated by or file SHA256 hash',
+  }),
 });
 
 export const FILTER_PLACEHOLDERS = Object.freeze({

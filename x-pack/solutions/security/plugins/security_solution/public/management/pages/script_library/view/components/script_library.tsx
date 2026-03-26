@@ -59,6 +59,7 @@ export const ScriptLibrary = memo<ScriptLibraryProps>(({ 'data-test-subj': dataT
     os: osFilterFromUrl,
     fileType: fileTypeFilterFromUrl,
     category: categoryFilterFromUrl,
+    searchTerms: searchTermsFromUrl,
     sortDirection: sortDirectionFromUrl,
     sortField: sortFieldFromUrl,
     setPagingAndSortingParams,
@@ -108,6 +109,7 @@ export const ScriptLibrary = memo<ScriptLibraryProps>(({ 'data-test-subj': dataT
     fileType: fileTypeFilterFromUrl ?? [],
     os: osFilterFromUrl ?? [],
     category: categoryFilterFromUrl ?? [],
+    searchTerms: searchTermsFromUrl ?? [],
     sortField: sortFieldFromUrl as SortableScriptLibraryFields,
     sortDirection: sortDirectionFromUrl,
     page: safePaging.page,
@@ -133,6 +135,7 @@ export const ScriptLibrary = memo<ScriptLibraryProps>(({ 'data-test-subj': dataT
       os: osFilterFromUrl,
       fileType: fileTypeFilterFromUrl,
       category: categoryFilterFromUrl,
+      searchTerms: searchTermsFromUrl,
       sortField: sortFieldFromUrl as SortableScriptLibraryFields,
       sortDirection: sortDirectionFromUrl,
       page: safePaging.page,
@@ -155,6 +158,7 @@ export const ScriptLibrary = memo<ScriptLibraryProps>(({ 'data-test-subj': dataT
     osFilterFromUrl,
     fileTypeFilterFromUrl,
     categoryFilterFromUrl,
+    searchTermsFromUrl,
   ]);
 
   const totalItemCount = useMemo(() => scriptsData?.total ?? 0, [scriptsData?.total]);
@@ -185,6 +189,16 @@ export const ScriptLibrary = memo<ScriptLibraryProps>(({ 'data-test-subj': dataT
       setQueryParams((prevState) => ({
         ...prevState,
         category: selectedCategory as ScriptTagKey[],
+      }));
+    },
+    [setQueryParams]
+  );
+
+  const onChangeSearchTermsFilter = useCallback(
+    (searchTerms: string[]) => {
+      setQueryParams((prevState) => ({
+        ...prevState,
+        searchTerms,
       }));
     },
     [setQueryParams]
@@ -349,7 +363,12 @@ export const ScriptLibrary = memo<ScriptLibraryProps>(({ 'data-test-subj': dataT
         {doesDataExist ? (
           <>
             <ScriptLibraryFilters
-              {...{ onChangePlatformFilter, onChangeFileTypeFilter, onChangeTagsFilter }}
+              {...{
+                onChangePlatformFilter,
+                onChangeFileTypeFilter,
+                onChangeTagsFilter,
+                onChangeSearchTermsFilter,
+              }}
             />
             <ScriptLibraryTable
               data-test-subj={getTestId('table')}

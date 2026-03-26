@@ -33,12 +33,14 @@ export interface ScriptLibraryUrlParams {
   os?: SupportedHostOsType[]; // maps to "platform" filter in the UI
   fileType?: ScriptLibraryAllowedFileType[]; // maps to "fileType" filter in the UI
   category?: ScriptTagKey[]; // maps to "tags" filter in the UI
+  searchTerms?: string[]; // maps to the search input in the UI
 }
 
 interface ScriptLibraryUrlParamSetters {
   setUrlOsFilter: (platforms: string) => void;
   setUrlFileTypeFilter: (fileTypes: string) => void;
   setUrlCategoryFilter: (category: string) => void;
+  setUrlSearchTermsFilter: (searchTerms: string) => void;
   setPagingAndSortingParams: (params: {
     page: number;
     pageSize: number;
@@ -58,6 +60,7 @@ export const scriptLibraryFiltersFromUrlParams = (
     os: [],
     fileType: [],
     category: [],
+    searchTerms: [],
   };
 
   const page = urlParams.page && Number(urlParams.page) > 0 ? Number(urlParams.page) : undefined;
@@ -90,6 +93,11 @@ export const scriptLibraryFiltersFromUrlParams = (
         .sort()
     : [];
   scriptLibraryFilters.category = urlCategoryFilter;
+
+  const urlSearchTermsFilter = urlParams.searchTerms
+    ? String(urlParams.searchTerms).split(',').sort()
+    : [];
+  scriptLibraryFilters.searchTerms = urlSearchTermsFilter;
 
   const urlSortField =
     urlParams.sortField && SCRIPT_LIBRARY_SORTABLE_FIELDS.includes(urlParams.sortField)
@@ -157,6 +165,19 @@ export const useScriptLibraryUrlParams = (): ScriptLibraryUrlParams &
     [history, location, toUrlParams, urlParams]
   );
 
+  const setUrlSearchTermsFilter = useCallback(
+    (searchTerms: string) => {
+      history.push({
+        ...location,
+        search: toUrlParams({
+          ...urlParams,
+          searchTerms: searchTerms.length ? searchTerms : undefined,
+        }),
+      });
+    },
+    [history, location, toUrlParams, urlParams]
+  );
+
   const setPagingAndSortingParams = useCallback(
     (pagingParams: {
       page: number;
@@ -196,6 +217,7 @@ export const useScriptLibraryUrlParams = (): ScriptLibraryUrlParams &
     setUrlFileTypeFilter,
     setUrlOsFilter,
     setUrlCategoryFilter,
+    setUrlSearchTermsFilter,
     setPagingAndSortingParams,
   };
 };

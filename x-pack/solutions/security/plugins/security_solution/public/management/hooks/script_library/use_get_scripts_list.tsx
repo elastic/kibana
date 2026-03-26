@@ -22,6 +22,7 @@ export type AugmentedListScriptsRequestQuery = Exclude<ListScriptsRequestQuery, 
   os?: SupportedHostOsType[];
   fileType?: ScriptLibraryAllowedFileType[];
   category?: ScriptTagKey[];
+  searchTerms?: string[];
 };
 
 const buildDisjunctionKql = (field: string, values: string[]): string => {
@@ -39,6 +40,21 @@ const buildConjunctionKql = (clauses: string[]): string => {
   return `${nonEmptyClauses.join(' AND ')}`;
 };
 
+const buildSearchTermKql = (searchTerms: string[]): string => {
+  if (!searchTerms || searchTerms.length === 0) return '';
+  const escapedSearchTerms = searchTerms.map((term) =>
+    // don't replace spaces within two words
+    term
+      .trim()
+      .replace(/([\)\(\<\>\}\{\"\:\\])/gm, '\\$&')
+      .replace(/\s/gm, '*')
+  );
+  const clauses = escapedSearchTerms.map(
+    (term) => `(name:"\*${term}\*" OR updatedBy:"\*${term}\*" OR fileHash:"\*${term}\*")`
+  );
+  return clauses.length === 1 ? clauses[0] : `(${clauses.join(' OR ')})`;
+};
+
 export const useGetEndpointScriptsList = (
   query: AugmentedListScriptsRequestQuery,
   options: UseQueryOptions<EndpointScriptListApiResponse, IHttpFetchError<ResponseErrorBody>> = {},
@@ -54,7 +70,13 @@ export const useGetEndpointScriptsList = (
       const osFiltersKQl = buildDisjunctionKql('platform', query.os ?? []);
       const fileTypeFiltersKQl = buildDisjunctionKql('fileType', query.fileType ?? []);
       const categoryFiltersKQl = buildDisjunctionKql('tags', query.category ?? []);
-      const kuery = buildConjunctionKql([osFiltersKQl, fileTypeFiltersKQl, categoryFiltersKQl]);
+      const searchTermKQl = buildSearchTermKql(query.searchTerms ?? []);
+      const kuery = buildConjunctionKql([
+        osFiltersKQl,
+        fileTypeFiltersKQl,
+        categoryFiltersKQl,
+        searchTermKQl,
+      ]);
 
       return http.get<EndpointScriptListApiResponse>(SCRIPTS_LIBRARY_ROUTE, {
         version: '2023-10-31',

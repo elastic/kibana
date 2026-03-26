@@ -75,7 +75,10 @@ export const useWithScriptLibraryData = (
   // 4. We're on page 1
   useEffect(() => {
     const hasFilters = Boolean(
-      queryParams?.os?.length || queryParams?.fileType?.length || queryParams?.category?.length
+      queryParams?.os?.length ||
+        queryParams?.fileType?.length ||
+        queryParams?.category?.length ||
+        queryParams?.searchTerms?.length
     );
     const isOnFirstPage = queryParams?.page === 1;
 
@@ -103,6 +106,7 @@ export const useWithScriptLibraryData = (
     queryParams?.os,
     queryParams?.fileType,
     queryParams?.category,
+    queryParams?.searchTerms,
     queryParams?.page,
     verifyDataExists,
   ]);
