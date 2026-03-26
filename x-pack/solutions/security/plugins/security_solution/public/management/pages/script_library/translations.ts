@@ -264,7 +264,7 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
           archive: i18n.translate(
             'xpack.securitySolution.scriptLibrary.table.flyout.body.edit.fileType.archiveOptionLabel',
             {
-              defaultMessage: 'Archive (.zip only)',
+              defaultMessage: 'Archive (.zip or .gz only)',
             }
           ),
           script: i18n.translate(

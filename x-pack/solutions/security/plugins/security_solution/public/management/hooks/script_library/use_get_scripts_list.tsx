@@ -28,7 +28,7 @@ export type AugmentedListScriptsRequestQuery = Exclude<ListScriptsRequestQuery, 
 const buildDisjunctionKql = (field: string, values: string[]): string => {
   if (!values || values.length === 0) return '';
   if (values.length === 1) return `${field}:"${values[0]}"`;
-  const escapeQuotes = (value: string): string => value.replace(/"/g, '\\"');
+  const escapeQuotes = (value: string): string => value.replace(/\"/g, '\\"');
   const disjunction = values.map((value) => `${field}:"${escapeQuotes(value)}"`).join(' OR ');
   return `(${disjunction})`;
 };
@@ -43,7 +43,6 @@ const buildConjunctionKql = (clauses: string[]): string => {
 const buildSearchTermKql = (searchTerms: string[]): string => {
   if (!searchTerms || searchTerms.length === 0) return '';
   const escapedSearchTerms = searchTerms.map((term) =>
-    // don't replace spaces within two words
     term
       .trim()
       .replace(/([\)\(\<\>\}\{\"\:\\])/gm, '\\$&')
