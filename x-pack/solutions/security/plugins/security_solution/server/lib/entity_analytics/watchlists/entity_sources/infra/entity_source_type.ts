@@ -27,55 +27,8 @@ const watchlistEntitySourceMappings: SavedObjectsType['mappings'] = {
     managed: {
       type: 'boolean',
     },
-    managedVersion: {
-      type: 'integer',
-    },
     enabled: {
       type: 'boolean',
-    },
-    error: {
-      type: 'keyword',
-    },
-    integrationName: {
-      type: 'keyword',
-    },
-    identifierField: {
-      type: 'keyword',
-    },
-    queryRule: {
-      type: 'keyword',
-    },
-    matchers: {
-      type: 'object',
-      dynamic: false,
-    },
-    matchersModifiedByUser: {
-      type: 'boolean',
-    },
-    filter: {
-      dynamic: false,
-      type: 'object',
-    },
-    integrations: {
-      type: 'object',
-      dynamic: false,
-      properties: {
-        syncMarkerIndex: {
-          type: 'keyword',
-        },
-        syncData: {
-          type: 'object',
-          dynamic: false,
-          properties: {
-            lastFullSync: {
-              type: 'date',
-            },
-            lastUpdateProcessed: {
-              type: 'date',
-            },
-          },
-        },
-      },
     },
   },
 };
