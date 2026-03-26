@@ -76,12 +76,7 @@ export const PluginDetailPanel: React.FC<PluginDetailPanelProps> = ({
           isAuto ? (
             <EuiBadge color="hollow">{labels.agentPlugins.autoIncludedBadgeLabel}</EuiBadge>
           ) : (
-            <EuiButtonEmpty
-              iconType="cross"
-              size="xs"
-              color="danger"
-              onClick={openConfirmRemove}
-            >
+            <EuiButtonEmpty iconType="cross" size="xs" color="danger" onClick={openConfirmRemove}>
               {labels.agentPlugins.removePluginButtonLabel}
             </EuiButtonEmpty>
           )
