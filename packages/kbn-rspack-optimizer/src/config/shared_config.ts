@@ -359,7 +359,7 @@ export function getFontLoaderRule(): RuleSetRule {
  */
 export function getTextLoaderRule(): RuleSetRule {
   return {
-    test: /\.(html|md|text|txt)$/,
+    test: /\.(html|md|text|txt|tmpl|yaml|yml)$/,
     type: 'asset/source',
   };
 }
