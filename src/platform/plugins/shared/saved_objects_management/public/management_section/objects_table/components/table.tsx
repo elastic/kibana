@@ -451,6 +451,10 @@ export class Table extends PureComponent<TableProps, TableState> {
               button={button}
               isOpen={this.state.isExportPopoverOpen}
               closePopover={this.closeExportPopover}
+              aria-label={i18n.translate(
+                'savedObjectsManagement.objectsTable.table.exportPopoverAriaLabel',
+                { defaultMessage: 'Export options' }
+              )}
             >
               <EuiFormRow
                 label={
