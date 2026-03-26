@@ -167,7 +167,7 @@ export function registerPluginsRoutes({ router, getInternalServices, logger }: R
         const { force = false } = request.query ?? {};
         const { plugins: pluginService, agents: agentsService } = getInternalServices();
 
-        const client = await pluginService.getScopedClient({ request });
+        const client = pluginService.getRegistry({ request });
         const plugin = await client.get(pluginId);
         const skillIds = plugin.skill_ids ?? [];
 
