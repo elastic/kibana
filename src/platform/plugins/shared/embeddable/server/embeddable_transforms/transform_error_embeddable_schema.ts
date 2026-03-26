@@ -7,14 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { DrilldownTransforms } from './drilldowns/types';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
-export type { EmbeddableTransforms } from '../server';
+export const transformErrorEmbeddableSchema = schema.object({
+  original_config: schema.object(
+    {},
+    {
+      unknowns: 'allow',
+    }
+  ),
+  original_type: schema.string(),
+  error: schema.string(),
+});
 
-export const TRANSFORM_ERROR_EMBEDDABLE_TYPE = 'transform_error';
-
-export type {
-  EmbeddableRegistryDefinition,
-  EmbeddableStateWithType,
-  EmbeddablePersistableStateService,
-} from '../server';
+export type TransformErrorEmbeddableState = TypeOf<typeof transformErrorEmbeddableSchema>;

@@ -17,6 +17,8 @@ import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
  */
 import { controlsGroupSchema as pinnedPanelsSchema } from '@kbn/controls-schemas';
 import { querySchema, timeRangeSchema } from '@kbn/es-query-server';
+import { TRANSFORM_ERROR_EMBEDDABLE_TYPE } from '@kbn/embeddable-plugin/common';
+import { transformErrorEmbeddableSchema } from '@kbn/embeddable-plugin/server';
 import { embeddableService } from '../kibana_services';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
 import {
@@ -102,9 +104,8 @@ export function getPanelSchema(isDashboardAppRequest: boolean) {
       )
     );
 
-  return schema.discriminatedUnion(
-    'type',
-    panelSchemas as [
+  return schema.discriminatedUnion('type', [
+    ...(panelSchemas as [
       ObjectType<{
         grid: ObjectType<{ x: Type<number>; y: Type<number>; w: Type<number>; h: Type<number> }>;
         uid: Type<string | undefined>;
@@ -112,8 +113,22 @@ export function getPanelSchema(isDashboardAppRequest: boolean) {
         type: Type<string>;
         config: ObjectType<{}>;
       }>
-    ]
-  );
+    ]),
+    schema.object(
+      {
+        ...basePanelProps,
+        type: schema.literal(TRANSFORM_ERROR_EMBEDDABLE_TYPE),
+        config: transformErrorEmbeddableSchema,
+      },
+      {
+        meta: {
+          id: `kbn-dashboard-panel-${TRANSFORM_ERROR_EMBEDDABLE_TYPE}`,
+          description: 'Replaces panel type when panel transform throws and panel.config can not be created',
+          title: TRANSFORM_ERROR_EMBEDDABLE_TYPE,
+        },
+      }
+    ),
+  ]);
 }
 
 const sectionGridSchema = schema.object({

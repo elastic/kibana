@@ -10,6 +10,8 @@
 import type { SavedObjectReference } from '@kbn/core/server';
 import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
 import { flow } from 'lodash';
+import { TRANSFORM_ERROR_EMBEDDABLE_TYPE } from '@kbn/embeddable-plugin/common';
+import type { TransformErrorEmbeddableState } from '@kbn/embeddable-plugin/server';
 import type { SavedDashboardPanel, SavedDashboardSection } from '../../../dashboard_saved_object';
 import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
 import { embeddableService, logger } from '../../../kibana_services';
@@ -89,10 +91,17 @@ function transformPanelProperties(
       transforms?.transformOut?.(embeddableConfig, panelReferences, containerReferences) ??
       defaultTransform(embeddableConfig);
   } catch (transformOutError) {
-    // do not prevent read on transformOutError
-    logger.warn(
-      `Unable to transform "${type}" embeddable state on read. Error: ${transformOutError.message}`
-    );
+    const errorConfig: TransformErrorEmbeddableState = {
+      original_config: embeddableConfig,
+      original_type: type,
+      error: transformOutError.message,
+    };
+    return {
+      grid: restOfGrid,
+      config: errorConfig,
+      uid: panelIndex,
+      type: TRANSFORM_ERROR_EMBEDDABLE_TYPE,
+    };
   }
 
   return {

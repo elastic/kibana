@@ -20,6 +20,10 @@ export type {
 } from './drilldowns/types';
 
 export type { EmbeddableTransforms } from './embeddable_transforms/types';
+export {
+  transformErrorEmbeddableSchema,
+  type TransformErrorEmbeddableState,
+} from './embeddable_transforms/transform_error_embeddable_schema';
 
 export type {
   EmbeddableStateWithType,
