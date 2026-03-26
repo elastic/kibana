@@ -19,7 +19,6 @@ const createPluginDefinition = (id: string, skillIds: string[]): PersistedPlugin
   manifest: {},
   skill_ids: skillIds,
   unmanaged_assets: {
-    commands: [],
     agents: [],
     hooks: [],
     mcp_servers: [],

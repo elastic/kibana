@@ -354,6 +354,50 @@ describe('parsePluginZipFile', () => {
     expect(result.unmanagedAssets.mcp_servers).toContain('mcp-config.json');
   });
 
+  it('merges skills and commands from an archive containing both', async () => {
+    const archive = createMockArchive({
+      '.claude-plugin/plugin.json': JSON.stringify({ name: 'test-plugin' }),
+      'skills/my-skill/SKILL.md': [
+        '---',
+        'name: my-skill',
+        'description: A skill',
+        '---',
+        '',
+        'Skill instructions.',
+      ].join('\n'),
+      'commands/': '',
+      'commands/deploy.md': 'Deploy command',
+    });
+
+    const result = await parsePluginZipFile(archive);
+
+    expect(result.skills).toHaveLength(2);
+    const dirNames = result.skills.map((s) => s.dirName);
+    expect(dirNames).toContain('my-skill');
+    expect(dirNames).toContain('deploy');
+
+    const skill = result.skills.find((s) => s.dirName === 'my-skill')!;
+    expect(skill.content).toBe('Skill instructions.');
+
+    const command = result.skills.find((s) => s.dirName === 'deploy')!;
+    expect(command.content).toBe('Deploy command');
+    expect(command.referencedFiles).toEqual([]);
+  });
+
+  it('throws when a skill and command have the same dirName', async () => {
+    const archive = createMockArchive({
+      '.claude-plugin/plugin.json': JSON.stringify({ name: 'test-plugin' }),
+      'skills/deploy/SKILL.md': 'Skill deploy instructions.',
+      'commands/': '',
+      'commands/deploy.md': 'Command deploy instructions.',
+    });
+
+    await expect(parsePluginZipFile(archive)).rejects.toThrow(PluginArchiveError);
+    await expect(parsePluginZipFile(archive)).rejects.toThrow(
+      /Duplicate skill name "deploy" found in archive/
+    );
+  });
+
   it('collects multiple referenced files for a skill', async () => {
     const archive = createMockArchive({
       '.claude-plugin/plugin.json': JSON.stringify({ name: 'test' }),

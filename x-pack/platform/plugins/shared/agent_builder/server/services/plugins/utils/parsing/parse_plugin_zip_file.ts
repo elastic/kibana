@@ -39,7 +39,19 @@ export const parsePluginZipFile = async (archive: ZipArchive): Promise<ParsedPlu
   const commands = await readCommands(archive, manifest);
   const unmanagedAssets = detectUnmanagedAssets(archive, manifest);
 
-  return { manifest, skills: [...skills, ...commands], unmanagedAssets };
+  const allSkills = [...skills, ...commands];
+
+  const seen = new Set<string>();
+  for (const skill of allSkills) {
+    if (seen.has(skill.dirName)) {
+      throw new PluginArchiveError(
+        `Duplicate skill name "${skill.dirName}" found in archive. Skills and commands must have unique names.`
+      );
+    }
+    seen.add(skill.dirName);
+  }
+
+  return { manifest, skills: allSkills, unmanagedAssets };
 };
 
 const readAndValidateManifest = async (archive: ZipArchive): Promise<PluginManifest> => {
@@ -238,7 +250,7 @@ const resolveCommandFiles = (archive: ZipArchive, manifest: PluginManifest): str
       if (cleaned.endsWith('.md')) {
         searchRoots.add(cleaned);
       } else {
-        searchRoots.add(cleaned.endsWith('/') ? cleaned : `${cleaned}/`);
+        searchRoots.add(normalizeDirPath(p));
       }
     }
   }
