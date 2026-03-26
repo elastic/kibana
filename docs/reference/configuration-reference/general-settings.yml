@@ -1,12 +1,13 @@
 ---
-# This file is used to generate the "General settings in Kibana" page in the product docs
+# This file is used to generate the "General settings in Kibana" page in the product docs.
+# For the schema and an example refer to the automated settings reference: 
+# https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
 
 product: Kibana
 collection: General settings in Kibana
 id: general-settings-kb
 page_description: |
   Use these settings to configure general features available in Kibana.
-note: 'If a setting is applicable to {{ech}} environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")'
 
 groups:
   - group: General settings
@@ -73,7 +74,7 @@ groups:
           self: ga
 
       - setting: ops.cGroupOverrides.cpuPath
-        id: ops-cGroupOverrides-cpuPath
+        id: ops-cgroupoverrides-cpupath
         description: |
           Override for cgroup cpu path when mounted in a manner that is inconsistent with `/proc/self/cgroup`.
         datatype: string
@@ -83,7 +84,7 @@ groups:
           self: ga
 
       - setting: ops.cGroupOverrides.cpuAcctPath
-        id: ops-cGroupOverrides-cpuAcctPath
+        id: ops-cgroupoverrides-cpuacctpath
         description: |
           Override for cgroup cpuacct path when mounted in a manner that is inconsistent with `/proc/self/cgroup`.
         datatype: string
@@ -237,7 +238,7 @@ groups:
           stack: ga
           ech: unavailable
           self: ga
-        note: "The `frame-ancestors` directive can also be configured by using [`server.securityResponseHeaders.disableEmbedding`](#server-securityResponseHeaders-disableEmbedding). In that case, that takes precedence and any values in `csp.frame_ancestors` are ignored."
+        note: "The `frame-ancestors` directive can also be configured by using [`server.securityResponseHeaders.disableEmbedding`](#server-securityresponseheaders-disableembedding). In that case, that takes precedence and any values in `csp.frame_ancestors` are ignored."
 
       - setting: csp.report_only.form_action
         description: |
@@ -303,7 +304,7 @@ groups:
 
       - setting: elasticsearch.customHeaders
         description: |
-          Header names and values to send to {{es}}. Any custom headers cannot be overwritten by client-side headers, regardless of the [`elasticsearch.requestHeadersWhitelist`](#elasticsearch-requestHeadersWhitelist) configuration.
+          Header names and values to send to {{es}}. Any custom headers cannot be overwritten by client-side headers, regardless of the [`elasticsearch.requestHeadersWhitelist`](#elasticsearch-requestheaderswhitelist) configuration.
         datatype: string
         default: "{}"
         applies_to:
@@ -325,7 +326,7 @@ groups:
           self: ga
 
       - setting: elasticsearch.publicBaseUrl
-        id: elasticsearch-publicBaseUrl
+        id: elasticsearch-publicbaseurl
         description: |
           The URL through which Elasticsearch is publicly accessible, if any. This will be shown to users in Kibana when they need connection details for your Elasticsearch cluster.
         datatype: string
@@ -335,9 +336,9 @@ groups:
           self: ga
 
       - setting: elasticsearch.pingTimeout
-        id: elasticsearch-pingTimeout
+        id: elasticsearch-pingtimeout
         description: |
-          Time in milliseconds to wait for {{es}} to respond to pings. Defaults to the value of the [`elasticsearch.requestTimeout`](#elasticsearch-requestTimeout) setting.
+          Time in milliseconds to wait for {{es}} to respond to pings. Defaults to the value of the [`elasticsearch.requestTimeout`](#elasticsearch-requesttimeout) setting.
         datatype: int
         applies_to:
           stack: ga
@@ -345,7 +346,7 @@ groups:
           self: ga
 
       - setting: elasticsearch.requestHeadersWhitelist
-        id: elasticsearch-requestHeadersWhitelist
+        id: elasticsearch-requestheaderswhitelist
         description: |
           List of {{kib}} client-side headers to send to {{es}}. To send **no** client-side headers, set this value to [] (an empty list). Removing the `authorization` header from being whitelisted means that you cannot use [basic authentication](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-authentication.md#basic-authentication) in {{kib}}.
         datatype: string
@@ -356,7 +357,7 @@ groups:
           self: ga
 
       - setting: elasticsearch.requestTimeout
-        id: elasticsearch-requestTimeout
+        id: elasticsearch-requestimeout
         description: |
           Time in milliseconds to wait for responses from the back end or {{es}}. This value must be a positive integer.
         datatype: int
@@ -418,19 +419,19 @@ groups:
           self: ga
 
       - setting: elasticsearch.maxSockets
-        id: elasticsearch-maxSockets
+        id: elasticsearch-maxsockets
         description: |
           The maximum number of sockets that can be used for communications with {{es}}.
           It is available in {{ecloud}} 8.2.0 and later versions.
         datatype: int
-        default: Infinity
+        default: 800
         applies_to:
           stack: ga
           ech: ga
           self: ga
 
       - setting: elasticsearch.maxResponseSize
-        id: elasticsearch-maxResponseSize
+        id: elasticsearch-maxresponsesize
         description: |
           Either `false` or a `byteSize` value. When set, responses from {{es}} with a size higher than the defined limit will be rejected. This is intended to be used as a circuit-breaker mechanism to avoid memory errors in case of unexpectedly high responses coming from {{es}}.
         datatype: string
@@ -441,7 +442,7 @@ groups:
           self: ga
 
       - setting: elasticsearch.maxIdleSockets
-        id: elasticsearch-maxIdleSockets
+        id: elasticsearch-maxidlesockets
         description: |
           The maximum number of idle sockets to keep open between {{kib}} and {{es}}. If more sockets become idle, they will be closed.
         datatype: int
@@ -452,7 +453,7 @@ groups:
           self: ga
 
       - setting: elasticsearch.idleSocketTimeout
-        id: elasticsearch-idleSocketTimeout
+        id: elasticsearch-idlesockettimeout
         description: |
           The timeout for idle sockets kept open between {{kib}} and {{es}}. If the socket is idle for longer than this timeout, it will be closed. If you have a transparent proxy between {{kib}} and {{es}} be sure to set this value lower than or equal to the proxy's timeout.
         datatype: string
@@ -496,7 +497,7 @@ groups:
     settings:
 
       - setting: elasticsearch.ssl.alwaysPresentCertificate
-        id: elasticsearch-ssl-alwaysPresentCertificate
+        id: elasticsearch-ssl-alwayspresentcertificate
         description: |
           Controls {{kib}} behavior in regard to presenting a client certificate when requested by {{es}}. This setting applies to all outbound SSL/TLS connections to {{es}}, including requests that are proxied for end users.
         datatype: bool
@@ -505,7 +506,7 @@ groups:
           stack: ga
           ech: unavailable
           self: ga
-        warning: "When {{es}} uses certificates to authenticate end users with a PKI realm and [`elasticsearch.ssl.alwaysPresentCertificate`](#elasticsearch-ssl-alwaysPresentCertificate) is `true`, proxied requests may be executed as the identity that is tied to the {{kib}} server."
+        warning: "When {{es}} uses certificates to authenticate end users with a PKI realm and [`elasticsearch.ssl.alwaysPresentCertificate`](#elasticsearch-ssl-alwayspresentcertificate) is `true`, proxied requests may be executed as the identity that is tied to the {{kib}} server."
 
       - setting: elasticsearch.ssl.certificate
         id: elasticsearch-ssl-cert-key
@@ -529,7 +530,7 @@ groups:
         note: "This setting cannot be used in conjunction with [`elasticsearch.ssl.keystore.path`](#elasticsearch-ssl-keystore-path)."
 
       - setting: elasticsearch.ssl.certificateAuthorities
-        id: elasticsearch-ssl-certificateAuthorities
+        id: elasticsearch-ssl-certificateauthorities
         description: |
           Paths to one or more PEM-encoded X.509 certificate authority (CA) certificates, which make up a trusted certificate chain for {{es}}. This chain is used by {{kib}} to establish trust when making outbound SSL/TLS connections to {{es}}.
 
@@ -554,7 +555,7 @@ groups:
         description: |
           Path to a PKCS#12 keystore that contains an X.509 client certificate and it's corresponding private key. These are used by {{kib}} to authenticate itself when making outbound SSL/TLS connections to {{es}}. For this setting, you must also set the `xpack.security.http.ssl.client_authentication` setting in {{es}} to `"required"` or `"optional"` to request a client certificate from {{kib}}.
 
-          If the keystore contains any additional certificates, they are used as a trusted certificate chain for {{es}}. This chain is used by {{kib}} to establish trust when making outbound SSL/TLS connections to {{es}}. In addition to this setting, trusted certificates may be specified via [`elasticsearch.ssl.certificateAuthorities`](#elasticsearch-ssl-certificateAuthorities) and/or [`elasticsearch.ssl.truststore.path`](#elasticsearch-ssl-truststore-path).
+          If the keystore contains any additional certificates, they are used as a trusted certificate chain for {{es}}. This chain is used by {{kib}} to establish trust when making outbound SSL/TLS connections to {{es}}. In addition to this setting, trusted certificates may be specified via [`elasticsearch.ssl.certificateAuthorities`](#elasticsearch-ssl-certificateauthorities) and/or [`elasticsearch.ssl.truststore.path`](#elasticsearch-ssl-truststore-path).
         datatype: string
         applies_to:
           stack: ga
@@ -576,7 +577,7 @@ groups:
         description: |
           Path to a PKCS#12 trust store that contains one or more X.509 certificate authority (CA) certificates, which make up a trusted certificate chain for {{es}}. This chain is used by {{kib}} to establish trust when making outbound SSL/TLS connections to {{es}}.
 
-          In addition to this setting, trusted certificates may be specified via [`elasticsearch.ssl.certificateAuthorities`](#elasticsearch-ssl-certificateAuthorities) and/or [`elasticsearch.ssl.keystore.path`](#elasticsearch-ssl-keystore-path).
+          In addition to this setting, trusted certificates may be specified via [`elasticsearch.ssl.certificateAuthorities`](#elasticsearch-ssl-certificateauthorities) and/or [`elasticsearch.ssl.keystore.path`](#elasticsearch-ssl-keystore-path).
         datatype: string
         applies_to:
           stack: ga
@@ -593,7 +594,7 @@ groups:
           self: ga
 
       - setting: elasticsearch.ssl.verificationMode
-        id: elasticsearch-ssl-verificationMode
+        id: elasticsearch-ssl-verificationmode
         description: |
           Controls the verification of the server certificate that {{kib}} receives when making an outbound SSL/TLS connection to {{es}}. Valid values are `"full"`, `"certificate"`, and `"none"`. Using `"full"` performs hostname verification, using `"certificate"` skips hostname verification, and using `"none"` skips verification entirely.
         datatype: enum
@@ -831,7 +832,7 @@ groups:
     settings:
 
       - setting: savedObjects.maxImportExportSize
-        id: savedObjects-maxImportExportSize
+        id: savedobjects-maximportexportsize
         description: |
           The maximum count of saved objects that can be imported or exported. This setting exists to prevent the {{kib}} server from running out of memory when handling large numbers of saved objects. It is recommended to only raise this setting if you are confident your server can hold this many objects in memory.
         datatype: int
@@ -842,9 +843,9 @@ groups:
           self: ga
 
       - setting: savedObjects.maxImportPayloadBytes
-        id: savedObjects-maxImportPayloadBytes
+        id: savedobjects-maximportpayloadbytes
         description: |
-          The maximum byte size of a saved objects import that the {{kib}} server will accept. This setting exists to prevent the {{kib}} server from running out of memory when handling a large import payload. Note that this setting overrides the more general [`server.maxPayload`](#server-maxPayload) for saved object imports only.
+          The maximum byte size of a saved objects import that the {{kib}} server will accept. This setting exists to prevent the {{kib}} server from running out of memory when handling a large import payload. Note that this setting overrides the more general [`server.maxPayload`](#server-maxpayload) for saved object imports only.
         datatype: int
         default: 26214400
         applies_to:
@@ -902,9 +903,9 @@ groups:
     settings:
 
       - setting: server.basePath
-        id: server-basePath
+        id: server-basepath
         description: |
-          Enables you to specify a path to mount {{kib}} at if you are running behind a proxy. Use the [`server.rewriteBasePath`](#server-rewriteBasePath) setting to tell {{kib}} if it should remove the basePath from requests it receives, and to prevent a deprecation warning at startup. This setting cannot end in a slash (`/`).
+          Enables you to specify a path to mount {{kib}} at if you are running behind a proxy. Use the [`server.rewriteBasePath`](#server-rewritebasepath) setting to tell {{kib}} if it should remove the basePath from requests it receives, and to prevent a deprecation warning at startup. This setting cannot end in a slash (`/`).
         datatype: string
         applies_to:
           stack: ga
@@ -912,7 +913,7 @@ groups:
           self: ga
 
       - setting: server.publicBaseUrl
-        id: server-publicBaseUrl
+        id: server-publicbaseurl
         description: |
           The publicly available URL that end-users access Kibana at. Must include the protocol, hostname, port (if different than the defaults for `http` and `https`, 80 and 443 respectively), and the [`server.basePath`](#server-basePath) (when that setting is configured explicitly). This setting cannot end in a slash (`/`).
         datatype: string
@@ -934,7 +935,7 @@ groups:
 
       - setting: server.keepaliveTimeout
         description: |
-          The number of milliseconds to wait for additional data before restarting the [`server.socketTimeout`](#server-socketTimeout) counter.
+          The number of milliseconds to wait for additional data before restarting the [`server.socketTimeout`](#server-sockettimeout) counter.
         datatype: int
         default: 120000
         applies_to:
@@ -943,7 +944,7 @@ groups:
           self: ga
 
       - setting: server.maxPayload
-        id: server-maxPayload
+        id: server-maxpayload
         description: |
           The maximum payload size in bytes for incoming server requests.
         datatype: int
@@ -986,10 +987,10 @@ groups:
           - "stack: preview"
           - "ech: unavailable"
           - "self: ga"
-        note: "By default, enabling `http2` requires a valid `h2c` configuration, meaning that TLS must be enabled via [`server.ssl.enabled`](#server-ssl-enabled) and [`server.ssl.supportedProtocols`](#server-ssl-supportedProtocols), if specified, must contain at least `TLSv1.2` or `TLSv1.3`. Strict validation of the `h2c` setup can be disabled by adding `server.http2.allowUnsecure: true` to the configuration."
+        note: "By default, enabling `http2` requires a valid `h2c` configuration, meaning that TLS must be enabled via [`server.ssl.enabled`](#server-ssl-enabled) and [`server.ssl.supportedprotocols`](#server-ssl-supportedProtocols), if specified, must contain at least `TLSv1.2` or `TLSv1.3`. Strict validation of the `h2c` setup can be disabled by adding `server.http2.allowUnsecure: true` to the configuration."
 
       - setting: server.shutdownTimeout
-        id: server-shutdownTimeout
+        id: server-shutdowntimeout
         description: |
           Sets the grace period for {{kib}} to attempt to resolve any ongoing HTTP requests after receiving a `SIGTERM`/`SIGINT` signal, and before shutting down. Any new HTTP requests received during this period are rejected, because the incoming socket is closed without further processing.
         datatype: string
@@ -1000,7 +1001,7 @@ groups:
           self: ga
 
       - setting: server.socketTimeout
-        id: server-socketTimeout
+        id: server-sockettimeout
         description: |
           The number of milliseconds to wait before closing an inactive socket.
         datatype: int
@@ -1011,7 +1012,7 @@ groups:
           self: ga
 
       - setting: server.payloadTimeout
-        id: server-payloadTimeout
+        id: server-payloadtimeout
         description: |
           Sets the maximum time allowed for the client to transmit the request payload (body) before giving up and responding with a Request Timeout (408) error response.
         datatype: int
@@ -1032,7 +1033,7 @@ groups:
           self: ga
 
       - setting: server.requestId.allowFromAnyIp
-        id: server-requestId-allowFromAnyIp
+        id: server-requestid-allowfromanyip
         description: |
           Sets whether or not the `X-Opaque-Id` header should be trusted from any IP address for identifying requests in logs and forwarded to Elasticsearch.
         datatype: bool
@@ -1043,7 +1044,7 @@ groups:
 
       - setting: server.requestId.ipAllowlist
         description: |
-          A list of IPv4 and IPv6 address which the `X-Opaque-Id` header should be trusted from. Normally this would be set to the IP addresses of the load balancers or reverse-proxy that end users use to access Kibana. If any are set, [`server.requestId.allowFromAnyIp`](#server-requestId-allowFromAnyIp) must also be set to `false.`
+          A list of IPv4 and IPv6 address which the `X-Opaque-Id` header should be trusted from. Normally this would be set to the IP addresses of the load balancers or reverse-proxy that end users use to access Kibana. If any are set, [`server.requestId.allowFromAnyIp`](#server-requestid-allowfromanyip) must also be set to `false.`
         datatype: string
         applies_to:
           stack: ga
@@ -1051,9 +1052,9 @@ groups:
           self: ga
 
       - setting: server.rewriteBasePath
-        id: server-rewriteBasePath
+        id: server-rewritebasepath
         description: |
-          Specifies whether {{kib}} should rewrite requests that are prefixed with [`server.basePath`](#server-basePath) or require that they are rewritten by your reverse proxy.
+          Specifies whether {{kib}} should rewrite requests that are prefixed with [`server.basePath`](#server-basepath) or require that they are rewritten by your reverse proxy.
         datatype: bool
         default: false
         applies_to:
@@ -1194,7 +1195,7 @@ groups:
     settings:
 
       - setting: server.securityResponseHeaders.strictTransportSecurity
-        id: server-securityResponseHeaders-strictTransportSecurity
+        id: server-securityresponseheaders-stricttransportsecurity
         description: |
           Controls whether the [`Strict-Transport-Security`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are any text value or `null`. To disable, set to `null`.
         datatype: string
@@ -1205,7 +1206,7 @@ groups:
           self: ga
 
       - setting: server.securityResponseHeaders.xContentTypeOptions
-        id: server-securityResponseHeaders-xContentTypeOptions
+        id: server-securityresponseheaders-xcontenttypeoptions
         description: |
           Controls whether the [`X-Content-Type-Options`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are `nosniff` or `null`. To disable, set to `null`.
         datatype: string
@@ -1216,7 +1217,7 @@ groups:
           self: ga
 
       - setting: server.securityResponseHeaders.referrerPolicy
-        id: server-securityResponseHeaders-referrerPolicy
+        id: server-securityresponseheaders-referrerpolicy
         description: |
           Controls whether the [`Referrer-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are `no-referrer`, `no-referrer-when-downgrade`, `origin`, `origin-when-cross-origin`, `same-origin`, `strict-origin`, `strict-origin-when-cross-origin`, `unsafe-url`, or `null`. To disable, set to `null`.
         datatype: string
@@ -1227,7 +1228,7 @@ groups:
           self: ga
 
       - setting: server.securityResponseHeaders.permissionsPolicy
-        id: server-securityResponseHeaders-permissionsPolicy
+        id: server-securityresponseheaders-permissionspolicy
         description: |
           Controls whether the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are any text value or `null`. Refer to the [`Permissions-Policy` documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) for defined directives, values, and text format. To disable, set to `null`.
         datatype: string
@@ -1238,7 +1239,7 @@ groups:
           - "self: ga"
 
       - setting: server.securityResponseHeaders.permissionsPolicyReportOnly
-        id: server-securityResponseHeaders-permissionsPolicyReportOnly
+        id: server-securityresponseheaders-permissionspolicyreportonly
         description: |
           Controls whether the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are any text value or `null`. Refer to the [`Permissions-Policy` documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) for defined directives, values, and text format.
         datatype: string
@@ -1248,7 +1249,7 @@ groups:
           - "self: ga"
 
       - setting: server.securityResponseHeaders.disableEmbedding
-        id: server-securityResponseHeaders-disableEmbedding
+        id: server-securityresponseheaders-disableembedding
         description: |
           Controls whether the [`Content-Security-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy) and [`X-Frame-Options`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options) headers are configured to disable embedding {{kib}} in other webpages using iframes. When set to `true`, secure headers are used to disable embedding, which adds the `frame-ancestors: 'self'` directive to the `Content-Security-Policy` response header and adds the `X-Frame-Options: SAMEORIGIN` response header.
         datatype: bool
@@ -1259,7 +1260,7 @@ groups:
           self: ga
 
       - setting: server.securityResponseHeaders.crossOriginOpenerPolicy
-        id: server-securityResponseHeaders-crossOriginOpenerPolicy
+        id: server-securityresponseheaders-crossoriginopenerpolicy
         description: |
           Controls whether the [`Cross-Origin-Opener-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are `unsafe-none`, `same-origin-allow-popups`, `same-origin`, or `null`. To disable, set to `null`.
           It is available in {{ecloud}} 8.7.0 and later versions.
@@ -1301,7 +1302,7 @@ groups:
         note: "This setting cannot be used in conjunction with [`server.ssl.keystore.path`](#server-ssl-keystore-path)."
 
       - setting: server.ssl.certificateAuthorities
-        id: server-ssl-certificateAuthorities
+        id: server-ssl-certificateauthorities
         description: |
           Paths to one or more PEM-encoded X.509 certificate authority (CA) certificates which make up a trusted certificate chain for {{kib}}. This chain is used by {{kib}} to establish trust when receiving inbound SSL/TLS connections from end users. If PKI authentication is enabled, this chain is also used by {{kib}} to verify client certificates from end users.
 
@@ -1313,7 +1314,7 @@ groups:
           self: ga
 
       - setting: server.ssl.cipherSuites
-        id: server-ssl-cipherSuites
+        id: server-ssl-ciphersuites
         description: |
           Details on the format, and the valid options, are available via the [OpenSSL cipher list format documentation](https://www.openssl.org/docs/man1.1.1/man1/ciphers.md#CIPHER-LIST-FORMAT).
         datatype: string
@@ -1362,7 +1363,7 @@ groups:
         description: |
           Path to a PKCS#12 keystore that contains an X.509 server certificate and its corresponding private key. If the keystore contains any additional certificates, those will be used as a trusted certificate chain for {{kib}}. All of these are used by {{kib}} to establish trust when receiving inbound SSL/TLS connections from end users. The certificate chain is also used by {{kib}} to verify client certificates from end users when PKI authentication is enabled.
 
-          In addition to this setting, trusted certificates may be specified via [`server.ssl.certificateAuthorities`](#server-ssl-certificateAuthorities) and/or [`server.ssl.truststore.path`](#server-ssl-truststore-path).
+          In addition to this setting, trusted certificates may be specified via [`server.ssl.certificateAuthorities`](#server-ssl-certificateauthorities) and/or [`server.ssl.truststore.path`](#server-ssl-truststore-path).
         datatype: string
         applies_to:
           stack: ga
@@ -1384,7 +1385,7 @@ groups:
         description: |
           Path to a PKCS#12 trust store that contains one or more X.509 certificate authority (CA) certificates which make up a trusted certificate chain for {{kib}}. This chain is used by {{kib}} to establish trust when receiving inbound SSL/TLS connections from end users. If PKI authentication is enabled, this chain is also used by {{kib}} to verify client certificates from end users.
 
-          In addition to this setting, trusted certificates may be specified via [`server.ssl.certificateAuthorities`](#server-ssl-certificateAuthorities) and/or [`server.ssl.keystore.path`](#server-ssl-keystore-path).
+          In addition to this setting, trusted certificates may be specified via [`server.ssl.certificateAuthorities`](#server-ssl-certificateauthorities) and/or [`server.ssl.keystore.path`](#server-ssl-keystore-path).
         datatype: string
         applies_to:
           stack: ga
@@ -1410,7 +1411,7 @@ groups:
           self: ga
 
       - setting: server.ssl.supportedProtocols
-        id: server-ssl-supportedProtocols
+        id: server-ssl-supportedprotocols
         description: |
           An array of supported protocols with versions. Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`, `TLSv1.3`. Enabling `TLSv1.1` would require both setting the `--tls-min-1.1` option in the `node.options` configuration and adding `TLSv1.1` to `server.ssl.supportedProtocols`. `HTTP/2` requires the use of minimum `TLSv1.2` for secure connections.
         datatype: string
@@ -1441,7 +1442,7 @@ groups:
           self: ga
 
       - setting: server.xsrf.disableProtection
-        id: settings-xsrf-disableProtection
+        id: settings-xsrf-disableprotection
         description: |
           Setting this to `true` will completely disable Cross-site request forgery protection in Kibana. This is not recommended.
         datatype: bool
@@ -1456,9 +1457,9 @@ groups:
     settings:
 
       - setting: telemetry.allowChangingOptInStatus
-        id: telemetry-allowChangingOptInStatus
+        id: telemetry-allowchangingoptinstatus
         description: |
-          When `false`, users cannot change the opt-in status through [Advanced Settings](/reference/advanced-settings.md), and {{kib}} only looks at the value of [`telemetry.optIn`](#settings-telemetry-optIn) to determine whether to send telemetry data or not.
+          When `false`, users cannot change the opt-in status through [Advanced Settings](/reference/advanced-settings.md), and {{kib}} only looks at the value of [`telemetry.optIn`](#settings-telemetry-optin) to determine whether to send telemetry data or not.
         datatype: bool
         default: true
         applies_to:
@@ -1467,11 +1468,11 @@ groups:
           self: ga
 
       - setting: telemetry.optIn
-        id: settings-telemetry-optIn
+        id: settings-telemetry-optin
         description: |
           Set to `false` to stop sending any telemetry data to Elastic. Reporting your cluster statistics helps us improve your user experience. When `false`, the telemetry data is never sent to Elastic.
 
-          This setting can be changed at any time in [Advanced Settings](/reference/advanced-settings.md). To prevent users from changing it, set [`telemetry.allowChangingOptInStatus`](#telemetry-allowChangingOptInStatus) to `false`.
+          This setting can be changed at any time in [Advanced Settings](/reference/advanced-settings.md). To prevent users from changing it, set [`telemetry.allowChangingOptInStatus`](#telemetry-allowchangingoptinstatus) to `false`.
         datatype: bool
         default: true
         applies_to:
