@@ -11,22 +11,19 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiPageTemplate } from '@elastic/eui';
 import { ElasticInferenceServiceModelsHeader } from './elastic_inference_service/header';
 import { ElasticInferenceServiceModelsPage } from './elastic_inference_service/elastic_inference_service_models_page';
-import { InferenceEndpointsProvider } from '../providers/inference_endpoints_provider';
 
 export const ElasticInferenceService = () => {
   return (
-    <InferenceEndpointsProvider>
-      <KibanaPageTemplate
-        offset={0}
-        restrictWidth={false}
-        grow={false}
-        data-test-subj="eisModelsPage"
-      >
-        <ElasticInferenceServiceModelsHeader />
-        <EuiPageTemplate.Section className="eui-yScroll" data-test-subj="eisModelsPageMain">
-          <ElasticInferenceServiceModelsPage />
-        </EuiPageTemplate.Section>
-      </KibanaPageTemplate>
-    </InferenceEndpointsProvider>
+    <KibanaPageTemplate
+      offset={0}
+      restrictWidth={false}
+      grow={false}
+      data-test-subj="eisModelsPage"
+    >
+      <ElasticInferenceServiceModelsHeader />
+      <EuiPageTemplate.Section className="eui-yScroll" data-test-subj="eisModelsPageMain">
+        <ElasticInferenceServiceModelsPage />
+      </EuiPageTemplate.Section>
+    </KibanaPageTemplate>
   );
 };
