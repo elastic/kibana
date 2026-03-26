@@ -8,11 +8,15 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { OverviewTab } from './overview_tab';
-import { TestProviders } from '../../../common/mock';
+import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { DocumentFlyout } from '.';
+import { TestProviders } from '../../common/mock';
 
-jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+jest.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+jest.mock('./header', () => ({ Header: () => <div data-test-subj="mock-header" /> }));
+jest.mock('./tabs/overview_tab', () => ({
+  OverviewTab: () => <div data-test-subj="mock-overview-tab" />,
+}));
 
 const createAlertHit = (): DataTableRecord =>
   ({
@@ -22,18 +26,17 @@ const createAlertHit = (): DataTableRecord =>
     isAnchor: false,
   } as DataTableRecord);
 
-describe('<OverviewTab />', () => {
+describe('<DocumentFlyout />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('renders FlyoutMissingAlertsPrivilege when document is an alert and user lacks alerts read privilege', () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: false, loading: false });
-    const alertHit = createAlertHit();
 
     const { getByTestId } = render(
       <TestProviders>
-        <OverviewTab hit={alertHit} renderCellActions={jest.fn()} />
+        <DocumentFlyout hit={createAlertHit()} renderCellActions={jest.fn()} />
       </TestProviders>
     );
 
@@ -42,11 +45,10 @@ describe('<OverviewTab />', () => {
 
   it('renders loading while alerts privileges are loading for an alert', () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: false, loading: true });
-    const alertHit = createAlertHit();
 
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
-        <OverviewTab hit={alertHit} renderCellActions={jest.fn()} />
+        <DocumentFlyout hit={createAlertHit()} renderCellActions={jest.fn()} />
       </TestProviders>
     );
 

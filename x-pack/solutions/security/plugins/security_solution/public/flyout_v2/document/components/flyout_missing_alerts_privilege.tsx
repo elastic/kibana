@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-
+import React, { memo } from 'react';
 import type { DocLinks } from '@kbn/doc-links';
 import { i18n } from '@kbn/i18n';
 import { FLYOUT_MISSING_ALERTS_PRIVILEGE_TEST_ID } from './test_ids';
 import { NoPrivileges } from '../../../common/components/no_privileges';
 
 const alertDetailsPageName = i18n.translate(
-  'xpack.securitySolution.flyout.shared.alertDetailsPageName',
+  'xpack.securitySolution.flyout.document.alertDetailsPageName',
   {
     defaultMessage: 'Alert details',
   }
@@ -23,12 +22,12 @@ const docLinkSelector = (links: DocLinks) => links.siem.detectionsReq;
 /**
  * Shown in the alert flyout when the user lacks the Alerts feature (securitySolutionAlertsV1) read privilege
  */
-export const FlyoutMissingAlertsPrivilege: React.FC = () => {
-  return (
-    <NoPrivileges
-      pageName={alertDetailsPageName}
-      docLinkSelector={docLinkSelector}
-      data-test-subj={FLYOUT_MISSING_ALERTS_PRIVILEGE_TEST_ID}
-    />
-  );
-};
+export const FlyoutMissingAlertsPrivilege = memo(() => (
+  <NoPrivileges
+    pageName={alertDetailsPageName}
+    docLinkSelector={docLinkSelector}
+    data-test-subj={FLYOUT_MISSING_ALERTS_PRIVILEGE_TEST_ID}
+  />
+));
+
+FlyoutMissingAlertsPrivilege.displayName = 'FlyoutMissingAlertsPrivilege';
