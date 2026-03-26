@@ -7,6 +7,7 @@
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { MlAnomalyResultType } from '@kbn/ml-anomaly-utils';
+import { GLOBAL_CALENDAR } from '../../common/constants/calendars';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
 import type { MlAnomalyDetectionJobsHealthRuleParams } from '../../common/types/alerts';
 import { getResultJobsHealthRuleConfig } from '../../common/util/alerts';
@@ -15,8 +16,15 @@ import {
   emptyCustomRulesUsage,
   type MlCustomRulesUsage,
 } from './custom_rules_usage_aggregation';
+import {
+  aggregateCalendarsUsage,
+  attachEventsToCalendars,
+  emptyCalendarsUsage,
+  type MlCalendarsUsage,
+  type MlGetCalendarsCalendarItem,
+} from './calendars_usage_aggregation';
 
-export type { MlCustomRulesUsage };
+export type { MlCustomRulesUsage, MlCalendarsUsage, MlGetCalendarsCalendarItem };
 
 export interface MlUsageData {
   alertRules: {
@@ -41,6 +49,7 @@ export interface MlUsageData {
     };
   };
   customRules: MlCustomRulesUsage;
+  calendars: MlCalendarsUsage;
 }
 
 export function registerCollector(
@@ -150,6 +159,42 @@ export function registerCollector(
         count_with_scope: {
           type: 'long',
           _meta: { description: 'Number of rules that have scope (filter list) configuration' },
+        },
+      },
+      calendars: {
+        total_count: {
+          type: 'long',
+          _meta: { description: 'Total number of calendars (standard and DST combined)' },
+        },
+        dst_calendars_count: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of DST calendars, identified by events with a force_time_shift field',
+          },
+        },
+        standard_calendars_count: {
+          type: 'long',
+          _meta: { description: 'Number of standard (non-DST) calendars' },
+        },
+        global_calendars_count: {
+          type: 'long',
+          _meta: {
+            description: "Number of calendars applied to all jobs (job_ids contains '_all')",
+          },
+        },
+        calendars_with_jobs_count: {
+          type: 'long',
+          _meta: {
+            description: 'Number of non-global calendars assigned to at least one job or job group',
+          },
+        },
+        standard_events_count: {
+          type: 'long',
+          _meta: {
+            description:
+              'Total number of scheduled events across all standard (non-DST) calendars. DST event counts are excluded because they are auto-generated and always approximately 40 per calendar.',
+          },
         },
       },
     },
@@ -271,11 +316,26 @@ export function registerCollector(
       );
 
       let customRulesData = emptyCustomRulesUsage();
+      let calendarsData = emptyCalendarsUsage();
       try {
         const { jobs = [] } = await esClient.ml.getJobs();
         customRulesData = aggregateCustomRulesUsageFromJobs(jobs);
       } catch {
         // ML API may be unavailable; keep zeroes so alertRules data is still returned
+      }
+
+      try {
+        const { calendars = [] } = await esClient.ml.getCalendars({
+          page: { from: 0, size: 10000 },
+        });
+        const { events = [] } = await esClient.ml
+          .getCalendarEvents({ calendar_id: GLOBAL_CALENDAR, size: 10000 }, { maxRetries: 0 })
+          .catch(() => ({ events: [] }));
+
+        const calendarsWithEvents = attachEventsToCalendars(calendars, events);
+        calendarsData = aggregateCalendarsUsage(calendarsWithEvents);
+      } catch {
+        // ML API may be unavailable; keep zeroes so other data is still returned
       }
 
       return {
@@ -289,6 +349,7 @@ export function registerCollector(
           },
         },
         customRules: customRulesData,
+        calendars: calendarsData,
       };
     },
   });
