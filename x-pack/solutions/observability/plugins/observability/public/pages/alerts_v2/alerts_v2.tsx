@@ -32,9 +32,9 @@ import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hook
 import { pagesToDatatableRecords } from '@kbn/alerting-v2-episodes-ui/utils/pages_to_datatable_records';
 import { useAlertingRulesIndex } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_index';
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
-import { AlertEpisodeStatusCell } from '@kbn/alerting-v2-episodes-ui/components/alert-episodes/status/alert_episode_status_cell';
-import { AlertEpisodeActionsCell } from '@kbn/alerting-v2-episodes-ui/components/alert-episodes/actions/alert_episode_actions_cell';
-import { AlertEpisodeTags } from '@kbn/alerting-v2-episodes-ui/components/alert-episodes/actions/alert_episode_tags';
+import { AlertEpisodeStatusCell } from '@kbn/alerting-v2-episodes-ui/components/alert_episodes/status/alert_episode_status_cell';
+import { AlertEpisodeActionsCell } from '@kbn/alerting-v2-episodes-ui/components/alert_episodes/actions/alert_episode_actions_cell';
+import { AlertEpisodeTags } from '@kbn/alerting-v2-episodes-ui/components/alert_episodes/actions/alert_episode_tags';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
