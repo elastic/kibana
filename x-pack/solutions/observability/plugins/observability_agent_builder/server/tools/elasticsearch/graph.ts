@@ -438,12 +438,13 @@ export const createElasticsearchToolGraph = async ({
     const tools = state.tools.map((tool) => toLangchainTool(tool, esClient));
     const toolNode = new ToolNode<typeof StateAnnotation.State.messages>(tools);
     const toolNodeResult = await toolNode.invoke(state.messages);
-    const toolMessage = toolNodeResult[toolNodeResult.length - 1];
-    const toolResponse = await parseToolResponse(toolMessage, model.chatModel);
+    const toolResponses = await Promise.all(
+      toolNodeResult.map((toolMessage) => parseToolResponse(toolMessage, model.chatModel))
+    );
 
     return {
       toolOutput: {
-        results: [otherResult(toolResponse)],
+        results: toolResponses.map((toolResponse) => otherResult(toolResponse)),
       },
     };
   };
