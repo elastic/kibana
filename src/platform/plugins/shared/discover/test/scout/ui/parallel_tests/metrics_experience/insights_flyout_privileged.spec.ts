@@ -15,6 +15,7 @@ spaceTest.describe(
   { tag: testData.METRICS_EXPERIENCE_TAGS },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
+      await scoutSpace.savedObjects.load(testData.KBN_DATA_STREAM_ARCHIVE);
       await scoutSpace.savedObjects.load(testData.KBN_ARCHIVE);
       await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_NAME);
       await scoutSpace.uiSettings.setDefaultTime(DEFAULT_TIME_RANGE);
@@ -36,7 +37,7 @@ spaceTest.describe(
     spaceTest(
       'should render data stream as a clickable link in the flyout',
       async ({ pageObjects }) => {
-        await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+        await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS_DATA_STREAM);
         const { metricsExperience } = pageObjects;
         await expect(metricsExperience.grid).toBeVisible();
 
@@ -46,6 +47,25 @@ spaceTest.describe(
 
           await expect(metricsExperience.flyout.overview.dataStream.link).toBeVisible();
           await expect(metricsExperience.flyout.overview.dataStream.text).toBeHidden();
+        });
+      }
+    );
+
+    // Plain indices should render as text without a navigation link,
+    // even when the user has streams permissions.
+    spaceTest(
+      'should render plain index as text without a link in the flyout',
+      async ({ pageObjects }) => {
+        await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+        const { metricsExperience } = pageObjects;
+        await expect(metricsExperience.grid).toBeVisible();
+
+        await spaceTest.step('open flyout and verify no link for plain index', async () => {
+          await metricsExperience.openInsightsFlyout(0);
+          await expect(metricsExperience.flyout.container).toBeVisible();
+
+          await expect(metricsExperience.flyout.overview.dataStream.text).toBeVisible();
+          await expect(metricsExperience.flyout.overview.dataStream.link).toBeHidden();
         });
       }
     );

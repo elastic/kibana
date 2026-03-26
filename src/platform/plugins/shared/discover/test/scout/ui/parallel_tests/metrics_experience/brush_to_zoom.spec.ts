@@ -15,14 +15,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData } from '../../fixtures/metrics_experience';
-
-// Narrow range centered on the test documents (00:30–00:39) so that the
-// 25%–75% brush gesture always captures data and avoids "no results".
-const BRUSH_TIME_RANGE = {
-  from: '2025-01-01T00:00:00.000Z',
-  to: '2025-01-01T01:00:00.000Z',
-};
+import { spaceTest, testData, BRUSH_TIME_RANGE } from '../../fixtures/metrics_experience';
 
 spaceTest.describe(
   'Metrics in Discover - Brush to Zoom',

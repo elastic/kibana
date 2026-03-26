@@ -8,3 +8,4 @@
  */
 
 export * from './metrics_tsdb_index';
+export * from './metrics_tsdb_data_stream';

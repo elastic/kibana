@@ -40,16 +40,32 @@ const MAX_DIMENSIONS = 50;
 const MAX_VALUES_PER_DIMENSION = 20;
 const PAGE_SIZE = 20;
 
-const INDEX_TIME_RANGE = {
-  from: '2025-01-01T00:00:00.000Z',
-  to: '2025-12-31T23:59:59.000Z',
-  documentsBaseTime: '2025-01-01T00:30:00.000Z',
+export const TEST_TIME_ANCHOR = Date.now();
+
+export const TIME_OFFSETS = {
+  TSDB_WINDOW: 6 * 60 * 60 * 1000,
+  INDEX_DOCS_BASE: 30 * 60 * 1000,
+  DATA_STREAM_DOCS_BASE: 60 * 60 * 1000,
+  QUERY_EXTRA_PADDING: 2 * 60 * 60 * 1000,
 } as const;
 
+const INDEX_TIME_RANGE = {
+  from: new Date(TEST_TIME_ANCHOR - TIME_OFFSETS.TSDB_WINDOW).toISOString(),
+  to: new Date(TEST_TIME_ANCHOR + TIME_OFFSETS.TSDB_WINDOW).toISOString(),
+  documentsBaseTime: new Date(TEST_TIME_ANCHOR - TIME_OFFSETS.INDEX_DOCS_BASE).toISOString(),
+};
+
 export const DEFAULT_TIME_RANGE = {
-  from: '2025-01-01T00:00:00.000Z',
-  to: '2025-12-31T23:59:59.000Z',
-} as const;
+  from: new Date(TEST_TIME_ANCHOR - TIME_OFFSETS.TSDB_WINDOW).toISOString(),
+  to: new Date(
+    TEST_TIME_ANCHOR + TIME_OFFSETS.TSDB_WINDOW + TIME_OFFSETS.QUERY_EXTRA_PADDING
+  ).toISOString(),
+};
+
+export const BRUSH_TIME_RANGE = {
+  from: new Date(TEST_TIME_ANCHOR - TIME_OFFSETS.INDEX_DOCS_BASE - 30 * 60 * 1000).toISOString(),
+  to: new Date(TEST_TIME_ANCHOR - TIME_OFFSETS.INDEX_DOCS_BASE + 30 * 60 * 1000).toISOString(),
+};
 
 export const DEFAULT_CONFIG: MetricsIndexConfig = {
   indexName: METRICS_TEST_INDEX_NAME,
@@ -94,7 +110,9 @@ function generateValue({ type }: MetricDefinition): number {
   }
 }
 
-function buildMappingProperties(config: MetricsIndexConfig): Record<string, EsMappingProperty> {
+export function buildMappingProperties(
+  config: MetricsIndexConfig
+): Record<string, EsMappingProperty> {
   const properties: Record<string, EsMappingProperty> = {
     '@timestamp': { type: 'date' },
   };
@@ -211,7 +229,7 @@ export async function createMetricsTestIndexIfNeeded(
   }
 }
 
-function buildDocument(
+export function buildDocument(
   index: number,
   baseTime: number,
   config: MetricsIndexConfig

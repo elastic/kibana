@@ -13,11 +13,14 @@ import type { KibanaRole } from '@kbn/scout';
 export const METRICS_TEST_INDEX_NAME = 'test-metrics-experience';
 export const METRICS_TEST_INDEX_PATTERN = 'test-metrics-*';
 
+export const METRICS_TEST_DATA_STREAM_NAME = 'metrics-test.experience-default';
+export const METRICS_TEST_DATA_STREAM_TEMPLATE = 'metrics-test-experience-template';
+
 // The Security serverless viewer role only grants read access to `metrics-endpoint.metadata_current_*`.
 // Our test index doesn't match that pattern. Instead of renaming the index to fit, we prefer a custom role that explicitly grants read access.
 const METRICS_ES_INDEX_PRIVILEGES = [
   {
-    names: [METRICS_TEST_INDEX_NAME, METRICS_TEST_INDEX_PATTERN],
+    names: [METRICS_TEST_INDEX_NAME, METRICS_TEST_INDEX_PATTERN, METRICS_TEST_DATA_STREAM_NAME],
     privileges: ['read', 'view_index_metadata'],
   },
 ];
@@ -37,6 +40,7 @@ export const METRICS_FLYOUT_DIMENSION_ITEM_DATA_TEST_SUBJ =
 
 export const ESQL_QUERIES = {
   TS: `TS ${METRICS_TEST_INDEX_NAME}`,
+  TS_DATA_STREAM: `TS ${METRICS_TEST_DATA_STREAM_NAME}`,
   TS_WILDCARD: `TS ${METRICS_TEST_INDEX_PATTERN}`,
   FROM: `FROM ${METRICS_TEST_INDEX_NAME}`,
 };
@@ -53,6 +57,9 @@ export const DATA_VIEW_NAME = METRICS_TEST_INDEX_NAME;
 
 export const KBN_ARCHIVE =
   'src/platform/plugins/shared/discover/test/scout/ui/fixtures/metrics_experience/kbn_archives/metrics_data_view.json';
+
+export const KBN_DATA_STREAM_ARCHIVE =
+  'src/platform/plugins/shared/discover/test/scout/ui/fixtures/metrics_experience/kbn_archives/metrics_data_stream_view.json';
 
 export const METRICS_EXPERIENCE_TAGS = [
   ...tags.stateful.all,

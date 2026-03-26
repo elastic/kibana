@@ -9,7 +9,10 @@
 
 import { globalSetupHook } from '@kbn/scout';
 import { getSynthtraceClient } from '@kbn/scout-synthtrace';
-import { createMetricsTestIndexIfNeeded } from '../fixtures/metrics_experience';
+import {
+  createMetricsTestIndexIfNeeded,
+  createMetricsDataStreamIfNeeded,
+} from '../fixtures/metrics_experience';
 import {
   TRACES,
   richTrace,
@@ -37,6 +40,15 @@ globalSetupHook(
       created
         ? '[setup:metrics] metrics test index created successfully'
         : '[setup:metrics] metrics test index already exists, skipping'
+    );
+
+    // Metrics Data Stream setup
+    log.debug('[setup:metrics] creating metrics data stream (only if it does not exist)...');
+    const streamCreated = await createMetricsDataStreamIfNeeded(esClient);
+    log.debug(
+      streamCreated
+        ? '[setup:metrics] metrics data stream created successfully'
+        : '[setup:metrics] metrics data stream already exists, skipping'
     );
 
     // Traces Experience setup (not supported in serverless security or search - no Fleet/APM privileges)
