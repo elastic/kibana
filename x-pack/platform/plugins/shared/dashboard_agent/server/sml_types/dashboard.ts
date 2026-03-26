@@ -88,7 +88,7 @@ const toDashboardState = (
 
 export const dashboardSmlType: SmlTypeDefinition = {
   id: DASHBOARD_SML_TYPE,
-  fetchFrequency: () => '5m',
+  fetchFrequency: () => '30m',
 
   async *list(context) {
     const finder = context.savedObjectsClient.createPointInTimeFinder({
