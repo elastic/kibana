@@ -14,6 +14,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 Never import from `react-intl` directly.
 
+**All user-visible text in React components must be internationalized.** No raw string literals in JSX output, props like `title`, `placeholder`, `aria-label`, button labels, error messages, tooltips, or any other text rendered to the screen.
+
 ## API
 
 ### `i18n.translate` (non-JSX contexts)
@@ -29,6 +31,21 @@ i18n.translate('myPlugin.myFeature.greeting', {
   defaultMessage: 'Hello, {name}',
   values: { name: userName },
 });
+```
+
+### `i18n.formatList` (locale-aware lists)
+
+Formats an array of strings into a localized list (e.g., "a, b, and c"):
+
+```ts
+i18n.formatList('conjunction', ['CPU', 'Memory', 'Disk']);
+// en: "CPU, Memory, and Disk"
+
+i18n.formatList('disjunction', ['warn', 'error']);
+// en: "warn or error"
+
+i18n.formatList('unit', ['CPU', 'Memory', 'Disk']);
+// en: "CPU, Memory, Disk"
 ```
 
 ### `<FormattedMessage>` (JSX contexts)
@@ -56,6 +73,8 @@ Standard react-intl component, re-exported from `@kbn/i18n-react`:
 | Props that accept `string` (aria-label, title, placeholder) | `i18n.translate()` |
 | Server-side / non-React code | `i18n.translate()` |
 | Hooks, callbacks, event handlers | `i18n.translate()` |
+| Relative time from a date/timestamp | `<FormattedRelative>` |
+| Relative time with explicit unit control | `<FormattedRelativeTime>` |
 
 ## Message ID Naming
 
@@ -82,7 +101,7 @@ Structure: `{pluginId}.{area}.[{subArea}].{descriptiveName}{TypeSuffix}`
 | `<a>` / link text | `LinkText` |
 | toggle / switch | `ToggleSwitch` |
 | markdown content | `.markdown` |
-| inner part of a compound message | `Detail` |
+| inner part of a compound message (generic) | `Detail` |
 
 ### Examples
 
@@ -108,6 +127,7 @@ import {
   FormattedDate,
   FormattedTime,
   FormattedNumber,
+  FormattedRelative,
   FormattedRelativeTime,
 } from '@kbn/i18n-react';
 ```
@@ -139,23 +159,28 @@ Used for locale-aware counts. Often passed as a JSX value inside `FormattedMessa
 />
 ```
 
-### `FormattedRelativeTime`
+### `FormattedRelative` (recommended for relative time)
 
-Value is in **seconds**. Use `updateIntervalInSeconds` for live countdowns:
+Compat wrapper from `@kbn/i18n-react` that accepts a `Date`, timestamp number, or date string directly. Internally computes the best unit via `selectUnit`:
 
 ```tsx
-<FormattedMessage
-  id="myPlugin.session.expirationDescription"
-  defaultMessage="You will be logged out {timeout}."
-  values={{
-    timeout: <FormattedRelativeTime value={secondsLeft} updateIntervalInSeconds={1} />,
-  }}
-/>
+import { FormattedRelative } from '@kbn/i18n-react';
+
+<FormattedRelative value={createdAt} />
+<FormattedRelative value={expiresAt} updateIntervalInSeconds={1} />
 ```
 
-### `FormattedPlural`
+Use this for most relative-time needs. It outputs text like "2 hours ago" or "in 3 minutes".
 
-Not used in the codebase. Use ICU `{count, plural, ...}` in `defaultMessage` instead.
+### `FormattedRelativeTime` (low-level)
+
+Requires a numeric `value` relative to a specific `unit`. Use only when you need precise control over unit selection:
+
+```tsx
+<FormattedRelativeTime value={-2} unit="hour" />           {/* "2 hours ago" */}
+<FormattedRelativeTime value={30} unit="second"
+  updateIntervalInSeconds={1} />                            {/* live countdown */}
+```
 
 ## ICU Formatters in `defaultMessage`
 
@@ -228,7 +253,7 @@ When a translated string contains JSX elements (bold, links, etc.), use the tag 
 />
 ```
 
-Inner IDs follow the pattern: `{parentId}.{variableName}Detail`
+Inner IDs follow the pattern: `{parentId}.{variableName}{TypeSuffix}` — use the same type suffix table (e.g., `LinkText` for a link, `Label` for a label). Only use `Detail` when no specific suffix applies.
 
 ## Static Analysis Constraints
 
@@ -260,10 +285,11 @@ i18n.translate('myPlugin.greetingLabel', {
 After adding or modifying i18n strings, run:
 
 ```bash
-node scripts/i18n_check --ignore-missing
+node scripts/i18n_check --fix
 ```
 
-## Deprecated Patterns
+## Legacy Patterns (avoid in new code)
 
-- `injectI18n` HOC -- use the `i18n.translate()` function or `<FormattedMessage>` instead.
+- `injectI18n` HOC -- still exported but discouraged. Use `i18n.translate()` or `<FormattedMessage>` instead.
 - `intl.formatMessage()` via `useIntl` / injected props -- use `i18n.translate()` directly (no provider dependency needed for imperative calls).
+- `FormattedPlural` -- exported but unused in the codebase. Use ICU `{count, plural, ...}` in `defaultMessage` instead.
