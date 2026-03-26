@@ -167,6 +167,8 @@ export const useDashboardMenuItems = ({
     dashboardTitle,
   });
 
+  const hasExportMenuItems = exportItems.length > 0;
+
   /**
    * Show the Dashboard app's share menu
    */
@@ -424,11 +426,6 @@ export const useDashboardMenuItems = ({
    */
   const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
 
-  const hasExportIntegration = useMemo(() => {
-    if (!shareService) return false;
-    return shareService.availableIntegrations('dashboard', 'export').length > 0;
-  }, []);
-
   const viewModeTopNavConfig = useMemo(() => {
     const { showWriteControls, storeSearchSession } = getDashboardCapabilities();
 
@@ -438,8 +435,8 @@ export const useDashboardMenuItems = ({
       items.push(menuItems.duplicate);
     }
 
-    // Only show the export button if the current user meets the requirements for at least one registered export integration
-    if (shareService && hasExportIntegration) {
+    // Only show the export button if the current user meets the requirements for at least one export integration or derivative
+    if (shareService && hasExportMenuItems) {
       items.push(menuItems.export);
     }
 
@@ -477,7 +474,7 @@ export const useDashboardMenuItems = ({
     menuItems.backgroundSearch,
     menuItems.labs,
     resetChangesMenuItem,
-    hasExportIntegration,
+    hasExportMenuItems,
     dashboardApi.isManaged,
     showResetChange,
     isLabsEnabled,
@@ -488,8 +485,8 @@ export const useDashboardMenuItems = ({
 
     const items: AppMenuItemType[] = [menuItems.switchToViewMode, menuItems.settings];
 
-    // Only show the export button if the current user meets the requirements for at least one registered export integration
-    if (shareService && hasExportIntegration) {
+    // Only show the export button if the current user meets the requirements for at least one export integration or derivative
+    if (shareService && hasExportMenuItems) {
       items.push(menuItems.export);
     }
 
@@ -521,7 +518,7 @@ export const useDashboardMenuItems = ({
     menuItems.add,
     menuItems.save,
     menuItems.labs,
-    hasExportIntegration,
+    hasExportMenuItems,
     isLabsEnabled,
   ]);
 
