@@ -56,7 +56,7 @@ export const configureClient = (
   const { apisToRedactInLogs = [] } = config;
   instrumentEsQueryAndDeprecationLogger({ logger, client, type, apisToRedactInLogs });
 
-  instrumentCpsMetrics({ client, logger });
+  instrumentCpsMetrics({ client, logger: logger.get('cps') });
 
   return client;
 };
