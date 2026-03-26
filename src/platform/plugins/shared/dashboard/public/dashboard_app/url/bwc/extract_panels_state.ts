@@ -43,10 +43,6 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
 } {
   const panels = Array.isArray(state.panels) ? state.panels : [];
 
-  if (panels.length === 0) {
-    return {};
-  }
-
   if (isPanelVersionTooOld(panels)) {
     coreServices.notifications.toasts.addWarning(getPanelTooOldErrorString());
     return {};
