@@ -172,6 +172,7 @@ export const SolutionViewSwitchModal = ({
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButton
+          data-test-subj="solutionViewSwitchModalSwitchButton"
           isLoading={isLoading}
           onClick={() => onSwitch(selectedSolution)}
           fill

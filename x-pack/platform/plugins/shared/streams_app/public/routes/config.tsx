@@ -12,6 +12,7 @@ import React from 'react';
 import { StreamsAppPageTemplate } from '../components/streams_app_page_template';
 import { StreamsAppRouterBreadcrumb } from '../components/streams_app_router_breadcrumb';
 import { RedirectTo } from '../components/redirect_to';
+import { StreamManagementDefaultRedirect } from '../components/stream_management_default_redirect';
 import { StreamListView } from '../components/stream_list_view';
 import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/data_management/stream_detail_management';
@@ -106,17 +107,13 @@ const streamsAppRoutes = {
         ]),
         children: {
           '/{key}': {
-            element: (
-              <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'retention' } }} />
-            ),
+            element: <StreamManagementDefaultRedirect />,
           },
           /**
            * This route redirects from legacy overview/dashboard links to the management page
            */
           '/{key}/{tab}': {
-            element: (
-              <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'retention' } }} />
-            ),
+            element: <StreamManagementDefaultRedirect />,
             params: t.intersection([
               t.type({
                 path: t.type({
@@ -147,9 +144,7 @@ const streamsAppRoutes = {
            * Works on more in-depth routes as well, e.g. /{key}/management/{tab}/{subtab}/random-path.
            */
           '/*': {
-            element: (
-              <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'retention' } }} />
-            ),
+            element: <StreamManagementDefaultRedirect />,
           },
         },
       },

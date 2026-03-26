@@ -6,12 +6,5 @@ reviews:
   auto_review:
     labels:
       - reviewer:coderabbit
-      - Team:Search
-      - Team:Operations
-      - Team:QA
-      - Team:SigEvents
-      - Feature:SigEvents
       - Team:Kibana Management
-      - Team:obs-onboarding
       - Team:AI Infra
-      - author:actionable-obs

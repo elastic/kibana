@@ -4,11 +4,13 @@ plugins:
     - advanced_settings
     - alerting
     - apm
+    - automatic_import_v2
     - banners
     - cloud_security_posture
     - console
     - custom_branding
     - dashboard
+    - dashboard_markdown
     - data_views
     - discover
     - discover_enhanced
@@ -25,6 +27,7 @@ plugins:
     - navigation
     - observability
     - observability_onboarding
+    - osquery
     - painless_lab
     - profiling
     - search_getting_started
