@@ -278,25 +278,33 @@ describe('Workflow Steps - Error Scenarios', () => {
   });
 
   describe('tagProcessedAlertsStep - updateByQuery', () => {
-    it('should tag alerts via updateByQuery using IDs filter', async () => {
+    const createTagContext = (alertIds: string[]) => {
       const mockEsClient = {
-        updateByQuery: jest.fn().mockResolvedValue({ updated: 5 }),
-      } as unknown as ElasticsearchClient;
-
-      const context = createMockContext({
+        updateByQuery: jest.fn().mockResolvedValue({ updated: alertIds.filter(Boolean).length }),
+      };
+      return createMockContext({
         input: {
-          alert_ids: ['alert-1', 'alert-2', 'alert-3', 'alert-4', 'alert-5'],
+          alert_ids: alertIds,
           index_pattern: '.alerts-security.alerts-default',
         },
         contextManager: {
-          getScopedEsClient: jest.fn().mockReturnValue(mockEsClient),
+          getScopedEsClient: jest.fn(),
+          getCoreStart: jest.fn().mockReturnValue({
+            elasticsearch: {
+              client: { asInternalUser: mockEsClient },
+            },
+          }),
         },
       });
+    };
 
+    it('should tag alerts via updateByQuery using IDs filter', async () => {
+      const context = createTagContext(['alert-1', 'alert-2', 'alert-3', 'alert-4', 'alert-5']);
       const result = await tagProcessedAlertsStep.handler(context);
 
       expect(result.output.tagged_count).toBe(5);
-      expect(mockEsClient.updateByQuery).toHaveBeenCalledWith(
+      const esClient = context.contextManager.getCoreStart().elasticsearch.client.asInternalUser;
+      expect(esClient.updateByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           index: '.alerts-security.alerts-default',
           query: { ids: { values: ['alert-1', 'alert-2', 'alert-3', 'alert-4', 'alert-5'] } },
@@ -305,40 +313,17 @@ describe('Workflow Steps - Error Scenarios', () => {
     });
 
     it('should return 0 for empty alert IDs', async () => {
-      const mockEsClient = {} as unknown as ElasticsearchClient;
-
-      const context = createMockContext({
-        input: {
-          alert_ids: [],
-          index_pattern: '.alerts-security.alerts-default',
-        },
-        contextManager: {
-          getScopedEsClient: jest.fn().mockReturnValue(mockEsClient),
-        },
-      });
-
+      const context = createTagContext([]);
       const result = await tagProcessedAlertsStep.handler(context);
       expect(result.output.tagged_count).toBe(0);
     });
 
     it('should filter out empty strings from alert IDs', async () => {
-      const mockEsClient = {
-        updateByQuery: jest.fn().mockResolvedValue({ updated: 2 }),
-      } as unknown as ElasticsearchClient;
-
-      const context = createMockContext({
-        input: {
-          alert_ids: ['alert-1', '', 'alert-2', ''],
-          index_pattern: '.alerts-security.alerts-default',
-        },
-        contextManager: {
-          getScopedEsClient: jest.fn().mockReturnValue(mockEsClient),
-        },
-      });
-
+      const context = createTagContext(['alert-1', '', 'alert-2', '']);
       const result = await tagProcessedAlertsStep.handler(context);
       expect(result.output.tagged_count).toBe(2);
-      expect(mockEsClient.updateByQuery).toHaveBeenCalledWith(
+      const esClient = context.contextManager.getCoreStart().elasticsearch.client.asInternalUser;
+      expect(esClient.updateByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           query: { ids: { values: ['alert-1', 'alert-2'] } },
         })

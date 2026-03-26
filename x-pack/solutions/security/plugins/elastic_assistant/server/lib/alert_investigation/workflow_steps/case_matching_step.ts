@@ -24,6 +24,7 @@ const CaseMatchingOutputSchema = z.object({
   alerts_grouped: z.number(),
   affected_case_ids: z.array(z.string()),
   alert_ids_by_case: z.record(z.string(), z.array(z.string())),
+  // alert_groups as native array for forEach consumption
   alert_groups: z.array(
     z.object({
       group_id: z.string(),
@@ -32,6 +33,8 @@ const CaseMatchingOutputSchema = z.object({
       primary_user: z.string(),
     })
   ),
+  // Same data as JSON string — workaround if forEach can't resolve complex arrays
+  alert_groups_json: z.string(),
 });
 
 export const caseMatchingStep = createServerStepDefinition({
@@ -182,6 +185,7 @@ export const caseMatchingStep = createServerStepDefinition({
         affected_case_ids: affectedCaseIds,
         alert_ids_by_case: alertIdsByCase,
         alert_groups: alertGroups,
+        alert_groups_json: JSON.stringify(alertGroups),
       },
     };
   },
