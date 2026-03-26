@@ -83,14 +83,19 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
 
     // < 9.2 id stored as panelIndex
     if (panel?.panelIndex) {
+      /**
+       * <8.19 'id' (saved object id) stored as siblings to config;
+       * this is checked as part of the `panelIndex` check because...
+       * - <8.19 `id` refers to saved object id
+       * - >9.3  `id` refers to the unique panel index
+       */
+      if (panel.id && panel.config && typeof panel.config === 'object') {
+        panel.config.savedObjectId = panel.id;
+        delete panel.id;
+      }
+
       panel.id = panel.panelIndex;
       delete panel.panelIndex;
-    }
-
-    // <8.19 'id' (saved object id) stored as siblings to config
-    if (panel.id && panel.config && typeof panel.config === 'object') {
-      panel.config.savedObjectId = panel.id;
-      delete panel.id;
     }
 
     // <8.19 'title' stored as siblings to config
