@@ -49,7 +49,8 @@ function validateAllowedHostsUrls(
   validateValueAgainstAllowedHostsJsonSchema(
     secrets as Record<string, unknown>,
     authTypeSchemaNode,
-    configurationUtilities
+    configurationUtilities,
+    jsonSchema
   );
 }
 

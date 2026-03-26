@@ -270,16 +270,13 @@ describe('oauthAuthorizeRoute', () => {
     expect(mockConfigurationUtilities.ensureUriAllowed).toHaveBeenCalledWith(
       'https://not-allowed.example.com/authorize'
     );
-    expect(res.customError).toHaveBeenCalledWith(
-      expect.objectContaining({
-        statusCode: 500,
-        body: {
-          message: expect.stringContaining(
-            'not added to the Kibana config xpack.actions.allowedHosts'
-          ),
-        },
-      })
-    );
+    expect(res.badRequest).toHaveBeenCalledWith({
+      body: {
+        message: expect.stringContaining(
+          'not added to the Kibana config xpack.actions.allowedHosts'
+        ),
+      },
+    });
   });
 
   it('returns error when tokenUrl host is not in allowedHosts', async () => {
@@ -314,16 +311,13 @@ describe('oauthAuthorizeRoute', () => {
       2,
       'https://not-allowed.example.com/token'
     );
-    expect(res.customError).toHaveBeenCalledWith(
-      expect.objectContaining({
-        statusCode: 500,
-        body: {
-          message: expect.stringContaining(
-            'not added to the Kibana config xpack.actions.allowedHosts'
-          ),
-        },
-      })
-    );
+    expect(res.badRequest).toHaveBeenCalledWith({
+      body: {
+        message: expect.stringContaining(
+          'not added to the Kibana config xpack.actions.allowedHosts'
+        ),
+      },
+    });
   });
 
   it('returns authorization URL on success', async () => {

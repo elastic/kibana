@@ -29,6 +29,52 @@ describe('validate_allowed_hosts', () => {
       expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith('https://example.com');
     });
 
+    it('resolves $ref to validate uri formatted strings', () => {
+      const configurationUtilities = { ensureUriAllowed: jest.fn() };
+
+      const jsonSchema = {
+        $defs: {
+          Url: { type: 'string', format: 'uri' },
+        },
+        type: 'object',
+        properties: {
+          url: { $ref: '#/$defs/Url' },
+        },
+      };
+
+      validateValueAgainstAllowedHostsJsonSchema(
+        { url: 'https://example.com' },
+        jsonSchema,
+        configurationUtilities as never,
+        jsonSchema
+      );
+
+      expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith('https://example.com');
+    });
+
+    it('respects validate.allowedHosts=false on referenced schema nodes', () => {
+      const configurationUtilities = { ensureUriAllowed: jest.fn() };
+
+      const jsonSchema = {
+        $defs: {
+          Url: { type: 'string', format: 'uri', validate: { allowedHosts: false } },
+        },
+        type: 'object',
+        properties: {
+          url: { $ref: '#/$defs/Url' },
+        },
+      };
+
+      validateValueAgainstAllowedHostsJsonSchema(
+        { url: 'https://example.com' },
+        jsonSchema,
+        configurationUtilities as never,
+        jsonSchema
+      );
+
+      expect(configurationUtilities.ensureUriAllowed).not.toHaveBeenCalled();
+    });
+
     it('recurses into arrays and validates uri items', () => {
       const configurationUtilities = { ensureUriAllowed: jest.fn() };
 
@@ -103,6 +149,27 @@ describe('validate_allowed_hosts', () => {
             },
           ],
         },
+        'authType',
+        'oauth_authorization_code'
+      ) as { properties: { authType: { const: string } } };
+
+      expect(variant.properties.authType.const).toBe('oauth_authorization_code');
+    });
+
+    it('resolves $ref variants', () => {
+      const jsonSchema = {
+        $defs: {
+          basic: { type: 'object', properties: { authType: { const: 'basic' } } },
+          oauth: {
+            type: 'object',
+            properties: { authType: { const: 'oauth_authorization_code' } },
+          },
+        },
+        anyOf: [{ $ref: '#/$defs/basic' }, { $ref: '#/$defs/oauth' }],
+      };
+
+      const variant = getDiscriminatedUnionVariantJsonSchemaNode(
+        jsonSchema,
         'authType',
         'oauth_authorization_code'
       ) as { properties: { authType: { const: string } } };

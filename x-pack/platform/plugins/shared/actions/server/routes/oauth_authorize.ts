@@ -117,10 +117,18 @@ export const oauthAuthorizeRoute = (
           }
           const oauthConfig = await oauthService.getOAuthConfig(connectorId, namespace);
 
-          // Validate authorizationUrl against xpack.actions.allowedHosts
-          configurationUtilities.ensureUriAllowed(oauthConfig.authorizationUrl);
-          // Validate tokenUrl against xpack.actions.allowedHosts (used by callback + token refresh)
-          configurationUtilities.ensureUriAllowed(oauthConfig.tokenUrl);
+          try {
+            configurationUtilities.ensureUriAllowed(oauthConfig.authorizationUrl);
+            configurationUtilities.ensureUriAllowed(oauthConfig.tokenUrl);
+          } catch (allowedHostsErr) {
+            const message =
+              allowedHostsErr instanceof Error ? allowedHostsErr.message : String(allowedHostsErr);
+            return res.badRequest({
+              body: {
+                message: message || 'OAuth URL is not allowed by xpack.actions.allowedHosts',
+              },
+            });
+          }
 
           const redirectUri = OAuthAuthorizationService.getRedirectUri(kibanaUrl);
 
