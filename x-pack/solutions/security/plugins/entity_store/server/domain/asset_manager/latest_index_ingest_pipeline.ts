@@ -6,7 +6,11 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ENTITY_BASE_PREFIX, ENTITY_SCHEMA_VERSION_V2, ENTITY_LATEST } from '../constants';
+import {
+  ENTITY_BASE_PREFIX,
+  ENTITY_SCHEMA_VERSION_V2,
+  ENTITY_LATEST,
+} from '../../../common/domain/entity_index';
 
 /**
  * Returns the ingest pipeline ID for the latest entity index (namespace-scoped).

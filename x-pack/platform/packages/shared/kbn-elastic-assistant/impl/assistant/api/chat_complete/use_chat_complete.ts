@@ -8,9 +8,10 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { PromptIds, Replacements } from '@kbn/elastic-assistant-common';
 import type { HttpFetchQuery } from '@kbn/core-http-browser';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import type { ChatCompleteResponse } from './post_chat_complete';
 import { postChatComplete } from './post_chat_complete';
-import { useAssistantContext, useLoadConnectors } from '../../../..';
+import { useAssistantContext } from '../../../..';
 
 interface SendMessageProps {
   message: string;
@@ -30,7 +31,11 @@ export const useChatComplete = ({ connectorId }: { connectorId: string }): UseCh
   const { alertsIndexPattern, http, traceOptions, settings } = useAssistantContext();
   const [isLoading, setIsLoading] = useState(false);
   const abortController = useRef(new AbortController());
-  const { data: connectors } = useLoadConnectors({ http, inferenceEnabled: true, settings });
+  const { data: connectors } = useLoadConnectors({
+    http,
+    featureId: 'elastic_assistant',
+    settings,
+  });
   const actionTypeId = useMemo(
     () => connectors?.find(({ id }) => id === connectorId)?.actionTypeId ?? '.gen-ai',
     [connectors, connectorId]

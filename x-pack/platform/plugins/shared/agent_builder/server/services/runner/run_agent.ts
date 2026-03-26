@@ -22,6 +22,7 @@ import {
   createToolProvider,
   createSkillsService,
 } from './utils';
+import { createPluginsService } from './utils/plugins';
 import type { RunnerManager } from './runner';
 
 export const createAgentHandlerContext = async <TParams = Record<string, unknown>>({
@@ -42,12 +43,14 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     toolsService,
     attachmentsService,
     resultStore,
+    skillsStore,
     attachmentStateManager,
     logger,
     promptManager,
     stateManager,
     filestore,
     skillServiceStart,
+    pluginsServiceStart,
     toolManager,
   } = manager.deps;
 
@@ -80,6 +83,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       request,
     }),
     resultStore,
+    skillsStore,
     attachmentStateManager,
     filestore,
     stateManager,
@@ -98,6 +102,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       spaceId,
       runner: manager.getRunner(),
     }),
+    plugins: createPluginsService({ pluginsServiceStart, request }),
     toolManager,
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
     hooks: manager.deps.hooks,

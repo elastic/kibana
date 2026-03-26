@@ -34,7 +34,7 @@ export const AlertStatus = memo(({ hit }: AlertStatusProps) => {
       <>
         {user && statusUpdatedAt && (
           <FormattedMessage
-            id="xpack.securitySolution.flyout.right.about.status.statusHistoryDetails"
+            id="xpack.securitySolution.flyout.document.about.status.statusHistoryDetails"
             defaultMessage="Alert status updated by {user} on {date}"
             values={{
               user: getUserDisplayName(user),
@@ -58,7 +58,7 @@ export const AlertStatus = memo(({ hit }: AlertStatusProps) => {
         <EuiTitle size="xxs">
           <h5>
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.about.status.statusHistoryTitle"
+              id="xpack.securitySolution.flyout.document.about.status.statusHistoryTitle"
               defaultMessage="Last alert status change"
             />
           </h5>
