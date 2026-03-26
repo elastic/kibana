@@ -20,6 +20,7 @@ import {
 } from '../shared';
 import { datasetEsqlTableSchema, datasetSchema } from '../dataset';
 import {
+  legendVisibilitySchemaWithAuto,
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
   mergeAllMetricsWithChartDimensionSchemaWithStaticOps,
@@ -176,10 +177,7 @@ const xyDataLayerSharedSchema = {
  * Common legend configuration properties for positioning and statistics
  */
 const sharedLegendSchema = {
-  visibility: schema.oneOf(
-    [schema.literal('auto'), schema.literal('visible'), schema.literal('hidden')],
-    { meta: { description: 'Show the legend' } }
-  ),
+  visibility: legendVisibilitySchemaWithAuto,
   statistics: schema.maybe(
     schema.arrayOf(statisticsSchema, {
       meta: { description: 'Statistics to display in legend' },

@@ -78,7 +78,7 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
       }),
     },
     legend: {
-      isVisible: layer.legend?.visible ?? true,
+      isVisible: layer.legend?.visibility !== 'hidden',
       position: layer.legend?.position ?? 'right',
       type: 'heatmap_legend',
       ...stripUndefined<HeatmapLegendConfigResult>({
@@ -144,8 +144,7 @@ type HeatmapAttributesWithoutFiltersAndQuery = Omit<HeatmapAttributes, 'state'> 
 };
 
 export function fromAPItoLensState(config: HeatmapState): HeatmapAttributesWithoutFiltersAndQuery {
-  const _buildDataLayer = (cfg: unknown, i: number) =>
-    buildFormBasedLayer(cfg as HeatmapStateNoESQL);
+  const _buildDataLayer = (cfg: unknown) => buildFormBasedLayer(cfg as HeatmapStateNoESQL);
 
   const { layers, usedDataviews } = buildDatasourceStates(config, _buildDataLayer, getValueColumns);
 

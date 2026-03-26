@@ -23,12 +23,12 @@ import {
 import type { PartitionMetric } from './partition_shared';
 import {
   legendNestedSchema,
-  legendVisibilitySchema,
   validateColoringAssignments,
   valueDisplaySchema,
 } from './partition_shared';
 import {
   legendSizeSchema,
+  legendVisibilitySchemaWithAuto,
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
@@ -40,7 +40,7 @@ const treemapSharedStateSchema = {
       {
         nested: legendNestedSchema,
         truncate_after_lines: legendTruncateAfterLinesSchema,
-        visibility: legendVisibilitySchema,
+        visibility: legendVisibilitySchemaWithAuto,
         size: legendSizeSchema,
       },
       {

@@ -21,14 +21,18 @@ import {
   axisTitleSchemaProps,
   legendTruncateAfterLinesSchema,
 } from '../shared';
-import { legendSizeSchema, mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps } from './shared';
+import {
+  legendSizeSchema,
+  legendVisibilitySchemaWithAuto,
+  mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
+} from './shared';
 import { positionSchema } from '../alignments';
 import { builderEnums } from '../enums';
 import { bucketOperationDefinitionSchema } from '../bucket_ops';
 
 const legendSchemaProps = {
   truncate_after_lines: legendTruncateAfterLinesSchema,
-  visible: schema.maybe(schema.boolean({ meta: { description: 'Show the legend' } })),
+  visibility: legendVisibilitySchemaWithAuto,
   size: legendSizeSchema,
   position: schema.maybe(positionSchema({ meta: { description: 'Legend position' } })),
 };
