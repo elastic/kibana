@@ -34,7 +34,6 @@ import {
   resetKeyboardFocus,
 } from '../../../timelines/components/timeline/helpers';
 import type { Status } from '../../../../common/api/detection_engine';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 export const CONTENT_TEST_ID = 'alerts-page-content';
 export const SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID = 'alerts-page-security-solution-page-wrapper';
@@ -70,7 +69,6 @@ export interface AlertsPageContentProps {
  */
 export const AlertsPageContent = memo(
   ({ dataView, oldSourcererDataViewSpec, runtimeMappings }: AlertsPageContentProps) => {
-    const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
     const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
     const containerElement = useRef<HTMLDivElement | null>(null);
 
@@ -129,11 +127,7 @@ export const AlertsPageContent = memo(
         >
           <Display show={!globalFullScreen}>
             <HeaderPage title={PAGE_TITLE}>
-              <HeaderSection
-                assignees={assignees}
-                setAssignees={setAssignees}
-                showManageRulesButton={canReadRules}
-              />
+              <HeaderSection assignees={assignees} setAssignees={setAssignees} />
             </HeaderPage>
             <EuiHorizontalRule margin="none" />
             <EuiSpacer size="l" />

@@ -92,6 +92,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     investigationGuide: { edit: canEditInvestigationGuides },
     customHighlightedFields: { edit: canEditCustomHighlightedFields },
   } = useUserPrivileges().rulesPrivileges;
+  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const { application, triggersActionsUi } = useKibana().services;
   const { navigateToApp } = application;
   const hasRulePermissionsForEditPage =

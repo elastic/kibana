@@ -97,6 +97,12 @@ export const RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE =
 // Exceptions
 export const EXCEPTIONS_API_READ = 'exceptions-read' as const;
 export const EXCEPTIONS_API_ALL = 'exceptions-all' as const;
+export const EXCEPTIONS_UI_READ = 'readExceptions' as const;
+export const EXCEPTIONS_UI_EDIT = 'editExceptions' as const;
+export const EXCEPTIONS_UI_READ_PRIVILEGES =
+  `${RULES_FEATURE_ID_V3}.${EXCEPTIONS_UI_READ}` as const;
+export const EXCEPTIONS_UI_EDIT_PRIVILEGES =
+  `${RULES_FEATURE_ID_V3}.${EXCEPTIONS_UI_EDIT}` as const;
 
 // Investigation guide
 export const INVESTIGATION_GUIDE_API_EDIT = 'investigation-guide-edit' as const;
@@ -117,14 +123,6 @@ export const RULES_MANAGEMENT_SETTINGS_API_PRIVILEGE =
 /**
  * Rules UI subfeatures privileges
  */
-
-// Exceptions
-export const EXCEPTIONS_UI_READ = 'readExceptions' as const;
-export const EXCEPTIONS_UI_EDIT = 'editExceptions' as const;
-export const EXCEPTIONS_UI_READ_PRIVILEGES =
-  `${RULES_FEATURE_ID_V4}.${EXCEPTIONS_UI_READ}` as const;
-export const EXCEPTIONS_UI_EDIT_PRIVILEGES =
-  `${RULES_FEATURE_ID_V4}.${EXCEPTIONS_UI_EDIT}` as const;
 
 // Investigation guide
 export const INVESTIGATION_GUIDE_UI_EDIT = 'editInvestigationGuide' as const;
@@ -154,6 +152,7 @@ export const RULES_MANAGEMENT_SETTINGS_UI_PRIVILEGES =
 /**
  * Alerts feature constants
  */
+
 export const ALERTS_FEATURE_ID = 'securitySolutionAlertsV1' as const;
 
 // Alerts API privileges

@@ -87,7 +87,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   esqlQuery,
   ruleSource,
 }) => {
-  const { data } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const {
     rules: { edit: canEditRules },
     investigationGuide: { edit: canEditInvestigationGuides },

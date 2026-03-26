@@ -156,6 +156,7 @@ import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { CpsMlRuleCallout } from '../../../rule_management_ui/components/cps_ml_rule_callout/callout';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 const RULE_EXCEPTION_LIST_TYPES = [
@@ -773,9 +774,97 @@ export const RuleDetailsPage = connector(
                 </Display>
                 <div>
                   <Routes>
+                    <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.overview})`}>
+                      <RuleFieldsSectionWrapper>
+                        <EuiResizeObserver onResize={onResize}>
+                          {(resizeRef) => (
+                            <EuiFlexGroup
+                              direction={shouldStackAboutContent ? 'column' : 'row'}
+                              ref={resizeRef}
+                            >
+                              <StyledEuiFlexItem
+                                data-test-subj="aboutRule"
+                                component="section"
+                                flexBasis={60}
+                              >
+                                {rule !== null && (
+                                  <StepAboutRuleToggleDetails
+                                    loading={isLoading}
+                                    stepData={aboutRuleData}
+                                    stepDataDetails={modifiedAboutRuleDetailsData}
+                                    rule={rule}
+                                  />
+                                )}
+                              </StyledEuiFlexItem>
+                              <StyledEuiFlexItem grow={1} component="section" flexBasis={40}>
+                                <EuiFlexGroup direction="column">
+                                  <EuiFlexItem
+                                    component="section"
+                                    grow={1}
+                                    data-test-subj="defineRule"
+                                  >
+                                    <StepPanel
+                                      loading={isLoading}
+                                      title={ruleI18n.DEFINITION}
+                                      headerProps={DEFAULT_PANEL_HEADER_OPTIONS}
+                                    >
+                                      {rule !== null && !isStartingJobs && (
+                                        <RuleDefinitionSection
+                                          rule={rule}
+                                          isInteractive
+                                          dataTestSubj="definitionRule"
+                                        />
+                                      )}
+                                    </StepPanel>
+                                  </EuiFlexItem>
+                                  <EuiFlexItem
+                                    data-test-subj="schedule"
+                                    component="section"
+                                    grow={1}
+                                  >
+                                    <StepPanel
+                                      loading={isLoading}
+                                      title={ruleI18n.SCHEDULE}
+                                      headerProps={DEFAULT_PANEL_HEADER_OPTIONS}
+                                    >
+                                      {rule != null && <RuleScheduleSection rule={rule} />}
+                                    </StepPanel>
+                                  </EuiFlexItem>
+                                  {hasActions && (
+                                    <EuiFlexItem
+                                      data-test-subj="actions"
+                                      component="section"
+                                      grow={1}
+                                    >
+                                      <StepPanel
+                                        loading={isLoading}
+                                        title={ruleI18n.ACTIONS}
+                                        headerProps={DEFAULT_PANEL_HEADER_OPTIONS}
+                                      >
+                                        <StepRuleActionsReadOnly
+                                          addPadding={false}
+                                          defaultValues={ruleActionsData}
+                                        />
+                                      </StepPanel>
+                                    </EuiFlexItem>
+                                  )}
+                                </EuiFlexGroup>
+                              </StyledEuiFlexItem>
+                            </EuiFlexGroup>
+                          )}
+                        </EuiResizeObserver>
+                      </RuleFieldsSectionWrapper>
+                    </Route>
                     {canReadAlerts && (
                       <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                         <>
+                          <SiemSearchBar
+                            dataView={experimentalDataView}
+                            pollForSignalIndex={pollForSignalIndex}
+                            id={InputsModelId.global}
+                            sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
+                          />
+                          <EuiSpacer />
                           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                             <EuiFlexItem grow={false}>
                               <AlertsTableFilterGroup

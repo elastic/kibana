@@ -8,16 +8,7 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { i18n } from '@kbn/i18n';
 
-import {
-  ESQL_RULE_TYPE_ID,
-  EQL_RULE_TYPE_ID,
-  INDICATOR_RULE_TYPE_ID,
-  ML_RULE_TYPE_ID,
-  QUERY_RULE_TYPE_ID,
-  SAVED_QUERY_RULE_TYPE_ID,
-  THRESHOLD_RULE_TYPE_ID,
-  NEW_TERMS_RULE_TYPE_ID,
-} from '@kbn/securitysolution-rules';
+import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import { EXCEPTION_LIST_NAMESPACE_AWARE } from '@kbn/securitysolution-list-constants';
 
 import {
@@ -42,26 +33,18 @@ import {
   SECURITY_SOLUTION_RULES_APP_ID,
   SERVER_APP_ID,
   USERS_API_READ,
+  EXCEPTIONS_SUBFEATURE_ALL_ID,
+  RULES_MANAGEMENT_SETTINGS_SUBFEATURE_ID,
 } from '../../constants';
 import { type BaseKibanaFeatureConfig } from '../../types';
 import type { SecurityFeatureParams } from '../../security/types';
 
-const SECURITY_RULE_TYPES = [
-  LEGACY_NOTIFICATIONS_ID,
-  ESQL_RULE_TYPE_ID,
-  EQL_RULE_TYPE_ID,
-  INDICATOR_RULE_TYPE_ID,
-  ML_RULE_TYPE_ID,
-  QUERY_RULE_TYPE_ID,
-  SAVED_QUERY_RULE_TYPE_ID,
-  THRESHOLD_RULE_TYPE_ID,
-  NEW_TERMS_RULE_TYPE_ID,
-];
-
-const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
-  ruleTypeId,
-  consumers: [SERVER_APP_ID],
-}));
+const alertingFeatures = [LEGACY_NOTIFICATIONS_ID, ...SECURITY_SOLUTION_RULE_TYPE_IDS].map(
+  (ruleTypeId) => ({
+    ruleTypeId,
+    consumers: [SERVER_APP_ID],
+  })
+);
 
 export const getRulesV3BaseKibanaFeature = (
   params: SecurityFeatureParams
@@ -102,10 +85,12 @@ export const getRulesV3BaseKibanaFeature = (
             feature: RULES_FEATURE_ID_V4,
             privileges: [
               'minimal_all',
+              EXCEPTIONS_SUBFEATURE_ALL_ID,
               INVESTIGATION_GUIDE_SUBFEATURE_EDIT_ID,
               CUSTOM_HIGHLIGHTED_FIELDS_SUBFEATURE_EDIT_ID,
               ENABLE_DISABLE_RULES_SUBFEATURE_ID,
               MANUAL_RUN_RULES_SUBFEATURE_ID,
+              RULES_MANAGEMENT_SETTINGS_SUBFEATURE_ID,
             ],
           },
         ],
@@ -117,7 +102,12 @@ export const getRulesV3BaseKibanaFeature = (
         read: params.savedObjects,
       },
       alerting: {
-        rule: { all: alertingFeatures },
+        rule: {
+          all: alertingFeatures,
+          enable: alertingFeatures,
+          manual_run: alertingFeatures,
+          manage_rule_settings: alertingFeatures,
+        },
       },
       management: {
         insightsAndAlerting: ['triggersActions'], // Access to the stack rules management UI

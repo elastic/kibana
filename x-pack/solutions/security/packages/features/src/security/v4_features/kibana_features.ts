@@ -39,6 +39,7 @@ import {
   MANUAL_RUN_RULES_SUBFEATURE_ID,
   ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
   ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE,
+  RULES_MANAGEMENT_SETTINGS_SUBFEATURE_ID,
 } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
 import type { BaseKibanaFeatureConfig } from '../../types';
@@ -106,6 +107,7 @@ export const getSecurityV4BaseKibanaFeature = ({
               CUSTOM_HIGHLIGHTED_FIELDS_SUBFEATURE_EDIT_ID,
               ENABLE_DISABLE_RULES_SUBFEATURE_ID,
               MANUAL_RUN_RULES_SUBFEATURE_ID,
+              RULES_MANAGEMENT_SETTINGS_SUBFEATURE_ID,
             ],
           },
           { feature: ALERTS_FEATURE_ID, privileges: ['minimal_all'] },

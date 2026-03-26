@@ -38,6 +38,10 @@ describe('AlertsPageContent', () => {
             read: true,
             edit: false,
           },
+          exceptions: {
+            read: false,
+            edit: false,
+          },
         },
       })
     );
@@ -63,7 +67,7 @@ describe('AlertsPageContent', () => {
     });
   });
 
-  describe('when the user does not have rules read privileges', () => {
+  describe('when the user has no rules privileges', () => {
     beforeEach(() => {
       mockUseUserPrivileges.mockReturnValue(
         getUserPrivilegesMockDefaultValue({
@@ -73,12 +77,16 @@ describe('AlertsPageContent', () => {
               read: false,
               edit: false,
             },
+            exceptions: {
+              read: false,
+              edit: false,
+            },
           },
         })
       );
     });
 
-    it('should not render the Manage Rules button', async () => {
+    it('renders the page content without the Go to Rules button', async () => {
       render(
         <TestProviders>
           <AlertsPageContent

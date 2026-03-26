@@ -90,7 +90,7 @@ export const useBulkAlertClosingReasonItems = ({
             },
           ] as ContentPanelConfig[])
         : [],
-    [hasAlertsUpdate, getRenderContent, onSubmitCloseReason]
+    [hasAlertsUpdate, getRenderContent, onSubmitCloseReason, buttonLabel]
   );
 
   /**
@@ -115,7 +115,7 @@ export const useBulkAlertClosingReasonItems = ({
             },
           ] as ContentPanelConfig[])
         : [],
-    [getRenderContent, hasAlertsUpdate]
+    [getRenderContent, hasAlertsUpdate, buttonLabel]
   );
 
   return useMemo(

@@ -38,6 +38,8 @@ import {
   MANUAL_RUN_RULES_SUBFEATURE_ID,
   ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
   ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE,
+  RULES_MANAGEMENT_SETTINGS_SUBFEATURE_ID,
+  EXCEPTIONS_SUBFEATURE_ALL_ID,
 } from '../../constants';
 import { type BaseKibanaFeatureConfig } from '../../types';
 import type { SecurityFeatureParams } from '../../security/types';
@@ -91,10 +93,12 @@ export const getRulesV2BaseKibanaFeature = (
             feature: RULES_FEATURE_ID_V4,
             privileges: [
               'minimal_all',
+              EXCEPTIONS_SUBFEATURE_ALL_ID,
               INVESTIGATION_GUIDE_SUBFEATURE_EDIT_ID,
               CUSTOM_HIGHLIGHTED_FIELDS_SUBFEATURE_EDIT_ID,
               ENABLE_DISABLE_RULES_SUBFEATURE_ID,
               MANUAL_RUN_RULES_SUBFEATURE_ID,
+              RULES_MANAGEMENT_SETTINGS_SUBFEATURE_ID,
             ],
           },
           { feature: ALERTS_FEATURE_ID, privileges: ['minimal_all'] },

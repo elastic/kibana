@@ -45,7 +45,12 @@ const DatePickerEuiFlexItem = styled(EuiFlexItem)`
   max-width: 582px;
 `;
 
-const getGapsTableColumns = (ruleId: string, enabled: boolean, canManualRunRules: boolean) => {
+const getGapsTableColumns = (
+  ruleId: string,
+  enabled: boolean,
+  canManualRunRules: boolean,
+  gapReasonDetectionEnabled: boolean
+) => {
   const fillActions = {
     name: i18n.GAPS_TABLE_ACTIONS_LABEL,
     align: 'right' as const,
@@ -213,11 +218,10 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
       manualRun: { edit: canManualRunRules },
     },
   } = useUserPrivileges();
+  const gapReasonDetectionEnabled = useIsExperimentalFeatureEnabled('gapReasonDetectionEnabled');
   const [refreshInterval, setRefreshInterval] = useState(1000);
   const [isPaused, setIsPaused] = useState(true);
   const [selectedStatuses, setSelectedStatuses] = useState<GapStatus[]>([]);
-  const isBulkFillRuleGapsEnabled = useIsExperimentalFeatureEnabled('bulkFillRuleGapsEnabled');
-  const isFillRuleGapsButtonEnabled = canManualRunRules && isBulkFillRuleGapsEnabled;
   const [sort, setSort] = useState<{ field: keyof Gap; direction: 'desc' | 'asc' }>({
     field: '@timestamp',
     direction: 'desc',
@@ -249,7 +253,7 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
     totalItemCount: Math.min(totalItemCount, MaxItemCount),
   };
 
-  const columns = getGapsTableColumns(ruleId, enabled, canManualRunRules);
+  const columns = getGapsTableColumns(ruleId, enabled, canManualRunRules, gapReasonDetectionEnabled);
 
   const onRefreshCallback = () => {
     refetch();

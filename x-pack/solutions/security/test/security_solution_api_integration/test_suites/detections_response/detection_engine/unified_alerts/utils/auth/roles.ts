@@ -54,6 +54,46 @@ export const alertsRead: Role = {
   },
 };
 
+const alertsIndicesPrivilege = {
+  names: ['.alerts-security.alerts-default', '.alerts-security.attack.discovery.alerts-default'],
+  privileges: ['all'],
+};
+
+export const alertsAll: Role = {
+  name: 'alerts_all_all_spaces',
+  privileges: {
+    elasticsearch: {
+      indices: [alertsIndicesPrivilege],
+    },
+    kibana: [
+      {
+        feature: {
+          [ALERTS_FEATURE_ID]: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+/** Role with Rules "read" which grants the legacy alerts update (deprecated) privilege */
+export const alertsUpdateLegacy: Role = {
+  name: 'alerts_update_legacy_all_spaces',
+  privileges: {
+    elasticsearch: {
+      indices: [alertsIndicesPrivilege],
+    },
+    kibana: [
+      {
+        feature: {
+          [RULES_FEATURE_ID_V2]: ['read'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 export const alertsReadNoIndices: Role = {
   name: 'alerts_read_all_spaces_no_indices',
   privileges: {
@@ -169,6 +209,8 @@ export const alertsReadAndAttackDiscoveryAll: Role = {
 export const allRoles = [
   noKibanaPrivileges,
   alertsRead,
+  alertsAll,
+  alertsUpdateLegacy,
   alertsReadNoIndices,
   alertsReadNoDetectionIndices,
   alertsReadNoAttackIndices,

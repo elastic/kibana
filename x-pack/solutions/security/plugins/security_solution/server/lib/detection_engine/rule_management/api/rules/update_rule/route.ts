@@ -7,7 +7,7 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   CUSTOM_HIGHLIGHTED_FIELDS_API_EDIT,
   ENABLE_DISABLE_RULES_API_PRIVILEGE,
@@ -15,6 +15,7 @@ import {
   INVESTIGATION_GUIDE_API_EDIT,
   RULES_API_ALL,
 } from '@kbn/security-solution-features/constants';
+import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { UpdateRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   UpdateRuleRequestBody,

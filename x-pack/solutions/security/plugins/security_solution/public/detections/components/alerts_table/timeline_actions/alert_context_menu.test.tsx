@@ -108,6 +108,14 @@ jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges', (
   useAlertsPrivileges: jest.fn().mockReturnValue({ hasAlertsUpdate: true }),
 }));
 
+const mockUseRunAlertWorkflowPanel = jest.fn().mockReturnValue({
+  runWorkflowMenuItem: [],
+  runAlertWorkflowPanel: [],
+});
+jest.mock('./use_run_alert_workflow_panel', () => ({
+  useRunAlertWorkflowPanel: (...args: unknown[]) => mockUseRunAlertWorkflowPanel(...args),
+}));
+
 const actionMenuButton = 'timeline-context-menu-button';
 const addToExistingCaseButton = 'add-to-existing-case-action';
 const addToNewCaseButton = 'add-to-new-case-action';
