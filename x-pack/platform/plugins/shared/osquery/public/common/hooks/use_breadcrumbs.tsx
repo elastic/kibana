@@ -67,6 +67,59 @@ const breadcrumbGetters: {
       text: liveQueryId,
     },
   ],
+  history: () => [
+    BASE_BREADCRUMB,
+    {
+      href: pagePathGetters.history(),
+      text: i18n.translate('xpack.osquery.breadcrumbs.historyPageTitle', {
+        defaultMessage: 'History',
+      }),
+    },
+  ],
+  new_query: () => [
+    BASE_BREADCRUMB,
+    {
+      href: pagePathGetters.history(),
+      text: i18n.translate('xpack.osquery.breadcrumbs.historyPageTitle', {
+        defaultMessage: 'History',
+      }),
+    },
+    {
+      text: i18n.translate('xpack.osquery.breadcrumbs.newQueryPageTitle', {
+        defaultMessage: 'New',
+      }),
+    },
+  ],
+  history_details: ({ liveQueryId }) => [
+    BASE_BREADCRUMB,
+    {
+      href: pagePathGetters.history(),
+      text: i18n.translate('xpack.osquery.breadcrumbs.historyPageTitle', {
+        defaultMessage: 'History',
+      }),
+    },
+    {
+      text: liveQueryId,
+    },
+  ],
+  history_scheduled_details: ({ scheduleId, executionCount }) => [
+    BASE_BREADCRUMB,
+    {
+      href: pagePathGetters.history(),
+      text: i18n.translate('xpack.osquery.breadcrumbs.historyPageTitle', {
+        defaultMessage: 'History',
+      }),
+    },
+    {
+      text: scheduleId,
+    },
+    {
+      text: i18n.translate('xpack.osquery.breadcrumbs.scheduledExecutionTitle', {
+        defaultMessage: 'Execution #{executionCount}',
+        values: { executionCount },
+      }),
+    },
+  ],
   saved_queries: () => [
     BASE_BREADCRUMB,
     {

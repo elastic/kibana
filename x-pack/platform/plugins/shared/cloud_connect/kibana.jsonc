@@ -1,0 +1,31 @@
+{
+  "type": "plugin",
+  "id": "@kbn/cloud-connect-plugin",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "cloudConnect",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "cloud_connect"
+    ],
+    "requiredPlugins": [
+      "management",
+      "features",
+      "encryptedSavedObjects",
+      "licensing"
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "home"
+    ],
+    "requiredBundles": [
+      "esUiShared"
+    ]
+  }
+}

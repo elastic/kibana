@@ -9,19 +9,19 @@
 
 import { act } from 'react-dom/test-utils';
 
+import type { EsDoc } from './helpers';
 import {
   setupEnvironment,
   fieldFormatsOptions,
   indexPatternNameForTest,
-  EsDoc,
   setSearchResponseLatency,
 } from './helpers';
+import type { FieldEditorFlyoutContentTestBed } from './field_editor_flyout_preview.helpers';
 import {
   setup,
   setIndexPatternFields,
   getSearchCallMeta,
   setSearchResponse,
-  FieldEditorFlyoutContentTestBed,
 } from './field_editor_flyout_preview.helpers';
 import { spyGetFieldsForWildcard } from './helpers/setup_environment';
 import { mockDocuments, createPreviewError } from './helpers/mocks';

@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import type {
-  ActionsClientChatBedrockConverse,
-  ActionsClientChatVertexAI,
-  ActionsClientChatOpenAI,
-} from '@kbn/langchain/server';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { Command } from '@langchain/langgraph';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { SelectIndexPatternAnnotation } from '../../state';
+import type { CreateLlmInstance } from '../../../../utils/common';
 
 const ShortlistedIndexPatterns = z
   .object({
@@ -23,20 +20,17 @@ const ShortlistedIndexPatterns = z
     'Object containing array of shortlisted index patterns that might be used to generate the query'
   );
 
-export const getShortlistIndexPatterns = ({
+export const getShortlistIndexPatterns = async ({
   createLlmInstance,
 }: {
-  createLlmInstance: () =>
-    | ActionsClientChatBedrockConverse
-    | ActionsClientChatVertexAI
-    | ActionsClientChatOpenAI;
+  createLlmInstance: CreateLlmInstance;
 }) => {
-  const llm = createLlmInstance();
+  const llm = await createLlmInstance();
 
   return async (state: typeof SelectIndexPatternAnnotation.State) => {
     const systemMessage = new SystemMessage({
       content: `You are a security analyst who is an expert in Elasticsearch and particularly writing Elastic Search queries. You have been given a list of index patterns and an explanation of the query we would like to generate. 
-To generate the query we first need to identify which index pattern should be used. To do this you short list a maximum of 3 index patterns that are the most likely to contain the fields required to write the query. Select a variety index patterns.`,
+To generate the query you first need to identify which index pattern should be used. To do this you short list a maximum of 3 index patterns that are the most likely to contain the fields required to write the query. If the query explanation explicitly states which index to use, then only shortlist the matching index pattern. Select a variety index patterns and sort them by highest relevance first.`,
     });
     const humanMessage = new HumanMessage({
       content: `Available index patterns:\n ${state.indexPatterns.join(
@@ -47,7 +41,7 @@ To generate the query we first need to identify which index pattern should be us
     });
 
     try {
-      const result = await llm
+      const result = await (llm as BaseChatModel)
         .withStructuredOutput(ShortlistedIndexPatterns, { name: 'shortlistedIndexPatterns' })
         .withRetry({
           stopAfterAttempt: 3,
@@ -56,7 +50,7 @@ To generate the query we first need to identify which index pattern should be us
 
       return new Command({
         update: {
-          shortlistedIndexPatterns: result.shortlistedIndexPatterns,
+          shortlistedIndexPatterns: result.shortlistedIndexPatterns.slice(0, 3),
         },
       });
     } catch (error) {

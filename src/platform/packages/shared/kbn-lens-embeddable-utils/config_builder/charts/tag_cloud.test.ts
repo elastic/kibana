@@ -7,49 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView, DataViewField, DataViewsContract } from '@kbn/data-views-plugin/common';
 import { buildTagCloud } from './tag_cloud';
-
-const dataViews: Record<string, DataView> = {
-  test: {
-    id: 'test',
-    fields: {
-      getByName: (name: string) => {
-        switch (name) {
-          case '@timestamp':
-            return {
-              type: 'datetime',
-            } as unknown as DataViewField;
-          case 'category':
-            return {
-              type: 'string',
-            } as unknown as DataViewField;
-          case 'price':
-            return {
-              type: 'number',
-            } as unknown as DataViewField;
-          default:
-            return undefined;
-        }
-      },
-    } as any,
-  } as unknown as DataView,
-};
-
-function mockDataViewsService() {
-  return {
-    get: jest.fn(async (id: '1' | '2') => {
-      const result = {
-        ...dataViews[id],
-        metaFields: [],
-        isPersisted: () => true,
-        toSpec: () => ({}),
-      };
-      return result;
-    }),
-    create: jest.fn(),
-  } as unknown as Pick<DataViewsContract, 'get' | 'create'>;
-}
+import { mockDataViewsService } from './mock_utils';
 
 test('generates tag cloud chart config', async () => {
   const result = await buildTagCloud(
@@ -64,18 +23,11 @@ test('generates tag cloud chart config', async () => {
     },
     {
       dataViewsAPI: mockDataViewsService() as any,
-      formulaAPI: {} as any,
     }
   );
   expect(result).toMatchInlineSnapshot(`
     Object {
-      "references": Array [
-        Object {
-          "id": "test",
-          "name": "indexpattern-datasource-layer-layer_0",
-          "type": "index-pattern",
-        },
-      ],
+      "references": Array [],
       "state": Object {
         "adHocDataViews": Object {
           "test": Object {},
@@ -114,7 +66,13 @@ test('generates tag cloud chart config', async () => {
           },
         },
         "filters": Array [],
-        "internalReferences": Array [],
+        "internalReferences": Array [
+          Object {
+            "id": "test",
+            "name": "indexpattern-datasource-layer-layer_0",
+            "type": "index-pattern",
+          },
+        ],
         "query": Object {
           "language": "kuery",
           "query": "",

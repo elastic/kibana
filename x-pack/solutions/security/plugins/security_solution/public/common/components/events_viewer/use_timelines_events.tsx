@@ -22,13 +22,15 @@ import type {
   TimelineEventsAllStrategyResponse,
   TimelineItem,
 } from '@kbn/timelines-plugin/common';
+import type { EsHitRecord } from '@kbn/discover-utils';
 import type {
   EntityType,
   TimelineFactoryQueryTypes,
   TimelineRequestSortField,
   TimelineStrategyResponseType,
 } from '@kbn/timelines-plugin/common/search_strategy';
-import { dataTableActions, Direction, TableId } from '@kbn/securitysolution-data-table';
+import { dataTableActions, Direction } from '@kbn/securitysolution-data-table';
+import { DETECTIONS_TABLE_IDS } from '../../../detections/constants';
 import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { TimelineEventsQueries } from '../../../../common/search_strategy';
 import type { KueryFilterQueryKind } from '../../../../common/types';
@@ -36,9 +38,8 @@ import type { ESQuery } from '../../../../common/typed_json';
 import type { AlertWorkflowStatus } from '../../types';
 import { getSearchTransactionName, useStartTransaction } from '../../lib/apm/use_start_transaction';
 import { useFetchNotes } from '../../../notes/hooks/use_fetch_notes';
-export type InspectResponse = Inspect & { response: string[] };
 
-export const detectionsTimelineIds = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage];
+export type InspectResponse = Inspect & { response: string[] };
 
 export type Refetch = () => void;
 
@@ -49,6 +50,7 @@ export interface TimelineArgs {
   inspect: InspectResponse;
   loadPage: LoadPage;
   pageInfo: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
+  rawEvents: EsHitRecord[];
   refetch: Refetch;
   totalCount: number;
   updatedAt: number;
@@ -164,11 +166,10 @@ export const useTimelineEventsHandler = ({
   const [loading, setLoading] = useState(true);
   const [activePage, setActivePage] = useState(0);
   const [timelineRequest, setTimelineRequest] = useState<TimelineRequest | null>(null);
-  const [prevFilterStatus, setFilterStatus] = useState(filterStatus);
   const prevTimelineRequest = useRef<TimelineRequest | null>(null);
 
   const clearSignalsState = useCallback(() => {
-    if (id != null && detectionsTimelineIds.some((timelineId) => timelineId === id)) {
+    if (id != null && DETECTIONS_TABLE_IDS.some((timelineId) => timelineId === id)) {
       dispatch(dataTableActions.clearEventsLoading({ id }));
       dispatch(dataTableActions.clearEventsDeleted({ id }));
     }
@@ -215,6 +216,7 @@ export const useTimelineEventsHandler = ({
       querySize: 0,
     },
     events: [],
+    rawEvents: [],
     loadPage: wrappedLoadPage,
     updatedAt: 0,
   });
@@ -254,6 +256,7 @@ export const useTimelineEventsHandler = ({
                       ...prevResponse,
                       consumers: response.consumers,
                       events: getTimelineEvents(response.edges),
+                      rawEvents: (response.rawResponse?.hits?.hits ?? []) as EsHitRecord[],
                       inspect: getInspectResponse(response, prevResponse.inspect),
                       pageInfo: response.pageInfo,
                       totalCount: response.totalCount,
@@ -262,10 +265,6 @@ export const useTimelineEventsHandler = ({
                     if (onNextHandler) onNextHandler(newTimelineResponse);
                     return newTimelineResponse;
                   });
-                  if (prevFilterStatus !== request.filterStatus) {
-                    dispatch(dataTableActions.updateGraphEventId({ id, graphEventId: '' }));
-                  }
-                  setFilterStatus(request.filterStatus);
                   setLoading(false);
 
                   searchSubscription$.current.unsubscribe();
@@ -286,7 +285,7 @@ export const useTimelineEventsHandler = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [skip, data, entityType, dataViewId, startTracking, dispatch, id, prevFilterStatus]
+    [skip, data, entityType, dataViewId, startTracking]
   );
 
   useEffect(() => {
@@ -408,6 +407,7 @@ export const useTimelineEventsHandler = ({
           querySize: 0,
         },
         events: [],
+        rawEvents: [],
         loadPage: wrappedLoadPage,
         updatedAt: 0,
       });

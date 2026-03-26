@@ -35,7 +35,7 @@ const walkSchema = (ctx: IContext, schema: Schema): void => {
     return;
   }
 
-  mutations.processAllTypes(schema);
+  mutations.processAllTypes(ctx, schema);
   /* At runtime 'type' can be broader than 'NonArraySchemaObjectType', so we set it to 'string' */
   const type: undefined | string = schema.type;
   if (type === 'array') {
@@ -64,6 +64,7 @@ const walkSchema = (ctx: IContext, schema: Schema): void => {
         schema[arrayContainer].forEach((s: OpenAPIV3.SchemaObject) => {
           walkSchema(ctx, s);
         });
+        mutations.processDiscriminator(ctx, schema);
         mutations.processEnum(schema);
         break;
       }

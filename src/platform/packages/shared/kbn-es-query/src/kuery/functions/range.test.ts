@@ -9,12 +9,12 @@
 
 import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
-import { DataViewBase } from '../../..';
+import type { DataViewBase } from '../../..';
 
 import * as range from './range';
 import type { estypes } from '@elastic/elasticsearch';
 import { KQL_NODE_TYPE_LITERAL } from '../node_types/literal';
-import { KqlRangeFunctionNode } from './range';
+import type { KqlRangeFunctionNode } from './range';
 
 describe('kuery functions', () => {
   describe('range', () => {
@@ -139,7 +139,7 @@ describe('kuery functions', () => {
         ) as KqlRangeFunctionNode;
         const result = range.toElasticsearchQuery(node, indexPattern);
 
-        expect((result.bool!.should as estypes.QueryDslQueryContainer[])[0]).toHaveProperty(
+        expect((result!.bool!.should as estypes.QueryDslQueryContainer[])[0]).toHaveProperty(
           'script'
         );
       });

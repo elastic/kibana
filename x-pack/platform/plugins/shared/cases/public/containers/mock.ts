@@ -43,12 +43,14 @@ import type {
   CasesFindResponseUI,
   CasesUI,
   AttachmentUI,
+  AttachmentUIV2,
   CaseUICustomField,
   CasesConfigurationUICustomField,
   CasesConfigurationUITemplate,
   CasesSimilarResponseUI,
   ObservableUI,
   InternalFindCaseUserActions,
+  EventAttachmentUI,
 } from '../../common/ui/types';
 import { CaseMetricsFeature } from '../../common/types/api';
 import { OBSERVABLE_TYPE_IPV4, SECURITY_SOLUTION_OWNER } from '../../common/constants';
@@ -101,6 +103,21 @@ export const basicComment: AttachmentUI = {
   version: 'WzQ3LDFc',
 };
 
+export const basicCommentUnified: AttachmentUIV2 = {
+  id: basicCommentId,
+  type: 'comment',
+  owner: SECURITY_SOLUTION_OWNER,
+  data: { content: 'Solve this fast!' },
+  metadata: null,
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
+  pushedAt: null,
+  pushedBy: null,
+  updatedAt: null,
+  updatedBy: null,
+  version: 'WzQ3LDFc',
+};
+
 export const alertComment: AlertAttachmentUI = {
   alertId: 'alert-id-1',
   index: 'alert-index-1',
@@ -134,6 +151,21 @@ export const alertCommentWithIndices: AlertAttachmentUI = {
     id: 'rule-id-1',
     name: 'Awesome rule',
   },
+  updatedAt: null,
+  updatedBy: null,
+  version: 'WzQ3LDFc',
+};
+
+export const eventComment: EventAttachmentUI = {
+  eventId: 'event-id-1',
+  index: 'event-index-1',
+  type: AttachmentType.event,
+  id: 'event-comment-id',
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
+  owner: SECURITY_SOLUTION_OWNER,
+  pushedAt: null,
+  pushedBy: null,
   updatedAt: null,
   updatedBy: null,
   version: 'WzQ3LDFc',
@@ -245,17 +277,26 @@ export const basicCase: CaseUI = {
   title: 'Another horrible breach!!',
   totalComment: 1,
   totalAlerts: 0,
+  totalEvents: 0,
   updatedAt: basicUpdatedAt,
   updatedBy: elasticUser,
   version: 'WzQ3LDFd',
   settings: {
     syncAlerts: true,
+    extractObservables: true,
   },
   // damaged_raccoon uid
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
   category: null,
   customFields: [],
   observables: [],
+  totalObservables: 0,
+  incrementalId: undefined,
+};
+
+export const basicCaseWithUnifiedComments: CaseUI = {
+  ...basicCase,
+  comments: [basicCommentUnified],
 };
 
 export const basicFileMock: FileJSON = {
@@ -288,6 +329,7 @@ export const caseWithAlertsSyncOff = {
   totalAlerts: 2,
   settings: {
     syncAlerts: false,
+    extractObservables: false,
   },
   id: caseWithAlertsSyncOffId,
 };
@@ -370,16 +412,20 @@ export const mockCase: CaseUI = {
   title: 'Another horrible breach!!',
   totalComment: 1,
   totalAlerts: 0,
+  totalEvents: 0,
   updatedAt: basicUpdatedAt,
   updatedBy: elasticUser,
   version: 'WzQ3LDFd',
   settings: {
     syncAlerts: true,
+    extractObservables: true,
   },
   assignees: [],
   category: null,
   customFields: [],
   observables: [],
+  totalObservables: 0,
+  incrementalId: undefined,
 };
 
 export const basicCasePost: CaseUI = {
@@ -451,8 +497,15 @@ export const cases: CasesUI = [
     comments: [],
     status: CaseStatuses['in-progress'],
     severity: CaseSeverity.MEDIUM,
+    incrementalId: 1,
   },
-  { ...pushedCase, updatedAt: laterTime, id: '2', totalComment: 0, comments: [] },
+  {
+    ...pushedCase,
+    updatedAt: laterTime,
+    id: '2',
+    totalComment: 0,
+    comments: [],
+  },
   { ...basicCase, id: '3', totalComment: 0, comments: [] },
   { ...basicCase, id: '4', totalComment: 0, comments: [] },
   caseWithAlerts,
@@ -565,6 +618,8 @@ export const basicCaseSnake: Case = {
   updated_by: elasticUserSnake,
   owner: SECURITY_SOLUTION_OWNER,
   customFields: [],
+  incremental_id: undefined,
+  total_observables: 0,
 } as Case;
 
 export const caseWithAlertsSnake = {
@@ -578,6 +633,7 @@ export const caseWithAlertsSyncOffSnake = {
   totalAlerts: 2,
   settings: {
     syncAlerts: false,
+    extractObservables: false,
   },
   id: caseWithAlertsSyncOffId,
 };
@@ -618,6 +674,7 @@ export const casesSnake: Cases = [
   {
     ...pushedCaseSnake,
     id: '1',
+    incremental_id: 1,
     totalComment: 0,
     comments: [],
     status: CaseStatuses['in-progress'],
@@ -705,7 +762,7 @@ export const getUserAction = (
           severity: CaseSeverity.LOW,
           title: 'a title',
           tags: ['a tag'],
-          settings: { syncAlerts: true },
+          settings: { syncAlerts: true, extractObservables: true },
           owner: SECURITY_SOLUTION_OWNER,
           assignees: [],
         },
@@ -739,7 +796,7 @@ export const getUserAction = (
       return {
         ...commonProperties,
         type: UserActionTypes.settings,
-        payload: { settings: { syncAlerts: true } },
+        payload: { settings: { syncAlerts: true, extractObservables: true } },
         ...overrides,
       };
     case UserActionTypes.status:
@@ -908,6 +965,24 @@ export const getMultipleAlertsUserAction = (
   ...overrides,
 });
 
+export const getEventUserAction = (
+  overrides?: Record<string, unknown>
+): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
+  ...getUserAction(UserActionTypes.comment, UserActionActions.create),
+  id: 'event-action-id',
+  commentId: 'event-comment-id',
+  type: UserActionTypes.comment,
+  payload: {
+    comment: {
+      type: AttachmentType.event,
+      eventId: 'event-id-1',
+      index: 'index-id-1',
+      owner: SECURITY_SOLUTION_OWNER,
+    },
+  },
+  ...overrides,
+});
+
 export const getHostIsolationUserAction = (
   overrides?: Record<string, unknown>
 ): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
@@ -984,8 +1059,13 @@ export const findCaseUserActionsResponse: InternalFindCaseUserActions = {
 
 export const getCaseUserActionsStatsResponse: CaseUserActionsStats = {
   total: 20,
+  totalDeletions: 0,
   totalComments: 10,
+  totalCommentCreations: 10,
+  totalCommentDeletions: 0,
+  totalHiddenCommentUpdates: 0,
   totalOtherActions: 10,
+  totalOtherActionDeletions: 0,
 };
 
 // components tests

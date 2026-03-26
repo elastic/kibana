@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 
 import { DisplayType } from '../..';
 
-import { ConfigEntryView } from './connector_configuration';
+import type { ConfigEntryView } from './connector_configuration';
 import { ConnectorConfigurationField } from './connector_configuration_field';
 
 interface ConnectorConfigurationFormItemsProps {

@@ -26,7 +26,7 @@ import {
   useResizeObserver,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
-import type { FlyoutActionItem } from '../../customizations';
+import type { FlyoutActionItem } from './types';
 
 const MAX_VISIBLE_ACTIONS_BEFORE_THE_FOLD = 3;
 
@@ -163,6 +163,7 @@ function FlyoutActions({
                 content={i18n.translate('discover.grid.tableRow.moreFlyoutActionsButton', {
                   defaultMessage: 'More actions',
                 })}
+                disableScreenReaderOutput
               >
                 <EuiButtonIcon
                   size="s"
@@ -198,6 +199,9 @@ function FlyoutActionsPopover({
   return (
     <EuiPopover
       id="docViewerMoreFlyoutActions"
+      aria-label={i18n.translate('discover.grid.tableRow.moreFlyoutActionsPopoverAriaLabel', {
+        defaultMessage: 'More actions',
+      })}
       button={button}
       isOpen={isOpen}
       closePopover={closePopover}

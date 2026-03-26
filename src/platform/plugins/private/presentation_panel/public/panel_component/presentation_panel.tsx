@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiErrorBoundary, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
-import { PanelLoader } from '@kbn/panel-loader';
-import { isPromise } from '@kbn/std';
-import React from 'react';
+import React, { useRef } from 'react';
 import useAsync from 'react-use/lib/useAsync';
+
+import { EuiErrorBoundary, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { PanelLoader } from '@kbn/panel-loader';
+import { isPromise } from '@kbn/std';
+
 import { untilPluginStartServicesReady } from '../kibana_services';
 import type { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
-import { usePanelErrorCss } from './use_panel_error_css';
 
 const errorLoadingPanel = i18n.translate('presentationPanel.error.errorWhenLoadingPanel', {
   defaultMessage: 'An error occurred while loading this panel.',
@@ -26,20 +27,12 @@ export const PresentationPanel = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
   PropsType extends {} = {}
 >(
-  props: PresentationPanelProps<ApiType, PropsType> & {
-    hidePanelChrome?: boolean;
-  }
+  props: PresentationPanelProps<ApiType, PropsType>
 ) => {
-  const panelErrorCss = usePanelErrorCss();
-  const { Component, hidePanelChrome, ...passThroughProps } = props;
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const { Component, ...passThroughProps } = props;
   const { euiTheme } = useEuiTheme();
   const { loading, value } = useAsync(async () => {
-    if (hidePanelChrome) {
-      return {
-        unwrappedComponent: isPromise(Component) ? await Component : Component,
-      };
-    }
-
     const startServicesPromise = untilPluginStartServicesReady();
     const componentPromise = isPromise(Component) ? Component : Promise.resolve(Component);
     const results = await Promise.allSettled([
@@ -87,26 +80,20 @@ export const PresentationPanel = <
   const Panel = value?.Panel;
   const PanelError = value?.PanelError;
   const UnwrappedComponent = value?.unwrappedComponent;
-  const shouldHavePanel = !hidePanelChrome;
-  if (value?.loadErrorReason || (shouldHavePanel && !Panel) || !UnwrappedComponent) {
+
+  if (value?.loadErrorReason || !Panel || !UnwrappedComponent) {
     return (
-      <EuiFlexGroup
-        alignItems="center"
-        css={panelErrorCss}
-        className="eui-fullHeight"
-        data-test-subj="embeddableError"
-        justifyContent="center"
-      >
+      <div ref={panelRef}>
         {PanelError ? (
           <PanelError error={new Error(value?.loadErrorReason ?? errorLoadingPanel)} />
         ) : (
           value?.loadErrorReason ?? errorLoadingPanel
         )}
-      </EuiFlexGroup>
+      </div>
     );
   }
 
-  return shouldHavePanel && Panel ? (
+  return Panel ? (
     <Panel<ApiType, PropsType> Component={UnwrappedComponent} {...passThroughProps} />
   ) : (
     <EuiErrorBoundary>

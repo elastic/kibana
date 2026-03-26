@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { OnTimeChangeProps, EuiSuperUpdateButtonProps } from '@elastic/eui';
+import type { EuiSuperUpdateButtonProps, OnTimeChangeProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { FilterManager } from '@kbn/data-plugin/public';
@@ -14,14 +14,14 @@ import type { Filter, Query } from '@kbn/es-query';
 import { debounce } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 
+import { PageScope } from '../../../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { getCommonTimeRanges } from '../helpers/get_common_time_ranges';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
-import { useDataView } from '../use_data_view';
+import { useCreateDataView } from '../../../../../common/hooks/use_create_data_view';
 import type { AlertsSelectionSettings } from '../../types';
-import { useDataViewSpec } from '../../../../../data_view_manager/hooks/use_data_view_spec';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 
 export const MAX_ALERTS = 500;
 export const MIN_ALERTS = 50;
@@ -50,23 +50,24 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
   } = useKibana().services;
   const { euiTheme } = useEuiTheme();
 
-  // get the sourcerer `DataViewSpec` for alerts:
-  const { sourcererDataView: oldSourcererDataView, loading: oldIsLoadingIndexPattern } =
-    useSourcererDataView(SourcererScopeName.detections);
-
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataViewSpec, status } = useDataViewSpec(SourcererScopeName.detections);
+  const { dataView: experimentalDataView, status } = useDataView(PageScope.alerts);
 
-  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
-  const isLoadingIndexPattern = newDataViewPickerEnabled
-    ? status !== 'ready'
-    : oldIsLoadingIndexPattern;
+  // get the sourcerer `DataViewSpec` for alerts:
+  const { sourcererDataView: oldSourcererDataViewSpec, loading: oldIsLoadingIndexPattern } =
+    useSourcererDataView(PageScope.alerts);
 
   // create a `DataView` from the `DataViewSpec`:
-  const alertsDataView = useDataView({
-    dataViewSpec: sourcererDataView,
-    loading: isLoadingIndexPattern,
+  const { dataView: oldDataView, loading: oldIsLoadingDataView } = useCreateDataView({
+    dataViewSpec: oldSourcererDataViewSpec,
+    loading: oldIsLoadingIndexPattern,
+    skip: newDataViewPickerEnabled, // skip data view creation if the new data view picker is enabled
   });
+
+  const alertsDataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
+  const isLoadingIndexPattern = newDataViewPickerEnabled
+    ? status !== 'ready'
+    : oldIsLoadingDataView;
 
   // create a container for the alerts `DataView`, as required by the search bar:
   const indexPatterns: DataView[] = useMemo(
@@ -202,6 +203,7 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
       >
         <EuiSuperDatePicker
           commonlyUsedRanges={commonlyUsedRanges}
+          compressed={true}
           data-test-subj="alertSelectionDatePicker"
           end={settings.end}
           isDisabled={false}

@@ -9,6 +9,7 @@ import type {
   CustomMetricExpressionParams,
   FilterQuery,
   MetricExpressionParams,
+  NoDataBehavior,
   NonCountMetricExpressionParams,
 } from '../../../common/alerting/metrics';
 import type { MetricsExplorerSeries } from '../../../common/http_api/metrics_explorer';
@@ -72,4 +73,5 @@ export interface AlertParams {
   alertOnNoData?: boolean;
   alertOnGroupDisappear?: boolean;
   shouldDropPartialBuckets?: boolean;
+  noDataBehavior?: NoDataBehavior;
 }

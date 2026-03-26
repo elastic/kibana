@@ -9,14 +9,12 @@
 
 import { i18n } from '@kbn/i18n';
 import * as React from 'react';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { openLazyFlyout } from '@kbn/presentation-util';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { InspectorViewRegistry } from './view_registry';
-import { InspectorOptions, InspectorSession } from './types';
-import { InspectorPanel } from './ui/inspector_panel';
-import { Adapters } from '../common';
-
+import type { InspectorOptions, InspectorSession } from './types';
+import type { Adapters } from '../common';
 import { getRequestsViewDescription } from './views';
 
 export interface InspectorPluginStartDeps {
@@ -25,10 +23,6 @@ export interface InspectorPluginStartDeps {
 
 export interface Setup {
   registerView: InspectorViewRegistry['register'];
-
-  __LEGACY: {
-    views: InspectorViewRegistry;
-  };
 }
 
 export interface Start {
@@ -51,11 +45,16 @@ export interface Start {
    * @param {object} adapters - An object of adapters for which you want to show
    *    the inspector panel.
    * @param {InspectorOptions} options - Options that configure the inspector. See InspectorOptions type.
+   * @param {unknown} parentApi - Optional parent api for trackingOverlays.
    * @return {InspectorSession} The session instance for the opened inspector.
    * @throws {Error}
    */
-  open: (adapters: Adapters, options?: InspectorOptions) => InspectorSession;
+  open: (adapters: Adapters, options?: InspectorOptions, parentApi?: unknown) => InspectorSession;
 }
+
+const closeButtonLabel = i18n.translate('inspector.closeButton', {
+  defaultMessage: 'Close Inspector',
+});
 
 export class InspectorPublicPlugin implements Plugin<Setup, Start> {
   views: InspectorViewRegistry | undefined;
@@ -69,10 +68,6 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
 
     return {
       registerView: this.views!.register.bind(this.views),
-
-      __LEGACY: {
-        views: this.views,
-      },
     };
   }
 
@@ -80,11 +75,7 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
     const isAvailable: Start['isAvailable'] = (adapters) =>
       this.views!.getVisible(adapters).length > 0;
 
-    const closeButtonLabel = i18n.translate('inspector.closeButton', {
-      defaultMessage: 'Close Inspector',
-    });
-
-    const open: Start['open'] = (adapters, options = {}) => {
+    const open: Start['open'] = (adapters, options = {}, parentApi) => {
       const views = this.views!.getVisible(adapters);
 
       // Don't open inspector if there are no views available for the passed adapters
@@ -94,31 +85,39 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
           if an inspector can be shown.`);
       }
 
-      return core.overlays.openFlyout(
-        toMountPoint(
-          <InspectorPanel
-            views={views}
-            adapters={adapters}
-            title={options.title}
-            options={options.options}
-            dependencies={{
-              application: core.application,
-              http: core.http,
-              uiSettings: core.uiSettings,
-              share: startDeps.share,
-              settings: core.settings,
-              theme: core.theme,
-            }}
-          />,
-          core
-        ),
-        {
+      const flyoutRef = openLazyFlyout({
+        core,
+        parentApi,
+        loadContent: async () => {
+          const { InspectorPanel } = await import('./async_services');
+          return (
+            <InspectorPanel
+              views={views}
+              adapters={adapters}
+              title={options.title}
+              options={options.options}
+              dependencies={{
+                application: core.application,
+                http: core.http,
+                uiSettings: core.uiSettings,
+                share: startDeps.share,
+                settings: core.settings,
+                theme: core.theme,
+              }}
+            />
+          );
+        },
+        flyoutProps: {
           'data-test-subj': 'inspectorPanel',
           'aria-labelledby': 'inspector-panel-title',
           closeButtonProps: { 'aria-label': closeButtonLabel },
-          type: options.flyoutType,
-        }
-      );
+          size: 'm',
+          paddingSize: 'l',
+          type: 'overlay',
+          ...options.flyoutProps,
+        },
+      });
+      return flyoutRef;
     };
 
     return {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AnyAction } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
+import type { AnyAction } from 'redux';
+import type { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import { MapStoreState } from '../../../../../../reducers/store';
+import type { MapStoreState } from '../../../../../../reducers/store';
 import {
   cloneLayer,
   fitToLayerExtent,

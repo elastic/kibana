@@ -10,7 +10,8 @@
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
-import { Introduction, IntroductionProps } from './introduction';
+import type { IntroductionProps } from './introduction';
+import { Introduction } from './introduction';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { TutorialsCategory } from '../../../../common/constants';
 

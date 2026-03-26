@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiCallOut, EuiConfirmModal, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiLink, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { i18n } from '@kbn/i18n';
@@ -32,6 +32,7 @@ export const DeleteMonitor = ({
 }) => {
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const { spaceId } = useGetUrlParams();
+  const modalTitleId = useGeneratedHtmlId();
 
   const handleConfirmDelete = () => {
     setIsDeleting(true);
@@ -105,6 +106,7 @@ export const DeleteMonitor = ({
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={
         configIds.length === 1
           ? i18n.translate('xpack.synthetics.monitorManagement.deleteMonitorNameLabel', {
@@ -117,6 +119,7 @@ export const DeleteMonitor = ({
               values: { monitorCount: configIds.length },
             })
       }
+      titleProps={{ id: modalTitleId }}
       onCancel={() => setMonitorPendingDeletion([])}
       onConfirm={handleConfirmDelete}
       cancelButtonText={labels.NO_LABEL}
@@ -127,7 +130,7 @@ export const DeleteMonitor = ({
     >
       {isProjectMonitor && (
         <>
-          <EuiCallOut color="warning" title={PROJECT_MONITOR_TITLE}>
+          <EuiCallOut announceOnMount color="warning" title={PROJECT_MONITOR_TITLE}>
             <p>
               <ProjectMonitorDisclaimer />
             </p>

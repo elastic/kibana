@@ -5,94 +5,51 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
-import { cloneDeep } from 'lodash';
 
-import { layerTypes } from '../../../common/layer_types';
-import { AnnotationGroups } from '../../types';
 import {
-  XYLayerConfig,
-  XYDataLayerConfig,
-  XYReferenceLineLayerConfig,
-  XYState,
-  XYAnnotationLayerConfig,
-  XYByReferenceAnnotationLayerConfig,
-  XYByValueAnnotationLayerConfig,
-} from './types';
-import { isAnnotationsLayer, isByReferenceAnnotationsLayer } from './visualization_helpers';
+  isPersistedAnnotationsLayer,
+  isPersistedByReferenceAnnotationsLayer,
+  isPersistedByValueAnnotationsLayer,
+  type AnnotationGroups,
+  type XYPersistedByReferenceAnnotationLayerConfig,
+  type XYPersistedLayerConfig,
+  type XYPersistedLinkedByValueAnnotationLayerConfig,
+  type XYPersistedState,
+} from '@kbn/lens-common';
 import { nonNullable } from '../../utils';
 import { annotationLayerHasUnsavedChanges } from './state_helpers';
-
-export const isPersistedByReferenceAnnotationsLayer = (
-  layer: XYPersistedAnnotationLayerConfig
-): layer is XYPersistedByReferenceAnnotationLayerConfig =>
-  isPersistedAnnotationsLayer(layer) && layer.persistanceType === 'byReference';
-
-export const isPersistedLinkedByValueAnnotationsLayer = (
-  layer: XYPersistedAnnotationLayerConfig
-): layer is XYPersistedLinkedByValueAnnotationLayerConfig =>
-  isPersistedAnnotationsLayer(layer) && layer.persistanceType === 'linked';
+import type {
+  XYAnnotationLayerConfig,
+  XYByReferenceAnnotationLayerConfig,
+  XYLayerConfig,
+  XYVisualizationState,
+} from './types';
+import { isAnnotationsLayer, isByReferenceAnnotationsLayer } from './visualization_helpers';
 
 /**
- * This is the type of hybrid layer we get after the user has made a change to
- * a by-reference annotation layer and saved the visualization without
- * first saving the changes to the library annotation layer.
+ * Converts persisted state to runtime state.
  *
- * We maintain the link to the library annotation group, but allow the users
- * changes (persisted in the visualization state) to override the attributes in
- * the library version until the user
- * - saves the changes to the library annotation group
- * - reverts the changes
- * - unlinks the layer from the library annotation group
+ * Injects references to produce a fully formed XYVisualizationState that can be used by the visualization.
  */
-export type XYPersistedLinkedByValueAnnotationLayerConfig = Omit<
-  XYPersistedByValueAnnotationLayerConfig,
-  'persistanceType'
-> &
-  Omit<XYPersistedByReferenceAnnotationLayerConfig, 'persistanceType'> & {
-    persistanceType: 'linked';
-  };
-
-export type XYPersistedByValueAnnotationLayerConfig = Omit<
-  XYByValueAnnotationLayerConfig,
-  'indexPatternId' | 'hide' | 'simpleView'
-> & { persistanceType?: 'byValue'; hide?: boolean; simpleView?: boolean }; // props made optional for backwards compatibility since this is how the existing saved objects are
-
-export type XYPersistedByReferenceAnnotationLayerConfig = Pick<
-  XYByValueAnnotationLayerConfig,
-  'layerId' | 'layerType'
-> & {
-  persistanceType: 'byReference';
-  annotationGroupRef: string;
-};
-
-export type XYPersistedAnnotationLayerConfig =
-  | XYPersistedByReferenceAnnotationLayerConfig
-  | XYPersistedByValueAnnotationLayerConfig
-  | XYPersistedLinkedByValueAnnotationLayerConfig;
-
-export type XYPersistedLayerConfig =
-  | XYDataLayerConfig
-  | XYReferenceLineLayerConfig
-  | XYPersistedAnnotationLayerConfig;
-
-export type XYPersistedState = Omit<XYState, 'layers'> & {
-  layers: XYPersistedLayerConfig[];
-  valuesInLegend?: boolean;
-};
-
 export function convertPersistedState(
   state: XYPersistedState,
   annotationGroups?: AnnotationGroups,
-  references?: SavedObjectReference[]
+  references?: Reference[]
 ) {
-  return cloneDeep(injectReferences(state, annotationGroups, references));
+  return structuredClone(injectReferences(state, annotationGroups, references));
 }
 
-export function convertToPersistable(state: XYState) {
+/**
+ * Converts runtime state to persisted state.
+ *
+ * @param state The runtime XYVisualizationState to convert.
+ * @returns An object containing the persistable state and any references.
+ */
+export function convertToPersistable(state: XYVisualizationState) {
   const persistableState: XYPersistedState = state;
-  const savedObjectReferences: SavedObjectReference[] = [];
+  const references: Reference[] = [];
   const persistableLayers: XYPersistedLayerConfig[] = [];
 
   persistableState.layers.forEach((layer) => {
@@ -104,7 +61,7 @@ export function convertToPersistable(state: XYState) {
     // a by value annotation layer can be persisted with some config tweak
     if (!isByReferenceAnnotationsLayer(layer)) {
       const { indexPatternId, ...persistableLayer } = layer;
-      savedObjectReferences.push({
+      references.push({
         type: 'index-pattern',
         id: indexPatternId,
         name: getLayerReferenceName(layer.layerId),
@@ -112,13 +69,14 @@ export function convertToPersistable(state: XYState) {
       persistableLayers.push({ ...persistableLayer, persistanceType: 'byValue' });
       return;
     }
-    /**
+
+    /*
      * by reference annotation layer needs to be handled carefully
-     **/
+     */
 
     // make this id stable so that it won't retrigger all the time a change diff
     const referenceName = `ref-${layer.layerId}`;
-    savedObjectReferences.push({
+    references.push({
       type: EVENT_ANNOTATION_GROUP_TYPE,
       id: layer.annotationGroupId,
       name: referenceName,
@@ -153,44 +111,51 @@ export function convertToPersistable(state: XYState) {
     };
     persistableLayers.push(persistableLayer);
 
-    savedObjectReferences.push({
+    references.push({
       type: 'index-pattern',
       id: layer.indexPatternId,
       name: getLayerReferenceName(layer.layerId),
     });
   });
-  return { savedObjectReferences, state: { ...persistableState, layers: persistableLayers } };
+
+  return {
+    references,
+    state: { ...persistableState, layers: persistableLayers },
+  };
 }
-
-export const isPersistedAnnotationsLayer = (
-  layer: XYPersistedLayerConfig
-): layer is XYPersistedAnnotationLayerConfig =>
-  layer.layerType === layerTypes.ANNOTATIONS && !('indexPatternId' in layer);
-
-export const isPersistedByValueAnnotationsLayer = (
-  layer: XYPersistedLayerConfig
-): layer is XYPersistedByValueAnnotationLayerConfig =>
-  isPersistedAnnotationsLayer(layer) &&
-  (layer.persistanceType === 'byValue' || !layer.persistanceType);
 
 function getLayerReferenceName(layerId: string) {
   return `xy-visualization-layer-${layerId}`;
 }
 
-function needsInjectReferences(state: XYPersistedState | XYState): state is XYPersistedState {
+function needsInjectReferences(
+  state: XYPersistedState | XYVisualizationState
+): state is XYPersistedState {
   return state.layers.some(isPersistedAnnotationsLayer);
 }
 
 function injectReferences(
   state: XYPersistedState,
   annotationGroups?: AnnotationGroups,
-  references?: SavedObjectReference[]
-): XYState {
+  references?: Reference[]
+): XYVisualizationState {
   if (!references || !references.length) {
-    return state as XYState;
+    return state as XYVisualizationState;
   }
   if (!needsInjectReferences(state)) {
-    return state as XYState;
+    // Runtime-format state still needs orphan cleanup: remove by-reference annotation
+    // layers whose annotation group was deleted from the library.
+    if (annotationGroups) {
+      const runtimeState = state as XYVisualizationState;
+      const filteredLayers = runtimeState.layers.filter((layer) => {
+        if (!isAnnotationsLayer(layer) || !isByReferenceAnnotationsLayer(layer)) return true;
+        return layer.annotationGroupId in annotationGroups;
+      });
+      if (filteredLayers.length !== runtimeState.layers.length) {
+        return { ...runtimeState, layers: filteredLayers };
+      }
+    }
+    return state as XYVisualizationState;
   }
 
   if (!annotationGroups) {
@@ -253,7 +218,7 @@ function injectReferences(
               ...commonProps,
               ignoreGlobalFilters: annotationGroup.ignoreGlobalFilters,
               indexPatternId: annotationGroup.indexPatternId,
-              annotations: cloneDeep(annotationGroup.annotations),
+              annotations: structuredClone(annotationGroup.annotations),
             };
           } else {
             // a linked by-value layer gets settings from visualization state while
@@ -262,7 +227,7 @@ function injectReferences(
               ...commonProps,
               ignoreGlobalFilters: persistedLayer.ignoreGlobalFilters,
               indexPatternId: getIndexPatternIdFromReferences(persistedLayer.layerId),
-              annotations: cloneDeep(persistedLayer.annotations),
+              annotations: structuredClone(persistedLayer.annotations),
               cachedMetadata: persistedLayer.cachedMetadata,
             };
           }

@@ -8,7 +8,7 @@
  */
 
 import type { Capabilities } from '@kbn/core/public';
-import type { DataViewsContract } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 async function popularizeField(

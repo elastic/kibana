@@ -11,6 +11,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
 
 import type { PivotGroupByConfig } from '../../../../common';
 import { isGroupByDateHistogram, isGroupByHistogram } from '../../../../common';
+import { transformLabelStyles } from '../../styles';
+import { groupByStyles } from './styles';
 
 interface Props {
   item: PivotGroupByConfig;
@@ -28,14 +30,11 @@ export const GroupByLabelSummary: React.FC<Props> = ({ item, optionsDataId }) =>
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem className="transform__GroupByLabel--text">
+      <EuiFlexItem css={transformLabelStyles}>
         <span className="eui-textTruncate">{optionsDataId}</span>
       </EuiFlexItem>
       {interval !== undefined && (
-        <EuiFlexItem
-          grow={false}
-          className="transform__GroupByLabel--text transform__GroupByLabel--interval"
-        >
+        <EuiFlexItem grow={false} css={groupByStyles.interval}>
           <EuiTextColor color="subdued" className="eui-textTruncate">
             {interval}
           </EuiTextColor>

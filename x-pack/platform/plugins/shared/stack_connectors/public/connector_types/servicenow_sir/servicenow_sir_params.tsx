@@ -25,11 +25,11 @@ import {
 
 import * as i18n from '../lib/servicenow/translations';
 import { useGetChoices } from '../lib/servicenow/use_get_choices';
-import { ServiceNowSIRActionParams } from './types';
-import { Fields, Choice } from '../lib/servicenow/types';
+import type { ServiceNowSIRActionParams } from './types';
+import type { Fields, Choice } from '../lib/servicenow/types';
 import { choicesToEuiOptions, DEFAULT_CORRELATION_ID } from '../lib/servicenow/helpers';
 import { DeprecatedCallout } from '../lib/servicenow/deprecated_callout';
-import { AdditionalFields } from '../lib/servicenow/additional_fields';
+import { AdditionalFields } from '../../common/components/additional_fields';
 import { OptionalFieldLabel } from '../../common/optional_field_label';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
@@ -309,6 +309,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
           errors={errors['subActionParams.incident.additional_fields'] as string[]}
           onChange={additionalFieldsOnChange}
           isOptionalField
+          helpText={i18n.ADDITIONAL_FIELDS_HELP_SERVICENOW_TEXT}
         />
       )}
     </>

@@ -1,6 +1,6 @@
 # DATE_TRUNC
 
-The DATE_TRUNC function rounds down a date to the nearest specified interval.
+The DATE_TRUNC function rounds down a date to the closest interval since the epoch, which starts at `0001-01-01T00:00:00Z`.
 
 ## Syntax
 
@@ -10,23 +10,15 @@ The DATE_TRUNC function rounds down a date to the nearest specified interval.
 
 #### interval
 
-This is the interval to which the date will be rounded down. It is expressed using the timespan literal syntax.
+Interval expressed using the timespan literal syntax.
 
 #### date
 
-This is the date expression that will be rounded down.
-
-## Important notes
-
-The *interval* parameter of DATE_TRUNC is a timespan literal, NOT a string.
-  - GOOD: `DATE_TRUNC(1 year, date)`
-  - BAD: `DATE_TRUNC("year", date)`
-
-When grouping data by time interval, it is recommended to use BUCKET instead of DATE_TRUNC.
+Date expression.
 
 ## Examples
 
-The following example rounds down the hire_date to the nearest year:
+Rounds each employee's hire date down to the nearest year and displays their first name, last name, and original hire date.
 
 ```esql
 FROM employees
@@ -34,7 +26,7 @@ FROM employees
 | EVAL year_hired = DATE_TRUNC(1 year, hire_date)
 ```
 
-You can combine DATE_TRUNC with STATS ... BY to create date histograms. For example, the number of hires per year:
+Counts the number of employees hired each year by truncating hire dates to the year and aggregating by year.
 
 ```esql
 FROM employees
@@ -43,12 +35,12 @@ FROM employees
 | SORT year
 ```
 
-Or, you can calculate an hourly error rate:
+Calculates the average error rate for each hour by marking error messages, truncating timestamps to the hour, and averaging the error flag.
 
 ```esql
 FROM sample_data
 | EVAL error = CASE(message LIKE "*error*", 1, 0)
 | EVAL hour = DATE_TRUNC(1 hour, @timestamp)
-| STATS error_rate = AVG(error) BY hour
+| STATS error_rate = AVG(error) by hour
 | SORT hour
 ```

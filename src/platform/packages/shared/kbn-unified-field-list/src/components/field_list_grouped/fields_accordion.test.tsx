@@ -9,70 +9,137 @@
 
 import React from 'react';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { EuiLoadingSpinner, EuiNotificationBadge, EuiText } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { FieldsAccordion, FieldsAccordionProps } from './fields_accordion';
-import { FieldListItem, FieldsGroupNames } from '../../types';
+import { FieldsAccordion } from './fields_accordion';
+import { FieldsGroupNames } from '../../types';
+import { render, screen } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { EuiNotificationBadge } from '@elastic/eui';
+
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  EuiNotificationBadge: jest.fn(() => <div>MockBadge</div>),
+}));
+const MockEuiNotificationBadge = jest.mocked(EuiNotificationBadge);
+
+beforeEach(() => {
+  MockEuiNotificationBadge.mockImplementation((props) => (
+    <div data-test-subj={props['data-test-subj']} />
+  ));
+});
+
+const setup = (props: Partial<React.ComponentProps<typeof FieldsAccordion>> = {}) => {
+  const propsToUse: React.ComponentProps<typeof FieldsAccordion> = {
+    initialIsOpen: true,
+    onToggle: jest.fn(),
+    groupIndex: 1,
+    groupName: FieldsGroupNames.AvailableFields,
+    id: 'id',
+    buttonId: 'button-id',
+    label: 'label-test',
+    hasLoaded: true,
+    fieldsCount: dataView.fields.length,
+    paginatedFields: dataView.fields,
+    isFiltered: false,
+    extraAction: null,
+    renderCallout: () => <div id="lens-test-callout">Callout</div>,
+    renderFieldItem: ({ field, fieldSearchHighlight }) => (
+      <div key={field.name} data-highlight={fieldSearchHighlight}>
+        {field.name}
+      </div>
+    ),
+    ...props,
+  };
+
+  render(
+    <IntlProvider>
+      <FieldsAccordion {...propsToUse} />
+    </IntlProvider>
+  );
+
+  return { props: propsToUse };
+};
 
 describe('UnifiedFieldList <FieldsAccordion />', () => {
-  let defaultProps: FieldsAccordionProps<FieldListItem>;
-  const paginatedFields = dataView.fields;
-
-  beforeEach(() => {
-    defaultProps = {
-      initialIsOpen: true,
-      onToggle: jest.fn(),
-      groupIndex: 1,
-      groupName: FieldsGroupNames.AvailableFields,
-      id: 'id',
-      label: 'label-test',
-      hasLoaded: true,
-      fieldsCount: paginatedFields.length,
-      isFiltered: false,
-      paginatedFields,
-      renderCallout: () => <div id="lens-test-callout">Callout</div>,
-      renderFieldItem: ({ field, fieldSearchHighlight }) => (
-        <EuiText key={field.name} data-highlight={fieldSearchHighlight}>
-          {field.name}
-        </EuiText>
-      ),
-    };
-  });
-
   it('renders fields correctly', () => {
-    const wrapper = mountWithIntl(<FieldsAccordion {...defaultProps} />);
-    expect(wrapper.find(EuiText)).toHaveLength(paginatedFields.length + 1); // + title
-    expect(wrapper.find(EuiText).first().text()).toBe(defaultProps.label);
-    expect(wrapper.find(EuiText).at(1).text()).toBe(paginatedFields[0].name);
-    expect(wrapper.find(EuiText).last().text()).toBe(
-      paginatedFields[paginatedFields.length - 1].name
-    );
+    const { props } = setup();
+
+    for (const field of props.paginatedFields) {
+      expect(screen.getByText(field.name)).toBeVisible();
+    }
+
+    expect(screen.getByText(props.label)).toBeVisible();
+    expect(screen.getByText(dataView.fields[0].name)).toBeVisible();
+    expect(screen.getByText(dataView.fields[dataView.fields.length - 1].name)).toBeVisible();
   });
 
-  it('renders callout if no fields', () => {
-    const wrapper = mountWithIntl(
-      <FieldsAccordion {...defaultProps} fieldsCount={0} paginatedFields={[]} />
-    );
-    expect(wrapper.find('#lens-test-callout').length).toEqual(1);
+  describe('when there are no fields', () => {
+    it('should render the callout', () => {
+      setup({
+        paginatedFields: [],
+        fieldsCount: 0,
+        renderCallout: () => <div>There are no items</div>,
+      });
+
+      expect(screen.getByText('There are no items')).toBeVisible();
+    });
   });
 
-  it('renders accented notificationBadge state if isFiltered', () => {
-    const wrapper = mountWithIntl(<FieldsAccordion {...defaultProps} isFiltered={true} />);
-    expect(wrapper.find(EuiNotificationBadge).prop('color')).toEqual('accent');
+  describe('when the accordion is filtered', () => {
+    it('should render the notification badge with accent color', () => {
+      setup({ isFiltered: true });
+
+      expect(screen.getByTestId('id-count')).toBeVisible();
+      expect(MockEuiNotificationBadge).toHaveBeenCalledWith(
+        expect.objectContaining({
+          color: 'accent',
+        }),
+        {}
+      );
+    });
   });
 
-  it('renders spinner if has not loaded', () => {
-    const wrapper = mountWithIntl(<FieldsAccordion {...defaultProps} hasLoaded={false} />);
-    expect(wrapper.find(EuiLoadingSpinner).length).toEqual(1);
+  describe('when the accordion is not filtered', () => {
+    it('should render the notification badge with subdued color', () => {
+      setup({ isFiltered: false });
+
+      expect(screen.getByTestId('id-count')).toBeVisible();
+      expect(MockEuiNotificationBadge).toHaveBeenCalledWith(
+        expect.objectContaining({
+          color: 'subdued',
+        }),
+        {}
+      );
+    });
   });
 
-  it('renders items with the provided highlight', () => {
-    const wrapperWithHighlight = mountWithIntl(
-      <FieldsAccordion {...defaultProps} fieldSearchHighlight="test-highlight" />
-    );
-    expect(wrapperWithHighlight.find(EuiText).last().prop('data-highlight')).toBe('test-highlight');
+  describe('when it is loading', () => {
+    it('should render the loading spinner', () => {
+      setup({ hasLoaded: false });
 
-    const wrapperWithoutHighlight = mountWithIntl(<FieldsAccordion {...defaultProps} />);
-    expect(wrapperWithoutHighlight.find(EuiText).last().prop('data-highlight')).toBeUndefined();
+      expect(screen.getByTestId('id-countLoading')).toBeVisible();
+    });
+  });
+
+  describe('given a search highlight', () => {
+    it('should apply the highlight to the field items', () => {
+      const highlight = 'test-highlight';
+      setup({
+        fieldSearchHighlight: highlight,
+      });
+
+      expect(screen.getByText(dataView.fields[0].name)).toHaveAttribute(
+        'data-highlight',
+        highlight
+      );
+    });
+  });
+
+  describe('given an extra action', () => {
+    it('should render the extra action', () => {
+      const extraAction = <div data-test-subj="extra-action">Extra Action</div>;
+      setup({ extraAction });
+
+      expect(screen.getByTestId('extra-action')).toBeVisible();
+    });
   });
 });

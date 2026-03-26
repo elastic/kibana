@@ -220,7 +220,7 @@ function AgentKeysContent({
           <p>
             {i18n.translate('xpack.apm.settings.agentKeys.emptyPromptBody', {
               defaultMessage:
-                'Create APM agent keys to authorize APM agent requests to the APM Server.',
+                'Create APM agent keys to authorize APM agent requests to the ingest endpoint.',
             })}
           </p>
         }

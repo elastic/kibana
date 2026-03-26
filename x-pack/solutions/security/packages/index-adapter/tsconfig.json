@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -13,6 +13,7 @@
     "@kbn/std",
     "@kbn/safer-lodash-set",
     "@kbn/logging-mocks",
+    "@kbn/core-elasticsearch-server-utils",
   ],
   "exclude": [
     "target/**/*"

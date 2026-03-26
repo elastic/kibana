@@ -15,13 +15,16 @@
     "requiredPlugins": [
       "share",
       "indexManagement",
+      "licensing",
     ],
     "optionalPlugins": [
       "cloud",
+      "cloudConnect",
       "console",
       "usageCollection",
       "serverless",
-      "searchNavigation"
+      "searchNavigation",
+      "sampleDataIngest"
     ],
     "requiredBundles": [
       "kibanaReact",

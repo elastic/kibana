@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console']);
@@ -22,8 +22,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it.skip('Dev tools settings page', async () => {
-      await PageObjects.console.setFontSizeSetting(20);
+    it('Dev tools settings page', async () => {
+      await PageObjects.console.openConfig();
       await a11y.testAppSnapshot();
     });
   });

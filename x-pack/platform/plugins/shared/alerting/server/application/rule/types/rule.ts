@@ -82,6 +82,7 @@ export interface Rule<Params extends RuleParams = never> {
   revision: RuleSchemaType['revision'];
   running?: RuleSchemaType['running'];
   viewInAppRelativeUrl?: RuleSchemaType['viewInAppRelativeUrl'];
+  lastEnabledAt?: Date;
   alertDelay?: RuleSchemaType['alertDelay'];
   legacyId?: RuleSchemaType['legacyId'];
   flapping?: RuleSchemaType['flapping'];
@@ -108,6 +109,7 @@ export interface RuleDomain<Params extends RuleParams = never> {
   apiKey: RuleDomainSchemaType['apiKey'];
   apiKeyOwner: RuleDomainSchemaType['apiKeyOwner'];
   apiKeyCreatedByUser?: RuleDomainSchemaType['apiKeyCreatedByUser'];
+  uiamApiKey?: RuleDomainSchemaType['uiamApiKey'];
   throttle?: RuleDomainSchemaType['throttle'];
   muteAll: RuleDomainSchemaType['muteAll'];
   notifyWhen?: RuleDomainSchemaType['notifyWhen'];
@@ -122,6 +124,7 @@ export interface RuleDomain<Params extends RuleParams = never> {
   revision: RuleDomainSchemaType['revision'];
   running?: RuleDomainSchemaType['running'];
   viewInAppRelativeUrl?: RuleDomainSchemaType['viewInAppRelativeUrl'];
+  lastEnabledAt?: Date;
   alertDelay?: RuleSchemaType['alertDelay'];
   legacyId?: RuleSchemaType['legacyId'];
   flapping?: RuleSchemaType['flapping'];

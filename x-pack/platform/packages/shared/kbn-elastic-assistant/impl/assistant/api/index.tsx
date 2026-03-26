@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import {
-  API_VERSIONS,
+import type { HttpSetup, IToasts } from '@kbn/core/public';
+import type {
   ApiConfig,
   Replacements,
   ScreenContext,
   MessageMetadata,
 } from '@kbn/elastic-assistant-common';
+import { API_VERSIONS } from '@kbn/elastic-assistant-common';
+import { i18n } from '@kbn/i18n';
 import { API_ERROR } from '../translations';
 import { getOptionalRequestParams } from '../helpers';
-import { TraceOptions } from '../types';
+import type { TraceOptions } from '../types';
 export * from './conversations';
 export * from './prompts';
 
@@ -30,6 +31,7 @@ export interface FetchConnectorExecuteAction {
   signal?: AbortSignal | undefined;
   size?: number;
   traceOptions?: TraceOptions;
+  toasts?: IToasts;
   screenContext: ScreenContext;
 }
 
@@ -54,6 +56,7 @@ export const fetchConnectorExecuteAction = async ({
   apiConfig,
   signal,
   size,
+  toasts,
   traceOptions,
   screenContext,
 }: FetchConnectorExecuteAction): Promise<FetchConnectorExecuteResponse> => {
@@ -65,7 +68,6 @@ export const fetchConnectorExecuteAction = async ({
   });
 
   const requestBody = {
-    model: apiConfig?.model,
     message,
     subAction: isStream ? 'invokeStream' : 'invokeAI',
     conversationId,
@@ -163,7 +165,32 @@ export const fetchConnectorExecuteAction = async ({
     const getReader = error?.response?.body?.getReader;
     const reader =
       isStream && typeof getReader === 'function' ? getReader.call(error.response.body) : null;
+    const defaultErrorMessage = i18n.translate('xpack.elasticAssistant.messageError.title', {
+      defaultMessage: 'An error occurred while sending the message',
+    });
 
+    if (error?.response.status === 403 && reader) {
+      // For streaming errors, we need to read the stream to get the actual error message
+      let errorMessage = error?.body?.message ?? error?.message;
+      if (reader) {
+        try {
+          const { value } = await reader.read();
+          if (value) {
+            const errorText = new TextDecoder().decode(value);
+            const errorData = JSON.parse(errorText);
+            errorMessage = errorData.message || errorData.body || errorMessage;
+          }
+        } catch (streamError) {
+          errorMessage = defaultErrorMessage;
+        }
+      }
+      // if streaming and error is 403, show toast
+      const errorForToast = new Error(errorMessage);
+      errorForToast.name = error?.name || 'Error';
+      toasts?.addError(errorForToast, {
+        title: defaultErrorMessage,
+      });
+    }
     if (!reader) {
       return {
         response: `${API_ERROR}\n\n${error?.body?.message ?? error?.message}`,

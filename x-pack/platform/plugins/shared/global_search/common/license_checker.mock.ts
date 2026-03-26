@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ILicenseChecker } from './license_checker';
+import type { ILicenseChecker } from './license_checker';
 
 const createLicenseCheckerMock = (): jest.Mocked<ILicenseChecker> => {
   const mock = {

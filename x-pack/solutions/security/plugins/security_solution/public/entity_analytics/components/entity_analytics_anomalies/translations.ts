@@ -56,20 +56,6 @@ export const RUN_JOB = i18n.translate(
   }
 );
 
-export const JOB_STATUS_DISABLED = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.anomalies.jobStatusDisabled',
-  {
-    defaultMessage: 'disabled',
-  }
-);
-
-export const JOB_STATUS_UNINSTALLED = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.anomalies.jobStatusUninstalled',
-  {
-    defaultMessage: 'uninstalled',
-  }
-);
-
 export const JOB_STATUS_FAILED = i18n.translate(
   'xpack.securitySolution.entityAnalytics.anomalies.jobStatusFailed',
   {

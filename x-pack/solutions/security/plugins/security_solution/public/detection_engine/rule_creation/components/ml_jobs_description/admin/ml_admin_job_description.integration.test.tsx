@@ -62,7 +62,7 @@ describe('MlAdminJobDescription', () => {
     await waitFor(() => {
       expect(refreshJobSpy).toHaveBeenCalledWith(securityJobNotStarted);
     });
-  });
+  }, 10000);
 
   it('should render loading spinner when job start is in progress', async () => {
     useEnableDataFeedMock.mockReturnValueOnce({

@@ -21,6 +21,7 @@ import {
   alertStateActionVariableDescription,
   cloudActionVariableDescription,
   containerActionVariableDescription,
+  groupByKeysActionVariableDescription,
   hostActionVariableDescription,
   labelsActionVariableDescription,
   metricActionVariableDescription,
@@ -90,6 +91,7 @@ export function registerInventoryThresholdRuleType(
     actionVariables: {
       context: [
         { name: 'group', description: groupActionVariableDescription },
+        { name: 'grouping', description: groupByKeysActionVariableDescription },
         { name: 'alertState', description: alertStateActionVariableDescription },
         {
           name: 'alertDetailsUrl',

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { API_STATUS } from '../public/app/constants/api';
+
 export interface AutoFollowPattern {
   name: string;
   active: boolean;
@@ -109,6 +111,10 @@ export interface FollowerIndex extends FollowerIndexAdvancedSettings {
   shards: Shard[];
 }
 
+export interface FollowerIndexWithPausedStatus extends FollowerIndex {
+  isPaused?: boolean; // This is an optional property that is added by the reducer to the FollowerIndex interface
+}
+
 export interface FollowerIndexToEs extends FollowerIndexAdvancedSettingsToEs {
   remote_cluster: string;
   leader_index: string;
@@ -185,3 +191,5 @@ export interface AutoFollowStatsFromEs {
   recent_auto_follow_errors: RecentAutoFollowErrorFromEs[];
   auto_followed_clusters: AutoFollowedClusterFromEs[];
 }
+
+export type ApiStatus = (typeof API_STATUS)[keyof typeof API_STATUS];

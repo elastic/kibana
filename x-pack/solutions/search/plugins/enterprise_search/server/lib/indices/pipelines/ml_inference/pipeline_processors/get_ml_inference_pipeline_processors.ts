@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { MlTrainedModels } from '@kbn/ml-plugin/server';
+import type { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import {
   getMlModelTypesForModelConfig,
   parseModelStateFromStats,
   parseModelStateReasonFromStats,
 } from '../../../../../../common/ml_inference_pipeline';
-import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
+import type { InferencePipeline } from '../../../../../../common/types/pipelines';
+import { TrainedModelState } from '../../../../../../common/types/pipelines';
 import { getInferencePipelineNameFromIndexName } from '../../../../../utils/ml_inference_pipeline_utils';
 
 export type InferencePipelineData = InferencePipeline & {
@@ -27,6 +28,7 @@ export const fetchMlInferencePipelines = async (client: ElasticsearchClient) => 
     return await client.ingest.getPipeline({
       id: getInferencePipelineNameFromIndexName('*'),
     });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     // The GET /_ingest/pipeline API returns an empty object on 404 Not Found. If there are no `@ml-inference`
     // pipelines then return an empty record of pipelines
@@ -47,7 +49,7 @@ export const getMlInferencePipelineProcessorNamesFromPipelines = (
   } = pipelines;
 
   return mlInferencePipelineProcessors
-    .map((obj) => obj.pipeline?.name)
+    .map((obj) => obj?.pipeline?.name)
     .filter((name): name is string => name !== undefined);
 };
 
@@ -65,7 +67,7 @@ export const getProcessorPipelineMap = (
 
   Object.entries(pipelines).forEach(([name, pipeline]) =>
     pipeline?.processors?.forEach((processor) => {
-      if (processor.pipeline?.name !== undefined) {
+      if (processor?.pipeline?.name !== undefined) {
         addPipelineToProcessorMap(processor.pipeline.name, name);
       }
     })
@@ -90,15 +92,15 @@ export const fetchPipelineProcessorInferenceData = async (
         mlInferencePipelineProcessorConfigs[pipelineProcessorName].processors || [];
 
       // Get the inference processors; there is one per configured field, but they share the same model ID
-      const inferenceProcessors = subProcessors.filter((processor) =>
-        Object.hasOwn(processor, 'inference')
+      const inferenceProcessors = subProcessors.filter(
+        (processor) => processor && Object.hasOwn(processor, 'inference')
       );
 
       const trainedModelName = inferenceProcessors[0]?.inference?.model_id;
       if (trainedModelName) {
         // Extract source fields from field mappings
         const sourceFields = inferenceProcessors.flatMap((processor) =>
-          Object.keys(processor.inference?.field_map ?? {})
+          Object.keys(processor?.inference?.field_map ?? {})
         );
 
         pipelineProcessorData.push({

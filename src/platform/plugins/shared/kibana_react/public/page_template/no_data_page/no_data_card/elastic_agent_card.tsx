@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import type { CoreStart } from '@kbn/core/public';
 import { EuiButton, EuiCard, EuiTextColor, EuiScreenReaderOnly, EuiImage } from '@elastic/eui';
 import { useKibana } from '../../../context';
-import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
+import type { NoDataPageActions } from '../no_data_page';
+import { NO_DATA_RECOMMENDED } from '../no_data_page';
 
 export type ElasticAgentCardProps = NoDataPageActions & {
   solution: string;
@@ -92,29 +93,23 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
     );
 
   return (
-    <RedirectAppLinks
-      coreStart={{
-        application,
-      }}
-    >
-      <EuiCard
-        paddingSize="l"
-        image={image}
-        href={href ?? addBasePath(`/app/integrations/browse${hasCategory}`)}
-        // Bad hack to fix the need for an a11y title even though the button exists
-        title={
-          <EuiScreenReaderOnly>
-            <span>{defaultCTAtitle}</span>
-          </EuiScreenReaderOnly>
-        }
-        description={i18n.translate('kibana-react.noDataPage.elasticAgentCard.description', {
-          defaultMessage: `Use Elastic Agent for a simple, unified way to collect data from your machines.`,
-        })}
-        betaBadgeProps={recommended ? { label: NO_DATA_RECOMMENDED } : undefined}
-        footer={footer}
-        layout={layout as 'vertical' | undefined}
-        {...cardRest}
-      />
-    </RedirectAppLinks>
+    <EuiCard
+      paddingSize="l"
+      image={image}
+      href={href ?? addBasePath(`/app/integrations/browse${hasCategory}`)}
+      // Bad hack to fix the need for an a11y title even though the button exists
+      title={
+        <EuiScreenReaderOnly>
+          <span>{defaultCTAtitle}</span>
+        </EuiScreenReaderOnly>
+      }
+      description={i18n.translate('kibana-react.noDataPage.elasticAgentCard.description', {
+        defaultMessage: `Use Elastic Agent for a simple, unified way to collect data from your machines.`,
+      })}
+      betaBadgeProps={recommended ? { label: NO_DATA_RECOMMENDED } : undefined}
+      footer={footer}
+      layout={layout as 'vertical' | undefined}
+      {...cardRest}
+    />
   );
 };

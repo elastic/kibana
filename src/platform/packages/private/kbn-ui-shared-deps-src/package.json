@@ -2,5 +2,16 @@
   "name": "@kbn/ui-shared-deps-src",
   "version": "1.0.0",
   "private": true,
-  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0"
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
+  "scripts": {
+    "build": "node ${REPO_ROOT:-`git rev-parse --show-toplevel`}/scripts/build_package.js $PWD --task-name shared_built_assets"
+  },
+  "buildSourcePaths": {
+    "include": [
+      "index.js",
+      "webpack.config.js",
+      "src/**/*"
+    ],
+    "exclude": []
+  }
 }

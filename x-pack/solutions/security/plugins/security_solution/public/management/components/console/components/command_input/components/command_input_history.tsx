@@ -34,11 +34,11 @@ const NO_FILTERED_MATCHES = i18n.translate(
 );
 
 export const CommandInputHistory = memo(() => {
+  const getTestId = useTestIdGenerator(useDataTestSubj());
   const dispatch = useConsoleStateDispatch();
   const inputHistory = useWithInputHistory();
   const [priorInputState] = useState(useWithInputTextEntered());
   const optionWasSelected = useRef(false);
-  const getTestId = useTestIdGenerator(useDataTestSubj());
 
   const selectableHistoryOptions = useMemo(() => {
     return inputHistory.map<EuiSelectableProps['options'][number]>((inputItem, index) => {
@@ -94,11 +94,15 @@ export const CommandInputHistory = memo(() => {
       dispatch({ type: 'updateInputPlaceholderState', payload: { placeholder: '' } });
 
       if (selected) {
+        const { input: historyItemInput, argState: historyItemArgState } =
+          selected.data as InputHistoryItem;
+
         dispatch({
           type: 'updateInputTextEnteredState',
           payload: {
-            leftOfCursorText: (selected.data as InputHistoryItem).input,
+            leftOfCursorText: historyItemInput,
             rightOfCursorText: '',
+            argState: historyItemArgState,
           },
         });
       }

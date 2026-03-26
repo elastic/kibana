@@ -19,13 +19,18 @@ import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
+import { pricingServiceMock } from '@kbn/core-pricing-server-mocks';
+import { injectionServiceMock } from '@kbn/core-di-mocks';
+import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
+import { lazyObject } from '@kbn/lazy-object';
 
 export function createCoreStartMock() {
-  const mock: MockedKeys<CoreStart> = {
+  const mock: MockedKeys<CoreStart> = lazyObject({
     analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     capabilities: capabilitiesServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
@@ -38,12 +43,16 @@ export function createCoreStartMock() {
     coreUsageData: coreUsageDataServiceMock.createStartContract(),
     executionContext: executionContextServiceMock.createInternalStartContract(),
     customBranding: customBrandingServiceMock.createStartContract(),
+    userActivity: userActivityServiceMock.createInternalStartContract(),
     security: securityServiceMock.createStart(),
     userProfile: userProfileServiceMock.createStart(),
-    plugins: {
+    injection: injectionServiceMock.createStartContract(),
+    plugins: lazyObject({
       onStart: jest.fn(),
-    },
-  };
+    }),
+    pricing: pricingServiceMock.createStartContract(),
+    dataStreams: dataStreamServiceMock.createStartContract(),
+  });
 
   return mock;
 }

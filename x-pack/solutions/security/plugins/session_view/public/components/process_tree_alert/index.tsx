@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useCallback, useMemo } from 'react';
+
+import React, { useCallback, useEffect, useMemo } from 'react';
 import {
+  EuiBadge,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBadge,
-  EuiIcon,
-  EuiText,
-  EuiButtonIcon,
-  EuiToolTip,
+  EuiIconTip,
   EuiPanel,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_ICONS } from '../../../common/constants';
@@ -23,13 +23,14 @@ import { getBadgeColorFromAlertStatus } from './helpers';
 import { useStyles } from './styles';
 import { getAlertCategoryDisplayText } from '../../utils/alert_category_display_text';
 import { getAlertIconTooltipContent } from '../../../common/utils/alert_icon_tooltip_content';
+
 export interface ProcessTreeAlertDeps {
   alert: ProcessEvent;
   isInvestigated: boolean;
   isSelected: boolean;
   onClick: (alert: ProcessEventAlert | null) => void;
   selectAlert: (alertUuid: string) => void;
-  onShowAlertDetails: (alertUuid: string) => void;
+  onShowAlertDetails: (alertId: string, alertIndex: string) => void;
 }
 
 export const ProcessTreeAlert = ({
@@ -43,7 +44,7 @@ export const ProcessTreeAlert = ({
   const styles = useStyles({ isInvestigated, isSelected });
 
   const { event } = alert;
-  const { uuid, rule, workflow_status: status } = alert.kibana?.alert || {};
+  const { uuid, index, rule, workflow_status: status } = alert.kibana?.alert || {};
   const category = event?.category?.[0] as ProcessEventAlertCategory;
   const alertIconType = useMemo(() => {
     if (category && category in ALERT_ICONS) return ALERT_ICONS[category];
@@ -56,11 +57,16 @@ export const ProcessTreeAlert = ({
     }
   }, [isInvestigated, uuid, selectAlert]);
 
-  const handleExpandClick = useCallback(() => {
-    if (uuid) {
-      onShowAlertDetails(uuid);
-    }
-  }, [onShowAlertDetails, uuid]);
+  const handleExpandClick = useCallback(
+    (evt: React.MouseEvent<HTMLButtonElement>) => {
+      evt.stopPropagation();
+      evt.preventDefault();
+      if (uuid && index) {
+        onShowAlertDetails(uuid, index);
+      }
+    },
+    [index, onShowAlertDetails, uuid]
+  );
 
   const handleClick = useCallback(() => {
     if (alert.kibana?.alert) {
@@ -88,16 +94,19 @@ export const ProcessTreeAlert = ({
       >
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
-            iconType="expand"
+            iconType="maximize"
             aria-label="expand"
             data-test-subj={`sessionView:sessionViewAlertDetailExpand-${uuid}`}
             onClick={handleExpandClick}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip position="top" content={alertIconTooltipContent}>
-            <EuiIcon type={alertIconType} color="danger" />
-          </EuiToolTip>
+          <EuiIconTip
+            content={alertIconTooltipContent}
+            position="top"
+            type={alertIconType}
+            color="danger"
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <div css={styles.processAlertDisplayContainer}>

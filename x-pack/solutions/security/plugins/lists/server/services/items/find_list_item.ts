@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   Filter,
   FoundListItemSchema,
@@ -17,7 +17,7 @@ import type {
   SortOrderOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import { SearchEsListItemSchema } from '../../schemas/elastic_response';
+import type { SearchEsListItemSchema } from '../../schemas/elastic_response';
 import { getList } from '../lists';
 import {
   encodeCursor,

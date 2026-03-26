@@ -7,19 +7,22 @@
 
 import { badRequest } from '@hapi/boom';
 import { FileAttachmentMetadataRt } from '../../common/types/domain';
-import { LENS_ATTACHMENT_TYPE } from '../../common/constants/visualizations';
-import { FILE_ATTACHMENT_TYPE } from '../../common/constants';
+import { FILE_ATTACHMENT_TYPE, LENS_ATTACHMENT_TYPE } from '../../common/constants';
 
 import { decodeWithExcessOrThrow } from '../common/runtime_types';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
+import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
+import { commentAttachmentType } from '../attachment_framework/attachments';
 
 export const registerInternalAttachments = (
   externalRefRegistry: ExternalReferenceAttachmentTypeRegistry,
-  persistableStateRegistry: PersistableStateAttachmentTypeRegistry
+  persistableStateRegistry: PersistableStateAttachmentTypeRegistry,
+  unifiedRegistry: UnifiedAttachmentTypeRegistry
 ) => {
   externalRefRegistry.register({ id: FILE_ATTACHMENT_TYPE, schemaValidator });
   persistableStateRegistry.register({ id: LENS_ATTACHMENT_TYPE });
+  unifiedRegistry.register(commentAttachmentType);
 };
 
 const schemaValidator = (data: unknown): void => {

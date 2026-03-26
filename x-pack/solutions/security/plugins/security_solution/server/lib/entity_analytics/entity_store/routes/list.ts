@@ -13,9 +13,12 @@ import type { ListEntityEnginesResponse } from '../../../../../common/api/entity
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
+import { ENTITY_STORE_API_CALL_EVENT } from '../../../telemetry/event_based/events';
 
 export const listEntityEnginesRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
+  telemetry: ITelemetryEventsSender,
   logger: Logger
 ) => {
   router.versioned
@@ -40,11 +43,17 @@ export const listEntityEnginesRoute = (
         try {
           const secSol = await context.securitySolution;
           const body = await secSol.getEntityStoreDataClient().list();
-
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+          });
           return response.ok({ body });
         } catch (e) {
           logger.error('Error in ListEntityEngines:', e);
           const error = transformError(e);
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+            error: error.message,
+          });
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,

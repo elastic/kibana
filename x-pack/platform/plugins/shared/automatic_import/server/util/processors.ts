@@ -11,7 +11,7 @@ import { Environment, FileSystemLoader } from 'nunjucks';
 import { deepCopy } from './util';
 import type { ESProcessorItem, Pipeline } from '../../common';
 import type { KVState, SimplifiedProcessors } from '../types';
-import { KVProcessor } from '../processor_types';
+import type { KVProcessor } from '../processor_types';
 
 export function combineProcessors(
   initialPipeline: Pipeline,

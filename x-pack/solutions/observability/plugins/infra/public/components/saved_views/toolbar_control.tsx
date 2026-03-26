@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiPopover, EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,7 +22,7 @@ import { UpsertViewModal } from './upsert_modal';
 
 interface Props<TSingleSavedViewState extends SavedViewItem, TViewState>
   extends SavedViewState<TSingleSavedViewState> {
-  viewState: TViewState & BasicAttributes;
+  viewState?: TViewState & BasicAttributes;
   onCreateView: SavedViewOperations<TSingleSavedViewState>['createView'];
   onDeleteView: SavedViewOperations<TSingleSavedViewState>['deleteViewById'];
   onUpdateView: SavedViewOperations<TSingleSavedViewState>['updateViewById'];
@@ -100,14 +100,20 @@ export function SavedViewsToolbarControls<TSingleSavedViewState extends SavedVie
     onUpdateView({ id: currentView.id, attributes }).then(closeUpdateModal);
   };
 
+  const openPopoverButtonRef = useRef<HTMLButtonElement>(null);
+
   return (
     <>
       <EuiPopover
         data-test-subj="savedViews-popover"
         button={
           <EuiButton
+            size="s"
             onClick={togglePopoverAndLoad}
-            data-test-subj="savedViews-openPopover"
+            data-test-subj={`savedViews-openPopover-${
+              isFetchingCurrentView ? 'loading' : 'loaded'
+            }`}
+            buttonRef={openPopoverButtonRef}
             iconType="arrowDown"
             iconSide="right"
             color="text"
@@ -182,6 +188,7 @@ export function SavedViewsToolbarControls<TSingleSavedViewState extends SavedVie
       )}
       {isManageFlyoutOpen && (
         <ManageViewsFlyout
+          triggerRef={openPopoverButtonRef}
           loading={isFetchingViews}
           views={views}
           onMakeDefaultView={onSetDefaultView}

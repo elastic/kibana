@@ -380,7 +380,11 @@ export function DataDriftIndexPatternsEditor({
             </EuiFormRow>
           ) : null}
 
-          {dataViewMsg ? <EuiCallOut color="primary">{dataViewMsg}</EuiCallOut> : null}
+          {dataViewMsg ? (
+            <EuiCallOut announceOnMount color="primary">
+              {dataViewMsg}
+            </EuiCallOut>
+          ) : null}
 
           <EuiFormRow id="analyzeDriftData">
             <EuiFlexGroup>
@@ -390,7 +394,7 @@ export function DataDriftIndexPatternsEditor({
                     color="primary"
                     disabled={hasError}
                     onClick={createDataViewAndRedirectToDataDriftPage.bind(null, true)}
-                    iconType="visTagCloud"
+                    iconType="chartTagCloud"
                     data-test-subj="analyzeDataDriftWithoutSavingButton"
                     aria-label={i18n.translate(
                       'xpack.ml.dataDrift.indexPatternsEditor.analyzeDataDriftWithoutSavingLabel',
@@ -412,7 +416,7 @@ export function DataDriftIndexPatternsEditor({
                   disabled={hasError}
                   fill
                   onClick={createDataViewAndRedirectToDataDriftPage.bind(null, false)}
-                  iconType="visTagCloud"
+                  iconType="chartTagCloud"
                   data-test-subj="analyzeDataDriftButton"
                   aria-label={i18n.translate(
                     'xpack.ml.dataDrift.indexPatternsEditor.analyzeDataDriftLabel',

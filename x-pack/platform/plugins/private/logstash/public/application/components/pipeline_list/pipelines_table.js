@@ -28,7 +28,7 @@ function getColumns(openPipeline, clonePipeline) {
             {id} &nbsp;
             <EuiIconTip
               content={PIPELINE_LIST.PIPELINE_NOT_CENTRALLY_MANAGED_TOOLTIP_TEXT}
-              type="questionInCircle"
+              type="question"
             />
           </span>
         );
@@ -188,7 +188,7 @@ function PipelinesTableUi({
       data-test-subj="pipelineTable"
       itemId="id"
       items={pipelines}
-      message={message}
+      noItemsMessage={message}
       pagination={pagination}
       search={search}
       selection={selectionOptions}
@@ -196,6 +196,9 @@ function PipelinesTableUi({
       rowProps={{
         'data-test-subj': 'row',
       }}
+      tableCaption={i18n.translate('xpack.logstash.pipelinesTable.tableCaption', {
+        defaultMessage: 'Logstash pipelines',
+      })}
     />
   );
 }

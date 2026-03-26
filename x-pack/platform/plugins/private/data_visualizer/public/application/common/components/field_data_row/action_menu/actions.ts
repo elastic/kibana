@@ -9,12 +9,10 @@ import { i18n } from '@kbn/i18n';
 import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import type { MutableRefObject } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import {
-  type VisualizeFieldContext,
-  VISUALIZE_GEO_FIELD_TRIGGER,
-} from '@kbn/ui-actions-plugin/public';
+import { type VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { Refresh } from '@kbn/ml-date-picker';
 import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
+import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { getCompatibleLensDataType, getLensAttributes } from './lens_utils';
 import type { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import type { FieldVisConfig } from '../../stats_table/types';
@@ -100,7 +98,7 @@ export function getActions(
           );
 
           if (testActions.length > 0 && testActions[0] !== undefined) {
-            services?.uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER).exec(triggerOptions);
+            services?.uiActions.executeTriggerActions(VISUALIZE_GEO_FIELD_TRIGGER, triggerOptions);
           }
         }
       },

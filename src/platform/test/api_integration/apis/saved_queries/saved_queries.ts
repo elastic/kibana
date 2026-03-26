@@ -12,8 +12,9 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { SavedQueryAttributes, SAVED_QUERY_BASE_URL } from '@kbn/data-plugin/common';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
+import { SAVED_QUERY_BASE_URL } from '@kbn/data-plugin/common';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 // node scripts/functional_tests --config test/api_integration/config.js --grep="search session"
 
@@ -247,7 +248,9 @@ export default function ({ getService }: FtrProviderContext) {
         findQueries({ foo: 'bar' } as any)
           .expect(400)
           .then(({ body }) => {
-            expect(body.message).to.be('[request body.foo]: definition for this key is missing');
+            expect(body.message).to.be(
+              "[request body.foo]: Additional properties are not allowed ('foo' was unexpected)"
+            );
           }));
 
       it('should return expected queries for find saved queries', async () => {

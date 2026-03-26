@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import type { TimelineType } from '../../../../common/api/timeline';
 import { appendSearch } from './helpers';
 
 export const getTimelineTabsUrl = (tabName: TimelineType, search?: string) =>
   `/${tabName}${appendSearch(search)}`;
 
-export const getTimelineUrl = (id: string, graphEventId?: string) =>
-  `?timeline=(id:'${id}',isOpen:!t${
-    isEmpty(graphEventId) ? ')' : `,graphEventId:'${graphEventId}')`
-  }`;
+export const getTimelineUrl = (id: string) => `?timeline=(id:'${id}',isOpen:!t)`;

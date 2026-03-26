@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { UseEuiTheme } from '@elastic/eui';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { EuiFormPrepend, type UseEuiTheme } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { SymbolIcon } from '../legend/symbol_icon';
 import { getIsDarkMode } from '../../../../../kibana_services';
 
@@ -18,14 +18,16 @@ const prependButtonStyles = {
 };
 
 export const PrependButton = ({ value, svg }: { value: string; svg: string }) => {
-  const styles = useMemoizedStyles(prependButtonStyles);
+  const styles = useMemoCss(prependButtonStyles);
   return (
-    <SymbolIcon
-      key={value}
-      css={styles.icon}
-      symbolId={value}
-      svg={svg}
-      fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
-    />
+    <EuiFormPrepend>
+      <SymbolIcon
+        key={value}
+        css={styles.icon}
+        symbolId={value}
+        svg={svg}
+        fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
+      />
+    </EuiFormPrepend>
   );
 };

@@ -18,7 +18,7 @@ export function ExistingDataCallout() {
         title={i18n.translate('xpack.observability_onboarding.firehose.existingDataCallout.title', {
           defaultMessage: 'This workflow has been used before.',
         })}
-        iconType="iInCircle"
+        iconType="info"
         color="warning"
         data-test-subj="observabilityOnboardingFirehosePanelExistingDataCallout"
       >

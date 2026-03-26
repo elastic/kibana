@@ -12,6 +12,7 @@ import { getResponseValidation } from '@kbn/core-http-server';
 import { BASE_PUBLIC_VERSION as SERVERLESS_VERSION_2023_10_31 } from '@kbn/core-http-router-server-internal';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { OasConverter } from './oas_converter';
+import type { GetOpId } from './util';
 import {
   getXsrfHeaderForMethod,
   assignToPaths,
@@ -23,19 +24,27 @@ import {
   mergeResponseContent,
   prepareRoutes,
   setXState,
-  GetOpId,
 } from './util';
-import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
+import type { Env, GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 import type { CustomOperationObject, InternalRouterRoute } from './type';
 import { extractAuthzDescription } from './extract_authz_description';
 import { mergeOperation } from './merge_operation';
 
-export const processRouter = async (
-  appRouter: Router,
-  converter: OasConverter,
-  getOpId: GetOpId,
-  filters: GenerateOpenApiDocumentOptionsFilters
-) => {
+export interface ProcessRouterOptions {
+  appRouter: Router;
+  converter: OasConverter;
+  getOpId: GetOpId;
+  filters: GenerateOpenApiDocumentOptionsFilters;
+  env?: Env;
+}
+
+export const processRouter = async ({
+  appRouter,
+  converter,
+  getOpId,
+  filters,
+  env = { serverless: false },
+}: ProcessRouterOptions) => {
   const paths: OpenAPIV3.PathsObject = {};
   if (filters?.version && filters.version !== SERVERLESS_VERSION_2023_10_31) return { paths };
   const routes = prepareRoutes(appRouter.getRoutes({ excludeVersionedRoutes: true }), filters);
@@ -98,7 +107,7 @@ export const processRouter = async (
         operationId: getOpId({ path: route.path, method: route.method }),
       };
 
-      setXState(route.options.availability, operation);
+      setXState(route.options.availability, operation, env);
 
       if (route.options.oasOperationObject) {
         await mergeOperation(route.options.oasOperationObject(), operation);

@@ -54,6 +54,11 @@ describe('Response Action file info API', () => {
     httpRequestMock = apiTestSetup.createRequestMock({
       params: { action_id: '321-654', file_id: '123-456-789' },
     });
+
+    (
+      apiTestSetup.endpointAppContextMock.service.getInternalFleetServices()
+        .ensureInCurrentSpace as jest.Mock
+    ).mockResolvedValue(undefined);
   });
 
   describe('#registerActionFileInfoRoute()', () => {

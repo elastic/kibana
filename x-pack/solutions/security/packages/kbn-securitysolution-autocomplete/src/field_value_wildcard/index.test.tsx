@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
-import { ReactWrapper, mount } from 'enzyme';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormHelpText } from '@elastic/eui';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormHelpText } from '@elastic/eui';
 import { act, waitFor } from '@testing-library/react';
 import { AutocompleteFieldWildcardComponent } from '.';
 import { useFieldValueAutocomplete } from '../hooks/use_field_value_autocomplete';
@@ -273,6 +275,39 @@ describe('AutocompleteFieldWildcardComponent', () => {
       query: 'A:\\Some Folder\\inc*.exe',
       selectedField: getField('file.path.text'),
     });
+  });
+
+  test('it invokes "onChange" with empty value when user paste-searches to modify an existing value', () => {
+    const mockOnChange = jest.fn();
+    wrapper = mount(
+      <AutocompleteFieldWildcardComponent
+        autocompleteService={autocompleteStartMock}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logs-endpoint.events.*',
+        }}
+        isClearable={false}
+        isDisabled={false}
+        isLoading={false}
+        onChange={mockOnChange}
+        onError={jest.fn()}
+        onWarning={jest.fn()}
+        placeholder="Placeholder text"
+        selectedField={getField('file.path.text')}
+        selectedValue="/opt/*/app.dmg"
+      />
+    );
+
+    act(() => {
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onSearchChange: (a: string) => void;
+        }
+      ).onSearchChange('/opt/*/app copy.dmg');
+    });
+
+    expect(mockOnChange).toHaveBeenCalledWith('');
   });
 
   test('it does not invoke "onWarning" when no warning exists', () => {

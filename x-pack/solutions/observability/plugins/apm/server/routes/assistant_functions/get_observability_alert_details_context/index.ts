@@ -19,7 +19,7 @@ import { getMlClient } from '../../../lib/helpers/get_ml_client';
 import { getRandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { getApmServiceSummary } from '../get_apm_service_summary';
 import type { APMDownstreamDependency } from '../get_apm_downstream_dependencies';
-import { getAssistantDownstreamDependencies } from '../get_apm_downstream_dependencies';
+import { getApmDownstreamDependencies } from '../get_apm_downstream_dependencies';
 import { getLogRateAnalysisForAlert } from '../get_log_rate_analysis_for_alert';
 import type { LogCategory } from '../get_log_categories';
 import { getLogCategories } from '../get_log_categories';
@@ -114,7 +114,7 @@ export const getAlertDetailsContextHandler = (
     ]);
 
     const downstreamDependenciesPromise = serviceName
-      ? getAssistantDownstreamDependencies({
+      ? getApmDownstreamDependencies({
           apmEventClient,
           arguments: {
             serviceName,
@@ -325,7 +325,7 @@ export const getAlertDetailsContextHandler = (
 
 function getApmErrorsWithDownstreamServiceName(
   apmErrors?: Awaited<ReturnType<typeof getApmErrors>>,
-  downstreamDependencies?: Awaited<ReturnType<typeof getAssistantDownstreamDependencies>>
+  downstreamDependencies?: Awaited<ReturnType<typeof getApmDownstreamDependencies>>
 ) {
   return apmErrors?.map(({ name, lastSeen, occurrences, downstreamServiceResource }) => {
     const downstreamServiceName = downstreamDependencies?.find(

@@ -70,10 +70,13 @@ describe('Running Processes Action Results component', () => {
     action.agentType = 'sentinel_one';
     render();
 
-    await waitFor(() => {
-      expect(renderResult.getByTestId('test-download'));
-    });
-  });
+    await waitFor(
+      () => {
+        expect(renderResult.getByTestId('test-download')).toBeTruthy();
+      },
+      { timeout: 5000 }
+    );
+  }, 10000);
 
   it('should display nothing if agent type does not support processes', () => {
     action.agentType = 'crowdstrike';

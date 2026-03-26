@@ -6,13 +6,13 @@
  */
 
 import * as t from 'io-ts';
-import {
+import type {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
 import type { Filter } from '@kbn/es-query';
-import { ALERT_STATUS_ALL } from './constants';
+import type { ALERT_STATUS_ALL } from './constants';
 
 export type Maybe<T> = T | null | undefined;
 

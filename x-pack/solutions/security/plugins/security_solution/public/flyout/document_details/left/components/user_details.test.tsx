@@ -27,7 +27,7 @@ import {
   USER_DETAILS_MISCONFIGURATIONS_TEST_ID,
   USER_DETAILS_ALERT_COUNT_TEST_ID,
 } from './test_ids';
-import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../../shared/components/test_ids';
+import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../../../flyout_v2/shared/components/test_ids';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
@@ -38,6 +38,8 @@ import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
 import { NetworkPreviewPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { getMockDataViewWithMatchedIndices } from '../../../../data_view_manager/mocks/mock_data_view';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
@@ -172,6 +174,9 @@ describe('<UserDetails />', () => {
     mockUseUsersRelatedHosts.mockReturnValue(mockRelatedHostsResponse);
     (useMisconfigurationPreview as jest.Mock).mockReturnValue({});
     (useAlertsByStatus as jest.Mock).mockReturnValue({ isLoading: false, items: {} });
+    jest
+      .mocked(useDataView)
+      .mockReturnValue({ dataView: getMockDataViewWithMatchedIndices(['index']), status: 'ready' });
   });
 
   it('should render user details correctly', () => {

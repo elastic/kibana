@@ -7,14 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter, AggregateQuery, isOfAggregateQueryType } from '@kbn/es-query';
-import { Datatable } from '@kbn/expressions-plugin/public';
-import { UiActionsActionDefinition, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { APPLY_FILTER_TRIGGER } from '../triggers';
-import {
-  createFiltersFromValueClickAction,
-  appendFilterToESQLQueryFromValueClickAction,
-} from './filters/create_filters_from_value_click';
+import type { Filter, AggregateQuery } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import type { UiActionsActionDefinition, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 export type ValueClickActionContext = ValueClickContext;
 export const ACTION_VALUE_CLICK = 'ACTION_VALUE_CLICK';
@@ -44,6 +41,8 @@ export function createValueClickActionDefinition(
     id: ACTION_VALUE_CLICK,
     shouldAutoExecute: async () => true,
     isCompatible: async (context: ValueClickContext) => {
+      const { createFiltersFromValueClickAction, appendFilterToESQLQueryFromValueClickAction } =
+        await import('./filters');
       if (context.data.query && isOfAggregateQueryType(context.data.query)) {
         const queryString = await appendFilterToESQLQueryFromValueClickAction(context.data);
         return queryString != null;
@@ -56,14 +55,17 @@ export function createValueClickActionDefinition(
         if (context.data.query && isOfAggregateQueryType(context.data.query)) {
           // ES|QL charts have a different way of applying filters,
           // they are appending a where clause to the query
+
+          const { appendFilterToESQLQueryFromValueClickAction } = await import('./filters');
           const queryString = appendFilterToESQLQueryFromValueClickAction(context.data);
-          await getStartServices().uiActions.getTrigger('UPDATE_ESQL_QUERY_TRIGGER').exec({
+          await getStartServices().uiActions.executeTriggerActions('UPDATE_ESQL_QUERY_TRIGGER', {
             queryString,
           });
         } else {
+          const { createFiltersFromValueClickAction } = await import('./filters');
           const filters: Filter[] = await createFiltersFromValueClickAction(context.data);
           if (filters.length > 0) {
-            await getStartServices().uiActions.getTrigger(APPLY_FILTER_TRIGGER).exec({
+            await getStartServices().uiActions.executeTriggerActions(ON_APPLY_FILTER, {
               filters,
               embeddable: context.embeddable,
               timeFieldName: context.data.timeFieldName,
@@ -73,7 +75,7 @@ export function createValueClickActionDefinition(
       } catch (e) {
         // eslint-disable-next-line no-console
         console.warn(
-          `Error [ACTION_EMIT_APPLY_FILTER_TRIGGER]: can\'t extract filters from action context`
+          `Error [ACTION_EMIT_ON_APPLY_FILTER]: can\'t extract filters from action context`
         );
       }
     },

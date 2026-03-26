@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod/v4';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { actionsConfigMock } from '../actions_config.mock';
@@ -21,12 +21,15 @@ describe('CaseConnector', () => {
   let service: TestCaseConnector;
   let connectorUsageCollector: ConnectorUsageCollector;
   const pushToServiceIncidentParamsSchema = {
-    name: schema.string(),
-    category: schema.nullable(schema.string()),
-    foo: schema.arrayOf(schema.boolean()),
-    bar: schema.object({
-      check: schema.nullable(schema.number()),
-    }),
+    name: z.string(),
+    category: z.string().nullable().optional(),
+    foo: z.array(z.boolean()).optional(),
+    bar: z
+      .object({
+        check: z.number().nullable(),
+      })
+      .strict()
+      .optional(),
   };
 
   const incidentSchemaMock = { name: 'Test', category: null, foo: [false], bar: { check: 1 } };
@@ -80,7 +83,7 @@ describe('CaseConnector', () => {
       const subActions = service.getSubActions();
       const subAction = subActions.get('pushToService');
       expect(
-        subAction?.schema?.validate({
+        subAction?.schema?.parse({
           incident: { externalId: 'test', ...incidentSchemaMock },
           comments: [{ comment: 'comment', commentId: 'comment-id' }],
         })
@@ -94,7 +97,7 @@ describe('CaseConnector', () => {
       const subActions = service.getSubActions();
       const subAction = subActions.get('pushToService');
       expect(
-        subAction?.schema?.validate({
+        subAction?.schema?.parse({
           incident: { externalId: null, ...incidentSchemaMock },
           comments: [],
         })
@@ -106,7 +109,7 @@ describe('CaseConnector', () => {
       async (externalId) => {
         const subActions = service.getSubActions();
         const subAction = subActions.get('pushToService');
-        expect(() => subAction?.schema?.validate({ externalId, comments: [] }));
+        expect(() => subAction?.schema?.parse({ externalId, comments: [] }));
       }
     );
 
@@ -114,7 +117,7 @@ describe('CaseConnector', () => {
       const subActions = service.getSubActions();
       const subAction = subActions.get('pushToService');
       expect(
-        subAction?.schema?.validate({
+        subAction?.schema?.parse({
           incident: { externalId: 'test', ...incidentSchemaMock },
           comments: null,
         })
@@ -132,7 +135,7 @@ describe('CaseConnector', () => {
     ])('should throw if comments %p', async (comments) => {
       const subActions = service.getSubActions();
       const subAction = subActions.get('pushToService');
-      expect(() => subAction?.schema?.validate({ incident: { externalId: 'test' }, comments }));
+      expect(() => subAction?.schema?.parse({ incident: { externalId: 'test' }, comments }));
     });
 
     it('should throw if necessary schema params not provided', async () => {
@@ -140,12 +143,24 @@ describe('CaseConnector', () => {
       const subAction = subActions.get('pushToService');
 
       expect(() =>
-        subAction?.schema?.validate({
+        subAction?.schema?.parse({
           incident: {
             externalId: 'test',
           },
         })
-      ).toThrow('[incident.name]: expected value of type [string] but got [undefined]');
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[
+          {
+            \\"expected\\": \\"string\\",
+            \\"code\\": \\"invalid_type\\",
+            \\"path\\": [
+              \\"incident\\",
+              \\"name\\"
+            ],
+            \\"message\\": \\"Invalid input: expected string, received undefined\\"
+          }
+        ]"
+      `);
     });
 
     it('should throw if schema params does not match string type', async () => {
@@ -153,13 +168,25 @@ describe('CaseConnector', () => {
       const subAction = subActions.get('pushToService');
 
       expect(() =>
-        subAction?.schema?.validate({
+        subAction?.schema?.parse({
           incident: {
             externalId: 'test',
             name: false,
           },
         })
-      ).toThrow('[incident.name]: expected value of type [string] but got [boolean]');
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[
+          {
+            \\"expected\\": \\"string\\",
+            \\"code\\": \\"invalid_type\\",
+            \\"path\\": [
+              \\"incident\\",
+              \\"name\\"
+            ],
+            \\"message\\": \\"Invalid input: expected string, received boolean\\"
+          }
+        ]"
+      `);
     });
 
     it('should throw if schema params does not match array type', async () => {
@@ -167,14 +194,26 @@ describe('CaseConnector', () => {
       const subAction = subActions.get('pushToService');
 
       expect(() =>
-        subAction?.schema?.validate({
+        subAction?.schema?.parse({
           incident: {
             externalId: 'test',
             name: 'sample',
             foo: null,
           },
         })
-      ).toThrow('[incident.foo]: expected value of type [array] but got [null]');
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[
+          {
+            \\"expected\\": \\"array\\",
+            \\"code\\": \\"invalid_type\\",
+            \\"path\\": [
+              \\"incident\\",
+              \\"foo\\"
+            ],
+            \\"message\\": \\"Invalid input: expected array, received null\\"
+          }
+        ]"
+      `);
     });
 
     it('should throw if schema params does not match nested object type', async () => {
@@ -182,7 +221,7 @@ describe('CaseConnector', () => {
       const subAction = subActions.get('pushToService');
 
       expect(() =>
-        subAction?.schema?.validate({
+        subAction?.schema?.parse({
           incident: {
             externalId: 'test',
             name: 'sample',
@@ -190,9 +229,20 @@ describe('CaseConnector', () => {
             bar: { check: 'hello' },
           },
         })
-      ).toThrow(
-        '[incident.bar.check]: types that failed validation:\n- [incident.bar.check.0]: expected value of type [number] but got [string]\n- [incident.bar.check.1]: expected value to equal [null]'
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[
+          {
+            \\"expected\\": \\"number\\",
+            \\"code\\": \\"invalid_type\\",
+            \\"path\\": [
+              \\"incident\\",
+              \\"bar\\",
+              \\"check\\"
+            ],
+            \\"message\\": \\"Invalid input: expected number, received string\\"
+          }
+        ]"
+      `);
     });
   });
 
@@ -297,8 +347,8 @@ describe('CaseConnector', () => {
       jest.clearAllMocks();
 
       const newPushToServiceSchema = {
-        name: schema.string(),
-        externalId: schema.number(),
+        name: z.string(),
+        externalId: z.number(),
       };
 
       newService = new TestCaseConnector(
@@ -318,7 +368,7 @@ describe('CaseConnector', () => {
       const subActions = newService.getSubActions();
       const subAction = subActions.get('pushToService');
       expect(
-        subAction?.schema?.validate({
+        subAction?.schema?.parse({
           incident: { name: 'foo' },
           comments: [],
         })
@@ -332,13 +382,23 @@ describe('CaseConnector', () => {
       const subActions = newService.getSubActions();
       const subAction = subActions.get('pushToService');
       expect(() =>
-        subAction?.schema?.validate({
+        subAction?.schema?.parse({
           incident: { name: 'foo', externalId: 123 },
           comments: [],
         })
-      ).toThrow(
-        '[incident.externalId]: types that failed validation:\n- [incident.externalId.0]: expected value of type [string] but got [number]\n- [incident.externalId.1]: expected value to equal [null]'
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[
+          {
+            \\"expected\\": \\"string\\",
+            \\"code\\": \\"invalid_type\\",
+            \\"path\\": [
+              \\"incident\\",
+              \\"externalId\\"
+            ],
+            \\"message\\": \\"Invalid input: expected string, received number\\"
+          }
+        ]"
+      `);
     });
   });
 });

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { controlGroupStateBuilder } from '@kbn/controls-plugin/public';
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+import { controlGroupStateBuilder } from '@kbn/control-group-renderer';
 import { COMMON_OPTIONS_LIST_CONTROL_INPUTS, TEST_IDS } from './constants';
 import { useFilterGroupInternalContext } from './hooks/use_filters';
 import {
@@ -65,13 +65,17 @@ export const FilterGroupContextMenu = () => {
           ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
           // option List controls will handle an invalid dataview
           // & display an appropriate message
-          dataViewId: dataViewId ?? '',
+          data_view_id: dataViewId ?? '',
           ...control,
+          display_settings: {
+            ...COMMON_OPTIONS_LIST_CONTROL_INPUTS.display_settings,
+            ...control.display_settings,
+          },
         },
         String(counter)
       );
-      controlGroup?.updateInput(newInput);
     }
+    controlGroup?.updateInput(newInput);
 
     switchToViewMode();
     setShowFiltersChangedBanner(false);
@@ -104,7 +108,7 @@ export const FilterGroupContextMenu = () => {
     () => (
       <EuiContextMenuItem
         key="edit"
-        icon={isViewMode ? 'pencil' : 'minusInCircle'}
+        icon={isViewMode ? 'pencil' : 'minusCircle'}
         aria-label={isViewMode ? EDIT_CONTROLS : DISCARD_CHANGES}
         onClick={
           isViewMode
@@ -132,7 +136,7 @@ export const FilterGroupContextMenu = () => {
           aria-label={FILTER_GROUP_MENU}
           display="empty"
           size="s"
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           onClick={toggleContextMenu}
           data-test-subj={TEST_IDS.CONTEXT_MENU.BTN}
         />

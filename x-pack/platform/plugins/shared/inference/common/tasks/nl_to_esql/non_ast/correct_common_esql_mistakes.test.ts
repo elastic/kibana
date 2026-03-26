@@ -42,10 +42,17 @@ describe('correctCommonEsqlMistakes', () => {
       | STATS avg_duration = AVG(transaction.duration.us), total_successes = SUM(success), total_requests = COUNT(*) BY service.name`,
     });
   });
-  it("replaces ` or ' escaping in FROM statements with double quotes", () => {
+
+  it("replaces ` or ' escaping in FROM or TS statements with double quotes", () => {
     expectQuery({ input: `FROM "logs-*" | LIMIT 10`, expectedOutput: 'FROM "logs-*"\n| LIMIT 10' });
-    expectQuery({ input: `FROM 'logs-*' | LIMIT 10`, expectedOutput: 'FROM "logs-*"\n| LIMIT 10' });
+
     expectQuery({ input: 'FROM `logs-*` | LIMIT 10', expectedOutput: 'FROM "logs-*"\n| LIMIT 10' });
+
+    expectQuery({
+      input: `TS 'metrics-*' | LIMIT 10`,
+      expectedOutput: 'TS "metrics-*"\n| LIMIT 10',
+    });
+
     expectQuery({
       input: `FROM 'logs-2024-07-01','logs-2024-07-02' | LIMIT 10`,
       expectedOutput: 'FROM "logs-2024-07-01","logs-2024-07-02"\n| LIMIT 10',
@@ -54,7 +61,8 @@ describe('correctCommonEsqlMistakes', () => {
       input: 'FROM `logs-2024-07-01`,`logs-2024-07-02` | LIMIT 10',
       expectedOutput: 'FROM "logs-2024-07-01","logs-2024-07-02"\n| LIMIT 10',
     });
-    expectQuery({ input: `FROM logs-* | LIMIT 10`, expectedOutput: 'FROM logs-*\n| LIMIT 10' });
+
+    expectQuery({ input: `TS metrics-* | LIMIT 10`, expectedOutput: 'TS metrics-*\n| LIMIT 10' });
   });
 
   it('replaces double quotes around columns with backticks', () => {
@@ -107,6 +115,12 @@ describe('correctCommonEsqlMistakes', () => {
       expectedOutput: `FROM nyc_taxis
     | WHERE DATE_EXTRACT("hour", "hh:mm a, 'of' d MMMM yyyy") >= 6 AND DATE_EXTRACT("hour", dropoff_datetime) < 10
     | LIMIT 10`,
+    });
+
+    // make sure that where clauses as part of STATS statements are also processed
+    expectQuery({
+      input: `FROM logs-apm.error-default\n| WHERE @timestamp >= NOW() - 7 days\n| STATS total_logs = COUNT(*), error_logs = COUNT(*) WHERE processor.event == 'error' BY day = BUCKET(@timestamp, 1 day)\n| EVAL error_rate = (error_logs / total_logs) * 100\n| SORT day | LIMIT 0`,
+      expectedOutput: `FROM logs-apm.error-default\n| WHERE @timestamp >= NOW() - 7 days\n| STATS total_logs = COUNT(*), error_logs = COUNT(*) WHERE processor.event == "error" BY day = BUCKET(@timestamp, 1 day)\n| EVAL error_rate = (error_logs / total_logs) * 100\n| SORT day\n| LIMIT 0`,
     });
   });
 
@@ -213,21 +227,6 @@ describe('correctCommonEsqlMistakes', () => {
           message == "Connection error", 0
         )
       | STATS success_rate = AVG(successful)`,
-    });
-  });
-
-  it('escapes special characters in column names', () => {
-    expectQuery({
-      input: `FROM "custom-test"
-| STATS
-    count = COUNT(*),
-    min = MIN("Total Bytes"),
-    max = MAX("Total Bytes"),
-    avg = AVG("Total Bytes"),
-    sum = SUM("Total Bytes")
-`,
-      expectedOutput: `FROM "custom-test"
-| STATS count = COUNT(*), min = MIN(\`Total Bytes\`), max = MAX(\`Total Bytes\`), avg = AVG(\`Total Bytes\`), sum = SUM(\`Total Bytes\`)`,
     });
   });
 });

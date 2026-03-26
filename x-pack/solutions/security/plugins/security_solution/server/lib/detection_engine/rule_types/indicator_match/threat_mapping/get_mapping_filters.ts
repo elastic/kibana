@@ -6,7 +6,7 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ThreatMapping } from '../../../../../../common/api/detection_engine/model/rule_schema';
 
 interface MustExist {
   bool: { must: Array<{ exists: { field: string } }> };
@@ -31,6 +31,9 @@ export const getMappingFilters = (threatMapping: ThreatMapping) => {
         bool: { must: [] },
       };
       threatMap.entries.forEach((entry) => {
+        if (entry.negate) {
+          return;
+        }
         eventMustClause.bool.must.push({ exists: { field: entry.field } });
         indicatorMustClause.bool.must.push({ exists: { field: entry.value } });
       });

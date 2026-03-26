@@ -7,14 +7,14 @@
 
 // TODO: https://github.com/elastic/kibana/issues/110905
 
-import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
-import {
-  Plugin,
+import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import type {
   ObservabilityPublicPluginsStart,
   ObservabilityPublicPluginsSetup,
   ObservabilityPublicStart,
   ObservabilityPublicSetup,
 } from './plugin';
+import { Plugin } from './plugin';
 export type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
@@ -39,18 +39,16 @@ export {
   enableComparisonByDefault,
   apmServiceGroupMaxNumberOfServices,
   apmEnableTableSearchBar,
-  apmEnableServiceMapApiV2,
 } from '../common/ui_settings_keys';
+export { alertsLocatorID, uptimeOverviewLocatorID } from '../common';
 export {
-  alertsLocatorID,
   ruleDetailsLocatorID,
   rulesLocatorID,
   sloDetailsLocatorID,
   sloEditLocatorID,
-  uptimeOverviewLocatorID,
-} from '../common';
+} from '@kbn/deeplinks-observability';
 
-export type { RulesParams } from './locators/rules';
+export type { RulesLocatorParams } from '@kbn/deeplinks-observability';
 export { getCoreVitalsComponent } from './pages/overview/components/sections/ux/core_web_vitals/get_core_web_vitals_lazy';
 export { ObservabilityAlertSearchBar } from './components/alert_search_bar/get_alert_search_bar_lazy';
 export { DatePicker } from './pages/overview/components/date_picker';
@@ -85,7 +83,7 @@ export type {
   ObservabilityHasDataResponse,
   Subset,
 } from './typings';
-import { TopAlert } from './typings/alerts';
+import type { TopAlert } from './typings/alerts';
 export type { TopAlert };
 import type { AlertDetailsAppSectionProps } from './pages/alert_details/types';
 export type { AlertDetailsAppSectionProps };

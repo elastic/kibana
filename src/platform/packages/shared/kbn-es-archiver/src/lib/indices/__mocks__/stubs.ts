@@ -9,8 +9,8 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import sinon from 'sinon';
-import { ToolingLog } from '@kbn/tooling-log';
-import { Stats } from '../../stats';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { Stats } from '../../stats';
 
 type StubStats = Stats & {
   getTestSummary: () => Record<string, number>;
@@ -58,6 +58,15 @@ export const createStubDataStreamRecord = (dataStream: string, template: string)
 export const createStubDocRecord = (index: string, id: number) => ({
   type: 'doc',
   value: { index, id },
+});
+
+export const createStubDataStreamDocRecord = (
+  dataStream: string,
+  backingIndex: string,
+  id: number
+) => ({
+  type: 'doc',
+  value: { index: backingIndex, data_stream: dataStream, id },
 });
 
 const createEsClientError = (errorType: string) => {

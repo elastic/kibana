@@ -6,7 +6,7 @@
  */
 
 import { openSans } from '../../../common/lib/fonts';
-import { ElementFactory } from '../../../types';
+import type { ElementFactory } from '../../../types';
 
 export const progressSemicircle: ElementFactory = () => ({
   name: 'progressSemicircle',

@@ -19,7 +19,7 @@ import { useParams } from 'react-router-dom';
 import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
-import { getMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
+import { useGetMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
 import { useNavigateFindings } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
 import { useBenchmarkDynamicValues } from '../../common/hooks/use_benchmark_dynamic_values';
 import { getPostureScorePercentage } from '../compliance_dashboard/compliance_charts/compliance_score_chart';
@@ -35,6 +35,7 @@ const EvaluationPieChart = ({ failed, passed }: { failed: number; passed: number
   const {
     services: { charts },
   } = useKibana();
+  const { getMisconfigurationStatusColor } = useGetMisconfigurationStatusColor();
 
   return (
     <Chart size={{ height: 30, width: 30 }}>
@@ -97,6 +98,7 @@ export const RulesCounters = ({
   const rulesPageParams = useParams<{ benchmarkId: string; benchmarkVersion: string }>();
   const getBenchmarks = useCspBenchmarkIntegrationsV2();
   const navToFindings = useNavigateFindings();
+  const { getMisconfigurationStatusColor } = useGetMisconfigurationStatusColor();
 
   const benchmarkRulesStats = getBenchmarks.data?.items.find(
     (benchmark) =>
@@ -215,7 +217,7 @@ export const RulesCounters = ({
       button: (
         <EuiButtonEmpty
           data-test-subj={RULE_COUNTERS_TEST_SUBJ.INTEGRATIONS_EVALUATED_BUTTON}
-          iconType="listAdd"
+          iconType="plusCircle"
           href={benchmarkValues.integrationLink}
         >
           {i18n.translate('xpack.csp.rulesCounters.accountsEvaluatedButton', {
@@ -264,7 +266,7 @@ export const RulesCounters = ({
       button: (
         <EuiButtonEmpty
           data-test-subj={RULE_COUNTERS_TEST_SUBJ.DISABLED_RULES_BUTTON}
-          iconType="search"
+          iconType="magnify"
           onClick={() => setEnabledDisabledItemsFilter('disabled')}
         >
           {i18n.translate('xpack.csp.rulesCounters.disabledRulesCounterButton', {

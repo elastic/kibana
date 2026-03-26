@@ -4,84 +4,144 @@ navigation_title: "Known issues"
 
 # Kibana known issues
 
-::::{dropdown} Errors in rule executions occur when maintenance windows have filters
+For Elastic {{observability}} known issues, refer to [Elastic Observability known issues](docs-content://release-notes/elastic-observability/known-issues.md).
 
-Applies to: {{stack}} 9.0.0, 9.0.1
+For Elastic Security known issues, refer to [Elastic Security known issues](docs-content://release-notes/elastic-security/known-issues.md).
 
-**Details** 
-Errors occur when rules run during an active maintenance window that has filters and a matching rule category. 
+::::{dropdown} The connection between agentless integrations and {{fleet-server}} is broken
+:applies_to: ess: ga
 
-**Workaround** 
-Remove any filters added to the active maintenance window.
+Applies to: {{stack}} <9.1.6
 
-::::
+**Details**
 
-::::{dropdown} Observability AI assistant gets stuck in a loop when attempting to call the `execute_connector` function
-:name:known-issue-1508
+When agentless integrations are deployed in {{fleet}} in an {{ech}} deployment, the connection between the agentless integrations and {{fleet-server}} can be broken if the default {{fleet-server}} host URL is modified or if a different host URL is set as the default.
 
-Applies to: {{stack}} 9.0.0, 9.0.1, 9.0.2
+**Resolved**
 
-**Details** 
-
-The Observability AI assistant gets stuck in a loop when calling the `execute_connector` function. Instead of completing queries, it times out with the error message `Failed to parse function call arguments when converting messages for inference: SyntaxError: Unexpected non-whitespace character after JSON at position 72 and Error: Tool call arguments for execute_connector (...) were invalid`. 
-
+This issue is resolved in {{stack}} 9.1.6.
 
 ::::
 
-::::{dropdown} Observability AI assistant Knowledge Base entries with empty text can lead to Kibana OOM or restarts
-:name:known-issue-220339
+::::{dropdown} Alerts aren't generated for rules with alert flapping off and an alert delay higher than 1
+
+Applies to: {{stack}} 9.0.0-9.2.0
+
+**Details**
+
+Alerts aren't generated for rules that have **Alert flapping detection** turned off and the alert delay set to a value higher than 1.
+
+**Workaround**
+
+Set the alert delay value to 1 or turn on **Alert flapping detection**.
+
+::::
+
+::::{dropdown} Reports created in non-default Kibana spaces aren't shown in the Reporting UI
+
+Applies to: {{stack}} 9.1.0, 9.1.1
+
+**Details**
+
+After creating a report in a non-default {{kib}} space, the document exists in the `.kibana-reporting` index but isn't shown in the Reporting UI.
+
+::::
+
+::::{dropdown} Issues with rules occur when xpack.alerting.rules.run.alerts.max is set to a value greater than 5000
+
+Applies to: {{stack}} 9.0.3, 9.0.4, 9.1.0
+
+**Details**
+
+If you've set `xpack.alerting.rules.run.alerts.max` to a value greater than `5000`, you will encounter `Result window is too large` error messages when a maintenance window is active.
+
+**Action**
+
+To mitigate the issue, set `xpack.alerting.rules.run.alerts.max` to a value equal to or less than `5000`.
+
+**Resolved**
+
+This issue is resolved in {{stack}} 9.1.0 and 9.1.2.
+
+::::
+
+::::{dropdown} PDF and PNG reports time out and fail with an invalid header error if server.protocol is set to http2
 
 Applies to: {{stack}} 9.0.0
 
-**Details** 
+**Details**
 
-The semantic text migration can cause excessive traffic to a cluster and might eventually cause the Kibana instance to crash due to OOM, together with increase of requests to Elasticsearch & ML nodes.
+Starting in  9.0.0, the default value of `server.protocol` is `http2`. PDF and PNG reports will fail when this setting is used in this release.
 
-The problem can occur when there is one or more empty text Knowledge Base documents.
+**Action**
 
-The migration script does not handle this scenario and will indefinitely update the same document.
+To temporarily resolve the issue, set `server.protocol` to `http1`. 
 
-Because the document update involves semantic_text an ML node is kept warm further increasing the costs.
+**Resolved**
 
-The issue involves semantic_text field type (and thus the semantic_text migration which is causing this issue), introduced in the knowledge base feature in 8.17.
+This issue is resolved in {{stack}} 9.0.0, 9.0.4, 9.1.0.
 
-**Workaround** 
+::::
 
-1. Pause the Kibana instance if possible. If not possible, skip this step.
-2. Run a dry run query to identify if you have empty Knowledge Base documents. If you have at least 1 hit, you can be affected by the problem.
+::::{dropdown} Dashboard Copy link doesn't work when sharing from a space other than the default space
 
-    ```sh
-    GET .kibana-observability-ai-assistant-kb/_search
-    {
-      "query": {
-        "bool": {
-          "must": [{ "exists": { "field": "text" }}],
-          "must_not": [ { "wildcard": { "text": "*" } }
-          ]
-        }
-      }
-    }
-    ```
+Applies to: {{stack}} 9.0.3
 
-3. Execute the deletion. For extra safety, you might want to trigger a snapshot before executing it.
+**Details**
 
-    ```sh
-    POST .kibana-observability-ai-assistant-kb/_delete_by_query
-    {
-      "query": {
-        "bool": {
-          "must": [{ "exists": { "field": "text" }}],
-          "must_not": [ { "wildcard": { "text": "*" } }
-          ]
-        }
-      }
-    }
-    ```
+When attempting to share a dashboard from a space that isn't the default space, the **Copy link** action never completes.
 
-For more information, check:
+**Action**
 
-- [#220339](https://github.com/elastic/kibana/issues/220339)
-- [#220342](https://github.com/elastic/kibana/issues/220342)
+To avoid this error, don't upgrade {{kib}} to {{stack}} 9.0.3 or upgrade {{kib}} to {{stack}} 9.0.4 when available.
+
+**Resolved**
+
+This issue is resolved in {{stack}} 9.0.4.
+
+::::
+
+::::{dropdown} Upgrading Kibana from 8.18.x to 9.0.2 fails due to a configuration conflict in the kibana.yml file
+
+Applies to: {{stack}} 9.0.2
+
+**Details**
+
+Upgrading {{kib}} from version 8.18.x to 9.0.2 fails due to a configuration conflict if `xpack.alerting.cancelAlertsOnRuleTimeout` is set to `false` in the `kibana.yml` file. {{kib}} fails to boot and shows a fatal error message in the {{kib}} logs that's similar to the following:
+
+````
+FATAL Error: Rule type "transform_health" cannot have both cancelAlertsOnRuleTimeout set to false and autoRecoverAlerts set to true.
+````
+
+This failure occurs when the `xpack.alerting.cancelAlertsOnRuleTimeout` setting is set to `false`, which is incompatible with the default configuration of an internal setting (`autoRecoverAlerts`) in 9.0.2.
+
+
+**Action**
+
+To temporarily resolve the issue and allow the upgrade to proceed, follow these steps:
+
+1. Remove the `xpack.alerting.cancelAlertsOnRuleTimeout: false` setting from the `kibana.yml` file.
+2. Restart {{kib}} to apply the changes.
+
+**Resolved**
+
+This was resolved in {{stack}} 9.0.3.
+
+::::
+
+::::{dropdown} Errors in rule executions occur when maintenance windows have filters
+
+Applies to: {{stack}} 9.0.0, 9.0.1, 9.0.2
+
+**Details**
+Errors occur when rules run during an active maintenance window that has filters and a matching rule category. 
+
+**Workaround**
+Remove any filters added to the active maintenance window.
+
+**Resolved**
+
+This was resolved in {{stack}} 9.0.3.
 
 ::::
 
@@ -122,7 +182,7 @@ Applies to: {{stack}} 9.0.0
 
 **Details**
 
-Rollup indices, like all indices, created in 7.x or earlier need to be reindexed in preparation for migration to 9.0. However, in addition to the normal reindex process the rollup job also needs to be accounted for. 
+Rollup indices, like all indices, created in 7.x or earlier need to be reindexed in preparation for migration to 9.0. However, in addition to the normal reindex process the rollup job also needs to be accounted for.
 
 **Action**
 

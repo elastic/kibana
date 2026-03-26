@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MemoryHistory, createMemoryHistory } from 'history';
+import type { MemoryHistory } from 'history';
+import { createMemoryHistory } from 'history';
 import React, { useEffect } from 'react';
 import { render, waitFor } from '@testing-library/react';
 
@@ -24,7 +25,7 @@ jest.mock('../dashboard_top_nav');
 describe('Dashboard App', () => {
   dataService.query.filterManager.getFilters = jest.fn().mockImplementation(() => []);
 
-  const { api: dashboardApi, cleanup } = buildMockDashboardApi();
+  const { api: dashboardApi, internalApi: dashboardInternalApi, cleanup } = buildMockDashboardApi();
   let mockHistory: MemoryHistory;
   // this is in url_utils dashboardApi expandedPanel subscription
   let historySpy: jest.SpyInstance;
@@ -44,7 +45,7 @@ describe('Dashboard App', () => {
       ({ onApiAvailable }: DashboardRendererProps) => {
         // we need overwrite the onApiAvailable prop to get access to the dashboard API in this test
         useEffect(() => {
-          onApiAvailable?.(dashboardApi);
+          onApiAvailable?.(dashboardApi, dashboardInternalApi);
         }, [onApiAvailable]);
 
         return <div>Test renderer</div>;
@@ -63,7 +64,9 @@ describe('Dashboard App', () => {
   });
 
   it('test the default behavior without an expandedPanel id passed as a prop to the DashboardApp', async () => {
-    render(<DashboardApp redirectTo={jest.fn()} history={mockHistory} />);
+    render(
+      <DashboardApp redirectTo={jest.fn()} history={mockHistory} setDashboardAppApi={jest.fn()} />
+    );
 
     await waitFor(() => {
       expect(expandPanelSpy).not.toHaveBeenCalled();
@@ -85,7 +88,14 @@ describe('Dashboard App', () => {
   });
 
   it('test that the expanded panel behavior subject and history is called when passed as a prop to the DashboardApp', async () => {
-    render(<DashboardApp redirectTo={jest.fn()} history={mockHistory} expandedPanelId="456" />);
+    render(
+      <DashboardApp
+        redirectTo={jest.fn()}
+        history={mockHistory}
+        expandedPanelId="456"
+        setDashboardAppApi={jest.fn()}
+      />
+    );
 
     await waitFor(() => {
       expect(expandPanelSpy).toHaveBeenCalledTimes(1);

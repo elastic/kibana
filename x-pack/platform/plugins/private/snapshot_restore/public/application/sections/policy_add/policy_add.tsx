@@ -7,10 +7,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 
 import { EuiPageSection, EuiSpacer, EuiPageHeader } from '@elastic/eui';
-import { SlmPolicyPayload } from '../../../../common/types';
+import type { SlmPolicyPayload } from '../../../../common/types';
 import { TIME_UNITS } from '../../../../common';
 
 import { SectionError, PageError } from '../../../shared_imports';

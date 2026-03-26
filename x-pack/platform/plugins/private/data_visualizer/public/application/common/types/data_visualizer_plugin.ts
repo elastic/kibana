@@ -21,6 +21,7 @@ import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-p
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 
 export interface DataVisualizerSetupDependencies {
   home?: HomePublicPluginSetup;
@@ -30,18 +31,19 @@ export interface DataVisualizerSetupDependencies {
 }
 export interface DataVisualizerStartDependencies {
   analytics: AnalyticsServiceStart;
-  data: DataPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
-  fileUpload: FileUploadPluginStart;
-  maps: MapsStartApi;
-  embeddable: EmbeddableStart;
-  share: SharePluginStart;
-  lens?: LensPublicStart;
   charts: ChartsPluginStart;
-  dataViewFieldEditor?: IndexPatternFieldEditorStart;
-  fieldFormats: FieldFormatsStart;
-  uiActions?: UiActionsStart;
   cloud?: CloudStart;
+  data: DataPublicPluginStart;
+  dataViewFieldEditor?: IndexPatternFieldEditorStart;
+  embeddable: EmbeddableStart;
+  fieldFormats: FieldFormatsStart;
+  fileUpload: FileUploadPluginStart;
+  lens?: LensPublicStart;
+  maps: MapsStartApi;
   savedSearch: SavedSearchPublicPluginStart;
+  share: SharePluginStart;
+  uiActions: UiActionsStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection?: UsageCollectionStart;
+  cps: CPSPluginStart;
 }

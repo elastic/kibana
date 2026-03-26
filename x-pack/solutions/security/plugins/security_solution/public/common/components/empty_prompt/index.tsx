@@ -12,7 +12,7 @@ const EmptyPromptLazy = lazy(() => import('./empty_prompt'));
 const centerLogoStyle = { display: 'flex', margin: 'auto' };
 
 export const EmptyPrompt = ({ onSkip }: { onSkip?: () => void }) => (
-  <Suspense fallback={<EuiLoadingLogo logo="logoSecurity" size="xl" style={centerLogoStyle} />}>
+  <Suspense fallback={<EuiLoadingLogo logo="logoSecurity" size="xl" css={centerLogoStyle} />}>
     <EmptyPromptLazy onSkip={onSkip} />
   </Suspense>
 );

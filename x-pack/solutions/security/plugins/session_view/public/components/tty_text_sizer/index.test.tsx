@@ -6,11 +6,11 @@
  */
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import type { AppContextTestRender } from '../../test';
+import { createAppRootMockRenderer } from '../../test';
 import { DEFAULT_TTY_FONT_SIZE } from '../../../common/constants';
-import { TTYTextSizer, TTYTextSizerDeps } from '.';
-
-const FULL_SCREEN_FONT_SIZE = 12;
+import type { TTYTextSizerDeps } from '.';
+import { TTYTextSizer } from '.';
 
 describe('TTYTextSizer component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -22,7 +22,6 @@ describe('TTYTextSizer component', () => {
     mockedContext = createAppRootMockRenderer();
 
     props = {
-      isFullscreen: false,
       tty: {
         rows: 24,
         columns: 80,
@@ -75,20 +74,5 @@ describe('TTYTextSizer component', () => {
 
     expect(props.onFontSizeChanged).toHaveBeenCalledTimes(1);
     expect(props.onFontSizeChanged).toHaveBeenCalledWith(DEFAULT_TTY_FONT_SIZE - 1);
-  });
-
-  it('emits a font size to fit to full screen, when isFullscreen = true', async () => {
-    renderResult = mockedContext.render(
-      <TTYTextSizer {...props} isFullscreen containerHeight={400} />
-    );
-
-    const zoomFitBtn = renderResult.queryByTestId('sessionView:TTYZoomFit');
-
-    if (zoomFitBtn) {
-      await userEvent.click(zoomFitBtn);
-    }
-
-    expect(props.onFontSizeChanged).toHaveBeenCalledTimes(1);
-    expect(props.onFontSizeChanged).toHaveBeenCalledWith(FULL_SCREEN_FONT_SIZE);
   });
 });

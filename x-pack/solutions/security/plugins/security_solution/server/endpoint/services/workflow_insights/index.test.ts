@@ -11,30 +11,30 @@ import { ReplaySubject } from 'rxjs';
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type {
-  DefendInsight,
   DefendInsightsGetRequestQuery,
   DefendInsightsPostRequestBody,
 } from '@kbn/elastic-assistant-common';
 import type { SearchHit, UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
+import type {
+  DefendInsight,
+  SearchParams,
+  SecurityWorkflowInsight,
+} from '../../../../common/endpoint/types/workflow_insights';
+import {
+  WorkflowInsightType,
+  WorkflowInsightCategory,
+  WorkflowInsightSourceType,
+  WorkflowInsightTargetType,
+  WorkflowInsightActionType,
+} from '../../../../common/endpoint/types/workflow_insights';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { kibanaPackageJson } from '@kbn/repo-info';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import type {
-  SearchParams,
-  SecurityWorkflowInsight,
-} from '../../../../common/endpoint/types/workflow_insights';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 
-import {
-  Category,
-  SourceType,
-  TargetType,
-  ActionType,
-} from '../../../../common/endpoint/types/workflow_insights';
 import { createMockEndpointAppContext } from '../../mocks';
 import {
   checkIfRemediationExists,
@@ -68,20 +68,20 @@ function getDefaultInsight(overrides?: Partial<SecurityWorkflowInsight>): Securi
   const defaultInsight = {
     '@timestamp': moment(),
     message: 'This is a test message',
-    category: Category.Endpoint,
-    type: DefendInsightType.Enum.incompatible_antivirus,
+    category: WorkflowInsightCategory.enum.endpoint,
+    type: WorkflowInsightType.enum.incompatible_antivirus,
     source: {
-      type: SourceType.LlmConnector,
+      type: WorkflowInsightSourceType.enum['llm-connector'],
       id: 'openai-connector-id',
       data_range_start: moment(),
       data_range_end: moment(),
     },
     target: {
-      type: TargetType.Endpoint,
+      type: WorkflowInsightTargetType.enum.endpoint,
       ids: ['endpoint-1', 'endpoint-2'],
     },
     action: {
-      type: ActionType.Refreshed,
+      type: WorkflowInsightActionType.enum.refreshed,
       timestamp: moment(),
     },
     value: 'unique-key',
@@ -149,7 +149,6 @@ describe('SecurityWorkflowInsightsService', () => {
       securityWorkflowInsightsService.setup({
         kibanaVersion: kibanaPackageJson.version,
         logger,
-        isFeatureEnabled: true,
         endpointContext: mockEndpointAppContextService,
       });
 
@@ -166,7 +165,6 @@ describe('SecurityWorkflowInsightsService', () => {
       securityWorkflowInsightsService.setup({
         kibanaVersion: kibanaPackageJson.version,
         logger,
-        isFeatureEnabled: true,
         endpointContext: mockEndpointAppContextService,
       });
 
@@ -191,7 +189,6 @@ describe('SecurityWorkflowInsightsService', () => {
       securityWorkflowInsightsService.setup({
         kibanaVersion: kibanaPackageJson.version,
         logger,
-        isFeatureEnabled: true,
         endpointContext: mockEndpointAppContextService,
       });
       expect(createDatastreamMock).toHaveBeenCalledTimes(1);
@@ -218,7 +215,6 @@ describe('SecurityWorkflowInsightsService', () => {
       securityWorkflowInsightsService.setup({
         kibanaVersion: kibanaPackageJson.version,
         logger,
-        isFeatureEnabled: true,
         endpointContext: mockEndpointAppContextService,
       });
 
@@ -254,9 +250,7 @@ describe('SecurityWorkflowInsightsService', () => {
         insight, // intentional dupe to confirm de-duping
       ];
 
-      const request = {} as KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
       const workflowInsights: SecurityWorkflowInsight[] = [getDefaultInsight()];
-
       const buildWorkflowInsightsMock = buildWorkflowInsights as jest.Mock;
       buildWorkflowInsightsMock.mockResolvedValueOnce(workflowInsights);
 
@@ -278,16 +272,24 @@ describe('SecurityWorkflowInsightsService', () => {
       });
       const result = await securityWorkflowInsightsService.createFromDefendInsights(
         defendInsights,
-        request
+        insight.events.map((e) => e.endpointId),
+        workflowInsights[0].type,
+        workflowInsights[0].source.id,
+        workflowInsights[0].source.type
       );
 
-      // three since it calls securityWorkflowInsightsService.create + fetch
-      expect(isInitializedSpy).toHaveBeenCalledTimes(3);
+      // four since it calls fetch + update + fetch + create
+      expect(isInitializedSpy).toHaveBeenCalledTimes(4);
       expect(buildWorkflowInsightsMock).toHaveBeenCalledWith({
         defendInsights,
-        request,
         endpointMetadataService: expect.any(Object),
         esClient,
+        options: {
+          insightType: workflowInsights[0].type,
+          endpointIds: insight.events.map((e) => e.endpointId),
+          connectorId: workflowInsights[0].source.id,
+          model: workflowInsights[0].source.type,
+        },
       });
       expect(result).toEqual(workflowInsights.map(() => esClientIndexResp));
     });
@@ -336,7 +338,7 @@ describe('SecurityWorkflowInsightsService', () => {
         expect.objectContaining({
           document: expect.objectContaining({
             action: expect.objectContaining({
-              type: ActionType.Remediated,
+              type: WorkflowInsightActionType.enum.remediated,
             }),
           }),
         })
@@ -412,13 +414,16 @@ describe('SecurityWorkflowInsightsService', () => {
         size: 50,
         from: 50,
         ids: ['id1', 'id2'],
-        categories: [Category.Endpoint],
-        types: [DefendInsightType.Enum.incompatible_antivirus],
-        sourceTypes: [SourceType.LlmConnector],
+        categories: [WorkflowInsightCategory.enum.endpoint],
+        types: [WorkflowInsightType.enum.incompatible_antivirus],
+        sourceTypes: [WorkflowInsightSourceType.enum['llm-connector']],
         sourceIds: ['source-id1', 'source-id2'],
-        targetTypes: [TargetType.Endpoint],
+        targetTypes: [WorkflowInsightTargetType.enum.endpoint],
         targetIds: ['target-id1', 'target-id2'],
-        actionTypes: [ActionType.Refreshed, ActionType.Remediated],
+        actionTypes: [
+          WorkflowInsightActionType.enum.refreshed,
+          WorkflowInsightActionType.enum.remediated,
+        ],
       };
       await securityWorkflowInsightsService.fetch(searchParams);
 
@@ -443,7 +448,7 @@ describe('SecurityWorkflowInsightsService', () => {
               },
               {
                 terms: {
-                  types: ['incompatible_antivirus'],
+                  type: ['incompatible_antivirus'],
                 },
               },
               {
@@ -509,16 +514,11 @@ describe('SecurityWorkflowInsightsService', () => {
     let request: KibanaRequest<unknown, unknown, DefendInsightsGetRequestQuery>;
 
     const setupWithMockFleet = () => {
-      // @ts-expect-error write to readonly property
-      mockEndpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-        true;
-
       const { ensureInCurrentSpace } = mockEndpointAppContextService.getInternalFleetServices();
 
       securityWorkflowInsightsService.setup({
         kibanaVersion: kibanaPackageJson.version,
         logger,
-        isFeatureEnabled: true,
         endpointContext: mockEndpointAppContextService,
       });
 
@@ -535,16 +535,6 @@ describe('SecurityWorkflowInsightsService', () => {
     });
 
     describe('ensureAgentIdsInCurrentSpace', () => {
-      it('should not call fleetServices.ensureInCurrentSpace when the experimental feature is disabled', async () => {
-        // @ts-expect-error write to readonly property
-        mockEndpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-          false;
-
-        await securityWorkflowInsightsService.ensureAgentIdsInCurrentSpace(request, ['agent-1']);
-
-        expect(mockEndpointAppContextService.getInternalFleetServices).not.toHaveBeenCalled();
-      });
-
       it('should call fleetServices.ensureInCurrentSpace with correct agent IDs when feature is enabled', async () => {
         const { ensureInCurrentSpace } = setupWithMockFleet();
 

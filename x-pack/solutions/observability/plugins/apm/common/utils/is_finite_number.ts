@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { isFinite } from 'lodash';
-
-// _.isNumber() returns true for NaN, _.isFinite() does not refine
 export function isFiniteNumber(value: any): value is number {
-  return isFinite(value);
+  return Number.isFinite(value);
 }

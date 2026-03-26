@@ -9,19 +9,14 @@
 
 import 'source-map-support/register';
 
-import webpack, { Stats } from 'webpack';
+import type { Stats } from 'webpack';
+import webpack from 'webpack';
 import * as Rx from 'rxjs';
 import { mergeMap, map, mapTo, takeUntil } from 'rxjs';
 import { isFailureStats, failedStatsToErrorMessage } from '@kbn/optimizer-webpack-helpers';
 
-import {
-  CompilerMsgs,
-  CompilerMsg,
-  maybeMap,
-  Bundle,
-  WorkerConfig,
-  BundleRemotes,
-} from '../common';
+import type { CompilerMsg, Bundle, WorkerConfig, BundleRemotes } from '../common';
+import { CompilerMsgs, maybeMap } from '../common';
 import { getWebpackConfig } from './webpack.config';
 
 const PLUGIN_NAME = '@kbn/optimizer';

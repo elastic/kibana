@@ -5,6 +5,25 @@ info:
 paths: { }
 components:
   schemas:
+    FindLiveQueryRequestQuery:
+      type: object
+      properties:
+        kuery:
+          type: string
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        sort:
+          type: string
+        sortOrder:
+          type: string
+          enum: [asc, desc]
+        withResultCounts:
+          type: boolean
+          description: >
+            When true, the response includes result_counts on each item with
+            aggregated result statistics from the action responses index.
     FindLiveQueryResponse:
       example:
         data:
@@ -24,6 +43,11 @@ components:
                       host.uptime:
                         field: "total_seconds"
                     agents: [ "16d7caf5-efd2-4212-9b62-73dafc91fa13" ]
+                result_counts:
+                  total_rows: 42
+                  responded_agents: 1
+                  successful_agents: 1
+                  error_agents: 0
       type: object
       properties: { }
     FindLiveQueryDetailsResponse:

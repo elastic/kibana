@@ -37,7 +37,7 @@ describe('webhook action params validation', () => {
       subActionParams: { incident: { title: 'some title {{test}}' }, comments: [] },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: { 'subActionParams.incident.title': [] },
     });
   });
@@ -47,7 +47,7 @@ describe('webhook action params validation', () => {
       subActionParams: { incident: { title: '' }, comments: [] },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.incident.title': ['Title is required.'],
       },

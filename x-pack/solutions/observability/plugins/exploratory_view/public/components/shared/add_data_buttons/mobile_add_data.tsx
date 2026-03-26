@@ -20,7 +20,6 @@ export function MobileAddData() {
       })}
       href={kibana.services?.application?.getUrlForApp('/apm/tutorial')}
       color="primary"
-      iconType="indexOpen"
     >
       {ADD_DATA_LABEL}
     </EuiHeaderLink>

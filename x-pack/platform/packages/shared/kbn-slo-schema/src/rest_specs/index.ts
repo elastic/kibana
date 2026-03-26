@@ -7,5 +7,5 @@
 
 export * from './slo';
 export * from './routes';
-export * from './indicators';
-export * from './common';
+export type * from './indicators';
+export type * from './common';

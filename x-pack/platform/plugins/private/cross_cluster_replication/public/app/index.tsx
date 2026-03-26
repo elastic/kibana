@@ -9,7 +9,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 
-import {
+import type {
   UnmountCallback,
   ScopedHistory,
   ApplicationStart,
@@ -18,7 +18,8 @@ import {
   CoreStart,
 } from '@kbn/core/public';
 import { KibanaRenderContextProvider, useExecutionContext } from '../shared_imports';
-import { init as initBreadcrumbs, SetBreadcrumbs } from './services/breadcrumbs';
+import type { SetBreadcrumbs } from './services/breadcrumbs';
+import { init as initBreadcrumbs } from './services/breadcrumbs';
 import { init as initDocumentation } from './services/documentation_links';
 import { App } from './app';
 import { ccrStore } from './store';
