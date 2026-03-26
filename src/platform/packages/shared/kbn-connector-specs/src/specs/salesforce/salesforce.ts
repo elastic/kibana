@@ -9,6 +9,12 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
+import describeWorkflow from './workflows/describe.yaml';
+import downloadFileWorkflow from './workflows/download_file.yaml';
+import getRecordWorkflow from './workflows/get_record.yaml';
+import listRecordsWorkflow from './workflows/list_records.yaml';
+import queryWorkflow from './workflows/query.yaml';
+import searchWorkflow from './workflows/search.yaml';
 
 const SALESFORCE_API_VERSION = 'v66.0';
 
@@ -248,4 +254,13 @@ export const SalesforceConnector: ConnectorSpec = {
       }
     },
   },
+
+  agentBuilderWorkflows: [
+    describeWorkflow,
+    downloadFileWorkflow,
+    getRecordWorkflow,
+    listRecordsWorkflow,
+    queryWorkflow,
+    searchWorkflow,
+  ],
 };
