@@ -10,6 +10,7 @@ import { useLocation, useHistory } from 'react-router-dom';
 import { EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SecurityPageName } from '@kbn/deeplinks-security';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { AdministrationListPage } from '../../components/administration_list_page';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -49,6 +50,15 @@ const ARTIFACTS_PAGE_DESCRIPTION = i18n.translate(
       'Manage the rules, exceptions, and trust settings that control how endpoints are protected and respond to activity.',
   }
 );
+
+const TAB_PAGE_NAMES: Partial<Record<AdministrationSubTab, SecurityPageName>> = {
+  [AdministrationSubTab.endpointExceptions]: SecurityPageName.endpointExceptions,
+  [AdministrationSubTab.trustedApps]: SecurityPageName.trustedApps,
+  [AdministrationSubTab.trustedDevices]: SecurityPageName.trustedDevices,
+  [AdministrationSubTab.eventFilters]: SecurityPageName.eventFilters,
+  [AdministrationSubTab.hostIsolationExceptions]: SecurityPageName.hostIsolationExceptions,
+  [AdministrationSubTab.blocklist]: SecurityPageName.blocklist,
+};
 
 const ARTIFACT_SUB_TABS: AdministrationSubTab[] = [
   AdministrationSubTab.endpointExceptions,
@@ -184,15 +194,17 @@ export const ArtifactsPage = memo(() => {
         ))}
       </EuiTabs>
       <EuiSpacer size="l" />
-      {activeTab === AdministrationSubTab.endpointExceptions && <EndpointExceptions />}
-      {activeTab === AdministrationSubTab.trustedApps && <TrustedAppsList />}
-      {activeTab === AdministrationSubTab.trustedDevices && <TrustedDevicesList />}
-      {activeTab === AdministrationSubTab.eventFilters && <EventFiltersList />}
-      {activeTab === AdministrationSubTab.hostIsolationExceptions && (
-        <HostIsolationExceptionsList />
-      )}
-      {activeTab === AdministrationSubTab.blocklist && <Blocklist />}
-      <SpyRoute pageName={SecurityPageName.artifacts} />
+      <TrackApplicationView viewId={TAB_PAGE_NAMES[activeTab] ?? SecurityPageName.artifacts}>
+        {activeTab === AdministrationSubTab.endpointExceptions && <EndpointExceptions />}
+        {activeTab === AdministrationSubTab.trustedApps && <TrustedAppsList />}
+        {activeTab === AdministrationSubTab.trustedDevices && <TrustedDevicesList />}
+        {activeTab === AdministrationSubTab.eventFilters && <EventFiltersList />}
+        {activeTab === AdministrationSubTab.hostIsolationExceptions && (
+          <HostIsolationExceptionsList />
+        )}
+        {activeTab === AdministrationSubTab.blocklist && <Blocklist />}
+        <SpyRoute pageName={SecurityPageName.artifacts} />
+      </TrackApplicationView>
     </AdministrationListPage>
   );
 });
