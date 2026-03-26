@@ -15,7 +15,6 @@ import type {
   ReferenceDataSavedObject,
 } from './types';
 import { REF_DATA_KEY_INITIAL_VALUE, REFERENCE_DATA_SAVED_OBJECT_TYPE } from './constants';
-import { stringify } from '../../utils/stringify';
 import { catchAndWrapError, wrapErrorIfNeeded } from '../../utils';
 
 /**
@@ -64,7 +63,7 @@ export class ReferenceDataClient implements ReferenceDataClientInterface {
     return soClient
       .get<ReferenceDataSavedObject<TMeta>>(REFERENCE_DATA_SAVED_OBJECT_TYPE, refDataKey)
       .then((response) => {
-        logger.debug(`Retrieved [${refDataKey}]\n${stringify(response)}`);
+        logger.debug(`Retrieved [${refDataKey}]`);
         return response.attributes;
       })
       .catch(async (err) => {

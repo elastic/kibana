@@ -60,6 +60,7 @@ import { InvalidInternalManifestError } from '../errors';
 import { wrapErrorIfNeeded } from '../../../utils';
 import { EndpointError } from '../../../../../common/endpoint/errors';
 import type { SavedObjectsClientFactory } from '../../saved_objects';
+import { getIsEndpointExceptionsPerPolicyEnabled } from '../../../lib/reference_data';
 
 interface ArtifactsBuildResult {
   defaultArtifacts: InternalArtifactCompleteSchema[];
@@ -232,7 +233,12 @@ export class ManifestManager {
 
     let exceptions: ExceptionListItemSchema[];
 
-    if (this.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+    if (
+      await getIsEndpointExceptionsPerPolicyEnabled(
+        this.savedObjectsClientFactory.createInternalScopedSoClient({ readonly: false }),
+        this.logger
+      )
+    ) {
       // with the feature enabled, we do not make an 'exception' with endpoint exceptions - it's filtered per-policy
       exceptions = allExceptionsByListId.filter(filter);
     } else {
@@ -337,7 +343,12 @@ export class ManifestManager {
 
     let policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
 
-    if (this.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+    if (
+      await getIsEndpointExceptionsPerPolicyEnabled(
+        this.savedObjectsClientFactory.createInternalScopedSoClient({ readonly: false }),
+        this.logger
+      )
+    ) {
       policySpecificArtifacts = await this.buildArtifactsByPolicy(
         allPolicyIds,
         ArtifactConstants.SUPPORTED_ENDPOINT_EXCEPTIONS_OPERATING_SYSTEMS,
