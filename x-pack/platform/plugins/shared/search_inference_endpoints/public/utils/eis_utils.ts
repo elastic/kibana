@@ -5,10 +5,20 @@
  * 2.0.
  */
 
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import type { MultiSelectFilterOption } from '../filter/multi_select_filter';
-import type { EisInferenceEndpoint } from '../../hooks/use_eis_models';
+import { isInferenceEndpointWithDisplayNameMetadata } from '../../common/type_guards';
+import type { MultiSelectFilterOption } from '../components/filter/multi_select_filter';
+
+export type EisInferenceEndpoint = InferenceAPIConfigResponse & {
+  service: 'elastic';
+  service_settings: { model_id: string };
+};
+
+export const isEisEndpoint = (ep: InferenceAPIConfigResponse): ep is EisInferenceEndpoint =>
+  ep.service === 'elastic';
 
 const serviceProviderKeys = new Set<string>(Object.values(ServiceProviderKeys));
 
@@ -17,7 +27,7 @@ export const isServiceProviderKey = (value: string): value is ServiceProviderKey
 
 export type TaskTypeCategory = 'LLM' | 'Embedding' | 'Rerank';
 
-export const TASK_TYPE_CATEGORY: Record<string, TaskTypeCategory> = {
+export const TASK_TYPE_CATEGORY: Partial<Record<InferenceTaskType, TaskTypeCategory>> = {
   chat_completion: 'LLM',
   completion: 'LLM',
   text_embedding: 'Embedding',
@@ -25,25 +35,40 @@ export const TASK_TYPE_CATEGORY: Record<string, TaskTypeCategory> = {
   rerank: 'Rerank',
 };
 
-export const TASK_TYPE_DISPLAY_NAME: Record<string, string> = {
-  chat_completion: 'chat completion',
-  completion: 'completion',
-  text_embedding: 'text embedding',
-  sparse_embedding: 'sparse embedding',
-  rerank: 'rerank',
+export const TASK_TYPE_DISPLAY_NAME: Record<InferenceTaskType, string> = {
+  chat_completion: i18n.translate(
+    'xpack.searchInferenceEndpoints.eisUtils.taskType.chatCompletion',
+    { defaultMessage: 'chat completion' }
+  ),
+  completion: i18n.translate('xpack.searchInferenceEndpoints.eisUtils.taskType.completion', {
+    defaultMessage: 'completion',
+  }),
+  text_embedding: i18n.translate('xpack.searchInferenceEndpoints.eisUtils.taskType.textEmbedding', {
+    defaultMessage: 'text embedding',
+  }),
+  sparse_embedding: i18n.translate(
+    'xpack.searchInferenceEndpoints.eisUtils.taskType.sparseEmbedding',
+    { defaultMessage: 'sparse embedding' }
+  ),
+  rerank: i18n.translate('xpack.searchInferenceEndpoints.eisUtils.taskType.rerank', {
+    defaultMessage: 'rerank',
+  }),
 };
 
 export interface GroupedModel {
-  service: string;
+  service: 'elastic';
   modelName: string;
-  taskTypes: string[];
+  taskTypes: InferenceTaskType[];
   categories: TaskTypeCategory[];
   endpoints: EisInferenceEndpoint[];
 }
 
 export const getModelName = (endpoint: EisInferenceEndpoint): string => {
-  const modelId = endpoint.serviceSettings?.model_id;
-  return typeof modelId === 'string' && modelId.length > 0 ? modelId : endpoint.inferenceId;
+  if (isInferenceEndpointWithDisplayNameMetadata(endpoint)) {
+    return endpoint.metadata.display.name;
+  }
+  const { model_id: modelId } = endpoint.service_settings;
+  return modelId.length > 0 ? modelId : endpoint.inference_id;
 };
 
 export const getProviderName = (service: string): string => {
@@ -60,20 +85,20 @@ export const groupEndpointsByModel = (endpoints: EisInferenceEndpoint[]): Groupe
 
     const existing = groups.get(key);
     if (existing) {
-      if (!existing.taskTypes.includes(ep.taskType)) {
-        existing.taskTypes.push(ep.taskType);
-        const cat = TASK_TYPE_CATEGORY[ep.taskType];
+      if (!existing.taskTypes.includes(ep.task_type)) {
+        existing.taskTypes.push(ep.task_type);
+        const cat = TASK_TYPE_CATEGORY[ep.task_type];
         if (cat && !existing.categories.includes(cat)) {
           existing.categories.push(cat);
         }
       }
       existing.endpoints.push(ep);
     } else {
-      const cat = TASK_TYPE_CATEGORY[ep.taskType];
+      const cat = TASK_TYPE_CATEGORY[ep.task_type];
       groups.set(key, {
         service: ep.service,
         modelName,
-        taskTypes: [ep.taskType],
+        taskTypes: [ep.task_type],
         categories: cat ? [cat] : [],
         endpoints: [ep],
       });

@@ -5,30 +5,14 @@
  * 2.0.
  */
 
-import { useQuery } from '@kbn/react-query';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import { useKibana } from './use_kibana';
-
-export interface EisInferenceEndpoint {
-  inferenceId: string;
-  taskType: InferenceTaskType;
-  service: string;
-  serviceSettings?: Record<string, unknown>;
-}
-
-const EIS_MODELS_QUERY_KEY = 'eis-models';
+import { useMemo } from 'react';
+import { isEisEndpoint } from '../utils/eis_utils';
+import { useQueryInferenceEndpoints } from './use_inference_endpoints';
 
 export const useEisModels = () => {
-  const { services } = useKibana();
+  const { data: allEndpoints, ...rest } = useQueryInferenceEndpoints();
 
-  return useQuery({
-    queryKey: [EIS_MODELS_QUERY_KEY],
-    queryFn: async () => {
-      const response = await services.http.get<{
-        endpoints: EisInferenceEndpoint[];
-      }>('/internal/inference/endpoints');
+  const data = useMemo(() => allEndpoints?.filter(isEisEndpoint), [allEndpoints]);
 
-      return response.endpoints;
-    },
-  });
+  return { data, ...rest };
 };

@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ModelCard } from './model_card';
-import type { GroupedModel } from './utils';
+import type { GroupedModel } from '../../utils/eis_utils';
 
 describe('ModelCard', () => {
   const baseModel: GroupedModel = {
@@ -31,10 +31,10 @@ describe('ModelCard', () => {
   });
 
   it('renders no avatar and falls back to raw service string for an unknown provider', () => {
-    const unknownModel: GroupedModel = {
+    const unknownModel = {
       ...baseModel,
       service: 'custom-unknown-provider',
-    };
+    } as unknown as GroupedModel;
     const { getByText, container } = render(<ModelCard model={unknownModel} />);
 
     expect(container.querySelectorAll('.euiAvatar')).toHaveLength(0);
@@ -42,11 +42,11 @@ describe('ModelCard', () => {
   });
 
   it('renders unknown task types as-is', () => {
-    const model: GroupedModel = {
+    const model = {
       ...baseModel,
       taskTypes: ['some_future_type'],
       categories: [],
-    };
+    } as unknown as GroupedModel;
     const { getByText } = render(<ModelCard model={model} />);
     expect(getByText('some_future_type', { exact: false })).toBeInTheDocument();
   });

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EisInferenceEndpoint } from '../../hooks/use_eis_models';
 import {
   isServiceProviderKey,
   getModelName,
@@ -16,17 +15,20 @@ import {
   TASK_TYPE_CATEGORY,
   TASK_TYPE_DISPLAY_NAME,
   TASK_TYPE_FILTERS,
+  type EisInferenceEndpoint,
   type GroupedModel,
   type TaskTypeCategory,
-} from './utils';
+} from '../../utils/eis_utils';
 
 const makeEndpoint = (
-  overrides: Partial<EisInferenceEndpoint> & Pick<EisInferenceEndpoint, 'inferenceId' | 'taskType'>
-): EisInferenceEndpoint => ({
-  service: 'elastic',
-  serviceSettings: {},
-  ...overrides,
-});
+  overrides: Partial<EisInferenceEndpoint> &
+    Pick<EisInferenceEndpoint, 'inference_id' | 'task_type'>
+): EisInferenceEndpoint =>
+  ({
+    service: 'elastic',
+    service_settings: { model_id: '' },
+    ...overrides,
+  } as EisInferenceEndpoint);
 
 const makeGroupedModel = (overrides: Partial<GroupedModel> = {}): GroupedModel => ({
   service: 'elastic',
@@ -90,72 +92,55 @@ describe('utils', () => {
   describe('getModelName', () => {
     it.each([
       {
-        scenario: 'model_id present',
+        scenario: 'returns display name from metadata',
+        endpoint: {
+          ...makeEndpoint({
+            inference_id: '.openai-gpt-4.1-chat_completion',
+            task_type: 'chat_completion' as const,
+            service_settings: { model_id: 'openai-gpt-4.1' },
+          }),
+          metadata: { display: { name: 'OpenAI GPT-4.1' } },
+        } as EisInferenceEndpoint,
+        expected: 'OpenAI GPT-4.1',
+      },
+      {
+        scenario: 'returns model_id when no display metadata',
         endpoint: makeEndpoint({
-          inferenceId: 'eis-elser-endpoint',
-          taskType: 'sparse_embedding',
-          serviceSettings: { model_id: '.elser-2-linux-x86_64' },
+          inference_id: 'eis-elser-endpoint',
+          task_type: 'sparse_embedding',
+          service_settings: { model_id: '.elser-2-linux-x86_64' },
         }),
         expected: '.elser-2-linux-x86_64',
       },
       {
-        scenario: 'model_id missing',
+        scenario: 'returns inference_id when model_id is empty',
         endpoint: makeEndpoint({
-          inferenceId: 'eis-elser-sparse-embedding',
-          taskType: 'sparse_embedding',
-          serviceSettings: {},
+          inference_id: 'eis-chat-completion',
+          task_type: 'completion',
+          service_settings: { model_id: '' },
         }),
-        expected: 'eis-elser-sparse-embedding',
-      },
-      {
-        scenario: 'model_id empty string',
-        endpoint: makeEndpoint({
-          inferenceId: 'eis-e5-text-embedding',
-          taskType: 'text_embedding',
-          serviceSettings: { model_id: '' },
-        }),
-        expected: 'eis-e5-text-embedding',
-      },
-      {
-        scenario: 'model_id non-string',
-        endpoint: makeEndpoint({
-          inferenceId: 'eis-rerank-endpoint',
-          taskType: 'rerank',
-          serviceSettings: { model_id: 42 },
-        }),
-        expected: 'eis-rerank-endpoint',
-      },
-      {
-        scenario: 'serviceSettings undefined',
-        endpoint: {
-          inferenceId: 'eis-chat-completion',
-          taskType: 'completion' as const,
-          service: 'elastic',
-        },
         expected: 'eis-chat-completion',
       },
-    ])('returns $expected when $scenario', ({ endpoint, expected }) => {
+    ])('$scenario', ({ endpoint, expected }) => {
       expect(getModelName(endpoint)).toBe(expected);
     });
   });
 
   describe('getProviderName', () => {
     it.each([
-      ['elastic', true],
-      ['elasticsearch', true],
-      ['openai', true],
-    ])('returns a human-readable name for known key "%s"', (key) => {
+      { key: 'elastic', returnsRaw: false },
+      { key: 'elasticsearch', returnsRaw: false },
+      { key: 'openai', returnsRaw: false },
+      { key: 'custom-eis-provider', returnsRaw: true },
+      { key: 'my-service', returnsRaw: true },
+    ])('$key → returnsRaw=$returnsRaw', ({ key, returnsRaw }) => {
       const name = getProviderName(key);
-      expect(typeof name).toBe('string');
-      expect(name).not.toBe(key);
-    });
-
-    it.each(['custom-eis-provider', 'my-service'])(
-      'returns raw string for unknown key "%s"',
-      (key) => {
-        expect(getProviderName(key)).toBe(key);
+      if (returnsRaw) {
+        expect(name).toBe(key);
+      } else {
+        expect(name).not.toBe(key);
       }
-    );
+    });
   });
 
   describe('groupEndpointsByModel', () => {
@@ -163,17 +148,17 @@ describe('utils', () => {
       expect(groupEndpointsByModel([])).toEqual([]);
     });
 
-    it('groups by service + model_id, aggregating task types and categories', () => {
-      const endpoints: EisInferenceEndpoint[] = [
+    it('groups by service + model name, aggregating task types and categories', () => {
+      const endpoints = [
         makeEndpoint({
-          inferenceId: 'eis-e5-embed',
-          taskType: 'text_embedding',
-          serviceSettings: { model_id: '.multilingual-e5-small' },
+          inference_id: 'eis-e5-embed',
+          task_type: 'text_embedding',
+          service_settings: { model_id: '.multilingual-e5-small' },
         }),
         makeEndpoint({
-          inferenceId: 'eis-e5-chat',
-          taskType: 'chat_completion',
-          serviceSettings: { model_id: '.multilingual-e5-small' },
+          inference_id: 'eis-e5-chat',
+          task_type: 'chat_completion',
+          service_settings: { model_id: '.multilingual-e5-small' },
         }),
       ];
 
@@ -187,25 +172,22 @@ describe('utils', () => {
       expect(result[0].endpoints).toHaveLength(2);
     });
 
-    it('separates groups by model name and by service', () => {
-      const endpoints: EisInferenceEndpoint[] = [
+    it('separates groups by model name', () => {
+      const endpoints = [
         makeEndpoint({
-          inferenceId: 'eis-e5',
-          taskType: 'text_embedding',
-          service: 'elastic',
-          serviceSettings: { model_id: '.multilingual-e5-small' },
+          inference_id: 'eis-e5',
+          task_type: 'text_embedding',
+          service_settings: { model_id: '.multilingual-e5-small' },
         }),
         makeEndpoint({
-          inferenceId: 'eis-elser',
-          taskType: 'sparse_embedding',
-          service: 'elastic',
-          serviceSettings: { model_id: '.elser-2-linux-x86_64' },
+          inference_id: 'eis-elser',
+          task_type: 'sparse_embedding',
+          service_settings: { model_id: '.elser-2-linux-x86_64' },
         }),
         makeEndpoint({
-          inferenceId: 'es-e5',
-          taskType: 'text_embedding',
-          service: 'elasticsearch',
-          serviceSettings: { model_id: '.multilingual-e5-small' },
+          inference_id: 'eis-rerank',
+          task_type: 'rerank',
+          service_settings: { model_id: 'rerank-v1' },
         }),
       ];
 
@@ -214,21 +196,21 @@ describe('utils', () => {
     });
 
     it('deduplicates task types and categories within a group', () => {
-      const endpoints: EisInferenceEndpoint[] = [
+      const endpoints = [
         makeEndpoint({
-          inferenceId: 'eis-e5-text',
-          taskType: 'text_embedding',
-          serviceSettings: { model_id: '.multilingual-e5-small' },
+          inference_id: 'eis-e5-text',
+          task_type: 'text_embedding',
+          service_settings: { model_id: '.multilingual-e5-small' },
         }),
         makeEndpoint({
-          inferenceId: 'eis-e5-text-dup',
-          taskType: 'text_embedding',
-          serviceSettings: { model_id: '.multilingual-e5-small' },
+          inference_id: 'eis-e5-text-dup',
+          task_type: 'text_embedding',
+          service_settings: { model_id: '.multilingual-e5-small' },
         }),
         makeEndpoint({
-          inferenceId: 'eis-e5-sparse',
-          taskType: 'sparse_embedding',
-          serviceSettings: { model_id: '.multilingual-e5-small' },
+          inference_id: 'eis-e5-sparse',
+          task_type: 'sparse_embedding',
+          service_settings: { model_id: '.multilingual-e5-small' },
         }),
       ];
 
@@ -240,11 +222,11 @@ describe('utils', () => {
     });
 
     it('assigns empty categories for unknown task types', () => {
-      const endpoints: EisInferenceEndpoint[] = [
+      const endpoints = [
         makeEndpoint({
-          inferenceId: 'eis-custom',
-          taskType: 'unknown_type' as EisInferenceEndpoint['taskType'],
-          serviceSettings: { model_id: '.elser-2-linux-x86_64' },
+          inference_id: 'eis-custom',
+          task_type: 'unknown_type' as EisInferenceEndpoint['task_type'],
+          service_settings: { model_id: '.elser-2-linux-x86_64' },
         }),
       ];
 
@@ -253,40 +235,37 @@ describe('utils', () => {
   });
 
   describe('getProviderOptions', () => {
-    it('returns unique provider options preserving insertion order, empty for empty input', () => {
+    it('returns empty array for empty input', () => {
       expect(getProviderOptions([])).toEqual([]);
+    });
 
+    it('deduplicates providers across models', () => {
       const models: GroupedModel[] = [
-        makeGroupedModel({ service: 'elastic', modelName: '.multilingual-e5-small' }),
-        makeGroupedModel({ service: 'elastic', modelName: '.elser-2-linux-x86_64' }),
-        makeGroupedModel({ service: 'elasticsearch', modelName: 'rerank-v1' }),
+        makeGroupedModel({ modelName: '.multilingual-e5-small' }),
+        makeGroupedModel({ modelName: '.elser-2-linux-x86_64' }),
+        makeGroupedModel({ modelName: 'rerank-v1' }),
       ];
 
       const options = getProviderOptions(models);
-      expect(options).toHaveLength(2);
-      expect(options.map((o) => o.key)).toEqual(['elastic', 'elasticsearch']);
-      options.forEach((o) => {
-        expect(o.label).toBeTruthy();
-      });
+      expect(options).toHaveLength(1);
+      expect(options[0].key).toBe('elastic');
+      expect(options[0].label).toBeTruthy();
     });
   });
 
   describe('filterGroupedModels', () => {
     const models: GroupedModel[] = [
       makeGroupedModel({
-        service: 'elastic',
         modelName: '.multilingual-e5-small',
         taskTypes: ['text_embedding'],
         categories: ['Embedding'],
       }),
       makeGroupedModel({
-        service: 'elastic',
         modelName: 'rainbow-sprinkle-completion',
         taskTypes: ['chat_completion'],
         categories: ['LLM'],
       }),
       makeGroupedModel({
-        service: 'elasticsearch',
         modelName: 'rerank-v1',
         taskTypes: ['rerank'],
         categories: ['Rerank'],
@@ -312,7 +291,10 @@ describe('utils', () => {
       it.each([
         { query: 'e5-small', expectedModels: ['.multilingual-e5-small'] },
         { query: 'rainbow', expectedModels: ['rainbow-sprinkle-completion'] },
-        { query: 'Elasticsearch', expectedModels: ['rerank-v1'] },
+        {
+          query: 'Elastic Inference',
+          expectedModels: ['.multilingual-e5-small', 'rainbow-sprinkle-completion', 'rerank-v1'],
+        },
         { query: 'E5-SMALL', expectedModels: ['.multilingual-e5-small'] },
         { query: 'nonexistent', expectedModels: [] },
       ])('query "$query" → $expectedModels', ({ query, expectedModels }) => {
@@ -353,13 +335,9 @@ describe('utils', () => {
       it.each([
         {
           providers: ['elastic'],
-          expectedModels: ['.multilingual-e5-small', 'rainbow-sprinkle-completion'],
-        },
-        { providers: ['elasticsearch'], expectedModels: ['rerank-v1'] },
-        {
-          providers: ['elastic', 'elasticsearch'],
           expectedModels: ['.multilingual-e5-small', 'rainbow-sprinkle-completion', 'rerank-v1'],
         },
+        { providers: ['openai'], expectedModels: [] },
       ])('$providers → $expectedModels', ({ providers, expectedModels }) => {
         const result = filterGroupedModels(models, {
           ...noFilters,

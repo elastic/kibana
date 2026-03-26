@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { ElasticInferenceServiceModelsHeader } from './header';
 import { useKibana } from '../../hooks/use_kibana';
 import { docLinks } from '../../../common/doc_links';
@@ -38,17 +38,41 @@ describe('ElasticInferenceServiceModelsHeader', () => {
   });
 
   describe('Cloud usage button', () => {
-    it('shows when cloud is enabled', () => {
+    it('shows when cloud is enabled and billingUrl is available', async () => {
       mockUseKibana.mockReturnValue({
-        services: { cloud: { isCloudEnabled: true } },
+        services: {
+          cloud: {
+            isCloudEnabled: true,
+            getPrivilegedUrls: jest
+              .fn()
+              .mockResolvedValue({ billingUrl: 'https://cloud.elastic.co/billing/' }),
+          },
+        },
       });
       const { getByText } = render(<ElasticInferenceServiceModelsHeader />);
-      expect(getByText('View Cloud usage')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(getByText('View Cloud usage')).toBeInTheDocument();
+      });
     });
 
     it('hidden when cloud is disabled', () => {
       const { queryByText } = render(<ElasticInferenceServiceModelsHeader />);
       expect(queryByText('View Cloud usage')).not.toBeInTheDocument();
+    });
+
+    it('hidden when cloud is enabled but billingUrl is not available', async () => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          cloud: {
+            isCloudEnabled: true,
+            getPrivilegedUrls: jest.fn().mockResolvedValue({}),
+          },
+        },
+      });
+      const { queryByText } = render(<ElasticInferenceServiceModelsHeader />);
+      await waitFor(() => {
+        expect(queryByText('View Cloud usage')).not.toBeInTheDocument();
+      });
     });
   });
 });

@@ -27,7 +27,7 @@ import {
   groupEndpointsByModel,
   TASK_TYPE_FILTERS,
   type TaskTypeCategory,
-} from './utils';
+} from '../../utils/eis_utils';
 import { ModelFamilyFilter } from './model_family_filter';
 
 export const ElasticInferenceServiceModelsPage = () => {

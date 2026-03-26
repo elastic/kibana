@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { EuiButton, EuiButtonEmpty, EuiPageTemplate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -16,6 +16,18 @@ export const ElasticInferenceServiceModelsHeader = () => {
   const {
     services: { cloud },
   } = useKibana();
+
+  const [billingUrl, setBillingUrl] = useState<string>();
+  useEffect(() => {
+    if (cloud?.isCloudEnabled && cloud?.getPrivilegedUrls) {
+      cloud.getPrivilegedUrls().then((urls) => {
+        if (urls.billingUrl) {
+          setBillingUrl(urls.billingUrl);
+        }
+      });
+    }
+  }, [cloud]);
+
   return (
     <EuiPageTemplate.Header
       data-test-subj="eisModelsPageHeader"
@@ -26,9 +38,10 @@ export const ElasticInferenceServiceModelsHeader = () => {
         defaultMessage: 'Manage models and endpoints for Elastic Inference Service',
       })}
       rightSideItems={[
-        ...(cloud?.isCloudEnabled
+        ...(cloud?.isCloudEnabled && billingUrl
           ? [
               <EuiButton
+                href={billingUrl}
                 target="_blank"
                 iconType="external"
                 aria-label={i18n.translate(

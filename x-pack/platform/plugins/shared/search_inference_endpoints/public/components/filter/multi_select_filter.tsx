@@ -15,11 +15,11 @@ import {
   EuiTextColor,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { EMPTY_FILTER_MESSAGE } from '../../../common/translations';
+import { optionCountStyles } from './styles';
 
 export interface MultiSelectFilterOption {
   key: string;
@@ -46,7 +46,7 @@ export const MultiSelectFilter: React.FC<UseFilterParams> = ({
   renderOption,
   dataTestSubj,
 }) => {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const toggleIsPopoverOpen = () => setIsPopoverOpen((prevValue) => !prevValue);
   const options: MultiSelectFilterOption[] = _.uniqBy(
@@ -97,13 +97,7 @@ export const MultiSelectFilter: React.FC<UseFilterParams> = ({
         {(list, search) => (
           <div>
             <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
-            <div
-              css={css`
-                line-height: ${euiTheme.size.xl};
-                padding-left: ${euiTheme.size.m};
-                border-bottom: ${euiTheme.border.thin};
-              `}
-            >
+            <div css={optionCountStyles(euiThemeContext)}>
               <EuiTextColor color="subdued">
                 {i18n.translate('xpack.searchInferenceEndpoints.filter.options', {
                   defaultMessage: '{totalCount, plural, one {# option} other {# options}}',

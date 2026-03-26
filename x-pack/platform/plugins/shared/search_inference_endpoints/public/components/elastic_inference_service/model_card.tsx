@@ -20,8 +20,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
-import type { GroupedModel } from './utils';
-import { isServiceProviderKey, TASK_TYPE_DISPLAY_NAME } from './utils';
+import type { GroupedModel } from '../../utils/eis_utils';
+import { isServiceProviderKey, TASK_TYPE_DISPLAY_NAME } from '../../utils/eis_utils';
 
 interface ModelCardProps {
   model: GroupedModel;
