@@ -33,7 +33,10 @@ export const unmanagedAssetsRoute = createServerRoute({
   handler: async ({ params, request, getScopedClients }) => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
 
-    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
+    const { read } = await checkAccess({
+      name: params.path.name,
+      esClient: scopedClusterClient.asCurrentUser,
+    });
 
     if (!read) {
       throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
@@ -51,12 +54,12 @@ export const unmanagedAssetsRoute = createServerRoute({
 
     const assets = await getUnmanagedElasticsearchAssets({
       dataStream,
-      scopedClusterClient,
+      esClient: scopedClusterClient.asCurrentUser,
     });
 
     return getUnmanagedElasticsearchAssetDetails({
       assets,
-      scopedClusterClient,
+      esClient: scopedClusterClient.asCurrentUser,
     });
   },
 });

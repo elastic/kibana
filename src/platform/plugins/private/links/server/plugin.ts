@@ -51,7 +51,8 @@ export class LinksServerPlugin implements Plugin<object, object> {
 
     plugins.embeddable.registerTransforms(LINKS_EMBEDDABLE_TYPE, {
       getTransforms: () => transforms,
-      // TODO register schema when its ready to be public
+      // do not publish - not finalized
+      // getSchema: () => linksEmbeddableSchema,
     });
 
     return {};

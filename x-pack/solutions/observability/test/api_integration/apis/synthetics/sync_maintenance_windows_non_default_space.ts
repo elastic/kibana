@@ -31,7 +31,8 @@ export const LOCAL_LOCATION = {
 };
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('SyncMaintenanceWindowsNonDefaultSpace', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/251844
+  describe.skip('SyncMaintenanceWindowsNonDefaultSpace', function () {
     this.tags('skipCloud');
     const supertestAPI = getService('supertest');
     const kServer = getService('kibanaServer');
@@ -128,6 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
         ...browserMonitorJson,
         locations: [LOCAL_LOCATION, pvtLoc],
         maintenance_windows: [mwObject.id],
+        timeout: null,
       };
 
       const createResponse = await monitorTestService.createMonitor({
@@ -150,7 +152,6 @@ export default function ({ getService }: FtrProviderContext) {
       const packagePolicy = await testPrivateLocations.getPackagePolicy({
         monitorId: newBrowserMonitorId,
         locId: loc.id,
-        spaceId,
       });
 
       expect(packagePolicy?.policy_id).eql(testFleetPolicyID);
@@ -164,6 +165,7 @@ export default function ({ getService }: FtrProviderContext) {
           location: { id: testFleetPolicyID },
           spaceId,
           mws: [mwObject],
+          packageVersion: testPrivateLocations.installedVersion,
         })
       );
     });

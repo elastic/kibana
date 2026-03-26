@@ -16,8 +16,12 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
-import type { TriggerType } from '@kbn/workflows/spec/schema/triggers/trigger_schema';
+import type { TriggerType } from '@kbn/workflows';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows/types/latest';
+import { registerWorkflowAgentBuilderIntegration } from './agent_builder';
+import { defineRoutes } from './api/routes';
+import { WorkflowsManagementApi } from './api/workflows_management_api';
+import { WorkflowsService } from './api/workflows_management_service';
 import {
   getWorkflowsConnectorAdapter,
   getConnectorType as getWorkflowsConnectorType,
@@ -36,6 +40,7 @@ import {
   type TriggerEventsDataStreamClient,
 } from './trigger_events_log';
 import type {
+  AgentBuilderPluginSetupContract,
   WorkflowsRequestHandlerContext,
   WorkflowsServerPluginSetup,
   WorkflowsServerPluginSetupDeps,
@@ -43,11 +48,7 @@ import type {
   WorkflowsServerPluginStartDeps,
 } from './types';
 import { registerUISettings } from './ui_settings';
-import { defineRoutes } from './workflows_management/routes';
-import { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
-import { WorkflowsService } from './workflows_management/workflows_management_service';
 import { stepSchemas } from '../common/step_schemas';
-// Import the workflows connector
 
 export class WorkflowsPlugin
   implements
@@ -134,8 +135,8 @@ export class WorkflowsPlugin
             workflowToSchedule,
             spaceId,
             inputs,
-            triggeredBy,
-            request
+            request,
+            triggeredBy
           );
         };
       };
@@ -182,6 +183,7 @@ export class WorkflowsPlugin
       api: this.api,
       logger: this.logger,
       getTriggerEventsClient: () => this.triggerEventsClient,
+      getWorkflowExecutionEngine,
       resolveMatchingWorkflowSubscriptions: resolveMatchingWorkflowSubscriptionsFn,
     });
 
@@ -191,10 +193,31 @@ export class WorkflowsPlugin
     const router = core.http.createRouter<WorkflowsRequestHandlerContext>();
 
     // Register server side APIs
-    defineRoutes(router, this.api, this.logger, this.spaces);
+    defineRoutes(router, this.api, this.logger, this.spaces, getWorkflowExecutionEngine);
+
+    void core.plugins
+      .onSetup<{ agentBuilder: AgentBuilderPluginSetupContract }>('agentBuilder')
+      .then(({ agentBuilder }) => {
+        if (agentBuilder.found) {
+          this.logger.debug(
+            'Workflows Management: Agent Builder found, registering AI integration'
+          );
+          registerWorkflowAgentBuilderIntegration({
+            agentBuilder: agentBuilder.contract,
+            logger: this.logger,
+            api,
+          });
+        }
+      })
+      .catch((err) => {
+        const message = err instanceof Error ? err.message : String(err);
+        this.logger.warn(
+          `Workflows Management: Failed to register AI integration with Agent Builder: ${message}`
+        );
+      });
 
     return {
-      management: this.api,
+      management: api,
     };
   }
 

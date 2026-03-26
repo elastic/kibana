@@ -12,6 +12,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
   describe('Alerting', () => {
     before(async () => await buildUp(getService));
     after(async () => await tearDown(getService));
+    loadTestFile(require.resolve('./consumer_metrics'));
     // the next file takes ~37 min to run
     loadTestFile(require.resolve('./event_log'));
   });

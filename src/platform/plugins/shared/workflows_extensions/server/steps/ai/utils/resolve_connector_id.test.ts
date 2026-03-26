@@ -25,6 +25,8 @@ describe('resolveConnectorId', () => {
     connectorId: 'mock-connector-id',
     config: {},
     capabilities: {},
+    isInferenceEndpoint: false,
+    isPreconfigured: false,
     ...partial,
   });
 
@@ -39,6 +41,7 @@ describe('resolveConnectorId', () => {
     mockInferencePlugin = {
       getDefaultConnector: jest.fn(),
       getConnectorList: jest.fn(),
+      getConnectorById: jest.fn(),
     } as any;
   });
 
@@ -104,10 +107,15 @@ describe('resolveConnectorId', () => {
         }),
       ];
       mockInferencePlugin.getConnectorList.mockResolvedValue(mockConnectors);
+      mockInferencePlugin.getConnectorById.mockResolvedValue(mockConnectors[0]);
 
       const result = await resolveConnectorId(connectorId, mockInferencePlugin, mockKibanaRequest);
 
-      expect(mockInferencePlugin.getConnectorList).toHaveBeenCalledWith(mockKibanaRequest);
+      expect(mockInferencePlugin.getConnectorById).toHaveBeenCalledWith(
+        connectorId,
+        mockKibanaRequest
+      );
+      expect(mockInferencePlugin.getConnectorList).not.toHaveBeenCalled();
       expect(result).toBe(connectorId);
     });
 

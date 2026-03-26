@@ -41,6 +41,10 @@ export interface InternalSkillDefinition {
    */
   readonly: boolean;
   /**
+   * When true, this skill is only available when experimental features are enabled.
+   */
+  experimental: boolean;
+  /**
    * Referenced content for the skill.
    */
   referencedContent?: ReferencedContent[];
@@ -59,4 +63,12 @@ export interface InternalSkillDefinition {
    * Only available for builtin skills.
    */
   getInlineTools?: () => MaybePromise<SkillBoundedTool[]>;
+  /**
+   * If this skill was installed from a plugin, the plugin name.
+   */
+  plugin_id?: string;
+  /**
+   * Number of referenced content items.
+   */
+  referencedContentCount: number;
 }

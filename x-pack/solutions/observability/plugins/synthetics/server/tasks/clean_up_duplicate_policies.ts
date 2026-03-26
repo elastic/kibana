@@ -52,15 +52,13 @@ export async function cleanUpDuplicatedPackagePolicies(
     for await (const result of finder.find()) {
       result.saved_objects.forEach((monitor) => {
         monitor.attributes.locations?.forEach((location) => {
-          const spaceId = monitor.namespaces?.[0];
-          if (!location.isServiceManaged && spaceId) {
+          if (!location.isServiceManaged) {
             const policyId = privateLocationAPI.getPolicyId(
               {
                 origin: monitor.attributes.origin,
                 id: monitor.attributes.id,
               },
-              location.id,
-              spaceId
+              location.id
             );
             expectedPackagePolicies.add(policyId);
           }
@@ -150,6 +148,7 @@ export async function deleteDuplicatePackagePolicies(
     await fleet.packagePolicyService.delete(soClient, esClient, batch, {
       force: true,
       spaceIds: ['*'],
+      ignoreMissing: true,
     });
   }
 }

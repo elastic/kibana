@@ -52,6 +52,12 @@ jest.mock('@kbn/repo-info', () => ({
 
 jest.mock('getopts', () => jest.fn());
 
+jest.mock('./buildkite_checkpoint', () => ({
+  isInBuildkite: jest.fn().mockReturnValue(false),
+  isConfigCompleted: jest.fn().mockResolvedValue(false),
+  markConfigCompletedSync: jest.fn(),
+}));
+
 import { relative } from 'path';
 import {
   commonBasePath,
@@ -61,6 +67,7 @@ import {
   resolveJestConfig,
   prepareJestExecution,
   removeFlagFromArgv,
+  runJest,
 } from './run';
 
 describe('run.ts', () => {
@@ -835,6 +842,119 @@ describe('run.ts', () => {
           expect(process.env.JEST_CONFIG_PATH).toBeUndefined();
         });
       });
+    });
+  });
+
+  describe('Buildkite checkpoint with shard annotation', () => {
+    let mockGetopts: jest.Mock;
+    let mockIsInBuildkite: jest.Mock;
+    let mockIsConfigCompleted: jest.Mock;
+    let mockProcessExit: jest.SpyInstance;
+
+    beforeEach(() => {
+      mockGetopts = jest.mocked(jest.requireMock('getopts'));
+      mockIsInBuildkite = jest.mocked(jest.requireMock('./buildkite_checkpoint').isInBuildkite);
+      mockIsConfigCompleted = jest.mocked(
+        jest.requireMock('./buildkite_checkpoint').isConfigCompleted
+      );
+
+      process.env.BUILDKITE = 'true';
+      process.env.BUILDKITE_STEP_ID = 'step-1';
+      process.env.BUILDKITE_PARALLEL_JOB = '0';
+      process.env.BUILDKITE_RETRY_COUNT = '1';
+
+      mockIsInBuildkite.mockReturnValue(true);
+      mockIsConfigCompleted.mockResolvedValue(true);
+
+      mockProcessExit = jest.spyOn(process, 'exit').mockImplementation((() => {
+        throw new Error('process.exit called');
+      }) as () => never);
+    });
+
+    afterEach(() => {
+      mockProcessExit.mockRestore();
+      delete process.env.BUILDKITE;
+      delete process.env.BUILDKITE_STEP_ID;
+      delete process.env.BUILDKITE_PARALLEL_JOB;
+      delete process.env.BUILDKITE_RETRY_COUNT;
+    });
+
+    it('should include shard annotation in checkpoint key when --shard is present', async () => {
+      process.argv = [
+        'node',
+        'script',
+        '--config',
+        '/mock/repo/root/x-pack/plugins/alerting/jest.config.js',
+        '--shard=2/6',
+      ];
+
+      mockGetopts.mockReturnValue({
+        _: [],
+        config: '/mock/repo/root/x-pack/plugins/alerting/jest.config.js',
+        shard: '2/6',
+        verbose: false,
+        help: false,
+      });
+
+      try {
+        await runJest();
+      } catch {
+        // Expected: process.exit mock throws
+      }
+
+      expect(mockIsConfigCompleted).toHaveBeenCalledWith(
+        'x-pack/plugins/alerting/jest.config.js||shard=2/6'
+      );
+    });
+
+    it('should include shard annotation when shard comes from config annotation', async () => {
+      process.argv = [
+        'node',
+        'script',
+        '--config',
+        '/mock/repo/root/x-pack/plugins/alerting/jest.config.js||shard=3/6',
+      ];
+
+      mockGetopts.mockReturnValue({
+        _: [],
+        config: '/mock/repo/root/x-pack/plugins/alerting/jest.config.js||shard=3/6',
+        verbose: false,
+        help: false,
+      });
+
+      try {
+        await runJest();
+      } catch {
+        // Expected: process.exit mock throws
+      }
+
+      expect(mockIsConfigCompleted).toHaveBeenCalledWith(
+        'x-pack/plugins/alerting/jest.config.js||shard=3/6'
+      );
+    });
+
+    it('should NOT include shard annotation when no shard is present', async () => {
+      process.argv = [
+        'node',
+        'script',
+        '--config',
+        '/mock/repo/root/x-pack/plugins/alerting/jest.config.js',
+      ];
+
+      mockGetopts.mockReturnValue({
+        _: [],
+        config: '/mock/repo/root/x-pack/plugins/alerting/jest.config.js',
+        verbose: false,
+        help: false,
+      });
+
+      try {
+        await runJest();
+      } catch {
+        // Expected: process.exit mock throws
+      }
+
+      expect(mockIsConfigCompleted).toHaveBeenCalledWith('x-pack/plugins/alerting/jest.config.js');
     });
   });
 });
