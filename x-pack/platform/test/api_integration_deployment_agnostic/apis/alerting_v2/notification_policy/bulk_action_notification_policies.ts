@@ -285,6 +285,43 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(getDeleted.status).to.be(404);
     });
 
+    it('should bulk update API keys', async () => {
+      const p1 = await createPolicy('bulk-update-key-1');
+      const p2 = await createPolicy('bulk-update-key-2');
+
+      const response = await bulkAction([
+        { id: p1.id, action: 'update_api_key' },
+        { id: p2.id, action: 'update_api_key' },
+      ]);
+
+      expect(response.status).to.be(200);
+      expect(response.body.processed).to.be(2);
+      expect(response.body.total).to.be(2);
+      expect(response.body.errors).to.have.length(0);
+
+      const updated1 = await getPolicy(p1.id);
+      const updated2 = await getPolicy(p2.id);
+      expect(updated1.name).to.be('bulk-update-key-1');
+      expect(updated2.name).to.be('bulk-update-key-2');
+      expect(updated1.auth).to.be.an('object');
+      expect(updated2.auth).to.be.an('object');
+    });
+
+    it('should report errors for non-existent policies in bulk update API key', async () => {
+      const existing = await createPolicy('bulk-update-key-partial');
+
+      const response = await bulkAction([
+        { id: existing.id, action: 'update_api_key' },
+        { id: 'non-existent-key-id', action: 'update_api_key' },
+      ]);
+
+      expect(response.status).to.be(200);
+      expect(response.body.processed).to.be(1);
+      expect(response.body.total).to.be(2);
+      expect(response.body.errors).to.have.length(1);
+      expect(response.body.errors[0].id).to.be('non-existent-key-id');
+    });
+
     it('should return 400 when bulk snooze has an invalid date', async () => {
       const p = await createPolicy('bulk-snooze-invalid');
 

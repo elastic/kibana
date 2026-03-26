@@ -17,7 +17,6 @@ export const useBulkDeleteRules = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: ruleKeys.bulkDelete(),
     mutationFn: (params: BulkOperationParams) => rulesApi.bulkDeleteRules(params),
     onSuccess: (data) => {
       if (data.errors.length > 0) {

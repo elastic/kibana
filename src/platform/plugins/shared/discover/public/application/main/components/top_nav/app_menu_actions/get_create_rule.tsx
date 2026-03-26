@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Suspense, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import type { AggregateQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
 import { AppMenuActionId } from '@kbn/discover-utils';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
@@ -19,11 +18,6 @@ import { selectTab } from '../../../state_management/redux/selectors';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 import { CreateAlertFlyout, getManageRulesUrl, getTimeField } from './get_alerts';
-
-// Lazy load to avoid Jest module resolution issues with Monaco dependencies
-const DynamicRuleFormFlyout = React.lazy(() =>
-  import('@kbn/alerting-v2-rule-form').then((m) => ({ default: m.DynamicRuleFormFlyout }))
-);
 
 export function CreateESQLRuleFlyout({
   services,
@@ -40,7 +34,8 @@ export function CreateESQLRuleFlyout({
   const currentTab = selectTab(getState(), tabId);
   const query = (currentTab.appState.query as AggregateQuery)?.esql || '';
 
-  const { http, data, dataViews, notifications, history, core, lens } = services;
+  const { history, core, alertingVTwo } = services;
+  const RuleFormFlyout = alertingVTwo!.DynamicRuleFormFlyout;
 
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
@@ -66,22 +61,7 @@ export function CreateESQLRuleFlyout({
     };
   }, [history, core.application.currentAppId$]);
 
-  return (
-    <Suspense fallback={<EuiLoadingSpinner size="l" />}>
-      <DynamicRuleFormFlyout
-        services={{
-          http,
-          data,
-          dataViews,
-          notifications,
-          application: core.application,
-          lens,
-        }}
-        query={query}
-        onClose={onClose}
-      />
-    </Suspense>
-  );
+  return <RuleFormFlyout query={query} onClose={onClose} />;
 }
 
 export const getCreateRuleMenuItem = ({

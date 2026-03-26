@@ -12,12 +12,6 @@ export const ruleKeys = {
     [...ruleKeys.lists(), filters] as const,
   details: () => [...ruleKeys.all, 'details'] as const,
   detail: (id: string) => [...ruleKeys.details(), id] as const,
-  create: () => [...ruleKeys.all, 'create'] as const,
-  update: () => [...ruleKeys.all, 'update'] as const,
-  delete: () => [...ruleKeys.all, 'delete'] as const,
-  bulkDelete: () => [...ruleKeys.all, 'bulkDelete'] as const,
-  bulkEnable: () => [...ruleKeys.all, 'bulkEnable'] as const,
-  bulkDisable: () => [...ruleKeys.all, 'bulkDisable'] as const,
 };
 
 export const workflowKeys = {
@@ -30,14 +24,6 @@ export const workflowKeys = {
 
 export const notificationPolicyKeys = {
   all: ['notificationPolicy'] as const,
-  create: () => [...notificationPolicyKeys.all, 'create'] as const,
-  update: () => [...notificationPolicyKeys.all, 'update'] as const,
-  delete: () => [...notificationPolicyKeys.all, 'delete'] as const,
-  enable: () => [...notificationPolicyKeys.all, 'enable'] as const,
-  disable: () => [...notificationPolicyKeys.all, 'disable'] as const,
-  snooze: () => [...notificationPolicyKeys.all, 'snooze'] as const,
-  unsnooze: () => [...notificationPolicyKeys.all, 'unsnooze'] as const,
-  bulkAction: () => [...notificationPolicyKeys.all, 'bulkAction'] as const,
   detail: (id: string) => [...notificationPolicyKeys.all, 'detail', id] as const,
   lists: () => [...notificationPolicyKeys.all, 'list'] as const,
   list: (filters: {

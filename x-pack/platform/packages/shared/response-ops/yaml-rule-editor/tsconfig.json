@@ -15,6 +15,7 @@
     "@kbn/code-editor",
     "@kbn/esql-language",
     "@kbn/esql-types",
-    "@kbn/monaco"
+    "@kbn/monaco",
+    "@kbn/zod"
   ]
 }

@@ -71,14 +71,14 @@ export class SearchInferenceEndpointsPlugin
         title: MODEL_SETTINGS_SECTION_TITLE,
         order: 3,
         async mount({ element, history }: ManagementAppMountParams) {
-          const { renderModelSettingsApp } = await import('./model_settings_application');
+          const { renderSettingsMgmtApp } = await import('./application');
           const [coreStart, depsStart] = await core.getStartServices();
           const startDeps: AppPluginStartDependencies = {
             ...depsStart,
             history,
           };
 
-          return renderModelSettingsApp(coreStart, startDeps, element);
+          return renderSettingsMgmtApp(coreStart, startDeps, element);
         },
       });
     }

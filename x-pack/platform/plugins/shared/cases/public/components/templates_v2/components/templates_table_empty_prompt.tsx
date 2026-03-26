@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiEmptyPrompt, EuiButtonEmpty } from '@elastic/eui';
-import * as i18n from '../../templates/translations';
+import * as i18n from '../translations';
 import { LinkButton } from '../../links';
 
 interface TemplatesTableEmptyPromptProps {
