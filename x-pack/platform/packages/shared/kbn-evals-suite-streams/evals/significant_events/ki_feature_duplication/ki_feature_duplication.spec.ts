@@ -22,7 +22,7 @@ import {
   kiFeatureDuplicationEvaluator,
   createSemanticUniquenessEvaluator,
   createIdConsistencyEvaluator,
-} from '../../../src/evaluators/ki_feature_duplication_evaluators';
+} from '../../../src/evaluators/ki_feature_duplication/evaluators';
 import {
   getActiveDatasets,
   MANAGED_STREAM_NAME,
