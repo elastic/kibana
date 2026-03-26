@@ -1492,6 +1492,9 @@
       "install_version": {
         "type": "keyword"
       },
+      "installed_as_dependency": {
+        "type": "boolean"
+      },
       "installed_es": {
         "properties": {
           "deferred": {
@@ -1534,9 +1537,6 @@
       "latest_install_failed_attempts": {
         "enabled": false,
         "type": "object"
-      },
-      "installed_as_dependency": {
-        "type": "boolean"
       },
       "name": {
         "type": "keyword"
@@ -2647,6 +2647,9 @@
       },
       "name": {
         "type": "keyword"
+      },
+      "otel_exporter_config_yaml": {
+        "type": "text"
       },
       "output_id": {
         "index": false,
