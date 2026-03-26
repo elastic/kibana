@@ -43,18 +43,20 @@ export async function fetchSampleDocuments({
   const entityFilters = getEntityFilters(features, MAX_FILTERS);
 
   if (entityFilters.length === 0) {
-    const diverseSize = Math.round(size * (ENTITY_FILTERED_RATIO + DIVERSE_RATIO));
-    const randomSize = size - diverseSize;
+    const diverseSize = Math.round(size * DIVERSE_RATIO);
 
     const [{ hits: diverseHits }, { hits: randomHits }] = await Promise.all([
       getDiverseSampleDocuments({ esClient, index, start, end, size: diverseSize }),
-      getSampleDocuments({ esClient, index, start, end, size: randomSize + diverseSize }),
+      getSampleDocuments({ esClient, index, start, end, size }),
     ]);
 
-    const documents = mergeBuckets([
-      { hits: diverseHits, cap: diverseSize },
-      { hits: randomHits, cap: randomSize },
-    ]);
+    const documents = mergeDocuments(
+      [
+        { hits: diverseHits, cap: diverseSize },
+        { hits: randomHits, cap: size },
+      ],
+      size
+    );
     return { documents, totalFilters: 0, filtersCapped: false, hasFilteredDocuments: false };
   }
 
@@ -68,7 +70,6 @@ export async function fetchSampleDocuments({
   const runtimeMappings = await getRuntimeMappings(esClient, index, entityFilters);
   const entityFilteredSize = Math.round(size * ENTITY_FILTERED_RATIO);
   const diverseSize = Math.round(size * DIVERSE_RATIO);
-  const randomSize = size - entityFilteredSize - diverseSize;
 
   const [{ hits: entityFilteredHits }, { hits: diverseHits }, { hits: randomHits }] =
     await Promise.all([
@@ -93,15 +94,18 @@ export async function fetchSampleDocuments({
         index,
         start,
         end,
-        size: randomSize + entityFilteredSize + diverseSize,
+        size,
       }),
     ]);
 
-  const documents = mergeBuckets([
-    { hits: entityFilteredHits, cap: entityFilteredSize },
-    { hits: diverseHits, cap: diverseSize },
-    { hits: randomHits, cap: randomSize },
-  ]);
+  const documents = mergeDocuments(
+    [
+      { hits: entityFilteredHits, cap: entityFilteredSize },
+      { hits: diverseHits, cap: diverseSize },
+      { hits: randomHits, cap: size },
+    ],
+    size
+  );
 
   return {
     documents,
@@ -111,19 +115,20 @@ export async function fetchSampleDocuments({
   };
 }
 
-interface Bucket {
-  hits: Array<SearchHit<Record<string, unknown>>>;
-  cap: number;
-}
-
-function mergeBuckets(buckets: Bucket[]): Array<SearchHit<Record<string, unknown>>> {
+function mergeDocuments(
+  prioritizedHits: Array<{
+    hits: Array<SearchHit<Record<string, unknown>>>;
+    cap: number;
+  }>,
+  totalSize: number
+): Array<SearchHit<Record<string, unknown>>> {
   const seen = new Set<string>();
   const result: Array<SearchHit<Record<string, unknown>>> = [];
 
-  for (const { hits, cap } of buckets) {
+  for (const { hits, cap } of prioritizedHits) {
     let added = 0;
     for (const hit of hits) {
-      if (added >= cap) break;
+      if (added >= cap || result.length >= totalSize) break;
       if (hit._id && seen.has(hit._id)) continue;
       if (hit._id) seen.add(hit._id);
       result.push(hit);
