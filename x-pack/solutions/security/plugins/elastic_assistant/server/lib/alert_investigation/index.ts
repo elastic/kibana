@@ -9,8 +9,6 @@ export { registerPipelineWorkflowSteps } from './workflow_steps';
 export { deduplicateAlerts } from './deduplication';
 export { extractEntitiesFromAlerts } from './entity_extraction';
 export { matchAlertsToCases } from './case_matching';
-export { triggerCaseAttackDiscovery } from './case_integration';
-export { getIncrementalDelta, markAlertsProcessed } from './incremental';
 export type {
   ExtractedEntity,
   CaseMatchScore,
