@@ -7,15 +7,9 @@
     "example": "examples"
   },
   "dependencies": {
-    "bump-cli": "2.9.11",
-    "@redocly/cli": "2.18.0"
-  },
-  "overrides": {
-    "axios": "1.13.6"
+    "@redocly/cli": "2.21.0"
   },
   "scripts": {
-    "bump": "bump",
-    "bump:diff": "bump diff",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

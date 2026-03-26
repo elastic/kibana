@@ -8,9 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { RoleApiCredentials } from '@kbn/scout-oblt';
-import { apiTest, COMMON_HEADERS, DASHBOARD_API_PATH } from '../fixtures';
-
-const SLO_ERROR_BUDGET_EMBEDDABLE_ID = 'SLO_ERROR_BUDGET_EMBEDDABLE';
+import { apiTest, COMMON_HEADERS, DASHBOARD_API_PATH, SLO_ERROR_BUDGET_ID } from '../fixtures';
 
 apiTest.describe(
   'SLO Error Budget Embeddable',
@@ -40,7 +38,7 @@ apiTest.describe(
 
         const dashboardTitle = `Error Budget Test ${Date.now()}`;
         const errorBudgetPanel = {
-          type: SLO_ERROR_BUDGET_EMBEDDABLE_ID,
+          type: SLO_ERROR_BUDGET_ID,
           grid: { x: 0, y: 0, w: 12, h: 8 },
           config: {
             slo_id: sloId,
@@ -61,7 +59,7 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        expect(response).toHaveStatusCode(200);
+        expect(response).toHaveStatusCode(201);
         expect(response.body.id).toBeDefined();
         expect(response.body.data).toBeDefined();
         expect(response.body.data.title).toBe(dashboardTitle);
@@ -69,7 +67,7 @@ apiTest.describe(
         expect(response.body.data.panels).toHaveLength(1);
 
         const createdPanel = response.body.data.panels[0];
-        expect(createdPanel.type).toBe(SLO_ERROR_BUDGET_EMBEDDABLE_ID);
+        expect(createdPanel.type).toBe(SLO_ERROR_BUDGET_ID);
         expect(createdPanel.config).toBeDefined();
         expect(createdPanel.config.slo_id).toBe(sloId);
         expect(createdPanel.config.slo_instance_id).toBe('*');
@@ -82,7 +80,7 @@ apiTest.describe(
       async ({ apiClient }) => {
         const dashboardTitle = `Invalid Error Budget ${Date.now()}`;
         const invalidPanel = {
-          type: SLO_ERROR_BUDGET_EMBEDDABLE_ID,
+          type: SLO_ERROR_BUDGET_ID,
           grid: { x: 0, y: 0, w: 12, h: 8 },
           config: {
             slo_instance_id: '*',

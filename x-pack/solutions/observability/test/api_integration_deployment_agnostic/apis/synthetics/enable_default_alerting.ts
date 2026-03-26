@@ -47,6 +47,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       _httpMonitorJson = getFixtureJson('http_monitor');
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+      await privateLocationTestService.installSyntheticsPackage();
       await alerting.createIndexConnector({
         roleAuthc: editorUser,
         name: TEST_INDEX_CONNECTOR_NAME,
@@ -108,6 +109,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         'id',
         'updatedAt',
         'createdAt',
+        'lastEnabledAt',
         'scheduledTaskId',
         'executionStatus',
         'monitoring',
@@ -330,7 +332,6 @@ const defaultAlertRules = {
       lastDuration: 64,
     },
     ruleTypeId: 'xpack.synthetics.alerts.monitorStatus',
-    viewInAppRelativeUrl: '/app/observability/alerts/rules/574e82f0-1672-11ee-8e7d-c985c0ef6c2e',
   },
   tlsRule: {
     id: '574eaa00-1672-11ee-8e7d-c985c0ef6c2e',
@@ -366,6 +367,5 @@ const defaultAlertRules = {
       lastDuration: 193,
     },
     ruleTypeId: 'xpack.synthetics.alerts.tls',
-    viewInAppRelativeUrl: '/app/observability/alerts/rules/574e82f0-1672-11ee-8e7d-c985c0ef6c2e',
   },
 };

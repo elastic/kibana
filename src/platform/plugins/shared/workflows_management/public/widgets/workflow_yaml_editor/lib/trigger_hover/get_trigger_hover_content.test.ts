@@ -43,6 +43,10 @@ describe('getTriggerHoverContent', () => {
 
     const result = getTriggerHoverContent('cases.updated', getTriggerDefinition('cases.updated'));
     expect(result).not.toBeNull();
+    expect(result!.value).toContain('Tech Preview');
+    expect(result!.value).toContain(
+      'This functionality is experimental and not supported. It may change or be removed at any time.'
+    );
     expect(result!.value).toContain('Case updated');
     expect(result!.value).toContain('**Trigger**:');
     expect(result!.value).toContain('Fired when a case is created or updated');
@@ -52,6 +56,34 @@ describe('getTriggerHoverContent', () => {
     expect(result!.value).toContain('The case identifier');
     expect(result!.value).toContain('action');
     expect(result!.value).toContain('The action that triggered');
+  });
+
+  it('includes nested event schema properties as a tree in trigger hover', () => {
+    const eventSchema = z.object({
+      message: z.string(),
+      foo: z
+        .object({
+          bar: z.object({
+            baz: z.string(),
+          }),
+        })
+        .optional(),
+    });
+    const definition = {
+      id: 'example.nested',
+      title: 'Nested example',
+      description: 'Trigger with nested event shape.',
+      eventSchema,
+    };
+    const result = getTriggerHoverContent('example.nested', definition);
+    expect(result).not.toBeNull();
+    expect(result!.value).toContain('`message`');
+    expect(result!.value).toContain('`foo`');
+    expect(result!.value).toContain('`bar`');
+    expect(result!.value).toContain('`baz`');
+    // Nested segments are indented (tree format)
+    expect(result!.value).toMatch(/\n  - `bar`/);
+    expect(result!.value).toMatch(/\n    - `baz`/);
   });
 
   it('returns content for custom trigger with documentation', () => {
