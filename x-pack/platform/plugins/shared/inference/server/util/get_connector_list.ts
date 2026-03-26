@@ -50,9 +50,18 @@ export const getConnectorList = async ({
   const connectors = connectorsResult.status === 'fulfilled' ? connectorsResult.value : [];
   const endpoints = endpointsResult.status === 'fulfilled' ? endpointsResult.value : [];
 
+  const stackConnectorByInferenceId = new Map(
+    connectors
+      .filter((c) => c.type === InferenceConnectorType.Inference)
+      .map((c) => [c.config?.inferenceId as string, c])
+  );
+
   const inferenceEndpointConnectors: InferenceConnector[] = endpoints.map((ep) => ({
     type: InferenceConnectorType.Inference,
-    name: ep.inferenceId,
+    name:
+      ep.metadata.display?.name ??
+      stackConnectorByInferenceId.get(ep.inferenceId)?.name ??
+      ep.inferenceId,
     connectorId: ep.inferenceId,
     config: {
       inferenceId: ep.inferenceId,
@@ -65,9 +74,19 @@ export const getConnectorList = async ({
     },
     capabilities: {},
     isInferenceEndpoint: true,
+    isPreconfigured: !!ep.metadata.display?.name,
   }));
 
-  return [...connectors, ...inferenceEndpointConnectors];
+  // Exclude .inference stack connectors that have a corresponding ES inference endpoint,
+  // since the endpoint representation is preferred (includes native endpoints too).
+  const endpointInferenceIds = new Set(endpoints.map((ep) => ep.inferenceId));
+  const filteredConnectors = connectors.filter(
+    (c) =>
+      c.type !== InferenceConnectorType.Inference ||
+      !endpointInferenceIds.has(c.config?.inferenceId as string)
+  );
+
+  return [...filteredConnectors, ...inferenceEndpointConnectors];
 };
 
 const getStackConnectors = async ({

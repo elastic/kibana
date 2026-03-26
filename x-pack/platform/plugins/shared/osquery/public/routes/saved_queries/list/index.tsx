@@ -17,7 +17,6 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import type { UseEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -26,7 +25,7 @@ import deepEqual from 'fast-deep-equal';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { QUERY_TIMEOUT } from '../../../../common/constants';
 import { Direction } from '../../../../common/search_strategy';
-import { WithHeaderLayout } from '../../../components/layouts';
+import { WithHeaderLayout, fullWidthContentCss } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
@@ -147,12 +146,6 @@ const EditButtonComponent: React.FC<EditButtonProps> = ({
 };
 
 const EditButton = React.memo(EditButtonComponent);
-
-const fullWidthContentCss = ({ euiTheme }: UseEuiTheme) => ({
-  padding: `0 ${euiTheme.size.l}`,
-  flex: 1,
-  minWidth: 0,
-});
 
 const SavedQueriesPageComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
@@ -296,7 +289,7 @@ const SavedQueriesPageComponent = () => {
       <EuiButton
         fill
         {...newQueryLinkProps}
-        iconType="plusInCircle"
+        iconType="plusCircle"
         isDisabled={!permissions.writeSavedQueries}
       >
         <FormattedMessage

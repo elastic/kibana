@@ -19,7 +19,7 @@ import {
   replaySignificantEventsSnapshot,
 } from '../../../src/data_generators/replay';
 import { evaluate } from '../../../src/evaluate';
-import { createKIFeatureExtractionEvaluators } from '../../../src/evaluators/ki_feature_extraction_evaluators';
+import { createKIFeatureExtractionEvaluators } from '../../../src/evaluators/ki_feature_extraction/evaluators';
 import { createCorrectnessEvaluators } from '../../../src/evaluators/correctness_evaluators';
 import {
   getActiveDatasets,

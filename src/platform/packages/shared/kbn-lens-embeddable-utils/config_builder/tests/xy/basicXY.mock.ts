@@ -1071,8 +1071,8 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
   type: 'xy',
   legend: {
     visibility: 'visible',
-    inside: true,
-    alignment: 'top_right',
+    placement: 'inside',
+    position: 'top_right',
   },
   fitting: {
     type: 'linear',
@@ -1082,29 +1082,35 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
       title: {
         visible: true,
       },
-      ticks: true,
-      grid: true,
-      label_orientation: 'horizontal',
+      ticks: { visible: true },
+      grid: { visible: true },
+      labels: {
+        orientation: 'horizontal',
+      },
     },
     left: {
       title: {
         visible: false,
       },
-      ticks: true,
-      grid: true,
-      label_orientation: 'horizontal',
+      ticks: { visible: true },
+      grid: { visible: true },
+      labels: {
+        orientation: 'horizontal',
+      },
     },
     right: {
       title: {
         visible: true,
       },
-      ticks: true,
-      grid: true,
-      label_orientation: 'horizontal',
+      ticks: { visible: true },
+      grid: { visible: true },
+      labels: {
+        orientation: 'horizontal',
+      },
     },
   },
   decorations: {
-    show_value_labels: false,
+    values: { visible: false },
   },
   layers: [
     {
@@ -1156,7 +1162,7 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
   type: 'xy',
   legend: {
     visibility: 'visible',
-    inside: false,
+    placement: 'outside',
     position: 'bottom',
   },
   fitting: {
@@ -1167,29 +1173,35 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
       title: {
         visible: true,
       },
-      ticks: true,
-      grid: true,
-      label_orientation: 'horizontal',
+      ticks: { visible: true },
+      grid: { visible: true },
+      labels: {
+        orientation: 'horizontal',
+      },
     },
     left: {
       title: {
         visible: false,
       },
-      ticks: true,
-      grid: true,
-      label_orientation: 'horizontal',
+      ticks: { visible: true },
+      grid: { visible: true },
+      labels: {
+        orientation: 'horizontal',
+      },
     },
     right: {
       title: {
         visible: true,
       },
-      ticks: true,
-      grid: true,
-      label_orientation: 'horizontal',
+      ticks: { visible: true },
+      grid: { visible: true },
+      labels: {
+        orientation: 'horizontal',
+      },
     },
   },
   decorations: {
-    show_value_labels: false,
+    values: { visible: false },
   },
   layers: [
     {

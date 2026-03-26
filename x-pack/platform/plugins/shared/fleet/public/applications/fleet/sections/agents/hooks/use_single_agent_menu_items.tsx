@@ -350,7 +350,7 @@ export function useSingleAgentMenuItems({
               defaultMessage="Uninstall agent"
             />
           ),
-          icon: 'minusInCircle',
+          icon: 'minusCircle',
           iconColor: 'danger',
           disabled: !agent.active,
           onClick: () => {

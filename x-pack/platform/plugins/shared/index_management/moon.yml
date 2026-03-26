@@ -78,6 +78,7 @@ dependsOn:
   - '@kbn/cloud'
   - '@kbn/search-index-documents'
   - '@kbn/cloud-connect-plugin'
+  - '@kbn/shared-ux-column-presets'
 tags:
   - plugin
   - prod
