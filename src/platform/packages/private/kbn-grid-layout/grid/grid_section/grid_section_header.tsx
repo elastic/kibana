@@ -378,6 +378,7 @@ const styles = {
           }
         : {
             userSelect: 'none',
+            touchAction: 'none',
             '&:hover': {
               cursor: 'move',
               backgroundColor: `${transparentize(euiTheme.colors.vis.euiColorVis0, 0.1)}`,
