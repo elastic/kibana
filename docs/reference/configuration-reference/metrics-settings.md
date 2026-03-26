@@ -11,18 +11,3 @@ applies_to:
 
 :::{settings} /reference/configuration-reference/metrics-settings.yml
 :::
-
-You do not need to configure any settings to use the Metrics app in {{kib}}. It is enabled by default.
-
-
-## General Metrics settings [general-infra-ui-settings-kb]
-
-`xpack.infra.sources.default.fields.message`
-:   Deprecated in 8.18. Fields used to display messages in the Logs app. Defaults to `['message', '@message']`.
-
-`xpack.infra.alerting.inventory_threshold.group_by_page_size`
-:   Controls the size of the composite aggregations used by the Inventory Threshold to retrieve all the hosts. Defaults to `10_000`.
-
-`xpack.infra.alerting.metric_threshold.group_by_page_size`
-:   Controls the size of the composite aggregations used by the Metric Threshold group by feature. Defaults to `10_000`.
-

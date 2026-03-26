@@ -12,18 +12,3 @@ applies_to:
 
 :::{settings} /reference/configuration-reference/internationalization-settings.yml
 :::
-
-You do not need to configure any settings to run Kibana in English.
-
-`i18n.locale` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:   Set the {{kib}} interface language:
-
-    * English - `en`
-    * Chinese - `zh-CN`
-    * Japanese - `ja-JP`
-    * French - `fr-FR`
-    * German - `de-DE`
-    
-    **Default: `en`**
-
-
