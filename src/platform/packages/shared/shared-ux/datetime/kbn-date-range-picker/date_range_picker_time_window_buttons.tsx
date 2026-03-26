@@ -67,7 +67,14 @@ export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig 
   } = config;
 
   const { stepForward, stepBackward, expandWindow, shrinkWindow, isWindowDurationZero, isInvalid } =
-    useTimeWindow(timeRange.start, timeRange.end, applyRange, { zoomFactor, timePrecision });
+    useTimeWindow(
+      timeRange.start,
+      timeRange.end,
+      timeRange.startDate,
+      timeRange.endDate,
+      applyRange,
+      { zoomFactor, timePrecision }
+    );
 
   const onChange = useCallback(
     (id: string) => {
@@ -198,11 +205,16 @@ function parseZoomFactor(value: number | string): number {
 function useTimeWindow(
   start: string,
   end: string,
+  startDate: Date | null,
+  endDate: Date | null,
   apply: (range: { start: string; end: string }, textOverride?: string) => void,
   options: { zoomFactor: number | string; timePrecision: import('./types').TimePrecision }
 ) {
-  const min = dateMath.parse(start);
-  const max = dateMath.parse(end, { roundUp: true });
+  // Prefer pre-parsed dates when available to avoid passing non-standard date
+  // strings (e.g. "Jan 2, 2025, 01:00:00") through dateMath.parse → moment(),
+  // which triggers deprecation warnings for non-ISO/non-RFC2822 formats.
+  const min = startDate ? moment(startDate) : dateMath.parse(start);
+  const max = endDate ? moment(endDate) : dateMath.parse(end, { roundUp: true });
   const isInvalid = !min || !min.isValid() || !max || !max.isValid();
   const windowDuration = isInvalid ? -1 : max.diff(min);
   const isWindowDurationZero = windowDuration === 0;
