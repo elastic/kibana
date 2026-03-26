@@ -77,7 +77,7 @@ shared@~1.2.0:
     const lockfile = `
 "@scope/alias@npm:@scope/alias@2.0.1", "real-pkg@1 - 2", "real-pkg@npm:@scope/alias@2.0.1":
   version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@scope/alias/-/alias-2.0.1.tgz#abc123"
+  resolved "https://registry.yarnpkg.com/@scope/alias/-/alias-2.0.1.tgz"
   integrity sha512-fake==
 
 consumer@^1.0.0:
@@ -92,7 +92,7 @@ consumer@^1.0.0:
       name: '@scope/alias',
       requestedVersions: ['npm:@scope/alias@2.0.1'],
       resolvedVersion: '2.0.1',
-      resolvedUrl: 'https://registry.yarnpkg.com/@scope/alias/-/alias-2.0.1.tgz#abc123',
+      resolvedUrl: 'https://registry.yarnpkg.com/@scope/alias/-/alias-2.0.1.tgz',
       integrity: 'sha512-fake==',
       dependencies: undefined,
     });
@@ -101,7 +101,7 @@ consumer@^1.0.0:
       name: 'real-pkg',
       requestedVersions: ['1 - 2', 'npm:@scope/alias@2.0.1'],
       resolvedVersion: '2.0.1',
-      resolvedUrl: 'https://registry.yarnpkg.com/@scope/alias/-/alias-2.0.1.tgz#abc123',
+      resolvedUrl: 'https://registry.yarnpkg.com/@scope/alias/-/alias-2.0.1.tgz',
       integrity: 'sha512-fake==',
       dependencies: undefined,
     });
