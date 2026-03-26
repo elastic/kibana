@@ -29,7 +29,7 @@
       "expressions",
       "unifiedDocViewer",
       "unifiedSearch",
-      "contentManagement",
+      "contentManagement"
     ],
     "optionalPlugins": [
       "dataVisualizer",
