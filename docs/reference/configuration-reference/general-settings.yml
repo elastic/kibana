@@ -1,6 +1,7 @@
 ---
 # This file is used to generate the "General settings in Kibana" page in the product docs.
-# Refer to yaml-settings-readme.md in this directory for the settings schema.
+# For the schema and an example refer to the automated settings reference: 
+# https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
 
 product: Kibana
 collection: General settings in Kibana

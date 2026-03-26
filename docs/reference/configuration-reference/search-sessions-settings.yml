@@ -1,5 +1,7 @@
 ---
 # This file is used to generate "Background search and search sessions settings" page in the product docs
+# For the schema and an example refer to the automated settings reference: 
+# https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
 
 product: Kibana
 collection: Background search and search sessions settings in Kibana
