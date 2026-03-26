@@ -45,7 +45,7 @@ describe('DeployPrivateLocationMonitors.getAllMonitorConfigs', () => {
       {
         id: 'm1',
         namespaces: ['space1'],
-        attributes: { locations: [] },
+        attributes: { locations: [], schedule: {} },
       },
     ];
     // Mock MonitorConfigRepository implementation

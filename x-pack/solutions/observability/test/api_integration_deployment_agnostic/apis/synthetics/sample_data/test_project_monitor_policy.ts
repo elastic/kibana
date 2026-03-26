@@ -166,8 +166,8 @@ export const getTestProjectSyntheticsPolicyLightweight = (
                       config_id: configId,
                       'monitor.project.name': projectId,
                       'monitor.project.id': projectId,
-                      meta: { space_id: 'default' },
                       'monitor.interval': 3600,
+                      meta: { space_id: 'default' },
                     },
                     target: '',
                   },
@@ -288,12 +288,12 @@ export const getTestProjectSyntheticsPolicyLightweight = (
               {
                 add_fields: {
                   fields: {
-                    config_id: configId,
                     'monitor.fleet_managed': true,
-                    'monitor.project.id': projectId,
+                    config_id: configId,
                     'monitor.project.name': projectId,
-                    meta: { space_id: 'default' },
+                    'monitor.project.id': projectId,
                     'monitor.interval': 3600,
+                    meta: { space_id: 'default' },
                   },
                   target: '',
                 },

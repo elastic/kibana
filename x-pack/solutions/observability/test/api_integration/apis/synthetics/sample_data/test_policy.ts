@@ -212,10 +212,11 @@ export const getHttpInput = ({
             fields: {
               'monitor.fleet_managed': true,
               config_id: id,
-              meta: { space_id: spaceId ?? 'default' },
-              'monitor.project.name': projectId,
-              'monitor.project.id': projectId,
+              ...(projectId
+                ? { 'monitor.project.name': projectId, 'monitor.project.id': projectId }
+                : {}),
               'monitor.interval': 300,
+              meta: { space_id: spaceId ?? 'default' },
             },
             target: '',
           },
@@ -314,15 +315,15 @@ export const getHttpInput = ({
       {
         add_fields: {
           fields: {
+            'monitor.fleet_managed': true,
             config_id: id,
+            ...(projectId
+              ? { 'monitor.project.name': projectId, 'monitor.project.id': projectId }
+              : {}),
+            'monitor.interval': 300,
             meta: {
               space_id: spaceId ?? 'default',
             },
-            'monitor.fleet_managed': true,
-            ...(projectId
-              ? { 'monitor.project.id': projectId, 'monitor.project.name': projectId }
-              : {}),
-            'monitor.interval': 300,
           },
           target: '',
         },
