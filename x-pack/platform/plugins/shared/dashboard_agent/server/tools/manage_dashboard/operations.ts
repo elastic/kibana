@@ -24,7 +24,7 @@ import {
   removePanelsFromDashboard,
   updatePanelInDashboard,
 } from './dashboard_state';
-import { createDashboardPanel } from './panel_content';
+import { normalizeDashboardPanel } from './panel_content';
 import type { ResolveVisualizationConfig } from './inline_visualization';
 import { createVisualizationFailureResult } from './inline_visualization';
 import type { VisualizationFailure } from './utils';
@@ -45,7 +45,7 @@ export const addMarkdownOperationSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Optional section ID to add this panel into. If omitted, panel is added at the top level.'
+      'UID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
     ),
 });
 
@@ -69,7 +69,7 @@ export const addPanelsFromAttachmentsOperationSchema = z.object({
           .string()
           .optional()
           .describe(
-            'Optional section ID to add this panel into. If omitted, panel is added at the top level.'
+            'UID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
           ),
       })
     )
@@ -133,7 +133,7 @@ const createVisualizationPanelSchema = visualizationPanelInputSchema.extend({
     .string()
     .optional()
     .describe(
-      'Optional section ID to add this panel into. If omitted, panel is added at the top level.'
+      'UID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
     ),
 });
 
@@ -180,7 +180,7 @@ export const updatePanelLayoutsOperationSchema = z.object({
           .nullable()
           .optional()
           .describe(
-            'Move panel to this section. null promotes to top level. Omit to keep the current location.'
+            'Move panel to an existing section by its uid. The section must already exist (use add_section first). null promotes to top level. Omit to keep the current location.'
           ),
       })
     )
@@ -368,8 +368,8 @@ const materializeResolvedVisualizationPanels = ({
 
     successfulPanels.push({
       request,
-      panel: createDashboardPanel({
-        panelContent: resolvedPanel.panelContent,
+      panel: normalizeDashboardPanel({
+        ...resolvedPanel.panelContent,
         grid: request.panelInput.grid,
       }),
     });
@@ -416,11 +416,9 @@ export const executeDashboardOperations = async ({
       }
 
       case 'add_markdown': {
-        const markdownPanel = createDashboardPanel({
-          panelContent: {
-            type: MARKDOWN_EMBEDDABLE_TYPE,
-            config: { content: operation.markdownContent },
-          },
+        const markdownPanel = normalizeDashboardPanel({
+          type: MARKDOWN_EMBEDDABLE_TYPE,
+          config: { content: operation.markdownContent },
           grid: operation.grid,
         });
         nextDashboardData = appendPanelsToDashboard({
@@ -517,8 +515,10 @@ export const executeDashboardOperations = async ({
             dashboardData: nextDashboardData,
             panelId: panelInput.panelId,
             transformPanel: (panel) => ({
-              ...panel,
-              ...resolvedPanel.panelContent,
+              ...normalizeDashboardPanel({
+                ...panel,
+                ...resolvedPanel.panelContent,
+              }),
             }),
           });
 
