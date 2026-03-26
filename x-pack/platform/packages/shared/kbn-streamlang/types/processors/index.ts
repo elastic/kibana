@@ -544,17 +544,6 @@ export const splitProcessorSchema = processorBaseWithWhereSchema
       .optional(z.boolean())
       .describe('Preserve empty trailing fields in the split result'),
   })
-  .refine(
-    (obj) =>
-      !obj.where ||
-      (obj.where && isAlwaysCondition(obj.where)) ||
-      (obj.where && obj.to && obj.from !== obj.to),
-    {
-      message:
-        'Split processor must have the "to" parameter when there is a "where" condition. It should not be the same as the source field.',
-      path: ['to', 'where'],
-    }
-  )
   .describe(
     'Split processor - Split a field value into an array using a separator'
   ) satisfies z.Schema<SplitProcessor>;
@@ -584,6 +573,58 @@ export const sortProcessorSchema = processorBaseWithWhereSchema.extend({
     .describe('Sort order - "asc" (ascending) or "desc" (descending). Defaults to "asc"'),
   ignore_missing: z.optional(z.boolean()).describe('Skip processing when source field is missing'),
 }) satisfies z.Schema<SortProcessor>;
+
+/**
+ * JsonExtract processor
+ *
+ * Extracts values from JSON strings using JSONPath-like selectors.
+ */
+
+export const jsonExtractTypes = ['keyword', 'integer', 'long', 'double', 'boolean'] as const;
+export type JsonExtractType = (typeof jsonExtractTypes)[number];
+
+export interface JsonExtraction {
+  selector: string;
+  target_field: string;
+  type?: JsonExtractType;
+}
+
+const jsonExtractionSchema = z
+  .object({
+    selector: NonEmptyString.describe(
+      'JSONPath-like selector to extract value (e.g., "user.id", "$.metadata.client.ip", "items[0].name")'
+    ),
+    target_field: StreamlangTargetField.describe('Target field to store the extracted value'),
+    type: z
+      .optional(z.enum(jsonExtractTypes))
+      .describe(
+        'Data type for the extracted value. Defaults to "keyword". Ensures consistent types across transpilers.'
+      ),
+  })
+  .describe('A single extraction specification') satisfies z.Schema<JsonExtraction>;
+
+export interface JsonExtractProcessor extends ProcessorBaseWithWhere {
+  action: 'json_extract';
+  field: string;
+  extractions: JsonExtraction[];
+  ignore_missing?: boolean;
+}
+
+export const jsonExtractProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('json_extract'),
+    field: StreamlangSourceField.describe('Source field containing the JSON string to parse'),
+    extractions: z
+      .array(jsonExtractionSchema)
+      .nonempty()
+      .describe('List of extraction specifications'),
+    ignore_missing: z
+      .optional(z.boolean())
+      .describe('Skip processing when source field is missing'),
+  })
+  .describe(
+    'JsonExtract processor - Extract values from JSON strings using JSONPath-like selectors'
+  ) satisfies z.Schema<JsonExtractProcessor>;
 
 /**
  * Concat processor
@@ -699,6 +740,7 @@ export type StreamlangProcessorDefinition =
   | SortProcessor
   | ConcatProcessor
   | NetworkDirectionProcessor
+  | JsonExtractProcessor
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.union([
@@ -723,6 +765,7 @@ export const streamlangProcessorSchema = z.union([
   convertProcessorSchema,
   concatProcessorSchema,
   networkDirectionProcessorSchema,
+  jsonExtractProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);
 
@@ -742,6 +785,7 @@ export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
     redactProcessorSchema,
     mathProcessorSchema,
     splitProcessorSchema,
+    jsonExtractProcessorSchema,
   ])
 );
 
@@ -770,28 +814,42 @@ export const isRedactProcessorDefinition = createIsNarrowSchema(
  */
 export type ProcessorType = StreamlangProcessorDefinition['action'];
 
+/** Internal Zod schema structure for extracting processor action from union options */
+interface ZodProcessorSchemaLike {
+  _def?: {
+    schema?: ZodProcessorSchemaLike;
+    left?: ZodProcessorSchemaLike;
+    options?: ZodProcessorSchemaLike[];
+  };
+  shape?: { action?: { value?: ProcessorType } };
+}
+
 /**
  * Get all processor types as a string array (derived from the Zod schema)
  */
 export const processorTypes: ProcessorType[] = (
-  streamlangProcessorSchema._def.options as ReadonlyArray<any>
-).map((schema: any) => {
+  streamlangProcessorSchema._def.options as ReadonlyArray<ZodProcessorSchemaLike>
+).map((schema: ZodProcessorSchemaLike) => {
   // Handle ZodEffects (from .refine()) by unwrapping to get the base schema
-  let baseSchema = '_def' in schema && 'schema' in schema._def ? schema._def.schema : schema;
+  let baseSchema: ZodProcessorSchemaLike =
+    '_def' in schema && schema._def && 'schema' in schema._def ? schema._def.schema! : schema;
 
   // Handle ZodIntersection (from z.intersection()) by getting the left side which contains the action
-  if ('_def' in baseSchema && 'left' in baseSchema._def) {
-    baseSchema = baseSchema._def.left;
+  if ('_def' in baseSchema && baseSchema._def && 'left' in baseSchema._def) {
+    baseSchema = baseSchema._def.left!;
   }
 
   // Handle ZodUnion (from z.union()) by getting the first option's action
   // All options in the union should have the same action value
-  if ('_def' in baseSchema && 'options' in baseSchema._def) {
-    baseSchema = baseSchema._def.options[0];
+  if ('_def' in baseSchema && baseSchema._def && 'options' in baseSchema._def) {
+    baseSchema = baseSchema._def.options![0]!;
   }
 
-  return baseSchema.shape.action.value;
-}) as ProcessorType[];
+  if (!baseSchema.shape?.action?.value) {
+    throw new Error('Unable to extract action from processor schema');
+  }
+  return baseSchema.shape.action.value as ProcessorType;
+});
 
 /**
  * Get the processor type (action) from a processor definition

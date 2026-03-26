@@ -8,6 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useSelector } from 'react-redux';
+import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import { OverviewTab } from '../../flyout_v2/document/tabs/overview_tab';
 import type { SecurityAppStore, State } from '../../common/store/types';
 import type { StartServices } from '../../types';
@@ -90,7 +91,8 @@ export const AlertFlyoutOverviewTab = ({
     children: (
       <>
         <DataViewManagerBootstrap />
-        <OverviewTab hit={hit} />
+        {/* TODO: implement Discover cell actions - see https://github.com/elastic/kibana/issues/258858*/}
+        <OverviewTab hit={hit} renderCellActions={noopCellActionRenderer} />
       </>
     ),
   });

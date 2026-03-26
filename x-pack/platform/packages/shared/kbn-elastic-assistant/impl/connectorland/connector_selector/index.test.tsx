@@ -11,7 +11,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { mockAssistantAvailability, TestProviders } from '../../mock/test_providers/test_providers';
 import { mockActionTypes, mockConnectors } from '../../mock/connectors';
 import * as i18n from '../translations';
-import { useLoadConnectors } from '../use_load_connectors';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { createMockUseLoadConnectorsResult } from '../../mock/test_helpers';
 
 const onConnectorSelectionChange = jest.fn();
@@ -27,7 +27,7 @@ const connectorTwo = mockConnectors[1];
 
 const mockRefetchConnectors = jest.fn();
 
-jest.mock('../use_load_connectors', () => ({
+jest.mock('@kbn/inference-connectors', () => ({
   useLoadConnectors: jest.fn(),
 }));
 

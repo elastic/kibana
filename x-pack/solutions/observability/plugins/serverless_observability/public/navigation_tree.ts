@@ -66,6 +66,8 @@ export const createNavigationTree = ({
       {
         link: 'observability-overview:alerts',
         icon: 'warning',
+        getIsActive: ({ pathNameSerialized, prepend }) =>
+          pathNameSerialized.startsWith(prepend('/app/observability/alerts')),
       },
       ...filterForFeatureAvailability(
         {
@@ -517,6 +519,10 @@ export const createNavigationTree = ({
             children: [
               {
                 link: 'management:genAiSettings' as const,
+                breadcrumbStatus: 'hidden' as const,
+              },
+              {
+                link: 'management:evals' as const,
                 breadcrumbStatus: 'hidden' as const,
               },
               ...(showAiAssistant
