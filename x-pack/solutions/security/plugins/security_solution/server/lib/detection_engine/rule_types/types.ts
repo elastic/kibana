@@ -69,6 +69,7 @@ export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   success: boolean;
   warning: boolean;
   warningMessages: string[];
+  alertsCandidateCount?: number;
   suppressedAlertsCount?: number;
   totalEventsFound?: number;
   loggedRequests?: RulePreviewLoggedRequest[];
@@ -337,12 +338,16 @@ export interface SearchAfterAndBulkCreateReturnType {
   searchAfterTimes: string[];
   enrichmentTimes: string[];
   bulkCreateTimes: string[];
+  /**
+   * The number of detected alerts. Suppression hasn't been applied yet.
+   */
+  alertsCandidateCount?: number;
+  suppressedAlertsCount?: number;
   createdSignalsCount: number;
   createdSignals: unknown[];
   errors: string[];
   userError?: boolean;
   warningMessages: string[];
-  suppressedAlertsCount?: number;
   totalEventsFound?: number;
   loggedRequests?: RulePreviewLoggedRequest[];
 }

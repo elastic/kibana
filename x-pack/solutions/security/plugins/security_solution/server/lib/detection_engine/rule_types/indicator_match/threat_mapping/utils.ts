@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 
-import { get, isEmpty } from 'lodash';
+import { get, isEmpty, sum } from 'lodash';
 
 import type { ThreatMapping } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { TelemetryChannel } from '../../../../telemetry/types';
@@ -124,6 +124,7 @@ export const combineConcurrentResults = (
         searchAfterTimes: [maxSearchAfterTime],
         bulkCreateTimes: [maxBulkCreateTimes],
         enrichmentTimes: [maxEnrichmentTimes],
+        alertsCandidateCount: sum([accum.alertsCandidateCount, item.alertsCandidateCount]),
         createdSignalsCount: accum.createdSignalsCount + item.createdSignalsCount,
         createdSignals: [...accum.createdSignals, ...item.createdSignals],
         warningMessages: [...accum.warningMessages, ...item.warningMessages],

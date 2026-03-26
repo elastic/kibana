@@ -228,6 +228,9 @@ export const groupAndBulkCreate = async ({
 
       const buckets = eventsByGroupResponseWithAggs.aggregations.eventGroups.buckets;
 
+      // Collect rule execution metrics
+      toReturn.alertsCandidateCount = buckets.length;
+
       // we can create only as many unsuppressed alerts, as total number of alerts(suppressed and unsuppressed) does not exceeds maxSignals
       const maxUnsuppressedCount = tuple.maxSignals - buckets.length;
       if (suppressOnMissingFields === false && maxUnsuppressedCount > 0) {
