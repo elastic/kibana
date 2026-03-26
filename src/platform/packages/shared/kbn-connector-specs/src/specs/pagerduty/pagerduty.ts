@@ -60,7 +60,7 @@ const PAGERDUTY_MCP_SERVER_URL = 'https://mcp.pagerduty.com/mcp';
 export const PagerdutyConnector: ConnectorSpec = {
   metadata: {
     id: '.pagerduty_mcp',
-    displayName: 'PagerDuty',
+    displayName: 'PagerDuty (MCP)',
     description: i18n.translate('core.kibanaConnectorSpecs.pagerduty.metadata.description', {
       defaultMessage:
         'Connect to PagerDuty to access incidents, escalation policies, schedules, and related data.',
