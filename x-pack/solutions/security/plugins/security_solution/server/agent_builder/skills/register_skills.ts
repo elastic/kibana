@@ -13,7 +13,6 @@ import { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting
 import { getEntityAnalyticsSkill } from './entity_analytics';
 import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
-import { detectionEngineeringSkill } from './detection_engineering';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
 import { getSecurityMlJobsSkill } from './security_ml_jobs';
 
@@ -55,5 +54,4 @@ export const registerSkills = async ({
 
   await agentBuilder.skills.register(threatHuntingSkill);
   await agentBuilder.skills.register(alertAnalysisSkill);
-  await agentBuilder.skills.register(detectionEngineeringSkill);
 };

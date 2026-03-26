@@ -188,68 +188,6 @@ evaluate.describe('Security Skills - Alert Analysis', () => {
   );
 });
 
-evaluate.describe('Security Skills - Detection Engineering', () => {
-  evaluate(
-    'detection engineering queries activate the correct skill and tools',
-    async ({ evaluateDataset }) => {
-      await evaluateDataset({
-        dataset: {
-          name: 'agent builder: security-detection-engineering-skill',
-          description:
-            'Validates that detection rule creation and exception management queries activate the detection-engineering skill',
-          examples: [
-            {
-              input: {
-                question:
-                  'Create a detection rule for PowerShell encoded command execution that could indicate obfuscated malicious scripts.',
-              },
-              output: {
-                expected:
-                  'I will create a detection rule that looks for PowerShell processes launched with encoded command arguments (-enc, -encodedcommand, -e), mapped to MITRE ATT&CK T1059.001 (Command and Scripting Interpreter: PowerShell).',
-              },
-              metadata: {
-                query_intent: 'Rule Creation',
-                expectedSkill: 'detection-engineering',
-                expectedOnlyToolId: 'security.create_detection_rule',
-              },
-            },
-            {
-              input: {
-                question:
-                  'The rule "Suspicious PowerShell Execution" is generating too many false positives from our CI/CD pipeline. Create an exception for the jenkins service account running powershell with -encodedcommand.',
-              },
-              output: {
-                expected:
-                  'I will create an exception on the detection rule that excludes PowerShell execution by the jenkins service account with encoded command arguments, since this is a known benign pattern from your CI/CD pipeline.',
-              },
-              metadata: {
-                query_intent: 'Exception Management',
-                expectedSkill: 'detection-engineering',
-                expectedOnlyToolId: 'security.manage_rule_exceptions',
-              },
-            },
-            {
-              input: {
-                question:
-                  'What MITRE ATT&CK techniques do we currently have detection rules for? Show me our coverage gaps.',
-              },
-              output: {
-                expected:
-                  'I will search attack discovery data to assess your current detection coverage across MITRE ATT&CK techniques and identify gaps where new rules should be created.',
-              },
-              metadata: {
-                query_intent: 'Coverage Analysis',
-                expectedSkill: 'detection-engineering',
-                expectedOnlyToolId: 'security.attack_discovery_search',
-              },
-            },
-          ],
-        },
-      });
-    }
-  );
-});
-
 evaluate.describe('Security Skills - Cross-Skill Workflows', () => {
   evaluate(
     'queries spanning multiple security concerns activate the most relevant skill',
@@ -260,20 +198,6 @@ evaluate.describe('Security Skills - Cross-Skill Workflows', () => {
           description:
             'Validates that ambiguous queries spanning multiple security domains are routed to the most relevant skill',
           examples: [
-            {
-              input: {
-                question:
-                  'I found suspicious PowerShell activity on host DC01 during a hunt. Create a detection rule to catch this pattern going forward.',
-              },
-              output: {
-                expected:
-                  'I will create a detection rule based on the suspicious PowerShell pattern you identified during your threat hunt, using the detection engineering workflow.',
-              },
-              metadata: {
-                query_intent: 'Rule Creation from Hunt',
-                expectedSkill: 'detection-engineering',
-              },
-            },
             {
               input: {
                 question:
@@ -327,19 +251,6 @@ evaluate.describe('Security Skills - Distractor Queries', () => {
             metadata: {
               query_intent: 'Observability',
               shouldNotActivateSkill: 'alert-analysis',
-            },
-          },
-          {
-            input: {
-              question: 'Help me create an index template for my application logs.',
-            },
-            output: {
-              expected:
-                'I will help you create an index template. This is a platform/data management task.',
-            },
-            metadata: {
-              query_intent: 'Platform',
-              shouldNotActivateSkill: 'detection-engineering',
             },
           },
         ],

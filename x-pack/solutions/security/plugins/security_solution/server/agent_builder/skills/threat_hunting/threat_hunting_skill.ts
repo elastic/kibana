@@ -64,7 +64,7 @@ Use this skill when:
 - Record the hypothesis, data explored, queries used, and results
 - Classify findings: confirmed threat, suspicious (needs more data), or benign
 - For confirmed threats, create a case using 'platform.core.cases' to track the investigation
-- Cross-reference the alert-analysis skill for triage and the detection-engineering skill for rule creation
+- Cross-reference the alert-analysis skill for triage of confirmed findings
 
 ## Query Templates
 

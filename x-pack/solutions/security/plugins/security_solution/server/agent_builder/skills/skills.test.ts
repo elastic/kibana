@@ -9,9 +9,8 @@ import { platformCoreTools } from '@kbn/agent-builder-common';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
 import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
-import { detectionEngineeringSkill } from './detection_engineering';
 
-const ALL_SKILLS = [threatHuntingSkill, alertAnalysisSkill, detectionEngineeringSkill];
+const ALL_SKILLS = [threatHuntingSkill, alertAnalysisSkill];
 
 describe('Security Skills', () => {
   describe('threat-hunting skill', () => {
@@ -41,9 +40,8 @@ describe('Security Skills', () => {
       expect(threatHuntingSkill.content).toContain('platform.core.cases');
     });
 
-    it('content references alert-analysis and detection-engineering skills', () => {
+    it('content references alert-analysis skill', () => {
       expect(threatHuntingSkill.content).toContain('alert-analysis');
-      expect(threatHuntingSkill.content).toContain('detection-engineering');
     });
 
     it('has no inline tools', () => {
@@ -99,44 +97,6 @@ describe('Security Skills', () => {
       expect(alertAnalysisSkill.content).toContain('entity-analytics');
     });
 
-    it('content references detection-engineering skill for rule tuning', () => {
-      expect(alertAnalysisSkill.content).toContain('detection-engineering');
-    });
-  });
-
-  describe('detection-engineering skill', () => {
-    it('validates successfully via validateSkillDefinition', async () => {
-      await expect(validateSkillDefinition(detectionEngineeringSkill)).resolves.toBeDefined();
-    });
-
-    it('has non-empty content', () => {
-      expect(detectionEngineeringSkill.content.length).toBeGreaterThan(100);
-    });
-
-    it('has description under 1024 characters', () => {
-      expect(detectionEngineeringSkill.description.length).toBeLessThanOrEqual(1024);
-    });
-
-    it('returns 4 registry tools', () => {
-      const tools = detectionEngineeringSkill.getRegistryTools!();
-      expect(tools).toHaveLength(4);
-    });
-
-    it('has no inline tools', () => {
-      expect(detectionEngineeringSkill.getInlineTools).toBeUndefined();
-    });
-
-    it('has referenced content for rule templates', () => {
-      expect(detectionEngineeringSkill.referencedContent).toBeDefined();
-      expect(detectionEngineeringSkill.referencedContent!.length).toBe(3);
-      const names = detectionEngineeringSkill.referencedContent!.map((rc) => rc.name);
-      expect(names).toEqual(expect.arrayContaining(['kql-rule', 'eql-sequence', 'threshold-rule']));
-    });
-
-    it('content references threat-hunting and alert-analysis skills', () => {
-      expect(detectionEngineeringSkill.content).toContain('threat-hunting');
-      expect(detectionEngineeringSkill.content).toContain('alert-analysis');
-    });
   });
 
   describe('cross-skill validation', () => {

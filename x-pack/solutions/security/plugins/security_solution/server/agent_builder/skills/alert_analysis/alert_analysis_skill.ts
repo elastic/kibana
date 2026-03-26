@@ -70,7 +70,6 @@ Use this skill when:
 - Compile a comprehensive analysis with supporting evidence
 - Provide clear threat assessment: severity, confidence level, affected scope
 - Recommend specific next steps based on disposition
-- Reference the detection-engineering skill if rule tuning or exception creation is needed
 - Reference the entity-analytics skill for deeper entity profiling or asset criticality review
 
 ## Best Practices

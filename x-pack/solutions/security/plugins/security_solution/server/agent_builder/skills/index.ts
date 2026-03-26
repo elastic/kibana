@@ -7,6 +7,5 @@
 
 export { alertAnalysisSkill } from './alert_analysis';
 export { threatHuntingSkill } from './threat_hunting';
-export { detectionEngineeringSkill } from './detection_engineering';
 export { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting';
 export { registerSkills } from './register_skills';
