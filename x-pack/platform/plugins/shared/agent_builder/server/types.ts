@@ -38,6 +38,7 @@ import type { SkillRegistry } from './services/skills/skill_registry';
 import type { AgentExecutionService } from './services/execution';
 import type { ModelProviderFactoryFn } from './services/runner/model_provider';
 import type { SmlTypeDefinition, SmlIndexAttachmentParams } from './services/sml';
+import type { PluginsServiceSetup, PluginRegistry } from './services/plugins';
 
 export interface AgentBuilderSetupDependencies {
   cloud?: CloudSetup;
@@ -168,6 +169,14 @@ export interface SmlSetup {
   registerType: (definition: SmlTypeDefinition) => void;
 }
 
+export interface PluginsSetup {
+  /**
+   * Register a built-in plugin to be available in agentBuilder.
+   * Built-in plugins are read-only and registered programmatically by solution teams.
+   */
+  register: PluginsServiceSetup['register'];
+}
+
 /**
  * Setup contract of the agentBuilder plugin.
  */
@@ -192,6 +201,10 @@ export interface AgentBuilderPluginSetup {
    * Skills setup contract, which can be used to register skills.
    */
   skills: SkillsSetup;
+  /**
+   * Plugins setup contract, which can be used to register built-in plugins.
+   */
+  plugins: PluginsSetup;
   /**
    * SML (Semantic Metadata Layer) setup contract.
    * Used to register content types for discovery and search.
@@ -223,6 +236,17 @@ export interface SmlStart {
 }
 
 /**
+ * AgentBuilder plugins service's start contract
+ */
+export interface PluginsStart {
+  /**
+   * Return a plugin registry scoped to the current user and context.
+   * The registry provides access to both built-in and persisted plugins.
+   */
+  getRegistry: (opts: { request: KibanaRequest }) => PluginRegistry;
+}
+
+/**
  * Start contract of the agentBuilder plugin.
  */
 export interface AgentBuilderPluginStart {
@@ -238,6 +262,10 @@ export interface AgentBuilderPluginStart {
    * Skills service, to manage and access skills.
    */
   skills: SkillsStart;
+  /**
+   * Plugins service, to query built-in and persisted plugins.
+   */
+  plugins: PluginsStart;
   /**
    * Execution service, to execute agents and retrieve execution status.
    */
