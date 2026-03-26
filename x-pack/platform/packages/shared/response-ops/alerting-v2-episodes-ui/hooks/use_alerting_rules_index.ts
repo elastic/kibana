@@ -10,7 +10,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { FindRulesResponse } from '@kbn/alerting-v2-plugin/public/services/rules_api';
 import useAsync from 'react-use/lib/useAsync';
 
-const RULE_API_PATH = '/api/alerting/v2/rule';
+const RULE_API_PATH = '/api/alerting/v2/rules';
 
 export interface UseAlertingRulesIndexOptions {
   ruleIds: string[];

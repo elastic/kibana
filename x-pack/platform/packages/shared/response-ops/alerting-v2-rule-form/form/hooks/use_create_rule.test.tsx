@@ -92,7 +92,7 @@ describe('useCreateRule', () => {
     });
 
     await waitFor(() => {
-      expect(http.post).toHaveBeenCalledWith('/api/alerting/v2/rule', expect.any(Object));
+      expect(http.post).toHaveBeenCalledWith('/api/alerting/v2/rules', expect.any(Object));
     });
   });
 
@@ -116,7 +116,7 @@ describe('useCreateRule', () => {
     });
 
     await waitFor(() => {
-      expect(http.post).toHaveBeenCalledWith('/api/alerting/v2/rule', {
+      expect(http.post).toHaveBeenCalledWith('/api/alerting/v2/rules', {
         body: JSON.stringify(expectedApiPayload),
       });
     });
@@ -373,7 +373,7 @@ describe('useCreateRule', () => {
     });
 
     await waitFor(() => {
-      expect(http.post).toHaveBeenCalledWith('/api/alerting/v2/rule', {
+      expect(http.post).toHaveBeenCalledWith('/api/alerting/v2/rules', {
         body: JSON.stringify(expectedPayload),
       });
     });

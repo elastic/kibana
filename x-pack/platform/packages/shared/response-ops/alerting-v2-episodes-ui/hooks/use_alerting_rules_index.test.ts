@@ -10,7 +10,7 @@ import { useAlertingRulesIndex } from './use_alerting_rules_index';
 import type { FindRulesResponse } from '@kbn/alerting-v2-plugin/public/services/rules_api';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 
-const RULE_API_PATH = '/api/alerting/v2/rule';
+const RULE_API_PATH = '/api/alerting/v2/rules';
 
 jest.mock('react-use/lib/useAsync', () => ({
   __esModule: true,

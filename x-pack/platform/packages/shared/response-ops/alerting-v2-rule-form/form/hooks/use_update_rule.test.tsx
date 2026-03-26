@@ -67,7 +67,7 @@ describe('useUpdateRule', () => {
 
     await waitFor(() => {
       expect(http.patch).toHaveBeenCalledWith(
-        `/api/alerting/v2/rule/${encodeURIComponent(ruleId)}`,
+        `/api/alerting/v2/rules/${encodeURIComponent(ruleId)}`,
         expect.any(Object)
       );
     });
@@ -136,7 +136,7 @@ describe('useUpdateRule', () => {
 
     await waitFor(() => {
       expect(http.patch).toHaveBeenCalledWith(
-        `/api/alerting/v2/rule/${encodeURIComponent(ruleId)}`,
+        `/api/alerting/v2/rules/${encodeURIComponent(ruleId)}`,
         { body: JSON.stringify(expectedPayload) }
       );
     });
