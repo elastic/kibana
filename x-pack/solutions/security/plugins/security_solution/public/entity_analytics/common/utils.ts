@@ -74,3 +74,17 @@ export const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
   querySize: 1,
 };
+
+/**
+ * Extracts a human-readable message from Kibana HTTP response errors,
+ * which nest the message under `error.body.message`.
+ */
+export function safeErrorMessage(error: unknown, fallback: string): string;
+export function safeErrorMessage(error: unknown): string | undefined;
+export function safeErrorMessage(error: unknown, fallback?: string): string | undefined {
+  if (error && typeof error === 'object' && 'body' in error) {
+    const body = (error as { body?: { message?: string } }).body;
+    if (body && typeof body.message === 'string') return body.message;
+  }
+  return fallback;
+}

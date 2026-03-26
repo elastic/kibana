@@ -11,7 +11,7 @@ import { LRUCache } from 'lru-cache';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
-import type { DashboardSearchRequestBody, DashboardSearchResponseBody } from '../../server';
+import type { DashboardSearchRequestParams, DashboardSearchResponseBody } from '../../server';
 import {
   DASHBOARD_API_PATH,
   DASHBOARD_API_VERSION,
@@ -79,17 +79,15 @@ export const dashboardClient = {
     }
     return result;
   },
-  search: async (searchBody: DashboardSearchRequestBody) => {
-    return await coreServices.http.post<DashboardSearchResponseBody>(
-      `${DASHBOARD_API_PATH}/search`,
-      {
-        version: DASHBOARD_API_VERSION,
-        body: JSON.stringify({
-          ...searchBody,
-          search: searchBody.search ? `${searchBody.search}*` : undefined,
-        }),
-      }
-    );
+  search: async (searchParams: DashboardSearchRequestParams) => {
+    const { query, ...params } = searchParams;
+    return await coreServices.http.get<DashboardSearchResponseBody>(`${DASHBOARD_API_PATH}`, {
+      version: DASHBOARD_API_VERSION,
+      query: {
+        ...params,
+        ...(query ? { query: `${query}*` } : {}),
+      },
+    });
   },
   update: async (id: string, dashboardState: DashboardState) => {
     const updateResponse = await coreServices.http.put<DashboardUpdateResponseBody>(
