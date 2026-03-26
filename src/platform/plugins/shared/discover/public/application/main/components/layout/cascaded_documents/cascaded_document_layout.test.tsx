@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  type ComponentProps,
-  createElement,
-  type ForwardedRef,
-  type ReactNode,
-} from 'react';
+import React, { type ComponentProps, type ForwardedRef, type ReactNode } from 'react';
 import { render, screen } from '@testing-library/react';
 import type { AggregateQuery } from '@kbn/es-query';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
@@ -24,6 +19,9 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { ESQLStatsQueryMeta } from '@kbn/esql-utils';
 import type { DataCascade, DataCascadeImplRef } from '@kbn/shared-ux-document-data-cascade';
 import type { ESQLDataGroupNode } from './blocks/types';
+import { DiscoverToolkitTestProvider } from '../../../../../__mocks__/test_provider';
+import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
+import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 
 /** Captured DataCascade props we assert on in tests. */
 const mockDataCascadeProps: Array<
@@ -114,7 +112,7 @@ const createMockFetcher = (): CascadedDocumentsFetcher =>
     cancelFetch: jest.fn(),
   } as unknown as CascadedDocumentsFetcher);
 
-const createWrapper = (overrides?: Partial<CascadedDocumentsContext>) => {
+const createWrapper = async (overrides?: Partial<CascadedDocumentsContext>) => {
   const esqlQuery: AggregateQuery = { esql: 'FROM logs | STATS count() BY category' };
 
   const contextValue: CascadedDocumentsContext = {
@@ -135,8 +133,16 @@ const createWrapper = (overrides?: Partial<CascadedDocumentsContext>) => {
     ...overrides,
   };
 
-  const Wrapper = ({ children }: { children: ReactNode }) =>
-    createElement(CascadedDocumentsProvider, { value: contextValue }, children);
+  const services = createDiscoverServicesMock();
+  const toolkit = getDiscoverInternalStateMock({ services });
+  await toolkit.initializeTabs();
+  await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+
+  const Wrapper = ({ children }: { children: ReactNode }) => (
+    <DiscoverToolkitTestProvider toolkit={toolkit}>
+      <CascadedDocumentsProvider value={contextValue}>{children}</CascadedDocumentsProvider>
+    </DiscoverToolkitTestProvider>
+  );
 
   return { Wrapper, contextValue };
 };
@@ -174,9 +180,9 @@ describe('CascadedDocumentsLayout', () => {
   });
 
   describe('when persistedCascadeUiState does not exist (getDataCascadeUiState returns undefined)', () => {
-    it('renders the layout and DataCascade without throwing', () => {
+    it('renders the layout and DataCascade without throwing', async () => {
       const getDataCascadeUiState = jest.fn().mockReturnValue(undefined);
-      const { Wrapper } = createWrapper({ getDataCascadeUiState });
+      const { Wrapper } = await createWrapper({ getDataCascadeUiState });
 
       expect(() => {
         render(
@@ -187,9 +193,9 @@ describe('CascadedDocumentsLayout', () => {
       }).not.toThrow();
     });
 
-    it('renders the cascade wrapper and mock DataCascade', () => {
+    it('renders the cascade wrapper and mock DataCascade', async () => {
       const getDataCascadeUiState = jest.fn().mockReturnValue(undefined);
-      const { Wrapper } = createWrapper({ getDataCascadeUiState });
+      const { Wrapper } = await createWrapper({ getDataCascadeUiState });
 
       render(
         <Wrapper>
@@ -200,9 +206,9 @@ describe('CascadedDocumentsLayout', () => {
       expect(screen.getByTestId('mock-data-cascade')).toBeInTheDocument();
     });
 
-    it('passes undefined initialState to DataCascade when no persisted state', () => {
+    it('passes undefined initialState to DataCascade when no persisted state', async () => {
       const getDataCascadeUiState = jest.fn().mockReturnValue(undefined);
-      const { Wrapper } = createWrapper({ getDataCascadeUiState });
+      const { Wrapper } = await createWrapper({ getDataCascadeUiState });
 
       render(
         <Wrapper>
@@ -217,7 +223,7 @@ describe('CascadedDocumentsLayout', () => {
   });
 
   describe('when persistedCascadeUiState exists', () => {
-    it('passes persisted restorable state to DataCascade as initialState', () => {
+    it('passes persisted restorable state to DataCascade as initialState', async () => {
       const persistedState = {
         scrollRect: { width: 800, height: 600 },
         scrollAnchorItemIndex: 5,
@@ -226,7 +232,7 @@ describe('CascadedDocumentsLayout', () => {
         connectedChildren: {},
       };
       const getDataCascadeUiState = jest.fn().mockReturnValue(persistedState);
-      const { Wrapper } = createWrapper({ getDataCascadeUiState });
+      const { Wrapper } = await createWrapper({ getDataCascadeUiState });
 
       render(
         <Wrapper>
