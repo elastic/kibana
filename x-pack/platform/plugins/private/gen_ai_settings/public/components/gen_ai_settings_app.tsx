@@ -326,7 +326,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                       </EuiTitle>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <AiIcon type="sparkles" size="m" aria-hidden={true} />
+                      <AiIcon iconType="sparkles" size="m" aria-hidden={true} />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
