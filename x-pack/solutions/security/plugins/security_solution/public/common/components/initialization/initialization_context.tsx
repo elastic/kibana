@@ -56,22 +56,23 @@ export const InitializationProvider: FC<PropsWithChildren> = ({ children }) => {
         inflightRef.current.add(id);
       }
 
-      let retryableFlows: InitializationFlowId[] = [];
+      let flowsToRetry: InitializationFlowId[] = [];
+      flowsToRetry = newFlows.filter((id) => {
+        const count = retryCountRef.current.get(id) ?? 0;
+        return count < DEFAULT_MAX_RETRIES;
+      });
 
       try {
         const response = await initializeSecuritySolution({ http, flows: newFlows });
 
-        retryableFlows = newFlows.filter((id) => {
-          if (response.flows[id]?.status === INITIALIZATION_FLOW_STATUS_READY) return false;
-          const count = retryCountRef.current.get(id) ?? 0;
-          return count < DEFAULT_MAX_RETRIES;
-        });
+        flowsToRetry = flowsToRetry.filter(
+          (id) => response.flows[id]?.status !== INITIALIZATION_FLOW_STATUS_READY
+        );
 
-        const toSettle: Array<[InitializationFlowId, InitializationFlowResult<unknown>]> = newFlows
-          .filter((id) => !retryableFlows.includes(id))
-          .map((id) => {
-            const flowResult = response.flows[id];
-            if (flowResult?.status === INITIALIZATION_FLOW_STATUS_READY) {
+        const toSettle: Array<[InitializationFlowId, InitializationFlowResult<unknown>]> =
+          Object.entries(response.flows).map(([key, flowResult]) => {
+            const id = key as InitializationFlowId;
+            if (flowResult.status === INITIALIZATION_FLOW_STATUS_READY) {
               try {
                 const payload = parseFlowPayload(id, flowResult.payload);
                 return [id, { status: INITIALIZATION_FLOW_STATUS_READY, payload }];
@@ -80,7 +81,7 @@ export const InitializationProvider: FC<PropsWithChildren> = ({ children }) => {
                   id,
                   {
                     status: INITIALIZATION_FLOW_STATUS_ERROR,
-                    error: `Invalid payload for flow '${id}': ${parseErr.message}`,
+                    error: `Invalid returned payload for flow '${id}': ${parseErr.message}`,
                   },
                 ];
               }
@@ -89,7 +90,7 @@ export const InitializationProvider: FC<PropsWithChildren> = ({ children }) => {
               id,
               {
                 status: INITIALIZATION_FLOW_STATUS_ERROR,
-                error: flowResult?.error ?? 'No result returned from server',
+                error: flowResult.error,
               },
             ];
           });
@@ -106,12 +107,7 @@ export const InitializationProvider: FC<PropsWithChildren> = ({ children }) => {
       } catch (err) {
         const errorMessage = err.body?.message ?? err.message ?? 'Unknown error';
 
-        retryableFlows = newFlows.filter((id) => {
-          const count = retryCountRef.current.get(id) ?? 0;
-          return count < DEFAULT_MAX_RETRIES;
-        });
-
-        const toSettle = newFlows.filter((id) => !retryableFlows.includes(id));
+        const toSettle = newFlows.filter((id) => !flowsToRetry.includes(id));
 
         if (toSettle.length > 0) {
           setSettledState((prev) => {
@@ -124,7 +120,7 @@ export const InitializationProvider: FC<PropsWithChildren> = ({ children }) => {
         }
       }
 
-      for (const id of retryableFlows) {
+      for (const id of flowsToRetry) {
         retryCountRef.current.set(id, (retryCountRef.current.get(id) ?? 0) + 1);
       }
 
@@ -132,8 +128,8 @@ export const InitializationProvider: FC<PropsWithChildren> = ({ children }) => {
         inflightRef.current.delete(id);
       }
 
-      if (retryableFlows.length > 0) {
-        requestInitialization(retryableFlows);
+      if (flowsToRetry.length > 0) {
+        requestInitialization(flowsToRetry);
       }
     },
     [http]
