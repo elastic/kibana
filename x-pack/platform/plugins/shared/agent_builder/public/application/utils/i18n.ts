@@ -17,6 +17,12 @@ export const labels = {
     title: i18n.translate('xpack.agentBuilder.conversations.title', {
       defaultMessage: 'Agent Chat',
     }),
+    staleCheckPartialFailureTitle: i18n.translate(
+      'xpack.agentBuilder.conversations.staleCheckPartialFailureTitle',
+      {
+        defaultMessage: 'Could not check whether some attachments are outdated',
+      }
+    ),
   },
   tools: {
     // Landing page
@@ -623,6 +629,9 @@ export const labels = {
     toolIdsHelpText: i18n.translate('xpack.agentBuilder.skills.toolIdsHelpText', {
       defaultMessage: 'Select tools that this skill can use.',
     }),
+    experimentalLabel: i18n.translate('xpack.agentBuilder.skills.experimentalLabel', {
+      defaultMessage: 'Experimental',
+    }),
   },
   plugins: {
     title: i18n.translate('xpack.agentBuilder.plugins.title', { defaultMessage: 'Plugins' }),
@@ -649,14 +658,14 @@ export const labels = {
     searchPluginsPlaceholder: i18n.translate(
       'xpack.agentBuilder.plugins.searchPluginsPlaceholder',
       {
-        defaultMessage: 'Search',
+        defaultMessage: 'Search plugins',
       }
     ),
     noPluginsMatchMessage: i18n.translate('xpack.agentBuilder.plugins.noPluginsMatchMessage', {
-      defaultMessage: 'No plugins match your search.',
+      defaultMessage: 'No plugins match your search',
     }),
     noPluginsMessage: i18n.translate('xpack.agentBuilder.plugins.noPluginsMessage', {
-      defaultMessage: 'No plugins installed yet.',
+      defaultMessage: 'No plugins installed',
     }),
     listPluginsErrorMessage: i18n.translate('xpack.agentBuilder.plugins.listPluginsErrorMessage', {
       defaultMessage: 'Failed to fetch plugins',

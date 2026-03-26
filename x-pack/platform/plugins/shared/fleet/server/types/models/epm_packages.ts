@@ -60,3 +60,28 @@ export const EpmPackagesSchemaV6 = schema.object({
   previous_version: schema.maybe(schema.string()),
   pending_upgrade_review: schema.maybe(schema.any()),
 });
+
+export const EpmPackagesSchemaV7 = EpmPackagesSchemaV6.extends({
+  dependencies: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        version: schema.string(),
+      }),
+      { maxSize: 1000 }
+    )
+  ),
+});
+
+export const EpmPackagesSchemaV8 = EpmPackagesSchemaV7.extends({
+  is_dependency_of: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        version: schema.string(),
+      }),
+      { maxSize: 1000 }
+    )
+  ),
+  installed_as_dependency: schema.maybe(schema.boolean()),
+});

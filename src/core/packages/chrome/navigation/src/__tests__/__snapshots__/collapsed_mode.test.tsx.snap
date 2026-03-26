@@ -63,7 +63,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
             class="euiPopover emotion-euiPopover-block"
           >
             <span
-              class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
               id="generated-id_euiToolTipAnchor"
             >
               <a
@@ -105,7 +105,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
             class="euiPopover emotion-euiPopover-block"
           >
             <span
-              class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
               id="generated-id_euiToolTipAnchor"
             >
               <a
@@ -202,7 +202,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
             class="euiPopover emotion-euiPopover-block"
           >
             <span
-              class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
               id="generated-id_euiToolTipAnchor"
             >
               <div
@@ -224,7 +224,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     color="inherit"
-                    data-euiicon-type="launch"
+                    data-euiicon-type="rocket"
                   />
                 </a>
               </div>
@@ -238,7 +238,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
             class="euiPopover emotion-euiPopover-block"
           >
             <span
-              class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
               id="generated-id_euiToolTipAnchor"
             >
               <div
@@ -315,7 +315,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
             class="euiPopover emotion-euiPopover-block"
           >
             <span
-              class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
               id="generated-id_euiToolTipAnchor"
             >
               <div
@@ -336,7 +336,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     color="inherit"
-                    data-euiicon-type="launch"
+                    data-euiicon-type="rocket"
                   />
                 </a>
               </div>
@@ -350,7 +350,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
             class="euiPopover emotion-euiPopover-block"
           >
             <span
-              class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
               id="generated-id_euiToolTipAnchor"
             >
               <div

@@ -6,8 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { z as z3 } from '@kbn/zod';
-import { z as z4 } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 import type {
   ActionType,
   ActionTypeConfig,
@@ -15,7 +14,6 @@ import type {
   ActionTypeParams,
   ValidatorServices,
 } from '../types';
-import { formatZodV3Error } from './format_zod_v3_error';
 
 export function validateParams<
   Config extends ActionTypeConfig = ActionTypeConfig,
@@ -112,7 +110,7 @@ function validateWithSchema<
                 validatorServices
               );
             }
-            return validatedValue;
+            return validatedValue as Record<string, unknown>;
           }
           break;
         case 'config':
@@ -126,7 +124,7 @@ function validateWithSchema<
                 validatorServices
               );
             }
-            return validatedValue;
+            return validatedValue as Record<string, unknown>;
           }
 
           break;
@@ -141,7 +139,7 @@ function validateWithSchema<
                 validatorServices
               );
             }
-            return validatedValue;
+            return validatedValue as Record<string, unknown>;
           }
           break;
         default:
@@ -150,10 +148,8 @@ function validateWithSchema<
       }
     } catch (err) {
       let errMessage = err.message;
-      if (err instanceof z3.ZodError) {
-        errMessage = formatZodV3Error(err);
-      } else if (err instanceof z4.ZodError) {
-        errMessage = z4.prettifyError(err);
+      if (err instanceof z.ZodError) {
+        errMessage = z.prettifyError(err);
       }
       // we can't really i18n this yet, since the err.message isn't i18n'd itself
       throw Boom.badRequest(`error validating ${name}: ${errMessage}`);

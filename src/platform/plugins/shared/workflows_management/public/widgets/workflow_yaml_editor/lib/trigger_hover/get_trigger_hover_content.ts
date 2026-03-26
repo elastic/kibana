@@ -12,6 +12,7 @@ import type { monaco } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import { z } from '@kbn/zod/v4';
+import { getStabilityNote } from '../get_stability_note';
 
 /**
  * Get the shape of a Zod object schema (unwrap optional so we can read .shape).
@@ -44,13 +45,83 @@ function getZodDescription(schema: z.ZodType): string | undefined {
   return undefined;
 }
 
+/** Unwrap ZodOptional once so we can inspect the inner type. */
+function tryUnwrapOptional(schema: z.ZodType): z.ZodType {
+  const s = schema as unknown as { unwrap?: () => z.ZodType };
+  return typeof s.unwrap === 'function' ? s.unwrap() : schema;
+}
+
+/** Infer a display type name from a Zod schema (e.g. string, object, number). */
+function getZodTypeName(schema: z.ZodType): string {
+  const unwrapped = tryUnwrapOptional(schema);
+  try {
+    const json = z.toJSONSchema(unwrapped) as Record<string, unknown>;
+    if (json.type === 'object' && json.properties) return 'object';
+    if (typeof json.type === 'string') return json.type;
+    if (Array.isArray(json.type)) return (json.type as string[]).join(' | ');
+    return 'unknown';
+  } catch {
+    return 'unknown';
+  }
+}
+
 /** Display shape for one event schema property (derived from getEventSchemaProperties return type). */
 type EventPropertyInfo = ReturnType<typeof getEventSchemaProperties>[number];
 
+const DEFAULT_EVENT_SCHEMA_MAX_DEPTH = 20;
+
+/**
+ * Recursively collect event schema properties (including nested objects) for display.
+ * Each property is emitted with a dotted path (e.g. foo, foo.bar, foo.bar.baz).
+ * Uses a visited set to avoid infinite recursion on circular schema references.
+ */
+function getEventSchemaPropertiesRecursive(
+  schema: z.ZodType,
+  prefix: string,
+  currentDepth: number,
+  maxDepth: number = DEFAULT_EVENT_SCHEMA_MAX_DEPTH,
+  visited: WeakSet<object> = new WeakSet()
+): Array<{ name: string; type: string; description?: string }> {
+  if (visited.has(schema as unknown as object)) return [];
+  visited.add(schema as unknown as object);
+
+  const shape = getZodObjectShape(schema);
+  if (!shape || typeof shape !== 'object') return [];
+
+  const result: Array<{ name: string; type: string; description?: string }> = [];
+
+  for (const [key, subSchema] of Object.entries(shape)) {
+    const fullName = prefix ? `${prefix}.${key}` : key;
+    const description = getZodDescription(subSchema);
+    const innerShape = getZodObjectShape(subSchema);
+
+    if (innerShape && Object.keys(innerShape).length > 0 && currentDepth < maxDepth) {
+      result.push({ name: fullName, type: 'object', description });
+      result.push(
+        ...getEventSchemaPropertiesRecursive(
+          subSchema,
+          fullName,
+          currentDepth + 1,
+          maxDepth,
+          visited
+        )
+      );
+    } else {
+      result.push({
+        name: fullName,
+        type: getZodTypeName(subSchema),
+        description,
+      });
+    }
+  }
+
+  return result;
+}
+
 /**
  * Extract event schema properties (name, type, description) from a Zod schema
- * for display in trigger hover. Uses JSON Schema for structure and falls back
- * to Zod schema .description when toJSONSchema omits it.
+ * for display in trigger hover. Nested objects are expanded so that e.g. foo.bar.baz
+ * is listed as well as foo and foo.bar.
  */
 function getEventSchemaProperties(eventSchema: z.ZodType): Array<{
   name: string;
@@ -58,33 +129,36 @@ function getEventSchemaProperties(eventSchema: z.ZodType): Array<{
   description?: string;
 }> {
   try {
-    const jsonSchema = z.toJSONSchema(eventSchema) as Record<string, unknown>;
-    const properties = jsonSchema?.properties as
-      | Record<string, Record<string, unknown>>
-      | undefined;
-    if (!properties || typeof properties !== 'object') {
-      return [];
-    }
-
-    const shape = getZodObjectShape(eventSchema);
-
-    return Object.entries(properties).map(([name, prop]) => {
-      let desc = typeof prop?.description === 'string' ? prop.description : undefined;
-      if (!desc && shape?.[name]) {
-        desc = getZodDescription(shape[name]);
-      }
-      const rawType = prop?.type;
-      const type =
-        typeof rawType === 'string'
-          ? rawType
-          : Array.isArray(rawType)
-          ? (rawType as string[]).join(' | ')
-          : 'unknown';
-      return { name, type, description: desc };
-    });
+    return getEventSchemaPropertiesRecursive(
+      eventSchema,
+      '',
+      0,
+      DEFAULT_EVENT_SCHEMA_MAX_DEPTH,
+      new WeakSet()
+    );
   } catch {
     return [];
   }
+}
+
+/**
+ * Format event properties as a tree: nested paths (e.g. foo.bar.baz) are shown
+ * with indentation and segment names so the structure reads like foo: { bar: { baz: (string) } }.
+ */
+function formatEventPropertiesAsTree(eventProperties: EventPropertyInfo[]): string {
+  const lines: string[] = [];
+  for (const prop of eventProperties) {
+    const parts = prop.name.split('.');
+    const depth = parts.length - 1;
+    const segment = parts[parts.length - 1] ?? prop.name;
+    const indent = '  '.repeat(depth);
+    const typeInfo = prop.type ? ` _(${prop.type})_` : '';
+    lines.push(`${indent}- \`${segment}\`${typeInfo}`);
+    if (prop.description) {
+      lines.push(`${indent}  ${prop.description}`);
+    }
+  }
+  return lines.join('\n');
 }
 
 function generateTriggerUsage(
@@ -106,13 +180,7 @@ function generateTriggerUsage(
       })
     );
     lines.push('');
-    for (const prop of eventProperties) {
-      const typeInfo = prop.type ? ` _(${prop.type})_` : '';
-      lines.push(`- \`${prop.name}\`${typeInfo}`);
-      if (prop.description) {
-        lines.push(`  ${prop.description}`);
-      }
-    }
+    lines.push(formatEventPropertiesAsTree(eventProperties));
     lines.push('');
   }
 
@@ -141,6 +209,8 @@ function buildTriggerHoverFromDefinition(
   triggerType: string
 ): monaco.IMarkdownString {
   const lines: string[] = [];
+  lines.push(getStabilityNote());
+  lines.push('');
   lines.push(
     i18n.translate('workflows.triggerHover.workflowTriggerLabel', {
       defaultMessage: '**Workflow Trigger**: `{title}`',

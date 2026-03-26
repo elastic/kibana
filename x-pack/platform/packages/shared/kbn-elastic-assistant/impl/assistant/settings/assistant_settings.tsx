@@ -18,10 +18,10 @@ import {
 
 import styled from 'styled-components';
 import { css } from '@emotion/react';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { useConversationsUpdater } from './use_settings_updater/use_conversations_updater';
 import type { AIConnector } from '../../connectorland/connector_selector';
 import type { Conversation } from '../../..';
-import { useLoadConnectors } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { TEST_IDS } from '../constants';
@@ -86,6 +86,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
 
     const { data: connectors } = useLoadConnectors({
       http,
+      featureId: 'elastic_assistant',
       settings,
     });
     const {

@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { Mapping, Pipeline, Docs, SamplesFormat } from './common_attributes.gen';
 import { ESProcessorItem } from './processor_attributes.gen';
