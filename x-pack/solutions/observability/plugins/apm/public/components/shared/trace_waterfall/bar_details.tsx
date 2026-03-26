@@ -95,7 +95,11 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
-          <EuiText css={{ overflow: 'hidden', whiteSpace: 'nowrap' }} size="s">
+          <EuiText
+            css={{ overflow: 'hidden', whiteSpace: 'nowrap' }}
+            size="s"
+            data-test-subj="apmBarDetailsName"
+          >
             <TruncateWithTooltip content={displayName} text={displayName} />
           </EuiText>
         </EuiFlexItem>
