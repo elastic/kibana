@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiPageTemplate, EuiButton, EuiButtonEmpty, EuiLink } from '@elastic/eui';
+import { EuiPageTemplate, EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import * as i18n from '../../common/translations';
 import { PLUGIN_TITLE, PROVIDER_INFERENCE_TITLE } from '../../common/constants';
@@ -28,25 +28,29 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
   const rightSideItems = useMemo(() => {
     if (isEisEnabled) {
       return [
-        <EuiButton
-          iconType="plusInCircle"
-          fill
-          data-test-subj="add-inference-endpoint-header-button"
-          onClick={onFlyoutOpen}
-        >
-          {i18n.ADD_ENDPOINT_LABEL}
-        </EuiButton>,
-        <EuiButtonEmpty
-          iconType="popout"
-          iconSide="right"
-          iconSize="s"
-          flush="both"
-          target="_blank"
-          data-test-subj="api-documentation"
-          href={docLinks.createInferenceEndpoint}
-        >
-          {i18n.API_DOCUMENTATION_LINK}
-        </EuiButtonEmpty>,
+        <EuiFlexGroup gutterSize="m" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiLink
+              aria-label={i18n.API_DOCUMENTATION_LINK}
+              target="_blank"
+              data-test-subj="api-documentation"
+              href={docLinks.createInferenceEndpoint}
+              external
+            >
+              {i18n.API_DOCUMENTATION_LINK}
+            </EuiLink>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              iconType="plusInCircle"
+              fill
+              data-test-subj="add-inference-endpoint-header-button"
+              onClick={onFlyoutOpen}
+            >
+              {i18n.ADD_ENDPOINT_LABEL}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>,
       ];
     }
 
