@@ -281,8 +281,7 @@ function fromUnassignedColorLensStateToAPI(
   if (!color || color.type === 'loop') {
     return undefined;
   }
-  const unassigned = fromColorLensStateToAPI(color);
-  return unassigned;
+  return fromColorLensStateToAPI(color);
 }
 
 export function fromColorMappingLensStateToAPI(
