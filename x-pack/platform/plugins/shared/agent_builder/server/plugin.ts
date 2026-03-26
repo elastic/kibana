@@ -242,6 +242,9 @@ export class AgentBuilderPlugin
       skills: {
         register: serviceSetups.skills.registerSkill.bind(serviceSetups.skills),
       },
+      plugins: {
+        register: serviceSetups.plugins.register.bind(serviceSetups.plugins),
+      },
       sml: {
         registerType: serviceSetups.sml.registerType.bind(serviceSetups.sml),
       },
@@ -270,7 +273,7 @@ export class AgentBuilderPlugin
       analyticsService: this.analyticsService,
     });
 
-    const { tools, agents, skills, runnerFactory, execution } = startServices;
+    const { tools, agents, skills, runnerFactory, execution, plugins } = startServices;
     const runner = runnerFactory.getRunner();
 
     if (this.home) {
@@ -307,6 +310,9 @@ export class AgentBuilderPlugin
       skills: {
         getRegistry: skills.getRegistry.bind(skills),
         register: skills.registerSkill.bind(skills),
+      },
+      plugins: {
+        getRegistry: ({ request }) => plugins.getRegistry({ request }),
       },
       execution: {
         executeAgent: execution.executeAgent.bind(execution),

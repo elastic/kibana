@@ -113,7 +113,7 @@ export const inProgressTitle = (action: ActionStatus, isAutomatic: boolean | und
         automaticIcon: isAutomatic ? (
           <EuiIconTip
             anchorProps={{ style: { display: 'flex', alignItems: 'center' } }}
-            type="timeRefresh"
+            type="refreshTime"
             content="Triggered by an automatic upgrade"
           />
         ) : null,
