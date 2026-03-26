@@ -663,6 +663,10 @@ export default function (providerContext: FtrProviderContext) {
           ).to.not.be(undefined);
         });
 
+        const installedAsDependency = res.attributes.installed_as_dependency;
+        delete res.attributes.installed_as_dependency;
+        expect(Boolean(installedAsDependency)).eql(false);
+
         expect({
           ...res.attributes,
           installed_kibana: sortBy(res.attributes.installed_kibana, ['id']),

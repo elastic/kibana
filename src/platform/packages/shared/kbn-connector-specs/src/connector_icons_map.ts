@@ -94,6 +94,15 @@ export const ConnectorIconsMap: Map<
   ],
   ['.figma', lazy(() => import(/* webpackChunkName: "connectorIconFigma" */ './specs/figma/icon'))],
   [
+    '.confluence-cloud',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconConfluenceCloud" */ './specs/atlassian/confluence_cloud/icon'
+        )
+    ),
+  ],
+  [
     '.google_drive',
     lazy(
       () => import(/* webpackChunkName: "connectorIconGoogleDrive" */ './specs/google_drive/icon')
@@ -146,5 +155,12 @@ export const ConnectorIconsMap: Map<
   [
     '.amazon_s3',
     lazy(() => import(/* webpackChunkName: "connectorIconAmazons3" */ './specs/amazon_s3/icon')),
+  ],
+  [
+    '.microsoft-teams',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconMicrosoftTeams" */ './specs/microsoft_teams/icon')
+    ),
   ],
 ]);

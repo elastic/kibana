@@ -16,6 +16,7 @@ export interface SkillPersistedDefinition {
   name: string;
   description: string;
   content: string;
+  base_path?: string;
   referenced_content?: SkillReferencedContent[];
   tool_ids: string[];
   referenced_content_count: number;

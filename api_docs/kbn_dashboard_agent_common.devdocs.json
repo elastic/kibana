@@ -21,74 +21,35 @@
     "functions": [
       {
         "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.isGenericAttachmentPanel",
+        "id": "def-common.isSection",
         "type": "Function",
         "tags": [],
-        "label": "isGenericAttachmentPanel",
+        "label": "isSection",
         "description": [
-          "\nType guard to check if a panel is a generic (non-Lens) panel."
+          "\nType guard to check if a widget is a section."
         ],
         "signature": [
-          "(panel: z.infer<any>) => boolean"
+          "(widget: any) => widget is z.infer<any>"
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 98,
-        "columnNumber": 1,
+        "lineNumber": 78,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dashboard-agent-common",
-            "id": "def-common.isGenericAttachmentPanel.$1",
+            "id": "def-common.isSection.$1",
             "type": "Any",
             "tags": [],
-            "label": "panel",
+            "label": "widget",
             "description": [],
             "signature": [
-              "z.infer<any>"
+              "any"
             ],
             "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-            "lineNumber": 101,
-            "columnNumber": 42,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.isLensAttachmentPanel",
-        "type": "Function",
-        "tags": [],
-        "label": "isLensAttachmentPanel",
-        "description": [
-          "\nType guard to check if a panel is a Lens panel."
-        ],
-        "signature": [
-          "(panel: z.infer<any>) => boolean"
-        ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 91,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/dashboard-agent-common",
-            "id": "def-common.isLensAttachmentPanel.$1",
-            "type": "Any",
-            "tags": [],
-            "label": "panel",
-            "description": [],
-            "signature": [
-              "z.infer<any>"
-            ],
-            "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-            "lineNumber": 94,
-            "columnNumber": 39,
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -109,7 +70,7 @@
           "\nData payload for a panel added event."
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 154,
+        "lineNumber": 105,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -122,7 +83,7 @@
             "label": "dashboardAttachmentId",
             "description": [],
             "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-            "lineNumber": 158,
+            "lineNumber": 109,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -138,7 +99,7 @@
               "z.infer<any>"
             ],
             "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-            "lineNumber": 159,
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -156,7 +117,7 @@
           "\nData payload for a panel removed event."
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 162,
+        "lineNumber": 113,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -169,7 +130,7 @@
             "label": "dashboardAttachmentId",
             "description": [],
             "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-            "lineNumber": 166,
+            "lineNumber": 117,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -185,7 +146,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-            "lineNumber": 167,
+            "lineNumber": 118,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -203,13 +164,13 @@
         "tags": [],
         "label": "AttachmentPanel",
         "description": [
-          "\nUnion type for dashboard panel entries.\n- LensAttachmentPanel: Lens visualization with config in API format (type: 'lens')\n- GenericAttachmentPanel: Non-Lens panels with raw config (type: actual embeddable type)"
+          "\nA dashboard panel entry."
         ],
         "signature": [
           "z.infer<any>"
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 84,
+        "lineNumber": 45,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -222,13 +183,13 @@
         "tags": [],
         "label": "attachmentPanelSchema",
         "description": [
-          "\nZod schema for dashboard panel entries."
+          "\n\n\nZod schema for generic (non-Lens) panel entries.\nThe `type` field contains the actual embeddable type."
         ],
         "signature": [
           "any"
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 79,
+        "lineNumber": 33,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -255,44 +216,6 @@
       },
       {
         "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.DASHBOARD_PANEL_ADDED_EVENT",
-        "type": "string",
-        "tags": [],
-        "label": "DASHBOARD_PANEL_ADDED_EVENT",
-        "description": [
-          "\nUI event type for panel added"
-        ],
-        "signature": [
-          "\"dashboard:panel_added\""
-        ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/constants.ts",
-        "lineNumber": 16,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.DASHBOARD_PANELS_REMOVED_EVENT",
-        "type": "string",
-        "tags": [],
-        "label": "DASHBOARD_PANELS_REMOVED_EVENT",
-        "description": [
-          "\nUI event type for panel removed"
-        ],
-        "signature": [
-          "\"dashboard:panels_removed\""
-        ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/constants.ts",
-        "lineNumber": 21,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dashboard-agent-common",
         "id": "def-common.DashboardAttachmentData",
         "type": "Type",
         "tags": [],
@@ -304,7 +227,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 144,
+        "lineNumber": 95,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -317,13 +240,13 @@
         "tags": [],
         "label": "dashboardAttachmentDataSchema",
         "description": [
-          "\nZod schema for dashboard attachment data."
+          "\nZod schema for dashboard attachment data.\nMatches the Dashboard API structure where panels and sections are in a single array."
         ],
         "signature": [
           "any"
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 133,
+        "lineNumber": 88,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -342,7 +265,7 @@
           "string"
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 149,
+        "lineNumber": 100,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -361,7 +284,7 @@
           "z.infer<any>"
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 125,
+        "lineNumber": 70,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -380,133 +303,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 112,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.DashboardUiEvent",
-        "type": "Type",
-        "tags": [],
-        "label": "DashboardUiEvent",
-        "description": [
-          "\nUnion type for dashboard UI events."
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/agent-builder-common",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderCommonPluginApi",
-            "section": "def-common.ToolUiEvent",
-            "text": "ToolUiEvent"
-          },
-          "<\"dashboard:panel_added\", ",
-          {
-            "pluginId": "@kbn/dashboard-agent-common",
-            "scope": "common",
-            "docId": "kibKbnDashboardAgentCommonPluginApi",
-            "section": "def-common.PanelAddedEventData",
-            "text": "PanelAddedEventData"
-          },
-          "> | ",
-          {
-            "pluginId": "@kbn/agent-builder-common",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderCommonPluginApi",
-            "section": "def-common.ToolUiEvent",
-            "text": "ToolUiEvent"
-          },
-          "<\"dashboard:panels_removed\", ",
-          {
-            "pluginId": "@kbn/dashboard-agent-common",
-            "scope": "common",
-            "docId": "kibKbnDashboardAgentCommonPluginApi",
-            "section": "def-common.PanelsRemovedEventData",
-            "text": "PanelsRemovedEventData"
-          },
-          ">"
-        ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 170,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.GenericAttachmentPanel",
-        "type": "Type",
-        "tags": [],
-        "label": "GenericAttachmentPanel",
-        "description": [
-          "\nA non-Lens panel entry containing the raw embeddable configuration.\nUsed for markdown, maps, TSVB, and other panel types, as well as\nLens panels with unsupported chart types that can't be converted to API format."
-        ],
-        "signature": [
-          "z.infer<any>"
-        ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 69,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.genericAttachmentPanelSchema",
-        "type": "Any",
-        "tags": [],
-        "label": "genericAttachmentPanelSchema",
-        "description": [
-          "\nZod schema for generic (non-Lens) panel entries.\nThe `type` field contains the actual embeddable type."
-        ],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
         "lineNumber": 57,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.LensAttachmentPanel",
-        "type": "Type",
-        "tags": [],
-        "label": "LensAttachmentPanel",
-        "description": [
-          "\nA Lens panel entry containing full visualization configuration in API format.\nAll Lens panels (whether created by the agent or extracted from existing dashboards)\nare stored in this unified format using LensApiSchemaType."
-        ],
-        "signature": [
-          "z.infer<any>"
-        ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 46,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.lensAttachmentPanelSchema",
-        "type": "Any",
-        "tags": [],
-        "label": "lensAttachmentPanelSchema",
-        "description": [
-          "\nZod schema for Lens panel entries."
-        ],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -525,7 +322,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 21,
+        "lineNumber": 16,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -542,7 +339,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
-        "lineNumber": 105,
+        "lineNumber": 50,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

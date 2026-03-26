@@ -7,9 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const esqlCharts = [
+import type { MosaicState } from '../../schema/charts/mosaic';
+import type { PieState } from '../../schema/charts/pie';
+import type { TreemapState } from '../../schema/charts/treemap';
+import type { WaffleState } from '../../schema/charts/waffle';
+
+type PartitionConfig = PieState | MosaicState | TreemapState | WaffleState;
+
+export const esqlCharts: Array<PartitionConfig> = [
   {
     title: 'basic pie',
+    sampling: 1,
+    ignore_global_filters: false,
     type: 'pie',
     metrics: [
       {
@@ -42,13 +51,17 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'auto',
+      visibility: 'auto',
       nested: false,
     },
-    value_display: {
+    values: {
+      visible: true,
       mode: 'percentage',
     },
-    label_position: 'outside',
+    labels: {
+      visible: true,
+      position: 'outside',
+    },
     query: {
       query: '',
       language: 'kuery',
@@ -56,6 +69,8 @@ export const esqlCharts = [
   },
   {
     title: 'basic donut',
+    sampling: 1,
+    ignore_global_filters: false,
     type: 'donut',
     metrics: [
       {
@@ -88,14 +103,18 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'auto',
+      visibility: 'auto',
       nested: false,
     },
-    value_display: {
+    values: {
+      visible: true,
       mode: 'percentage',
     },
     donut_hole: 'medium',
-    label_position: 'outside',
+    labels: {
+      visible: true,
+      position: 'outside',
+    },
     query: {
       query: '',
       language: 'kuery',
@@ -103,6 +122,8 @@ export const esqlCharts = [
   },
   {
     title: 'basic treemap',
+    sampling: 1,
+    ignore_global_filters: false,
     type: 'treemap',
     metrics: [
       {
@@ -135,10 +156,11 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'auto',
+      visibility: 'auto',
       nested: false,
     },
-    value_display: {
+    values: {
+      visible: true,
       mode: 'percentage',
     },
     query: {
@@ -148,6 +170,8 @@ export const esqlCharts = [
   },
   {
     title: 'basic mosaic',
+    sampling: 1,
+    ignore_global_filters: false,
     type: 'mosaic',
     metric: {
       operation: 'count',
@@ -178,10 +202,11 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'auto',
+      visibility: 'auto',
       nested: false,
     },
-    value_display: {
+    values: {
+      visible: true,
       mode: 'percentage',
     },
     query: {
@@ -191,6 +216,8 @@ export const esqlCharts = [
   },
   {
     title: 'basic waffle',
+    sampling: 1,
+    ignore_global_filters: false,
     type: 'waffle',
     metrics: [
       {
@@ -223,9 +250,10 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'auto',
+      visibility: 'auto',
     },
-    value_display: {
+    values: {
+      visible: true,
       mode: 'percentage',
     },
     query: {
@@ -235,6 +263,8 @@ export const esqlCharts = [
   },
   {
     title: 'pie with multiple groups',
+    sampling: 1,
+    ignore_global_filters: false,
     type: 'pie',
     metrics: [
       {
@@ -280,13 +310,17 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
       nested: true,
     },
-    value_display: {
+    values: {
+      visible: true,
       mode: 'percentage',
     },
-    label_position: 'outside',
+    labels: {
+      visible: true,
+      position: 'outside',
+    },
     query: {
       query: '',
       language: 'kuery',
@@ -294,6 +328,8 @@ export const esqlCharts = [
   },
   {
     title: 'donut with multiple groups',
+    sampling: 1,
+    ignore_global_filters: false,
     type: 'donut',
     metrics: [
       {
@@ -339,14 +375,18 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
       nested: true,
     },
-    value_display: {
+    values: {
+      visible: true,
       mode: 'percentage',
     },
     donut_hole: 'medium',
-    label_position: 'outside',
+    labels: {
+      visible: true,
+      position: 'outside',
+    },
     query: {
       query: '',
       language: 'kuery',
@@ -354,6 +394,8 @@ export const esqlCharts = [
   },
   {
     title: 'treemap with multiple groups',
+    sampling: 1,
+    ignore_global_filters: false,
     type: 'treemap',
     metrics: [
       {
@@ -399,10 +441,11 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'auto',
+      visibility: 'auto',
       nested: false,
     },
-    value_display: {
+    values: {
+      visible: true,
       mode: 'percentage',
     },
     query: {
@@ -412,6 +455,8 @@ export const esqlCharts = [
   },
   {
     title: 'mosaic with multiple groups',
+    sampling: 1,
+    ignore_global_filters: false,
     type: 'mosaic',
     metric: {
       operation: 'count',
@@ -457,10 +502,10 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'auto',
+      visibility: 'auto',
       nested: false,
     },
-    value_display: {
+    values: {
       mode: 'percentage',
     },
     query: {
@@ -470,6 +515,8 @@ export const esqlCharts = [
   },
   {
     title: 'pie with multiple metrics',
+    sampling: 1,
+    ignore_global_filters: false,
     type: 'pie',
     metrics: [
       {
@@ -527,13 +574,17 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
       nested: true,
     },
-    value_display: {
+    values: {
+      visible: true,
       mode: 'percentage',
     },
-    label_position: 'outside',
+    labels: {
+      visible: true,
+      position: 'outside',
+    },
     query: {
       query: '',
       language: 'kuery',
@@ -541,6 +592,8 @@ export const esqlCharts = [
   },
   {
     title: 'donut with multiple metrics',
+    sampling: 1,
+    ignore_global_filters: false,
     type: 'donut',
     metrics: [
       {
@@ -598,14 +651,17 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
       nested: true,
     },
-    value_display: {
+    values: {
       mode: 'percentage',
     },
     donut_hole: 'medium',
-    label_position: 'outside',
+    labels: {
+      visible: true,
+      position: 'outside',
+    },
     query: {
       query: '',
       language: 'kuery',
@@ -613,6 +669,8 @@ export const esqlCharts = [
   },
   {
     title: 'treemap with multiple metrics',
+    sampling: 1,
+    ignore_global_filters: false,
     type: 'treemap',
     metrics: [
       {
@@ -657,10 +715,10 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
       nested: true,
     },
-    value_display: {
+    values: {
       mode: 'percentage',
     },
     query: {
@@ -670,6 +728,8 @@ export const esqlCharts = [
   },
   {
     title: 'waffle with multiple metrics',
+    sampling: 1,
+    ignore_global_filters: false,
     type: 'waffle',
     metrics: [
       {
@@ -716,9 +776,9 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
     },
-    value_display: {
+    values: {
       mode: 'percentage',
     },
     query: {
@@ -728,6 +788,8 @@ export const esqlCharts = [
   },
   {
     title: 'advanced pie with legacy palette',
+    sampling: 1,
+    ignore_global_filters: false,
     type: 'pie',
     metrics: [
       {
@@ -786,13 +848,16 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
       nested: true,
     },
-    value_display: {
+    values: {
       mode: 'percentage',
     },
-    label_position: 'outside',
+    labels: {
+      visible: true,
+      position: 'outside',
+    },
     query: {
       query: '',
       language: 'kuery',
@@ -800,6 +865,8 @@ export const esqlCharts = [
   },
   {
     title: 'advanced palette with color mapping',
+    sampling: 1,
+    ignore_global_filters: false,
     type: 'pie',
     metrics: [
       {
@@ -891,13 +958,16 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
       nested: true,
     },
-    value_display: {
+    values: {
       mode: 'percentage',
     },
-    label_position: 'outside',
+    labels: {
+      visible: true,
+      position: 'outside',
+    },
     query: {
       query: '',
       language: 'kuery',
@@ -905,6 +975,8 @@ export const esqlCharts = [
   },
   {
     title: 'pie with 3 groups',
+    sampling: 1,
+    ignore_global_filters: false,
     type: 'pie',
     metrics: [
       {
@@ -958,13 +1030,16 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
       nested: true,
     },
-    value_display: {
+    values: {
       mode: 'percentage',
     },
-    label_position: 'outside',
+    labels: {
+      visible: true,
+      position: 'outside',
+    },
     query: {
       query: '',
       language: 'kuery',
@@ -972,6 +1047,8 @@ export const esqlCharts = [
   },
   {
     title: 'donut with color mapping',
+    sampling: 1,
+    ignore_global_filters: false,
     type: 'donut',
     metrics: [
       {
@@ -1063,14 +1140,17 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
       nested: true,
     },
-    value_display: {
+    values: {
       mode: 'percentage',
     },
     donut_hole: 'medium',
-    label_position: 'outside',
+    labels: {
+      visible: true,
+      position: 'outside',
+    },
     query: {
       query: '',
       language: 'kuery',
@@ -1078,6 +1158,8 @@ export const esqlCharts = [
   },
   {
     title: 'treemap with color mapping',
+    sampling: 1,
+    ignore_global_filters: false,
     type: 'treemap',
     metrics: [
       {
@@ -1156,10 +1238,11 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
       nested: true,
     },
-    value_display: {
+    values: {
+      visible: true,
       mode: 'percentage',
     },
     query: {
@@ -1169,6 +1252,8 @@ export const esqlCharts = [
   },
   {
     title: 'mosaic with color mapping',
+    sampling: 1,
+    ignore_global_filters: false,
     type: 'mosaic',
     metric: {
       operation: 'count',
@@ -1247,10 +1332,11 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
       nested: true,
     },
-    value_display: {
+    values: {
+      visible: true,
       mode: 'percentage',
     },
     query: {
@@ -1260,6 +1346,8 @@ export const esqlCharts = [
   },
   {
     title: 'waffle with color mapping',
+    sampling: 1,
+    ignore_global_filters: false,
     type: 'waffle',
     metrics: [
       {
@@ -1325,9 +1413,10 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
     },
-    value_display: {
+    values: {
+      visible: true,
       mode: 'percentage',
     },
     query: {
@@ -1337,6 +1426,8 @@ export const esqlCharts = [
   },
   {
     title: 'ESQL pie',
+    sampling: 1,
+    ignore_global_filters: false,
     type: 'pie',
     metrics: [
       {
@@ -1360,16 +1451,21 @@ export const esqlCharts = [
       query: 'FROM kibana_sample_data_ecommerce | STATS  count = COUNT(*) BY category.keyword',
     },
     legend: {
-      visible: 'auto',
+      visibility: 'auto',
       nested: false,
     },
-    value_display: {
+    values: {
       mode: 'percentage',
     },
-    label_position: 'outside',
+    labels: {
+      visible: true,
+      position: 'outside',
+    },
   },
   {
     title: 'ESQL treemap',
+    sampling: 1,
+    ignore_global_filters: false,
     type: 'treemap',
     metrics: [
       {
@@ -1393,15 +1489,17 @@ export const esqlCharts = [
       query: 'FROM kibana_sample_data_ecommerce | STATS  count = COUNT(*) BY category.keyword',
     },
     legend: {
-      visible: 'auto',
+      visibility: 'auto',
       nested: false,
     },
-    value_display: {
+    values: {
       mode: 'percentage',
     },
   },
   {
     title: 'ESQL mosaic',
+    sampling: 1,
+    ignore_global_filters: false,
     type: 'mosaic',
     metric: {
       operation: 'value',
@@ -1423,15 +1521,17 @@ export const esqlCharts = [
       query: 'FROM kibana_sample_data_ecommerce | STATS  count = COUNT(*) BY category.keyword',
     },
     legend: {
-      visible: 'auto',
+      visibility: 'auto',
       nested: false,
     },
-    value_display: {
+    values: {
       mode: 'percentage',
     },
   },
   {
     title: 'ESQL waffle',
+    sampling: 1,
+    ignore_global_filters: false,
     type: 'waffle',
     metrics: [
       {
@@ -1478,9 +1578,9 @@ export const esqlCharts = [
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
     legend: {
-      visible: 'show',
+      visibility: 'visible',
     },
-    value_display: {
+    values: {
       mode: 'percentage',
     },
     query: {
@@ -1490,6 +1590,8 @@ export const esqlCharts = [
   },
   {
     title: 'ESQL waffle with collapsed group',
+    sampling: 1,
+    ignore_global_filters: false,
     type: 'waffle',
     metrics: [
       {
@@ -1513,9 +1615,9 @@ export const esqlCharts = [
       query: 'FROM kibana_sample_data_ecommerce | STATS  count = COUNT(*) BY category.keyword',
     },
     legend: {
-      visible: 'auto',
+      visibility: 'auto',
     },
-    value_display: {
+    values: {
       mode: 'percentage',
     },
   },
