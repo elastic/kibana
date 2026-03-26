@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { AcknowledgeActionButton } from './acknowledge_action_button';
 import { SnoozeActionButton } from './snooze_action_button';
 import type { EpisodeAction } from '../../../types/episode_action';
-import { DeactivateActionButton } from './deactivate_action_button';
+import { ResolveActionButton } from './deactivate_action_button';
 
 export interface AlertEpisodeActionsCellProps {
   episodeAction?: EpisodeAction;
@@ -64,7 +64,7 @@ export function AlertEpisodeActionsCell({ episodeAction }: AlertEpisodeActionsCe
           panelPaddingSize="s"
         >
           <EuiListGroup gutterSize="none" bordered={false} flush={true} size="l">
-            <DeactivateActionButton lastDeactivateAction={episodeAction?.lastDeactivateAction} />
+            <ResolveActionButton lastDeactivateAction={episodeAction?.lastDeactivateAction} />
           </EuiListGroup>
         </EuiPopover>
       </EuiFlexItem>
