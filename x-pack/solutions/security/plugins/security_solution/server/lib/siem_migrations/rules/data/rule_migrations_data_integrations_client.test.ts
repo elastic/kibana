@@ -360,19 +360,6 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
     });
 
     it('should return empty string when packageService is unavailable', async () => {
-      const noSvcClient = new RuleMigrationsDataIntegrationsClient(
-        getIndexName,
-        currentUser,
-        esScopedClientMock,
-        logger,
-        {
-          ...dependencies,
-          packageService: undefined,
-        } as unknown as SiemMigrationsClientDependencies
-      );
-
-      mockGetPackages.mockResolvedValue([createMockPackage()]);
-
       // populate won't be called since getSecurityLogsPackages returns undefined
       // Test processIntegration path directly by calling populate on a client
       // that has packages but no packageService for archive
