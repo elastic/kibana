@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { Request, Response, type RouteHandler } from '@kbn/core-di-server';
-import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
+import { Request } from '@kbn/core-di-server';
+import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { inject, injectable } from 'inversify';
 import {
@@ -17,9 +16,11 @@ import {
 import { AlertActionsClient } from '../../lib/alert_actions_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_ALERT_API_PATH } from '../constants';
+import { AlertingRouteContext } from '../alerting_route_context';
+import { BaseAlertingRoute } from '../base_alerting_route';
 
 @injectable()
-export class BulkGetAlertActionsRoute implements RouteHandler {
+export class BulkGetAlertActionsRoute extends BaseAlertingRoute {
   static method = 'post' as const;
   static path = `${INTERNAL_ALERTING_V2_ALERT_API_PATH}/action/_bulk_get`;
   static security: RouteSecurity = {
@@ -34,24 +35,20 @@ export class BulkGetAlertActionsRoute implements RouteHandler {
     },
   } as const;
 
+  protected readonly routeName = 'bulk get alert actions';
+
   constructor(
+    @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
     private readonly request: KibanaRequest<unknown, unknown, BulkGetAlertActionsBody>,
-    @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(AlertActionsClient) private readonly alertActionsClient: AlertActionsClient
-  ) {}
+  ) {
+    super(ctx);
+  }
 
-  async handle() {
-    try {
-      const results = await this.alertActionsClient.bulkGet(this.request.body.episode_ids);
+  protected async execute() {
+    const results = await this.alertActionsClient.bulkGet(this.request.body.episode_ids);
 
-      return this.response.ok({ body: results });
-    } catch (e) {
-      const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
-      return this.response.customError({
-        statusCode: boom.output.statusCode,
-        body: boom.output.payload,
-      });
-    }
+    return this.ctx.response.ok({ body: results });
   }
 }
