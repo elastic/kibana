@@ -138,6 +138,7 @@ export const createPatternsDataSourceProfileProvider = (
         ...prev(params),
         columns: [
           { name: 'Count', width: 150 },
+          { name: 'Sparkline', width: 150 },
           { name: 'Pattern', width: undefined },
         ],
       };
