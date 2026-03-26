@@ -74,6 +74,32 @@ export const triggerIncrementalAdStep = createServerStepDefinition({
           `Calling AD generation API for case ${caseId} with connector ${connectorId} and ${alertIds.length} alerts`
         );
 
+        const authHeaders: Record<string, string> = {
+          'Content-Type': 'application/json',
+          'kbn-xsrf': 'true',
+          'elastic-api-version': '2023-10-31',
+        };
+        if (request.headers.authorization) {
+          authHeaders.Authorization = request.headers.authorization as string;
+        }
+
+        // Fetch anonymization fields (required by AD API)
+        const anonResponse = await fetch(
+          `${kibanaUrl}/api/security_ai_assistant/anonymization_fields/_find?per_page=1000`,
+          { headers: authHeaders }
+        );
+        const anonData = anonResponse.ok ? await anonResponse.json() : { data: [] };
+        const anonymizationFields = (anonData.data ?? []).map((f: Record<string, unknown>) => ({
+          id: f.id,
+          field: f.field,
+          allowed: f.allowed,
+          anonymized: f.anonymized,
+        }));
+
+        context.logger.info(
+          `Fetched ${anonymizationFields.length} anonymization fields for AD generation`
+        );
+
         // Build a filter that limits AD to only the alerts in this case
         const filter = {
           bool: {
@@ -83,18 +109,13 @@ export const triggerIncrementalAdStep = createServerStepDefinition({
 
         const adResponse = await fetch(`${kibanaUrl}/api/attack_discovery/_generate`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'kbn-xsrf': 'true',
-            'elastic-api-version': '2023-10-31',
-            Authorization: request.headers.authorization as string,
-          },
+          headers: authHeaders,
           body: JSON.stringify({
             alertsIndexPattern: indexPattern,
-            anonymizationFields: [],
+            anonymizationFields,
             apiConfig: {
               connectorId,
-              actionTypeId: '.bedrock',
+              actionTypeId: '.gen-ai',
             },
             filter,
             size: alertIds.length,
