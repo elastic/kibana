@@ -85,14 +85,21 @@ export const OverviewTab = ({ metricItem, description, services }: OverviewTabPr
     [euiTheme.base]
   );
 
-  // Create description list items
+  const sourceLabel = metricItem.isDataStream
+    ? i18n.translate('metricsExperience.overviewTab.strong.dataStreamLabel', {
+        defaultMessage: 'Data stream',
+      })
+    : i18n.translate('metricsExperience.overviewTab.strong.indexLabel', {
+        defaultMessage: 'Index',
+      });
+
+  const streamUrl = metricItem.isDataStream ? getStreamUrl(metricItem.dataStream) : undefined;
+
   const descriptionListItems = useMemo(
     () => [
       createDescriptionListItem(
-        i18n.translate('metricsExperience.overviewTab.strong.dataStreamLabel', {
-          defaultMessage: 'Data stream',
-        }),
-        <DataStreamLink dataStream={metricItem.dataStream} getStreamUrl={getStreamUrl} />
+        sourceLabel,
+        <DataStreamLink dataStream={metricItem.dataStream} streamUrl={streamUrl} />
       ),
       createDescriptionListItem(
         i18n.translate('metricsExperience.overviewTab.strong.fieldTypeLabel', {
@@ -132,11 +139,12 @@ export const OverviewTab = ({ metricItem, description, services }: OverviewTabPr
       ),
     ],
     [
+      sourceLabel,
+      streamUrl,
       metricItem.dataStream,
       metricItem.fieldTypes,
       metricItem.metricTypes,
       metricItem.units,
-      getStreamUrl,
       createDescriptionListItem,
     ]
   );

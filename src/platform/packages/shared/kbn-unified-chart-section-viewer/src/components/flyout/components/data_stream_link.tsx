@@ -12,15 +12,14 @@ import { EuiLink, EuiText } from '@elastic/eui';
 
 interface DataStreamLinkProps {
   dataStream?: string;
-  getStreamUrl: (name: string) => string | undefined;
+  streamUrl?: string;
 }
 
 /**
  * Renders a data stream name as a navigable link or plain text.
- * URL resolution and permission gating are delegated to the
- * `getStreamUrl` callback provided by the consumer.
+ * When `streamUrl` is provided, the name is rendered as a clickable link.
  */
-export const DataStreamLink = ({ dataStream, getStreamUrl }: DataStreamLinkProps) => {
+export const DataStreamLink = ({ dataStream, streamUrl }: DataStreamLinkProps) => {
   if (!dataStream) {
     return (
       <EuiText size="s" color="subdued" data-test-subj="metricsDataStreamEmpty">
@@ -28,8 +27,6 @@ export const DataStreamLink = ({ dataStream, getStreamUrl }: DataStreamLinkProps
       </EuiText>
     );
   }
-
-  const streamUrl = getStreamUrl(dataStream);
 
   if (!streamUrl) {
     return (

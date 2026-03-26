@@ -17,6 +17,7 @@ import { useTelemetry } from '../../../../context/ebt_telemetry_context';
 import { useChartSectionInspector } from '../../../../context/chart_section_inspector';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
+import { enrichWithDataStreamInfo } from '../utils/enrich_with_data_stream_info';
 import { getEsqlQuery } from '../utils/get_esql_query';
 
 /**
@@ -89,20 +90,22 @@ export function useFetchMetricsData({
       };
 
       const parsed = parseMetricsWithTelemetry(documents, getFieldType);
-
-      const sortedMetrics: ParsedMetrics = {
-        metricItems: [...parsed.metricItems].sort((a, b) =>
-          a.metricName.localeCompare(b.metricName)
-        ),
-        allDimensions: [...parsed.allDimensions].sort((a, b) => a.name.localeCompare(b.name)),
-      };
+      const enrichedItems = await enrichWithDataStreamInfo(
+        services.dataViews,
+        parsed.metricItems,
+        parsed.uniqueDataStreamNames
+      );
 
       if (!signal.aborted) {
         trackMetricsInfo(parsed.telemetry);
       }
 
       return {
-        ...sortedMetrics,
+        metricItems: [...enrichedItems].sort((a, b) => a.metricName.localeCompare(b.metricName)),
+        allDimensions: [...(parsed?.allDimensions ?? [])].sort((a, b) =>
+          a.name.localeCompare(b.name)
+        ),
+        uniqueDataStreamNames: parsed.uniqueDataStreamNames,
         activeDimensions: selectedDimensionNames ?? [],
       };
     },
@@ -114,6 +117,7 @@ export function useFetchMetricsData({
       fetchParams.filters,
       fetchParams.esqlVariables,
       services.data.search.search,
+      services.dataViews,
       services.uiSettings,
       trackMetricsInfo,
       selectedDimensionNames,

@@ -70,6 +70,7 @@ export interface MetricsESQLResponse {
 export interface ParsedMetricItem {
   metricName: string;
   dataStream: string;
+  isDataStream: boolean;
   readonly units: NullableMetricUnit[];
   readonly metricTypes: MappingTimeSeriesMetricType[];
   readonly fieldTypes: ES_FIELD_TYPES[];
@@ -91,6 +92,7 @@ export interface MetricsTelemetry {
 export interface ParsedMetrics {
   metricItems: ParsedMetricItem[];
   allDimensions: Dimension[];
+  uniqueDataStreamNames: Set<string>;
 }
 
 export interface MetricsInfo extends ParsedMetrics {

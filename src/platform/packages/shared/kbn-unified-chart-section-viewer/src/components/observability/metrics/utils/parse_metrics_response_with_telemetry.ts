@@ -56,6 +56,7 @@ export const parseMetricsWithTelemetry = (
   const telemetry = createInitialMetricsTelemetry();
 
   const allDimensionsSet = new Set<string>();
+  const allDataStreamNamesSet = new Set<string>();
 
   const toDimension = (name: string): Dimension => {
     const type = getFieldType?.(name);
@@ -92,9 +93,11 @@ export const parseMetricsWithTelemetry = (
     });
 
     for (const stream of dataStreams) {
+      allDataStreamNamesSet.add(stream);
       parsedMetrics.push({
         metricName: metric.metric_name,
         dataStream: stream,
+        isDataStream: true, // Defaults to true since most TSDB sources are data streams.
         units,
         metricTypes,
         fieldTypes,
@@ -109,6 +112,7 @@ export const parseMetricsWithTelemetry = (
   return {
     metricItems: parsedMetrics,
     allDimensions: Array.from(allDimensionsSet).map(toDimension),
+    uniqueDataStreamNames: allDataStreamNamesSet,
     telemetry,
   };
 };

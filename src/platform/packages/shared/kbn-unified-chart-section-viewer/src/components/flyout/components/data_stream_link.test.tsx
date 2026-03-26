@@ -12,39 +12,36 @@ import { render, screen } from '@testing-library/react';
 import { DataStreamLink } from './data_stream_link';
 
 describe('DataStreamLink', () => {
-  const noUrl = jest.fn(() => undefined);
-  const withUrl = jest.fn((name: string) => `/app/streams/${name}`);
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   describe('empty values', () => {
     it('renders "-" when dataStream is undefined', () => {
-      render(<DataStreamLink getStreamUrl={noUrl} />);
+      render(<DataStreamLink />);
 
       expect(screen.getByTestId('metricsDataStreamEmpty')).toHaveTextContent('-');
-      expect(noUrl).not.toHaveBeenCalled();
     });
 
     it('renders "-" when dataStream is an empty string', () => {
-      render(<DataStreamLink dataStream="" getStreamUrl={noUrl} />);
+      render(<DataStreamLink dataStream="" />);
 
       expect(screen.getByTestId('metricsDataStreamEmpty')).toHaveTextContent('-');
     });
   });
 
   describe('link rendering', () => {
-    it('renders a link when getStreamUrl returns a URL', () => {
-      render(<DataStreamLink dataStream="metrics-system.cpu-default" getStreamUrl={withUrl} />);
+    it('renders a link when streamUrl is provided', () => {
+      render(
+        <DataStreamLink
+          dataStream="metrics-system.cpu-default"
+          streamUrl="/app/streams/metrics-system.cpu-default"
+        />
+      );
 
       const link = screen.getByTestId('metricsDataStreamLink');
       expect(link).toHaveAttribute('href', '/app/streams/metrics-system.cpu-default');
       expect(screen.getByText('metrics-system.cpu-default')).toBeInTheDocument();
     });
 
-    it('renders plain text when getStreamUrl returns undefined', () => {
-      render(<DataStreamLink dataStream="metrics-system.cpu-default" getStreamUrl={noUrl} />);
+    it('renders plain text when streamUrl is not provided', () => {
+      render(<DataStreamLink dataStream="metrics-system.cpu-default" />);
 
       expect(screen.queryByTestId('metricsDataStreamLink')).not.toBeInTheDocument();
       expect(screen.getByTestId('metricsDataStreamText')).toHaveTextContent(

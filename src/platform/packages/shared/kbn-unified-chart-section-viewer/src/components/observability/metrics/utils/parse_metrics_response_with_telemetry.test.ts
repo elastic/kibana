@@ -20,6 +20,7 @@ describe('parseMetricsWithTelemetry', () => {
     expect(parseMetricsWithTelemetry([])).toEqual({
       metricItems: [],
       allDimensions: [],
+      uniqueDataStreamNames: new Set(),
       telemetry: createInitialMetricsTelemetry(),
     });
   });
@@ -41,6 +42,7 @@ describe('parseMetricsWithTelemetry', () => {
         {
           metricName: 'my.metric',
           dataStream: 'my-index',
+          isDataStream: true,
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
           units: [null],
@@ -48,6 +50,7 @@ describe('parseMetricsWithTelemetry', () => {
         },
       ],
       allDimensions: [{ name: 'host.name' }],
+      uniqueDataStreamNames: new Set(['my-index']),
       telemetry: {
         total_number_of_metrics: 1,
         total_number_of_dimensions: 1,
@@ -79,6 +82,7 @@ describe('parseMetricsWithTelemetry', () => {
         {
           metricName: 'cpu.usage',
           dataStream: 'my-index',
+          isDataStream: true,
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
           units: ['percent'],
@@ -86,6 +90,7 @@ describe('parseMetricsWithTelemetry', () => {
         },
       ],
       allDimensions: [{ name: 'host.name' }],
+      uniqueDataStreamNames: new Set(['my-index']),
       telemetry: {
         total_number_of_metrics: 1,
         total_number_of_dimensions: 1,
@@ -117,6 +122,7 @@ describe('parseMetricsWithTelemetry', () => {
         {
           metricName: 'cpu.usage',
           dataStream: 'stream-a',
+          isDataStream: true,
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
           units: ['percent'],
@@ -125,6 +131,7 @@ describe('parseMetricsWithTelemetry', () => {
         {
           metricName: 'cpu.usage',
           dataStream: 'stream-b',
+          isDataStream: true,
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
           units: ['percent'],
@@ -132,6 +139,7 @@ describe('parseMetricsWithTelemetry', () => {
         },
       ],
       allDimensions: [{ name: 'host.name' }],
+      uniqueDataStreamNames: new Set(['stream-a', 'stream-b']),
       telemetry: {
         total_number_of_metrics: 1,
         total_number_of_dimensions: 1,
@@ -163,6 +171,7 @@ describe('parseMetricsWithTelemetry', () => {
         {
           metricName: 'my.metric',
           dataStream: 'my-index',
+          isDataStream: true,
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
           units: ['bytes'],
@@ -170,6 +179,7 @@ describe('parseMetricsWithTelemetry', () => {
         },
       ],
       allDimensions: [{ name: 'host.name' }],
+      uniqueDataStreamNames: new Set(['my-index']),
       telemetry: {
         total_number_of_metrics: 1,
         total_number_of_dimensions: 1,
@@ -201,6 +211,7 @@ describe('parseMetricsWithTelemetry', () => {
         {
           metricName: 'my.metric',
           dataStream: 'my-index',
+          isDataStream: true,
           metricTypes: ['gauge', 'counter'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.LONG],
           units: ['bytes'],
@@ -208,6 +219,7 @@ describe('parseMetricsWithTelemetry', () => {
         },
       ],
       allDimensions: [{ name: 'host.name' }, { name: 'pod.name' }],
+      uniqueDataStreamNames: new Set(['my-index']),
       telemetry: {
         total_number_of_metrics: 1,
         total_number_of_dimensions: 2,

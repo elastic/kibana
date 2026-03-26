@@ -32,6 +32,7 @@ describe('Metric Flyout Overview Tab', () => {
   const createMockMetric = (overrides: Partial<ParsedMetricItem> = {}): ParsedMetricItem => ({
     metricName: 'test.metric',
     dataStream: 'test-data-stream',
+    isDataStream: true,
     fieldTypes: [ES_FIELD_TYPES.DOUBLE],
     units: ['ms'],
     dimensionFields: [],
@@ -386,6 +387,31 @@ describe('Metric Flyout Overview Tab', () => {
       render(<OverviewTab metricItem={metricItem} services={mockServices} />);
 
       expect(screen.getByTestId('metricsDataStreamEmpty')).toHaveTextContent('-');
+    });
+
+    it('renders "Index" label and plain text when isDataStream is false', () => {
+      const metricItem = createMockMetric({
+        dataStream: 'test-plain-tsdb-index',
+        isDataStream: false,
+      });
+      render(<OverviewTab metricItem={metricItem} services={mockServicesWithStreams} />);
+
+      expect(screen.getByText('Index')).toBeInTheDocument();
+      expect(screen.getByTestId('metricsDataStreamText')).toHaveTextContent(
+        'test-plain-tsdb-index'
+      );
+      expect(screen.queryByTestId('metricsDataStreamLink')).not.toBeInTheDocument();
+    });
+
+    it('renders "Data stream" label when isDataStream is true', () => {
+      const metricItem = createMockMetric({
+        dataStream: 'metrics-system.cpu-default',
+        isDataStream: true,
+      });
+      render(<OverviewTab metricItem={metricItem} services={mockServicesWithStreams} />);
+
+      expect(screen.getByText('Data stream')).toBeInTheDocument();
+      expect(screen.getByTestId('metricsDataStreamLink')).toBeInTheDocument();
     });
   });
 });
