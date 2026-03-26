@@ -59,7 +59,7 @@ const ESQLDataCascade = React.memo(
       cascadeGroupingChangeHandler,
     } = useCascadedDocumentsContext();
 
-    const cascadeGroupData = useGroupedCascadeData({
+    const { data: cascadeGroupData, columnTypes } = useGroupedCascadeData({
       selectedCascadeGroups,
       rows,
       queryMeta,
@@ -81,7 +81,8 @@ const ESQLDataCascade = React.memo(
     const { rowActions, rowHeaderMeta, rowHeaderTitle } = useEsqlDataCascadeRowHeaderComponents(
       queryMeta,
       columns,
-      togglePopover
+      togglePopover,
+      columnTypes
     );
 
     const cascadeLeafRowRenderer = useCallback<

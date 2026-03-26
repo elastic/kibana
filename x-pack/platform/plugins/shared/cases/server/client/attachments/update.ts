@@ -26,7 +26,7 @@ import { validateMaxUserActions } from '../../common/validators';
  * @ignore
  */
 export async function update(
-  { caseID, updateRequest: queryParams }: UpdateArgs,
+  { caseID, updateRequest: queryParams, mode = 'legacy' }: UpdateArgs,
   clientArgs: CasesClientArgs
 ): Promise<Case> {
   const {
@@ -57,6 +57,7 @@ export async function update(
 
     const myComment = await attachmentService.getter.get({
       attachmentId: queryCommentId,
+      mode,
     });
 
     if (myComment == null) {
@@ -106,9 +107,10 @@ export async function update(
       updateRequest: queryParams,
       updatedAt: updatedDate,
       owner: myComment.attributes.owner,
+      mode,
     });
 
-    return await updatedModel.encodeWithComments();
+    return await updatedModel.encodeWithComments({ mode });
   } catch (error) {
     throw createCaseError({
       message: `Failed to patch comment case id: ${caseID}: ${error}`,
