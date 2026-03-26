@@ -33,6 +33,7 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
     prompt: string;
     combinedMaybePartialResults: string;
     continuePrompt: string;
+    dataSourceContext?: string;
   }) => string;
   responseIsHallucinated: (response: string) => boolean;
   generationSchema: ZodType<{ insights: T[] }>;
@@ -46,6 +47,7 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
       prompt,
       continuePrompt,
       combinedGenerations,
+      dataSourceContext,
       generationAttempts,
       generations,
       hallucinationFailures,
@@ -62,6 +64,7 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
         prompt,
         combinedMaybePartialResults: combinedGenerations,
         continuePrompt,
+        dataSourceContext,
       });
 
       const { chain, formatInstructions, llmType } = getChainWithFormatInstructions({

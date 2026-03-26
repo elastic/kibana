@@ -18,17 +18,28 @@ import {
 } from '../constants';
 
 export interface Options {
+  dataSourceContext?: string;
   end?: string;
   filter?: Record<string, unknown> | null;
   prompts: AttackDiscoveryPrompts;
   start?: string;
 }
 
-export const getDefaultGraphAnnotation = ({ end, filter, prompts, start }: Options) =>
+export const getDefaultGraphAnnotation = ({
+  dataSourceContext,
+  end,
+  filter,
+  prompts,
+  start,
+}: Options) =>
   Annotation.Root({
     insights: Annotation<AttackDiscovery[] | null>({
       reducer: (x: AttackDiscovery[] | null, y?: AttackDiscovery[] | null) => y ?? x,
       default: () => null,
+    }),
+    dataSourceContext: Annotation<string>({
+      reducer: (x: string, y?: string) => y ?? x,
+      default: () => dataSourceContext ?? '',
     }),
     prompt: Annotation<string>({
       reducer: (x: string, y?: string) => y ?? x,

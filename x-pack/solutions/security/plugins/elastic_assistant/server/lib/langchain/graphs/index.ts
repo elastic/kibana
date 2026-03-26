@@ -88,6 +88,7 @@ export interface BaseGraphState<T extends GraphInsightTypes> {
   combinedGenerations: string;
   combinedRefinements: string;
   continuePrompt: string;
+  dataSourceContext: string;
   end?: DateMath;
   errors: string[];
   filter?: Record<string, unknown> | null;

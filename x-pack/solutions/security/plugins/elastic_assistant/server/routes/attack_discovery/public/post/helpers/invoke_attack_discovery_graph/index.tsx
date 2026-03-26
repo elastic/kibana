@@ -32,6 +32,7 @@ export const invokeAttackDiscoveryGraph = async ({
   anonymizationFields,
   apiConfig,
   connectorTimeout,
+  dataSourceContext,
   end,
   esClient,
   filter,
@@ -49,6 +50,7 @@ export const invokeAttackDiscoveryGraph = async ({
   anonymizationFields: AnonymizationFieldResponse[];
   apiConfig: ApiConfig;
   connectorTimeout: number;
+  dataSourceContext?: string;
   end?: string;
   esClient: ElasticsearchClient;
   filter?: Record<string, unknown>;
@@ -110,6 +112,7 @@ export const invokeAttackDiscoveryGraph = async ({
   const graph = getDefaultAttackDiscoveryGraph({
     alertsIndexPattern,
     anonymizationFields,
+    dataSourceContext,
     end,
     esClient,
     filter,

@@ -30,6 +30,7 @@ import { getDefaultGraphAnnotation } from './state';
 export interface GetDefaultAttackDiscoveryGraphParams {
   alertsIndexPattern?: string;
   anonymizationFields: AnonymizationFieldResponse[];
+  dataSourceContext?: string;
   end?: string;
   esClient: ElasticsearchClient;
   filter?: Record<string, unknown>;
@@ -54,6 +55,7 @@ export type DefaultAttackDiscoveryGraph = ReturnType<typeof getDefaultAttackDisc
 export const getDefaultAttackDiscoveryGraph = ({
   alertsIndexPattern,
   anonymizationFields,
+  dataSourceContext,
   end,
   esClient,
   filter,
@@ -66,7 +68,13 @@ export const getDefaultAttackDiscoveryGraph = ({
   start,
 }: GetDefaultAttackDiscoveryGraphParams) => {
   try {
-    const graphState = getDefaultGraphAnnotation({ end, filter, prompts, start });
+    const graphState = getDefaultGraphAnnotation({
+      dataSourceContext,
+      end,
+      filter,
+      prompts,
+      start,
+    });
 
     // get nodes:
     const retrieveAnonymizedAlertsNode = getRetrieveAnonymizedAlertsNode({

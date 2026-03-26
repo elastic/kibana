@@ -53,6 +53,10 @@ export const getDefaultGraphState = ({
     value: (current: string, next?: string) => next ?? current,
     default: () => '',
   },
+  dataSourceContext: {
+    value: (current: string, next?: string) => next ?? current,
+    default: () => '',
+  },
   combinedRefinements: {
     value: (current: string, next?: string) => next ?? current,
     default: () => '',

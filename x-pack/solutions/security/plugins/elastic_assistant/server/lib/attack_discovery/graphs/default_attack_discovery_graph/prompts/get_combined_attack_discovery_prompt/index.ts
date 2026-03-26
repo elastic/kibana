@@ -11,11 +11,13 @@ import { isEmpty } from 'lodash/fp';
 const getAlertsContextPrompt = ({
   anonymizedAlerts,
   attackDiscoveryPrompt,
+  dataSourceContext,
 }: {
   anonymizedAlerts: string[];
   attackDiscoveryPrompt: string;
+  dataSourceContext?: string;
 }) => `${attackDiscoveryPrompt}
-
+${dataSourceContext ? `\nContext about available data sources in this environment:\n${dataSourceContext}\n` : ''}
 Use context from the following alerts to provide insights:
 
 """
@@ -32,16 +34,19 @@ export const getCombinedAttackDiscoveryPrompt = ({
   prompt,
   combinedMaybePartialResults,
   continuePrompt,
+  dataSourceContext,
 }: {
   anonymizedDocs: string[];
   prompt: string;
   /** combined results that may contain incomplete JSON */
   combinedMaybePartialResults: string;
   continuePrompt: string;
+  dataSourceContext?: string;
 }): string => {
   const alertsContextPrompt = getAlertsContextPrompt({
     anonymizedAlerts: anonymizedDocs,
     attackDiscoveryPrompt: prompt,
+    dataSourceContext,
   });
 
   return isEmpty(combinedMaybePartialResults)
