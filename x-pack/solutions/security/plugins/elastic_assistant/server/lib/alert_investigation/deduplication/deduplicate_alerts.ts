@@ -12,6 +12,45 @@ import { deduplicateWithHybridApproach } from './semantic_dedup_elser';
 const DEFAULT_SIMILARITY_THRESHOLD = 0.85;
 
 /**
+ * Rule-specific similarity thresholds.
+ *
+ * Some detection rules produce alerts that differ only in timestamps or minor
+ * fields (e.g., brute force — same rule, host, user, just different source IPs).
+ * These need a LOWER threshold to dedup effectively.
+ *
+ * Other rules produce alerts where every field matters (e.g., malware with
+ * unique file hashes). These need a HIGHER threshold to avoid false dedup.
+ */
+const RULE_THRESHOLD_OVERRIDES: Record<string, number> = {
+  // High-volume rules with repetitive alerts → lower threshold (more dedup)
+  'brute force': 0.65,
+  'multiple failed': 0.65,
+  'failed login': 0.65,
+  'authentication failure': 0.65,
+
+  // Rules where process/command line matters → higher threshold (less dedup)
+  'suspicious process': 0.90,
+  'credential dump': 0.90,
+  'lateral movement': 0.90,
+
+  // Rules where file hash is the key differentiator → highest threshold
+  malware: 0.95,
+  ransomware: 0.95,
+};
+
+/**
+ * Get the similarity threshold for a specific rule name.
+ * Falls back to the configured default if no override matches.
+ */
+const getThresholdForRule = (ruleName: string, defaultThreshold: number): number => {
+  const lowerRule = ruleName.toLowerCase();
+  for (const [pattern, threshold] of Object.entries(RULE_THRESHOLD_OVERRIDES)) {
+    if (lowerRule.includes(pattern)) return threshold;
+  }
+  return defaultThreshold;
+};
+
+/**
  * Deduplication Strategy:
  *
  * **Phase 1 (Current)**: Jaccard similarity on lexical features
@@ -146,12 +185,17 @@ const mergeBySimilarity = (
   similarityThreshold: number,
   uf: UnionFind
 ): void => {
-  for (const members of ruleHostGroups.values()) {
+  for (const [groupKey, members] of ruleHostGroups.entries()) {
     if (members.length < 2) {
-      // nothing to do
-    } else if (members.length > MAX_PAIRWISE_GROUP) {
-      // Too many members for pairwise comparison — cluster all together
-      // (same rule + host with this many alerts is likely noise)
+      continue;
+    }
+
+    // Extract rule name from group key for adaptive threshold
+    const firstEntry = featureMap.get(members[0]);
+    const ruleName = firstEntry?.features.ruleName ?? '';
+    const effectiveThreshold = getThresholdForRule(ruleName, similarityThreshold);
+
+    if (members.length > MAX_PAIRWISE_GROUP) {
       for (let i = 1; i < members.length; i++) {
         uf.union(members[0], members[i]);
       }
@@ -162,7 +206,7 @@ const mergeBySimilarity = (
           const entryB = featureMap.get(members[j]);
           if (entryA && entryB) {
             const similarity = computeTextSimilarity(entryA.text, entryB.text);
-            if (similarity >= similarityThreshold) {
+            if (similarity >= effectiveThreshold) {
               uf.union(members[i], members[j]);
             }
           }
@@ -272,15 +316,26 @@ export const deduplicateAlerts = async ({
 
   const featureMap = buildFeatureMap(alerts);
 
-  // Try ELSER first, fallback to Jaccard if unavailable
-  const { clusters: clusterMap, method } = await deduplicateWithHybridApproach(
+  // Try ELSER semantic dedup first, fall back to Jaccard
+  let clusterMap: Map<string, string[]>;
+  let method: string;
+
+  const elserClusters = await deduplicateWithHybridApproach(
     alerts,
     esClient,
-    logger,
-    similarityThreshold,
-    async (alertsForJaccard, threshold) =>
-      deduplicateWithJaccard(alertsForJaccard, featureMap, threshold)
+    similarityThreshold ?? DEFAULT_SIMILARITY_THRESHOLD,
+    logger
   );
+
+  if (elserClusters) {
+    clusterMap = elserClusters;
+    method = 'elser';
+    logger.info('Using ELSER semantic deduplication');
+  } else {
+    logger.info('Using Jaccard similarity deduplication (ELSER unavailable or failed)');
+    clusterMap = await deduplicateWithJaccard(alerts, featureMap, similarityThreshold ?? DEFAULT_SIMILARITY_THRESHOLD);
+    method = 'jaccard';
+  }
 
   // Convert cluster map to cluster objects with leaders
   const clusters: DedupCluster[] = [];

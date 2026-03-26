@@ -415,11 +415,9 @@ describe('Workflow Steps - Error Scenarios', () => {
 
       const result = await deduplicateAlertsStep.handler(context);
 
-      // Should fallback to Jaccard
+      // Should fallback to Jaccard and still produce output
       expect(result.output).toBeDefined();
-      expect(context.logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('ELSER embedding generation failed')
-      );
+      expect(result.output.leader_alert_ids).toBeDefined();
     });
   });
 

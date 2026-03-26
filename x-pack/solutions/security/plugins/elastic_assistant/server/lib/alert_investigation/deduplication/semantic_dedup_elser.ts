@@ -10,22 +10,16 @@ import type { AlertWithId } from '../utils';
 import { extractAlertFeatures, composeFeatureText } from './feature_extraction';
 
 /**
- * ELSER Semantic Deduplication - Full Implementation
+ * ELSER Semantic Deduplication
  *
- * Uses Elasticsearch ELSER model for semantic alert clustering
- * Handles: Encoded commands, lexical variations, different log sources for same attack
+ * Uses ELSER sparse vector embeddings for semantic alert similarity.
+ * Instead of converting to dense vectors (which hits the 4096 dim limit),
+ * this uses text_expansion queries on a sparse_vector field.
  *
- * Performance: O(n²) kNN searches but with smart batching
- * Cost: Zero (in-cluster inference, no API calls)
- *
- * Fallback: Returns null if ELSER unavailable → caller uses Jaccard
+ * Fallback: Returns null if ELSER unavailable → caller uses Jaccard.
  */
 
-interface ElserEmbedding {
-  alertId: string;
-  embedding: number[];
-  featureText: string;
-}
+const ELSER_TEMP_INDEX_PREFIX = '.temp-alert-elser-dedup';
 
 /**
  * Check if ELSER v2 model is available and deployed
@@ -41,11 +35,9 @@ export async function isElserAvailable(esClient: ElasticsearchClient): Promise<b
       m.model_id.startsWith('.elser_model_2')
     );
 
-    if (elserModel == null || elserModel.fully_defined !== true) {
-      return false;
-    }
+    if (!elserModel?.fully_defined) return false;
 
-    // Verify the model is actually deployed, not just defined
+    // Verify actually deployed
     const stats = await esClient.ml.getTrainedModelsStats({
       model_id: elserModel.model_id,
     });
@@ -54,196 +46,145 @@ export async function isElserAvailable(esClient: ElasticsearchClient): Promise<b
       (s) => s.model_id === elserModel.model_id
     );
 
-    // Model must have at least one active deployment
-    const deploymentState = modelStats?.deployment_stats?.state;
-    return deploymentState === 'started' || deploymentState === 'fully_allocated';
-  } catch (error) {
-    // ML API not available (no ML node) or permission error
+    const state = modelStats?.deployment_stats?.state;
+    return state === 'started' || state === 'fully_allocated';
+  } catch {
     return false;
   }
 }
 
 /**
- * Generate ELSER embeddings in batches
- * ELSER returns sparse vectors (not dense), so we use ml.infer API
+ * Hybrid dedup: try ELSER semantic similarity, fall back to null (Jaccard).
+ *
+ * Uses sparse_vector field + text_expansion query — no dense vector
+ * conversion, no dimension limit issues.
  */
-async function generateElserEmbeddingsBatch(
-  featureTexts: string[],
+export async function deduplicateWithHybridApproach(
+  alerts: AlertWithId[],
   esClient: ElasticsearchClient,
-  logger: Logger
-): Promise<number[][] | null> {
-  try {
-    // ELSER batch size limit: 50 docs per request (empirical limit)
-    const BATCH_SIZE = 50;
-    const allEmbeddings: number[][] = [];
-
-    for (let i = 0; i < featureTexts.length; i += BATCH_SIZE) {
-      const batch = featureTexts.slice(i, i + BATCH_SIZE);
-
-      const result = await esClient.ml.inferTrainedModel({
-        model_id: '.elser_model_2',
-        docs: batch.map((text) => ({ text_field: text })),
-      });
-
-      // ELSER returns sparse vectors - convert to dense for kNN
-      // predicted_value is sparse {token: weight}, we need dense array
-      const batchEmbeddings = result.inference_results.map((r) => {
-        const sparse = r.predicted_value as Record<string, number>;
-        return convertSparseToDense(sparse);
-      });
-
-      allEmbeddings.push(...batchEmbeddings);
-
-      logger.debug(`Generated ELSER embeddings for batch ${i / BATCH_SIZE + 1}`);
-    }
-
-    return allEmbeddings;
-  } catch (error) {
-    logger.warn(
-      `ELSER embedding generation failed: ${error instanceof Error ? error.message : error}`
-    );
-    return null;
-  }
-}
-
-/**
- * Convert ELSER sparse vector to dense vector for kNN
- * ELSER outputs {token: weight} sparse format
- * We need dense array for cosine similarity
- */
-function convertSparseToDense(sparse: Record<string, number>): number[] {
-  // ELSER vocabulary size is ~30K tokens
-  // For efficiency, we only store non-zero weights (sparse storage)
-  // Then convert to dense for kNN (ES kNN requires dense vectors)
-
-  const ELSER_VOCAB_SIZE = 30522; // BERT/ELSER vocabulary size
-  const dense = new Array(ELSER_VOCAB_SIZE).fill(0);
-
-  for (const [token, weight] of Object.entries(sparse)) {
-    const tokenId = hashToken(token); // Map token to index
-    if (tokenId < ELSER_VOCAB_SIZE) {
-      dense[tokenId] = weight;
-    }
-  }
-
-  return dense;
-}
-
-/**
- * Simple hash function to map ELSER tokens to indices
- * Distributes tokens across vocabulary space
- */
-function hashToken(token: string): number {
-  let hash = 0;
-  for (let i = 0; i < token.length; i++) {
-    hash = (hash << 5) - hash + token.charCodeAt(i);
-    hash = hash & hash; // Convert to 32-bit integer
-  }
-  return Math.abs(hash) % 30522;
-}
-
-/**
- * Create temporary index for kNN similarity search
- */
-async function createTempEmbeddingIndex(
-  esClient: ElasticsearchClient,
-  logger: Logger
-): Promise<string> {
-  const indexName = `.temp-alert-embeddings-${Date.now()}`;
-
-  await esClient.indices.create({
-    index: indexName,
-    settings: {
-      number_of_shards: 1,
-      number_of_replicas: 0,
-      'index.hidden': true,
-    },
-    mappings: {
-      properties: {
-        alert_id: { type: 'keyword' },
-        feature_text: { type: 'text', index: false },
-        embedding: {
-          type: 'dense_vector',
-          dims: 30522, // ELSER vocabulary size
-          similarity: 'cosine',
-        },
-      },
-    },
-  });
-
-  logger.debug(`Created temporary embedding index: ${indexName}`);
-  return indexName;
-}
-
-/**
- * Index embeddings for kNN search
- */
-async function indexEmbeddings(
-  esClient: ElasticsearchClient,
-  indexName: string,
-  embeddings: ElserEmbedding[],
-  logger: Logger
-): Promise<void> {
-  const operations = embeddings.flatMap((emb) => [
-    { index: { _index: indexName } },
-    {
-      alert_id: emb.alertId,
-      feature_text: emb.featureText,
-      embedding: emb.embedding,
-    },
-  ]);
-
-  await esClient.bulk({
-    operations,
-    refresh: 'wait_for',
-  });
-
-  logger.debug(`Indexed ${embeddings.length} alert embeddings for kNN search`);
-}
-
-/**
- * Find similar alerts using kNN search
- */
-async function findSimilarAlerts(
-  esClient: ElasticsearchClient,
-  indexName: string,
-  queryEmbedding: number[],
-  alertId: string,
   similarityThreshold: number,
   logger: Logger
-): Promise<string[]> {
+): Promise<Map<string, string[]> | null> {
+  if (alerts.length < 2) return null;
+
+  // Check ELSER availability
+  const elserReady = await isElserAvailable(esClient);
+  if (!elserReady) {
+    logger.info('ELSER not available, skipping semantic dedup');
+    return null;
+  }
+
+  const indexName = `${ELSER_TEMP_INDEX_PREFIX}-${Date.now()}`;
+
   try {
-    const knnResult = await esClient.search({
+    // Create temp index with ELSER ingest pipeline + sparse_vector field
+    await esClient.indices.create({
       index: indexName,
-      knn: {
-        field: 'embedding',
-        query_vector: queryEmbedding,
-        k: 20, // Find top 20 neighbors
-        num_candidates: 100,
+      settings: {
+        number_of_shards: 1,
+        number_of_replicas: 0,
+        'index.hidden': true,
+        'index.default_pipeline': `${indexName}-pipeline`,
       },
-      _source: ['alert_id'],
+      mappings: {
+        properties: {
+          alert_id: { type: 'keyword' },
+          feature_text: { type: 'text' },
+          ml: {
+            properties: {
+              tokens: { type: 'sparse_vector' },
+            },
+          },
+        },
+      },
     });
 
-    const similarAlertIds: string[] = [];
+    // Create ingest pipeline for ELSER
+    await esClient.ingest.putPipeline({
+      id: `${indexName}-pipeline`,
+      processors: [
+        {
+          inference: {
+            model_id: '.elser_model_2',
+            input_output: [
+              {
+                input_field: 'feature_text',
+                output_field: 'ml.tokens',
+              },
+            ],
+          },
+        },
+      ],
+    });
 
-    for (const hit of knnResult.hits.hits) {
-      const score = hit._score ?? 0;
-      const hitAlertId = (hit._source as { alert_id: string }).alert_id;
+    // Index alert feature texts (ELSER pipeline generates embeddings)
+    const featureTexts = alerts.map((alert) => ({
+      alertId: alert._id,
+      text: composeFeatureText(extractAlertFeatures(alert._source)),
+    }));
 
-      // Skip self
-      if (hitAlertId === alertId) continue;
+    const bulkOps = featureTexts.flatMap((ft) => [
+      { index: { _index: indexName } },
+      { alert_id: ft.alertId, feature_text: ft.text },
+    ]);
 
-      // ES kNN with cosine similarity returns _score = (1 + cosine_sim) / 2, already in [0, 1]
-      if (score >= similarityThreshold) {
-        similarAlertIds.push(hitAlertId);
+    await esClient.bulk({ operations: bulkOps, refresh: 'wait_for' });
+
+    logger.info(`Indexed ${alerts.length} alerts with ELSER embeddings for semantic dedup`);
+
+    // Find similar pairs using text_expansion queries
+    const similarityGraph = new Map<string, string[]>();
+
+    for (const ft of featureTexts) {
+      const result = await esClient.search({
+        index: indexName,
+        query: {
+          text_expansion: {
+            'ml.tokens': {
+              model_id: '.elser_model_2',
+              model_text: ft.text,
+            },
+          },
+        },
+        size: 20,
+        _source: ['alert_id'],
+      });
+
+      const similar: string[] = [];
+      for (const hit of result.hits.hits) {
+        const hitId = (hit._source as { alert_id: string }).alert_id;
+        const score = hit._score ?? 0;
+        if (hitId !== ft.alertId && score >= similarityThreshold) {
+          similar.push(hitId);
+        }
+      }
+
+      if (similar.length > 0) {
+        similarityGraph.set(ft.alertId, similar);
       }
     }
 
-    return similarAlertIds;
+    // Build clusters from similarity graph using Union-Find
+    const clusters = buildClustersFromSimilarityGraph(alerts, similarityGraph);
 
+    logger.info(
+      `ELSER semantic dedup: ${alerts.length} alerts → ${clusters.size} clusters`
+    );
+
+    return clusters;
   } catch (error) {
-    logger.warn(`kNN search failed for alert ${alertId}: ${error}`);
-    return [];
+    logger.warn(
+      `ELSER deduplication failed: ${error instanceof Error ? error.message : error}`
+    );
+    return null;
+  } finally {
+    // Cleanup temp index and pipeline
+    try {
+      await esClient.indices.delete({ index: indexName }).catch(() => {});
+      await esClient.ingest.deletePipeline({ id: `${indexName}-pipeline` }).catch(() => {});
+    } catch {
+      // Best effort cleanup
+    }
   }
 }
 
@@ -254,189 +195,41 @@ function buildClustersFromSimilarityGraph(
   alerts: AlertWithId[],
   similarityGraph: Map<string, string[]>
 ): Map<string, string[]> {
-  // Import Union-Find from deduplicate_alerts or reimplement here
-  class UnionFind {
-    private readonly parent = new Map<string, string>();
+  const parent = new Map<string, string>();
 
-    init(id: string): void {
-      this.parent.set(id, id);
+  const find = (x: string): string => {
+    if (!parent.has(x)) parent.set(x, x);
+    let root = x;
+    while (parent.get(root) !== root) root = parent.get(root)!;
+    // Path compression
+    let current = x;
+    while (current !== root) {
+      const next = parent.get(current)!;
+      parent.set(current, root);
+      current = next;
     }
+    return root;
+  };
 
-    find(id: string): string {
-      let root = id;
-      let resolved = this.parent.get(root);
-      while (resolved !== root && resolved !== undefined) {
-        root = resolved;
-        resolved = this.parent.get(root);
-      }
+  const unite = (a: string, b: string) => {
+    parent.set(find(a), find(b));
+  };
 
-      // Path compression
-      let current = id;
-      while (current !== root) {
-        const next = this.parent.get(current)!;
-        this.parent.set(current, root);
-        current = next;
-      }
+  // Initialize all alerts
+  for (const alert of alerts) find(alert._id);
 
-      return root;
-    }
-
-    union(idA: string, idB: string): void {
-      const rootA = this.find(idA);
-      const rootB = this.find(idB);
-      if (rootA !== rootB) {
-        this.parent.set(rootB, rootA);
-      }
-    }
-  }
-
-  const uf = new UnionFind();
-
-  // Initialize
-  for (const alert of alerts) {
-    uf.init(alert._id);
-  }
-
-  // Merge similar alerts
+  // Unite similar alerts
   for (const [alertId, similarIds] of similarityGraph) {
-    for (const similarId of similarIds) {
-      uf.union(alertId, similarId);
-    }
+    for (const simId of similarIds) unite(alertId, simId);
   }
 
   // Build cluster map
   const clusters = new Map<string, string[]>();
   for (const alert of alerts) {
-    const root = uf.find(alert._id);
-    const members = clusters.get(root) ?? [];
-    members.push(alert._id);
-    clusters.set(root, members);
+    const root = find(alert._id);
+    if (!clusters.has(root)) clusters.set(root, []);
+    clusters.get(root)!.push(alert._id);
   }
 
   return clusters;
-}
-
-/**
- * Main ELSER deduplication function - FULL IMPLEMENTATION
- *
- * Complexity: O(n²) for kNN but batched and optimized
- * Memory: Temporary index ~(n × 30KB) for embeddings
- * Time: ~2-3 seconds for 500 alerts with ML node
- */
-export async function deduplicateWithElser(
-  alerts: AlertWithId[],
-  esClient: ElasticsearchClient,
-  logger: Logger,
-  similarityThreshold: number = 0.75
-): Promise<Map<string, string[]> | null> {
-  // Check ELSER availability
-  const elserAvailable = await isElserAvailable(esClient);
-  if (!elserAvailable) {
-    logger.info('ELSER not available - will use Jaccard fallback');
-    return null;
-  }
-
-  logger.info(`Starting ELSER semantic deduplication for ${alerts.length} alerts`);
-
-  let tempIndexName: string | null = null;
-
-  try {
-    // Step 1: Extract feature texts
-    const featureTexts = alerts.map((alert) => {
-      const features = extractAlertFeatures(alert._source);
-      return composeFeatureText(features);
-    });
-
-    // Step 2: Generate ELSER embeddings (batched)
-    const embeddings = await generateElserEmbeddingsBatch(featureTexts, esClient, logger);
-    if (!embeddings) {
-      logger.warn('ELSER embedding generation returned null - falling back to Jaccard');
-      return null;
-    }
-
-    // Step 3: Create temporary index for kNN
-    tempIndexName = await createTempEmbeddingIndex(esClient, logger);
-
-    // Step 4: Index embeddings
-    const embeddingData: ElserEmbedding[] = alerts.map((alert, i) => ({
-      alertId: alert._id,
-      embedding: embeddings[i],
-      featureText: featureTexts[i],
-    }));
-
-    await indexEmbeddings(esClient, tempIndexName, embeddingData, logger);
-
-    // Step 5: kNN search for each alert to find similar neighbors
-    const similarityGraph = new Map<string, string[]>();
-
-    for (let i = 0; i < alerts.length; i++) {
-      const similar = await findSimilarAlerts(
-        esClient,
-        tempIndexName,
-        embeddings[i],
-        alerts[i]._id,
-        similarityThreshold,
-        logger
-      );
-
-      if (similar.length > 0) {
-        similarityGraph.set(alerts[i]._id, similar);
-      }
-    }
-
-    // Step 6: Build clusters from similarity graph
-    const clusters = buildClustersFromSimilarityGraph(alerts, similarityGraph);
-
-    logger.info(
-      `ELSER deduplication complete: ${alerts.length} alerts → ${clusters.size} clusters ` +
-        `(${Math.round(((alerts.length - clusters.size) / alerts.length) * 100)}% dedup rate)`
-    );
-
-    return clusters;
-  } catch (error) {
-    logger.error(`ELSER deduplication failed: ${error instanceof Error ? error.message : error}`);
-    return null; // Fallback to Jaccard
-  } finally {
-    // Cleanup: Delete temporary index
-    if (tempIndexName) {
-      try {
-        await esClient.indices.delete({ index: tempIndexName });
-        logger.debug(`Deleted temporary index: ${tempIndexName}`);
-      } catch (cleanupError) {
-        logger.warn(`Failed to cleanup temp index ${tempIndexName}: ${cleanupError}`);
-      }
-    }
-  }
-}
-
-/**
- * Hybrid deduplication: Try ELSER, fallback to Jaccard
- *
- * This is the entry point called by deduplicate_alerts.ts
- * Provides automatic fallback with method tracking
- */
-export async function deduplicateWithHybridApproach(
-  alerts: AlertWithId[],
-  esClient: ElasticsearchClient,
-  logger: Logger,
-  similarityThreshold: number,
-  jaccardFallback: (alerts: AlertWithId[], threshold: number) => Promise<Map<string, string[]>>
-): Promise<{ clusters: Map<string, string[]>; method: 'elser' | 'jaccard' }> {
-  // Try ELSER first (if available)
-  const elserClusters = await deduplicateWithElser(
-    alerts,
-    esClient,
-    logger,
-    similarityThreshold * 0.88 // ELSER threshold slightly lower (more sensitive)
-  );
-
-  if (elserClusters !== null) {
-    logger.info('Used ELSER semantic deduplication');
-    return { clusters: elserClusters, method: 'elser' };
-  }
-
-  // Fallback to Jaccard (always works)
-  logger.info('Using Jaccard similarity deduplication (ELSER unavailable or failed)');
-  const jaccardClusters = await jaccardFallback(alerts, similarityThreshold);
-  return { clusters: jaccardClusters, method: 'jaccard' };
 }
