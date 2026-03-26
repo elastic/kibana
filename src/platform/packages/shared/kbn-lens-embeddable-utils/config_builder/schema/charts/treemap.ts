@@ -23,7 +23,7 @@ import {
 import type { PartitionMetric } from './partition_shared';
 import {
   legendNestedSchema,
-  legendVisibleSchema,
+  legendVisibilitySchema,
   validateColoringAssignments,
   valueDisplaySchema,
 } from './partition_shared';
@@ -40,7 +40,7 @@ const treemapSharedStateSchema = {
       {
         nested: legendNestedSchema,
         truncate_after_lines: legendTruncateAfterLinesSchema,
-        visible: legendVisibleSchema,
+        visibility: legendVisibilitySchema,
         size: legendSizeSchema,
       },
       {
@@ -52,17 +52,18 @@ const treemapSharedStateSchema = {
       }
     )
   ),
-  value_display: valueDisplaySchema,
+  values: valueDisplaySchema,
 
   /**
-   * Position of the labels: hidden or visible
+   * Labels configuration
    */
-  label_position: schema.maybe(
-    schema.oneOf([schema.literal('hidden'), schema.literal('visible')], {
-      meta: {
-        description: 'Position of the labels: hidden or visible',
+  labels: schema.maybe(
+    schema.object(
+      {
+        visible: schema.maybe(schema.boolean({ meta: { description: 'Show category labels' } })),
       },
-    })
+      { meta: { description: 'Labels configuration' } }
+    )
   ),
 };
 
