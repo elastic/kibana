@@ -13,6 +13,9 @@ import { getDiverseSampleDocuments, getSampleDocuments } from '@kbn/ai-tools';
 import { conditionToQueryDsl, getConditionFields } from '@kbn/streamlang';
 import type { Condition } from '@kbn/streamlang';
 import { getEntityFilters, MAX_FILTERS } from './get_entity_filters';
+import { parseError } from '../../../streams/errors/parse_error';
+
+const EMPTY_SAMPLE: { hits: Array<SearchHit<Record<string, unknown>>> } = { hits: [] };
 
 const DEFAULT_SAMPLE_SIZE = 20;
 // The sample is split into three buckets to balance novelty and coverage:
@@ -46,8 +49,14 @@ export async function fetchSampleDocuments({
     const diverseSize = Math.round(size * DIVERSE_RATIO);
 
     const [{ hits: diverseHits }, { hits: randomHits }] = await Promise.all([
-      getDiverseSampleDocuments({ esClient, index, start, end, size: diverseSize }),
-      getSampleDocuments({ esClient, index, start, end, size }),
+      getDiverseSampleDocuments({ esClient, index, start, end, size: diverseSize }).catch((err) => {
+        logger.warn(`Diverse sampling query failed: ${parseError(err).message}`);
+        return EMPTY_SAMPLE;
+      }),
+      getSampleDocuments({ esClient, index, start, end, size }).catch((err) => {
+        logger.warn(`Random sampling query failed: ${parseError(err).message}`);
+        return EMPTY_SAMPLE;
+      }),
     ]);
 
     const documents = mergeDocuments(
@@ -81,6 +90,9 @@ export async function fetchSampleDocuments({
         size: entityFilteredSize,
         filter: { bool: { must_not: entityFilters.map(conditionToQueryDsl) } },
         runtime_mappings: runtimeMappings,
+      }).catch((err) => {
+        logger.warn(`Entity-filtered sampling query failed: ${parseError(err).message}`);
+        return EMPTY_SAMPLE;
       }),
       getDiverseSampleDocuments({
         esClient,
@@ -88,6 +100,9 @@ export async function fetchSampleDocuments({
         start,
         end,
         size: diverseSize + entityFilteredSize,
+      }).catch((err) => {
+        logger.warn(`Diverse sampling query failed: ${parseError(err).message}`);
+        return EMPTY_SAMPLE;
       }),
       getSampleDocuments({
         esClient,
@@ -95,6 +110,9 @@ export async function fetchSampleDocuments({
         start,
         end,
         size,
+      }).catch((err) => {
+        logger.warn(`Random sampling query failed: ${parseError(err).message}`);
+        return EMPTY_SAMPLE;
       }),
     ]);
 
