@@ -84,49 +84,11 @@ export const INVESTIGATION_SECTION_HEADER_TEST_ID = INVESTIGATION_SECTION_TEST_I
 export const INVESTIGATION_SECTION_CONTENT_TEST_ID =
   INVESTIGATION_SECTION_TEST_ID + CONTENT_TEST_ID;
 
-const HIGHLIGHTED_FIELDS_TEST_ID = `${PREFIX}HighlightedFields` as const;
-export const HIGHLIGHTED_FIELDS_TITLE_TEST_ID = `${HIGHLIGHTED_FIELDS_TEST_ID}Title` as const;
-export const HIGHLIGHTED_FIELDS_DETAILS_TEST_ID = `${HIGHLIGHTED_FIELDS_TEST_ID}Details` as const;
-export const HIGHLIGHTED_FIELDS_CELL_TEST_ID = `${HIGHLIGHTED_FIELDS_TEST_ID}Cell` as const;
-export const HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID =
-  `${HIGHLIGHTED_FIELDS_TEST_ID}BasicCell` as const;
-export const HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID =
-  `${HIGHLIGHTED_FIELDS_TEST_ID}LinkedCell` as const;
-export const HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID =
-  `${HIGHLIGHTED_FIELDS_TEST_ID}AgentStatusCell` as const;
-
-export const HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID =
-  `${HIGHLIGHTED_FIELDS_TEST_ID}EditButton` as const;
-export const HIGHLIGHTED_FIELDS_EDIT_BUTTON_LOADING_TEST_ID =
-  `${HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID}Loading` as const;
-export const HIGHLIGHTED_FIELDS_EDIT_BUTTON_TOOLTIP_TEST_ID =
-  `${HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID}Tooltip` as const;
-export const HIGHLIGHTED_FIELDS_MODAL_TEST_ID = `${HIGHLIGHTED_FIELDS_TEST_ID}Modal` as const;
-export const HIGHLIGHTED_FIELDS_MODAL_TITLE_TEST_ID =
-  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}Title` as const;
-export const HIGHLIGHTED_FIELDS_MODAL_DESCRIPTION_TEST_ID =
-  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}Description` as const;
-export const HIGHLIGHTED_FIELDS_MODAL_DEFAULT_FIELDS_TEST_ID =
-  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}DefaultFields` as const;
-export const HIGHLIGHTED_FIELDS_MODAL_CUSTOM_FIELDS_TEST_ID =
-  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}CustomFields` as const;
-export const HIGHLIGHTED_FIELDS_MODAL_SAVE_BUTTON_TEST_ID =
-  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}SaveButton` as const;
-export const HIGHLIGHTED_FIELDS_MODAL_CANCEL_BUTTON_TEST_ID =
-  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}CancelButton` as const;
-
 /* Insights section */
 
 export const INSIGHTS_TEST_ID = `${PREFIX}Insights` as const;
 export const INSIGHTS_HEADER_TEST_ID = INSIGHTS_TEST_ID + HEADER_TEST_ID;
 export const INSIGHTS_CONTENT_TEST_ID = INSIGHTS_TEST_ID + CONTENT_TEST_ID;
-
-/* Summary row */
-
-export const SUMMARY_ROW_LOADING_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Loading`;
-export const SUMMARY_ROW_TEXT_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Text`;
-export const SUMMARY_ROW_VALUE_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Value`;
-export const SUMMARY_ROW_BUTTON_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Button`;
 
 /* Entities */
 
@@ -163,21 +125,6 @@ export const ENTITIES_HOST_OVERVIEW_MISCONFIGURATIONS_TEST_ID =
   `${ENTITIES_HOST_OVERVIEW_TEST_ID}Misconfigurations` as const;
 export const ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID =
   `${ENTITIES_HOST_OVERVIEW_TEST_ID}Vulnerabilities` as const;
-
-/* Correlations */
-
-export const CORRELATIONS_TEST_ID = `${PREFIX}Correlations` as const;
-export const CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID =
-  `${CORRELATIONS_TEST_ID}SuppressedAlerts` as const;
-export const CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID =
-  `${CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID}TechnicalPreview` as const;
-export const CORRELATIONS_RELATED_CASES_TEST_ID = `${CORRELATIONS_TEST_ID}RelatedCases` as const;
-export const CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID =
-  `${CORRELATIONS_TEST_ID}RelatedAlertsBySession` as const;
-export const CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID =
-  `${CORRELATIONS_TEST_ID}RelatedAlertsBySameSourceEvent` as const;
-export const CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID =
-  `${CORRELATIONS_TEST_ID}RelatedAlertsByAncestry` as const;
 
 /* Visualizations section */
 
