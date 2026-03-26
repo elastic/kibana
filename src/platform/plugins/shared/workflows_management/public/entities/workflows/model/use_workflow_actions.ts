@@ -292,7 +292,7 @@ export function useWorkflowActions() {
     RunStepCommand & { triggerTab?: WorkflowStepTriggerTab }
   >({
     mutationKey: ['POST', 'workflows', 'stepId', 'run'],
-    mutationFn: (params: RunStepCommand) =>
+    mutationFn: (params: RunStepCommand & { triggerTab?: WorkflowStepTriggerTab }) =>
       api.testStep({
         workflowYaml: params.workflowYaml,
         stepId: params.stepId,
