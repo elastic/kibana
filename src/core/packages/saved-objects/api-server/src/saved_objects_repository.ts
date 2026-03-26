@@ -207,7 +207,7 @@ export interface ISavedObjectsRepository {
    * @param options {@link SavedObjectsEsqlOptions} - options for the ES|QL query operation
    * @returns the {@link SavedObjectsEsqlResponse}
    *
-   * @remarks While the `esql` method is powerful, it can increase code complexity, introduce performance issues and introduce security risks (like injection attacks). Use the `esql` tagged template from `@kbn/esql-language` or ES|QL params (`?` placeholders) to safely interpolate user input. Carefully consider how you would like to use this method in your plugin to unlock value for users.
+   * @remarks While the `esql` method is powerful, it can increase code complexity, introduce performance issues and introduce security risks (like injection attacks). Use ES|QL named params (`?paramName`) with the `params` array to safely interpolate user input. Carefully consider how you would like to use this method in your plugin to unlock value for users.
    * @remarks See tutorial https://docs.elastic.dev/kibana-dev-docs/tutorials/saved-objects-esql
    */
   esql(options: SavedObjectsEsqlOptions): Promise<SavedObjectsEsqlResponse>;

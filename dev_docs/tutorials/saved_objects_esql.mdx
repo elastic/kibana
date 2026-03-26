@@ -69,50 +69,34 @@ const result = await savedObjectsClient.esql({
 
 See the full example in the Kibana repository at `examples/saved_objects`.
 
-## Safe pipeline construction with `esql` tagged template
+## Safe pipeline construction with ES|QL params
 
-When interpolating user input into ES|QL pipelines, **never** use string concatenation. Instead, use the `esql` tagged template from `@kbn/esql-language` with the **named param syntax**.
+When interpolating user input into ES|QL pipelines, **never** use string concatenation. Instead, use ES|QL's native parameterization — named params (`?paramName`) or positional params (`?`) — to separate code from data at the protocol level.
 
-### Named param syntax `${{ name: value }}` (recommended for user input)
+### Named params `?paramName` (recommended for user input)
 
-The `esql` tagged template from `@kbn/esql-language` provides safe query construction. When you use the `${{ name: value }}` shorthand, it creates a `?name` placeholder in the query and stores the value separately in a params bag. This is true parameterization — code and data are separated at the protocol level, preventing injection attacks.
-
-Use `.print()` to extract the pipeline string and `.getParams()` to extract the named params:
+Use `?paramName` placeholders in the pipeline string and pass the values via the `params` array as `{ name: value }` entries. This is true parameterization — the values are never interpolated into the query string, preventing injection attacks.
 
 ```ts
-import { esql } from '@kbn/esql-language';
+import type { estypes } from '@elastic/elasticsearch';
 
 const userInput = req.body.searchTerm;
-
-const pipeline = esql`
-  | WHERE my_type.title LIKE ${{ searchTerm: userInput }}
-  | LIMIT 100
-`;
-
-const params = pipeline.getParams();
 
 const result = await savedObjectsClient.esql({
   type: ['my_type'],
   namespaces: ['default'],
-  pipeline: pipeline.print(),
-  // Convert named params to the format expected by the ES client.
+  pipeline: '| WHERE my_type.title LIKE ?searchTerm | LIMIT 100',
   // Named params are supported by ES at runtime, but the ES client TypeScript types
   // only define positional params — cast through unknown to bridge the type gap.
-  params: Object.entries(params).map(([k, v]) => ({
-    [k]: v,
-  })) as unknown as EsqlESQLParam[],
+  params: [{ searchTerm: userInput }] as unknown as estypes.EsqlESQLParam[],
 });
 ```
 
 The pipeline sent to Elasticsearch will be `| WHERE my_type.title LIKE ?searchTerm | LIMIT 100` — with `searchTerm` as a separate parameter, never interpolated into the pipeline string.
 
-<DocCallOut title="Avoid the plain ${value} syntax for user input">
-  The composer also supports a plain `${value}` syntax (without the double braces), but this **inlines** the value directly into the query string as an escaped literal (e.g., `"O\"Brien"`). While the escaping provides some protection, it is NOT true parameterization. Use `${{ name: value }}` for any untrusted input. The plain `${value}` syntax is acceptable for developer-controlled constants like column names.
-</DocCallOut>
+### Positional params `?` (alternative)
 
-### Using ES|QL positional parameters (alternative)
-
-ES|QL also supports positional `?` placeholders natively. Params are plain values (string, number, boolean, or null):
+ES|QL also supports positional `?` placeholders. Params are plain values (string, number, boolean, or null) matched by position:
 
 ```ts
 const result = await savedObjectsClient.esql({
@@ -129,7 +113,7 @@ const result = await savedObjectsClient.esql({
 
 The ES|QL pipeline executes with the privileges of the `kibana_system` Elasticsearch user, which has elevated access including `manage_enrich` and broad index monitoring permissions. This means the pipeline can access resources that the end user may not be authorized to see.
 
-**Never inject arbitrary or untrusted user input directly into the pipeline string.** If a user can control the full pipeline, they could use commands like `ENRICH` to join against enrich policies whose source data they would not normally have access to — this is a privilege escalation. Always construct the pipeline server-side and use parameterized values (see [Safe pipeline construction](#safe-pipeline-construction-with-esql-tagged-template)) for any user-provided input.
+**Never inject arbitrary or untrusted user input directly into the pipeline string.** If a user can control the full pipeline, they could use commands like `ENRICH` to join against enrich policies whose source data they would not normally have access to — this is a privilege escalation. Always construct the pipeline server-side and use parameterized values (see [Safe pipeline construction](#safe-pipeline-construction-with-esql-params)) for any user-provided input.
 
 Using `ENRICH` in your pipeline is perfectly fine when you control the pipeline and are enriching from a policy whose data is appropriate for all users who will see the results.
 

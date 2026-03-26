@@ -21,7 +21,6 @@ dependsOn:
   - '@kbn/core-plugins-server'
   - '@kbn/core-security-server'
   - '@kbn/es-errors'
-  - '@kbn/esql-language'
 tags:
   - plugin
   - prod

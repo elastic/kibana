@@ -24,8 +24,8 @@ import type { estypes } from '@elastic/elasticsearch';
  * While the method injects namespace and type filters to enforce space-level security,
  * care must be taken when constructing pipelines with user input:
  *
- * - Use the `esql` tagged template from `@kbn/esql-language` with named param syntax
- *   (`${{ name: value }}`) to prevent injection attacks.
+ * - Use ES|QL named params (`?paramName`) with the `params` array to prevent injection attacks.
+ *   Never interpolate user input directly into the pipeline string.
  * - Standalone encrypted scalar columns are always replaced with `null`.
  *   When `_source` is present (via `metadata: ['_id', '_source']`), encrypted attributes
  *   within `_source` are decrypted using the same path as `find` and `search`.
