@@ -22,7 +22,7 @@ import {
   MANAGED_STREAM_SEARCH_PATTERN,
   type KIFeatureExclusionScenario,
 } from '../datasets';
-import { createExcludeSemanticEvaluator } from '../../../src/evaluators/exclude';
+import { createExcludeSemanticEvaluator } from '../../../src/evaluators/ki_feature_exclusion/evaluators';
 import { runExcludeExperiment } from './run_exclude_experiment';
 
 evaluate.describe.configure({ timeout: 600_000 });
@@ -102,7 +102,7 @@ evaluate.describe(
             await executorClient.runExperiment(
               {
                 dataset: {
-                  name: `sigevents: exclude: ${scenario.input.scenario_id} (${dataset.id}, exclude ${scenario.input.exclude_count})`,
+                  name: `sigevents: KI feature exclusion: ${scenario.input.scenario_id} (${dataset.id}, exclude ${scenario.input.exclude_count})`,
                   description: `[${dataset.id}] Exclude ${scenario.input.exclude_count} feature(s) from ${scenario.input.scenario_id}, verify exclusion across ${scenario.input.follow_up_runs} follow-up runs`,
                   examples: [{ input: scenario.input }],
                 },

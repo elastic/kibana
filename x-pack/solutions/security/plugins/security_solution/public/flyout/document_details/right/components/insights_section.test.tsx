@@ -10,13 +10,13 @@ import { act, render } from '@testing-library/react';
 import type { EsHitRecord } from '@kbn/discover-utils';
 import { DocumentDetailsContext } from '../../shared/context';
 import {
-  CORRELATIONS_TEST_ID,
   INSIGHTS_CONTENT_TEST_ID,
   INSIGHTS_ENTITIES_TEST_ID,
   INSIGHTS_HEADER_TEST_ID,
 } from './test_ids';
 import {
   INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
+  CORRELATIONS_TEST_ID,
   PREVALENCE_TEST_ID,
 } from '../../../../flyout_v2/document/components/test_ids';
 import { TestProviders } from '../../../../common/mock';
@@ -24,23 +24,23 @@ import { useFirstLastSeen } from '../../../../common/containers/use_first_last_s
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
 import { useFetchThreatIntelligence } from '../../../../flyout_v2/document/hooks/use_fetch_threat_intelligence';
-import { usePrevalence } from '../../../../flyout_v2/document/hooks/use_prevalence';
+import { usePrevalence } from '../../../../flyout_v2/prevalence/hooks/use_prevalence';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { InsightsSection } from './insights_section';
-import { useAlertPrevalence } from '../../shared/hooks/use_alert_prevalence';
+import { useAlertPrevalence } from '../../../../flyout_v2/document/hooks/use_alert_prevalence';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
-import { useShowRelatedAlertsByAncestry } from '../../shared/hooks/use_show_related_alerts_by_ancestry';
-import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
-import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
-import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
-import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_alerts';
+import { useShowRelatedAlertsByAncestry } from '../../../../flyout_v2/document/hooks/use_show_related_alerts_by_ancestry';
+import { useShowRelatedAlertsBySameSourceEvent } from '../../../../flyout_v2/document/hooks/use_show_related_alerts_by_same_source_event';
+import { useShowRelatedAlertsBySession } from '../../../../flyout_v2/document/hooks/use_show_related_alerts_by_session';
+import { useShowRelatedCases } from '../../../../flyout_v2/document/hooks/use_show_related_cases';
+import { useShowSuppressedAlerts } from '../../../../flyout_v2/document/hooks/use_show_suppressed_alerts';
 
-jest.mock('../../shared/hooks/use_alert_prevalence');
+jest.mock('../../../../flyout_v2/document/hooks/use_alert_prevalence');
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -111,13 +111,12 @@ const mockUseHostDetails = useHostDetails as jest.Mock;
 jest.mock('../../../../explore/hosts/containers/hosts/details');
 
 jest.mock('../../../../flyout_v2/document/hooks/use_fetch_threat_intelligence');
-
-jest.mock('../../../../flyout_v2/document/hooks/use_prevalence');
-jest.mock('../../shared/hooks/use_show_related_alerts_by_ancestry');
-jest.mock('../../shared/hooks/use_show_related_alerts_by_same_source_event');
-jest.mock('../../shared/hooks/use_show_related_alerts_by_session');
-jest.mock('../../shared/hooks/use_show_related_cases');
-jest.mock('../../shared/hooks/use_show_suppressed_alerts');
+jest.mock('../../../../flyout_v2/prevalence/hooks/use_prevalence');
+jest.mock('../../../../flyout_v2/document/hooks/use_show_related_alerts_by_ancestry');
+jest.mock('../../../../flyout_v2/document/hooks/use_show_related_alerts_by_same_source_event');
+jest.mock('../../../../flyout_v2/document/hooks/use_show_related_alerts_by_session');
+jest.mock('../../../../flyout_v2/document/hooks/use_show_related_cases');
+jest.mock('../../../../flyout_v2/document/hooks/use_show_suppressed_alerts');
 
 const renderInsightsSection = (contextValue: DocumentDetailsContext) =>
   render(
@@ -154,7 +153,7 @@ describe('<InsightsSection />', () => {
     });
     (useShowRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
       show: false,
-      documentId: 'event-id',
+      ancestryDocumentId: 'event-id',
     });
     (useShowRelatedAlertsBySameSourceEvent as jest.Mock).mockReturnValue({
       show: false,

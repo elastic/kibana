@@ -14,7 +14,7 @@ describe('NER output', () => {
     });
 
     test('returns the correct icon for class LOC', () => {
-      expect(getClassIcon('LOC')).toBe('visMapCoordinate');
+      expect(getClassIcon('LOC')).toBe('waypoint');
     });
 
     test('returns the correct icon for class ORG', () => {

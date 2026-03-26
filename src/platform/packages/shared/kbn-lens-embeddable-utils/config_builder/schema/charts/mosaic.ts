@@ -19,7 +19,7 @@ import {
   legendTruncateAfterLinesSchema,
   sharedPanelInfoSchema,
 } from '../shared';
-import { legendNestedSchema, legendVisibleSchema, valueDisplaySchema } from './partition_shared';
+import { legendNestedSchema, legendVisibilitySchema, valueDisplaySchema } from './partition_shared';
 import {
   legendSizeSchema,
   mergeAllBucketsWithChartDimensionSchema,
@@ -33,7 +33,7 @@ const mosaicStateSharedSchema = {
       {
         nested: legendNestedSchema,
         truncate_after_lines: legendTruncateAfterLinesSchema,
-        visible: legendVisibleSchema,
+        visibility: legendVisibilitySchema,
         size: legendSizeSchema,
       },
       {
@@ -45,7 +45,7 @@ const mosaicStateSharedSchema = {
       }
     )
   ),
-  value_display: valueDisplaySchema,
+  values: valueDisplaySchema,
 };
 
 const partitionStatePrimaryMetricOptionsSchema = {};

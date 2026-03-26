@@ -23,6 +23,7 @@ import {
 import type { FieldDefinition, UnsavedFieldChange } from '@kbn/management-settings-types';
 import type { UiSettingsType } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { useConnectorExists } from '../../hooks/use_connector_exists';
 import type { UseGenAiConnectorsResult } from '../../hooks/use_genai_connectors';
 import { useFieldSettingsContext, type ValidationError } from '../../contexts/settings_context';
 import { NO_DEFAULT_CONNECTOR } from '../../../common/constants';
@@ -44,19 +45,16 @@ const NoDefaultOption: EuiComboBoxOptionOption<string> = {
 const validateDefaultAIConnector = (
   unsavedChanges: Record<string, UnsavedFieldChange<UiSettingsType>>,
   fields: Record<string, FieldDefinition<UiSettingsType>>,
-  connectors: UseGenAiConnectorsResult
+  connectorExists: boolean,
+  connectorExistsLoading: boolean
 ): ValidationError[] => {
   const defaultLlmValue = getDefaultLlmValue(unsavedChanges, fields);
   const defaultLlmOnlyValue = getDefaultLlmOnlyValue(unsavedChanges, fields);
 
   const errors: ValidationError[] = [];
 
-  // Check if selected connector exists
-  const selectedConnectorExists =
-    connectors.connectors?.some((connector) => connector.id === defaultLlmValue) ||
-    defaultLlmValue === NO_DEFAULT_CONNECTOR;
-
-  if (!selectedConnectorExists && !connectors.loading) {
+  // Check if selected connector exists (via direct getConnectorById, not the deduped list)
+  if (!connectorExists && !connectorExistsLoading && defaultLlmValue !== NO_DEFAULT_CONNECTOR) {
     errors.push({
       message: i18n.translate(
         'xpack.gen_ai_settings.settings.defaultLLm.select.error.selectedDefaultLlmDoesNotExist.message',
@@ -92,7 +90,7 @@ const getOptions = (connectors: UseGenAiConnectorsResult): EuiComboBoxOptionOpti
       ?.filter((connector) => connector.isPreconfigured)
       .map((connector) => ({
         label: connector.name,
-        value: connector.id,
+        value: connector.connectorId,
       })) ?? [];
 
   const custom =
@@ -100,7 +98,7 @@ const getOptions = (connectors: UseGenAiConnectorsResult): EuiComboBoxOptionOpti
       ?.filter((connector) => !connector.isPreconfigured)
       .map((connector) => ({
         label: connector.name,
-        value: connector.id,
+        value: connector.connectorId,
       })) ?? [];
 
   return [
@@ -162,16 +160,28 @@ export const DefaultAIConnector: React.FC<Props> = ({ connectors }) => {
 
   const canEditAdvancedSettings = application.capabilities.advancedSettings?.save;
 
+  const defaultLlmValue = getDefaultLlmValue(unsavedChanges, fields);
+
+  // Check existence via direct getConnectorById to avoid false negatives from the deduped list
+  const { exists: connectorExists, loading: connectorExistsLoading } =
+    useConnectorExists(defaultLlmValue);
+
   // Calculate and set validation errors automatically
   React.useEffect(() => {
-    const errors = validateDefaultAIConnector(unsavedChanges, fields, connectors);
+    const errors = validateDefaultAIConnector(
+      unsavedChanges,
+      fields,
+      connectorExists,
+      connectorExistsLoading
+    );
     setValidationErrors(errors);
-  }, [unsavedChanges, fields, connectors, setValidationErrors]);
+  }, [unsavedChanges, fields, connectorExists, connectorExistsLoading, setValidationErrors]);
 
   // Get current validation errors for inline display
   const validationErrors = useMemo(
-    () => validateDefaultAIConnector(unsavedChanges, fields, connectors),
-    [unsavedChanges, fields, connectors]
+    () =>
+      validateDefaultAIConnector(unsavedChanges, fields, connectorExists, connectorExistsLoading),
+    [unsavedChanges, fields, connectorExists, connectorExistsLoading]
   );
 
   const onChangeDefaultLlm = (selectedOptions: EuiComboBoxOptionOption<string>[]) => {
@@ -217,8 +227,6 @@ export const DefaultAIConnector: React.FC<Props> = ({ connectors }) => {
       unsavedValue: checked,
     });
   };
-
-  const defaultLlmValue = getDefaultLlmValue(unsavedChanges, fields);
 
   const selectedOptions = useMemo(
     () => getOptionsByValues(defaultLlmValue, options),

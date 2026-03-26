@@ -76,6 +76,7 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/ecs-data-quality-dashboard'
   - '@kbn/elastic-assistant'
+  - '@kbn/inference-connectors'
   - '@kbn/elastic-assistant-plugin'
   - '@kbn/data-views-plugin'
   - '@kbn/datemath'
@@ -282,8 +283,10 @@ dependsOn:
   - '@kbn/workflows'
   - '@kbn/deeplinks-workflows'
   - '@kbn/core-rendering-browser'
+  - '@kbn/controls-constants'
   - '@kbn/anonymization-plugin'
   - '@kbn/anonymization-common'
+  - '@kbn/controls-schemas'
 tags:
   - plugin
   - prod
