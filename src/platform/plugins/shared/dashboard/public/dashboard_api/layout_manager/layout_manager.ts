@@ -29,6 +29,7 @@ import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddab
 import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import type { GridLayoutData, GridPanelData, GridSectionData } from '@kbn/grid-layout';
 import type { PinnedControlLayoutState as PinnedPanelLayoutState } from '@kbn/controls-schemas';
+import { DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
 import { i18n } from '@kbn/i18n';
 import type { SerializedTitles, PanelPackage } from '@kbn/presentation-publishing';
 import {
@@ -43,7 +44,6 @@ import {
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
 
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 import type { PinnedControlLayoutState } from '@kbn/controls-schemas';
 import type { PanelResizeSettings } from '@kbn/presentation-util-plugin/public';
 import { PanelPlacementStrategy } from '@kbn/presentation-util-plugin/public';
@@ -425,8 +425,8 @@ export function initializeLayoutManager(
     newPinnedPanels[uuid] = {
       type: panelToPin.type as PinnedControlLayoutState['type'],
       order: panelToPin.order ?? Object.keys(newPinnedPanels).length,
-      width: panelToPin.width ?? DEFAULT_CONTROL_WIDTH,
-      grow: panelToPin.grow ?? DEFAULT_CONTROL_GROW,
+      width: panelToPin.width ?? DEFAULT_PINNED_CONTROL_STATE.width,
+      grow: panelToPin.grow ?? DEFAULT_PINNED_CONTROL_STATE.grow,
     };
     const newPanels = { ...layout$.getValue().panels };
     delete newPanels[uuid];

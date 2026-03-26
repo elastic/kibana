@@ -54,6 +54,7 @@
     "@kbn/securitysolution-list-utils",
     "@kbn/securitysolution-io-ts-list-types",
     "@kbn/securitysolution-io-ts-alerting-types",
+    "@kbn/kbn-client",
     "@kbn/test",
     "@kbn/std",
     "@kbn/rule-data-utils",
@@ -77,6 +78,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/ecs-data-quality-dashboard",
     "@kbn/elastic-assistant",
+    "@kbn/inference-connectors",
     "@kbn/elastic-assistant-plugin",
     "@kbn/data-views-plugin",
     "@kbn/datemath",
@@ -283,7 +285,9 @@
     "@kbn/workflows",
     "@kbn/deeplinks-workflows",
     "@kbn/core-rendering-browser",
+    "@kbn/controls-constants",
     "@kbn/anonymization-plugin",
-    "@kbn/anonymization-common"
+    "@kbn/anonymization-common",
+    "@kbn/controls-schemas"
   ]
 }
