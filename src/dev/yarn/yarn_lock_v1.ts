@@ -112,7 +112,7 @@ export const parseYarnLock = (content: string, focus?: string[]): Record<string,
         resolvedVersion,
         resolvedUrl,
         integrity,
-        dependencies,
+        dependencies: dependencies ? { ...dependencies } : undefined,
       };
 
       const entryKey = makeKey(entryName, resolvedVersion);
