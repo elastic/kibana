@@ -72,7 +72,7 @@ describe('trace_charts_definition', () => {
       expect(result?.esqlQuery).toContain('EVAL');
       expect(result?.esqlQuery).toContain('KEEP');
       expect(result?.esqlQuery).toContain('SORT');
-      expect(result?.esqlQuery).toContain('BUCKET(@timestamp, 100, ?_tstart, ?_tend)');
+      expect(result?.esqlQuery).toContain('TBUCKET(100, ?_tstart, ?_tend)');
     });
 
     it('should include METADATA directive', () => {
@@ -146,7 +146,7 @@ describe('trace_charts_definition', () => {
       expect(result?.esqlQuery).toContain('EVAL');
       expect(result?.esqlQuery).toContain('STATS');
       expect(result?.esqlQuery).toContain('AVG(duration_ms)');
-      expect(result?.esqlQuery).toContain('BUCKET(@timestamp, 100, ?_tstart, ?_tend)');
+      expect(result?.esqlQuery).toContain('TBUCKET(100)');
     });
   });
 

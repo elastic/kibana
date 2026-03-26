@@ -33,7 +33,7 @@ jest.mock('../../../common/utils', () => ({
       splitAccessors.length > 0
         ? `, ${splitAccessors.map((field: string) => `\`${field}\``).join(', ')}`
         : '';
-    return `FROM ${metricItem.dataStream} | STATS AVG(${metricItem.metricName}) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)${splitAccessorsStr}`;
+    return `FROM ${metricItem.dataStream} | STATS AVG(${metricItem.metricName}) BY TBUCKET(100)${splitAccessorsStr}`;
   }),
 }));
 
