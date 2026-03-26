@@ -11,25 +11,25 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import {
   ADD_ENDPOINT_LABEL,
-  PROVIDER_INFERENCE_EMPTY_TITLE,
-  PROVIDER_INFERENCE_EMPTY_DESCRIPTION,
+  EXTERNAL_INFERENCE_EMPTY_TITLE,
+  EXTERNAL_INFERENCE_EMPTY_DESCRIPTION,
   VIEW_DOCUMENTATION_LINK,
 } from '../../common/translations';
 import { docLinks } from '../../common/doc_links';
 
-interface ProviderInferenceEmptyPromptProps {
+interface ExternalInferenceEmptyPromptProps {
   onFlyoutOpen: () => void;
 }
 
-export const ProviderInferenceEmptyPrompt: React.FC<ProviderInferenceEmptyPromptProps> = ({
+export const ExternalInferenceEmptyPrompt: React.FC<ExternalInferenceEmptyPromptProps> = ({
   onFlyoutOpen,
 }) => {
   return (
     <KibanaPageTemplate.EmptyPrompt
-      data-test-subj="providerInferenceEmptyPrompt"
+      data-test-subj="externalInferenceEmptyPrompt"
       iconType="plusInCircle"
-      title={<h2>{PROVIDER_INFERENCE_EMPTY_TITLE}</h2>}
-      body={<p>{PROVIDER_INFERENCE_EMPTY_DESCRIPTION}</p>}
+      title={<h2>{EXTERNAL_INFERENCE_EMPTY_TITLE}</h2>}
+      body={<p>{EXTERNAL_INFERENCE_EMPTY_DESCRIPTION}</p>}
       actions={
         <EuiButton fill onClick={onFlyoutOpen} data-test-subj="addEndpointButton">
           {ADD_ENDPOINT_LABEL}

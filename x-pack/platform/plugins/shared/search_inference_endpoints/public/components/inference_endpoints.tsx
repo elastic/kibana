@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import { EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
 import { useQueryInferenceEndpoints } from '../hooks/use_inference_endpoints';
 import { useKibana } from '../hooks/use_kibana';
@@ -17,7 +18,35 @@ import { isEndpointPreconfigured } from '../utils/preconfigured_endpoint_helper'
 import { TabularPage } from './all_inference_endpoints/tabular_page';
 import { InferenceEndpointsHeader } from './inference_endpoints_header';
 import { AddInferenceFlyoutWrapper } from './add_inference_endpoints/add_inference_flyout_wrapper';
-import { ProviderInferenceEmptyPrompt } from './provider_inference_empty_prompt';
+import { ExternalInferenceEmptyPrompt } from './external_inference_empty_prompt';
+
+const PageContent: React.FC<{
+  isLoading: boolean;
+  showEmptyState: boolean;
+  inferenceEndpoints: InferenceAPIConfigResponse[];
+  onFlyoutOpen: () => void;
+}> = ({ isLoading, showEmptyState, inferenceEndpoints, onFlyoutOpen }) => {
+  if (isLoading) {
+    return (
+      <EuiPageTemplate.Section alignment="center">
+        <EuiLoadingSpinner size="l" />
+      </EuiPageTemplate.Section>
+    );
+  }
+
+  if (showEmptyState) {
+    return <ExternalInferenceEmptyPrompt onFlyoutOpen={onFlyoutOpen} />;
+  }
+
+  return (
+    <>
+      <InferenceEndpointsHeader onFlyoutOpen={onFlyoutOpen} />
+      <EuiPageTemplate.Section className="eui-yScroll" data-test-subj="inferenceManagementPage">
+        <TabularPage inferenceEndpoints={inferenceEndpoints} />
+      </EuiPageTemplate.Section>
+    </>
+  );
+};
 
 export const InferenceEndpoints: React.FC = () => {
   const { services } = useKibana();
@@ -53,20 +82,12 @@ export const InferenceEndpoints: React.FC = () => {
 
   return (
     <>
-      {isLoading ? (
-        <EuiPageTemplate.Section alignment="center">
-          <EuiLoadingSpinner size="l" />
-        </EuiPageTemplate.Section>
-      ) : showEmptyState ? (
-        <ProviderInferenceEmptyPrompt onFlyoutOpen={onFlyoutOpen} />
-      ) : (
-        <>
-          <InferenceEndpointsHeader onFlyoutOpen={onFlyoutOpen} />
-          <EuiPageTemplate.Section className="eui-yScroll" data-test-subj="inferenceManagementPage">
-            <TabularPage inferenceEndpoints={inferenceEndpoints} />
-          </EuiPageTemplate.Section>
-        </>
-      )}
+      <PageContent
+        isLoading={isLoading}
+        showEmptyState={showEmptyState}
+        inferenceEndpoints={inferenceEndpoints}
+        onFlyoutOpen={onFlyoutOpen}
+      />
       {isAddInferenceFlyoutOpen && (
         <AddInferenceFlyoutWrapper onFlyoutClose={onFlyoutClose} reloadFn={reload} />
       )}

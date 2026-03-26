@@ -212,15 +212,15 @@ export const SETTINGS_NO_FEATURES_DESCRIPTION = i18n.translate(
   }
 );
 
-export const PROVIDER_INFERENCE_EMPTY_TITLE = i18n.translate(
-  'xpack.searchInferenceEndpoints.providerInference.emptyTitle',
+export const EXTERNAL_INFERENCE_EMPTY_TITLE = i18n.translate(
+  'xpack.searchInferenceEndpoints.externalInference.emptyTitle',
   {
     defaultMessage: 'Connect to external model providers',
   }
 );
 
-export const PROVIDER_INFERENCE_EMPTY_DESCRIPTION = i18n.translate(
-  'xpack.searchInferenceEndpoints.providerInference.emptyDescription',
+export const EXTERNAL_INFERENCE_EMPTY_DESCRIPTION = i18n.translate(
+  'xpack.searchInferenceEndpoints.externalInference.emptyDescription',
   {
     defaultMessage:
       'Add model endpoints from your favorite model providers to use them for AI-powered search.',

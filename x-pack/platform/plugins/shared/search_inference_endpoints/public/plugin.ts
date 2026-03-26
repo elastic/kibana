@@ -16,7 +16,7 @@ import {
   MODEL_SETTINGS_APP_ID,
   MODEL_SETTINGS_SECTION_TITLE,
   PLUGIN_TITLE,
-  PROVIDER_INFERENCE_TITLE,
+  EXTERNAL_INFERENCE_TITLE,
 } from '../common/constants';
 import { docLinks } from '../common/doc_links';
 import type {
@@ -54,7 +54,7 @@ export class SearchInferenceEndpointsPlugin
     this.registerInferenceEndpoints =
       plugins.management.sections.section.machineLearning.registerApp({
         id: INFERENCE_ENDPOINTS_APP_ID,
-        title: eisEnabled ? PROVIDER_INFERENCE_TITLE : PLUGIN_TITLE,
+        title: eisEnabled ? EXTERNAL_INFERENCE_TITLE : PLUGIN_TITLE,
         order: 2,
         async mount({ element, history }: ManagementAppMountParams) {
           const { renderInferenceEndpointsMgmtApp } = await import('./application');

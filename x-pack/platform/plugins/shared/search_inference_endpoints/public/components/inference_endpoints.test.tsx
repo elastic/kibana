@@ -149,7 +149,7 @@ describe('InferenceEndpoints', () => {
       renderComponent();
 
       expect(screen.getByTestId('allInferenceEndpointsPage')).toBeInTheDocument();
-      expect(screen.queryByTestId('providerInferenceEmptyPrompt')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('externalInferenceEmptyPrompt')).not.toBeInTheDocument();
     });
 
     it('shows loading spinner while data is loading', () => {
@@ -162,7 +162,7 @@ describe('InferenceEndpoints', () => {
       renderComponent();
 
       expect(screen.getByRole('progressbar')).toBeInTheDocument();
-      expect(screen.queryByTestId('providerInferenceEmptyPrompt')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('externalInferenceEmptyPrompt')).not.toBeInTheDocument();
       expect(screen.queryByTestId('allInferenceEndpointsPage')).not.toBeInTheDocument();
     });
 
@@ -176,7 +176,7 @@ describe('InferenceEndpoints', () => {
       renderComponent();
 
       expect(screen.getByTestId('allInferenceEndpointsPage')).toBeInTheDocument();
-      expect(screen.queryByTestId('providerInferenceEmptyPrompt')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('externalInferenceEmptyPrompt')).not.toBeInTheDocument();
     });
   });
 
@@ -195,7 +195,7 @@ describe('InferenceEndpoints', () => {
       renderComponent();
 
       expect(screen.getByRole('progressbar')).toBeInTheDocument();
-      expect(screen.queryByTestId('providerInferenceEmptyPrompt')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('externalInferenceEmptyPrompt')).not.toBeInTheDocument();
       expect(screen.queryByTestId('allInferenceEndpointsPage')).not.toBeInTheDocument();
     });
 
@@ -208,7 +208,7 @@ describe('InferenceEndpoints', () => {
 
       renderComponent();
 
-      expect(screen.getByTestId('providerInferenceEmptyPrompt')).toBeInTheDocument();
+      expect(screen.getByTestId('externalInferenceEmptyPrompt')).toBeInTheDocument();
       expect(screen.getByText('Connect to external model providers')).toBeInTheDocument();
       expect(screen.getByTestId('addEndpointButton')).toBeInTheDocument();
       expect(screen.getByTestId('viewDocumentationLink')).toBeInTheDocument();
@@ -225,7 +225,7 @@ describe('InferenceEndpoints', () => {
       renderComponent();
 
       expect(screen.getByTestId('allInferenceEndpointsPage')).toBeInTheDocument();
-      expect(screen.queryByTestId('providerInferenceEmptyPrompt')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('externalInferenceEmptyPrompt')).not.toBeInTheDocument();
     });
 
     it('filters out elastic service endpoints', () => {
@@ -279,7 +279,7 @@ describe('InferenceEndpoints', () => {
       expect(addButton).toBeEnabled();
     });
 
-    it('shows Provider Inference as page title', () => {
+    it('shows External Inference as page title', () => {
       useQueryInferenceEndpoints.mockReturnValue({
         data: mixedEndpoints,
         isLoading: false,
@@ -288,7 +288,7 @@ describe('InferenceEndpoints', () => {
 
       renderComponent();
 
-      expect(screen.getByText('Provider Inference')).toBeInTheDocument();
+      expect(screen.getByText('External Inference')).toBeInTheDocument();
     });
 
     it('hides EIS documentation and ML Trained Models links', () => {

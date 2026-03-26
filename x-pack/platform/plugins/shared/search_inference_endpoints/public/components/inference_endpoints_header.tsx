@@ -8,7 +8,7 @@
 import { EuiPageTemplate, EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import * as i18n from '../../common/translations';
-import { PLUGIN_TITLE, PROVIDER_INFERENCE_TITLE } from '../../common/constants';
+import { PLUGIN_TITLE, EXTERNAL_INFERENCE_TITLE } from '../../common/constants';
 import { docLinks } from '../../common/doc_links';
 import { useKibana } from '../hooks/use_kibana';
 import { isElasticInferenceServiceEnabled } from '../feature_flag';
@@ -94,7 +94,7 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
   return (
     <EuiPageTemplate.Header
       data-test-subj="allInferenceEndpointsPage"
-      pageTitle={isEisEnabled ? PROVIDER_INFERENCE_TITLE : PLUGIN_TITLE}
+      pageTitle={isEisEnabled ? EXTERNAL_INFERENCE_TITLE : PLUGIN_TITLE}
       description={i18n.MANAGE_INFERENCE_ENDPOINTS_LABEL}
       bottomBorder={true}
       rightSideItems={rightSideItems}

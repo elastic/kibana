@@ -20,10 +20,10 @@ export const PLUGIN_TITLE = i18n.translate(
   }
 );
 
-export const PROVIDER_INFERENCE_TITLE = i18n.translate(
-  'xpack.searchInferenceEndpoints.providerInferenceTitle',
+export const EXTERNAL_INFERENCE_TITLE = i18n.translate(
+  'xpack.searchInferenceEndpoints.externalInferenceTitle',
   {
-    defaultMessage: 'Provider Inference',
+    defaultMessage: 'External Inference',
   }
 );
 
