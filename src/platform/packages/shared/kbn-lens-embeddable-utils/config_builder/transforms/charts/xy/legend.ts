@@ -10,9 +10,12 @@
 import { LegendLayout, LegendSize, type XYLegendValue } from '@kbn/chart-expressions-common';
 import type { XYVisualizationState } from '@kbn/lens-common';
 import type { XYState } from '../../../schema';
-import { getLegendTruncateAfterLines, stripUndefined } from '../utils';
+import { stripUndefined } from '../utils';
 
-type OutsideLegendType = Extract<Required<XYState['legend']>, { placement: 'outside' }>;
+type OutsideLegendType = Extract<
+  Required<XYState['legend']>,
+  { placement: 'outside'; layout: { type: 'grid' } }
+>;
 
 type StatisticsType = OutsideLegendType['statistics'][number];
 
@@ -97,13 +100,58 @@ function getLegendSize(
   }
 }
 
+function isOutsideListLegendLayout(legend: XYState['legend']) {
+  return Boolean(
+    legend &&
+      legend.placement !== 'inside' &&
+      'layout' in legend &&
+      legend.layout?.type === 'list' &&
+      'position' in legend &&
+      (legend.position === 'top' || legend.position === 'bottom')
+  );
+}
+function isOutsideListLegendLayoutState(legend: XYVisualizationState['legend']) {
+  return Boolean(
+    !isLegendInside(legend) &&
+      legend.layout === LegendLayout.List &&
+      (legend.position === 'top' || legend.position === 'bottom')
+  );
+}
+
+function isVerticalPosition(legend: XYState['legend']): boolean {
+  return Boolean(
+    legend &&
+      legend.placement !== 'inside' &&
+      'position' in legend &&
+      (legend.position === 'left' || legend.position === 'right')
+  );
+}
+
+function getLegendTruncation(legend: XYState['legend']): {
+  max_lines?: number;
+  max_pixels?: number;
+} | null {
+  return legend && 'layout' in legend && legend.layout?.truncate ? legend.layout.truncate : null;
+}
+
+function getOutsideLegendSize(
+  legend: XYState['legend']
+): 'small' | 'medium' | 'large' | 'xlarge' | undefined {
+  return legend && 'size' in legend ? legend.size : undefined;
+}
+
 export function convertLegendToStateFormat(legend: XYState['legend']): {
   legend: XYVisualizationState['legend'];
 } {
+  const isListLegendLayout = isOutsideListLegendLayout(legend);
+  const legendTruncation = getLegendTruncation(legend);
+  const truncateMaxLines = legendTruncation?.max_lines;
+  const truncateMaxPixels = legendTruncation?.max_pixels;
+  const outsideLegendSize = getOutsideLegendSize(legend);
+
   const newStateLegend: XYVisualizationState['legend'] = {
     isVisible: legend?.visibility === 'auto' || legend?.visibility === 'visible',
-    shouldTruncate: Boolean(legend?.truncate_after_lines), // 0 will be interpreted as false
-    ...(legend?.truncate_after_lines ? { maxLines: legend?.truncate_after_lines } : {}),
+    shouldTruncate: Boolean(truncateMaxLines || truncateMaxPixels), // 0 will be interpreted as false
     ...(legend?.statistics
       ? { legendStats: (legend?.statistics ?? []).map(mapStatToCamelCase) }
       : {}),
@@ -117,8 +165,21 @@ export function convertLegendToStateFormat(legend: XYState['legend']): {
         }
       : {
           position: legend?.position ?? DEFAULT_LEGEND_POSITON,
-          legendSize: legend?.size ? getLegendSize(legend.size) : undefined,
-          ...(legend?.layout === 'list' ? { layout: LegendLayout.List } : {}),
+          legendSize: outsideLegendSize ? getLegendSize(outsideLegendSize) : undefined,
+          ...(isVerticalPosition(legend)
+            ? {
+                ...(!isListLegendLayout && truncateMaxLines ? { maxLines: truncateMaxLines } : {}),
+              }
+            : {
+                ...(isListLegendLayout
+                  ? {
+                      layout: LegendLayout.List,
+                      ...(truncateMaxPixels != null ? { maxPixels: truncateMaxPixels } : {}),
+                    }
+                  : truncateMaxLines
+                  ? { maxLines: truncateMaxLines }
+                  : {}),
+              }),
         }),
   };
 
@@ -165,31 +226,79 @@ function getLegendAlignment(legend: XYVisualizationState['legend']) {
 }
 
 function getLegendLayout(legend: XYVisualizationState['legend']) {
+  const { max_pixels, max_lines } = getApiLegendTruncate(legend);
+
   if (isLegendInside(legend)) {
     return {
       placement: 'inside' as const,
+      layout: stripUndefined({
+        type: 'list' as const,
+        truncate: max_pixels ? { max_pixels } : undefined,
+      }),
       ...(legend.floatingColumns ? { columns: legend.floatingColumns } : {}),
       ...getLegendAlignment(legend),
     };
   }
-  return {
+
+  const position = legend.position ?? DEFAULT_LEGEND_POSITON;
+  const isListLayout = isOutsideListLegendLayoutState(legend);
+
+  const baseOutside = stripUndefined({
     placement: 'outside' as const,
+    position,
     ...getLegendSizeAPI(legend.legendSize),
-    ...(legend.position ? { position: legend.position } : {}),
+  });
+
+  return {
+    ...baseOutside,
+    layout: isListLayout
+      ? stripUndefined({
+          type: 'list' as const,
+          truncate: max_pixels ? { max_pixels } : undefined,
+        })
+      : stripUndefined({
+          type: 'grid' as const,
+          truncate: max_lines != null ? { max_lines } : undefined,
+        }),
+  };
+}
+
+function getApiLegendTruncate(
+  legend: Pick<XYVisualizationState['legend'], 'shouldTruncate' | 'maxLines' | 'maxPixels'>
+): {
+  max_lines?: number;
+  max_pixels?: number;
+} {
+  if (!legend) return {};
+
+  const { shouldTruncate: stateShouldTruncate, maxLines, maxPixels } = legend;
+  // if shouldTruncate is not explicitly set, infer it from maxLines and maxPixels
+  const shouldTruncate =
+    stateShouldTruncate != null ? stateShouldTruncate : Boolean(maxLines || maxPixels);
+
+  if (!shouldTruncate) return {};
+
+  return {
+    max_lines: !!maxLines ? maxLines : undefined,
+    max_pixels: !!maxPixels ? maxPixels : undefined,
   };
 }
 
 export function convertLegendToAPIFormat(
   legend: XYVisualizationState['legend']
 ): Pick<XYState, 'legend'> | {} {
-  const legendOptions = stripUndefined({
-    visibility: !legend.isVisible ? 'hidden' : legend.showSingleSeries ? 'auto' : 'visible',
-    truncate_after_lines: getLegendTruncateAfterLines(legend),
-    statistics: legend?.legendStats?.length
-      ? legend.legendStats.map(mapStatToSnakeCase)
-      : undefined,
-    ...getLegendLayout(legend),
-  });
+  const visibility = !legend.isVisible ? 'hidden' : legend.showSingleSeries ? 'auto' : 'visible';
+  const statistics = legend.legendStats?.length
+    ? legend.legendStats.map(mapStatToSnakeCase)
+    : undefined;
 
-  return { legend: legendOptions };
+  return {
+    legend: stripUndefined({
+      visibility,
+      statistics,
+      ...(legend.floatingColumns ? { columns: legend.floatingColumns } : {}),
+      ...getLegendAlignment(legend),
+      ...getLegendLayout(legend),
+    }),
+  };
 }

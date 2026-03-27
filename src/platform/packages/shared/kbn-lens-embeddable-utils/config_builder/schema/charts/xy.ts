@@ -346,6 +346,7 @@ const xySharedSettings = {
           {
             ...sharedLegendSchema,
             placement: schema.literal('inside'),
+            layout: schema.maybe(gridLayout),
             columns: schema.maybe(
               schema.number({ min: 1, max: 5, meta: { description: 'Number of legend columns' } })
             ),
