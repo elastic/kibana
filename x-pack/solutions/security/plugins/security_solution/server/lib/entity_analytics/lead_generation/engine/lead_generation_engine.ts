@@ -15,7 +15,7 @@ import type {
   Observation,
   ObservationModule,
 } from '../types';
-import { DEFAULT_ENGINE_CONFIG, computeStaleness } from '../types';
+import { DEFAULT_ENGINE_CONFIG } from '../types';
 import { entityToKey } from '../observation_modules/utils';
 import { llmSynthesizeLeadContent } from './llm_synthesize';
 
@@ -236,7 +236,7 @@ const groupIntoLeads = async (
       priority: maxPriority,
       chatRecommendations: recommendations,
       timestamp: now.toISOString(),
-      staleness: computeStaleness(now, now),
+      staleness: 'fresh',
       observations: allObservations,
     });
   }

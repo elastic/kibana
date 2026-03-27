@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { createBehavioralAnalysisModule, createAlertAnalysisModule } from './module';
+export { createBehavioralAnalysisModule } from './module';

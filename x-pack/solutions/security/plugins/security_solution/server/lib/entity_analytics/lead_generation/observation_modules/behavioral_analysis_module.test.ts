@@ -7,7 +7,7 @@
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { createBehavioralAnalysisModule } from './alert_analysis_module';
+import { createBehavioralAnalysisModule } from './behavioral_analysis_module';
 import type { LeadEntity } from '../types';
 
 const createEntity = (type: string, name: string, email?: string): LeadEntity => ({
