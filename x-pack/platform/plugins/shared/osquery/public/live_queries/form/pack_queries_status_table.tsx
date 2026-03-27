@@ -201,6 +201,15 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     },
     []
   );
+  const handleQueryFlyoutKeyDown = useCallback(
+    (item: any) => (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        setQueryDetailsFlyoutOpen(item);
+      }
+    },
+    []
+  );
   const handleQueryFlyoutClose = useCallback(() => setQueryDetailsFlyoutOpen(null), []);
 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
@@ -223,8 +232,13 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
       const content = singleLine.length > 120 ? `${singleLine.substring(0, 120)}...` : singleLine;
 
       const queryContent = (
-        // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-        <div css={queryClampCss} role="button" tabIndex={0} onClick={handleQueryFlyoutOpen(item)}>
+        <div
+          css={queryClampCss}
+          role="button"
+          tabIndex={0}
+          onClick={handleQueryFlyoutOpen(item)}
+          onKeyDown={handleQueryFlyoutKeyDown(item)}
+        >
           <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
             {content}
           </EuiCodeBlock>
@@ -248,7 +262,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
       return queryContent;
     },
-    [handleQueryFlyoutOpen, scheduleId, packName]
+    [handleQueryFlyoutOpen, handleQueryFlyoutKeyDown, scheduleId, packName]
   );
 
   const renderDocsColumn = useCallback((item: PackQueryStatusItem) => {

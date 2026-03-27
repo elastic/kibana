@@ -81,7 +81,7 @@ const COLUMN_CONFIGS = [
   {
     id: 'query',
     label: i18n.translate('xpack.osquery.history.table.queryColumnTitle', {
-      defaultMessage: 'Query',
+      defaultMessage: 'Query or Pack',
     }),
   },
   {
@@ -575,7 +575,7 @@ const UnifiedHistoryTableComponent = () => {
       cols.push({
         field: 'queryText',
         name: i18n.translate('xpack.osquery.liveQueryActions.table.queryColumnTitle', {
-          defaultMessage: 'Query',
+          defaultMessage: 'Query or Pack',
         }),
         width: '42%',
         render: renderQueryColumn,
