@@ -8,6 +8,7 @@
 import type { Output, TemplateAgentPolicyInput } from '../../types';
 import type {
   FullAgentPolicyInput,
+  FullAgentPolicyInputStream,
   OTelCollectorComponentID,
   OTelCollectorConfig,
   OTelCollectorPipeline,
@@ -100,7 +101,10 @@ export function generateOtelcolConfig(
                     addSuffixToOtelcolComponentsConfig(
                       'pipelines',
                       suffix,
-                      addSuffixToOtelcolPipelinesComponents(stream.service.pipelines, suffix)
+                      addSuffixToOtelcolPipelinesComponents(
+                        adjustPipelineSignalType(stream, packageInfo),
+                        suffix
+                      )
                     ).pipelines ?? {},
                     shouldAddAPMConfig,
                     namespace
@@ -306,6 +310,28 @@ function conditionallyAddApmToPipelines(
     }
   );
   return result;
+}
+
+function adjustPipelineSignalType(
+  stream: FullAgentPolicyInputStream,
+  packageInfo: PackageInfo | undefined
+): Record<OTelCollectorPipelineID, any> {
+  const pipelines = stream.service?.pipelines ?? {};
+  const dataStreamType = stream.data_stream.type;
+  if (
+    !dataStreamType ||
+    hasDynamicSignalTypes(packageInfo) ||
+    Object.keys(pipelines).length !== 1
+  ) {
+    return pipelines;
+  }
+  const [[pipelineID, pipeline]] = Object.entries(pipelines);
+  const [signalType, ...rest] = pipelineID.split('/');
+  if (signalType === dataStreamType) {
+    return pipelines;
+  }
+  const newKey = [dataStreamType, ...rest].join('/') as OTelCollectorPipelineID;
+  return { [newKey]: pipeline };
 }
 
 function addSuffixToOtelcolPipelinesComponents(
