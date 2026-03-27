@@ -27,7 +27,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ message: '   test message 1   ' }, { message: '   test message 2   ' }];
       await testBed.ingest(indexName, docs);
@@ -51,7 +51,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ message: '   test message 1   ' }, { message: '   test message 2   ' }];
       await testBed.ingest(indexName, docs);
@@ -78,7 +78,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [
         { message: '   test message 1   ', should_trim: 'yes' },
@@ -111,7 +111,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docs = [
           { message: '   test message 1   ', should_trim: 'yes' },

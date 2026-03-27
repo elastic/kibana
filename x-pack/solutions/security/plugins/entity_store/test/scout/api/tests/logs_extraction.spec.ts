@@ -91,7 +91,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     });
 
     expect(entities.hits.hits).toHaveLength(expectedResultCount);
-    // it's deterministic because of the MD5 id;
+    // it's deterministic because of the SHA-256 id;
     expect(entities.hits.hits).toMatchObject(expectedHostEntities);
   });
 
@@ -128,7 +128,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     });
 
     expect(entities.hits.hits).toHaveLength(expectedResultCount);
-    // it's deterministic because of the MD5 id
+    // it's deterministic because of the SHA-256 id
     // manually checking object until we have a snapshot matcher
     expect(entities.hits.hits).toMatchObject(expectedUserEntities);
     // All user entities must have entity.namespace (from fieldEvaluations) and entity.confidence (from whenConditionTrueSetFieldsPreAgg)
@@ -171,7 +171,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     });
 
     expect(entities.hits.hits).toHaveLength(2);
-    // it's deterministic because of the MD5 id
+    // it's deterministic because of the SHA-256 id
     // manually checking object until we have a snapshot matcher
     expect(entities.hits.hits).toMatchObject(expectedServiceEntities);
   });
@@ -207,7 +207,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     });
 
     expect(entities.hits.hits).toHaveLength(1);
-    // it's deterministic because of the MD5 id
+    // it's deterministic because of the SHA-256 id
     // manually checking object until we have a snapshot matcher
     expect(entities.hits.hits).toMatchObject(expectedGenericEntities);
   });
