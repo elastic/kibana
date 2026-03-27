@@ -40,11 +40,13 @@ const PageContent: React.FC<{
     return <ExternalInferenceEmptyPrompt onFlyoutOpen={onFlyoutOpen} />;
   }
 
-  const Header = isEisEnabled ? ExternalInferenceHeader : InferenceEndpointsHeader;
-
   return (
     <>
-      <Header onFlyoutOpen={onFlyoutOpen} />
+      {isEisEnabled ? (
+        <ExternalInferenceHeader onFlyoutOpen={onFlyoutOpen} />
+      ) : (
+        <InferenceEndpointsHeader onFlyoutOpen={onFlyoutOpen} />
+      )}
       <EuiPageTemplate.Section className="eui-yScroll" data-test-subj="inferenceManagementPage">
         <TabularPage inferenceEndpoints={inferenceEndpoints} isEisEnabled={isEisEnabled} />
       </EuiPageTemplate.Section>
