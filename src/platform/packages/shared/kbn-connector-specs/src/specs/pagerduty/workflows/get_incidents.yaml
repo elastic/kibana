@@ -50,24 +50,21 @@ inputs:
       Use colon for direction, e.g. created_at:desc or incident_number:asc. Default direction is asc.
 steps:
   - name: list-incidents
-    type: mcp.callTool
-    connector-id: <%= mcp-stack-connector-id %>
+    type: pagerduty_mcp.listIncidents
+    connector-id: <%= pagerduty_mcp-stack-connector-id %>
     with:
-      name: "list_incidents"
-      arguments:
-        query_model:
-          limit: ${{inputs.limit}}
-          status: ${{inputs.status}}
-          service_ids: ${{inputs.service_ids}}
-          user_ids: ${{inputs.user_ids}}
-          since: "${{inputs.since}}"
-          until: "${{inputs.until}}"
-          urgencies: ${{inputs.urgencies}}
-          request_scope: "${{inputs.request_scope}}"
-          sort_by: ${{inputs.sort_by}}
+      limit: ${{inputs.limit}}
+      status: ${{inputs.status}}
+      service_ids: ${{inputs.service_ids}}
+      user_ids: ${{inputs.user_ids}}
+      since: "${{inputs.since}}"
+      until: "${{inputs.until}}"
+      urgencies: ${{inputs.urgencies}}
+      request_scope: "${{inputs.request_scope}}"
+      sort_by: ${{inputs.sort_by}}
   - name: get-incidents
     type: data.map
-    items: ${{steps['list-incidents'].output.content[0].text | json_parse}}
+    items: ${{steps['list-incidents'].output}}
     with:
       fields:
         response:

@@ -24,19 +24,16 @@ inputs:
     description: Filter escalation policies by team IDs
 steps:
   - name: list-escalation-policies
-    type: mcp.callTool
-    connector-id: <%= mcp-stack-connector-id %>
+    type: pagerduty_mcp.listEscalationPolicies
+    connector-id: <%= pagerduty_mcp-stack-connector-id %>
     with:
-      name: "list_escalation_policies"
-      arguments:
-        query_model:
-          query: "${{inputs.query}}"
-          limit: ${{inputs.limit}}
-          user_ids: ${{inputs.user_ids}}
-          team_ids: ${{inputs.team_ids}}
+      query: "${{inputs.query}}"
+      limit: ${{inputs.limit}}
+      user_ids: ${{inputs.user_ids}}
+      team_ids: ${{inputs.team_ids}}
   - name: get-escalation-policies
     type: data.map
-    items: ${{steps['list-escalation-policies'].output.content[0].text | json_parse}}
+    items: ${{steps['list-escalation-policies'].output}}
     with:
       fields:
         response:

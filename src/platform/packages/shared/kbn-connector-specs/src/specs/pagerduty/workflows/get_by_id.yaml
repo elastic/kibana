@@ -25,15 +25,13 @@ steps:
     condition: "${{inputs.item_type == 'schedule'}}"
     steps:
       - name: get-schedule
-        type: mcp.callTool
-        connector-id: <%= mcp-stack-connector-id %>
+        type: pagerduty_mcp.getSchedule
+        connector-id: <%= pagerduty_mcp-stack-connector-id %>
         with:
-          name: "get_schedule"
-          arguments:
-            schedule_id: "${{inputs.id}}"
+          schedule_id: "${{inputs.id}}"
       - name: filter-schedule
         type: data.map
-        items: ${{steps['get-schedule'].output.content[0].text | json_parse}}
+        items: ${{steps['get-schedule'].output}}
         with:
           fields:
             id: "${{ item.id }}"
@@ -62,15 +60,13 @@ steps:
         condition: "${{inputs.item_type == 'incident'}}"
         steps:
           - name: get-incident
-            type: mcp.callTool
-            connector-id: <%= mcp-stack-connector-id %>
+            type: pagerduty_mcp.getIncident
+            connector-id: <%= pagerduty_mcp-stack-connector-id %>
             with:
-              name: "get_incident"
-              arguments:
-                incident_id: "${{inputs.id}}"
+              incident_id: "${{inputs.id}}"
           - name: filter-incident
             type: data.map
-            items: ${{steps['get-incident'].output.content[0].text | json_parse}}
+            items: ${{steps['get-incident'].output}}
             with:
               fields:
                 id: "${{ item.id }}"
@@ -94,15 +90,13 @@ steps:
             condition: "${{ inputs.item_type == 'escalation_policy' }}"
             steps:
               - name: get-escalation-policy
-                type: mcp.callTool
-                connector-id: <%= mcp-stack-connector-id %>
+                type: pagerduty_mcp.getEscalationPolicy
+                connector-id: <%= pagerduty_mcp-stack-connector-id %>
                 with:
-                  name: "get_escalation_policy"
-                  arguments:
-                    policy_id: "${{inputs.id}}"
+                  policy_id: "${{inputs.id}}"
               - name: filter-escalation-policy
                 type: data.map
-                items: ${{steps['get-escalation-policy'].output.content[0].text | json_parse}}
+                items: ${{steps['get-escalation-policy'].output}}
                 with:
                   fields:
                     id: "${{ item.id }}"
@@ -131,15 +125,13 @@ steps:
                 condition: "${{ inputs.item_type == 'team' }}"
                 steps:
                   - name: get-team
-                    type: mcp.callTool
-                    connector-id: <%= mcp-stack-connector-id %>
+                    type: pagerduty_mcp.getTeam
+                    connector-id: <%= pagerduty_mcp-stack-connector-id %>
                     with:
-                      name: "get_team"
-                      arguments:
-                        team_id: "${{inputs.id}}"
+                      team_id: "${{inputs.id}}"
                   - name: filter-team
                     type: data.map
-                    items: ${{steps['get-team'].output.content[0].text | json_parse}}
+                    items: ${{steps['get-team'].output}}
                     with:
                       fields:
                         id: "${{ item.id }}"
