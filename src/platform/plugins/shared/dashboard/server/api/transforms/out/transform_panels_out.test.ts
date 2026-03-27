@@ -46,7 +46,7 @@ describe('transformPanelsOut', () => {
         "panels": Array [],
         "warnings": Array [
           Object {
-            "message": "Panel section, nonexistent-section, does not exist",
+            "message": "Panel references non-existent section 'nonexistent-section'",
             "panel_config": Object {
               "content": "Orphaned panel",
             },

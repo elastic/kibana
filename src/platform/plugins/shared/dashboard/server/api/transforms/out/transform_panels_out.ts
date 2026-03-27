@@ -67,7 +67,7 @@ export function transformPanelsOut(
           type: 'dropped_panel',
           panel_type: panelProperties.type,
           panel_config: panelProperties.config,
-          message: `Panel section, ${sectionId}, does not exist`,
+          message: `Panel references non-existent section '${sectionId}'`,
         });
         return;
       }
