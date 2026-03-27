@@ -8,13 +8,10 @@
 import inquirer from 'inquirer';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
+import { isNotFoundError } from '@kbn/es-errors';
 import { createEsClientForTesting } from '@kbn/test';
 import { envFromExportProfile, defaultExportProfile } from '../profiles';
 import { isTTY } from '../prompts';
-
-interface EsResponseError {
-  meta?: { statusCode?: number };
-}
 
 const DEFAULT_PATTERN = 'kibana-evaluations*';
 const DEFAULT_DATA_STREAM = 'kibana-evaluations';
@@ -202,8 +199,7 @@ export const clearIndexCmd: Command<void> = {
       await esClient.indices.deleteDataStream({ name: dataStream });
       log.info(`Deleted data stream: ${dataStream}`);
     } catch (error: unknown) {
-      const statusCode = (error as EsResponseError)?.meta?.statusCode;
-      if (statusCode !== 404) {
+      if (!isNotFoundError(error)) {
         throw error;
       }
     }
@@ -220,8 +216,7 @@ export const clearIndexCmd: Command<void> = {
       });
       matchedIndexNames = Object.keys(resolved ?? {});
     } catch (error: unknown) {
-      const statusCode = (error as EsResponseError)?.meta?.statusCode;
-      if (statusCode !== 404) {
+      if (!isNotFoundError(error)) {
         throw error;
       }
     }
@@ -240,8 +235,7 @@ export const clearIndexCmd: Command<void> = {
         await esClient.indices.deleteIndexTemplate({ name: template });
         log.info(`Deleted index template: ${template}`);
       } catch (error: unknown) {
-        const statusCode = (error as EsResponseError)?.meta?.statusCode;
-        if (statusCode !== 404) {
+        if (!isNotFoundError(error)) {
           throw error;
         }
       }
