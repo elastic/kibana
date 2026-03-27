@@ -115,8 +115,9 @@ export const SharepointServer: ConnectorSpec = {
         const { listTitle } = input as { listTitle: string };
         const { siteUrl } = ctx.config as { siteUrl: string };
         ctx.log.debug(`SharePoint Server getting items of list "${listTitle}"`);
+        const escapedListTitle = listTitle.replace(/'/g, "''");
         const response = await ctx.client.get(
-          `${siteUrl}/_api/web/lists/GetByTitle('${encodeURIComponent(listTitle)}')/items`,
+          `${siteUrl}/_api/web/lists/GetByTitle('${escapedListTitle}')/items`,
           {
             headers: ODATA_HEADERS,
           }
@@ -144,14 +145,14 @@ export const SharepointServer: ConnectorSpec = {
         const { path } = input as { path: string };
         const { siteUrl } = ctx.config as { siteUrl: string };
         ctx.log.debug(`SharePoint Server getting folder contents at "${path}"`);
-        const encodedPath = encodeURIComponent(path);
+        const escapedPath = path.replace(/'/g, "''");
         const [filesResponse, foldersResponse] = await Promise.all([
           ctx.client.get(
-            `${siteUrl}/_api/web/GetFolderByServerRelativeUrl('${encodedPath}')/Files`,
+            `${siteUrl}/_api/web/GetFolderByServerRelativeUrl('${escapedPath}')/Files`,
             { headers: ODATA_HEADERS }
           ),
           ctx.client.get(
-            `${siteUrl}/_api/web/GetFolderByServerRelativeUrl('${encodedPath}')/Folders`,
+            `${siteUrl}/_api/web/GetFolderByServerRelativeUrl('${escapedPath}')/Folders`,
             { headers: ODATA_HEADERS }
           ),
         ]);
@@ -182,9 +183,9 @@ export const SharepointServer: ConnectorSpec = {
         const { path } = input as { path: string };
         const { siteUrl } = ctx.config as { siteUrl: string };
         ctx.log.debug(`SharePoint Server downloading file at "${path}"`);
-        const encodedPath = encodeURIComponent(path);
+        const escapedPath = path.replace(/'/g, "''");
         const response = await ctx.client.get(
-          `${siteUrl}/_api/web/GetFileByServerRelativeUrl('${encodedPath}')/$value`,
+          `${siteUrl}/_api/web/GetFileByServerRelativeUrl('${escapedPath}')/$value`,
           { responseType: 'arraybuffer' }
         );
         const buffer = Buffer.from(response.data);
@@ -247,7 +248,7 @@ export const SharepointServer: ConnectorSpec = {
         const response = await ctx.client.get(`${siteUrl}/_api/search/query`, {
           headers: ODATA_HEADERS,
           params: {
-            querytext: `'${query}'`,
+            querytext: `'${query.replace(/'/g, "''")}'`,
             ...(from !== undefined && { startRow: from }),
             ...(size !== undefined && { rowLimit: size }),
           },
