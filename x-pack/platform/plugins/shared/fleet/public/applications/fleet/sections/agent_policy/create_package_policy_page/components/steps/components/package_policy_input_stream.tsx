@@ -86,6 +86,8 @@ interface Props {
   totalStreams?: number;
   showDescriptionColumn?: boolean;
   varGroupSelections?: Record<string, string>;
+  /** Parent input's `policy_template`; required for correct composable multi-template matching. */
+  inputPolicyTemplate?: string;
 }
 
 export const PackagePolicyInputStreamConfig = memo<Props>(
@@ -101,6 +103,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     totalStreams,
     showDescriptionColumn = true,
     varGroupSelections = {},
+    inputPolicyTemplate,
   }) => {
     const { docLinks } = useStartServices();
     const { isAgentlessEnabled } = useAgentless();
@@ -137,10 +140,17 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
         if (isInputOnlyPolicyTemplate(template) && template.input !== inputType) {
           return false;
         }
+        if (
+          !isInputOnlyPolicyTemplate(template) &&
+          inputPolicyTemplate &&
+          template.name !== inputPolicyTemplate
+        ) {
+          return false;
+        }
         const inputDef = getPolicyTemplateInputDefinition(template, inputType);
         return inputDef ? registryInputAllowsDynamicSignalTypes(inputDef) : false;
       });
-    }, [packageInfo?.policy_templates, packageInputStream.input]);
+    }, [packageInfo?.policy_templates, packageInputStream.input, inputPolicyTemplate]);
 
     const customDataStreamTypeVarValue =
       customDataStreamTypeVar?.value || packagePolicyInputStream.data_stream.type || 'logs';

@@ -206,7 +206,8 @@ describe('PackagePolicyInputStreamConfig', () => {
   const render = (
     packageInputStream: RegistryStreamWithDataStream = mockPackageInputStreamWithVarGroups,
     packagePolicyInputStream: NewPackagePolicyInputStream = mockPackagePolicyInputStream,
-    packageInfo: PackageInfo = mockPackageInfo
+    packageInfo: PackageInfo = mockPackageInfo,
+    inputPolicyTemplate?: string
   ) => {
     renderResult = testRenderer.render(
       <PackagePolicyInputStreamConfig
@@ -217,6 +218,7 @@ describe('PackagePolicyInputStreamConfig', () => {
         inputStreamValidationResults={{ vars: {} }}
         forceShowErrors={false}
         totalStreams={2}
+        inputPolicyTemplate={inputPolicyTemplate}
       />
     );
   };
@@ -460,6 +462,70 @@ describe('PackagePolicyInputStreamConfig', () => {
       vars: {},
     };
 
+    /** Two integration-style policy templates both expose `logfile`; only template_a sets dynamic_signal_types. */
+    const composableMultiTemplatePackageInfo: PackageInfo = {
+      ...mockPackageInfo,
+      type: 'input',
+      policy_templates: [
+        {
+          name: 'template_a',
+          title: 'Template A',
+          description: 'OTel-style logfile',
+          inputs: [
+            {
+              type: 'logfile',
+              title: 'Log file',
+              description: 'Read log files',
+              dynamic_signal_types: true,
+              vars: [],
+            },
+          ],
+        },
+        {
+          name: 'template_b',
+          title: 'Template B',
+          description: 'Plain logfile',
+          inputs: [
+            {
+              type: 'logfile',
+              title: 'Log file',
+              description: 'Read log files',
+              vars: [],
+            },
+          ],
+        },
+      ],
+    } as unknown as PackageInfo;
+
+    const mockLogfileInputStream: RegistryStreamWithDataStream = {
+      input: 'logfile',
+      title: 'Log file stream',
+      template_path: 'stream.yml.hbs',
+      vars: [],
+      description: 'Read logs from files',
+      data_stream: {
+        title: 'Logs',
+        release: 'ga',
+        type: 'logs',
+        package: 'composable_pkg',
+        dataset: 'composable_pkg.logs',
+        path: 'logs',
+        elasticsearch: {},
+        ingest_pipeline: 'default',
+        streams: [],
+      },
+    };
+
+    const mockLogfilePolicyInputStream: NewPackagePolicyInputStream = {
+      id: 'logfile-stream-1',
+      enabled: true,
+      data_stream: {
+        type: 'logs',
+        dataset: 'composable_pkg.logs',
+      },
+      vars: {},
+    };
+
     it('should hide Data Stream Type selector when dynamic_signal_types is true', async () => {
       const packageInfoWithDynamicTypes: PackageInfo = {
         ...mockPackageInfo,
@@ -637,6 +703,40 @@ describe('PackagePolicyInputStreamConfig', () => {
       await waitFor(() => {
         expect(renderResult.getByText('Data Stream Type')).toBeInTheDocument();
         expect(renderResult.getByTestId('packagePolicyDataStreamType')).toBeInTheDocument();
+      });
+    });
+
+    it('should not inherit dynamic_signal_types from a different composable policy template when inputPolicyTemplate matches the plain template', async () => {
+      render(
+        mockLogfileInputStream,
+        mockLogfilePolicyInputStream,
+        composableMultiTemplatePackageInfo,
+        'template_b'
+      );
+
+      const advancedButton = renderResult.getByText('Advanced options');
+      fireEvent.click(advancedButton);
+
+      await waitFor(() => {
+        expect(renderResult.getByText('Data Stream Type')).toBeInTheDocument();
+        expect(renderResult.getByTestId('packagePolicyDataStreamType')).toBeInTheDocument();
+      });
+    });
+
+    it('should hide Data Stream Type selector when inputPolicyTemplate matches the template with dynamic_signal_types', async () => {
+      render(
+        mockLogfileInputStream,
+        mockLogfilePolicyInputStream,
+        composableMultiTemplatePackageInfo,
+        'template_a'
+      );
+
+      const advancedButton = renderResult.getByText('Advanced options');
+      fireEvent.click(advancedButton);
+
+      await waitFor(() => {
+        expect(renderResult.queryByText('Data Stream Type')).not.toBeInTheDocument();
+        expect(renderResult.queryByTestId('packagePolicyDataStreamType')).not.toBeInTheDocument();
       });
     });
 
