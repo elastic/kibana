@@ -9,6 +9,10 @@ source .buildkite/scripts/steps/artifacts/env.sh
 
 KIBANA_DOCKER_CONTEXT="${KIBANA_DOCKER_CONTEXT:="default"}"
 
+
+echo "--- Clean up cached images"
+clean_cached_images
+
 echo "--- Create contexts"
 mkdir -p target
 node scripts/build --skip-initialize --skip-generic-folders --skip-platform-folders --skip-archives --skip-cdn-assets --docker-context-use-local-artifact "${BUILD_ARGS[@]}"
