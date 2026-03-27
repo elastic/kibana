@@ -72,7 +72,7 @@ describe('trace_charts_definition', () => {
       expect(result?.esqlQuery).toContain('EVAL');
       expect(result?.esqlQuery).toContain('KEEP');
       expect(result?.esqlQuery).toContain('SORT');
-      expect(result?.esqlQuery).toContain('TBUCKET(100, ?_tstart, ?_tend)');
+      expect(result?.esqlQuery).toContain('TBUCKET(100)');
     });
 
     it('should include METADATA directive', () => {
