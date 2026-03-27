@@ -1144,6 +1144,8 @@
       "@kbn/evals/*": ["x-pack/platform/packages/shared/kbn-evals/*"],
       "@kbn/evals-common": ["x-pack/platform/packages/shared/kbn-evals-common"],
       "@kbn/evals-common/*": ["x-pack/platform/packages/shared/kbn-evals-common/*"],
+      "@kbn/evals-extensions": ["x-pack/platform/packages/shared/kbn-evals-extensions"],
+      "@kbn/evals-extensions/*": ["x-pack/platform/packages/shared/kbn-evals-extensions/*"],
       "@kbn/evals-phoenix-executor": ["x-pack/platform/packages/shared/kbn-evals-phoenix-executor"],
       "@kbn/evals-phoenix-executor/*": ["x-pack/platform/packages/shared/kbn-evals-phoenix-executor/*"],
       "@kbn/evals-plugin": ["x-pack/platform/plugins/shared/evals"],
