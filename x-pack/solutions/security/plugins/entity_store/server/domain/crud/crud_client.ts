@@ -30,8 +30,9 @@ interface CRUDClientDependencies {
 }
 
 export interface ListEntitiesParams {
-  filter?: QueryDslQueryContainer;
+  filter?: QueryDslQueryContainer | QueryDslQueryContainer[];
   size?: number;
+  source?: string[] | undefined;
   searchAfter?: Array<string | number>;
 }
 
@@ -310,18 +311,24 @@ export class CRUDClient {
   public async listEntities(params?: ListEntitiesParams): Promise<ListEntitiesResult> {
     this.logger.debug('Listing entities');
 
-    const { filter, size, searchAfter } = params ?? {};
+    const { filter, size, searchAfter, source } = params ?? {};
 
-    const query: QueryDslQueryContainer = filter
-      ? { bool: { filter: [filter] } }
-      : { match_all: {} };
+    let query: QueryDslQueryContainer = { match_all: {} };
+    if (filter) {
+      if (Array.isArray(filter)) {
+        query = { bool: { filter } };
+      } else {
+        query = { bool: { filter: [filter] } };
+      }
+    }
 
     const resp = await this.esClient.search<Entity>({
       index: getLatestEntitiesIndexName(this.namespace),
       query,
       size,
-      sort: [{ _id: 'asc' }],
+      sort: [{ '@timestamp': 'desc' }, { _shard_doc: 'desc' }],
       search_after: searchAfter,
+      ...(source && source.length > 0 ? { _source: source } : {}),
     });
 
     const hits = resp.hits.hits;

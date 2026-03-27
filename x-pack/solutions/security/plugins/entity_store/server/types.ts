@@ -74,6 +74,7 @@ export type EntityStoreCRUDClient = Omit<CRUDClient, 'createEntity'>;
 
 export interface EntityStoreStartContract {
   createCRUDClient: (esClient: ElasticsearchClient, namespace: string) => EntityStoreCRUDClient;
+  createResolutionClient: (esClient: ElasticsearchClient, namespace: string) => ResolutionClient;
 }
 
 export interface EntityStoreSetupContract {
