@@ -149,7 +149,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
               @timestamp = recent.timestamp,
  entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"generic\\",
- entity.hashedId = HASH(\\"MD5\\", recent.entity.id)
+ entity.hashedId = HASH(\\"sha256\\", recent.entity.id)
 | RENAME
     recent.entity.id AS entity.id,
     recent.entity.EngineMetadata.UntypedId AS entity.EngineMetadata.UntypedId
@@ -330,7 +330,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
               @timestamp = recent.timestamp,
  entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"host\\",
- entity.hashedId = HASH(\\"MD5\\", recent.entity.id),
+ entity.hashedId = HASH(\\"sha256\\", recent.entity.id),
  entity.type = COALESCE(entity.type, \\"Host\\")
 | RENAME
     recent.entity.id AS entity.id,
@@ -514,7 +514,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
               @timestamp = recent.timestamp,
  entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"host\\",
- entity.hashedId = HASH(\\"MD5\\", recent.entity.id),
+ entity.hashedId = HASH(\\"sha256\\", recent.entity.id),
  entity.type = COALESCE(entity.type, \\"Host\\")
 | RENAME
     recent.entity.id AS entity.id,
@@ -698,7 +698,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
               @timestamp = recent.timestamp,
  entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"host\\",
- entity.hashedId = HASH(\\"MD5\\", recent.entity.id),
+ entity.hashedId = HASH(\\"sha256\\", recent.entity.id),
  entity.type = COALESCE(entity.type, \\"Host\\")
 | RENAME
     recent.entity.id AS entity.id,
@@ -829,7 +829,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
               @timestamp = recent.timestamp,
  entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"service\\",
- entity.hashedId = HASH(\\"MD5\\", recent.entity.id),
+ entity.hashedId = HASH(\\"sha256\\", recent.entity.id),
  entity.type = COALESCE(entity.type, \\"Service\\")
 | RENAME
     recent.entity.id AS entity.id,
@@ -993,7 +993,7 @@ true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace
               @timestamp = recent.timestamp,
  entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"user\\",
- entity.hashedId = HASH(\\"MD5\\", recent.entity.id),
+ entity.hashedId = HASH(\\"sha256\\", recent.entity.id),
  entity.type = COALESCE(entity.type, \\"Identity\\")
 | RENAME
     recent.entity.id AS entity.id,

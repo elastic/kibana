@@ -338,6 +338,9 @@ components:
     KnowledgeBaseEntryCreateProps:
       discriminator:
         propertyName: type
+        mapping:
+          document: "#/components/schemas/DocumentEntryCreateFields"
+          index: "#/components/schemas/IndexEntryCreateFields"
       anyOf:
         - $ref: "#/components/schemas/DocumentEntryCreateFields"
         - $ref: "#/components/schemas/IndexEntryCreateFields"
@@ -345,6 +348,9 @@ components:
     KnowledgeBaseEntryUpdateProps:
       discriminator:
         propertyName: type
+        mapping:
+          document: "#/components/schemas/DocumentEntryUpdateFields"
+          index: "#/components/schemas/IndexEntryUpdateFields"
       anyOf:
         - $ref: "#/components/schemas/DocumentEntryUpdateFields"
         - $ref: "#/components/schemas/IndexEntryUpdateFields"
@@ -353,6 +359,9 @@ components:
     KnowledgeBaseEntryUpdateRouteProps:
       discriminator:
         propertyName: type
+        mapping:
+          document: "#/components/schemas/DocumentEntryCreateFields"
+          index: "#/components/schemas/IndexEntryCreateFields"
       anyOf:
         - $ref: "#/components/schemas/DocumentEntryCreateFields"
         - $ref: "#/components/schemas/IndexEntryCreateFields"
@@ -360,6 +369,9 @@ components:
     KnowledgeBaseEntryResponse:
       discriminator:
         propertyName: type
+        mapping:
+          document: "#/components/schemas/DocumentEntry"
+          index: "#/components/schemas/IndexEntry"
       anyOf:
         - $ref: "#/components/schemas/DocumentEntry"
         - $ref: "#/components/schemas/IndexEntry"

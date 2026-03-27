@@ -29,7 +29,20 @@ export const createInitialMetricsTelemetry = (): MetricsTelemetry => ({
   multi_value_counts: { data_streams: 0, field_types: 0, metric_types: 0 },
 });
 
-export const parseMetricsWithTelemetry = (
+/**
+ * Dimension name prefixes that indicate internal metadata fields.
+ * Any dimension whose name starts with one of these prefixes will be hidden.
+ */
+const INTERNAL_DIMENSION_PREFIXES = ['labels._'];
+
+const isInternalDimension = (name: string): boolean => {
+  if (INTERNAL_DIMENSION_EXACT_NAMES.has(name)) {
+    return true;
+  }
+  return INTERNAL_DIMENSION_PREFIXES.some((prefix) => name.startsWith(prefix));
+};
+
+export const parseMetricsResponse = (
   response: MetricsESQLResponse[],
   getFieldType?: (name: string) => string | undefined
 ): ParsedMetricsWithTelemetry => {
@@ -48,7 +61,9 @@ export const parseMetricsWithTelemetry = (
     const dataStreams = toArray(metric.data_stream);
     const units = toArray(metric.unit);
     const fieldTypes = toArray(metric.field_type);
-    const dimensions = toArray(metric.dimension_fields);
+    const dimensions = toArray(metric.dimension_fields).filter(
+      (name) => !isInternalDimension(name)
+    );
 
     accumulateMetricsRowTelemetry(telemetry, {
       metricTypes,
