@@ -8,7 +8,8 @@
 /**
  * EUID translation layer: helpers that depend on entity definitions and streamlang.
  * Import from here when you need euid DSL/ESQL/Painless. For entity types use common (index).
- * Do not import this file from plugin public (browser) code — it pulls in @kbn/streamlang.
+ * Do not import this file from plugin public (browser) code synchronously — it pulls in @kbn/streamlang.
+ * For browser bundles, load the same {@link euid} object via dynamic import (`euid_browser` / `loadEuidApi()`).
  *
  * @example
  * import { euid } from '@kbn/entity-store/common/euid_helpers';
@@ -25,6 +26,20 @@ export const euid = {
    * Output: EUID string such as `user:…` / `host:…`, or `undefined` when no id can be derived.
    */
   getEuidFromObject: euidModule.getEuidFromObject,
+  /**
+   * Flat map of ECS field → scalar value for the winning identity branch (same pipeline as {@link euid.getEuidFromObject}).
+   * Use to seed flyouts, filters, and resolution when you need field-level context, not only the composed EUID string.
+   */
+  getEntityIdentifiersFromDocument: euidModule.getEntityIdentifiersFromDocument,
+  /**
+   * Builds EUID from Timeline “non-ECS” row arrays (field + value[]) without importing timelines types.
+   */
+  getEuidFromTimelineNonEcsData: euidModule.getEuidFromTimelineNonEcsData,
+  /**
+   * Returns which source fields are read for EUID for an entity type (`requiresOneOf`, full `identitySourceFields` list).
+   * Exposed so UIs and CRUD can request minimal `_source` or validate partial documents.
+   */
+  getEuidSourceFields: euidModule.getEuidSourceFields,
 
   /**
    * Painless-backed EUID helpers for runtime fields and scripts (same semantics as `getEuidFromObject`).
@@ -83,3 +98,14 @@ export const euid = {
     getEuidDocumentsContainsIdFilter: euidModule.getEuidDslDocumentsContainsIdFilter,
   },
 };
+
+/** Full EUID API (memory + painless + esql + dsl) — same object for Node and browser lazy chunk. */
+export type EntityStoreEuid = typeof euid;
+
+/**
+ * EUID API surface passed through the entity_store plugin React context and `loadEuidApi()`.
+ * Aligns with the {@link euid} object from this module.
+ */
+export interface EntityStoreEuidApi {
+  euid: EntityStoreEuid;
+}
