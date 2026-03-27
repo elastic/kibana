@@ -16,19 +16,20 @@ export const visualizationCreationSkill = defineSkillType({
   id: 'visualization-creation',
   name: 'visualization-creation',
   basePath: 'skills/platform/visualization',
-  description: 'Create high-quality visualizations from grounded index and field context.',
+  description:
+    'Create standalone or reusable visualizations from grounded index and field context.',
   content: `## When to Use This Skill
 
 Use this skill when:
-- A user asks for one or more visualizations (chart, metric, trend, breakdown, distribution).
-- A user asks to add new panels to a dashboard and you first need panel attachments.
-- You need a reusable visualization attachment ID for later dashboard composition.
+- A user asks for one or more standalone visualizations (chart, metric, trend, breakdown, distribution).
+- You explicitly want a reusable visualization attachment ID for later use.
 - A user asks to update an existing visualization by attachment ID.
 
 Do **not** use this skill when:
 - The user only needs raw documents or table/query output without a visualization.
 - The user first needs broad data discovery and exploration across unknown sources.
 - The request is about persisted saved objects instead of in-memory attachment workflows.
+- The primary goal is to compose or update a dashboard. Use the dashboard-management skill for dashboard panel creation and layout.
 
 ## Available Tools
 
@@ -74,7 +75,7 @@ Do **not** use this skill when:
 ## Inline Rendering Guidelines
 
 - **When creating standalone visualizations** (i.e. the user directly asked for a chart or visualization), render each visualization attachment inline so the user can see and interact with it immediately.
-- **When creating visualizations as intermediate steps in a larger workflow** (e.g. producing panels that will be composed into another artifact), do NOT render individual visualization attachments inline. Only the final composed artifact should be rendered. Rendering intermediate visualizations clutters the conversation.
+- **When creating visualizations as intermediate reusable artifacts** for a later workflow, do NOT render individual visualization attachments inline unless the user asked to inspect them. Only the final composed artifact should be rendered. Rendering intermediate visualizations clutters the conversation.
 
 ## Writing Effective Visualization Prompts
 
