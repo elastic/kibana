@@ -94,7 +94,8 @@ export const convertPreviousEvents = async ({
 
   for (const event of events) {
     if (isProcessedUserMessageEvent(event)) {
-      messages.push(formatProcessedInput({ input: event.processedInput }));
+      const username = event.user?.username ?? event.user?.id;
+      messages.push(formatProcessedInput({ input: event.processedInput, username }));
     } else if (isProcessedAgentResponseEvent(event)) {
       messages.push(...(await agentResponseToLangchain(event, { resultTransformer, ignoreSteps })));
     }
@@ -131,10 +132,16 @@ export const agentResponseToLangchain = async (
   return messages;
 };
 
-const formatProcessedInput = ({ input }: { input: ProcessedRoundInput }): HumanMessage => {
+const formatProcessedInput = ({
+  input,
+  username,
+}: {
+  input: ProcessedRoundInput;
+  username?: string;
+}): HumanMessage => {
   const { message, attachments } = input;
 
-  let content = message;
+  let content = username ? `[${username}]: ${message}` : message;
 
   if (attachments.length > 0) {
     const attachmentsXml = generateXmlTree(

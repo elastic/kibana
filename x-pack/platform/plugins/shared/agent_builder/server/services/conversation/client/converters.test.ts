@@ -459,7 +459,7 @@ describe('conversation model converters', () => {
           expect.objectContaining({ type: 'user_message', message: 'some message' }),
           expect.objectContaining({ type: 'agent_response', agent_id: 'agent_id' }),
         ]),
-        conversation_mode: undefined,
+        conversation_mode: 'group',
         execution_state: 'idle',
         created_at: creationDate,
         updated_at: updateDate,

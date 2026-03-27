@@ -11,7 +11,6 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   agentBuilderDefaultAgentId,
   ConversationRoundStatus,
-  timelineEventsToRounds,
 } from '@kbn/agent-builder-common';
 import type { ConversationRound, TimelineEvent } from '@kbn/agent-builder-common';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
@@ -45,7 +44,8 @@ export const useConversation = () => {
     // Otherwise a refetch will overwrite our optimistic updates
     enabled: Boolean(conversationId) && !isSendingMessage,
     // Poll every 3s to pick up other users' messages (multi-user POC)
-    refetchInterval: isSendingMessage ? false : 3000,
+    // Disabled while sending to prevent overwriting optimistic updates
+    refetchInterval: Boolean(conversationId) && !isSendingMessage ? 3000 : false,
     queryFn: () => {
       if (!conversationId) {
         return Promise.reject(new Error('Invalid conversation id'));
@@ -137,12 +137,18 @@ export const useConversationTitle = () => {
 export const useConversationRounds = () => {
   const { conversation } = useConversation();
   const { pendingMessage, error, errorSteps } = useSendMessage();
+  const isSendingMessage = useIsSendingMessage();
+
+  // Stable key for events to avoid unnecessary re-renders on poll
+  const events = conversation?.events;
+  const eventsKey = events?.length
+    ? `${events.length}:${events[events.length - 1]?.id}`
+    : '';
 
   const conversationRounds = useMemo(() => {
-    // If events are available (new timeline format), use them
-    // This shows standalone user messages that didn't trigger agent responses
-    const events = conversation?.events;
-    if (events && events.length > 0) {
+    // While sending, use rounds (stable, not overwritten during send)
+    // Otherwise use events if available (shows standalone user messages)
+    if (!isSendingMessage && events && events.length > 0) {
       const rounds = eventsToDisplayRounds(events);
       if (Boolean(error) && pendingMessage) {
         const pendingRound = createNewRound({
@@ -166,7 +172,8 @@ export const useConversationRounds = () => {
       return [...rounds, pendingRound];
     }
     return rounds;
-  }, [conversation?.rounds, conversation?.events, error, errorSteps, pendingMessage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversation?.rounds, eventsKey, isSendingMessage, error, errorSteps, pendingMessage]);
 
   return conversationRounds;
 };
@@ -174,31 +181,71 @@ export const useConversationRounds = () => {
 /**
  * Convert timeline events to round-like display items.
  * User messages without an agent response become rounds with an empty response.
+ * Each round carries `_username` from the UserMessageEvent for display.
  */
 const eventsToDisplayRounds = (events: TimelineEvent[]): ConversationRound[] => {
-  const rounds = timelineEventsToRounds(events);
+  const rounds: ConversationRound[] = [];
+  let pendingUserEvent: TimelineEvent | null = null;
 
-  // Check if there's a trailing user message (no agent response yet)
-  const lastEvent = events[events.length - 1];
-  if (lastEvent && lastEvent.type === 'user_message') {
+  for (const event of events) {
+    if (event.type === 'user_message') {
+      // If there was a previous user message without response, add it as standalone
+      if (pendingUserEvent && pendingUserEvent.type === 'user_message') {
+        rounds.push({
+          id: `standalone-${pendingUserEvent.id}`,
+          status: ConversationRoundStatus.completed,
+          input: { message: pendingUserEvent.message },
+          steps: [],
+          response: { message: '' },
+          started_at: pendingUserEvent.timestamp,
+          time_to_first_token: 0,
+          time_to_last_token: 0,
+          model_usage: { connector_id: '', llm_calls: 0, input_tokens: 0, output_tokens: 0 },
+          _username: pendingUserEvent.user?.username ?? pendingUserEvent.user?.id,
+        } as ConversationRound & { _username?: string });
+      }
+      pendingUserEvent = event;
+    } else if (event.type === 'agent_response') {
+      const userMsg = pendingUserEvent?.type === 'user_message' ? pendingUserEvent : undefined;
+      const round = {
+        id: event.id,
+        status: event.status,
+        state: event.state,
+        pending_prompt: event.pending_prompt,
+        input: {
+          message: userMsg?.message ?? '',
+          attachments: userMsg?.attachments,
+          attachment_refs: userMsg?.attachment_refs,
+        },
+        steps: event.steps,
+        response: event.response,
+        started_at: event.started_at,
+        time_to_first_token: event.time_to_first_token,
+        time_to_last_token: event.time_to_last_token,
+        model_usage: event.model_usage,
+        trace_id: event.trace_id,
+        configuration_overrides: event.configuration_overrides,
+        _username: userMsg?.user?.username ?? userMsg?.user?.id,
+      } as ConversationRound & { _username?: string };
+      rounds.push(round);
+      pendingUserEvent = null;
+    }
+  }
+
+  // Trailing user message without response
+  if (pendingUserEvent && pendingUserEvent.type === 'user_message') {
     rounds.push({
-      id: `standalone-${lastEvent.id}`,
+      id: `standalone-${pendingUserEvent.id}`,
       status: ConversationRoundStatus.completed,
-      input: {
-        message: lastEvent.message,
-      },
+      input: { message: pendingUserEvent.message },
       steps: [],
       response: { message: '' },
-      started_at: lastEvent.timestamp,
+      started_at: pendingUserEvent.timestamp,
       time_to_first_token: 0,
       time_to_last_token: 0,
-      model_usage: {
-        connector_id: '',
-        llm_calls: 0,
-        input_tokens: 0,
-        output_tokens: 0,
-      },
-    });
+      model_usage: { connector_id: '', llm_calls: 0, input_tokens: 0, output_tokens: 0 },
+      _username: pendingUserEvent.user?.username ?? pendingUserEvent.user?.id,
+    } as ConversationRound & { _username?: string });
   }
 
   return rounds;

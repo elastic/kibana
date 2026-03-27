@@ -152,6 +152,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
       <EuiFlexItem grow={false}>
         <RoundInput
           input={input.message}
+          username={(rawRound as any)._username}
           attachmentRefs={input.attachment_refs}
           conversationAttachments={conversationAttachments}
           fallbackAttachments={input.attachments}
@@ -159,17 +160,20 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
       </EuiFlexItem>
 
       {/* Thinking - treat awaiting prompt as loading to show last reasoning event */}
-      <EuiFlexItem grow={false}>
-        {isErrorCurrentRound ? (
-          <RoundError error={error} errorSteps={rawRound.steps} onRetry={retrySendMessage} />
-        ) : (
-          <RoundThinking
-            steps={steps}
-            isLoading={isLoadingCurrentRound || Boolean(isAwaitingPrompt)}
-            rawRound={rawRound}
-          />
-        )}
-      </EuiFlexItem>
+      {/* Hidden for standalone user messages (no response, no steps) */}
+      {(response.message || steps.length > 0 || isLoadingCurrentRound || isErrorCurrentRound) && (
+        <EuiFlexItem grow={false}>
+          {isErrorCurrentRound ? (
+            <RoundError error={error} errorSteps={rawRound.steps} onRetry={retrySendMessage} />
+          ) : (
+            <RoundThinking
+              steps={steps}
+              isLoading={isLoadingCurrentRound || Boolean(isAwaitingPrompt)}
+              rawRound={rawRound}
+            />
+          )}
+        </EuiFlexItem>
+      )}
 
       {/* Confirmation Prompt */}
       {isAwaitingPrompt && isConfirmationPrompt(pendingPrompt) && (
@@ -183,8 +187,8 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
         </EuiFlexItem>
       )}
 
-      {/* Response Message - hidden when awaiting confirmation */}
-      {!isAwaitingPrompt && (
+      {/* Response Message - hidden when awaiting confirmation or when there's no response (standalone user message) */}
+      {!isAwaitingPrompt && (response.message || steps.length > 0 || isLoadingCurrentRound) && (
         <EuiFlexItem grow={false}>
           <EuiFlexItem>
             <RoundResponse

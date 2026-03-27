@@ -182,10 +182,10 @@ export function registerConversationRoutes({
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
-      access: 'internal',
+      access: 'public',
       summary: 'Follow active execution for a conversation',
       options: {
-        tags: ['conversation'],
+        tags: ['conversation', 'oas-tag:agent builder'],
         timeout: { idleSocket: 300_000 },
       },
     })

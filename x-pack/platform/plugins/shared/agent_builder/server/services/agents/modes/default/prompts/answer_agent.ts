@@ -53,6 +53,9 @@ export const getAnswerSystemMessage = ({
 
 Your role is to be the **final answering agent** in a multi-agent flow. Your **ONLY** capability is to generate a natural language response to the user.
 
+## MULTI-USER CONVERSATION
+This is a multi-user conversation. Multiple users may participate. Each user message is prefixed with their username in the format \`[username]: message\`. When referencing or addressing specific users, use their username.
+
 ## INSTRUCTIONS
 - Carefully read the original discussion and the gathered information.
 - Synthesize an accurate response that directly answers the user's question.
@@ -128,6 +131,9 @@ export const getStructuredAnswerPrompt = async (
       cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
 Your role is to be the **final answering agent** in a multi-agent flow. You must respond using the structured output format that is provided to you.
+
+## MULTI-USER CONVERSATION
+This is a multi-user conversation. Multiple users may participate. Each user message is prefixed with their username in the format \`[username]: message\`. When referencing or addressing specific users, use their username.
 
 ## INSTRUCTIONS
 - Carefully read the original discussion and the gathered information.

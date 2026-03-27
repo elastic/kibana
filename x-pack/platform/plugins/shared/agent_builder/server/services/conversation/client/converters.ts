@@ -13,8 +13,8 @@ import type {
   ConversationWithoutRounds,
   ToolResult,
   UserIdAndName,
-  ConversationMode,
 } from '@kbn/agent-builder-common';
+import { ConversationMode } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import {
   ConversationRoundStatus,
@@ -206,12 +206,37 @@ export const toEs = (
   space: string,
   conversationMode?: ConversationMode
 ): ConversationProperties => {
-  // Write both old and new formats for backward compatibility during transition
-  const events = roundsToTimelineEvents(
-    conversation.rounds,
-    conversation.user,
-    conversation.agent_id
-  );
+  // If conversation already has events (from ES), preserve them and only append
+  // new agent_response events for rounds not yet represented.
+  // User messages are already in events (appended by the trigger hook or initial creation).
+  // This avoids wiping standalone user messages that don't have agent responses.
+  let events: import('@kbn/agent-builder-common').TimelineEvent[];
+  if (conversation.events && conversation.events.length > 0) {
+    const existingAgentResponseIds = new Set(
+      conversation.events
+        .filter((e) => e.type === 'agent_response')
+        .map((e) => e.id)
+    );
+    // Find rounds whose agent response event isn't already in the events array
+    const newRounds = conversation.rounds.filter((r) => !existingAgentResponseIds.has(r.id));
+    if (newRounds.length > 0) {
+      // Only add the agent_response events, not user_message (already present)
+      const newAgentResponseEvents = roundsToTimelineEvents(
+        newRounds,
+        conversation.user,
+        conversation.agent_id
+      ).filter((e) => e.type === 'agent_response');
+      events = [...conversation.events, ...newAgentResponseEvents];
+    } else {
+      events = conversation.events;
+    }
+  } else {
+    events = roundsToTimelineEvents(
+      conversation.rounds,
+      conversation.user,
+      conversation.agent_id
+    );
+  }
 
   return {
     agent_id: conversation.agent_id,
@@ -226,7 +251,7 @@ export const toEs = (
     conversation_rounds: serializeStepResults(conversation.rounds),
     // New timeline format
     events,
-    conversation_mode: conversationMode,
+    conversation_mode: conversationMode ?? ConversationMode.group, // POC: default to group
     execution_state: 'idle',
     attachments: conversation.attachments ?? [],
     state: conversation.state,
@@ -278,7 +303,7 @@ export const createRequestToEs = ({
     updated_at: creationDate.toISOString(),
     conversation_rounds: serializeStepResults(conversation.rounds),
     events,
-    conversation_mode: conversation.conversation_mode,
+    conversation_mode: conversation.conversation_mode ?? ConversationMode.group, // POC: default to group
     execution_state: 'idle',
     attachments: conversation.attachments ?? [],
     state: conversation.state,

@@ -12,6 +12,8 @@ import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
 import type { ChatEvent, ConversationAction } from '@kbn/agent-builder-common';
@@ -43,6 +45,7 @@ import {
 } from './utils';
 import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
+import { getUserFromRequest } from '../utils';
 import { getTriggerHookForMode } from './trigger_hooks';
 import { withConverseSpan } from '../../tracing';
 import type { MeteringService } from '../metering';
@@ -63,6 +66,8 @@ export interface AgentExecutionDeps {
   runAgent: RunAgentFn;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
+  security: SecurityServiceStart;
+  elasticsearch: ElasticsearchServiceStart;
   spaces?: SpacesPluginStart;
   meteringService: MeteringService;
   trackingService?: TrackingService;
@@ -124,18 +129,26 @@ export const handleAgentExecution = async ({
   const effectiveConversationId =
     conversation.operation === 'CREATE' ? conversation.id : conversationId;
 
+  // POC: default all conversations to group mode
+  const effectiveConversationMode = conversationMode ?? 'group';
+
   if (
-    conversationMode === 'group' &&
+    effectiveConversationMode === 'group' &&
     storeConversation &&
     effectiveConversationId &&
     conversation.operation !== 'CREATE'
   ) {
-    // Build and persist UserMessageEvent
+    // Build and persist UserMessageEvent with the CURRENT user (not the conversation owner)
+    const currentUser = await getUserFromRequest({
+      request,
+      security: deps.security,
+      esClient: deps.elasticsearch.client.asScoped(request).asCurrentUser,
+    });
     const userMessageEvent = {
       id: uuidv4(),
       timestamp: new Date().toISOString(),
       type: TimelineEventType.user_message as const,
-      user: conversation.user,
+      user: currentUser,
       message: nextInput.message ?? '',
     };
 
@@ -261,7 +274,7 @@ export const handleAgentExecution = async ({
       }),
       // Clear current execution ID when execution completes (multi-user POC)
       finalize(() => {
-        if (conversationMode === 'group' && effectiveConversationId) {
+        if (effectiveConversationMode === 'group' && effectiveConversationId) {
           conversationClient.clearCurrentExecutionId(effectiveConversationId).catch((err) => {
             logger.warn(`Failed to clear current_execution_id: ${err}`);
           });

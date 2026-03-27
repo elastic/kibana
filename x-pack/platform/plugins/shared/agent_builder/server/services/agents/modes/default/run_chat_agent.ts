@@ -108,9 +108,12 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   } = context;
 
   // Convert to timeline events at entry — the canonical format for the pipeline
+  // Prefer conversation.events (preserves standalone user messages) over rounds conversion
   const timelineEvents =
     conversation && 'timeline' in conversation
       ? conversation.timeline
+      : conversation?.events && conversation.events.length > 0
+      ? conversation.events
       : conversation
       ? roundsToTimelineEvents(conversation.rounds, conversation.user, conversation.agent_id)
       : [];

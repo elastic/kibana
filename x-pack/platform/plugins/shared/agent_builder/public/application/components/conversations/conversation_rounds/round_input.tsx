@@ -35,6 +35,8 @@ const labels = {
 
 interface RoundInputProps {
   input: string;
+  /** Username to display above the message bubble (multi-user POC) */
+  username?: string;
   attachmentRefs?: AttachmentVersionRef[];
   conversationAttachments?: VersionedAttachment[];
   fallbackAttachments?: Attachment[];
@@ -42,6 +44,7 @@ interface RoundInputProps {
 
 export const RoundInput = ({
   input,
+  username,
   attachmentRefs,
   conversationAttachments,
   fallbackAttachments,
@@ -66,6 +69,18 @@ export const RoundInput = ({
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
+      {username && (
+        <EuiText
+          size="xs"
+          color="subdued"
+          css={css`
+            align-self: end;
+            font-weight: ${euiTheme.font.weight.semiBold};
+          `}
+        >
+          {username}
+        </EuiText>
+      )}
       <EuiPanel
         css={inputContainerStyles}
         paddingSize="m"

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import {
   isMessageChunkEvent,
@@ -34,6 +34,7 @@ export const useFollowRemoteExecution = () => {
   const { conversation } = useConversation();
   const { conversationActions } = useConversationContext();
   const queryClient = useQueryClient();
+  const [isFollowing, setIsFollowing] = useState(false);
 
   // Track which execution IDs were started by this client
   const localExecutionIdsRef = useRef<Set<string>>(new Set());
@@ -50,10 +51,11 @@ export const useFollowRemoteExecution = () => {
     if (followingRef.current === currentExecutionId) return;
 
     followingRef.current = currentExecutionId;
+    setIsFollowing(true);
 
     // Add an optimistic round for the remote execution
     conversationActions.addOptimisticRound({
-      userMessage: '(loading...)',
+      userMessage: '...',
     });
 
     const abortController = new AbortController();
@@ -108,12 +110,14 @@ export const useFollowRemoteExecution = () => {
         },
         error: () => {
           followingRef.current = null;
+          setIsFollowing(false);
           queryClient.invalidateQueries({
             queryKey: queryKeys.conversations.byId(conversationId),
           });
         },
         complete: () => {
           followingRef.current = null;
+          setIsFollowing(false);
           queryClient.invalidateQueries({
             queryKey: queryKeys.conversations.byId(conversationId),
           });
@@ -124,10 +128,14 @@ export const useFollowRemoteExecution = () => {
       abortController.abort();
       subscription.unsubscribe();
       followingRef.current = null;
+      setIsFollowing(false);
     };
   }, [currentExecutionId, conversationId, chatService, conversationActions, queryClient]);
 
   return {
+    /** Whether we're currently following a remote execution */
+    isFollowing,
+    /** Call this to record an execution ID started by this client (won't be followed) */
     addLocalExecutionId: (id: string) => {
       localExecutionIdsRef.current.add(id);
     },

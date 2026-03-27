@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AssistantResponse, ConversationRoundStep } from '@kbn/agent-builder-common';
@@ -38,41 +38,55 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   conversationAttachments,
   attachmentRefs,
   conversationId,
-}) => (
-  <EuiFlexGroup
-    direction="column"
-    gutterSize="m"
-    aria-label={i18n.translate('xpack.agentBuilder.round.assistantResponse', {
-      defaultMessage: 'Assistant response',
-    })}
-    data-test-subj="agentBuilderRoundResponse"
-    css={css`
-      position: relative;
-    `}
-  >
-    <EuiFlexItem>
-      {isLoading ? (
-        <StreamingText
-          content={message}
-          steps={steps}
-          conversationAttachments={conversationAttachments}
-          attachmentRefs={attachmentRefs}
-          conversationId={conversationId}
-        />
-      ) : (
-        <ChatMessageText
-          content={message}
-          steps={steps}
-          conversationAttachments={conversationAttachments}
-          attachmentRefs={attachmentRefs}
-          conversationId={conversationId}
-        />
-      )}
-    </EuiFlexItem>
-    {!isLoading && !hasError && (
-      <EuiFlexItem grow={false}>
-        <RoundResponseActions content={message} isVisible isLastRound={isLastRound} />
-      </EuiFlexItem>
-    )}
-  </EuiFlexGroup>
-);
+}) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiPanel
+      hasShadow={false}
+      hasBorder
+      paddingSize="m"
+      css={css`
+        border-color: ${euiTheme.colors.borderBaseSubdued};
+        border-radius: ${euiTheme.border.radius.medium};
+      `}
+    >
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="m"
+        aria-label={i18n.translate('xpack.agentBuilder.round.assistantResponse', {
+          defaultMessage: 'Assistant response',
+        })}
+        data-test-subj="agentBuilderRoundResponse"
+        css={css`
+          position: relative;
+        `}
+      >
+        <EuiFlexItem>
+          {isLoading ? (
+            <StreamingText
+              content={message}
+              steps={steps}
+              conversationAttachments={conversationAttachments}
+              attachmentRefs={attachmentRefs}
+              conversationId={conversationId}
+            />
+          ) : (
+            <ChatMessageText
+              content={message}
+              steps={steps}
+              conversationAttachments={conversationAttachments}
+              attachmentRefs={attachmentRefs}
+              conversationId={conversationId}
+            />
+          )}
+        </EuiFlexItem>
+        {!isLoading && !hasError && (
+          <EuiFlexItem grow={false}>
+            <RoundResponseActions content={message} isVisible isLastRound={isLastRound} />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+};
