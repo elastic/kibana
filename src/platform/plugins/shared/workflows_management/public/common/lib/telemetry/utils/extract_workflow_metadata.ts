@@ -8,6 +8,8 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
+import type { ManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
+import { isManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import { parseWorkflowYamlForAutocomplete } from '../../../../../common/lib/yaml/parse_workflow_yaml_for_autocomplete';
 
 /**
@@ -197,7 +199,16 @@ export function extractWorkflowMetadata(
   ];
 
   // Count inputs
-  const inputCount = Array.isArray(workflow.inputs) ? workflow.inputs.length : 0;
+  const manualTrigger = workflow.triggers?.find((trigger) => isManualTrigger(trigger)) as
+    | ManualTrigger
+    | undefined;
+  const inputs = manualTrigger?.inputs;
+  const inputCount =
+    inputs == null
+      ? 0
+      : Array.isArray(inputs)
+      ? inputs.length
+      : Object.keys(inputs.properties ?? {}).length;
 
   // Count constants
   const consts = (workflow as { consts?: Record<string, unknown> }).consts || {};

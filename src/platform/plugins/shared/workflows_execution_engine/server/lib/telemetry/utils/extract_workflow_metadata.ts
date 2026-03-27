@@ -192,7 +192,13 @@ export function extractWorkflowMetadata(
   const manualTrigger = workflow.triggers?.find((trigger) => isManualTrigger(trigger)) as
     | ManualTrigger
     | undefined;
-  const inputCount = Object.keys(manualTrigger?.inputs?.properties ?? {}).length;
+  const inputs = manualTrigger?.inputs;
+  const inputCount =
+    inputs == null
+      ? 0
+      : Array.isArray(inputs)
+      ? inputs.length
+      : Object.keys(inputs.properties ?? {}).length;
 
   // Extract settings
   const enabled = Boolean(workflow.enabled);
