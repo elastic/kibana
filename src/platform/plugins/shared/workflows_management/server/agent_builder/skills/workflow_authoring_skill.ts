@@ -17,6 +17,7 @@ import {
 export const workflowAuthoringSkill = defineSkillType({
   id: 'workflow-authoring',
   name: 'workflow-authoring',
+  experimental: true,
   basePath: 'skills/platform/workflows',
   description:
     'Create, modify, and validate Elastic workflow YAML definitions using natural language. Covers step types, triggers, Liquid templating, connector integrations, and validation.',

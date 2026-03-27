@@ -153,7 +153,7 @@ export function FeaturesTable() {
           return (
             <EuiButtonIcon
               data-test-subj="featuresDiscoveryDetailsButton"
-              iconType={isSelected ? 'minimize' : 'expand'}
+              iconType={isSelected ? 'minimize' : 'maximize'}
               aria-label={i18n.translate(
                 'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.detailsButtonAriaLabel',
                 { defaultMessage: 'View details' }
