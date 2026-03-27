@@ -38,15 +38,6 @@ export interface KIQueryGenerationScenario {
   snapshot_source?: SnapshotSourceOverride;
 }
 
-export interface NeedleInHaystackStrategy {
-  kind: 'needle_in_haystack';
-  signal_query: Record<string, unknown>;
-  noise_ratio: number;
-  sweep_ratios?: number[];
-}
-
-export type SamplingStrategy = NeedleInHaystackStrategy;
-
 export interface KIFeatureExtractionScenario {
   input: {
     scenario_id: string;
@@ -62,7 +53,6 @@ export interface KIFeatureExtractionScenario {
   };
   metadata: Record<string, unknown> & ScenarioMetadata;
   snapshot_source?: SnapshotSourceOverride;
-  sampling_strategy?: SamplingStrategy;
 }
 
 /**
