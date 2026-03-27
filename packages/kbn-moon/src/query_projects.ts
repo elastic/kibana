@@ -62,6 +62,7 @@ export interface ResolveMoonAffectedBaseOptions {
 
 export const ROOT_MOON_PROJECT_ID = 'kibana';
 
+// Module-level cache — acceptable for short-lived CLI processes, tests mock getMoonExecutablePath.
 let moonExecutablePath: string | undefined;
 
 const ROOT_MOON_PROJECT_TRIGGER_FILES = new Set([

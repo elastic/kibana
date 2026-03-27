@@ -50,6 +50,9 @@
     "@kbn/dot-text",
     "@kbn/yarn-lock-validator",
     "@kbn/sort-package-json",
-    "@kbn/babel-register"
+    "@kbn/babel-register",
+    "@kbn/dev-validation-runner",
+    "@kbn/moon",
+    "@kbn/ts-type-check-cli"
   ]
 }
