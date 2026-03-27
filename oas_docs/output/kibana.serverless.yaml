@@ -72178,6 +72178,9 @@ components:
         - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryCreateFields'
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
       discriminator:
+        mapping:
+          document: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryCreateFields'
+          index: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
         propertyName: type
     Security_AI_Assistant_API_KnowledgeBaseEntryDetailsInError:
       type: object
@@ -72217,18 +72220,27 @@ components:
         - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntry'
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntry'
       discriminator:
+        mapping:
+          document: '#/components/schemas/Security_AI_Assistant_API_DocumentEntry'
+          index: '#/components/schemas/Security_AI_Assistant_API_IndexEntry'
         propertyName: type
     Security_AI_Assistant_API_KnowledgeBaseEntryUpdateProps:
       anyOf:
         - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryUpdateFields'
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryUpdateFields'
       discriminator:
+        mapping:
+          document: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryUpdateFields'
+          index: '#/components/schemas/Security_AI_Assistant_API_IndexEntryUpdateFields'
         propertyName: type
     Security_AI_Assistant_API_KnowledgeBaseEntryUpdateRouteProps:
       anyOf:
         - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryCreateFields'
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
       discriminator:
+        mapping:
+          document: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryCreateFields'
+          index: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
         propertyName: type
     Security_AI_Assistant_API_KnowledgeBaseReadResponse200:
       type: object
