@@ -47,61 +47,71 @@ export function LogAiInsight({ doc }: LogAiInsightProps) {
     DefaultClientOptions
   >({ http });
 
-  const { index, id } = useMemo(() => {
-    return {
-      index: doc?.fields.find((field) => field.field === '_index')?.value[0],
-      id: doc?.fields.find((field) => field.field === '_id')?.value[0],
-    };
-  }, [doc]);
+  const { index, id, fields } = useMemo(() => {
+    const idx = doc?.fields.find((field) => field.field === '_index')?.value[0];
+    const docId = doc?.fields.find((field) => field.field === '_id')?.value[0];
+    if (typeof idx === 'string' && typeof docId === 'string') {
+      return { index: idx, id: docId, fields: undefined };
+    }
 
-  if (typeof index !== 'string' || typeof id !== 'string') {
+    const docFields: Record<string, unknown> = {};
+    for (const entry of doc?.fields ?? []) {
+      if (entry.value[0] != null) {
+        docFields[entry.field] = entry.value.length === 1 ? entry.value[0] : entry.value;
+      }
+    }
+    return { index: undefined, id: undefined, fields: docFields };
+  }, [doc]);
+  const hasDocIdentity = typeof index === 'string' && typeof id === 'string';
+  const hasFields = fields !== undefined && Object.keys(fields).length > 0;
+  if (!hasDocIdentity && !hasFields) {
     return null;
   }
 
   const fetchInsight = async () => {
+    const body = hasDocIdentity ? { index, id } : { fields };
     const response = await apiClient.fetch(
       'POST /internal/observability_agent_builder/ai_insights/log',
       {
         signal: null,
-        params: {
-          body: {
-            index,
-            id,
-          },
-        },
+        params: { body },
       }
     );
     return response;
   };
 
-  const buildAttachments = (summary: string, context: string): AiInsightAttachment[] => [
-    {
-      type: 'screen_context',
-      data: {
-        app: 'discover',
-        url: window.location.href,
+  const buildAttachments = (summary: string, context: string): AiInsightAttachment[] => {
+    const attachments: AiInsightAttachment[] = [
+      {
+        type: 'screen_context',
+        data: {
+          app: 'discover',
+          url: window.location.href,
+        },
+        hidden: true,
       },
-      hidden: true,
-    },
-    {
-      type: OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
-      data: {
-        summary,
-        context,
-        attachmentLabel: i18n.translate(
-          'xpack.observabilityAgentBuilder.logAiInsight.attachmentLabel',
-          { defaultMessage: 'Log summary' }
-        ),
+      {
+        type: OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
+        data: {
+          summary,
+          context,
+          attachmentLabel: i18n.translate(
+            'xpack.observabilityAgentBuilder.logAiInsight.attachmentLabel',
+            { defaultMessage: 'Log summary' }
+          ),
+        },
       },
-    },
-    {
-      type: OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,
-      data: {
-        index,
-        id,
-      },
-    },
-  ];
+    ];
+
+    if (hasDocIdentity) {
+      attachments.push({
+        type: OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,
+        data: { index, id },
+      });
+    }
+
+    return attachments;
+  };
 
   return (
     <>

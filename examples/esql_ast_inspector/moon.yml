@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/esql-ast-inspector-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-esql'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/esql-ast-inspector-plugin'
+  title: '@kbn/esql-ast-inspector-plugin'
   description: Moon project for @kbn/esql-ast-inspector-plugin
   channel: ''
   owner: '@elastic/kibana-esql'
-  metadata:
-    sourceRoot: examples/esql_ast_inspector
+  sourceRoot: examples/esql_ast_inspector
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
