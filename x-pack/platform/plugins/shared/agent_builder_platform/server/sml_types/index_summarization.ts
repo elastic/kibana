@@ -1,17 +1,22 @@
 
 import { Logger } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { SmlContext, SmlData, SmlTypeDefinition } from '@kbn/agent-builder-plugin/server';
 import { SmlDocument, SmlToAttachmentContext } from '@kbn/agent-builder-plugin/server/services/sml/types';
 import { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { EsqlColumn } from '@elastic/elasticsearch/lib/helpers';
 
 const INDEX_SUMMARIZATION_SML_TYPE = 'index_summarization';
 
 interface IndexSummarizationSmlTypeDeps {
     logger: Logger;
+    getActionsClient: (request: KibanaRequest) => Promise<ActionsClient>;
 }
 
 export const createIndexSummarizationSmlType = (deps: IndexSummarizationSmlTypeDeps): SmlTypeDefinition => {
+    const { getActionsClient, logger } = deps;    
+
     return {
         id: INDEX_SUMMARIZATION_SML_TYPE,
         list: (_context) => {
@@ -58,13 +63,22 @@ export const createIndexSummarizationSmlType = (deps: IndexSummarizationSmlTypeD
                 }
             }
 
+            const systemPrompt = `
+You are a helpful assistant for summarizing the values in a field across multiple records in an Elasticsearch index. 
+You will be given a list of text chunks that represent sampled values for a single field across different records.
+Your task is to consolidate these summaries into a single summary that captures the overall patterns, variations, and data quality issues for that field.
+Do not report on individual values, but rather identify common themes, notable differences, and any insights about the likely data type or structure.
+Do not include any information about the quality of the data.
+If you are unsure about the content or quality of the data, do not speculate or make assumptions.            
+            `;
+
             const summaryPrompt = `
 You are given a set of document values for different fields in an Elasticsearch index, along with the index mapping that describes the field types and structure.
 The index mapping is in JSON format and includes the field names, types, and any nested structures.
 Using this information, provide a final summary of the index as a whole.
 Identify the overall themes and topics represented in the index, the types of data contained.
 Consider how the different fields relate to each other and what insights can be drawn about the nature of the data in the index.
-Do not give any specific examples from the field summaries, only summarize the findings.
+Do not give any specific examples from the field data, only summarize the findings.
 Provide a list of up to the top 10 most interesting or unique fields in the index based on the summaries, and explain why they are notable.
 Keep the summary concise but informative, ideally no more than 5 sentences.
 
@@ -84,6 +98,41 @@ ${JSON.stringify(sampleDocuments, null, 2)}
             `;
 
             // TODO - call out to LLM with summaryPrompt and return the response as part of SmlData
+            const LLMEndpointConnector = "Anthropic-Claude-Opus-4-6";
+            const actionsClient = await getActionsClient(context.request);
+
+            try {
+                const llmResponse = await actionsClient.execute({
+                    actionId: LLMEndpointConnector,
+                    params: {
+                        body: {
+                            system_prompt: systemPrompt,
+                            user_prompt: summaryPrompt,
+                        },
+                    },
+                });
+
+                const summaryContent = (llmResponse?.data as any)?.choices?.[0]?.message?.content || 'No summary generated';
+
+                logger.info(
+                    `LLM response for index summarization of '${originId}': ${summaryContent}`
+                );
+
+                return {
+                    chunks: [
+                        {
+                            type: INDEX_SUMMARIZATION_SML_TYPE,
+                            title: `index summary for ${originId}`,
+                            content: summaryContent,
+                            permissions: ['index/get'],
+                        },
+                    ],
+                };
+            } catch (error) {
+                logger.warn(
+                    `Failed to get LLM response for index summarization of '${originId}': ${(error as Error).message}`
+                );
+            }
 
             return undefined; // TODO: Implement logic to fetch index summarization data
         },
