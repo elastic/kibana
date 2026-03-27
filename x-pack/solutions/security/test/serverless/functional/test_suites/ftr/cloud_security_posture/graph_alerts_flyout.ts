@@ -77,8 +77,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         entityTypes: ['generic'],
       });
 
-      // Create v2 lookup index so the graph ESQL query uses LOOKUP JOIN instead of ENRICH.
-      // ENRICH requires monitor_enrich cluster privilege that editor/viewer roles lack.
+      // Create v2 lookup index so the graph ESQL query can use LOOKUP JOIN for entity enrichment.
       await es.indices.create({
         index: '.entities.v2.latest.security_default',
         settings: { index: { mode: 'lookup' } },

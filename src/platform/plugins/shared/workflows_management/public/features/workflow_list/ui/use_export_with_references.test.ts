@@ -7,283 +7,336 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, renderHook, waitFor } from '@testing-library/react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { WorkflowListItemDto, WorkflowYaml } from '@kbn/workflows';
-import { useWorkflowsApi } from '@kbn/workflows-ui';
+import { act, renderHook } from '@testing-library/react';
+import type { WorkflowListItemDto } from '@kbn/workflows';
 import { useExportWithReferences } from './use_export_with_references';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
+const mockNotifications = {
+  toasts: {
+    addSuccess: jest.fn(),
+    addWarning: jest.fn(),
+    addError: jest.fn(),
+  },
+};
+
+const mockReportWorkflowExported = jest.fn();
+
+const mockApi = {
+  exportWorkflows: jest.fn(),
+};
+
+jest.mock('@kbn/workflows-ui', () => ({
+  useWorkflowsApi: () => mockApi,
 }));
 
-jest.mock('@kbn/workflows-ui');
-const mockUseWorkflowsApi = useWorkflowsApi as jest.MockedFunction<typeof useWorkflowsApi>;
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: () => ({
+    services: {
+      notifications: mockNotifications,
+    },
+  }),
+}));
 
 jest.mock('../../../hooks/use_telemetry', () => ({
-  useTelemetry: () => ({ reportWorkflowExported: jest.fn() }),
+  useTelemetry: () => ({
+    reportWorkflowExported: mockReportWorkflowExported,
+  }),
 }));
 
-const mockExportSingleWorkflow = jest.fn();
+// Mock export_workflows module
 const mockExportWorkflows = jest.fn();
+const mockExportSingleWorkflow = jest.fn();
 const mockFindMissingReferencedIds = jest.fn();
 const mockResolveAllReferences = jest.fn();
 
 jest.mock('../../../common/lib/export_workflows', () => ({
-  exportSingleWorkflow: (...args: unknown[]) => mockExportSingleWorkflow(...args),
   exportWorkflows: (...args: unknown[]) => mockExportWorkflows(...args),
+  exportSingleWorkflow: (...args: unknown[]) => mockExportSingleWorkflow(...args),
   findMissingReferencedIds: (...args: unknown[]) => mockFindMissingReferencedIds(...args),
   resolveAllReferences: (...args: unknown[]) => mockResolveAllReferences(...args),
 }));
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-
-const createWorkflow = (overrides: Partial<WorkflowListItemDto> = {}): WorkflowListItemDto => ({
-  id: 'w-1',
+const createMockWorkflow = (overrides: Partial<WorkflowListItemDto> = {}): WorkflowListItemDto => ({
+  id: 'wf-1',
   name: 'Test Workflow',
-  description: 'desc',
+  description: 'A test workflow',
   enabled: true,
-  definition: { steps: [] } as unknown as WorkflowYaml,
-  createdAt: '2026-01-01T00:00:00Z',
+  definition: {
+    version: '1',
+    name: 'Test Workflow',
+    enabled: true,
+    triggers: [],
+    steps: [],
+  },
+  createdAt: '2024-01-01T00:00:00Z',
   history: [],
   valid: true,
   ...overrides,
 });
 
 describe('useExportWithReferences', () => {
-  let mockApi: { exportWorkflows: jest.Mock };
-  let mockToasts: {
-    addSuccess: jest.Mock;
-    addWarning: jest.Mock;
-    addError: jest.Mock;
-  };
-  let onComplete: jest.Mock;
+  const allWorkflowsMap = new Map<string, WorkflowListItemDto>();
+  const onComplete = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockApi = { exportWorkflows: jest.fn() };
-    mockToasts = {
-      addSuccess: jest.fn(),
-      addWarning: jest.fn(),
-      addError: jest.fn(),
-    };
-    onComplete = jest.fn();
-    mockUseWorkflowsApi.mockReturnValue(mockApi as any);
-    mockUseKibana.mockReturnValue({
-      services: {
-        notifications: { toasts: mockToasts },
-      },
-    } as any);
-    mockExportWorkflows.mockResolvedValue(1);
+    allWorkflowsMap.clear();
     mockFindMissingReferencedIds.mockReturnValue([]);
-    mockResolveAllReferences.mockImplementation((initial: WorkflowListItemDto[]) => initial);
+  });
+
+  it('returns initial state with no export modal', () => {
+    const { result } = renderHook(() => useExportWithReferences({ allWorkflowsMap, onComplete }));
+    expect(result.current.exportModalState).toBeNull();
   });
 
   describe('startExport', () => {
-    it('should export directly when no references are missing', () => {
+    it('exports a single workflow as YAML without showing a modal', () => {
       mockFindMissingReferencedIds.mockReturnValue([]);
-      const wA = createWorkflow({ id: 'a' });
 
-      const { result } = renderHook(() =>
-        useExportWithReferences({ allWorkflowsMap: new Map(), onComplete })
+      const workflow = createMockWorkflow();
+      const { result } = renderHook(() => useExportWithReferences({ allWorkflowsMap, onComplete }));
+
+      act(() => {
+        result.current.startExport([workflow]);
+      });
+
+      expect(mockExportSingleWorkflow).toHaveBeenCalledWith(workflow);
+      expect(mockNotifications.toasts.addSuccess).toHaveBeenCalled();
+      expect(mockReportWorkflowExported).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowCount: 1,
+          format: 'yaml',
+          referenceResolution: 'none',
+        })
       );
-
-      act(() => result.current.startExport([wA]));
-
-      expect(mockExportSingleWorkflow).toHaveBeenCalledWith(wA);
-      expect(result.current.exportModalState).toBeNull();
+      expect(onComplete).toHaveBeenCalled();
     });
 
-    it('should show modal when missing references exist in allWorkflowsMap', () => {
-      const wA = createWorkflow({ id: 'a' });
-      const wB = createWorkflow({ id: 'b', name: 'Referenced' });
-      mockFindMissingReferencedIds.mockReturnValue(['b']);
+    it('exports multiple workflows as ZIP when no references are missing', async () => {
+      mockFindMissingReferencedIds.mockReturnValue([]);
+      mockExportWorkflows.mockResolvedValue(2);
 
-      const allMap = new Map([
-        ['a', wA],
-        ['b', wB],
-      ]);
+      const workflows = [createMockWorkflow({ id: 'wf-1' }), createMockWorkflow({ id: 'wf-2' })];
+      const { result } = renderHook(() => useExportWithReferences({ allWorkflowsMap, onComplete }));
 
-      const { result } = renderHook(() =>
-        useExportWithReferences({ allWorkflowsMap: allMap, onComplete })
+      await act(async () => {
+        result.current.startExport(workflows);
+      });
+
+      expect(mockExportWorkflows).toHaveBeenCalledWith(workflows, mockApi);
+      expect(mockNotifications.toasts.addSuccess).toHaveBeenCalled();
+      expect(mockReportWorkflowExported).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowCount: 2,
+          format: 'zip',
+          referenceResolution: 'none',
+        })
       );
+    });
 
-      act(() => result.current.startExport([wA]));
+    it('shows the references modal when there are missing references', () => {
+      const mainWorkflow = createMockWorkflow({ id: 'wf-main' });
+      const referencedWorkflow = createMockWorkflow({ id: 'wf-ref', name: 'Referenced Workflow' });
+
+      allWorkflowsMap.set('wf-main', mainWorkflow);
+      allWorkflowsMap.set('wf-ref', referencedWorkflow);
+
+      mockFindMissingReferencedIds.mockReturnValue(['wf-ref']);
+
+      const { result } = renderHook(() => useExportWithReferences({ allWorkflowsMap, onComplete }));
+
+      act(() => {
+        result.current.startExport([mainWorkflow]);
+      });
 
       expect(result.current.exportModalState).not.toBeNull();
-      expect(result.current.exportModalState!.missingWorkflows).toEqual([wB]);
-      expect(result.current.exportModalState!.pendingExport).toEqual([wA]);
-      expect(mockExportSingleWorkflow).not.toHaveBeenCalled();
+      expect(result.current.exportModalState?.missingWorkflows).toEqual([referencedWorkflow]);
+      expect(result.current.exportModalState?.pendingExport).toEqual([mainWorkflow]);
     });
 
-    it('should export directly when missing references are NOT in allWorkflowsMap (deleted)', () => {
-      const wA = createWorkflow({ id: 'a' });
-      mockFindMissingReferencedIds.mockReturnValue(['deleted-id']);
+    it('exports without modal when missing IDs are not found in allWorkflowsMap', () => {
+      mockFindMissingReferencedIds.mockReturnValue(['wf-unknown']);
+      // allWorkflowsMap does NOT have 'wf-unknown'
 
-      const { result } = renderHook(() =>
-        useExportWithReferences({ allWorkflowsMap: new Map([['a', wA]]), onComplete })
-      );
+      const workflow = createMockWorkflow();
+      const { result } = renderHook(() => useExportWithReferences({ allWorkflowsMap, onComplete }));
 
-      act(() => result.current.startExport([wA]));
+      act(() => {
+        result.current.startExport([workflow]);
+      });
 
-      expect(mockExportSingleWorkflow).toHaveBeenCalledWith(wA);
+      // Should fall through to exportWithoutReferences because missingWorkflows is empty
       expect(result.current.exportModalState).toBeNull();
+      expect(mockExportSingleWorkflow).toHaveBeenCalled();
     });
   });
 
   describe('handleIgnore', () => {
-    it('should export only the originally selected workflows', async () => {
-      const wA = createWorkflow({ id: 'a' });
-      const wB = createWorkflow({ id: 'b' });
-      mockFindMissingReferencedIds.mockReturnValue(['b']);
+    it('exports pending workflows without references and clears the modal', async () => {
+      const mainWorkflow = createMockWorkflow({ id: 'wf-main' });
+      const referencedWorkflow = createMockWorkflow({ id: 'wf-ref' });
+
+      allWorkflowsMap.set('wf-main', mainWorkflow);
+      allWorkflowsMap.set('wf-ref', referencedWorkflow);
+
+      mockFindMissingReferencedIds.mockReturnValue(['wf-ref']);
       mockExportWorkflows.mockResolvedValue(1);
 
-      const allMap = new Map([
-        ['a', wA],
-        ['b', wB],
-      ]);
+      const { result } = renderHook(() => useExportWithReferences({ allWorkflowsMap, onComplete }));
 
-      const { result } = renderHook(() =>
-        useExportWithReferences({ allWorkflowsMap: allMap, onComplete })
-      );
+      act(() => {
+        result.current.startExport([mainWorkflow]);
+      });
 
-      // First, trigger the modal
-      act(() => result.current.startExport([wA]));
       expect(result.current.exportModalState).not.toBeNull();
 
-      // Then ignore references
-      await act(async () => result.current.handleIgnore());
-
-      await waitFor(() => {
-        expect(mockExportWorkflows).toHaveBeenCalledWith([wA], mockApi);
+      await act(async () => {
+        result.current.handleIgnore();
       });
+
       expect(result.current.exportModalState).toBeNull();
+      expect(mockExportWorkflows).toHaveBeenCalledWith([mainWorkflow], mockApi);
+      expect(mockReportWorkflowExported).toHaveBeenCalledWith(
+        expect.objectContaining({ referenceResolution: 'ignore' })
+      );
     });
   });
 
   describe('handleAddDirect', () => {
-    it('should merge direct references into the export', async () => {
-      const wA = createWorkflow({ id: 'a' });
-      const wB = createWorkflow({ id: 'b' });
-      mockFindMissingReferencedIds.mockReturnValue(['b']);
+    it('exports pending + missing workflows and clears the modal', async () => {
+      const mainWorkflow = createMockWorkflow({ id: 'wf-main' });
+      const referencedWorkflow = createMockWorkflow({ id: 'wf-ref' });
+
+      allWorkflowsMap.set('wf-main', mainWorkflow);
+      allWorkflowsMap.set('wf-ref', referencedWorkflow);
+
+      mockFindMissingReferencedIds.mockReturnValue(['wf-ref']);
       mockExportWorkflows.mockResolvedValue(2);
 
-      const allMap = new Map([
-        ['a', wA],
-        ['b', wB],
-      ]);
+      const { result } = renderHook(() => useExportWithReferences({ allWorkflowsMap, onComplete }));
 
-      const { result } = renderHook(() =>
-        useExportWithReferences({ allWorkflowsMap: allMap, onComplete })
-      );
-
-      act(() => result.current.startExport([wA]));
-
-      await act(async () => result.current.handleAddDirect());
-
-      await waitFor(() => {
-        expect(mockExportWorkflows).toHaveBeenCalledWith([wA, wB], mockApi);
+      act(() => {
+        result.current.startExport([mainWorkflow]);
       });
+
+      await act(async () => {
+        result.current.handleAddDirect();
+      });
+
+      expect(result.current.exportModalState).toBeNull();
+      expect(mockExportWorkflows).toHaveBeenCalledWith([mainWorkflow, referencedWorkflow], mockApi);
+      expect(mockReportWorkflowExported).toHaveBeenCalledWith(
+        expect.objectContaining({ referenceResolution: 'add_direct' })
+      );
     });
   });
 
   describe('handleAddAll', () => {
-    it('should recursively resolve all transitive references', async () => {
-      const wA = createWorkflow({ id: 'a' });
-      const wB = createWorkflow({ id: 'b' });
-      const wC = createWorkflow({ id: 'c' });
-      mockFindMissingReferencedIds.mockReturnValue(['b']);
-      mockResolveAllReferences.mockReturnValue([wA, wB, wC]);
+    it('resolves all references and exports them', async () => {
+      const mainWorkflow = createMockWorkflow({ id: 'wf-main' });
+      const referencedWorkflow = createMockWorkflow({ id: 'wf-ref' });
+      const transitiveWorkflow = createMockWorkflow({ id: 'wf-transitive' });
+
+      allWorkflowsMap.set('wf-main', mainWorkflow);
+      allWorkflowsMap.set('wf-ref', referencedWorkflow);
+      allWorkflowsMap.set('wf-transitive', transitiveWorkflow);
+
+      mockFindMissingReferencedIds.mockReturnValue(['wf-ref']);
+      mockResolveAllReferences.mockReturnValue([
+        mainWorkflow,
+        referencedWorkflow,
+        transitiveWorkflow,
+      ]);
       mockExportWorkflows.mockResolvedValue(3);
 
-      const allMap = new Map([
-        ['a', wA],
-        ['b', wB],
-        ['c', wC],
-      ]);
+      const { result } = renderHook(() => useExportWithReferences({ allWorkflowsMap, onComplete }));
 
-      const { result } = renderHook(() =>
-        useExportWithReferences({ allWorkflowsMap: allMap, onComplete })
-      );
-
-      act(() => result.current.startExport([wA]));
-
-      await act(async () => result.current.handleAddAll());
-
-      await waitFor(() => {
-        expect(mockResolveAllReferences).toHaveBeenCalledWith([wA, wB], allMap);
-        expect(mockExportWorkflows).toHaveBeenCalledWith([wA, wB, wC], mockApi);
+      act(() => {
+        result.current.startExport([mainWorkflow]);
       });
+
+      await act(async () => {
+        result.current.handleAddAll();
+      });
+
+      expect(result.current.exportModalState).toBeNull();
+      expect(mockResolveAllReferences).toHaveBeenCalled();
+      expect(mockExportWorkflows).toHaveBeenCalledWith(
+        [mainWorkflow, referencedWorkflow, transitiveWorkflow],
+        mockApi
+      );
+      expect(mockReportWorkflowExported).toHaveBeenCalledWith(
+        expect.objectContaining({ referenceResolution: 'add_all' })
+      );
     });
   });
 
   describe('handleCancel', () => {
-    it('should close the modal without exporting', () => {
-      const wA = createWorkflow({ id: 'a' });
-      const wB = createWorkflow({ id: 'b' });
-      mockFindMissingReferencedIds.mockReturnValue(['b']);
+    it('clears the modal state without exporting', () => {
+      const mainWorkflow = createMockWorkflow({ id: 'wf-main' });
+      const referencedWorkflow = createMockWorkflow({ id: 'wf-ref' });
 
-      const allMap = new Map([
-        ['a', wA],
-        ['b', wB],
-      ]);
+      allWorkflowsMap.set('wf-main', mainWorkflow);
+      allWorkflowsMap.set('wf-ref', referencedWorkflow);
 
-      const { result } = renderHook(() =>
-        useExportWithReferences({ allWorkflowsMap: allMap, onComplete })
-      );
+      mockFindMissingReferencedIds.mockReturnValue(['wf-ref']);
 
-      act(() => result.current.startExport([wA]));
+      const { result } = renderHook(() => useExportWithReferences({ allWorkflowsMap, onComplete }));
+
+      act(() => {
+        result.current.startExport([mainWorkflow]);
+      });
+
       expect(result.current.exportModalState).not.toBeNull();
 
-      act(() => result.current.handleCancel());
+      act(() => {
+        result.current.handleCancel();
+      });
 
       expect(result.current.exportModalState).toBeNull();
       expect(mockExportWorkflows).not.toHaveBeenCalled();
-      expect(mockExportSingleWorkflow).not.toHaveBeenCalled();
     });
   });
 
-  describe('performExport', () => {
-    it('should show warning toast when some workflows have null definitions', async () => {
-      const workflows = [
-        createWorkflow({ id: 'w-1' }),
-        createWorkflow({ id: 'w-2', definition: null }),
-      ];
+  describe('error handling', () => {
+    it('shows an error toast and reports telemetry when export fails', async () => {
       mockFindMissingReferencedIds.mockReturnValue([]);
-      mockExportWorkflows.mockResolvedValue(1);
+      const exportError = new Error('Export failed');
+      mockExportWorkflows.mockRejectedValue(exportError);
 
-      const { result } = renderHook(() =>
-        useExportWithReferences({ allWorkflowsMap: new Map(), onComplete })
-      );
+      const workflows = [createMockWorkflow({ id: 'wf-1' }), createMockWorkflow({ id: 'wf-2' })];
+      const { result } = renderHook(() => useExportWithReferences({ allWorkflowsMap, onComplete }));
 
-      act(() => result.current.startExport(workflows));
-
-      await waitFor(() => {
-        expect(mockExportWorkflows).toHaveBeenCalledWith(workflows, mockApi);
-        expect(mockToasts.addWarning).toHaveBeenCalledWith(
-          expect.stringContaining('skipped'),
-          expect.any(Object)
-        );
+      await act(async () => {
+        result.current.startExport(workflows);
       });
+
+      expect(mockNotifications.toasts.addError).toHaveBeenCalledWith(
+        exportError,
+        expect.objectContaining({
+          title: 'Failed to export workflows',
+        })
+      );
+      expect(mockReportWorkflowExported).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: exportError,
+        })
+      );
     });
 
-    it('should show error toast when export API fails', async () => {
-      const workflows = [createWorkflow({ id: 'w-1' }), createWorkflow({ id: 'w-2' })];
+    it('shows a warning toast when some workflows were skipped', async () => {
       mockFindMissingReferencedIds.mockReturnValue([]);
-      mockExportWorkflows.mockRejectedValue(new Error('Network failure'));
+      // Return 1 exported out of 2 provided => 1 was skipped
+      mockExportWorkflows.mockResolvedValue(1);
 
-      const { result } = renderHook(() =>
-        useExportWithReferences({ allWorkflowsMap: new Map(), onComplete })
-      );
+      const workflows = [createMockWorkflow({ id: 'wf-1' }), createMockWorkflow({ id: 'wf-2' })];
+      const { result } = renderHook(() => useExportWithReferences({ allWorkflowsMap, onComplete }));
 
-      act(() => result.current.startExport(workflows));
-
-      await waitFor(() => {
-        expect(mockToasts.addError).toHaveBeenCalledWith(
-          expect.any(Error),
-          expect.objectContaining({ title: 'Failed to export workflows' })
-        );
+      await act(async () => {
+        result.current.startExport(workflows);
       });
+
+      expect(mockNotifications.toasts.addWarning).toHaveBeenCalled();
     });
   });
 });

@@ -2966,10 +2966,18 @@
             "section": "def-common.Query",
             "text": "Query"
           },
-          " | undefined) => string"
+          " | undefined, filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined) => string"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_initial_esql_query.ts",
-        "lineNumber": 37,
+        "lineNumber": 43,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2991,7 +2999,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_initial_esql_query.ts",
-            "lineNumber": 44,
+            "lineNumber": 52,
             "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
@@ -3015,8 +3023,34 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_initial_esql_query.ts",
-            "lineNumber": 44,
+            "lineNumber": 52,
             "columnNumber": 57,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getInitialESQLQuery.$3",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [
+              "- DSL filters to convert to ES|QL WHERE clauses"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_initial_esql_query.ts",
+            "lineNumber": 52,
+            "columnNumber": 72,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
