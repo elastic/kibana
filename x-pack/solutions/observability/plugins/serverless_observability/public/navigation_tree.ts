@@ -108,7 +108,7 @@ export const createNavigationTree = ({
           defaultMessage: 'SLOs',
         }),
         link: 'slo',
-        icon: 'visGauge',
+        icon: 'chartGauge',
       },
       ...filterForFeatureAvailability(
         {
@@ -408,7 +408,7 @@ export const createNavigationTree = ({
           defaultMessage: 'Add data',
         }),
         link: 'observabilityOnboarding',
-        icon: 'plusInCircle',
+        icon: 'plusCircle',
       },
       {
         id: 'devTools',

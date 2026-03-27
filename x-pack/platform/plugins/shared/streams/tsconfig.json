@@ -84,5 +84,6 @@
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-common",
     "@kbn/datemath",
+    "@kbn/setup-node-env",
   ]
 }
