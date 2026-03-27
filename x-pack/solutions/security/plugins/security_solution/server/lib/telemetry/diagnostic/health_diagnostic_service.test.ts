@@ -141,6 +141,80 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
         expect(mockQueryExecutor.search).not.toHaveBeenCalled();
       });
 
+      describe('query attribute filtering', () => {
+        test('should filter out queries with unknown version (missing scheduleCron and enabled)', async () => {
+          (artifactService.getArtifact as jest.Mock).mockResolvedValue({
+            data: `---
+id: unknown-version-query
+name: unknown-version-query
+version: 99
+type: DSL
+query: '{"query": {"match_all": {}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true`,
+          });
+
+          const result = await service.runHealthDiagnosticQueries({});
+
+          expect(result).toHaveLength(0);
+          expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+        });
+
+        test('should filter out queries missing the enabled attribute', async () => {
+          (artifactService.getArtifact as jest.Mock).mockResolvedValue({
+            data: `---
+id: no-enabled-query
+name: no-enabled-query
+index: test-index
+type: DSL
+query: '{"query": {"match_all": {}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep`,
+          });
+
+          const result = await service.runHealthDiagnosticQueries({});
+
+          expect(result).toHaveLength(0);
+          expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+        });
+
+        test('should only execute valid queries when mixed with unknown-version queries', async () => {
+          (artifactService.getArtifact as jest.Mock).mockResolvedValue({
+            data: `---
+id: valid-query-1
+name: valid-query-1
+index: test-index
+type: DSL
+query: '{"query": {"match_all": {}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true
+---
+id: unknown-version-query
+name: unknown-version-query
+version: 99
+type: DSL
+query: '{"query": {"match_all": {}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true`,
+          });
+
+          mockQueryExecutor.search.mockReturnValue(of(mockDocument));
+
+          const result = await service.runHealthDiagnosticQueries({});
+
+          expect(result).toHaveLength(1);
+          expect(result[0].name).toBe('valid-query-1');
+          expect(mockQueryExecutor.search).toHaveBeenCalledTimes(1);
+        });
+      });
+
       test('should include circuit breaker stats in successful execution', async () => {
         const lastExecutionByQuery = { 'test-query': 1640995200000 };
         mockQueryExecutor.search.mockReturnValue(of(mockDocument));

@@ -368,7 +368,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       } as LogMeta);
       try {
         if (!('scheduleCron' in query) || !('enabled' in query)) {
-          return true;
+          return false;
         }
         const {
           name,
