@@ -65,7 +65,7 @@ export function registerInternalSkillsRoutes({
       validate: {
         body: schema.object({
           ids: schema.arrayOf(SKILL_ID_STRING, { minSize: 1, maxSize: 1000 }),
-          force: schema.boolean({ defaultValue: true }),
+          force: schema.boolean({ defaultValue: false }),
         }),
       },
       options: { access: 'internal' },
