@@ -35,6 +35,7 @@ steps:
     key: osquery-cypress-burn
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 115
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
