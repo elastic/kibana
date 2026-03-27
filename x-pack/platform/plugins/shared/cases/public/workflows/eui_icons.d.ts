@@ -7,7 +7,7 @@
 
 declare module '@elastic/eui/es/components/icon/assets/*' {
   import type * as React from 'react';
-  import type { SVGProps } from 'react';
+
   interface SVGRProps {
     title?: string;
     titleId?: string;
@@ -16,6 +16,6 @@ declare module '@elastic/eui/es/components/icon/assets/*' {
     title,
     titleId,
     ...props
-  }: SVGProps<SVGSVGElement> & SVGRProps) => React.JSX.Element;
+  }: React.SVGProps<SVGSVGElement> & SVGRProps) => React.JSX.Element;
   export {};
 }
