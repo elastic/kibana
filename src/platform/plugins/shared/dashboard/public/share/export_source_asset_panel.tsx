@@ -12,19 +12,23 @@ import { css } from '@emotion/react';
 import {
   EuiAccordion,
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
-  EuiCodeBlock,
+  EuiCopy,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiSpacer,
   EuiText,
   euiYScrollWithShadows,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TryInConsoleButton } from '@kbn/try-in-console';
+import { XJsonLang } from '@kbn/monaco';
+import { compressToEncodedURIComponent } from 'lz-string';
+import { CodeEditor } from '@kbn/code-editor';
 import type { DashboardState } from '../../server';
 import { getSanitizedExportSource } from './dashboard_export_source_client';
 import { buildCreateDashboardRequestForConsole } from './export_source_share_utils';
@@ -200,39 +204,110 @@ function SuccessState({
   openInConsoleRequest: string;
   jsonValue: string;
 }) {
+  const useUrl = shareService?.url.locators.useUrl;
+  const navigateToUrl = coreServices.application?.navigateToUrl;
+
+  const devToolsDataUri = compressToEncodedURIComponent(openInConsoleRequest);
+  const consoleHref = useUrl?.(
+    () => ({
+      id: 'CONSOLE_APP_LOCATOR',
+      params: {
+        loadFrom: `data:text/plain,${devToolsDataUri}`,
+      },
+    }),
+    [devToolsDataUri]
+  );
+
+  const canShowDevTools = Boolean(
+    coreServices.application?.capabilities?.dev_tools?.show && consoleHref !== undefined
+  );
+  const handleDevToolsLinkClick = useCallback(() => {
+    if (consoleHref && navigateToUrl) {
+      navigateToUrl(consoleHref);
+    }
+  }, [consoleHref, navigateToUrl]);
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs" css={{ height: '100%' }}>
-      <EuiFlexItem grow={false} css={{ alignSelf: 'flex-end' }}>
-        <TryInConsoleButton
-          request={openInConsoleRequest}
-          application={coreServices.application}
-          sharePlugin={shareService}
-          type="emptyButton"
-          iconType="wrench"
-          content={i18n.translate('dashboard.exportSource.openInConsoleButtonLabel', {
-            defaultMessage: 'Open in Console',
-          })}
-          data-test-subj="dashboardExportSourceOpenInConsoleButton"
-        />
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      wrap={false}
+      responsive={false}
+      css={css({
+        '.react-monaco-editor-container': {
+          flexGrow: 1, // Ensure the editor takes the full height of its flex container on Safari.
+        },
+      })}
+      data-test-subj="exportAssetValue"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" wrap>
+          <EuiFlexItem grow={false}>
+            <div>
+              <EuiCopy textToCopy={jsonValue}>
+                {(copy) => (
+                  <EuiButtonEmpty
+                    size="xs"
+                    flush="right"
+                    iconType="copyClipboard"
+                    onClick={copy}
+                    aria-label={i18n.translate('dashboard.exportSource.copyAriaLabel', {
+                      defaultMessage: 'Copy JSON source',
+                    })}
+                    data-test-subj="dashboardExportSourceCopyButton"
+                  >
+                    {i18n.translate('dashboard.exportSource.copyButtonLabel', {
+                      defaultMessage: 'Copy to clipboard',
+                    })}
+                  </EuiButtonEmpty>
+                )}
+              </EuiCopy>
+            </div>
+          </EuiFlexItem>
+          {canShowDevTools ? (
+            <EuiFlexItem grow={false}>
+              <div>
+                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                <EuiButtonEmpty
+                  size="xs"
+                  flush="right"
+                  iconType="wrench"
+                  href={consoleHref}
+                  onClick={handleDevToolsLinkClick}
+                  data-test-subj="dashboardExportSourceOpenInConsoleButton"
+                >
+                  {i18n.translate('dashboard.exportSource.openInConsoleButtonLabel', {
+                    defaultMessage: 'Open in Console',
+                  })}
+                </EuiButtonEmpty>
+              </div>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow css={{ minHeight: 0 }}>
-        <EuiCodeBlock
-          data-test-subj="exportAssetValue"
-          css={{ overflowWrap: 'break-word' }}
-          overflowHeight="100%"
-          language="json"
-          whiteSpace="pre"
-          isCopyable
-          isVirtualized
-          copyAriaLabel={i18n.translate('dashboard.exportSource.copyAriaLabel', {
-            defaultMessage: 'Copy JSON source',
-          })}
+      <EuiFlexItem grow={true}>
+        <CodeEditor
+          languageId={XJsonLang.ID}
+          value={jsonValue}
           aria-label={i18n.translate('dashboard.exportSource.codeBlockAriaLabel', {
             defaultMessage: 'Export JSON source',
           })}
-        >
-          {jsonValue}
-        </EuiCodeBlock>
+          options={{
+            readOnly: true,
+            lineNumbers: 'off',
+            fontSize: 12,
+            minimap: {
+              enabled: false,
+            },
+            folding: true,
+            scrollBeyondLastLine: false,
+            glyphMargin: true,
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
+            automaticLayout: true,
+          }}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -247,11 +322,11 @@ function ErrorState({ errorMessage, onRetry }: { errorMessage: string; onRetry: 
       css={{ height: '100%' }}
       gutterSize="none"
     >
-      <EuiFlexItem grow={false} css={{ maxWidth: 560 }}>
+      <EuiFlexItem grow={false}>
         <EuiEmptyPrompt
           iconType="error"
           color="danger"
-          titleSize="xs"
+          titleSize="s"
           data-test-subj="dashboardExportSourceSanitizeErrorPrompt"
           title={
             <h3>
@@ -261,11 +336,7 @@ function ErrorState({ errorMessage, onRetry }: { errorMessage: string; onRetry: 
             </h3>
           }
           body={
-            <EuiText
-              size="s"
-              color="subdued"
-              css={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}
-            >
+            <EuiText size="s">
               <p>
                 {i18n.translate('dashboard.exportSource.sanitizeErrorBody', {
                   defaultMessage: 'Sorry, there was an error loading the JSON source.',

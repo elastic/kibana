@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
+import '@kbn/code-editor-mock/jest_helper';
 import type { DashboardState } from '../../server';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
 import { ExportSourceAssetPanel } from './export_source_asset_panel';
