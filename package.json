@@ -111,7 +111,6 @@
     "@aws-sdk/client-kendra": "3.994.0",
     "@aws-sdk/credential-provider-node": "3.972.10",
     "@elastic/elasticsearch/@elastic/transport": "9.3.5",
-    "@langchain/core/ansi-styles": "4.3.0",
     "@storybook/react-docgen-typescript-plugin": "1.0.6--canary.9.cd77847.0",
     "@types/react": "18.2.79",
     "@types/react-dom": "18.2.25",
