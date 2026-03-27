@@ -2421,6 +2421,9 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/virustotal/** @elasti
 src/platform/packages/shared/kbn-connector-specs/src/specs/zendesk/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/zoom/** @elastic/workchat-eng
 
+# Connector Workflow Tests
+src/platform/plugins/shared/workflows_management/test/connector_workflows @elastic/workchat-eng
+
 # Gap fill feature has shared responsibility between response-ops and security-detection-engine
 /x-pack/platform/plugins/shared/alerting/common/routes/gaps @elastic/response-ops @elastic/security-detection-engine
 /x-pack/platform/plugins/shared/alerting/server/application/gaps @elastic/response-ops @elastic/security-detection-engine
