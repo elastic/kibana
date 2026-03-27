@@ -14,7 +14,8 @@ export function useGetServiceBadgeHrefFromRouter(): WaterfallGetServiceBadgeHref
   const router = useApmRouter();
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
-    '/mobile-services/{serviceName}/transactions/view'
+    '/mobile-services/{serviceName}/transactions/view',
+    '/dependencies/operation'
   );
 
   return useCallback(

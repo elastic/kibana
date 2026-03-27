@@ -91,4 +91,32 @@ describe('useGetServiceBadgeHrefFromRouter', () => {
 
     expect(href).toBe('/apm/services/checkout-service/overview');
   });
+
+  it('works when called from the /dependencies/operation route', () => {
+    mockUseAnyOfApmParams.mockReturnValue({
+      query: {
+        rangeFrom: 'now-1h',
+        rangeTo: 'now',
+        environment: 'staging',
+        comparisonEnabled: false,
+        kuery: '',
+        serviceGroup: '',
+      },
+    } as any);
+
+    const { result } = renderHook(() => useGetServiceBadgeHrefFromRouter());
+
+    result.current('downstream-service');
+
+    expect(mockLink).toHaveBeenCalledWith('/services/{serviceName}/overview', {
+      path: { serviceName: 'downstream-service' },
+      query: expect.objectContaining({
+        rangeFrom: 'now-1h',
+        rangeTo: 'now',
+        environment: 'staging',
+        kuery: '',
+        serviceGroup: '',
+      }),
+    });
+  });
 });
