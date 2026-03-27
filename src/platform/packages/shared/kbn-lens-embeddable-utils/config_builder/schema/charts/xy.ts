@@ -28,7 +28,7 @@ import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema } from '../color';
 import { filterSchema } from '../filter';
 import { builderEnums } from '../enums';
-import { cornerPositionSchema, positionSchema } from '../alignments';
+import { cornerPositionSchema } from '../alignments';
 
 /**
  * Statistical functions that can be displayed in chart legend for data series
@@ -196,8 +196,28 @@ const sharedLegendSchema = {
       maxSize: statisticsOptionsSize,
     })
   ),
-  truncate_after_lines: legendTruncateAfterLinesSchema,
 };
+
+/**
+ * Layout Schemas
+ */
+const legendTruncateMaxPixelsSchema = schema.number({
+  defaultValue: 250,
+  min: 10,
+  max: 1000,
+  meta: {
+    description: 'Maximum pixels before truncating legend items in list layout',
+    id: 'legendTruncateMaxPixels',
+  },
+});
+const gridLayout = schema.object({
+  type: schema.literal('grid'),
+  truncate: schema.maybe(schema.object({ max_lines: legendTruncateAfterLinesSchema })),
+});
+const listLayout = schema.object({
+  type: schema.literal('list'),
+  truncate: schema.maybe(schema.object({ max_pixels: legendTruncateMaxPixelsSchema })),
+});
 
 const XY_API_LINE_INTERPOLATION = {
   LINEAR: 'linear',
@@ -281,12 +301,29 @@ const xySharedSettings = {
   legend: schema.maybe(
     schema.oneOf(
       [
+        // Outside legend, position: top/bottom (supports both Grid and List layout)
         schema.object(
           {
             ...sharedLegendSchema,
             placement: schema.maybe(schema.literal('outside')),
-            layout: schema.maybe(schema.literal('list')),
-            position: schema.maybe(positionSchema()),
+            layout: schema.maybe(schema.oneOf([gridLayout, listLayout])),
+            position: schema.maybe(schema.oneOf([schema.literal('top'), schema.literal('bottom')])),
+          },
+          {
+            meta: {
+              id: 'xyLegendOutsideHorizontal',
+              title: 'Outside horizontal',
+              description: 'Outside legend positioned horizontal (top/bottom) of the chart',
+            },
+          }
+        ),
+        // Outside legend, position: left/right (supports only Grid layout)
+        schema.object(
+          {
+            ...sharedLegendSchema,
+            placement: schema.maybe(schema.literal('outside')),
+            layout: schema.maybe(gridLayout),
+            position: schema.maybe(schema.oneOf([schema.literal('left'), schema.literal('right')])),
             size: schema.maybe(
               schema.oneOf([
                 schema.literal('small'),
@@ -298,11 +335,13 @@ const xySharedSettings = {
           },
           {
             meta: {
-              id: 'xyLegendOutside',
-              description: 'External legend positioned outside the chart',
+              id: 'xyLegendOutsideVertical',
+              title: 'Outside vertical',
+              description: 'Outside legend positioned vertical (left/right) of the chart',
             },
           }
         ),
+        // Legend positioned inside
         schema.object(
           {
             ...sharedLegendSchema,
@@ -319,6 +358,7 @@ const xySharedSettings = {
           {
             meta: {
               id: 'xyLegendInside',
+              title: 'Inside',
               description: 'Internal legend positioned inside the chart',
             },
           }
