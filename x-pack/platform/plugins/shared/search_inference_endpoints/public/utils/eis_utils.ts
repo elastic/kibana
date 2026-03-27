@@ -9,7 +9,10 @@ import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import { isInferenceEndpointWithDisplayNameMetadata } from '../../common/type_guards';
+import {
+  isInferenceEndpointWithDisplayNameMetadata,
+  isInferenceEndpointWithDisplayCreatorMetadata,
+} from '../../common/type_guards';
 import type { MultiSelectFilterOption } from '../components/filter/multi_select_filter';
 
 export type EisInferenceEndpoint = InferenceAPIConfigResponse & {
@@ -19,11 +22,6 @@ export type EisInferenceEndpoint = InferenceAPIConfigResponse & {
 
 export const isEisEndpoint = (ep: InferenceAPIConfigResponse): ep is EisInferenceEndpoint =>
   ep.service === 'elastic';
-
-const serviceProviderKeys = new Set<string>(Object.values(ServiceProviderKeys));
-
-export const isServiceProviderKey = (value: string): value is ServiceProviderKeys =>
-  serviceProviderKeys.has(value);
 
 export type TaskTypeCategory = 'LLM' | 'Embedding' | 'Rerank';
 
@@ -58,6 +56,7 @@ export const TASK_TYPE_DISPLAY_NAME: Record<InferenceTaskType, string> = {
 export interface GroupedModel {
   service: 'elastic';
   modelName: string;
+  modelCreator: string;
   taskTypes: InferenceTaskType[];
   categories: TaskTypeCategory[];
   endpoints: EisInferenceEndpoint[];
@@ -71,10 +70,24 @@ export const getModelName = (endpoint: EisInferenceEndpoint): string => {
   return modelId.length > 0 ? modelId : endpoint.inference_id;
 };
 
-export const getProviderName = (service: string): string => {
-  if (!isServiceProviderKey(service)) return service;
-  return SERVICE_PROVIDERS[service].name;
+export const getModelCreator = (endpoint: EisInferenceEndpoint): string => {
+  if (isInferenceEndpointWithDisplayCreatorMetadata(endpoint)) {
+    return endpoint.metadata.display.model_creator;
+  }
+  return SERVICE_PROVIDERS[endpoint.service]?.name ?? endpoint.service;
 };
+
+const CREATOR_TO_PROVIDER_KEY: Record<string, ServiceProviderKeys> = {
+  Anthropic: ServiceProviderKeys.anthropic,
+  Elastic: ServiceProviderKeys.elastic,
+  Google: ServiceProviderKeys.googleaistudio,
+  Jina: ServiceProviderKeys.jinaai,
+  OpenAI: ServiceProviderKeys.openai,
+  Microsoft: ServiceProviderKeys.azureopenai,
+};
+
+export const getProviderKeyForCreator = (creator: string): ServiceProviderKeys | undefined =>
+  CREATOR_TO_PROVIDER_KEY[creator];
 
 export const groupEndpointsByModel = (endpoints: EisInferenceEndpoint[]): GroupedModel[] => {
   const groups = new Map<string, GroupedModel>();
@@ -98,6 +111,7 @@ export const groupEndpointsByModel = (endpoints: EisInferenceEndpoint[]): Groupe
       groups.set(key, {
         service: ep.service,
         modelName,
+        modelCreator: getModelCreator(ep),
         taskTypes: [ep.task_type],
         categories: cat ? [cat] : [],
         endpoints: [ep],
@@ -130,10 +144,10 @@ export const TASK_TYPE_FILTERS: Array<{ category: TaskTypeCategory; label: strin
 ];
 
 export const getProviderOptions = (models: GroupedModel[]): MultiSelectFilterOption[] => {
-  const unique = [...new Set(models.map((m) => m.service))];
-  return unique.map((service) => ({
-    key: service,
-    label: getProviderName(service),
+  const unique = [...new Set(models.map((m) => m.modelCreator))].sort();
+  return unique.map((creator) => ({
+    key: creator,
+    label: creator,
   }));
 };
 
@@ -154,14 +168,14 @@ export const filterGroupedModels = (
       if (
         q &&
         !m.modelName.toLowerCase().includes(q) &&
-        !getProviderName(m.service).toLowerCase().includes(q)
+        !m.modelCreator.toLowerCase().includes(q)
       ) {
         return false;
       }
       if (selectedTaskTypes.size > 0 && !m.categories.some((cat) => selectedTaskTypes.has(cat))) {
         return false;
       }
-      if (selectedProviders.length > 0 && !selectedProviders.includes(m.service)) {
+      if (selectedProviders.length > 0 && !selectedProviders.includes(m.modelCreator)) {
         return false;
       }
       return true;

@@ -6,9 +6,9 @@
  */
 
 import {
-  isServiceProviderKey,
   getModelName,
-  getProviderName,
+  getModelCreator,
+  getProviderKeyForCreator,
   groupEndpointsByModel,
   getProviderOptions,
   filterGroupedModels,
@@ -33,6 +33,7 @@ const makeEndpoint = (
 const makeGroupedModel = (overrides: Partial<GroupedModel> = {}): GroupedModel => ({
   service: 'elastic',
   modelName: '.multilingual-e5-small',
+  modelCreator: 'Elastic',
   taskTypes: ['text_embedding'],
   categories: ['Embedding'],
   endpoints: [],
@@ -40,25 +41,6 @@ const makeGroupedModel = (overrides: Partial<GroupedModel> = {}): GroupedModel =
 });
 
 describe('utils', () => {
-  describe('isServiceProviderKey', () => {
-    it.each([
-      ['elastic', true],
-      ['elasticsearch', true],
-      ['openai', true],
-      ['cohere', true],
-      ['anthropic', true],
-      ['mistral', true],
-      ['hugging_face', true],
-      ['amazonbedrock', true],
-      ['googleaistudio', true],
-      ['not-a-provider', false],
-      ['', false],
-      ['random-service', false],
-    ])('%s → %s', (key, expected) => {
-      expect(isServiceProviderKey(key)).toBe(expected);
-    });
-  });
-
   describe('TASK_TYPE_CATEGORY', () => {
     it.each([
       ['chat_completion', 'LLM'],
@@ -126,20 +108,43 @@ describe('utils', () => {
     });
   });
 
-  describe('getProviderName', () => {
+  describe('getModelCreator', () => {
+    it('returns model_creator from metadata when present', () => {
+      const endpoint = {
+        ...makeEndpoint({
+          inference_id: 'eis-gpt',
+          task_type: 'chat_completion' as const,
+          service_settings: { model_id: 'gpt-4.1' },
+        }),
+        metadata: { display: { model_creator: 'OpenAI' } },
+      } as EisInferenceEndpoint;
+      expect(getModelCreator(endpoint)).toBe('OpenAI');
+    });
+
+    it('falls back to provider name when no metadata', () => {
+      const endpoint = makeEndpoint({
+        inference_id: 'eis-e5',
+        task_type: 'text_embedding',
+        service_settings: { model_id: '.multilingual-e5-small' },
+      });
+      expect(getModelCreator(endpoint)).toBe('Elastic Inference Service');
+    });
+  });
+
+  describe('getProviderKeyForCreator', () => {
     it.each([
-      { key: 'elastic', returnsRaw: false },
-      { key: 'elasticsearch', returnsRaw: false },
-      { key: 'openai', returnsRaw: false },
-      { key: 'custom-eis-provider', returnsRaw: true },
-      { key: 'my-service', returnsRaw: true },
-    ])('$key → returnsRaw=$returnsRaw', ({ key, returnsRaw }) => {
-      const name = getProviderName(key);
-      if (returnsRaw) {
-        expect(name).toBe(key);
-      } else {
-        expect(name).not.toBe(key);
-      }
+      ['Anthropic', 'anthropic'],
+      ['Elastic', 'elastic'],
+      ['Google', 'googleaistudio'],
+      ['OpenAI', 'openai'],
+      ['Jina', 'jinaai'],
+      ['Microsoft', 'azureopenai'],
+    ])('%s → %s', (creator, expectedKey) => {
+      expect(getProviderKeyForCreator(creator)).toBe(expectedKey);
+    });
+
+    it('returns undefined for unknown creators', () => {
+      expect(getProviderKeyForCreator('UnknownCorp')).toBeUndefined();
     });
   });
 
@@ -166,6 +171,7 @@ describe('utils', () => {
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
         modelName: '.multilingual-e5-small',
+        modelCreator: expect.any(String),
         taskTypes: ['text_embedding', 'chat_completion'],
         categories: ['Embedding', 'LLM'],
       });
@@ -239,17 +245,17 @@ describe('utils', () => {
       expect(getProviderOptions([])).toEqual([]);
     });
 
-    it('deduplicates providers across models', () => {
+    it('deduplicates creators and sorts alphabetically', () => {
       const models: GroupedModel[] = [
-        makeGroupedModel({ modelName: '.multilingual-e5-small' }),
-        makeGroupedModel({ modelName: '.elser-2-linux-x86_64' }),
-        makeGroupedModel({ modelName: 'rerank-v1' }),
+        makeGroupedModel({ modelName: '.multilingual-e5-small', modelCreator: 'Elastic' }),
+        makeGroupedModel({ modelName: 'gpt-4.1', modelCreator: 'OpenAI' }),
+        makeGroupedModel({ modelName: 'rerank-v1', modelCreator: 'Elastic' }),
       ];
 
       const options = getProviderOptions(models);
-      expect(options).toHaveLength(1);
-      expect(options[0].key).toBe('elastic');
-      expect(options[0].label).toBeTruthy();
+      expect(options).toHaveLength(2);
+      expect(options[0]).toEqual({ key: 'Elastic', label: 'Elastic' });
+      expect(options[1]).toEqual({ key: 'OpenAI', label: 'OpenAI' });
     });
   });
 
@@ -292,7 +298,7 @@ describe('utils', () => {
         { query: 'e5-small', expectedModels: ['.multilingual-e5-small'] },
         { query: 'rainbow', expectedModels: ['rainbow-sprinkle-completion'] },
         {
-          query: 'Elastic Inference',
+          query: 'Elastic',
           expectedModels: ['.multilingual-e5-small', 'rainbow-sprinkle-completion', 'rerank-v1'],
         },
         { query: 'E5-SMALL', expectedModels: ['.multilingual-e5-small'] },
@@ -334,10 +340,10 @@ describe('utils', () => {
     describe('provider filter', () => {
       it.each([
         {
-          providers: ['elastic'],
+          providers: ['Elastic'],
           expectedModels: ['.multilingual-e5-small', 'rainbow-sprinkle-completion', 'rerank-v1'],
         },
-        { providers: ['openai'], expectedModels: [] },
+        { providers: ['OpenAI'], expectedModels: [] },
       ])('$providers → $expectedModels', ({ providers, expectedModels }) => {
         const result = filterGroupedModels(models, {
           ...noFilters,
@@ -351,7 +357,7 @@ describe('utils', () => {
       const result = filterGroupedModels(models, {
         searchQuery: 'rainbow',
         selectedTaskTypes: new Set<TaskTypeCategory>(['LLM']),
-        selectedProviders: ['elastic'],
+        selectedProviders: ['Elastic'],
       });
       expect(result.map((m) => m.modelName)).toEqual(['rainbow-sprinkle-completion']);
     });

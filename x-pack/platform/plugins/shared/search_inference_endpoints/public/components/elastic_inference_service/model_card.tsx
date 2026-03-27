@@ -21,15 +21,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 import type { GroupedModel } from '../../utils/eis_utils';
-import { isServiceProviderKey, TASK_TYPE_DISPLAY_NAME } from '../../utils/eis_utils';
+import { getProviderKeyForCreator, TASK_TYPE_DISPLAY_NAME } from '../../utils/eis_utils';
 
 interface ModelCardProps {
   model: GroupedModel;
 }
 
 export const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
-  const { service, modelName, taskTypes, categories } = model;
-  const provider = isServiceProviderKey(service) ? SERVICE_PROVIDERS[service] : undefined;
+  const { modelName, modelCreator, taskTypes, categories } = model;
+  const providerKey = getProviderKeyForCreator(modelCreator);
+  const provider = providerKey ? SERVICE_PROVIDERS[providerKey] : undefined;
 
   const taskTypeLabels = taskTypes.map((tt) => TASK_TYPE_DISPLAY_NAME[tt] ?? tt).join(', ');
 
@@ -37,19 +38,17 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
     <EuiPanel paddingSize="l" data-test-subj={`eisModelCard-${modelName}`} hasBorder>
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem grow={false}>
-          {provider && (
-            <EuiAvatar
-              name={provider.name}
-              iconType={provider.icon}
-              color="subdued"
-              size="l"
-              type="space"
-            />
-          )}
+          <EuiAvatar
+            name={modelCreator}
+            iconType={provider?.icon ?? 'machineLearningApp'}
+            color="subdued"
+            size="l"
+            type="space"
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="xs">
-            <h4>{`${provider?.name ?? service} ${modelName}`}</h4>
+            <h4>{modelName}</h4>
           </EuiTitle>
           <EuiText size="xs" color="subdued">
             {i18n.translate('xpack.searchInferenceEndpoints.eisModelCard.supports', {

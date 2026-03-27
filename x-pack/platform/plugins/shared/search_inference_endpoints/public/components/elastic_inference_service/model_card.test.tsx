@@ -14,12 +14,13 @@ describe('ModelCard', () => {
   const baseModel: GroupedModel = {
     service: 'elastic',
     modelName: 'my-model',
+    modelCreator: 'OpenAI',
     taskTypes: ['text_embedding', 'chat_completion'],
     categories: ['Embedding', 'LLM'],
     endpoints: [],
   };
 
-  it('renders name, test-subj, task types, categories, and avatar for a known provider', () => {
+  it('renders name, test-subj, task types, categories, and avatar for a known creator', () => {
     const { getByText, getByTestId, container } = render(<ModelCard model={baseModel} />);
 
     expect(getByText('my-model', { exact: false })).toBeInTheDocument();
@@ -30,15 +31,14 @@ describe('ModelCard', () => {
     expect(container.querySelector('[data-euiicon-type]')).not.toBeNull();
   });
 
-  it('renders no avatar and falls back to raw service string for an unknown provider', () => {
-    const unknownModel = {
+  it('renders avatar with fallback icon for an unknown creator', () => {
+    const unknownModel: GroupedModel = {
       ...baseModel,
-      service: 'custom-unknown-provider',
-    } as unknown as GroupedModel;
-    const { getByText, container } = render(<ModelCard model={unknownModel} />);
+      modelCreator: 'UnknownCorp',
+    };
+    const { container } = render(<ModelCard model={unknownModel} />);
 
-    expect(container.querySelectorAll('.euiAvatar')).toHaveLength(0);
-    expect(getByText('custom-unknown-provider', { exact: false })).toBeInTheDocument();
+    expect(container.querySelectorAll('.euiAvatar')).toHaveLength(1);
   });
 
   it('renders unknown task types as-is', () => {

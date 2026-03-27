@@ -104,10 +104,10 @@ describe('ElasticInferenceServiceModelsPage', () => {
     fireEvent.click(getByText('Model family'));
 
     await waitFor(() => {
-      expect(getByText('Elastic Inference Service')).toBeInTheDocument();
+      expect(getByText('Anthropic')).toBeInTheDocument();
     });
 
-    fireEvent.click(getByText('Elastic Inference Service'));
+    fireEvent.click(getByText('Anthropic'));
 
     await waitFor(() => {
       const cards = container.querySelectorAll('[data-test-subj^="eisModelCard-"]');
