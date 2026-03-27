@@ -17,7 +17,6 @@ const RESOURCE_MIME_TYPE = 'text/html;profile=mcp-app';
 
 /**
  * Reads the pre-built single-file HTML produced by vite + vite-plugin-singlefile.
- * Reuses the same build artifact as chart_mcp_app since it shares the same client bundle.
  */
 const loadBuiltHtml = (): string => {
   const htmlPath = path.resolve(__dirname, 'chart_mcp_app', 'dist', 'index.html');

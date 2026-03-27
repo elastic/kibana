@@ -16,8 +16,6 @@ import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { KibanaMcpHttpTransport } from '../utils/mcp/kibana_mcp_http_transport';
 import { MCP_SERVER_PATH } from '../../common/mcp';
-import { registerHelloMcpApp } from './mcp_apps/hello_mcp_app';
-import { registerChartMcpApp } from './mcp_apps/chart_mcp_app';
 import { registerLensChartMcpApp } from './mcp_apps/lens_chart_mcp_app';
 import { registerDashboardsMcpTools } from './mcp_tools/dashboards';
 
@@ -151,10 +149,7 @@ To learn more, refer to the [MCP documentation](https://www.elastic.co/docs/expl
           }
 
           // Register MCP App tools (tools with interactive UI)
-          registerHelloMcpApp(server);
-
           const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
-          registerChartMcpApp(server, esClient);
           registerLensChartMcpApp(server, esClient);
 
           // Register dashboards & lens visualizations CRUD tools
