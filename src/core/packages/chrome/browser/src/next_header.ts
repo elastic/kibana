@@ -106,6 +106,7 @@ export interface ChromeNextHeaderGlobalActions {
     onClick: () => void;
   };
   /** Favorite control as `ReactNode` (e.g. FavoriteButton) so apps supply providers and clients. */
+  /** TODO: should become a structured API */
   favorite?: ReactNode;
 }
 

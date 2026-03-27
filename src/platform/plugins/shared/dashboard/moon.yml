@@ -118,6 +118,7 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/scout'
   - '@kbn/cps-utils'
+  - '@kbn/core-chrome-browser'
 tags:
   - plugin
   - prod
