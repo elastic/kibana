@@ -9,8 +9,7 @@ source .buildkite/scripts/steps/artifacts/env.sh
 
 KIBANA_DOCKER_CONTEXT="${KIBANA_DOCKER_CONTEXT:="default"}"
 
-
-echo "--- Clean up cached images"
+echo "--- Clean up cached images to free up space (this job doesn't require any of the cached images, and they can take up a lot of space)"
 clean_cached_images
 
 echo "--- Create contexts"
