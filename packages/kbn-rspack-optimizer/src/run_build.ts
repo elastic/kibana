@@ -231,7 +231,7 @@ async function runWatchBuild(
 
     log?.info('Setting up RSPack watcher...');
     log?.debug('Watcher will ignore: /node_modules/');
-    log?.debug('Aggregate timeout: 300ms');
+    log?.debug('Aggregate timeout: 50ms');
 
     if (hmrServer) {
       compiler.hooks.compile.tap('kbn-hmr-building', () => {
