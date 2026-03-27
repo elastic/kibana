@@ -8,9 +8,15 @@
 import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../fixtures';
+import {
+  applyLensInlineEditorAndWaitClosed,
+  cancelLensInlineEditorAndWaitClosed,
+  convertToEsqlViaModal,
+  openDimensionEditorAndWaitForFlyout,
+  openInlineEditorAndWaitVisible,
+} from '../fixtures/helpers';
 
-// Failing: See https://github.com/elastic/kibana/issues/257943
-spaceTest.describe.skip('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () => {
+spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
     await apiServices.core.settings({
       'feature_flags.overrides': {
@@ -43,28 +49,18 @@ spaceTest.describe.skip('Lens Convert to ES|QL', { tag: '@local-stateful-classic
 
   spaceTest(
     'should display ES|QL conversion modal for inline visualizations',
-    async ({ pageObjects }) => {
+    async ({ pageObjects, page }) => {
       const { dashboard, lens } = pageObjects;
 
+      await openInlineEditorAndWaitVisible(pageObjects, testData.INLINE_METRIC_PANEL_ID);
+
+      await convertToEsqlViaModal({ pageObjects, page });
+
+      await applyLensInlineEditorAndWaitClosed({ lens });
+
+      // Open editor again and check the "Apply and close" button is disabled
       await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
-
-      await lens.getConvertToEsqlButton().click();
-
-      const modal = lens.getConvertToEsqModal();
-      await expect(modal).toBeVisible();
-
-      await lens.getConvertToEsqModalConfirmButton().click();
-
-      await expect(modal).toBeHidden();
-      await expect(lens.getEditInLensButton()).toBeHidden();
-
-      await lens.getApplyFlyoutButton().click();
-
-      const editor = lens.getInlineEditor();
-      await expect(editor).toBeHidden();
-
-      await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
-      await expect(editor).toBeVisible();
+      await expect(lens.getInlineEditor()).toBeVisible();
       await expect(lens.getApplyFlyoutButton()).toBeDisabled();
 
       // TODO: Add conversion assertions: https://github.com/elastic/kibana/issues/250385
@@ -76,31 +72,27 @@ spaceTest.describe.skip('Lens Convert to ES|QL', { tag: '@local-stateful-classic
     async ({ pageObjects, page }) => {
       const { dashboard, lens } = pageObjects;
 
-      await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
+      await openInlineEditorAndWaitVisible(pageObjects, testData.INLINE_METRIC_PANEL_ID);
 
-      await lens.getConvertToEsqlButton().click();
+      await convertToEsqlViaModal({ pageObjects, page });
 
-      const modal = lens.getConvertToEsqModal();
-      await expect(modal).toBeVisible();
-
-      await lens.getConvertToEsqModalConfirmButton().click();
-
-      await expect(modal).toBeHidden();
-
-      await page.getByTestId('lnsMetric_primaryMetricDimensionPanel').click();
+      // Update primary metric name from the dimension editor
+      const metricDimensionPanel = page.getByTestId('lnsMetric_primaryMetricDimensionPanel');
+      await openDimensionEditorAndWaitForFlyout(pageObjects, page, metricDimensionPanel);
       const nameInput = page.getByTestId('name-input');
       await nameInput.fill('Converted metric');
       await expect(nameInput).toHaveValue('Converted metric');
 
-      // The changes are reflected in the visualization
+      // Check that the name has been updated in the panel
       const panel = dashboard.getPanelByEmbeddableId(testData.INLINE_METRIC_PANEL_ID);
       await expect(panel).toContainText('Converted metric');
 
       await lens.getSecondaryFlyoutBackButton().click();
-      await lens.getApplyFlyoutButton().click();
 
-      // The button is disabled after clicking on "Apply and close" button
-      await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
+      await applyLensInlineEditorAndWaitClosed({ lens });
+
+      // The "Apply and close" button is disabled when there are no unsaved changes
+      await openInlineEditorAndWaitVisible(pageObjects, testData.INLINE_METRIC_PANEL_ID);
       await expect(lens.getApplyFlyoutButton()).toBeDisabled();
     }
   );
@@ -108,19 +100,17 @@ spaceTest.describe.skip('Lens Convert to ES|QL', { tag: '@local-stateful-classic
   spaceTest(
     'should correctly cancel the conversion and close the flyout',
     async ({ pageObjects, page }) => {
-      const { dashboard, lens } = pageObjects;
+      const { lens } = pageObjects;
 
-      await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
-      await expect(page.getByTestId('ESQLEditor')).toBeHidden();
+      await openInlineEditorAndWaitVisible(pageObjects, testData.INLINE_METRIC_PANEL_ID);
 
-      await lens.getConvertToEsqlButton().click();
-      await lens.getConvertToEsqModalConfirmButton().click();
-      await expect(page.getByTestId('ESQLEditor')).toBeVisible();
+      await convertToEsqlViaModal({ pageObjects, page });
 
-      await lens.getCancelFlyoutButton().click();
-      await expect(lens.getInlineEditor()).toBeHidden();
+      await cancelLensInlineEditorAndWaitClosed({ lens });
 
-      await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
+      // Reopen and verify revert: form-based mode with Convert button visible
+      await openInlineEditorAndWaitVisible(pageObjects, testData.INLINE_METRIC_PANEL_ID);
+      await expect(lens.getConvertToEsqlButton()).toBeEnabled();
       await expect(page.getByTestId('ESQLEditor')).toBeHidden();
     }
   );
@@ -128,11 +118,8 @@ spaceTest.describe.skip('Lens Convert to ES|QL', { tag: '@local-stateful-classic
   spaceTest(
     'should disable Convert to ES|QL button for visualizations saved to library',
     async ({ pageObjects }) => {
-      const { dashboard, lens } = pageObjects;
-
-      await dashboard.openInlineEditor(testData.SAVED_METRIC_PANEL_ID);
-
-      await expect(lens.getConvertToEsqlButton()).toBeDisabled();
+      await openInlineEditorAndWaitVisible(pageObjects, testData.SAVED_METRIC_PANEL_ID);
+      await expect(pageObjects.lens.getConvertToEsqlButton()).toBeDisabled();
     }
   );
 });
