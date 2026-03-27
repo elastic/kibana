@@ -9,6 +9,7 @@ import { partition, sum } from 'lodash';
 import agent from 'elastic-apm-node';
 
 import type { estypes } from '@elastic/elasticsearch';
+import { addSpanLabels } from '@kbn/apm-utils';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
@@ -69,7 +70,7 @@ Object.entries(aadFieldConversion).forEach(([key, value]) => {
 });
 
 const addApmLabelsFromParams = (params: RuleParams) => {
-  agent.addLabels(
+  addSpanLabels(
     {
       [SECURITY_FROM]: params.from,
       [SECURITY_IMMUTABLE]: params.immutable,
@@ -77,7 +78,7 @@ const addApmLabelsFromParams = (params: RuleParams) => {
       [SECURITY_RULE_ID]: params.ruleId,
       [SECURITY_TO]: params.to,
     },
-    false
+    { isString: false }
   );
 };
 

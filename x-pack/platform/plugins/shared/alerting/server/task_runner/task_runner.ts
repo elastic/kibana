@@ -10,6 +10,7 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { addSpanLabels } from '@kbn/apm-utils';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { ActionScheduler, type RunResult } from './action_scheduler';
@@ -278,14 +279,15 @@ export class TaskRunner<
   }: RunRuleParams<Params>): Promise<RunRuleResult> {
     if (apm.currentTransaction) {
       apm.currentTransaction.name = `Execute Alerting Rule: "${rule.name}"`;
-      apm.currentTransaction.addLabels({
-        alerting_rule_consumer: rule.consumer,
-        alerting_rule_name: rule.name,
-        alerting_rule_tags: rule.tags.join(', '),
-        alerting_rule_type_id: rule.alertTypeId,
-        alerting_rule_params: JSON.stringify(rule.params),
-      });
     }
+
+    addSpanLabels({
+      alerting_rule_consumer: rule.consumer,
+      alerting_rule_name: rule.name,
+      alerting_rule_tags: rule.tags.join(', '),
+      alerting_rule_type_id: rule.alertTypeId,
+      alerting_rule_params: JSON.stringify(rule.params),
+    });
 
     const {
       params: { alertId: ruleId, spaceId },
@@ -526,12 +528,13 @@ export class TaskRunner<
 
       if (apm.currentTransaction) {
         apm.currentTransaction.name = `Execute Alerting Rule`;
-        apm.currentTransaction.addLabels({
-          alerting_rule_space_id: spaceId,
-          alerting_rule_id: ruleId,
-          plugins: 'alerting',
-        });
       }
+
+      addSpanLabels({
+        alerting_rule_space_id: spaceId,
+        alerting_rule_id: ruleId,
+        plugins: 'alerting',
+      });
 
       this.ruleRunning.start(ruleId, this.context.spaceIdToNamespace(spaceId));
 

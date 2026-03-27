@@ -127,6 +127,7 @@
     "@kbn/saved-search-component",
     "@kbn/saved-search-plugin",
     "@kbn/charts-theme",
+    "@kbn/apm-utils",
     "@kbn/response-ops-rule-params",
     "@kbn/core-http-server-utils",
     "@kbn/key-value-metadata-table",

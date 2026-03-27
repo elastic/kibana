@@ -6,8 +6,8 @@
  */
 
 import { omitBy } from 'lodash';
-import agent from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
+import { addSpanLabels } from '@kbn/apm-utils';
 import type {
   PublicRuleMonitoringService,
   PublicRuleResultService,
@@ -157,7 +157,7 @@ export function createRuleExecutionLogClientForExecutors(
         const correlationIds = baseCorrelationIds.withStatus(executionResult.status);
         const logMeta = correlationIds.getLogMeta();
 
-        agent.addLabels({ [SECURITY_RULE_STATUS]: executionResult.status });
+        addSpanLabels({ [SECURITY_RULE_STATUS]: executionResult.status });
 
         try {
           const normalizedExecutionResult: ExecutionResult = {
