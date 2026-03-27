@@ -10,8 +10,6 @@ import {
   EuiPopover,
   EuiButtonIcon,
   EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
@@ -24,6 +22,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AIFeatures } from '../../../../../hooks/use_ai_features';
 import { ConnectorIcon } from '../../../../connector_list_button/connector_icon';
+import { ConnectorPickerPopover } from '../../../../connector_list_button/connector_picker_popover';
 import { GenerateSuggestionButton } from './generate_suggestions_button';
 
 export interface RefinementPopoverProps {
@@ -210,9 +209,11 @@ export const RefinementPopover = ({
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               {connectorsResult?.connectors && connectorsResult.connectors.length >= 2 && (
                 <EuiFlexItem grow={false}>
-                  <EuiPopover
+                  <ConnectorPickerPopover
+                    connectors={connectorsResult}
                     isOpen={isConnectorPopoverOpen}
-                    closePopover={() => setIsConnectorPopoverOpen(false)}
+                    onClose={() => setIsConnectorPopoverOpen(false)}
+                    aria-label={connectorPickerAriaLabel}
                     button={
                       <EuiButtonIcon
                         data-test-subj="streamsAppRefinementPickConnectorButton"
@@ -223,35 +224,7 @@ export const RefinementPopover = ({
                         aria-label={connectorPickerAriaLabel}
                       />
                     }
-                    panelPaddingSize="none"
-                    anchorPosition="upLeft"
-                    aria-label={connectorPickerAriaLabel}
-                  >
-                    <EuiContextMenuPanel
-                      size="s"
-                      items={connectorsResult.connectors.map((connector) => (
-                        <EuiContextMenuItem
-                          key={connector.connectorId}
-                          icon={
-                            connector.connectorId === connectorsResult.selectedConnector
-                              ? 'check'
-                              : 'empty'
-                          }
-                          onClick={() => {
-                            connectorsResult.selectConnector(connector.connectorId);
-                            setIsConnectorPopoverOpen(false);
-                          }}
-                        >
-                          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                            <EuiFlexItem grow={false}>
-                              <ConnectorIcon connectorName={connector.name} />
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>{connector.name}</EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiContextMenuItem>
-                      ))}
-                    />
-                  </EuiPopover>
+                  />
                 </EuiFlexItem>
               )}
               {selectedConnectorName && (

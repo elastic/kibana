@@ -4,15 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPopover,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
@@ -26,7 +18,7 @@ import React from 'react';
 import type { AIFeatures } from '../../hooks/use_ai_features';
 import { useAIFeatures } from '../../hooks/use_ai_features';
 import { EnableAIFeaturesLink } from '../enable_ai_features_link/enable_ai_features_link';
-import { ConnectorIcon } from './connector_icon';
+import { ConnectorPickerPopover } from './connector_picker_popover';
 
 const CHOOSE_CONNECTOR_ARIA_LABEL = i18n.translate(
   'xpack.streams.connectorListButton.chooseConnectorButtonLabel',
@@ -100,11 +92,12 @@ export function ConnectorListButtonBase({
       </EuiFlexItem>
       {showConnectorSelector && hasMultipleConnectors && (
         <EuiFlexItem grow={false}>
-          <EuiPopover
+          <ConnectorPickerPopover
             id={splitButtonPopoverId}
             aria-label={CHOOSE_CONNECTOR_ARIA_LABEL}
+            connectors={connectorsResult}
             isOpen={isPopoverOpen}
-            closePopover={() => closePopover()}
+            onClose={closePopover}
             button={
               <AiButtonIcon
                 className={splitButtonSecondaryStyles}
@@ -115,31 +108,7 @@ export function ConnectorListButtonBase({
                 aria-label={CHOOSE_CONNECTOR_ARIA_LABEL}
               />
             }
-            panelPaddingSize="none"
-          >
-            <EuiContextMenuPanel
-              size="s"
-              items={connectorsResult.connectors?.map((connector) => (
-                <EuiContextMenuItem
-                  key={connector.connectorId}
-                  icon={
-                    connector.connectorId === connectorsResult.selectedConnector ? 'check' : 'empty'
-                  }
-                  onClick={() => {
-                    connectorsResult.selectConnector(connector.connectorId);
-                    closePopover();
-                  }}
-                >
-                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <ConnectorIcon connectorName={connector.name} />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>{connector.name}</EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiContextMenuItem>
-              ))}
-            />
-          </EuiPopover>
+          />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
