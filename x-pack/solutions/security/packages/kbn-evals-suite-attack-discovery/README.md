@@ -120,7 +120,7 @@ See `src/data_generators/restore_alerts_snapshot.ts`.
 
 To make this snapshot discoverable via the Snapshot Dataset Management best practices, register it in Dataplex using the checked-in aspects file:
 
-- `x-pack/platform/packages/shared/kbn-evals/snapshots/dataplex/security-ai/attack-discovery-oh-my-malware-2026-03-26.yaml`
+- `x-pack/platform/packages/shared/kbn-evals/snapshots/dataplex/security_ai/attack_discovery_oh_my_malware_2026_03_26.yaml`
 
 Example:
 
@@ -135,7 +135,7 @@ gcloud dataplex entries create attack-discovery-oh-my-malware-2026-03-26 \
   --entry-source-display-name="Attack Discovery: oh-my-malware (2026-03-26)" \
   --entry-source-description="Attack Discovery alert snapshot for searchAlerts eval runs" \
   --entry-source-update-time="2026-03-26T00:00:00Z" \
-  --aspects=x-pack/platform/packages/shared/kbn-evals/snapshots/dataplex/security-ai/attack-discovery-oh-my-malware-2026-03-26.yaml
+  --aspects=x-pack/platform/packages/shared/kbn-evals/snapshots/dataplex/security_ai/attack_discovery_oh_my_malware_2026_03_26.yaml
 ```
 
 ### 3) `graphState` (prompt-input stub)
