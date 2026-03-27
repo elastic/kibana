@@ -17,11 +17,18 @@ export const CaseMatchingStepId = 'security.matchAndAttachAlertsToCases';
 const CaseMatchingInputSchema = z.object({
   leader_alert_ids: LiquidArraySchema,
   index_pattern: z.string().default('.alerts-security.alerts-default'),
+  existing_cases: z.unknown().optional(),
+});
+
+const AlertObjectSchema = z.object({
+  alertId: z.string(),
+  index: z.string(),
 });
 
 const AlertGroupSchema = z.object({
   group_id: z.string(),
   alert_ids: z.array(z.string()),
+  alerts: z.array(AlertObjectSchema),
   primary_host: z.string(),
   primary_user: z.string(),
   existing_case_id: z.string().optional(),
@@ -36,6 +43,51 @@ const CaseMatchingOutputSchema = z.object({
   alert_groups_json: z.string(),
 });
 
+/**
+ * Parse existing cases from the cases.findCases step output.
+ * Handles Liquid | json serialization: may be a JSON string, array of objects,
+ * or Zod-wrapped single-element array with a JSON string.
+ */
+const parseExistingCases = (val: unknown): Array<{ id: string; title: string }> => {
+  let cases: unknown[];
+
+  if (Array.isArray(val)) {
+    // Zod-wrapped: ["[{...},{...}]"] — single JSON string element
+    if (val.length === 1 && typeof val[0] === 'string') {
+      try {
+        const parsed = JSON.parse(val[0]);
+        cases = Array.isArray(parsed) ? parsed : [];
+      } catch {
+        cases = val;
+      }
+    } else {
+      cases = val;
+    }
+  } else if (typeof val === 'string') {
+    try {
+      const parsed = JSON.parse(val);
+      cases = Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  } else {
+    return [];
+  }
+
+  return cases
+    .filter((c): c is { id: string; title: string } => {
+      return (
+        typeof c === 'object' &&
+        c !== null &&
+        'id' in c &&
+        'title' in c &&
+        typeof (c as Record<string, unknown>).id === 'string' &&
+        typeof (c as Record<string, unknown>).title === 'string'
+      );
+    })
+    .map((c) => ({ id: c.id, title: c.title }));
+};
+
 export const caseMatchingStep = createServerStepDefinition({
   id: CaseMatchingStepId,
   category: StepCategory.Kibana,
@@ -45,7 +97,7 @@ export const caseMatchingStep = createServerStepDefinition({
     'Outputs new_groups (need case creation) and existing_groups (attach to existing case).',
   documentation: {
     details:
-      'Searches for existing cases tagged alert-investigation-pipeline with matching host/user titles. ' +
+      'Accepts existing cases from cases.findCases step output. ' +
       'Alerts matching an existing case go to existing_groups with existing_case_id set.',
     examples: [],
   },
@@ -76,7 +128,12 @@ export const caseMatchingStep = createServerStepDefinition({
     }
 
     // Fetch alerts and extract entities
-    const alerts = await fetchAlertsByIds({ esClient, indexPattern, alertIds: leaderAlertIds, logger });
+    const alerts = await fetchAlertsByIds({
+      esClient,
+      indexPattern,
+      alertIds: leaderAlertIds,
+      logger,
+    });
     if (alerts.length === 0) {
       context.logger.warn('No alerts found for the given IDs');
       return emptyOutput;
@@ -95,8 +152,8 @@ export const caseMatchingStep = createServerStepDefinition({
         if (!entityAlertMap.has(groupKey)) {
           entityAlertMap.set(groupKey, []);
         }
-        const group = entityAlertMap.get(groupKey)!;
-        if (!group.includes(entity.alertId)) {
+        const group = entityAlertMap.get(groupKey);
+        if (group && !group.includes(entity.alertId)) {
           group.push(entity.alertId);
         }
       }
@@ -119,7 +176,7 @@ export const caseMatchingStep = createServerStepDefinition({
       if (!groupAlertSets.has(groupId)) {
         groupAlertSets.set(groupId, new Set());
       }
-      const group = groupAlertSets.get(groupId)!;
+      const group = groupAlertSets.get(groupId) ?? new Set<string>();
       for (const alertId of alertIds) {
         group.add(alertId);
         alertToGroup.set(alertId, groupId);
@@ -130,42 +187,21 @@ export const caseMatchingStep = createServerStepDefinition({
     const groupContext = new Map<string, { hosts: Set<string>; users: Set<string> }>();
     for (const entity of extractionResult.entities) {
       const alertGroup = alertToGroup.get(entity.alertId);
-      if (!alertGroup) continue;
+      if (!alertGroup) {
+        // eslint-disable-next-line no-continue
+        continue;
+      }
       if (!groupContext.has(alertGroup)) {
         groupContext.set(alertGroup, { hosts: new Set(), users: new Set() });
       }
-      const ctx = groupContext.get(alertGroup)!;
-      if (entity.typeKey === 'hostname') ctx.hosts.add(entity.value);
-      if (entity.typeKey === 'user') ctx.users.add(entity.value);
+      const ctx = groupContext.get(alertGroup);
+      if (ctx && entity.typeKey === 'hostname') ctx.hosts.add(entity.value);
+      if (ctx && entity.typeKey === 'user') ctx.users.add(entity.value);
     }
 
-    // Search for existing cases tagged with alert-investigation-pipeline
-    // Case titles follow pattern: "Investigation - {host} / {user}"
-    let existingCases: Array<{ id: string; title: string }> = [];
-    try {
-      const fakeRequest = context.contextManager.getFakeRequest();
-      const kibanaUrl = context.contextManager.getContext()?.kibanaUrl ?? 'http://localhost:5601';
-      const headers: Record<string, string> = { 'kbn-xsrf': 'true' };
-      if (fakeRequest.headers.authorization) {
-        headers.Authorization = fakeRequest.headers.authorization as string;
-      }
-
-      const casesResponse = await fetch(
-        `${kibanaUrl}/api/cases/_find?tags=alert-investigation-pipeline&perPage=100&sortOrder=desc&status=open`,
-        { headers }
-      );
-
-      if (casesResponse.ok) {
-        const casesData = await casesResponse.json();
-        existingCases = (casesData.cases ?? []).map((c: { id: string; title: string }) => ({
-          id: c.id,
-          title: c.title,
-        }));
-        context.logger.info(`Found ${existingCases.length} existing pipeline cases`);
-      }
-    } catch (err) {
-      context.logger.warn(`Could not query existing cases: ${err instanceof Error ? err.message : err}`);
-    }
+    // Parse existing cases from the cases.findCases step output
+    const existingCases = parseExistingCases(context.input.existing_cases);
+    context.logger.info(`Received ${existingCases.length} existing pipeline cases from findCases`);
 
     // Build alert groups and match to existing cases
     const newGroups: AlertGroup[] = [];
@@ -173,7 +209,10 @@ export const caseMatchingStep = createServerStepDefinition({
     const allGroups: AlertGroup[] = [];
 
     for (const [groupId, alertSet] of groupAlertSets) {
-      if (alertSet.size === 0) continue;
+      if (alertSet.size === 0) {
+        // eslint-disable-next-line no-continue
+        continue;
+      }
 
       const ids = [...alertSet];
       const ctx = groupContext.get(groupId);
@@ -189,6 +228,7 @@ export const caseMatchingStep = createServerStepDefinition({
       const group: AlertGroup = {
         group_id: groupId,
         alert_ids: ids,
+        alerts: ids.map((id) => ({ alertId: id, index: indexPattern })),
         primary_host: primaryHost,
         primary_user: primaryUser,
         existing_case_id: matchedCase?.id,

@@ -43,11 +43,21 @@ steps:
       index_pattern: .alerts-security.alerts-default
       similarity_threshold: 0.85
 
+  - name: find_existing_cases
+    type: cases.findCases
+    with:
+      tags: alert-investigation-pipeline
+      status: open
+      owner: securitySolution
+      perPage: 100
+      sortOrder: desc
+
   - name: match_cases
     type: security.matchAndAttachAlertsToCases
     with:
       leader_alert_ids: "{{steps.deduplicate.output.leader_alert_ids | json}}"
       index_pattern: .alerts-security.alerts-default
+      existing_cases: "{{steps.find_existing_cases.output.cases | json}}"
 
   - name: handle_new_groups
     type: foreach
@@ -63,11 +73,10 @@ steps:
           owner: securitySolution
           severity: high
       - name: attach_new_alerts
-        type: cases.attachAlert
+        type: cases.addAlerts
         with:
           case_id: "{{steps.create_case.output.case.id}}"
-          alert_id: "{{foreach.item.alert_ids | json}}"
-          index: .alerts-security.alerts-default
+          alerts: "{{foreach.item.alerts | json}}"
       - name: trigger_ad_new
         type: security.triggerIncrementalAd
         with:
@@ -86,11 +95,10 @@ steps:
     foreach: "{{steps.match_cases.output.existing_groups}}"
     steps:
       - name: attach_existing_alerts
-        type: cases.attachAlert
+        type: cases.addAlerts
         with:
           case_id: "{{foreach.item.existing_case_id}}"
-          alert_id: "{{foreach.item.alert_ids | json}}"
-          index: .alerts-security.alerts-default
+          alerts: "{{foreach.item.alerts | json}}"
       - name: trigger_ad_existing
         type: security.triggerIncrementalAd
         with:
@@ -115,7 +123,7 @@ steps:
  * Version hash of the bundled YAML.
  * Increment when YAML changes to trigger self-healing re-creation.
  */
-export const PIPELINE_WORKFLOW_VERSION = '1.0.0';
+export const PIPELINE_WORKFLOW_VERSION = '1.2.0';
 
 /**
  * Workflow ID prefix. Full ID is `{PREFIX}-{spaceId}`.
