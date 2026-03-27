@@ -81,6 +81,9 @@ export type Lead = z.infer<typeof leadSchema>;
 export const leadGenerationEngineConfigSchema = z.object({
   minObservations: z.number().int().min(0).default(1),
   maxLeads: z.number().int().min(1).default(10),
+  corroborationBonus: z.number().min(0).max(1).default(0.15),
+  diversityBonus: z.number().min(0).max(1).default(0.1),
+  normalizationCeiling: z.number().min(1).default(100),
 });
 
 export type LeadGenerationEngineConfig = z.infer<typeof leadGenerationEngineConfigSchema>;
