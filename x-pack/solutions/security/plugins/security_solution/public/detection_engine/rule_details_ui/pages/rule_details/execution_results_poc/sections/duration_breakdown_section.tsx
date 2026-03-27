@@ -1,0 +1,104 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import {
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import * as i18n from '../translations';
+import { AccordionButtonContent, FieldLabel, SectionSeparator, Tooltip } from './shared';
+import { RuleDurationFormat } from '../../execution_log_table/rule_duration_format';
+
+interface DurationBreakdownSectionProps {
+  totalSearchDurationMs: number | null | undefined;
+  totalIndexingDurationMs: number | null | undefined;
+  indexDurationMs: number | null | undefined;
+}
+
+export const DurationBreakdownSection: React.FC<DurationBreakdownSectionProps> = ({
+  totalSearchDurationMs,
+  totalIndexingDurationMs,
+  indexDurationMs,
+}) => {
+  const accordionId = useGeneratedHtmlId({ prefix: 'durationBreakdown' });
+
+  return (
+    <EuiAccordion
+      id={accordionId}
+      buttonContent={
+        <AccordionButtonContent
+          tooltip={
+            <Tooltip
+              items={[
+                {
+                  title: i18n.FLYOUT_SEARCH_DURATION,
+                  description: i18n.FLYOUT_TOOLTIP_SEARCH_DURATION,
+                },
+                {
+                  title: i18n.FLYOUT_INDEX_DURATION,
+                  description: i18n.FLYOUT_TOOLTIP_INDEXING_TOTAL,
+                },
+                {
+                  title: i18n.FLYOUT_ALERT_INDEX_DURATION,
+                  description: i18n.FLYOUT_TOOLTIP_INDEXING_ALERTS,
+                },
+              ]}
+            />
+          }
+        >
+          {i18n.FLYOUT_ACCORDION_DURATION_BREAKDOWN}
+        </AccordionButtonContent>
+      }
+      initialIsOpen
+    >
+      <EuiSpacer size="s" />
+      <EuiPanel hasBorder paddingSize="m">
+        <EuiFlexGroup>
+          {totalSearchDurationMs != null && (
+            <EuiFlexItem>
+              <FieldLabel label={i18n.FLYOUT_SEARCH_DURATION} />
+              <EuiSpacer size="xs" />
+              <EuiText size="s" data-test-subj="executionDetailsFlyoutSearchDuration">
+                <RuleDurationFormat duration={totalSearchDurationMs} />
+              </EuiText>
+            </EuiFlexItem>
+          )}
+          {totalIndexingDurationMs != null && (
+            <>
+              <SectionSeparator />
+              <EuiFlexItem>
+                <FieldLabel label={i18n.FLYOUT_INDEX_DURATION} />
+                <EuiSpacer size="xs" />
+                <EuiText size="s" data-test-subj="executionDetailsFlyoutIndexDuration">
+                  <RuleDurationFormat duration={totalIndexingDurationMs} />
+                </EuiText>
+              </EuiFlexItem>
+            </>
+          )}
+          {indexDurationMs != null && (
+            <>
+              <SectionSeparator />
+              <EuiFlexItem>
+                <FieldLabel label={i18n.FLYOUT_ALERT_INDEX_DURATION} />
+                <EuiSpacer size="xs" />
+                <EuiText size="s">
+                  <RuleDurationFormat duration={indexDurationMs} />
+                </EuiText>
+              </EuiFlexItem>
+            </>
+          )}
+        </EuiFlexGroup>
+      </EuiPanel>
+    </EuiAccordion>
+  );
+};

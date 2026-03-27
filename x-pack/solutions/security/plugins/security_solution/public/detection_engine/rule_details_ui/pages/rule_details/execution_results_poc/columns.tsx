@@ -23,7 +23,7 @@ import type {
   UnifiedExecutionStatus,
 } from '../../../../../../common/api/detection_engine/rule_monitoring';
 
-const UNIFIED_TO_RULE_STATUS: Record<UnifiedExecutionStatus, RuleExecutionStatus> = {
+export const UNIFIED_TO_RULE_STATUS: Record<UnifiedExecutionStatus, RuleExecutionStatus> = {
   success: 'succeeded',
   warning: 'partial failure',
   failure: 'failed',
@@ -47,11 +47,14 @@ export const getColumns = ({
       />
     ),
     render: (_: unknown, record: UnifiedExecutionResult) => (
-      <ExecutionStatusIndicator
-        status={UNIFIED_TO_RULE_STATUS[record.outcome.status]}
-        showTooltip={true}
-      />
+      <span data-test-subj="executionResultsPocTableCellStatus">
+        <ExecutionStatusIndicator
+          status={UNIFIED_TO_RULE_STATUS[record.outcome.status]}
+          showTooltip={true}
+        />
+      </span>
     ),
+    textOnly: false,
     width: '120px',
   },
   {
@@ -64,7 +67,11 @@ export const getColumns = ({
     ),
     render: (_: unknown, record: UnifiedExecutionResult) => {
       const typeStr = record.backfill ? RULE_EXECUTION_TYPE_BACKFILL : RULE_EXECUTION_TYPE_STANDARD;
-      return <EuiText size="s">{typeStr}</EuiText>;
+      return (
+        <EuiText size="s" data-test-subj="executionResultsPocTableCellRunType">
+          {typeStr}
+        </EuiText>
+      );
     },
     width: '110px',
   },
@@ -76,7 +83,11 @@ export const getColumns = ({
         tooltipContent={i18n.COLUMN_TIMESTAMP_TOOLTIP}
       />
     ),
-    render: (value: string) => <FormattedDate value={value} fieldName="execution_start" />,
+    render: (value: string) => (
+      <span data-test-subj="executionResultsPocTableCellTimestamp">
+        <FormattedDate value={value} fieldName="execution_start" />
+      </span>
+    ),
     sortable: true,
     width: '240px',
   },
@@ -88,8 +99,11 @@ export const getColumns = ({
         tooltipContent={i18n.COLUMN_DURATION_TOOLTIP}
       />
     ),
-    render: (value: number | null) =>
-      value != null ? <RuleDurationFormat duration={value} /> : <span>{'—'}</span>,
+    render: (value: number | null) => (
+      <span data-test-subj="executionResultsPocTableCellDuration">
+        {value != null ? <RuleDurationFormat duration={value} /> : '—'}
+      </span>
+    ),
     sortable: true,
     width: '170px',
   },
@@ -101,7 +115,11 @@ export const getColumns = ({
         tooltipContent={i18n.COLUMN_ALERTS_CREATED_TOOLTIP}
       />
     ),
-    render: (_: unknown, record: UnifiedExecutionResult) => record.metrics.alert_counts?.new ?? 0,
+    render: (_: unknown, record: UnifiedExecutionResult) => (
+      <span data-test-subj="executionResultsPocTableCellAlerts">
+        {record.metrics.alert_counts?.new ?? 0}
+      </span>
+    ),
     width: '130px',
   },
   {
@@ -113,7 +131,9 @@ export const getColumns = ({
       />
     ),
     render: (_: unknown, record: UnifiedExecutionResult) => (
-      <EuiTextBlockTruncate lines={2}>{record.outcome.message ?? '—'}</EuiTextBlockTruncate>
+      <span data-test-subj="executionResultsPocTableCellMessage">
+        <EuiTextBlockTruncate lines={2}>{record.outcome.message ?? '—'}</EuiTextBlockTruncate>
+      </span>
     ),
   },
   {
@@ -140,6 +160,7 @@ export const getColumns = ({
         icon: 'maximize',
         type: 'icon',
         onClick: onViewDetails,
+        'data-test-subj': 'executionResultsPocTableActionViewDetails',
       },
     ],
     width: '80px',

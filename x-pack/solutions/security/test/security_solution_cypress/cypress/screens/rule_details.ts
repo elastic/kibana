@@ -152,6 +152,39 @@ export const EXECUTION_TABLE = `[data-test-subj="executionsTable"]`;
 
 export const EXECUTION_LOG_CONTAINER = `[data-test-subj="executionLogContainer"]`;
 
+export const EXECUTION_RESULTS_POC_CONTAINER = `[data-test-subj="executionResultsPocContainer"]`;
+
+export const EXECUTION_RESULTS_POC_TABLE = `[data-test-subj="executionResultsPocTable"]`;
+
+export const EXECUTION_DETAILS_FLYOUT = `[data-test-subj="executionDetailsFlyout"]`;
+
+export const EXECUTION_DETAILS_FLYOUT_MESSAGE_SECTION = `[data-test-subj="executionDetailsFlyoutMessageSection"]`;
+
+export const EXECUTION_RESULTS_POC_TABLE_ACTION_VIEW_DETAILS = `[data-test-subj="executionResultsPocTableActionViewDetails"]`;
+
+// Execution results POC table cell selectors
+export const EXECUTION_RESULTS_POC_TABLE_CELL_STATUS = `[data-test-subj="executionResultsPocTableCellStatus"]`;
+export const EXECUTION_RESULTS_POC_TABLE_CELL_RUN_TYPE = `[data-test-subj="executionResultsPocTableCellRunType"]`;
+export const EXECUTION_RESULTS_POC_TABLE_CELL_TIMESTAMP = `[data-test-subj="executionResultsPocTableCellTimestamp"]`;
+export const EXECUTION_RESULTS_POC_TABLE_CELL_DURATION = `[data-test-subj="executionResultsPocTableCellDuration"]`;
+export const EXECUTION_RESULTS_POC_TABLE_CELL_ALERTS = `[data-test-subj="executionResultsPocTableCellAlerts"]`;
+export const EXECUTION_RESULTS_POC_TABLE_CELL_MESSAGE = `[data-test-subj="executionResultsPocTableCellMessage"]`;
+
+// Execution details flyout header selectors
+export const EXECUTION_DETAILS_FLYOUT_HEADER_STATUS = `[data-test-subj="executionDetailsFlyoutHeaderStatus"]`;
+export const EXECUTION_DETAILS_FLYOUT_HEADER_RUN_TYPE = `[data-test-subj="executionDetailsFlyoutHeaderRunType"]`;
+
+// Execution details flyout field value selectors
+export const EXECUTION_DETAILS_FLYOUT_ALERT_COUNT = `[data-test-subj="executionDetailsFlyoutAlertCount"]`;
+export const EXECUTION_DETAILS_FLYOUT_CANDIDATE_COUNT = `[data-test-subj="executionDetailsFlyoutCandidateCount"]`;
+export const EXECUTION_DETAILS_FLYOUT_MATCHED_INDICES = `[data-test-subj="executionDetailsFlyoutMatchedIndices"]`;
+export const EXECUTION_DETAILS_FLYOUT_FROZEN_INDICES = `[data-test-subj="executionDetailsFlyoutFrozenIndices"]`;
+export const EXECUTION_DETAILS_FLYOUT_GAP_DURATION = `[data-test-subj="executionDetailsFlyoutGapDuration"]`;
+export const EXECUTION_DETAILS_FLYOUT_SCHEDULING_DELAY = `[data-test-subj="executionDetailsFlyoutSchedulingDelay"]`;
+export const EXECUTION_DETAILS_FLYOUT_EXECUTION_DURATION = `[data-test-subj="executionDetailsFlyoutExecutionDuration"]`;
+export const EXECUTION_DETAILS_FLYOUT_SEARCH_DURATION = `[data-test-subj="executionDetailsFlyoutSearchDuration"]`;
+export const EXECUTION_DETAILS_FLYOUT_INDEX_DURATION = `[data-test-subj="executionDetailsFlyoutIndexDuration"]`;
+
 export const EXECUTION_RUN_TYPE_FILTER = `[data-test-subj="ExecutionRunTypeFilter"]`;
 
 export const EXECUTION_RUN_TYPE_FILTER_ITEM = `[data-test-subj="ExecutionRunTypeFilter-item"]`;
