@@ -22,8 +22,6 @@ export interface WatchlistEntitySourceClientDependencies {
   namespace: string;
 }
 
-type PartialEntitySource = Partial<MonitoringEntitySource> & { id: string };
-
 interface UpsertResult {
   action: 'created' | 'updated';
   source: MonitoringEntitySource;
@@ -60,7 +58,9 @@ export class WatchlistEntitySourceClient {
     return { action: 'created', source: created };
   }
 
-  async update(entitySource: PartialEntitySource): Promise<MonitoringEntitySource> {
+  async update(
+    entitySource: Partial<MonitoringEntitySource> & { id: string }
+  ): Promise<MonitoringEntitySource> {
     await this.assertNameUniqueness(entitySource);
     const { attributes } =
       await this.dependencies.soClient.update<MonitoringEntitySourceAttributes>(
