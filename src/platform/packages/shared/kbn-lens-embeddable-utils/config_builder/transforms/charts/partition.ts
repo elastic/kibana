@@ -679,9 +679,7 @@ function fromLensStateToPerChartSpecificAPI(visualization: LensPartitionVisualiz
   // Pie and Donut chart have the label_position and donut_hole options
   if (isStatePieChart(visualization)) {
     return stripUndefined({
-      donut_hole: (() => {
-        return donutHoleSizeCompat.toAPI(vizLayer.emptySizeRatio);
-      })(),
+      donut_hole: donutHoleSizeCompat.toAPI(vizLayer.emptySizeRatio),
       labels: convertStateCategoryDisplayOption(vizLayer.categoryDisplay),
     });
   }
