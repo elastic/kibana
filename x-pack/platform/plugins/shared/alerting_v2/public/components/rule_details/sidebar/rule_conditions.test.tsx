@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { RuleApiResponse } from '../../services/rules_api';
+import type { RuleApiResponse } from '../../../services/rules_api';
 import { RuleConditions } from './rule_conditions';
 
 jest.mock('@kbn/alerting-plugin/common', () => ({

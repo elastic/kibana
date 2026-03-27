@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiHorizontalRule, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart, useService } from '@kbn/core-di-browser';
@@ -17,8 +17,7 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useDeleteRule } from '../../hooks/use_delete_rule';
 import { DeleteConfirmationModal } from '../rule/modals/delete_confirmation_modal';
 import { RuleHeaderDescription, RuleTitleWithBadges } from './rule_header_description';
-import { RuleConditions } from './rule_conditions';
-import { RuleMetadata } from './rule_metadata';
+import { Sidebar } from './sidebar';
 import { paths } from '../../constants';
 
 export interface RuleDetailPageProps {
@@ -79,11 +78,7 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
 
       <EuiSpacer size="l" />
 
-      <RuleConditions rule={rule} />
-
-      <EuiHorizontalRule margin="l" />
-
-      <RuleMetadata rule={rule} />
+      <Sidebar rule={rule} />
 
       <EuiSpacer size="l" />
       {showDeleteConfirmation && (
