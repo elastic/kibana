@@ -19,6 +19,7 @@ import { css } from '@emotion/react';
 import * as i18n from './translations';
 import * as logTableI18n from '../execution_log_table/translations';
 import { getColumns } from './columns';
+import { useFilterByExecutionId } from './use_filter_by_execution_id';
 import {
   ExecutionRunTypeFilter,
   ExecutionStatusFilter,
@@ -51,13 +52,14 @@ const RULE_STATUS_TO_UNIFIED: Partial<Record<RuleExecutionStatus, UnifiedExecuti
 
 interface ExecutionResultsPocTableProps {
   ruleId: string;
-  onFilterByExecutionId: (executionId: string, executionStart: string) => void;
+  selectAlertsTab: () => void;
 }
 
 export const ExecutionResultsPocTable: React.FC<ExecutionResultsPocTableProps> = ({
   ruleId,
-  onFilterByExecutionId,
+  selectAlertsTab,
 }) => {
+  const onFilterByExecutionId = useFilterByExecutionId(selectAlertsTab);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
   const [selectedItem, setSelectedItem] = useState<UnifiedExecutionResult | null>(null);
