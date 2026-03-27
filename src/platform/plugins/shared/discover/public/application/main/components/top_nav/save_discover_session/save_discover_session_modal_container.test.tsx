@@ -528,6 +528,29 @@ describe('DiscoverSessionSaveModalContainer', () => {
       expect(toolkit.getCurrentTab().id).toBe(currentTabId);
     });
 
+    it('should not transfer back to editor when newCopyOnSave is toggled on in embedded editor', async () => {
+      const services = createDiscoverServicesMock();
+      const transferSpy = jest.spyOn(services.embeddableEditor, 'transferBackToEditor');
+      const { modalProps, onClose, toolkit } = await setup({
+        isEmbedded: true,
+        services,
+      });
+      const currentTabId = toolkit.getCurrentTab().id;
+
+      await act(async () => {
+        await modalProps?.onSave(
+          getOnSaveProps({
+            dashboardId: null,
+            newCopyOnSave: true,
+          })
+        );
+      });
+
+      expect(transferSpy).not.toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalled();
+      expect(toolkit.getCurrentTab().id).toBe(currentTabId);
+    });
+
     it('should not navigate for embedded editor', async () => {
       const services = createDiscoverServicesMock();
       const navigateSpy = jest.spyOn(services.locator, 'navigate');

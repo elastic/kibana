@@ -128,6 +128,8 @@ export const DiscoverSessionSaveModalContainer = ({
       return { discoverSession: undefined, redirectedToDashboard: true };
     }
 
+    const isCopyOnSave = initialCopyOnSave || newCopyOnSave;
+
     const response = await dispatch(
       internalStateActions.saveDiscoverSession({
         newTitle,
@@ -137,7 +139,7 @@ export const DiscoverSessionSaveModalContainer = ({
         newTags,
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
-        skipResetDiscoverSession: Boolean(dashboardId) || (isEmbeddedEditor && initialCopyOnSave),
+        skipResetDiscoverSession: Boolean(dashboardId) || (isEmbeddedEditor && isCopyOnSave),
       })
     ).unwrap();
 
@@ -166,7 +168,7 @@ export const DiscoverSessionSaveModalContainer = ({
       if (onSaveCb) {
         onSaveCb();
       } else if (isEmbeddedEditor) {
-        if (!initialCopyOnSave) {
+        if (!isCopyOnSave) {
           services.embeddableEditor.transferBackToEditor(TransferAction.SaveSession);
         }
       } else if (response.discoverSession.id !== persistedDiscoverSession?.id) {
