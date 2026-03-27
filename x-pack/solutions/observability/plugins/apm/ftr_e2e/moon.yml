@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/apm-ftr-e2e'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-presentation-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/apm-ftr-e2e'
+  title: '@kbn/apm-ftr-e2e'
   description: Moon project for @kbn/apm-ftr-e2e
   channel: ''
   owner: '@elastic/obs-presentation-team'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/plugins/apm/ftr_e2e
+  sourceRoot: x-pack/solutions/observability/plugins/apm/ftr_e2e
 dependsOn:
   - '@kbn/test'
   - '@kbn/synthtrace'

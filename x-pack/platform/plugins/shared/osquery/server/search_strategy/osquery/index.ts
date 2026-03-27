@@ -59,6 +59,9 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             ...('integrationNamespaces' in request
               ? { integrationNamespaces: request.integrationNamespaces }
               : {}),
+            ...('scheduleId' in request ? { scheduleId: request.scheduleId } : {}),
+            ...('executionCount' in request ? { executionCount: request.executionCount } : {}),
+            ...('esFilters' in request ? { esFilters: request.esFilters } : {}),
           } as StrategyRequestType<T>;
 
           const dsl = queryFactory.buildDsl({

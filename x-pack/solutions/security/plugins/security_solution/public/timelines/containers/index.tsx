@@ -372,15 +372,15 @@ export const useTimelineEventsHandler = ({
      * Trigger search with a new request object to fetch the latest data.
      *
      */
-    const newTimelineRequest: typeof timelineRequest = {
+    const newTimelineRequest = {
       ...timelineRequest,
       factoryQueryType: TimelineEventsQueries.all,
-      language,
+      language: language as TimelineEventsAllOptionsInput['language'],
       sort,
       fieldRequested: timelineRequest?.fieldRequested ?? fields,
       fields: timelineRequest?.fieldRequested ?? fields,
       pagination: refetchPagination,
-    };
+    } as NonNullable<typeof timelineRequest>;
 
     setTimelineRequest(newTimelineRequest);
 
@@ -418,6 +418,7 @@ export const useTimelineEventsHandler = ({
           runtimeMappings: runtimeMappings ?? {},
           ...timerange,
           ...deStructureEqlOptions(eqlOptions),
+          ...(dateRangeField ? { dateRangeField } : {}),
         };
 
         const areSearchParamsSame = deepEqual(prevSearchParameters, currentSearchParameters);

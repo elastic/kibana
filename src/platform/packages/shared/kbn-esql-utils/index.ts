@@ -10,6 +10,7 @@
 export {
   getESQLAdHocDataview,
   getIndexPatternFromESQLQuery,
+  getSourceCommandFromESQLQuery,
   hasTransformationalCommand,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
@@ -20,6 +21,7 @@ export {
   appendWhereClauseToESQLQuery,
   appendStatsByToQuery,
   appendLimitToQuery,
+  buildMetricsInfoQuery,
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,
   getESQLResults,
@@ -64,6 +66,7 @@ export {
   getEditorExtensions,
   getProjectRoutingFromEsqlQuery,
   hasOnlySourceCommand,
+  hasTimeseriesInfoCommand,
   isComputedColumn,
   getQuerySummary,
   getEsqlControls,

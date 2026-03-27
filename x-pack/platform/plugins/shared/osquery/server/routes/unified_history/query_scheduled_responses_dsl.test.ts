@@ -93,17 +93,6 @@ describe('buildScheduledResponsesQuery', () => {
 
       expect(subAggs.max_timestamp).toEqual({ max: { field: '@timestamp' } });
     });
-
-    test('includes pack_id_hit top_hits sub-aggregation', () => {
-      const result = buildScheduledResponsesQuery({ spaceId: defaultSpaceId });
-      const aggs = result.body.aggs as Record<string, unknown>;
-      const scheduledExec = aggs.scheduled_executions as Record<string, unknown>;
-      const subAggs = scheduledExec.aggs as Record<string, unknown>;
-
-      expect(subAggs.pack_id_hit).toEqual({
-        top_hits: { size: 1, _source: { includes: ['pack_id'] } },
-      });
-    });
   });
 
   describe('base filters', () => {
@@ -233,6 +222,51 @@ describe('buildScheduledResponsesQuery', () => {
     });
   });
 
+  describe('scheduleIds filter', () => {
+    test('adds terms filter when only scheduleIds is provided', () => {
+      const scheduleIds = ['sched-1', 'sched-2'];
+      const result = buildScheduledResponsesQuery({
+        spaceId: defaultSpaceId,
+        scheduleIds,
+      });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      expect(filters).toContainEqual({ terms: { schedule_id: scheduleIds } });
+    });
+
+    test('adds bool should with pack_id and schedule_id when both packIds and scheduleIds provided', () => {
+      const packIds = ['pack-1'];
+      const scheduleIds = ['sched-1'];
+      const result = buildScheduledResponsesQuery({
+        spaceId: defaultSpaceId,
+        packIds,
+        scheduleIds,
+      });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      expect(filters).toContainEqual({
+        bool: {
+          should: [{ terms: { pack_id: packIds } }, { terms: { schedule_id: scheduleIds } }],
+          minimum_should_match: 1,
+        },
+      });
+    });
+
+    test('adds match_none when both packIds and scheduleIds are empty', () => {
+      const result = buildScheduledResponsesQuery({
+        spaceId: defaultSpaceId,
+        packIds: [],
+        scheduleIds: [],
+      });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      expect(filters).toContainEqual({ match_none: {} });
+    });
+  });
+
   describe('date range filter', () => {
     test('adds timestamp range filter when both startDate and endDate are provided', () => {
       const result = buildScheduledResponsesQuery({
@@ -245,6 +279,57 @@ describe('buildScheduledResponsesQuery', () => {
 
       expect(filters).toContainEqual({
         range: { '@timestamp': { gte: 'now-24h', lte: 'now' } },
+      });
+    });
+  });
+
+  describe('sortDirection', () => {
+    test('defaults to desc when not provided', () => {
+      const result = buildScheduledResponsesQuery({ spaceId: defaultSpaceId });
+      const aggs = result.body.aggs as Record<string, unknown>;
+      const multiTerms = (aggs.scheduled_executions as Record<string, unknown>)
+        .multi_terms as Record<string, unknown>;
+
+      expect(multiTerms.order).toEqual({ planned_time: 'desc' });
+    });
+
+    test('orders ascending when sortDirection is asc', () => {
+      const result = buildScheduledResponsesQuery({
+        spaceId: defaultSpaceId,
+        sortDirection: 'asc',
+      });
+      const aggs = result.body.aggs as Record<string, unknown>;
+      const multiTerms = (aggs.scheduled_executions as Record<string, unknown>)
+        .multi_terms as Record<string, unknown>;
+
+      expect(multiTerms.order).toEqual({ planned_time: 'asc' });
+    });
+
+    test('cursor filter uses gte when sortDirection is asc', () => {
+      const result = buildScheduledResponsesQuery({
+        spaceId: defaultSpaceId,
+        cursor: '2024-06-01T00:00:00.000Z',
+        sortDirection: 'asc',
+      });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      expect(filters).toContainEqual({
+        range: { planned_schedule_time: { gte: '2024-06-01T00:00:00.000Z' } },
+      });
+    });
+
+    test('cursor filter uses lte when sortDirection is desc', () => {
+      const result = buildScheduledResponsesQuery({
+        spaceId: defaultSpaceId,
+        cursor: '2024-06-01T00:00:00.000Z',
+        sortDirection: 'desc',
+      });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      expect(filters).toContainEqual({
+        range: { planned_schedule_time: { lte: '2024-06-01T00:00:00.000Z' } },
       });
     });
   });

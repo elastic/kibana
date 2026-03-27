@@ -54,8 +54,15 @@ export const AnalyzerPreview = memo(
 
     const alertIndices = useMemo(() => {
       const ruleIndices = getFieldValue(hit, ALERT_RULE_INDICES) as string[];
-      const ruleParameters = getFieldValue(hit, ALERT_RULE_PARAMETERS) as { index: string };
-      const ruleParametersIndices = ruleParameters ? [ruleParameters.index] : [];
+      const ruleParameters = getFieldValue(hit, ALERT_RULE_PARAMETERS) as {
+        index: string | string[];
+      };
+      const ruleParametersIndices =
+        ruleParameters && ruleParameters.index
+          ? Array.isArray(ruleParameters.index)
+            ? ruleParameters.index
+            : [ruleParameters.index]
+          : [];
       return ruleIndices?.length > 0 ? ruleIndices : ruleParametersIndices;
     }, [hit]);
     const indices = alertIndices.length > 0 ? alertIndices : dataViewIndices;
@@ -86,7 +93,7 @@ export const AnalyzerPreview = memo(
         <EuiSkeletonText
           data-test-subj={ANALYZER_PREVIEW_LOADING_TEST_ID}
           contentAriaLabel={i18n.translate(
-            'xpack.securitySolution.flyout.right.visualizations.analyzerPreview.loadingAriaLabel',
+            'xpack.securitySolution.flyout.document.visualizations.analyzerPreview.loadingAriaLabel',
             {
               defaultMessage: 'analyzer preview',
             }
@@ -98,7 +105,7 @@ export const AnalyzerPreview = memo(
     if (!showAnalyzerTree) {
       return (
         <FormattedMessage
-          id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.errorDescription"
+          id="xpack.securitySolution.flyout.document.visualizations.analyzerPreview.errorDescription"
           defaultMessage="An error is preventing this alert from being analyzed."
         />
       );
@@ -109,7 +116,7 @@ export const AnalyzerPreview = memo(
         items={items}
         display="compressed"
         aria-label={i18n.translate(
-          'xpack.securitySolution.flyout.right.visualizations.analyzerPreview.treeViewAriaLabel',
+          'xpack.securitySolution.flyout.document.visualizations.analyzerPreview.treeViewAriaLabel',
           {
             defaultMessage: 'Analyzer preview',
           }

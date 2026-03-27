@@ -18,6 +18,7 @@ import type { TaskParams } from '../types';
 import { generateInsights } from '../../significant_events/insights/generate_insights';
 import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
+import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
 
 export interface InsightsDiscoveryTaskResult {
   insights: Insight[];
@@ -25,7 +26,6 @@ export interface InsightsDiscoveryTaskResult {
 }
 
 export interface InsightsDiscoveryTaskParams {
-  connectorId: string;
   /** When provided, only generate insights for these stream names. Otherwise all streams are used. */
   streamNames?: string[];
 }
@@ -43,7 +43,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                 throw new Error('Request is required to run this task');
               }
 
-              const { connectorId, streamNames, _task } = runContext.taskInstance
+              const { streamNames, _task } = runContext.taskInstance
                 .params as TaskParams<InsightsDiscoveryTaskParams>;
 
               const {
@@ -53,10 +53,20 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                 inferenceClient,
                 queryClient,
                 insightClient,
+                modelSettingsClient,
+                uiSettingsClient,
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
               });
 
+              const taskLogger = taskContext.logger.get('insights_discovery');
+              const settings = await modelSettingsClient.getSettings();
+              const connectorId = await resolveConnectorId({
+                connectorId: settings.connectorIdDiscovery,
+                uiSettingsClient,
+                logger: taskLogger,
+              });
+              taskLogger.debug(`Using connector ${connectorId} for discovery`);
               const boundInferenceClient = inferenceClient.bindTo({ connectorId });
 
               try {
@@ -66,7 +76,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                   esClient: scopedClusterClient.asCurrentUser,
                   inferenceClient: boundInferenceClient,
                   signal: runContext.abortController.signal,
-                  logger: taskContext.logger.get('insights_discovery'),
+                  logger: taskLogger,
                   streamNames,
                 });
 
@@ -104,7 +114,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
 
                 await taskClient.complete<InsightsDiscoveryTaskParams, InsightsDiscoveryTaskResult>(
                   _task,
-                  { connectorId, streamNames },
+                  { streamNames },
                   { insights, tokensUsed: result.tokens_used }
                 );
               } catch (error) {
@@ -128,7 +138,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
 
                 await taskClient.fail<InsightsDiscoveryTaskParams>(
                   _task,
-                  { connectorId, streamNames },
+                  { streamNames },
                   errorMessage
                 );
                 return getDeleteTaskRunResult();

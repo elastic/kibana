@@ -6,12 +6,6 @@
  */
 
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import {
-  getReviewFields,
-  getDissectProcessorWithReview,
-  extractDissectPattern,
-  groupMessagesByPattern,
-} from '@kbn/dissect-heuristics';
 import { lastValueFrom } from 'rxjs';
 import type { useAbortController } from '@kbn/react-hooks';
 import { useFetchErrorToast } from '../../../../../../../hooks/use_fetch_error_toast';
@@ -47,7 +41,7 @@ export function useDissectPatternSuggestion(
   return useAsyncFn(
     async (params: DissectPatternSuggestionParams | null) => {
       if (params === null) {
-        return Promise.resolve(undefined); // Reset to initial value
+        return Promise.resolve(undefined);
       }
 
       // Prepare samples by running partial simulation if needed
@@ -68,17 +62,8 @@ export function useDissectPatternSuggestion(
         connector_id: params.connectorId,
       });
 
-      // Group messages by pattern and use only the largest group
-      const groupedMessages = groupMessagesByPattern(messages);
-      const largestGroup = groupedMessages[0]; // Groups are already sorted by probability (descending)
-
-      // Extract dissect pattern from the largest group
-      const dissectPattern = extractDissectPattern(largestGroup.messages);
-
       try {
-        // The only reason we're streaming the response here is to avoid timeout issues prevalent with long-running requests to LLMs.
-        // There is only ever going to be a single event emitted so we can safely use `lastValueFrom`.
-        const reviewResult = await lastValueFrom(
+        const { dissectProcessor } = await lastValueFrom(
           streamsRepositoryClient.stream(
             'POST /internal/streams/{name}/processing/_suggestions/dissect',
             {
@@ -87,26 +72,18 @@ export function useDissectPatternSuggestion(
                 path: { name: params.streamName },
                 body: {
                   connector_id: params.connectorId,
-                  sample_messages: largestGroup.messages.slice(0, 10),
-                  review_fields: getReviewFields(dissectPattern, 10),
+                  field_name: params.fieldName,
+                  sample_messages: messages,
                 },
               },
             }
           )
         );
 
-        // Handle case where LLM couldn't generate suggestions
-        if (reviewResult.dissectProcessor === null) {
+        if (!dissectProcessor) {
           throw new NoSuggestionsError();
         }
 
-        const dissectProcessor = getDissectProcessorWithReview(
-          dissectPattern,
-          reviewResult.dissectProcessor,
-          params.fieldName
-        );
-
-        // Run simulation to validate the processor
         const simulationResult = await streamsRepositoryClient.fetch(
           'POST /internal/streams/{name}/processing/_simulate',
           {
@@ -118,10 +95,8 @@ export function useDissectPatternSuggestion(
                 processing: {
                   steps: [
                     {
-                      action: 'dissect',
+                      ...dissectProcessor,
                       customIdentifier: SUGGESTED_DISSECT_PROCESSOR_ID,
-                      from: params.fieldName,
-                      pattern: dissectProcessor.pattern,
                     },
                   ],
                 },
@@ -141,9 +116,8 @@ export function useDissectPatternSuggestion(
         };
       } catch (error) {
         finishTrackingAndReport(0, [0]);
-        // Don't show toast for NoSuggestionsError - let UI handle it inline
         if (!isNoSuggestionsError(error)) {
-          showFetchErrorToast(error);
+          showFetchErrorToast(error as Error);
         }
         throw error;
       }

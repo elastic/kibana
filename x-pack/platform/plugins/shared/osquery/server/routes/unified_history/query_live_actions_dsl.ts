@@ -6,6 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { SourceFilter } from '../../../common/api/unified_history/types';
 
 const SIMPLE_QUERY_STRING_SPECIAL_CHARS = /[+\-|"*()~\\{}[\]:^!/&]/g;
 const escapeSimpleQueryString = (input: string): string =>
@@ -18,9 +19,12 @@ interface LiveActionsQueryOptions {
   searchAfter?: SortValues;
   kuery?: string;
   userIds?: string[];
+  tags?: string[];
   spaceId: string;
   startDate?: string;
   endDate?: string;
+  sortDirection?: 'asc' | 'desc';
+  activeFilters?: Set<SourceFilter>;
 }
 
 export const buildLiveActionsQuery = ({
@@ -28,9 +32,12 @@ export const buildLiveActionsQuery = ({
   searchAfter,
   kuery,
   userIds,
+  tags,
   spaceId,
   startDate,
   endDate,
+  sortDirection = 'desc',
+  activeFilters,
 }: LiveActionsQueryOptions): {
   body: Record<string, unknown>;
 } => {
@@ -60,10 +67,9 @@ export const buildLiveActionsQuery = ({
   }
 
   if (kuery) {
-    const escaped = escapeSimpleQueryString(kuery);
     filters.push({
       simple_query_string: {
-        query: `*${escaped}*`,
+        query: `${escapeSimpleQueryString(kuery)}*`,
         fields: ['pack_name', 'queries.query', 'queries.id'],
         analyze_wildcard: true,
       },
@@ -72,6 +78,24 @@ export const buildLiveActionsQuery = ({
 
   if (userIds && userIds.length > 0) {
     filters.push({ terms: { user_id: userIds } });
+  }
+
+  if (tags && tags.length > 0) {
+    filters.push({ terms: { tags } });
+  }
+
+  if (activeFilters) {
+    const wantsLive = activeFilters.has('live');
+    const wantsRule = activeFilters.has('rule');
+
+    if (wantsRule && !wantsLive) {
+      // Rule-only: keep actions that have alert_ids
+      filters.push({ exists: { field: 'alert_ids' } });
+    } else if (wantsLive && !wantsRule) {
+      // Live-only: exclude actions that have alert_ids
+      filters.push({ bool: { must_not: { exists: { field: 'alert_ids' } } } });
+    }
+    // Both live+rule selected (or neither, which shouldn't reach here): no filter needed
   }
 
   return {
@@ -83,8 +107,8 @@ export const buildLiveActionsQuery = ({
       },
       size: pageSize,
       sort: [
-        { '@timestamp': { order: 'desc' as const } },
-        { _shard_doc: { order: 'asc' as const } },
+        { '@timestamp': { order: sortDirection } },
+        { _shard_doc: { order: sortDirection === 'desc' ? 'asc' : 'desc' } },
       ],
       ...(searchAfter ? { search_after: searchAfter } : {}),
       _source: true,

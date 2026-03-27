@@ -6,8 +6,6 @@
  */
 
 import React from 'react';
-import { takeUntil, distinctUntilChanged, skip } from 'rxjs';
-import { from } from 'rxjs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -31,12 +29,7 @@ export function createFlyout(
   lens?: LensPublicStart,
   cps?: CPSPluginStart
 ): Promise<void> {
-  const {
-    http,
-    overlays,
-    application: { currentAppId$ },
-    ...startServices
-  } = coreStart;
+  const { http, overlays, ...startServices } = coreStart;
 
   return new Promise(async (resolve, reject) => {
     try {
@@ -75,13 +68,6 @@ export function createFlyout(
           size: '35vw',
         }
       );
-
-      // Close the flyout when user navigates out of the current plugin
-      currentAppId$
-        .pipe(skip(1), takeUntil(from(flyoutSession.onClose)), distinctUntilChanged())
-        .subscribe(() => {
-          flyoutSession.close();
-        });
     } catch (error) {
       reject(error);
     }

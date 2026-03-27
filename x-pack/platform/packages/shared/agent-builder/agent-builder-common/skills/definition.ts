@@ -51,7 +51,23 @@ export interface PublicSkillDefinition {
    * Whether this skill is built-in (readonly) or user-created.
    */
   readonly: boolean;
+  /**
+   * If this skill was installed from a plugin, the plugin name.
+   */
+  plugin_id?: string;
+  /**
+   * When true, this skill is only available when experimental features are enabled.
+   */
+  experimental: boolean;
 }
+
+/**
+ * Lightweight version of {@link PublicSkillDefinition} used for listing.
+ * Omits heavy `content` and `referenced_content` fields; carries only the count.
+ */
+export type PublicSkillSummary = Omit<PublicSkillDefinition, 'content' | 'referenced_content'> & {
+  referenced_content_count: number;
+};
 
 /**
  * Shape for creating a persisted (user-created) skill.
@@ -65,6 +81,10 @@ export interface PersistedSkillCreateRequest {
    * Name of the skill.
    */
   name: string;
+  /**
+   * Base path for the skill (optional)
+   */
+  base_path?: string;
   /**
    * Description of what the skill does.
    */
@@ -81,6 +101,10 @@ export interface PersistedSkillCreateRequest {
    * Tool IDs from the tool registry.
    */
   tool_ids: string[];
+  /**
+   * If this skill is managed by a plugin, the plugin name.
+   */
+  plugin_id?: string;
 }
 
 /**
@@ -91,6 +115,10 @@ export interface PersistedSkillUpdateRequest {
    * Updated name.
    */
   name?: string;
+  /**
+   * Base path for the skill (optional)
+   */
+  base_path?: string;
   /**
    * Updated description.
    */

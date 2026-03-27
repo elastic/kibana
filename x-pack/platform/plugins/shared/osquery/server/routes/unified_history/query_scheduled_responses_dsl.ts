@@ -12,9 +12,11 @@ interface ScheduledResponsesQueryOptions {
   scheduledOffset?: number;
   pageSize?: number;
   packIds?: string[];
+  scheduleIds?: string[];
   spaceId: string;
   startDate?: string;
   endDate?: string;
+  sortDirection?: 'asc' | 'desc';
 }
 
 export const buildScheduledResponsesQuery = ({
@@ -22,9 +24,11 @@ export const buildScheduledResponsesQuery = ({
   scheduledOffset = 0,
   pageSize = 20,
   packIds,
+  scheduleIds,
   spaceId,
   startDate,
   endDate,
+  sortDirection = 'desc',
 }: ScheduledResponsesQueryOptions): {
   body: Record<string, unknown>;
 } => {
@@ -43,17 +47,31 @@ export const buildScheduledResponsesQuery = ({
     filters.push({ term: { space_id: spaceId } });
   }
 
-  if (packIds) {
-    if (packIds.length === 0) {
-      filters.push({ match_none: {} });
-    } else {
+  if (packIds !== undefined || scheduleIds !== undefined) {
+    const hasPackIds = packIds && packIds.length > 0;
+    const hasScheduleIds = scheduleIds && scheduleIds.length > 0;
+
+    if (hasPackIds && hasScheduleIds) {
+      filters.push({
+        bool: {
+          should: [{ terms: { pack_id: packIds } }, { terms: { schedule_id: scheduleIds } }],
+          minimum_should_match: 1,
+        },
+      });
+    } else if (hasPackIds) {
       filters.push({ terms: { pack_id: packIds } });
+    } else if (hasScheduleIds) {
+      filters.push({ terms: { schedule_id: scheduleIds } });
+    } else {
+      filters.push({ match_none: {} });
     }
   }
 
   if (cursor) {
     filters.push({
-      range: { planned_schedule_time: { lte: cursor } },
+      range: {
+        planned_schedule_time: sortDirection === 'desc' ? { lte: cursor } : { gte: cursor },
+      },
     });
   }
 
@@ -80,7 +98,7 @@ export const buildScheduledResponsesQuery = ({
           multi_terms: {
             terms: [{ field: 'schedule_id' }, { field: 'schedule_execution_count' }],
             size: aggSize,
-            order: { planned_time: 'desc' as const },
+            order: { planned_time: sortDirection },
           },
           aggs: {
             planned_time: { max: { field: 'planned_schedule_time' } },
@@ -96,9 +114,6 @@ export const buildScheduledResponsesQuery = ({
             },
             error_count: {
               filter: { exists: { field: 'error' } },
-            },
-            pack_id_hit: {
-              top_hits: { size: 1, _source: { includes: ['pack_id'] } },
             },
           },
         },

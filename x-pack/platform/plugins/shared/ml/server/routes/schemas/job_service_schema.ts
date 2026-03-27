@@ -54,10 +54,6 @@ export const populationChartSchema = {
   projectRouting: schema.maybe(schema.string()),
 };
 
-export const datafeedIdsSchema = schema.object({
-  datafeedIds: schema.arrayOf(schema.string()),
-});
-
 export const forceStartDatafeedSchema = schema.object({
   datafeedIds: schema.arrayOf(schema.string()),
   start: schema.maybe(schema.number()),
@@ -76,6 +72,11 @@ export const deleteJobsSchema = schema.object({
   ...jobIds,
   deleteUserAnnotations: schema.maybe(schema.boolean()),
   deleteAlertingRules: schema.maybe(schema.boolean()),
+});
+
+export const stopDatafeedsSchema = schema.object({
+  datafeedIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
+  closeJobs: schema.maybe(schema.boolean()),
 });
 
 export const optionalJobIdsSchema = schema.object({

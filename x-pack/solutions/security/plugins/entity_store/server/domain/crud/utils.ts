@@ -8,7 +8,7 @@
 import { createHash } from 'crypto';
 import { getFlattenedObject } from '@kbn/std';
 import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
-import { BadCRUDRequestError } from '../errors';
+import { getEuidSourceFields } from '../../../common/domain/euid';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import type { EntityType } from '../../../common';
@@ -16,29 +16,60 @@ import type {
   EntityField,
   ManagedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
+import { HASH_ALG } from '../constants';
+import { BadCRUDRequestError } from '../errors';
 
+type CrudOperation = 'create' | 'update';
 const GENERIC_TYPE = 'generic' as EntityType;
 
 export function hashEuid(id: string): string {
-  // EUID generation uses MD5. It is not a security-related feature.
-  // eslint-disable-next-line @kbn/eslint/no_unsafe_hash
-  return createHash('md5').update(id).digest('hex');
+  return createHash(HASH_ALG).update(id).digest('hex');
 }
 
-export function validateAndTransformDocForUpsert(
+// validateDocIdentification checks provided and generated EUIDs. It
+// picks validId, preferring generated over supplied ID.
+export function validateDocIdentification(doc: Entity, generatedId: string | undefined): string {
+  if (!doc.entity?.id && generatedId === undefined) {
+    throw new BadCRUDRequestError(`Could not derive EUID from document or find it in entity.id`);
+  }
+
+  if (doc.entity?.id && generatedId !== undefined && doc.entity.id !== generatedId) {
+    throw new BadCRUDRequestError(
+      `Supplied ID ${doc.entity.id} does not match generated EUID ${generatedId}`
+    );
+  }
+  return generatedId || doc.entity!.id!;
+}
+
+export interface ValidatedDoc {
+  id: string;
+  doc: Record<string, unknown>;
+}
+
+export function validateAndTransformDoc(
+  operation: CrudOperation,
   entityType: EntityType,
   namespace: string,
   doc: Entity,
-  force: boolean,
-  timestampGenerator?: () => string
-): Record<string, unknown> {
-  const definition = getEntityDefinition(entityType, namespace);
+  generatedId: string | undefined,
+  force: boolean
+): ValidatedDoc {
+  const id = validateDocIdentification(doc, generatedId);
+
+  if (!doc.entity) {
+    doc.entity = { id };
+  } else {
+    doc.entity.id = id;
+  }
+
   if (!force) {
+    const definition = getEntityDefinition(entityType, namespace);
     const flat = getFlattenedObject(doc);
     const fieldDescriptions = getFieldDescriptions(flat, definition);
     assertOnlyNonForcedAttributesInReq(fieldDescriptions);
   }
-  return transformDocForUpsert(entityType, doc, timestampGenerator);
+
+  return { id, doc: transformDoc(operation, entityType, doc) };
 }
 
 function getFieldDescriptions(
@@ -53,8 +84,9 @@ function getFieldDescriptions(
   const invalid: string[] = [];
   const descriptions: Record<string, EntityField & { value: unknown }> = {};
 
+  const identitySourceFields = getEuidSourceFields(description.type).identitySourceFields;
   for (const [key, value] of Object.entries(flatProps)) {
-    if (key === ENTITY_ID_FIELD || description.identityField.requiresOneOfFields.includes(key)) {
+    if (key === ENTITY_ID_FIELD || identitySourceFields.includes(key)) {
       continue;
     }
 
@@ -98,14 +130,14 @@ function assertOnlyNonForcedAttributesInReq(fields: Record<string, EntityField>)
   }
 }
 
-function transformDocForUpsert(
+function transformDoc(
+  operation: CrudOperation,
   type: EntityType,
-  data: Partial<Entity>,
-  timestampGenerator?: () => string
+  data: Entity
 ): Record<string, unknown> {
   const doc: Record<string, unknown> = {
     ...data,
-    '@timestamp': timestampGenerator ? timestampGenerator() : new Date().toISOString(),
+    '@timestamp': new Date().toISOString(),
   };
 
   if (type === GENERIC_TYPE) {
@@ -118,7 +150,7 @@ function transformDocForUpsert(
   }
   const typeDoc = doc[typeKey] as Record<string, unknown>;
 
-  if (!typeDoc.name) {
+  if (operation === 'create' && !typeDoc.name) {
     typeDoc.name = data.entity?.id;
   }
   typeDoc.entity = data.entity;

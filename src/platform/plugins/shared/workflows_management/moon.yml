@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/workflows-management-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/workflows-eng'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/workflows-management-plugin'
+  title: '@kbn/workflows-management-plugin'
   description: Moon project for @kbn/workflows-management-plugin
   channel: ''
   owner: '@elastic/workflows-eng'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/workflows_management
+  sourceRoot: src/platform/plugins/shared/workflows_management
 dependsOn:
   - '@kbn/core'
   - '@kbn/eval-kql'
@@ -56,6 +55,7 @@ dependsOn:
   - '@kbn/serverless'
   - '@kbn/field-types'
   - '@kbn/data-views-plugin'
+  - '@kbn/kql'
   - '@kbn/field-formats-plugin'
   - '@kbn/unified-search-plugin'
   - '@kbn/es-query'
@@ -89,6 +89,8 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/agent-builder-server'
   - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/share-plugin'
 tags:
   - plugin
   - prod
@@ -108,14 +110,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
