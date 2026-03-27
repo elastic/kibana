@@ -2,6 +2,16 @@
 
 `@kbn/evals` contains utilities for writing offline evaluation suites against LLM-based workflows in Kibana.
 
+## Vision Alignment
+
+This package follows the strategic direction outlined in the "Future of @kbn/evals" vision document. Contributors should be aware of these principles:
+
+- **Trace-first evaluators**: New evaluators should derive signals from OTel traces stored in Elasticsearch when possible. Use `createTraceBasedEvaluator` for non-functional metrics. For evaluators that currently operate on in-memory output, design interfaces that also accept `traceId` references for future API-based evaluation.
+- **Elastic-native path**: Build on ES/Kibana/OTel capabilities rather than introducing new external dependencies. Phoenix usage should remain behind `KBN_EVALS_EXECUTOR=phoenix` and not expand.
+- **Shared evaluation layer**: This package provides primitives (evaluator factories, data model, persistence, reporting). Solution-specific evaluators, datasets, and reporting belong in solution-owned evaluation suites, not here.
+- **Code-defined datasets**: Evaluation datasets should be defined in code, versioned, and reviewed alongside suites. Ad-hoc datasets must be explicitly decoupled from CI-contributing datasets.
+- **Ownership**: Framework is owned by the Observability AI team. General-purpose evaluators discovered in solution suites should be contributed upstream.
+
 This package is built on top of `@kbn/scout` and the `@kbn/inference-*` packages. It bundles three main entry-points:
 
 1. `createPlaywrightEvalsConfig` – helper that returns a ready-made Playwright config for evaluation suites. It automatically:
