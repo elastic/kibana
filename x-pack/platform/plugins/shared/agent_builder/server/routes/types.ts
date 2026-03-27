@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup } from '@kbn/core/server';
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import type {
   AgentBuilderPluginStart,
   AgentBuilderStartDependencies,
@@ -21,6 +22,7 @@ export interface RouteDependencies {
   router: AgentBuilderRouter;
   logger: Logger;
   coreSetup: CoreSetup<AgentBuilderStartDependencies, AgentBuilderPluginStart>;
+  contentManagement?: ContentManagementServerSetup;
   getInternalServices: () => InternalStartServices;
   pluginsSetup: AgentBuilderSetupDependencies;
   trackingService?: TrackingService;

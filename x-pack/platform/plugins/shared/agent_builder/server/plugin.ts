@@ -181,6 +181,7 @@ export class AgentBuilderPlugin
     registerRoutes({
       router,
       coreSetup,
+      contentManagement: setupDeps.contentManagement,
       logger: this.logger,
       pluginsSetup: setupDeps,
       getInternalServices,

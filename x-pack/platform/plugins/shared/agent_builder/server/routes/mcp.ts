@@ -18,6 +18,8 @@ import { KibanaMcpHttpTransport } from '../utils/mcp/kibana_mcp_http_transport';
 import { MCP_SERVER_PATH } from '../../common/mcp';
 import { registerHelloMcpApp } from './mcp_apps/hello_mcp_app';
 import { registerChartMcpApp } from './mcp_apps/chart_mcp_app';
+import { registerLensChartMcpApp } from './mcp_apps/lens_chart_mcp_app';
+import { registerDashboardsMcpTools } from './mcp_tools/dashboards';
 
 const MCP_SERVER_NAME = 'elastic-mcp-server';
 const MCP_SERVER_VERSION = '0.0.1';
@@ -51,7 +53,13 @@ export function filterToolsByNamespace(
   });
 }
 
-export function registerMCPRoutes({ router, getInternalServices, logger }: RouteDependencies) {
+export function registerMCPRoutes({
+  router,
+  getInternalServices,
+  logger,
+  coreSetup,
+  contentManagement,
+}: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
   router.versioned
@@ -147,6 +155,16 @@ To learn more, refer to the [MCP documentation](https://www.elastic.co/docs/expl
 
           const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
           registerChartMcpApp(server, esClient);
+          registerLensChartMcpApp(server, esClient);
+
+          // Register dashboards & lens visualizations CRUD tools
+          registerDashboardsMcpTools(
+            server,
+            request,
+            ctx,
+            contentManagement,
+            request.query.namespace
+          );
 
           request.events.aborted$.subscribe(async () => {
             await transport?.close().catch((error) => {

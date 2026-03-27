@@ -28,6 +28,7 @@ import type {
 } from '@kbn/actions-plugin/server';
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 import type { HooksServiceSetup } from '@kbn/agent-builder-server';
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
@@ -42,6 +43,7 @@ import type { PluginsServiceSetup, PluginRegistry } from './services/plugins';
 
 export interface AgentBuilderSetupDependencies {
   cloud?: CloudSetup;
+  contentManagement?: ContentManagementServerSetup;
   usageApi?: UsageApiSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
