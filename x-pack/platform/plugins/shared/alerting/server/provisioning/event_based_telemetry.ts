@@ -13,6 +13,7 @@ export interface UiamProvisioningRunEventData {
   failed: number;
   skipped: number;
   has_more_to_provision: boolean;
+  has_error: boolean;
   run_number: number;
 }
 
@@ -55,6 +56,13 @@ export const UIAM_PROVISIONING_RUN_EVENT: EventTypeOpts<UiamProvisioningRunEvent
       _meta: {
         description:
           'Whether there are more rules to provision in subsequent runs (batch exceeded).',
+        optional: false,
+      },
+    },
+    has_error: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the provisioning run failed with an error.',
         optional: false,
       },
     },
