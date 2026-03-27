@@ -8,7 +8,7 @@
  */
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import {
   LazySavedObjectSaveModalDashboard,
@@ -64,16 +64,17 @@ export function SaveDiscoverTableButton() {
 
   return (
     <>
-      <EuiButtonIcon
-        data-test-subj="saveDiscoverTableToDashboardButton"
-        aria-label={BUTTON_LABEL}
-        color="text"
-        size="s"
-        iconSize="m"
-        iconType="dashboardApp"
-        title={BUTTON_LABEL}
-        onClick={() => setShowSaveModal(true)}
-      />
+      <EuiToolTip content={BUTTON_LABEL} delay="long" disableScreenReaderOutput position="top">
+        <EuiButtonIcon
+          data-test-subj="saveDiscoverTableToDashboardButton"
+          aria-label={BUTTON_LABEL}
+          color="text"
+          size="s"
+          iconSize="m"
+          iconType="dashboardApp"
+          onClick={() => setShowSaveModal(true)}
+        />
+      </EuiToolTip>
       {showSaveModal && (
         <SavedObjectSaveModalDashboard
           documentInfo={{
