@@ -205,7 +205,6 @@ function SuccessState({
   jsonValue: string;
 }) {
   const useUrl = shareService?.url.locators.useUrl;
-  const navigateToUrl = coreServices.application?.navigateToUrl;
 
   const devToolsDataUri = compressToEncodedURIComponent(openInConsoleRequest);
   const consoleHref = useUrl?.(
@@ -221,11 +220,6 @@ function SuccessState({
   const canShowDevTools = Boolean(
     coreServices.application?.capabilities?.dev_tools?.show && consoleHref !== undefined
   );
-  const handleDevToolsLinkClick = useCallback(() => {
-    if (consoleHref && navigateToUrl) {
-      navigateToUrl(consoleHref);
-    }
-  }, [consoleHref, navigateToUrl]);
 
   return (
     <EuiFlexGroup
@@ -268,13 +262,13 @@ function SuccessState({
           {canShowDevTools ? (
             <EuiFlexItem grow={false}>
               <div>
-                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                 <EuiButtonEmpty
                   size="xs"
                   flush="right"
                   iconType="wrench"
                   href={consoleHref}
-                  onClick={handleDevToolsLinkClick}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   data-test-subj="dashboardExportSourceOpenInConsoleButton"
                 >
                   {i18n.translate('dashboard.exportSource.openInConsoleButtonLabel', {
