@@ -21,3 +21,4 @@ export { CopyToDashboardAction } from '../dashboard_actions/copy_to_dashboard_ac
 export { AddSectionAction } from '../dashboard_actions/add_section_action';
 export { dashboardDrilldown } from '../dashboard_drilldown/dashboard_drilldown';
 export { getJsonExportConfig } from '../share/json_export_config';
+export { initializeDashboardApiServices } from '../services/dashboard_api_services';

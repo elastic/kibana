@@ -120,7 +120,7 @@ export function TraceSearchBox({ query, onQueryChange, onQueryCommit, loading }:
               onClick={() => {
                 onQueryCommit();
               }}
-              iconType="search"
+              iconType="magnify"
               style={{ width: '100px' }}
             >
               {i18n.translate('xpack.apm.traceSearchBox.refreshButton', {

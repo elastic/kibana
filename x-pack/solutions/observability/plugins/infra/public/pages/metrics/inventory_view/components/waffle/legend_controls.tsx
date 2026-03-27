@@ -128,7 +128,7 @@ export const LegendControls = ({
 
   const buttonComponent = (
     <EuiButtonIcon
-      iconType="color"
+      iconType="paintBucket"
       color="text"
       display="base"
       size="s"
