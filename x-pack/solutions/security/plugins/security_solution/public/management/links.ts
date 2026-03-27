@@ -9,6 +9,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
 import { SECURITY_UI_SHOW_PRIVILEGE } from '@kbn/security-solution-features/constants';
+import { checkArtifactHasData } from './services/exceptions_list/check_artifact_has_data';
 import {
   calculateEndpointAuthz,
   getEndpointAuthzInitialState,
@@ -58,6 +59,7 @@ import { IconArtifacts } from '../common/icons/artifacts';
 import { IconEntityAnalytics } from '../common/icons/entity_analytics';
 import { IconAssetCriticality } from '../common/icons/asset_criticality';
 import { IconScriptLibrary } from '../common/icons/script_library';
+import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 
 const categories = [
   {
@@ -274,6 +276,7 @@ export const getManagementFilteredLinks = async (
 
   const {
     canReadActionsLogManagement,
+    canAccessHostIsolationExceptions,
     canReadHostIsolationExceptions,
     canReadEndpointList,
     canReadEndpointExceptions,
@@ -287,6 +290,13 @@ export const getManagementFilteredLinks = async (
     fleetAuthz && currentUser
       ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles)
       : getEndpointAuthzInitialState();
+      
+    const showHostIsolationExceptions =
+    canAccessHostIsolationExceptions || // access host isolation exceptions is a paid feature, always show the link.
+    // read host isolation exceptions is not a paid feature, to allow deleting exceptions after a downgrade scenario.
+    // however, in this situation we allow to access only when there is data, otherwise the link won't be accessible.
+    (canReadHostIsolationExceptions &&
+      (await checkArtifactHasData(HostIsolationExceptionsApiClient.getInstance(core.http))));
 
   const linksToExclude: SecurityPageName[] = [];
 
@@ -304,7 +314,7 @@ export const getManagementFilteredLinks = async (
     canReadTrustedApplications ||
     canReadTrustedDevices ||
     canReadEventFilters ||
-    canReadHostIsolationExceptions ||
+    showHostIsolationExceptions ||
     canReadBlocklist;
   if (!canReadAnyArtifact) {
     linksToExclude.push(SecurityPageName.artifacts);
