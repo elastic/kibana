@@ -23,7 +23,7 @@ export interface SecondaryMenuProps {
   children: ReactNode;
   isNew?: boolean;
   isPanel?: boolean;
-  title: string;
+  title?: string;
 }
 
 interface SecondaryMenuComponent
@@ -51,15 +51,17 @@ const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
 
     return (
       <div ref={ref}>
-        <EuiTitle css={titleStyles} size="xs">
-          <div css={titleWithBadgeStyles}>
-            <h4>{title}</h4>
-            {/* Always show non-new badges, only show new ones if isNew check allows it */}
-            {badgeType && (badgeType !== 'new' || isNew) && (
-              <BetaBadge type={badgeType} alignment="text-bottom" />
-            )}
-          </div>
-        </EuiTitle>
+        {title && (
+          <EuiTitle css={titleStyles} size="xs">
+            <div css={titleWithBadgeStyles}>
+              <h4>{title}</h4>
+              {/* Always show non-new badges, only show new ones if isNew check allows it */}
+              {badgeType && (badgeType !== 'new' || isNew) && (
+                <BetaBadge type={badgeType} alignment="text-bottom" />
+              )}
+            </div>
+          </EuiTitle>
+        )}
         {children}
       </div>
     );

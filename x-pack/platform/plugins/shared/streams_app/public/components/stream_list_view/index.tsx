@@ -41,12 +41,32 @@ import { FeedbackButton } from '../feedback_button';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { WelcomeTourCallout } from '../streams_tour';
 import { ClassicStreamCreationFlyout } from './classic_stream_creation_flyout';
+import { MockAwsStreamsTable } from './mock_aws_streams_table';
 import { StreamsListEmptyPrompt } from './streams_list_empty_prompt';
 import { StreamsSettingsFlyout } from './streams_settings_flyout';
 import { StreamsTreeTable } from './tree_table';
 import { LegacyLogsDeprecationCallout } from './legacy_logs_deprecation_callout';
 import { CreateQueryStreamFlyout } from '../query_streams/create_query_stream_flyout';
 import { getFormattedError } from '../../util/errors';
+import { DataSourcesCatalogFlyout } from '../data_sources_view/data_sources_catalog_flyout';
+
+const useHasIngestedMockAwsData = () => {
+  const [hasData, setHasData] = React.useState(
+    () => sessionStorage.getItem('ingestHub:dataAdded') === 'true'
+  );
+
+  React.useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'ingestHub:dataAdded') {
+        setHasData(e.newValue === 'true');
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
+  return hasData;
+};
 
 export function StreamListView() {
   const { euiTheme } = useEuiTheme();
@@ -155,9 +175,16 @@ export function StreamListView() {
     }
   }, [streamsListFetch.loading, streamsListFetch.value, onPageReady]);
 
+  const hasIngestedMockAwsData = useHasIngestedMockAwsData();
+
   const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = React.useState(false);
   const [isClassicStreamCreationFlyoutOpen, setIsClassicStreamCreationFlyoutOpen] =
     React.useState(false);
+  const [isCatalogOpen, setIsCatalogOpen] = React.useState(false);
+
+  const handleDataConnected = React.useCallback(() => {
+    sessionStorage.setItem('ingestHub:dataAdded', 'true');
+  }, []);
 
   return (
     <>
@@ -177,7 +204,7 @@ export function StreamListView() {
               <EuiFlexItem>
                 <EuiFlexGroup alignItems="center" gutterSize="m">
                   {i18n.translate('xpack.streams.streamsListView.pageHeaderTitle', {
-                    defaultMessage: 'Streams',
+                    defaultMessage: 'Data streams',
                   })}
                 </EuiFlexGroup>
               </EuiFlexItem>
@@ -227,40 +254,17 @@ export function StreamListView() {
               )}
             </EuiFlexGroup>
           }
+          description={i18n.translate('xpack.streams.streamsListView.pageHeaderDescription', {
+            defaultMessage:
+              'Monitor ingestion rates, data quality, and retention across your Elasticsearch data streams.',
+          })}
         />
       )}
       <StreamsAppPageTemplate.Body grow={!isEmbedded}>
-        {streamsListFetch.loading && streamsListFetch.value === undefined ? (
-          <EuiEmptyPrompt
-            icon={<EuiLoadingElastic size="xl" />}
-            title={
-              <h2>
-                {i18n.translate('xpack.streams.streamsListView.loadingStreams', {
-                  defaultMessage: 'Loading Streams',
-                })}
-              </h2>
-            }
-          />
-        ) : !streamsListFetch.loading && isEmpty(streamsListFetch.value?.streams) ? (
-          <StreamsListEmptyPrompt />
+        {hasIngestedMockAwsData ? (
+          <MockAwsStreamsTable />
         ) : (
-          <>
-            <WelcomeTourCallout
-              hasClassicStreams={hasClassicStreams}
-              firstClassicStreamName={firstClassicStreamName}
-            />
-            <LegacyLogsDeprecationCallout
-              streamsStatus={wiredStreamsStatus}
-              openFlyout={() => setIsSettingsFlyoutOpen(true)}
-            />
-            <StreamsTreeTable
-              loading={streamsListFetch.loading}
-              streams={streamsListFetch.value?.streams}
-              canReadFailureStore={streamsListFetch.value?.canReadFailureStore}
-              wiredStreamsStatus={wiredStreamsStatus}
-              openFlyout={() => setIsSettingsFlyoutOpen(true)}
-            />
-          </>
+          <StreamsListEmptyPrompt onAddData={() => setIsCatalogOpen(true)} />
         )}
       </StreamsAppPageTemplate.Body>
       {isSettingsFlyoutOpen && (
@@ -273,6 +277,12 @@ export function StreamListView() {
       )}
       {isClassicStreamCreationFlyoutOpen && (
         <ClassicStreamCreationFlyout onClose={() => setIsClassicStreamCreationFlyoutOpen(false)} />
+      )}
+      {isCatalogOpen && (
+        <DataSourcesCatalogFlyout
+          onClose={() => setIsCatalogOpen(false)}
+          onDataConnected={handleDataConnected}
+        />
       )}
     </>
   );

@@ -241,6 +241,7 @@ export const toNavigationItems = (
       sections: secondarySections,
       'data-test-subj': getTestSubj(navNode),
       badgeType: navNode.badgeType,
+      hidePanelTitle: navNode.panelTitle === 'hidden',
     } as MenuItem;
   };
 

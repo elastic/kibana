@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiTourStep, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTourStep, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
 import { Streams } from '@kbn/streams-schema';
@@ -124,8 +124,7 @@ export function Wrapper({
   const { euiTheme } = useEuiTheme();
   return (
     <>
-      <EuiPageHeader
-        paddingSize="l"
+      <StreamsAppPageTemplate.Header
         bottomBorder="extended"
         css={css`
           background: ${euiTheme.colors.backgroundBasePlain};
@@ -215,7 +214,7 @@ export function Wrapper({
           };
         })}
       />
-      <StreamsAppPageTemplate.Body noPadding={tab === 'partitioning' || tab === 'processing'}>
+      <StreamsAppPageTemplate.Body noPadding={tab === 'partitioning' || tab === 'processing'} grow={true}>
         {tabs[tab]?.content}
       </StreamsAppPageTemplate.Body>
     </>

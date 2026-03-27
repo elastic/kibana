@@ -30,10 +30,23 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   children,
   coreStart,
   services,
+  onAttachmentRemoved,
   ...contextProps
 }) => {
   // Track current props, starting with initial props
   const [currentProps, setCurrentProps] = useState<EmbeddableConversationProps>(contextProps);
+
+  // Sync externally-controlled props (attachments, placeholder) into internal state
+  // without triggering a full remount. Other props (sessionTag, agentId, etc.) are
+  // intentionally not synced because they affect conversation identity.
+  const incomingAttachments = contextProps.attachments;
+  const incomingPlaceholder = contextProps.placeholder;
+  useEffect(() => {
+    setCurrentProps((prev) => ({ ...prev, attachments: incomingAttachments }));
+  }, [incomingAttachments]);
+  useEffect(() => {
+    setCurrentProps((prev) => ({ ...prev, placeholder: incomingPlaceholder }));
+  }, [incomingPlaceholder]);
 
   // Register callbacks to allow parent to update props and clear browserApiTools
   const onRegisterCallbacks = contextProps.onRegisterCallbacks;
@@ -176,12 +189,16 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     setCurrentProps((prevProps) => ({ ...prevProps, attachments: undefined }));
   }, []);
 
-  const removeAttachment = useCallback((attachmentIndex: number) => {
-    setCurrentProps((prevProps) => ({
-      ...prevProps,
-      attachments: prevProps.attachments?.filter((_, index) => index !== attachmentIndex),
-    }));
-  }, []);
+  const removeAttachment = useCallback(
+    (attachmentIndex: number) => {
+      setCurrentProps((prevProps) => ({
+        ...prevProps,
+        attachments: prevProps.attachments?.filter((_, index) => index !== attachmentIndex),
+      }));
+      onAttachmentRemoved?.();
+    },
+    [onAttachmentRemoved]
+  );
 
   const conversationContextValue = useMemo(
     () => ({
@@ -190,6 +207,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       isEmbeddedContext: true,
       sessionTag: currentProps.sessionTag,
       agentId: currentProps.agentId,
+      placeholder: currentProps.placeholder,
       initialMessage: currentProps.initialMessage,
       autoSendInitialMessage: currentProps.autoSendInitialMessage ?? false,
       resetInitialMessage,
@@ -204,6 +222,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       conversationId,
       currentProps.sessionTag,
       currentProps.agentId,
+      currentProps.placeholder,
       currentProps.initialMessage,
       currentProps.autoSendInitialMessage,
       currentProps.browserApiTools,

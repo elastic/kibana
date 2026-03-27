@@ -64,6 +64,16 @@ export interface EmbeddableConversationProps {
    */
   autoSendInitialMessage?: boolean;
   /**
+   * Optional placeholder text for the conversation input.
+   * Defaults to 'Ask anything' when not provided.
+   */
+  placeholder?: string;
+  /**
+   * Called when an attachment is removed from the input (e.g. via the X button on a pill).
+   * Use this to keep external selection state in sync with the input.
+   */
+  onAttachmentRemoved?: () => void;
+  /**
    * Optional attachments with lazy content loading.
    * Content will be fetched when starting a new conversation round.
    * It will be appended only if it has changed since previous conversation round.

@@ -51,6 +51,7 @@ import {
   clearSidebarRuntimeContext,
 } from './sidebar';
 import { createVisualizationAttachmentDefinition } from './application/components/attachments/visualization_attachment';
+import { createEmbeddableConversationInput } from './embeddable/create_embeddable_conversation_input';
 
 export class AgentBuilderPlugin
   implements
@@ -160,6 +161,11 @@ export class AgentBuilderPlugin
 
     setSidebarServices(core, internalServices);
 
+    const ConversationInputComponent = createEmbeddableConversationInput({
+      services: internalServices,
+      coreStart: core,
+    });
+
     const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
     const sidebar = core.chrome.sidebar.getApp('agentBuilder');
 
@@ -205,6 +211,7 @@ export class AgentBuilderPlugin
       attachments: createPublicAttachmentContract({ attachmentsService }),
       tools: createPublicToolContract({ toolsService }),
       events: createPublicEventsContract({ eventsService }),
+      getConversationInput: () => ConversationInputComponent,
       addAttachment: (attachment: AttachmentInput) => {
         if (this.sidebarCallbacks) {
           this.sidebarCallbacks.addAttachment(attachment);

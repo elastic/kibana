@@ -29,6 +29,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { AIAssistantManagementSelectionPluginPublicStart } from '@kbn/ai-assistant-management-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type React from 'react';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
 import type { EmbeddableConversationProps } from './embeddable/types';
@@ -121,6 +122,13 @@ export interface AgentBuilderPluginStart {
   toggleConversationFlyout: (options?: OpenConversationSidebarOptions) => void;
   setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => void;
   clearConversationFlyoutActiveConfig: () => void;
+  /**
+   * Returns a pre-wired ConversationInput React component ready to render inline.
+   * Includes all required contexts (agents, conversation, send-message).
+   * Accepts the same EmbeddableConversationProps as the flyout
+   * (agentId, sessionTag, initialMessage, etc.).
+   */
+  getConversationInput: () => React.FC<EmbeddableConversationProps>;
   /**
    * Adds an attachment to the active conversation sidebar.
    * If no sidebar is open, the attachment is ignored.

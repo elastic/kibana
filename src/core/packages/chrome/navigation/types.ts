@@ -94,6 +94,10 @@ export interface MenuItem {
    * (optional) The secondary menu sections belonging to the menu item.
    */
   sections?: SecondaryMenuSection[];
+  /**
+   * (optional) When true, the title header row is not rendered inside the secondary panel.
+   */
+  hidePanelTitle?: boolean;
 }
 
 /**

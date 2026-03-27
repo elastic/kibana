@@ -13,9 +13,11 @@ import React from 'react';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { useKibana } from '../../../../utils/kibana_react';
+import { useIngestHubVersion } from '../../../../hooks/use_ingest_hub_version';
 
 export function HeaderMenu(): React.ReactElement | null {
   const { share, theme } = useKibana().services;
+  const { isSkipVersion } = useIngestHubVersion();
 
   const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
@@ -23,6 +25,10 @@ export function HeaderMenu(): React.ReactElement | null {
   const href = onboardingLocator?.useUrl({});
 
   const { appMountParameters } = usePluginContext();
+
+  if (isSkipVersion) {
+    return null;
+  }
 
   return (
     <HeaderMenuPortal

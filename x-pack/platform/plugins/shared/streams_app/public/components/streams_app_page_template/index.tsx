@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { EuiPageSectionProps } from '@elastic/eui';
+import type { EuiPageSectionProps, EuiPageSidebarProps } from '@elastic/eui';
 import { EuiPageTemplate } from '@elastic/eui';
 import { css } from '@emotion/css';
 
@@ -27,6 +27,20 @@ export function StreamsAppPageTemplate({ children }: { children: React.ReactNode
 
 StreamsAppPageTemplate.Header = EuiPageTemplate.Header;
 StreamsAppPageTemplate.EmptyPrompt = EuiPageTemplate.EmptyPrompt;
+StreamsAppPageTemplate.Sidebar = ({
+  children,
+  ...props
+}: EuiPageSidebarProps & { children: React.ReactNode }) => (
+  <EuiPageTemplate.Sidebar
+    className={css`
+      border-right: 1px solid var(--euiBorderColor, #e0e5ee);
+      overflow-y: auto;
+    `}
+    {...props}
+  >
+    {children}
+  </EuiPageTemplate.Sidebar>
+);
 StreamsAppPageTemplate.Body = ({
   noPadding,
   grow = true,
@@ -36,6 +50,7 @@ StreamsAppPageTemplate.Body = ({
     grow={grow}
     className={css`
       overflow-y: auto;
+      min-height: 0;
       ${noPadding ? 'padding: 0px;' : ''}
     `}
     contentProps={{
