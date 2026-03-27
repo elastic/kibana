@@ -184,6 +184,9 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
       switch (type) {
         case 'init':
           hasDraggedHeaderRef.current = false;
+          if (event?.sensorType === 'keyboard') {
+            handleFirstDrag();
+          }
           break;
 
         case 'update':
