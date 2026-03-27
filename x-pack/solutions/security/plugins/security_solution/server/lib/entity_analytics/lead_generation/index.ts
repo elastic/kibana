@@ -6,13 +6,34 @@
  */
 
 export { createLeadIndexService, type LeadIndexService } from './indices';
+export {
+  createLeadDataClient,
+  type LeadDataClient,
+  type LeadDataClientDeps,
+} from './lead_data_client';
 export { ObservationModuleRegistry, type ObservationEntity } from './observation_modules';
 export { createLeadGenerationEngine } from './engine';
 export {
   createRiskScoreModule,
   createTemporalStateModule,
   createBehavioralAnalysisModule,
+  createAlertAnalysisModule,
 } from './observation_modules';
+export {
+  createEntityRetriever,
+  entityRecordToLeadEntity,
+  type EntityRetriever,
+  type EntityRetrieverDeps,
+} from './entity_retriever';
+export {
+  createEntityEnricher,
+  type EntityEnricher,
+  type EntityEnricherDeps,
+  type EnrichedLeadEntity,
+  type EntityEnrichment,
+  type RiskEnrichment,
+  type AlertEnrichment,
+} from './entity_enricher';
 export type {
   Lead,
   LeadEntity,

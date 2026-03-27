@@ -8,21 +8,21 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 
-import { GET_LEADS_URL } from '../../../../../common/entity_analytics/lead_generation/constants';
-import { findLeadsRequestSchema } from '../../../../../common/entity_analytics/lead_generation/types';
+import { ENABLE_LEAD_GENERATION_URL } from '../../../../../common/entity_analytics/lead_generation/constants';
 import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { APP_ID } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import { createLeadDataClient } from '../lead_data_client';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
 
-export const getLeadsRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
+export const enableLeadGenerationRoute = (
+  router: EntityAnalyticsRoutesDeps['router'],
+  logger: Logger
+) => {
   router.versioned
-    .get({
+    .post({
       access: 'internal',
-      path: GET_LEADS_URL,
+      path: ENABLE_LEAD_GENERATION_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -32,27 +32,19 @@ export const getLeadsRoute = (router: EntityAnalyticsRoutesDeps['router'], logge
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
-        validate: {
-          request: {
-            query: buildRouteValidationWithZod(findLeadsRequestSchema),
-          },
-        },
+        validate: {},
       },
 
-      withMinimumLicense(async (context, request, response): Promise<IKibanaResponse> => {
+      withMinimumLicense(async (_context, _request, response): Promise<IKibanaResponse> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const { getSpaceId } = await context.securitySolution;
-          const spaceId = getSpaceId();
-          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          // TODO: Wire to Task Manager (#15955) — schedule the 24h recurring task
+          logger.info('[LeadGeneration] Enable requested — Task Manager wiring pending (#15955)');
 
-          const leadDataClient = createLeadDataClient({ esClient, logger, spaceId });
-          const result = await leadDataClient.findLeads(request.query);
-
-          return response.ok({ body: result });
+          return response.ok({ body: { success: true } });
         } catch (e) {
-          logger.error(`[LeadGeneration] Error reading leads: ${e}`);
+          logger.error(`[LeadGeneration] Error enabling lead generation: ${e}`);
           const error = transformError(e);
           return siemResponse.error({
             statusCode: error.statusCode,

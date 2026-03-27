@@ -8,21 +8,22 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 
-import { GET_LEADS_URL } from '../../../../../common/entity_analytics/lead_generation/constants';
-import { findLeadsRequestSchema } from '../../../../../common/entity_analytics/lead_generation/types';
+import { LEAD_GENERATION_STATUS_URL } from '../../../../../common/entity_analytics/lead_generation/constants';
 import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { APP_ID } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { createLeadDataClient } from '../lead_data_client';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
 
-export const getLeadsRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
+export const getLeadGenerationStatusRoute = (
+  router: EntityAnalyticsRoutesDeps['router'],
+  logger: Logger
+) => {
   router.versioned
     .get({
       access: 'internal',
-      path: GET_LEADS_URL,
+      path: LEAD_GENERATION_STATUS_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -32,14 +33,10 @@ export const getLeadsRoute = (router: EntityAnalyticsRoutesDeps['router'], logge
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
-        validate: {
-          request: {
-            query: buildRouteValidationWithZod(findLeadsRequestSchema),
-          },
-        },
+        validate: {},
       },
 
-      withMinimumLicense(async (context, request, response): Promise<IKibanaResponse> => {
+      withMinimumLicense(async (context, _request, response): Promise<IKibanaResponse> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -48,11 +45,11 @@ export const getLeadsRoute = (router: EntityAnalyticsRoutesDeps['router'], logge
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
           const leadDataClient = createLeadDataClient({ esClient, logger, spaceId });
-          const result = await leadDataClient.findLeads(request.query);
+          const status = await leadDataClient.getStatus();
 
-          return response.ok({ body: result });
+          return response.ok({ body: status });
         } catch (e) {
-          logger.error(`[LeadGeneration] Error reading leads: ${e}`);
+          logger.error(`[LeadGeneration] Error fetching status: ${e}`);
           const error = transformError(e);
           return siemResponse.error({
             statusCode: error.statusCode,

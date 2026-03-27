@@ -10,19 +10,19 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 
-import { GET_LEADS_URL } from '../../../../../common/entity_analytics/lead_generation/constants';
-import { findLeadsRequestSchema } from '../../../../../common/entity_analytics/lead_generation/types';
+import { GET_LEAD_BY_ID_URL } from '../../../../../common/entity_analytics/lead_generation/constants';
+import { getLeadByIdRequestSchema } from '../../../../../common/entity_analytics/lead_generation/types';
 import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { APP_ID } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { createLeadDataClient } from '../lead_data_client';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
 
-export const getLeadsRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
+export const getLeadByIdRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
     .get({
       access: 'internal',
-      path: GET_LEADS_URL,
+      path: GET_LEAD_BY_ID_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -34,7 +34,7 @@ export const getLeadsRoute = (router: EntityAnalyticsRoutesDeps['router'], logge
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(findLeadsRequestSchema),
+            params: buildRouteValidationWithZod(getLeadByIdRequestSchema),
           },
         },
       },
@@ -48,11 +48,18 @@ export const getLeadsRoute = (router: EntityAnalyticsRoutesDeps['router'], logge
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
           const leadDataClient = createLeadDataClient({ esClient, logger, spaceId });
-          const result = await leadDataClient.findLeads(request.query);
+          const lead = await leadDataClient.getLeadById(request.params.id);
 
-          return response.ok({ body: result });
+          if (!lead) {
+            return siemResponse.error({
+              statusCode: 404,
+              body: `Lead ${request.params.id} not found`,
+            });
+          }
+
+          return response.ok({ body: lead });
         } catch (e) {
-          logger.error(`[LeadGeneration] Error reading leads: ${e}`);
+          logger.error(`[LeadGeneration] Error fetching lead by id: ${e}`);
           const error = transformError(e);
           return siemResponse.error({
             statusCode: error.statusCode,

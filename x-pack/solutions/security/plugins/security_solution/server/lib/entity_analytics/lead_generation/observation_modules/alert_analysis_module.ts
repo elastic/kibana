@@ -208,6 +208,8 @@ const alertSubAggs = () => ({
   },
 });
 
+const ALERT_ENTITY_TYPES = ['user', 'host', 'service'] as const;
+
 const fetchAlertSummariesForEntities = async (
   esClient: ElasticsearchClient,
   alertsIndexPattern: string,
@@ -216,25 +218,18 @@ const fetchAlertSummariesForEntities = async (
 ): Promise<Map<string, AlertSummary>> => {
   const result = new Map<string, AlertSummary>();
 
-  const userEntities = entities.filter((e) => e.type === 'user');
-  const hostNames = entities.filter((e) => e.type === 'host').map((e) => e.name);
-
-  const userEmails = userEntities
-    .map(extractUserEmail)
-    .filter((email): email is string => email != null);
-  const userNames = userEntities.map((e) => e.name);
-
-  const entityTerms: Array<Record<string, unknown>> = [];
-  if (userNames.length > 0) {
-    const userClauses: Array<Record<string, unknown>> = [{ terms: { 'user.name': userNames } }];
-    if (userEmails.length > 0) {
-      userClauses.push({ terms: { 'user.email': userEmails } });
+  const namesByType: Record<string, string[]> = {};
+  for (const e of entities) {
+    if (ALERT_ENTITY_TYPES.includes(e.type as (typeof ALERT_ENTITY_TYPES)[number])) {
+      const list = namesByType[e.type] ?? [];
+      list.push(e.name);
+      namesByType[e.type] = list;
     }
-    entityTerms.push({ bool: { should: userClauses, minimum_should_match: 1 } });
   }
-  if (hostNames.length > 0) {
-    entityTerms.push({ terms: { 'host.name': hostNames } });
-  }
+
+  const entityTerms: Array<Record<string, unknown>> = Object.entries(namesByType)
+    .filter(([, names]) => names.length > 0)
+    .map(([type, names]) => ({ terms: { [`${type}.name`]: names } }));
   if (entityTerms.length === 0) return result;
 
   try {
@@ -253,14 +248,17 @@ const fetchAlertSummariesForEntities = async (
           must_not: [{ exists: { field: 'kibana.alert.building_block_type' } }],
         },
       },
-      aggs: {
-        by_user: { terms: { field: 'user.name', size: entities.length }, aggs: alertSubAggs() },
-        by_host: { terms: { field: 'host.name', size: entities.length }, aggs: alertSubAggs() },
-      },
+      aggs: Object.fromEntries(
+        Object.keys(namesByType).map((type) => [
+          `by_${type}`,
+          { terms: { field: `${type}.name`, size: entities.length }, aggs: alertSubAggs() },
+        ])
+      ),
     });
 
-    parseEntityBuckets(response.aggregations?.by_user, 'user', result);
-    parseEntityBuckets(response.aggregations?.by_host, 'host', result);
+    for (const type of Object.keys(namesByType)) {
+      parseEntityBuckets(response.aggregations?.[`by_${type}`], type, result);
+    }
   } catch (error) {
     logger.warn(`[${MODULE_ID}] Failed to fetch alert summaries: ${error}`);
   }
@@ -305,9 +303,5 @@ const parseEntityBuckets = (
   }
 };
 
-const extractUserEmail = (entity: LeadEntity): string | undefined => {
-  const record = entity.record as Record<string, unknown>;
-  const user = record.user as { email?: string | string[] } | undefined;
-  if (!user?.email) return undefined;
-  return Array.isArray(user.email) ? user.email[0] : user.email;
-};
+/** @deprecated Use createBehavioralAnalysisModule. */
+export const createAlertAnalysisModule = createBehavioralAnalysisModule;
