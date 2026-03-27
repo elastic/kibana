@@ -73,10 +73,12 @@ If you need a query, use the \`${platformCoreTools.generateEsql}\` tool first.`,
       });
 
       // need the interpolated query to return in the results / to display in the UI
-      const interpolatedQuery = interpolateEsqlQuery(
-        esqlQuery,
-        params.reduce((acc, curr) => ({ ...acc, ...curr }), {})
-      );
+      const interpolatedQuery = params.length
+        ? interpolateEsqlQuery(
+            esqlQuery,
+            params.reduce((acc, curr) => ({ ...acc, ...curr }), {})
+          )
+        : esqlQuery;
 
       return {
         results: [
