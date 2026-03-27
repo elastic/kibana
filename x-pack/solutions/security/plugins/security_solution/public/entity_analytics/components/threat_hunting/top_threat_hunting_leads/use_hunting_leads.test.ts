@@ -50,7 +50,7 @@ describe('useHuntingLeads', () => {
     });
     mockUseMutation.mockReturnValue({
       mutate: jest.fn(),
-      isPending: false,
+      isLoading: false,
     });
   });
 
@@ -151,7 +151,7 @@ describe('useHuntingLeads', () => {
     const mockMutate = jest.fn();
     mockUseMutation.mockReturnValue({
       mutate: mockMutate,
-      isPending: false,
+      isLoading: false,
     });
 
     const { result } = renderHook(() => useHuntingLeads());
@@ -175,10 +175,10 @@ describe('useHuntingLeads', () => {
     expect(result.current.isLoading).toBe(true);
   });
 
-  it('returns isGenerating from useMutation isPending', () => {
+  it('returns isGenerating from useMutation isLoading', () => {
     mockUseMutation.mockReturnValue({
       mutate: jest.fn(),
-      isPending: true,
+      isLoading: true,
     });
 
     const { result } = renderHook(() => useHuntingLeads());

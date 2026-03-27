@@ -50,7 +50,7 @@ export const useLeadAttachment = () => {
 
   const openWithLead = useCallback(
     (lead: HuntingLead) => {
-      if (!isAgentBuilderEnabled || !agentBuilder?.openConversationFlyout) {
+      if (!isAgentBuilderEnabled || !agentBuilder?.openChat) {
         return;
       }
 
@@ -65,7 +65,7 @@ export const useLeadAttachment = () => {
         },
       };
 
-      agentBuilder.openConversationFlyout({
+      agentBuilder.openChat({
         autoSendInitialMessage: false,
         newConversation: true,
         initialMessage: LEAD_ATTACHMENT_PROMPT,

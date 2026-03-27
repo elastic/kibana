@@ -171,7 +171,7 @@ export const EntityThreatHuntingPage = () => {
         )}
       </SecuritySolutionPageWrapper>
 
-      <SpyRoute pageName={SecurityPageName.entityAnalyticsThreatHunting} />
+      <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
 
       {isFlyoutOpen && (
         <ThreatHuntingLeadsFlyout

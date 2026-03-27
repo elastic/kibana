@@ -33,7 +33,7 @@ export const useHuntingLeads = () => {
       }),
   });
 
-  const { mutate: generate, isPending: isGenerating } = useMutation({
+  const { mutate: generate, isLoading: isGenerating } = useMutation({
     mutationFn: () => generateLeadsApi({ params: {} }),
     onSuccess: () => {
       addSuccess(i18n.GENERATE_SUCCESS);
