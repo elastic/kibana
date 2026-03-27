@@ -27,7 +27,7 @@ type Props = {
   isOpen?: boolean;
   isManaged?: boolean;
   onChange?: (isOpen: boolean) => void;
-  ariaLabel?: string;
+  'aria-label'?: string;
 } & (
   | {
       items: EuiContextMenuPanelProps['items'];
@@ -37,7 +37,7 @@ type Props = {
     }
 );
 
-export const ContextMenuActions = React.memo<Props>(({ button, onChange, isOpen, ariaLabel, ...props }) => {
+export const ContextMenuActions = React.memo<Props>(({ button, onChange, isOpen, 'aria-label': ariaLabel, ...props }) => {
   const [isOpenState, setIsOpenState] = useState(false);
   const handleCloseMenu = useCallback(() => {
     if (onChange) {

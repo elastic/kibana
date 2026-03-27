@@ -358,7 +358,7 @@ export const AgentPolicyActionMenu = memo<{
               <ContextMenuActions
                 isOpen={isContextMenuOpen}
                 onChange={onContextMenuChange}
-                ariaLabel={actionsAriaLabel}
+                aria-label={actionsAriaLabel}
                 button={
                   fullButton
                     ? {

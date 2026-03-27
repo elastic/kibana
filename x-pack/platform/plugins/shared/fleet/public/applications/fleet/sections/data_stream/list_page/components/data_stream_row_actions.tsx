@@ -66,7 +66,7 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
         ],
       },
     ];
-    return <ContextMenuActions panels={apmItem} ariaLabel={actionsAriaLabel} />;
+    return <ContextMenuActions panels={apmItem} aria-label={actionsAriaLabel} />;
   }
 
   if (!dashboards || dashboards.length === 0) {
@@ -82,7 +82,7 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
         ],
       },
     ];
-    return <ContextMenuActions panels={disabledItems} ariaLabel={actionsAriaLabel} />;
+    return <ContextMenuActions panels={disabledItems} aria-label={actionsAriaLabel} />;
   }
 
   if (dashboards.length === 1) {
@@ -99,7 +99,7 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
         ],
       },
     ];
-    return <ContextMenuActions panels={panelItems} ariaLabel={actionsAriaLabel} />;
+    return <ContextMenuActions panels={panelItems} aria-label={actionsAriaLabel} />;
   }
 
   const panelItems = [
@@ -127,5 +127,5 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
     },
   ];
 
-  return <ContextMenuActions panels={panelItems} ariaLabel={actionsAriaLabel} />;
+  return <ContextMenuActions panels={panelItems} aria-label={actionsAriaLabel} />;
 });

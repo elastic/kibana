@@ -251,7 +251,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         isOpen={isActionsMenuOpen}
         items={menuItems}
         onChange={(open) => setIsActionsMenuOpen(open)}
-        ariaLabel={i18n.translate('xpack.fleet.packagePolicyActionsMenu.actionsAriaLabel', {
+        aria-label={i18n.translate('xpack.fleet.packagePolicyActionsMenu.actionsAriaLabel', {
           defaultMessage: 'Actions for {policyName}',
           values: { policyName: packagePolicy.name },
         })}
