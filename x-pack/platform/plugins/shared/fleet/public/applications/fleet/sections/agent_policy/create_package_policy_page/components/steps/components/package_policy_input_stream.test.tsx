@@ -203,6 +203,11 @@ describe('PackagePolicyInputStreamConfig', () => {
     jest.resetAllMocks();
   });
 
+  /**
+   * Renders `PackagePolicyInputStreamConfig`. Pass `inputPolicyTemplate` (parent input’s
+   * `policy_template`) for composable multi-template packages so `dynamic_signal_types` matches
+   * the correct template.
+   */
   const render = (
     packageInputStream: RegistryStreamWithDataStream = mockPackageInputStreamWithVarGroups,
     packagePolicyInputStream: NewPackagePolicyInputStream = mockPackagePolicyInputStream,
@@ -433,6 +438,10 @@ describe('PackagePolicyInputStreamConfig', () => {
   });
 
   describe('dynamic_signal_types behavior', () => {
+    // Data Stream Type UI applies only to `packageInfo.type === 'input'` (see dev_docs/input_packages.md).
+    // Input packages are documented with a single policy template; composable multi-template behavior
+    // for `dynamic_signal_types` / `policy_template` is covered in policy_template.test.ts
+    // (`packagePolicyInputAllowsUndefinedDataStreamType`).
     const mockOtelInputStream: RegistryStreamWithDataStream = {
       input: 'otelcol',
       title: 'OTel Collector',
@@ -458,70 +467,6 @@ describe('PackagePolicyInputStreamConfig', () => {
       data_stream: {
         type: 'logs',
         dataset: 'otel_package.data',
-      },
-      vars: {},
-    };
-
-    /** Two integration-style policy templates both expose `logfile`; only template_a sets dynamic_signal_types. */
-    const composableMultiTemplatePackageInfo: PackageInfo = {
-      ...mockPackageInfo,
-      type: 'input',
-      policy_templates: [
-        {
-          name: 'template_a',
-          title: 'Template A',
-          description: 'OTel-style logfile',
-          inputs: [
-            {
-              type: 'logfile',
-              title: 'Log file',
-              description: 'Read log files',
-              dynamic_signal_types: true,
-              vars: [],
-            },
-          ],
-        },
-        {
-          name: 'template_b',
-          title: 'Template B',
-          description: 'Plain logfile',
-          inputs: [
-            {
-              type: 'logfile',
-              title: 'Log file',
-              description: 'Read log files',
-              vars: [],
-            },
-          ],
-        },
-      ],
-    } as unknown as PackageInfo;
-
-    const mockLogfileInputStream: RegistryStreamWithDataStream = {
-      input: 'logfile',
-      title: 'Log file stream',
-      template_path: 'stream.yml.hbs',
-      vars: [],
-      description: 'Read logs from files',
-      data_stream: {
-        title: 'Logs',
-        release: 'ga',
-        type: 'logs',
-        package: 'composable_pkg',
-        dataset: 'composable_pkg.logs',
-        path: 'logs',
-        elasticsearch: {},
-        ingest_pipeline: 'default',
-        streams: [],
-      },
-    };
-
-    const mockLogfilePolicyInputStream: NewPackagePolicyInputStream = {
-      id: 'logfile-stream-1',
-      enabled: true,
-      data_stream: {
-        type: 'logs',
-        dataset: 'composable_pkg.logs',
       },
       vars: {},
     };
@@ -651,92 +596,6 @@ describe('PackagePolicyInputStreamConfig', () => {
         // Data Stream Type selector SHOULD be visible for non-otelcol inputs
         expect(renderResult.getByText('Data Stream Type')).toBeInTheDocument();
         expect(renderResult.getByTestId('packagePolicyDataStreamType')).toBeInTheDocument();
-      });
-    });
-
-    it('should show Data Stream Type selector for httpjson when another input-only template has dynamic_signal_types', async () => {
-      const multiTemplatePackageInfo: PackageInfo = {
-        ...mockPackageInfo,
-        type: 'input',
-        policy_templates: [
-          {
-            name: 'otel_template',
-            title: 'OTel Template',
-            description: 'OpenTelemetry template',
-            input: 'otelcol',
-            template_path: 'otel.yml.hbs',
-            dynamic_signal_types: true,
-            vars: [],
-          },
-          {
-            name: 'httpjson_template',
-            title: 'HTTP JSON',
-            description: 'HTTP JSON input',
-            input: 'httpjson',
-            type: 'logs',
-            template_path: 'httpjson.yml.hbs',
-            vars: [],
-          },
-        ],
-      } as unknown as PackageInfo;
-
-      const httpjsonStream: RegistryStreamWithDataStream = {
-        ...mockOtelInputStream,
-        input: 'httpjson',
-        title: 'Collect via HTTP JSON',
-      };
-
-      const httpjsonPolicyInputStream: NewPackagePolicyInputStream = {
-        ...mockOtelPolicyInputStream,
-        id: 'httpjson-stream-1',
-        data_stream: {
-          type: 'logs',
-          dataset: 'combined_pkg.httpjson',
-        },
-      };
-
-      render(httpjsonStream, httpjsonPolicyInputStream, multiTemplatePackageInfo);
-
-      const advancedButton = renderResult.getByText('Advanced options');
-      fireEvent.click(advancedButton);
-
-      await waitFor(() => {
-        expect(renderResult.getByText('Data Stream Type')).toBeInTheDocument();
-        expect(renderResult.getByTestId('packagePolicyDataStreamType')).toBeInTheDocument();
-      });
-    });
-
-    it('should not inherit dynamic_signal_types from a different composable policy template when inputPolicyTemplate matches the plain template', async () => {
-      render(
-        mockLogfileInputStream,
-        mockLogfilePolicyInputStream,
-        composableMultiTemplatePackageInfo,
-        'template_b'
-      );
-
-      const advancedButton = renderResult.getByText('Advanced options');
-      fireEvent.click(advancedButton);
-
-      await waitFor(() => {
-        expect(renderResult.getByText('Data Stream Type')).toBeInTheDocument();
-        expect(renderResult.getByTestId('packagePolicyDataStreamType')).toBeInTheDocument();
-      });
-    });
-
-    it('should hide Data Stream Type selector when inputPolicyTemplate matches the template with dynamic_signal_types', async () => {
-      render(
-        mockLogfileInputStream,
-        mockLogfilePolicyInputStream,
-        composableMultiTemplatePackageInfo,
-        'template_a'
-      );
-
-      const advancedButton = renderResult.getByText('Advanced options');
-      fireEvent.click(advancedButton);
-
-      await waitFor(() => {
-        expect(renderResult.queryByText('Data Stream Type')).not.toBeInTheDocument();
-        expect(renderResult.queryByTestId('packagePolicyDataStreamType')).not.toBeInTheDocument();
       });
     });
 

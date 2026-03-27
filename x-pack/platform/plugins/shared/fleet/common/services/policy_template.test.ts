@@ -699,6 +699,74 @@ describe('packagePolicyInputAllowsUndefinedDataStreamType', () => {
       })
     ).toBe(false);
   });
+
+  it('returns false for composable integration when another policy template defines dynamic logfile but input uses the plain template', () => {
+    const pkg: PackageInfo = {
+      ...basePackageInfo,
+      type: 'integration',
+      policy_templates: [
+        {
+          name: 'template_a',
+          title: 'Template A',
+          description: 'desc',
+          inputs: [
+            {
+              type: 'logfile',
+              title: 'Log file',
+              description: 'Log file',
+              dynamic_signal_types: true,
+            },
+          ],
+        },
+        {
+          name: 'template_b',
+          title: 'Template B',
+          description: 'desc',
+          inputs: [{ type: 'logfile', title: 'Log file', description: 'Log file' }],
+        },
+      ],
+    } as any;
+    expect(
+      packagePolicyInputAllowsUndefinedDataStreamType(pkg, {
+        type: 'logfile',
+        policy_template: 'template_b',
+      })
+    ).toBe(false);
+  });
+
+  // Input packages normally declare one policy template; if multiple input-only templates were present,
+  // httpjson must not pick up otelcol's dynamic_signal_types (same selection rule the stream UI mirrors).
+  it('with multiple input-only policy templates, matches template by input type for dynamic_signal_types', () => {
+    const pkg: PackageInfo = {
+      ...basePackageInfo,
+      type: 'input',
+      policy_templates: [
+        {
+          input: 'otelcol',
+          name: 'otel',
+          template_path: 'otel.yml.hbs',
+          title: 'OTel',
+          description: 'OTel',
+          dynamic_signal_types: true,
+        },
+        {
+          input: 'httpjson',
+          name: 'httpjson',
+          type: 'logs',
+          template_path: 'httpjson.yml.hbs',
+          title: 'HTTP JSON',
+          description: 'HTTP JSON',
+          vars: [],
+        },
+      ],
+    } as any;
+    expect(
+      packagePolicyInputAllowsUndefinedDataStreamType(pkg, {
+        type: 'httpjson',
+        policy_template: undefined,
+      })
+    ).toBe(false);
+  });
 });
 
 describe('filterPolicyTemplatesTiles', () => {
