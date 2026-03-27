@@ -20,6 +20,14 @@ export const packageInfoHasOtelInputs = (packageInfo: PackageInfo | undefined) =
     getNormalizedInputs(template).some((input) => input.type === OTEL_COLLECTOR_INPUT_TYPE)
   );
 
+export const hasDynamicSignalTypes = (packageInfo: PackageInfo | undefined): boolean =>
+  (packageInfo?.policy_templates || []).some(
+    (template) =>
+      isInputOnlyPolicyTemplate(template) &&
+      template.input === OTEL_COLLECTOR_INPUT_TYPE &&
+      template.dynamic_signal_types === true
+  );
+
 export const packagePolicyHasOtelInputs = (packagePolicyInputs: PackagePolicyInput[] | undefined) =>
   (packagePolicyInputs || []).some(
     (input) => input.type === OTEL_COLLECTOR_INPUT_TYPE && input.enabled

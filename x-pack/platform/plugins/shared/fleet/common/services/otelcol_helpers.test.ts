@@ -7,7 +7,11 @@
 
 import type { PackageInfo } from '../types';
 
-import { packageInfoHasOtelInputs, packagePolicyHasOtelInputs } from './otelcol_helpers';
+import {
+  packageInfoHasOtelInputs,
+  hasDynamicSignalTypes,
+  packagePolicyHasOtelInputs,
+} from './otelcol_helpers';
 
 describe('packageInfoHasOtelInputs', () => {
   const otelPackageInfo = {
@@ -63,6 +67,69 @@ describe('packageInfoHasOtelInputs', () => {
 
   it('should return false if undefined is passed', () => {
     expect(packageInfoHasOtelInputs(undefined)).toBe(false);
+  });
+});
+
+describe('hasDynamicSignalTypes', () => {
+  it('should return true when OTel input has dynamic_signal_types: true', () => {
+    const pkg = {
+      policy_templates: [
+        {
+          name: 't',
+          title: 't',
+          input: 'otelcol',
+          type: 'logs',
+          template_path: 'input.yml.hbs',
+          dynamic_signal_types: true,
+        },
+      ],
+    } as any as PackageInfo;
+    expect(hasDynamicSignalTypes(pkg)).toBe(true);
+  });
+
+  it('should return false when OTel input has dynamic_signal_types: false', () => {
+    const pkg = {
+      policy_templates: [
+        {
+          name: 't',
+          title: 't',
+          input: 'otelcol',
+          type: 'logs',
+          template_path: 'input.yml.hbs',
+          dynamic_signal_types: false,
+        },
+      ],
+    } as any as PackageInfo;
+    expect(hasDynamicSignalTypes(pkg)).toBe(false);
+  });
+
+  it('should return false when OTel input has no dynamic_signal_types property', () => {
+    const pkg = {
+      policy_templates: [
+        { name: 't', title: 't', input: 'otelcol', type: 'logs', template_path: 'input.yml.hbs' },
+      ],
+    } as any as PackageInfo;
+    expect(hasDynamicSignalTypes(pkg)).toBe(false);
+  });
+
+  it('should return false for non-OTel input package', () => {
+    const pkg = {
+      policy_templates: [
+        {
+          name: 't',
+          title: 't',
+          input: 'logfile',
+          type: 'logs',
+          template_path: 'input.yml.hbs',
+          dynamic_signal_types: true,
+        },
+      ],
+    } as any as PackageInfo;
+    expect(hasDynamicSignalTypes(pkg)).toBe(false);
+  });
+
+  it('should return false when packageInfo is undefined', () => {
+    expect(hasDynamicSignalTypes(undefined)).toBe(false);
   });
 });
 

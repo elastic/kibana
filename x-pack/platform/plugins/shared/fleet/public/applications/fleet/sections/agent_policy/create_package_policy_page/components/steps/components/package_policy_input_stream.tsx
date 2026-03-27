@@ -553,31 +553,15 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                               idSelected={customDataStreamTypeVarValue}
                               options={dataStreamTypeOptions}
                               onChange={(type: string) => {
-                                const updatedVars: typeof packagePolicyInputStream.vars = {
-                                  ...packagePolicyInputStream.vars,
-                                  [DATA_STREAM_TYPE_VAR_NAME]: {
-                                    type: 'string',
-                                    value: type,
+                                updatePackagePolicyInputStream({
+                                  vars: {
+                                    ...packagePolicyInputStream.vars,
+                                    [DATA_STREAM_TYPE_VAR_NAME]: {
+                                      type: 'string',
+                                      value: type,
+                                    },
                                   },
-                                };
-                                // When switching to a type that needs use_apm, seed it with
-                                // its default if the var isn't in the schema and the user
-                                // hasn't set a value yet.
-                                if (
-                                  !isUseAPMVarInSchema &&
-                                  !updatedVars[USE_APM_VAR_NAME] &&
-                                  shouldIncludeUseAPMVar(
-                                    packageInputStream.input,
-                                    type,
-                                    dynamicSignalTypes
-                                  )
-                                ) {
-                                  updatedVars[USE_APM_VAR_NAME] = {
-                                    type: 'bool',
-                                    value: DATA_STREAM_USE_APM_VAR.default,
-                                  };
-                                }
-                                updatePackagePolicyInputStream({ vars: updatedVars });
+                                });
                               }}
                               name="dataStreamType"
                             />
