@@ -7,16 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { runElasticsearch } from './run_elasticsearch';
-export { cleanupElasticsearch } from '@kbn/test-es-server';
-export * from './run_ftr';
-export {
-  getArgValue,
-  getKibanaCliArg,
-  getKibanaCliLoggers,
-  parseRawFlags,
-  remapPluginPaths,
-  runKibanaServer,
-} from '@kbn/test-kibana-server';
-export { initLogsDir } from './logs_dir';
-export { applyFipsOverrides, fipsIsEnabled } from './fips';
+/**
+ * Minimal config surface used to spawn Kibana (and optional dedicated task runner) for tests.
+ * Satisfied by the FTR {@link Config} type and Scout server configs.
+ */
+export interface KibanaTestServerLaunchConfig {
+  get(path: string): unknown;
+}
