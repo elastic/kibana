@@ -54,6 +54,7 @@ dependsOn:
   - '@kbn/cloud-security-posture-graph'
   - '@kbn/kubernetes-security-plugin'
   - '@kbn/securitysolution-list-constants'
+  - '@kbn/kbn-client'
 tags:
   - test-helper
   - package
