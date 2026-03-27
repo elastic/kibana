@@ -202,6 +202,7 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
               min-width: 0;
             `,
           }}
+          // TODO: https://github.com/elastic/kibana/issues/260002
           css={css`
             align-items: stretch;
             row-gap: ${euiTheme.size.xxs};
