@@ -107,18 +107,16 @@ export const validateParsedRows = (
   const valid: Array<Record<string, string>> = [];
   const invalid: Array<Record<string, string>> = [];
   const errors: RowValidationError[] = [];
-  let errorIndex = 1;
 
-  for (const row of rows) {
+  rows.forEach((row, i) => {
     const error = validateRow(row);
     if (error) {
       invalid.push(row);
-      errors.push({ message: error, index: errorIndex });
-      errorIndex++;
+      errors.push({ message: error, index: i + 1 }); // 1-based original CSV row number
     } else {
       valid.push(row);
     }
-  }
+  });
 
   return { valid, invalid, errors };
 };
