@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React, { useContext } from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import type { FC, PropsWithChildren } from 'react';
 
 import { InitializationContext, InitializationProvider } from './initialization_context';
 import { useSecuritySolutionInitialization } from './use_security_solution_initialization';
@@ -16,9 +16,9 @@ import { useHttp } from '../../lib/kibana';
 import type { InitializationFlowId } from '../../../../common/api/initialization';
 import {
   INITIALIZATION_FLOW_CREATE_LIST_INDICES,
-  INITIALIZATION_FLOW_SOURCERER_DATA_VIEWS,
-  INITIALIZATION_FLOW_STATUS_READY,
+  INITIALIZATION_FLOW_SECURITY_DATA_VIEWS,
   INITIALIZATION_FLOW_STATUS_ERROR,
+  INITIALIZATION_FLOW_STATUS_READY,
 } from '../../../../common/api/initialization';
 
 jest.mock('./api');
@@ -28,7 +28,7 @@ const mockHttp = {};
 const mockInitializeSecuritySolution = initializeSecuritySolution as jest.Mock;
 
 const flowA = INITIALIZATION_FLOW_CREATE_LIST_INDICES;
-const flowB = INITIALIZATION_FLOW_SOURCERER_DATA_VIEWS;
+const flowB = INITIALIZATION_FLOW_SECURITY_DATA_VIEWS;
 
 const wrapper: FC<PropsWithChildren> = ({ children }) => (
   <InitializationProvider>{children}</InitializationProvider>
