@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { runElasticsearch } from './run_elasticsearch';
-export { cleanupElasticsearch } from '@kbn/test-es-server';
-export * from './run_ftr';
-export {
-  getArgValue,
-  getKibanaCliArg,
-  getKibanaCliLoggers,
-  parseRawFlags,
-  remapPluginPaths,
-  runKibanaServer,
-} from '@kbn/test-kibana-server';
-export { initLogsDir } from './logs_dir';
-export { applyFipsOverrides, fipsIsEnabled } from './fips';
+/**
+ * Parsed URL pieces for test server endpoints.
+ * Duplicated from @kbn/test `UrlParts` so Scout typings do not import @kbn/test.
+ */
+export interface UrlParts {
+  protocol?: string;
+  hostname?: string;
+  port?: number;
+  auth?: string;
+  username?: string;
+  password?: string;
+}

@@ -7,10 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+<<<<<<< HEAD
 import { Command } from '@kbn/dev-cli-runner';
 import { initLogsDir } from '@kbn/test';
 import { FlagsReader } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
+=======
+import type { Command } from '@kbn/dev-cli-runner';
+import type { FlagsReader } from '@kbn/dev-cli-runner';
+import type { ToolingLog } from '@kbn/tooling-log';
+
+import { initLogsDir } from './init_logs_dir';
+>>>>>>> 0702344b8f29 (add kbn/test-kibana-server (#259090))
 import { TEST_FLAG_OPTIONS } from '../playwright/runner';
 import { parseTestFlags, runTests } from '../playwright/runner';
 

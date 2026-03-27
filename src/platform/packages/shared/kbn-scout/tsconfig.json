@@ -24,6 +24,7 @@
     "@kbn/dev-proc-runner",
     "@kbn/kbn-client",
     "@kbn/test",
+    "@kbn/test-kibana-server",
     "@kbn/test-saml-auth",
     "@kbn/es-archiver",
     "@kbn/dev-utils",
