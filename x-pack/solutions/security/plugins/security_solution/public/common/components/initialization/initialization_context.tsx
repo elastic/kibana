@@ -17,6 +17,42 @@ import { useHttp } from '../../lib/kibana';
 import { initializeSecuritySolution } from './api';
 import type { InitializationFlowResult, SettledInitializationState } from './types';
 
+/**
+ * Provides centralized initialization flows for Security Solution.
+ *
+ * The provider calls `POST /api/security_solution/initialize` to create or
+ * verify resources (list indices, data views, etc.) that the app depends on.
+ * Each resource is represented by an **initialization flow** identified by an
+ * {@link InitializationFlowId}.
+ *
+ * **Key behaviors:**
+ * - **Deduplication** — concurrent requests for the same flow are collapsed
+ *   into a single HTTP call (`inflightRef`).
+ * - **Retry** — failed flows are retried up to `DEFAULT_MAX_RETRIES` times
+ *   before settling as an error (`retryCountRef`).
+ * - **Settled state** — once a flow reaches a terminal state (success or
+ *   budget-exhausted error) it is stored in `settledState` and never
+ *   re-requested.
+ * - **Per-flow validation** — each flow's response is validated against its
+ *   generated zod schema (`InitializationFlowsResult.shape[flowId]`) so
+ *   consumers receive correctly typed payloads.
+ *
+ * **Adding a new flow:** flows must be idempotent and only create static
+ * resources that do not depend on user input. The backend runs them with the
+ * internal user, so they must not rely on the request user's privileges.
+ *
+ * **Usage — consumers should not interact with this context directly.**
+ * Instead, use the {@link useSecuritySolutionInitialization} hook:
+ *
+ * ```tsx
+ * const { 'create-list-indices': listIndices } =
+ *   useSecuritySolutionInitialization(['create-list-indices']);
+ *
+ * if (listIndices.loading) return <EuiLoadingSpinner />;
+ * if (listIndices.result?.status === 'error') { ... }
+ * ```
+ */
+
 const DEFAULT_MAX_RETRIES = 2;
 
 export interface InitializationContextValue {
