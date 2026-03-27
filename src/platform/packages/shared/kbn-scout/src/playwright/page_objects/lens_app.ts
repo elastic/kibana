@@ -15,6 +15,10 @@ export class LensApp {
   private readonly chartSwitchPopover;
   private readonly chartSwitchList;
   private readonly saveAndReturnButton;
+  private readonly saveButton;
+  private readonly saveModal;
+  private readonly savedObjectTitleInput;
+  private readonly confirmSaveButton;
   private readonly closeDimensionEditorButton;
   public readonly applyChangesButton;
   private readonly dimensionFieldComboBox;
@@ -24,6 +28,10 @@ export class LensApp {
     this.chartSwitchPopover = this.page.testSubj.locator('lnsChartSwitchPopover');
     this.chartSwitchList = this.page.testSubj.locator('lnsChartSwitchList');
     this.saveAndReturnButton = this.page.testSubj.locator('lnsApp_saveAndReturnButton');
+    this.saveButton = this.page.testSubj.locator('lnsApp_saveButton');
+    this.saveModal = this.page.testSubj.locator('savedObjectSaveModal');
+    this.savedObjectTitleInput = this.page.testSubj.locator('savedObjectTitle');
+    this.confirmSaveButton = this.page.testSubj.locator('confirmSaveSavedObjectButton');
     this.closeDimensionEditorButton = this.page.testSubj.locator(
       'lns-indexPattern-dimensionContainerClose'
     );
@@ -54,6 +62,22 @@ export class LensApp {
     await this.saveAndReturnButton.click();
     await expect(this.lensApp).toBeHidden();
     await expect(this.page.testSubj.locator('dshDashboardViewport')).toBeVisible();
+  }
+
+  /**
+   * Opens the Lens save modal, fills in the title, and confirms.
+   * Use `beforeSave` to configure dashboard target or other modal options
+   * before the confirm button is clicked.
+   */
+  async save(title: string, beforeSave?: () => Promise<void>) {
+    await this.saveButton.click();
+    await expect(this.saveModal).toBeVisible();
+    await this.savedObjectTitleInput.fill(title);
+    if (beforeSave) {
+      await beforeSave();
+    }
+    await this.confirmSaveButton.click();
+    await expect(this.saveModal).toBeHidden();
   }
 
   async configureXYDimensions(options?: {

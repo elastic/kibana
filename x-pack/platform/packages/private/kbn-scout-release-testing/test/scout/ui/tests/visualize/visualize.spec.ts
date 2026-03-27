@@ -77,12 +77,9 @@ test.describe('Visualize app', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('save Lens visualization to existing dashboard', async () => {
-      await page.testSubj.click('lnsApp_saveButton');
-      await expect(page.testSubj.locator('savedObjectSaveModal')).toBeVisible();
-      await page.testSubj.locator('savedObjectTitle').fill('Test Lens Visualization');
-      await pageObjects.visualize.selectExistingDashboard(SAMPLE_DASHBOARD);
-      await page.testSubj.click('confirmSaveSavedObjectButton');
-      await expect(page.testSubj.locator('savedObjectSaveModal')).toBeHidden();
+      await pageObjects.lens.save('Test Lens Visualization', () =>
+        pageObjects.visualize.selectExistingDashboard(SAMPLE_DASHBOARD)
+      );
     });
 
     await test.step('verify panel added to dashboard', async () => {

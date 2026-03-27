@@ -29,8 +29,11 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     await installLogsSampleData({ apiServices, kbnClient, settings: defaultSettings });
   });
 
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+  test.beforeEach(async ({ browserAuth, pageObjects, uiSettings }) => {
     await browserAuth.loginAsAdmin();
+    await uiSettings.set({
+      'timepicker:timeDefaults': '{ "from": "now-1h", "to": "now"}',
+    });
     await pageObjects.dashboard.goto();
   });
 
