@@ -16,6 +16,39 @@ export interface AlertsSnapshotConfig {
 }
 
 const INDEX_REFRESH_WAIT_MS = 3_000;
+
+export const DEFAULT_ALERTS_SNAPSHOT_CONFIG: Required<AlertsSnapshotConfig> = {
+  bucket: 'security-ai-datasets',
+  basePath: 'attack-discovery/oh-my-malware/2026-03-26',
+  snapshotName: 'alerts-snapshot',
+};
+
+/**
+ * Resolve the alerts snapshot configuration.
+ *
+ * - Defaults are pinned in code for repeatability.
+ * - Env vars can override for experimentation and CI variants.
+ * - Returns `null` when no GCS credentials are available (to avoid failing local runs).
+ */
+export const resolveAlertsSnapshotConfig = (): AlertsSnapshotConfig | null => {
+  if (process.env.ATTACK_DISCOVERY_ALERTS_SNAPSHOT_DISABLE === 'true') return null;
+
+  const bucket =
+    process.env.ATTACK_DISCOVERY_ALERTS_SNAPSHOT_BUCKET ?? DEFAULT_ALERTS_SNAPSHOT_CONFIG.bucket;
+  const basePath =
+    process.env.ATTACK_DISCOVERY_ALERTS_SNAPSHOT_BASE_PATH ??
+    DEFAULT_ALERTS_SNAPSHOT_CONFIG.basePath;
+  const snapshotName =
+    process.env.ATTACK_DISCOVERY_ALERTS_SNAPSHOT_NAME ??
+    DEFAULT_ALERTS_SNAPSHOT_CONFIG.snapshotName;
+
+  // Snapshot restore requires Elasticsearch to have repository-gcs credentials configured.
+  // In our Scout setup, that is driven by the presence of the GCS_CREDENTIALS env var.
+  if (!process.env.GCS_CREDENTIALS) return null;
+
+  return { bucket, basePath, snapshotName };
+};
+
 const ALERT_INDICES_TO_RESTORE_AND_OVERWRITE = [
   '.internal.alerts-security.alerts-default-*',
   'insights-alerts-*',
@@ -63,23 +96,6 @@ const deleteExistingAlertIndices = async (esClient: Client, log: ToolingLog): Pr
 
 const isOpenIndexConflictError = (errors: string[]): boolean =>
   errors.some((e) => e.includes('open index with same name already exists in the cluster'));
-
-/**
- * Reads snapshot config from environment variables.
- * Returns `null` if the required env vars are not set.
- */
-export const getAlertsSnapshotConfigFromEnv = (): AlertsSnapshotConfig | null => {
-  const bucket = process.env.ATTACK_DISCOVERY_ALERTS_SNAPSHOT_BUCKET;
-  const basePath = process.env.ATTACK_DISCOVERY_ALERTS_SNAPSHOT_BASE_PATH;
-  if (!bucket || !basePath) {
-    return null;
-  }
-  return {
-    bucket,
-    basePath,
-    snapshotName: process.env.ATTACK_DISCOVERY_ALERTS_SNAPSHOT_NAME,
-  };
-};
 
 /**
  * Restores an alerts snapshot from GCS into the local ES cluster,

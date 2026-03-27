@@ -96,15 +96,47 @@ To provide realistic alert data for the `searchAlerts` path, this suite supports
 restoring an Elasticsearch snapshot from GCS before running:
 
 ```bash
+node scripts/evals run --suite attack-discovery --grep "searchAlerts"
+```
+
+Defaults are pinned in code for repeatability:
+- bucket: `security-ai-datasets`
+- base path: `attack-discovery/oh-my-malware/2026-03-26`
+- snapshot: `alerts-snapshot`
+
+Override as needed:
+
+```bash
 ATTACK_DISCOVERY_ALERTS_SNAPSHOT_BUCKET=security-ai-datasets \
 ATTACK_DISCOVERY_ALERTS_SNAPSHOT_BASE_PATH=attack-discovery/oh-my-malware/2026-03-26 \
 ATTACK_DISCOVERY_ALERTS_SNAPSHOT_NAME=alerts-snapshot \
   node scripts/evals run --suite attack-discovery --grep "searchAlerts"
 ```
 
-The snapshot restore uses the shared `GCS_CREDENTIALS` service account
-(which is automatically configured via the vault config in CI).
+The restore uses the shared `GCS_CREDENTIALS` service account (automatically set via the vault config when using `node scripts/evals`).
 See `src/data_generators/restore_alerts_snapshot.ts`.
+
+#### Dataset registry (Dataplex)
+
+To make this snapshot discoverable via the Snapshot Dataset Management best practices, register it in Dataplex using the checked-in aspects file:
+
+- `x-pack/platform/packages/shared/kbn-evals/snapshots/dataplex/security-ai/attack-discovery-oh-my-malware-2026-03-26.yaml`
+
+Example:
+
+```bash
+gcloud dataplex entries create attack-discovery-oh-my-malware-2026-03-26 \
+  --location=us-central1 \
+  --project=elastic-observability \
+  --entry-group=snapshot-datasets \
+  --entry-type=projects/elastic-observability/locations/global/entryTypes/es-snapshot \
+  --fully-qualified-name="custom:es-snapshots.security-ai-datasets.attack-discovery.oh-my-malware.2026-03-26" \
+  --entry-source-resource="gs://security-ai-datasets/attack-discovery/oh-my-malware/2026-03-26" \
+  --entry-source-display-name="Attack Discovery: oh-my-malware (2026-03-26)" \
+  --entry-source-description="Attack Discovery alert snapshot for searchAlerts eval runs" \
+  --entry-source-update-time="2026-03-26T00:00:00Z" \
+  --aspects=x-pack/platform/packages/shared/kbn-evals/snapshots/dataplex/security-ai/attack-discovery-oh-my-malware-2026-03-26.yaml
+```
 
 ### 3) `graphState` (prompt-input stub)
 
@@ -178,9 +210,10 @@ nvm use && ATTACK_DISCOVERY_DATASET_JSONL_PATH=data/eval_dataset_attack_discover
 | `ATTACK_DISCOVERY_DATASET_LIMIT` | Max examples to load from JSONL | (all) |
 | `ATTACK_DISCOVERY_DATASET_OFFSET` | Skip first N examples in JSONL | 0 |
 | `ATTACK_DISCOVERY_EVAL_CONCURRENCY` | Concurrency for executor `runExperiment` | 5 |
-| `ATTACK_DISCOVERY_ALERTS_SNAPSHOT_BUCKET` | GCS bucket for alert snapshot restore | (unset) |
-| `ATTACK_DISCOVERY_ALERTS_SNAPSHOT_BASE_PATH` | GCS base path within the bucket | (unset) |
-| `ATTACK_DISCOVERY_ALERTS_SNAPSHOT_NAME` | Specific snapshot name (defaults to latest) | (unset) |
+| `ATTACK_DISCOVERY_ALERTS_SNAPSHOT_DISABLE` | Disable snapshot restore for `searchAlerts` smoke | (unset) |
+| `ATTACK_DISCOVERY_ALERTS_SNAPSHOT_BUCKET` | GCS bucket for alert snapshot restore | `security-ai-datasets` |
+| `ATTACK_DISCOVERY_ALERTS_SNAPSHOT_BASE_PATH` | GCS base path within the bucket | `attack-discovery/oh-my-malware/2026-03-26` |
+| `ATTACK_DISCOVERY_ALERTS_SNAPSHOT_NAME` | Specific snapshot name (defaults to pinned) | `alerts-snapshot` |
 | `EVALUATIONS_KBN_URL` | Golden cluster Kibana URL for dataset ops | (from vault config) |
 | `EVALUATIONS_KBN_API_KEY` | API key for golden cluster Kibana | (from vault config) |
 

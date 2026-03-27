@@ -19,6 +19,7 @@ import { stopCmd } from './commands/stop';
 import { logsCmd } from './commands/logs';
 import { scoutCmd } from './commands/scout';
 import { clearIndexCmd } from './commands/clear_index';
+import { dataplexCmd } from './commands/dataplex';
 
 export async function run() {
   await new RunWithCommands(
@@ -32,6 +33,7 @@ export async function run() {
       logsCmd,
       scoutCmd,
       clearIndexCmd,
+      dataplexCmd,
       runSuiteCmd,
       listSuitesCmd,
       labelsCmd,

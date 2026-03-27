@@ -344,6 +344,38 @@ node scripts/evals start --suite <suite-id>
 
 `evals start` handles EDOT, Scout, and EIS CCM enablement automatically.
 
+## Snapshot datasets (Dataplex)
+
+Snapshot datasets used by eval suites are stored in GCS and can optionally be registered in **Dataplex** for discoverability (see the Snapshot Dataset Management best practices).
+
+### Where aspects files live
+
+Team-owned Dataplex aspects YAML files are checked in under:
+
+- `x-pack/platform/packages/shared/kbn-evals/snapshots/dataplex/<team>/`
+
+These YAML files are **metadata only** (GCS path, description, indices, etc). Never commit credentials.
+
+### Syncing Dataplex entries from aspects files
+
+This repo includes a helper command that runs `gcloud dataplex entries create/update` based on those YAML files:
+
+```bash
+# One-time: create the aspect type + entry type + entry group (requires permissions)
+node scripts/evals dataplex bootstrap
+
+# Create/update entries for all checked-in aspects YAML files
+node scripts/evals dataplex sync
+
+# Dry run (print what would happen)
+node scripts/evals dataplex sync --dry-run
+
+# If you do not have Dataplex write permissions, generate commands to hand off
+node scripts/evals dataplex sync --print-commands
+```
+
+Note: The **Dataplex "Aspect types"** console page lists *schemas*. Snapshot datasets themselves show up under Dataplex **Entries**.
+
 <details>
 <summary>Manual flow (if you prefer full control)</summary>
 
