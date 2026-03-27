@@ -312,12 +312,16 @@ describe(
             cy.get('[aria-label="Details"]').click();
           });
       });
-      cy.contains('Live query details');
+      cy.contains('Query results');
 
       cy.get('[data-test-subj^="packQueriesTableKebab-"]').first().click();
 
       cy.contains('Add to Case').click();
 
+      // Kebab popover should close after clicking "Add to Case"
+      cy.get('.euiContextMenuPanel').should('not.exist');
+
+      // Cases modal must survive the popover unmount (CasesContext lives above the popover)
       cy.getBySel('all-cases-modal', { timeout: 10000 }).should('be.visible');
 
       cy.getBySel('all-cases-modal').within(() => {
