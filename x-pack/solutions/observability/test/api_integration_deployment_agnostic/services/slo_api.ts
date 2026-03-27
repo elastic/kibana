@@ -344,6 +344,8 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
       return body;
     },
 
+    // Composite SLO CRUD: Scout (plugins/slo/test/scout/api/tests/composite_slo/).
+
     async getSavedObject(roleAuthc: RoleCredentials, sloId: string): Promise<SavedObjectResponse> {
       const { body } = await supertestWithoutAuth
         .get(`/api/saved_objects/_find?type=slo&filter=slo.attributes.id:(${sloId})`)
