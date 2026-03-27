@@ -12,7 +12,6 @@ import { LoopStepTypes } from '@kbn/workflows';
 import { getConnectorIdSuggestions } from './connector_id/get_connector_id_suggestions';
 import { getConnectorTypeSuggestions } from './connector_type/get_connector_type_suggestions';
 import { getCustomPropertySuggestions } from './custom_property/get_custom_property_suggestions';
-// import { getJsonSchemaSuggestions } from './json_schema/get_json_schema_suggestions';
 import {
   createLiquidBlockKeywordCompletions,
   createLiquidFilterCompletions,
@@ -197,12 +196,6 @@ export async function getSuggestions(
   if (workflowOutputSuggestions.length > 0) {
     return workflowOutputSuggestions;
   }
-
-  // JSON Schema autocompletion for inputs.properties
-  // const jsonSchemaSuggestions = getJsonSchemaSuggestions(autocompleteContext);
-  // if (jsonSchemaSuggestions.length > 0) {
-  //   return jsonSchemaSuggestions;
-  // }
 
   // Custom property completion for steps registered via workflows_extensions
   return getCustomPropertySuggestions(

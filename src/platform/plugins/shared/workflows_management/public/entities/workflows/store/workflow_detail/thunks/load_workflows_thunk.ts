@@ -9,6 +9,8 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
+import type { ManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
+import { isManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import type { WorkflowsServices } from '../../../../../types';
 import type { WorkflowsResponse } from '../../../model/types';
@@ -36,10 +38,17 @@ export const loadWorkflowsThunk = createAsyncThunk<
 
     const workflowsMap: WorkflowsResponse['workflows'] = {};
     response.results.forEach((workflow) => {
+      const manualTrigger = workflow.definition?.triggers.find((trigger) =>
+        isManualTrigger(trigger)
+      ) as ManualTrigger | undefined;
+      const inputsSchema = manualTrigger?.inputs
+        ? normalizeFieldsToJsonSchema(manualTrigger.inputs)
+        : undefined;
+
       workflowsMap[workflow.id] = {
         id: workflow.id,
         name: workflow.name,
-        inputsSchema: normalizeFieldsToJsonSchema(workflow.definition?.inputs),
+        inputsSchema,
       };
     });
 

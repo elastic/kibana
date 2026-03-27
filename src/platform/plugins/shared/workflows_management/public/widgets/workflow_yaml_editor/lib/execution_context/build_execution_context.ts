@@ -81,10 +81,6 @@ export function buildExecutionContext(
 
   // Add execution context data if available
   if (executionContextData) {
-    if (executionContextData.inputs) {
-      context.inputs = executionContextData.inputs as JsonObject;
-    }
-
     if (executionContextData.workflow) {
       context.workflow = executionContextData.workflow as JsonObject;
     }
