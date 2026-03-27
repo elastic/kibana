@@ -63,6 +63,7 @@ export function StreamFeaturesTable({
     bulkActions,
     flyoutActions,
     label,
+    items,
   } = useStreamFeaturesTable({
     definition,
     features,
@@ -123,7 +124,7 @@ export function StreamFeaturesTable({
       <EuiInMemoryTable
         loading={isLoadingFeatures}
         tableCaption={TABLE_CAPTION_LABEL}
-        items={features}
+        items={items}
         itemId="uuid"
         columns={columns}
         noItemsMessage={noItemsMessage}

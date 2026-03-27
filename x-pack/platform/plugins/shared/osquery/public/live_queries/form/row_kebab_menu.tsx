@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useMemo } from 'react';
-import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import React, { useCallback, useContext, useState, useMemo } from 'react';
+import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AddToCaseWrapper } from '../../cases/add_to_cases';
+import { AddToCaseContextProvider } from '../../cases/add_to_cases';
+import { AddToCaseButton } from '../../cases/add_to_cases_button';
+import { CasesAttachmentWrapperContext } from '../../shared_components/attachments/pack_queries_attachment_wrapper';
 import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
 import type { AddToTimelineHandler } from '../../types';
 
@@ -20,11 +22,11 @@ interface RowKebabMenuProps {
   addToTimeline?: AddToTimelineHandler;
   scheduleId?: string;
   executionCount?: number;
-  onViewQuery: () => void;
 }
 
-export const RowKebabMenu: React.FC<RowKebabMenuProps> = React.memo(
-  ({ row, actionId, agentIds, addToTimeline, scheduleId, executionCount, onViewQuery }) => {
+const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
+  ({ row, actionId, agentIds, addToTimeline, scheduleId, executionCount }) => {
+    const isCasesAttachment = useContext(CasesAttachmentWrapperContext);
     const [isOpen, setIsOpen] = useState(false);
     const close = useCallback(() => setIsOpen(false), []);
     const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
@@ -33,15 +35,6 @@ export const RowKebabMenu: React.FC<RowKebabMenuProps> = React.memo(
       'xpack.osquery.pack.queriesTable.viewResultsMoreActionsAriaLabel',
       { defaultMessage: 'More actions' }
     );
-
-    const handleViewQueryClick = useCallback(() => {
-      close();
-      onViewQuery();
-    }, [close, onViewQuery]);
-
-    const viewQueryLabel = i18n.translate('xpack.osquery.pack.queriesTable.viewQueryMenuLabel', {
-      defaultMessage: 'View query',
-    });
 
     const menuItems = useMemo(
       () => [
@@ -57,9 +50,9 @@ export const RowKebabMenu: React.FC<RowKebabMenuProps> = React.memo(
               />,
             ]
           : []),
-        ...(actionId
+        ...(!isCasesAttachment && actionId
           ? [
-              <AddToCaseWrapper
+              <AddToCaseButton
                 key="case"
                 actionId={actionId}
                 agentIds={agentIds}
@@ -73,11 +66,9 @@ export const RowKebabMenu: React.FC<RowKebabMenuProps> = React.memo(
               />,
             ]
           : []),
-        <EuiContextMenuItem key="viewQuery" icon="expand" onClick={handleViewQueryClick}>
-          {viewQueryLabel}
-        </EuiContextMenuItem>,
       ],
       [
+        isCasesAttachment,
         row.action_id,
         actionId,
         agentIds,
@@ -85,10 +76,10 @@ export const RowKebabMenu: React.FC<RowKebabMenuProps> = React.memo(
         scheduleId,
         executionCount,
         close,
-        handleViewQueryClick,
-        viewQueryLabel,
       ]
     );
+
+    if (menuItems.length === 0) return null;
 
     return (
       <EuiPopover
@@ -110,5 +101,23 @@ export const RowKebabMenu: React.FC<RowKebabMenuProps> = React.memo(
     );
   }
 );
+
+RowKebabMenuContent.displayName = 'RowKebabMenuContent';
+
+/**
+ * Wraps CasesContext above the popover so the case selector modal
+ * survives when the popover closes and unmounts its content.
+ */
+export const RowKebabMenu: React.FC<RowKebabMenuProps> = React.memo((props) => {
+  if (!props.actionId && !props.scheduleId) {
+    return <RowKebabMenuContent {...props} />;
+  }
+
+  return (
+    <AddToCaseContextProvider>
+      <RowKebabMenuContent {...props} />
+    </AddToCaseContextProvider>
+  );
+});
 
 RowKebabMenu.displayName = 'RowKebabMenu';

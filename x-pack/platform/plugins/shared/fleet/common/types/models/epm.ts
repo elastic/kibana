@@ -293,7 +293,7 @@ export interface RegistryPolicyIntegrationTemplate extends BaseTemplate {
 }
 
 export interface RegistryPolicyInputOnlyTemplate extends BaseTemplate {
-  [RegistryPolicyTemplateKeys.type]: string;
+  [RegistryPolicyTemplateKeys.type]?: string;
   [RegistryPolicyTemplateKeys.input]: string;
   [RegistryPolicyTemplateKeys.template_path]?: string;
   [RegistryPolicyTemplateKeys.template_paths]?: string[];
@@ -322,6 +322,7 @@ export enum RegistryInputKeys {
   hide_in_var_group_options = 'hide_in_var_group_options',
   deprecated = 'deprecated',
   migrate_from = 'migrate_from',
+  dynamic_signal_types = 'dynamic_signal_types',
 }
 
 export type RegistryInputGroup = 'logs' | 'metrics';
@@ -341,6 +342,8 @@ export interface RegistryInput {
   [RegistryInputKeys.hide_in_var_group_options]?: Record<string, string[]>;
   [RegistryInputKeys.deprecated]?: DeprecationInfo;
   [RegistryInputKeys.migrate_from]?: string;
+  /** When true the data stream signal type (logs/metrics/traces) is determined at runtime by the agent. Valid for OTel collector inputs in composable integrations. */
+  [RegistryInputKeys.dynamic_signal_types]?: boolean;
 }
 
 export enum RegistryStreamKeys {
@@ -480,6 +483,13 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.lifecycle]?: RegistryDataStreamLifecycle;
   [RegistryDataStreamKeys.agent]?: RegistryAgent;
 }
+
+export type InputOnlyRegistryDataStream = Omit<
+  Pick<RegistryDataStream, RegistryDataStreamKeys>,
+  RegistryDataStreamKeys.type
+> & {
+  [RegistryDataStreamKeys.type]?: string;
+};
 
 export interface RegistryAgent {
   privileges?: { root?: boolean };

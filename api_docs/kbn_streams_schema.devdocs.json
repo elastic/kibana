@@ -7186,7 +7186,7 @@
         "label": "RootStreamName",
         "description": [],
         "signature": [
-          "\"logs\" | \"logs.ecs\" | \"logs.otel\""
+          "\"logs\" | \"logs.otel\" | \"logs.ecs\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
         "lineNumber": 17,

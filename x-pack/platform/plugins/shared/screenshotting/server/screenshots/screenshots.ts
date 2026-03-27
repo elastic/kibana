@@ -197,30 +197,28 @@ export class Screenshots {
     }
 
     const eventLogger = new EventLogger(logger, this.config);
-    const transactionEnd = eventLogger.startTransaction(Transactions.SCREENSHOTTING);
-
     const layoutInstance = createLayout(layout ?? {});
     const captureOptions = this.getCaptureOptions(options);
 
-    return this.captureScreenshots(eventLogger, layoutInstance, captureOptions, logger).pipe(
-      tap(({ results, metrics }) => {
-        transactionEnd({
-          labels: {
+    return eventLogger.withTransaction(Transactions.SCREENSHOTTING, (setLabels) =>
+      this.captureScreenshots(eventLogger, layoutInstance, captureOptions, logger).pipe(
+        tap(({ results, metrics }) => {
+          setLabels({
             cpu: metrics?.cpu,
             memory: metrics?.memory,
             memory_mb: metrics?.memoryInMegabytes,
             ...eventLogger.getByteLengthFromCaptureResults(results),
-          },
-        });
-      }),
-      mergeMap((result) => {
-        switch (format) {
-          case 'pdf':
-            return toPdf(eventLogger, this.packageInfo, layoutInstance, options, result);
-          default:
-            return toPng(result);
-        }
-      })
+          });
+        }),
+        mergeMap((result) => {
+          switch (format) {
+            case 'pdf':
+              return toPdf(eventLogger, this.packageInfo, layoutInstance, options, result);
+            default:
+              return toPng(result);
+          }
+        })
+      )
     );
   }
 }

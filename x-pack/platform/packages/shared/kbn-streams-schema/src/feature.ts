@@ -6,9 +6,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { isEqual } from 'lodash';
-import type { Condition } from '@kbn/streamlang';
-import { conditionSchema } from '@kbn/streamlang';
+import { isEqual, uniq } from 'lodash';
+import { conditionSchema, type Condition } from '@kbn/streamlang';
 
 const featureStatus = ['active', 'stale', 'expired'] as const;
 export const featureStatusSchema = z.enum(featureStatus);
@@ -103,4 +102,48 @@ export function hasSameFingerprint(feature: BaseFeature, other: BaseFeature): bo
 
 export function isDuplicateFeature(feature: BaseFeature, other: BaseFeature): boolean {
   return feature.id.toLowerCase() === other.id.toLowerCase() || hasSameFingerprint(feature, other);
+}
+
+const mergeArrays = (a: string[] | undefined, b: string[] | undefined): string[] | undefined => {
+  const merged = uniq([...(a ?? []), ...(b ?? [])]);
+  return merged.length > 0 ? merged : undefined;
+};
+
+export function toBaseFeature(feature: Feature): BaseFeature {
+  return {
+    id: feature.id,
+    stream_name: feature.stream_name,
+    type: feature.type,
+    subtype: feature.subtype,
+    title: feature.title,
+    description: feature.description,
+    properties: feature.properties,
+    confidence: feature.confidence,
+    evidence: feature.evidence,
+    evidence_doc_ids: feature.evidence_doc_ids,
+    tags: feature.tags,
+    filter: feature.filter,
+    meta: feature.meta,
+  };
+}
+
+export function mergeFeature(existing: BaseFeature, incoming: BaseFeature): BaseFeature {
+  const mergedMeta = { ...(existing.meta ?? {}), ...(incoming.meta ?? {}) };
+  const mergedProperties = { ...(existing.properties ?? {}), ...(incoming.properties ?? {}) };
+
+  return {
+    id: existing.id,
+    stream_name: existing.stream_name,
+    type: existing.type,
+    subtype: existing.subtype,
+    title: incoming.title,
+    description: incoming.description,
+    properties: mergedProperties,
+    confidence: Math.round((existing.confidence + incoming.confidence) / 2),
+    evidence: mergeArrays(existing.evidence, incoming.evidence),
+    evidence_doc_ids: mergeArrays(existing.evidence_doc_ids, incoming.evidence_doc_ids),
+    tags: mergeArrays(existing.tags, incoming.tags),
+    filter: incoming.filter ?? existing.filter,
+    meta: Object.keys(mergedMeta).length > 0 ? mergedMeta : undefined,
+  };
 }
