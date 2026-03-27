@@ -219,9 +219,7 @@ export const SubFeatureForm = (props: Props) => {
               .flatMap((g) => g.privileges.map((p) => p.id));
 
             props.onChange(
-              privilegesWithoutGroupEntries.filter(
-                (sp) => !independentPrivilegeIds.includes(sp)
-              )
+              privilegesWithoutGroupEntries.filter((sp) => !independentPrivilegeIds.includes(sp))
             );
           } else {
             props.onChange([...privilegesWithoutGroupEntries, selectedPrivilegeId]);
