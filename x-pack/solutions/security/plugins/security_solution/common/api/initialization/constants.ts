@@ -18,8 +18,8 @@ export const INITIALIZE_SECURITY_SOLUTION_SOCKET_TIMEOUT_MS = 2 * 60 * 1000;
 export const INITIALIZATION_FLOW_CREATE_LIST_INDICES =
   InitializationFlowIdEnum['create-list-indices'];
 // TODO: the implementation of this flow is in a follow up PR
-export const INITIALIZATION_FLOW_SOURCERER_DATA_VIEWS =
-  InitializationFlowIdEnum['sourcerer-data-views'];
+export const INITIALIZATION_FLOW_SECURITY_DATA_VIEWS =
+  InitializationFlowIdEnum['security-data-views'];
 
 // Flow statuses
 export const INITIALIZATION_FLOW_STATUS_READY = InitializationFlowReadyResult.shape.status.value;

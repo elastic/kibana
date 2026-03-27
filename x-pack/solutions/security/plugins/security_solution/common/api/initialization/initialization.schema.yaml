@@ -45,7 +45,7 @@ components:
       enum:
         - create-list-indices
         # TODO: the implementation of this flow is in a follow up PR
-        - sourcerer-data-views
+        - security-data-views
 
     InitializationFlowsResult:
       type: object
@@ -58,9 +58,9 @@ components:
           oneOf:
             - $ref: '#/components/schemas/CreateListIndicesReadyResult'
             - $ref: '#/components/schemas/InitializationFlowErrorResult'
-        sourcerer-data-views:
+        security-data-views:
           oneOf:
-            # TODO: replace with SourcererDataViewsReadyResult in a follow up PR
+            # TODO: replace with SecurityDataViewsReadyResult in a follow up PR
             - $ref: '#/components/schemas/InitializationFlowReadyResult'
             - $ref: '#/components/schemas/InitializationFlowErrorResult'
 

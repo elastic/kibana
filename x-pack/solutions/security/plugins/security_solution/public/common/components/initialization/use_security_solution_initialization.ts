@@ -25,13 +25,13 @@ type RegistryState<Ids extends InitializationFlowId[]> = {
  *
  * @example
  * ```tsx
- * const { 'sourcerer-data-views': sourcerer } =
- *   useSecuritySolutionInitialization(['sourcerer-data-views']);
+ * const { 'security-data-views': securityDataViews } =
+ *   useSecuritySolutionInitialization(['security-data-views']);
  *
- * if (sourcerer.loading) return <EuiLoadingSpinner />;
- * if (sourcerer.result?.status === 'error') return <EuiCallOut color="danger" title={sourcerer.result.error ?? 'Unknown error'} />;
- * const payload = sourcerer.result?.status === 'ready' ? sourcerer.result.payload : null;
- * //    ^ typed as SourcecererDataViewsPayload | null — no cast needed
+ * if (securityDataViews.loading) return <EuiLoadingSpinner />;
+ * if (securityDataViews.result?.status === 'error') return <EuiCallOut color="danger" title={securityDataViews.result.error ?? 'Unknown error'} />;
+ * const payload = securityDataViews.result?.status === 'ready' ? securityDataViews.result.payload : null;
+ * //    ^ typed as SecurityDataViewsPayload | null — no cast needed
  * ```
  */
 export const useSecuritySolutionInitialization = <Ids extends InitializationFlowId[]>(

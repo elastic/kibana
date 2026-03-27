@@ -20,7 +20,7 @@ import { z } from '@kbn/zod/v4';
  * Identifier for an initialization flow.
  */
 export type InitializationFlowId = z.infer<typeof InitializationFlowId>;
-export const InitializationFlowId = z.enum(['create-list-indices', 'sourcerer-data-views']);
+export const InitializationFlowId = z.enum(['create-list-indices', 'security-data-views']);
 export type InitializationFlowIdEnum = typeof InitializationFlowId.enum;
 export const InitializationFlowIdEnum = InitializationFlowId.enum;
 
@@ -52,7 +52,7 @@ export const InitializationFlowsResult = z.object({
   'create-list-indices': z
     .union([CreateListIndicesReadyResult, InitializationFlowErrorResult])
     .optional(),
-  'sourcerer-data-views': z
+  'security-data-views': z
     .union([InitializationFlowReadyResult, InitializationFlowErrorResult])
     .optional(),
 });
