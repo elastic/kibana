@@ -71,7 +71,7 @@ export const UPDATE_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
 export const UPDATE_CASES_STEP_LABEL = i18n.translate(
   'xpack.cases.workflowSteps.updateCases.label',
   {
-    defaultMessage: 'Update cases',
+    defaultMessage: 'Cases - Update cases',
   }
 );
 
@@ -93,7 +93,7 @@ export const UPDATE_CASES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
 export const SET_CUSTOM_FIELD_STEP_LABEL = i18n.translate(
   'xpack.cases.workflowSteps.setCustomField.label',
   {
-    defaultMessage: 'Set case custom field',
+    defaultMessage: 'Cases - Set custom field',
   }
 );
 
@@ -150,7 +150,7 @@ export const GET_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
 );
 
 export const FIND_CASES_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.findCases.label', {
-  defaultMessage: 'Find cases',
+  defaultMessage: 'Cases - Find cases',
 });
 
 export const FIND_CASES_STEP_DESCRIPTION = i18n.translate(
@@ -171,7 +171,7 @@ export const FIND_CASES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
 export const SET_SEVERITY_STEP_LABEL = i18n.translate(
   'xpack.cases.workflowSteps.setSeverity.label',
   {
-    defaultMessage: 'Set case severity',
+    defaultMessage: 'Cases - Set case severity',
   }
 );
 
@@ -191,7 +191,7 @@ export const SET_SEVERITY_STEP_DOCUMENTATION_DETAILS = i18n.translate(
 );
 
 export const SET_STATUS_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.setStatus.label', {
-  defaultMessage: 'Set case status',
+  defaultMessage: 'Cases - Set case status',
 });
 
 export const SET_STATUS_STEP_DESCRIPTION = i18n.translate(
@@ -210,7 +210,7 @@ export const SET_STATUS_STEP_DOCUMENTATION_DETAILS = i18n.translate(
 );
 
 export const CLOSE_CASE_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.closeCase.label', {
-  defaultMessage: 'Close case',
+  defaultMessage: 'Cases - Close case',
 });
 
 export const CLOSE_CASE_STEP_DESCRIPTION = i18n.translate(
@@ -231,7 +231,7 @@ export const CLOSE_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
 export const DELETE_CASES_STEP_LABEL = i18n.translate(
   'xpack.cases.workflowSteps.deleteCases.label',
   {
-    defaultMessage: 'Delete cases',
+    defaultMessage: 'Cases - Delete cases',
   }
 );
 
@@ -251,7 +251,7 @@ export const DELETE_CASES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
 );
 
 export const ASSIGN_CASE_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.assignCase.label', {
-  defaultMessage: 'Assign case',
+  defaultMessage: 'Cases - Assign case',
 });
 
 export const ASSIGN_CASE_STEP_DESCRIPTION = i18n.translate(
@@ -272,7 +272,7 @@ export const ASSIGN_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
 export const UNASSIGN_CASE_STEP_LABEL = i18n.translate(
   'xpack.cases.workflowSteps.unassignCase.label',
   {
-    defaultMessage: 'Unassign case',
+    defaultMessage: 'Cases - Unassign case',
   }
 );
 
@@ -292,7 +292,7 @@ export const UNASSIGN_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
 );
 
 export const ADD_ALERTS_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.addAlerts.label', {
-  defaultMessage: 'Add alerts to case',
+  defaultMessage: 'Cases - Add alerts to case',
 });
 
 export const ADD_ALERTS_STEP_DESCRIPTION = i18n.translate(
@@ -311,7 +311,7 @@ export const ADD_ALERTS_STEP_DOCUMENTATION_DETAILS = i18n.translate(
 );
 
 export const ADD_EVENTS_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.addEvents.label', {
-  defaultMessage: 'Add events to case',
+  defaultMessage: 'Cases - Add events to case',
 });
 
 export const ADD_EVENTS_STEP_DESCRIPTION = i18n.translate(
@@ -332,7 +332,7 @@ export const ADD_EVENTS_STEP_DOCUMENTATION_DETAILS = i18n.translate(
 export const FIND_SIMILAR_CASES_STEP_LABEL = i18n.translate(
   'xpack.cases.workflowSteps.findSimilarCases.label',
   {
-    defaultMessage: 'Find similar cases',
+    defaultMessage: 'Cases - Find similar cases',
   }
 );
 
@@ -354,7 +354,7 @@ export const FIND_SIMILAR_CASES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
 export const SET_DESCRIPTION_STEP_LABEL = i18n.translate(
   'xpack.cases.workflowSteps.setDescription.label',
   {
-    defaultMessage: 'Set case description',
+    defaultMessage: 'Cases - Set case description',
   }
 );
 
@@ -374,7 +374,7 @@ export const SET_DESCRIPTION_STEP_DOCUMENTATION_DETAILS = i18n.translate(
 );
 
 export const SET_TITLE_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.setTitle.label', {
-  defaultMessage: 'Set case title',
+  defaultMessage: 'Cases - Set case title',
 });
 
 export const SET_TITLE_STEP_DESCRIPTION = i18n.translate(
@@ -395,7 +395,7 @@ export const SET_TITLE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
 export const ADD_OBSERVABLES_STEP_LABEL = i18n.translate(
   'xpack.cases.workflowSteps.addObservables.label',
   {
-    defaultMessage: 'Add observables to case',
+    defaultMessage: 'Cases - Add observables to case',
   }
 );
 
@@ -415,7 +415,7 @@ export const ADD_OBSERVABLES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
 );
 
 export const ADD_TAG_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.addTag.label', {
-  defaultMessage: 'Add case tag',
+  defaultMessage: 'Cases - Add tag to case',
 });
 
 export const ADD_TAG_STEP_DESCRIPTION = i18n.translate(
@@ -436,7 +436,7 @@ export const ADD_TAG_STEP_DOCUMENTATION_DETAILS = i18n.translate(
 export const ADD_CATEGORY_STEP_LABEL = i18n.translate(
   'xpack.cases.workflowSteps.addCategory.label',
   {
-    defaultMessage: 'Add case category',
+    defaultMessage: 'Cases - Add category to case',
   }
 );
 

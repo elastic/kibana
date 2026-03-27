@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { addAlertsStepCommonDefinition } from '../../common/workflows/steps/add_alerts';
 import { addCommentStepCommonDefinition } from '../../common/workflows/steps/add_comment';
 import { addEventsStepCommonDefinition } from '../../common/workflows/steps/add_events';
@@ -25,79 +24,80 @@ import { setTitleStepCommonDefinition } from '../../common/workflows/steps/set_t
 import { unassignCaseStepCommonDefinition } from '../../common/workflows/steps/unassign_case';
 import { updateCaseStepCommonDefinition } from '../../common/workflows/steps/update_case';
 import { updateCasesStepCommonDefinition } from '../../common/workflows/steps/update_cases';
+import { createPublicCaseStepDefinition } from './shared';
 
-export const addAlertsStepDefinition = createPublicStepDefinition({
+export const addAlertsStepDefinition = createPublicCaseStepDefinition({
   ...addAlertsStepCommonDefinition,
 });
 
-export const addCommentStepDefinition = createPublicStepDefinition({
+export const addCommentStepDefinition = createPublicCaseStepDefinition({
   ...addCommentStepCommonDefinition,
 });
 
-export const addEventsStepDefinition = createPublicStepDefinition({
+export const addEventsStepDefinition = createPublicCaseStepDefinition({
   ...addEventsStepCommonDefinition,
 });
 
-export const addObservablesStepDefinition = createPublicStepDefinition({
+export const addObservablesStepDefinition = createPublicCaseStepDefinition({
   ...addObservablesStepCommonDefinition,
 });
 
-export const addTagsStepDefinition = createPublicStepDefinition({
+export const addTagsStepDefinition = createPublicCaseStepDefinition({
   ...addTagsStepCommonDefinition,
 });
 
-export const assignCaseStepDefinition = createPublicStepDefinition({
+export const assignCaseStepDefinition = createPublicCaseStepDefinition({
   ...assignCaseStepCommonDefinition,
 });
 
-export const closeCaseStepDefinition = createPublicStepDefinition({
+export const closeCaseStepDefinition = createPublicCaseStepDefinition({
   ...closeCaseStepCommonDefinition,
 });
 
-export const deleteCasesStepDefinition = createPublicStepDefinition({
+export const deleteCasesStepDefinition = createPublicCaseStepDefinition({
   ...deleteCasesStepCommonDefinition,
 });
 
-export const findCasesStepDefinition = createPublicStepDefinition({
+export const findCasesStepDefinition = createPublicCaseStepDefinition({
   ...findCasesStepCommonDefinition,
 });
 
-export const findSimilarCasesStepDefinition = createPublicStepDefinition({
+export const findSimilarCasesStepDefinition = createPublicCaseStepDefinition({
   ...findSimilarCasesStepCommonDefinition,
 });
 
-export const getCaseStepDefinition = createPublicStepDefinition({
+export const getCaseStepDefinition = createPublicCaseStepDefinition({
   ...getCaseStepCommonDefinition,
 });
 
-export const setCategoryStepDefinition = createPublicStepDefinition({
+export const setCategoryStepDefinition = createPublicCaseStepDefinition({
   ...setCategoryStepCommonDefinition,
 });
 
-export const setDescriptionStepDefinition = createPublicStepDefinition({
+export const setDescriptionStepDefinition = createPublicCaseStepDefinition({
   ...setDescriptionStepCommonDefinition,
 });
 
-export const setSeverityStepDefinition = createPublicStepDefinition({
+export const setSeverityStepDefinition = createPublicCaseStepDefinition({
   ...setSeverityStepCommonDefinition,
 });
 
-export const setStatusStepDefinition = createPublicStepDefinition({
+export const setStatusStepDefinition = createPublicCaseStepDefinition({
   ...setStatusStepCommonDefinition,
 });
 
-export const setTitleStepDefinition = createPublicStepDefinition({
+export const setTitleStepDefinition = createPublicCaseStepDefinition({
   ...setTitleStepCommonDefinition,
 });
 
-export const unassignCaseStepDefinition = createPublicStepDefinition({
+export const unassignCaseStepDefinition = createPublicCaseStepDefinition({
   ...unassignCaseStepCommonDefinition,
 });
 
-export const updateCaseStepDefinition = createPublicStepDefinition({
+export const updateCaseStepDefinition = createPublicCaseStepDefinition({
   ...updateCaseStepCommonDefinition,
 });
 
-export const updateCasesStepDefinition = createPublicStepDefinition({
+export const updateCasesStepDefinition = createPublicCaseStepDefinition({
   ...updateCasesStepCommonDefinition,
 });

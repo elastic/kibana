@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import type { SelectionOption } from '@kbn/workflows/types/latest';
 import { getCaseConfigure } from '../containers/configure/api';
 import { setCustomFieldStepCommonDefinition } from '../../common/workflows/steps/set_custom_field';
 import type { CasesConfigurationUICustomField } from '../../common/ui';
 import * as i18n from '../../common/workflows/translations';
+import { createPublicCaseStepDefinition } from './shared';
 
 const WORKFLOW_CASE_OWNER = 'securitySolution';
 
@@ -30,7 +30,7 @@ const getCustomFieldsForWorkflowOwner = async () => {
     .flatMap((configuration) => configuration.customFields ?? []);
 };
 
-export const setCustomFieldStepDefinition = createPublicStepDefinition({
+export const setCustomFieldStepDefinition = createPublicCaseStepDefinition({
   ...setCustomFieldStepCommonDefinition,
   editorHandlers: {
     input: {

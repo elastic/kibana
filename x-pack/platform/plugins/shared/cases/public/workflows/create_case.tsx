@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { createCaseStepCommonDefinition } from '../../common/workflows/steps/create_case';
 import { connectorTypesOptions } from './case_enum_options';
+import { createPublicCaseStepDefinition } from './shared';
 
-export const createCaseStepDefinition = createPublicStepDefinition({
+export const createCaseStepDefinition = createPublicCaseStepDefinition({
   ...createCaseStepCommonDefinition,
   editorHandlers: {
     config: {
