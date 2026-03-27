@@ -13,11 +13,10 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
-  loadWorkflowsThroughProductionPath,
+  loadWorkflowsFromConnectorSpec,
   getWorkflowYaml,
   type ProcessedWorkflow,
 } from '../../workflow.test_helpers';
-import { sharepointOnlineDataSource } from '../data_type';
 
 const CONNECTOR_NAME = 'fake-sharepoint-connector';
 const CONNECTOR_ID = 'fake-sp-connector-uuid';
@@ -38,8 +37,8 @@ describe('sharepoint online workflows (real ES)', () => {
   beforeAll(async () => {
     jest.setTimeout(5 * 60_000);
 
-    workflows = await loadWorkflowsThroughProductionPath(sharepointOnlineDataSource, {
-      stackConnectorId: CONNECTOR_NAME,
+    workflows = loadWorkflowsFromConnectorSpec('.sharepoint-online', {
+      connectorName: CONNECTOR_NAME,
     });
 
     esCluster = createTestEsCluster({
