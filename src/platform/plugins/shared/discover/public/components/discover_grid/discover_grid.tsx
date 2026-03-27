@@ -133,7 +133,6 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
           showTimeCol={props.showTimeCol}
           dataView={props.dataView}
           showKeyboardShortcuts={props.showKeyboardShortcuts}
-          renderDocumentView={props.renderDocumentView}
           externalCustomRenderers={props.externalCustomRenderers}
           onUpdateDataGridDensity={props.onUpdateDataGridDensity}
           setExpandedDoc={props.setExpandedDoc}
