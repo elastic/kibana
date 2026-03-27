@@ -262,6 +262,11 @@ async function processRow(
 }
 
 function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
+  // Check flat dotted key first (ES may store fields as flat keys)
+  if (path in obj) {
+    return obj[path];
+  }
+  // Fall back to nested object traversal
   return path.split('.').reduce<unknown>((acc, part) => {
     if (acc && typeof acc === 'object' && !Array.isArray(acc)) {
       return (acc as Record<string, unknown>)[part];
