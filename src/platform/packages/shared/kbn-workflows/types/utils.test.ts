@@ -25,6 +25,7 @@ import {
   isKibanaStep,
   isMergeStep,
   isParallelStep,
+  isSwitchStep,
   isTerminalStatus,
   isTriggerType,
   isWaitStep,
@@ -181,6 +182,7 @@ describe('types/utils', () => {
       ['isForeachStep', isForeachStep, 'foreach', 'while'],
       ['isWhileStep', isWhileStep, 'while', 'foreach'],
       ['isIfStep', isIfStep, 'if', 'foreach'],
+      ['isSwitchStep', isSwitchStep, 'switch', 'if'],
       ['isParallelStep', isParallelStep, 'parallel', 'merge'],
       ['isMergeStep', isMergeStep, 'merge', 'parallel'],
     ] as const)(

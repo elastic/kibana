@@ -61,6 +61,21 @@ describe('getStepByNameFromNestedSteps', () => {
     expect(getStepByNameFromNestedSteps(steps, 'in-else')).toBe(nested);
   });
 
+  it('prefers if.steps over if.else when names collide', () => {
+    const inThen = waitStep('dup');
+    const inElse = waitStep('dup');
+    const steps = [
+      {
+        name: 'check',
+        type: 'if',
+        condition: 'true',
+        steps: [inThen],
+        else: [inElse],
+      },
+    ] as unknown as Step[];
+    expect(getStepByNameFromNestedSteps(steps, 'dup')).toBe(inThen);
+  });
+
   it('finds step inside parallel.branches', () => {
     const nested = waitStep('in-branch');
     const steps = [
@@ -111,6 +126,21 @@ describe('getStepByNameFromNestedSteps', () => {
     expect(getStepByNameFromNestedSteps(steps, 'in-default')).toBe(nested);
   });
 
+  it('prefers switch.cases over switch.default when names collide', () => {
+    const inCase = waitStep('dup');
+    const inDefault = waitStep('dup');
+    const steps = [
+      {
+        name: 'sw',
+        type: 'switch',
+        expression: '{{ x }}',
+        cases: [{ match: 'a', steps: [inCase] }],
+        default: [inDefault],
+      },
+    ] as unknown as Step[];
+    expect(getStepByNameFromNestedSteps(steps, 'dup')).toBe(inCase);
+  });
+
   it('finds step inside merge.steps', () => {
     const nested = waitStep('in-merge');
     const steps = [
@@ -139,6 +169,42 @@ describe('getStepByNameFromNestedSteps', () => {
     expect(getStepByNameFromNestedSteps(steps, 'deep-target')).toBe(target);
   });
 
+  it('finds deeply nested step: parallel > switch > while > target', () => {
+    const target = waitStep('deep-target');
+    const steps = [
+      {
+        name: 'par',
+        type: 'parallel',
+        branches: [
+          {
+            name: 'b1',
+            steps: [
+              {
+                name: 'sw',
+                type: 'switch',
+                expression: '{{ x }}',
+                cases: [
+                  {
+                    match: 'a',
+                    steps: [
+                      {
+                        name: 'loop',
+                        type: 'while',
+                        condition: 'true',
+                        steps: [target],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ] as unknown as Step[];
+    expect(getStepByNameFromNestedSteps(steps, 'deep-target')).toBe(target);
+  });
+
   it('returns first found for duplicate step names (depth-first)', () => {
     const first = waitStep('dup');
     const second = waitStep('dup');
@@ -158,5 +224,18 @@ describe('getStepByNameFromNestedSteps', () => {
     const target = waitStep('');
     const steps = [target];
     expect(getStepByNameFromNestedSteps(steps, '')).toBe(target);
+  });
+
+  describe('handles malformed container steps without throwing', () => {
+    it.each([
+      ['foreach without steps', { name: 'loop', type: 'foreach', foreach: '{{ items }}' }],
+      ['while without steps', { name: 'loop', type: 'while', condition: 'true' }],
+      ['if without steps or else', { name: 'check', type: 'if', condition: 'true' }],
+      ['parallel without branches', { name: 'par', type: 'parallel' }],
+      ['merge without steps', { name: 'mrg', type: 'merge', sources: ['b1'] }],
+    ])('%s', (_label, shape) => {
+      const steps = [shape] as unknown as Step[];
+      expect(getStepByNameFromNestedSteps(steps, 'unreachable')).toBeNull();
+    });
   });
 });
