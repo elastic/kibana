@@ -7,7 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react';
 import * as reactRedux from 'react-redux';
-import { LocationHealthStatusValue } from '../../../../../../common/runtime_types';
+import { PrivateLocationHealthStatusValue } from '../../../../../../common/runtime_types';
 import { useMonitorIntegrationHealth } from './use_monitor_integration_health';
 
 jest.mock('react-redux', () => ({
@@ -36,7 +36,7 @@ const healthyMonitor = {
     {
       locationId: 'loc-1',
       locationLabel: 'Location 1',
-      status: LocationHealthStatusValue.Healthy,
+      status: PrivateLocationHealthStatusValue.Healthy,
       packagePolicyId: 'mon-1-loc-1',
     },
   ],
@@ -50,14 +50,14 @@ const unhealthyMonitor = {
     {
       locationId: 'loc-1',
       locationLabel: 'Location 1',
-      status: LocationHealthStatusValue.MissingPackagePolicy,
+      status: PrivateLocationHealthStatusValue.MissingPackagePolicy,
       packagePolicyId: 'mon-2-loc-1',
       reason: 'Missing',
     },
     {
       locationId: 'loc-2',
       locationLabel: 'Location 2',
-      status: LocationHealthStatusValue.Healthy,
+      status: PrivateLocationHealthStatusValue.Healthy,
       packagePolicyId: 'mon-2-loc-2',
     },
   ],
@@ -112,7 +112,7 @@ describe('useMonitorIntegrationHealth', () => {
       const statuses = result.current.getUnhealthyLocationStatuses('mon-2');
       expect(statuses).toHaveLength(1);
       expect(statuses[0].locationId).toBe('loc-1');
-      expect(statuses[0].status).toBe(LocationHealthStatusValue.MissingPackagePolicy);
+      expect(statuses[0].status).toBe(PrivateLocationHealthStatusValue.MissingPackagePolicy);
     });
 
     it('getUnhealthyMonitorCountForLocation counts monitors with unhealthy status at that location', () => {

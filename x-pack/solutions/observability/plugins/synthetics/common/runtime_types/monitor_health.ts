@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export enum LocationHealthStatusValue {
+export enum PrivateLocationHealthStatusValue {
   Healthy = 'healthy',
   MissingPackagePolicy = 'missing_package_policy',
   MissingAgentPolicy = 'missing_agent_policy',
@@ -17,7 +17,7 @@ export enum LocationHealthStatusValue {
 export interface PrivateLocationHealthStatus {
   locationId: string;
   locationLabel: string;
-  status: LocationHealthStatusValue;
+  status: PrivateLocationHealthStatusValue;
   packagePolicyId: string;
   agentPolicyId?: string;
   reason?: string;

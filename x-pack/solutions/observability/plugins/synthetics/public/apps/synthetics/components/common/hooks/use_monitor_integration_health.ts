@@ -12,7 +12,7 @@ import {
   getMonitorListPageStateWithDefaults,
   selectMonitorListState,
 } from '../../../state';
-import { ConfigKey, LocationHealthStatusValue } from '../../../../../../common/runtime_types';
+import { ConfigKey, PrivateLocationHealthStatusValue } from '../../../../../../common/runtime_types';
 import { fetchMonitorHealthAction, selectMonitorHealth } from '../../../state/monitor_health';
 import { resetMonitorAPI, resetMonitorBulkAPI } from '../../../state/monitor_management/api';
 import { useSyntheticsRefreshContext } from '../../../contexts';
@@ -24,7 +24,7 @@ export interface MonitorIntegrationStatus {
   locationLabel: string;
   packagePolicyId: string;
   agentPolicyId?: string;
-  status: LocationHealthStatusValue;
+  status: PrivateLocationHealthStatusValue;
   isUnhealthy: boolean;
 }
 
@@ -97,7 +97,7 @@ export const useMonitorIntegrationHealth = (
         packagePolicyId: loc.packagePolicyId,
         agentPolicyId: loc.agentPolicyId,
         status: loc.status,
-        isUnhealthy: loc.status !== LocationHealthStatusValue.Healthy,
+        isUnhealthy: loc.status !== PrivateLocationHealthStatusValue.Healthy,
       }));
       map.set(monitor.configId, locationStatuses);
     }

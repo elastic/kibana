@@ -10,7 +10,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   ConfigKey,
-  LocationHealthStatusValue,
+  PrivateLocationHealthStatusValue,
   type EncryptedSyntheticsMonitorAttributes,
   type PrivateLocationHealthStatus,
   type MonitorHealthError,
@@ -24,18 +24,18 @@ import type { SyntheticsServerSetup } from '../types';
 import type { MonitorConfigRepository } from './monitor_config_repository';
 
 const STATUS_REASONS: Record<
-  Exclude<LocationHealthStatusValue, LocationHealthStatusValue.Healthy>,
+  Exclude<PrivateLocationHealthStatusValue, PrivateLocationHealthStatusValue.Healthy>,
   string
 > = {
-  [LocationHealthStatusValue.MissingPackagePolicy]:
+  [PrivateLocationHealthStatusValue.MissingPackagePolicy]:
     'The Fleet package policy for this monitor and private location pair does not exist.',
-  [LocationHealthStatusValue.MissingAgentPolicy]:
+  [PrivateLocationHealthStatusValue.MissingAgentPolicy]:
     'The agent policy referenced by this private location no longer exists.',
-  [LocationHealthStatusValue.AgentPolicyMismatch]:
+  [PrivateLocationHealthStatusValue.AgentPolicyMismatch]:
     'The package policy exists but is attached to a different agent policy than expected.',
-  [LocationHealthStatusValue.MissingLocation]:
+  [PrivateLocationHealthStatusValue.MissingLocation]:
     'The monitor references a private location that no longer exists.',
-  [LocationHealthStatusValue.PackageNotInstalled]: 'The synthetics Fleet package is not installed.',
+  [PrivateLocationHealthStatusValue.PackageNotInstalled]: 'The synthetics Fleet package is not installed.',
 };
 
 interface FoundMonitor {
@@ -72,7 +72,7 @@ export class MonitorIntegrationHealthApi {
       return {
         monitors: this.buildAllLocationsWithStatus(
           foundMonitors,
-          LocationHealthStatusValue.PackageNotInstalled,
+          PrivateLocationHealthStatusValue.PackageNotInstalled,
           allPrivateLocationsMap,
           privateLocationAPI
         ),
@@ -117,7 +117,7 @@ export class MonitorIntegrationHealthApi {
           return MonitorIntegrationHealthApi.buildLocationStatus(
             loc.id,
             loc.label ?? loc.id,
-            LocationHealthStatusValue.MissingLocation,
+            PrivateLocationHealthStatusValue.MissingLocation,
             newFormatPolicyId
           );
         }
@@ -126,7 +126,7 @@ export class MonitorIntegrationHealthApi {
           return MonitorIntegrationHealthApi.buildLocationStatus(
             loc.id,
             existingPrivateLocation.label,
-            LocationHealthStatusValue.MissingAgentPolicy,
+            PrivateLocationHealthStatusValue.MissingAgentPolicy,
             newFormatPolicyId,
             existingPrivateLocation.agentPolicyId
           );
@@ -144,7 +144,7 @@ export class MonitorIntegrationHealthApi {
           return MonitorIntegrationHealthApi.buildLocationStatus(
             loc.id,
             existingPrivateLocation.label,
-            LocationHealthStatusValue.MissingPackagePolicy,
+            PrivateLocationHealthStatusValue.MissingPackagePolicy,
             newFormatPolicyId,
             existingPrivateLocation.agentPolicyId
           );
@@ -161,7 +161,7 @@ export class MonitorIntegrationHealthApi {
           return MonitorIntegrationHealthApi.buildLocationStatus(
             loc.id,
             existingPrivateLocation.label,
-            LocationHealthStatusValue.AgentPolicyMismatch,
+            PrivateLocationHealthStatusValue.AgentPolicyMismatch,
             resolvedPolicyId,
             expectedAgentPolicyId
           );
@@ -170,7 +170,7 @@ export class MonitorIntegrationHealthApi {
         return MonitorIntegrationHealthApi.buildLocationStatus(
           loc.id,
           existingPrivateLocation.label,
-          LocationHealthStatusValue.Healthy,
+          PrivateLocationHealthStatusValue.Healthy,
           resolvedPolicyId,
           expectedAgentPolicyId
         );
@@ -179,7 +179,7 @@ export class MonitorIntegrationHealthApi {
       return {
         configId: so.id,
         monitorName: so.attributes[ConfigKey.NAME],
-        isHealthy: locationStatuses.every((s) => s.status === LocationHealthStatusValue.Healthy),
+        isHealthy: locationStatuses.every((s) => s.status === PrivateLocationHealthStatusValue.Healthy),
         privateLocations: locationStatuses,
       };
     });
@@ -201,10 +201,13 @@ export class MonitorIntegrationHealthApi {
         foundMonitors.push({ id: monitorIds[i], so: result.value });
       } else {
         const reason = result.reason;
+        const statusCode = SavedObjectsErrorHelpers.isNotFoundError(reason)
+          ? 404
+          : (reason?.statusCode as number | undefined);
         errors.push({
           configId: monitorIds[i],
           message: reason?.message ?? 'Failed to fetch monitor',
-          ...(SavedObjectsErrorHelpers.isNotFoundError(reason) ? { statusCode: 404 } : {}),
+          ...(statusCode ? { statusCode } : {}),
         });
       }
     }
@@ -273,7 +276,7 @@ export class MonitorIntegrationHealthApi {
 
   private buildAllLocationsWithStatus(
     foundMonitors: FoundMonitor[],
-    status: LocationHealthStatusValue,
+    status: PrivateLocationHealthStatusValue,
     allPrivateLocationsMap: Map<string, PrivateLocationAttributes>,
     privateLocationAPI: SyntheticsPrivateLocation
   ): MonitorHealthStatus[] {
@@ -300,7 +303,7 @@ export class MonitorIntegrationHealthApi {
       return {
         configId: so.id,
         monitorName: so.attributes[ConfigKey.NAME],
-        isHealthy: locationStatuses.every((ls) => ls.status === LocationHealthStatusValue.Healthy),
+        isHealthy: locationStatuses.every((ls) => ls.status === PrivateLocationHealthStatusValue.Healthy),
         privateLocations: locationStatuses,
       };
     });
@@ -309,7 +312,7 @@ export class MonitorIntegrationHealthApi {
   private static buildLocationStatus(
     locationId: string,
     locationLabel: string,
-    status: LocationHealthStatusValue,
+    status: PrivateLocationHealthStatusValue,
     packagePolicyId: string,
     agentPolicyId?: string
   ): PrivateLocationHealthStatus {
@@ -319,7 +322,7 @@ export class MonitorIntegrationHealthApi {
       status,
       packagePolicyId,
       agentPolicyId,
-      ...(status !== LocationHealthStatusValue.Healthy ? { reason: STATUS_REASONS[status] } : {}),
+      ...(status !== PrivateLocationHealthStatusValue.Healthy ? { reason: STATUS_REASONS[status] } : {}),
     };
   }
 }
