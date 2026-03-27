@@ -769,6 +769,24 @@ export const labels = {
         defaultMessage: 'Instructions',
       }
     ),
+    instructionsViewModeLegend: i18n.translate(
+      'xpack.agentBuilder.agentSkills.instructionsViewModeLegend',
+      {
+        defaultMessage: 'Instructions view mode',
+      }
+    ),
+    instructionsViewRenderedLabel: i18n.translate(
+      'xpack.agentBuilder.agentSkills.instructionsViewRenderedLabel',
+      {
+        defaultMessage: 'Rendered',
+      }
+    ),
+    instructionsViewRawLabel: i18n.translate(
+      'xpack.agentBuilder.agentSkills.instructionsViewRawLabel',
+      {
+        defaultMessage: 'Raw',
+      }
+    ),
     noSkillSelectedMessage: i18n.translate(
       'xpack.agentBuilder.agentSkills.noSkillSelectedMessage',
       {
@@ -811,6 +829,9 @@ export const labels = {
         defaultMessage: 'Auto',
       }
     ),
+    readOnlyBadge: i18n.translate('xpack.agentBuilder.agentSkills.readOnlyBadge', {
+      defaultMessage: 'Read only',
+    }),
     autoIncludedBadgeLabel: i18n.translate(
       'xpack.agentBuilder.agentSkills.autoIncludedBadgeLabel',
       {
