@@ -15,7 +15,8 @@ export function useGetServiceBadgeHrefFromRouter(): WaterfallGetServiceBadgeHref
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
-    '/dependencies/operation'
+    '/dependencies/operation',
+    '/traces/explorer/waterfall' // TODO remove this url when the trace explorer url and its ftrs tests are removed [ADD issue link]
   );
 
   return useCallback(
