@@ -32,6 +32,7 @@ const CRITICALITY_LEVEL_HEADER = 'criticality_level';
 const REQUIRED_CSV_HEADERS: string[] = [TYPE_HEADER, CRITICALITY_LEVEL_HEADER];
 
 const MAX_ITERATIONS = 100;
+const LIST_PAGE_SIZE = 100;
 
 interface CsvUploadV2Opts {
   batchSize?: number;
@@ -67,6 +68,7 @@ type BulkUpdateObjectWithNdx = BulkUpdateObject & { ndx: number };
 interface ProcessRowOpts {
   entityStoreClient: EntityStoreCRUDClient;
   index: number;
+  logger: Logger;
   row: Record<string, unknown>;
 }
 
@@ -111,6 +113,7 @@ const updateEntityDocs = async ({ entityStoreClient, docs, results }: UpdateEnti
 const processRow = async ({
   entityStoreClient,
   index,
+  logger,
   row,
 }: ProcessRowOpts): Promise<ProcessRowResult> => {
   let type = row[TYPE_HEADER];
@@ -151,12 +154,17 @@ const processRow = async ({
   while (true) {
     if (iters >= MAX_ITERATIONS) {
       // failsafe to prevent infinite looping
+      logger.warn(
+        `Max iterations of ${MAX_ITERATIONS} reached while processing CSV row ${index}. ${
+          MAX_ITERATIONS * LIST_PAGE_SIZE
+        } entities will be updated for this row.`
+      );
       break;
     }
 
     const { entities, nextSearchAfter } = await entityStoreClient.listEntities({
       filter: queryFilters,
-      size: 100,
+      size: LIST_PAGE_SIZE,
       source: ['entity.id'],
       searchAfter,
     });
@@ -209,6 +217,7 @@ const processBatch = async ({
         ({ numEntitiesMatched, docs } = await processRow({
           entityStoreClient,
           index: currIndex,
+          logger,
           row,
         }));
       } catch (err) {

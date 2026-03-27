@@ -9,9 +9,7 @@ import expect from 'expect';
 import { getLatestEntitiesIndexName, hashEuid } from '@kbn/entity-store/server';
 import type { Entity } from '@kbn/entity-store/common';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import { EntityStoreUtils } from '../../utils';
-
-const ASSET_CRITICALITY_CSV_UPLOAD_V2_URL = '/internal/asset_criticality/upload_csv_v2';
+import { assetCriticalityRouteHelpersFactory, EntityStoreUtils } from '../../utils';
 
 const entities = [
   {
@@ -74,16 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const entityStoreUtils = EntityStoreUtils(getService);
 
-  const uploadCsvV2 = (csvContent: string) =>
-    supertest
-      .post(ASSET_CRITICALITY_CSV_UPLOAD_V2_URL)
-      .set('kbn-xsrf', 'xxxx')
-      .set('x-elastic-internal-origin', 'kibana')
-      .set('elastic-api-version', '1')
-      .attach('file', Buffer.from(csvContent), {
-        filename: 'test.csv',
-        contentType: 'text/csv',
-      });
+  const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
 
   describe('@ess @serverless @serverlessQA Asset Criticality CSV Upload V2', () => {
     before(async () => {
@@ -137,9 +126,8 @@ export default ({ getService }: FtrProviderContext) => {
         'host,no-such-host,,,high_impact', // should match 0
       ].join('\n');
 
-      const { body, status } = await uploadCsvV2(csv);
+      const { body } = await assetCriticalityRoutes.uploadCsvV2(csv);
 
-      expect(status).toBe(200);
       expect(body.total).toBe(5);
       expect(body.successful).toBe(3);
       expect(body.failed).toBe(1);
@@ -197,15 +185,72 @@ export default ({ getService }: FtrProviderContext) => {
       // Missing the required 'type' column
       let csv = ['host.name,criticality_level', 'csv-test-host,high_impact'].join('\n');
 
-      const { body: b1, status: s1 } = await uploadCsvV2(csv);
-      expect(s1).toBe(400);
+      const { body: b1 } = await assetCriticalityRoutes.uploadCsvV2(csv, {
+        expectStatusCode: 400,
+      });
       expect(b1.message).toBe('CSV header is missing required fields: type');
 
       // Missing the required 'type' column
       csv = ['type,host.name', 'host,csv-test-host'].join('\n');
-      const { body: b2, status: s2 } = await uploadCsvV2(csv);
-      expect(s2).toBe(400);
+      const { body: b2 } = await assetCriticalityRoutes.uploadCsvV2(csv, {
+        expectStatusCode: 400,
+      });
       expect(b2.message).toBe('CSV header is missing required fields: criticality_level');
+    });
+
+    it('should handle all errors in the csv', async () => {
+      const invalidRows = [
+        'type,host.name,host.hostname,host.domain,criticality_level',
+        'host,host-1,,,invalid_criticality', // invalid criticality
+        'invalid_entity_type,host-1,Host1,,low_impact', // invalid entity
+        'host,host-1,,,', // missing criticality
+        ',host-1,,,low_impact', // missing entity type
+        'host,host-1', // missing columns
+        'host,host-1,,,low_impact,extra_column', // extra column
+      ].join('\n');
+
+      const { body } = await assetCriticalityRoutes.uploadCsvV2(invalidRows);
+
+      expect(body.total).toBe(6);
+      expect(body.successful).toBe(0);
+      expect(body.failed).toBe(6);
+      expect(body.unmatched).toBe(0);
+
+      expect(body.items[0].status).toBe('failure');
+      expect(body.items[0].matchedEntities).toBe(0);
+      expect(body.items[0].error).toBe(
+        `Error processing row: Invalid criticality level: \"invalid_criticality\". Must be one of: low_impact, medium_impact, high_impact, extreme_impact`
+      );
+
+      expect(body.items[1].status).toBe('failure');
+      expect(body.items[1].matchedEntities).toBe(0);
+      expect(body.items[1].error).toBe(
+        `Error processing row: Invalid entity type: \"invalid_entity_type\". Must be one of: user, host, service, generic`
+      );
+
+      expect(body.items[2].status).toBe('failure');
+      expect(body.items[2].matchedEntities).toBe(0);
+      expect(body.items[2].error).toBe(
+        `Error processing row: Invalid criticality level: \"\". Must be one of: low_impact, medium_impact, high_impact, extreme_impact`
+      );
+
+      expect(body.items[3].status).toBe('failure');
+      expect(body.items[3].matchedEntities).toBe(0);
+      expect(body.items[3].error).toBe(
+        `Error processing row: Invalid entity type: \"\". Must be one of: user, host, service, generic`
+      );
+
+      expect(body.items[4].status).toBe('failure');
+      expect(body.items[4].matchedEntities).toBe(0);
+      expect(body.items[4].error).toBe(
+        `Error processing row: Invalid criticality level: \"undefined\". Must be one of: low_impact, medium_impact, high_impact, extreme_impact`
+      );
+
+      expect(body.items[5].status).toBe('failure');
+      expect(body.items[5].matchedEntities).toBe(0);
+      expect(body.items[5].error).toBe(
+        `Error processing row: x_content_parse_exception\n\tCaused by:\n\t\tparsing_exception: [term] query does not support array of values\n\tRoot causes:\n\t\tparsing_exception: [term] query does not support array of values`
+      );
     });
   });
 };

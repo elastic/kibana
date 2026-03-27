@@ -10,6 +10,12 @@ paths:
       x-codegen-enabled: true
       operationId: InternalUploadAssetCriticalityV2Csv
       summary: Internal API which Uploads a CSV file containing asset criticality data for the V2 entity store.
+      description: |
+        Uploads a CSV file to assign asset criticality.
+
+        CSV must contain header row with "type" and "criticality_level" columns, in addition to ECS fields used to match entities in the entity store (e.g. "host.name", "user.id", "user.email").
+
+        Each row will match up to 10,000 entities.
       requestBody:
         required: true
         content:

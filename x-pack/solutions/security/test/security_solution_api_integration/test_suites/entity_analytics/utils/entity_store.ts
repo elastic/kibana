@@ -266,22 +266,19 @@ export const EntityStoreUtils = (
   const installEntityStoreV2 = async (body: any = { entityTypes: ['user', 'host'] }) => {
     const supertest = getService('supertest');
 
-    const res = enableEntityStoreV2(body);
+    const res = await enableEntityStoreV2(body);
 
     let maintainersUrl = '/internal/security/entity_store/entity_maintainers/init?apiVersion=2';
     if (namespace !== 'default') {
       maintainersUrl = `/s/${namespace}${maintainersUrl}`;
     }
 
-    await retry.try(async () => {
-      await supertest
-        .post(maintainersUrl)
-        .set('kbn-xsrf', 'true')
-        .set('x-elastic-internal-origin', 'Kibana')
-        .send({})
-        .expect(200);
-    });
-
+    await supertest
+      .post(maintainersUrl)
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .send({})
+      .expect(200);
     return res;
   };
 
