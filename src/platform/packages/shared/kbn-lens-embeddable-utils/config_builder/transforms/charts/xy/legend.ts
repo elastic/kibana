@@ -118,15 +118,6 @@ function isOutsideListLegendLayoutState(legend: XYVisualizationState['legend']) 
   );
 }
 
-function isVerticalPosition(legend: XYState['legend']): boolean {
-  return Boolean(
-    legend &&
-      legend.placement !== 'inside' &&
-      'position' in legend &&
-      (legend.position === 'left' || legend.position === 'right')
-  );
-}
-
 function getLegendTruncation(legend: XYState['legend']): {
   max_lines?: number;
   max_pixels?: number;
@@ -166,19 +157,13 @@ export function convertLegendToStateFormat(legend: XYState['legend']): {
       : {
           position: legend?.position ?? DEFAULT_LEGEND_POSITON,
           legendSize: outsideLegendSize ? getLegendSize(outsideLegendSize) : undefined,
-          ...(isVerticalPosition(legend)
+          ...(isListLegendLayout
             ? {
-                ...(!isListLegendLayout && truncateMaxLines ? { maxLines: truncateMaxLines } : {}),
+                layout: LegendLayout.List,
+                ...(truncateMaxPixels != null ? { maxPixels: truncateMaxPixels } : {}),
               }
             : {
-                ...(isListLegendLayout
-                  ? {
-                      layout: LegendLayout.List,
-                      ...(truncateMaxPixels != null ? { maxPixels: truncateMaxPixels } : {}),
-                    }
-                  : truncateMaxLines
-                  ? { maxLines: truncateMaxLines }
-                  : {}),
+                ...(truncateMaxLines ? { maxLines: truncateMaxLines } : {}),
               }),
         }),
   };
@@ -279,8 +264,8 @@ function getApiLegendTruncate(
   if (!shouldTruncate) return {};
 
   return {
-    max_lines: !!maxLines ? maxLines : undefined,
-    max_pixels: !!maxPixels ? maxPixels : undefined,
+    max_lines: maxLines ?? 1,
+    max_pixels: maxPixels ?? 250,
   };
 }
 

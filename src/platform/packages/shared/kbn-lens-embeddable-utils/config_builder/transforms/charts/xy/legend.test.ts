@@ -10,36 +10,31 @@
 import type { XYState } from '../../../schema';
 import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
 import { LegendLayout } from '@kbn/chart-expressions-common';
+import type { XYVisualizationState } from '@kbn/lens-common';
 
 describe('XY Legend Transforms', () => {
   type ApiLegend = NonNullable<XYState['legend']>;
-  type StateLegend = ReturnType<typeof convertLegendToStateFormat>['legend'];
+  type StateLegend = XYVisualizationState['legend'];
 
-  const roundTripLegend = (apiLegend: ApiLegend) => {
-    const { legend: stateLegend } = convertLegendToStateFormat(apiLegend);
+  const roundTripLegend = (stateLegend: StateLegend) => {
     const apiResult = convertLegendToAPIFormat(stateLegend) as { legend?: ApiLegend };
     if (!apiResult.legend) {
       throw new Error('Expected legend to be returned from convertLegendToAPIFormat');
     }
-    return { stateLegend, apiLegend: apiResult.legend };
+    const { legend: nextStateLegend } = convertLegendToStateFormat(apiResult.legend);
+    return { stateLegend: nextStateLegend, apiLegend: apiResult.legend };
   };
 
   interface LegendCase {
     readonly title: string;
+    readonly state: StateLegend;
     readonly api: ApiLegend;
-    readonly state: Partial<StateLegend>;
     readonly forbiddenApiPaths?: readonly string[];
   }
 
   const cases: readonly LegendCase[] = [
     {
       title: 'outside bottom list legend persists truncate.max_pixels',
-      api: {
-        visibility: 'visible',
-        placement: 'outside',
-        position: 'bottom',
-        layout: { type: 'list', truncate: { max_pixels: 320 } },
-      },
       state: {
         isVisible: true,
         shouldTruncate: true,
@@ -47,61 +42,65 @@ describe('XY Legend Transforms', () => {
         layout: LegendLayout.List,
         maxPixels: 320,
       },
-      forbiddenApiPaths: ['layout.truncate.max_lines'],
-    },
-    {
-      title: 'outside top list legend persists truncate.max_pixels',
       api: {
         visibility: 'visible',
         placement: 'outside',
-        position: 'top',
-        layout: { type: 'list', truncate: { max_pixels: 280 } },
+        position: 'bottom',
+        layout: { type: 'list', truncate: { max_pixels: 320 } },
       },
+      forbiddenApiPaths: ['layout.truncate.max_lines'],
+    },
+    {
+      title: 'outside top list legend persists default truncate.max_pixels = 250',
       state: {
         isVisible: true,
         shouldTruncate: true,
         position: 'top',
         layout: LegendLayout.List,
-        maxPixels: 280,
+      },
+      api: {
+        visibility: 'visible',
+        placement: 'outside',
+        position: 'top',
+        layout: { type: 'list', truncate: { max_pixels: 250 } },
       },
       forbiddenApiPaths: ['layout.truncate.max_lines'],
     },
     {
-      title: 'outside right grid legend persists truncate.max_lines (no max_pixels)',
-      api: {
-        visibility: 'visible',
-        placement: 'outside',
-        position: 'right',
-        layout: { type: 'grid', truncate: { max_lines: 2 } },
-      },
+      title: 'outside right grid legend persists truncate.max_lines',
       state: {
         isVisible: true,
         position: 'right',
         shouldTruncate: true,
         maxLines: 2,
       },
-      forbiddenApiPaths: ['layout.truncate.max_pixels'],
-    },
-    {
-      title: 'outside left grid legend persists truncate.max_lines (no max_pixels)',
       api: {
         visibility: 'visible',
         placement: 'outside',
-        position: 'left',
-        layout: { type: 'grid', truncate: { max_lines: 3 } },
+        position: 'right',
+        layout: { type: 'grid', truncate: { max_lines: 2 } },
       },
+      forbiddenApiPaths: ['layout.truncate.max_pixels'],
+    },
+    {
+      title: 'outside left grid legend persists default truncate.max_lines',
       state: {
         isVisible: true,
         position: 'left',
         shouldTruncate: true,
-        maxLines: 3,
+      },
+      api: {
+        visibility: 'visible',
+        placement: 'outside',
+        position: 'left',
+        layout: { type: 'grid', truncate: { max_lines: 1 } },
       },
       forbiddenApiPaths: ['layout.truncate.max_pixels'],
     },
   ];
 
-  it.each(cases)('$title (API -> State -> API)', ({ api, state, forbiddenApiPaths }) => {
-    const { stateLegend, apiLegend } = roundTripLegend(api);
+  it.each(cases)('$title (State -> API -> State)', ({ api, state, forbiddenApiPaths }) => {
+    const { stateLegend, apiLegend } = roundTripLegend(state);
 
     expect(stateLegend).toMatchObject(state);
 
