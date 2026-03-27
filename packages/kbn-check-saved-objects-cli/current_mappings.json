@@ -329,8 +329,7 @@
           "owner": {
             "type": "keyword"
           }
-        },
-        "type": "object"
+        }
       },
       "createdAt": {
         "type": "date"
@@ -342,12 +341,6 @@
         "type": "keyword"
       },
       "description": {
-        "fields": {
-          "keyword": {
-            "ignore_above": 256,
-            "type": "keyword"
-          }
-        },
         "type": "text"
       },
       "destinations": {
@@ -358,8 +351,7 @@
           "type": {
             "type": "keyword"
           }
-        },
-        "type": "object"
+        }
       },
       "enabled": {
         "type": "boolean"
@@ -368,13 +360,7 @@
         "type": "keyword"
       },
       "name": {
-        "fields": {
-          "keyword": {
-            "ignore_above": 256,
-            "type": "keyword"
-          }
-        },
-        "type": "text"
+        "type": "keyword"
       },
       "snoozedUntil": {
         "type": "date"
@@ -394,18 +380,8 @@
     "dynamic": false,
     "properties": {
       "artifacts": {
-        "properties": {
-          "id": {
-            "type": "keyword"
-          },
-          "type": {
-            "type": "keyword"
-          },
-          "value": {
-            "type": "keyword"
-          }
-        },
-        "type": "nested"
+        "enabled": false,
+        "type": "object"
       },
       "createdAt": {
         "type": "date"
@@ -457,12 +433,31 @@
         }
       },
       "no_data": {
-        "enabled": false,
-        "type": "object"
+        "properties": {
+          "behavior": {
+            "type": "keyword"
+          },
+          "timeframe": {
+            "type": "keyword"
+          }
+        }
       },
       "recovery_policy": {
-        "enabled": false,
-        "type": "object"
+        "properties": {
+          "query": {
+            "properties": {
+              "base": {
+                "type": "text"
+              },
+              "condition": {
+                "type": "text"
+              }
+            }
+          },
+          "type": {
+            "type": "keyword"
+          }
+        }
       },
       "schedule": {
         "properties": {

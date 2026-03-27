@@ -39,23 +39,30 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
         },
       },
     },
-    // Objects that don't need to be searched/filtered are stored opaque.
-    recovery_policy: { type: 'object', enabled: false },
+    recovery_policy: {
+      properties: {
+        type: { type: 'keyword' },
+        query: {
+          properties: {
+            base: { type: 'text' },
+            condition: { type: 'text' },
+          },
+        },
+      },
+    },
     state_transition: { type: 'object', enabled: false },
     grouping: {
       properties: {
         fields: { type: 'keyword' },
       },
     },
-    no_data: { type: 'object', enabled: false },
-    artifacts: {
-      type: 'nested',
+    no_data: {
       properties: {
-        id: { type: 'keyword' },
-        type: { type: 'keyword' },
-        value: { type: 'keyword' },
+        behavior: { type: 'keyword' },
+        timeframe: { type: 'keyword' },
       },
     },
+    artifacts: { type: 'object', enabled: false },
 
     enabled: { type: 'boolean' },
     createdBy: { type: 'keyword' },

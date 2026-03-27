@@ -165,8 +165,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       describe('search', () => {
-        it('should search by name', async () => {
-          const response = await listPolicies(roleAuthc, { search: 'Alpha' });
+        it('should search by name using prefix wildcard', async () => {
+          const response = await listPolicies(roleAuthc, { search: 'Alpha*' });
 
           expect(response.status).to.be(200);
           expect(response.body.total).to.be(1);
@@ -189,7 +189,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(response.body.items[0].name).to.be('Gamma Policy');
         });
 
-        it('should return all matching results for partial match', async () => {
+        it('should return all matching results for partial match in description', async () => {
           const response = await listPolicies(roleAuthc, { search: 'Monitors' });
 
           expect(response.status).to.be(200);
@@ -333,16 +333,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         it('should combine search with pagination', async () => {
           const response = await listPolicies(roleAuthc, {
-            search: 'Policy',
-            perPage: 2,
+            search: 'Monitors',
+            perPage: 1,
             page: 1,
           });
 
           expect(response.status).to.be(200);
-          expect(response.body.total).to.be(3);
-          expect(response.body.items.length).to.be(2);
+          expect(response.body.total).to.be(2);
+          expect(response.body.items.length).to.be(1);
           expect(response.body.page).to.be(1);
-          expect(response.body.perPage).to.be(2);
+          expect(response.body.perPage).to.be(1);
         });
       });
     });

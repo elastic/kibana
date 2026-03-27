@@ -96,6 +96,14 @@ export class AppMenuRegistry {
   }
 
   /**
+   * Remove a menu item by ID.
+   * @param id The ID of the menu item to remove
+   */
+  public deleteItem(id: string): void {
+    this.items.delete(id);
+  }
+
+  /**
    * Get a menu item by ID.
    * @param id The ID of the menu item to retrieve
    * @returns The menu item or undefined if not found

@@ -127,11 +127,6 @@ export const useTopNavLinks = ({
     const inspectAppMenuItem = getInspectAppMenuItem({ onOpenInspector });
     items.push(inspectAppMenuItem);
 
-    const showLegacyAlerts =
-      services.triggersActionsUi &&
-      discoverParams.authorizedRuleTypeIds.length &&
-      (!canCreateESQLRule || !discoverParams.isEsqlMode);
-
     if (showCreateRuleV2) {
       const createRuleV2 = getCreateRuleMenuItem({
         discoverParams,
@@ -142,7 +137,7 @@ export const useTopNavLinks = ({
       items.push(createRuleV2);
     }
 
-    if (showLegacyAlerts) {
+    if (services.triggersActionsUi && discoverParams.authorizedRuleTypeIds.length) {
       const alertsAppMenuItem = getAlertsAppMenuItem({
         discoverParams,
         services,
@@ -233,7 +228,6 @@ export const useTopNavLinks = ({
     hasUnsavedChanges,
     totalHitsState,
     intl,
-    canCreateESQLRule,
     showCreateRuleV2,
   ]);
 
@@ -247,20 +241,6 @@ export const useTopNavLinks = ({
     const newAppMenuRegistry = new AppMenuRegistry();
 
     newAppMenuRegistry.registerItems(appMenuItems);
-
-    // Register legacyRules as a top-level item when v2 rules are enabled
-    // This allows profile extensions to add items to it via registerPopoverItem
-    // The items are then merged into the createRule menu's legacy submenu
-    if (showCreateRuleV2) {
-      newAppMenuRegistry.registerItem({
-        id: AppMenuActionId.legacyRules,
-        label: '', // Not displayed directly - items are pulled into the v2 menu's submenu
-        iconType: 'empty',
-        order: Number.MAX_SAFE_INTEGER,
-        hidden: 'all', // Hide at all breakpoints since this is just a container for registry items
-        items: [],
-      });
-    }
 
     // Only show the ES|QL button in classic mode (not in ES|QL mode)
     // The "Switch to Classic" option is now in the tab menu when in ES|QL mode
@@ -404,14 +384,16 @@ export const useTopNavLinks = ({
 
     const registry = getAppMenu(discoverParams).appMenuRegistry(newAppMenuRegistry);
 
-    // Merge items from legacyRules into the createRule menu's legacy-rules submenu
-    // This allows profile extensions to add rule types to the v2 rules menu
+    // When v2 rules are enabled, profile extensions have registered their rule types
+    // into the alerts menu as usual. Move those items into the v2 createRule menu's
+    // legacy-rules submenu, then remove the alerts menu since v2 replaces it.
     if (showCreateRuleV2) {
       registry.mergePopoverItems(
         AppMenuActionId.createRule,
         'legacy-rules',
-        AppMenuActionId.legacyRules
+        AppMenuActionId.alerts
       );
+      registry.deleteItem(AppMenuActionId.alerts);
     }
 
     return registry;
