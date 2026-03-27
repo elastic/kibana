@@ -33,6 +33,8 @@ dependsOn:
   - '@kbn/core-ui-settings-browser'
   - '@kbn/apm-types'
   - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/core-http-browser'
+  - '@kbn/esql-utils'
 tags:
   - shared-common
   - package

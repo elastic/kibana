@@ -24,11 +24,13 @@ export const createNavigationTree = ({
   overviewAvailable = true,
   isCasesAvailable = true,
   showAiAssistant = true,
+  showAlertingV2 = false,
 }: {
   streamsAvailable?: boolean;
   overviewAvailable?: boolean;
   isCasesAvailable?: boolean;
   showAiAssistant?: boolean;
+  showAlertingV2?: boolean;
 }): NavigationTreeDefinition => {
   return {
     body: [
@@ -63,12 +65,29 @@ export const createNavigationTree = ({
       {
         link: 'workflows',
       },
-      {
-        link: 'observability-overview:alerts',
-        icon: 'warning',
-        getIsActive: ({ pathNameSerialized, prepend }) =>
-          pathNameSerialized.startsWith(prepend('/app/observability/alerts')),
-      },
+      showAlertingV2
+        ? {
+            id: 'alerting',
+            renderAs: 'panelOpener',
+            title: i18n.translate('xpack.serverlessObservability.nav.alerts', {
+              defaultMessage: 'Alerts',
+            }),
+            icon: 'warning',
+            children: [
+              {
+                link: 'observability-overview:alerts',
+              },
+              {
+                link: 'observability-overview:alerts_v2',
+              },
+            ],
+          }
+        : {
+            link: 'observability-overview:alerts',
+            icon: 'warning',
+            getIsActive: ({ pathNameSerialized, prepend }) =>
+              pathNameSerialized.startsWith(prepend('/app/observability/alerts')),
+          },
       ...filterForFeatureAvailability(
         {
           link: 'observability-overview:cases' as const,
