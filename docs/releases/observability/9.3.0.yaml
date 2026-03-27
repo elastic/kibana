@@ -1,6 +1,5 @@
 ﻿products:
 - product: observability
-  target: 9.3.0
   repo: kibana
   owner: elastic
 entries:
@@ -54,18 +53,6 @@ entries:
   - https://github.com/elastic/kibana/pull/241026
   issues:
   - https://github.com/elastic/kibana/issues/235936
-- file:
-    name: 249379.yaml
-    checksum: 6d813cb8b140add48659985f4430a45a0e55c462
-  type: enhancement
-  title: 'Preconfigured Connectors: adds new connectors'
-  products:
-  - product: kibana
-  areas:
-  - Machine learning
-  - Data ingestion and Fleet
-  prs:
-  - https://github.com/elastic/kibana/pull/249379
 - file:
     name: 249973.yaml
     checksum: a9b47755ba305010e3617187be76e08653edaf0b
@@ -154,19 +141,6 @@ entries:
   issues:
   - https://github.com/elastic/kibana/issues/237480
 - file:
-    name: 242105.yaml
-    checksum: 1193e51536f0f06118084132a2b026b59f23dfa9
-  type: feature
-  title: Enable by default
-  products:
-  - product: kibana
-  areas:
-  - Discover and ES|QL
-  prs:
-  - https://github.com/elastic/kibana/pull/242105
-  issues:
-  - https://github.com/elastic/kibana/issues/236543
-- file:
     name: 245025.yaml
     checksum: dde3690db76bc0d98ca823af9cf965419bfb76c5
   type: feature
@@ -193,19 +167,6 @@ entries:
   - https://github.com/elastic/kibana/pull/238811
   issues:
   - https://github.com/elastic/kibana/issues/238809
-- file:
-    name: 239555.yaml
-    checksum: 0900651199095caacdbd7c2af1822e3e06d42d80
-  type: bug-fix
-  title: 'GenAI Settings: Reflect selected `AI Assistants Visibility` value from header selector on the Settings page'
-  products:
-  - product: kibana
-  areas:
-  - Machine learning
-  prs:
-  - https://github.com/elastic/kibana/pull/239555
-  issues:
-  - https://github.com/elastic/kibana/issues/236804
 - file:
     name: 243574.yaml
     checksum: 36b22be9fae9da9e026aa4bf3f6a4f1c0ad1e8dc
@@ -400,18 +361,6 @@ entries:
   issues:
   - https://github.com/elastic/kibana/issues/240349
 - file:
-    name: 242791.yaml
-    checksum: 2784a1e753393c2671f276108433aa33cf7ec43e
-  type: enhancement
-  title: 'Preconfigured Connectors: adds new connectors and updates existing one'
-  products:
-  - product: kibana
-  areas:
-  - Machine learning
-  - Data ingestion and Fleet
-  prs:
-  - https://github.com/elastic/kibana/pull/242791
-- file:
     name: 249776.yaml
     checksum: 1f8bf2de7c211742410f6c5923ad2af450073ed7
   type: bug-fix
@@ -533,19 +482,6 @@ entries:
   - https://github.com/elastic/kibana/pull/246088
   issues:
   - https://github.com/elastic/kibana/issues/245866
-- file:
-    name: 241921.yaml
-    checksum: b1b7fcb52e108705906411e245beb834041908fa
-  type: enhancement
-  title: Supports subqueries in our apps
-  products:
-  - product: kibana
-  areas:
-  - Discover and ES|QL
-  prs:
-  - https://github.com/elastic/kibana/pull/241921
-  issues:
-  - https://github.com/elastic/kibana/issues/237401
 - file:
     name: 244559.yaml
     checksum: db6c44a9bdae01b92b39ca13985be311b7b7f5fb
@@ -677,17 +613,6 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/242761
 - file:
-    name: 244532.yaml
-    checksum: e2253e8ded7c34967048ba6cbb56407870e1c015
-  type: feature
-  title: 'Agent Builder: Opt-in flow'
-  products:
-  - product: kibana
-  areas:
-  - Machine learning
-  prs:
-  - https://github.com/elastic/kibana/pull/244532
-- file:
     name: 238326.yaml
     checksum: 5ebd29b3cf2f7c353b8d4d0749ea976110d10a08
   type: bug-fix
@@ -714,17 +639,6 @@ entries:
   issues:
   - https://github.com/elastic/kibana/issues/238846
 - file:
-    name: 240992.yaml
-    checksum: de291c4c24a27863b0ddb762ca8d68213f3a64f5
-  type: bug-fix
-  title: Align "Members" link across solutions
-  products:
-  - product: kibana
-  areas:
-  - Global experience
-  prs:
-  - https://github.com/elastic/kibana/pull/240992
-- file:
     name: 244251.yaml
     checksum: a3ff06387902f21845caa2140a729e56a22464ae
   type: enhancement
@@ -741,19 +655,6 @@ entries:
   issues:
   - https://github.com/elastic/kibana/issues/240377
   - https://github.com/elastic/kibana/issues/240376
-- file:
-    name: 242452.yaml
-    checksum: 4436d53091d70378d1d0fb3ab522a2f62f574107
-  type: bug-fix
-  title: Fix squished Apple icon on Auto Detect flow cards
-  products:
-  - product: kibana
-  areas:
-  - Data ingestion and Fleet
-  prs:
-  - https://github.com/elastic/kibana/pull/242452
-  issues:
-  - https://github.com/elastic/kibana/issues/242234
 - file:
     name: 237504.yaml
     checksum: c6543a1559065ea4406675541a84e201d8e21607

@@ -27,19 +27,6 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/246794
 - file:
-    name: 236992.yaml
-    checksum: 577d9b00983bfdbe17ba53fc834266a6b4002457
-  type: enhancement
-  title: Add CSPM Cloud Connector Usage Statistics Collection
-  products:
-  - product: cloud-serverless
-  areas:
-  - Cloud security
-  prs:
-  - https://github.com/elastic/kibana/pull/236992
-  issues:
-  - https://github.com/elastic/security-team/issues/14106
-- file:
     name: 247351.yaml
     checksum: c2a46d30365238cd3b4f714db4b25e00bed8fe8b
   type: bug-fix
@@ -50,17 +37,6 @@ entries:
   - Investigations
   prs:
   - https://github.com/elastic/kibana/pull/247351
-- file:
-    name: 236906.yaml
-    checksum: 838617166c44338df393a8c5bbe3aed73326c5de
-  type: enhancement
-  title: replace node label and detail labels tooltips with popovers
-  products:
-  - product: cloud-serverless
-  areas:
-  - Cloud security
-  prs:
-  - https://github.com/elastic/kibana/pull/236906
 - file:
     name: 242313.yaml
     checksum: 5a2cbb33f8a5ba2391585d3c92c98a323cc079af
@@ -179,19 +155,6 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/243574
 - file:
-    name: 242365.yaml
-    checksum: 37ab46edd2f0a2f643a8a96038d9c76fefc3db41
-  type: bug-fix
-  title: add encoding of cloudFormation url params
-  products:
-  - product: kibana
-  - product: cloud-serverless
-  areas:
-  - Data ingestion and Fleet
-  - Cloud security
-  prs:
-  - https://github.com/elastic/kibana/pull/242365
-- file:
     name: 241153.yaml
     checksum: be89336fcb3237ecff54beb45f141e0dd61ff694
   type: bug-fix
@@ -202,17 +165,6 @@ entries:
   - Entity analytics
   prs:
   - https://github.com/elastic/kibana/pull/241153
-- file:
-    name: 239661.yaml
-    checksum: 05f78931ffa2e8f0beeca2ce905460c792811b5b
-  type: bug-fix
-  title: generic entity popover showing entity EngineMetadata.type is missing
-  products:
-  - product: cloud-serverless
-  areas:
-  - Cloud security
-  prs:
-  - https://github.com/elastic/kibana/pull/239661
 - file:
     name: 245002.yaml
     checksum: 58abda822c16fdeb03431ce5dcd36727a1f10b78
@@ -453,17 +405,6 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/242441
 - file:
-    name: 241390.yaml
-    checksum: e703d0b6cead84e51babb0224625f3e9e45ab628
-  type: bug-fix
-  title: 'Fix Agent-Based Failing to produce data '
-  products:
-  - product: cloud-serverless
-  areas:
-  - Cloud security
-  prs:
-  - https://github.com/elastic/kibana/pull/241390
-- file:
     name: 246005.yaml
     checksum: 4ac65c2f146bb6a46a37ff7ae3f557e056e08bf5
   type: feature
@@ -564,17 +505,6 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/247617
 - file:
-    name: 243711.yaml
-    checksum: f9d1be48c865475a00b675dd72e11e2d752c608c
-  type: enhancement
-  title: align graph visualization with ECS entity namespace fields for actor and target identification
-  products:
-  - product: cloud-serverless
-  areas:
-  - Cloud security
-  prs:
-  - https://github.com/elastic/kibana/pull/243711
-- file:
     name: 237796.yaml
     checksum: 58b9a41fbec237488be7d9e44ea18ce0b5e3478e
   type: bug-fix
@@ -611,19 +541,6 @@ entries:
   - Detection rules and alerts
   prs:
   - https://github.com/elastic/kibana/pull/239634
-- file:
-    name: 238547.yaml
-    checksum: 9b098aca93fc0ddaac51785d9f66c1405c317cf7
-  type: enhancement
-  title: CDR Data View versioning and migration logic
-  products:
-  - product: cloud-serverless
-  areas:
-  - Cloud security
-  prs:
-  - https://github.com/elastic/kibana/pull/238547
-  issues:
-  - https://github.com/elastic/kibana/issues/234835
 - file:
     name: 241022.yaml
     checksum: 860ff7b0b05ce0b94919113bd98d0be19047e551
@@ -780,17 +697,6 @@ entries:
   - Detection rules and alerts
   prs:
   - https://github.com/elastic/kibana/pull/248259
-- file:
-    name: 242592.yaml
-    checksum: 28d7a90f77fdbf1024d3690ba524210c766fea45
-  type: enhancement
-  title: 'fix csp-agnostic regressions '
-  products:
-  - product: cloud-serverless
-  areas:
-  - Cloud security
-  prs:
-  - https://github.com/elastic/kibana/pull/242592
 - file:
     name: 240517.yaml
     checksum: 1737e744dc4fb9de65ff4995a185622708e74fdd
@@ -1030,17 +936,6 @@ entries:
   prs:
   - https://github.com/elastic/kibana/pull/239453
 - file:
-    name: 238038.yaml
-    checksum: 2259b37440c031de060cefc709833ee457cd0ab8
-  type: bug-fix
-  title: fix graph not rendering when switching tabs or refreshing the page
-  products:
-  - product: cloud-serverless
-  areas:
-  - Cloud security
-  prs:
-  - https://github.com/elastic/kibana/pull/238038
-- file:
     name: 237436.yaml
     checksum: 6859aa77e297fccaa7188e1aedde3b3d72dd7deb
   type: enhancement
@@ -1051,20 +946,6 @@ entries:
   - Entity analytics
   prs:
   - https://github.com/elastic/kibana/pull/237436
-- file:
-    name: 240272.yaml
-    checksum: 33566fe3c8b0467ae53e5386727829a772451d1c
-  type: enhancement
-  title: Create Cloud Connector usage collector in Asset Inventory
-  products:
-  - product: cloud-serverless
-  areas:
-  - Cloud security
-  prs:
-  - https://github.com/elastic/kibana/pull/240272
-  issues:
-  - https://github.com/elastic/security-team/issues/14116
-  - https://github.com/elastic/security-team/issues/11085
 - file:
     name: 245532.yaml
     checksum: 20f63b7de81e9e7b6ad196498d09ae7b13a3593b

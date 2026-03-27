@@ -41,7 +41,7 @@ extract:
   # Auto-extract issues from PR body (default: true)
   # Looks for patterns like "Fixes #123", "Closes #456", etc.
   issues: true
-  # strip_title_prefix: true
+  strip_title_prefix: true
 
 
 # Available lifecycle values (strongly typed: preview, beta, ga)
@@ -201,6 +201,7 @@ pivot:
       - "Team:Presentation"
       - "Team:Reporting Services"
       - "Team:ResponseOps"
+      - "Team:Search"
       - "Team:Security"
       - "Team:SharedUX"
       - "Team:Visualizations"
@@ -266,72 +267,61 @@ rules:
   #       exclude: "ILM"
 
   # Bundle — filtering applied during 'changelog bundle' and 'changelog gh-release'.
-  # Applied after the primary filter (--prs, --issues, --all, ...) has collected changelogs.
-  #
-  # Product filtering:
-  #   Skipped when the primary filter is already product-based
-  #   (--input-products option or a profile with bundle.profiles.<name>.products configured).
-  #   exclude_products / include_products (string or list) — cannot specify both.
-  #   match_products inherits from rules.match if not specified.
-  #
-  # Type and area filtering (replaces rules.publish):
-  #   Always applied, regardless of the primary filter.
-  #   exclude_types / include_types (string or list) — cannot specify both.
-  #   exclude_areas / include_areas (string or list) — cannot specify both.
-  #   match_areas inherits from rules.match if not specified.
-  #
-  # Per-product overrides:
-  #   products:
-  #     '<id>': override type/area filters for that product
-  #
-  #   When an entry belongs to multiple products, the applicable rule is resolved using
-  #   intersection + alphabetical first-match. See docs/contribute/changelog.md for details.
-  #
   bundle:
-  #   # match_products: any
+  #  # Global rules
+    # match_products: any
   #   exclude_products: "cloud-enterprise"
-  #   # Or include only certain products:
-  #   # include_products:
-  #   #   - cloud-serverless
-  #   #   - cloud-hosted
+  #   # Or include only changelogs with this list of products:
+    # match_products: any
+    # exclude_products:
+    #   - observability
   #   # Type/area filtering:
-  #   # exclude_types: "deprecation, known-issue"
-  #   # exclude_areas:
-  #   #   - "Internal"
-  #   # Per-product overrides:
-      products:
+    # exclude_types: "docs"
+    # exclude_areas: "AI for observability"
+  #     - "Internal"
+  #   # Per-product rules:
+    products:
         # 'cloud-serverless':
           # match_areas: any
           # include_areas:
-          #   - "Cloud security"
+        #   #   - "Cloud security"
         'kibana':
-          match_products: any
-          include_products:
-            - "kibana"
-            - "elasticsearch"
           exclude_types:
             - docs
-          match_areas: any
-          include_areas:
-            - "Agent Builder"
-            - "Alerting, connectors, and reporting"
-            - "Cloud security"
-            - "Dashboards and Visualizations"
+          match_areas: all
+          exclude_areas:
+            - "Actionable Observability"
+            - "AI for observability"
+            - "AI for security"
+            - "APM"
             - "Data ingestion and Fleet"
-            - "Data management"
-            - "Developer tools"
-            - "Discover and ES|QL"
-            - "Global experience"
-            - "Kibana security"
-            - "Machine learning"
-            - "Search"
+            - "Detection rules and alerts"
+            - "Endpoint security"
+            - "Entity analytics"
+            - "Infrastructure monitoring"
+            - "Investigations"
+            - "Logs and metrics"
+            - "Service maps"
+            - "Streams"
+            - "Threat hunting"
+            - "Uptime"
+        #   # include_areas:
+        #   #   - "Agent Builder"
+        #   #   - "Alerting, connectors, and reporting"
+        #   #   - "Cloud security"
+        #   #   - "Dashboards and Visualizations"
+        #   #   - "Data ingestion and Fleet"
+        #   #   - "Data management"
+        #   #   - "Developer tools"
+        #   #   - "Discover and ES|QL"
+        #   #   - "Global experience"
+        #   #   - "Kibana security"
+        #   #   - "Machine learning"
+        #   #   - "Search"
         'observability':
-          match_products: any
-          include_products:
-            - "observability"
           exclude_types:
             - docs
-          # Include changelogs that have (at least) the following areas:
+        #   # Include changelogs that have (at least) the following areas:
           match_areas: any
           include_areas:
             - "Actionable Observability"
@@ -345,9 +335,6 @@ rules:
             - "Streams"
             - "Uptime"
         'security':
-          match_products: any
-          include_products:
-            - "security"
           exclude_types:
             - docs
           match_areas: any
@@ -355,8 +342,7 @@ rules:
             - "AI for security"
             - "Cloud security"
             - "Detection rules and alerts"
-            - "Endpoint security"
-            - "Elastic Security solution"   
+            - "Endpoint security" 
             - "Entity analytics"
             - "Investigations"
             - "Threat hunting"
@@ -392,7 +378,7 @@ bundle:
       output_products: "kibana {version}"
       output: "kibana/{version}.yaml"
     observability-release:
-      output_products: "observability {version}"
+      output_products: "observability"
       output: "observability/{version}.yaml"
     security-release:
       output_products: "security {version}"
