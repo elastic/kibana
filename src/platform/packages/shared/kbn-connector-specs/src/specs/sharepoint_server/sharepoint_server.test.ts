@@ -95,7 +95,7 @@ describe('SharepointServer', () => {
   });
 
   describe('getListItems action', () => {
-    it('should encode list title in URL and return items', async () => {
+    it('should embed list title in URL and return items', async () => {
       const mockResponse = {
         data: {
           value: [{ Id: 1, Title: 'Item 1' }],
@@ -108,19 +108,19 @@ describe('SharepointServer', () => {
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        `${SITE_URL}/_api/web/lists/GetByTitle('${encodeURIComponent('My Documents')}')/items`,
+        `${SITE_URL}/_api/web/lists/GetByTitle('My Documents')/items`,
         { headers: ODATA_HEADERS }
       );
       expect(result).toEqual(mockResponse.data);
     });
 
-    it('should handle special characters in list title', async () => {
+    it('should escape single quotes in list title with OData doubling', async () => {
       mockClient.get.mockResolvedValue({ data: { value: [] } });
       await SharepointServer.actions.getListItems.handler(mockContext, {
-        listTitle: 'Team & Projects',
+        listTitle: "John's Documents",
       });
       expect(mockClient.get).toHaveBeenCalledWith(
-        `${SITE_URL}/_api/web/lists/GetByTitle('${encodeURIComponent('Team & Projects')}')/items`,
+        `${SITE_URL}/_api/web/lists/GetByTitle('John''s Documents')/items`,
         { headers: ODATA_HEADERS }
       );
     });
@@ -143,13 +143,12 @@ describe('SharepointServer', () => {
         path: '/sites/mysite/Shared Documents',
       })) as { files: unknown[]; folders: unknown[] };
 
-      const encodedPath = encodeURIComponent('/sites/mysite/Shared Documents');
       expect(mockClient.get).toHaveBeenCalledWith(
-        `${SITE_URL}/_api/web/GetFolderByServerRelativeUrl('${encodedPath}')/Files`,
+        `${SITE_URL}/_api/web/GetFolderByServerRelativeUrl('/sites/mysite/Shared Documents')/Files`,
         { headers: ODATA_HEADERS }
       );
       expect(mockClient.get).toHaveBeenCalledWith(
-        `${SITE_URL}/_api/web/GetFolderByServerRelativeUrl('${encodedPath}')/Folders`,
+        `${SITE_URL}/_api/web/GetFolderByServerRelativeUrl('/sites/mysite/Shared Documents')/Folders`,
         { headers: ODATA_HEADERS }
       );
       expect(result.files).toEqual([{ Name: 'file.docx' }]);
@@ -179,9 +178,8 @@ describe('SharepointServer', () => {
         path: '/sites/mysite/Shared Documents/hello.txt',
       })) as { text: string; contentType: string; contentLength: string };
 
-      const encodedPath = encodeURIComponent('/sites/mysite/Shared Documents/hello.txt');
       expect(mockClient.get).toHaveBeenCalledWith(
-        `${SITE_URL}/_api/web/GetFileByServerRelativeUrl('${encodedPath}')/$value`,
+        `${SITE_URL}/_api/web/GetFileByServerRelativeUrl('/sites/mysite/Shared Documents/hello.txt')/$value`,
         { responseType: 'arraybuffer' }
       );
       expect(result.text).toBe('Hello');
