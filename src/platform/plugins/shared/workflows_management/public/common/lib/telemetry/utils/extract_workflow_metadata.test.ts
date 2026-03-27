@@ -36,6 +36,28 @@ const { parseWorkflowYamlForAutocomplete } = jest.requireMock(
   '../../../../../common/lib/yaml/parse_workflow_yaml_for_autocomplete'
 ) as { parseWorkflowYamlForAutocomplete: jest.Mock };
 
+/** Runtime triggers can include registered custom trigger ids (e.g. cases.updated). */
+function asRuntimeTriggers(triggers: unknown): WorkflowYaml['triggers'] {
+  return triggers as WorkflowYaml['triggers'];
+}
+
+/** Legacy inputs array form is not fully expressed on `WorkflowYaml['inputs']` union typing. */
+function asRuntimeInputs(inputs: unknown): WorkflowYaml['inputs'] {
+  return inputs as WorkflowYaml['inputs'];
+}
+
+const minimalConsoleStep = { name: 's1', type: 'console', with: {} };
+
+function baseWorkflow(overrides: Partial<WorkflowYaml> = {}): Partial<WorkflowYaml> {
+  return {
+    name: 'telemetry-contract',
+    enabled: true,
+    steps: [minimalConsoleStep],
+    triggers: [{ type: 'manual' }],
+    ...overrides,
+  };
+}
+
 describe('extractWorkflowMetadata', () => {
   const defaultMetadata = {
     enabled: false,
@@ -47,175 +69,245 @@ describe('extractWorkflowMetadata', () => {
     inputCount: 0,
     constCount: 0,
     triggerCount: 0,
+    hasTriggerConditions: false,
     settingsUsed: [],
     hasDescription: false,
     tagCount: 0,
   };
 
-  describe('null / undefined / empty workflow', () => {
-    it('returns default metadata for null', () => {
-      expect(extractWorkflowMetadata(null)).toEqual(defaultMetadata);
-    });
-
-    it('returns default metadata for undefined', () => {
-      expect(extractWorkflowMetadata(undefined)).toEqual(defaultMetadata);
+  describe('extractWorkflowMetadata (workflows management UI)', () => {
+    it('returns defaults for null and undefined', () => {
+      const defaults = {
+        enabled: false,
+        stepCount: 0,
+        connectorTypes: [],
+        stepTypes: [],
+        stepTypeCounts: {},
+        triggerTypes: [],
+        inputCount: 0,
+        constCount: 0,
+        triggerCount: 0,
+        hasTriggerConditions: false,
+        settingsUsed: [],
+        hasDescription: false,
+        tagCount: 0,
+      };
+      expect(extractWorkflowMetadata(undefined)).toEqual(defaults);
+      expect(extractWorkflowMetadata(null)).toEqual(defaults);
     });
 
     it('returns default metadata for an empty object', () => {
       expect(extractWorkflowMetadata({})).toEqual(defaultMetadata);
     });
-  });
 
-  describe('enabled flag', () => {
-    it('returns enabled: true when workflow is enabled', () => {
-      const result = metadata({ enabled: true });
-      expect(result.enabled).toBe(true);
-    });
-
-    it('returns enabled: false when workflow is disabled', () => {
-      const result = metadata({ enabled: false });
-      expect(result.enabled).toBe(false);
-    });
-
-    it('returns enabled: false when enabled is not set', () => {
-      const result = metadata({});
-      expect(result.enabled).toBe(false);
-    });
-  });
-
-  describe('steps counting', () => {
-    it('counts a single step', () => {
-      const result = metadata({
-        steps: [{ name: 'step-1', type: 'console' }],
+    describe('enabled flag', () => {
+      it('returns enabled: true when workflow is enabled', () => {
+        const result = metadata({ enabled: true });
+        expect(result.enabled).toBe(true);
       });
-      expect(result.stepCount).toBe(1);
-      expect(result.stepTypes).toEqual(['console']);
-      expect(result.stepTypeCounts).toEqual({ console: 1 });
-    });
 
-    it('counts multiple steps of different types', () => {
-      const result = metadata({
-        steps: [
-          { name: 'step-1', type: 'console' },
-          { name: 'step-2', type: 'if' },
-          { name: 'step-3', type: 'console' },
-        ],
+      it('returns enabled: false when workflow is disabled', () => {
+        const result = metadata({ enabled: false });
+        expect(result.enabled).toBe(false);
       });
-      expect(result.stepCount).toBe(3);
-      expect(result.stepTypes).toEqual(expect.arrayContaining(['console', 'if']));
-      expect(result.stepTypeCounts).toEqual({ console: 2, if: 1 });
-    });
 
-    it('handles empty steps array', () => {
-      const result = metadata({ steps: [] });
-      expect(result.stepCount).toBe(0);
-      expect(result.stepTypes).toEqual([]);
-    });
-
-    it('skips steps without a type field', () => {
-      const result = metadata({
-        steps: [{ name: 'step-1', type: 'console' }, { name: 'step-2' }],
-      });
-      expect(result.stepCount).toBe(1);
-    });
-  });
-
-  describe('nested steps (foreach, if, else)', () => {
-    it('counts steps nested inside a foreach step', () => {
-      const result = metadata({
-        steps: [
-          {
-            name: 'loop',
-            type: 'foreach',
-            steps: [
-              { name: 'inner-1', type: 'slack.webhook' },
-              { name: 'inner-2', type: 'console' },
-            ],
-          },
-        ],
-      });
-      // foreach + inner-1 + inner-2
-      expect(result.stepCount).toBe(3);
-      expect(result.stepTypes).toEqual(
-        expect.arrayContaining(['foreach', 'slack.webhook', 'console'])
-      );
-      expect(result.stepTypeCounts).toEqual({
-        foreach: 1,
-        'slack.webhook': 1,
-        console: 1,
+      it('returns enabled: false when enabled is not set', () => {
+        const result = metadata({});
+        expect(result.enabled).toBe(false);
       });
     });
 
-    it('counts steps in if/else branches', () => {
-      const result = metadata({
-        steps: [
-          {
-            name: 'branch',
-            type: 'if',
-            steps: [{ name: 'then-step', type: 'console' }],
-            else: [{ name: 'else-step', type: 'email.send' }],
-          },
-        ],
+    describe('steps counting', () => {
+      it('counts a single step', () => {
+        const result = metadata({
+          steps: [{ name: 'step-1', type: 'console' }],
+        });
+        expect(result.stepCount).toBe(1);
+        expect(result.stepTypes).toEqual(['console']);
+        expect(result.stepTypeCounts).toEqual({ console: 1 });
       });
-      // if + then-step + else-step
-      expect(result.stepCount).toBe(3);
-      expect(result.stepTypes).toEqual(expect.arrayContaining(['if', 'console', 'email.send']));
+
+      it('counts multiple steps of different types', () => {
+        const result = metadata({
+          steps: [
+            { name: 'step-1', type: 'console' },
+            { name: 'step-2', type: 'if' },
+            { name: 'step-3', type: 'console' },
+          ],
+        });
+        expect(result.stepCount).toBe(3);
+        expect(result.stepTypes).toEqual(expect.arrayContaining(['console', 'if']));
+        expect(result.stepTypeCounts).toEqual({ console: 2, if: 1 });
+      });
+
+      it('handles empty steps array', () => {
+        const result = metadata({ steps: [] });
+        expect(result.stepCount).toBe(0);
+        expect(result.stepTypes).toEqual([]);
+      });
+
+      it('skips steps without a type field', () => {
+        const result = metadata({
+          steps: [{ name: 'step-1', type: 'console' }, { name: 'step-2' }],
+        });
+        expect(result.stepCount).toBe(1);
+      });
     });
 
-    it('counts deeply nested steps', () => {
-      const result = metadata({
-        steps: [
-          {
-            name: 'outer-loop',
-            type: 'foreach',
-            steps: [
-              {
-                name: 'inner-branch',
-                type: 'if',
-                steps: [{ name: 'deep-step', type: 'slack.postMessage' }],
+    describe('nested steps (foreach, if, else)', () => {
+      it('counts steps nested inside a foreach step', () => {
+        const result = metadata({
+          steps: [
+            {
+              name: 'loop',
+              type: 'foreach',
+              steps: [
+                { name: 'inner-1', type: 'slack.webhook' },
+                { name: 'inner-2', type: 'console' },
+              ],
+            },
+          ],
+        });
+        // foreach + inner-1 + inner-2
+        expect(result.stepCount).toBe(3);
+        expect(result.stepTypes).toEqual(
+          expect.arrayContaining(['foreach', 'slack.webhook', 'console'])
+        );
+        expect(result.stepTypeCounts).toEqual({
+          foreach: 1,
+          'slack.webhook': 1,
+          console: 1,
+        });
+      });
+
+      it('counts steps in if/else branches', () => {
+        const result = metadata({
+          steps: [
+            {
+              name: 'branch',
+              type: 'if',
+              steps: [{ name: 'then-step', type: 'console' }],
+              else: [{ name: 'else-step', type: 'email.send' }],
+            },
+          ],
+        });
+        // if + then-step + else-step
+        expect(result.stepCount).toBe(3);
+        expect(result.stepTypes).toEqual(expect.arrayContaining(['if', 'console', 'email.send']));
+      });
+
+      it('counts deeply nested steps', () => {
+        const result = metadata({
+          steps: [
+            {
+              name: 'outer-loop',
+              type: 'foreach',
+              steps: [
+                {
+                  name: 'inner-branch',
+                  type: 'if',
+                  steps: [{ name: 'deep-step', type: 'slack.postMessage' }],
+                },
+              ],
+            },
+          ],
+        });
+        // foreach + if + deep-step
+        expect(result.stepCount).toBe(3);
+      });
+    });
+
+    describe('on-failure / iteration-on-failure fallback steps', () => {
+      it('counts steps in on-failure fallback', () => {
+        const result = metadata({
+          steps: [
+            {
+              name: 'risky-step',
+              type: 'console',
+              'on-failure': {
+                fallback: [{ name: 'fallback-1', type: 'email.send' }],
               },
-            ],
-          },
-        ],
-      });
-      // foreach + if + deep-step
-      expect(result.stepCount).toBe(3);
-    });
-  });
-
-  describe('on-failure / iteration-on-failure fallback steps', () => {
-    it('counts steps in on-failure fallback', () => {
-      const result = metadata({
-        steps: [
-          {
-            name: 'risky-step',
-            type: 'console',
-            'on-failure': {
-              fallback: [{ name: 'fallback-1', type: 'email.send' }],
             },
-          },
-        ],
+          ],
+        });
+        // risky-step + fallback-1
+        expect(result.stepCount).toBe(2);
+        expect(result.stepTypes).toEqual(expect.arrayContaining(['console', 'email.send']));
       });
-      // risky-step + fallback-1
-      expect(result.stepCount).toBe(2);
-      expect(result.stepTypes).toEqual(expect.arrayContaining(['console', 'email.send']));
+
+      it('counts steps in iteration-on-failure fallback', () => {
+        const result = metadata({
+          steps: [
+            {
+              name: 'loop',
+              type: 'foreach',
+              'iteration-on-failure': {
+                fallback: [{ name: 'iter-fallback', type: 'console' }],
+              },
+              steps: [],
+            },
+          ],
+        });
+        // foreach + iter-fallback
+        expect(result.stepCount).toBe(2);
+      });
     });
 
-    it('counts steps in iteration-on-failure fallback', () => {
-      const result = metadata({
-        steps: [
-          {
-            name: 'loop',
-            type: 'foreach',
-            'iteration-on-failure': {
-              fallback: [{ name: 'iter-fallback', type: 'console' }],
-            },
-            steps: [],
-          },
-        ],
+    it('reflects root field: triggers as triggerTypes and triggerCount', () => {
+      const meta = metadata(
+        baseWorkflow({
+          triggers: [{ type: 'manual' }, { type: 'scheduled', with: { every: '1h' } }],
+        })
+      );
+      expect(meta.triggerCount).toBe(2);
+      expect(meta.triggerTypes).toEqual(expect.arrayContaining(['manual', 'scheduled']));
+      expect(meta.triggerTypes).toHaveLength(2);
+    });
+
+    it('tracks trigger condition presence without reporting condition text', () => {
+      const withCondition = metadata(
+        baseWorkflow({
+          triggers: asRuntimeTriggers([
+            { type: 'manual' },
+            { type: 'cases.updated', on: { condition: 'event.action == "create"' } },
+          ]),
+        })
+      );
+
+      const withoutCondition = metadata(
+        baseWorkflow({
+          triggers: asRuntimeTriggers([
+            { type: 'manual' },
+            { type: 'cases.updated', on: { condition: '   ' } },
+          ]),
+        })
+      );
+
+      expect(withCondition.hasTriggerConditions).toBe(true);
+      expect(withoutCondition.hasTriggerConditions).toBe(false);
+    });
+
+    it('reflects root field: inputs (array length)', () => {
+      expect(
+        metadata(
+          baseWorkflow({
+            inputs: asRuntimeInputs([
+              { name: 'a', type: 'string' },
+              { name: 'b', type: 'number' },
+            ]),
+          })
+        ).inputCount
+      ).toBe(2);
+    });
+
+    it('reflects root field: consts', () => {
+      expect(metadata(baseWorkflow({ consts: { X: 1, Y: 2 } })).constCount).toBe(2);
+    });
+
+    it('reflects root field: description and tags', () => {
+      expect(metadata(baseWorkflow({ description: '  hi  ' }))).toMatchObject({
+        hasDescription: true,
       });
-      // foreach + iter-fallback
-      expect(result.stepCount).toBe(2);
     });
 
     it('ignores on-failure without fallback array', () => {
