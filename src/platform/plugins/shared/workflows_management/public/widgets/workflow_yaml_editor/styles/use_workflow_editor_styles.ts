@@ -108,6 +108,25 @@ export const useWorkflowEditorStyles = () => {
           backgroundColor: euiTheme.colors.backgroundLightWarning,
         },
 
+        // Migration hint glyph (warning triangle in glyph margin)
+        '.migration-hint-glyph': {
+          '&:before': {
+            content: '"⚠"',
+            display: 'block',
+            width: '14px',
+            height: '14px',
+            fontSize: '14px',
+            lineHeight: '14px',
+            color: euiTheme.colors.warning,
+            textAlign: 'center',
+          },
+        },
+
+        // Allow migration hint hovers to show full content without clipping
+        '& .monaco-hover': {
+          maxHeight: 'none !important',
+        },
+
         // Error highlighting
         '.duplicate-step-name-error': {
           backgroundColor: euiTheme.colors.backgroundLightDanger,
