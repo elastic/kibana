@@ -12,31 +12,17 @@ import type { Command } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { resolveEvalSuites } from '../suites';
 import { promptForSuite, promptForConnector, isTTY } from '../prompts';
-import { defaultExportProfile, envFromDatasetsProfile, envFromExportProfile } from '../profiles';
+import {
+  defaultExportProfile,
+  envFromDatasetsProfile,
+  envFromExportProfile,
+  stripTrailingSlash,
+  probeHttp,
+  isExportProfileImplicitLocal,
+} from '../profiles';
 
 const EXECUTORS = ['phoenix', 'kibana'] as const;
 type Executor = (typeof EXECUTORS)[number];
-
-// Any HTTP response (including 401/503) means the service is listening.
-// We only care that the port is up, not that auth is configured yet.
-const probeHttp = async (url: string): Promise<boolean> => {
-  try {
-    await fetch(url, { signal: AbortSignal.timeout(2000) });
-    return true;
-  } catch {
-    return false;
-  }
-};
-
-const stripTrailingSlash = (url: string): string => url.replace(/\/$/, '');
-
-const isExportProfileImplicitLocal = (flagsReader: any, exportProfile?: string): boolean => {
-  if (exportProfile !== 'local') return false;
-  const hasExplicitExport = Boolean(
-    flagsReader.string('export-profile') ?? flagsReader.string('profile')
-  );
-  return !hasExplicitExport;
-};
 
 const formatEnvPrefix = (overrides: Record<string, string>) =>
   Object.entries(overrides)

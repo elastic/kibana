@@ -29,7 +29,14 @@ import {
   tailLog,
 } from '../services';
 import { safeExec, VAULT_SECRET_PATH } from '../utils';
-import { defaultExportProfile, envFromDatasetsProfile, envFromExportProfile } from '../profiles';
+import {
+  defaultExportProfile,
+  envFromDatasetsProfile,
+  envFromExportProfile,
+  stripTrailingSlash,
+  probeHttp,
+  isExportProfileImplicitLocal,
+} from '../profiles';
 
 const SCOUT_LOCAL_CONFIG = '.scout/servers/local.json';
 const SCOUT_READY_POLL_INTERVAL_MS = 3000;
@@ -76,17 +83,6 @@ const isEdotRunningViaDocker = (): boolean => {
   return result !== null && result.length > 0;
 };
 
-// Any HTTP response (including 401/503) means the service is listening.
-// We only care that the port is up, not that auth is configured yet.
-const probeHttp = async (url: string): Promise<boolean> => {
-  try {
-    await fetch(url, { signal: AbortSignal.timeout(2000) });
-    return true;
-  } catch {
-    return false;
-  }
-};
-
 const waitForScoutReady = async (repoRoot: string, log: ToolingLog): Promise<void> => {
   const configPath = Path.join(repoRoot, SCOUT_LOCAL_CONFIG);
   const startTime = Date.now();
@@ -122,16 +118,6 @@ const waitForScoutReady = async (repoRoot: string, log: ToolingLog): Promise<voi
 };
 
 const isEisConnectorId = (id: string): boolean => id.startsWith('eis-');
-
-const stripTrailingSlash = (url: string): string => url.replace(/\/$/, '');
-
-const isExportProfileImplicitLocal = (flagsReader: any, exportProfile?: string): boolean => {
-  if (exportProfile !== 'local') return false;
-  const hasExplicitExport = Boolean(
-    flagsReader.string('export-profile') ?? flagsReader.string('profile')
-  );
-  return !hasExplicitExport;
-};
 
 const shellQuote = (value: string): string => {
   // Prefer single quotes for bash/zsh. If the string contains single quotes, fall back to double quotes.

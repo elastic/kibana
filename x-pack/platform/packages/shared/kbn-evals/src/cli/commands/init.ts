@@ -14,11 +14,11 @@ import type { Command } from '@kbn/dev-cli-runner';
 import { set } from '@kbn/safer-lodash-set';
 import { parseConnectorsFromEnv, parseConnectorsFromKibanaDevYml } from '../prompts';
 import { safeExec, VAULT_SECRET_PATH } from '../utils';
+import { VAULT_CONFIG_DIR } from '../profiles';
 import { buildApiKeyPayload } from '../../api_key/build_api_key_payload';
 
 const EIS_MODELS_PATH = 'target/eis_models.json';
 
-const CONFIG_DIR = 'x-pack/platform/packages/shared/kbn-evals/scripts/vault';
 const CONFIG_FILENAME = 'config.json';
 const CONFIG_EXAMPLE_FILENAME = 'config.example.json';
 
@@ -180,7 +180,7 @@ const runConfigInit = async (
   log: { info: (msg: string) => void; warning: (msg: string) => void },
   options?: { profile?: string }
 ): Promise<boolean> => {
-  const configDir = Path.resolve(repoRoot, CONFIG_DIR);
+  const configDir = Path.resolve(repoRoot, VAULT_CONFIG_DIR);
   const configFileName = options?.profile ? `config.${options.profile}.json` : CONFIG_FILENAME;
   const configPath = Path.join(configDir, configFileName);
   const examplePath = Path.join(configDir, CONFIG_EXAMPLE_FILENAME);
@@ -190,7 +190,7 @@ const runConfigInit = async (
 
   if (Fs.existsSync(configPath)) {
     existingApiKey = getExistingApiKey(configPath);
-    log.info(`Config already exists at ${CONFIG_DIR}/${configFileName}`);
+    log.info(`Config already exists at ${VAULT_CONFIG_DIR}/${configFileName}`);
     const { overwrite } = await inquirer.prompt<{ overwrite: boolean }>({
       type: 'confirm',
       name: 'overwrite',
@@ -368,7 +368,7 @@ const runConfigInit = async (
 
   Fs.writeFileSync(configPath, JSON.stringify(example, null, 2) + '\n');
   log.info('');
-  log.info(`Config written to ${CONFIG_DIR}/${configFileName}`);
+  log.info(`Config written to ${VAULT_CONFIG_DIR}/${configFileName}`);
   log.info('Edit it to fill in any remaining REPLACE_ME values.');
   log.info('');
   log.info('Start an eval (config is loaded automatically):');

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, type MouseEvent } from 'react';
+import React, { useCallback, useMemo, type MouseEvent } from 'react';
 import {
   EuiAccordion,
   EuiBasicTable,
@@ -31,19 +31,8 @@ import type { EvaluatorStats } from '@kbn/evals-common';
 import { useEvaluationRun, useRunDatasetExamples } from '../../hooks/use_evals_api';
 import { ExampleScoresTable } from '../../components/example_scores_table';
 import { TraceWaterfall } from '../../components/trace_waterfall';
+import { resolvePrUrl } from '../../utils/pr_url';
 import * as i18n from './translations';
-
-const isLikelyUrl = (value: string): boolean => /^https?:\/\//i.test(value);
-
-const resolvePrUrl = (pullRequest: string): string | null => {
-  const raw = pullRequest.trim();
-  if (!raw || raw === 'false') return null;
-  if (isLikelyUrl(raw)) return raw;
-  if (/^\d+$/.test(raw)) {
-    return `https://github.com/elastic/kibana/pull/${raw}`;
-  }
-  return null;
-};
 
 interface DatasetStatsGroup {
   datasetId: string;
@@ -169,50 +158,62 @@ export const RunDetailPage: React.FC = () => {
     return pr ? resolvePrUrl(pr) : null;
   }, [runDetail?.ci?.pull_request]);
 
-  const updateSearchParams = (updater: (params: URLSearchParams) => void) => {
-    const next = new URLSearchParams(location.search);
-    updater(next);
-    const search = next.toString();
-    history.push({
-      pathname: location.pathname,
-      search: search ? `?${search}` : '',
-    });
-  };
+  const updateSearchParams = useCallback(
+    (updater: (params: URLSearchParams) => void) => {
+      const next = new URLSearchParams(location.search);
+      updater(next);
+      const search = next.toString();
+      history.push({
+        pathname: location.pathname,
+        search: search ? `?${search}` : '',
+      });
+    },
+    [history, location.pathname, location.search]
+  );
 
-  const setOpenDatasetId = (datasetId: string | null) => {
-    updateSearchParams((params) => {
-      if (datasetId) {
-        params.set('dataset_id', datasetId);
-      } else {
-        params.delete('dataset_id');
-        params.delete('example_id');
-        params.delete('trace_id');
-      }
-    });
-  };
+  const setOpenDatasetId = useCallback(
+    (datasetId: string | null) => {
+      updateSearchParams((params) => {
+        if (datasetId) {
+          params.set('dataset_id', datasetId);
+        } else {
+          params.delete('dataset_id');
+          params.delete('example_id');
+          params.delete('trace_id');
+        }
+      });
+    },
+    [updateSearchParams]
+  );
 
-  const setSelectedExample = (exampleId: string | null) => {
-    updateSearchParams((params) => {
-      if (exampleId) {
-        params.set('example_id', exampleId);
-      } else {
-        params.delete('example_id');
-      }
-    });
-  };
-
-  const setSelectedTrace = (traceId: string | null, exampleId?: string) => {
-    updateSearchParams((params) => {
-      if (traceId) {
-        params.set('trace_id', traceId);
+  const setSelectedExample = useCallback(
+    (exampleId: string | null) => {
+      updateSearchParams((params) => {
         if (exampleId) {
           params.set('example_id', exampleId);
+        } else {
+          params.delete('example_id');
         }
-      } else {
-        params.delete('trace_id');
-      }
-    });
-  };
+      });
+    },
+    [updateSearchParams]
+  );
+
+  const setSelectedTrace = useCallback(
+    (traceId: string | null, exampleId?: string) => {
+      updateSearchParams((params) => {
+        if (traceId) {
+          params.set('trace_id', traceId);
+          if (exampleId) {
+            params.set('example_id', exampleId);
+          }
+        } else {
+          params.delete('trace_id');
+        }
+      });
+    },
+    [updateSearchParams]
+  );
 
   const datasetStatsGroups = useMemo(() => {
     const groupedStats = new Map<

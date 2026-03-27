@@ -12,6 +12,10 @@ import { createEsClientForTesting } from '@kbn/test';
 import { envFromExportProfile, defaultExportProfile } from '../profiles';
 import { isTTY } from '../prompts';
 
+interface EsResponseError {
+  meta?: { statusCode?: number };
+}
+
 const DEFAULT_PATTERN = 'kibana-evaluations*';
 const DEFAULT_DATA_STREAM = 'kibana-evaluations';
 const DEFAULT_TEMPLATE = 'kibana-evaluations-template';
@@ -198,7 +202,7 @@ export const clearIndexCmd: Command<void> = {
       await esClient.indices.deleteDataStream({ name: dataStream });
       log.info(`Deleted data stream: ${dataStream}`);
     } catch (error: unknown) {
-      const statusCode = (error as any)?.meta?.statusCode as number | undefined;
+      const statusCode = (error as EsResponseError)?.meta?.statusCode;
       if (statusCode !== 404) {
         throw error;
       }
@@ -216,7 +220,7 @@ export const clearIndexCmd: Command<void> = {
       });
       matchedIndexNames = Object.keys(resolved ?? {});
     } catch (error: unknown) {
-      const statusCode = (error as any)?.meta?.statusCode as number | undefined;
+      const statusCode = (error as EsResponseError)?.meta?.statusCode;
       if (statusCode !== 404) {
         throw error;
       }
@@ -236,7 +240,7 @@ export const clearIndexCmd: Command<void> = {
         await esClient.indices.deleteIndexTemplate({ name: template });
         log.info(`Deleted index template: ${template}`);
       } catch (error: unknown) {
-        const statusCode = (error as any)?.meta?.statusCode as number | undefined;
+        const statusCode = (error as EsResponseError)?.meta?.statusCode;
         if (statusCode !== 404) {
           throw error;
         }

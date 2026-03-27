@@ -7,8 +7,31 @@
 
 import Fs from 'fs';
 import Path from 'path';
+import type { FlagsReader } from '@kbn/dev-cli-runner';
 
 export const VAULT_CONFIG_DIR = 'x-pack/platform/packages/shared/kbn-evals/scripts/vault';
+
+export const stripTrailingSlash = (url: string): string => url.replace(/\/$/, '');
+
+export const probeHttp = async (url: string): Promise<boolean> => {
+  try {
+    await fetch(url, { signal: AbortSignal.timeout(2000) });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+export const isExportProfileImplicitLocal = (
+  flagsReader: FlagsReader,
+  exportProfile?: string
+): boolean => {
+  if (exportProfile !== 'local') return false;
+  const hasExplicitExport = Boolean(
+    flagsReader.string('export-profile') ?? flagsReader.string('profile')
+  );
+  return !hasExplicitExport;
+};
 
 interface VaultConfig {
   evaluationsKbn?: { url?: string; apiKey?: string };

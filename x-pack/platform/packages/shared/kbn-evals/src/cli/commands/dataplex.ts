@@ -10,7 +10,13 @@ import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
 import type { Command } from '@kbn/dev-cli-runner';
-import { parse as parseYaml } from 'yaml';
+import {
+  buildEntrySourceDisplayName,
+  buildFullyQualifiedName,
+  formatShellCommand,
+  readAspectData,
+  listYamlFilesRecursively,
+} from './dataplex_utils';
 
 const DEFAULT_PROJECT = 'elastic-observability';
 const DEFAULT_LOCATION = 'us-central1';
@@ -54,15 +60,6 @@ const ensureGcloud = (): void => {
   }
 };
 
-const formatShellCommand = (args: string[]): string =>
-  args
-    .map((a) => {
-      // Minimal shell escaping; sufficient for our expected args.
-      if (/^[A-Za-z0-9_./:=,@-]+$/.test(a)) return a;
-      return `'${a.replaceAll("'", `'\"'\"'`)}'`;
-    })
-    .join(' ');
-
 const isPermissionDenied = (stderrOrStdout: string): boolean =>
   (stderrOrStdout.includes('Permission') && stderrOrStdout.includes('denied')) ||
   stderrOrStdout.includes('PERMISSION_DENIED') ||
@@ -70,92 +67,6 @@ const isPermissionDenied = (stderrOrStdout: string): boolean =>
   stderrOrStdout.includes('dataplex.entries.update') ||
   stderrOrStdout.includes('dataplex.entries.lookup') ||
   stderrOrStdout.includes('Status code: 403');
-
-const listYamlFilesRecursively = (dir: string): string[] => {
-  const out: string[] = [];
-  const entries = Fs.readdirSync(dir, { withFileTypes: true });
-  for (const ent of entries) {
-    const full = Path.join(dir, ent.name);
-    if (ent.isDirectory()) {
-      out.push(...listYamlFilesRecursively(full));
-      continue;
-    }
-    if (ent.isFile() && (ent.name.endsWith('.yaml') || ent.name.endsWith('.yml'))) {
-      out.push(full);
-    }
-  }
-  return out;
-};
-
-const parseGsPath = (gcsPath: string): { bucket: string; path: string } => {
-  if (!gcsPath.startsWith('gs://')) {
-    throw new Error(`Invalid gcs_path (expected gs://...): ${gcsPath}`);
-  }
-  const remainder = gcsPath.slice('gs://'.length);
-  const idx = remainder.indexOf('/');
-  if (idx === -1) {
-    return { bucket: remainder, path: '' };
-  }
-  return { bucket: remainder.slice(0, idx), path: remainder.slice(idx + 1) };
-};
-
-const titleCase = (s: string): string =>
-  s
-    .split(/[-_]+/g)
-    .filter(Boolean)
-    .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
-    .join(' ');
-
-const buildEntrySourceDisplayName = (gcsPath: string): string => {
-  const { path } = parseGsPath(gcsPath);
-  const parts = path.split('/').filter(Boolean);
-  if (parts.length >= 3) {
-    const [domain, ...rest] = parts;
-    const runId = rest.at(-1) as string;
-    const scenario = rest.slice(0, -1).join(' / ');
-    return `${titleCase(domain)}: ${scenario} (${runId})`;
-  }
-  return `ES snapshot dataset: ${gcsPath}`;
-};
-
-const buildFullyQualifiedName = (gcsPath: string): string => {
-  const { bucket, path } = parseGsPath(gcsPath);
-  const segments = path ? path.split('/').filter(Boolean) : [];
-  return `custom:es-snapshots.${[bucket, ...segments].join('.')}`;
-};
-
-interface SnapshotAspectData {
-  gcs_path: string;
-  description?: string;
-  team?: string;
-}
-
-const readAspectData = (filePath: string): SnapshotAspectData => {
-  const raw = Fs.readFileSync(filePath, 'utf8');
-  const parsed = parseYaml(raw) as unknown;
-  if (!parsed || typeof parsed !== 'object') {
-    throw new Error(`Invalid YAML (expected object) in ${filePath}`);
-  }
-
-  const topKeys = Object.keys(parsed as Record<string, unknown>);
-  if (topKeys.length === 0) throw new Error(`No aspect keys found in ${filePath}`);
-
-  const firstKey = topKeys[0];
-  const aspect = (parsed as Record<string, any>)[firstKey];
-  const data = aspect?.data;
-  if (!data || typeof data !== 'object') {
-    throw new Error(`Missing aspect data in ${filePath}`);
-  }
-  const gcsPath = data.gcs_path;
-  if (typeof gcsPath !== 'string' || gcsPath.trim().length === 0) {
-    throw new Error(`Missing data.gcs_path in ${filePath}`);
-  }
-  return {
-    gcs_path: gcsPath,
-    description: typeof data.description === 'string' ? data.description : undefined,
-    team: typeof data.team === 'string' ? data.team : undefined,
-  };
-};
 
 const entryTypeResource = (project: string) =>
   `projects/${project}/locations/global/entryTypes/${DEFAULT_ENTRY_TYPE_ID}`;
@@ -211,7 +122,7 @@ const syncEntry = ({
   dryRun: boolean;
   printCommands: boolean;
   log: { info: (m: string) => void };
-}): { action: 'created' | 'updated' | 'skipped' } => {
+}): { action: 'created' | 'updated' | 'skipped' | 'printed' } => {
   const fqn = buildFullyQualifiedName(gcsPath);
   const displayName = buildEntrySourceDisplayName(gcsPath);
   const updateTime = new Date().toISOString();
@@ -272,7 +183,7 @@ const syncEntry = ({
 
     log.info(`# ${entryId}`);
     log.info(`${formatShellCommand(createArgs)} || ${formatShellCommand(updateArgs)}`);
-    return { action: 'created' };
+    return { action: 'printed' };
   }
 
   if (dryRun) {
@@ -599,6 +510,7 @@ export const dataplexCmd: Command<void> = {
     const created: string[] = [];
     const updated: string[] = [];
     const skipped: string[] = [];
+    const printed: string[] = [];
 
     for (const filePath of selected) {
       const entryId = Path.basename(filePath, Path.extname(filePath));
@@ -617,11 +529,13 @@ export const dataplexCmd: Command<void> = {
       });
       if (res.action === 'created') created.push(entryId);
       else if (res.action === 'updated') updated.push(entryId);
+      else if (res.action === 'printed') printed.push(entryId);
       else skipped.push(entryId);
     }
 
     if (created.length) log.info(`Created: ${created.join(', ')}`);
     if (updated.length) log.info(`Updated: ${updated.join(', ')}`);
+    if (printed.length) log.info(`Printed commands for: ${printed.join(', ')}`);
     if (skipped.length) log.info(`Unchanged: ${skipped.join(', ')}`);
     if (dryRun) log.info('Dry run: no changes were applied.');
   },

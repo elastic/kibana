@@ -36,10 +36,6 @@ export const STAT_PULL_REQUEST = i18n.translate('xpack.evals.runDetail.stat.pull
   defaultMessage: 'PR',
 });
 
-export const STAT_COMMIT = i18n.translate('xpack.evals.runDetail.stat.commit', {
-  defaultMessage: 'Commit',
-});
-
 export const CI_BUILD_LINK = i18n.translate('xpack.evals.runDetail.ciBuildLink', {
   defaultMessage: 'Build',
 });

@@ -24,19 +24,8 @@ import {
 import { useHistory } from 'react-router-dom';
 import type { EvaluationRunSummary } from '@kbn/evals-common';
 import { useEvaluationRuns } from '../../hooks/use_evals_api';
+import { resolvePrUrl } from '../../utils/pr_url';
 import * as i18n from './translations';
-
-const isLikelyUrl = (value: string): boolean => /^https?:\/\//i.test(value);
-
-const resolvePrUrl = (pullRequest: string): string | null => {
-  const raw = pullRequest.trim();
-  if (!raw || raw === 'false') return null;
-  if (isLikelyUrl(raw)) return raw;
-  if (/^\d+$/.test(raw)) {
-    return `https://github.com/elastic/kibana/pull/${raw}`;
-  }
-  return null;
-};
 
 export const RunsListPage: React.FC = () => {
   const history = useHistory();
