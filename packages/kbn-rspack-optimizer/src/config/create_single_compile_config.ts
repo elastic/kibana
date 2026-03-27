@@ -816,6 +816,19 @@ class PluginWatchPlugin {
 
     if (!modified && !removed) return true;
 
+    const hasFileWithExtension = (files: ReadonlySet<string> | undefined): boolean => {
+      if (!files) return false;
+      for (const f of files) {
+        if (Path.extname(f) !== '') return true;
+      }
+      return false;
+    };
+
+    // Only directories changed (no files with extensions) -- structural change, trigger discovery
+    if (!hasFileWithExtension(modified) && !hasFileWithExtension(removed)) {
+      return true;
+    }
+
     const isManifest = (f: string) =>
       f.endsWith('/kibana.jsonc') || f.endsWith('\\kibana.jsonc');
     const isPluginEntry = (f: string) =>
@@ -902,6 +915,7 @@ class PluginWatchPlugin {
 
         // If plugin list changed, regenerate the unified entry
         if (currentHash !== this.lastPluginHash) {
+          const isInitial = this.lastPluginHash === '';
           this.lastPluginHash = currentHash;
 
           // Regenerate unified entry (will update zone chunks too)
@@ -912,9 +926,13 @@ class PluginWatchPlugin {
             Path.join(p.contextDir, 'kibana.jsonc')
           );
 
-          // Log the change
           if (this.options.log) {
             this.options.log.info(`Plugin list changed, regenerating entry (${pluginEntries.length} bundles)`);
+            if (!isInitial) {
+              this.options.log.warning(
+                'Browser plugin list changed. Stop and restart the dev server for the changes to take full effect.'
+              );
+            }
           }
         }
 
