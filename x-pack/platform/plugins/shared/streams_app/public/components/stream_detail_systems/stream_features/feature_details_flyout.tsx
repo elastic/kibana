@@ -40,6 +40,10 @@ interface FeatureDetailsFlyoutProps {
   onClose: () => void;
   onDelete?: () => Promise<void>;
   isDeleting?: boolean;
+  onExclude?: () => Promise<void>;
+  isExcluding?: boolean;
+  onRestore?: () => Promise<void>;
+  isRestoring?: boolean;
 }
 
 const noDataPlaceholder = '-';
@@ -49,6 +53,10 @@ export function FeatureDetailsFlyout({
   onClose,
   onDelete,
   isDeleting = false,
+  onExclude,
+  isExcluding = false,
+  onRestore,
+  isRestoring = false,
 }: FeatureDetailsFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const flyoutTitleId = useGeneratedHtmlId({
@@ -61,6 +69,16 @@ export function FeatureDetailsFlyout({
   const handleDeleteClick = () => {
     closeActionsPopover();
     showDeleteModal();
+  };
+
+  const handleExcludeClick = () => {
+    closeActionsPopover();
+    onExclude?.();
+  };
+
+  const handleRestoreClick = () => {
+    closeActionsPopover();
+    onRestore?.();
   };
 
   const displayTitle = feature.title ?? feature.id;
@@ -137,11 +155,6 @@ export function FeatureDetailsFlyout({
       ownFocus={false}
       size="40%"
       hideCloseButton
-      css={css`
-        // Temporary workaround for #253800 removing global push-flyout positioning.
-        // Remove once the platform team restores these rules.
-        top: var(--kbn-layout--application-top, 0px);
-      `}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
@@ -152,7 +165,7 @@ export function FeatureDetailsFlyout({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" responsive={false}>
-              {onDelete && (
+              {(onDelete || onExclude || onRestore) && (
                 <EuiFlexItem grow={false}>
                   <EuiPopover
                     button={
@@ -161,6 +174,7 @@ export function FeatureDetailsFlyout({
                         iconType="boxesVertical"
                         aria-label={ACTIONS_BUTTON_ARIA_LABEL}
                         onClick={toggleActionsPopover}
+                        isLoading={isExcluding || isRestoring}
                       />
                     }
                     isOpen={isActionsPopoverOpen}
@@ -171,17 +185,53 @@ export function FeatureDetailsFlyout({
                     <EuiContextMenuPanel
                       size="s"
                       items={[
-                        <EuiContextMenuItem
-                          key="delete"
-                          icon={<EuiIcon type="trash" color="danger" />}
-                          css={css`
-                            color: ${euiTheme.colors.danger};
-                          `}
-                          onClick={handleDeleteClick}
-                          data-test-subj="streamsAppFeatureDetailsFlyoutDeleteAction"
-                        >
-                          {DELETE_ACTION_LABEL}
-                        </EuiContextMenuItem>,
+                        ...(onRestore
+                          ? [
+                              <EuiContextMenuItem
+                                key="restore"
+                                icon={<EuiIcon type="eye" color="primary" aria-hidden={true} />}
+                                css={css`
+                                  color: ${euiTheme.colors.primary};
+                                `}
+                                onClick={handleRestoreClick}
+                                data-test-subj="streamsAppFeatureDetailsFlyoutRestoreAction"
+                              >
+                                {RESTORE_ACTION_LABEL}
+                              </EuiContextMenuItem>,
+                            ]
+                          : []),
+                        ...(onExclude
+                          ? [
+                              <EuiContextMenuItem
+                                key="exclude"
+                                icon={
+                                  <EuiIcon type="eyeClosed" color="warning" aria-hidden={true} />
+                                }
+                                css={css`
+                                  color: ${euiTheme.colors.warning};
+                                `}
+                                onClick={handleExcludeClick}
+                                data-test-subj="streamsAppFeatureDetailsFlyoutExcludeAction"
+                              >
+                                {EXCLUDE_ACTION_LABEL}
+                              </EuiContextMenuItem>,
+                            ]
+                          : []),
+                        ...(onDelete
+                          ? [
+                              <EuiContextMenuItem
+                                key="delete"
+                                icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
+                                css={css`
+                                  color: ${euiTheme.colors.danger};
+                                `}
+                                onClick={handleDeleteClick}
+                                data-test-subj="streamsAppFeatureDetailsFlyoutDeleteAction"
+                              >
+                                {DELETE_ACTION_LABEL}
+                              </EuiContextMenuItem>,
+                            ]
+                          : []),
                       ]}
                     />
                   </EuiPopover>
@@ -317,6 +367,14 @@ const ACTIONS_BUTTON_ARIA_LABEL = i18n.translate(
   'xpack.streams.featureDetailsFlyout.actionsButtonAriaLabel',
   { defaultMessage: 'Actions' }
 );
+
+const RESTORE_ACTION_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.restoreAction', {
+  defaultMessage: 'Restore',
+});
+
+const EXCLUDE_ACTION_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.excludeAction', {
+  defaultMessage: 'Exclude',
+});
 
 const DELETE_ACTION_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.deleteAction', {
   defaultMessage: 'Delete',

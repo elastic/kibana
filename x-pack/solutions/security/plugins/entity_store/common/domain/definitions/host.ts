@@ -19,8 +19,13 @@ export const hostEntityDefinition: EntityDefinitionWithoutId = {
   type: 'host',
   name: `Security 'host' Entity Store Definition`,
   identityField: {
-    // Ranking mechanism for the identity field
-    euidFields: [[{ field: 'host.id' }], [{ field: 'host.name' }], [{ field: 'host.hostname' }]],
+    euidRanking: {
+      branches: [
+        {
+          ranking: [[{ field: 'host.id' }], [{ field: 'host.name' }], [{ field: 'host.hostname' }]],
+        },
+      ],
+    },
     documentsFilter: {
       or: [
         isNotEmptyCondition('host.id'),

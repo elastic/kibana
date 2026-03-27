@@ -8,10 +8,8 @@
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { DocumentDetailsContext } from '../../shared/context';
-import {
-  PrevalenceDetails,
-  resetColdFrozenTierCalloutDismissedStateForTests,
-} from './prevalence_details';
+import { PrevalenceDetails } from './prevalence_details';
+import { resetColdFrozenTierCalloutDismissedStateForTests } from '../../../../flyout_v2/prevalence/prevalence';
 import {
   PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID,
   PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_TEST_ID,
@@ -26,8 +24,8 @@ import {
   PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
   PREVALENCE_DETAILS_UPSELL_TEST_ID,
-} from './test_ids';
-import { usePrevalence } from '../../../../flyout_v2/document/hooks/use_prevalence';
+} from '../../../../flyout_v2/prevalence/test_ids';
+import { usePrevalence } from '../../../../flyout_v2/prevalence/hooks/use_prevalence';
 import { TestProviders } from '../../../../common/mock';
 import { licenseService } from '../../../../common/hooks/use_license';
 import { mockContextValue } from '../../shared/mocks/mock_context';
@@ -62,7 +60,7 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../../../flyout_v2/document/hooks/use_prevalence');
+jest.mock('../../../../flyout_v2/prevalence/hooks/use_prevalence');
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -153,7 +151,10 @@ describe('PrevalenceDetails', () => {
     mockUiSettingsGet.mockReturnValue(true);
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    (useUserPrivileges as jest.Mock).mockReturnValue({ timelinePrivileges: { read: true } });
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      timelinePrivileges: { read: true },
+      rulesPrivileges: { rules: { read: true } },
+    });
   });
 
   it('should render the table with all data if license is platinum', () => {
@@ -281,7 +282,10 @@ describe('PrevalenceDetails', () => {
   });
 
   it('should render formatted numbers as text if user lacks timeline read privileges', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({ timelinePrivileges: { read: false } });
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      timelinePrivileges: { read: false },
+      rulesPrivileges: { rules: { read: true } },
+    });
     (usePrevalence as jest.Mock).mockReturnValue({
       loading: false,
       error: false,

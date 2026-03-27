@@ -16,16 +16,17 @@ import {
   renderWithTestingProviders,
 } from '../../common/mock';
 
-import { AttachmentType } from '../../../common/types/domain';
+import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { SECURITY_SOLUTION_OWNER, MAX_COMMENT_LENGTH } from '../../../common/constants';
+import { AttachmentType } from '../../../common/types/domain';
 import { createAttachments } from '../../containers/api';
 import type { AddCommentProps, AddCommentRefObject } from '.';
 import { AddComment } from '.';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { timelineIntegrationMock } from '../__mock__/timeline';
-import type { CaseAttachmentWithoutOwner } from '../../types';
 
 import { useCreateAttachments } from '../../containers/use_create_attachments';
+import { KibanaServices } from '../../common/lib/kibana';
 
 jest.mock('../../containers/use_create_attachments');
 
@@ -50,16 +51,18 @@ const defaultResponse = {
   mutate: createAttachments,
 };
 
-const sampleData: CaseAttachmentWithoutOwner = {
-  comment: 'what a cool comment',
-  type: AttachmentType.user as const,
-};
+const sampleData = { comment: 'what a cool comment' };
 const appId = 'securitySolution';
 const draftKey = `cases.${appId}.${addCommentProps.caseId}.${addCommentProps.id}.markdownEditor`;
+
+const getConfigMock = jest.spyOn(KibanaServices, 'getConfig');
+const getCasesConfig = (attachmentsEnabled: boolean): ReturnType<typeof KibanaServices.getConfig> =>
+  ({ attachments: { enabled: attachmentsEnabled } } as ReturnType<typeof KibanaServices.getConfig>);
 
 describe('AddComment ', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    getConfigMock.mockReturnValue(getCasesConfig(false));
 
     useCreateAttachmentsMock.mockReturnValue({
       isLoading: false,
@@ -150,6 +153,33 @@ describe('AddComment ', () => {
     await waitFor(() => {
       expect(screen.getByTestId('euiMarkdownEditorTextArea')).toHaveTextContent('');
     });
+  });
+
+  it('sends unified payload when config.attachments.enabled is true', async () => {
+    getConfigMock.mockReturnValue(getCasesConfig(true));
+
+    renderWithTestingProviders(<AddComment {...addCommentProps} />);
+
+    const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
+    await userEvent.type(markdown, sampleData.comment);
+    await userEvent.click(screen.getByTestId('submit-comment'));
+
+    await waitFor(() => expect(onCommentSaving).toBeCalled());
+    await waitFor(() =>
+      expect(createAttachmentsMock).toBeCalledWith(
+        {
+          caseId: addCommentProps.caseId,
+          attachments: [
+            {
+              type: COMMENT_ATTACHMENT_TYPE,
+              data: { content: sampleData.comment },
+            },
+          ],
+          caseOwner: SECURITY_SOLUTION_OWNER,
+        },
+        { onSuccess: expect.any(Function) }
+      )
+    );
   });
 
   it('should insert a quote', async () => {
@@ -244,6 +274,11 @@ describe('AddComment ', () => {
 describe('draft comment ', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    getConfigMock.mockReturnValue(getCasesConfig(false));
+    useCreateAttachmentsMock.mockReturnValue({
+      isLoading: false,
+      mutate: createAttachmentsMock,
+    });
   });
 
   beforeAll(() => {
@@ -318,6 +353,14 @@ describe('draft comment ', () => {
 });
 
 describe('submit comment by key press', () => {
+  beforeEach(() => {
+    getConfigMock.mockReturnValue(getCasesConfig(false));
+    useCreateAttachmentsMock.mockReturnValue({
+      isLoading: false,
+      mutate: createAttachmentsMock,
+    });
+  });
+
   beforeAll(() => {
     jest.useFakeTimers();
   });

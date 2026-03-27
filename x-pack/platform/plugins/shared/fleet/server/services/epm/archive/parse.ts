@@ -494,6 +494,7 @@ export function parseAndVerifyStreams(
         title: streamTitle,
         vars: manifestVars,
         template_path: templatePath,
+        template_paths: templatePaths,
         ...restOfProps
       } = manifestStream;
       if (!(input && streamTitle)) {
@@ -507,7 +508,9 @@ export function parseAndVerifyStreams(
       const streamObject: RegistryStream = {
         input,
         title: streamTitle,
-        template_path: templatePath || 'stream.yml.hbs',
+        ...(templatePaths?.length
+          ? { template_paths: templatePaths }
+          : { template_path: templatePath || 'stream.yml.hbs' }),
       };
 
       if (vars.length) {

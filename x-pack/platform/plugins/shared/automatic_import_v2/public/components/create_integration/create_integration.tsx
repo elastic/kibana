@@ -11,6 +11,7 @@ import { useLocation } from 'react-router-dom';
 import type { Services } from '../../services/types';
 import { IntegrationManagement } from '../integration_management/integration_management';
 import { UIStateProvider } from '../integration_management/contexts';
+import { TelemetryContextProvider } from '../telemetry_context';
 import { CreateIntegrationUpload } from './create_integration_upload';
 import { ManageIntegrations } from './manage_integrations';
 
@@ -36,9 +37,11 @@ CreateIntegrationContents.displayName = 'CreateIntegrationContents';
 export const CreateIntegration = React.memo<CreateIntegrationProps>(({ services }) => (
   <QueryClientProvider client={queryClient}>
     <KibanaContextProvider services={services}>
-      <UIStateProvider>
-        <CreateIntegrationContents />
-      </UIStateProvider>
+      <TelemetryContextProvider>
+        <UIStateProvider>
+          <CreateIntegrationContents />
+        </UIStateProvider>
+      </TelemetryContextProvider>
     </KibanaContextProvider>
   </QueryClientProvider>
 ));

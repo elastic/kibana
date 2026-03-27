@@ -70,8 +70,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/258810
-  describe.skip('Basic functionality', () => {
+  describe('Basic functionality', () => {
     async function getWiredStatus() {
       const response = await viewerApiClient.fetch('GET /api/streams/_status').expect(200);
       return response.body;
@@ -526,6 +525,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, `${rootStream}.nginx`, {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
@@ -682,6 +682,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, `${rootStream}.apache`, {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
@@ -870,6 +871,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
@@ -894,6 +896,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             ...body,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 ...body.stream.ingest,
@@ -916,6 +919,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
@@ -1043,6 +1047,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, `${rootStream}.one`, {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },
@@ -1057,6 +1062,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, `${rootStream}.one.two.three`, {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },
@@ -1119,6 +1125,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, parentStream, {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: parentBefore.stream.description,
               ingest: {
                 ...parentBefore.stream.ingest,
@@ -1143,6 +1150,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, childStream, {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: childBefore.stream.description,
               ingest: {
                 ...childBefore.stream.ingest,
@@ -1181,6 +1189,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, parentStream, {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: parentForUpdate.stream.description,
               ingest: {
                 ...parentForUpdate.stream.ingest,
@@ -1229,6 +1238,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               ...emptyAssets,
               stream: {
+                type: 'wired',
                 description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
@@ -1252,6 +1262,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
@@ -1270,6 +1281,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const validStreamBody: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },

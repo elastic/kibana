@@ -18,6 +18,7 @@ import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { useAgentBuilderAgentById } from './use_agent_by_id';
 import { useToolsService } from '../tools/use_tools';
 import { useSkillsService } from '../skills/use_skills';
+import { usePluginsService } from '../plugins/use_plugins';
 import { useExperimentalFeatures } from '../use_experimental_features';
 import { queryKeys } from '../../query_keys';
 import { duplicateName } from '../../utils/duplicate_name';
@@ -45,6 +46,7 @@ const emptyState = (): AgentEditState => ({
     tools: defaultToolSelection,
     enable_elastic_capabilities: false,
     workflow_ids: [],
+    plugin_ids: [],
   },
 });
 
@@ -65,6 +67,7 @@ export function useAgentEdit({
   const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const { tools, isLoading: toolsLoading, error: toolsError } = useToolsService();
   const { skills, isLoading: skillsLoading, error: skillsError } = useSkillsService();
+  const { plugins, isLoading: pluginsLoading, error: pluginsError } = usePluginsService();
   const sourceAgentId = searchParams.get(searchParamNames.sourceId);
   const isClone = Boolean(!editingAgentId && sourceAgentId);
   const agentId = editingAgentId || sourceAgentId || '';
@@ -132,7 +135,10 @@ export function useAgentEdit({
   );
 
   const isLoading = agentId
-    ? agentLoading || toolsLoading || (isExperimentalFeaturesEnabled && skillsLoading)
+    ? agentLoading ||
+      toolsLoading ||
+      (isExperimentalFeaturesEnabled && skillsLoading) ||
+      (isExperimentalFeaturesEnabled && pluginsLoading)
     : false;
 
   return {
@@ -142,6 +148,11 @@ export function useAgentEdit({
     submit,
     tools,
     skills,
-    error: toolsError || (isExperimentalFeaturesEnabled ? skillsError : undefined) || agentError,
+    plugins,
+    error:
+      toolsError ||
+      (isExperimentalFeaturesEnabled ? skillsError : undefined) ||
+      (isExperimentalFeaturesEnabled ? pluginsError : undefined) ||
+      agentError,
   };
 }

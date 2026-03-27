@@ -17,6 +17,12 @@ export const labels = {
     title: i18n.translate('xpack.agentBuilder.conversations.title', {
       defaultMessage: 'Agent Chat',
     }),
+    staleCheckPartialFailureTitle: i18n.translate(
+      'xpack.agentBuilder.conversations.staleCheckPartialFailureTitle',
+      {
+        defaultMessage: 'Could not check whether some attachments are outdated',
+      }
+    ),
   },
   tools: {
     // Landing page
@@ -631,7 +637,7 @@ export const labels = {
     title: i18n.translate('xpack.agentBuilder.plugins.title', { defaultMessage: 'Plugins' }),
     pluginsTableCaption: (pluginsCount: number) =>
       i18n.translate('xpack.agentBuilder.plugins.pluginsTableCaption', {
-        defaultMessage: 'Installed plugins: {pluginsCount} plugins',
+        defaultMessage: 'Plugins: {pluginsCount} plugins',
         values: { pluginsCount },
       }),
     nameLabel: i18n.translate('xpack.agentBuilder.plugins.nameLabel', {
@@ -652,14 +658,14 @@ export const labels = {
     searchPluginsPlaceholder: i18n.translate(
       'xpack.agentBuilder.plugins.searchPluginsPlaceholder',
       {
-        defaultMessage: 'Search',
+        defaultMessage: 'Search plugins',
       }
     ),
     noPluginsMatchMessage: i18n.translate('xpack.agentBuilder.plugins.noPluginsMatchMessage', {
-      defaultMessage: 'No plugins match your search.',
+      defaultMessage: 'No plugins match your search',
     }),
     noPluginsMessage: i18n.translate('xpack.agentBuilder.plugins.noPluginsMessage', {
-      defaultMessage: 'No plugins installed yet.',
+      defaultMessage: 'No plugins installed',
     }),
     listPluginsErrorMessage: i18n.translate('xpack.agentBuilder.plugins.listPluginsErrorMessage', {
       defaultMessage: 'Failed to fetch plugins',
@@ -758,6 +764,9 @@ export const labels = {
       }),
     uploadPluginErrorToast: i18n.translate('xpack.agentBuilder.plugins.uploadPluginErrorToast', {
       defaultMessage: 'Failed to upload plugin',
+    }),
+    readOnly: i18n.translate('xpack.agentBuilder.plugins.readOnly', {
+      defaultMessage: 'Built-in plugin (read-only)',
     }),
     viewPluginButtonLabel: i18n.translate('xpack.agentBuilder.plugins.viewPluginButtonLabel', {
       defaultMessage: 'View',

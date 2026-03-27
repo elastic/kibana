@@ -57,6 +57,7 @@
       "serverless",
       "observabilityAIAssistant",
       "investigate",
+      "cps",
       "ingestHub"
     ],
     "requiredBundles": [
