@@ -12,7 +12,7 @@ import React from 'react';
 export function DisabledPrompt() {
   return (
     <EuiEmptyPrompt
-      iconType="eyeClosed"
+      iconType="eyeSlash"
       iconColor="subdued"
       title={
         <h2>

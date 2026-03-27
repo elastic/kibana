@@ -15,6 +15,7 @@ import { setWorkflowEventChainContext } from '@kbn/workflows-extensions/server';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 
 import { ConnectorExecutor } from '../connector_executor';
+import { extractEventChainDepthFromExecution } from '../lib/telemetry/utils/extract_execution_metadata';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
@@ -31,23 +32,6 @@ import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_mana
 const defaultWorkflowSettings: WorkflowSettings = {
   timeout: '6h',
 };
-
-/**
- * Extracts event-chain depth from workflow execution context when this run was scheduled
- * by the trigger event handler (event-driven). The handler injects eventChainDepth into
- * context.event; manual/scheduled runs do not have it. Returns undefined when not present
- * or invalid so we only set event-chain context on the request for event-driven runs.
- */
-function getEventChainDepthFromExecutionContext(
-  context: Record<string, unknown> | undefined
-): number | undefined {
-  const event = context?.event;
-  if (event == null || typeof event !== 'object') {
-    return undefined;
-  }
-  const depth = (event as { eventChainDepth?: unknown }).eventChainDepth;
-  return typeof depth === 'number' && depth >= 0 ? depth : undefined;
-}
 
 export async function setupDependencies(
   workflowRunId: string,
@@ -86,7 +70,7 @@ export async function setupDependencies(
     );
   }
 
-  const eventChainDepth = getEventChainDepthFromExecutionContext(workflowExecution.context);
+  const eventChainDepth = extractEventChainDepthFromExecution(workflowExecution);
 
   if (eventChainDepth !== undefined) {
     setWorkflowEventChainContext(fakeRequest, {
@@ -185,5 +169,6 @@ export async function setupDependencies(
     nodesFactory,
     workflowExecutionRepository,
     esClient,
+    telemetryClient,
   };
 }
