@@ -159,12 +159,10 @@ export const useMonitorIntegrationHealth = (
         listMonitors.map((m) => [m[ConfigKey.CONFIG_ID], m[ConfigKey.NAME]])
       );
       const monitors: Array<{ configId: string; name: string }> = [];
-      const seenConfigIds = new Set<string>();
 
       for (const entries of statuses.values()) {
         const entry = entries.find((s) => s.locationId === locationId && s.isUnhealthy);
-        if (entry && !seenConfigIds.has(entry.configId)) {
-          seenConfigIds.add(entry.configId);
+        if (entry) {
           monitors.push({
             configId: entry.configId,
             name: monitorNameMap.get(entry.configId) || entry.configId,
