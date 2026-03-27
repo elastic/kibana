@@ -18,9 +18,12 @@ import {
   EuiRadioGroup,
 } from '@elastic/eui';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { getFields } from '@kbn/triggers-actions-ui-plugin/public';
 import { ESQLLangEditor } from '@kbn/esql/public';
-import { getESQLAdHocDataview, getESQLResults } from '@kbn/esql-utils';
+import {
+  getESQLAdHocDataview,
+  getESQLResults,
+  getProjectRoutingFromEsqlQuery,
+} from '@kbn/esql-utils';
 import { type AggregateQuery } from '@kbn/es-query';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
@@ -36,7 +39,7 @@ import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { EsQueryRuleParams, EsQueryRuleMetaData } from '../types';
 import { SearchType } from '../types';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
-import { useTriggerUiActionServices } from '../util';
+import { convertFieldSpecToFieldOption, useTriggerUiActionServices } from '../util';
 import { hasExpressionValidationErrors } from '../validation';
 import { TestQueryRow } from '../test_query_row';
 import { transformToEsqlTable, getEsqlQueryHits, ALERT_ID_SUGGESTED_MAX } from '../../../../common';
@@ -112,8 +115,8 @@ const keepRecommendedWarning = i18n.translate(
 
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
-> = ({ ruleParams, metadata, setRuleParams, setRuleProperty, errors, data }) => {
-  const { http, isServerless, dataViews, uiSettings } = useTriggerUiActionServices();
+> = ({ ruleParams, metadata, setRuleParams, setRuleProperty, errors, data, dataViews }) => {
+  const { http, isServerless, uiSettings } = useTriggerUiActionServices();
   const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, groupBy } = ruleParams;
   const isEdit = !!metadata?.isEdit;
 
@@ -274,7 +277,15 @@ export const EsqlQueryExpression: React.FC<
             http,
           });
           const indexPattern: string = esqlDataView.getIndexPattern();
-          const currentEsFields = await getFields(http, [indexPattern]);
+
+          const fieldSpecs = await dataViews.getFieldsForWildcard({
+            pattern: indexPattern,
+            allowNoIndex: true,
+            projectRouting: getProjectRoutingFromEsqlQuery(queryObj.esql),
+          });
+
+          const currentEsFields = convertFieldSpecToFieldOption(fieldSpecs, false);
+
           const newTimeFieldOptions = getTimeFieldOptions(currentEsFields);
           const timestampField = esqlDataView.timeFieldName;
           return { newTimeFieldOptions, timestampField };
