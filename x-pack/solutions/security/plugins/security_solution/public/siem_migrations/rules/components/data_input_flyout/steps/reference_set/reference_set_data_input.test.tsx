@@ -130,7 +130,7 @@ describe('ReferenceSetDataInput', () => {
       </TestProviders>
     );
     expect(getByTestId('referenceSetsSkipButton')).toBeInTheDocument();
-    expect(getByTestId('referenceSetsSkipButton')).toHaveTextContent('Continue without uploading');
+    expect(getByTestId('referenceSetsSkipButton')).toHaveTextContent('Skip');
   });
 
   it('calls onComplete when skip button is clicked', () => {

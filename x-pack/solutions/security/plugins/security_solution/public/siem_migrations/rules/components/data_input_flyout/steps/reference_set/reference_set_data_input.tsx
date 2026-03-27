@@ -67,6 +67,20 @@ export const ReferenceSetDataInput = React.memo<MigrationStepProps>(
                   <b>{i18n.REFERENCE_SET_DATA_INPUT_TITLE}</b>
                 </EuiTitle>
               </EuiFlexItem>
+              {dataInputStatus === 'current' && onComplete && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    onClick={onComplete}
+                    iconType="arrowRight"
+                    iconSide="right"
+                    size="s"
+                    aria-label={i18n.REFERENCE_SET_CONTINUE_BUTTON_ARIA_LABEL}
+                    data-test-subj="referenceSetsSkipButton"
+                  >
+                    {i18n.REFERENCE_SET_CONTINUE_BUTTON}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           {dataInputStatus === 'current' && migrationStats && missingReferenceSet && onComplete && (
@@ -82,21 +96,6 @@ export const ReferenceSetDataInput = React.memo<MigrationStepProps>(
                   missingReferenceSet={missingReferenceSet}
                   onComplete={onComplete}
                 />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup justifyContent="flexEnd">
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      onClick={onComplete}
-                      iconType="arrowRight"
-                      iconSide="right"
-                      flush="right"
-                      data-test-subj="referenceSetsSkipButton"
-                    >
-                      {i18n.REFERENCE_SET_CONTINUE_BUTTON}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
               </EuiFlexItem>
             </>
           )}

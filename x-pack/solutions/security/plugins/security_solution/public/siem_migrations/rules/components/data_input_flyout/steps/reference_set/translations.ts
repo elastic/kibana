@@ -19,5 +19,9 @@ export const REFERENCE_SET_DATA_INPUT_DESCRIPTION = i18n.translate(
 );
 export const REFERENCE_SET_CONTINUE_BUTTON = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.referenceSet.continueButton',
-  { defaultMessage: 'Continue without uploading' }
+  { defaultMessage: 'Skip' }
+);
+export const REFERENCE_SET_CONTINUE_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.referenceSet.continueButtonAriaLabel',
+  { defaultMessage: 'Continue without uploading all the reference sets' }
 );
