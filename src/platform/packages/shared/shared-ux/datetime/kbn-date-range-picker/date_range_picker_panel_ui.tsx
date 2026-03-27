@@ -198,6 +198,7 @@ export const PanelBodySectionInfo = ({
           .euiCode {
             color: ${euiTheme.colors.textSubdued};
             font-weight: ${euiTheme.font.weight.semiBold};
+            padding-block: 0.0125em;
           }
         `}
       >

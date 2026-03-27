@@ -98,7 +98,7 @@ export const documentationPanelTexts = {
   }),
   intro: i18n.translate('sharedUXPackages.dateRangePicker.documentationPanel.intro', {
     defaultMessage:
-      'Type `to` to split start and end dates, otherwise the input will consider it just a one day range.',
+      'Type `to` to split start and end dates, otherwise the input will consider it relative to now.',
   }),
   absoluteHeading: i18n.translate(
     'sharedUXPackages.dateRangePicker.documentationPanel.absoluteHeading',
@@ -106,7 +106,7 @@ export const documentationPanelTexts = {
   ),
   absoluteBody: i18n.translate('sharedUXPackages.dateRangePicker.documentationPanel.absoluteBody', {
     defaultMessage:
-      'Use formats like `Dec 1, 2025, 00:00` (default), `2025-12-01` (ISO 8601), `Fri, 1 Dec 2025 00:00:00 GMT` (RFC 2822), `1760665383890` (unix timestamp), `1st of January, 2025` or just `Jan 1st, 2025`.',
+      'Use formats like `Dec 1, 2025, 00:00` (default), `2025-12-01` (ISO 8601), `Fri, 1 Dec 2025 00:00:00 GMT` (RFC 2822), or `1760665383890` (unix timestamp).',
   }),
   relativeHeading: i18n.translate(
     'sharedUXPackages.dateRangePicker.documentationPanel.relativeHeading',
