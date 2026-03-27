@@ -53,8 +53,10 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     if (options.esServerArgs || options.kbnServerArgs) {
       throw new Error(
-        `FTR doesn't provision custom ES/Kibana server arguments into the ESS deployment.
-  It may lead to unexpected test failures on Cloud. Please contact #appex-qa.`
+        `Deployment-agnostic configs run unchanged on ECH. Custom ES/Kibana server args passed here
+  won't be set on ECH and will cause unexpected test failures.
+  If your test needs a feature flag, create a config under feature_flag_configs/ using
+  createStatefulFeatureFlagTestConfig from feature_flag.stateful.config.base.ts.`
       );
     }
 

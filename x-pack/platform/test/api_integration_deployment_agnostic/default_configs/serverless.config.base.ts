@@ -68,8 +68,10 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
   return async ({ readConfigFile }: FtrConfigProviderContext): Promise<Config> => {
     if (options.esServerArgs || options.kbnServerArgs) {
       throw new Error(
-        `FTR doesn't provision custom ES/Kibana server arguments into the serverless project on MKI.
-  It may lead to unexpected test failures on Cloud. Please contact #appex-qa.`
+        `Deployment-agnostic configs run unchanged on MKI. Custom ES/Kibana server args passed here
+  won't be set on MKI and will cause unexpected test failures on Cloud.
+  If your test needs a feature flag, create a config under feature_flag_configs/ using
+  createServerlessFeatureFlagTestConfig from feature_flag.serverless.config.base.ts.`
       );
     }
 
