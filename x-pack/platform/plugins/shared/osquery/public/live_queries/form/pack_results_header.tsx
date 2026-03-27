@@ -97,7 +97,7 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
             </EuiFlexItem>
             {actionId && (
               <EuiFlexItem grow={false} css={actionsGroupCss}>
-                <EuiFlexGroup gutterSize="m" alignItems="center">
+                <EuiFlexGroup gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <AddToCaseWrapper
                       actionId={actionId}

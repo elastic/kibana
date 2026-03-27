@@ -62,7 +62,7 @@ function buildVisualizationState(config: GaugeState): GaugeVisualizationState {
     goalAccessor: layer.metric.goal ? getAccessorName('goal') : undefined,
     shape: layer.shape
       ? layer.shape.type === 'bullet'
-        ? layer.shape.direction === 'horizontal'
+        ? layer.shape.orientation === 'horizontal'
           ? 'horizontalBullet'
           : 'verticalBullet'
         : layer.shape.type === 'semi_circle'
@@ -106,9 +106,9 @@ function reverseBuildVisualizationState(
     ...generateApiLayer(layer),
     shape:
       visualization.shape === 'horizontalBullet'
-        ? { type: 'bullet', direction: 'horizontal' }
+        ? { type: 'bullet', orientation: 'horizontal' }
         : visualization.shape === 'verticalBullet'
-        ? { type: 'bullet', direction: 'vertical' }
+        ? { type: 'bullet', orientation: 'vertical' }
         : {
             type: visualization.shape === 'semiCircle' ? 'semi_circle' : visualization.shape,
           },

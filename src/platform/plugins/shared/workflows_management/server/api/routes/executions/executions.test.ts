@@ -258,7 +258,7 @@ describe('Execution Routes', () => {
       expect(handler('POST', path)).toBeDefined();
     });
 
-    it('should call api.testStep with yaml, ids, context, space, and request', async () => {
+    it('should call api.testStep with yaml, ids, executionContext, contextOverride, space, and request', async () => {
       mockApi.testStep.mockResolvedValue('step-exec-1');
       const h = handler('POST', path)!;
       const request = {
@@ -266,6 +266,7 @@ describe('Execution Routes', () => {
           stepId: 'step-1',
           workflowId: 'wf-1',
           workflowYaml: 'steps: []',
+          executionContext: { inputs: { foo: 'bar' }, event: { type: 'test' } },
           contextOverride: { x: 1 },
         },
       };
@@ -276,6 +277,7 @@ describe('Execution Routes', () => {
         'steps: []',
         'step-1',
         'wf-1',
+        { inputs: { foo: 'bar' }, event: { type: 'test' } },
         { x: 1 },
         'default',
         request
