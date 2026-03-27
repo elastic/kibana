@@ -56,6 +56,15 @@ export function FeatureIdentificationControl({
     onCancel: cancelFeaturesIdentificationTask,
   });
 
+  // Refresh features periodically while the task is running
+  useEffect(() => {
+    if (task?.status !== TaskStatus.InProgress) {
+      return;
+    }
+    const interval = setInterval(refreshFeatures, 10_000);
+    return () => clearInterval(interval);
+  }, [task?.status, refreshFeatures]);
+
   // Sync task status with parent component - only trigger on status changes
   useEffect(() => {
     const currentStatus = task?.status;
