@@ -59,7 +59,7 @@ export const StreamsListEmptyPrompt = ({ onAddData }: { onAddData?: () => void }
   return (
     <EuiEmptyPrompt
       css={{
-        maxInlineSize: '960px !important',
+        maxInlineSize: '100% !important',
         '.euiEmptyPrompt__content': {
           flexBasis: '35%',
         },

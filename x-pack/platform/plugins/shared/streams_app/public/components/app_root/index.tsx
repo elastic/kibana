@@ -42,9 +42,12 @@ export function AppRoot({
 
   // Remove any block-UX CSS overrides left over from the Ingest Hub before the
   // first browser paint, so every Streams page (including all tour steps) has a
-  // consistent chrome layout.
+  // consistent chrome layout. Only clean up if the blockUx style tag is present
+  // (i.e. navigating from blockUx mode), to avoid disrupting other app layouts.
   useLayoutEffect(() => {
-    document.getElementById('blockUxOverrideStyles')?.remove();
+    const blockUxStyleEl = document.getElementById('blockUxOverrideStyles');
+    if (!blockUxStyleEl) return;
+    blockUxStyleEl.remove();
     const appEl = document.querySelector('.kbnChromeLayoutApplication');
     const gridRoot = appEl?.parentElement;
     if (gridRoot) {

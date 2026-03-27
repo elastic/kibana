@@ -403,7 +403,7 @@ export const IngestHubPage: React.FC = () => {
   `;
 
   const renderSectionPageHeader = (imageSrc: string, heading: string, subtitle: string) => (
-    <div style={{ maxWidth: 1440, margin: '0 auto', width: '100%' }}>
+    <div style={{ width: '100%' }}>
       <div
         style={{
           display: 'flex',
@@ -796,7 +796,7 @@ export const IngestHubPage: React.FC = () => {
   const renderIntegrationsView = () => {
     return (
       <>
-        <div css={paddedContent} style={{ maxWidth: 1440, margin: '0 auto', width: '100%' }}>
+        <div css={paddedContent} style={{ width: '100%' }}>
           {renderSectionPageHeader(
             integrationsHeaderImg,
             'Add data to Elastic Observability',
@@ -837,7 +837,7 @@ export const IngestHubPage: React.FC = () => {
           )}
         </div>
         <EuiHorizontalRule margin="none" css={dividerStyle} />
-        <div css={paddedContent} style={{ maxWidth: 1440, margin: '0 auto', width: '100%' }}>
+        <div css={paddedContent} style={{ width: '100%' }}>
           <div style={{ height: 32 }} />
 
           {integrationsTab === 'all' && renderBrowseAllTab()}
@@ -1786,7 +1786,7 @@ export const IngestHubPage: React.FC = () => {
 
   const renderGetStartedView = () => (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-      <div css={paddedContent} style={{ maxWidth: 1440, margin: '0 auto', width: '100%' }}>
+      <div css={paddedContent} style={{ width: '100%' }}>
         {renderSectionPageHeader(
           rocketImg,
           'Get started with Elastic Observability',
@@ -1794,7 +1794,7 @@ export const IngestHubPage: React.FC = () => {
         )}
       </div>
       <EuiHorizontalRule margin="none" css={dividerStyle} />
-      <div css={paddedContent} style={{ maxWidth: 1440, margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', flex: 1 }}>
+      <div css={paddedContent} style={{ width: '100%', display: 'flex', flexDirection: 'column', flex: 1 }}>
         <div style={{ height: 40 }} />
         <EuiAccordion
           id="step1-add-data"
@@ -2632,9 +2632,9 @@ export const IngestHubPage: React.FC = () => {
     placeholder: string
   ) => (
     <>
-      <div css={paddedContent} style={{ maxWidth: 1440, margin: '0 auto', width: '100%' }}>{renderSectionPageHeader(imageSrc, heading, subtitle)}</div>
+      <div css={paddedContent} style={{ width: '100%' }}>{renderSectionPageHeader(imageSrc, heading, subtitle)}</div>
       <EuiHorizontalRule margin="none" css={dividerStyle} />
-      <div css={paddedContent} style={{ maxWidth: 1440, margin: '0 auto', width: '100%' }}>
+      <div css={paddedContent} style={{ width: '100%' }}>
         <div style={{ height: 40 }} />
         <EuiText color="subdued">{placeholder}</EuiText>
       </div>
@@ -2643,7 +2643,7 @@ export const IngestHubPage: React.FC = () => {
 
   const renderPlatformMigrationView = () => (
     <>
-      <div css={paddedContent} style={{ maxWidth: 1440, margin: '0 auto', width: '100%' }}>
+      <div css={paddedContent} style={{ width: '100%' }}>
         {renderSectionPageHeader(
           platformMigrationHeaderImg,
           'Platform Migration',
@@ -2651,7 +2651,7 @@ export const IngestHubPage: React.FC = () => {
         )}
       </div>
       <EuiHorizontalRule margin="none" css={dividerStyle} />
-      <div css={paddedContent} style={{ maxWidth: 1440, margin: '0 auto', width: '100%' }}>
+      <div css={paddedContent} style={{ width: '100%' }}>
         <div style={{ height: 40 }} />
         {renderPlatformMigrationContent()}
       </div>
@@ -2694,8 +2694,8 @@ export const IngestHubPage: React.FC = () => {
 
     return (
     <>
-      <div css={paddedContent} style={{ maxWidth: 1440, margin: '0 auto', width: '100%' }}>
-        <div style={{ maxWidth: 1440, margin: '0 auto', width: '100%' }}>
+      <div css={paddedContent} style={{ width: '100%' }}>
+        <div style={{ width: '100%' }}>
           <div
             style={{
               display: 'flex',
@@ -3146,7 +3146,7 @@ export const IngestHubPage: React.FC = () => {
       `}
     >
       <div css={css`flex: 1; overflow-y: auto;`}>
-        <div css={paddedContent} style={{ maxWidth: 1440, margin: '0 auto', width: '100%' }}>
+        <div css={paddedContent} style={{ width: '100%' }}>
           <div
             style={{
               display: 'flex',
@@ -3169,7 +3169,7 @@ export const IngestHubPage: React.FC = () => {
           </div>
         </div>
         <EuiHorizontalRule margin="none" css={dividerStyle} />
-        <div css={paddedContent} style={{ maxWidth: 1440, margin: '0 auto', width: '100%' }}>
+        <div css={paddedContent} style={{ width: '100%' }}>
           <div style={{ height: 32 }} />
           <div css={css`margin-bottom: 48px;`}>
             <EuiTitle size="s">
