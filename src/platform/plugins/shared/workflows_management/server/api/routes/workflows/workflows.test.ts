@@ -141,7 +141,8 @@ describe('Workflow routes', () => {
           tags: ['a'],
           query: 'search',
         },
-        'default-space'
+        'default-space',
+        { includeExecutionHistory: false }
       );
       expect(response.ok).toHaveBeenCalledWith({ body: list });
     });
@@ -548,7 +549,9 @@ describe('Workflow routes', () => {
 
       await routeHandlers[key].handler(context, request, response);
 
-      expect(mockApi.getWorkflowStats).toHaveBeenCalledWith('default-space');
+      expect(mockApi.getWorkflowStats).toHaveBeenCalledWith('default-space', {
+        includeExecutionStats: false,
+      });
       expect(response.ok).toHaveBeenCalledWith({ body: stats });
     });
   });

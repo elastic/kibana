@@ -124,8 +124,12 @@ export class WorkflowsManagementApi {
     private readonly getWorkflowsExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>
   ) {}
 
-  public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {
-    return this.workflowsService.getWorkflows(params, spaceId);
+  public async getWorkflows(
+    params: GetWorkflowsParams,
+    spaceId: string,
+    options?: { includeExecutionHistory?: boolean }
+  ): Promise<WorkflowListDto> {
+    return this.workflowsService.getWorkflows(params, spaceId, options);
   }
 
   /**
@@ -471,8 +475,8 @@ export class WorkflowsManagementApi {
     return workflowsExecutionEngine.resumeWorkflowExecution(executionId, spaceId, input, request);
   }
 
-  public async getWorkflowStats(spaceId: string) {
-    return this.workflowsService.getWorkflowStats(spaceId);
+  public async getWorkflowStats(spaceId: string, options?: { includeExecutionStats?: boolean }) {
+    return this.workflowsService.getWorkflowStats(spaceId, options);
   }
 
   public async getWorkflowAggs(fields: string[] = [], spaceId: string) {

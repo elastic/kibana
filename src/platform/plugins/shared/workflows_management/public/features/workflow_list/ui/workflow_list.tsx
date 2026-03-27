@@ -301,11 +301,16 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         field: 'triggers',
         name: 'Trigger',
         width: '12%',
-        render: (value: unknown, item: WorkflowListItemDto) => (
-          <NextExecutionTime triggers={item.definition?.triggers ?? []} history={item.history}>
-            <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />
-          </NextExecutionTime>
-        ),
+        render: (value: unknown, item: WorkflowListItemDto) => {
+          if (!item.history || item.history.length === 0) {
+            return <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />;
+          }
+          return (
+            <NextExecutionTime triggers={item.definition?.triggers ?? []} history={item.history}>
+              <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />
+            </NextExecutionTime>
+          );
+        },
       },
       {
         name: 'Last run',
