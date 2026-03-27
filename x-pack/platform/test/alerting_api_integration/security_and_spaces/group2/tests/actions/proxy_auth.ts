@@ -22,7 +22,7 @@ export default function httpProxyBasicAuthTest({ getService }: FtrProviderContex
   const configService = getService('config');
   const objectRemover = new ObjectRemover(supertest);
 
-  describe.only('ensure proxy authentication works (with webhook)', () => {
+  describe('ensure proxy authentication works (with webhook)', () => {
     let webhookSimulatorURL: string = '';
     let webhookServer: http.Server;
     let proxyServer: http.Server | undefined;
