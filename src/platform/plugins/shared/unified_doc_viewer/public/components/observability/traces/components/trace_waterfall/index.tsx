@@ -164,19 +164,19 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
     [setActiveFlyoutType, setActiveSection, setActiveDocId, setActiveDocIndex]
   );
 
-  // EUI's flyout manager fires onClose with a synthetic MouseEvent('navigation')
-  // in two scenarios: cascade close (tab switch unmount) and back-button click.
-  // We must preserve restorable state during cascade close but honor back-button.
+  // EUI's flyout manager fires `onClose` with a synthetic MouseEvent('navigation'),
+  // When the user switches tabs in discover, and back-button click.
+  // We must preserve restorable state during tab switching, but not back-button.
   //
-  // NOTE: The 'navigation' event type string is an EUI internal — it is not part
+  // NOTE: The 'navigation' event type string is an EUI internal, it is not part
   // of EUI's public API and may change without notice. If this breaks after an EUI
-  // upgrade, check flyout_managed.tsx for the current synthetic event type.
+  // upgrade, check `flyout_managed.tsx` for the current synthetic event type.
   //
-  // The trick: when we receive a 'navigation' event, we defer the state clearing
-  // to a useEffect. During a cascade close the component is unmounting, so React
-  // will not run new effects — the deferred clear never commits and the restorable
+  // When we receive a 'navigation' event, we defer the state clearing to a
+  // `useEffect`. When switching tabs, the component is unmounting, so React
+  // will not run new effects, the deferred clear never happens and the restorable
   // state is preserved. During a back-button click the component stays alive, the
-  // effect runs on the next render, and the state is properly cleared.
+  // effect runs on the next render, and the state is cleared.
   //
   // See: https://github.com/elastic/eui/blob/v113.3.0/packages/eui/src/components/flyout/manager/flyout_managed.tsx
   const pendingCloseRef = useRef<'exit' | 'child' | null>(null);
