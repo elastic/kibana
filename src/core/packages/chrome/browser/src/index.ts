@@ -62,8 +62,9 @@ export type {
 
 export type {
   ChromeNextHeaderBack,
+  ChromeNextHeaderBadge,
   ChromeNextHeaderConfig,
-  ChromeNextHeaderMetadataItem,
+  ChromeNextHeaderMetadataSlotItem,
   ChromeNextHeaderGlobalActions,
   ChromeNextHeaderTab,
   ChromeNextHeaderCallout,

@@ -25,11 +25,26 @@ export interface ChromeNextHeaderConfig {
   title: string;
 
   /**
-   * Optional metadata badges/text for a second row below the title.
-   * E.g. "Managed", "Read-only", creation date, severity.
-   * TODO: Wire rendering in `ProjectNextHeader` when the metadata row is implemented.
+   * Optional badges displayed inline next to the title.
+   * Overflow rules (enforced by Chrome rendering):
+   * - 1–2 badges: show all.
+   * - 3+: show the first badge plus a "+N" overflow control that opens a popover with the rest.
+   * Guidance: prefer 1–2 badges; 3+ is for uncontrolled cases (e.g. user-applied tags).
+   * Badge max width: 200px (truncated text).
+   * The `filled` color variant is not exposed to avoid competing primary CTAs.
+   *
+   * TODO: Wire rendering in `ProjectNextHeader`.
    */
-  metadata?: ChromeNextHeaderMetadataItem[];
+  badges?: ChromeNextHeaderBadge[];
+
+  /**
+   * Optional metadata row below the title (second row).
+   * At most 3 items; no overflow — all are visible.
+   * Items are plain text (`EuiText`) or interactive (`EuiButtonEmpty`).
+   *
+   * TODO: Wire rendering in `ProjectNextHeader`.
+   */
+  metadata?: ChromeNextHeaderMetadataSlotItem[];
 
   /**
    * Global object actions next to the title. Edit title and share use fixed Chrome icons;
@@ -71,13 +86,20 @@ export interface ChromeNextHeaderBack {
   label?: string;
 }
 
-export interface ChromeNextHeaderMetadataItem {
+export interface ChromeNextHeaderBadge {
   label: string;
-  type: 'badge' | 'text';
-  /** Badge color (EUI badge color). Only used when type is 'badge'. */
-  color?: string;
+  /** EUI badge color. `filled` is intentionally excluded. */
+  color?: 'hollow' | 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'accent';
   tooltip?: string;
 }
+
+/**
+ * A single metadata slot item — either plain text or an interactive button.
+ * Text renders as `EuiText`; button renders as `EuiButtonEmpty`.
+ */
+export type ChromeNextHeaderMetadataSlotItem =
+  | { type: 'text'; label: string }
+  | { type: 'button'; label: string; onClick: () => void; iconType?: string };
 
 /**
  * Global actions beside the Chrome-Next title.
