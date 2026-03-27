@@ -95,7 +95,7 @@ export const scriptLibraryFiltersFromUrlParams = (
   scriptLibraryFilters.category = urlCategoryFilter;
 
   const urlSearchTermsFilter = urlParams.searchTerms
-    ? String(urlParams.searchTerms).split(',').sort()
+    ? String(urlParams.searchTerms).split(',')
     : [];
   scriptLibraryFilters.searchTerms = urlSearchTermsFilter;
 
