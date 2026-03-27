@@ -1687,6 +1687,7 @@
     "@kbn/test-es-server": "link:src/platform/packages/shared/kbn-test-es-server",
     "@kbn/test-eui-helpers": "link:src/platform/packages/private/kbn-test-eui-helpers",
     "@kbn/test-jest-helpers": "link:src/platform/packages/shared/kbn-test-jest-helpers",
+    "@kbn/test-kibana-server": "link:src/platform/packages/shared/kbn-test-kibana-server",
     "@kbn/test-saml-auth": "link:src/platform/packages/shared/kbn-test-saml-auth",
     "@kbn/test-subj-selector": "link:src/platform/packages/shared/kbn-test-subj-selector",
     "@kbn/test-suites-security-solution-apis": "link:x-pack/solutions/security/test/security_solution_api_integration",

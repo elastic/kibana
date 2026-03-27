@@ -8498,6 +8498,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/test-kibana-server@link:src/platform/packages/shared/kbn-test-kibana-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/test-saml-auth@link:src/platform/packages/shared/kbn-test-saml-auth":
   version "0.0.0"
   uid ""
