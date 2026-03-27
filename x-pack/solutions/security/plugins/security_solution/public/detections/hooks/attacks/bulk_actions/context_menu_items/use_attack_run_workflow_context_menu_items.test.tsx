@@ -186,7 +186,7 @@ describe('useAttackRunWorkflowContextMenuItems', () => {
     it('should return empty items and panels', () => {
       const { result } = renderHook(() =>
         useAttackRunWorkflowContextMenuItems({
-          attacksForWorkflowRun: [{ attackId: 'attack-1', relatedAlertIds: ['alert-1'] }],
+          attacksForWorkflowRun: [{ attackId: 'attack-1' }],
         })
       );
 
