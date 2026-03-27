@@ -26,6 +26,11 @@ function asRuntimeInputs(inputs: unknown): WorkflowYaml['inputs'] {
   return inputs as WorkflowYaml['inputs'];
 }
 
+/** Runtime triggers can include registered custom trigger ids (e.g. cases.updated). */
+function asRuntimeTriggers(triggers: unknown): WorkflowYaml['triggers'] {
+  return triggers as WorkflowYaml['triggers'];
+}
+
 const minimalConsoleStep = { name: 's1', type: 'console', with: {} };
 
 function baseWorkflow(overrides: Partial<WorkflowYaml> = {}): Partial<WorkflowYaml> {
@@ -50,6 +55,7 @@ describe('extractWorkflowMetadata (workflows management UI)', () => {
       inputCount: 0,
       constCount: 0,
       triggerCount: 0,
+      hasTriggerConditions: false,
       settingsUsed: [],
       hasDescription: false,
       tagCount: 0,
@@ -93,6 +99,28 @@ describe('extractWorkflowMetadata (workflows management UI)', () => {
     expect(meta.triggerCount).toBe(2);
     expect(meta.triggerTypes).toEqual(expect.arrayContaining(['manual', 'scheduled']));
     expect(meta.triggerTypes).toHaveLength(2);
+  });
+
+  it('tracks trigger condition presence without reporting condition text', () => {
+    const withCondition = extractWorkflowMetadata(
+      baseWorkflow({
+        triggers: asRuntimeTriggers([
+          { type: 'manual' },
+          { type: 'cases.updated', on: { condition: 'event.action == "create"' } },
+        ]),
+      })
+    );
+    const withoutCondition = extractWorkflowMetadata(
+      baseWorkflow({
+        triggers: asRuntimeTriggers([
+          { type: 'manual' },
+          { type: 'cases.updated', on: { condition: '   ' } },
+        ]),
+      })
+    );
+
+    expect(withCondition.hasTriggerConditions).toBe(true);
+    expect(withoutCondition.hasTriggerConditions).toBe(false);
   });
 
   it('reflects root field: inputs (array length)', () => {
