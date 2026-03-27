@@ -12,9 +12,11 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ModelSettings } from './model_settings';
 import { useModelSettingsForm } from './use_model_settings_form';
+import { useDefaultModelSettings } from '../../hooks/use_default_model_settings';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 
 jest.mock('./use_model_settings_form');
+jest.mock('../../hooks/use_default_model_settings');
 jest.mock('./feature_section', () => ({
   FeatureSection: ({ parentName, onReset }: { parentName: string; onReset: () => void }) => (
     <div data-test-subj={`featureSection-${parentName}`}>
@@ -24,8 +26,12 @@ jest.mock('./feature_section', () => ({
     </div>
   ),
 }));
+jest.mock('./default_model_section', () => ({
+  DefaultModelSection: () => <div data-test-subj="defaultModelSection">DefaultModelSection</div>,
+}));
 
 const mockUseModelSettingsForm = useModelSettingsForm as jest.Mock;
+const mockUseDefaultModelSettings = useDefaultModelSettings as jest.Mock;
 
 const childFeature: InferenceFeatureConfig = {
   featureId: 'child_1',
@@ -56,6 +62,16 @@ const defaultFormState = {
   resetSection: jest.fn(),
 };
 
+const defaultModelSettingsState = {
+  state: { defaultModelId: 'NO_DEFAULT_CONNECTOR', disallowOtherModels: false },
+  savedState: { defaultModelId: 'NO_DEFAULT_CONNECTOR', disallowOtherModels: false },
+  isDirty: false,
+  setDefaultModelId: jest.fn(),
+  setDisallowOtherModels: jest.fn(),
+  save: jest.fn().mockResolvedValue(undefined),
+  reset: jest.fn(),
+};
+
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
   <MemoryRouter>
     <EuiThemeProvider>
@@ -68,6 +84,7 @@ describe('ModelSettings', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseModelSettingsForm.mockReturnValue(defaultFormState);
+    mockUseDefaultModelSettings.mockReturnValue(defaultModelSettingsState);
   });
 
   it('renders loading spinner when loading', () => {
@@ -127,6 +144,28 @@ describe('ModelSettings', () => {
 
     fireEvent.click(screen.getByTestId('save-settings-button'));
     expect(save).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders the default model section', () => {
+    render(
+      <Wrapper>
+        <ModelSettings />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('defaultModelSection')).toBeInTheDocument();
+  });
+
+  it('save button is enabled when only default model settings are dirty', () => {
+    mockUseDefaultModelSettings.mockReturnValue({ ...defaultModelSettingsState, isDirty: true });
+
+    render(
+      <Wrapper>
+        <ModelSettings />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('save-settings-button')).toBeEnabled();
   });
 
   it('shows reset modal and calls resetSection on confirm', async () => {

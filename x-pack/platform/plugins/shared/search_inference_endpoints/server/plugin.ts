@@ -16,9 +16,11 @@ import type {
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { ApiPrivileges } from '@kbn/core-security-server';
 
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsConfig } from './config';
 import { DynamicConnectorsPoller } from './lib/dynamic_connectors';
 import { defineRoutes } from './routes';
+import { defineConnectorRoutes } from './routes/connectors';
 import { InferenceFeatureRegistry } from './inference_feature_registry';
 import { getForFeature as getForFeatureFn } from './inference_endpoints';
 import { createInferenceSettingsSavedObjectType } from './saved_objects/inference_settings';
@@ -51,6 +53,7 @@ export class SearchInferenceEndpointsPlugin
   private readonly config: SearchInferenceEndpointsConfig;
   private dynamicConnectorsPoller?: DynamicConnectorsPoller;
   private readonly featureRegistry: InferenceFeatureRegistry;
+  private inferenceStart?: InferenceServerStart;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -92,6 +95,11 @@ export class SearchInferenceEndpointsPlugin
       featureRegistry: this.featureRegistry,
       getForFeature,
       getConnectorList,
+    });
+    defineConnectorRoutes({
+      logger: this.logger,
+      router,
+      getInferenceStart: () => this.inferenceStart,
     });
 
     plugins.features.registerKibanaFeature({
@@ -142,6 +150,8 @@ export class SearchInferenceEndpointsPlugin
   }
 
   public start(core: CoreStart, plugins: SearchInferenceEndpointsPluginStartDependencies) {
+    this.inferenceStart = plugins.inference;
+
     if (this.config.dynamicConnectors.enabled) {
       this.logger.debug(
         `dynamic connectors enabled: ${this.config.dynamicConnectors.enabled} - polling ${this.config.dynamicConnectors.pollingIntervalMins} mins`

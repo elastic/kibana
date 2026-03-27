@@ -211,3 +211,96 @@ export const SETTINGS_NO_FEATURES_DESCRIPTION = i18n.translate(
     defaultMessage: 'No features have been registered for inference settings in this project.',
   }
 );
+
+export const DEFAULT_MODEL_TITLE = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.title',
+  {
+    defaultMessage: 'Default model',
+  }
+);
+
+export const DEFAULT_MODEL_DESCRIPTION = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.description',
+  {
+    defaultMessage:
+      'Choose a default inference connector for all AI features. Individual features can override this with their own connector.',
+  }
+);
+
+export const DEFAULT_MODEL_LABEL = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.label',
+  {
+    defaultMessage: 'Default model',
+  }
+);
+
+export const DEFAULT_MODEL_PLACEHOLDER = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.placeholder',
+  {
+    defaultMessage: 'Select a default model',
+  }
+);
+
+export const DEFAULT_MODEL_NO_DEFAULT_OPTION = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.noDefault',
+  {
+    defaultMessage: 'No default model',
+  }
+);
+
+export const DEFAULT_MODEL_PRECONFIGURED_GROUP = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.preconfiguredGroup',
+  {
+    defaultMessage: 'Pre-configured',
+  }
+);
+
+export const DEFAULT_MODEL_CUSTOM_GROUP = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.customGroup',
+  {
+    defaultMessage: 'Custom connectors',
+  }
+);
+
+export const DISALLOW_OTHER_MODELS_LABEL = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.disallowOtherModels',
+  {
+    defaultMessage: 'Disallow all other connectors',
+  }
+);
+
+export const DISALLOW_OTHER_MODELS_TOOLTIP = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.disallowOtherModels.tooltip',
+  {
+    defaultMessage: 'Only the chosen default connector will be shown to users of this space.',
+  }
+);
+
+export const DEFAULT_MODEL_CONNECTOR_NOT_EXIST_ERROR = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.error.connectorNotExist',
+  {
+    defaultMessage:
+      'The connector previously selected does not exist anymore. Please select a different option.',
+  }
+);
+
+export const DEFAULT_MODEL_DISALLOW_NO_DEFAULT_ERROR = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.error.disallowNoDefault',
+  {
+    defaultMessage: 'When disallowing all other connectors, a default model must be selected.',
+  }
+);
+
+export const DEFAULT_MODEL_SAVE_SUCCESS = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.saveSuccess',
+  {
+    defaultMessage: 'Default model settings saved',
+  }
+);
+
+export const DEFAULT_MODEL_SAVE_ERROR = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.saveError',
+  {
+    defaultMessage: 'Failed to save default model settings',
+  }
+);
