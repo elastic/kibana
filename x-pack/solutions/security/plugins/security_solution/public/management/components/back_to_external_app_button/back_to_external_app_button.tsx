@@ -40,7 +40,7 @@ export const BackToExternalAppButton = memo<BackToExternalAppButtonProps>(
         {...commonProps}
         flush="left"
         size="xs"
-        iconType="arrowLeft"
+        iconType="chevronSingleLeft"
         href={backButtonUrl}
         onClick={handleBackOnClick}
         textProps={{ className: 'text' }}

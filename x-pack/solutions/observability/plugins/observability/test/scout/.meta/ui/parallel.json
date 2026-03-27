@@ -1,5 +1,5 @@
 {
-  "sha1": "25b02780ca060f02d4c86c8f211d3ed20f3dee2f",
+  "sha1": "bd30f306994286b0f826f365c109f4802d98d42f",
   "tests": [
     {
       "id": "f3ddbbb53c28ebe-f2cd2d3cdc77643",
@@ -644,7 +644,7 @@
     {
       "id": "678552a93faa6fd-8761d9717953ff0",
       "title": "Rules Page - Rules Tab should show the edit action button for an editable rule & open the edit rule flyout",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -653,8 +653,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_rules_tab/rules_page_rules_tab.admin.spec.ts",
-        "line": 41,
-        "column": 9
+        "line": 42,
+        "column": 10
       }
     },
     {
@@ -669,7 +669,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_rules_tab/rules_page_rules_tab.admin.spec.ts",
-        "line": 73,
+        "line": 74,
         "column": 9
       }
     },

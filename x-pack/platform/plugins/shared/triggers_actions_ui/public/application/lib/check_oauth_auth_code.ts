@@ -23,5 +23,5 @@ export function usesOAuthAuthorizationCode(connector: ActionConnector): boolean 
   const authType =
     (config?.authType as string) || ((config?.auth as Record<string, unknown>)?.type as string);
 
-  return OAUTH_AUTH_TYPES.has(authType);
+  return OAUTH_AUTH_TYPES.has(authType) || connector.authMode === 'per-user';
 }

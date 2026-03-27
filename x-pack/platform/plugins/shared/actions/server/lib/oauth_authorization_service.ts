@@ -6,6 +6,7 @@
  */
 
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { AuthMode } from '@kbn/connector-specs';
 import type { ActionsClient } from '../actions_client';
 import { BASE_ACTION_API_PATH } from '../../common';
 
@@ -113,11 +114,12 @@ export class OAuthAuthorizationService {
    * @throws Error if connector doesn't use a supported OAuth flow
    */
   private validateOAuthConnector(
-    config: OAuthConnectorConfig
+    config: OAuthConnectorConfig,
+    authMode?: AuthMode
   ): 'oauth_authorization_code' | 'ears' {
     const authType = config?.authType || config?.auth?.type;
 
-    if (authType === 'oauth_authorization_code' || authType === 'ears') {
+    if (authMode === 'per-user' || authType === 'oauth_authorization_code' || authType === 'ears') {
       return authType;
     }
 
@@ -138,7 +140,7 @@ export class OAuthAuthorizationService {
     const config = connector.config as OAuthConnectorConfig;
 
     // Validate this is an OAuth connector and get the resolved auth type
-    const authTypeId = this.validateOAuthConnector(config);
+    const authTypeId = this.validateOAuthConnector(config, connector.authMode);
 
     // Fetch connector with decrypted secrets
     const rawAction =

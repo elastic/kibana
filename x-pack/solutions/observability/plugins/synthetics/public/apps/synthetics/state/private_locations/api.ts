@@ -22,7 +22,7 @@ export const fetchAgentPolicies = async (): Promise<AgentPolicyInfo[]> => {
 export const createSyntheticsPrivateLocation = async (
   newLocation: NewLocation
 ): Promise<PrivateLocation> => {
-  return await apiService.post(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS, newLocation, undefined, {
+  return apiService.post(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS, newLocation, undefined, {
     version: INITIAL_REST_VERSION,
   });
 };

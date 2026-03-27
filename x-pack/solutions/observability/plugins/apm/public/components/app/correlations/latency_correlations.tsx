@@ -231,7 +231,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
                 'xpack.apm.correlations.latencyCorrelations.correlationsTable.filterDescription',
                 { defaultMessage: 'Filter by {fieldName}', values: { fieldName } }
               ),
-            icon: 'plusInCircle',
+            icon: 'plusCircle',
             type: 'icon',
             onClick: ({ fieldName, fieldValue }: LatencyCorrelation) =>
               onAddFilter({
@@ -250,7 +250,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
                 'xpack.apm.correlations.latencyCorrelations.correlationsTable.excludeDescription',
                 { defaultMessage: 'Filter out {fieldName}', values: { fieldName } }
               ),
-            icon: 'minusInCircle',
+            icon: 'minusCircle',
             type: 'icon',
             onClick: ({ fieldName, fieldValue }: LatencyCorrelation) =>
               onAddFilter({
