@@ -180,6 +180,8 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
   //
   // See: https://github.com/elastic/eui/blob/v113.3.0/packages/eui/src/components/flyout/manager/flyout_managed.tsx
   const pendingCloseRef = useRef<'exit' | 'child' | null>(null);
+  // Dummy state update to force a re-render so the effect below can fire.
+  const [, forceRender] = useState(0);
 
   useEffect(() => {
     if (pendingCloseRef.current === 'exit') {
@@ -195,6 +197,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
     (event) => {
       if (event.type === 'navigation') {
         pendingCloseRef.current = 'exit';
+        forceRender((n) => n + 1);
         return;
       }
 
@@ -208,6 +211,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
     (event) => {
       if (event.type === 'navigation') {
         pendingCloseRef.current = 'child';
+        forceRender((n) => n + 1);
         return;
       }
 
