@@ -37,11 +37,18 @@ import {
   createDiscoverFlyoutStreamFieldLink,
   createDiscoverFlyoutStreamProcessingLink,
 } from './discover_features';
+import { StreamsAppContextProvider } from './components/streams_app_context_provider';
 import { StreamsTelemetryService } from './telemetry/service';
 import { StreamsAppLocatorDefinition } from '../common/locators';
 
 const StreamsApplication = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.StreamsApplication }))
+);
+
+const StreamsListEmptyPromptLazy = dynamic(() =>
+  import('./components/stream_list_view/streams_list_empty_prompt').then((mod) => ({
+    default: mod.StreamsListEmptyPrompt,
+  }))
 );
 
 export const renderApp = ({
@@ -155,6 +162,32 @@ export class StreamsAppPlugin
       appRoute: '/app/streams',
       category: DEFAULT_APP_CATEGORIES.management,
       order: 10000,
+      deepLinks: [
+        {
+          id: 'streams-list',
+          title: i18n.translate('xpack.streams.nav.dataStreams', {
+            defaultMessage: 'Data streams',
+          }),
+          path: '/',
+          visibleIn: [],
+        },
+        {
+          id: 'significant-events',
+          title: i18n.translate('xpack.streams.nav.significantEvents', {
+            defaultMessage: 'Significant events',
+          }),
+          path: '/',
+          visibleIn: [],
+        },
+        {
+          id: 'data-sources',
+          title: i18n.translate('xpack.streams.nav.dataSources', {
+            defaultMessage: 'Data sources',
+          }),
+          path: '/data-sources',
+          visibleIn: [],
+        },
+      ],
       updater$: from(startServicesPromise).pipe(
         switchMap(([_, pluginsStart]) =>
           pluginsStart.streams.navigationStatus$.pipe(
@@ -243,6 +276,42 @@ export class StreamsAppPlugin
           services,
           isServerless: this.context.env.packageInfo.buildFlavor === 'serverless',
         });
+      },
+      renderEmbeddedStreamsEmptyPrompt: (container: HTMLElement): (() => void) => {
+        const memoryHistory = createMemoryHistory({ initialEntries: ['/'], initialIndex: 0 });
+        const scopedHistory = new CoreScopedHistory(memoryHistory, '/app/streams');
+        const appParams: AppMountParameters = {
+          element: container,
+          history: scopedHistory,
+          appBasePath: '/app/streams',
+          onAppLeave: () => {},
+          setHeaderActionMenu: () => {},
+          theme$: coreStart.theme.theme$,
+        };
+        const services: StreamsAppServices = {
+          dataStreamsClient: new DataStreamsStatsService()
+            .start({ http: coreStart.http })
+            .getClient(),
+          telemetryClient: this.telemetry.getClient(),
+          version: this.version,
+        };
+        ReactDOM.render(
+          coreStart.rendering.addContext(
+            <StreamsAppContextProvider
+              context={{
+                appParams,
+                core: coreStart,
+                dependencies: { start: pluginsStart },
+                services,
+                isServerless: this.context.env.packageInfo.buildFlavor === 'serverless',
+              }}
+            >
+              <StreamsListEmptyPromptLazy />
+            </StreamsAppContextProvider>
+          ),
+          container
+        );
+        return () => ReactDOM.unmountComponentAtNode(container);
       },
     };
   }

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { EuiButtonGroup, EuiCard } from '@elastic/eui';
+import { EuiCard, EuiSuperSelect, EuiText } from '@elastic/eui';
 import type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
@@ -55,18 +55,52 @@ import { DiscoverTour } from './application/discover_tour';
 
 const VERSION_OPTIONS = [
   {
-    id: 'blockUx' as IngestHubVersion,
-    label: 'Block',
-    title: '',
-    toolTipContent: 'User lands in Kibana and is blocked and pushed to add data.',
-    toolTipProps: { position: 'top' as const, className: 'onboardingSwitcherTooltip' },
+    value: 'blockUx' as IngestHubVersion,
+    inputDisplay: 'Block',
+    dropdownDisplay: (
+      <>
+        <strong>Block</strong>
+        <EuiText size="s" color="subdued">
+          <p>User lands in Kibana and is blocked and pushed to add data.</p>
+        </EuiText>
+      </>
+    ),
   },
   {
-    id: 'skipUx' as IngestHubVersion,
-    label: 'Skip',
-    title: '',
-    toolTipContent: 'User lands in Kibana and is pushed to add data but can skip the flow.',
-    toolTipProps: { position: 'top' as const, className: 'onboardingSwitcherTooltip' },
+    value: 'streamsUx' as IngestHubVersion,
+    inputDisplay: 'Streams',
+    dropdownDisplay: (
+      <>
+        <strong>Streams</strong>
+        <EuiText size="s" color="subdued">
+          <p>User lands in Kibana and is pushed to add data but can skip the flow.</p>
+        </EuiText>
+      </>
+    ),
+  },
+  {
+    value: 'agentUx' as IngestHubVersion,
+    inputDisplay: 'Agent',
+    dropdownDisplay: (
+      <>
+        <strong>Agent</strong>
+        <EuiText size="s" color="subdued">
+          <p>Same as Streams: classic Observability without Add data emphasis.</p>
+        </EuiText>
+      </>
+    ),
+  },
+  {
+    value: 'aiSourceMap' as IngestHubVersion,
+    inputDisplay: 'AI SourceMap',
+    dropdownDisplay: (
+      <>
+        <strong>AI SourceMap</strong>
+        <EuiText size="s" color="subdued">
+          <p>User lands in Kibana and is pushed to add data but can skip the flow.</p>
+        </EuiText>
+      </>
+    ),
   },
 ];
 
@@ -96,30 +130,29 @@ const VersionSwitcherNavControl: React.FC<{ navigateToApp?: (appId: string, opti
     <>
       <style>{`.onboardingSwitcherTooltip { z-index: 2147483647 !important; }`}</style>
       <EuiCard
-      layout="horizontal"
-      titleSize="xs"
-      title={<span style={{ fontSize: 13 }}>Onboarding Experience</span>}
-      description=""
-      paddingSize="s"
-      style={{ textAlign: 'center' }}
-    >
-      <EuiButtonGroup
-        legend="Onboarding Experience"
-        options={VERSION_OPTIONS}
-        idSelected={active}
-        onChange={(id) => {
-          versionStore.setVersion(id as IngestHubVersion);
-          sessionStorage.removeItem('ingestHub:showDiscoverTour');
-          sessionStorage.removeItem('ingestHub:dataAdded');
-          const path =
-            id === 'blockUx' ? '/ingest-hub/integrations' : '/ingest-hub';
-          navigateToApp?.(PLUGIN_ID, { path });
-        }}
-        buttonSize="compressed"
-        color="text"
-        isFullWidth={false}
-      />
-    </EuiCard>
+        layout="horizontal"
+        titleSize="xs"
+        title={<span style={{ fontSize: 13 }}>Onboarding Experience</span>}
+        description=""
+        paddingSize="s"
+        style={{ textAlign: 'center', width: 200 }}
+      >
+        <EuiSuperSelect
+          options={VERSION_OPTIONS}
+          valueOfSelected={active}
+          onChange={(value) => {
+            versionStore.setVersion(value);
+            sessionStorage.removeItem('ingestHub:showDiscoverTour');
+            sessionStorage.removeItem('ingestHub:dataAdded');
+            const path = value === 'blockUx' ? '/ingest-hub/integrations' : '/ingest-hub';
+            navigateToApp?.(PLUGIN_ID, { path });
+          }}
+          compressed
+          hasDividers
+          fullWidth
+          aria-label="Onboarding Experience"
+        />
+      </EuiCard>
     <DiscoverTour />
     </>,
     portalContainer
@@ -186,7 +219,7 @@ export class ObservabilityOnboardingPlugin
         },
         {
           id: 'ingest-hub-integrations',
-          title: 'Data sources',
+          title: 'Add data',
           path: '/ingest-hub/integrations',
           visibleIn: [],
         },

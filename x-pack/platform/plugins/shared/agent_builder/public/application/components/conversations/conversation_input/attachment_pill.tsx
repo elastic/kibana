@@ -6,17 +6,9 @@
  */
 
 import { css } from '@emotion/css';
-import {
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiButtonIcon,
-  EuiIcon,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React from 'react';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 
@@ -29,8 +21,6 @@ export interface AttachmentPillProps {
   onRemoveAttachment?: () => void;
 }
 
-const DEFAULT_ICON = 'document';
-
 export const AttachmentPill: React.FC<AttachmentPillProps> = ({
   attachment,
   onRemoveAttachment,
@@ -38,21 +28,9 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
   const { attachmentsService } = useAgentBuilderServices();
   const { euiTheme } = useEuiTheme();
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
-  const [isHovered, setIsHovered] = useState(false);
 
   const displayName = uiDefinition?.getLabel(attachment) ?? attachment.type;
   const canRemoveAttachment = Boolean(onRemoveAttachment);
-  const iconType = uiDefinition?.getIcon?.() ?? DEFAULT_ICON;
-
-  const iconContainerStyles = css`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: ${euiTheme.size.xl};
-    height: ${euiTheme.size.xl};
-    border-radius: ${euiTheme.border.radius.small};
-    background-color: ${euiTheme.colors.backgroundBasePrimary};
-  `;
 
   const titleStyles = css`
     display: -webkit-box;
@@ -73,22 +51,15 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
         max-width: 200px;
         border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.darkShade};
       `}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       data-test-subj={`agentBuilderAttachmentPill-${attachment.id}`}
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <div className={iconContainerStyles}>
-            <EuiIcon type={iconType} size="m" color="primary" />
-          </div>
-        </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 0 }}>
           <EuiText size="xs" className={titleStyles}>
             <strong>{displayName}</strong>
           </EuiText>
         </EuiFlexItem>
-        {canRemoveAttachment && isHovered && (
+        {canRemoveAttachment && (
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
               iconType="cross"

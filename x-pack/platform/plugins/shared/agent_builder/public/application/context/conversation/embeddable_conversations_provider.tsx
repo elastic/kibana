@@ -9,20 +9,17 @@ import React, { useMemo, useEffect, useCallback, useState, useRef } from 'react'
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type {
   EmbeddableConversationInternalProps,
   EmbeddableConversationProps,
 } from '../../../embeddable/types';
 import { ConversationContext } from './conversation_context';
-import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
 import { AgentBuilderServicesContext } from '../agent_builder_services_context';
-import { StreamingProvider } from '../streaming/streaming_context';
+import { SendMessageProvider } from '../send_message/send_message_context';
 import { useConversationActions } from './use_conversation_actions';
-import { ConversationChangeNotifier } from './conversation_change_notifier';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
 import { AppLeaveContext } from '../app_leave_context';
+import { AgentBuilderTourProvider } from '../agent_builder_tour_context';
 
 const noopOnAppLeave = () => {};
 interface EmbeddableConversationsProviderProps extends EmbeddableConversationInternalProps {
@@ -33,10 +30,23 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   children,
   coreStart,
   services,
+  onAttachmentRemoved,
   ...contextProps
 }) => {
   // Track current props, starting with initial props
   const [currentProps, setCurrentProps] = useState<EmbeddableConversationProps>(contextProps);
+
+  // Sync externally-controlled props (attachments, placeholder) into internal state
+  // without triggering a full remount. Other props (sessionTag, agentId, etc.) are
+  // intentionally not synced because they affect conversation identity.
+  const incomingAttachments = contextProps.attachments;
+  const incomingPlaceholder = contextProps.placeholder;
+  useEffect(() => {
+    setCurrentProps((prev) => ({ ...prev, attachments: incomingAttachments }));
+  }, [incomingAttachments]);
+  useEffect(() => {
+    setCurrentProps((prev) => ({ ...prev, placeholder: incomingPlaceholder }));
+  }, [incomingPlaceholder]);
 
   // Register callbacks to allow parent to update props and clear browserApiTools
   const onRegisterCallbacks = contextProps.onRegisterCallbacks;
@@ -47,10 +57,24 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
         resetBrowserApiTools: () =>
           setCurrentProps((prevProps) => ({ ...prevProps, browserApiTools: undefined })),
         addAttachment: (attachment) =>
-          setCurrentProps((prevProps) => ({
-            ...prevProps,
-            attachments: upsertAttachmentsIntoList(prevProps.attachments, [attachment]),
-          })),
+          setCurrentProps((prevProps) => {
+            const existingAttachments = prevProps.attachments ?? [];
+
+            // If the new attachment has an ID, check for duplicates
+            if (attachment.id) {
+              const existingIndex = existingAttachments.findIndex((a) => a.id === attachment.id);
+              if (existingIndex !== -1) {
+                const updatedAttachments = [...existingAttachments];
+                updatedAttachments[existingIndex] = attachment;
+                return { ...prevProps, attachments: updatedAttachments };
+              }
+            }
+
+            return {
+              ...prevProps,
+              attachments: [...existingAttachments, attachment],
+            };
+          }),
       });
     }
   }, [onRegisterCallbacks]);
@@ -123,6 +147,13 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     validateAndSetConversationId,
   ]);
 
+  const onConversationCreated = useCallback(
+    ({ conversationId: id }: { conversationId: string }) => {
+      setConversationId(id);
+    },
+    [setConversationId]
+  );
+
   const onDeleteConversation = useCallback(() => {
     setConversationId(undefined);
   }, [setConversationId]);
@@ -140,6 +171,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     conversationId,
     queryClient,
     conversationsService: services.conversationsService,
+    onConversationCreated,
     onDeleteConversation,
   });
 
@@ -157,26 +189,16 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     setCurrentProps((prevProps) => ({ ...prevProps, attachments: undefined }));
   }, []);
 
-  const upsertAttachments = useCallback((attachments: AttachmentInput[]) => {
-    if (attachments.length === 0) {
-      return;
-    }
-    setCurrentProps((prevProps) => ({
-      ...prevProps,
-      attachments: upsertAttachmentsIntoList(prevProps.attachments, attachments),
-    }));
-  }, []);
-
-  const removeAttachment = useCallback((attachmentIndex: number) => {
-    setCurrentProps((prevProps) => ({
-      ...prevProps,
-      attachments: prevProps.attachments?.filter((_, index) => index !== attachmentIndex),
-    }));
-  }, []);
-
-  const setAgentId = useCallback((id: string) => {
-    setCurrentProps((prev) => ({ ...prev, agentId: id, newConversation: true }));
-  }, []);
+  const removeAttachment = useCallback(
+    (attachmentIndex: number) => {
+      setCurrentProps((prevProps) => ({
+        ...prevProps,
+        attachments: prevProps.attachments?.filter((_, index) => index !== attachmentIndex),
+      }));
+      onAttachmentRemoved?.();
+    },
+    [onAttachmentRemoved]
+  );
 
   const conversationContextValue = useMemo(
     () => ({
@@ -184,15 +206,14 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       shouldStickToBottom: true,
       isEmbeddedContext: true,
       sessionTag: currentProps.sessionTag,
-      agentId: currentProps.agentId ?? agentBuilderDefaultAgentId,
+      agentId: currentProps.agentId,
+      placeholder: currentProps.placeholder,
       initialMessage: currentProps.initialMessage,
       autoSendInitialMessage: currentProps.autoSendInitialMessage ?? false,
       resetInitialMessage,
       browserApiTools: currentProps.browserApiTools,
       setConversationId,
-      setAgentId,
       attachments: currentProps.attachments,
-      upsertAttachments,
       resetAttachments,
       removeAttachment,
       conversationActions,
@@ -201,14 +222,13 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       conversationId,
       currentProps.sessionTag,
       currentProps.agentId,
+      currentProps.placeholder,
       currentProps.initialMessage,
       currentProps.autoSendInitialMessage,
       currentProps.browserApiTools,
       currentProps.attachments,
-      upsertAttachments,
       resetInitialMessage,
       setConversationId,
-      setAgentId,
       resetAttachments,
       removeAttachment,
       conversationActions,
@@ -221,12 +241,11 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
         <QueryClientProvider client={queryClient}>
           <AgentBuilderServicesContext.Provider value={services}>
             <AppLeaveContext.Provider value={noopOnAppLeave}>
-              <StreamingProvider>
-                <ConversationContext.Provider value={conversationContextValue}>
-                  <ConversationChangeNotifier />
-                  {children}
-                </ConversationContext.Provider>
-              </StreamingProvider>
+              <ConversationContext.Provider value={conversationContextValue}>
+                <AgentBuilderTourProvider>
+                  <SendMessageProvider>{children}</SendMessageProvider>
+                </AgentBuilderTourProvider>
+              </ConversationContext.Provider>
             </AppLeaveContext.Provider>
           </AgentBuilderServicesContext.Provider>
         </QueryClientProvider>

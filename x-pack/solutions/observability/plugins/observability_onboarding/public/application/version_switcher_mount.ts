@@ -55,22 +55,25 @@ export const mountVersionSwitcherWidget = () => {
       transition: 'background 0.15s',
     });
     btn.addEventListener('click', () => {
-      versionStore.setVersion(id as 'blockUx' | 'skipUx');
+      versionStore.setVersion(id as 'blockUx' | 'streamsUx' | 'agentUx');
     });
     return btn;
   };
 
   const blockBtn = makeBtn('blockUx', 'Block');
-  const skipBtn = makeBtn('skipUx', 'Skip');
+  const streamsBtn = makeBtn('streamsUx', 'Streams');
+  const agentBtn = makeBtn('agentUx', 'Agent');
   container.appendChild(blockBtn);
-  container.appendChild(skipBtn);
+  container.appendChild(streamsBtn);
+  container.appendChild(agentBtn);
 
   const updateButtons = () => {
     const current = versionStore.getSnapshot();
     const activeStyle = { background: '#343741', color: '#DFE5EF' };
     const inactiveStyle = { background: 'transparent', color: '#98A2B3' };
     Object.assign(blockBtn.style, current === 'blockUx' ? activeStyle : inactiveStyle);
-    Object.assign(skipBtn.style, current === 'skipUx' ? activeStyle : inactiveStyle);
+    Object.assign(streamsBtn.style, current === 'streamsUx' ? activeStyle : inactiveStyle);
+    Object.assign(agentBtn.style, current === 'agentUx' ? activeStyle : inactiveStyle);
   };
 
   updateButtons();

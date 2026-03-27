@@ -173,7 +173,7 @@ export const Navigation = ({
                   >
                     {(closePopover, ids) => (
                       <SideNav.SecondaryMenu
-                        title={item.label}
+                        title={item.hidePanelTitle ? undefined : item.label}
                         badgeType={item.badgeType}
                         isNew={getIsNewSecondary(item.id)}
                       >
@@ -370,7 +370,7 @@ export const Navigation = ({
                   >
                     {(closePopover, ids) => (
                       <SideNav.SecondaryMenu
-                        title={item.label}
+                        title={item.hidePanelTitle ? undefined : item.label}
                         badgeType={item.badgeType}
                         isNew={getIsNewSecondary(item.id)}
                       >
@@ -431,7 +431,7 @@ export const Navigation = ({
               <SideNav.SecondaryMenu
                 badgeType={openerNode.badgeType}
                 isPanel
-                title={openerNode.label}
+                title={openerNode.hidePanelTitle ? undefined : openerNode.label}
                 isNew={getIsNewSecondary(openerNode.id)}
               >
                 {openerNode.sections?.map((section, sectionIndex) => (

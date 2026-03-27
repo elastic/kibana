@@ -17,7 +17,7 @@ import useAsync from 'react-use/lib/useAsync';
 import { AssetImage } from '../asset_image';
 import { useKibana } from '../../hooks/use_kibana';
 
-export const StreamsListEmptyPrompt = () => {
+export const StreamsListEmptyPrompt = ({ onAddData }: { onAddData?: () => void }) => {
   const {
     core: { docLinks, http },
     dependencies: {
@@ -89,7 +89,13 @@ export const StreamsListEmptyPrompt = () => {
         </p>
       }
       actions={
-        onboardingLink.value ? (
+        onAddData ? (
+          <EuiButton color="primary" fill onClick={onAddData}>
+            {i18n.translate('xpack.streams.emptyState.addDataButton', {
+              defaultMessage: 'Add data',
+            })}
+          </EuiButton>
+        ) : onboardingLink.value ? (
           <EuiButton color="primary" fill href={onboardingLink.value}>
             {i18n.translate('xpack.streams.emptyState.addDataButton', {
               defaultMessage: 'Add data',

@@ -42,7 +42,7 @@ function isEditingFromDashboard(
 
 const INGEST_HUB_VERSION_STORAGE_KEY = 'ingestHub:activeVersion';
 
-/** Observable of Ingest Hub version (skipUx = hide Data management nav). No cross-plugin import. */
+/** Observable of Ingest Hub version (streamsUx = hide Data management nav). No cross-plugin import. */
 function getIngestHubVersion$() {
   const getVersion = () => {
     try {
@@ -67,11 +67,13 @@ function createNavTree({
   showAiAssistant,
   isCloudEnabled,
   hideIngestHubDataManagement = false,
+  aiSourceMapMode = false,
 }: {
   streamsAvailable?: boolean;
   showAiAssistant?: boolean;
   isCloudEnabled?: boolean;
   hideIngestHubDataManagement?: boolean;
+  aiSourceMapMode?: boolean;
 }) {
   const navTree: NavigationTreeDefinition = {
     body: [
@@ -121,8 +123,43 @@ function createNavTree({
       ...(streamsAvailable
         ? [
             {
+              id: 'streamsNav',
+              title: i18n.translate('xpack.observability.obltNav.streams', {
+                defaultMessage: 'Streams',
+              }),
               link: 'streams' as const,
               icon: 'productStreamsWired',
+              renderAs: 'panelOpener' as const,
+              children: [
+              {
+                id: 'streams_main',
+                title: '',
+                children: [
+                  {
+                    link: 'streams:streams-list' as const,
+                  },
+                  {
+                    // Hidden catch-all that keeps the Streams panel open when
+                    // navigating to stream detail/management pages whose URLs
+                    // don't match any explicit nav item (e.g. /{key}/management/{tab}).
+                    link: 'streams:streams-list' as const,
+                    sideNavStatus: 'hidden' as const,
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      const base = prepend('/app/streams');
+                      if (!pathNameSerialized.startsWith(base)) return false;
+                      const streamsPath = pathNameSerialized.slice(base.length);
+                      return /^\/[^/]+\/management/.test(streamsPath);
+                    },
+                  },
+                  {
+                    link: 'streams:significant-events' as const,
+                  },
+                  {
+                    link: 'streams:data-sources' as const,
+                  },
+                ],
+              },
+              ],
             },
           ]
         : []),
@@ -448,50 +485,58 @@ function createNavTree({
             id: 'ingestHub_main',
             title: '',
             children: [
+              ...(!aiSourceMapMode
+                ? [
+                    {
+                      link: 'observabilityOnboarding:ingest-hub' as const,
+                      title: i18n.translate('xpack.observability.obltNav.ingestHub.getStarted', {
+                        defaultMessage: 'Get started',
+                      }),
+                    },
+                  ]
+                : []),
               {
-                link: 'observabilityOnboarding:ingest-hub',
-                title: i18n.translate('xpack.observability.obltNav.ingestHub.getStarted', {
-                  defaultMessage: 'Get started',
-                }),
-              },
-              {
-                link: 'observabilityOnboarding:ingest-hub-integrations',
+                link: 'observabilityOnboarding:ingest-hub-integrations' as const,
                 title: i18n.translate('xpack.observability.obltNav.ingestHub.dataSources', {
-                  defaultMessage: 'Data sources',
+                  defaultMessage: 'Add data',
                 }),
               },
             ],
           },
-          {
-            id: 'ingestHub_migration',
-            title: i18n.translate('xpack.observability.obltNav.ingestHub.migration', {
-              defaultMessage: 'Migration',
-            }),
-            children: [
-              {
-                link: 'observabilityOnboarding:ingest-hub-platform-migration',
-                title: i18n.translate(
-                  'xpack.observability.obltNav.ingestHub.platformMigration',
-                  {
-                    defaultMessage: 'Platform Migration',
-                  }
-                ),
-              },
-              {
-                link: 'observabilityOnboarding:ingest-hub-dashboards',
-                title: i18n.translate('xpack.observability.obltNav.ingestHub.dashboards', {
-                  defaultMessage: 'Dashboards',
-                }),
-              },
-              {
-                link: 'observabilityOnboarding:ingest-hub-rules',
-                title: i18n.translate('xpack.observability.obltNav.ingestHub.rules', {
-                  defaultMessage: 'Rules & Monitors',
-                }),
-              },
-            ],
-          },
-          ...(hideIngestHubDataManagement
+          ...(!aiSourceMapMode
+            ? [
+                {
+                  id: 'ingestHub_migration',
+                  title: i18n.translate('xpack.observability.obltNav.ingestHub.migration', {
+                    defaultMessage: 'Migration',
+                  }),
+                  children: [
+                    {
+                      link: 'observabilityOnboarding:ingest-hub-platform-migration' as const,
+                      title: i18n.translate(
+                        'xpack.observability.obltNav.ingestHub.platformMigration',
+                        {
+                          defaultMessage: 'Platform Migration',
+                        }
+                      ),
+                    },
+                    {
+                      link: 'observabilityOnboarding:ingest-hub-dashboards' as const,
+                      title: i18n.translate('xpack.observability.obltNav.ingestHub.dashboards', {
+                        defaultMessage: 'Dashboards',
+                      }),
+                    },
+                    {
+                      link: 'observabilityOnboarding:ingest-hub-rules' as const,
+                      title: i18n.translate('xpack.observability.obltNav.ingestHub.rules', {
+                        defaultMessage: 'Rules & Monitors',
+                      }),
+                    },
+                  ],
+                },
+              ]
+            : []),
+          ...(hideIngestHubDataManagement || aiSourceMapMode
             ? []
             : [
                 {
@@ -761,7 +806,11 @@ export const createDefinition = (
         streamsAvailable: streamsStatus.status === 'enabled',
         showAiAssistant: chatExperience !== AIChatExperience.Agent,
         isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
-        hideIngestHubDataManagement: ingestHubVersion === 'skipUx',
+        hideIngestHubDataManagement:
+          ingestHubVersion === 'streamsUx' ||
+          ingestHubVersion === 'agentUx' ||
+          ingestHubVersion === 'aiSourceMap',
+        aiSourceMapMode: ingestHubVersion === 'aiSourceMap',
       })
     )
   ),

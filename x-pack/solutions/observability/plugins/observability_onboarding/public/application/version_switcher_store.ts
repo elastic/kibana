@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type IngestHubVersion = 'blockUx' | 'skipUx';
+export type IngestHubVersion = 'blockUx' | 'streamsUx' | 'agentUx' | 'aiSourceMap';
 
 type Listener = () => void;
 
@@ -25,8 +25,9 @@ const getOrCreateStore = (): VersionStore => {
   const listeners = new Set<Listener>();
   const STORAGE_KEY = 'ingestHub:activeVersion';
   const stored = sessionStorage.getItem(STORAGE_KEY) as IngestHubVersion | null;
+  const validVersions: IngestHubVersion[] = ['blockUx', 'streamsUx', 'agentUx', 'aiSourceMap'];
   let version: IngestHubVersion =
-    stored === 'skipUx' || stored === 'blockUx' ? stored : 'blockUx';
+    validVersions.includes(stored as IngestHubVersion) ? (stored as IngestHubVersion) : 'blockUx';
   const store: VersionStore = {
     _listeners: listeners,
     _version: version,

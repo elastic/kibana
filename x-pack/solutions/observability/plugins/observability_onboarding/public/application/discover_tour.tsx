@@ -71,16 +71,16 @@ const TOUR_STEPS: TourStepConfig[] = [
     anchorPosition: 'downCenter',
   },
   {
-    title: 'Add more data and manage your integrations',
+    title: 'Inspect a log event',
     content: (
       <EuiText size="s">
         <p>
-          Head back to <strong>Ingest Hub</strong> to add data sources, set up metrics, or manage
-          your integrations in the <strong>Integrations installed</strong> section.
+          Click the expand icon on any row to open the full document details — all fields, values,
+          and metadata in one place.
         </p>
       </EuiText>
     ),
-    anchor: '[data-test-subj*="deepLinkId-observabilityOnboarding:ingest-hub"]',
+    anchor: '[data-test-subj="docTableExpandToggleColumn"]',
     anchorPosition: 'rightCenter',
   },
 ];
@@ -127,8 +127,16 @@ const SingleTourStep: React.FC<{
               <EuiButtonEmpty size="s" color="text" onClick={onClose} flush="left">
                 Close tour
               </EuiButtonEmpty>,
-              <EuiButton size="s" color="success" fill onClick={onClose}>
-                Done
+              <EuiButton
+                size="s"
+                color="success"
+                fill
+                onClick={() => {
+                  anchorEl?.click();
+                  onClose();
+                }}
+              >
+                Open details
               </EuiButton>,
             ]
       }
@@ -163,7 +171,7 @@ export const DiscoverTour: React.FC<{
         sessionStorage.removeItem(TOUR_STORAGE_KEY);
         setCurrentStep(0);
         setIsActive(true);
-      } else if (attempts > 40) {
+      } else if (attempts > 80) {
         clearPolling();
         sessionStorage.removeItem(TOUR_STORAGE_KEY);
       }
@@ -171,13 +179,25 @@ export const DiscoverTour: React.FC<{
   }, [clearPolling]);
 
   useEffect(() => {
-    if (sessionStorage.getItem(TOUR_STORAGE_KEY) === 'true') {
-      startPolling();
-    }
+    // Poll sessionStorage every 500 ms so we don't miss the key when it is
+    // written after this component already mounted (the window event can fire
+    // before the listener is registered if the nav control remounts).
+    const storageCheckRef = { interval: 0 as ReturnType<typeof setInterval> };
+    storageCheckRef.interval = setInterval(() => {
+      if (sessionStorage.getItem(TOUR_STORAGE_KEY) === 'true') {
+        clearInterval(storageCheckRef.interval);
+        startPolling();
+      }
+    }, 500);
 
-    const handler = () => startPolling();
+    const handler = () => {
+      clearInterval(storageCheckRef.interval);
+      startPolling();
+    };
     window.addEventListener(TOUR_EVENT, handler);
+
     return () => {
+      clearInterval(storageCheckRef.interval);
       window.removeEventListener(TOUR_EVENT, handler);
       clearPolling();
     };

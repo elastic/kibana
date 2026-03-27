@@ -86,4 +86,9 @@ export interface StreamsAppPublicStart {
    * Returns an unmount function to clean up when the container is no longer needed.
    */
   renderEmbeddedStreamListView: (container: HTMLElement) => () => void;
+  /**
+   * Renders only the Streams empty-state/welcome panel into the given container.
+   * Returns an unmount function.
+   */
+  renderEmbeddedStreamsEmptyPrompt: (container: HTMLElement) => () => void;
 }

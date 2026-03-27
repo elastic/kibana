@@ -155,19 +155,22 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const { addErrorToast } = useToasts();
   const hasActiveConversation = useHasActiveConversation();
   const isAwaitingPrompt = useIsAwaitingPrompt();
-  const { attachments, initialMessage, autoSendInitialMessage, resetInitialMessage } =
+  const { attachments, initialMessage, autoSendInitialMessage, resetInitialMessage, placeholder: contextPlaceholder } =
     useConversationContext();
   const submitMessage = useSubmitMessage();
 
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
+  const { isEmbeddedContext } = useConversationContext();
 
-  const isAgentDeleted = !isAgentIdValid && isFetched && Boolean(agentId);
+  // In embedded contexts (e.g. overview page inline input) the agent ID is resolved
+  // outside React by the embedding code. Never block the input with "agent deleted" there.
+  const isAgentDeleted = !isEmbeddedContext && !isAgentIdValid && isFetched && Boolean(agentId);
   const isInputDisabled = isAgentDeleted || isAwaitingPrompt || isResuming;
   const isSubmitDisabled =
     messageEditorController.isEmpty || isResponseLoading || !isAgentIdValid || isAwaitingPrompt;
 
-  const placeholder = isAgentDeleted ? disabledPlaceholder(agentId) : enabledPlaceholder;
+  const placeholder = isAgentDeleted ? disabledPlaceholder(agentId) : (contextPlaceholder ?? enabledPlaceholder);
 
   const editorContainerStyles = css`
     display: flex;

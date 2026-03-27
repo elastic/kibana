@@ -16,11 +16,15 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCallOut,
+  EuiCard,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiCopy,
   EuiEmptyPrompt,
+  EuiFieldPassword,
   EuiFieldSearch,
+  EuiFieldText,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -29,9 +33,13 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiFormRow,
+  EuiHealth,
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
+  EuiListGroup,
+  EuiListGroupItem,
   EuiLoadingElastic,
   EuiNotificationBadge,
   EuiPageTemplate,
@@ -40,6 +48,8 @@ import {
   EuiSelectable,
   EuiSideNav,
   EuiSpacer,
+  EuiStat,
+  EuiSteps,
   EuiTab,
   EuiTabs,
   EuiText,
@@ -72,6 +82,7 @@ import type {
 import { IntegrationCard, CompactIntegrationCard, CardLogoIcon } from './ingest_hub_components';
 import { KubernetesFlyout } from './kubernetes_flyout';
 import { AwsFlyout } from './aws_flyout';
+import { CrowdStrikeFlyout } from './crowdstrike_flyout';
 import rocketImg from './assets/rocket.png';
 import integrationsHeaderImg from './assets/integrations-header.png';
 import apiEndpointHeaderImg from './assets/api-endpoint-header.png';
@@ -83,6 +94,56 @@ import { StreamsReplicatedTable } from './streams_replicated_table';
 
 
 type TaggedTile = IntegrationTile & { badge?: string };
+
+// ── AI SourceMap data flow view ──────────────────────────────────────────────
+interface AiDataSource {
+  id: string;
+  name: string;
+  category: 'cloud' | 'containers' | 'host' | 'applications' | 'saas';
+  logoDomain: string;
+  volume: string;
+  events: string;
+}
+
+interface AiSourceWizard {
+  step: 1 | 2 | 3 | 4;
+  authMethod: 'iam' | 'access-key' | 'existing-agent' | null;
+  accessKeyId: string;
+  secretAccessKey: string;
+  authConfirmed: boolean;
+  dataTypes: string[];
+  dataTypesConfirmed: boolean;
+  services: string[];
+  servicesConfirmed: boolean;
+  isLive: boolean;
+}
+
+const AI_DATA_SOURCES: AiDataSource[] = [
+  { id: 'aws', name: 'Amazon Web Services', category: 'cloud', logoDomain: 'amazon_web_services', volume: '3.6 GB/h', events: '18.2k ev/s' },
+  { id: 'gcp', name: 'Google Cloud Platform', category: 'cloud', logoDomain: 'gcp', volume: '1.3 GB/h', events: '6.7k ev/s' },
+  { id: 'azure', name: 'Azure', category: 'cloud', logoDomain: 'azure', volume: '2.7 GB/h', events: '9.4k ev/s' },
+  { id: 'kubernetes', name: 'Kubernetes', category: 'containers', logoDomain: 'kubernetes', volume: '4.2 GB/h', events: '12.4k ev/s' },
+  { id: 'docker', name: 'Docker', category: 'containers', logoDomain: 'docker', volume: '1.7 GB/h', events: '5.4k ev/s' },
+  { id: 'amazon-ecs', name: 'Amazon ECS', category: 'containers', logoDomain: 'amazon_web_services', volume: '3.1 GB/h', events: '9.8k ev/s' },
+  { id: 'linux', name: 'Linux', category: 'host', logoDomain: 'linux', volume: '1.8 GB/h', events: '11.2k ev/s' },
+  { id: 'windows', name: 'Windows', category: 'host', logoDomain: 'microsoft', volume: '0.9 GB/h', events: '5.1k ev/s' },
+  { id: 'macos', name: 'macOS', category: 'host', logoDomain: 'macos', volume: '0.4 GB/h', events: '2.3k ev/s' },
+  { id: 'opentelemetry', name: 'OpenTelemetry', category: 'applications', logoDomain: 'opentelemetry', volume: '2.4 GB/h', events: '16.8k ev/s' },
+  { id: 'prometheus', name: 'Prometheus', category: 'applications', logoDomain: 'prometheus', volume: '0.2 GB/h', events: '3.9k ev/s' },
+  { id: 'fluent-bit', name: 'Fluent Bit', category: 'applications', logoDomain: 'fluentbit', volume: '3.1 GB/h', events: '222k ev/s' },
+  { id: 'salesforce', name: 'Salesforce', category: 'saas', logoDomain: 'salesforce', volume: '0.3 GB/h', events: '1.8k ev/s' },
+  { id: 'slack', name: 'Slack', category: 'saas', logoDomain: 'slack', volume: '0.2 GB/h', events: '5.2k ev/s' },
+  { id: 'confluence', name: 'Confluence', category: 'saas', logoDomain: 'atlassian', volume: '0.1 GB/h', events: '0.4k ev/s' },
+];
+
+const AI_SOURCE_CATEGORIES: ReadonlyArray<{ id: AiDataSource['category']; label: string }> = [
+  { id: 'cloud', label: 'Cloud' },
+  { id: 'containers', label: 'Containers' },
+  { id: 'host', label: 'Host' },
+  { id: 'applications', label: 'Applications' },
+  { id: 'saas', label: 'SaaS Products' },
+];
+// ────────────────────────────────────────────────────────────────────────────
 
 const SECTION_TO_NAV_ID: Record<string, string> = {
   integrations: 'integrations',
@@ -115,6 +176,20 @@ export const IngestHubPage: React.FC = () => {
       (routeSection && SECTION_TO_NAV_ID[routeSection]) || routeSection || 'get-started';
     setActiveNavId(navId);
   }, [routeSection]);
+
+  useEffect(() => {
+    if (activeVersion === 'aiSourceMap' && activeNavId !== 'integrations') {
+      history.replace(`${basePath}/integrations`);
+    }
+  }, [activeVersion, activeNavId, basePath, history]);
+
+  const streamsEmptyPromptRef = React.useRef<HTMLDivElement | null>(null);
+  const [streamsEmptyPromptEl, setStreamsEmptyPromptEl] = React.useState<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!streamsEmptyPromptEl || activeVersion !== 'streamsUx' || !services.streamsApp) return;
+    const unmount = services.streamsApp.renderEmbeddedStreamsEmptyPrompt(streamsEmptyPromptEl);
+    return unmount;
+  }, [streamsEmptyPromptEl, activeVersion, services.streamsApp]);
 
   const sectionPadding = euiTheme.size.l;
   const paddedContent = css`
@@ -175,6 +250,32 @@ export const IngestHubPage: React.FC = () => {
   const [assetsCategory, setAssetsCategory] = useState('all');
   const [connectorsSearch, setConnectorsSearch] = useState('');
   const [connectorsCategory, setConnectorsCategory] = useState('all');
+
+  // AI SourceMap data flow view state
+  const [aiSourceFilter, setAiSourceFilter] = useState('');
+  const [aiActiveSourceIds, setAiActiveSourceIds] = useState<string[]>([]);
+  const [aiSelectedSourceId, setAiSelectedSourceId] = useState<string | null>(null);
+  const [aiWizardStates, setAiWizardStates] = useState<Record<string, AiSourceWizard>>({});
+
+  const updateAiWizard = (sourceId: string, updates: Partial<AiSourceWizard>) => {
+    setAiWizardStates((prev) => ({
+      ...prev,
+      [sourceId]: {
+        step: 1 as const,
+        authMethod: null,
+        accessKeyId: '',
+        secretAccessKey: '',
+        authConfirmed: false,
+        dataTypes: [],
+        dataTypesConfirmed: false,
+        services: [],
+        servicesConfirmed: false,
+        isLive: false,
+        ...(prev[sourceId] ?? {}),
+        ...updates,
+      },
+    }));
+  };
 
   const allIntegrations = [...SECTIONS.flatMap((s) => s.tiles), ...OBSERVABILITY_INTEGRATIONS];
   const seen = new Set<string>();
@@ -701,38 +802,39 @@ export const IngestHubPage: React.FC = () => {
             'Add data to Elastic Observability',
             'Monitor your applications and infrastructure with powerful logs, metrics, traces, and AI-driven insights'
           )}
-          <EuiTabs
-            css={css`
-              box-shadow: none;
-              border-bottom: none;
-            `}
-          >
-            <EuiTab
-              isSelected={integrationsTab === 'all'}
-              onClick={() => setIntegrationsTab('all')}
+          {activeVersion !== 'streamsUx' && (
+            <EuiTabs
+              css={css`
+                box-shadow: none;
+                border-bottom: none;
+              `}
             >
-              Browse all
-            </EuiTab>
-            <EuiTab
-              isSelected={integrationsTab === 'installed'}
-              onClick={() => setIntegrationsTab('installed')}
-              append={
-                (() => {
-                  // Same in Block UX and Skip UX: set by seedAwsLogsAndNavigateToDiscover when user completes "See my data"
-                  const hasAwsInstalled =
-                    sessionStorage.getItem('ingestHub:dataAdded') === 'true';
-                  const count = hasAwsInstalled ? AWS_INSTALLED_INTEGRATIONS_TABLE.length : 0;
-                  return count > 0 ? (
-                    <EuiNotificationBadge className="eui-alignCenter" size="m">
-                      {count}
-                    </EuiNotificationBadge>
-                  ) : undefined;
-                })()
-              }
-            >
-              Installed
-            </EuiTab>
-          </EuiTabs>
+              <EuiTab
+                isSelected={integrationsTab === 'all'}
+                onClick={() => setIntegrationsTab('all')}
+              >
+                Browse all
+              </EuiTab>
+              <EuiTab
+                isSelected={integrationsTab === 'installed'}
+                onClick={() => setIntegrationsTab('installed')}
+                append={
+                  (() => {
+                    const hasAwsInstalled =
+                      sessionStorage.getItem('ingestHub:dataAdded') === 'true';
+                    const count = hasAwsInstalled ? AWS_INSTALLED_INTEGRATIONS_TABLE.length : 0;
+                    return count > 0 ? (
+                      <EuiNotificationBadge className="eui-alignCenter" size="m">
+                        {count}
+                      </EuiNotificationBadge>
+                    ) : undefined;
+                  })()
+                }
+              >
+                Installed
+              </EuiTab>
+            </EuiTabs>
+          )}
         </div>
         <EuiHorizontalRule margin="none" css={dividerStyle} />
         <div css={paddedContent} style={{ maxWidth: 1440, margin: '0 auto', width: '100%' }}>
@@ -1068,33 +1170,34 @@ export const IngestHubPage: React.FC = () => {
     </div>
   );
 
-  const isStopVersion = activeVersion === 'skipUx';
+  const isSkipLikeVersion = activeVersion === 'streamsUx' || activeVersion === 'agentUx' || activeVersion === 'aiSourceMap';
+  const isStopVersion = isSkipLikeVersion;
   const hasAddedData = sessionStorage.getItem('ingestHub:dataAdded') === 'true';
   const isStopFillVersion = activeVersion === 'blockUx' && !hasAddedData;
   const [leavingForDiscover, setLeavingForDiscover] = useState(false);
   const [isGetStartedFlyoutOpen, setIsGetStartedFlyoutOpen] = useState(() => {
     const onGetStarted = !routeSection || routeSection === 'get-started';
-    const skipUxWithData =
-      activeVersion === 'skipUx' &&
+    const skipLikeWithData =
+      isSkipLikeVersion &&
       sessionStorage.getItem('ingestHub:dataAdded') === 'true';
-    return onGetStarted && !skipUxWithData;
+    return onGetStarted && !skipLikeWithData;
   });
   const [welcomeChildTile, setWelcomeChildTile] = useState<IntegrationTile | null>(null);
 
   useEffect(() => {
     if (!routeSection || routeSection === 'get-started') {
-      // Skip UX: don't show Welcome flyout when user has already added fake AWS data (start state only)
-      const skipUxWithData =
-        activeVersion === 'skipUx' &&
+      // Skip/Agent UX: don't show Welcome flyout when user has already added fake AWS data (start state only)
+      const skipLikeWithData =
+        isSkipLikeVersion &&
         sessionStorage.getItem('ingestHub:dataAdded') === 'true';
-      if (skipUxWithData) {
+      if (skipLikeWithData) {
         setIsGetStartedFlyoutOpen(false);
       } else {
         setIsGetStartedFlyoutOpen(true);
         setWelcomeChildTile(null);
       }
     }
-  }, [activeVersion, routeSection]);
+  }, [activeVersion, isSkipLikeVersion, routeSection]);
 
   useEffect(() => {
     if (!isStopFillVersion || leavingForDiscover) return;
@@ -1124,10 +1227,10 @@ export const IngestHubPage: React.FC = () => {
   }, [isStopFillVersion, leavingForDiscover]);
 
   useEffect(() => {
-    if (activeVersion === 'skipUx') {
+    if (isSkipLikeVersion) {
       services.chrome?.sideNav.setIsCollapsed(false);
     }
-  }, [activeVersion, services.chrome]);
+  }, [isSkipLikeVersion, services.chrome]);
 
 
   const renderAddDataRecommendedContent = () => {
@@ -2062,102 +2165,6 @@ export const IngestHubPage: React.FC = () => {
         </EuiAccordion>
 
         <div style={{ height: 40 }} />
-        <EuiAccordion
-          id="step-manage-integrations"
-          initialIsOpen={hasAddedData}
-          arrowDisplay="left"
-          borders="none"
-          buttonElement="div"
-          buttonProps={{ paddingSize: 's' as const }}
-          paddingSize="s"
-          css={accordionCss}
-          buttonContent={
-            <EuiFlexGroup
-              alignItems="center"
-              gutterSize="none"
-              responsive={false}
-              wrap={false}
-              css={css`
-                gap: 16px;
-              `}
-            >
-              <EuiFlexItem>
-                <EuiTitle size="s">
-                  <h3 css={css`display: flex; align-items: center; gap: 8px;`}>
-                    <span css={css`display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background-color: ${euiTheme.colors.backgroundBaseSubdued}; flex-shrink: 0;`}>
-                      <EuiIcon type="managementApp" size="m" />
-                    </span>
-                    Manage your installed integrations
-                  </h3>
-                </EuiTitle>
-                <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
-                  <p>
-                    View, upgrade, and manage the integrations you installed from the Integrations hub.
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color={hasAddedData ? 'success' : 'warning'}>
-                  {hasAddedData ? 'Available' : 'Requires data'}
-                </EuiBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-        >
-          <EuiEmptyPrompt
-            color="dark"
-            layout="horizontal"
-            css={css`
-              border-radius: 8px;
-            `}
-            body={
-              <EuiText size="s">
-                <p>
-                  The Integrations hub gives you a single place to view your installed
-                  integrations, upgrade to newer versions, attach agent policies, and manage
-                  dashboards and rules—so you can keep your data pipelines up to date without
-                  leaving Observability.
-                </p>
-              </EuiText>
-            }
-            actions={[
-              hasAddedData ? (
-                <EuiButton
-                  key="integrations-btn"
-                  fill
-                  onClick={() => {
-                    history.push(`${basePath}/integrations`);
-                    setIntegrationsTab('installed');
-                    setSelectedCategory('all');
-                  }}
-                >
-                  Open Integrations
-                </EuiButton>
-              ) : (
-                <EuiToolTip content="Ingest data first to unlock Integrations" key="integrations-btn">
-                  <EuiButton disabled>Open Integrations</EuiButton>
-                </EuiToolTip>
-              ),
-            ]}
-            icon={
-              <div
-                css={css`
-                  width: 100%;
-                  min-height: 180px;
-                  border-radius: 6px;
-                  background-color: ${euiTheme.colors.backgroundBaseSubdued};
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                `}
-              >
-                <EuiIcon type="image" size="xxl" color="subdued" />
-              </div>
-            }
-          />
-        </EuiAccordion>
-
-        <div style={{ height: 40 }} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
           <EuiAccordion
             id="step2-streams"
@@ -2219,6 +2226,93 @@ export const IngestHubPage: React.FC = () => {
                 <EuiToolTip content="Ingest data first to unlock Streams" key="streams-btn">
                   <EuiButton disabled>Open Streams</EuiButton>
                 </EuiToolTip>,
+              ]}
+              icon={
+                <div
+                  css={css`
+                    width: 100%;
+                    min-height: 180px;
+                    border-radius: 6px;
+                    background-color: ${euiTheme.colors.backgroundBaseSubdued};
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  `}
+                >
+                  <EuiIcon type="image" size="xxl" color="subdued" />
+                </div>
+              }
+            />
+          </EuiAccordion>
+
+          <EuiAccordion
+            id="step-discover"
+            arrowDisplay="left"
+            borders="none"
+            buttonElement="div"
+            buttonProps={{ paddingSize: 's' as const }}
+            paddingSize="s"
+            css={accordionCss}
+            buttonContent={
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="none"
+                responsive={false}
+                wrap={false}
+                css={css`
+                  gap: 16px;
+                `}
+              >
+                <EuiFlexItem>
+                  <EuiTitle size="s">
+                    <h3 css={css`display: flex; align-items: center; gap: 8px;`}>
+                      <span css={css`display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background-color: ${euiTheme.colors.backgroundBaseSubdued}; flex-shrink: 0;`}>
+                        <EuiIcon type="discoverApp" size="m" />
+                      </span>
+                      Explore your data with Discover
+                    </h3>
+                  </EuiTitle>
+                  <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
+                    <p>
+                      Search, filter, and visualize your ingested data to uncover patterns and insights.
+                    </p>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color={hasAddedData ? 'success' : 'warning'}>{hasAddedData ? 'Available' : 'Requires data'}</EuiBadge>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          >
+            <EuiEmptyPrompt
+              color="dark"
+              layout="horizontal"
+              css={css`
+                border-radius: 8px;
+              `}
+              body={
+                <EuiText size="s">
+                  <p>
+                    Discover lets you interactively explore your data with full-text search and
+                    filtering. Drill into individual log entries, correlate events across sources,
+                    and build saved searches to share with your team.
+                  </p>
+                </EuiText>
+              }
+              actions={[
+                hasAddedData ? (
+                  <EuiButton
+                    key="discover-btn"
+                    fill
+                    onClick={() => services.application?.navigateToApp('discover')}
+                  >
+                    Open Discover
+                  </EuiButton>
+                ) : (
+                  <EuiToolTip content="Ingest data first to unlock Discover" key="discover-btn">
+                    <EuiButton disabled>Open Discover</EuiButton>
+                  </EuiToolTip>
+                ),
               ]}
               icon={
                 <div
@@ -2720,6 +2814,7 @@ export const IngestHubPage: React.FC = () => {
         `}
       >
         <div style={{ height: 40 }} />
+        <div ref={(el) => { streamsEmptyPromptRef.current = el; setStreamsEmptyPromptEl(el); }} />
         {!streamsWelcomeBannerDismissed && (
           <>
             <EuiPanel hasBorder paddingSize="m" color="subdued" grow={false} borderRadius="m">
@@ -2997,9 +3092,12 @@ export const IngestHubPage: React.FC = () => {
     sessionStorage.setItem('ingestHub:dataAdded', 'true');
     window.dispatchEvent(new Event('ingestHub:startDiscoverTour'));
 
+    // Always open Discover in KQL/data-view mode so tour anchors (field list,
+    // data view picker) are present. Falling back to a generic kuery path
+    // avoids the ES|QL view where those elements don't exist.
     const discoverPath = dataViewId
-      ? `#/?_a=(dataSource:(dataViewId:'${dataViewId}',type:dataView))`
-      : undefined;
+      ? `#/?_a=(dataSource:(dataViewId:'${dataViewId}',type:dataView),query:(language:kuery,query:''))`
+      : `#/?_a=(query:(language:kuery,query:''))`;
     services.application?.navigateToApp('discover', { path: discoverPath });
   };
 
@@ -3187,9 +3285,1035 @@ export const IngestHubPage: React.FC = () => {
     </>
   );
 
-  if (isStopFillVersion && !leavingForDiscover) {
+  if (isStopFillVersion) {
+    if (leavingForDiscover) {
+      return (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9999,
+            background: '#fff',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '16px',
+          }}
+        >
+          <EuiLoadingElastic size="xxl" />
+          <EuiText color="subdued" size="s">
+            <p>Loading your data&hellip;</p>
+          </EuiText>
+        </div>
+      );
+    }
     return renderBlockUxPage();
   }
+
+  // ── AI SourceMap: data flow view (replaces integrations catalog for aiSourceMap version) ──
+  const renderAiSourceMapIntegrationsView = () => {
+    const filteredSources = aiSourceFilter
+      ? AI_DATA_SOURCES.filter((s) =>
+          s.name.toLowerCase().includes(aiSourceFilter.toLowerCase())
+        )
+      : AI_DATA_SOURCES;
+
+    const liveSources = aiActiveSourceIds.filter((id) => aiWizardStates[id]?.isLive);
+    const hasActiveSources = aiActiveSourceIds.length > 0;
+    const hasLiveSources = liveSources.length > 0;
+    const overallStatus = hasLiveSources ? 'live' : hasActiveSources ? 'idle' : null;
+
+    const handleSourceActivate = (source: AiDataSource) => {
+      if (!aiActiveSourceIds.includes(source.id)) {
+        setAiActiveSourceIds((prev) => [...prev, source.id]);
+      }
+      setAiSelectedSourceId(source.id);
+    };
+
+    const handleReset = () => {
+      setAiActiveSourceIds([]);
+      setAiSelectedSourceId(null);
+      setAiWizardStates({});
+    };
+
+    // ── Top bar ──
+    const topBar = hasActiveSources ? (
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        justifyContent="spaceBetween"
+        responsive={false}
+        css={css`
+          padding: ${euiTheme.size.s} ${euiTheme.size.base};
+          border-bottom: 1px solid ${euiTheme.colors.borderBaseSubdued};
+          background: ${euiTheme.colors.backgroundBasePlain};
+          flex-shrink: 0;
+        `}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s"><strong>Elastic</strong></EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">Data flow</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color={overallStatus === 'live' ? 'success' : 'default'}>
+                {overallStatus === 'live' ? 'live' : 'idle'}
+              </EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="aiSourceMapResetButton"
+                size="s"
+                color="text"
+                onClick={handleReset}
+              >
+                Reset
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton data-test-subj="aiSourceMapAutoDiscoverButton" size="s" color="text">
+                Auto-discover
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton data-test-subj="aiSourceMapExportButton" size="s" color="primary" fill>
+                Export config
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ) : null;
+
+    // ── Left sources panel ──
+    const sourcesPanel = (
+      <div
+        style={{
+          width: 165,
+          minWidth: 165,
+          borderRight: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+          display: 'flex',
+          flexDirection: 'column',
+          overflowY: 'auto',
+          background: euiTheme.colors.backgroundBasePlain,
+          flexShrink: 0,
+        }}
+      >
+        <EuiText
+          size="xs"
+          color="subdued"
+          css={css`
+            padding: ${euiTheme.size.m} ${euiTheme.size.s} ${euiTheme.size.xs};
+          `}
+        >
+          <strong>SOURCES</strong>
+        </EuiText>
+        <div
+          css={css`
+            padding: ${euiTheme.size.xs} ${euiTheme.size.s} ${euiTheme.size.s};
+          `}
+        >
+          <EuiFieldSearch
+            placeholder="Filter sources..."
+            value={aiSourceFilter}
+            onChange={(e) => setAiSourceFilter(e.target.value)}
+            compressed
+            fullWidth
+          />
+        </div>
+        {AI_SOURCE_CATEGORIES.map((cat) => {
+          const sources = filteredSources.filter((s) => s.category === cat.id);
+          if (sources.length === 0) return null;
+          return (
+            <div key={cat.id}>
+              <EuiText
+                size="xs"
+                color="subdued"
+                css={css`
+                  padding: ${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.xs};
+                  font-size: 10px;
+                  letter-spacing: 0.06em;
+                `}
+              >
+                <strong>{cat.label.toUpperCase()}</strong>
+              </EuiText>
+              <EuiListGroup flush gutterSize="none">
+                {sources.map((source) => {
+                  const isSelected = aiSelectedSourceId === source.id;
+                  const isLive = aiWizardStates[source.id]?.isLive;
+                  return (
+                    <EuiListGroupItem
+                      key={source.id}
+                      size="xs"
+                      isActive={isSelected}
+                      wrapText
+                      icon={
+                        <img
+                          src={`${LOGO_FALLBACK}/${source.logoDomain}/${source.logoDomain}-icon.svg`}
+                          alt=""
+                          style={{ width: 16, height: 16, objectFit: 'contain', display: 'block' }}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
+                      }
+                      label={
+                        <>
+                          <EuiText
+                            size="xs"
+                            style={{ fontWeight: isSelected ? 600 : 400, lineHeight: 1.3 }}
+                          >
+                            {source.name}
+                          </EuiText>
+                          <EuiText size="xs" color="subdued">
+                            {isLive ? source.volume : '\u2014'} &middot;{' '}
+                            {isLive ? source.events : '\u2014'}
+                          </EuiText>
+                        </>
+                      }
+                      onClick={() => handleSourceActivate(source)}
+                    />
+                  );
+                })}
+              </EuiListGroup>
+            </div>
+          );
+        })}
+      </div>
+    );
+
+    // ── Center canvas ──
+    const canvas = (() => {
+      if (!hasActiveSources) {
+        return (
+          <div
+            style={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: euiTheme.colors.backgroundBaseSubdued,
+            }}
+          >
+            <EuiEmptyPrompt
+              icon={<EuiIcon type="share" size="xl" />}
+              title={<h3>No sources connected</h3>}
+              body={
+                <EuiText size="s" color="subdued">
+                  Select a source from the left, or let AI discover what&apos;s running in
+                  your environment.
+                </EuiText>
+              }
+              actions={[
+                <EuiButton
+                  key="autodiscover"
+                  data-test-subj="aiSourceMapAutoDiscoverEmptyButton"
+                  fill
+                  color="success"
+                  iconType="clock"
+                >
+                  Auto-discover sources
+                </EuiButton>,
+                <EuiText key="hint" size="xs" color="subdued">
+                  <em>or add manually from the left panel</em>
+                </EuiText>,
+              ]}
+            />
+          </div>
+        );
+      }
+
+      return (
+        <div
+          style={{
+            flex: 1,
+            background: euiTheme.colors.backgroundBaseSubdued,
+            position: 'relative',
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <style>{`
+            @keyframes aiFlowDash { to { stroke-dashoffset: -24; } }
+          `}</style>
+          <EuiFlexGroup
+            gutterSize="none"
+            alignItems="center"
+            responsive={false}
+            style={{ gap: 0 }}
+          >
+            {aiActiveSourceIds.map((id) => {
+              const source = AI_DATA_SOURCES.find((s) => s.id === id)!;
+              const ws = aiWizardStates[id];
+              const step = ws?.step ?? 1;
+              const isLive = ws?.isLive ?? false;
+              const isSelected = aiSelectedSourceId === id;
+              return (
+                <EuiFlexItem key={id} grow={false}>
+                  <EuiPanel
+                    paddingSize="s"
+                    hasShadow={false}
+                    hasBorder
+                    style={{
+                      width: 148,
+                      borderColor: isSelected
+                        ? euiTheme.colors.primary
+                        : isLive
+                        ? euiTheme.colors.success
+                        : euiTheme.colors.borderBaseSubdued,
+                      cursor: 'pointer',
+                      background: euiTheme.colors.backgroundBasePlain,
+                    }}
+                    onClick={() => setAiSelectedSourceId(id)}
+                  >
+                    <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <img
+                          src={`${LOGO_FALLBACK}/${source.logoDomain}/${source.logoDomain}-icon.svg`}
+                          alt={source.name}
+                          style={{ width: 20, height: 20, objectFit: 'contain' }}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
+                      </EuiFlexItem>
+                      {isLive && (
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge color="success" style={{ fontSize: 9 }}>live</EuiBadge>
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
+                    <EuiSpacer size="xs" />
+                    <EuiText size="xs" style={{ fontWeight: 600, lineHeight: 1.3 }}>
+                      {source.name}
+                    </EuiText>
+                    <EuiText size="xs" color="subdued">
+                      {isLive ? source.volume : ws ? `Step ${step} of 4` : 'Not configured'}
+                    </EuiText>
+                    {isLive ? (
+                      <EuiText size="xs" color="subdued">{source.events}</EuiText>
+                    ) : (
+                      <EuiText size="xs" color="warning">&uarr; Setup required</EuiText>
+                    )}
+                    {isLive && (
+                      <>
+                        <EuiSpacer size="xs" />
+                        <EuiBadge color="success" style={{ fontSize: 9 }}>
+                          live &middot; collecting
+                        </EuiBadge>
+                      </>
+                    )}
+                  </EuiPanel>
+                </EuiFlexItem>
+              );
+            })}
+            {hasLiveSources && (
+              <>
+                <EuiFlexItem grow={false}>
+                  <div style={{ width: 80, display: 'flex', alignItems: 'center' }}>
+                    <svg width="80" height="4" style={{ overflow: 'visible' }}>
+                      <line
+                        x1="0"
+                        y1="2"
+                        x2="80"
+                        y2="2"
+                        stroke={euiTheme.colors.success}
+                        strokeWidth="2"
+                        strokeDasharray="6 4"
+                        style={{ animation: 'aiFlowDash 0.6s linear infinite' }}
+                      />
+                    </svg>
+                  </div>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiPanel
+                    paddingSize="s"
+                    hasShadow={false}
+                    hasBorder
+                    style={{
+                      width: 148,
+                      borderColor: euiTheme.colors.success,
+                      background: euiTheme.colors.backgroundBasePlain,
+                      textAlign: 'center',
+                    }}
+                  >
+                    <EuiIcon type="logoElasticsearch" size="l" />
+                    <EuiSpacer size="xs" />
+                    <EuiText size="xs" style={{ fontWeight: 600 }}>Elasticsearch</EuiText>
+                    <EuiText size="xs" color="subdued">Destination</EuiText>
+                    <EuiSpacer size="xs" />
+                    <EuiBadge color="success" style={{ fontSize: 9 }}>&#10003; Receiving</EuiBadge>
+                  </EuiPanel>
+                </EuiFlexItem>
+              </>
+            )}
+          </EuiFlexGroup>
+        </div>
+      );
+    })();
+
+    // ── Right wizard panel ──
+    const wizardPanel = (() => {
+      if (!aiSelectedSourceId) return null;
+      const source = AI_DATA_SOURCES.find((s) => s.id === aiSelectedSourceId);
+      if (!source) return null;
+
+      const ws: AiSourceWizard = aiWizardStates[aiSelectedSourceId] ?? {
+        step: 1 as const,
+        authMethod: null,
+        accessKeyId: '',
+        secretAccessKey: '',
+        authConfirmed: false,
+        dataTypes: [],
+        dataTypesConfirmed: false,
+        services: [],
+        servicesConfirmed: false,
+        isLive: false,
+      };
+
+      const msgBubble = (text: React.ReactNode) => (
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="flexStart"
+          responsive={false}
+          css={css`
+            margin-bottom: ${euiTheme.size.m};
+          `}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiAvatar size="s" name="AI" iconType="sparkles" color="primary" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiPanel paddingSize="s" hasShadow={false} color="subdued">
+              <EuiText size="s">{text}</EuiText>
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+
+      const stepCircle = (status: 'in-progress' | 'pending' | 'done', num: number) => (
+        <EuiAvatar
+          size="s"
+          name={String(num)}
+          iconType={status === 'done' ? 'check' : undefined}
+          color={
+            status === 'done'
+              ? 'success'
+              : status === 'in-progress'
+              ? 'warning'
+              : 'subdued'
+          }
+        />
+      );
+
+      const stepBadge = (status: 'in-progress' | 'pending' | 'done') => (
+        <EuiBadge
+          color={
+            status === 'in-progress' ? 'warning' : status === 'done' ? 'success' : 'default'
+          }
+        >
+          {status === 'in-progress' ? 'in progress' : status === 'done' ? 'done' : 'pending'}
+        </EuiBadge>
+      );
+
+      const stepHeader = (
+        num: number,
+        title: string,
+        status: 'in-progress' | 'pending' | 'done'
+      ) => (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>{stepCircle(status, num)}</EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s" style={{ fontWeight: 500 }}>{title}</EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{stepBadge(status)}</EuiFlexItem>
+        </EuiFlexGroup>
+      );
+
+      const getStepStatus = (stepNum: number): 'in-progress' | 'pending' | 'done' => {
+        if (ws.isLive) return 'done';
+        if (stepNum < ws.step) return 'done';
+        if (stepNum === ws.step) return 'in-progress';
+        return 'pending';
+      };
+
+      const wizardStatusLabel = ws.isLive
+        ? 'Live \u2014 data flowing to Elasticsearch'
+        : ws.step > 1
+        ? `Step ${ws.step} of 4 \u2014 ${
+            ['', 'Access method', 'Data types', 'Services', 'Review'][ws.step]
+          }`
+        : 'Not configured \u2192 setup required';
+
+      const wizardStatusColor = ws.isLive
+        ? euiTheme.colors.success
+        : ws.step > 1
+        ? euiTheme.colors.warning
+        : euiTheme.colors.textSubdued;
+
+      return (
+        <div
+          style={{
+            width: 460,
+            minWidth: 460,
+            borderLeft: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+            display: 'flex',
+            flexDirection: 'column',
+            background: euiTheme.colors.backgroundBasePlain,
+            flexShrink: 0,
+          }}
+        >
+          {/* Panel header */}
+          <EuiPanel
+            paddingSize="m"
+            hasBorder={false}
+            hasShadow={false}
+            borderRadius="none"
+            css={css`
+              border-bottom: 1px solid ${euiTheme.colors.borderBaseSubdued};
+              flex-shrink: 0;
+            `}
+          >
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <img
+                  src={`${LOGO_FALLBACK}/${source.logoDomain}/${source.logoDomain}-icon.svg`}
+                  alt={source.name}
+                  style={{ width: 28, height: 28, objectFit: 'contain' }}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="s" style={{ fontWeight: 600 }}>{source.name}</EuiText>
+                <EuiText size="xs" color="subdued">
+                  {source.category.charAt(0).toUpperCase() + source.category.slice(1)}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  data-test-subj="aiSourceMapWizardClose"
+                  iconType="cross"
+                  aria-label="Close"
+                  onClick={() => setAiSelectedSourceId(null)}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="xs" />
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <span
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    background: wizardStatusColor,
+                    display: 'inline-block',
+                    flexShrink: 0,
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="xs" color="subdued">{wizardStatusLabel}</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+
+          {/* Steps content */}
+          <EuiPanel
+            paddingSize="m"
+            hasBorder={false}
+            hasShadow={false}
+            borderRadius="none"
+            css={css`
+              flex: 1;
+              overflow-y: auto;
+            `}
+          >
+            {/* Live summary */}
+            {ws.isLive && (
+              <>
+                {msgBubble(
+                  <span>
+                    <strong>{source.name}</strong> is live &mdash; {source.volume} flowing to
+                    Elasticsearch. Everything looks healthy.
+                  </span>
+                )}
+                <EuiPanel paddingSize="m" hasBorder hasShadow={false}>
+                  <EuiFlexGroup responsive={false} gutterSize="none">
+                    {[
+                      { label: 'VOLUME', value: source.volume.split(' ')[0] },
+                      { label: 'EVENTS', value: source.events.split(' ')[0] },
+                      { label: 'UPTIME', value: '4h 23m' },
+                      { label: 'ERRORS', value: '0' },
+                    ].map(({ label, value }) => (
+                      <EuiFlexItem key={label}>
+                        <EuiStat
+                          title={value}
+                          description={label}
+                          titleSize="m"
+                          textAlign="center"
+                        />
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGroup>
+                </EuiPanel>
+                <EuiSpacer size="s" />
+                {(['Access method', 'Data types', 'Services', 'Review'] as const).map(
+                  (title, i) => (
+                    <React.Fragment key={title}>
+                      {stepHeader(i + 1, title, 'done')}
+                      <EuiSpacer size="s" />
+                    </React.Fragment>
+                  )
+                )}
+                <EuiSpacer size="s" />
+                <EuiFlexGroup gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="aiSourceMapWizardCloseBtn"
+                      onClick={() => setAiSelectedSourceId(null)}
+                    >
+                      Close
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      data-test-subj="aiSourceMapWizardRemove"
+                      color="danger"
+                      onClick={() => {
+                        const removedId = aiSelectedSourceId;
+                        setAiActiveSourceIds((prev) => prev.filter((id) => id !== removedId));
+                        setAiSelectedSourceId(null);
+                        setAiWizardStates((prev) => {
+                          const next = { ...prev };
+                          delete next[removedId];
+                          return next;
+                        });
+                      }}
+                    >
+                      Remove source
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
+            )}
+
+            {/* In-progress wizard steps */}
+            {!ws.isLive && (
+              <>
+                {/* Step 1 — Access method */}
+                {stepHeader(1, 'Access method', getStepStatus(1))}
+                {ws.step === 1 && (
+                  <>
+                    <EuiSpacer size="s" />
+                    {msgBubble('How would you like to authenticate to AWS?')}
+                    <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+                      {(
+                        [
+                          { id: 'iam', label: 'IAM Role (recommended)' },
+                          { id: 'access-key', label: 'Access Key + Secret' },
+                          { id: 'existing-agent', label: 'Use existing agent' },
+                        ] as Array<{ id: AiSourceWizard['authMethod']; label: string }>
+                      ).map((opt) => (
+                        <EuiFlexItem grow={false} key={opt.id!}>
+                          <EuiButton
+                            data-test-subj={`aiSourceMapAuth-${opt.id}`}
+                            size="s"
+                            fill={ws.authMethod === opt.id}
+                            color={ws.authMethod === opt.id ? 'warning' : 'text'}
+                            onClick={() =>
+                              updateAiWizard(aiSelectedSourceId, { authMethod: opt.id })
+                            }
+                          >
+                            {opt.label}
+                          </EuiButton>
+                        </EuiFlexItem>
+                      ))}
+                    </EuiFlexGroup>
+
+                    {ws.authMethod === 'access-key' && (
+                      <>
+                        <EuiSpacer size="m" />
+                        {msgBubble(
+                          "I'll need your Access Key ID and Secret. Make sure to restrict permissions to the minimum required."
+                        )}
+                        <EuiPanel paddingSize="m" hasBorder hasShadow={false}>
+                          <EuiText size="xs" color="subdued">
+                            <strong style={{ letterSpacing: '0.05em' }}>CONFIGURATION</strong>
+                          </EuiText>
+                          <EuiSpacer size="s" />
+                          <EuiFormRow label="AWS Access Key ID">
+                            <EuiFieldText
+                              data-test-subj="aiSourceMapAccessKeyId"
+                              value={ws.accessKeyId}
+                              onChange={(e) =>
+                                updateAiWizard(aiSelectedSourceId, {
+                                  accessKeyId: e.target.value,
+                                })
+                              }
+                              placeholder="AKIAIOSFODNN7EXAMPLE"
+                              compressed
+                            />
+                          </EuiFormRow>
+                          <EuiFormRow
+                            label="AWS Secret Access Key"
+                            helpText="Stored encrypted at rest"
+                          >
+                            <EuiFieldPassword
+                              data-test-subj="aiSourceMapSecretKey"
+                              value={ws.secretAccessKey}
+                              onChange={(e) =>
+                                updateAiWizard(aiSelectedSourceId, {
+                                  secretAccessKey: e.target.value,
+                                })
+                              }
+                              compressed
+                            />
+                          </EuiFormRow>
+                        </EuiPanel>
+                        <EuiSpacer size="s" />
+                        <EuiFlexGroup gutterSize="s" responsive={false}>
+                          <EuiFlexItem grow={false}>
+                            <EuiButton
+                              data-test-subj="aiSourceMapContinueToDataTypes"
+                              fill
+                              disabled={!ws.accessKeyId}
+                              iconType="arrowDown"
+                              iconSide="right"
+                              onClick={() =>
+                                updateAiWizard(aiSelectedSourceId, {
+                                  authConfirmed: true,
+                                  step: 2,
+                                })
+                              }
+                            >
+                              Continue to Data types
+                            </EuiButton>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonEmpty
+                              data-test-subj="aiSourceMapSaveForLater"
+                              size="s"
+                            >
+                              Save for later
+                            </EuiButtonEmpty>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </>
+                    )}
+
+                    {(ws.authMethod === 'iam' || ws.authMethod === 'existing-agent') && (
+                      <>
+                        <EuiSpacer size="m" />
+                        {msgBubble(
+                          ws.authMethod === 'iam'
+                            ? "I'll use an IAM Role to authenticate. Make sure the role has the required permissions."
+                            : 'I found an existing Elastic Agent. I can use that to collect data from this source.'
+                        )}
+                        <EuiButton
+                          data-test-subj="aiSourceMapContinueAuth"
+                          fill
+                          iconType="arrowDown"
+                          iconSide="right"
+                          onClick={() =>
+                            updateAiWizard(aiSelectedSourceId, {
+                              authConfirmed: true,
+                              step: 2,
+                            })
+                          }
+                        >
+                          Continue to Data types
+                        </EuiButton>
+                      </>
+                    )}
+                  </>
+                )}
+
+                {/* Step 2 — Data types */}
+                {ws.step >= 2 && (
+                  <>
+                    <EuiHorizontalRule margin="s" />
+                    {stepHeader(2, 'Data types', getStepStatus(2))}
+                    {ws.step === 2 && (
+                      <>
+                        <EuiSpacer size="s" />
+                        {msgBubble(
+                          'What types of data do you want to collect from AWS? You can select multiple.'
+                        )}
+                        <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
+                          {['Metrics', 'Logs', 'Traces', 'Infrastructure events'].map((dt) => {
+                            const isSelected = ws.dataTypes.includes(dt);
+                            return (
+                              <EuiFlexItem grow={false} key={dt}>
+                                <EuiButton
+                                  data-test-subj={`aiSourceMapDataType-${dt}`}
+                                  size="s"
+                                  fill={isSelected}
+                                  color={isSelected ? 'success' : 'text'}
+                                  onClick={() => {
+                                    const next = isSelected
+                                      ? ws.dataTypes.filter((d) => d !== dt)
+                                      : [...ws.dataTypes, dt];
+                                    updateAiWizard(aiSelectedSourceId, { dataTypes: next });
+                                  }}
+                                >
+                                  {dt}
+                                </EuiButton>
+                              </EuiFlexItem>
+                            );
+                          })}
+                        </EuiFlexGroup>
+                        <EuiSpacer size="s" />
+                        <EuiButton
+                          data-test-subj="aiSourceMapConfirmDataTypes"
+                          fill
+                          disabled={ws.dataTypes.length === 0}
+                          onClick={() =>
+                            updateAiWizard(aiSelectedSourceId, {
+                              dataTypesConfirmed: true,
+                              step: 3,
+                            })
+                          }
+                        >
+                          Confirm selection
+                        </EuiButton>
+                      </>
+                    )}
+                  </>
+                )}
+
+                {/* Step 3 — Services */}
+                {ws.step >= 3 && (
+                  <>
+                    <EuiHorizontalRule margin="s" />
+                    {stepHeader(3, 'Services', getStepStatus(3))}
+                    {ws.step === 3 && (
+                      <>
+                        <EuiSpacer size="s" />
+                        {msgBubble(
+                          "Which AWS services do you want to monitor? I'll configure the right integrations and dashboards for each one."
+                        )}
+                        <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
+                          {[
+                            'EC2',
+                            'RDS',
+                            'S3',
+                            'Lambda',
+                            'EKS',
+                            'ECS',
+                            'CloudFront',
+                            'API Gateway',
+                            'SQS / SNS',
+                            'DynamoDB',
+                            'ElastiCache',
+                          ].map((svc) => {
+                            const isSelected = ws.services.includes(svc);
+                            return (
+                              <EuiFlexItem grow={false} key={svc}>
+                                <EuiButton
+                                  data-test-subj={`aiSourceMapService-${svc}`}
+                                  size="s"
+                                  fill={isSelected}
+                                  color={isSelected ? 'success' : 'text'}
+                                  onClick={() => {
+                                    const next = isSelected
+                                      ? ws.services.filter((s) => s !== svc)
+                                      : [...ws.services, svc];
+                                    updateAiWizard(aiSelectedSourceId, { services: next });
+                                  }}
+                                >
+                                  {svc}
+                                </EuiButton>
+                              </EuiFlexItem>
+                            );
+                          })}
+                        </EuiFlexGroup>
+                        <EuiSpacer size="s" />
+                        <EuiButton
+                          data-test-subj="aiSourceMapConfirmServices"
+                          fill
+                          disabled={ws.services.length === 0}
+                          onClick={() =>
+                            updateAiWizard(aiSelectedSourceId, {
+                              servicesConfirmed: true,
+                              step: 4,
+                            })
+                          }
+                        >
+                          Confirm selection
+                        </EuiButton>
+                        <EuiSpacer size="s" />
+                        <EuiText size="xs" color="subdued">not sure? try</EuiText>
+                        <EuiSpacer size="xs" />
+                        <EuiPanel
+                          paddingSize="s"
+                          hasBorder
+                          hasShadow={false}
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => {}}
+                        >
+                          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                            <EuiFlexItem grow={false}>
+                              <EuiIcon type="clock" color="primary" />
+                            </EuiFlexItem>
+                            <EuiFlexItem>
+                              <EuiText size="s" style={{ fontWeight: 500 }}>
+                                Discover my services automatically
+                              </EuiText>
+                              <EuiText size="xs" color="subdued">
+                                Runs a script in AWS CloudShell &mdash; takes about 30 seconds
+                              </EuiText>
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <EuiIcon type="arrowRight" color="subdued" />
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        </EuiPanel>
+                      </>
+                    )}
+                  </>
+                )}
+
+                {/* Step 4 — Review */}
+                {ws.step >= 4 && (
+                  <>
+                    <EuiHorizontalRule margin="s" />
+                    {stepHeader(4, 'Review', getStepStatus(4))}
+                    {ws.step === 4 && (
+                      <>
+                        <EuiSpacer size="s" />
+                        {msgBubble(
+                          <span>
+                            Everything looks good! I&apos;ll configure{' '}
+                            <strong>{source.name}</strong> with the settings you selected.
+                            This should take about 30 seconds.
+                          </span>
+                        )}
+                        <EuiButton
+                          data-test-subj="aiSourceMapGoLive"
+                          fill
+                          color="success"
+                          onClick={() =>
+                            updateAiWizard(aiSelectedSourceId, { isLive: true })
+                          }
+                        >
+                          Confirm &amp; go live
+                        </EuiButton>
+                      </>
+                    )}
+                  </>
+                )}
+              </>
+            )}
+          </EuiPanel>
+
+          {/* Ask AI footer */}
+          <EuiPanel
+            paddingSize="s"
+            hasBorder={false}
+            hasShadow={false}
+            borderRadius="none"
+            css={css`
+              border-top: 1px solid ${euiTheme.colors.borderBaseSubdued};
+              flex-shrink: 0;
+            `}
+          >
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem>
+                <EuiFieldSearch
+                  data-test-subj="aiSourceMapAskAI"
+                  placeholder="Ask AI about this source..."
+                  compressed
+                  fullWidth
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  data-test-subj="aiSourceMapAskAISubmit"
+                  fill
+                  size="s"
+                  iconType="arrowRight"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </div>
+      );
+    })();
+
+    // ── Bottom stats bar ──
+    const bottomBar = hasActiveSources ? (
+      <EuiFlexGroup
+        gutterSize="none"
+        justifyContent="center"
+        responsive={false}
+        css={css`
+          border-top: 1px solid ${euiTheme.colors.borderBaseSubdued};
+          background: ${euiTheme.colors.backgroundBasePlain};
+          padding: ${euiTheme.size.m} ${euiTheme.size.xl};
+          flex-shrink: 0;
+        `}
+      >
+        {[
+          { label: 'sources', value: String(aiActiveSourceIds.length) },
+          { label: 'configured', value: String(liveSources.length) },
+          {
+            label: 'volume',
+            value: hasLiveSources
+              ? `${liveSources
+                  .reduce((sum, id) => {
+                    const vol = AI_DATA_SOURCES.find((s) => s.id === id)?.volume ?? '0 GB/h';
+                    return sum + parseFloat(vol);
+                  }, 0)
+                  .toFixed(1)} GB/h`
+              : '0 GB/h',
+          },
+          {
+            label: 'events',
+            value: hasLiveSources
+              ? AI_DATA_SOURCES.find((s) => s.id === liveSources[0])?.events ?? '0/s'
+              : '0/s',
+          },
+        ].map(({ label, value }) => (
+          <EuiFlexItem key={label} grow={false} css={css`padding: 0 ${euiTheme.size.xl};`}>
+            <EuiStat title={value} description={label} titleSize="m" textAlign="center" />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    ) : null;
+
+    return (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          minHeight: 'calc(100vh - 48px)',
+        }}
+      >
+        {topBar}
+        <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
+          {sourcesPanel}
+          {canvas}
+          {wizardPanel}
+        </div>
+        {bottomBar}
+      </div>
+    );
+  };
+  // ── end renderAiSourceMapIntegrationsView ────────────────────────────────
 
   return (
     <>
@@ -3202,7 +4326,10 @@ export const IngestHubPage: React.FC = () => {
     >
       <EuiPageTemplate.Section paddingSize="none" restrictWidth={false} grow>
         {activeNavId === 'get-started' && renderGetStartedView()}
-        {activeNavId === 'integrations' && renderIntegrationsView()}
+        {activeNavId === 'integrations' &&
+          (activeVersion === 'aiSourceMap'
+            ? renderAiSourceMapIntegrationsView()
+            : renderIntegrationsView())}
         {activeNavId === 'platform-migration' && renderPlatformMigrationView()}
         {activeNavId === 'migration-dashboards' &&
           renderMigrationPlaceholder(
@@ -3234,6 +4361,10 @@ export const IngestHubPage: React.FC = () => {
           onClose={() => setFlyoutTile(null)}
           onSeeMyData={() => seedAwsLogsAndNavigateToDiscover()}
         />
+      )}
+
+      {flyoutTile && flyoutTile.id === 'crowdstrike' && (
+        <CrowdStrikeFlyout onClose={() => setFlyoutTile(null)} />
       )}
 
       {flyoutTile && 'endpointLabel' in flyoutTile && (
@@ -3331,6 +4462,7 @@ export const IngestHubPage: React.FC = () => {
       {flyoutTile &&
         flyoutTile.id !== 'kubernetes' &&
         flyoutTile.id !== 'aws' &&
+        flyoutTile.id !== 'crowdstrike' &&
         !('endpointLabel' in flyoutTile) && (
         <EuiFlyout
           ownFocus

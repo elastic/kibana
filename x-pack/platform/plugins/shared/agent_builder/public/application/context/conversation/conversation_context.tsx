@@ -16,6 +16,7 @@ interface ConversationContextValue {
   isEmbeddedContext: boolean;
   sessionTag?: string;
   agentId?: string;
+  placeholder?: string;
   initialMessage?: string;
   autoSendInitialMessage?: boolean;
   resetInitialMessage?: () => void;

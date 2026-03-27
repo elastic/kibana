@@ -142,6 +142,13 @@ interface NodeDefinitionBase {
    */
   sideNavStatus?: SideNavNodeStatus;
   /**
+   * Optional status to control whether the title header is shown inside the secondary navigation panel.
+   * When set to 'hidden', the panel opens without a title header row.
+   * Only applies to nodes with renderAs: 'panelOpener'.
+   * @default 'visible'
+   */
+  panelTitle?: 'hidden' | 'visible';
+  /**
    * Optional function to get the active state. This function is called whenever the location changes.
    */
   getIsActive?: GetIsActiveFn;
