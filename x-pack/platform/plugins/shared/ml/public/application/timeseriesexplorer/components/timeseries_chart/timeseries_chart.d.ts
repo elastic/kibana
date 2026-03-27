@@ -50,6 +50,7 @@ interface TimeseriesChartProps {
   zoomFromFocusLoaded: object;
   zoomToFocusLoaded: object;
   tooltipService: object;
+  telemetrySource: string;
 }
 
 interface TimeseriesChartIntProps {

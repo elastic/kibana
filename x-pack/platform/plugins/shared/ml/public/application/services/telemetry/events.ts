@@ -6,12 +6,14 @@
  */
 
 import type { SchemaObject } from '@elastic/ebt';
-import type { TrainedModelsModelTestedEbtProps } from './types';
+import type { TrainedModelsModelTestedEbtProps, CustomRuleEditorOpenedEbtEvent } from './types';
 import {
   TrainedModelsTelemetryEventTypes,
   type TrainedModelsDeploymentEbtProps,
   type TrainedModelsTelemetryEvent,
   type TrainedModelsModelDownloadEbtProps,
+  type CustomRuleEditorOpenedEbtProps,
+  RULE_EDITOR_OPENED,
 } from './types';
 
 const trainedModelsDeploymentSchema: SchemaObject<TrainedModelsDeploymentEbtProps>['properties'] = {
@@ -145,4 +147,22 @@ export const trainedModelsEbtEvents = {
   trainedModelsModelDownloadEventType,
   trainedModelsDeploymentUpdatedEventType,
   trainedModelsModelTestedEventType,
+};
+
+const customRuleEditorOpenedSchema: SchemaObject<CustomRuleEditorOpenedEbtProps>['properties'] = {
+  source: {
+    type: 'keyword',
+    _meta: {
+      description: 'The UI view from which the rule editor was opened',
+    },
+  },
+};
+
+const customRuleEditorOpenedEventType: CustomRuleEditorOpenedEbtEvent = {
+  eventType: RULE_EDITOR_OPENED,
+  schema: customRuleEditorOpenedSchema,
+};
+
+export const customRulesEbtEvents = {
+  customRuleEditorOpenedEventType,
 };

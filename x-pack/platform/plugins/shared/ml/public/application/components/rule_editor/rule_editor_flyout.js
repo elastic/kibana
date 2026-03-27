@@ -55,11 +55,13 @@ import {
 import { getPartitioningFieldNames } from '../../../../common/util/job_utils';
 import { mlJobServiceFactory } from '../../services/job_service';
 import { toastNotificationServiceProvider } from '../../services/toast_notification_service';
+import { TelemetryClient } from '../../services/telemetry/telemetry_client';
 
 class RuleEditorFlyoutUI extends Component {
   static propTypes = {
     setShowFunction: PropTypes.func.isRequired,
     unsetShowFunction: PropTypes.func.isRequired,
+    telemetrySource: PropTypes.string.isRequired,
   };
 
   constructor(props) {
@@ -82,6 +84,10 @@ class RuleEditorFlyoutUI extends Component {
     this.canGetFilters = checkPermission('canGetFilters');
 
     this.mlJobService = mlJobServiceFactory(props.kibana.services.mlServices.mlApi);
+
+    if (this.props.kibana.services.analytics) {
+      this.telemetryClient = new TelemetryClient(this.props.kibana.services.analytics);
+    }
   }
 
   componentDidMount() {
@@ -148,6 +154,10 @@ class RuleEditorFlyoutUI extends Component {
       isScopeEnabled: false,
       isFlyoutVisible: true,
       focusTrapProps,
+    });
+
+    this.telemetryClient?.trackCustomRuleEditorOpened({
+      source: this.props.telemetrySource,
     });
 
     if (this.partitioningFieldNames.length > 0 && this.canGetFilters) {

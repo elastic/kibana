@@ -38,6 +38,7 @@ interface TimeSeriesChartWithTooltipsProps {
     interval: string;
   };
   sourceIndicesWithGeoFields: SourceIndicesWithGeoFields;
+  telemetrySource: string;
 }
 export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> = ({
   bounds,
@@ -57,6 +58,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
     interval: 'second',
   },
   sourceIndicesWithGeoFields,
+  telemetrySource,
 }) => {
   const { toasts: toastNotifications } = useNotifications();
   const {
@@ -160,6 +162,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
             tooltipService={tooltipService}
             tableData={tableData}
             sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
+            telemetrySource={telemetrySource}
           />
         )}
       </MlTooltipComponent>
