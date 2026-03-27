@@ -169,13 +169,6 @@ export class SearchInterceptor {
       })
     );
 
-    // Increase performance buffer size to capture more entries
-    try {
-      performance.setResourceTimingBufferSize(500);
-    } catch (e) {
-      // Silently fail - not critical
-    }
-
     // Set up PerformanceObserver to capture search requests as they happen
     try {
       this.performanceObserver = new PerformanceObserver((list) => {
