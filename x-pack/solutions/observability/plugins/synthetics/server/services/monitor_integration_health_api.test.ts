@@ -6,6 +6,7 @@
  */
 
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   ConfigKey,
@@ -201,6 +202,54 @@ describe('MonitorIntegrationHealthApi', () => {
       const result = await api.getHealth(['mon-1']);
 
       expect(result.errors).toEqual([{ configId: 'mon-1', message: 'Failed to fetch monitor' }]);
+    });
+
+    it('includes statusCode 404 for SavedObjects not found errors', async () => {
+      const notFoundError = SavedObjectsErrorHelpers.createGenericNotFoundError(
+        'synthetics-monitor',
+        'mon-1'
+      );
+      const api = buildApi({
+        monitorConfigRepository: {
+          get: jest.fn().mockRejectedValue(notFoundError),
+        },
+      });
+
+      const result = await api.getHealth(['mon-1']);
+
+      expect(result.errors).toEqual([
+        { configId: 'mon-1', message: notFoundError.message, statusCode: 404 },
+      ]);
+    });
+
+    it('includes statusCode for non-404 SavedObjects errors via output.statusCode', async () => {
+      const forbiddenError = SavedObjectsErrorHelpers.decorateForbiddenError(
+        new Error('Access denied')
+      );
+      const api = buildApi({
+        monitorConfigRepository: {
+          get: jest.fn().mockRejectedValue(forbiddenError),
+        },
+      });
+
+      const result = await api.getHealth(['mon-1']);
+
+      expect(result.errors).toEqual([
+        { configId: 'mon-1', message: 'Access denied', statusCode: 403 },
+      ]);
+    });
+
+    it('omits statusCode for generic errors without output.statusCode', async () => {
+      const api = buildApi({
+        monitorConfigRepository: {
+          get: jest.fn().mockRejectedValue(new Error('Something went wrong')),
+        },
+      });
+
+      const result = await api.getHealth(['mon-1']);
+
+      expect(result.errors).toEqual([{ configId: 'mon-1', message: 'Something went wrong' }]);
+      expect(result.errors[0]).not.toHaveProperty('statusCode');
     });
   });
 
