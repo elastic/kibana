@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { css } from '@emotion/react';
 import {
   EuiSelectable,
@@ -60,10 +67,32 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
   ) => {
     const { euiTheme } = useEuiTheme();
     const [activeIndex, setActiveIndex] = useState(0);
+    const activeIndexRef = useRef(activeIndex);
+    activeIndexRef.current = activeIndex;
+
+    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
       setActiveIndex(0);
     }, [options.length]);
+
+    const scrollIndexIntoView = (index: number) => {
+      const items = containerRef.current?.querySelectorAll('.euiSelectableListItem');
+      const item = items?.[index];
+      item?.scrollIntoView?.({ block: 'nearest' });
+    };
+    const handleSetActive = (next: (index: number) => number) => {
+      const nextIndex = next(activeIndexRef.current);
+      activeIndexRef.current = nextIndex;
+      setActiveIndex(nextIndex);
+      scrollIndexIntoView(nextIndex);
+    };
+    const handleSelectOption = () => {
+      const option = options[activeIndexRef.current];
+      if (option) {
+        onSelect(option);
+      }
+    };
 
     const selectableOptions: EuiSelectableOption[] = useMemo(
       () =>
@@ -76,18 +105,23 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
 
     useImperativeHandle(ref, () => ({
       isKeyDownEventHandled: (event: React.KeyboardEvent): boolean => {
-        const handledKeys = [keys.ARROW_DOWN, keys.ARROW_UP, keys.ENTER, keys.TAB];
+        const handledKeys = [
+          keys.ARROW_DOWN,
+          keys.ARROW_UP,
+          // Ctrl+n and Ctrl+p
+          ...(event.ctrlKey ? ['n', 'p'] : []),
+          keys.ENTER,
+          keys.TAB,
+        ];
         return handledKeys.includes(event.key);
       },
       handleKeyDown: (event: React.KeyboardEvent): void => {
-        if (event.key === keys.ARROW_DOWN) {
-          setActiveIndex((prev) => Math.min(prev + 1, options.length - 1));
-        } else if (event.key === keys.ARROW_UP) {
-          setActiveIndex((prev) => Math.max(prev - 1, 0));
+        if (event.key === keys.ARROW_DOWN || (event.ctrlKey && event.key === 'n')) {
+          handleSetActive((prev) => Math.min(prev + 1, options.length - 1));
+        } else if (event.key === keys.ARROW_UP || (event.ctrlKey && event.key === 'p')) {
+          handleSetActive((prev) => Math.max(prev - 1, 0));
         } else if (event.key === keys.ENTER || event.key === keys.TAB) {
-          if (options.length > 0) {
-            onSelect(options[activeIndex]);
-          }
+          handleSelectOption();
         }
       },
     }));
@@ -141,6 +175,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
 
     return (
       <div
+        ref={containerRef}
         css={[containerStyles, activeHighlightStyles]}
         data-test-subj={dataTestSubj}
         onMouseDown={(e) => {
