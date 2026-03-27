@@ -32,6 +32,8 @@ import { TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
 import { throwRetryableError, throwUnrecoverableError } from './errors';
 import apm from 'elastic-apm-node';
+import { SpanStatusCode, trace } from '@opentelemetry/api';
+import { tracing } from '@elastic/opentelemetry-node/sdk';
 import { executionContextServiceMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { bufferedTaskStoreMock } from '../buffered_task_store.mock';
@@ -75,6 +77,25 @@ describe('TaskManagerRunner', () => {
     addLabels: jest.fn(),
     setLabel: jest.fn(),
   };
+
+  let otelExporter: tracing.InMemorySpanExporter;
+  let otelProvider: tracing.BasicTracerProvider;
+
+  beforeAll(() => {
+    otelExporter = new tracing.InMemorySpanExporter();
+    otelProvider = new tracing.BasicTracerProvider({
+      spanProcessors: [new tracing.SimpleSpanProcessor(otelExporter)],
+    });
+    trace.setGlobalTracerProvider(otelProvider);
+  });
+
+  beforeEach(() => {
+    otelExporter?.reset();
+  });
+
+  afterAll(async () => {
+    await otelProvider.shutdown();
+  });
 
   test('execution ID', async () => {
     const { runner } = await pendingStageSetup({
@@ -121,6 +142,12 @@ describe('TaskManagerRunner', () => {
         TASK_MANAGER_TRANSACTION_TYPE
       );
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
+
+      const spans = otelExporter.getFinishedSpans();
+      const span = spans.find((s) => s.name === 'mark-task-as-running');
+      expect(span).toBeDefined();
+      expect(span!.attributes['transaction.type']).toBe(TASK_MANAGER_TRANSACTION_TYPE);
+      expect(span!.status.code).not.toBe(SpanStatusCode.ERROR);
     });
 
     test('makes calls to APM as expected when task markedAsRunning fails', async () => {
@@ -151,6 +178,11 @@ describe('TaskManagerRunner', () => {
         TASK_MANAGER_TRANSACTION_TYPE
       );
       expect(mockApmTrans.end).toHaveBeenCalledWith('failure');
+
+      const spans = otelExporter.getFinishedSpans();
+      const span = spans.find((s) => s.name === 'mark-task-as-running');
+      expect(span).toBeDefined();
+      expect(span!.status.code).toBe(SpanStatusCode.ERROR);
     });
 
     test('provides execution context on run', async () => {
@@ -820,6 +852,9 @@ describe('TaskManagerRunner', () => {
       expect(apm.startTransaction).not.toHaveBeenCalled();
       expect(mockApmTrans.end).not.toHaveBeenCalled();
 
+      const spans = otelExporter.getFinishedSpans();
+      expect(spans.find((s) => s.name === 'mark-task-as-running')).toBeUndefined();
+
       expect(runner.id).toEqual('foo');
       expect(runner.taskType).toEqual('bar');
       expect(runner.toString()).toEqual('bar "foo"');
@@ -913,6 +948,13 @@ describe('TaskManagerRunner', () => {
         childOf: 'apmTraceparent',
       });
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
+
+      const spans = otelExporter.getFinishedSpans();
+      const span = spans.find((s) => s.name === 'task-manager-run');
+      expect(span).toBeDefined();
+      expect(span!.attributes['transaction.type']).toBe(TASK_MANAGER_RUN_TRANSACTION_TYPE);
+      expect(span!.attributes['kibana.task.type']).toBe('bar');
+      expect(span!.status.code).not.toBe(SpanStatusCode.ERROR);
     });
     test('makes calls to APM and logs errors as expected when task fails', async () => {
       const { runner, logger } = await readyToRunStageSetup({
@@ -936,6 +978,13 @@ describe('TaskManagerRunner', () => {
         childOf: 'apmTraceparent',
       });
       expect(mockApmTrans.end).toHaveBeenCalledWith('failure');
+
+      const spans = otelExporter.getFinishedSpans();
+      const span = spans.find((s) => s.name === 'task-manager-run');
+      expect(span).toBeDefined();
+      expect(span!.attributes['transaction.type']).toBe(TASK_MANAGER_RUN_TRANSACTION_TYPE);
+      expect(span!.attributes['kibana.task.type']).toBe('bar');
+
       const loggerCall = logger.error.mock.calls[0][0];
       const loggerMeta = logger.error.mock.calls[0][1];
       expect(loggerCall as string).toMatchInlineSnapshot(`"Task bar \\"foo\\" failed: Error: rar"`);

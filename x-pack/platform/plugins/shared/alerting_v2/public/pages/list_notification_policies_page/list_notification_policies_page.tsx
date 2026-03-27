@@ -43,9 +43,11 @@ import { useEnableNotificationPolicy } from '../../hooks/use_enable_notification
 import { useFetchNotificationPolicies } from '../../hooks/use_fetch_notification_policies';
 import { useSnoozeNotificationPolicy } from '../../hooks/use_snooze_notification_policy';
 import { useUnsnoozeNotificationPolicy } from '../../hooks/use_unsnooze_notification_policy';
+import { useUpdateNotificationPolicyApiKey } from '../../hooks/use_update_notification_policy_api_key';
 import { NotificationPoliciesBulkActions } from './components/notification_policies_bulk_actions';
 import { NotificationPoliciesSearchBar } from './components/notification_policies_search_bar';
 import { NotificationPolicyActionsCell } from './components/notification_policy_actions_cell';
+import { UpdateApiKeyConfirmationModal } from './components/update_api_key_confirmation_modal';
 
 const DEFAULT_PER_PAGE = 20;
 
@@ -66,6 +68,7 @@ export const ListNotificationPoliciesPage = () => {
   const [sortField, setSortField] = useState<'name' | 'updatedAt' | 'updatedByUsername'>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [policyToDelete, setPolicyToDelete] = useState<NotificationPolicyResponse | null>(null);
+  const [policyToUpdateApiKey, setPolicyToUpdateApiKey] = useState<string | null>(null);
   const [selectedPolicies, setSelectedPolicies] = useState<NotificationPolicyResponse[]>([]);
 
   const { euiTheme } = useEuiTheme();
@@ -96,6 +99,8 @@ export const ListNotificationPoliciesPage = () => {
     isLoading: isUnsnoozing,
     variables: unsnoozeVariables,
   } = useUnsnoozeNotificationPolicy();
+
+  const { mutate: updateApiKey, isLoading: isUpdatingApiKey } = useUpdateNotificationPolicyApiKey();
 
   const { mutate: bulkAction, isLoading: isBulkActionInProgress } =
     useBulkActionNotificationPolicies();
@@ -172,7 +177,7 @@ export const ListNotificationPoliciesPage = () => {
   const hasSelection = selectedPolicies.length > 0;
 
   const handleBulkAction = (
-    action: 'enable' | 'disable' | 'delete' | 'snooze' | 'unsnooze',
+    action: 'enable' | 'disable' | 'delete' | 'snooze' | 'unsnooze' | 'update_api_key',
     snoozedUntil?: string
   ) => {
     const ids = selectedPolicies.map((policy) => policy.id);
@@ -187,6 +192,8 @@ export const ListNotificationPoliciesPage = () => {
       actions = ids.map((id) => ({ id, action: 'unsnooze' }));
     } else if (action === 'delete') {
       actions = ids.map((id) => ({ id, action: 'delete' }));
+    } else if (action === 'update_api_key') {
+      actions = ids.map((id) => ({ id, action: 'update_api_key' }));
     } else {
       throw new Error(`Invalid action: ${action}`);
     }
@@ -322,6 +329,7 @@ export const ListNotificationPoliciesPage = () => {
           onDisable={(id) => disablePolicy(id)}
           onSnooze={(id, until) => snoozePolicy({ id, snoozedUntil: until })}
           onCancelSnooze={(id) => unsnoozePolicy(id)}
+          onUpdateApiKey={(id) => setPolicyToUpdateApiKey(id)}
           isStateLoading={
             (isEnabling && enableVariables === policy.id) ||
             (isDisabling && disableVariables === policy.id)
@@ -462,6 +470,19 @@ export const ListNotificationPoliciesPage = () => {
             });
           }}
           isLoading={isDeleting}
+        />
+      )}
+
+      {policyToUpdateApiKey && (
+        <UpdateApiKeyConfirmationModal
+          count={1}
+          onCancel={() => setPolicyToUpdateApiKey(null)}
+          onConfirm={() => {
+            updateApiKey(policyToUpdateApiKey, {
+              onSuccess: () => setPolicyToUpdateApiKey(null),
+            });
+          }}
+          isLoading={isUpdatingApiKey}
         />
       )}
     </>

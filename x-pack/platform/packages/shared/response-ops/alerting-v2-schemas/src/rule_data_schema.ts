@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { validateEsqlQuery } from './validation';
+import { z } from '@kbn/zod/v4';
+import { validateEsqlQuery, validateMinDuration } from './validation';
 import { durationSchema } from './common';
-import { MAX_CONSECUTIVE_BREACHES } from './constants';
+import { MAX_CONSECUTIVE_BREACHES, MIN_SCHEDULE_INTERVAL } from './constants';
 
 /** Primitives */
 
@@ -47,9 +47,16 @@ const metadataSchema = z
 
 /** Schedule (required) */
 
+const scheduleEverySchema = durationSchema.superRefine((value, ctx) => {
+  const error = validateMinDuration(value, MIN_SCHEDULE_INTERVAL);
+  if (error) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: error });
+  }
+});
+
 const scheduleSchema = z
   .object({
-    every: durationSchema.describe('Execution interval, e.g. 1m, 5m.'),
+    every: scheduleEverySchema.describe('Execution interval, e.g. 1m, 5m.'),
     lookback: durationSchema
       .optional()
       .describe('Lookback window for the query (can also be expressed in ES|QL).'),
@@ -270,6 +277,7 @@ export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
  */
 export const ruleResponseSchema = createRuleDataBaseSchema.extend({
   id: z.string().describe('Unique rule identifier.'),
+  enabled: z.boolean().describe('Whether the rule is enabled.'),
   createdBy: z.string().nullable().describe('User who created the rule.'),
   createdAt: z.string().describe('ISO timestamp when the rule was created.'),
   updatedBy: z.string().nullable().describe('User who last updated the rule.'),
@@ -277,3 +285,31 @@ export const ruleResponseSchema = createRuleDataBaseSchema.extend({
 });
 
 export type RuleResponse = z.infer<typeof ruleResponseSchema>;
+
+/** Paginated list response schema. */
+export const findRulesResponseSchema = z
+  .object({
+    items: z.array(ruleResponseSchema).describe('The list of rules.'),
+    total: z.number().describe('The total number of rules matching the query.'),
+    page: z.number().describe('The current page number.'),
+    perPage: z.number().describe('The number of rules per page.'),
+  })
+  .describe('Paginated list of rules.');
+
+/** Bulk operation response schema. */
+export const bulkOperationResponseSchema = z
+  .object({
+    rules: z.array(ruleResponseSchema).describe('The rules that the operation was applied to.'),
+    errors: z
+      .array(
+        z.object({
+          id: z.string().describe('The identifier of the rule that failed.'),
+          error: z.object({
+            message: z.string().describe('The error message.'),
+            statusCode: z.number().describe('The HTTP status code.'),
+          }),
+        })
+      )
+      .describe('Errors encountered during the bulk operation.'),
+  })
+  .describe('Result of a bulk rule operation.');

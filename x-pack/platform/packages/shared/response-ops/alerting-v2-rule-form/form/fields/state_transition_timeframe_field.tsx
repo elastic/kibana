@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { MAX_DURATION, validateMaxDuration } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
@@ -62,6 +63,17 @@ export const StateTransitionTimeframeField = ({
             defaultMessage: 'Duration is required.',
           }
         ),
+        validate: (value) => {
+          if (!value) return true;
+          const error = validateMaxDuration(value, MAX_DURATION);
+          if (error) {
+            return i18n.translate('xpack.alertingV2.ruleForm.stateTransition.timeframeMaxError', {
+              defaultMessage: 'Duration cannot exceed {max}.',
+              values: { max: MAX_DURATION },
+            });
+          }
+          return true;
+        },
       }}
       render={({ field: { value, onChange, ref }, fieldState: { error } }) => (
         <DurationInput

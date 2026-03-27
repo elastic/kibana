@@ -23,7 +23,7 @@ export const ruleSavedObjectAttributesSchema = schema.object({
     name: schema.string(),
     description: schema.maybe(schema.string()),
     owner: schema.maybe(schema.string()),
-    labels: schema.maybe(schema.arrayOf(schema.string())),
+    labels: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 })),
   }),
   time_field: schema.string(),
   schedule: schema.object({
@@ -63,7 +63,7 @@ export const ruleSavedObjectAttributesSchema = schema.object({
   ),
   grouping: schema.maybe(
     schema.object({
-      fields: schema.arrayOf(schema.string()),
+      fields: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 10 }),
     })
   ),
   no_data: schema.maybe(
@@ -85,7 +85,8 @@ export const ruleSavedObjectAttributesSchema = schema.object({
         id: schema.string(),
         type: schema.string(),
         value: schema.string(),
-      })
+      }),
+      { maxSize: 100 }
     )
   ),
   // Server-managed fields

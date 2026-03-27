@@ -21,23 +21,23 @@ import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
 import type { DiscoverInternalState } from '../../../state_management/redux';
-import { selectTab } from '../../../state_management/redux/selectors';
+import { selectTab } from '../../../state_management/redux';
 
-export const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
+const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
   AlertConsumers.LOGS,
   AlertConsumers.OBSERVABILITY,
   STACK_ALERTS_FEATURE_ID,
 ];
 
-export interface EsQueryAlertMetaData extends RuleTypeMetaData {
+interface EsQueryAlertMetaData extends RuleTypeMetaData {
   isManagementPage?: boolean;
   adHocDataViewList: DataView[];
 }
 
 const RuleFormFlyoutWithType = RuleFormFlyout<EsQueryAlertMetaData>;
 
-export const CreateAlertFlyout: React.FC<{
+const CreateAlertFlyout: React.FC<{
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   tabId: string;
@@ -193,12 +193,12 @@ export const getAlertsAppMenuItem = ({
   };
 };
 
-export function getTimeField(dataView: DataView | undefined) {
+function getTimeField(dataView: DataView | undefined) {
   const dateFields = dataView?.fields.getByType('date');
   return dataView?.timeFieldName || dateFields?.[0]?.name;
 }
 
-export function getManageRulesUrl(services: DiscoverServices) {
+function getManageRulesUrl(services: DiscoverServices) {
   return services.application.getUrlForApp(
     services.application.isAppRegistered('rules')
       ? 'rules'

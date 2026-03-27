@@ -7,23 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Suspense, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import type { AggregateQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
 import { AppMenuActionId } from '@kbn/discover-utils';
-import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import type { DiscoverInternalState } from '../../../state_management/redux';
 import { selectTab } from '../../../state_management/redux/selectors';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
-import { CreateAlertFlyout, getManageRulesUrl, getTimeField } from './get_alerts';
-
-// Lazy load to avoid Jest module resolution issues with Monaco dependencies
-const DynamicRuleFormFlyout = React.lazy(() =>
-  import('@kbn/alerting-v2-rule-form').then((m) => ({ default: m.DynamicRuleFormFlyout }))
-);
 
 export function CreateESQLRuleFlyout({
   services,
@@ -40,7 +32,8 @@ export function CreateESQLRuleFlyout({
   const currentTab = selectTab(getState(), tabId);
   const query = (currentTab.appState.query as AggregateQuery)?.esql || '';
 
-  const { http, data, dataViews, notifications, history, core, lens } = services;
+  const { history, core, alertingVTwo } = services;
+  const RuleFormFlyout = alertingVTwo!.DynamicRuleFormFlyout;
 
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
@@ -66,22 +59,7 @@ export function CreateESQLRuleFlyout({
     };
   }, [history, core.application.currentAppId$]);
 
-  return (
-    <Suspense fallback={<EuiLoadingSpinner size="l" />}>
-      <DynamicRuleFormFlyout
-        services={{
-          http,
-          data,
-          dataViews,
-          notifications,
-          application: core.application,
-          lens,
-        }}
-        query={query}
-        onClose={onClose}
-      />
-    </Suspense>
-  );
+  return <RuleFormFlyout query={query} onClose={onClose} />;
 }
 
 export const getCreateRuleMenuItem = ({
@@ -95,59 +73,11 @@ export const getCreateRuleMenuItem = ({
   tabId: string;
   getState: () => DiscoverInternalState;
 }): DiscoverAppMenuItemType => {
-  const { dataView, isEsqlMode } = discoverParams;
-  const timeField = getTimeField(dataView);
-  const hasTimeFieldName = !isEsqlMode ? Boolean(dataView?.timeFieldName) : Boolean(timeField);
-
-  const legacyItems: DiscoverAppMenuPopoverItem[] = [];
-
-  if (services.capabilities.management?.insightsAndAlerting?.triggersActions) {
-    if (discoverParams.authorizedRuleTypeIds.includes(ES_QUERY_ID)) {
-      legacyItems.push({
-        id: 'legacy-search-threshold',
-        order: 1,
-        label: i18n.translate('discover.localMenu.legacySearchThresholdTitle', {
-          defaultMessage: 'Search threshold rule',
-        }),
-        iconType: 'bell',
-        testId: 'discoverLegacySearchThresholdButton',
-        disableButton: !hasTimeFieldName,
-        tooltipContent: hasTimeFieldName
-          ? undefined
-          : i18n.translate('discover.localMenu.legacyMissedTimeFieldToolTip', {
-              defaultMessage: 'Data view does not have a time field.',
-            }),
-        run: ({ context: { onFinishAction } }) => {
-          return (
-            <CreateAlertFlyout
-              onFinishAction={onFinishAction}
-              discoverParams={discoverParams}
-              services={services}
-              tabId={tabId}
-              getState={getState}
-            />
-          );
-        },
-      });
-    }
-
-    legacyItems.push({
-      id: 'manage-rules-connectors',
-      order: Number.MAX_SAFE_INTEGER,
-      label: i18n.translate('discover.localMenu.manageRulesAndConnectors', {
-        defaultMessage: 'Manage rules and connectors',
-      }),
-      iconType: 'tableOfContents',
-      testId: 'discoverManageRulesButton',
-      href: getManageRulesUrl(services),
-    });
-  }
-
   const createRuleItem: DiscoverAppMenuPopoverItem = {
     id: 'create-rule',
     order: 1,
     label: i18n.translate('discover.localMenu.createRuleTitle', {
-      defaultMessage: 'Create rule',
+      defaultMessage: 'Create v2 ES|QL rule',
     }),
     iconType: 'bell',
     testId: 'discoverCreateRuleButton',
@@ -168,17 +98,13 @@ export const getCreateRuleMenuItem = ({
     id: 'legacy-rules',
     order: 2,
     label: i18n.translate('discover.localMenu.legacyRulesTitle', {
-      defaultMessage: 'Create legacy rules',
+      defaultMessage: 'Create v1 rules',
     }),
     testId: 'discoverLegacyRulesButton',
-    items: legacyItems,
+    items: [],
   };
 
-  const items: DiscoverAppMenuPopoverItem[] = [createRuleItem];
-
-  if (legacyItems.length > 0) {
-    items.push(legacyRulesItem);
-  }
+  const items: DiscoverAppMenuPopoverItem[] = [createRuleItem, legacyRulesItem];
 
   return {
     id: AppMenuActionId.createRule,

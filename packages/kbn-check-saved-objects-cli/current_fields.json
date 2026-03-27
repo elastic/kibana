@@ -116,10 +116,6 @@
     "updatedByUsername"
   ],
   "alerting_rule": [
-    "artifacts",
-    "artifacts.id",
-    "artifacts.type",
-    "artifacts.value",
     "createdAt",
     "createdBy",
     "enabled",
@@ -136,11 +132,16 @@
     "metadata.name",
     "metadata.owner",
     "no_data",
+    "no_data.behavior",
+    "no_data.timeframe",
     "recovery_policy",
+    "recovery_policy.query",
+    "recovery_policy.query.base",
+    "recovery_policy.query.condition",
+    "recovery_policy.type",
     "schedule",
     "schedule.every",
     "schedule.lookback",
-    "state_transition",
     "time_field",
     "updatedAt",
     "updatedBy"

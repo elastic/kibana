@@ -6,6 +6,6 @@
  */
 
 export const queryKeys = {
-  all: ['alerting-episodes'] as const,
+  all: ['alert-episodes'] as const,
   list: (pageSize: number) => [...queryKeys.all, 'list', pageSize] as const,
 };

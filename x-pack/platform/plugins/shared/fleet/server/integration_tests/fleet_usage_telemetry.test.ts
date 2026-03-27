@@ -603,6 +603,7 @@ describe('fleet usage telemetry', () => {
           count_with_global_data_tags: 2,
           count_with_non_default_space: 0,
           avg_number_global_data_tags_per_policy: 2,
+          count_with_agent_version_conditions: 0,
         },
         agent_logs_panics_last_hour: [
           {

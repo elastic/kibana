@@ -93,6 +93,21 @@ jest.mock('../../hooks/use_unsnooze_notification_policy', () => ({
   }),
 }));
 
+const mockUpdateNotificationPolicyApiKey = jest.fn();
+jest.mock('../../hooks/use_update_notification_policy_api_key', () => ({
+  useUpdateNotificationPolicyApiKey: () => ({
+    mutate: mockUpdateNotificationPolicyApiKey,
+  }),
+}));
+
+const mockBulkAction = jest.fn();
+jest.mock('../../hooks/use_bulk_action_notification_policies', () => ({
+  useBulkActionNotificationPolicies: () => ({
+    mutate: mockBulkAction,
+    isLoading: false,
+  }),
+}));
+
 jest.mock('../../hooks/use_fetch_workflow', () => ({
   useFetchWorkflow: (...args: unknown[]) => mockUseFetchWorkflow(...args),
 }));

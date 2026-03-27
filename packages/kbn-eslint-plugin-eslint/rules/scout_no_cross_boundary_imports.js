@@ -88,6 +88,11 @@ module.exports = {
         return;
       }
 
+      // Optional add-on package (not re-exported by solution Scout wrappers).
+      if (scoutPkg === '@kbn/scout-synthtrace') {
+        return;
+      }
+
       context.report({
         node: sourceNode,
         messageId: allowed.solution ? 'solutionTestImport' : 'platformTestImport',

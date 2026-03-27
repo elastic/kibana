@@ -105,6 +105,12 @@ export class NotificationPoliciesApi {
     );
   }
 
+  public async updateNotificationPolicyApiKey(id: string) {
+    await this.http.post(
+      `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}/_update_api_key`
+    );
+  }
+
   public async bulkActionNotificationPolicies(body: BulkActionNotificationPoliciesBody) {
     return this.http.post<BulkActionNotificationPoliciesResponse>(
       `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/_bulk`,

@@ -6,14 +6,109 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+/**
+ * GitHub MCP Connector (v2)
+ *
+ * An MCP-native v2 connector that connects to the GitHub Copilot MCP server.
+ *
+ * Auth: Bearer token (PAT or OAuth token)
+ */
+
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
-import type { ConnectorSpec } from '../../connector_spec';
+import { UISchemas, type ActionContext, type ConnectorSpec } from '../../connector_spec';
+import { withMcpClient } from '../../lib/mcp';
+import type {
+  CallToolInput,
+  GetCommitInput,
+  GetFileContentsInput,
+  GetIssueCommentsInput,
+  GetIssueInput,
+  GetLatestReleaseInput,
+  ListBranchesInput,
+  ListCommitsInput,
+  ListIssuesInput,
+  ListPullRequestsInput,
+  ListReleasesInput,
+  ListTagsInput,
+  PullRequestReadInput,
+  SearchCodeInput,
+  SearchIssuesInput,
+  SearchPullRequestsInput,
+  SearchRepositoriesInput,
+  SearchUsersInput,
+} from './types';
+import getWorkflow from './workflows/get.yaml';
+import listWorkflow from './workflows/list.yaml';
+import searchWorkflow from './workflows/search.yaml';
+import whoAmIWorkflow from './workflows/who_am_i.yaml';
+import {
+  GetMeInputSchema,
+  ListToolsInputSchema,
+  SearchCodeInputSchema,
+  SearchRepositoriesInputSchema,
+  SearchIssuesInputSchema,
+  SearchPullRequestsInputSchema,
+  SearchUsersInputSchema,
+  ListIssuesInputSchema,
+  ListPullRequestsInputSchema,
+  ListCommitsInputSchema,
+  ListBranchesInputSchema,
+  ListReleasesInputSchema,
+  ListTagsInputSchema,
+  GetCommitInputSchema,
+  GetLatestReleaseInputSchema,
+  PullRequestReadInputSchema,
+  GetFileContentsInputSchema,
+  GetIssueInputSchema,
+  GetIssueCommentsInputSchema,
+  CallToolInputSchema,
+} from './types';
+
+const GITHUB_MCP_SERVER_URL = 'https://api.githubcopilot.com/mcp/';
+
+const parseJsonTextFromContentParts = (
+  content: Array<{ type: string; text?: string }>
+): unknown => {
+  const text = content
+    .filter((part) => part.type === 'text' && typeof part.text === 'string')
+    .map((part) => part.text)
+    .join('\n');
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
+};
+
+const callToolContent = async (
+  ctx: ActionContext,
+  toolName: string,
+  args?: Record<string, unknown>
+) => {
+  return withMcpClient(ctx, async (mcp) => {
+    const result = await mcp.callTool({ name: toolName, arguments: args ?? {} });
+    return result.content;
+  });
+};
+
+const callToolJson = async (
+  ctx: ActionContext,
+  toolName: string,
+  args: Record<string, unknown> = {}
+): Promise<unknown> => {
+  return withMcpClient(ctx, async (mcp) => {
+    const result = await mcp.callTool({ name: toolName, arguments: args });
+    return parseJsonTextFromContentParts(result.content);
+  });
+};
 
 export const GithubConnector: ConnectorSpec = {
   metadata: {
     id: '.github',
-    displayName: 'Github',
+    displayName: 'GitHub',
     description: i18n.translate('core.kibanaConnectorSpecs.github.metadata.description', {
       defaultMessage:
         'Search repositories, issues, and pull requests, browse file contents, and list branches in GitHub',
@@ -21,6 +116,7 @@ export const GithubConnector: ConnectorSpec = {
     minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
+
   auth: {
     types: ['bearer'],
     headers: {
@@ -28,494 +124,349 @@ export const GithubConnector: ConnectorSpec = {
     },
   },
 
+  schema: z.object({
+    serverUrl: UISchemas.url()
+      .default(GITHUB_MCP_SERVER_URL)
+      .describe('GitHub MCP Server URL')
+      .meta({
+        widget: 'text',
+        placeholder: 'https://api.githubcopilot.com/mcp/',
+        label: i18n.translate('connectorSpecs.github.config.serverUrl.label', {
+          defaultMessage: 'MCP Server URL',
+        }),
+        helpText: i18n.translate('connectorSpecs.github.config.serverUrl.helpText', {
+          defaultMessage: 'The URL of the GitHub Copilot MCP server.',
+        }),
+      }),
+  }),
+
+  validateUrls: {
+    fields: ['serverUrl'],
+  },
+
   actions: {
-    listRepos: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
+    getMe: {
+      isTool: true,
+      description: i18n.translate('connectorSpecs.github.actions.getMe.description', {
+        defaultMessage: 'Get the authenticated GitHub user profile.',
       }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-        };
-        const response = await ctx.client.get(
-          `https://api.github.com/users/${typedInput.owner}/repos`
-        );
-        return response.data.map((repo: { name: string }) => repo.name);
+      input: GetMeInputSchema,
+      handler: async (ctx) => {
+        return callToolJson(ctx, 'get_me');
       },
     },
+
+    searchCode: {
+      isTool: true,
+      description: i18n.translate('connectorSpecs.github.actions.searchCode.description', {
+        defaultMessage: 'Search for code across GitHub repositories.',
+      }),
+      input: SearchCodeInputSchema,
+      handler: async (ctx, input: SearchCodeInput) => {
+        return callToolJson(ctx, 'search_code', {
+          query: input.query,
+          page: input.page,
+          perPage: input.perPage,
+        });
+      },
+    },
+
+    searchRepositories: {
+      isTool: true,
+      description: i18n.translate('connectorSpecs.github.actions.searchRepositories.description', {
+        defaultMessage: 'Search for GitHub repositories.',
+      }),
+      input: SearchRepositoriesInputSchema,
+      handler: async (ctx, input: SearchRepositoriesInput) => {
+        return callToolJson(ctx, 'search_repositories', {
+          query: input.query,
+          page: input.page,
+          perPage: input.perPage,
+        });
+      },
+    },
+
     searchIssues: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        type: z.enum(['issue', 'pr']),
-        query: z.string().optional(),
-        size: z.number().default(10),
+      isTool: true,
+      description: i18n.translate('connectorSpecs.github.actions.searchIssues.description', {
+        defaultMessage: 'Search for issues across GitHub repositories.',
       }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          type: 'issue' | 'pr';
-          query?: string;
-          size?: number;
-        };
-
-        const query =
-          `repo:${typedInput.owner}/${typedInput.repo} is:${typedInput.type} is:open` +
-          (typedInput.query ? ` ${typedInput.query}` : '');
-
-        const response = await ctx.client.get('https://api.github.com/search/issues', {
-          params: {
-            q: query,
-            per_page: typedInput.size || 10,
-          },
-          headers: {
-            Accept: 'application/vnd.github.v3+json',
-          },
-        });
-
-        return response.data;
-      },
-    },
-    searchRepoContents: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        query: z.string().optional(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          query?: string;
-        };
-        let searchQuery = `repo:${typedInput.owner}/${typedInput.repo}`;
-        if (typedInput.query) {
-          searchQuery += ` ${typedInput.query}`;
-        }
-
-        const response = await ctx.client.get('https://api.github.com/search/code', {
-          params: {
-            q: searchQuery,
-          },
-          headers: {
-            Accept: 'application/vnd.github.v3+json',
-          },
-        });
-
-        const searchRepoContentsResponseSchema = z.object({
-          total_count: z.number(),
-          items: z.array(
-            z.object({
-              name: z.string(),
-              path: z.string(),
-              html_url: z.string(),
-              repository: z.object({ full_name: z.string() }),
-              score: z.number(),
-            })
-          ),
-        });
-
-        return searchRepoContentsResponseSchema.parse(response.data);
-      },
-    },
-    getDocs: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        ref: z.string().optional(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          ref?: string;
-        };
-
-        const ref = typedInput.ref || 'main';
-
-        // Get the commit SHA for the ref
-        const commitResponse = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/commits/${ref}`,
-          {
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
-            },
-          }
-        );
-        const commitSha = commitResponse.data.sha;
-
-        // Get the tree from the commit
-        const treeResponse = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/git/trees/${commitSha}`,
-          {
-            params: { recursive: '1' },
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
-            },
-          }
-        );
-
-        // Filter the tree for markdown files
-        const markdownFiles = treeResponse.data.tree.filter(
-          (file: { type: string; path: string }) =>
-            file.type === 'blob' && file.path.toLowerCase().endsWith('.md')
-        );
-
-        if (markdownFiles.length === 0) {
-          throw new Error(
-            `No .md files found in repository ${typedInput.owner}/${typedInput.repo}`
-          );
-        }
-
-        // Get the content of the markdown files
-        const markdownFilesWithContent = await Promise.all(
-          markdownFiles.map(async (file: { path: string }) => {
-            const response = await ctx.client.get(
-              `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/contents/${file.path}`,
-              {
-                params: { ref },
-                headers: {
-                  Accept: 'application/vnd.github.v3+json',
-                },
-              }
-            );
-
-            return {
-              name: response.data.name,
-              path: response.data.path,
-              content: response.data.content,
-              html_url: response.data.html_url,
-            };
-          })
-        );
-
-        const getDocsResponseSchema = z.array(
-          z.object({
-            name: z.string(),
-            path: z.string(),
-            content: z.string(),
-            html_url: z.string(),
-          })
-        );
-
-        // Only return the name, path, content, and html_url of markdown files
-        return getDocsResponseSchema.parse(markdownFilesWithContent);
-      },
-    },
-    getDoc: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        path: z.string(),
-        ref: z.string().optional(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          path: string;
-          ref?: string;
-        };
-
-        const ref = typedInput.ref || 'main';
-
-        // Get the content of the specified file
-        const response = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/contents/${typedInput.path}`,
-          {
-            params: { ref },
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
-            },
-          }
-        );
-
-        const getDocResponseSchema = z.object({
-          name: z.string(),
-          path: z.string(),
-          content: z.string(),
-          html_url: z.string(),
-        });
-
-        // Return the name, path, content, and html_url of the file
-        // Note: GitHub API returns content as base64-encoded string
-        return getDocResponseSchema.parse({
-          name: response.data.name,
-          path: response.data.path,
-          content: response.data.content,
-          html_url: response.data.html_url,
+      input: SearchIssuesInputSchema,
+      handler: async (ctx, input: SearchIssuesInput) => {
+        return callToolJson(ctx, 'search_issues', {
+          query: input.query,
+          order: input.order,
+          sort: input.sort,
+          page: input.page,
+          perPage: input.perPage,
         });
       },
     },
-    getFileContents: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        path: z.string(),
-        ref: z.string().optional(),
+
+    searchPullRequests: {
+      isTool: true,
+      description: i18n.translate('connectorSpecs.github.actions.searchPullRequests.description', {
+        defaultMessage: 'Search for pull requests across GitHub repositories.',
       }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          path: string;
-          ref?: string;
-        };
-
-        const ref = typedInput.ref || 'main';
-
-        const response = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/contents/${typedInput.path}`,
-          {
-            params: { ref },
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
-            },
-          }
-        );
-
-        // Return raw response data to support both file and directory responses
-        // Files: object with name, path, content (base64), html_url, etc.
-        // Directories: array of objects with type, name, path, size, url, etc.
-        return response.data;
+      input: SearchPullRequestsInputSchema,
+      handler: async (ctx, input: SearchPullRequestsInput) => {
+        return callToolJson(ctx, 'search_pull_requests', {
+          query: input.query,
+          order: input.order,
+          sort: input.sort,
+          page: input.page,
+          perPage: input.perPage,
+        });
       },
     },
-    getIssue: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        issueNumber: z.number(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          issueNumber: number;
-        };
 
-        const response = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/issues/${typedInput.issueNumber}`,
-          {
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
-            },
-          }
-        );
-        return response.data;
+    searchUsers: {
+      isTool: true,
+      description: i18n.translate('connectorSpecs.github.actions.searchUsers.description', {
+        defaultMessage: 'Search for GitHub users.',
+      }),
+      input: SearchUsersInputSchema,
+      handler: async (ctx, input: SearchUsersInput) => {
+        return callToolJson(ctx, 'search_users', {
+          query: input.query,
+          page: input.page,
+          perPage: input.perPage,
+        });
       },
     },
-    getIssueComments: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        issueNumber: z.number(),
-        page: z.number().optional(),
-        perPage: z.number().optional(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          issueNumber: number;
-          page?: number;
-          perPage?: number;
-        };
 
-        const response = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/issues/${typedInput.issueNumber}/comments`,
-          {
-            params: {
-              ...(typedInput.page && { page: typedInput.page }),
-              ...(typedInput.perPage && { per_page: typedInput.perPage }),
-            },
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
-            },
-          }
-        );
-        return response.data;
+    listIssues: {
+      isTool: true,
+      description: i18n.translate('connectorSpecs.github.actions.listIssues.description', {
+        defaultMessage: 'List issues in a GitHub repository. Uses cursor-based pagination.',
+      }),
+      input: ListIssuesInputSchema,
+      handler: async (ctx, input: ListIssuesInput) => {
+        return callToolJson(ctx, 'list_issues', {
+          owner: input.owner,
+          repo: input.repo,
+          state: input.state,
+          first: input.first,
+          after: input.after,
+        });
       },
     },
-    getPullRequest: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        pullNumber: z.number(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          pullNumber: number;
-        };
 
-        const response = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/pulls/${typedInput.pullNumber}`,
-          {
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
-            },
-          }
-        );
-        return response.data;
+    listPullRequests: {
+      isTool: true,
+      description: i18n.translate('connectorSpecs.github.actions.listPullRequests.description', {
+        defaultMessage: 'List pull requests in a GitHub repository. Uses cursor-based pagination.',
+      }),
+      input: ListPullRequestsInputSchema,
+      handler: async (ctx, input: ListPullRequestsInput) => {
+        return callToolJson(ctx, 'list_pull_requests', {
+          owner: input.owner,
+          repo: input.repo,
+          state: input.state,
+          first: input.first,
+          after: input.after,
+        });
       },
     },
-    getPullRequestComments: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        pullNumber: z.number(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          pullNumber: number;
-        };
 
-        const response = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/pulls/${typedInput.pullNumber}/comments`,
-          {
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
-            },
-          }
-        );
-        return response.data;
+    listCommits: {
+      isTool: true,
+      description: i18n.translate('connectorSpecs.github.actions.listCommits.description', {
+        defaultMessage: 'List commits in a GitHub repository. Uses cursor-based pagination.',
+      }),
+      input: ListCommitsInputSchema,
+      handler: async (ctx, input: ListCommitsInput) => {
+        return callToolJson(ctx, 'list_commits', {
+          owner: input.owner,
+          repo: input.repo,
+          sha: input.sha,
+          first: input.first,
+          after: input.after,
+        });
       },
     },
-    getPullRequestDiff: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        pullNumber: z.number(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          pullNumber: number;
-        };
 
-        const response = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/pulls/${typedInput.pullNumber}`,
-          {
-            headers: {
-              Accept: 'application/vnd.github.v3.diff',
-            },
-          }
-        );
-        return response.data;
-      },
-    },
-    getPullRequestFiles: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        pullNumber: z.number(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          pullNumber: number;
-        };
-
-        const response = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/pulls/${typedInput.pullNumber}/files`,
-          {
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
-            },
-          }
-        );
-        return response.data;
-      },
-    },
-    getPullRequestReviews: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        pullNumber: z.number(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          pullNumber: number;
-        };
-
-        const response = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/pulls/${typedInput.pullNumber}/reviews`,
-          {
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
-            },
-          }
-        );
-        return response.data;
-      },
-    },
     listBranches: {
-      isTool: false,
-      input: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        page: z.number().optional(),
-        perPage: z.number().optional(),
+      isTool: true,
+      description: i18n.translate('connectorSpecs.github.actions.listBranches.description', {
+        defaultMessage: 'List branches in a GitHub repository. Uses cursor-based pagination.',
       }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          owner: string;
-          repo: string;
-          page?: number;
-          perPage?: number;
-        };
+      input: ListBranchesInputSchema,
+      handler: async (ctx, input: ListBranchesInput) => {
+        return callToolJson(ctx, 'list_branches', {
+          owner: input.owner,
+          repo: input.repo,
+          first: input.first,
+          after: input.after,
+        });
+      },
+    },
 
-        const response = await ctx.client.get(
-          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/branches`,
-          {
-            params: {
-              ...(typedInput.page && { page: typedInput.page }),
-              ...(typedInput.perPage && { per_page: typedInput.perPage }),
-            },
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
-            },
-          }
-        );
-        return response.data;
+    listReleases: {
+      isTool: true,
+      description: i18n.translate('connectorSpecs.github.actions.listReleases.description', {
+        defaultMessage: 'List releases in a GitHub repository. Uses cursor-based pagination.',
+      }),
+      input: ListReleasesInputSchema,
+      handler: async (ctx, input: ListReleasesInput) => {
+        return callToolJson(ctx, 'list_releases', {
+          owner: input.owner,
+          repo: input.repo,
+          first: input.first,
+          after: input.after,
+        });
+      },
+    },
+
+    listTags: {
+      isTool: true,
+      description: i18n.translate('connectorSpecs.github.actions.listTags.description', {
+        defaultMessage: 'List tags in a GitHub repository. Uses cursor-based pagination.',
+      }),
+      input: ListTagsInputSchema,
+      handler: async (ctx, input: ListTagsInput) => {
+        return callToolJson(ctx, 'list_tags', {
+          owner: input.owner,
+          repo: input.repo,
+          first: input.first,
+          after: input.after,
+        });
+      },
+    },
+
+    getCommit: {
+      isTool: true,
+      description: i18n.translate('connectorSpecs.github.actions.getCommit.description', {
+        defaultMessage: 'Get details of a specific commit.',
+      }),
+      input: GetCommitInputSchema,
+      handler: async (ctx, input: GetCommitInput) => {
+        return callToolJson(ctx, 'get_commit', {
+          owner: input.owner,
+          repo: input.repo,
+          sha: input.sha,
+        });
+      },
+    },
+
+    getLatestRelease: {
+      isTool: true,
+      description: i18n.translate('connectorSpecs.github.actions.getLatestRelease.description', {
+        defaultMessage: 'Get the latest release of a GitHub repository.',
+      }),
+      input: GetLatestReleaseInputSchema,
+      handler: async (ctx, input: GetLatestReleaseInput) => {
+        return callToolJson(ctx, 'get_latest_release', { owner: input.owner, repo: input.repo });
+      },
+    },
+
+    pullRequestRead: {
+      isTool: true,
+      description: i18n.translate('connectorSpecs.github.actions.pullRequestRead.description', {
+        defaultMessage: 'Read the full details of a specific pull request.',
+      }),
+      input: PullRequestReadInputSchema,
+      handler: async (ctx, input: PullRequestReadInput) => {
+        return callToolJson(ctx, 'pull_request_read', {
+          owner: input.owner,
+          repo: input.repo,
+          pullNumber: input.pullNumber,
+          method: input.method,
+        });
+      },
+    },
+
+    getFileContents: {
+      isTool: true,
+      description: i18n.translate('connectorSpecs.github.actions.getFileContents.description', {
+        defaultMessage: 'Get the contents of a file or directory from a GitHub repository.',
+      }),
+      input: GetFileContentsInputSchema,
+      handler: async (ctx, input: GetFileContentsInput) => {
+        return callToolContent(ctx, 'get_file_contents', {
+          owner: input.owner,
+          repo: input.repo,
+          path: input.path,
+          ref: input.ref,
+        });
+      },
+    },
+
+    getIssue: {
+      isTool: true,
+      description: i18n.translate('connectorSpecs.github.actions.getIssue.description', {
+        defaultMessage: 'Get details of a specific issue in a GitHub repository.',
+      }),
+      input: GetIssueInputSchema,
+      handler: async (ctx, input: GetIssueInput) => {
+        return callToolJson(ctx, 'issue_read', {
+          owner: input.owner,
+          repo: input.repo,
+          issue_number: input.issueNumber,
+          method: 'get',
+        });
+      },
+    },
+
+    getIssueComments: {
+      isTool: true,
+      description: i18n.translate('connectorSpecs.github.actions.getIssueComments.description', {
+        defaultMessage: 'Get comments for a specific issue in a GitHub repository.',
+      }),
+      input: GetIssueCommentsInputSchema,
+      handler: async (ctx, input: GetIssueCommentsInput) => {
+        return callToolJson(ctx, 'issue_read', {
+          owner: input.owner,
+          repo: input.repo,
+          issue_number: input.issueNumber,
+          method: 'get_comments',
+        });
+      },
+    },
+
+    listTools: {
+      isTool: true,
+      description: i18n.translate('connectorSpecs.github.actions.listTools.description', {
+        defaultMessage:
+          'List all tools available on the GitHub MCP server. Use this to discover available capabilities or refresh tool context for the LLM.',
+      }),
+      input: ListToolsInputSchema,
+      handler: async (ctx) => {
+        return withMcpClient(ctx, async (mcp) => {
+          const { tools } = await mcp.listTools();
+          return tools;
+        });
+      },
+    },
+
+    callTool: {
+      isTool: true,
+      description: i18n.translate('connectorSpecs.github.actions.callTool.description', {
+        defaultMessage:
+          'Call any tool on the GitHub MCP server directly by name. Use this as an escape hatch when a specific tool is not yet exposed as a named action.',
+      }),
+      input: CallToolInputSchema,
+      handler: async (ctx, input: CallToolInput) => {
+        return callToolContent(ctx, input.name, input.arguments);
       },
     },
   },
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.github.test.description', {
-      defaultMessage: 'Verifies Github connection by fetching metadata about given data source',
+    description: i18n.translate('connectorSpecs.github.test.description', {
+      defaultMessage:
+        'Verifies connection to the GitHub Copilot MCP server by listing available tools.',
     }),
     handler: async (ctx) => {
-      ctx.log.debug('Github test handler');
-      const response = await ctx.client.get('https://api.github.com/user');
-
-      if (response.status !== 200) {
-        return { ok: false, message: 'Failed to connect to Github API' };
-      } else {
-        return { ok: true, message: 'Successfully connected to Github API' };
-      }
+      return withMcpClient(ctx, async (mcp) => {
+        const { tools } = await mcp.listTools();
+        return {
+          ok: true,
+          message: `Connected to GitHub MCP server. ${tools.length} tools available.`,
+        };
+      });
     },
   },
+
+  agentBuilderWorkflows: [getWorkflow, listWorkflow, searchWorkflow, whoAmIWorkflow],
 };
