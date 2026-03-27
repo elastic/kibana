@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/repo-packages'
   - '@kbn/es'
   - '@kbn/dev-proc-runner'
+  - '@kbn/kbn-client'
   - '@kbn/test'
   - '@kbn/es-archiver'
   - '@kbn/dev-utils'
