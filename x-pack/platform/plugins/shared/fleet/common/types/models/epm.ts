@@ -270,6 +270,7 @@ export enum RegistryPolicyTemplateKeys {
   configuration_links = 'configuration_links',
   fips_compatible = 'fips_compatible',
   dynamic_signal_types = 'dynamic_signal_types',
+  var_groups = 'var_groups',
   deprecated = 'deprecated',
 }
 interface BaseTemplate {
@@ -298,6 +299,7 @@ export interface RegistryPolicyInputOnlyTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.template_paths]?: string[];
   [RegistryPolicyTemplateKeys.required_vars]?: RegistryRequiredVars;
   [RegistryPolicyTemplateKeys.vars]?: RegistryVarsEntry[];
+  [RegistryPolicyTemplateKeys.var_groups]?: RegistryVarGroup[];
   [RegistryPolicyTemplateKeys.dynamic_signal_types]?: boolean;
 }
 
@@ -315,6 +317,7 @@ export enum RegistryInputKeys {
   input_group = 'input_group',
   required_vars = 'required_vars',
   vars = 'vars',
+  var_groups = 'var_groups',
   deployment_modes = 'deployment_modes',
   hide_in_var_group_options = 'hide_in_var_group_options',
   deprecated = 'deprecated',
@@ -333,6 +336,7 @@ export interface RegistryInput {
   [RegistryInputKeys.input_group]?: RegistryInputGroup;
   [RegistryInputKeys.required_vars]?: RegistryRequiredVars;
   [RegistryInputKeys.vars]?: RegistryVarsEntry[];
+  [RegistryInputKeys.var_groups]?: RegistryVarGroup[];
   [RegistryInputKeys.deployment_modes]?: string[];
   [RegistryInputKeys.hide_in_var_group_options]?: Record<string, string[]>;
   [RegistryInputKeys.deprecated]?: DeprecationInfo;

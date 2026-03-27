@@ -66,6 +66,8 @@ export const createNavigationTree = ({
       {
         link: 'observability-overview:alerts',
         icon: 'warning',
+        getIsActive: ({ pathNameSerialized, prepend }) =>
+          pathNameSerialized.startsWith(prepend('/app/observability/alerts')),
       },
       ...filterForFeatureAvailability(
         {
@@ -87,7 +89,7 @@ export const createNavigationTree = ({
           defaultMessage: 'SLOs',
         }),
         link: 'slo',
-        icon: 'visGauge',
+        icon: 'chartGauge',
       },
       ...filterForFeatureAvailability(
         {
@@ -387,7 +389,7 @@ export const createNavigationTree = ({
           defaultMessage: 'Add data',
         }),
         link: 'observabilityOnboarding',
-        icon: 'plusInCircle',
+        icon: 'plusCircle',
       },
       {
         id: 'devTools',

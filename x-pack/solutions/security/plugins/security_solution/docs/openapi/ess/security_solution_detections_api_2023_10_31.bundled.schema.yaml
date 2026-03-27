@@ -504,7 +504,7 @@ paths:
                   anomaly_threshold: 50
                   id: 60b13926-289b-41b1-a537-197ef1fa5059
                   machine_learning_job_id:
-                    - auth_high_count_logon_events
+                    - auth_high_count_logon_events_ea
             schema:
               $ref: '#/components/schemas/RulePatchProps'
         description: |
@@ -1542,7 +1542,7 @@ paths:
                   description: New description of ml rule
                   id: 60b13926-289b-41b1-a537-197ef1fa5059
                   machine_learning_job_id:
-                    - auth_high_count_logon_events
+                    - auth_high_count_logon_events_ea
                   name: New name of ml rule
                   risk_score: 21
                   severity: low
@@ -2192,7 +2192,7 @@ paths:
                             interval: 15m
                             license: Elastic License v2
                             machine_learning_job_id:
-                              - packetbeat_dns_tunneling
+                              - packetbeat_dns_tunneling_ea
                             max_signals: 100
                             name: DNS Tunneling [Duplicate]
                             references:
@@ -8847,6 +8847,20 @@ components:
           required:
             - gte
             - lte
+        gap_reason:
+          description: Detected reason for the execution gap
+          type: object
+          properties:
+            type:
+              description: >-
+                The type of reason for the gap (rule_disabled or
+                rule_did_not_run)
+              enum:
+                - rule_disabled
+                - rule_did_not_run
+              type: string
+          required:
+            - type
         total_enrichment_duration_ms:
           description: >-
             Total time spent enriching documents during current rule execution

@@ -44,16 +44,6 @@ export interface AsScopedOptions {
 }
 
 /**
- * {@link AsScopedOptions} variant that routes requests to the NPRE configured for the current
- * Kibana space. Requires a {@link ScopeableUrlRequest} to be passed to `asScoped` so the space
- * can be extracted from the URL pathname.
- * @public
- */
-export interface SpaceNPRERouting extends AsScopedOptions {
-  projectRouting: 'space';
-}
-
-/**
  * Represents an Elasticsearch cluster API client created by the platform.
  * It allows to call API on behalf of the internal Kibana user and
  * the actual user that is derived from the request headers (via `asScoped(...)`).
@@ -72,7 +62,7 @@ export interface IClusterClient {
    */
   readonly asInternalUser: ElasticsearchClient;
 
-  asScoped(request: ScopeableUrlRequest, opts: SpaceNPRERouting): IScopedClusterClient;
+  asScoped(request: ScopeableUrlRequest, opts: AsScopedOptions): IScopedClusterClient;
   /**
    * Creates a {@link IScopedClusterClient | scoped cluster client} bound to the given request,
    * forwarding the request's authentication headers to Elasticsearch.
