@@ -31,7 +31,6 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
         <EuiFlexGroup gutterSize="m" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiLink
-              aria-label={i18n.API_DOCUMENTATION_LINK}
               target="_blank"
               data-test-subj="api-documentation"
               href={docLinks.createInferenceEndpoint}
@@ -64,7 +63,6 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
         {i18n.ADD_ENDPOINT_LABEL}
       </EuiButton>,
       <EuiLink
-        aria-label={i18n.API_DOCUMENTATION_LINK}
         target="_blank"
         data-test-subj="api-documentation"
         href={docLinks.createInferenceEndpoint}
@@ -73,14 +71,12 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
         {i18n.API_DOCUMENTATION_LINK}
       </EuiLink>,
       <EuiLink
-        aria-label={i18n.VIEW_YOUR_MODELS_LINK}
         onClick={() => application.navigateToApp('ml', { path: 'trained_models' })}
         data-test-subj="view-your-models"
       >
         {i18n.VIEW_YOUR_MODELS_LINK}
       </EuiLink>,
       <EuiLink
-        aria-label={i18n.EIS_DOCUMENTATION_LINK}
         href={docLinks.elasticInferenceService}
         target="_blank"
         data-test-subj="eis-documentation"
