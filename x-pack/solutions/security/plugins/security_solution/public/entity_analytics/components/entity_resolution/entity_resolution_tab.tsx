@@ -46,7 +46,7 @@ const WhatIsEntityResolutionPanel: React.FC = () => {
       <EuiText size="s">
         <FormattedMessage
           id="xpack.securitySolution.entityAnalytics.entityResolution.introText"
-          defaultMessage="Use a CSV file to batch-link entity records that represent the same real-world identity. Aliases are matched by identity fields and linked to a target (golden) entity."
+          defaultMessage="Use a CSV file to batch-link entity records that represent the same real-world identity. Aliases are matched by identity fields and linked to a target entity."
         />
       </EuiText>
       <EuiSpacer size="l" />
