@@ -101,7 +101,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
         exclude: [...(options.suiteTags?.exclude || []), 'skipStateful'],
       },
 
-      // ⚠️  DO NOT add args here to make tests pass as they won't be set on ECH (Elastic Cloud Hosted).
+      // ⚠️  Do not add server args here to make tests pass as they won't be set on ECH (Elastic Cloud Hosted).
       //     If your test needs a feature flag, use createStatefulFeatureFlagTestConfig (feature_flag_configs/).
       esTestCluster: {
         ...xPackAPITestsConfig.get('esTestCluster'),
@@ -127,7 +127,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           path.resolve(REPO_ROOT, STATEFUL_ROLES_ROOT_PATH, 'roles.yml'),
         ],
       },
-      // ⚠️  DO NOT add args here to make tests pass as they won't be set on ECH (Elastic Cloud Hosted).
+      // ⚠️  Do not add server args here to make tests pass as they won't be set on ECH (Elastic Cloud Hosted).
       //     If your test needs a feature flag, use createStatefulFeatureFlagTestConfig (feature_flag_configs/).
       kbnTestServer: {
         ...xPackAPITestsConfig.get('kbnTestServer'),

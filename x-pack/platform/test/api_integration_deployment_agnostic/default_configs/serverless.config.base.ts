@@ -28,7 +28,7 @@ interface CreateTestConfigOptions<T> {
 // include settings from elasticsearch controller
 // https://github.com/elastic/elasticsearch-controller/blob/main/helm/values.yaml
 //
-// ⚠️  DO NOT add args here to make tests pass as they won't be set on MKI.
+// ⚠️  Do not add server args here to make tests pass as they won't be set on MKI.
 //     If your test needs a feature flag, create a config under feature_flag_configs/ using
 //     createServerlessFeatureFlagTestConfig from feature_flag.serverless.config.base.ts.
 const esServerArgsFromController = {
@@ -41,7 +41,7 @@ const esServerArgsFromController = {
 // include settings from kibana controller
 // https://github.com/elastic/kibana-controller/blob/main/internal/controllers/kibana/config/config_settings.go
 //
-// ⚠️  DO NOT add args here to make tests pass as they won't be set on MKI.
+// ⚠️  Do not add server args here to make tests pass as they won't be set on MKI.
 //     If your test needs a feature flag, create a config under feature_flag_configs/ using
 //     createServerlessFeatureFlagTestConfig from feature_flag.serverless.config.base.ts.
 const kbnServerArgsFromController = {
