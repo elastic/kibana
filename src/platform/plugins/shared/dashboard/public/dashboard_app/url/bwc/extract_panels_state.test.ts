@@ -50,6 +50,7 @@ describe('extractPanelsState', () => {
             "grid": Object {
               "y": 1,
             },
+            "id": "section1",
             "panels": Array [
               Object {
                 "config": Object {},
@@ -64,7 +65,6 @@ describe('extractPanelsState', () => {
               },
             ],
             "title": "Section 1",
-            "id": "section1",
           },
         ]
       `);

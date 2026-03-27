@@ -226,13 +226,13 @@ describe('dashboardSmlType', () => {
     expect(attachmentData?.panels).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          uid: 'panel-1',
+          id: 'panel-1',
           type: 'lens',
         }),
         expect.objectContaining({
-          uid: 'section-1',
+          id: 'section-1',
           title: 'Operations',
-          panels: [expect.objectContaining({ uid: 'panel-2', type: 'markdown' })],
+          panels: [expect.objectContaining({ id: 'panel-2', type: 'markdown' })],
         }),
       ])
     );
@@ -278,7 +278,7 @@ describe('dashboardSmlType', () => {
 
     expect(attachmentData?.panels).toEqual([
       expect.objectContaining({
-        uid: 'panel-3',
+        id: 'panel-3',
         type: 'lens',
         config: expect.objectContaining({
           attributes: expect.objectContaining({
