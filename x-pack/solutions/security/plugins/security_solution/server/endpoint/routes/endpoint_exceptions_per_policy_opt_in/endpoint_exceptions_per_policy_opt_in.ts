@@ -89,10 +89,16 @@ export const registerEndpointExceptionsPerPolicyOptInRoute = (
         version: '1',
         validate: {},
       },
-      // todo: would be better to use `withEndpointAuthz` with `canOptInPerPolicyEndpointExceptions`,
+      // todo: would be better to add `canOptInPerPolicyEndpointExceptions` to `withEndpointAuthz`, instead of
+      // using the ReservedPrivilegesSet.superuser above,
       // so we have a single source of truth regarding authz, but the role names in the serverless API test
       // are not passed through the authz service, which makes the test fail, so for now rather have the test pass.
-      getOptInToPerPolicyEndpointExceptionsPOSTHandler(endpointContext.service)
+      withEndpointAuthz(
+        // hiding behind Platinum+ license
+        { all: ['canCreateArtifactsByPolicy'] },
+        logger,
+        getOptInToPerPolicyEndpointExceptionsPOSTHandler(endpointContext.service)
+      )
     );
 
   router.versioned

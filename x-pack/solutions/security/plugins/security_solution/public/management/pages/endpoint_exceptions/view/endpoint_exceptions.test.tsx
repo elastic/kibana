@@ -156,6 +156,19 @@ describe('When on the endpoint exceptions page', () => {
           expect(renderResult.queryByTestId(CALLOUT)).toBeTruthy();
         });
 
+        it('should not show the per-policy opt-in below Platinum license', async () => {
+          mockUserPrivileges.mockReturnValue({
+            endpointPrivileges: getEndpointAuthzInitialStateMock({
+              canCreateArtifactsByPolicy: false,
+            }),
+          });
+
+          render();
+
+          await waitFor(() => expect(optInGetMock).toHaveBeenCalled());
+          expect(renderResult.queryByTestId(CALLOUT)).not.toBeInTheDocument();
+        });
+
         it('should hide the per-policy opt-in callout after dismissing it and store the dismissal in session storage', async () => {
           render();
 
@@ -203,6 +216,21 @@ describe('When on the endpoint exceptions page', () => {
 
           expect(renderResult.queryByTestId(UPDATE_TO_PER_POLICY_ACTION_BTN)).toBeInTheDocument();
           expect(renderResult.queryByTestId(CALLOUT)).not.toBeInTheDocument();
+        });
+
+        it('should not show the opt-in menu action below Platinum license', async () => {
+          mockUserPrivileges.mockReturnValue({
+            endpointPrivileges: getEndpointAuthzInitialStateMock({
+              canCreateArtifactsByPolicy: false,
+            }),
+          });
+
+          render();
+
+          await waitFor(() => expect(optInGetMock).toHaveBeenCalled());
+          expect(
+            renderResult.queryByTestId(UPDATE_TO_PER_POLICY_ACTION_BTN)
+          ).not.toBeInTheDocument();
         });
 
         it('should show the per-policy opt-in modal when clicking on the action menu item', async () => {

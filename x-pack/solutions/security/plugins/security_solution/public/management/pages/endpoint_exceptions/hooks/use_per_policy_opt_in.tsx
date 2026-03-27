@@ -26,7 +26,8 @@ export const usePerPolicyOptIn = (): {
 } => {
   const { sessionStorage } = useKibana().services;
   const toasts = useToasts();
-  const { canOptInPerPolicyEndpointExceptions } = useUserPrivileges().endpointPrivileges;
+  const { canOptInPerPolicyEndpointExceptions, canCreateArtifactsByPolicy } =
+    useUserPrivileges().endpointPrivileges;
 
   const { mutate, isLoading } = useSendEndpointExceptionsPerPolicyOptIn();
   const { data: isPerPolicyOptIn, refetch } = useGetEndpointExceptionsPerPolicyOptIn();
@@ -34,9 +35,12 @@ export const usePerPolicyOptIn = (): {
   const [isCalloutDismissed, setIsCalloutDismissed] = useState(
     sessionStorage.get(STORAGE_KEY) === true
   );
-  const shouldShowCallout = isPerPolicyOptIn?.status === false && !isCalloutDismissed;
+  const shouldShowCallout =
+    canCreateArtifactsByPolicy && isPerPolicyOptIn?.status === false && !isCalloutDismissed;
   const shouldShowAction =
-    isPerPolicyOptIn?.status === false && canOptInPerPolicyEndpointExceptions;
+    canCreateArtifactsByPolicy &&
+    isPerPolicyOptIn?.status === false &&
+    canOptInPerPolicyEndpointExceptions;
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
