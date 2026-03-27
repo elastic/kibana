@@ -122,11 +122,6 @@ export const useWorkflowEditorStyles = () => {
           },
         },
 
-        // Allow migration hint hovers to show full content without clipping
-        '& .monaco-hover': {
-          maxHeight: 'none !important',
-        },
-
         // Error highlighting
         '.duplicate-step-name-error': {
           backgroundColor: euiTheme.colors.backgroundLightDanger,
@@ -218,6 +213,12 @@ export const useWorkflowEditorStyles = () => {
       transform: `translateY(${FOCUSED_STEP_DECORATION_INSET_PX}px) translateX(-${
         EDITOR_SCROLLBAR_WIDTH_PX + 2 * FOCUSED_STEP_DECORATION_INSET_PX
       }px)`, // scrollbar + twice decoration inset (outside and inside)
+    }),
+
+    migrationHintPanelContainer: css({
+      position: 'absolute',
+      left: 0,
+      zIndex: 1002,
     }),
 
     downloadSchemaButton: ({ euiTheme }: UseEuiTheme) =>
