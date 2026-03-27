@@ -41,13 +41,17 @@ export class PrebootExamplePlugin implements PrebootPlugin {
         {
           path: '/api/preboot/state',
           security: {
+            authc: {
+              enabled: false,
+              reason:
+                'This route is available during the preboot phase before authentication is set up.',
+            },
             authz: {
               enabled: false,
               reason: 'This route is opted out of authorization as it is a core preboot route',
             },
           },
           validate: false,
-          options: { authRequired: false },
         },
         (_, request, response) => {
           const isSetupModeActive = !skipSetup && core.preboot.isSetupOnHold();
@@ -62,6 +66,11 @@ export class PrebootExamplePlugin implements PrebootPlugin {
         {
           path: '/api/preboot/complete_setup',
           security: {
+            authc: {
+              enabled: false,
+              reason:
+                'This route is available during the preboot phase before authentication is set up.',
+            },
             authz: {
               enabled: false,
               reason: 'This route is opted out of authorization as it is a core preboot route',
@@ -70,7 +79,6 @@ export class PrebootExamplePlugin implements PrebootPlugin {
           validate: {
             body: schema.object({ shouldReloadConfig: schema.boolean() }),
           },
-          options: { authRequired: false },
         },
         (_, request, response) => {
           completeSetup({ shouldReloadConfig: request.body.shouldReloadConfig });
@@ -82,6 +90,11 @@ export class PrebootExamplePlugin implements PrebootPlugin {
         {
           path: '/api/preboot/write_config',
           security: {
+            authc: {
+              enabled: false,
+              reason:
+                'This route is available during the preboot phase before authentication is set up.',
+            },
             authz: {
               enabled: false,
               reason: 'This route is opted out of authorization as it is a core preboot route',
@@ -90,7 +103,6 @@ export class PrebootExamplePlugin implements PrebootPlugin {
           validate: {
             body: schema.object({ key: schema.string(), value: schema.string() }),
           },
-          options: { authRequired: false },
         },
         async (_, request, response) => {
           const configPath = this.#initializerContext.env.configs.find((path) =>
@@ -110,6 +122,11 @@ export class PrebootExamplePlugin implements PrebootPlugin {
         {
           path: '/api/preboot/connect_to_es',
           security: {
+            authc: {
+              enabled: false,
+              reason:
+                'This route is available during the preboot phase before authentication is set up.',
+            },
             authz: { enabled: false, reason: 'This route delegates authorization to es client' },
           },
           validate: {
@@ -119,7 +136,6 @@ export class PrebootExamplePlugin implements PrebootPlugin {
               password: schema.string(),
             }),
           },
-          options: { authRequired: false },
         },
         async (_, request, response) => {
           const esClient = core.elasticsearch.createClient('data', {

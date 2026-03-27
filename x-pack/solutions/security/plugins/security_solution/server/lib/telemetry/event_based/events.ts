@@ -1777,6 +1777,7 @@ export const GAP_DETECTED_EVENT: EventTypeOpts<{
   ruleType: string;
   ruleSource: string;
   isCustomized: boolean;
+  gapReasonType?: string;
 }> = {
   eventType: 'gap_detected_event',
   schema: {
@@ -1814,6 +1815,13 @@ export const GAP_DETECTED_EVENT: EventTypeOpts<{
       type: 'boolean',
       _meta: {
         description: 'Whether the prebuilt rule is customized',
+      },
+    },
+    gapReasonType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Detected reason for the gap (rule_disabled or rule_did_not_run)',
+        optional: true,
       },
     },
   },

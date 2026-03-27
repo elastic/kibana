@@ -17,7 +17,7 @@ import {
   EuiHorizontalRule,
   EuiLink,
 } from '@elastic/eui';
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
+import { WorkflowInsightType } from '../../../../../../../../common/endpoint/types/workflow_insights';
 
 import type { SecurityWorkflowInsight } from '../../../../../../../../common/endpoint/types/workflow_insights';
 import { WORKFLOW_INSIGHTS_SURVEY_URL } from '../../../../constants';
@@ -71,7 +71,7 @@ export const WorkflowInsightsResults = ({
     } else if (results?.length) {
       return results.flatMap((insight, index) => {
         switch (insight.type) {
-          case DefendInsightType.enum.incompatible_antivirus:
+          case WorkflowInsightType.enum.incompatible_antivirus:
             return (
               <WorkflowInsightsIncompatibleAntivirusResult
                 insight={insight}
@@ -79,7 +79,7 @@ export const WorkflowInsightsResults = ({
                 endpointId={endpointId}
               />
             );
-          case DefendInsightType.enum.policy_response_failure:
+          case WorkflowInsightType.enum.policy_response_failure:
             return <WorkflowInsightsPolicyResponseFailureResult insight={insight} index={index} />;
           default:
             return null;
@@ -102,7 +102,7 @@ export const WorkflowInsightsResults = ({
           alignItems={'center'}
           data-test-subj={'workflowInsightsSurveySection'}
         >
-          <EuiIcon type="discuss" size="m" />
+          <EuiIcon type="comment" size="m" />
           <EuiText size={'xs'} data-test-subj={'workflowInsightsSurveyLink'}>
             <p>
               {WORKFLOW_INSIGHTS.issues.survey.description}
