@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import { isNotEmptyCondition } from '../../../common/domain/definitions/common_fields';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import {
@@ -13,6 +14,7 @@ import {
   type ManagedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
+import { HASH_ALG } from '../constants';
 import { BadCRUDRequestError } from '../errors';
 import { hashEuid, validateAndTransformDoc, validateDocIdentification } from './utils';
 
@@ -53,11 +55,12 @@ describe('crud_client utils', () => {
   });
 
   describe('hashEuid', () => {
-    it('returns a valid MD5 hash', () => {
+    it('returns a valid SHA-256 hash', () => {
       const hashedId = hashEuid('entity-id');
+      const expectedHash = createHash(HASH_ALG).update('entity-id').digest('hex');
 
-      expect(hashedId).toMatch(/^[a-f0-9]{32}$/);
-      expect(hashedId).toBe('169fbe0cb705d8d8811b5098d0cf4588');
+      expect(hashedId).toMatch(/^[a-f0-9]{64}$/);
+      expect(hashedId).toBe(expectedHash);
     });
   });
 
@@ -156,29 +159,14 @@ describe('crud_client utils', () => {
       expect(result.id).toBe('doc-id');
     });
 
-    it('nests entity under typed field for non-generic types', () => {
-      mockGetEntityDefinition.mockReturnValue(createDefinition('host', [createField('host.name')]));
-
-      const doc: Entity = {
-        entity: { id: 'entity-host' },
-        host: { name: 'original-host-name' },
-      };
-      const result = validateAndTransformDoc('update', 'host', 'default', doc, undefined, false);
-
-      expect(result.doc['@timestamp']).toEqual(expect.any(String));
-      expect(result.doc).not.toHaveProperty('entity');
-      expect(result.doc).toHaveProperty('host.entity.id', 'entity-host');
-      expect(result.doc).toHaveProperty('host.name', 'original-host-name');
-    });
-
     describe('name defaulting on create vs update', () => {
-      it('defaults type.name from entity.id on create when name is not present', () => {
+      it('defaults entity.name from entity.id on create when name is not present', () => {
         mockGetEntityDefinition.mockReturnValue(createDefinition('host', []));
 
         const doc: Entity = { entity: { id: 'entity-host' } };
         const result = validateAndTransformDoc('create', 'host', 'default', doc, undefined, true);
 
-        expect(result.doc).toHaveProperty('host.name', 'entity-host');
+        expect(result.doc).toHaveProperty('entity.name', 'entity-host');
       });
 
       it('does not default type.name on update when name is not present', () => {
@@ -334,24 +322,6 @@ describe('crud_client utils', () => {
         expect(result.doc).toHaveProperty('@timestamp');
       });
 
-      it('nests entity under type key and removes root entity for typed entities', () => {
-        mockGetEntityDefinition.mockReturnValue(
-          createDefinition('host', [createField('host.name')])
-        );
-
-        const doc: Entity = {
-          entity: { id: 'host-1', type: 'Host' },
-          host: { name: 'my-host' },
-        };
-        const result = validateAndTransformDoc('update', 'host', 'default', doc, undefined, true);
-
-        expect(result.doc).not.toHaveProperty('entity');
-        expect(result.doc).toHaveProperty('host.entity.id', 'host-1');
-        expect(result.doc).toHaveProperty('host.entity.type', 'Host');
-        expect(result.doc).toHaveProperty('host.name', 'my-host');
-        expect(result.doc).toHaveProperty('@timestamp');
-      });
-
       it('creates the type object when not present in typed entity', () => {
         mockGetEntityDefinition.mockReturnValue(createDefinition('service', []));
 
@@ -365,9 +335,10 @@ describe('crud_client utils', () => {
           true
         );
 
-        expect(result.doc).not.toHaveProperty('entity');
-        expect(result.doc).toHaveProperty('service.entity.id', 'svc-1');
-        expect(result.doc).toHaveProperty('service.name', 'svc-1');
+        expect(result.doc).toHaveProperty('entity');
+        expect(result.doc).toHaveProperty('entity.id', 'svc-1');
+        expect(result.doc).toHaveProperty('entity.name', 'svc-1');
+        expect(result.doc).not.toHaveProperty('service');
       });
     });
 
@@ -413,8 +384,8 @@ describe('crud_client utils', () => {
         const result = validateAndTransformDoc('update', 'host', 'default', doc, undefined, false);
 
         expect(result.id).toBe('host:flat-host');
-        expect(result.doc).not.toHaveProperty('entity');
-        expect(result.doc).toHaveProperty('host.entity.id', 'host:flat-host');
+        expect(result.doc).not.toHaveProperty('host.entity');
+        expect(result.doc).toHaveProperty('entity.id', 'host:flat-host');
         expect(result.doc).toHaveProperty('host.name', 'flat-host');
       });
     });
