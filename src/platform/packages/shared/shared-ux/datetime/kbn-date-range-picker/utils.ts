@@ -237,12 +237,15 @@ export function getOptionShorthand(option: TimeRangeBoundsOption): string | null
   const alias = getNamedRangeAlias(option.start, option.end);
   if (alias) return alias;
 
-  const startOffset = boundToRelativeShorthand(option.start);
+  let startOffset = boundToRelativeShorthand(option.start);
   const endOffset = boundToRelativeShorthand(option.end);
 
   if (startOffset === null || endOffset === null) return null;
   if (startOffset === 'now' && endOffset === 'now') return null;
-  if (startOffset !== 'now' && startOffset.includes('/')) return null;
+  if (startOffset !== 'now' && startOffset.includes('/')) {
+    if (endOffset !== 'now') return null;
+    startOffset = startOffset.replace(/\/[smhdwMy]$/, '');
+  }
   if (endOffset !== 'now' && endOffset.includes('/')) return null;
   if (startOffset === 'now') return endOffset;
   if (endOffset === 'now') return startOffset;

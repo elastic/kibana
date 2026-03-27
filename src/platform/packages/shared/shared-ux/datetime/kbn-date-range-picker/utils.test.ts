@@ -130,9 +130,17 @@ describe('getOptionShorthand', () => {
     expect(getOptionShorthand({ start: 'now+1d/d', end: 'now+1d/d' })).toBe('tmr');
   });
 
-  it('returns null when a bound has rounding but no named range alias', () => {
-    expect(getOptionShorthand({ start: 'now-1d/d', end: 'now' })).toBeNull();
+  it('strips start rounding when end is now', () => {
+    expect(getOptionShorthand({ start: 'now-1d/d', end: 'now' })).toBe('-1d');
+    expect(getOptionShorthand({ start: 'now-24h/h', end: 'now' })).toBe('-24h');
+  });
+
+  it('returns null when end has rounding (not strippable)', () => {
     expect(getOptionShorthand({ start: 'now', end: 'now+1d/d' })).toBeNull();
+  });
+
+  it('returns null when both bounds have rounding', () => {
+    expect(getOptionShorthand({ start: 'now-7d/d', end: 'now-1d/d' })).toBeNull();
   });
 
   it('returns null when a bound is absolute', () => {
