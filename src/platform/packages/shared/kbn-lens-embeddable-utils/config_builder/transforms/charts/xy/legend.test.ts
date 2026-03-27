@@ -83,7 +83,7 @@ describe('XY Legend Transforms', () => {
       forbiddenApiPaths: ['layout.truncate.max_pixels'],
     },
     {
-      title: 'outside left grid legend persists default truncate.max_lines',
+      title: 'outside left grid legend persists default truncate.max_lines = 1',
       state: {
         isVisible: true,
         position: 'left',
