@@ -64,7 +64,6 @@ export const PrivateLocationsTable = ({
   } | null>(null);
   const {
     resetMonitors,
-    getUnhealthyMonitorCountForLocation,
     getUnhealthyLocationStatuses,
     getUnhealthyMonitorsForLocation,
   } = useMonitorIntegrationHealth();
@@ -155,18 +154,24 @@ export const PrivateLocationsTable = ({
           color: 'warning',
           isPrimary: false,
           'data-test-subj': 'action-reset',
-          available: (item: ListItem) => getUnhealthyMonitorCountForLocation(item.id) > 0,
+          available: (item: ListItem) => {
+            const unhealthyMonitors = getUnhealthyMonitorsForLocation(item.id);
+            return unhealthyMonitors.some((monitor) => {
+              const locationStatuses = getUnhealthyLocationStatuses(monitor.configId);
+              const locationStatus = locationStatuses.find((s) => s.locationId === item.id);
+              return locationStatus != null && isFixableByResetStatus(locationStatus.status);
+            });
+          },
           onClick: (item: ListItem) => {
             const unhealthyMonitors = getUnhealthyMonitorsForLocation(item.id);
-            const unhealthyStatuses = getUnhealthyLocationStatuses(item.id);
-            const statusMap = new Map(unhealthyStatuses.map((s) => [s.configId, s.status]));
 
             const resetIds: string[] = [];
             const skippedMonitors: Array<{ id: string; name: string }> = [];
 
             for (const monitor of unhealthyMonitors) {
-              const status = statusMap.get(monitor.configId);
-              if (status && isFixableByResetStatus(status)) {
+              const locationStatuses = getUnhealthyLocationStatuses(monitor.configId);
+              const locationStatus = locationStatuses.find((s) => s.locationId === item.id);
+              if (locationStatus && isFixableByResetStatus(locationStatus.status)) {
                 resetIds.push(monitor.configId);
               } else {
                 skippedMonitors.push({
