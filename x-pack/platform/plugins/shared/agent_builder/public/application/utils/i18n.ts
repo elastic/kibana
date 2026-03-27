@@ -829,6 +829,9 @@ export const labels = {
         defaultMessage: 'Auto',
       }
     ),
+    readOnlyBadge: i18n.translate('xpack.agentBuilder.agentSkills.readOnlyBadge', {
+      defaultMessage: 'Read only',
+    }),
     autoIncludedBadgeLabel: i18n.translate(
       'xpack.agentBuilder.agentSkills.autoIncludedBadgeLabel',
       {

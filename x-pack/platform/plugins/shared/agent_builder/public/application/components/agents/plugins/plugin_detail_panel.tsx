@@ -149,9 +149,18 @@ const SkillDetailFlyout: React.FC<{
   return (
     <EuiFlyout onClose={onClose} size="m" aria-labelledby="pluginSkillDetailFlyoutTitle">
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
-          <h2 id="pluginSkillDetailFlyoutTitle">{skill?.name ?? skillId}</h2>
-        </EuiTitle>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="s">
+              <h2 id="pluginSkillDetailFlyoutTitle">{skill?.name ?? skillId}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow" iconType="lock">
+              {labels.agentSkills.readOnlyBadge}
+            </EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiText size="xs" color="subdued">
           {labels.agentPlugins.skillDetailInstalledVia(pluginName)}
         </EuiText>
