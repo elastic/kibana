@@ -1020,5 +1020,36 @@ describe('actions_connectors_list', () => {
       expect(screen.queryByTestId('authorizeConnector')).not.toBeInTheDocument();
       expect(screen.queryByTestId('disconnectConnector')).not.toBeInTheDocument();
     });
+
+    it('does not show OAuth buttons when userAuthStatus is not_applicable (shared auth)', async () => {
+      const actions: ActionConnector[] = [
+        createMockActionConnector({
+          id: 'shared-oauth-connector',
+          actionTypeId: 'google-drive',
+          name: 'Shared Google Drive',
+          referencedByCount: 1,
+          config: { authType: 'oauth_authorization_code' },
+          userAuthStatus: 'not_applicable',
+        }),
+      ];
+
+      render(
+        <IntlProvider>
+          <ActionsConnectorsList
+            setAddFlyoutVisibility={() => {}}
+            loadActions={async () => {}}
+            editItem={() => {}}
+            isLoadingActions={false}
+            actions={actions}
+            setActions={() => {}}
+          />
+        </IntlProvider>
+      );
+
+      expect(await screen.findByTestId('actionsTable')).toBeInTheDocument();
+      expect(screen.queryByTestId('authorizeConnector')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('disconnectConnector')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('cancelAuthorizeConnector')).not.toBeInTheDocument();
+    });
   });
 });

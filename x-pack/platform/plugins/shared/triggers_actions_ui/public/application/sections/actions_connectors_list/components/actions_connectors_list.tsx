@@ -372,20 +372,21 @@ const ActionsConnectorsList = ({
 
         return (
           <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-            {usesOAuthAuthorizationCode(item) && (
-              <OAuthOperations
-                item={item}
-                onConnectionStatusChange={(changedConnectorId, status) =>
-                  setActions(
-                    actions.map((connector) =>
-                      connector.id === changedConnectorId
-                        ? { ...connector, userAuthStatus: status }
-                        : connector
+            {usesOAuthAuthorizationCode(item) &&
+              (item.userAuthStatus === 'connected' || item.userAuthStatus === 'not_connected') && (
+                <OAuthOperations
+                  item={item}
+                  onConnectionStatusChange={(changedConnectorId, status) =>
+                    setActions(
+                      actions.map((connector) =>
+                        connector.id === changedConnectorId
+                          ? { ...connector, userAuthStatus: status }
+                          : connector
+                      )
                     )
-                  )
-                }
-              />
-            )}
+                  }
+                />
+              )}
             <DeleteOperation canDelete={canDelete} item={item} onDelete={() => onDelete([item])} />
             {showFixButton && (
               <EuiFlexItem grow={false} style={{ marginLeft: 4 }}>
