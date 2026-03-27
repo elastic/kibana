@@ -34,22 +34,22 @@ describe('prettifyValue', () => {
 
   describe('both bounds relative — keeps delimiter', () => {
     it('strips rounding only from start: "now-30d/d to now-7d/d" to "-30d to -7d/d"', () => {
-      expect(prettifyValue('now-30d/d to now-7d/d')).toBe('-30d - -7d/d');
+      expect(prettifyValue('now-30d/d to now-7d/d')).toBe('-30d to -7d/d');
     });
 
     it('simplifies "now-1y to now-1M" to "-1y to -1M"', () => {
-      expect(prettifyValue('now-1y to now-1M')).toBe('-1y - -1M');
+      expect(prettifyValue('now-1y to now-1M')).toBe('-1y to -1M');
     });
   });
 
   describe('mixed relative and absolute', () => {
     it('prettifies the relative start, keeps absolute end', () => {
-      expect(prettifyValue('now-1d/d to 2025-06-15T00:00:00Z')).toBe('-1d - 2025-06-15T00:00:00Z');
+      expect(prettifyValue('now-1d/d to 2025-06-15T00:00:00Z')).toBe('-1d to 2025-06-15T00:00:00Z');
     });
 
     it('keeps rounding on end bound when start is absolute', () => {
       expect(prettifyValue('2025-01-01T00:00:00Z to now+7d/d')).toBe(
-        '2025-01-01T00:00:00Z - +7d/d'
+        '2025-01-01T00:00:00Z to +7d/d'
       );
     });
   });

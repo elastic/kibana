@@ -33,9 +33,11 @@ const DATEMATH_OFFSET_RE = /^(now)?([+-])(\d+)([a-zA-Z]+)(\/[smhdwMy])?$/;
 /**
  * Builds the full set of delimiter patterns by combining the parser's
  * configured delimiters, the universal dash, and an optional consumer delimiter.
+ *
+ * TODO use constant for dash delimiter (need to solve taking the parser into account)
  */
 const getDelimiterPatterns = (extraDelimiter?: string): RegExp[] => {
-  const delimiters = [...PARSER_DELIMITERS, DATE_RANGE_INPUT_DELIMITER];
+  const delimiters = [...PARSER_DELIMITERS, DATE_RANGE_INPUT_DELIMITER, '-'];
   if (extraDelimiter) delimiters.push(extraDelimiter);
 
   return delimiters.map(buildDelimiterPattern).filter((p): p is RegExp => p !== null);

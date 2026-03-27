@@ -50,7 +50,6 @@ import {
 } from '../date_range_picker_panel_ui';
 import { useDateRangePickerContext } from '../date_range_picker_context';
 import { dateMathToRelativeParts, applyTimePrecision } from '../format';
-import { getOptionShorthand } from '../utils';
 import type { DateType, DateOffset, TimeUnit } from '../types';
 import {
   DATE_TYPE_ABSOLUTE,
@@ -336,8 +335,8 @@ export function CustomTimeRangePanel() {
     [startState, endState]
   );
   const shorthandValue = useMemo(
-    () => getOptionShorthand({ start: startDateString, end: endDateString }),
-    [startDateString, endDateString]
+    () => datePartStateToShorthand(startState, endState),
+    [startState, endState]
   );
 
   const isInternalChangeRef = useRef(false);
@@ -525,6 +524,30 @@ function datePartStateToInputFragment(state: DatePartState): string {
     return `${operator}${Math.abs(count)}${displayUnit}`;
   }
   return state.absoluteText;
+}
+
+/**
+ * Builds the shorthand string for the custom time range panel.
+ *
+ * - RELATIVE bounds produce compact offset notation (e.g. `-15m`, `+3d`).
+ * - ABSOLUTE bounds use the user's typed text as-is.
+ * - NOW collapses: when one side is NOW the other side's fragment stands alone.
+ * - Returns `null` when both sides are NOW (no meaningful shorthand).
+ */
+function datePartStateToShorthand(
+  startState: DatePartState,
+  endState: DatePartState
+): string | null {
+  const startIsNow = startState.type === DATE_TYPE_NOW;
+  const endIsNow = endState.type === DATE_TYPE_NOW;
+
+  if (startIsNow && endIsNow) return null;
+  if (startIsNow) return datePartStateToInputFragment(endState);
+  if (endIsNow) return datePartStateToInputFragment(startState);
+
+  return `${datePartStateToInputFragment(
+    startState
+  )} ${DATE_RANGE_INPUT_DELIMITER} ${datePartStateToInputFragment(endState)}`;
 }
 
 function datePartStateToDateString(state: DatePartState): string {

@@ -25,8 +25,8 @@ export const DEFAULT_DATE_FORMAT_TIME_ONLY = 'HH:mm:ss.SSS';
 /** Date format without year at full precision, used when start and end fall in the same year */
 export const DEFAULT_DATE_FORMAT_NO_YEAR = 'MMM D, HH:mm:ss.SSS';
 
-/** Delimiter between start and end when the user types a range (e.g. "now-1d - now") */
-export const DATE_RANGE_INPUT_DELIMITER = '-';
+/** Delimiter between start and end when the user types a range (e.g. "-1d to now") */
+export const DATE_RANGE_INPUT_DELIMITER = 'to';
 
 /** Delimiter used in the display text between start and end (e.g. "Feb 3 → Feb 10") */
 export const DATE_RANGE_DISPLAY_DELIMITER = '→';

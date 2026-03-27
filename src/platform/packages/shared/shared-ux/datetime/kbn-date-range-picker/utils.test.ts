@@ -121,7 +121,7 @@ describe('getOptionShorthand', () => {
   });
 
   it('combines both offsets when neither is now', () => {
-    expect(getOptionShorthand({ start: 'now-7d', end: 'now-1d' })).toBe('-7d - -1d');
+    expect(getOptionShorthand({ start: 'now-7d', end: 'now-1d' })).toBe('-7d to -1d');
   });
 
   it('returns null when a bound has rounding', () => {
@@ -159,11 +159,11 @@ describe('getOptionInputText', () => {
   });
 
   it('joins both fragments with delimiter when neither bound is now', () => {
-    expect(getOptionInputText({ start: 'now-7d', end: 'now-1d' })).toBe('-7d - -1d');
+    expect(getOptionInputText({ start: 'now-7d', end: 'now-1d' })).toBe('-7d to -1d');
   });
 
   it('keeps bounds as-is when now prefix cannot be stripped', () => {
-    expect(getOptionInputText({ start: 'now/d', end: 'now/d' })).toBe('now/d - now/d');
+    expect(getOptionInputText({ start: 'now/d', end: 'now/d' })).toBe('now/d to now/d');
   });
 
   it('returns now when both bounds are now', () => {
@@ -227,22 +227,22 @@ describe('formatDateRange', () => {
   it('formats two dates with the standard delimiter (default precision = s)', () => {
     const start = new Date(2026, 1, 10, 10, 15, 30, 500);
     const end = new Date(2026, 1, 11, 23, 30, 0, 0);
-    expect(formatDateRange(start, end)).toBe('Feb 10, 2026, 10:15:30 - Feb 11, 2026, 23:30:00');
+    expect(formatDateRange(start, end)).toBe('Feb 10, 2026, 10:15:30 to Feb 11, 2026, 23:30:00');
   });
 
   it('respects timePrecision', () => {
     const start = new Date(2026, 1, 10, 10, 15, 30, 500);
     const end = new Date(2026, 1, 11, 23, 30, 0, 0);
     expect(formatDateRange(start, end, 'ms')).toBe(
-      'Feb 10, 2026, 10:15:30.500 - Feb 11, 2026, 23:30:00.000'
+      'Feb 10, 2026, 10:15:30.500 to Feb 11, 2026, 23:30:00.000'
     );
-    expect(formatDateRange(start, end, 'none')).toBe('Feb 10, 2026, 10:15 - Feb 11, 2026, 23:30');
+    expect(formatDateRange(start, end, 'none')).toBe('Feb 10, 2026, 10:15 to Feb 11, 2026, 23:30');
   });
 
   it('handles same-day ranges', () => {
     const start = new Date(2026, 2, 5, 9, 0, 0, 0);
     const end = new Date(2026, 2, 5, 17, 0, 0, 0);
-    expect(formatDateRange(start, end)).toBe('Mar 5, 2026, 09:00:00 - Mar 5, 2026, 17:00:00');
+    expect(formatDateRange(start, end)).toBe('Mar 5, 2026, 09:00:00 to Mar 5, 2026, 17:00:00');
   });
 });
 

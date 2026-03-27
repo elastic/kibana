@@ -202,7 +202,7 @@ describe('CustomTimeRangePanel', () => {
         target: { value: '15' },
       });
 
-      expect(screen.getByTestId('currentDateRangeText')).toHaveTextContent('-15m - now');
+      expect(screen.getByTestId('currentDateRangeText')).toHaveTextContent('-15m to now');
     });
 
     it('emits the literal "now" in the input for the Now type', () => {
@@ -212,7 +212,7 @@ describe('CustomTimeRangePanel', () => {
 
       fireEvent.click(within(getStartFieldset()).getByText('Now'));
 
-      expect(screen.getByTestId('currentDateRangeText')).toHaveTextContent('now - now');
+      expect(screen.getByTestId('currentDateRangeText')).toHaveTextContent('now to now');
     });
 
     it('updates the panel UI when the input text changes to a valid range', () => {
@@ -270,7 +270,7 @@ describe('CustomTimeRangePanel', () => {
       expect(onPresetSave).toHaveBeenCalledWith({
         start: 'now-15m',
         end: 'now',
-        label: '-15m - now',
+        label: '-15m to now',
       });
     });
   });
