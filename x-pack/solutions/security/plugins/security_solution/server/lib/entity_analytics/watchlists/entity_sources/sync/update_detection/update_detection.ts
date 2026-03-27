@@ -137,7 +137,7 @@ export const createUpdateDetectionService = ({
   descriptorClient?: WatchlistEntitySourceClient;
 }) => {
   const syncMarkersService = descriptorClient
-    ? createWatchlistSyncMarkersService(descriptorClient)
+    ? createWatchlistSyncMarkersService(descriptorClient, esClient)
     : undefined;
 
   const detectForIntegrationEntityType = async (

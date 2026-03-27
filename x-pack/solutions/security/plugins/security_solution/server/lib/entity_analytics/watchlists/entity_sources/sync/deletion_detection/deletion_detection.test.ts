@@ -72,7 +72,7 @@ describe('DeletionDetectionService', () => {
     // Default: no stale entities found
     esClient.search.mockResolvedValue({
       hits: { hits: [], total: { value: 0, relation: 'eq' } },
-    });
+    } as unknown as ReturnType<typeof esClient.search>);
   });
 
   describe('index sources', () => {
@@ -103,6 +103,7 @@ describe('DeletionDetectionService', () => {
           ],
           total: { value: 2, relation: 'eq' },
         },
+      } as unknown as ReturnType<typeof esClient.search>);
       });
 
       const service = createService();
@@ -152,7 +153,7 @@ describe('DeletionDetectionService', () => {
       mockGetLastFullSyncMarker.mockResolvedValue(undefined);
       esClient.search.mockResolvedValueOnce({
         hits: { hits: [], total: { value: 0, relation: 'eq' } },
-      });
+      } as unknown as ReturnType<typeof esClient.search>);
 
       const service = createService();
       await service.deletionDetection(integrationSource, ['euid-1']);
