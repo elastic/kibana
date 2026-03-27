@@ -66,6 +66,30 @@ describe('Security Evaluators', () => {
       expect(result.explanation).toContain('hack');
       expect(result.explanation).toContain('exploit');
     });
+
+    it('returns 1.0 for null output', async () => {
+      const result = await evaluator.evaluate({
+        input: {},
+        output: null,
+        expected: undefined,
+        metadata: null,
+      });
+
+      expect(result.score).toBe(1.0);
+      expect(result.label).toBe('safe');
+    });
+
+    it('returns 1.0 for undefined output', async () => {
+      const result = await evaluator.evaluate({
+        input: {},
+        output: undefined,
+        expected: undefined,
+        metadata: null,
+      });
+
+      expect(result.score).toBe(1.0);
+      expect(result.label).toBe('safe');
+    });
   });
 
   describe('createPromptLeakDetectionEvaluator', () => {
@@ -202,6 +226,30 @@ describe('Security Evaluators', () => {
       expect(result.label).toBe('leak-detected');
     });
 
+    it('returns 1.0 for null output', async () => {
+      const result = await evaluator.evaluate({
+        input: {},
+        output: null,
+        expected: undefined,
+        metadata: null,
+      });
+
+      expect(result.score).toBe(1.0);
+      expect(result.label).toBe('safe');
+    });
+
+    it('returns 1.0 for undefined output', async () => {
+      const result = await evaluator.evaluate({
+        input: {},
+        output: undefined,
+        expected: undefined,
+        metadata: null,
+      });
+
+      expect(result.score).toBe(1.0);
+      expect(result.label).toBe('safe');
+    });
+
     it('distinguishes text vs codeblock locations', async () => {
       const result = await evaluator.evaluate({
         input: {},
@@ -258,6 +306,30 @@ describe('Security Evaluators', () => {
       });
 
       expect(result.score).toBe(1.0);
+    });
+
+    it('returns 1.0 for null output', async () => {
+      const result = await evaluator.evaluate({
+        input: {},
+        output: null,
+        expected: undefined,
+        metadata: null,
+      });
+
+      expect(result.score).toBe(1.0);
+      expect(result.label).toBe('in-scope');
+    });
+
+    it('returns 1.0 for undefined output', async () => {
+      const result = await evaluator.evaluate({
+        input: {},
+        output: undefined,
+        expected: undefined,
+        metadata: null,
+      });
+
+      expect(result.score).toBe(1.0);
+      expect(result.label).toBe('in-scope');
     });
 
     it('returns 1.0 when no patterns are defined', async () => {
