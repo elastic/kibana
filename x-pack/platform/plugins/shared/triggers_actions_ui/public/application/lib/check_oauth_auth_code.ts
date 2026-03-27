@@ -21,6 +21,7 @@ export function usesOAuthAuthorizationCode(connector: ActionConnector): boolean 
 
   return (
     config?.authType === 'oauth_authorization_code' ||
+    connector.authMode === 'per-user' ||
     (config?.auth as Record<string, unknown>)?.type === 'oauth_authorization_code'
   );
 }
