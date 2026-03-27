@@ -4,7 +4,7 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-echo "--- Clean up cached images to free up space (this job doesn't require any of the cached images, and they can take up a lot of space)"
+echo "--- Clean up cached images to free up space"
 clean_cached_images
 
 export KBN_NP_PLUGINS_BUILT=true
