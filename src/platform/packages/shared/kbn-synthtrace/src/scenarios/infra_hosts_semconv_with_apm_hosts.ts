@@ -139,9 +139,11 @@ const scenario: Scenario<Fields | ApmOtelFields> = async ({ logger, scenarioOpts
                 direction: 'receive',
                 'system.network.io': Math.floor(Math.random() * 1000000000),
               },
-            ].map((net) => ({
+            ].map(({ 'system.network.io': netIo, ...net }) => ({
               ...base,
               ...net,
+              'system.network.io': netIo,
+              'metrics.system.network.io': netIo,
               'metricset.name': 'network',
               'device.keyword': 'eth0',
             }));
