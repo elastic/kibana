@@ -79,6 +79,8 @@ import {
   filterDuplicatedWarnings,
   filterOutWarningsOverlappingWithErrors,
   getEditorOverwrites,
+  shouldAutoTriggerSuggestions,
+  trackSuggestionPopupState,
   getToggleCommentLines,
   onKeyDownResizeHandler,
   onMouseDownResizeHandler,
@@ -160,6 +162,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const editorModelUriRef = useRef<string | undefined>(undefined);
   const containerRef = useRef<HTMLElement>(null);
   const suppressSuggestionsRef = useRef(false);
+  const isSuggestionPopupOpenRef = useRef(false);
 
   const editorCommandDisposables = useRef(
     new WeakMap<monaco.editor.IStandaloneCodeEditor, monaco.IDisposable[]>()
@@ -473,7 +476,7 @@ const ESQLEditorInternal = function ESQLEditor({
     const { current: editor } = editorRef;
     const { current: model } = editorModel;
 
-    if (!editor || !model) {
+    if (!editor || !model || isSuggestionPopupOpenRef.current) {
       return;
     }
 
@@ -484,10 +487,9 @@ const ESQLEditorInternal = function ESQLEditor({
 
     const { lineNumber, column } = position;
     const lineContent = model.getLineContent(lineNumber);
-    const spaceHasBeenTyped = column > 1 && lineContent[column - 2] === ' ';
-    const inlineCastHasBeenTyped = lineContent.substring(0, column - 1).endsWith('::');
+    const lineContentBeforeCursor = lineContent.substring(0, column - 1);
 
-    if (spaceHasBeenTyped || inlineCastHasBeenTyped) {
+    if (shouldAutoTriggerSuggestions(lineContentBeforeCursor)) {
       triggerSuggestions();
     }
   }, [triggerSuggestions]);
@@ -720,15 +722,14 @@ const ESQLEditorInternal = function ESQLEditor({
     isDataSourceBrowserOpen,
     setIsDataSourceBrowserOpen,
     browserPopoverPosition: dataSourceBrowserPosition,
-    allSources,
-    isLoadingSources,
+    preloadedSources,
+    isTimeseries,
     selectedSources,
     openIndicesBrowser,
     handleDataSourceBrowserSelect,
   } = useDataSourceBrowser({
     editorRef,
     editorModel,
-    esqlCallbacks,
     telemetryService,
   });
 
@@ -763,19 +764,14 @@ const ESQLEditorInternal = function ESQLEditor({
     isFieldsBrowserOpen,
     setIsFieldsBrowserOpen,
     browserPopoverPosition: fieldsBrowserPosition,
-    allFields,
-    recommendedFields,
-    isLoadingFields,
+    preloadedFields,
+    indexPattern: fieldsBrowserIndexPattern,
+    fullQuery,
     openFieldsBrowser,
     handleFieldsBrowserSelect,
   } = useFieldsBrowser({
     editorRef,
     editorModel,
-    http: core.http,
-    search: data.search.search,
-    getTimeRange: () => data.query.timefilter.timefilter.getTime(),
-    signal: abortControllerRef.current.signal,
-    activeSolutionId,
     telemetryService,
   });
 
@@ -1005,6 +1001,8 @@ const ESQLEditorInternal = function ESQLEditor({
     return ESQLLang.getInlineCompletionsProvider?.(esqlCallbacks);
   }, [esqlCallbacks]);
 
+  const documentHighlightProvider = useMemo(() => ESQLLang.getDocumentHighlightProvider?.(), []);
+
   const codeEditorHoverProvider = useMemo(
     () => ({
       provideHover: (
@@ -1211,6 +1209,7 @@ const ESQLEditorInternal = function ESQLEditor({
                 hoverProvider={codeEditorHoverProvider}
                 signatureProvider={signatureProvider}
                 inlineCompletionsProvider={inlineCompletionsProvider}
+                documentHighlightProvider={documentHighlightProvider}
                 onChange={onQueryUpdate}
                 editorDidMount={async (editor) => {
                   // Track editor init time once per mount
@@ -1292,6 +1291,8 @@ const ESQLEditorInternal = function ESQLEditor({
 
                     isFirstFocusRef.current = false;
                   });
+
+                  trackSuggestionPopupState(editor, isSuggestionPopupOpenRef);
 
                   // on CMD/CTRL + / comment out the entire line
                   editor.addCommand(
@@ -1468,8 +1469,8 @@ const ESQLEditorInternal = function ESQLEditor({
         createPortal(
           <DataSourceBrowser
             isOpen={isDataSourceBrowserOpen}
-            isLoading={isLoadingSources}
-            allSources={allSources}
+            isTimeseries={isTimeseries}
+            preloadedSources={preloadedSources}
             selectedSources={selectedSources}
             position={dataSourceBrowserPosition}
             onSelect={handleDataSourceBrowserSelect}
@@ -1485,9 +1486,10 @@ const ESQLEditorInternal = function ESQLEditor({
         createPortal(
           <FieldsBrowser
             isOpen={isFieldsBrowserOpen}
-            isLoading={isLoadingFields}
-            allFields={allFields}
-            recommendedFields={recommendedFields}
+            preloadedFields={preloadedFields}
+            indexPattern={fieldsBrowserIndexPattern}
+            fullQuery={fullQuery}
+            activeSolutionId={activeSolutionId ?? undefined}
             position={fieldsBrowserPosition}
             onSelect={handleFieldsBrowserSelect}
             onClose={() => setIsFieldsBrowserOpen(false)}

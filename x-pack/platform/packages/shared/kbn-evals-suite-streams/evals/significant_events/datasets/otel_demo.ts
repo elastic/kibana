@@ -90,6 +90,7 @@ export const otelDemoDataset: DatasetConfig = {
         min_features: 4,
         max_features: 30,
         required_types: ['entity'],
+        expect_entity_filters: true,
         expected_ground_truth:
           'entities=[frontend, checkout, cart, payment, product-catalog, recommendation, shipping, email, ad, quote], deps=[checkout->payment, cart->valkey], infra=[kubernetes]',
       },
@@ -153,6 +154,7 @@ export const otelDemoDataset: DatasetConfig = {
         min_features: 3,
         max_features: 30,
         required_types: ['entity', 'dependency'],
+        expect_entity_filters: true,
         expected_ground_truth:
           'entities=[checkout, payment, frontend], deps=[checkout->payment (timeout)], error_signatures=[i/o timeout, dial tcp, deadline exceeded, gRPC transport failure]',
       },
@@ -197,6 +199,7 @@ export const otelDemoDataset: DatasetConfig = {
         min_features: 3,
         max_features: 20,
         required_types: ['entity', 'dependency'],
+        expect_entity_filters: true,
         expected_ground_truth:
           'entities=[cart, checkout, frontend], deps=[cart->valkey (connection refused)], tech=[valkey/redis], error_signatures=[ECONNREFUSED, connection timeout]',
       },
@@ -241,6 +244,7 @@ export const otelDemoDataset: DatasetConfig = {
         min_features: 3,
         max_features: 20,
         required_types: ['entity', 'dependency'],
+        expect_entity_filters: true,
         expected_ground_truth:
           'entities=[checkout, frontend, currency], deps=[checkout->currency, frontend->currency], error_signatures=[connection refused, deadline exceeded]',
       },
@@ -285,6 +289,7 @@ export const otelDemoDataset: DatasetConfig = {
         min_features: 3,
         max_features: 20,
         required_types: ['entity'],
+        expect_entity_filters: true,
         expected_ground_truth:
           'entities=[checkout, frontend], infra=[kubernetes, memory/GC], error_signatures=[timeout, OOMKilled, GC pressure, 500 errors]',
       },
@@ -329,6 +334,7 @@ export const otelDemoDataset: DatasetConfig = {
         min_features: 3,
         max_features: 20,
         required_types: ['entity', 'dependency'],
+        expect_entity_filters: true,
         expected_ground_truth:
           'entities=[cart, payment, recommendation], deps=[cart->flagd, payment->flagd, recommendation->flagd], tech=[flagd/feature-flags], error_signatures=[flag evaluation failed, connection refused]',
       },
@@ -368,6 +374,7 @@ export const otelDemoDataset: DatasetConfig = {
         min_features: 3,
         max_features: 20,
         required_types: ['entity'],
+        expect_entity_filters: true,
         expected_ground_truth:
           'entities=[frontend, checkout, cart, ...multiple services], signals=[elevated latency, increased error rates, 500 errors under load]',
       },
@@ -375,6 +382,24 @@ export const otelDemoDataset: DatasetConfig = {
         difficulty: 'hard',
         failure_domain: 'system-wide',
         failure_mode: 'demand_surge',
+      },
+    },
+  ],
+  kiFeatureExclusion: [
+    {
+      input: {
+        scenario_id: 'healthy-baseline',
+        sample_document_count: 20,
+        exclude_count: 4,
+        follow_up_runs: 3,
+      },
+    },
+    {
+      input: {
+        scenario_id: 'healthy-baseline',
+        sample_document_count: 20,
+        exclude_count: 1,
+        follow_up_runs: 3,
       },
     },
   ],

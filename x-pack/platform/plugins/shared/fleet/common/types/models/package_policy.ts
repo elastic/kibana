@@ -51,6 +51,7 @@ export interface NewPackagePolicyInputStream {
   vars?: PackagePolicyConfigRecord;
   var_group_selections?: Record<string, string>;
   config?: PackagePolicyConfigRecord;
+  migrate_from?: string;
 }
 
 export interface PackagePolicyInputStream extends NewPackagePolicyInputStream {
@@ -65,9 +66,11 @@ export interface NewPackagePolicyInput {
   enabled: boolean;
   keep_enabled?: boolean;
   vars?: PackagePolicyConfigRecord;
+  var_group_selections?: Record<string, string>;
   config?: PackagePolicyConfigRecord;
   streams: NewPackagePolicyInputStream[];
   deprecated?: DeprecationInfo;
+  migrate_from?: string;
 }
 
 export interface PackagePolicyInput extends Omit<NewPackagePolicyInput, 'streams'> {

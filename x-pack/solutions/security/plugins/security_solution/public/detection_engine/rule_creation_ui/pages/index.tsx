@@ -42,7 +42,7 @@ const CustomHeaderPage: React.FC<
           data-test-subj="preview-container"
           isSelected={isRulePreviewVisible}
           fill={isRulePreviewVisible}
-          iconType="visBarVerticalStacked"
+          iconType="chartBarVerticalStack"
           onClick={() => {
             togglePanel?.('preview', { direction: 'left' });
             setIsRulePreviewVisible((isVisible) => !isVisible);

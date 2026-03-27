@@ -1015,7 +1015,7 @@
               " & { setIsActionLoading?: ((isLoading: boolean) => void) | undefined; })"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/components/alert_actions/alert_actions.tsx",
-            "lineNumber": 29,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1337,7 +1337,7 @@
         "label": "createUseRulesLink",
         "description": [],
         "signature": [
-          "(unifiedRulesPage: boolean) => (options?: ",
+          "() => (options?: ",
           {
             "pluginId": "observabilityShared",
             "scope": "public",
@@ -1353,25 +1353,7 @@
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.createUseRulesLink.$1",
-            "type": "boolean",
-            "tags": [],
-            "label": "unifiedRulesPage",
-            "description": [],
-            "signature": [
-              "boolean"
-            ],
-            "path": "x-pack/solutions/observability/plugins/observability/public/hooks/create_use_rules_link.ts",
-            "lineNumber": 11,
-            "columnNumber": 4,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -10551,6 +10533,29 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.cps",
+            "type": "Object",
+            "tags": [],
+            "label": "cps",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "cps",
+                "scope": "public",
+                "docId": "kibCpsPluginApi",
+                "section": "def-public.CPSPluginStart",
+                "text": "CPSPluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
+            "lineNumber": 189,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -19672,7 +19677,7 @@
         "; }"
       ],
       "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-      "lineNumber": 190,
+      "lineNumber": 191,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -19847,7 +19852,11 @@
                 "label": "client",
                 "description": [],
                 "signature": [
-                  "{ create: { <TDocument = unknown>(this: That, params: ",
+                  "{ child: (opts: ",
+                  "ClientOptions",
+                  ") => ",
+                  "default",
+                  "; create: { <TDocument = unknown>(this: That, params: ",
                   "CreateRequest",
                   "<TDocument>, options?: ",
                   "TransportRequestOptionsWithOutMeta",
@@ -19930,10 +19939,6 @@
                   ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
                   "default",
                   "; helpers: ",
-                  "default",
-                  "; child: (opts: ",
-                  "ClientOptions",
-                  ") => ",
                   "default",
                   "; asyncSearch: ",
                   "default",
@@ -20938,7 +20943,11 @@
                 "label": "client",
                 "description": [],
                 "signature": [
-                  "{ create: { <TDocument = unknown>(this: That, params: ",
+                  "{ child: (opts: ",
+                  "ClientOptions",
+                  ") => ",
+                  "default",
+                  "; create: { <TDocument = unknown>(this: That, params: ",
                   "CreateRequest",
                   "<TDocument>, options?: ",
                   "TransportRequestOptionsWithOutMeta",
@@ -21021,10 +21030,6 @@
                   ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
                   "default",
                   "; helpers: ",
-                  "default",
-                  "; child: (opts: ",
-                  "ClientOptions",
-                  ") => ",
                   "default",
                   "; asyncSearch: ",
                   "default",

@@ -1,0 +1,653 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import AdmZip from 'adm-zip';
+import YAML from 'yaml';
+import type { IRouter } from '@kbn/core/server';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { WorkflowsManagementApiActions } from '@kbn/workflows';
+import { registerWorkflowRoutes } from '.';
+import type { RouteDependencies } from '../types';
+import { handleRouteError } from '../utils/route_error_handlers';
+
+jest.mock('../utils/route_error_handlers', () => ({
+  handleRouteError: jest.fn((response: { customError: jest.Mock }, error: Error) =>
+    response.customError({ statusCode: 500, body: { message: String(error) } })
+  ),
+}));
+
+const createLicensingContext = () => ({
+  licensing: Promise.resolve({
+    license: {
+      isAvailable: true,
+      isActive: true,
+      hasAtLeast: jest.fn().mockReturnValue(true),
+      type: 'enterprise',
+    },
+  }),
+});
+
+describe('Workflow routes', () => {
+  let routeHandlers: Record<string, { handler: (...args: any[]) => Promise<any> }>;
+  let mockApi: Record<string, jest.Mock>;
+  let mockSpaces: { getSpaceId: jest.Mock };
+  let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  const mockResponse = () => httpServerMock.createResponseFactory();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    routeHandlers = {};
+    mockSpaces = { getSpaceId: jest.fn().mockReturnValue('default-space') };
+    mockLogger = loggingSystemMock.createLogger();
+
+    mockApi = {
+      getWorkflows: jest.fn(),
+      getWorkflow: jest.fn(),
+      getWorkflowsByIds: jest.fn(),
+      getWorkflowsSourceByIds: jest.fn(),
+      createWorkflow: jest.fn(),
+      updateWorkflow: jest.fn(),
+      deleteWorkflows: jest.fn(),
+      bulkCreateWorkflows: jest.fn(),
+      cloneWorkflow: jest.fn(),
+      validateWorkflow: jest.fn(),
+      getWorkflowStats: jest.fn(),
+      getWorkflowAggs: jest.fn(),
+      getAvailableConnectors: jest.fn(),
+      getWorkflowJsonSchema: jest.fn(),
+    };
+
+    const createVersionedRoute = (method: string, path: string) => ({
+      addVersion: jest
+        .fn()
+        .mockImplementation((_config: unknown, handler: (...args: any[]) => Promise<any>) => {
+          routeHandlers[`${method}:${path}`] = { handler };
+          return { addVersion: jest.fn() };
+        }),
+    });
+
+    const mockRouter = {
+      versioned: {
+        get: jest
+          .fn()
+          .mockImplementation((config: { path: string }) =>
+            createVersionedRoute('GET', config.path)
+          ),
+        post: jest
+          .fn()
+          .mockImplementation((config: { path: string }) =>
+            createVersionedRoute('POST', config.path)
+          ),
+        put: jest
+          .fn()
+          .mockImplementation((config: { path: string }) =>
+            createVersionedRoute('PUT', config.path)
+          ),
+        delete: jest
+          .fn()
+          .mockImplementation((config: { path: string }) =>
+            createVersionedRoute('DELETE', config.path)
+          ),
+      },
+    } as unknown as jest.Mocked<IRouter>;
+
+    registerWorkflowRoutes({
+      router: mockRouter,
+      api: mockApi as any,
+      logger: mockLogger,
+      spaces: mockSpaces as any,
+    } as unknown as RouteDependencies);
+  });
+
+  describe('GET:/api/workflows', () => {
+    const key = 'GET:/api/workflows';
+
+    it('should register route handler', () => {
+      expect(routeHandlers[key]).toBeDefined();
+    });
+
+    it('should call api.getWorkflows with query filters and space id when license is valid', async () => {
+      const list = { workflows: [], total: 0 };
+      mockApi.getWorkflows.mockResolvedValue(list);
+      const request = httpServerMock.createKibanaRequest({
+        query: {
+          size: 10,
+          page: 2,
+          enabled: true,
+          createdBy: 'user-1',
+          tags: ['a'],
+          query: 'search',
+        },
+      });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(request);
+      expect(mockApi.getWorkflows).toHaveBeenCalledWith(
+        {
+          size: 10,
+          page: 2,
+          enabled: [true],
+          createdBy: ['user-1'],
+          tags: ['a'],
+          query: 'search',
+        },
+        'default-space'
+      );
+      expect(response.ok).toHaveBeenCalledWith({ body: list });
+    });
+
+    it('should delegate errors to handleRouteError', async () => {
+      const err = new Error('boom');
+      mockApi.getWorkflows.mockRejectedValue(err);
+      const request = httpServerMock.createKibanaRequest({ query: {} });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(handleRouteError).toHaveBeenCalledWith(response, err);
+    });
+  });
+
+  describe('GET:/api/workflows/workflow/{id}', () => {
+    const key = 'GET:/api/workflows/workflow/{id}';
+
+    it('should register route handler', () => {
+      expect(routeHandlers[key]).toBeDefined();
+    });
+
+    it('should call api.getWorkflow with id and space id when workflow exists', async () => {
+      const workflow = { id: 'wf-1', name: 'W' };
+      mockApi.getWorkflow.mockResolvedValue(workflow);
+      const request = httpServerMock.createKibanaRequest({ params: { id: 'wf-1' } });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.getWorkflow).toHaveBeenCalledWith('wf-1', 'default-space');
+      expect(response.ok).toHaveBeenCalledWith({ body: workflow });
+    });
+
+    it('should return 404 when workflow is not found', async () => {
+      mockApi.getWorkflow.mockResolvedValue(null);
+      const request = httpServerMock.createKibanaRequest({ params: { id: 'missing' } });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(response.notFound).toHaveBeenCalledWith({ body: { message: 'Workflow not found' } });
+    });
+
+    it('should delegate errors to handleRouteError', async () => {
+      const err = new Error('boom');
+      mockApi.getWorkflow.mockRejectedValue(err);
+      const request = httpServerMock.createKibanaRequest({ params: { id: 'wf-1' } });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(handleRouteError).toHaveBeenCalledWith(response, err);
+    });
+  });
+
+  describe('POST:/api/workflows/workflow', () => {
+    const key = 'POST:/api/workflows/workflow';
+
+    it('should register route handler', () => {
+      expect(routeHandlers[key]).toBeDefined();
+    });
+
+    it('should call api.createWorkflow with body, space id, and request', async () => {
+      const created = { id: 'new', name: 'N' };
+      mockApi.createWorkflow.mockResolvedValue(created);
+      const body = { yaml: 'name: N' };
+      const request = httpServerMock.createKibanaRequest({ body });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.createWorkflow).toHaveBeenCalledWith(body, 'default-space', request);
+      expect(response.ok).toHaveBeenCalledWith({ body: created });
+    });
+  });
+
+  describe('PUT:/api/workflows/workflow/{id}', () => {
+    const key = 'PUT:/api/workflows/workflow/{id}';
+
+    it('should register route handler', () => {
+      expect(routeHandlers[key]).toBeDefined();
+    });
+
+    it('should call api.updateWorkflow with id, body, space id, and request', async () => {
+      const updated = { id: 'wf-1', name: 'U' };
+      mockApi.updateWorkflow.mockResolvedValue(updated);
+      const body = { name: 'U', enabled: true, tags: [], yaml: 'x' };
+      const request = httpServerMock.createKibanaRequest({ params: { id: 'wf-1' }, body });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.updateWorkflow).toHaveBeenCalledWith('wf-1', body, 'default-space', request);
+      expect(response.ok).toHaveBeenCalledWith({ body: updated });
+    });
+  });
+
+  describe('DELETE:/api/workflows/workflow/{id}', () => {
+    const key = 'DELETE:/api/workflows/workflow/{id}';
+
+    it('should register route handler', () => {
+      expect(routeHandlers[key]).toBeDefined();
+    });
+
+    it('should call api.deleteWorkflows with a single id, space id, and request', async () => {
+      mockApi.deleteWorkflows.mockResolvedValue({ total: 1, deleted: 1, failures: [] });
+      const request = httpServerMock.createKibanaRequest({ params: { id: 'wf-1' } });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.deleteWorkflows).toHaveBeenCalledWith(['wf-1'], 'default-space', request);
+      expect(response.ok).toHaveBeenCalledWith();
+    });
+  });
+
+  describe('POST:/api/workflows (bulk create)', () => {
+    const key = 'POST:/api/workflows';
+
+    it('should register route handler', () => {
+      expect(routeHandlers[key]).toBeDefined();
+    });
+
+    it('should call api.bulkCreateWorkflows when authz allows create', async () => {
+      const result = { created: [], failed: [] };
+      mockApi.bulkCreateWorkflows.mockResolvedValue(result);
+      const workflows = [{ yaml: 'name: A' }];
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: '/api/workflows',
+        query: { overwrite: true },
+        body: { workflows },
+      });
+      (request as any).authzResult = {
+        [WorkflowsManagementApiActions.create]: true,
+        [WorkflowsManagementApiActions.update]: true,
+      };
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.bulkCreateWorkflows).toHaveBeenCalledWith(
+        workflows,
+        'default-space',
+        request,
+        { overwrite: true }
+      );
+      expect(response.ok).toHaveBeenCalledWith({ body: result });
+    });
+
+    it('should delegate errors to handleRouteError', async () => {
+      const err = new Error('bulk failed');
+      mockApi.bulkCreateWorkflows.mockRejectedValue(err);
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: '/api/workflows',
+        query: { overwrite: false },
+        body: { workflows: [{ yaml: 'name: A' }] },
+      });
+      (request as any).authzResult = { [WorkflowsManagementApiActions.create]: true };
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(handleRouteError).toHaveBeenCalledWith(response, err);
+    });
+  });
+
+  describe('DELETE:/api/workflows (bulk delete)', () => {
+    const key = 'DELETE:/api/workflows';
+
+    it('should register route handler', () => {
+      expect(routeHandlers[key]).toBeDefined();
+    });
+
+    it('should call api.deleteWorkflows with ids, space id, and request', async () => {
+      const bodyResult = { total: 2, deleted: 2, failures: [] };
+      mockApi.deleteWorkflows.mockResolvedValue(bodyResult);
+      const request = httpServerMock.createKibanaRequest({ body: { ids: ['a', 'b'] } });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.deleteWorkflows).toHaveBeenCalledWith(['a', 'b'], 'default-space', request);
+      expect(response.ok).toHaveBeenCalledWith({ body: bodyResult });
+    });
+  });
+
+  describe('POST:/api/workflows/mget (get by IDs)', () => {
+    const key = 'POST:/api/workflows/mget';
+
+    it('should register route handler', () => {
+      expect(routeHandlers[key]).toBeDefined();
+    });
+
+    it('should call api.getWorkflowsSourceByIds with ids, space id, and source', async () => {
+      const workflows = [{ id: 'a', name: 'Existing' }];
+      mockApi.getWorkflowsSourceByIds.mockResolvedValue(workflows);
+      const request = httpServerMock.createKibanaRequest({ body: { ids: ['a'] } });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.getWorkflowsSourceByIds).toHaveBeenCalledWith(
+        ['a'],
+        'default-space',
+        undefined
+      );
+      expect(response.ok).toHaveBeenCalledWith({ body: workflows });
+    });
+  });
+
+  describe('POST:/api/workflows/workflow/{id}/clone', () => {
+    const key = 'POST:/api/workflows/workflow/{id}/clone';
+
+    it('should register route handler', () => {
+      expect(routeHandlers[key]).toBeDefined();
+    });
+
+    it('should load workflow then call api.cloneWorkflow with workflow, space id, and request', async () => {
+      const wf = { id: 'wf-1', name: 'Orig', yaml: 'name: Orig' };
+      const cloned = { id: 'wf-2', name: 'Orig copy' };
+      mockApi.getWorkflow.mockResolvedValue(wf);
+      mockApi.cloneWorkflow.mockResolvedValue(cloned);
+      const request = httpServerMock.createKibanaRequest({ params: { id: 'wf-1' } });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.getWorkflow).toHaveBeenCalledWith('wf-1', 'default-space');
+      expect(mockApi.cloneWorkflow).toHaveBeenCalledWith(wf, 'default-space', request);
+      expect(response.ok).toHaveBeenCalledWith({ body: cloned });
+    });
+
+    it('should return 404 when source workflow is not found', async () => {
+      mockApi.getWorkflow.mockResolvedValue(null);
+      const request = httpServerMock.createKibanaRequest({ params: { id: 'missing' } });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(response.notFound).toHaveBeenCalledWith();
+      expect(mockApi.cloneWorkflow).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('POST:/api/workflows/validate', () => {
+    const key = 'POST:/api/workflows/validate';
+
+    it('should register route handler', () => {
+      expect(routeHandlers[key]).toBeDefined();
+    });
+
+    it('should call api.validateWorkflow with yaml, space id, and request', async () => {
+      const validation = { valid: true };
+      mockApi.validateWorkflow.mockResolvedValue(validation);
+      const request = httpServerMock.createKibanaRequest({ body: { yaml: 'name: X' } });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.validateWorkflow).toHaveBeenCalledWith('name: X', 'default-space', request);
+      expect(response.ok).toHaveBeenCalledWith({ body: validation });
+    });
+
+    it('should return customError when validation throws', async () => {
+      const err = new Error('validate failed');
+      mockApi.validateWorkflow.mockRejectedValue(err);
+      const request = httpServerMock.createKibanaRequest({ body: { yaml: 'bad' } });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: `Internal server error: ${err.message}` },
+      });
+      expect(handleRouteError).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('POST:/api/workflows/export', () => {
+    const key = 'POST:/api/workflows/export';
+
+    it('should register route handler', () => {
+      expect(routeHandlers[key]).toBeDefined();
+    });
+
+    it('should call api.getWorkflowsByIds with ids and space id', async () => {
+      mockApi.getWorkflowsByIds.mockResolvedValue([
+        { id: 'w1', yaml: 'name: A', definition: null },
+      ]);
+      const request = httpServerMock.createKibanaRequest({ body: { ids: ['w1'] } });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.getWorkflowsByIds).toHaveBeenCalledWith(['w1'], 'default-space');
+      expect(response.ok).toHaveBeenCalled();
+    });
+
+    it('should return notFound when no workflows match ids', async () => {
+      mockApi.getWorkflowsByIds.mockResolvedValue([]);
+      const request = httpServerMock.createKibanaRequest({ body: { ids: ['missing'] } });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(response.notFound).toHaveBeenCalledWith({
+        body: { message: 'None of the requested workflows were found' },
+      });
+    });
+
+    it('should export workflows as a ZIP archive', async () => {
+      mockApi.getWorkflowsByIds.mockResolvedValue([
+        {
+          id: 'w-1',
+          name: 'Workflow w-1',
+          yaml: 'name: Workflow w-1\nsteps: []',
+          definition: null,
+        },
+        {
+          id: 'w-2',
+          name: 'Workflow w-2',
+          yaml: 'name: Workflow w-2\nsteps: []',
+          definition: null,
+        },
+      ]);
+
+      const request = httpServerMock.createKibanaRequest({ body: { ids: ['w-1', 'w-2'] } });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+      const { body, headers } = (response.ok as jest.Mock).mock.calls[0][0];
+
+      expect(headers['Content-Type']).toBe('application/zip');
+      expect(headers['Content-Disposition']).toContain('.zip');
+
+      const zip = new AdmZip(body);
+      const entryNames = zip.getEntries().map((e) => e.entryName);
+      expect(entryNames.some((n) => n.includes('w-1.yml'))).toBe(true);
+      expect(entryNames.some((n) => n.includes('w-2.yml'))).toBe(true);
+      expect(entryNames.some((n) => n.includes('manifest.yml'))).toBe(true);
+
+      const manifestEntry = zip.getEntries().find((e) => e.entryName === 'manifest.yml');
+      expect(manifestEntry).toBeDefined();
+
+      const manifest = YAML.parse(manifestEntry!.getData().toString('utf-8'));
+      expect(manifest.exportedCount).toBe(2);
+      expect(manifest.version).toBe('1');
+      expect(manifest.exportedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    });
+
+    it('should log a warning when some workflow IDs are missing', async () => {
+      mockApi.getWorkflowsByIds.mockResolvedValue([
+        { id: 'w-1', name: 'Found', yaml: 'name: Found', definition: null },
+      ]);
+      const request = httpServerMock.createKibanaRequest({ body: { ids: ['w-missing-1'] } });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalled();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Export skipped 1 missing workflow(s): w-missing-1'
+      );
+    });
+  });
+
+  describe('GET:/api/workflows/stats', () => {
+    const key = 'GET:/api/workflows/stats';
+
+    it('should register route handler', () => {
+      expect(routeHandlers[key]).toBeDefined();
+    });
+
+    it('should call api.getWorkflowStats with space id', async () => {
+      const stats = { total: 3 };
+      mockApi.getWorkflowStats.mockResolvedValue(stats);
+      const request = httpServerMock.createKibanaRequest();
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.getWorkflowStats).toHaveBeenCalledWith('default-space');
+      expect(response.ok).toHaveBeenCalledWith({ body: stats });
+    });
+  });
+
+  describe('GET:/api/workflows/aggs', () => {
+    const key = 'GET:/api/workflows/aggs';
+
+    it('should register route handler', () => {
+      expect(routeHandlers[key]).toBeDefined();
+    });
+
+    it('should call api.getWorkflowAggs with fields from query and space id', async () => {
+      const aggs = { tags: {} };
+      mockApi.getWorkflowAggs.mockResolvedValue(aggs);
+      const request = httpServerMock.createKibanaRequest({ query: { fields: ['tags'] } });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.getWorkflowAggs).toHaveBeenCalledWith(['tags'], 'default-space');
+      expect(response.ok).toHaveBeenCalledWith({ body: aggs });
+    });
+  });
+
+  describe('GET:/api/workflows/connectors', () => {
+    const key = 'GET:/api/workflows/connectors';
+
+    it('should register route handler', () => {
+      expect(routeHandlers[key]).toBeDefined();
+    });
+
+    it('should call api.getAvailableConnectors with space id and request', async () => {
+      mockApi.getAvailableConnectors.mockResolvedValue({
+        connectorTypes: { slack: {} },
+        totalConnectors: 1,
+      });
+      const request = httpServerMock.createKibanaRequest();
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.getAvailableConnectors).toHaveBeenCalledWith('default-space', request);
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { connectorTypes: { slack: {} }, totalConnectors: 1 },
+      });
+    });
+
+    it('should log and delegate errors to handleRouteError', async () => {
+      const err = new Error('connector failure');
+      mockApi.getAvailableConnectors.mockRejectedValue(err);
+      const request = httpServerMock.createKibanaRequest();
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockLogger.error).toHaveBeenCalled();
+      expect(handleRouteError).toHaveBeenCalledWith(response, err);
+    });
+  });
+
+  describe('GET:/api/workflows/schema', () => {
+    const key = 'GET:/api/workflows/schema';
+
+    it('should register route handler', () => {
+      expect(routeHandlers[key]).toBeDefined();
+    });
+
+    it('should call api.getWorkflowJsonSchema with loose flag, space id, and request', async () => {
+      const schemaBody = { type: 'object' };
+      mockApi.getWorkflowJsonSchema.mockResolvedValue(schemaBody);
+      const request = httpServerMock.createKibanaRequest({ query: { loose: true } });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.getWorkflowJsonSchema).toHaveBeenCalledWith(
+        { loose: true },
+        'default-space',
+        request
+      );
+      expect(response.ok).toHaveBeenCalledWith({ body: schemaBody });
+    });
+
+    it('should return customError when schema generation returns null', async () => {
+      mockApi.getWorkflowJsonSchema.mockResolvedValue(null);
+      const request = httpServerMock.createKibanaRequest({ query: { loose: false } });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: 'Error generating JSON schema' },
+      });
+    });
+  });
+});

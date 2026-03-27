@@ -22,6 +22,7 @@ interface LiveActionsQueryOptions {
   spaceId: string;
   startDate?: string;
   endDate?: string;
+  sortDirection?: 'asc' | 'desc';
 }
 
 export const buildLiveActionsQuery = ({
@@ -33,6 +34,7 @@ export const buildLiveActionsQuery = ({
   spaceId,
   startDate,
   endDate,
+  sortDirection = 'desc',
 }: LiveActionsQueryOptions): {
   body: Record<string, unknown>;
 } => {
@@ -88,8 +90,8 @@ export const buildLiveActionsQuery = ({
       },
       size: pageSize,
       sort: [
-        { '@timestamp': { order: 'desc' as const } },
-        { _shard_doc: { order: 'asc' as const } },
+        { '@timestamp': { order: sortDirection } },
+        { _shard_doc: { order: sortDirection === 'desc' ? 'asc' : 'desc' } },
       ],
       ...(searchAfter ? { search_after: searchAfter } : {}),
       _source: true,
