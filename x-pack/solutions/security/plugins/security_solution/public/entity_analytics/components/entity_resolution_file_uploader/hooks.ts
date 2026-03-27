@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { parse } from 'papaparse';
+import { parse, unparse } from 'papaparse';
 import { useCallback, useMemo } from 'react';
 import type { EuiStepHorizontalProps } from '@elastic/eui/src/components/steps/step_horizontal';
 import { noop } from 'lodash/fp';
@@ -83,9 +83,7 @@ const rowsToText = (headers: string[], rows: Array<Record<string, string>>): str
   if (rows.length === 0) {
     return '';
   }
-  const headerLine = headers.join(',');
-  const dataLines = rows.map((row) => headers.map((h) => row[h] ?? '').join(','));
-  return [headerLine, ...dataLines].join('\n');
+  return unparse({ fields: headers, data: rows.map((row) => headers.map((h) => row[h] ?? '')) });
 };
 
 export const useNavigationSteps = (
