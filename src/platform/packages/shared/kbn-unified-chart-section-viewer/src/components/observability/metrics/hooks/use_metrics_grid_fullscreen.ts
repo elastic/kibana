@@ -96,7 +96,9 @@ export const useMetricsGridFullScreen = ({ prefix }: { prefix: string }) => {
 
         .euiFlyout {
           ${logicalCSS('top', '0 !important')}
+          ${logicalCSS('bottom', '0')}
           ${logicalCSS('height', '100%')}
+          ${logicalCSS('max-height', '100vh')}
         }
 
         [id^='echTooltipPortalMainTooltip'] {
