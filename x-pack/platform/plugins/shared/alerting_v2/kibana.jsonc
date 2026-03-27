@@ -24,7 +24,7 @@
       "share"
     ],
     "optionalPlugins": ["management"],
-    "requiredBundles": ["alerting"],
+    "requiredBundles": [],
     "extraPublicDirs": []
   }
 }
