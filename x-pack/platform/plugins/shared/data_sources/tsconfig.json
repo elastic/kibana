@@ -45,9 +45,6 @@
     "@kbn/task-manager-plugin",
     "@kbn/workflows",
     "@kbn/workflows-execution-engine",
-    "@kbn/tooling-log",
-    "@kbn/test",
-    "@kbn/workflows-extensions",
     "@kbn/connector-specs-test-helpers"
   ]
 }
