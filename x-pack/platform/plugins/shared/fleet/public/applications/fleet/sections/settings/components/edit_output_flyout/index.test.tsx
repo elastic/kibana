@@ -491,8 +491,11 @@ describe('EditOutputFlyout', () => {
         is_default_monitoring: false,
       });
 
-      expect(utils.queryByText('OpenTelemetry Exporter')).not.toBeNull();
-      expect(utils.queryByLabelText('Advanced YAML Configuration')).not.toBeNull();
+      expect(utils.queryByText('OpenTelemetry exporter')).not.toBeNull();
+
+      // Expand the accordion to reveal the YAML editor
+      fireEvent.click(utils.getByText('OpenTelemetry exporter'));
+      expect(utils.queryByLabelText('Advanced YAML configuration')).not.toBeNull();
     });
 
     it('should not show the OTel exporter section for logstash output', async () => {
@@ -504,7 +507,7 @@ describe('EditOutputFlyout', () => {
         is_default_monitoring: false,
       });
 
-      expect(utils.queryByText('OpenTelemetry Exporter')).toBeNull();
+      expect(utils.queryByText('OpenTelemetry exporter')).toBeNull();
       expect(utils.queryByLabelText('Advanced YAML Configuration')).toBeNull();
     });
 
@@ -517,7 +520,7 @@ describe('EditOutputFlyout', () => {
         is_default_monitoring: false,
       });
 
-      expect(utils.queryByText('OpenTelemetry Exporter')).toBeNull();
+      expect(utils.queryByText('OpenTelemetry exporter')).toBeNull();
       expect(utils.queryByLabelText('Advanced YAML Configuration')).toBeNull();
     });
 
@@ -535,7 +538,7 @@ describe('EditOutputFlyout', () => {
         is_default_monitoring: false,
       });
 
-      expect(utils.queryByText('OpenTelemetry Exporter')).toBeNull();
+      expect(utils.queryByText('OpenTelemetry exporter')).toBeNull();
       expect(utils.queryByLabelText('Advanced YAML Configuration')).toBeNull();
     });
 

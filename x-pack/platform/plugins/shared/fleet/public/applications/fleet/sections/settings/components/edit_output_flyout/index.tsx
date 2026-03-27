@@ -587,10 +587,9 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                 buttonContent={
                   <EuiTitle size="xs">
                     <h3>
-                      i
                       <FormattedMessage
                         id="xpack.fleet.settings.editOutputFlyout.otelExporterConfigTitle"
-                        defaultMessage="OpenTelemetry Exporter"
+                        defaultMessage="OpenTelemetry exporter"
                       />
                     </h3>
                   </EuiTitle>
@@ -603,7 +602,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                     label={
                       <FormattedMessage
                         id="xpack.fleet.settings.editOutputFlyout.otelExporterConfigLabel"
-                        defaultMessage="Advanced YAML Configuration"
+                        defaultMessage="Advanced YAML configuration"
                       />
                     }
                     helpText={
@@ -622,7 +621,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                         'xpack.fleet.settings.editOutputFlyout.otelExporterConfigPlaceholder',
                         {
                           defaultMessage:
-                            '# YAML settings here will be added to the exporter section of OTel policies.',
+                            '# YAML settings defined here will be added to the exporter section of OTel policies.',
                         }
                       )}
                     />
