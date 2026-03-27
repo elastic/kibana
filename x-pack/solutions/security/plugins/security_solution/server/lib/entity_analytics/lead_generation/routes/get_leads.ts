@@ -18,12 +18,12 @@ import {
 import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { APP_ID } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { computeStaleness } from '../types';
 
-const DEFAULT_PAGE_SIZE = 50;
 const MAX_PAGE_SIZE = 200;
 
 const GetLeadsQueryParams = z.object({
-  size: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).optional().default(DEFAULT_PAGE_SIZE),
+  size: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).optional().default(50),
   from: z.coerce.number().int().min(0).optional().default(0),
 });
 
@@ -68,20 +68,25 @@ export const getLeadsRoute = (router: EntityAnalyticsRoutesDeps['router'], logge
               index: `${adhocIndex},${scheduledIndex}`,
               size,
               from,
-              sort: [{ timestamp: { order: 'desc' } }],
+              track_total_hits: true,
+              sort: [{ priority: { order: 'desc' } }, { timestamp: { order: 'desc' } }],
               query: { match_all: {} },
               ignore_unavailable: true,
-              track_total_hits: true,
             });
+
+            total =
+              typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total?.value ?? 0;
 
             leads = resp.hits.hits
               .map((hit) => hit._source)
-              .filter((doc): doc is Record<string, unknown> => doc != null);
-
-            total =
-              typeof resp.hits.total === 'number'
-                ? resp.hits.total
-                : resp.hits.total?.value ?? leads.length;
+              .filter((doc): doc is Record<string, unknown> => doc != null)
+              .map((doc) => ({
+                ...doc,
+                staleness:
+                  typeof doc.timestamp === 'string'
+                    ? computeStaleness(new Date(doc.timestamp), new Date())
+                    : doc.staleness,
+              }));
           } catch (searchError) {
             logger.debug(`[LeadGeneration] Leads indices not available yet: ${searchError}`);
           }
@@ -90,7 +95,8 @@ export const getLeadsRoute = (router: EntityAnalyticsRoutesDeps['router'], logge
             body: {
               leads,
               total,
-              page: { size, from },
+              size,
+              from,
             },
           });
         } catch (e) {
