@@ -6,9 +6,8 @@
  */
 
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
+import { attachmentToDashboardState } from '@kbn/dashboard-agent-common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import { getStateFromAttachment } from './attachment_to_dashboard_state';
-
 interface HandlePreviewInDashboardParams {
   attachment: DashboardAttachment;
   dashboardApi: DashboardApi;
@@ -22,7 +21,7 @@ export const handlePreviewInDashboard = async ({
   checkSavedDashboardExist,
   updateOrigin,
 }: HandlePreviewInDashboardParams) => {
-  const dashboardState = getStateFromAttachment(attachment);
+  const dashboardState = attachmentToDashboardState(attachment);
   let attachmentLinkedSavedObjectId = attachment.origin;
   const currentSavedObjectId = dashboardApi.savedObjectId$.getValue();
 
