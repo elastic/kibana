@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
+import { EuiText, EuiTextBlockTruncate } from '@elastic/eui';
 import * as i18n from './translations';
 import { ExecutionStatusIndicator } from '../../../../rule_monitoring';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
@@ -52,7 +52,7 @@ export const getColumns = ({
         showTooltip={true}
       />
     ),
-    width: '10%',
+    width: '120px',
   },
   {
     field: 'backfill',
@@ -66,7 +66,7 @@ export const getColumns = ({
       const typeStr = record.backfill ? RULE_EXECUTION_TYPE_BACKFILL : RULE_EXECUTION_TYPE_STANDARD;
       return <EuiText size="s">{typeStr}</EuiText>;
     },
-    width: '10%',
+    width: '110px',
   },
   {
     field: 'execution_start',
@@ -78,7 +78,7 @@ export const getColumns = ({
     ),
     render: (value: string) => <FormattedDate value={value} fieldName="execution_start" />,
     sortable: true,
-    width: '15%',
+    width: '240px',
   },
   {
     field: 'execution_duration_ms',
@@ -91,7 +91,7 @@ export const getColumns = ({
     render: (value: number | null) =>
       value != null ? <RuleDurationFormat duration={value} /> : <span>{'—'}</span>,
     sortable: true,
-    width: '10%',
+    width: '170px',
   },
   {
     field: 'metrics.alert_counts.new',
@@ -102,7 +102,7 @@ export const getColumns = ({
       />
     ),
     render: (_: unknown, record: UnifiedExecutionResult) => record.metrics.alert_counts?.new ?? 0,
-    width: '10%',
+    width: '130px',
   },
   {
     field: 'outcome.message',
@@ -112,17 +112,22 @@ export const getColumns = ({
         tooltipContent={i18n.COLUMN_MESSAGE_TOOLTIP}
       />
     ),
-    render: (_: unknown, record: UnifiedExecutionResult) => record.outcome.message ?? '—',
-    width: '35%',
+    render: (_: unknown, record: UnifiedExecutionResult) => (
+      <EuiTextBlockTruncate lines={2}>{record.outcome.message ?? '—'}</EuiTextBlockTruncate>
+    ),
   },
   {
     name: i18n.COLUMN_ACTIONS,
     actions: [
       {
         name: i18n.ACTION_FILTER_BY_EXECUTION_ID,
-        description: i18n.ACTION_FILTER_BY_EXECUTION_ID,
+        description: (item: UnifiedExecutionResult) =>
+          (item.metrics.alert_counts?.new ?? 0) > 0
+            ? i18n.ACTION_FILTER_BY_EXECUTION_ID
+            : i18n.ACTION_FILTER_BY_EXECUTION_ID_DISABLED,
         icon: 'filter',
         type: 'icon',
+        enabled: (item: UnifiedExecutionResult) => (item.metrics.alert_counts?.new ?? 0) > 0,
         onClick: (item: UnifiedExecutionResult) => {
           if (item.execution_uuid) {
             onFilterByExecutionId(item.execution_uuid, item.execution_start);
@@ -137,6 +142,6 @@ export const getColumns = ({
         onClick: onViewDetails,
       },
     ],
-    width: '10%',
+    width: '80px',
   },
 ];

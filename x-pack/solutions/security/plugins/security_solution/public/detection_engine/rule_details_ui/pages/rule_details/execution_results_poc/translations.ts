@@ -119,6 +119,13 @@ export const ACTION_FILTER_BY_EXECUTION_ID = i18n.translate(
   }
 );
 
+export const ACTION_FILTER_BY_EXECUTION_ID_DISABLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.actionFilterByExecutionIdDisabled',
+  {
+    defaultMessage: 'No alerts were created during this run',
+  }
+);
+
 export const ACTION_VIEW_DETAILS = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.actionViewDetails',
   {
