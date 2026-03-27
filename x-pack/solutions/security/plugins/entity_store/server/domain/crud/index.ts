@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { CRUDClient, type BulkObject, type BulkObjectResponse } from './crud_client';
+export {
+  CRUDClient,
+  type EntityUpdateClient,
+  type BulkObject,
+  type BulkObjectResponse,
+} from './crud_client';

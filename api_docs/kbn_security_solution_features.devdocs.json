@@ -38,7 +38,7 @@
           "<C>"
         ],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
-        "lineNumber": 112,
+        "lineNumber": 130,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -56,7 +56,7 @@
               "C"
             ],
             "path": "x-pack/solutions/security/packages/features/src/types.ts",
-            "lineNumber": 113,
+            "lineNumber": 133,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -74,7 +74,7 @@
               "{ [x: string]: C; }"
             ],
             "path": "x-pack/solutions/security/packages/features/src/types.ts",
-            "lineNumber": 115,
+            "lineNumber": 135,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -100,7 +100,7 @@
           "<K, S>"
         ],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
-        "lineNumber": 102,
+        "lineNumber": 103,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -138,7 +138,7 @@
               "[]; } | undefined; }"
             ],
             "path": "x-pack/solutions/security/packages/features/src/types.ts",
-            "lineNumber": 106,
+            "lineNumber": 107,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -154,7 +154,7 @@
               "S[] | undefined"
             ],
             "path": "x-pack/solutions/security/packages/features/src/types.ts",
-            "lineNumber": 107,
+            "lineNumber": 108,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -177,7 +177,7 @@
               "<S> | undefined"
             ],
             "path": "x-pack/solutions/security/packages/features/src/types.ts",
-            "lineNumber": 108,
+            "lineNumber": 109,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -201,7 +201,7 @@
               "<S>>> | undefined"
             ],
             "path": "x-pack/solutions/security/packages/features/src/types.ts",
-            "lineNumber": 109,
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -217,7 +217,7 @@
         "label": "ProductFeaturesConfigurator",
         "description": [],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
-        "lineNumber": 132,
+        "lineNumber": 153,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -240,7 +240,7 @@
               "[]"
             ],
             "path": "x-pack/solutions/security/packages/features/src/types.ts",
-            "lineNumber": 133,
+            "lineNumber": 154,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -256,7 +256,7 @@
               "Partial<ProductFeatureConfigExtensions> | undefined"
             ],
             "path": "x-pack/solutions/security/packages/features/src/types.ts",
-            "lineNumber": 134,
+            "lineNumber": 155,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -272,7 +272,7 @@
         "label": "SubFeatureReplacement",
         "description": [],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
-        "lineNumber": 139,
+        "lineNumber": 160,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -287,7 +287,7 @@
               "The (top-level) feature id that will replace the sub-feature"
             ],
             "path": "x-pack/solutions/security/packages/features/src/types.ts",
-            "lineNumber": 140,
+            "lineNumber": 161,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -305,7 +305,7 @@
               "Record<string, string[]> | undefined"
             ],
             "path": "x-pack/solutions/security/packages/features/src/types.ts",
-            "lineNumber": 142,
+            "lineNumber": 163,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -323,7 +323,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/packages/features/src/types.ts",
-            "lineNumber": 144,
+            "lineNumber": 165,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -353,7 +353,7 @@
           ">"
         ],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
-        "lineNumber": 100,
+        "lineNumber": 101,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -380,7 +380,7 @@
           "> | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
-        "lineNumber": 88,
+        "lineNumber": 89,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -405,7 +405,7 @@
           "<string> | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
-        "lineNumber": 92,
+        "lineNumber": 93,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -444,7 +444,7 @@
           "[]; } | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
-        "lineNumber": 33,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -471,7 +471,7 @@
           "> | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
-        "lineNumber": 84,
+        "lineNumber": 85,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -504,7 +504,7 @@
           ">) => void"
         ],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
-        "lineNumber": 39,
+        "lineNumber": 40,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -671,7 +671,7 @@
               "<Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined>; }"
             ],
             "path": "x-pack/solutions/security/packages/features/src/types.ts",
-            "lineNumber": 39,
+            "lineNumber": 40,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false
@@ -840,7 +840,7 @@
           "<Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined>; }"
         ],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
-        "lineNumber": 36,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -897,7 +897,7 @@
           "<string | undefined>; }"
         ],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
-        "lineNumber": 37,
+        "lineNumber": 38,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -922,7 +922,7 @@
           "<string> | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
-        "lineNumber": 95,
+        "lineNumber": 96,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -939,7 +939,7 @@
           "keyof ProductFeatureConfigExtensions"
         ],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
-        "lineNumber": 137,
+        "lineNumber": 158,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -963,7 +963,7 @@
           "[]"
         ],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
-        "lineNumber": 30,
+        "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -991,10 +991,12 @@
           " | ",
           "ProductFeatureNotesKey",
           " | ",
-          "ProductFeatureRulesKey"
+          "ProductFeatureRulesKey",
+          " | ",
+          "ProductFeatureAlertsKey"
         ],
         "path": "x-pack/solutions/security/packages/features/src/product_features_keys.ts",
-        "lineNumber": 201,
+        "lineNumber": 210,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1050,7 +1052,77 @@
           "[] | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
-        "lineNumber": 41,
+        "lineNumber": 42,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-features",
+        "id": "def-common.ProductFeatureParamsKey",
+        "type": "Type",
+        "tags": [],
+        "label": "ProductFeatureParamsKey",
+        "description": [
+          "Infers the key type from ProductFeatureParams"
+        ],
+        "signature": [
+          "P extends ",
+          {
+            "pluginId": "@kbn/security-solution-features",
+            "scope": "common",
+            "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+            "section": "def-common.ProductFeatureParams",
+            "text": "ProductFeatureParams"
+          },
+          "<infer K extends ",
+          {
+            "pluginId": "@kbn/security-solution-features",
+            "scope": "common",
+            "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+            "section": "def-common.ProductFeatureKeyType",
+            "text": "ProductFeatureKeyType"
+          },
+          ", infer _S extends string> ? K : never"
+        ],
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
+        "lineNumber": 113,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-features",
+        "id": "def-common.ProductFeatureParamsSubFeatureId",
+        "type": "Type",
+        "tags": [],
+        "label": "ProductFeatureParamsSubFeatureId",
+        "description": [
+          "Infers the sub-feature id type from ProductFeatureParams"
+        ],
+        "signature": [
+          "P extends ",
+          {
+            "pluginId": "@kbn/security-solution-features",
+            "scope": "common",
+            "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+            "section": "def-common.ProductFeatureParams",
+            "text": "ProductFeatureParams"
+          },
+          "<infer _K extends ",
+          {
+            "pluginId": "@kbn/security-solution-features",
+            "scope": "common",
+            "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+            "section": "def-common.ProductFeatureKeyType",
+            "text": "ProductFeatureKeyType"
+          },
+          ", infer S extends string> ? S : never"
+        ],
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
+        "lineNumber": 118,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1085,7 +1157,34 @@
           "<T>>[P] | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
-        "lineNumber": 64,
+        "lineNumber": 65,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-features",
+        "id": "def-common.ProductFeaturesConfigKey",
+        "type": "Type",
+        "tags": [],
+        "label": "ProductFeaturesConfigKey",
+        "description": [
+          "Infers the key type from a ProductFeaturesConfig-like type (Partial<Record<K, ...>>)"
+        ],
+        "signature": [
+          "C extends Partial<Record<infer K extends string | number | symbol, ",
+          {
+            "pluginId": "@kbn/security-solution-features",
+            "scope": "common",
+            "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+            "section": "def-common.ProductFeatureKibanaConfig",
+            "text": "ProductFeatureKibanaConfig"
+          },
+          "<string>>> ? K : never"
+        ],
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
+        "lineNumber": 123,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1249,10 +1348,28 @@
             "section": "def-common.ProductFeatureKibanaConfig",
             "text": "ProductFeatureKibanaConfig"
           },
+          "<string>>>> | undefined; alerts?: ",
+          {
+            "pluginId": "@kbn/security-solution-features",
+            "scope": "common",
+            "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+            "section": "def-common.ConfigExtensions",
+            "text": "ConfigExtensions"
+          },
+          "<Partial<Record<",
+          "ProductFeatureAlertsKey",
+          ", ",
+          {
+            "pluginId": "@kbn/security-solution-features",
+            "scope": "common",
+            "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+            "section": "def-common.ProductFeatureKibanaConfig",
+            "text": "ProductFeatureKibanaConfig"
+          },
           "<string>>>> | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
-        "lineNumber": 130,
+        "lineNumber": 151,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1301,7 +1418,7 @@
           "<string> | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
-        "lineNumber": 98,
+        "lineNumber": 99,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1588,7 +1705,7 @@
           "> | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
-        "lineNumber": 80,
+        "lineNumber": 81,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1613,7 +1730,7 @@
           "<string> | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
-        "lineNumber": 96,
+        "lineNumber": 97,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1637,7 +1754,7 @@
           "[]"
         ],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
-        "lineNumber": 150,
+        "lineNumber": 171,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1764,7 +1881,7 @@
           "<{ all: readonly string[]; read: readonly string[]; }> | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
-        "lineNumber": 34,
+        "lineNumber": 35,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1789,7 +1906,7 @@
           "<string> | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
-        "lineNumber": 94,
+        "lineNumber": 95,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
