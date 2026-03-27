@@ -143,7 +143,7 @@ export const ExecutionResultsPocTable: React.FC<ExecutionResultsPocTableProps> =
   );
 
   return (
-    <EuiPanel hasBorder>
+    <EuiPanel hasBorder data-test-subj="executionResultsPocContainer">
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={true}>
           <HeaderSection title={logTableI18n.TABLE_TITLE} subtitle={logTableI18n.TABLE_SUBTITLE} />
@@ -174,6 +174,7 @@ export const ExecutionResultsPocTable: React.FC<ExecutionResultsPocTableProps> =
             onRefresh={onRefreshCallback}
             isLoading={isFetching}
             width="full"
+            data-test-subj="executionResultsPocDatePicker"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -181,6 +182,7 @@ export const ExecutionResultsPocTable: React.FC<ExecutionResultsPocTableProps> =
       <EuiSpacer size="s" />
 
       <EuiBasicTable
+        data-test-subj="executionResultsPocTable"
         tableCaption={i18n.TABLE_CAPTION}
         items={tableItems}
         columns={columns}

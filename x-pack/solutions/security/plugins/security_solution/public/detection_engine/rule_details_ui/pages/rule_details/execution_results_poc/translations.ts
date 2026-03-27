@@ -84,13 +84,6 @@ export const COLUMN_ALERTS_CREATED_TOOLTIP = i18n.translate(
   }
 );
 
-export const COLUMN_MATCHED_EVENTS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.matchedEventsColumn',
-  {
-    defaultMessage: 'Matched events',
-  }
-);
-
 export const COLUMN_MESSAGE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.messageColumn',
   {
@@ -320,34 +313,6 @@ export const FLYOUT_TOOLTIP_EXECUTION_DURATION = i18n.translate(
   }
 );
 
-export const FLYOUT_EXECUTION_TIME = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutExecutionTime',
-  {
-    defaultMessage: 'Execution time',
-  }
-);
-
-export const FLYOUT_EVENTS_MATCHED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutEventsMatched',
-  {
-    defaultMessage: 'Events matched',
-  }
-);
-
-export const FLYOUT_GAP_DETECTED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutGapDetected',
-  {
-    defaultMessage: 'Gap detected',
-  }
-);
-
-export const FLYOUT_ACCORDION_ALERTS_FLOW = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutAccordionAlertsFlow',
-  {
-    defaultMessage: 'Alerts (flow)',
-  }
-);
-
 export const FLYOUT_ACCORDION_SOURCE_EVENT_TIME_RANGE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutAccordionSourceEventTimeRange',
   {
@@ -403,30 +368,3 @@ export const FLYOUT_TOOLTIP_FROZEN_INDICES_QUERIED = i18n.translate(
     defaultMessage: 'Number of frozen-tier indices included in the search.',
   }
 );
-
-export const FLYOUT_STEP_EVENTS_MATCHED = (count: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutStepEventsMatched',
-    {
-      defaultMessage: '{count}\nEvents matched',
-      values: { count },
-    }
-  );
-
-export const FLYOUT_STEP_CANDIDATE_ALERTS = (count: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutStepCandidateAlerts',
-    {
-      defaultMessage: '{count}\nCandidate alerts',
-      values: { count },
-    }
-  );
-
-export const FLYOUT_STEP_ALERTS_GENERATED = (count: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.ruleDetails.executionResultsPoc.flyoutStepAlertsGenerated',
-    {
-      defaultMessage: '{count}\nAlerts generated',
-      values: { count },
-    }
-  );
