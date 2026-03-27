@@ -133,7 +133,7 @@ export function StorageExplorer() {
           title={i18n.translate('xpack.apm.storageExplorer.longLoadingTimeCalloutTitle', {
             defaultMessage: 'Long loading time?',
           })}
-          iconType="timeRefresh"
+          iconType="refreshTime"
           data-test-subj="apmStorageExplorerLongLoadingTimeCallout"
         >
           <p>
@@ -176,7 +176,7 @@ export function StorageExplorer() {
             title={i18n.translate('xpack.apm.storageExplorer.crossClusterSearchCalloutTitle', {
               defaultMessage: 'Searching across clusters?',
             })}
-            iconType="search"
+            iconType="magnify"
           >
             <p>
               {i18n.translate('xpack.apm.storageExplorer.crossClusterSearchCalloutText', {

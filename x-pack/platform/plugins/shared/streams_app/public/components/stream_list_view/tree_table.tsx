@@ -367,7 +367,7 @@ export function StreamsTreeTable({
                 {treeMode && item.children && hasChildren && (
                   <EuiFlexItem grow={false}>
                     <EuiIcon
-                      type={isCollapsed ? 'arrowRight' : 'arrowDown'}
+                      type={isCollapsed ? 'chevronSingleRight' : 'chevronSingleDown'}
                       color="text"
                       size="m"
                       data-test-subj={`${isCollapsed ? 'expand' : 'collapse'}Button-${

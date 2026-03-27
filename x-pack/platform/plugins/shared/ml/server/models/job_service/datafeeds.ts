@@ -111,13 +111,14 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
     });
   }
 
-  async function stopDatafeeds(datafeedIds: string[]) {
+  async function stopDatafeeds(datafeedIds: string[], closeJobs: boolean = true) {
     const results: Results = Object.create(null);
 
     for (const datafeedId of datafeedIds) {
       try {
         const body = await mlClient.stopDatafeed({
           datafeed_id: datafeedId,
+          close_job: closeJobs,
         });
         results[datafeedId] = { stopped: body.stopped };
       } catch (error) {
