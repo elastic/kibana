@@ -36,7 +36,8 @@ import {
 } from '@kbn/alerting-rule-utils';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
-import { AlertStates } from '../../../../common/alerting/metrics';
+import { Aggregators, AlertStates } from '../../../../common/alerting/metrics';
+import type { MetricExpressionParams } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import type { InfraBackendLibs, InfraLocators } from '../../infra_types';
 import {
@@ -61,6 +62,7 @@ import type { EvaluatedRuleParams, Evaluation } from './lib/evaluate_rule';
 import { evaluateRule } from './lib/evaluate_rule';
 import type { MissingGroupsRecord } from './lib/check_missing_group';
 import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_missing_groups_record';
+import { isCustom } from './lib/metric_expression_params';
 
 export type MetricThresholdAlert = Omit<
   ObservabilityMetricsAlert,
@@ -264,12 +266,14 @@ export const createMetricThresholdExecutor =
           )
         : [];
 
-    const dataViewsService = await services.getDataViews();
     let dataView;
-    try {
-      dataView = await dataViewsService.create({ title: config.metricAlias });
-    } catch (e) {
-      // ignore — dataView stays undefined and toElasticsearchQuery degrades gracefully
+    if (shouldCreateDataView(criteria)) {
+      const dataViewsService = await services.getDataViews();
+      try {
+        dataView = await dataViewsService.create({ title: config.metricAlias });
+      } catch (e) {
+        // ignore — dataView stays undefined and toElasticsearchQuery degrades gracefully
+      }
     }
 
     const alertResults = await evaluateRule(
@@ -584,6 +588,17 @@ const mapToConditionsLookup = (
     result[`condition${i}`] = value;
     return result;
   }, {} as Record<string, unknown>);
+
+const shouldCreateDataView = (criteria: MetricExpressionParams[]) =>
+  criteria.some((criterion) => {
+    if (!isCustom(criterion)) {
+      return false;
+    }
+
+    return criterion.customMetrics.some(
+      (customMetric) => customMetric.aggType === Aggregators.COUNT && customMetric.filter != null
+    );
+  });
 
 const formatAlertResult = <AlertResult>(
   alertResult: {
