@@ -7,7 +7,7 @@
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { createBehavioralAnalysisModule } from './behavioral_analysis_module';
+import { createBehavioralAnalysisModule } from './alert_analysis_module';
 import type { LeadEntity } from '../types';
 
 const createEntity = (type: string, name: string, email?: string): LeadEntity => ({
@@ -17,7 +17,6 @@ const createEntity = (type: string, name: string, email?: string): LeadEntity =>
   } as never,
   type,
   name,
-  id: `euid-${name}`,
 });
 
 const createAlertAggResponse = (
@@ -298,8 +297,8 @@ describe('BehavioralAnalysisModule', () => {
     });
   });
 
-  it('includes user.email in the query when available', async () => {
-    const entity = createEntity('user', 'alice', 'alice@example.com');
+  it('queries by entity name field for the given type', async () => {
+    const entity = createEntity('user', 'alice');
     esClient.search.mockResolvedValue(createAlertAggResponse() as never);
 
     const module = createBehavioralAnalysisModule({ esClient, logger, alertsIndexPattern });
@@ -307,8 +306,8 @@ describe('BehavioralAnalysisModule', () => {
 
     const searchCall = esClient.search.mock.calls[0][0] as Record<string, unknown>;
     const queryStr = JSON.stringify(searchCall.query);
-    expect(queryStr).toContain('user.email');
-    expect(queryStr).toContain('alice@example.com');
+    expect(queryStr).toContain('user.name');
+    expect(queryStr).toContain('alice');
   });
 
   it('returns empty observations when no alerts match', async () => {
