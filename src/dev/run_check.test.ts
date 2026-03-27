@@ -58,7 +58,7 @@ jest.mock('@kbn/repo-packages', () => ({
 
 jest.mock('fs', () => ({
   ...jest.requireActual('fs'),
-  existsSync: (p: string) => p.endsWith('jest.config.js'),
+  existsSync: jest.fn(),
 }));
 
 const mockExecaFn = jest.fn();
@@ -74,6 +74,7 @@ const mockExecuteTypeCheckValidation = jest.requireMock('./type_check_validation
 const mockExecuteEslintValidation = jest.requireMock('./eslint/run_eslint_contract')
   .executeEslintValidation as jest.Mock;
 const mockGetPackages = jest.requireMock('@kbn/repo-packages').getPackages as jest.Mock;
+const mockExistsSync = jest.requireMock('fs').existsSync as jest.Mock;
 const mockExeca = mockExecaFn;
 
 let handler: (args: {
@@ -139,6 +140,7 @@ describe('run_check', () => {
     cpusSpy = jest.spyOn(Os, 'cpus').mockReturnValue(new Array(8).fill({}) as any);
     mockReadValidationRunFlags.mockReturnValue({});
     mockResolveValidationBaseContext.mockResolvedValue(baseContext);
+    mockExistsSync.mockImplementation((p: string) => p.endsWith('jest.config.js'));
     mockExecuteEslintValidation.mockResolvedValue({
       fileCount: 3,
       fixedFiles: [],
@@ -301,7 +303,7 @@ describe('run_check', () => {
     const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
     expect(output).toContain('jest  ✗ failed');
     expect(output).toContain('FAIL packages/foo/src/bar.test.ts');
-    expect(output).toContain('→ node scripts/jest packages/foo/src/bar.test.ts');
+    expect(output).toContain('node scripts/jest packages/foo/src/bar.test.ts');
   });
 
   it('still invokes Moon for downstream Jest tasks when the changed package has no local config', async () => {
@@ -364,5 +366,30 @@ describe('run_check', () => {
       expect.arrayContaining(['--concurrency', '2', '--maxWorkers=4']),
       expect.any(Object)
     );
+  });
+
+  it('uses the repo root Jest config when no package-level config is found', async () => {
+    mockExistsSync.mockImplementation((p: string) => p === '/repo/jest.config.js');
+    mockResolveValidationBaseContext.mockResolvedValue({
+      ...baseContext,
+      runContext: {
+        ...baseContext.runContext,
+        changedFiles: ['packages/foo/src/index.ts'],
+      },
+    });
+    mockExeca.mockResolvedValue({
+      exitCode: 0,
+      stdout: [
+        'fail RunTask(@kbn/foo:jest) (1s 200ms, abc123)',
+        '@kbn/foo:jest | {"success":false,"numTotalTests":1,"numPassedTests":0,"numFailedTests":1,"testResults":[{"name":"/repo/packages/foo/src/bar.test.ts","assertionResults":[{"status":"failed","fullName":"fails","failureMessages":["Error\\n    at /repo/packages/foo/src/bar.test.ts:12:3"]}]}]}',
+      ].join('\n'),
+      stderr: '',
+    });
+
+    await handler(createArgs());
+
+    expect(process.exitCode).toBe(1);
+    const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+    expect(output).toContain('node scripts/jest --config jest.config.js');
   });
 });

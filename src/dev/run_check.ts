@@ -151,13 +151,18 @@ const stripAnsi = (s: string) => s.replace(/\x1B\[[0-9;]*[A-Za-z]/g, '');
 
 const findJestConfig = (testFilePath: string): string | undefined => {
   let dir = Path.dirname(Path.resolve(REPO_ROOT, testFilePath));
-  while (dir !== REPO_ROOT && dir !== Path.dirname(dir)) {
+  while (true) {
     for (const configName of JEST_CONFIG_NAMES) {
       const configPath = Path.join(dir, configName);
       if (existsSync(configPath)) {
         return Path.relative(REPO_ROOT, configPath);
       }
     }
+
+    if (dir === REPO_ROOT || dir === Path.dirname(dir)) {
+      break;
+    }
+
     dir = Path.dirname(dir);
   }
   return undefined;

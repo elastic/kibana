@@ -15,13 +15,19 @@ import {
   VALIDATION_RUN_STRING_FLAGS,
 } from '@kbn/dev-validation-runner';
 
-import { executeTypeCheckValidation } from './execute_type_check_validation';
+import { cleanTypeCheckCaches, executeTypeCheckValidation } from './execute_type_check_validation';
 import { normalizeProjectPath } from './src/normalize_project_path';
 
 /** Runs the validation-contract-aware `scripts/type_check` CLI entrypoint. */
 export const runTypeCheckContractCli = () => {
   run(
     async ({ log, flagsReader, procRunner }) => {
+      if (flagsReader.boolean('clean-cache')) {
+        const { TS_PROJECTS } = await import('@kbn/ts-projects');
+        await cleanTypeCheckCaches(log, TS_PROJECTS);
+        return;
+      }
+
       const projectFilter = normalizeProjectPath(flagsReader.path('project'), log);
       const validationRunFlags = readValidationRunFlags(flagsReader);
       const baseContext = await resolveValidationBaseContext({

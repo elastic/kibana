@@ -95,6 +95,15 @@ jest.mock('./src/archive/utils', () => ({
   isCiEnvironment: jest.fn(),
 }));
 
+jest.mock('execa', () => {
+  const mockExecaFn = jest.fn();
+  return {
+    __esModule: true,
+    default: mockExecaFn,
+    __mock: { mockExecaFn },
+  };
+});
+
 jest.mock('fs/promises', () => ({
   readFile: jest.fn(),
   writeFile: jest.fn(),
@@ -118,6 +127,12 @@ const mockCountCommitsBetweenRefs = countCommitsBetweenRefs as unknown as jest.M
 const mockHasStagedChanges = hasStagedChanges as unknown as jest.Mock;
 const mockUpdateRootRefsConfig = updateRootRefsConfig as unknown as jest.Mock;
 const mockIsCiEnvironment = isCiEnvironment as unknown as jest.Mock;
+const mockArchiveTSBuildArtifacts = jest.requireMock('./src/archive/archive_ts_build_artifacts')
+  .archiveTSBuildArtifacts as jest.Mock;
+const mockRestoreTSBuildArtifacts = jest.requireMock('./src/archive/restore_ts_build_artifacts')
+  .restoreTSBuildArtifacts as jest.Mock;
+const mockExeca = (jest.requireMock('execa') as { __mock: { mockExecaFn: jest.Mock } }).__mock
+  .mockExecaFn;
 
 let contractHandler: (args: {
   log: { info: jest.Mock; warning: jest.Mock; verbose: jest.Mock };
@@ -212,6 +227,7 @@ describe('run_type_check_cli', () => {
     fsPromises.writeFile.mockResolvedValue(undefined);
     fsPromises.rm.mockResolvedValue(undefined);
     fsPromises.unlink.mockResolvedValue(undefined);
+    mockExeca.mockResolvedValue({ stdout: '' });
 
     mockIsCiEnvironment.mockReturnValue(false);
     mockCountCommitsBetweenRefs.mockResolvedValue(3);
@@ -306,6 +322,39 @@ describe('run_type_check_cli', () => {
     expect(ctx.log.info).toHaveBeenCalledWith(
       'No affected TypeScript projects found in staged changes; skipping type check.'
     );
+  });
+
+  it('supports --clean-cache on the contract path', async () => {
+    tsProjectsState.projects = [createProject()];
+
+    const ctx = createContext({ profile: 'quick', 'clean-cache': true });
+    await contractHandler(ctx);
+
+    expect(fsPromises.rm).toHaveBeenCalledWith('/repo/packages/foo/target/types', {
+      force: true,
+      recursive: true,
+    });
+    expect(fsPromises.rm).toHaveBeenCalledWith(expect.stringContaining('/archives'), {
+      force: true,
+      recursive: true,
+    });
+    expect(mockGetMoonChangedFiles).not.toHaveBeenCalled();
+    expect(ctx.procRunner.run).not.toHaveBeenCalled();
+  });
+
+  it('restores and archives caches when --with-archive is used on the contract path', async () => {
+    tsProjectsState.projects = [createProject()];
+    mockGetMoonChangedFiles.mockResolvedValue(['packages/foo/src/index.ts']);
+    mockGetAffectedMoonProjectsFromChangedFiles.mockResolvedValue([
+      { id: 'foo', sourceRoot: 'packages/foo' },
+    ]);
+
+    const ctx = createContext({ profile: 'quick', 'with-archive': true });
+    await contractHandler(ctx);
+
+    expect(mockRestoreTSBuildArtifacts).toHaveBeenCalledTimes(1);
+    expect(ctx.procRunner.run).toHaveBeenCalledTimes(1);
+    expect(mockArchiveTSBuildArtifacts).toHaveBeenCalledTimes(1);
   });
 
   it('skips staged scope immediately when nothing is staged', async () => {
