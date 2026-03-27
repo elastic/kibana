@@ -12,12 +12,10 @@ const STORAGE_KEY = 'test.dismissal';
 
 describe('useTimedDismissal', () => {
   let getItemSpy: jest.SpyInstance;
-  let setItemSpy: jest.SpyInstance;
 
   beforeEach(() => {
     localStorage.clear();
     getItemSpy = jest.spyOn(Storage.prototype, 'getItem');
-    setItemSpy = jest.spyOn(Storage.prototype, 'setItem');
     jest.useFakeTimers();
   });
 
