@@ -30,6 +30,10 @@ const cleanupResolver = () => ProjectRoutingAccess.DISABLED;
  *
  * Consumers are responsible for providing their own resolver logic
  * based on their routing patterns.
+ *
+ * NOTE: Call this hook only once per rendered page (at the top-level page component).
+ * Calling it in nested sub-routes or sub-components risks the cleanup of an inner instance
+ * overwriting the CPS state set by an outer one.
  */
 export const useCpsPickerAccess = ({
   resolver,
