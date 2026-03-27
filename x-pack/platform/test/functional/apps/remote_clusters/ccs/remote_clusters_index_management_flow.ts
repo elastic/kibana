@@ -87,7 +87,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('Verify that the follower index is duplicating from the remote.', async () => {
         await pageObjects.indexManagement.clickIndexAt(0);
         await pageObjects.indexManagement.performIndexAction('flush');
-        await testSubjects.click('indexDetailsBackToIndicesButton');
         await pageObjects.common.navigateToApp('indexManagement');
         await retry.waitForWithTimeout('indices table to be visible', 15000, async () => {
           return await testSubjects.isDisplayed('indicesList');

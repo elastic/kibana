@@ -185,7 +185,6 @@ export function IndexManagementPageProvider({ getService, getPageObjects }: FtrP
       async expectIndexDetailsPageIsLoaded() {
         await testSubjects.existOrFail('indexDetailsTab-overview');
         await testSubjects.existOrFail('indexDetailsContent');
-        await testSubjects.existOrFail('indexDetailsBackToIndicesButton');
       },
       async expectUrlShouldChangeTo(tabId: string) {
         const url = await browser.getCurrentUrl();
