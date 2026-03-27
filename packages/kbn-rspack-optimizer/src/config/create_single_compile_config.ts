@@ -9,7 +9,6 @@
 
 import Path from 'path';
 import Fs from 'fs';
-import crypto from 'crypto';
 import { rspack, type Configuration, type Compiler, type RspackPluginInstance } from '@rspack/core';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -120,7 +119,7 @@ function getConfigHash(repoRoot: string): string {
     'packages/kbn-rspack-optimizer/src/loaders/require_interop_loader.ts',
   ];
 
-  const hash = crypto.createHash('md5');
+  const hash = rspack.util.createHash('xxhash64');
   for (const file of configFiles) {
     try {
       const content = Fs.readFileSync(Path.resolve(repoRoot, file), 'utf-8');
@@ -678,8 +677,8 @@ function createUnifiedEntry(
 
   // Create a hash using RELATIVE paths so it's consistent across machines
   // This allows cache reuse when the same plugins are present regardless of repo location
-  const pluginListHash = crypto
-    .createHash('md5')
+  const pluginListHash = rspack.util
+    .createHash('xxhash64')
     .update(`${ENTRY_VERSION}\n${pluginEntries.map((e) => `${e.id}:${Path.relative(repoRoot, e.path)}`).join('\n')}`)
     .digest('hex');
 
@@ -801,11 +800,41 @@ class PluginWatchPlugin {
   private options: SingleCompileConfigOptions;
   private wrapperDir: string;
   private lastPluginHash: string = '';
+  private hasInitialDiscovery = false;
 
   constructor(pluginManifests: string[], options: SingleCompileConfigOptions, wrapperDir: string) {
     this.pluginManifests = pluginManifests;
     this.options = options;
     this.wrapperDir = wrapperDir;
+  }
+
+  private shouldRediscoverPlugins(compiler: Compiler): boolean {
+    if (!this.hasInitialDiscovery) return true;
+
+    const modified = compiler.modifiedFiles;
+    const removed = compiler.removedFiles;
+
+    if (!modified && !removed) return true;
+
+    const isManifest = (f: string) =>
+      f.endsWith('/kibana.jsonc') || f.endsWith('\\kibana.jsonc');
+    const isPluginEntry = (f: string) =>
+      /[/\\]public[/\\]index\.(?!test\.)[^/\\]+$/.test(f);
+
+    const isRelevant = (f: string) => isManifest(f) || isPluginEntry(f);
+
+    if (modified) {
+      for (const f of modified) {
+        if (isRelevant(f)) return true;
+      }
+    }
+    if (removed) {
+      for (const f of removed) {
+        if (isRelevant(f)) return true;
+      }
+    }
+
+    return false;
   }
 
   apply(compiler: Compiler) {
@@ -841,10 +870,15 @@ class PluginWatchPlugin {
       }
     });
 
-    // Watch for changes to kibana.jsonc files
     compiler.hooks.watchRun.tapAsync('PluginWatchPlugin', async (_compiler, callback) => {
+      if (!this.shouldRediscoverPlugins(_compiler)) {
+        callback();
+        return;
+      }
+
+      this.hasInitialDiscovery = true;
+
       try {
-        // Re-discover plugins on each watch run to detect additions/removals
         const currentPlugins = await discoverPlugins({
           repoRoot: this.options.repoRoot,
           outputRoot: this.options.outputRoot || this.options.repoRoot,
@@ -861,9 +895,8 @@ class PluginWatchPlugin {
           currentPlugins
         );
 
-        // Create hash of current plugin list
-        const currentHash = crypto
-          .createHash('md5')
+        const currentHash = rspack.util
+          .createHash('xxhash64')
           .update(pluginEntries.map((e) => `${e.id}:${e.path}`).join('\n'))
           .digest('hex');
 
