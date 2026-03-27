@@ -201,9 +201,9 @@ export class MonitorIntegrationHealthApi {
         foundMonitors.push({ id: monitorIds[i], so: result.value });
       } else {
         const reason = result.reason;
-        const statusCode = SavedObjectsErrorHelpers.isNotFoundError(reason)
+        const statusCode: number | undefined = SavedObjectsErrorHelpers.isNotFoundError(reason)
           ? 404
-          : (reason?.statusCode as number | undefined);
+          : (reason?.output?.statusCode ?? reason?.statusCode);
         errors.push({
           configId: monitorIds[i],
           message: reason?.message ?? 'Failed to fetch monitor',
