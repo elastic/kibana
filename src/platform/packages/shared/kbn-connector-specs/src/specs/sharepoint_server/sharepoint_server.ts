@@ -27,12 +27,19 @@ import type { ConnectorSpec } from '../../connector_spec';
 import downloadWorkflow from './workflows/download.yaml';
 import listWorkflow from './workflows/list.yaml';
 import searchWorkflow from './workflows/search.yaml';
+import {
+  CallRestApiInputSchema,
+  DownloadFileInputSchema,
+  DownloadFileOutputSchema,
+  GetFolderContentsInputSchema,
+  GetFolderContentsOutputSchema,
+  GetListItemsInputSchema,
+  GetSitePageContentsInputSchema,
+  ODataCollectionOutputSchema,
+  SearchInputSchema,
+} from './types';
 
 const ODATA_HEADERS = { Accept: 'application/json;odata=nometadata' };
-
-const ODataCollectionOutputSchema = z.object({
-  value: z.array(z.any()).describe('Array of items returned from the API'),
-});
 
 export const SharepointServer: ConnectorSpec = {
   metadata: {
@@ -112,13 +119,7 @@ export const SharepointServer: ConnectorSpec = {
         'core.kibanaConnectorSpecs.sharepointServer.actions.getListItems.description',
         { defaultMessage: 'Get items from a list or document library by display name.' }
       ),
-      input: z.object({
-        listTitle: z
-          .string()
-          .describe(
-            "Exact display name of the list, as returned in the Title field of getLists. Case-sensitive. Example: 'Documents', 'Tasks', 'Site Pages'"
-          ),
-      }),
+      input: GetListItemsInputSchema,
       output: ODataCollectionOutputSchema,
       handler: async (ctx, input) => {
         const { listTitle } = input as { listTitle: string };
@@ -141,17 +142,8 @@ export const SharepointServer: ConnectorSpec = {
         'core.kibanaConnectorSpecs.sharepointServer.actions.getFolderContents.description',
         { defaultMessage: 'List files and subfolders at a given server-relative folder path.' }
       ),
-      input: z.object({
-        path: z
-          .string()
-          .describe(
-            "Server-relative URL of the folder: starts with '/', no hostname. Get this from getLists (RootFolder.ServerRelativeUrl) or from a previous getFolderContents result (ServerRelativeUrl on a folder). Example: '/sites/mysite/Shared Documents' or '/sites/mysite/Shared Documents/Reports'"
-          ),
-      }),
-      output: z.object({
-        files: z.array(z.any()).describe('Files in the folder'),
-        folders: z.array(z.any()).describe('Subfolders in the folder'),
-      }),
+      input: GetFolderContentsInputSchema,
+      output: GetFolderContentsOutputSchema,
       handler: async (ctx, input) => {
         const { path } = input as { path: string };
         const { siteUrl } = ctx.config as { siteUrl: string };
@@ -180,18 +172,8 @@ export const SharepointServer: ConnectorSpec = {
         'core.kibanaConnectorSpecs.sharepointServer.actions.downloadFile.description',
         { defaultMessage: 'Download a file by server-relative URL and return its content as text.' }
       ),
-      input: z.object({
-        path: z
-          .string()
-          .describe(
-            "Server-relative URL of the file: starts with '/', no hostname. Get this from the ServerRelativeUrl field in getFolderContents results. Example: '/sites/mysite/Shared Documents/report.txt'"
-          ),
-      }),
-      output: z.object({
-        contentType: z.string().optional().describe('Content-Type header'),
-        contentLength: z.string().optional().describe('Content-Length header'),
-        text: z.string().describe('File content as UTF-8 text'),
-      }),
+      input: DownloadFileInputSchema,
+      output: DownloadFileOutputSchema,
       handler: async (ctx, input) => {
         const { path } = input as { path: string };
         const { siteUrl } = ctx.config as { siteUrl: string };
@@ -216,14 +198,7 @@ export const SharepointServer: ConnectorSpec = {
         'core.kibanaConnectorSpecs.sharepointServer.actions.getSitePageContents.description',
         { defaultMessage: 'Get the content of a SharePoint site page by integer item ID.' }
       ),
-      input: z.object({
-        pageId: z
-          .number()
-          .int()
-          .describe(
-            "Integer item ID of the page. Get this from getListItems with listTitle='Site Pages': look for the Id field (not the GUID) on the desired page. Example: 3"
-          ),
-      }),
+      input: GetSitePageContentsInputSchema,
       output: z.any(),
       handler: async (ctx, input) => {
         const { pageId } = input as { pageId: number };
@@ -248,15 +223,7 @@ export const SharepointServer: ConnectorSpec = {
         'core.kibanaConnectorSpecs.sharepointServer.actions.search.description',
         { defaultMessage: 'Search SharePoint site content using Keyword Query Language (KQL).' }
       ),
-      input: z.object({
-        query: z
-          .string()
-          .describe(
-            "KQL query string. Use plain keywords for broad search, or field:value pairs for filtered search. Examples: 'budget report', 'FileExtension:docx', 'author:Jane AND project plan', 'ContentType:Document AND title:policy'"
-          ),
-        from: z.number().optional().describe('Zero-based start row for pagination (default: 0)'),
-        size: z.number().optional().describe('Number of results to return (default: 10)'),
-      }),
+      input: SearchInputSchema,
       output: z.any(),
       handler: async (ctx, input) => {
         const { query, from, size } = input as { query: string; from?: number; size?: number };
@@ -283,16 +250,7 @@ export const SharepointServer: ConnectorSpec = {
             "Call a SharePoint Server REST API endpoint directly by path (must start with '_api/').",
         }
       ),
-      input: z.object({
-        method: z.enum(['GET', 'POST']).describe('HTTP method'),
-        path: z
-          .string()
-          .describe("API path starting with '_api/' (for example, '_api/web/title')")
-          .refine((value) => value.startsWith('_api/'), {
-            message: "Path must start with '_api/'",
-          }),
-        body: z.any().optional().describe('Request body (for POST)'),
-      }),
+      input: CallRestApiInputSchema,
       output: z.any(),
       handler: async (ctx, input) => {
         const { method, path, body } = input as {
