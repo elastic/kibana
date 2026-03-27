@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout';
 import moment from 'moment';
 import type { ErrorInsightParams } from '../../src/clients/ai_insight_client';
+import type { LoadResult } from '@kbn/es-snapshot-loader';
 import {
   replayObservabilityDataStreams,
   cleanObservabilityDataStreams,
@@ -32,13 +33,19 @@ function createScenarioTest(scenario: ApmErrorScenario) {
       let errorId: string;
       let start: string;
       let end: string;
+      let replayResult: LoadResult;
 
       evaluate.beforeAll(async ({ esClient, log }) => {
         end = moment().toISOString();
         start = moment().subtract(15, 'minutes').toISOString();
 
         log.info(`Replaying scenario: ${scenario.id}`);
-        await replayObservabilityDataStreams(esClient, log, scenario.snapshotName, scenario.gcs);
+        replayResult = await replayObservabilityDataStreams(
+          esClient,
+          log,
+          scenario.snapshotName,
+          scenario.gcs
+        );
 
         log.debug('Waiting to make sure all indices are refreshed');
         await new Promise((resolve) => setTimeout(resolve, INDEX_REFRESH_WAIT_MS));
@@ -115,7 +122,7 @@ function createScenarioTest(scenario: ApmErrorScenario) {
 
       evaluate.afterAll(async ({ esClient, log }) => {
         log.debug('Cleaning up indices');
-        await cleanObservabilityDataStreams(esClient);
+        await cleanObservabilityDataStreams(esClient, replayResult, log);
       });
     }
   );

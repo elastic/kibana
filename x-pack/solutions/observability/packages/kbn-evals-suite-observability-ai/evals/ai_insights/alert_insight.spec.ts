@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout';
 import type { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
 import type { AlertInsightParams } from '../../src/clients/ai_insight_client';
+import type { LoadResult } from '@kbn/es-snapshot-loader';
 import {
   replayObservabilityDataStreams,
   cleanObservabilityDataStreams,
@@ -30,6 +31,7 @@ function createScenarioTest(scenario: AlertScenario) {
   evaluate.describe(scenarioLabel, { tag: tags.serverless.observability.complete }, () => {
     let ruleId: string;
     let alertId: string;
+    let replayResult: LoadResult;
 
     evaluate.beforeAll(async ({ kbnClient, esClient, log }) => {
       log.info(`Creating alerting rule for scenario: ${scenario.id}`);
@@ -42,7 +44,12 @@ function createScenarioTest(scenario: AlertScenario) {
       ruleId = ruleResponse.data.id;
 
       log.info(`Replaying scenario: ${scenario.id}`);
-      await replayObservabilityDataStreams(esClient, log, scenario.snapshotName, scenario.gcs);
+      replayResult = await replayObservabilityDataStreams(
+        esClient,
+        log,
+        scenario.snapshotName,
+        scenario.gcs
+      );
 
       log.info('Triggering rule run');
       await kbnClient.request<void>({
@@ -121,7 +128,7 @@ function createScenarioTest(scenario: AlertScenario) {
               }),
             ]
           : []),
-        cleanObservabilityDataStreams(esClient),
+        cleanObservabilityDataStreams(esClient, replayResult, log),
       ]);
     });
   });
