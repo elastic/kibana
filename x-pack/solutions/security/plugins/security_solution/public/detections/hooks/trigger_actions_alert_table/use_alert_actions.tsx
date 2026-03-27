@@ -172,7 +172,7 @@ export const useBulkAlertActionItems = ({
 
   const { item: alertClosingReasonItem, panels: alertClosingReasonPanels } =
     useBulkClosingReasonItems({
-      isEnabled: hasIndexWrite ?? false,
+      isEnabled: hasAlertsUpdate ?? false,
       onSubmitCloseReason({
         reason,
         alertItems,

@@ -80,7 +80,7 @@ export const useBulkAttackWorkflowStatusItems = ({
 
   const { item: alertClosingReasonItem, panels: alertClosingReasonPanels } =
     useBulkClosingReasonItems({
-      isEnabled: hasIndexWrite ?? false,
+      isEnabled: (hasIndexWrite && hasAttackIndexWrite) ?? false,
       onSubmitCloseReason,
       buttonLabel: i18n.CLOSE_ATTACK_BUTTON_MESSAGE,
     });

@@ -52,7 +52,7 @@ export const useBulkActionItems = ({
   const { addSuccess, addError, addWarning } = useAppToasts();
   const { startTransaction } = useStartTransaction();
   const { promptAlertCloseConfirmation } = useAlertCloseInfoModal();
-  const { hasIndexWrite, hasAlertsUpdate } = useAlertsPrivileges();
+  const { hasAlertsUpdate } = useAlertsPrivileges();
 
   const onAlertStatusUpdateSuccess = useCallback(
     (updated: number, conflicts: number, newStatus: AlertWorkflowStatus) => {
@@ -155,7 +155,7 @@ export const useBulkActionItems = ({
 
   const { item: alertClosingReasonItem, panels: alertClosingReasonPanels } =
     useBulkClosingReasonItems({
-      isEnabled: hasIndexWrite ?? false,
+      isEnabled: hasAlertsUpdate ?? false,
       onSubmitCloseReason({ reason }) {
         onClickUpdate(FILTER_CLOSED as AlertWorkflowStatus, reason);
       },

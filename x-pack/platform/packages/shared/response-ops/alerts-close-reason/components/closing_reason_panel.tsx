@@ -22,9 +22,14 @@ interface ClosingReasonOption {
 
 export interface ClosingReasonPanelProps {
   onSubmit: (reason?: string) => void;
+  /** Optional label override for the confirm button */
+  buttonLabel?: string;
 }
 
-const ClosingReasonPanelComponent: React.FC<ClosingReasonPanelProps> = ({ onSubmit }) => {
+const ClosingReasonPanelComponent: React.FC<ClosingReasonPanelProps> = ({
+  onSubmit,
+  buttonLabel,
+}) => {
   const {
     services: { uiSettings },
   } = useKibana<{ uiSettings: IUiSettingsClient }>();
@@ -53,7 +58,7 @@ const ClosingReasonPanelComponent: React.FC<ClosingReasonPanelProps> = ({ onSubm
         {(list) => list}
       </EuiSelectable>
       <EuiButton fullWidth size="s" disabled={!selectedOption} onClick={onSubmitHandler}>
-        {i18n.CLOSING_REASON_BUTTON_MESSAGE}
+        {buttonLabel ?? i18n.CLOSING_REASON_BUTTON_MESSAGE}
       </EuiButton>
     </>
   );

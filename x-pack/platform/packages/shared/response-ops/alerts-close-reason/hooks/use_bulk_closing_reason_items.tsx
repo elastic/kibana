@@ -28,6 +28,8 @@ interface UseBulkClosingReasonItemsProps {
    * Called once the user confirms the closing reason
    */
   onSubmitCloseReason?: (params: OnSubmitClosingReasonParams) => void;
+  /** Optional label override for the confirm button */
+  buttonLabel?: string;
 }
 
 /**
@@ -36,6 +38,7 @@ interface UseBulkClosingReasonItemsProps {
 export const useBulkClosingReasonItems = ({
   isEnabled = true,
   onSubmitCloseReason,
+  buttonLabel,
 }: UseBulkClosingReasonItemsProps = {}) => {
   const item = useMemo(
     () =>
@@ -67,10 +70,10 @@ export const useBulkClosingReasonItems = ({
             renderProps.closePopoverMenu();
           }
         };
-        return <ClosingReasonPanel onSubmit={handleSubmit} />;
+        return <ClosingReasonPanel buttonLabel={buttonLabel} onSubmit={handleSubmit} />;
       };
     },
-    []
+    [buttonLabel]
   );
 
   const getPanel = useCallback(
