@@ -63227,7 +63227,7 @@ paths:
       summary: Get stream list
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63264,7 +63264,7 @@ paths:
       summary: Disable streams
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63301,7 +63301,7 @@ paths:
       summary: Enable streams
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63338,7 +63338,7 @@ paths:
       summary: Resync streams
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63380,7 +63380,7 @@ paths:
       summary: Delete a stream
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63414,7 +63414,7 @@ paths:
       summary: Get a stream
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63450,7 +63450,7 @@ paths:
       summary: Create or update a stream
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63507,7 +63507,7 @@ paths:
       summary: Fork a stream
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63542,7 +63542,7 @@ paths:
       summary: Get ingest stream settings
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63730,7 +63730,7 @@ paths:
       summary: Update ingest stream settings
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63765,7 +63765,7 @@ paths:
       summary: Get query stream settings
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.4.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63817,7 +63817,7 @@ paths:
       summary: Upsert query stream settings
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.4.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63869,6 +63869,7 @@ paths:
       summary: Export stream content
       tags:
         - streams
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63913,6 +63914,7 @@ paths:
       summary: Import content into a stream
       tags:
         - streams
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63947,7 +63949,7 @@ paths:
       summary: Get stream queries
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -64038,7 +64040,7 @@ paths:
       summary: Bulk update queries
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -64085,7 +64087,7 @@ paths:
       summary: Remove a query from a stream
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -64152,7 +64154,7 @@ paths:
       summary: Upsert a query to a stream
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -64435,7 +64437,7 @@ paths:
       summary: Get stream attachments
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.3.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -64535,7 +64537,7 @@ paths:
       summary: Bulk update attachments
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.3.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -64605,7 +64607,7 @@ paths:
       summary: Unlink an attachment from a stream
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.3.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -64674,7 +64676,7 @@ paths:
       summary: Link an attachment to a stream
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.3.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -68334,6 +68336,10 @@ paths:
                 contextOverride:
                   additionalProperties: {}
                   description: Context overrides for the step execution.
+                  type: object
+                executionContext:
+                  additionalProperties: {}
+                  description: Execution context for the step execution.
                   type: object
                 stepId:
                   description: ID of the step to test.
@@ -83021,6 +83027,9 @@ components:
         - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryCreateFields'
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
       discriminator:
+        mapping:
+          document: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryCreateFields'
+          index: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
         propertyName: type
     Security_AI_Assistant_API_KnowledgeBaseEntryDetailsInError:
       type: object
@@ -83060,18 +83069,27 @@ components:
         - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntry'
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntry'
       discriminator:
+        mapping:
+          document: '#/components/schemas/Security_AI_Assistant_API_DocumentEntry'
+          index: '#/components/schemas/Security_AI_Assistant_API_IndexEntry'
         propertyName: type
     Security_AI_Assistant_API_KnowledgeBaseEntryUpdateProps:
       anyOf:
         - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryUpdateFields'
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryUpdateFields'
       discriminator:
+        mapping:
+          document: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryUpdateFields'
+          index: '#/components/schemas/Security_AI_Assistant_API_IndexEntryUpdateFields'
         propertyName: type
     Security_AI_Assistant_API_KnowledgeBaseEntryUpdateRouteProps:
       anyOf:
         - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryCreateFields'
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
       discriminator:
+        mapping:
+          document: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryCreateFields'
+          index: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
         propertyName: type
     Security_AI_Assistant_API_KnowledgeBaseReadResponse200:
       type: object
@@ -88502,6 +88520,18 @@ components:
           required:
             - gte
             - lte
+        gap_reason:
+          description: Detected reason for the execution gap
+          type: object
+          properties:
+            type:
+              description: The type of reason for the gap (rule_disabled or rule_did_not_run)
+              enum:
+                - rule_disabled
+                - rule_did_not_run
+              type: string
+          required:
+            - type
         total_enrichment_duration_ms:
           description: Total time spent enriching documents during current rule execution cycle
           minimum: 0
