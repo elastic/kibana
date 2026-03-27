@@ -368,6 +368,7 @@ const styles = {
       },
       '.kbnGridSection--dragHandle': {
         cursor: 'move',
+        pointerEvents: 'none',
         '&:active, &:hover, &:focus': {
           transform: 'none !important', // prevent "bump up" that EUI adds on hover
           backgroundColor: 'transparent',
