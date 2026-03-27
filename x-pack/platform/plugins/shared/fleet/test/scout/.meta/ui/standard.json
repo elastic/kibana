@@ -1,5 +1,5 @@
 {
-  "sha1": "8a49119372ef3c1109e4be53a93886a758781366",
+  "sha1": "d1651e772a444c90bdb88452878c98ba4a3a7c29",
   "tests": [
     {
       "id": "0ab9aa6583f6769-b18346ef7c3b1d3",
@@ -129,12 +129,11 @@
       "title": "When the user has All privilege for Fleet but None for integrations Fleet is accessible",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_fleet_all_integrations_none.spec.ts",
-        "line": 18,
+        "line": 17,
         "column": 9
       }
     },
