@@ -186,9 +186,10 @@ const NetworkDetailsComponent: React.FC = () => {
     aggregationInterval: 'auto',
   });
 
-  const entityIdentifiers = useMemo(
+  const entityFilter = useMemo(
     () => ({
-      [`${flowTarget}.ip`]: detailName,
+      field: `${flowTarget}.ip`,
+      value: detailName,
     }),
     [detailName, flowTarget]
   );
@@ -272,13 +273,13 @@ const NetworkDetailsComponent: React.FC = () => {
                   <EuiFlexItem>
                     <AlertsByStatus
                       signalIndexName={signalIndexName}
-                      entityIdentifiers={entityIdentifiers}
+                      entityFilter={entityFilter}
                       additionalFilters={additionalFilters}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <AlertCountByRuleByStatus
-                      entityIdentifiers={entityIdentifiers}
+                      entityFilter={{ ...entityFilter, field: 'destination.ip', value: ip }}
                       signalIndexName={signalIndexName}
                       additionalFilters={additionalFilters}
                     />

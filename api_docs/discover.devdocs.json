@@ -3464,7 +3464,7 @@
           "\"discover_session\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
-        "lineNumber": 25,
+        "lineNumber": 26,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

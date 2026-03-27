@@ -205,8 +205,12 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
   );
 
   const entity = useMemo(
-    () => ({ type: EntityType.host as const, name: displayName }),
-    [displayName]
+    () => ({
+      type: EntityType.host as const,
+      name: detailName,
+      identifiers: { 'host.name': detailName },
+    }),
+    [detailName]
   );
   const privileges = useAssetCriticalityPrivileges(entity.name);
 
@@ -313,7 +317,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <AlertCountByRuleByStatus
-                        entityIdentifiers={entityIdentifiers}
+                        entityFilter={{ ...entityFilter, entityType: EntityType.host }}
                         signalIndexName={signalIndexName}
                         additionalFilters={additionalFilters}
                       />

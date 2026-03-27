@@ -206,6 +206,7 @@ dependsOn:
   - '@kbn/cloud-security-posture-graph'
   - '@kbn/siem-readiness'
   - '@kbn/presentation-publishing'
+  - '@kbn/entity-store'
   - '@kbn/entityManager-plugin'
   - '@kbn/entities-schema'
   - '@kbn/inference-plugin'

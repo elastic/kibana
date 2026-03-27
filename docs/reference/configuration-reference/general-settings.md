@@ -538,6 +538,9 @@ $$$settings-telemetry-optIn$$$ `telemetry.optIn`
 `vis_type_table.legacyVisEnabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Starting from version 7.11, a new datatable visualization is used. Set to `true` to enable the legacy version. In version 8.0 and later, the old implementation is removed and this setting is no longer supported.
 
+`vis_type_timelion.enable` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   For 8.0 version and later, set to `false` to disable Timelion vizualizations. **Default: `true`**
+
 `vis_type_vega.enable` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   For 7.7 version and later, set to `false` to disable Vega vizualizations. **Default: `true`**
 

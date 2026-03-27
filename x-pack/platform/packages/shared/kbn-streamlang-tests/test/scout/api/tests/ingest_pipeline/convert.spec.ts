@@ -29,7 +29,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ attributes: { size: 4096 } }];
       await testBed.ingest(indexName, docs, processors);
@@ -77,9 +77,9 @@ apiTest.describe(
           ],
         };
 
-        expect(() => {
-          transpile(streamlangDSL);
-        }).toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed'); // Should throw validation error for Mustache templates
+        await expect(transpile(streamlangDSL)).rejects.toThrow(
+          'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
+        );
       });
     });
 
@@ -99,7 +99,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [{ attributes: { size: 4096 } }];
         await testBed.ingest(indexName, docs, processors);
@@ -130,7 +130,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [{ attributes: { size: 4096 } }];
         await testBed.ingest(indexName, docs, processors);

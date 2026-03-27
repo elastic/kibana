@@ -73,14 +73,21 @@ export function validateNewModelVersionSchemas(name: string, mv: ModelVersionSum
 }
 
 /**
- * Extracts field paths from flattened ES mapping keys (e.g. properties.foo.type, properties.bar.properties.baz.type).
- * Returns paths in ES format (e.g. "bar.properties.baz" for nested).
+ * Extracts logical field paths from flattened ES mapping keys, excluding multi-field subfields
+ * (e.g. `properties.name.fields.keyword.type`) which have no independent schema counterpart.
  */
 export function getMappingFieldPaths(mappings: Record<string, unknown>): string[] {
   return [
     ...new Set(
       Object.keys(mappings)
-        .filter((key) => key.startsWith('properties.'))
+        .filter((key) => {
+          if (!key.startsWith('properties.')) return false;
+          // A property named 'fields' is always wrapped in '.properties.' on both sides in the
+          // flattened key, so splitting on '.properties.' and checking for '.fields.' within a
+          // segment reliably identifies multi-field subfields vs. regular nested properties.
+          const keyBody = key.slice('properties.'.length);
+          return !keyBody.split('.properties.').some((segment) => segment.includes('.fields.'));
+        })
         .map((key) => {
           const withoutPrefix = key.slice('properties.'.length);
           const lastDotIndex = withoutPrefix.lastIndexOf('.');
@@ -91,12 +98,39 @@ export function getMappingFieldPaths(mappings: Record<string, unknown>): string[
   ].sort();
 }
 
-/**
- * Normalizes ES mapping path (e.g. "schedule.properties.interval") to schema path format (e.g. "schedule.interval")
- * for comparison with getSchemaStructure() output.
- */
+/** Normalizes an ES mapping path (e.g. "parent.properties.child") to schema path format ("parent.child"). */
 export function toSchemaPathFormat(mappingPath: string): string {
   return mappingPath.replace(/\.properties\./g, '.');
+}
+
+/**
+ * Recursively extracts field paths from a Joi schema in a format compatible with ES mapping paths,
+ * so they can be directly compared. Unlike `getSchemaStructure()`, this function recurses into
+ * array item schemas (ES has no array type) and union alternatives (schema.nullable / schema.oneOf).
+ *
+ * Accesses Joi schema internals following the same pattern as `getSchemaStructure()` in
+ * kbn-config-schema. If Joi internals change, both places will need updating.
+ */
+function extractMappingCompatibleSchemaFields(joiSchema: any, path: string[] = []): string[] {
+  const matches: Array<{ schema: any }> = joiSchema.$_terms?.matches;
+  if (matches?.length > 0) {
+    return matches.flatMap(({ schema: alt }) => extractMappingCompatibleSchemaFields(alt, path));
+  }
+
+  const namedKeys: Map<string, { schema: any }> = joiSchema._ids?._byKey;
+  if (namedKeys?.size > 0) {
+    return [...namedKeys.entries()].flatMap(([key, { schema: child }]) =>
+      extractMappingCompatibleSchemaFields(child, [...path, key])
+    );
+  }
+
+  const items: any[] = joiSchema.$_terms?.items;
+  if (items?.length > 0) {
+    const itemPaths = items.flatMap((item) => extractMappingCompatibleSchemaFields(item, path));
+    return itemPaths.length > 0 ? itemPaths : path.length > 0 ? [path.join('.')] : [];
+  }
+
+  return path.length > 0 ? [path.join('.')] : [];
 }
 
 export function validateAllMappingsInModelVersion(
@@ -129,13 +163,16 @@ export function validateAllMappingsInModelVersion(
   }
 
   const mappingFieldPaths = getMappingFieldPaths(to.mappings);
-  const schemaFields = (
-    createSchema.getSchemaStructure() as Array<{ path: string[]; type: string }>
-  ).map(({ path }) => path.join('.'));
+  const schemaFields = extractMappingCompatibleSchemaFields(createSchema.getSchema());
 
-  // Normalize mapping paths (ES format: "parent.properties.child") to schema format ("parent.child")
   const normalizedMappingPaths = mappingFieldPaths.map((p) => toSchemaPathFormat(p));
-  const undeclaredFields = normalizedMappingPaths.filter((field) => !schemaFields.includes(field));
+  const undeclaredFields = normalizedMappingPaths.filter((field) => {
+    if (schemaFields.includes(field)) return false;
+    // Accept a mapping path that has no sub-properties listed (e.g. type:object/enabled:false)
+    // if the schema declares deeper leaf paths under the same parent.
+    if (schemaFields.some((sf) => sf.startsWith(`${field}.`))) return false;
+    return true;
+  });
 
   if (undeclaredFields.length > 0) {
     throw new Error(
@@ -146,6 +183,31 @@ export function validateAllMappingsInModelVersion(
   }
 }
 
+function throwIfIndexOrEnabledFalse(
+  name: string,
+  fieldsWithIndexFalse: string[],
+  fieldsWithEnabledFalse: string[]
+): void {
+  if (fieldsWithIndexFalse.length > 0) {
+    throw new Error(
+      `❌ The SO type '${name}' has new mapping fields with 'index: false': ${fieldsWithIndexFalse.join(
+        ', '
+      )}. ` +
+        `This option cannot be updated without reindexing. Use 'dynamic: false' instead or omit the mapping.`
+    );
+  }
+
+  if (fieldsWithEnabledFalse.length > 0) {
+    throw new Error(
+      `❌ The SO type '${name}' has new mapping fields with 'enabled: false': ${fieldsWithEnabledFalse.join(
+        ', '
+      )}. ` +
+        `This option cannot be updated without reindexing. Use 'dynamic: false' instead or omit the mapping.`
+    );
+  }
+}
+
+/** Checks that newly introduced mapping fields (existing types) do not use 'index: false' or 'enabled: false'. */
 export function validateNoIndexOrEnabledFalse(
   name: string,
   to: MigrationInfoRecord,
@@ -168,23 +230,31 @@ export function validateNoIndexOrEnabledFalse(
     });
   });
 
-  if (fieldsWithIndexFalse.length > 0) {
-    throw new Error(
-      `❌ The SO type '${name}' has new mapping fields with 'index: false': ${fieldsWithIndexFalse.join(
-        ', '
-      )}. ` +
-        `This option cannot be updated without reindexing. Use 'dynamic: false' instead or omit the mapping.`
-    );
-  }
+  throwIfIndexOrEnabledFalse(name, fieldsWithIndexFalse, fieldsWithEnabledFalse);
+}
 
-  if (fieldsWithEnabledFalse.length > 0) {
-    throw new Error(
-      `❌ The SO type '${name}' has new mapping fields with 'enabled: false': ${fieldsWithEnabledFalse.join(
-        ', '
-      )}. ` +
-        `This option cannot be updated without reindexing. Use 'dynamic: false' instead or omit the mapping.`
-    );
-  }
+/** Checks that no field in the full mapping snapshot uses 'index: false' or 'enabled: false'. Used for new types. */
+export function validateNoIndexOrEnabledFalseInAllMappings(
+  name: string,
+  to: MigrationInfoRecord
+): void {
+  const fieldsWithIndexFalse: string[] = [];
+  const fieldsWithEnabledFalse: string[] = [];
+
+  Object.entries(to.mappings).forEach(([key, value]) => {
+    if (!key.startsWith('properties.') || value !== false) return;
+    if (key.endsWith('.index')) {
+      fieldsWithIndexFalse.push(
+        toSchemaPathFormat(key.slice('properties.'.length, -'.index'.length))
+      );
+    } else if (key.endsWith('.enabled')) {
+      fieldsWithEnabledFalse.push(
+        toSchemaPathFormat(key.slice('properties.'.length, -'.enabled'.length))
+      );
+    }
+  });
+
+  throwIfIndexOrEnabledFalse(name, fieldsWithIndexFalse, fieldsWithEnabledFalse);
 }
 
 export function validateNameTitleFieldTypes(name: string, to: MigrationInfoRecord): void {

@@ -11,10 +11,12 @@ import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
-import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import { ATTACHMENT_REF_OPERATION, getLatestVersion } from '@kbn/agent-builder-common/attachments';
-import { getStateFromAttachment } from './attachment_to_dashboard_state';
+import { DASHBOARD_ATTACHMENT_TYPE, attachmentToDashboardState } from '@kbn/dashboard-agent-common';
+import {
+  type VersionedAttachment,
+  ATTACHMENT_REF_OPERATION,
+  getLatestVersion,
+} from '@kbn/agent-builder-common/attachments';
 export interface OnAttachmentMountParams extends AttachmentLifecycleParams<DashboardAttachment> {
   dashboardPlugin: DashboardStart;
   chat$: Observable<ChatEvent>;
@@ -100,7 +102,7 @@ export const onAttachmentMount = ({
         data: latestVersion.data as DashboardAttachment['data'], // TODO: fix type
         origin: updatedVersionedAttachment.origin,
       };
-      api.setState(getStateFromAttachment(attachment));
+      api.setState(attachmentToDashboardState(attachment));
       setTimeout(() => api!.scrollToBottom(), 0);
     });
   });

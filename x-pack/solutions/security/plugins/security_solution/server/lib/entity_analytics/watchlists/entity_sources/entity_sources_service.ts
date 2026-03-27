@@ -6,13 +6,13 @@
  */
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { MonitoringEntitySourceDescriptorClient } from '../../privilege_monitoring/saved_objects';
+import { WatchlistEntitySourceClient } from './infra';
+import type { IntegrationType } from './infra';
 import { WatchlistConfigClient } from '../management/watchlist_config';
 import type { IdentityProvider } from '../entities/service';
 import { createWatchlistEntitiesService } from '../entities/service';
 import { getIndexForWatchlist } from '../entities/utils';
 import { createIndexSyncService } from './sync/index_sync';
-import type { IntegrationType } from '../../privilege_monitoring/data_sources/constants';
 
 export type EntitySourcesService = ReturnType<typeof createEntitySourcesService>;
 
@@ -28,7 +28,7 @@ export const createEntitySourcesService = ({
   namespace: string;
 }) => {
   const watchlistClient = new WatchlistConfigClient({ esClient, soClient, logger, namespace });
-  const descriptorClient = new MonitoringEntitySourceDescriptorClient({ soClient, namespace });
+  const descriptorClient = new WatchlistEntitySourceClient({ soClient, namespace });
   const watchlistEntitiesService = createWatchlistEntitiesService({
     esClient,
     namespace,
@@ -44,7 +44,7 @@ export const createEntitySourcesService = ({
       if (source.type === 'index') {
         return {
           type: 'index' as const,
-          field: source.indexPattern || '', // TODO: this is wrong, I think we need to store the id field in the source SO now.
+          field: source.identifierField || '',
         };
       }
 
