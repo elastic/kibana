@@ -28,7 +28,7 @@ interface OpenAgentChatOptions {
 }
 
 interface MigrationHintPanelProps {
-  hint: MigrationHint;
+  hints: MigrationHint[];
   isAiMigrationEnabled: boolean;
   onMigrateWithAi: (options?: OpenAgentChatOptions) => void;
   onMouseEnter: () => void;
@@ -36,7 +36,7 @@ interface MigrationHintPanelProps {
 }
 
 export const MigrationHintPanel: React.FC<MigrationHintPanelProps> = ({
-  hint,
+  hints,
   isAiMigrationEnabled,
   onMigrateWithAi,
   onMouseEnter,
@@ -45,12 +45,14 @@ export const MigrationHintPanel: React.FC<MigrationHintPanelProps> = ({
   const { euiTheme } = useEuiTheme();
 
   const handleMigrateClick = useCallback(() => {
+    const combinedMessage = hints.map((h) => h.hoverMessage.trimEnd()).join('\n\n---\n\n');
+    const sessionTag = `workflow-migrate:${hints.map((h) => h.id).join('+')}`;
     onMigrateWithAi({
-      initialMessage: `Perform the following migration on this workflow:\n\n${hint.hoverMessage.trimEnd()}`,
+      initialMessage: `Perform the following migration(s) on this workflow:\n\n${combinedMessage}`,
       autoSendInitialMessage: true,
-      sessionTag: `workflow-migrate:${hint.id}`,
+      sessionTag,
     });
-  }, [onMigrateWithAi, hint.hoverMessage, hint.id]);
+  }, [onMigrateWithAi, hints]);
 
   return (
     <EuiPanel
@@ -69,14 +71,20 @@ export const MigrationHintPanel: React.FC<MigrationHintPanelProps> = ({
         <strong>
           <FormattedMessage
             id="workflows.migrationHint.title"
-            defaultMessage="Migration required"
+            defaultMessage="{count, plural, one {Migration required} other {Migrations required}}"
+            values={{ count: hints.length }}
           />
         </strong>
       </EuiText>
-      <EuiSpacer size="s" />
-      <EuiMarkdownFormat textSize="xs" color="subdued">
-        {hint.hoverMessage.trimEnd()}
-      </EuiMarkdownFormat>
+      {hints.map((hint, index) => (
+        <React.Fragment key={hint.id}>
+          <EuiSpacer size="s" />
+          <EuiMarkdownFormat textSize="xs" color="subdued">
+            {hint.hoverMessage.trimEnd()}
+          </EuiMarkdownFormat>
+          {index < hints.length - 1 && <EuiHorizontalRule margin="s" />}
+        </React.Fragment>
+      ))}
       {isAiMigrationEnabled && (
         <>
           <EuiHorizontalRule margin="s" />

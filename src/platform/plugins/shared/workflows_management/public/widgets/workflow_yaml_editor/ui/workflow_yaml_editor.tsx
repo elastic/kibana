@@ -495,7 +495,7 @@ export const WorkflowYAMLEditor = ({
   });
 
   const {
-    activeHint: activeMigrationHint,
+    activeHints: activeMigrationHints,
     activeHintTop: migrationHintTop,
     onPanelMouseEnter: onMigrationPanelMouseEnter,
     onPanelMouseLeave: onMigrationPanelMouseLeave,
@@ -670,14 +670,14 @@ export const WorkflowYAMLEditor = ({
       >
         <StepActions onStepRun={onStepRun} />
       </div>
-      {activeMigrationHint && migrationHintTop != null && (
+      {activeMigrationHints && migrationHintTop != null && (
         <div
           css={styles.migrationHintPanelContainer}
           style={{ top: `${migrationHintTop}px` }}
           data-test-subj="migrationHintPanelContainer"
         >
           <MigrationHintPanel
-            hint={activeMigrationHint.hint}
+            hints={activeMigrationHints.hints}
             isAiMigrationEnabled={isAgentBuilderAvailable}
             onMigrateWithAi={openAgentChat}
             onMouseEnter={onMigrationPanelMouseEnter}

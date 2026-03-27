@@ -27,9 +27,10 @@ export interface MigrationHint {
   hoverMessage: string;
 }
 
-export const migrationHints: MigrationHint[] = [
-  {
-    id: 'scheduled-interval-minimum',
+type MigrationHintDefinition = Omit<MigrationHint, 'id'>;
+
+const migrationHintDefinitions: Record<string, MigrationHintDefinition> = {
+  'scheduled-interval-minimum': {
     match: (context) => {
       return (
         context.yamlPath.length === 4 &&
@@ -59,8 +60,7 @@ export const migrationHints: MigrationHint[] = [
       '```',
     ].join('\n'),
   },
-  {
-    id: 'ai-prompt-output-schema-renamed',
+  'ai-prompt-output-schema-renamed': {
     match: ({ propertyName, yamlDocument, offset }) => {
       if (propertyName !== 'outputSchema' || !yamlDocument) return false;
       const stepNode = getStepNodeAtPosition(yamlDocument, offset);
@@ -72,7 +72,22 @@ export const migrationHints: MigrationHint[] = [
       '',
       'Rename `outputSchema` to `schema` in your `ai.prompt` step.',
       '',
-      '**Example:**',
+      '**Before (invalid):**',
+      '```yaml',
+      '- name: Categorize alert',
+      '  type: ai.prompt',
+      '  with:',
+      '    outputSchema:       # ❌ no longer supported',
+      '      type: object',
+      '      properties:',
+      '        category:',
+      '          type: string',
+      '        severity:',
+      '          type: integer',
+      '    prompt: Categorize the following alert...',
+      '```',
+      '',
+      '**After (valid):**',
       '```yaml',
       '- name: Categorize alert',
       '  type: ai.prompt',
@@ -88,4 +103,8 @@ export const migrationHints: MigrationHint[] = [
       '```',
     ].join('\n'),
   },
-];
+};
+
+export const migrationHints: Record<string, MigrationHint> = Object.fromEntries(
+  Object.entries(migrationHintDefinitions).map(([key, hint]) => [key, { ...hint, id: key }])
+);

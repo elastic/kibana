@@ -27,13 +27,13 @@ interface UseMigrationHintDecorationsProps {
   yamlDocument: YAML.Document | null;
 }
 
-interface ActiveMigrationHint {
-  hint: MigrationHint;
+interface ActiveMigrationHints {
+  hints: MigrationHint[];
   lineNumber: number;
 }
 
 export interface MigrationHintPanelState {
-  activeHint: ActiveMigrationHint | null;
+  activeHints: ActiveMigrationHints | null;
   activeHintTop: number | null;
   onPanelMouseEnter: () => void;
   onPanelMouseLeave: () => void;
@@ -46,11 +46,11 @@ export const useMigrationHintDecorations = ({
   yamlDocument,
 }: UseMigrationHintDecorationsProps): MigrationHintPanelState => {
   const decorationCollectionRef = useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
-  const [activeHint, setActiveHint] = useState<ActiveMigrationHint | null>(null);
+  const [activeHints, setActiveHints] = useState<ActiveMigrationHints | null>(null);
   const [activeHintTop, setActiveHintTop] = useState<number | null>(null);
   const isPanelHoveredRef = useRef(false);
   const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const matchedHintLinesRef = useRef<Map<number, MigrationHint>>(new Map());
+  const matchedHintLinesRef = useRef<Map<number, MigrationHint[]>>(new Map());
 
   const clearDismissTimer = useCallback(() => {
     if (dismissTimerRef.current) {
@@ -63,7 +63,7 @@ export const useMigrationHintDecorations = ({
     clearDismissTimer();
     dismissTimerRef.current = setTimeout(() => {
       if (!isPanelHoveredRef.current) {
-        setActiveHint(null);
+        setActiveHints(null);
         setActiveHintTop(null);
       }
     }, PANEL_DISMISS_DELAY_MS);
@@ -91,14 +91,14 @@ export const useMigrationHintDecorations = ({
         e.target.position
       ) {
         const lineNumber = e.target.position.lineNumber;
-        const hint = matchedHintLinesRef.current.get(lineNumber);
+        const hints = matchedHintLinesRef.current.get(lineNumber);
 
-        if (hint) {
+        if (hints && hints.length > 0) {
           clearDismissTimer();
           const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
           const top =
             editor.getTopForLineNumber(lineNumber, true) - editor.getScrollTop() + lineHeight;
-          setActiveHint({ hint, lineNumber });
+          setActiveHints({ hints, lineNumber });
           setActiveHintTop(top);
           return;
         }
@@ -112,13 +112,33 @@ export const useMigrationHintDecorations = ({
     return () => disposable.dispose();
   }, [editor, isEditorMounted, clearDismissTimer, scheduleDismiss]);
 
+  // Update panel position on scroll
+  useEffect(() => {
+    if (!editor || !isEditorMounted) {
+      return;
+    }
+
+    const disposable = editor.onDidScrollChange(() => {
+      setActiveHints((current) => {
+        if (!current) return null;
+        const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
+        const top =
+          editor.getTopForLineNumber(current.lineNumber, true) - editor.getScrollTop() + lineHeight;
+        setActiveHintTop(top);
+        return current;
+      });
+    });
+
+    return () => disposable.dispose();
+  }, [editor, isEditorMounted]);
+
   // Create glyph decorations (no hover message — the React panel handles that)
   useEffect(() => {
     if (decorationCollectionRef.current) {
       decorationCollectionRef.current.clear();
     }
 
-    const newMatchedLines = new Map<number, MigrationHint>();
+    const newMatchedLines = new Map<number, MigrationHint[]>();
 
     if (!editor || !isEditorMounted) {
       matchedHintLinesRef.current = newMatchedLines;
@@ -131,9 +151,9 @@ export const useMigrationHintDecorations = ({
       return;
     }
 
-    const decorations: monaco.editor.IModelDeltaDecoration[] = validationErrors
+    validationErrors
       .filter((error): error is YamlValidationResult & { message: string } => !!error.message)
-      .map((error) => {
+      .forEach((error) => {
         let yamlPath: (string | number)[] = [];
         let value: unknown;
         const offset = model.getOffsetAt({
@@ -159,28 +179,31 @@ export const useMigrationHintDecorations = ({
           yamlDocument,
           offset,
         };
-        return {
-          error,
-          hint: migrationHints.find((h: MigrationHint) => h.match(context)),
-        };
-      })
-      .filter((entry): entry is { error: typeof entry.error; hint: MigrationHint } => !!entry.hint)
-      .map(({ error, hint }) => {
-        newMatchedLines.set(error.startLineNumber, hint);
-        return {
-          range: new monaco.Range(
-            error.startLineNumber,
-            1,
-            error.startLineNumber,
-            model.getLineMaxColumn(error.startLineNumber)
-          ),
-          options: {
-            glyphMarginClassName: hint.glyphClassName,
-          },
-        };
+
+        const matched = Object.values(migrationHints).filter((h: MigrationHint) =>
+          h.match(context)
+        );
+        if (matched.length === 0) return;
+
+        const existing = newMatchedLines.get(error.startLineNumber) ?? [];
+        for (const hint of matched) {
+          if (!existing.some((h) => h.id === hint.id)) {
+            existing.push(hint);
+          }
+        }
+        newMatchedLines.set(error.startLineNumber, existing);
       });
 
     matchedHintLinesRef.current = newMatchedLines;
+
+    const decorations: monaco.editor.IModelDeltaDecoration[] = Array.from(
+      newMatchedLines.keys()
+    ).map((lineNumber) => ({
+      range: new monaco.Range(lineNumber, 1, lineNumber, model.getLineMaxColumn(lineNumber)),
+      options: {
+        glyphMarginClassName: 'migration-hint-glyph',
+      },
+    }));
 
     if (decorations.length > 0) {
       try {
@@ -194,8 +217,7 @@ export const useMigrationHintDecorations = ({
       }
     }
 
-    // Dismiss active hint if the error it was pointing at is gone
-    setActiveHint((current) => {
+    setActiveHints((current) => {
       if (current && !newMatchedLines.has(current.lineNumber)) {
         setActiveHintTop(null);
         return null;
@@ -209,5 +231,5 @@ export const useMigrationHintDecorations = ({
     return () => clearDismissTimer();
   }, [clearDismissTimer]);
 
-  return { activeHint, activeHintTop, onPanelMouseEnter, onPanelMouseLeave };
+  return { activeHints, activeHintTop, onPanelMouseEnter, onPanelMouseLeave };
 };
