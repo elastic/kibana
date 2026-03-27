@@ -30,7 +30,6 @@ Array [
       fallback={<EuiLoadingSpinner />}
     >
       <UNDEFINED
-        attachmentId="basic-comment-id"
         caseData={
           Object {
             "id": "basic-case-id",
@@ -38,6 +37,7 @@ Array [
           }
         }
         foo="bar"
+        savedObjectId="basic-comment-id"
       />
     </React.Suspense>,
     "className": "comment-user-attachment-test",
@@ -127,7 +127,6 @@ Array [
       fallback={<EuiLoadingSpinner />}
     >
       <UNDEFINED
-        attachmentId="basic-comment-id"
         caseData={
           Object {
             "id": "basic-case-id",
@@ -135,6 +134,7 @@ Array [
           }
         }
         foo="bar"
+        savedObjectId="basic-comment-id"
       />
     </React.Suspense>,
     "className": "comment-user-attachment-test",
@@ -211,7 +211,6 @@ Array [
       fallback={<EuiLoadingSpinner />}
     >
       <UNDEFINED
-        attachmentId="basic-comment-id"
         caseData={
           Object {
             "id": "basic-case-id",
@@ -219,6 +218,7 @@ Array [
           }
         }
         foo="bar"
+        savedObjectId="basic-comment-id"
       />
     </React.Suspense>,
     "className": "comment-user-attachment-test",
