@@ -71,6 +71,7 @@ export function registerSignificantEventsInferenceFeatures(
       recommendedEndpoints: [
         '.google-gemini-3.0-flash-chat_completion',
         '.openai-gpt-oss-120b-chat_completion',
+        '.openai-gpt-5.2-chat_completion',
       ],
     },
     {
@@ -86,6 +87,7 @@ export function registerSignificantEventsInferenceFeatures(
       ),
       recommendedEndpoints: [
         '.openai-gpt-5.2-chat_completion',
+        '.google-gemini-3.1-pro-chat_completion',
         '.anthropic-claude-4.6-sonnet-chat_completion',
       ],
     },
@@ -98,8 +100,9 @@ export function registerSignificantEventsInferenceFeatures(
         defaultMessage: 'Model used during Discovery and Significant Event generation.',
       }),
       recommendedEndpoints: [
-        '.anthropic-claude-4.6-sonnet-chat_completion',
+        '.openai-gpt-5.2-chat_completion',
         '.anthropic-claude-4.6-opus-chat_completion',
+        '.anthropic-claude-4.6-sonnet-chat_completion',
       ],
     },
   ];
