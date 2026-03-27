@@ -5,7 +5,14 @@
  * 2.0.
  */
 
+import type { SourceFilter } from '../../../common/api/unified_history/types';
 import { buildLiveActionsQuery } from './query_live_actions_dsl';
+
+const getFilters = (result: ReturnType<typeof buildLiveActionsQuery>) => {
+  const query = result.body.query as Record<string, unknown>;
+
+  return (query.bool as Record<string, unknown>).filter as unknown[];
+};
 
 describe('buildLiveActionsQuery', () => {
   describe('base structure', () => {
@@ -179,6 +186,37 @@ describe('buildLiveActionsQuery', () => {
     });
   });
 
+  describe('sortDirection', () => {
+    test('defaults to desc when not provided', () => {
+      const result = buildLiveActionsQuery({ pageSize: 20, spaceId: 'default' });
+      const sort = result.body.sort as unknown[];
+
+      expect(sort).toEqual([{ '@timestamp': { order: 'desc' } }, { _shard_doc: { order: 'asc' } }]);
+    });
+
+    test('sorts ascending when sortDirection is asc', () => {
+      const result = buildLiveActionsQuery({
+        pageSize: 20,
+        spaceId: 'default',
+        sortDirection: 'asc',
+      });
+      const sort = result.body.sort as unknown[];
+
+      expect(sort).toEqual([{ '@timestamp': { order: 'asc' } }, { _shard_doc: { order: 'desc' } }]);
+    });
+
+    test('sorts descending when sortDirection is desc', () => {
+      const result = buildLiveActionsQuery({
+        pageSize: 20,
+        spaceId: 'default',
+        sortDirection: 'desc',
+      });
+      const sort = result.body.sort as unknown[];
+
+      expect(sort).toEqual([{ '@timestamp': { order: 'desc' } }, { _shard_doc: { order: 'asc' } }]);
+    });
+  });
+
   describe('combined options', () => {
     test('applies searchAfter, kuery, and date range together', () => {
       const result = buildLiveActionsQuery({
@@ -203,6 +241,61 @@ describe('buildLiveActionsQuery', () => {
       expect(filters).toContainEqual({
         range: { '@timestamp': { gte: 'now-24h', lte: 'now' } },
       });
+    });
+  });
+
+  describe('activeFilters (source type filtering)', () => {
+    test('adds must_not exists alert_ids filter when only "live" is selected', () => {
+      const activeFilters = new Set<SourceFilter>(['live']);
+      const result = buildLiveActionsQuery({ pageSize: 20, spaceId: 'default', activeFilters });
+      const filters = getFilters(result);
+
+      expect(filters).toContainEqual({
+        bool: { must_not: { exists: { field: 'alert_ids' } } },
+      });
+    });
+
+    test('adds exists alert_ids filter when only "rule" is selected', () => {
+      const activeFilters = new Set<SourceFilter>(['rule']);
+      const result = buildLiveActionsQuery({ pageSize: 20, spaceId: 'default', activeFilters });
+      const filters = getFilters(result);
+
+      expect(filters).toContainEqual({ exists: { field: 'alert_ids' } });
+    });
+
+    test('does not add alert_ids filter when both "live" and "rule" are selected', () => {
+      const activeFilters = new Set<SourceFilter>(['live', 'rule']);
+      const result = buildLiveActionsQuery({ pageSize: 20, spaceId: 'default', activeFilters });
+      const filters = getFilters(result);
+
+      const alertIdFilters = filters.filter(
+        (f) =>
+          typeof f === 'object' &&
+          f !== null &&
+          (('exists' in f &&
+            (f as Record<string, unknown>).exists != null &&
+            typeof (f as Record<string, unknown>).exists === 'object' &&
+            'field' in ((f as Record<string, unknown>).exists as Record<string, unknown>) &&
+            ((f as Record<string, unknown>).exists as Record<string, unknown>).field ===
+              'alert_ids') ||
+            JSON.stringify(f).includes('alert_ids'))
+      );
+      expect(alertIdFilters).toHaveLength(0);
+    });
+
+    test('does not add alert_ids filter when activeFilters is undefined', () => {
+      const result = buildLiveActionsQuery({ pageSize: 20, spaceId: 'default' });
+      const filters = getFilters(result);
+
+      expect(filters.some((f) => JSON.stringify(f).includes('alert_ids'))).toBe(false);
+    });
+
+    test('does not add alert_ids filter when activeFilters contains all three sources', () => {
+      const activeFilters = new Set<SourceFilter>(['live', 'rule', 'scheduled']);
+      const result = buildLiveActionsQuery({ pageSize: 20, spaceId: 'default', activeFilters });
+      const filters = getFilters(result);
+
+      expect(filters.some((f) => JSON.stringify(f).includes('alert_ids'))).toBe(false);
     });
   });
 });

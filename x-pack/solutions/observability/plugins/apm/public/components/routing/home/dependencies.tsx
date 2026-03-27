@@ -12,13 +12,18 @@ import * as t from 'io-ts';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import qs from 'query-string';
+import {
+  unifiedSearchBarPlaceholder,
+  getSearchBarBoolFilter,
+} from '../../../../common/dependencies';
 import { page } from './page_template';
 import { offsetRt } from '../../../../common/comparison_rt';
 import { DependencyDetailOperations } from '../../app/dependency_detail_operations';
 import { DependencyDetailOverview } from '../../app/dependency_detail_overview';
 import { DependencyDetailView } from '../../app/dependency_detail_view';
-import { DependenciesInventory } from '../../app/dependencies_inventory';
+import { DependenciesInventoryTable } from '../../app/dependencies_inventory/dependencies_inventory_table';
 import { DependencyOperationDetailView } from '../../app/dependency_operation_detail_view';
+import { SearchBar } from '../../shared/search_bar/search_bar';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { TransactionTab } from '../../app/transaction_details/waterfall_with_summary/transaction_tabs';
 
@@ -26,6 +31,21 @@ export const DependenciesInventoryTitle = i18n.translate(
   'xpack.apm.views.dependenciesInventory.title',
   { defaultMessage: 'Dependencies' }
 );
+
+function DependenciesInventorySearchBar() {
+  const {
+    query: { environment },
+  } = useApmParams('/dependencies/inventory');
+  const searchBarBoolFilter = getSearchBarBoolFilter({ environment });
+  return (
+    <SearchBar
+      showTimeComparison
+      showEnvironmentFilter
+      searchBarPlaceholder={unifiedSearchBarPlaceholder}
+      searchBarBoolFilter={searchBarBoolFilter}
+    />
+  );
+}
 
 function RedirectDependenciesToDependenciesOverview() {
   const { query } = useApmParams('/dependencies');
@@ -37,7 +57,8 @@ export const dependencies = {
   ...page({
     path: '/dependencies/inventory',
     title: DependenciesInventoryTitle,
-    element: <DependenciesInventory />,
+    element: <DependenciesInventoryTable />,
+    searchBar: <DependenciesInventorySearchBar />,
     params: t.partial({
       query: t.intersection([
         t.type({
