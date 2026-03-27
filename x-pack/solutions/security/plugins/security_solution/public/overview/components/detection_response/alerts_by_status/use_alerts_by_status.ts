@@ -222,6 +222,18 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
     [dispatch]
   );
 
+  const alertsQuery = useMemo(
+    () =>
+      getAlertsByStatusQuery({
+        from,
+        to,
+        identityFields: identityFieldsForQuery ?? identityFields,
+        additionalFilters,
+        runtimeMappings,
+      }),
+    [from, to, identityFieldsForQuery, identityFields, additionalFilters, runtimeMappings]
+  );
+
   const {
     data,
     loading: isLoading,
@@ -230,37 +242,15 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
     response,
     setQuery: setAlertsQuery,
   } = useQueryAlerts<{}, AlertsByStatusAgg>({
-    query: getAlertsByStatusQuery({
-      from,
-      to,
-      identityFields: identityFieldsForQuery ?? identityFields,
-      additionalFilters,
-      runtimeMappings,
-    }),
+    query: alertsQuery,
     indexName: signalIndexName,
     skip: skipAlertsQuery,
     queryName: ALERTS_QUERY_NAMES.BY_STATUS,
   });
 
   useEffect(() => {
-    setAlertsQuery(
-      getAlertsByStatusQuery({
-        from,
-        to,
-        identityFields: identityFieldsForQuery ?? identityFields,
-        additionalFilters,
-        runtimeMappings,
-      })
-    );
-  }, [
-    setAlertsQuery,
-    from,
-    to,
-    identityFieldsForQuery,
-    identityFields,
-    additionalFilters,
-    runtimeMappings,
-  ]);
+    setAlertsQuery(alertsQuery);
+  }, [setAlertsQuery, alertsQuery]);
 
   useEffect(() => {
     if (data == null) {
