@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics';
+import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import type { WatchlistBulkEntity } from '../types';
 import { getErrorFromBulkResponse, errorsMsg } from '../sync/utils';
 

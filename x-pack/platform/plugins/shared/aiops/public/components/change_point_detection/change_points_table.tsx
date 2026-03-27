@@ -174,6 +174,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       sortable: true,
       truncateText: false,
       render: (type: ChangePointAnnotation['type']) => <EuiBadge color="hollow">{type}</EuiBadge>,
+      width: '150px',
     },
     {
       id: 'pValue',
@@ -192,18 +193,10 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       truncateText: false,
       render: (pValue: ChangePointAnnotation['p_value']) =>
         pValue !== undefined ? pValue.toPrecision(3) : '-',
+      width: '130px',
     },
     ...(fieldConfig.splitField
       ? [
-          {
-            id: 'groupName',
-            'data-test-subj': 'aiopsChangePointGroupName',
-            field: 'group.name',
-            name: i18n.translate('xpack.aiops.changePointDetection.fieldNameColumn', {
-              defaultMessage: 'Field name',
-            }),
-            truncateText: false,
-          },
           {
             id: 'groupValue',
             'data-test-subj': 'aiopsChangePointGroupValue',
@@ -304,6 +297,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
 
   return (
     <EuiInMemoryTable<ChangePointAnnotation>
+      tableLayout="auto"
       tableCaption={i18n.translate('xpack.aiops.changePointDetection.resultsTableCaption', {
         defaultMessage: 'Change point detection results',
       })}

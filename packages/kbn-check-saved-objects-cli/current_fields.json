@@ -1425,5 +1425,11 @@
     "name",
     "riskModifier"
   ],
+  "watchlist-entity-source": [
+    "enabled",
+    "managed",
+    "name",
+    "type"
+  ],
   "workplace_search_telemetry": []
 }

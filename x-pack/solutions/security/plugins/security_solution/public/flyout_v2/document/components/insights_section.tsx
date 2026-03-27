@@ -11,21 +11,23 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
+import { DocumentFlyoutWrapper } from '../document_flyout_wrapper';
+import { cellActionRenderer } from '../../shared/components/cell_actions';
 import { EventKind } from '../constants/event_kinds';
 import { getColumns } from '../../prevalence/utils/get_columns';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { PREFIX } from '../../../flyout/shared/test_ids';
+import { useKibana } from '../../../common/lib/kibana';
 import { ExpandableSection } from '../../shared/components/expandable_section';
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
 import { CorrelationsOverview } from './correlations_overview';
 import { PrevalenceOverview } from './prevalence_overview';
 import { PrevalenceDetails } from '../../prevalence/prevalence';
-import { cellActionRenderer } from '../../shared/components/cell_actions';
-import { useKibana } from '../../../common/lib/kibana';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
+import { CorrelationsDetails } from '../../correlations';
 
 export const INSIGHTS_SECTION_TEST_ID = `${PREFIX}InsightsSection` as const;
 
@@ -80,7 +82,48 @@ export const InsightsSection = memo(({ hit }: InsightsSectionProps) => {
   );
 
   const onShowThreatIntelligenceDetails = useCallback(() => {}, []);
-  const onShowCorrelationsDetails = useCallback(() => {}, []);
+  const onShowAlert = useCallback(
+    (id: string, indexName: string) =>
+      services.overlays?.openSystemFlyout(
+        flyoutProviders({
+          services,
+          store,
+          history,
+          children: (
+            <DocumentFlyoutWrapper
+              documentId={id}
+              indexName={indexName}
+              renderCellActions={cellActionRenderer}
+            />
+          ),
+        }),
+        { ownFocus: false, resizable: true, session: 'inherit', size: 's' }
+      ),
+    [history, services, store]
+  );
+  const onShowCorrelationsDetails = useCallback(() => {
+    overlays.openSystemFlyout(
+      flyoutProviders({
+        services,
+        store,
+        history,
+        children: (
+          <CorrelationsDetails
+            hit={hit}
+            scopeId=""
+            isRulePreview={false}
+            onShowAlert={onShowAlert}
+          />
+        ),
+      }),
+      {
+        ownFocus: false,
+        resizable: true,
+        size: 'm',
+        type: 'overlay',
+      }
+    );
+  }, [history, hit, onShowAlert, overlays, services, store]);
   const onShowPrevalenceDetails = useCallback(() => {
     overlays.openSystemFlyout(
       flyoutProviders({

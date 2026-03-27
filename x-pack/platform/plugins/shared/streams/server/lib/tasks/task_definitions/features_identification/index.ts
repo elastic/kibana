@@ -5,20 +5,32 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
-import { isInferenceProviderError } from '@kbn/inference-common';
-import type { IgnoredFeature } from '@kbn/streams-schema';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import {
+  isInferenceProviderError,
+  type BoundInferenceClient,
+  type ChatCompletionTokenCount,
+} from '@kbn/inference-common';
 import {
   type IdentifyFeaturesResult,
   type BaseFeature,
   type Feature,
   isComputedFeature,
   isDuplicateFeature,
+  mergeFeature,
+  toBaseFeature,
   getStreamTypeFromDefinition,
   isFeatureWithFilter,
 } from '@kbn/streams-schema';
-import type { ExcludedFeatureSummary } from '@kbn/streams-ai';
-import { identifyFeatures, generateAllComputedFeatures } from '@kbn/streams-ai';
+import {
+  identifyFeatures,
+  generateAllComputedFeatures,
+  sumTokens,
+  type ExcludedFeatureSummary,
+  type IgnoredFeature,
+} from '@kbn/streams-ai';
 import { v4 as uuid, v5 as uuidv5 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger, LogMeta } from '@kbn/logging';
@@ -30,12 +42,265 @@ import type { TaskContext } from '..';
 import type { TaskParams } from '../../types';
 import { PromptsConfigService } from '../../../saved_objects/significant_events/prompts_config_service';
 import { cancellableTask } from '../../cancellable_task';
-import type { FeatureClient } from '../../../streams/feature/feature_client';
 import { MAX_FEATURE_AGE_MS } from '../../../streams/feature/feature_client';
 import { isDefinitionNotFoundError } from '../../../streams/errors/definition_not_found_error';
-import type { StreamsFeaturesIdentifiedProps } from '../../../telemetry';
 
+const DEFAULT_MAX_ITERATIONS = 5;
+const DOCUMENTS_BATCH_SIZE = 20;
+const MAX_PREVIOUSLY_IDENTIFIED_FEATURES = 100;
 const MAX_EXCLUDED_FEATURES_FOR_PROMPT = 10;
+
+class FeatureAccumulator {
+  private readonly byUuid = new Map<string, Feature>();
+  private readonly byLowerId = new Map<string, Feature>();
+
+  constructor(initialFeatures: Feature[] = []) {
+    for (const f of initialFeatures) {
+      this.add(f);
+    }
+  }
+
+  add(feature: Feature) {
+    this.byUuid.set(feature.uuid, feature);
+    this.byLowerId.set(feature.id.toLowerCase(), feature);
+  }
+
+  update(feature: Feature) {
+    if (!this.byUuid.has(feature.uuid)) {
+      return;
+    }
+    this.byUuid.set(feature.uuid, feature);
+    this.byLowerId.set(feature.id.toLowerCase(), feature);
+  }
+
+  findDuplicate(candidate: BaseFeature): Feature | undefined {
+    return (
+      this.byLowerId.get(candidate.id.toLowerCase()) ??
+      this.getAll().find((f) => isDuplicateFeature(f, candidate))
+    );
+  }
+
+  getAll(): Feature[] {
+    return Array.from(this.byUuid.values());
+  }
+
+  getTopByConfidence(limit: number): Feature[] {
+    return this.getAll()
+      .sort((a, b) => b.confidence - a.confidence)
+      .slice(0, limit);
+  }
+
+  public get length(): number {
+    return this.byUuid.size;
+  }
+}
+
+export interface IterationTelemetry {
+  iteration: number;
+  state: 'success' | 'failure';
+  docsCount: number;
+  featuresNew: number;
+  featuresUpdated: number;
+  durationMs: number;
+  tokensUsed: ChatCompletionTokenCount;
+  ignoredFeaturesCount: number;
+  codeIgnoredCount: number;
+  totalFilters: number;
+  filtersCapped: boolean;
+  hasFilteredDocuments: boolean;
+}
+
+export interface IdentifyStreamFeaturesOptions {
+  streamName: string;
+  esClient: ElasticsearchClient;
+  start: number;
+  end: number;
+  existingFeatures: Feature[];
+  inferenceClient: BoundInferenceClient;
+  systemPrompt: string;
+  logger: Logger;
+  signal: AbortSignal;
+  maxIterations?: number;
+  onIterationComplete?: (
+    telemetry: IterationTelemetry,
+    changedFeatures: Feature[]
+  ) => Promise<void>;
+  excludedFeatures: Feature[];
+}
+
+export async function identifyStreamFeatures({
+  streamName,
+  esClient,
+  start,
+  end,
+  existingFeatures,
+  inferenceClient,
+  systemPrompt,
+  logger,
+  signal,
+  maxIterations = DEFAULT_MAX_ITERATIONS,
+  onIterationComplete,
+  excludedFeatures,
+}: IdentifyStreamFeaturesOptions): Promise<{
+  features: Feature[];
+  tokensUsed: ChatCompletionTokenCount;
+}> {
+  const excludedSummaries: ExcludedFeatureSummary[] = excludedFeatures
+    .slice(0, MAX_EXCLUDED_FEATURES_FOR_PROMPT)
+    .map(({ id, type, subtype, title, description, properties }) => ({
+      id,
+      type,
+      subtype,
+      title,
+      description,
+      properties,
+    }));
+
+  const known = new FeatureAccumulator();
+  const existing = new FeatureAccumulator(existingFeatures);
+
+  let totalTokensUsed: ChatCompletionTokenCount = {
+    prompt: 0,
+    completion: 0,
+    total: 0,
+    cached: 0,
+  };
+
+  for (let i = 0; i < maxIterations; i++) {
+    if (signal.aborted) {
+      logger.debug('Feature identification aborted');
+      throw new Error('Request was aborted');
+    }
+
+    const batchResult = await fetchSampleDocuments({
+      esClient,
+      index: streamName,
+      start,
+      end,
+      features: known.getAll().filter(isFeatureWithFilter),
+      logger,
+      size: DOCUMENTS_BATCH_SIZE,
+    });
+
+    if (batchResult.documents.length === 0) {
+      logger.debug('Stopping: no documents available for sampling');
+      break;
+    }
+
+    const previousFeatures = known.getTopByConfidence(MAX_PREVIOUSLY_IDENTIFIED_FEATURES);
+
+    logger.debug(
+      () =>
+        `Iteration ${i + 1}/${maxIterations}: processing ${
+          batchResult.documents.length
+        } documents, ${known.length} features known`
+    );
+
+    const iterationStart = Date.now();
+    let rawFeatures: BaseFeature[];
+    let tokensUsed: ChatCompletionTokenCount;
+    let ignoredFeatures: IgnoredFeature[];
+
+    try {
+      ({
+        features: rawFeatures,
+        tokensUsed,
+        ignoredFeatures,
+      } = await identifyFeatures({
+        streamName,
+        sampleDocuments: batchResult.documents,
+        excludedFeatures: excludedSummaries,
+        inferenceClient,
+        systemPrompt,
+        logger,
+        signal,
+        previouslyIdentifiedFeatures: previousFeatures.map((f) => ({
+          id: f.id,
+          type: f.type,
+          subtype: f.subtype,
+          title: f.title,
+          description: f.description,
+          properties: f.properties,
+        })),
+      }));
+    } catch (error) {
+      const emptyTokens: ChatCompletionTokenCount = {
+        prompt: 0,
+        completion: 0,
+        total: 0,
+        cached: 0,
+      };
+      await onIterationComplete?.(
+        {
+          iteration: i + 1,
+          state: 'failure',
+          docsCount: batchResult.documents.length,
+          featuresNew: 0,
+          featuresUpdated: 0,
+          durationMs: Date.now() - iterationStart,
+          tokensUsed: emptyTokens,
+          ignoredFeaturesCount: 0,
+          codeIgnoredCount: 0,
+          totalFilters: batchResult.totalFilters,
+          filtersCapped: batchResult.filtersCapped,
+          hasFilteredDocuments: batchResult.hasFilteredDocuments,
+        },
+        []
+      );
+      throw error;
+    }
+
+    totalTokensUsed = sumTokens(totalTokensUsed, tokensUsed);
+
+    const { newFeatures, updatedFeatures, codeIgnoredCount } = reconcileFeatures({
+      rawFeatures,
+      known,
+      existing,
+      ignoredFeatures,
+      logger,
+      excludedFeatures,
+    });
+
+    const changedFeatures = [...newFeatures, ...updatedFeatures];
+
+    for (const feature of newFeatures) {
+      known.add(feature);
+    }
+    for (const feature of updatedFeatures) {
+      known.update(feature);
+    }
+
+    const iterationEntry: IterationTelemetry = {
+      iteration: i + 1,
+      state: 'success',
+      docsCount: batchResult.documents.length,
+      featuresNew: newFeatures.length,
+      featuresUpdated: updatedFeatures.length,
+      durationMs: Date.now() - iterationStart,
+      tokensUsed,
+      ignoredFeaturesCount: ignoredFeatures.length,
+      codeIgnoredCount,
+      totalFilters: batchResult.totalFilters,
+      filtersCapped: batchResult.filtersCapped,
+      hasFilteredDocuments: batchResult.hasFilteredDocuments,
+    };
+    await onIterationComplete?.(iterationEntry, changedFeatures);
+
+    logger.debug(
+      () =>
+        `Iteration ${i + 1}: found ${rawFeatures.length} features ` +
+        `(${newFeatures.length} new, ${updatedFeatures.length} updated), ${known.length} total known, ` +
+        `tokens: prompt=${tokensUsed.prompt} completion=${tokensUsed.completion} cached=${
+          tokensUsed.cached ?? 0
+        }`
+    );
+  }
+
+  return {
+    features: known.getAll(),
+    tokensUsed: totalTokensUsed,
+  };
+}
 
 export interface FeaturesIdentificationTaskParams {
   start: number;
@@ -60,27 +325,32 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 throw new Error('Request is required to run this task');
               }
 
-              const taskStart = Date.now();
               const { start, end, streamName, _task } = runContext.taskInstance
                 .params as TaskParams<FeaturesIdentificationTaskParams>;
 
-              const telemetryProps: StreamsFeaturesIdentifiedProps = {
-                total_duration_ms: 0,
-                identification_duration_ms: 0,
-                stream_name: streamName,
-                stream_type: 'unknown',
-                input_tokens_used: 0,
-                output_tokens_used: 0,
-                total_tokens_used: 0,
-                inferred_total_count: 0,
-                inferred_dedup_count: 0,
-                total_filters: 0,
-                filters_capped: false,
-                has_filtered_documents: false,
-                excluded_features_count: 0,
-                llm_ignored_count: 0,
-                code_ignored_count: 0,
-                state: 'success',
+              const runId = uuid();
+              const trackEmptyTelemetry = (state: 'canceled' | 'failure') => {
+                taskContext.telemetry.trackFeaturesIdentified({
+                  run_id: runId,
+                  iteration: 0,
+                  stream_name: streamName,
+                  stream_type: 'unknown',
+                  state,
+                  docs_count: 0,
+                  features_new: 0,
+                  features_updated: 0,
+                  input_tokens_used: 0,
+                  output_tokens_used: 0,
+                  total_tokens_used: 0,
+                  cached_tokens_used: 0,
+                  duration_ms: 0,
+                  total_filters: 0,
+                  filters_capped: false,
+                  has_filtered_documents: false,
+                  excluded_features_count: 0,
+                  llm_ignored_count: 0,
+                  code_ignored_count: 0,
+                });
               };
 
               const {
@@ -105,10 +375,11 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
               });
               taskLogger.debug(`Using connector ${connectorId} for knowledge indicator extraction`);
 
+              let hasTrackedIteration = false;
               try {
                 const [
                   stream,
-                  { hits: existingFeatures },
+                  { hits: allExistingFeatures },
                   { hits: excludedFeatures },
                   { featurePromptOverride },
                 ] = await Promise.all([
@@ -121,112 +392,83 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   }).getPrompt(),
                 ]);
 
-                telemetryProps.stream_type = getStreamTypeFromDefinition(stream);
-
+                const streamType = getStreamTypeFromDefinition(stream);
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
                 const esClient = scopedClusterClient.asCurrentUser;
 
-                const {
-                  documents: sampleDocuments,
-                  totalFilters,
-                  filtersCapped,
-                  hasFilteredDocuments,
-                } = await fetchSampleDocuments({
-                  esClient,
-                  index: stream.name,
-                  start,
-                  end,
-                  features: existingFeatures.filter(isFeatureWithFilter),
-                  logger: taskContext.logger,
-                });
-                telemetryProps.total_filters = totalFilters;
-                telemetryProps.filters_capped = filtersCapped;
-                telemetryProps.has_filtered_documents = hasFilteredDocuments;
+                const existingFeatures = allExistingFeatures.filter((f) => !isComputedFeature(f));
 
-                if (sampleDocuments.length === 0) {
-                  taskContext.logger.debug(
-                    () =>
-                      `No sample documents found for stream ${streamName}, skipping features identification`
-                  );
-                  return getDeleteTaskRunResult();
-                }
+                const [{ features: inferredFeatures }, computedFeatures] = await Promise.all([
+                  identifyStreamFeatures({
+                    streamName: stream.name,
+                    esClient,
+                    start,
+                    end,
+                    existingFeatures,
+                    excludedFeatures,
+                    inferenceClient: boundInferenceClient,
+                    logger: taskContext.logger.get('features_identification'),
+                    signal: runContext.abortController.signal,
+                    systemPrompt: featurePromptOverride,
+                    onIterationComplete: async (it, changedFeatures) => {
+                      if (changedFeatures.length > 0) {
+                        await featureClient.bulk(
+                          stream.name,
+                          changedFeatures.map((feature) => ({ index: { feature } }))
+                        );
+                      }
+                      taskContext.telemetry.trackFeaturesIdentified({
+                        run_id: runId,
+                        iteration: it.iteration,
+                        stream_name: streamName,
+                        stream_type: streamType,
+                        state: it.state,
+                        docs_count: it.docsCount,
+                        features_new: it.featuresNew,
+                        features_updated: it.featuresUpdated,
+                        input_tokens_used: it.tokensUsed.prompt,
+                        output_tokens_used: it.tokensUsed.completion,
+                        total_tokens_used: it.tokensUsed.total,
+                        cached_tokens_used: it.tokensUsed.cached ?? 0,
+                        duration_ms: it.durationMs,
+                        excluded_features_count: excludedFeatures.length,
+                        llm_ignored_count: it.ignoredFeaturesCount,
+                        code_ignored_count: it.codeIgnoredCount,
+                        total_filters: it.totalFilters,
+                        filters_capped: it.filtersCapped,
+                        has_filtered_documents: it.hasFilteredDocuments,
+                      });
+                      hasTrackedIteration = true;
+                    },
+                  }),
+                  generateAllComputedFeatures({
+                    stream,
+                    start,
+                    end,
+                    esClient,
+                    logger: taskContext.logger.get('computed_features'),
+                  }),
+                ]);
 
-                telemetryProps.excluded_features_count = excludedFeatures.length;
-
-                const excludedSummaries: ExcludedFeatureSummary[] = excludedFeatures
-                  .slice(0, MAX_EXCLUDED_FEATURES_FOR_PROMPT)
-                  .map(({ id, type, subtype, title, description, properties }) => ({
-                    id,
-                    type,
-                    subtype,
-                    title,
-                    description,
-                    properties,
-                  }));
-
-                const identifyFeaturesStart = Date.now();
-                const [{ features: inferredBaseFeatures, ignoredFeatures }, computedFeatures] =
-                  await Promise.all([
-                    identifyFeatures({
-                      streamName: stream.name,
-                      sampleDocuments,
-                      excludedFeatures: excludedSummaries,
-                      inferenceClient: boundInferenceClient,
-                      logger: taskContext.logger.get('features_identification'),
-                      signal: runContext.abortController.signal,
-                      systemPrompt: featurePromptOverride,
-                    })
-                      .then((result) => {
-                        telemetryProps.input_tokens_used = result.tokensUsed.prompt;
-                        telemetryProps.output_tokens_used = result.tokensUsed.completion;
-                        telemetryProps.total_tokens_used = result.tokensUsed.total;
-                        return result;
-                      })
-                      .finally(() => {
-                        telemetryProps.identification_duration_ms =
-                          Date.now() - identifyFeaturesStart;
-                      }),
-                    generateAllComputedFeatures({
-                      stream,
-                      start,
-                      end,
-                      esClient,
-                      logger: taskContext.logger.get('computed_features'),
-                    }),
-                  ]);
-
-                const { features, newFeaturesCount, codeIgnoredCount } = reconcileFeatures({
-                  inferredBaseFeatures,
-                  ignoredFeatures,
+                const reconciledComputedFeatures = reconcileComputedFeatures({
                   computedFeatures,
-                  existingFeatures,
-                  excludedFeatures,
-                  featureClient,
-                  logger: taskLogger,
                   streamName,
                 });
 
-                telemetryProps.llm_ignored_count = ignoredFeatures.length;
-                telemetryProps.code_ignored_count = codeIgnoredCount;
+                if (reconciledComputedFeatures.length > 0) {
+                  await featureClient.bulk(
+                    stream.name,
+                    reconciledComputedFeatures.map((feature) => ({ index: { feature } }))
+                  );
+                }
 
-                await featureClient.bulk(
-                  stream.name,
-                  features.map((feature) => ({ index: { feature } }))
-                );
+                const allFeatures = [...inferredFeatures, ...reconciledComputedFeatures];
 
                 await taskClient.complete<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
                   _task,
                   { start, end, streamName },
-                  { features }
+                  { features: allFeatures }
                 );
-
-                taskContext.telemetry.trackFeaturesIdentified({
-                  ...telemetryProps,
-                  inferred_total_count: inferredBaseFeatures.length,
-                  inferred_dedup_count: newFeaturesCount,
-                  total_duration_ms: Date.now() - taskStart,
-                  state: 'success',
-                });
               } catch (error) {
                 if (isDefinitionNotFoundError(error)) {
                   taskContext.logger.debug(
@@ -250,11 +492,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   taskContext.logger.debug(
                     () => `Task ${runContext.taskInstance.id} was canceled: ${errorMessage}`
                   );
-                  taskContext.telemetry.trackFeaturesIdentified({
-                    ...telemetryProps,
-                    total_duration_ms: Date.now() - taskStart,
-                    state: 'canceled',
-                  });
+                  trackEmptyTelemetry('canceled');
                   return getDeleteTaskRunResult();
                 }
 
@@ -269,11 +507,9 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   errorMessage
                 );
 
-                taskContext.telemetry.trackFeaturesIdentified({
-                  ...telemetryProps,
-                  total_duration_ms: Date.now() - taskStart,
-                  state: 'failure',
-                });
+                if (!hasTrackedIteration) {
+                  trackEmptyTelemetry('failure');
+                }
 
                 return getDeleteTaskRunResult();
               }
@@ -287,26 +523,38 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
   } satisfies TaskDefinitionRegistry;
 }
 
+function createFeatureMetadata() {
+  const now = Date.now();
+  return {
+    status: 'active' as const,
+    last_seen: new Date(now).toISOString(),
+    expires_at: new Date(now + MAX_FEATURE_AGE_MS).toISOString(),
+  };
+}
+
+/** Compares only domain fields (ignores uuid, status, timestamps) */
+const hasChanged = (updated: BaseFeature, current: Feature): boolean =>
+  !isEqual(updated, toBaseFeature(current));
+
 function reconcileFeatures({
-  inferredBaseFeatures,
+  rawFeatures,
+  known,
+  existing,
   ignoredFeatures,
-  computedFeatures,
-  existingFeatures,
   excludedFeatures,
-  featureClient,
   logger,
-  streamName,
 }: {
-  inferredBaseFeatures: BaseFeature[];
+  rawFeatures: BaseFeature[];
+  known: FeatureAccumulator;
+  existing: FeatureAccumulator;
   ignoredFeatures: IgnoredFeature[];
-  computedFeatures: BaseFeature[];
-  existingFeatures: Feature[];
   excludedFeatures: Feature[];
-  featureClient: FeatureClient;
   logger: Logger;
-  streamName: string;
-}): { features: Feature[]; newFeaturesCount: number; codeIgnoredCount: number } {
-  // Log all LLM-reported ignored features
+}): { newFeatures: Feature[]; updatedFeatures: Feature[]; codeIgnoredCount: number } {
+  const newFeatures: Feature[] = [];
+  const updatedFeatures: Feature[] = [];
+  const metadata = createFeatureMetadata();
+
   for (const ignored of ignoredFeatures) {
     logger.debug(
       () =>
@@ -316,7 +564,7 @@ function reconcileFeatures({
 
   // Server-side safety net: check against ALL excluded features (not just the subset sent to the LLM)
   let codeIgnoredCount = 0;
-  const nonExcludedInferredFeatures = inferredBaseFeatures.filter((feature) => {
+  const nonExcludedInferredFeatures = rawFeatures.filter((feature) => {
     const matchingExcluded = excludedFeatures.find((excluded) =>
       isDuplicateFeature(feature, excluded)
     );
@@ -331,34 +579,41 @@ function reconcileFeatures({
     return true;
   });
 
-  // Combine with computed features
-  const identifiedFeatures: BaseFeature[] = [...nonExcludedInferredFeatures, ...computedFeatures];
+  for (const raw of nonExcludedInferredFeatures) {
+    const thisRunMatch = known.findDuplicate(raw);
 
-  // Reconcile with existing features (UUID reuse, dedup tracking)
-  let newFeaturesCount = nonExcludedInferredFeatures.length;
-  const now = Date.now();
-  const features = identifiedFeatures.map((feature) => {
-    const existing = featureClient.findDuplicateFeature({
-      existingFeatures,
-      feature,
-    });
-    const isComputed = isComputedFeature(feature);
-    if (existing && !isComputed) {
-      newFeaturesCount--;
-      logger.debug(
-        () => `Overwriting duplicate feature [${feature.id}] with existing uuid [${existing.uuid}]`
-      );
+    if (thisRunMatch) {
+      // Intra-run: merge evidence/tags accumulated across iterations of this run
+      const merged = mergeFeature(thisRunMatch, raw);
+      if (hasChanged(merged, thisRunMatch)) {
+        updatedFeatures.push({ ...merged, ...metadata, uuid: thisRunMatch.uuid });
+      }
+    } else {
+      // Cross-run: reuse UUID for UI continuity but don't merge — prior data may be stale
+      const existingMatch = existing.findDuplicate(raw);
+
+      if (existingMatch) {
+        newFeatures.push({ ...raw, ...metadata, uuid: existingMatch.uuid });
+      } else {
+        newFeatures.push({ ...raw, ...metadata, uuid: uuid() });
+      }
     }
-    return {
-      ...feature,
-      status: 'active' as const,
-      last_seen: new Date(now).toISOString(),
-      expires_at: new Date(now + MAX_FEATURE_AGE_MS).toISOString(),
-      uuid: isComputed
-        ? uuidv5(`${streamName}:${feature.id}`, uuidv5.DNS)
-        : existing?.uuid ?? uuid(),
-    };
-  });
+  }
 
-  return { features, newFeaturesCount, codeIgnoredCount };
+  return { newFeatures, updatedFeatures, codeIgnoredCount };
+}
+
+function reconcileComputedFeatures({
+  computedFeatures,
+  streamName,
+}: {
+  computedFeatures: BaseFeature[];
+  streamName: string;
+}): Feature[] {
+  const metadata = createFeatureMetadata();
+  return computedFeatures.map((feature) => ({
+    ...feature,
+    ...metadata,
+    uuid: uuidv5(`${streamName}:${feature.id}`, uuidv5.DNS),
+  }));
 }
