@@ -204,7 +204,7 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
 
     collect({ source: 'user.domain' }),
     collect({ source: 'user.email' }),
-    collect({ source: 'user.name' }),
+    newestValue({ source: 'user.name' }),
     collect({
       source: 'user.full_name',
       mapping: {
@@ -228,6 +228,6 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
     /* Used to populate the identity field */
     collect({ source: 'host.entity.id' }),
     collect({ source: 'host.id' }),
-    collect({ source: 'host.name' }),
+    newestValue({ source: 'host.name' }),
   ],
 } as const satisfies EntityDefinitionWithoutId;

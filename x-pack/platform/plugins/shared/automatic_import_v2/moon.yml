@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/licensing-plugin'
+  - '@kbn/licensing-types'
   - '@kbn/actions-plugin'
   - '@kbn/inference-plugin'
   - '@kbn/spaces-plugin'
@@ -57,7 +58,6 @@ dependsOn:
   - '@kbn/elastic-assistant'
   - '@kbn/kibana-utils-plugin'
   - '@kbn/ingest-pipelines-plugin'
-  - '@kbn/utility-types'
   - '@kbn/code-editor'
   - '@kbn/monaco'
   - '@kbn/scout'

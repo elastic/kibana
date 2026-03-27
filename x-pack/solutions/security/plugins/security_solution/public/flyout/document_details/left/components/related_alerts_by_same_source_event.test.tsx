@@ -22,9 +22,13 @@ import {
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../../flyout_v2/shared/components/test_ids';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+
+const useAlertsPrivilegesMock = useAlertsPrivileges as jest.Mock;
 
 jest.mock('../../../../flyout_v2/document/hooks/use_fetch_related_alerts_by_same_source_event');
 jest.mock('../hooks/use_paginated_alerts');
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 
 const originalEventId = 'originalEventId';
 const scopeId = 'scopeId';
@@ -54,6 +58,12 @@ const renderRelatedAlertsBySameSourceEvent = () =>
   );
 
 describe('<RelatedAlertsBySameSourceEvent />', () => {
+  beforeEach(() => {
+    useAlertsPrivilegesMock.mockReturnValue({
+      hasAlertsRead: true,
+    });
+  });
+
   it('should render component correctly', () => {
     (useFetchRelatedAlertsBySameSourceEvent as jest.Mock).mockReturnValue({
       loading: false,
