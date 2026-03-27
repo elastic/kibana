@@ -10,7 +10,7 @@ import { test, tags } from '@kbn/scout';
 import fs from 'fs';
 import os from 'os';
 import {
-  ArtifactTracker,
+  SavedObjectsTracker,
   cleanupDownloadedFile,
   installLogsSampleData,
   removeLogsSampleData,
@@ -24,7 +24,7 @@ const defaultSettings = {
 const SAMPLE_DASHBOARD = '[Logs] Web Traffic';
 const SAMPLE_DASHBOARD_PANEL_COUNT = 12;
 
-const tracker = new ArtifactTracker();
+const tracker = new SavedObjectsTracker();
 let downloadedFilePath: string | null = null;
 
 test.describe('Visualize app', { tag: tags.stateful.classic }, () => {

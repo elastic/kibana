@@ -69,7 +69,9 @@ export class VisualizeApp {
   }
 
   async waitForVisualizationLoaded() {
-    await expect(this.visualizationLoader).toBeVisible({ timeout: 30_000 });
+    await expect(this.visualizationLoader).toHaveAttribute('data-render-complete', 'true', {
+      timeout: 30_000,
+    });
   }
 
   async openSavedVisualization(title: string) {

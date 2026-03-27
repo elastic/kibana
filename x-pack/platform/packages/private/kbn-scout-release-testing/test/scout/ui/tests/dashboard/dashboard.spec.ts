@@ -10,7 +10,7 @@ import { test, tags } from '@kbn/scout';
 import fs from 'fs';
 import os from 'os';
 import {
-  ArtifactTracker,
+  SavedObjectsTracker,
   cleanupDownloadedFile,
   installLogsSampleData,
   removeLogsSampleData,
@@ -21,7 +21,7 @@ const defaultSettings = {
   'dateFormat:tz': 'UTC',
 };
 
-const tracker = new ArtifactTracker();
+const tracker = new SavedObjectsTracker();
 let downloadedFilePath: string | null = null;
 
 test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {

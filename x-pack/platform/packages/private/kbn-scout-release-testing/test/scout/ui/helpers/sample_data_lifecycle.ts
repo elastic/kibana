@@ -18,7 +18,7 @@ interface Artifact {
  * Tracks saved objects created during tests and bulk-deletes them on cleanup.
  * Safe for serial Playwright execution within a single file.
  */
-export class ArtifactTracker {
+export class SavedObjectsTracker {
   private readonly artifacts: Artifact[] = [];
 
   track(artifact: Artifact) {

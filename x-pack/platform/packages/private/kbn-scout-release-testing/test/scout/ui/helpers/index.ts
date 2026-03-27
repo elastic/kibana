@@ -6,7 +6,7 @@
  */
 
 export {
-  ArtifactTracker,
+  SavedObjectsTracker,
   cleanupDownloadedFile,
   installLogsSampleData,
   removeLogsSampleData,
