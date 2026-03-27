@@ -9,6 +9,14 @@ argument-hint: [3rd-party-service-name]
 
 This skill orchestrates the full lifecycle of building a new connector for **$ARGUMENTS**. It chains together multiple skills and performs code review and quality verification between each stage.
 
+## Prerequisites
+
+This skill depends on skills from other plugins. Before starting, ensure they are loaded:
+
+- **`create-agent`** and **`chat-with-agent`** — from `x-pack/platform/plugins/shared/agent_builder/.claude/skills/`. Load them by reading the SKILL.md files at `**/agent_builder/**/SKILL.md`.
+
+If these skills are not available when needed (Tasks 6–7), the agent creation and chat testing steps will fail.
+
 ## Step 0: Create the Task List
 
 Use `TaskCreate` to create all of the following tasks up front so the user can see the full plan. Set all tasks to `pending` initially.
