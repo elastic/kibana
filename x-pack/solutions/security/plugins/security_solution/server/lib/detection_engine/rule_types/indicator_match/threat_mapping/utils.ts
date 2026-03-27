@@ -96,6 +96,7 @@ export const combineResults = (
     currentResult.searchAfterTimes,
     newResult.searchAfterTimes
   ),
+  alertsCandidateCount: sum([currentResult.alertsCandidateCount, newResult.alertsCandidateCount]),
   createdSignalsCount: currentResult.createdSignalsCount + newResult.createdSignalsCount,
   createdSignals: [...currentResult.createdSignals, ...newResult.createdSignals],
   warningMessages: [...currentResult.warningMessages, ...newResult.warningMessages],
