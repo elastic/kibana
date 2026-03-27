@@ -225,7 +225,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     const input = useMemo(() => {
       return (
         <EuiButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           size="s"
           color="text"
@@ -261,7 +261,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     const addConnectorButton = (
       <EuiButtonEmpty
         data-test-subj="addNewConnectorButton"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         isDisabled={isAddConnectorDisabled}
         size="xs"
         onClick={() => setIsConnectorModalVisible(true)}
