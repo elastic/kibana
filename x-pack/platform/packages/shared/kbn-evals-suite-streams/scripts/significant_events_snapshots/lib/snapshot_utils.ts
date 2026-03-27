@@ -103,11 +103,11 @@ export async function resolvePatterns(
         resolved.push(...indices, ...dataStreamNames);
       }
     } catch (err) {
-      log.warning(
-        `Failed to resolve pattern "${pattern}" — skipping: ${
-          err instanceof Error ? err.message : String(err)
-        }`
-      );
+      if (err instanceof errors.ResponseError && err.statusCode === 404) {
+        log.warning(`No indices matched pattern "${pattern}" — skipping`);
+        continue;
+      }
+      throw err;
     }
   }
 
