@@ -43,8 +43,8 @@ describe('extractPanelsState', () => {
               "x": 0,
               "y": 0,
             },
-            "type": "lens",
             "id": "panel1",
+            "type": "lens",
           },
           Object {
             "grid": Object {
@@ -59,8 +59,8 @@ describe('extractPanelsState', () => {
                   "x": 0,
                   "y": 2,
                 },
-                "type": "lens",
                 "id": "panelInSection",
+                "type": "lens",
               },
             ],
             "title": "Section 1",

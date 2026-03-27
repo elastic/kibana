@@ -28,7 +28,7 @@ describe('transformPanelsIn', () => {
           y: 0,
         },
         type: 'DASHBOARD_MARKDOWN',
-        uid: '2e814ac0-33c2-4676-9d29-e1f868cddebd',
+        id: '2e814ac0-33c2-4676-9d29-e1f868cddebd',
       },
       {
         collapsed: true,
@@ -47,11 +47,11 @@ describe('transformPanelsIn', () => {
               y: 0,
             },
             type: 'DASHBOARD_MARKDOWN',
-            uid: 'd724d87b-2256-4c8b-8aa3-55bc0b8881c6',
+            id: 'd724d87b-2256-4c8b-8aa3-55bc0b8881c6',
           },
         ],
         title: 'Section 1',
-        uid: 'bcebc09a-270f-42ef-8d45-daf5f5f4f511',
+        id: 'bcebc09a-270f-42ef-8d45-daf5f5f4f511',
       },
     ];
     const results = transformPanelsIn(panels);
@@ -130,11 +130,11 @@ describe('transformPanelsIn', () => {
             y: 0,
           },
           type: TEST_EMBEDDABLE_TYPE,
-          uid: 'panel1',
+          id: 'panel1',
         },
       ];
       expect(() => transformPanelsIn(panels, true)).toThrowErrorMatchingInlineSnapshot(
-        `"Panel config validation failed. Panel uid: panel1, type: test, validation error: [lessThan10]: Value must be equal to or lower than [10]."`
+        `"Panel config validation failed. Panel id: panel1, type: test, validation error: [lessThan10]: Value must be equal to or lower than [10]."`
       );
     });
 

@@ -25,7 +25,7 @@ describe('transformDashboardIn', () => {
         {
           config: { anyKey: 'some value' },
           grow: false,
-          uid: 'foo',
+          id: 'foo',
           type: 'type1',
           width: 'small',
         } as unknown as PinnedControlState,
@@ -48,7 +48,7 @@ describe('transformDashboardIn', () => {
             enhancements: {},
             savedObjectId: '1',
           },
-          uid: '1',
+          id: '1',
           title: 'title1',
           type: 'type1',
         },
