@@ -7,7 +7,8 @@
 
 export interface CompositeSLOMember {
   sloId: string;
-  sloName: string;
+  sloName: string; // UI-only: not sent to the API
+  groupBy: string | string[]; // UI-only: used to determine if instance selector should be shown
   instanceId?: string;
   weight: number;
 }

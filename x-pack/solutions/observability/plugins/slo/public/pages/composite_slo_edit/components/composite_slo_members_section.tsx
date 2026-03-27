@@ -51,11 +51,13 @@ export function CompositeSloMembersSection() {
       const sloId = String(value);
       const alreadyAdded = members.some((m) => m.sloId === sloId);
       if (!alreadyAdded && members.length < MAX_COMPOSITE_MEMBERS) {
-        append({ sloId, sloName: label, instanceId: ALL_VALUE, weight: 1 });
+        const sloDefinition = sloDefinitions?.results.find((slo) => slo.id === sloId);
+        const groupBy = sloDefinition?.groupBy ?? ALL_VALUE;
+        append({ sloId, sloName: label, groupBy, instanceId: ALL_VALUE, weight: 1 });
       }
       setSloSearch('');
     },
-    [append, members]
+    [append, members, sloDefinitions]
   );
 
   const atMax = fields.length >= MAX_COMPOSITE_MEMBERS;
@@ -160,24 +162,20 @@ function MemberRow({ index, onRemove }: MemberRowProps) {
   const { control, watch } = useFormContext<CreateCompositeSLOForm>();
   const sloId = watch(`members.${index}.sloId`);
   const sloName = watch(`members.${index}.sloName`);
+  const groupBy = watch(`members.${index}.groupBy`);
+
+  const isGrouped = [groupBy].flat().some((g) => g !== ALL_VALUE);
 
   const { data: instances, isLoading: isLoadingInstances } = useFetchSloInstances({
     sloId,
     size: 100,
+    enabled: isGrouped,
   });
 
-  const instanceOptions: EuiComboBoxOptionOption[] = [
-    {
-      label: i18n.translate('xpack.slo.compositeSloEdit.members.instanceId.allInstances', {
-        defaultMessage: 'All instances',
-      }),
-      value: ALL_VALUE,
-    },
-    ...(instances?.results ?? []).map((inst) => ({
-      label: inst.instanceId,
-      value: inst.instanceId,
-    })),
-  ];
+  const instanceOptions: EuiComboBoxOptionOption[] = (instances?.results ?? []).map((inst) => ({
+    label: inst.instanceId,
+    value: inst.instanceId,
+  }));
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="flexStart">
@@ -188,26 +186,34 @@ function MemberRow({ index, onRemove }: MemberRowProps) {
       </EuiFlexItem>
 
       <EuiFlexItem grow={3}>
-        <Controller
-          name={`members.${index}.instanceId`}
-          control={control}
-          render={({ field: { value, onChange } }) => {
-            const selected = instanceOptions.filter((opt) => opt.value === (value ?? ALL_VALUE));
-            return (
-              <EuiComboBox
-                fullWidth
-                singleSelection={{ asPlainText: true }}
-                isLoading={isLoadingInstances}
-                options={instanceOptions}
-                selectedOptions={selected}
-                onChange={(opts) => onChange(opts[0]?.value ?? ALL_VALUE)}
-                isClearable={false}
-                compressed
-                data-test-subj={`compositeSloMemberInstanceComboBox-${index}`}
-              />
-            );
-          }}
-        />
+        {isGrouped ? (
+          <Controller
+            name={`members.${index}.instanceId`}
+            control={control}
+            render={({ field: { value, onChange } }) => {
+              const selected = instanceOptions.filter((opt) => opt.value === value);
+              return (
+                <EuiComboBox
+                  fullWidth
+                  singleSelection={{ asPlainText: true }}
+                  isLoading={isLoadingInstances}
+                  options={instanceOptions}
+                  selectedOptions={selected}
+                  onChange={(opts) => onChange(opts[0]?.value ?? ALL_VALUE)}
+                  isClearable={false}
+                  compressed
+                  data-test-subj={`compositeSloMemberInstanceComboBox-${index}`}
+                />
+              );
+            }}
+          />
+        ) : (
+          <EuiText size="s" color="subdued" style={{ paddingTop: 4 }}>
+            {i18n.translate('xpack.slo.compositeSloEdit.members.instanceId.allInstances', {
+              defaultMessage: 'All instances',
+            })}
+          </EuiText>
+        )}
       </EuiFlexItem>
 
       <EuiFlexItem grow={2}>
