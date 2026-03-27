@@ -12,6 +12,7 @@ import type { SyntheticsRestApiRouteFactory } from '../types';
 export const getMonitorHealthRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_HEALTH,
+  writeAccess: false,
   validate: {
     params: schema.object({
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
