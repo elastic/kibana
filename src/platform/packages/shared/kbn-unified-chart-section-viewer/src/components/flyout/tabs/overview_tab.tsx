@@ -107,42 +107,41 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
           />
         ),
       },
+      {
+        title: title(
+          i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
+            defaultMessage: 'Metric unit',
+          })
+        ),
+        description: (
+          <div data-test-subj="metricsExperienceFlyoutOverviewTabMetricUnitLabel">
+            <BadgeGroup
+              items={metricItem.units}
+              renderItem={(unit, index) => (
+                <EuiBadge key={`${unit}-${index}`}>{getUnitLabel({ unit })}</EuiBadge>
+              )}
+            />
+          </div>
+        ),
+      },
+      {
+        title: title(
+          i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
+            defaultMessage: 'Metric type',
+          })
+        ),
+        description: (
+          <div data-test-subj="metricsExperienceFlyoutOverviewTabMetricTypeLabel">
+            <BadgeGroup
+              items={metricItem.metricTypes}
+              renderItem={(metricType, index) => (
+                <MetricTypeBadge key={`${metricType}-${index}`} instrument={metricType} />
+              )}
+            />
+          </div>
+        ),
+      },
     ];
-    rows.push({
-      title: title(
-        i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
-          defaultMessage: 'Metric unit',
-        })
-      ),
-      description: (
-        <div data-test-subj="metricsExperienceFlyoutOverviewTabMetricUnitLabel">
-          <BadgeGroup
-            items={metricItem.units}
-            renderItem={(unit, index) => (
-              <EuiBadge key={`${unit}-${index}`}>{getUnitLabel({ unit })}</EuiBadge>
-            )}
-          />
-        </div>
-      ),
-    });
-
-    rows.push({
-      title: title(
-        i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
-          defaultMessage: 'Metric type',
-        })
-      ),
-      description: (
-        <div data-test-subj="metricsExperienceFlyoutOverviewTabMetricTypeLabel">
-          <BadgeGroup
-            items={metricItem.metricTypes}
-            renderItem={(metricType, index) => (
-              <MetricTypeBadge key={`${metricType}-${index}`} instrument={metricType} />
-            )}
-          />
-        </div>
-      ),
-    });
 
     return { rows, labelMinWidthPx };
   }, [
