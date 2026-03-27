@@ -135,7 +135,7 @@ describe('UnifiedHistoryTable', () => {
 
     const columnHeaders = screen.getAllByRole('columnheader');
     const headerTexts = columnHeaders.map((h) => h.textContent);
-    expect(headerTexts).toContain('Query');
+    expect(headerTexts).toContain('Query or Pack');
     expect(headerTexts).toContain('Source');
     expect(headerTexts).toContain('Results');
     expect(headerTexts).toContain('Agents');
@@ -438,7 +438,7 @@ describe('UnifiedHistoryTable', () => {
       renderWithProviders(<UnifiedHistoryTable />);
 
       const headers = screen.getAllByRole('columnheader').map((h) => h.textContent);
-      expect(headers).toContain('Query');
+      expect(headers).toContain('Query or Pack');
       expect(headers).toContain('Tags');
       expect(headers).toContain('Results');
       expect(headers).toContain('Source');
@@ -456,7 +456,7 @@ describe('UnifiedHistoryTable', () => {
 
       const headers = screen.getAllByRole('columnheader').map((h) => h.textContent);
       expect(headers).toContain('Actions');
-      expect(headers).toContain('Query');
+      expect(headers).toContain('Query or Pack');
       expect(headers).toContain('Created at');
       expect(headers).not.toContain('Tags');
       expect(headers).not.toContain('Source');
