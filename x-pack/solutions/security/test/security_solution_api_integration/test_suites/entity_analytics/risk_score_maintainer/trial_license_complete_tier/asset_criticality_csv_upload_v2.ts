@@ -182,6 +182,52 @@ export default ({ getService }: FtrProviderContext) => {
       expect((entityById.asset as Record<string, unknown>)?.criticality).toBe('high_impact');
     });
 
+    it('unassigns criticality from an entity using the "unassign" criticality level', async () => {
+      // DESKTOP-LUIS-XPU3PTS was assigned low_impact in the previous test
+      const csv = ['type,host.name,criticality_level', 'host,DESKTOP-LUIS-XPU3PTS,unassign'].join(
+        '\n'
+      );
+
+      const { body } = await assetCriticalityRoutes.uploadCsvV2(csv);
+
+      expect(body.total).toBe(1);
+      expect(body.successful).toBe(1);
+      expect(body.failed).toBe(0);
+      expect(body.unmatched).toBe(0);
+      expect(body.items[0].status).toBe('success');
+      expect(body.items[0].matchedEntities).toBe(1);
+
+      const result = await entityStoreUtils.searchEntitiesV2(
+        `${entities.map((e) => `entity.id:"${e.id}"`).join(' OR ')}`,
+        { size: entities.length }
+      );
+
+      const returnedEntities = result.body.entities ?? [];
+      expect(returnedEntities.length).toBe(entities.length);
+
+      const entityById = (id: string) => returnedEntities.find((e: Entity) => e.entity?.id === id);
+
+      // Unassigned entity should have null criticality
+      expect(
+        (entityById('host:1f317303-88b2-433b-b84f-396db7a7e2f0')?.asset as Record<string, unknown>)
+          ?.criticality
+      ).toBeNull();
+
+      // Other entities should retain their criticality from the previous test
+      expect(
+        (entityById('host:1fe138db-b369-4342-acd2-5d464928a240')?.asset as Record<string, unknown>)
+          ?.criticality
+      ).toBe('medium_impact');
+      expect(
+        (entityById('host:alfredoa-pc119.acmecrm.com')?.asset as Record<string, unknown>)
+          ?.criticality
+      ).toBe('high_impact');
+      expect(
+        (entityById('host:alyshacr-pc196.acmecrm.com')?.asset as Record<string, unknown>)
+          ?.criticality
+      ).toBe('high_impact');
+    });
+
     it('rejects when CSV is missing required headers', async () => {
       // Missing the required 'type' column
       let csv = ['host.name,criticality_level', 'csv-test-host,high_impact'].join('\n');
@@ -220,7 +266,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.items[0].status).toBe('failure');
       expect(body.items[0].matchedEntities).toBe(0);
       expect(body.items[0].error).toBe(
-        `Error processing row: Invalid criticality level: \"invalid_criticality\". Must be one of: low_impact, medium_impact, high_impact, extreme_impact`
+        `Error processing row: Invalid criticality level: \"invalid_criticality\". Must be one of: low_impact, medium_impact, high_impact, extreme_impact, unassign`
       );
 
       expect(body.items[1].status).toBe('failure');
@@ -232,7 +278,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.items[2].status).toBe('failure');
       expect(body.items[2].matchedEntities).toBe(0);
       expect(body.items[2].error).toBe(
-        `Error processing row: Invalid criticality level: \"\". Must be one of: low_impact, medium_impact, high_impact, extreme_impact`
+        `Error processing row: Invalid criticality level: \"\". Must be one of: low_impact, medium_impact, high_impact, extreme_impact, unassign`
       );
 
       expect(body.items[3].status).toBe('failure');
@@ -244,7 +290,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.items[4].status).toBe('failure');
       expect(body.items[4].matchedEntities).toBe(0);
       expect(body.items[4].error).toBe(
-        `Error processing row: Invalid criticality level: \"undefined\". Must be one of: low_impact, medium_impact, high_impact, extreme_impact`
+        `Error processing row: Invalid criticality level: \"undefined\". Must be one of: low_impact, medium_impact, high_impact, extreme_impact, unassign`
       );
 
       expect(body.items[5].status).toBe('failure');

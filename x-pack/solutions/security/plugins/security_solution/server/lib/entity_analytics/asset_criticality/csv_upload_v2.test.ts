@@ -121,10 +121,44 @@ describe('csvUploadV2', () => {
         expect(result.total).toBe(1);
         expect(result.items[0]).toEqual({
           error:
-            'Error processing row: Invalid criticality level: "invalid_level". Must be one of: low_impact, medium_impact, high_impact, extreme_impact',
+            'Error processing row: Invalid criticality level: "invalid_level". Must be one of: low_impact, medium_impact, high_impact, extreme_impact, unassign',
           matchedEntities: 0,
           status: 'failure',
         });
+      });
+
+      it('accepts "unassign" as a valid criticality level', async () => {
+        const csv = 'type,host.name,criticality_level\nhost,my-host,unassign\n';
+        const result = await csvUploadV2({
+          entityStoreClient,
+          fileStream: createMockStream(csv),
+          logger,
+        });
+        expect(result.failed).toBe(0);
+        expect(result.items[0].error).toBeUndefined();
+      });
+
+      it('sends null asset criticality when criticality_level is "unassign"', async () => {
+        (entityStoreClient.listEntities as jest.Mock).mockResolvedValueOnce({
+          entities: [{ entity: { id: 'host:my-host' } }],
+          nextSearchAfter: undefined,
+        });
+        (entityStoreClient.bulkUpdateEntity as jest.Mock).mockResolvedValueOnce([]);
+
+        const csv = 'type,host.name,criticality_level\nhost,my-host,unassign\n';
+        await csvUploadV2({ entityStoreClient, fileStream: createMockStream(csv), logger });
+
+        expect(entityStoreClient.bulkUpdateEntity).toHaveBeenCalledWith(
+          expect.objectContaining({
+            objects: [
+              expect.objectContaining({
+                doc: expect.objectContaining({
+                  asset: { criticality: null },
+                }),
+              }),
+            ],
+          })
+        );
       });
     });
 

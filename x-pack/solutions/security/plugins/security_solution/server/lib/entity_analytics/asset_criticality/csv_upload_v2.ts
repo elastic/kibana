@@ -22,6 +22,7 @@ import { AssetCriticalityLevel } from '../../../../common/api/entity_analytics/a
 import type { HapiReadableStream } from '../../../types';
 
 export const ALL_ASSET_CRITICALITY_LEVELS = Object.values(AssetCriticalityLevel.enum);
+export const UNASSIGN_CRITICALITY_VALUE = 'unassign';
 
 // Process the CSV file in batches
 const CSV_BATCH_SIZE = 1000;
@@ -128,11 +129,15 @@ const processRow = async ({
   let criticalityLevel = row[CRITICALITY_LEVEL_HEADER];
   criticalityLevel =
     typeof criticalityLevel === 'string' ? toLower(criticalityLevel) : criticalityLevel;
-  if (!AssetCriticalityLevel.safeParse(criticalityLevel).success) {
+  if (
+    criticalityLevel !== UNASSIGN_CRITICALITY_VALUE &&
+    !AssetCriticalityLevel.safeParse(criticalityLevel).success
+  ) {
     throw new Error(
-      `Invalid criticality level: "${criticalityLevel}". Must be one of: ${ALL_ASSET_CRITICALITY_LEVELS.join(
-        ', '
-      )}`
+      `Invalid criticality level: "${criticalityLevel}". Must be one of: ${[
+        ...ALL_ASSET_CRITICALITY_LEVELS,
+        UNASSIGN_CRITICALITY_VALUE,
+      ].join(', ')}`
     );
   }
 
@@ -183,14 +188,19 @@ const processRow = async ({
           type: type as EntityType,
           doc: {
             entity: { id: entityId },
-            asset: { criticality: criticalityLevel as AssetCriticalityLevel },
+            asset: {
+              criticality:
+                criticalityLevel === UNASSIGN_CRITICALITY_VALUE
+                  ? (null as unknown as AssetCriticalityLevel)
+                  : (criticalityLevel as AssetCriticalityLevel),
+            },
           },
         });
       }
     }
 
     searchAfter = nextSearchAfter;
-    if (!searchAfter) {
+    if (!searchAfter || entities.length < LIST_PAGE_SIZE) {
       break;
     }
 
