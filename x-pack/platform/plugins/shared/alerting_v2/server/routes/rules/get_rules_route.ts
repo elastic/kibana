@@ -29,7 +29,9 @@ const getRulesQuerySchema = z.object({
 
   filter: z.string().optional().describe('A KQL string to filter the rules.'),
   search: z
-    .string({ minLength: 1 })
+    .string()
+    .trim()
+    .min(1)
     .optional()
     .describe('A text string to search across rule fields.'),
 });
