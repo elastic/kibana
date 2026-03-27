@@ -160,13 +160,13 @@ describe('crud_client utils', () => {
     });
 
     describe('name defaulting on create vs update', () => {
-      it('defaults type.name from entity.id on create when name is not present', () => {
+      it('defaults entity.name from entity.id on create when name is not present', () => {
         mockGetEntityDefinition.mockReturnValue(createDefinition('host', []));
 
         const doc: Entity = { entity: { id: 'entity-host' } };
         const result = validateAndTransformDoc('create', 'host', 'default', doc, undefined, true);
 
-        expect(result.doc).toHaveProperty('host.name', 'entity-host');
+        expect(result.doc).toHaveProperty('entity.name', 'entity-host');
       });
 
       it('does not default type.name on update when name is not present', () => {
@@ -337,9 +337,8 @@ describe('crud_client utils', () => {
 
         expect(result.doc).toHaveProperty('entity');
         expect(result.doc).toHaveProperty('entity.id', 'svc-1');
-        expect(result.doc).toHaveProperty('service');
-        expect(result.doc).toHaveProperty('service.name', 'svc-1');
-        expect(result.doc).not.toHaveProperty('service.entity');
+        expect(result.doc).toHaveProperty('entity.name', 'svc-1');
+        expect(result.doc).not.toHaveProperty('service');
       });
     });
 
