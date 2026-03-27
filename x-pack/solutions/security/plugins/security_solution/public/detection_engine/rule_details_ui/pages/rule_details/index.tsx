@@ -347,9 +347,6 @@ export const RuleDetailsPage = connector(
     const mlCapabilities = useMlCapabilities();
     const { globalFullScreen } = useGlobalFullScreen();
     const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
-    const storeGapsInEventLogEnabled = useIsExperimentalFeatureEnabled(
-      'storeGapsInEventLogEnabled'
-    );
     const newExecutionResultsTableEnabled = useIsExperimentalFeatureEnabled(
       'newExecutionResultsTableEnabled'
     );
