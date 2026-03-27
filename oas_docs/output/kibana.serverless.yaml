@@ -59387,7 +59387,7 @@ paths:
                 description:
                   type: string
                 include:
-                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_3___schema0'
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_ContentPackIncludedObjects'
                 name:
                   type: string
                 version:
@@ -67310,58 +67310,6 @@ components:
           type: boolean
       required:
         - data_view
-    Kibana_HTTP_APIs__zod_v4_3___schema0:
-      anyOf:
-        - additionalProperties: false
-          type: object
-          properties:
-            objects:
-              additionalProperties: false
-              type: object
-              properties:
-                all:
-                  additionalProperties: false
-                  type: object
-                  properties: {}
-              required:
-                - all
-          required:
-            - objects
-        - additionalProperties: false
-          type: object
-          properties:
-            objects:
-              additionalProperties: false
-              type: object
-              properties:
-                mappings:
-                  type: boolean
-                queries:
-                  items:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                    required:
-                      - id
-                  type: array
-                routing:
-                  items:
-                    allOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_3___schema0'
-                      - type: object
-                        properties:
-                          destination:
-                            type: string
-                        required:
-                          - destination
-                  type: array
-              required:
-                - mappings
-                - queries
-                - routing
-          required:
-            - objects
     Kibana_HTTP_APIs_ClassicFieldDefinition:
       additionalProperties:
         $ref: '#/components/schemas/Kibana_HTTP_APIs_ClassicFieldDefinitionConfig'
@@ -67618,6 +67566,58 @@ components:
               type: array
           required:
             - steps
+    Kibana_HTTP_APIs_ContentPackIncludedObjects:
+      anyOf:
+        - additionalProperties: false
+          type: object
+          properties:
+            objects:
+              additionalProperties: false
+              type: object
+              properties:
+                all:
+                  additionalProperties: false
+                  type: object
+                  properties: {}
+              required:
+                - all
+          required:
+            - objects
+        - additionalProperties: false
+          type: object
+          properties:
+            objects:
+              additionalProperties: false
+              type: object
+              properties:
+                mappings:
+                  type: boolean
+                queries:
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                    required:
+                      - id
+                  type: array
+                routing:
+                  items:
+                    allOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_ContentPackIncludedObjects'
+                      - type: object
+                        properties:
+                          destination:
+                            type: string
+                        required:
+                          - destination
+                  type: array
+              required:
+                - mappings
+                - queries
+                - routing
+          required:
+            - objects
     Kibana_HTTP_APIs_core_status_redactedResponse:
       additionalProperties: false
       description: A minimal representation of Kibana's operational status.
@@ -72178,6 +72178,9 @@ components:
         - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryCreateFields'
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
       discriminator:
+        mapping:
+          document: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryCreateFields'
+          index: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
         propertyName: type
     Security_AI_Assistant_API_KnowledgeBaseEntryDetailsInError:
       type: object
@@ -72217,18 +72220,27 @@ components:
         - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntry'
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntry'
       discriminator:
+        mapping:
+          document: '#/components/schemas/Security_AI_Assistant_API_DocumentEntry'
+          index: '#/components/schemas/Security_AI_Assistant_API_IndexEntry'
         propertyName: type
     Security_AI_Assistant_API_KnowledgeBaseEntryUpdateProps:
       anyOf:
         - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryUpdateFields'
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryUpdateFields'
       discriminator:
+        mapping:
+          document: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryUpdateFields'
+          index: '#/components/schemas/Security_AI_Assistant_API_IndexEntryUpdateFields'
         propertyName: type
     Security_AI_Assistant_API_KnowledgeBaseEntryUpdateRouteProps:
       anyOf:
         - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryCreateFields'
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
       discriminator:
+        mapping:
+          document: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryCreateFields'
+          index: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
         propertyName: type
     Security_AI_Assistant_API_KnowledgeBaseReadResponse200:
       type: object

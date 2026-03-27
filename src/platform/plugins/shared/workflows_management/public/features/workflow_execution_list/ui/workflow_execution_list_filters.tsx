@@ -31,7 +31,7 @@ import { i18n } from '@kbn/i18n';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import { getStatusLabel } from '../../../shared/translations';
 
-interface ExecutionListFiltersProps {
+export interface ExecutionListFiltersProps {
   filters: {
     statuses: ExecutionStatus[];
     executionTypes: ExecutionType[];
