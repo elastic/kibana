@@ -45,8 +45,9 @@ describe('batchByUrlLength', () => {
   it('handles typical datastream names with default limit', () => {
     // 100 names of ~45 chars each. Joined: 100*45 + 99 commas = 4599 chars.
     // With default limit 3000, should produce at least 2 batches.
-    const names = Array.from({ length: 100 }, (_, i) =>
-      `logs-elastic_agent.filebeat_input-${String(i).padStart(7, '0')}`
+    const names = Array.from(
+      { length: 100 },
+      (_, i) => `logs-elastic_agent.filebeat_input-${String(i).padStart(7, '0')}`
     );
     const batches = batchByUrlLength(names);
     expect(batches.length).toBeGreaterThanOrEqual(2);

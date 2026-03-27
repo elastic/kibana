@@ -197,8 +197,9 @@ describe('mappings utilities', () => {
     });
 
     it('batches requests when datastream names would exceed URL length', async () => {
-      const datastreams = Array.from({ length: 100 }, (_, i) =>
-        `logs-elastic_agent.filebeat_input-${String(i).padStart(7, '0')}`
+      const datastreams = Array.from(
+        { length: 100 },
+        (_, i) => `logs-elastic_agent.filebeat_input-${String(i).padStart(7, '0')}`
       );
 
       const makeResponse = (names: string[]): GetDataStreamMappingsRes => ({

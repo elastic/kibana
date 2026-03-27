@@ -256,8 +256,9 @@ describe('getIndexFields', () => {
 
 describe('getBatchedFieldsFromFieldCaps', () => {
   it('batches requests when resource names would exceed URL length', async () => {
-    const resources = Array.from({ length: 100 }, (_, i) =>
-      `remote_cluster:logs-elastic_agent.input-${String(i).padStart(7, '0')}`
+    const resources = Array.from(
+      { length: 100 },
+      (_, i) => `remote_cluster:logs-elastic_agent.input-${String(i).padStart(7, '0')}`
     );
 
     const esClient = {

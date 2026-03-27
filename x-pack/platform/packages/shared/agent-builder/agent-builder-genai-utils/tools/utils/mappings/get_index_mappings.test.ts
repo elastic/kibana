@@ -78,8 +78,9 @@ describe('getIndexMappings', () => {
   });
 
   it('batches requests when index names would exceed URL length', async () => {
-    const indices = Array.from({ length: 100 }, (_, i) =>
-      `my-very-long-index-name-for-testing-${String(i).padStart(7, '0')}`
+    const indices = Array.from(
+      { length: 100 },
+      (_, i) => `my-very-long-index-name-for-testing-${String(i).padStart(7, '0')}`
     );
 
     esClient.indices.getMapping.mockImplementation((params: any) => {
