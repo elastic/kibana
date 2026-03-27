@@ -210,9 +210,7 @@ describe('AgentLogsUI', () => {
       id: 'agent1',
       local_metadata: { elastic: { agent: { version: '8.15.0' } } },
     } as any;
-    const result = renderer.render(
-      <SelectLogLevel agent={agent} agentPolicyLogLevel="warning" />
-    );
+    const result = renderer.render(<SelectLogLevel agent={agent} agentPolicyLogLevel="warning" />);
     expect(result.getByTestId('selectAgentLogLevel')).toHaveDisplayValue('warning');
   });
 
