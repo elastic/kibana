@@ -26,7 +26,6 @@ import {
   SERVICE_PROVIDER,
 } from '../../../common/translations';
 
-import { useKibana } from '../../hooks/use_kibana';
 import { useEndpointActions } from '../../hooks/use_endpoint_actions';
 import { type FilterOptions, GroupByOptions } from '../../types';
 import { getModelId } from '../../utils/get_model_id';
@@ -74,9 +73,6 @@ interface TabularPageProps {
 }
 
 export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) => {
-  const {
-    services: { application },
-  } = useKibana();
   const [searchKey, setSearchKey] = useState('');
   const [groupBy, setGroupBy] = useState<GroupByOptions>(initializeGroupBy);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>(DEFAULT_FILTER_OPTIONS);
