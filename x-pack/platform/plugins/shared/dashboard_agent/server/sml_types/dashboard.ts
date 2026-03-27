@@ -42,8 +42,8 @@ const toPanelSummary = (
   return [
     title,
     panel.type,
-    panel.uid ? `panel:${panel.uid}` : undefined,
-    ...(panel.uid ? getReferenceText(references, panel.uid) : []),
+    panel.id ? `panel:${panel.id}` : undefined,
+    ...(panel.id ? getReferenceText(references, panel.id) : []),
   ].filter((value): value is string => Boolean(value));
 };
 
@@ -63,7 +63,7 @@ const toDashboardSearchContent = (
   }
 
   for (const section of sections) {
-    contentParts.push(section.title, `section:${section.uid}`);
+    contentParts.push(section.title, `section:${section.id}`);
     for (const panel of section.panels) {
       contentParts.push(...toPanelSummary(panel, references));
     }
