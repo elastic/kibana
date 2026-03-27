@@ -403,40 +403,43 @@ export const IngestHubPage: React.FC = () => {
   `;
 
   const renderSectionPageHeader = (imageSrc: string, heading: string, subtitle: string) => (
-    <div style={{ width: '100%' }}>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-start',
-          gap: 16,
-          paddingTop: 40,
-          paddingBottom: 40,
-        }}
-      >
-        <div
-          style={{
-            backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-            borderRadius: 12,
-            padding: 4,
-            flexShrink: 0,
-          }}
-        >
-          <img
-            src={imageSrc}
-            alt={heading}
-            style={{ width: 64, height: 64, objectFit: 'contain', display: 'block' }}
-          />
-        </div>
-        <div>
+    <div
+      style={{
+        width: '100%',
+        backgroundColor: euiTheme.colors.backgroundBasePlain,
+        paddingLeft: sectionPadding,
+        paddingRight: sectionPadding,
+        paddingTop: 24,
+        paddingBottom: 24,
+      }}
+    >
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <div
+            style={{
+              backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+              borderRadius: 10,
+              padding: 4,
+              flexShrink: 0,
+            }}
+          >
+            <img
+              src={imageSrc}
+              alt={heading}
+              style={{ width: 48, height: 48, objectFit: 'contain', display: 'block' }}
+            />
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem>
           <EuiTitle size="l">
-            <h2>{heading}</h2>
+            <h1>{heading}</h1>
           </EuiTitle>
-          <EuiText size="s" color="subdued" style={{ marginTop: 4 }}>
-            {subtitle}
+          <EuiSpacer size="s" />
+          <EuiText grow={false}>
+            <p>{subtitle}</p>
           </EuiText>
-        </div>
-      </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 
@@ -796,13 +799,13 @@ export const IngestHubPage: React.FC = () => {
   const renderIntegrationsView = () => {
     return (
       <>
-        <div css={paddedContent} style={{ width: '100%' }}>
-          {renderSectionPageHeader(
-            integrationsHeaderImg,
-            'Add data to Elastic Observability',
-            'Monitor your applications and infrastructure with powerful logs, metrics, traces, and AI-driven insights'
-          )}
-          {activeVersion !== 'streamsUx' && (
+        {renderSectionPageHeader(
+          integrationsHeaderImg,
+          'Add data to Elastic Observability',
+          'Monitor your applications and infrastructure with powerful logs, metrics, traces, and AI-driven insights'
+        )}
+        {activeVersion !== 'streamsUx' && (
+          <div css={paddedContent} style={{ width: '100%' }}>
             <EuiTabs
               css={css`
                 box-shadow: none;
@@ -834,9 +837,9 @@ export const IngestHubPage: React.FC = () => {
                 Installed
               </EuiTab>
             </EuiTabs>
-          )}
-        </div>
-        <EuiHorizontalRule margin="none" css={dividerStyle} />
+          </div>
+        )}
+        <EuiHorizontalRule margin="none" />
         <div css={paddedContent} style={{ width: '100%' }}>
           <div style={{ height: 32 }} />
 
@@ -1786,14 +1789,12 @@ export const IngestHubPage: React.FC = () => {
 
   const renderGetStartedView = () => (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-      <div css={paddedContent} style={{ width: '100%' }}>
-        {renderSectionPageHeader(
-          rocketImg,
-          'Get started with Elastic Observability',
-          'Your starting point to ingest data, create alerts, manage SLOs, explore Streams, and get the most out of your observability stack'
-        )}
-      </div>
-      <EuiHorizontalRule margin="none" css={dividerStyle} />
+      {renderSectionPageHeader(
+        rocketImg,
+        'Get started with Elastic Observability',
+        'Your starting point to ingest data, create alerts, manage SLOs, explore Streams, and get the most out of your observability stack'
+      )}
+      <EuiHorizontalRule margin="none" />
       <div css={paddedContent} style={{ width: '100%', display: 'flex', flexDirection: 'column', flex: 1 }}>
         <div style={{ height: 40 }} />
         <EuiAccordion
@@ -2632,8 +2633,8 @@ export const IngestHubPage: React.FC = () => {
     placeholder: string
   ) => (
     <>
-      <div css={paddedContent} style={{ width: '100%' }}>{renderSectionPageHeader(imageSrc, heading, subtitle)}</div>
-      <EuiHorizontalRule margin="none" css={dividerStyle} />
+      {renderSectionPageHeader(imageSrc, heading, subtitle)}
+      <EuiHorizontalRule margin="none" />
       <div css={paddedContent} style={{ width: '100%' }}>
         <div style={{ height: 40 }} />
         <EuiText color="subdued">{placeholder}</EuiText>
@@ -2643,14 +2644,12 @@ export const IngestHubPage: React.FC = () => {
 
   const renderPlatformMigrationView = () => (
     <>
-      <div css={paddedContent} style={{ width: '100%' }}>
-        {renderSectionPageHeader(
-          platformMigrationHeaderImg,
-          'Platform Migration',
-          'Migrate dashboards, rules, and data pipelines from other observability platforms into Elastic'
-        )}
-      </div>
-      <EuiHorizontalRule margin="none" css={dividerStyle} />
+      {renderSectionPageHeader(
+        platformMigrationHeaderImg,
+        'Platform Migration',
+        'Migrate dashboards, rules, and data pipelines from other observability platforms into Elastic'
+      )}
+      <EuiHorizontalRule margin="none" />
       <div css={paddedContent} style={{ width: '100%' }}>
         <div style={{ height: 40 }} />
         {renderPlatformMigrationContent()}
@@ -3230,7 +3229,7 @@ export const IngestHubPage: React.FC = () => {
           onClose={() => setWelcomeChildTile(null)}
           aria-labelledby="blockUxChildFlyoutTitle"
           css={css`
-            inline-size: 50vw !important;
+            inline-size: 72vw !important;
             & .euiFlyoutHeader {
               padding-block: 32px !important;
               padding-inline: 32px !important;
@@ -3240,7 +3239,7 @@ export const IngestHubPage: React.FC = () => {
               padding-inline: 32px !important;
             }
             & .euiFlyoutFooter {
-              padding-block: 24px !important;
+              padding-block: 16px !important;
               padding-inline: 32px !important;
             }
           `}
@@ -4373,7 +4372,7 @@ export const IngestHubPage: React.FC = () => {
           onClose={() => setFlyoutTile(null)}
           aria-labelledby="apiIngestionFlyoutTitle"
           css={css`
-            inline-size: 50vw !important;
+            inline-size: 72vw !important;
             & .euiFlyoutHeader {
               padding-block: 32px !important;
               padding-inline: 32px !important;
@@ -4383,7 +4382,7 @@ export const IngestHubPage: React.FC = () => {
               padding-inline: 32px !important;
             }
             & .euiFlyoutFooter {
-              padding-block: 24px !important;
+              padding-block: 16px !important;
               padding-inline: 32px !important;
             }
           `}
@@ -4469,7 +4468,7 @@ export const IngestHubPage: React.FC = () => {
           onClose={() => setFlyoutTile(null)}
           aria-labelledby="flyoutTileTitle"
           css={css`
-            inline-size: 50vw !important;
+            inline-size: 72vw !important;
             & .euiFlyoutHeader {
               padding-block: 32px !important;
               padding-inline: 32px !important;
@@ -4479,7 +4478,7 @@ export const IngestHubPage: React.FC = () => {
               padding-inline: 32px !important;
             }
             & .euiFlyoutFooter {
-              padding-block: 24px !important;
+              padding-block: 16px !important;
               padding-inline: 32px !important;
             }
           `}
@@ -4537,7 +4536,7 @@ export const IngestHubPage: React.FC = () => {
           hideCloseButton={isStopFillVersion}
           aria-labelledby="getStartedFlyoutTitle"
           css={css`
-            inline-size: 74vw !important;
+            inline-size: 72vw !important;
             animation-duration: 0s !important;
             transition-duration: 0s !important;
             [class*="euiFlyoutMenu__container"] {
@@ -4556,7 +4555,7 @@ export const IngestHubPage: React.FC = () => {
               padding-inline: 32px !important;
             }
             & .euiFlyoutFooter {
-              padding-block: 24px !important;
+              padding-block: 16px !important;
               padding-inline: 32px !important;
             }
           `}
@@ -4572,11 +4571,12 @@ export const IngestHubPage: React.FC = () => {
             >
               <EuiIcon type="logoObservability" size="xxl" />
               <div>
-                <EuiTitle size="l">
+                <EuiTitle size="m">
                   <h2 id="getStartedFlyoutTitle">Welcome to Elastic Observability</h2>
                 </EuiTitle>
-                <EuiText size="s" color="subdued" style={{ marginTop: 4 }}>
-                  Your starting point to ingest data, create alerts, manage SLOs, explore Streams, and get the most out of your observability stack
+                <EuiSpacer size="s" />
+                <EuiText grow={false}>
+                  <p>Your starting point to ingest data, create alerts, manage SLOs, explore Streams, and get the most out of your observability stack</p>
                 </EuiText>
               </div>
             </div>
@@ -4657,7 +4657,7 @@ export const IngestHubPage: React.FC = () => {
               session="start"
               flyoutMenuProps={{ title: welcomeChildTile.name }}
               css={css`
-                inline-size: 74vw !important;
+                inline-size: 72vw !important;
                 animation-duration: 0s !important;
                 transition-duration: 0s !important;
                 [class*="euiFlyoutMenu__container"] {
@@ -4672,7 +4672,7 @@ export const IngestHubPage: React.FC = () => {
                   padding-inline: 32px !important;
                 }
                 & .euiFlyoutFooter {
-                  padding-block: 24px !important;
+                  padding-block: 16px !important;
                   padding-inline: 32px !important;
                 }
               `}

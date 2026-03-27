@@ -152,9 +152,6 @@ function createNavTree({
                     },
                   },
                   {
-                    link: 'streams:significant-events' as const,
-                  },
-                  {
                     link: 'streams:data-sources' as const,
                   },
                 ],

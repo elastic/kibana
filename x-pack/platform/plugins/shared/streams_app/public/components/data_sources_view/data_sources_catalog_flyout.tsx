@@ -8,6 +8,7 @@
 import React, { useState, useCallback } from 'react';
 import { css } from '@emotion/react';
 import { AwsFlyout } from './aws_flyout';
+import integrationsHeaderImg from './assets/integrations-header.png';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -146,9 +147,11 @@ const CompactIntegrationCard: React.FC<{
         height: 100%;
         cursor: pointer;
         .euiCard__top { min-width:0; flex-shrink:0; margin-block-end:0 !important; margin-inline-end:12px !important; }
-        .euiCard__content { min-width:0; }
+        .euiCard__content { min-width:0; overflow:hidden; }
+        .euiCard__main { min-width:0; overflow:hidden; }
         .euiCard__content, .euiCard__children { margin-bottom:0; padding-bottom:0; }
-        .euiCard__title { font-family:${euiTheme.font.family}; font-weight:${euiTheme.font.weight.bold}; color:${euiTheme.colors.text}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .euiCard__title { min-width:0; overflow:hidden; font-family:${euiTheme.font.family}; font-weight:${euiTheme.font.weight.bold}; color:${euiTheme.colors.text}; }
+        .euiCard__title h4 { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         .euiCard__description { display:none; }
       `}
     >
@@ -419,11 +422,11 @@ export function DataSourcesCatalogFlyout({
 
   // ── renderCompactGrid ──────────────────────────────────────────────────────
 
-  const renderCompactGrid = (tiles: IntegrationTile[], cols?: number) => (
+  const renderCompactGrid = (tiles: IntegrationTile[], cols: number = 3) => (
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: `repeat(${cols ?? tiles.length}, 1fr)`,
+        gridTemplateColumns: `repeat(${cols}, 1fr)`,
         gap: 8,
       }}
     >
@@ -744,7 +747,7 @@ export function DataSourcesCatalogFlyout({
       session="start"
       flyoutMenuProps={{ title: 'Add data to Elastic Observability' }}
       css={css`
-        inline-size: 74vw !important;
+        inline-size: 72vw !important;
         animation-duration: 0s !important;
         transition-duration: 0s !important;
         .euiFlyout__closeButton { z-index: 10; }
@@ -755,6 +758,18 @@ export function DataSourcesCatalogFlyout({
           min-height: 0 !important;
           overflow: hidden !important;
         }
+        & .euiFlyoutHeader {
+          padding-block: 32px !important;
+          padding-inline: 32px !important;
+        }
+        & .euiFlyoutBody__overflowContent {
+          padding-block: 32px !important;
+          padding-inline: 32px !important;
+        }
+        & .euiFlyoutFooter {
+          padding-block: 16px !important;
+          padding-inline: 32px !important;
+        }
       `}
     >
       <EuiFlyoutHeader hasBorder>
@@ -762,40 +777,32 @@ export function DataSourcesCatalogFlyout({
           <EuiFlexItem grow={false}>
             <div
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: 48,
-                height: 48,
+                backgroundColor: euiTheme.colors.backgroundBaseSubdued,
                 borderRadius: 10,
-                background: euiTheme.colors.backgroundBaseSubdued,
-                border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+                padding: 4,
                 flexShrink: 0,
               }}
             >
-              <EuiIcon type="visBarVerticalStacked" size="l" color="primary" />
+              <img
+                src={integrationsHeaderImg}
+                alt="Add data"
+                style={{ width: 48, height: 48, objectFit: 'contain', display: 'block' }}
+              />
             </div>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="m">
               <h2>Add data to Elastic Observability</h2>
             </EuiTitle>
-            <EuiText size="s" color="subdued" style={{ marginTop: 2 }}>
-              <p>
-                Monitor your applications and infrastructure with powerful logs, metrics, traces,
-                and AI-driven insights
-              </p>
+            <EuiText size="s" color="subdued" style={{ marginTop: 4 }}>
+              Monitor your applications and infrastructure with powerful logs, metrics, traces,
+              and AI-driven insights
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody
-        css={css`
-          .euiFlyoutBody__overflow {
-            padding: ${euiTheme.size.l};
-          }
-        `}
-      >
+        >
         {renderFilterToolbar()}
 
         <EuiFlexGroup
