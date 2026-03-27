@@ -37,6 +37,12 @@ export class OperationDetailSubpage {
     this.waterfallSpanLinksBadge = this.page.testSubj.locator('^spanLinksBadge_');
   }
 
+  public getWaterfallServiceBadge(serviceName: string): Locator {
+    return this.page.testSubj
+      .locator('apmBarDetailsServiceNameBadge')
+      .filter({ hasText: serviceName });
+  }
+
   private async waitForWaterfallToLoad() {
     await this.waterfallInvestigateButton.getByRole('progressbar').waitFor({ state: 'hidden' });
   }

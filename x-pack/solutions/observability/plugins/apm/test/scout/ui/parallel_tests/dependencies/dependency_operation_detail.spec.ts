@@ -84,6 +84,24 @@ test.describe(
       });
     });
 
+    test('Service badge in waterfall links to service overview', async ({
+      pageObjects: { dependencyDetailsPage },
+    }) => {
+      const serviceBadge = dependencyDetailsPage.operationDetailSubpage.getWaterfallServiceBadge(
+        dependencyDetailsPage.SERVICE_NAME
+      );
+
+      await test.step('verify service badge is visible in the waterfall', async () => {
+        await expect(serviceBadge).toBeVisible();
+      });
+
+      await test.step('click the service badge and verify navigation to service overview', async () => {
+        const href = await serviceBadge.getAttribute('href');
+        expect(href).toContain('/services/');
+        expect(href).toContain('/overview');
+      });
+    });
+
     test('Has no detectable a11y violations on load', async ({ page }) => {
       const { violations } = await page.checkA11y({ include: ['main'] });
       expect(violations).toHaveLength(0);
