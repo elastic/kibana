@@ -106,7 +106,7 @@ const LogOverviewTab = ({
   );
   useAccordionExpansionEffect(logOverviewContext$, logsOverviewApi, props.hit.id);
 
-  const showCpsWarning = Boolean(streamsFeature) && cpsHasLinkedProjects && !props.hit.raw._index;
+  const renderCpsWarning = Boolean(streamsFeature) && cpsHasLinkedProjects && !props.hit.raw._index;
 
   return (
     <UnifiedDocViewerLogsOverview
@@ -117,7 +117,7 @@ const LogOverviewTab = ({
       renderAIInsight={logsAIInsightFeature?.render}
       renderFlyoutStreamField={streamsFeature?.renderFlyoutStreamField}
       renderFlyoutStreamProcessingLink={streamsFeature?.renderFlyoutStreamProcessingLink}
-      showCpsWarning={showCpsWarning}
+      renderCpsWarning={renderCpsWarning}
       indexes={indexes}
     />
   );

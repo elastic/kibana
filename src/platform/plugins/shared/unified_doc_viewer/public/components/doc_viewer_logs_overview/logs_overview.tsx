@@ -9,7 +9,7 @@
 
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import {
   SERVICE_NAME_FIELD,
   SPAN_ID_FIELD,
@@ -25,7 +25,6 @@ import type {
 import type { LogDocument, ObservabilityIndexes } from '@kbn/discover-utils/src';
 import { getStacktraceFields } from '@kbn/discover-utils/src';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import type { DocViewActions } from '@kbn/unified-doc-viewer/src/services/types';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import { LogsOverviewHeader } from './logs_overview_header';
@@ -53,7 +52,7 @@ export type LogsOverviewProps = DocViewRenderProps &
     renderAIInsight?: ObservabilityLogsAIInsightFeature['render'];
     renderFlyoutStreamField?: ObservabilityStreamsFeature['renderFlyoutStreamField'];
     renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
-    showCpsWarning?: boolean;
+    renderCpsWarning?: boolean;
     indexes: ObservabilityIndexes;
     showTraceWaterfall?: boolean;
     docViewActions?: DocViewActions;
@@ -77,7 +76,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
       renderAIInsight,
       renderFlyoutStreamField,
       renderFlyoutStreamProcessingLink,
-      showCpsWarning,
+      renderCpsWarning,
       indexes,
       showTraceWaterfall = true,
       docViewActions,
@@ -135,11 +134,11 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
           }
         >
           <EuiSpacer size="m" />
-          {showCpsWarning && <CpsStreamsWarning />}
           <LogsOverviewHeader
             formattedDoc={parsedDoc}
             hit={hit}
             renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
+            renderCpsWarning={renderCpsWarning}
             filter={filter}
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
@@ -149,7 +148,8 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
             <DocViewerExtensionActionsProvider actions={docViewActions}>
               {showSimilarErrors ? <SimilarErrors hit={hit} /> : null}
               <div>
-                {renderFlyoutStreamField && renderFlyoutStreamField({ dataView, doc: hit })}
+                {renderFlyoutStreamField &&
+                  renderFlyoutStreamField({ dataView, doc: hit, renderCpsWarning })}
               </div>
               <LogsOverviewDegradedFields ref={qualityIssuesSectionRef} rawDoc={hit.raw} />
               {isStacktraceAvailable && (
@@ -178,24 +178,4 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
       </FieldActionsProvider>
     );
   }
-);
-
-const CpsStreamsWarning = () => (
-  <>
-    <EuiCallOut
-      title={i18n.translate('unifiedDocViewer.logsOverview.cpsStreamsWarningTitle', {
-        defaultMessage: 'Cross-project search is active',
-      })}
-      color="warning"
-      iconType="warning"
-      size="s"
-      data-test-subj="cpsStreamsWarningCallout"
-    >
-      {i18n.translate('unifiedDocViewer.logsOverview.cpsStreamsWarningDescription', {
-        defaultMessage:
-          'This document may come from a linked project. Streams is local to this project, so the document may not be available when navigating to Streams. Add "METADATA _index" to your ES|QL query to identify the source.',
-      })}
-    </EuiCallOut>
-    <EuiSpacer size="s" />
-  </>
 );

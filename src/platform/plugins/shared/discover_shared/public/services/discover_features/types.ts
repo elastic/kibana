@@ -40,6 +40,7 @@ import type { FeaturesRegistry } from '../../../common';
 export interface ObservabilityStreamsFeatureRenderDeps {
   doc: DataTableRecord;
   dataView: DataView;
+  renderCpsWarning?: boolean;
 }
 
 export interface ObservabilityStreamsFeature {
