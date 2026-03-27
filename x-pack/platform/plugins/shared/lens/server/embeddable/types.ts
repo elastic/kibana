@@ -11,11 +11,11 @@ import type {
 } from '@kbn/embeddable-plugin/server';
 
 import type { LensRuntimeState } from '../../public';
-import type { DOC_TYPE } from '../../common/constants';
+import type { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
 
 export type LensEmbeddableStateWithType = EmbeddableStateWithType &
   LensRuntimeState & {
-    type: typeof DOC_TYPE;
+    type: typeof LENS_EMBEDDABLE_TYPE;
   };
 
 export type LensEmbeddableRegistryDefinition =

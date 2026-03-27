@@ -34,7 +34,7 @@ import type {
   LensSerializedState,
 } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
-import { DOC_TYPE } from '../../../common/constants';
+import { LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
 import { createEmptyLensState } from '../helper';
 import { createMockDatasource, createMockVisualization, makeDefaultServices } from '../../mocks';
 import { initializeInternalApi } from '../initializers/initialize_internal_api';
@@ -43,7 +43,7 @@ import type { LensEmbeddableStartServices } from '../types';
 function getDefaultLensApiMock() {
   const LensApiMock: LensApi = {
     // Static props
-    type: DOC_TYPE,
+    type: LENS_EMBEDDABLE_TYPE,
     uuid: faker.string.uuid(),
     // Shared Embeddable Observables
     title$: new BehaviorSubject<string | undefined>(faker.lorem.words()),
