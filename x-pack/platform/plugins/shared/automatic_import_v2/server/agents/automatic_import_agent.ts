@@ -8,7 +8,6 @@
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import type { StructuredTool } from '@langchain/core/tools';
 import { createTaskTool } from './sub_agents';
-import { fetchCurrentPipelineTool, fetchUniqueKeysTool } from './tools';
 import type { AutomaticImportAgentParams } from './types';
 import { AUTOMATIC_IMPORT_AGENT_PROMPT } from './prompts';
 import { AutomaticImportAgentState } from './state';
@@ -17,36 +16,31 @@ const AGENT_RECURSION_LIMIT = 100;
 
 /**
  * Creates an automatic import agent with the given parameters.
- * Subagents can be provided to customize behavior, including passing
- * pre-configured agents with samples (without storing samples in context).
+ * The orchestrator only has the task tool — it delegates all data retrieval
+ * and pipeline work to sub-agents.
  *
  * @param params - The parameters for the automatic import agent
  * @returns The automatic import agent
  */
 export const createAutomaticImportAgent = (params: AutomaticImportAgentParams) => {
-  const { model, subagents } = params;
+  const { model, subagents, samples } = params;
 
   const stateSchema = AutomaticImportAgentState;
-  const allTools: StructuredTool[] = [];
-
-  const uniqueKeysTool = fetchUniqueKeysTool();
-  allTools.push(uniqueKeysTool);
-
-  const currentPipelineTool = fetchCurrentPipelineTool();
-  allTools.push(currentPipelineTool);
 
   const taskTool = createTaskTool({
     subagents,
     model,
+    samples,
     recursionLimit: AGENT_RECURSION_LIMIT,
   });
-  allTools.push(taskTool);
 
-  // Return createReactAgent with proper configuration
+  const allTools: StructuredTool[] = [taskTool];
+
   const baseAgent = createReactAgent<typeof stateSchema, typeof AutomaticImportAgentState>({
     name: 'automatic_import_agent',
     llm: model,
-    tools: allTools as any, // TypeScript workaround to appease the expected type
+    // StructuredTool[] is not directly assignable to createReactAgent's generic tool parameter due to variance in the generic
+    tools: allTools as any,
     stateSchema,
     messageModifier: AUTOMATIC_IMPORT_AGENT_PROMPT,
   });
