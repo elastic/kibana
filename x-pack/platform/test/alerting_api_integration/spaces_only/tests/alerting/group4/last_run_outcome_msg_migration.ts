@@ -157,22 +157,6 @@ export default function lastRunOutcomeMsgMigrationTests({ getService }: FtrProvi
         id: createdRule.id,
       });
     });
-
-    async function waitForEventLogDocs(
-      id: string,
-      actions: Map<string, { gte: number } | { equal: number }>
-    ) {
-      return await retry.try(async () => {
-        return await getEventLog({
-          getService,
-          spaceId: Spaces.space1.id,
-          type: 'alert',
-          id,
-          provider: 'alerting',
-          actions,
-        });
-      });
-    }
   });
 
   async function waitForEventLogDocs(
