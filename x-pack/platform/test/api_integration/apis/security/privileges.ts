@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type { RawKibanaPrivileges } from '@kbn/security-plugin-types-common';
 import { diff } from 'jest-diff';
 import { isEqual, isEqualWith } from 'lodash';
