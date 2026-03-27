@@ -60,7 +60,7 @@ export function createMultiJudgeEvaluator(config: {
       results.forEach((result, i) => {
         if (result.status === 'fulfilled') {
           judgeResults.push({ name: judges[i].name, result: result.value });
-          if (result.value.score != null) {
+          if (result.value.score != null && Number.isFinite(result.value.score)) {
             scores.push(result.value.score);
           }
         } else {

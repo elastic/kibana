@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/evals-extensions'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-obs-ai'
+  defaultOwner: '@elastic/obs-ai-team'
 toolchains:
   default: node
 language: typescript
@@ -14,14 +14,14 @@ project:
   title: '@kbn/evals-extensions'
   description: Moon project for @kbn/evals-extensions
   channel: ''
-  owner: '@elastic/kibana-obs-ai'
+  owner: '@elastic/obs-ai-team'
   sourceRoot: x-pack/platform/packages/shared/kbn-evals-extensions
 dependsOn:
   - '@kbn/evals'
 tags:
-  - shared-common
+  - test-helper
   - package
-  - prod
+  - dev
   - group-undefined
   - jest-unit-tests
 fileGroups:

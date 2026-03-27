@@ -113,6 +113,7 @@ export function createPromptLeakDetectionEvaluator(config?: {
       const detectedPatterns: Array<{ pattern: string; location: 'text' | 'codeblock' }> = [];
 
       for (const pattern of patterns) {
+        pattern.lastIndex = 0;
         if (pattern.test(strippedPlainText)) {
           detectedPatterns.push({ pattern: pattern.source, location: 'text' });
         }
@@ -121,6 +122,7 @@ export function createPromptLeakDetectionEvaluator(config?: {
       for (const block of codeBlocks) {
         const strippedBlock = stripExcludedSegments(block);
         for (const pattern of patterns) {
+          pattern.lastIndex = 0;
           if (pattern.test(strippedBlock)) {
             detectedPatterns.push({ pattern: pattern.source, location: 'codeblock' });
           }
