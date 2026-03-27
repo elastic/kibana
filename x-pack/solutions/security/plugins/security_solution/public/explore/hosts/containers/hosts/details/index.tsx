@@ -28,7 +28,8 @@ export interface HostDetailsArgs {
 
 interface UseHostDetails {
   endDate: string;
-  hostName: string;
+  /** When missing or empty, the host details search is not run (avoids invalid strategy requests). */
+  hostName?: string;
   id?: string;
   indexNames: string[];
   skip?: boolean;
@@ -43,6 +44,8 @@ export const useHostDetails = ({
   skip = false,
   startDate,
 }: UseHostDetails): [boolean, HostDetailsArgs, inputsModel.Refetch] => {
+  const shouldSkip = skip || hostName == null || hostName === '';
+
   const {
     loading,
     result: response,
@@ -55,7 +58,7 @@ export const useHostDetails = ({
       hostDetails: {},
     },
     errorMessage: i18n.FAIL_HOST_OVERVIEW,
-    abort: skip,
+    abort: shouldSkip,
   });
 
   const hostDetailsResponse = useMemo(
@@ -71,8 +74,11 @@ export const useHostDetails = ({
     [endDate, response.hostDetails, id, inspect, refetch, startDate]
   );
 
-  const hostDetailsRequest = useMemo(
-    () => ({
+  const hostDetailsRequest = useMemo(() => {
+    if (hostName == null || hostName === '') {
+      return null;
+    }
+    return {
       defaultIndex: indexNames,
       factoryQueryType: HostsQueries.details,
       hostName,
@@ -81,15 +87,14 @@ export const useHostDetails = ({
         from: startDate,
         to: endDate,
       },
-    }),
-    [endDate, hostName, indexNames, startDate]
-  );
+    };
+  }, [endDate, hostName, indexNames, startDate]);
 
   useEffect(() => {
-    if (!skip) {
+    if (!shouldSkip && hostDetailsRequest != null) {
       search(hostDetailsRequest);
     }
-  }, [hostDetailsRequest, search, skip]);
+  }, [hostDetailsRequest, search, shouldSkip]);
 
   return [loading, hostDetailsResponse, refetch];
 };

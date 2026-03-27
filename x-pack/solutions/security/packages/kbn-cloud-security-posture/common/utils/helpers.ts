@@ -19,6 +19,8 @@ interface BuildEntityAlertsQueryParams {
   severity?: string;
   sortField?: string;
   sortDirection?: string;
+  /** When set (EUID DSL from the entity store), used instead of a `term` filter on `field`. */
+  entityFilter?: QueryDslQueryContainer;
 }
 
 export const defaultErrorMessage = i18n.translate(
@@ -130,7 +132,21 @@ export const buildEntityAlertsQuery = ({
   severity,
   sortField,
   sortDirection,
+  entityFilter,
 }: BuildEntityAlertsQueryParams) => {
+  const entityClause: QueryDslQueryContainer = entityFilter ?? {
+    bool: {
+      should: [
+        {
+          term: {
+            [field]: `${queryValue || ''}`,
+          },
+        },
+      ],
+      minimum_should_match: 1,
+    },
+  };
+
   return {
     size: size || 0,
     _source: false,
@@ -146,18 +162,7 @@ export const buildEntityAlertsQuery = ({
     query: {
       bool: {
         filter: [
-          {
-            bool: {
-              should: [
-                {
-                  term: {
-                    [field]: `${queryValue || ''}`,
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
-          },
+          entityClause,
           severity
             ? {
                 bool: {
