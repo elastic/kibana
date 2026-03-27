@@ -37,6 +37,9 @@ export const severityLabels: Record<Severity, string> = {
 
 export const ENTITY_ID_FIELD = 'entity.id';
 
+/** Stable empty map so callers passing inline `{}` do not invalidate query memoization every render. */
+const EMPTY_IDENTITY_FIELDS: Record<string, string> = {};
+
 const toStoreEntityType = (type: string | undefined): 'host' | 'user' | undefined => {
   if (type === EntityType.host || type === 'host') {
     return 'host';
@@ -168,7 +171,11 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
 }) => {
   const dispatch = useDispatch();
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
-  const entityIdValue = identityFields?.[ENTITY_ID_FIELD];
+  const identityFieldsStable =
+    identityFields != null && Object.keys(identityFields).length > 0
+      ? identityFields
+      : EMPTY_IDENTITY_FIELDS;
+  const entityIdValue = identityFieldsStable[ENTITY_ID_FIELD];
   const storeEntityType = toStoreEntityType(entityType);
   const shouldResolveEntityIdFromStore =
     Boolean(entityIdValue) && entityStoreV2Enabled && storeEntityType != null;
@@ -189,8 +196,8 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
             storeEntityType ?? 'generic',
             entityRecord
           )
-        : identityFields,
-    [entityStoreV2Enabled, euidApi?.euid, storeEntityType, entityRecord, identityFields]
+        : identityFieldsStable,
+    [entityStoreV2Enabled, euidApi?.euid, storeEntityType, entityRecord, identityFieldsStable]
   );
 
   const skipAlertsQuery =
@@ -227,11 +234,11 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
       getAlertsByStatusQuery({
         from,
         to,
-        identityFields: identityFieldsForQuery ?? identityFields,
+        identityFields: identityFieldsForQuery ?? identityFieldsStable,
         additionalFilters,
         runtimeMappings,
       }),
-    [from, to, identityFieldsForQuery, identityFields, additionalFilters, runtimeMappings]
+    [from, to, identityFieldsForQuery, identityFieldsStable, additionalFilters, runtimeMappings]
   );
 
   const {

@@ -278,16 +278,15 @@ export const AlertsByStatus = ({
               <EuiFlexGroup justifyContent="center" gutterSize="none">
                 <EuiFlexItem grow={false}>
                   <EuiText className="eui-textCenter" size="s">
-                    {totalAlerts !== 0 ||
-                      (visualizationTotalAlerts !== 0 && (
-                        <>
-                          <b>
-                            <FormattedCount count={totalAlerts} />
-                          </b>
-                          <> </>
-                          <small>{ALERTS(totalAlerts)}</small>
-                        </>
-                      ))}
+                    {(totalAlerts !== 0 || visualizationTotalAlerts !== 0) && (
+                      <>
+                        <b>
+                          <FormattedCount count={totalAlerts} />
+                        </b>
+                        <> </>
+                        <small>{ALERTS(totalAlerts)}</small>
+                      </>
+                    )}
                   </EuiText>
 
                   <EuiSpacer size="l" />
