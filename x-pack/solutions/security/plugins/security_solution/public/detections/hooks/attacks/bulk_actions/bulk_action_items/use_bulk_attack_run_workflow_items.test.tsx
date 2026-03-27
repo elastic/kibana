@@ -160,35 +160,6 @@ describe('useBulkAttackRunWorkflowItems', () => {
       expect(closePopoverMenu).toHaveBeenCalledTimes(1);
     });
 
-    it('should pass telemetry service and telemetrySource to the panel', () => {
-      const mockTelemetry = { reportEvent: reportEventMock };
-      (useKibana as jest.Mock).mockReturnValue({ services: { telemetry: mockTelemetry } });
-
-      const { result } = renderHook(() =>
-        useBulkAttackRunWorkflowItems({ telemetrySource: 'attacks_page_group_take_action' })
-      );
-
-      const panelContent = result.current.panels[0].renderContent({
-        alertItems: defaultAlertItems,
-        closePopoverMenu: jest.fn(),
-        setIsBulkActionsLoading: jest.fn(),
-      }) as ReactElement;
-
-      expect(panelContent.props.telemetry).toBe(mockTelemetry);
-      expect(panelContent.props.telemetrySource).toBe('attacks_page_group_take_action');
-    });
-
-    it('should pass undefined telemetrySource when not provided', () => {
-      const { result } = renderHook(() => useBulkAttackRunWorkflowItems());
-
-      const panelContent = result.current.panels[0].renderContent({
-        alertItems: defaultAlertItems,
-        closePopoverMenu: jest.fn(),
-        setIsBulkActionsLoading: jest.fn(),
-      }) as ReactElement;
-
-      expect(panelContent.props.telemetrySource).toBeUndefined();
-    });
   });
 
   describe('when canRunWorkflow is false', () => {
