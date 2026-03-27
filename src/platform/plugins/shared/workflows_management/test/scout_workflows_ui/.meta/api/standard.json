@@ -1,5 +1,5 @@
 {
-  "sha1": "88b77477d67e2420c4b476d5ed8dbc781e9c260e",
+  "sha1": "49e0ba785b87dfa8bc84d913851db1424cf67d2c",
   "tests": [
     {
       "id": "b2eaaaa0cf33c26-d5cddc6b883a994",
@@ -11,7 +11,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
-        "line": 39,
+        "line": 40,
         "column": 10
       }
     },
@@ -25,13 +25,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
-        "line": 54,
+        "line": 55,
         "column": 10
       }
     },
     {
-      "id": "b2eaaaa0cf33c26-d1958b5e6fc896e",
-      "title": "Workflows Import/Export API should detect conflicts via check-conflicts endpoint",
+      "id": "b2eaaaa0cf33c26-c2d7d16a55f13e8",
+      "title": "Workflows Import/Export API should detect conflicts",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
-        "line": 73,
+        "line": 74,
         "column": 10
       }
     },
@@ -53,7 +53,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
-        "line": 98,
+        "line": 96,
         "column": 10
       }
     },
@@ -67,7 +67,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
-        "line": 124,
+        "line": 122,
         "column": 10
       }
     },
@@ -81,7 +81,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
-        "line": 151,
+        "line": 149,
         "column": 10
       }
     },
@@ -95,7 +95,77 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
-        "line": 164,
+        "line": 162,
+        "column": 10
+      }
+    },
+    {
+      "id": "b2eaaaa0cf33c26-c00b07d98d39b91",
+      "title": "Workflows Import/Export API should return 400 when export ids array is empty",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
+        "line": 211,
+        "column": 10
+      }
+    },
+    {
+      "id": "b2eaaaa0cf33c26-43507cae012329c",
+      "title": "Workflows Import/Export API should return 400 when mget ids array is empty",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
+        "line": 224,
+        "column": 10
+      }
+    },
+    {
+      "id": "b2eaaaa0cf33c26-111d9ee48eabb99",
+      "title": "Workflows Import/Export API should handle partial failures in bulk_create (one valid, one invalid)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
+        "line": 237,
+        "column": 10
+      }
+    },
+    {
+      "id": "b2eaaaa0cf33c26-f69ce4769b2968b",
+      "title": "Workflows Import/Export API should bulk create with explicit custom IDs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
+        "line": 258,
+        "column": 10
+      }
+    },
+    {
+      "id": "b2eaaaa0cf33c26-89f4db35755a8cf",
+      "title": "Workflows Import/Export API should export manifest with correct version and count",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/import_export.spec.ts",
+        "line": 276,
         "column": 10
       }
     },

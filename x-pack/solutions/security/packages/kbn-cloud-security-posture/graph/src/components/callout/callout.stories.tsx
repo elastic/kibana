@@ -13,6 +13,7 @@ import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 
 const mockLinks = {
   integrationUrl: '/app/integrations/browse/security/asset_inventory',
+  entityStoreUrl: '/app/security/entity_analytics_management',
   discoverUrl: '/app/discover',
 };
 
