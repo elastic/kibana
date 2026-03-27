@@ -25,8 +25,15 @@ interface CreateTestConfigOptions<T> {
   indexRefreshInterval?: string | false;
 }
 
-// include settings from elasticsearch controller
+// Include settings from Elasticsearch controller:
 // https://github.com/elastic/elasticsearch-controller/blob/main/helm/values.yaml
+//
+// ⚠️  DO NOT add args here to make new tests pass.
+//     Args added here do NOT get set on MKI. Your tests will pass locally
+//     but may fail or behave differently in serverless cloud.
+//     If your test needs an experimental feature flag, use
+//     createServerlessFeatureFlagTestConfig from feature_flag.serverless.config.base.ts
+//     and place your config under feature_flag_configs/ instead.
 const esServerArgsFromController = {
   es: [],
   oblt: ['xpack.apm_data.enabled=true'],
@@ -34,8 +41,15 @@ const esServerArgsFromController = {
   workplaceai: [],
 };
 
-// include settings from kibana controller
+// Include settings from Kibana controller:
 // https://github.com/elastic/kibana-controller/blob/main/internal/controllers/kibana/config/config_settings.go
+//
+// ⚠️  DO NOT add args here to make new tests pass.
+//     Args added here do NOT get set on MKI. Your tests will pass locally
+//     but may fail or behave differently in serverless cloud.
+//     If your test needs an experimental feature flag, use
+//     createServerlessFeatureFlagTestConfig from feature_flag.serverless.config.base.ts
+//     and place your config under feature_flag_configs/ instead.
 const kbnServerArgsFromController = {
   es: [
     // useful for testing (also enabled in MKI QA)
