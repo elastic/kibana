@@ -10,7 +10,9 @@ import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
 import {
   API_VERSIONS as ENTITY_STORE_API_VERSIONS,
   ENTITY_STORE_ROUTES,
+  FF_ENABLE_ENTITY_STORE_V2,
 } from '@kbn/entity-store/common';
+import { compact } from 'lodash';
 import type { EntityDetailsHighlightsResponse } from '../../../common/api/entity_analytics/entity_details/highlights.gen';
 import { ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
 import type {
@@ -26,6 +28,7 @@ import type {
   FindAssetCriticalityRecordsResponse,
   InitMonitoringEngineResponse,
   InitRiskEngineResponse,
+  InternalUploadAssetCriticalityV2CsvResponse,
   ListEntitiesRequestQuery,
   ListEntitiesResponse,
   ListEntitySourcesResponse,
@@ -51,6 +54,7 @@ import type {
 } from '../../../common/api/entity_analytics/watchlists/management/update.gen';
 import {
   API_VERSIONS,
+  ASSET_CRITICALITY_CSV_UPLOAD_V2_URL,
   ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL,
   ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
   ASSET_CRITICALITY_PUBLIC_LIST_URL,
@@ -80,6 +84,7 @@ import {
 import { WATCHLISTS_URL } from '../../../common/entity_analytics/watchlists/constants';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 export interface DeleteAssetCriticalityResponse {
   deleted: true;
@@ -92,7 +97,12 @@ export interface DeleteAssetCriticalityResponse {
 const ENTITY_SOURCE_NAME = 'User Monitored Indices';
 
 export const useEntityAnalyticsRoutes = () => {
-  const http = useKibana().services.http;
+  const { http, uiSettings } = useKibana().services;
+  const isEntityStoreV2UiSettingEnabled =
+    uiSettings?.get<boolean>(FF_ENABLE_ENTITY_STORE_V2, false) ?? false;
+  const isEntityAnalyticsEntityStoreV2Enabled = useIsExperimentalFeatureEnabled(
+    'entityAnalyticsEntityStoreV2'
+  );
 
   return useMemo(() => {
     /**
@@ -401,6 +411,39 @@ export const useEntityAnalyticsRoutes = () => {
       const body = new FormData();
       body.append('file', file);
 
+      if (isEntityAnalyticsEntityStoreV2Enabled && isEntityStoreV2UiSettingEnabled) {
+        const response = await http.fetch<InternalUploadAssetCriticalityV2CsvResponse>(
+          ASSET_CRITICALITY_CSV_UPLOAD_V2_URL,
+          {
+            version: API_VERSIONS.internal.v1,
+            method: 'POST',
+            headers: {
+              'Content-Type': undefined, // Lets the browser set the appropriate content type
+            },
+            body,
+          }
+        );
+
+        return {
+          errors: compact(
+            response.items.map((item, ndx) => {
+              if (item.error) {
+                return {
+                  index: ndx,
+                  message: item.error,
+                };
+              }
+              return null;
+            })
+          ),
+          stats: {
+            successful: response.successful,
+            failed: response.failed,
+            total: response.total,
+          },
+        };
+      }
+
       return http.fetch<UploadAssetCriticalityRecordsResponse>(
         ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
         {
@@ -596,7 +639,7 @@ export const useEntityAnalyticsRoutes = () => {
       fetchEntityDetailsHighlights,
       fetchWatchlists,
     };
-  }, [http]);
+  }, [http, isEntityStoreV2UiSettingEnabled, isEntityAnalyticsEntityStoreV2Enabled]);
 };
 
 export type AssetCriticality = SnakeToCamelCase<AssetCriticalityRecord>;
