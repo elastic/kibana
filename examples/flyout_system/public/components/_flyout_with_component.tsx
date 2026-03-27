@@ -392,11 +392,11 @@ const GlobalFlyout: React.FC = React.memo(() => {
         <EuiFlexItem grow={false}>
           <EuiText>
             <EuiButton
-                buttonRef={triggerRef}
-                disabled={isFlyoutVisible}
-                onClick={handleOpenFlyout}
-                data-test-subj="openNonSessionFlyoutComponentButton"
-              >
+              buttonRef={triggerRef}
+              disabled={isFlyoutVisible}
+              onClick={handleOpenFlyout}
+              data-test-subj="openNonSessionFlyoutComponentButton"
+            >
               Open Global Flyout
             </EuiButton>
           </EuiText>
