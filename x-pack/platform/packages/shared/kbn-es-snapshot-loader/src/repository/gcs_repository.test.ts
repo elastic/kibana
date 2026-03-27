@@ -47,6 +47,8 @@ describe('createGcsRepository', () => {
     expect(createRepository).toHaveBeenCalledWith(
       {
         name: 'test-repo',
+        master_timeout: '2m',
+        timeout: '2m',
         body: {
           type: 'gcs',
           settings: {
@@ -74,6 +76,8 @@ describe('createGcsRepository', () => {
     expect(createRepository).toHaveBeenCalledWith(
       {
         name: 'test-repo',
+        master_timeout: '2m',
+        timeout: '2m',
         body: {
           type: 'gcs',
           settings: {
