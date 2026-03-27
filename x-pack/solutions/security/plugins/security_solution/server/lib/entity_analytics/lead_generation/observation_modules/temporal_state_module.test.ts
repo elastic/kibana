@@ -16,7 +16,6 @@ const createPrivilegedEntity = (type: string, name: string): LeadEntity => ({
   } as never,
   type,
   name,
-  id: `euid-${name}`,
 });
 
 const createNonPrivilegedEntity = (type: string, name: string): LeadEntity => ({
@@ -25,7 +24,6 @@ const createNonPrivilegedEntity = (type: string, name: string): LeadEntity => ({
   } as never,
   type,
   name,
-  id: `euid-${name}`,
 });
 
 const mockSnapshotResponse = (buckets: Array<{ key: string; wasPrivileged: boolean }>) => ({
@@ -68,7 +66,7 @@ describe('TemporalStateModule', () => {
   it('detects privilege escalation when entity was not privileged historically', async () => {
     const entity = createPrivilegedEntity('user', 'alice');
     esClient.search.mockResolvedValue(
-      mockSnapshotResponse([{ key: 'euid-alice', wasPrivileged: false }]) as never
+      mockSnapshotResponse([{ key: 'alice', wasPrivileged: false }]) as never
     );
 
     const module = createTemporalStateModule({ esClient, logger, spaceId });
@@ -77,13 +75,13 @@ describe('TemporalStateModule', () => {
     expect(observations).toHaveLength(1);
     expect(observations[0].type).toBe('privilege_escalation');
     expect(observations[0].severity).toBe('high');
-    expect(observations[0].entityId).toBe('user:euid-alice');
+    expect(observations[0].entityId).toBe('user:alice');
   });
 
-  it('queries entity.id (EUID) rather than entity.name or entity.type', async () => {
+  it('queries by entity type name field (e.g. user.name)', async () => {
     const entity = createPrivilegedEntity('user', 'alice');
     esClient.search.mockResolvedValue(
-      mockSnapshotResponse([{ key: 'euid-alice', wasPrivileged: false }]) as never
+      mockSnapshotResponse([{ key: 'alice', wasPrivileged: false }]) as never
     );
 
     const module = createTemporalStateModule({ esClient, logger, spaceId });
@@ -91,13 +89,13 @@ describe('TemporalStateModule', () => {
 
     const searchCall = esClient.search.mock.calls[0][0] as Record<string, unknown>;
     const query = searchCall.query as { bool: { filter: Array<Record<string, unknown>> } };
-    expect(query.bool.filter).toEqual([{ terms: { 'entity.id': ['euid-alice'] } }]);
+    expect(query.bool.filter).toEqual([{ terms: { 'user.name': ['alice'] } }]);
   });
 
   it('does not produce observation when entity was already privileged', async () => {
     const entity = createPrivilegedEntity('user', 'always-admin');
     esClient.search.mockResolvedValue(
-      mockSnapshotResponse([{ key: 'euid-always-admin', wasPrivileged: true }]) as never
+      mockSnapshotResponse([{ key: 'always-admin', wasPrivileged: true }]) as never
     );
 
     const module = createTemporalStateModule({ esClient, logger, spaceId });
@@ -116,24 +114,25 @@ describe('TemporalStateModule', () => {
     expect(esClient.search).not.toHaveBeenCalled();
   });
 
-  it('handles multiple entity types in a single query', async () => {
+  it('handles multiple entity types with one query per type', async () => {
     const userEntity = createPrivilegedEntity('user', 'alice');
     const hostEntity = createPrivilegedEntity('host', 'server-01');
 
-    esClient.search.mockResolvedValueOnce(
-      mockSnapshotResponse([
-        { key: 'euid-alice', wasPrivileged: false },
-        { key: 'euid-server-01', wasPrivileged: false },
-      ]) as never
-    );
+    esClient.search
+      .mockResolvedValueOnce(
+        mockSnapshotResponse([{ key: 'alice', wasPrivileged: false }]) as never
+      )
+      .mockResolvedValueOnce(
+        mockSnapshotResponse([{ key: 'server-01', wasPrivileged: false }]) as never
+      );
 
     const module = createTemporalStateModule({ esClient, logger, spaceId });
     const observations = await module.collect([userEntity, hostEntity]);
 
-    expect(esClient.search).toHaveBeenCalledTimes(1);
+    expect(esClient.search).toHaveBeenCalledTimes(2);
     expect(observations).toHaveLength(2);
-    expect(observations[0].entityId).toBe('user:euid-alice');
-    expect(observations[1].entityId).toBe('host:euid-server-01');
+    expect(observations[0].entityId).toBe('user:alice');
+    expect(observations[1].entityId).toBe('host:server-01');
   });
 
   it('logs warning and returns empty when ES query fails', async () => {
