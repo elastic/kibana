@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../..',
-  roots: ['<rootDir>/packages/shared/as-code/shared-schemas'],
+  roots: ['<rootDir>/src/platform/packages/shared/as-code/shared-schemas'],
 };
