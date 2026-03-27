@@ -6,8 +6,8 @@
  */
 
 import datemath from '@kbn/datemath';
-import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics';
-import type { MonitoringEntitySourceDescriptorClient } from '../../../privilege_monitoring/saved_objects';
+import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
+import type { WatchlistEntitySourceClient } from '../infra';
 
 const FIRST_RUN_DEFAULT_RANGE = 'now-1M'; // on first run (update detection), look back over last month
 
@@ -20,7 +20,7 @@ const parseOrThrow = (expr: string): string => {
 export type WatchlistSyncMarkersService = ReturnType<typeof createWatchlistSyncMarkersService>;
 
 export const createWatchlistSyncMarkersService = (
-  descriptorClient: MonitoringEntitySourceDescriptorClient
+  descriptorClient: WatchlistEntitySourceClient
 ) => {
   const getLastProcessedMarker = async (source: MonitoringEntitySource): Promise<string> => {
     const lastProcessedMarker = await descriptorClient.getLastProcessedMarker(source);
