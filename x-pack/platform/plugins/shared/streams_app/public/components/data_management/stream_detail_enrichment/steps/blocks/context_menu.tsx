@@ -183,7 +183,7 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
     <EuiContextMenuItem
       data-test-subj="stepContextMenuMoveUpItem"
       key="moveUpItem"
-      icon="arrowUp"
+      icon="chevronSingleUp"
       disabled={!canReorder || isFirstStepInLevel}
       onClick={() => {
         togglePopover(false);
@@ -195,7 +195,7 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
     <EuiContextMenuItem
       data-test-subj="stepContextMenuMoveDownItem"
       key="moveDownItem"
-      icon="arrowDown"
+      icon="chevronSingleDown"
       disabled={!canReorder || isLastStepInLevel}
       onClick={() => {
         togglePopover(false);
@@ -210,7 +210,7 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
             <EuiContextMenuItem
               data-test-subj="stepContextMenuEditDescriptionItem"
               key="editDescription"
-              icon="editorComment"
+              icon="comment"
               disabled={!canEdit}
               onClick={() => {
                 togglePopover(false);
@@ -222,7 +222,7 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
             <EuiContextMenuItem
               data-test-subj="stepContextMenuRemoveDescriptionItem"
               key="removeDescription"
-              icon="minusInCircle"
+              icon="minusCircle"
               disabled={!canEdit}
               onClick={() => {
                 togglePopover(false);
@@ -236,7 +236,7 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
             <EuiContextMenuItem
               data-test-subj="stepContextMenuEditDescriptionItem"
               key="editDescription"
-              icon="editorComment"
+              icon="comment"
               disabled={!canEdit}
               onClick={() => {
                 togglePopover(false);

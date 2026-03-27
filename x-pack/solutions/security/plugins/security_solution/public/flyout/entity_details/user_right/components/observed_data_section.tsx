@@ -27,16 +27,19 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { getCriteriaFromUsersType } from '../../../../common/components/ml/criteria/get_criteria_from_users_type';
 import { UsersType } from '../../../../explore/users/store/model';
 import type { ObservedUserData } from '../content';
+import type { IdentityFields } from '../../../document_details/shared/utils';
 
 export const ObservedDataSection = memo(
   ({
     userName,
+    identityFields,
     observedUser,
     contextID,
     scopeId,
     queryId,
   }: {
     userName: string;
+    identityFields: IdentityFields;
     observedUser: ObservedUserData;
     contextID: string;
     scopeId: string;
@@ -122,6 +125,7 @@ export const ObservedDataSection = memo(
           ) : (
             <ObservedDataSectionContent
               userName={userName}
+              identityFields={identityFields}
               observedUser={observedUser}
               contextID={contextID}
               scopeId={scopeId}
@@ -138,12 +142,14 @@ ObservedDataSection.displayName = 'ObservedDataSection';
 const ObservedDataSectionContent = memo(
   ({
     userName,
+    identityFields,
     observedUser,
     contextID,
     scopeId,
     queryId,
   }: {
     userName: string;
+    identityFields: IdentityFields;
     observedUser: ObservedUserData;
     contextID: string;
     scopeId: string;
@@ -165,6 +171,7 @@ const ObservedDataSectionContent = memo(
     const observedUserWithAnomalies = useMemo(
       () => ({
         ...observedUser,
+        entityId: observedUser.entityRecord?.entity.id,
         anomalies: {
           isLoading: isLoadingAnomaliesData,
           anomalies: anomaliesData,
