@@ -32,18 +32,16 @@ inputs:
     description: 'Include the cleaned and parsed HTML content of each search result. Significantly increases response size.'
 steps:
   - name: tavily-search
-    type: mcp.callTool
-    connector-id: <%= mcp-stack-connector-id %>
+    type: tavily_mcp.tavilySearch
+    connector-id: <%= tavily_mcp-stack-connector-id %>
     with:
-      name: "tavily_search"
-      arguments:
-        query: "${{inputs.query}}"
-        max_results: ${{inputs.max_results}}
-        search_depth: "${{inputs.search_depth}}"
-        include_raw_content: ${{inputs.include_raw_content}}
+      query: "${{inputs.query}}"
+      max_results: ${{inputs.max_results}}
+      search_depth: "${{inputs.search_depth}}"
+      include_raw_content: ${{inputs.include_raw_content}}
   - name: map-results
     type: data.map
-    items: ${{ steps['tavily-search'].output.content[0].text | json_parse }}
+    items: ${{steps['tavily-search'].output}}
     with:
       fields:
         query: "${{ item.query }}"
@@ -56,4 +54,3 @@ steps:
           content: "${{ result.content }}"
           score: "${{ result.score }}"
           published_date: "${{ result.published_date }}"
-          # raw_content: "${{ result.raw_content }}"

@@ -5,14 +5,9 @@ tags: ['agent-builder-tool']
 enabled: true
 triggers:
   - type: manual
-inputs:
-  properties: {}
-  required: []
-  additionalProperties: false
+inputs: []
 steps:
   - name: get-user-data
-    type: mcp.callTool
-    connector-id: <%= mcp-stack-connector-id %>
-    with:
-      name: "get_user_data"
-      arguments: {}
+    type: pagerduty_mcp.getUserData
+    connector-id: <%= pagerduty_mcp-stack-connector-id %>
+    with: {}

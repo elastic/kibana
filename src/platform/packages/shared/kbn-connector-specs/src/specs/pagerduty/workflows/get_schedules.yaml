@@ -28,20 +28,17 @@ inputs:
     description: Filter schedules by user IDs
 steps:
   - name: list-schedules
-    type: mcp.callTool
-    connector-id: <%= mcp-stack-connector-id %>
+    type: pagerduty_mcp.listSchedules
+    connector-id: <%= pagerduty_mcp-stack-connector-id %>
     with:
-      name: "list_schedules"
-      arguments:
-        query_model:
-          query: "${{inputs.query}}"
-          limit: ${{inputs.limit}}
-          include: ${{inputs.include}}
-          team_ids: ${{inputs.team_ids}}
-          user_ids: ${{inputs.user_ids}}
+      query: "${{inputs.query}}"
+      limit: ${{inputs.limit}}
+      include: ${{inputs.include}}
+      team_ids: ${{inputs.team_ids}}
+      user_ids: ${{inputs.user_ids}}
   - name: get-schedules
     type: data.map
-    items: ${{steps['list-schedules'].output.content[0].text | json_parse}}
+    items: ${{steps['list-schedules'].output}}
     with:
       fields:
         response:
