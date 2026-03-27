@@ -192,50 +192,37 @@ export class UiamApiKeyProvisioningTask {
     core: CoreSetup<AlertingPluginsStart>
   ): Promise<{ state: LatestTaskStateSchema; runAt?: Date; error?: Error }> => {
     const state = (taskInstance.state ?? emptyState) as LatestTaskStateSchema;
+    const context = await createProvisioningRunContext(core);
+
+    const { apiKeysToConvert, provisioningStatusForSkippedRules, hasMoreToProvision } =
+      await this.getApiKeysToConvert(context);
+
+    const { rulesWithUiamApiKeys, provisioningStatusForFailedConversions } =
+      await this.convertApiKeys(apiKeysToConvert, context);
+
+    const { provisioningStatusForCompletedRules, provisioningStatusForFailedRules } =
+      await this.updateRules(rulesWithUiamApiKeys, context);
+
+    await this.updateProvisioningStatus(
+      {
+        skipped: provisioningStatusForSkippedRules,
+        failedConversions: provisioningStatusForFailedConversions,
+        completed: provisioningStatusForCompletedRules,
+        failed: provisioningStatusForFailedRules,
+      },
+      context
+    );
+
     const nextState = { runs: state.runs + 1 };
 
-    let provisioningStatusForSkippedRules: Array<ProvisioningStatusDocs> = [];
-    let provisioningStatusForFailedConversions: Array<ProvisioningStatusDocs> = [];
-    let provisioningStatusForCompletedRules: Array<ProvisioningStatusDocs> = [];
-    let provisioningStatusForFailedRules: Array<ProvisioningStatusDocs> = [];
-    let hasMoreToProvision = false;
-
-    try {
-      const context = await createProvisioningRunContext(core);
-
-      const getApiKeysResult = await this.getApiKeysToConvert(context);
-      provisioningStatusForSkippedRules = getApiKeysResult.provisioningStatusForSkippedRules;
-      hasMoreToProvision = getApiKeysResult.hasMoreToProvision;
-
-      const convertResult = await this.convertApiKeys(
-        getApiKeysResult.apiKeysToConvert,
-        context
-      );
-      provisioningStatusForFailedConversions = convertResult.provisioningStatusForFailedConversions;
-
-      const updateResult = await this.updateRules(convertResult.rulesWithUiamApiKeys, context);
-      provisioningStatusForCompletedRules = updateResult.provisioningStatusForCompletedRules;
-      provisioningStatusForFailedRules = updateResult.provisioningStatusForFailedRules;
-
-      await this.updateProvisioningStatus(
-        {
-          skipped: provisioningStatusForSkippedRules,
-          failedConversions: provisioningStatusForFailedConversions,
-          completed: provisioningStatusForCompletedRules,
-          failed: provisioningStatusForFailedRules,
-        },
-        context
-      );
-    } finally {
-      this.reportProvisioningRunEvent({
-        completed: provisioningStatusForCompletedRules.length,
-        failed:
-          provisioningStatusForFailedConversions.length + provisioningStatusForFailedRules.length,
-        skipped: provisioningStatusForSkippedRules.length,
-        hasMoreToProvision,
-        runNumber: nextState.runs,
-      });
-    }
+    this.reportProvisioningRunEvent({
+      completed: provisioningStatusForCompletedRules.length,
+      failed:
+        provisioningStatusForFailedConversions.length + provisioningStatusForFailedRules.length,
+      skipped: provisioningStatusForSkippedRules.length,
+      hasMoreToProvision,
+      runNumber: nextState.runs,
+    });
 
     if (hasMoreToProvision) {
       return {
