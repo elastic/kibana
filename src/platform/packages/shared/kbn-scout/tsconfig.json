@@ -18,6 +18,7 @@
     "@kbn/kbn-client",
     "@kbn/test-es-server",
     "@kbn/test",
+    "@kbn/test-kibana-server",
     "@kbn/test-saml-auth",
     "@kbn/es-archiver",
     "@kbn/dev-utils",

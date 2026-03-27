@@ -1,0 +1,140 @@
+version: '1'
+name: sources.pagerduty.get_by_id
+description: Get a PagerDuty resource by ID (schedule, incident, escalation policy, or team).
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: manual
+inputs:
+  - name: id
+    type: string
+    required: true
+    description: The ID of the item to retrieve (schedule, incident, escalation policy, or team ID)
+  - name: item_type
+    type: choice
+    required: true
+    description: 'The type of item to retrieve'
+    options:
+      - schedule
+      - incident
+      - escalation_policy
+      - team
+steps:
+  - name: if-schedule
+    type: if
+    condition: "${{inputs.item_type == 'schedule'}}"
+    steps:
+      - name: get-schedule
+        type: pagerduty_mcp.getSchedule
+        connector-id: <%= pagerduty_mcp-stack-connector-id %>
+        with:
+          schedule_id: "${{inputs.id}}"
+      - name: filter-schedule
+        type: data.map
+        items: ${{steps['get-schedule'].output}}
+        with:
+          fields:
+            id: "${{ item.id }}"
+            name: "${{ item.name }}"
+            description: "${{ item.description }}"
+            time_zone: "${{ item.time_zone }}"
+            schedule_layers:
+              $map: { items: "${{ item.schedule_layers }}", item: "layer" }
+              id: "${{ layer.id }}"
+              name: "${{ layer.name }}"
+              start: "${{ layer.start }}"
+              rotation_virtual_start: "${{ layer.rotation_virtual_start }}"
+              rotation_turn_length_seconds: "${{ layer.rotation_turn_length_seconds }}"
+              users:
+                $map: { items: "${{ layer.users }}", item: "layerUser" }
+                user:
+                  id: "${{ layerUser.user.id }}"
+                  summary: "${{ layerUser.user.summary }}"
+            users:
+              $map: { items: "${{ item.users }}", item: "u" }
+              id: "${{ u.id }}"
+              summary: "${{ u.summary }}"
+    else:
+      - name: if-incident-check
+        type: if
+        condition: "${{inputs.item_type == 'incident'}}"
+        steps:
+          - name: get-incident
+            type: pagerduty_mcp.getIncident
+            connector-id: <%= pagerduty_mcp-stack-connector-id %>
+            with:
+              incident_id: "${{inputs.id}}"
+          - name: filter-incident
+            type: data.map
+            items: ${{steps['get-incident'].output}}
+            with:
+              fields:
+                id: "${{ item.id }}"
+                summary: "${{ item.summary }}"
+                urgency: "${{ item.urgency }}"
+                status: "${{ item.status }}"
+                service:
+                  id: "${{ item.service.id }}"
+                  summary: "${{ item.service.summary }}"
+                assignments:
+                  $map: { items: "${{ item.assignments }}", item: "assignment" }
+                  at: "${{ assignment.at }}"
+                  assignee:
+                    id: "${{ assignment.assignee.id }}"
+                    summary: "${{ assignment.assignee.summary }}"
+                created_at: "${{ item.created_at }}"
+                updated_at: "${{ item.updated_at }}"
+        else:
+          - name: if-escalation-policy
+            type: if
+            condition: "${{ inputs.item_type == 'escalation_policy' }}"
+            steps:
+              - name: get-escalation-policy
+                type: pagerduty_mcp.getEscalationPolicy
+                connector-id: <%= pagerduty_mcp-stack-connector-id %>
+                with:
+                  policy_id: "${{inputs.id}}"
+              - name: filter-escalation-policy
+                type: data.map
+                items: ${{steps['get-escalation-policy'].output}}
+                with:
+                  fields:
+                    id: "${{ item.id }}"
+                    name: "${{ item.name }}"
+                    description: "${{ item.description }}"
+                    num_loops: "${{ item.num_loops }}"
+                    escalation_rules:
+                      $map: { items: "${{ item.escalation_rules }}", item: "rule" }
+                      id: "${{ rule.id }}"
+                      escalation_delay_in_minutes: "${{ rule.escalation_delay_in_minutes }}"
+                      targets:
+                        $map: { items: "${{ rule.targets }}", item: "target" }
+                        id: "${{ target.id }}"
+                        type: "${{ target.type }}"
+                    services:
+                      $map: { items: "${{ item.services }}", item: "svc" }
+                      id: "${{ svc.id }}"
+                      summary: "${{ svc.summary }}"
+                    teams:
+                      $map: { items: "${{ item.teams }}", item: "team" }
+                      id: "${{ team.id }}"
+                      summary: "${{ team.summary }}"
+            else:
+              - name: if-team
+                type: if
+                condition: "${{ inputs.item_type == 'team' }}"
+                steps:
+                  - name: get-team
+                    type: pagerduty_mcp.getTeam
+                    connector-id: <%= pagerduty_mcp-stack-connector-id %>
+                    with:
+                      team_id: "${{inputs.id}}"
+                  - name: filter-team
+                    type: data.map
+                    items: ${{steps['get-team'].output}}
+                    with:
+                      fields:
+                        id: "${{ item.id }}"
+                        name: "${{ item.name }}"
+                        description: "${{ item.description }}"
+                        summary: "${{ item.summary }}"

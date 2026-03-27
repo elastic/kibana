@@ -29,6 +29,7 @@ dependsOn:
   - '@kbn/repo-info'
   - '@kbn/es'
   - '@kbn/dev-proc-runner'
+  - '@kbn/test-kibana-server'
   - '@kbn/jest-serializers'
   - '@kbn/stdio-dev-helpers'
   - '@kbn/babel-register'

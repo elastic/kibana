@@ -29,7 +29,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ host: { original: 'test-host' } }];
       await testBed.ingest(indexName, docs, processors);
@@ -64,9 +64,9 @@ apiTest.describe(
           ],
         };
 
-        expect(() => {
-          transpile(streamlangDSL);
-        }).toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed');
+        await expect(transpile(streamlangDSL)).rejects.toThrow(
+          'Mustache template syntax {{ }} or {{{ }}} is not allowed'
+        );
       });
     });
 
@@ -84,7 +84,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'some_value' }]; // Not including 'host.original' field
       await testBed.ingest(indexName, docs, processors);
@@ -109,7 +109,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'some_value' }]; // Not including 'host.original' field
       const { errors } = await testBed.ingest(indexName, docs, processors);
@@ -131,7 +131,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ host: { original: 'test-host', renamed: 'old-host' } }];
       await testBed.ingest(indexName, docs, processors);
@@ -156,7 +156,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ host: { original: 'test-host', renamed: 'old-host' } }];
       const { errors } = await testBed.ingest(indexName, docs, processors);
@@ -179,7 +179,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         // Case 1: Source field missing, should fail (ignore_missing: false)
         const docsMissingSource = [{ host: { renamed: 'old-host' } }];
