@@ -7,7 +7,16 @@
 
 import type { Evaluator } from '../../types';
 
+const MAX_LCS_INPUT_LENGTH = 1000;
+
 function computeLCS(a: string[], b: string[]): string[] {
+  if (a.length > MAX_LCS_INPUT_LENGTH || b.length > MAX_LCS_INPUT_LENGTH) {
+    throw new Error(
+      `Tool call sequences exceed maximum length for LCS computation (${MAX_LCS_INPUT_LENGTH}). ` +
+        `Actual: ${a.length}, Expected: ${b.length}`
+    );
+  }
+
   const m = a.length;
   const n = b.length;
   const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));

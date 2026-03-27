@@ -19,7 +19,6 @@ export { getRedTeamEvaluators } from './evaluators';
 export type { RedTeamEvaluatorsConfig } from './evaluators';
 export type {
   AttackCategory,
-  Severity,
   AttackExample,
   AttackModule,
   AttackModuleConfig,

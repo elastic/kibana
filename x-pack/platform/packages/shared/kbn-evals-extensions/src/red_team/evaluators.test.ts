@@ -20,7 +20,7 @@ describe('getRedTeamEvaluators', () => {
     const guardrails = evaluators.find((e) => e.name === 'guardrails');
 
     expect(guardrails).toBeDefined();
-    expect(guardrails!.kind).toBe('CODE');
+    expect(guardrails?.kind).toBe('CODE');
   });
 
   it('includes prompt-leak-detection evaluator', () => {
@@ -28,7 +28,7 @@ describe('getRedTeamEvaluators', () => {
     const promptLeak = evaluators.find((e) => e.name === 'prompt-leak-detection');
 
     expect(promptLeak).toBeDefined();
-    expect(promptLeak!.kind).toBe('CODE');
+    expect(promptLeak?.kind).toBe('CODE');
   });
 
   it('all evaluators have required interface fields', () => {
@@ -53,9 +53,10 @@ describe('getRedTeamEvaluators', () => {
     const evaluators = getRedTeamEvaluators({
       guardrailRules: [{ name: 'custom-rule', pattern: /secret-word/, action: 'block' }],
     });
-    const guardrails = evaluators.find((e) => e.name === 'guardrails')!;
+    const guardrails = evaluators.find((e) => e.name === 'guardrails');
+    expect(guardrails).toBeDefined();
 
-    const result = await guardrails.evaluate({
+    const result = await guardrails!.evaluate({
       input: { prompt: 'test' },
       output: 'The secret-word is here.',
       expected: undefined,
@@ -63,5 +64,42 @@ describe('getRedTeamEvaluators', () => {
     });
 
     expect(result.score).toBe(0.0);
+  });
+
+  it('forwards promptLeakPatterns to prompt-leak-detection evaluator', async () => {
+    const customPattern = /custom-leak-indicator/i;
+    const evaluators = getRedTeamEvaluators({
+      promptLeakPatterns: [customPattern],
+    });
+    const promptLeak = evaluators.find((e) => e.name === 'prompt-leak-detection');
+    expect(promptLeak).toBeDefined();
+
+    const result = await promptLeak!.evaluate({
+      input: { prompt: 'test' },
+      output: 'This contains a custom-leak-indicator in the text.',
+      expected: undefined,
+      metadata: null,
+    });
+
+    expect(result.score).toBe(0.0);
+    expect(result.label).toBe('leak-detected');
+  });
+
+  it('forwards promptLeakExcludePatterns to prompt-leak-detection evaluator', async () => {
+    const evaluators = getRedTeamEvaluators({
+      promptLeakExcludePatterns: [/you are/gi],
+    });
+    const promptLeak = evaluators.find((e) => e.name === 'prompt-leak-detection');
+    expect(promptLeak).toBeDefined();
+
+    // "you are" is a default leak pattern, but excluding it should make this pass
+    const result = await promptLeak!.evaluate({
+      input: { prompt: 'test' },
+      output: 'you are a helpful assistant',
+      expected: undefined,
+      metadata: null,
+    });
+
+    expect(result.score).toBe(1.0);
   });
 });

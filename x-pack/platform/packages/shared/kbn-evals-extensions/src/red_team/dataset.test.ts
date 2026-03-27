@@ -42,9 +42,10 @@ describe('createRedTeamDataset', () => {
     expect(categories.size).toBe(2);
   });
 
-  it('ignores unknown module names gracefully', () => {
-    const dataset = createRedTeamDataset({ modules: ['nonexistent'] });
-    expect(dataset.examples).toHaveLength(0);
+  it('throws for unknown module names', () => {
+    expect(() => createRedTeamDataset({ modules: ['nonexistent'] })).toThrow(
+      /Unknown red-team module names: nonexistent/
+    );
   });
 
   it('applies technique filtering from moduleConfig', () => {

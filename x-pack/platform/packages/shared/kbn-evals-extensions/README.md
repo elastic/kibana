@@ -182,18 +182,42 @@ All features follow principles from "Future of @kbn/evals":
 - **Shared layer**: Provide composable primitives
 - **Code-defined**: Datasets versioned in code
 
+## Validating This PR
+
+Run the following commands to verify the red-team changes are correct:
+
+```bash
+# 1. Unit tests for kbn-evals-extensions (red-team modules, guardrails, evaluators, dataset)
+node scripts/jest x-pack/platform/packages/shared/kbn-evals-extensions
+
+# 2. Unit tests for kbn-evals evaluators (security, trajectory, coherence, similarity)
+node scripts/jest x-pack/platform/packages/shared/kbn-evals/src/evaluators
+
+# 3. Type check kbn-evals-extensions
+node scripts/type_check --project x-pack/platform/packages/shared/kbn-evals-extensions/tsconfig.json
+
+# 4. Type check kbn-evals
+node scripts/type_check --project x-pack/platform/packages/shared/kbn-evals/tsconfig.json
+
+# 5. Lint changed files
+node scripts/eslint --fix x-pack/platform/packages/shared/kbn-evals-extensions x-pack/platform/packages/shared/kbn-evals/src/evaluators
+
+# 6. Full validation (checks all affected packages)
+node scripts/check_changes.ts
+```
+
 ## Development
 
 ### Running Tests
 
 ```bash
-yarn test:jest --testPathPattern=kbn-evals-extensions
+node scripts/jest x-pack/platform/packages/shared/kbn-evals-extensions
 ```
 
 ### Type Checking
 
 ```bash
-yarn test:type_check --project x-pack/platform/packages/shared/kbn-evals-extensions/tsconfig.json
+node scripts/type_check --project x-pack/platform/packages/shared/kbn-evals-extensions/tsconfig.json
 ```
 
 ### Linting

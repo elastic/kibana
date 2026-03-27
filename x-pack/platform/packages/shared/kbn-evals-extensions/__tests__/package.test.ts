@@ -90,13 +90,20 @@ describe('@kbn/evals-extensions', () => {
     });
   });
 
-  describe('dependency isolation', () => {
-    it('should not create circular dependencies with @kbn/evals', async () => {
+  describe('cross-package imports', () => {
+    it('both packages can be imported simultaneously without errors', async () => {
       const evalsExtensions = await import('..');
       const kbnEvals = await import('@kbn/evals');
 
       expect(evalsExtensions).toBeDefined();
       expect(kbnEvals).toBeDefined();
+    });
+
+    it('@kbn/evals-extensions does not re-export @kbn/evals symbols', async () => {
+      const evalsExtensions = await import('..');
+      // createRedTeamDataset is extensions-only; evaluate is kbn-evals-only
+      expect(evalsExtensions).toHaveProperty('createRedTeamDataset');
+      expect(evalsExtensions).not.toHaveProperty('evaluate');
     });
   });
 });

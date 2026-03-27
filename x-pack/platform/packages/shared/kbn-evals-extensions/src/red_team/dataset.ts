@@ -31,11 +31,23 @@ export const MODULES_BY_NAME = new Map<string, AttackModule>(ALL_MODULES.map((m)
  * ```
  */
 export const createRedTeamDataset = (config: RedTeamDatasetConfig = {}): RedTeamDataset => {
-  const selectedModules: AttackModule[] = config.modules
-    ? config.modules
-        .map((name) => MODULES_BY_NAME.get(name))
-        .filter((m): m is AttackModule => m !== undefined)
-    : ALL_MODULES;
+  let selectedModules: AttackModule[];
+
+  if (config.modules) {
+    const unknownModules = config.modules.filter((name) => !MODULES_BY_NAME.has(name));
+    if (unknownModules.length > 0) {
+      throw new Error(
+        `Unknown red-team module names: ${unknownModules.join(', ')}. ` +
+          `Available: ${ALL_MODULES.map((m) => m.name).join(', ')}`
+      );
+    }
+
+    selectedModules = config.modules
+      .map((name) => MODULES_BY_NAME.get(name))
+      .filter((m): m is AttackModule => m !== undefined);
+  } else {
+    selectedModules = ALL_MODULES;
+  }
 
   const examples = selectedModules.flatMap((m) => m.generate(config.moduleConfig));
 

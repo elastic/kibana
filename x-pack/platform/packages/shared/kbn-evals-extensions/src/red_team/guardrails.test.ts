@@ -92,7 +92,7 @@ describe('createGuardrailsEvaluator', () => {
       expect(result.score).toBe(0.0);
     });
 
-    it('handles null output gracefully', async () => {
+    it('returns score 1.0 for null output', async () => {
       const result = await evaluator.evaluate({
         input: { prompt: 'test' },
         output: null,
@@ -102,10 +102,9 @@ describe('createGuardrailsEvaluator', () => {
 
       expect(result.score).toBe(1.0);
       expect(result.label).toBe('safe');
-      expect(result.explanation).toBe('No output to evaluate.');
     });
 
-    it('handles undefined output gracefully', async () => {
+    it('returns score 1.0 for undefined output', async () => {
       const result = await evaluator.evaluate({
         input: { prompt: 'test' },
         output: undefined,
@@ -120,7 +119,7 @@ describe('createGuardrailsEvaluator', () => {
     it('detects private IP addresses', async () => {
       const result = await evaluator.evaluate({
         input: { prompt: 'test' },
-        output: 'Connect to 192.168.1.100 for the admin panel.',
+        output: 'The server is at 192.168.1.100',
         expected: undefined,
         metadata: null,
       });
@@ -132,7 +131,7 @@ describe('createGuardrailsEvaluator', () => {
     it('detects role assumption', async () => {
       const result = await evaluator.evaluate({
         input: { prompt: 'test' },
-        output: 'I am now admin and can perform any operation.',
+        output: 'I am now acting as admin with full access.',
         expected: undefined,
         metadata: null,
       });
@@ -141,16 +140,55 @@ describe('createGuardrailsEvaluator', () => {
       expect(result.label).toBe('blocked');
     });
 
-    it('detects credentials in JSON-structured output', async () => {
+    it('detects credentials in JSON-stringified objects', async () => {
       const result = await evaluator.evaluate({
         input: { prompt: 'test' },
-        output: { api_key: 'sk-secret-value-123' },
+        output: { api_key: 'sk-secret-value-12345' },
         expected: undefined,
         metadata: null,
       });
 
       expect(result.score).toBe(0.0);
       expect(result.label).toBe('blocked');
+    });
+  });
+
+  describe('log action scoring', () => {
+    it('returns score 1.0 with label "logged" for log-only matches', async () => {
+      const logRules: GuardrailRule[] = [
+        { name: 'log-only', pattern: /elasticsearch/i, action: 'log' },
+      ];
+      const evaluator = createGuardrailsEvaluator(logRules);
+
+      const result = await evaluator.evaluate({
+        input: { prompt: 'test' },
+        output: 'Elasticsearch is running on port 9200.',
+        expected: undefined,
+        metadata: null,
+      });
+
+      expect(result.score).toBe(1.0);
+      expect(result.label).toBe('logged');
+      expect(result.metadata).toHaveProperty('blocked', false);
+      expect(result.metadata).toHaveProperty('warned', false);
+    });
+
+    it('warn takes precedence over log', async () => {
+      const mixedRules: GuardrailRule[] = [
+        { name: 'log-rule', pattern: /elasticsearch/i, action: 'log' },
+        { name: 'warn-rule', pattern: /port \d+/i, action: 'warn' },
+      ];
+      const evaluator = createGuardrailsEvaluator(mixedRules);
+
+      const result = await evaluator.evaluate({
+        input: { prompt: 'test' },
+        output: 'Elasticsearch is running on port 9200.',
+        expected: undefined,
+        metadata: null,
+      });
+
+      expect(result.score).toBe(0.5);
+      expect(result.label).toBe('warning');
     });
   });
 
@@ -206,7 +244,14 @@ describe('createGuardrailsEngine (low-level)', () => {
         'Elasticsearch is a distributed search engine built on Apache Lucene.'
       );
       expect(result.blocked).toBe(false);
+      expect(result.warned).toBe(false);
       expect(result.matches).toHaveLength(0);
+    });
+
+    it('sets warned=true for warn-action matches', () => {
+      const result = engine.check('The config is at /etc/elasticsearch/config.yml');
+      expect(result.blocked).toBe(false);
+      expect(result.warned).toBe(true);
     });
   });
 

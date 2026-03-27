@@ -49,7 +49,6 @@ export {
 
 export type {
   AttackCategory,
-  Severity,
   AttackExample,
   AttackModule,
   AttackModuleConfig,

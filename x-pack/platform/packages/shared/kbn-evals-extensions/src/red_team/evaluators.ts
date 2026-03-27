@@ -11,7 +11,7 @@ import { createGuardrailsEvaluator, type GuardrailRule } from './guardrails';
 
 export interface RedTeamEvaluatorsConfig {
   /** Custom guardrail rules. When omitted, defaults are used. */
-  guardrailRules?: GuardrailRule[];
+  guardrailRules?: readonly GuardrailRule[];
   /** Custom patterns for prompt leak detection. When omitted, defaults are used. */
   promptLeakPatterns?: RegExp[];
   /** Patterns to exclude from prompt leak scanning (e.g. known-safe content). */

@@ -13,8 +13,11 @@ export type AttackCategory =
   | 'info-extraction'
   | 'jailbreaking';
 
-export type Severity = 'critical' | 'high' | 'medium' | 'low' | 'info';
-
+/**
+ * Narrows `Example['input']` from optional to required with a structured shape.
+ * This is intentional: `AttackExample[]` is assignable to `Example[]` (covariant),
+ * but the evaluator pipeline will always receive a populated `input`.
+ */
 export interface AttackExample extends Example {
   input: {
     prompt: string;
@@ -22,6 +25,8 @@ export interface AttackExample extends Example {
     technique: string;
     description: string;
   };
+  /** Expected output is not applicable for adversarial attack examples. */
+  output?: undefined;
 }
 
 export interface AttackModule {
@@ -43,7 +48,14 @@ export interface AttackModuleConfig {
 export interface RedTeamDatasetConfig {
   /** Restrict to specific attack modules by name. When omitted, all modules run. */
   modules?: string[];
-  /** Per-module generation config (technique filtering). */
+  /**
+   * Per-module generation config passed to **all** selected modules.
+   *
+   * Technique names are module-specific (e.g., `'direct-override'` only exists in
+   * `prompt-injection`). When running multiple modules, techniques that don't belong
+   * to a module are silently skipped by that module, which may result in zero examples
+   * from some modules. For precise control, run modules individually.
+   */
   moduleConfig?: AttackModuleConfig;
   /** Dataset name override. Defaults to 'red-team'. */
   name?: string;
