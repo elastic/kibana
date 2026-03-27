@@ -16,7 +16,8 @@ describe('buildPrompt', () => {
       expect(result).toBe(
         [...INSTALL_LINES_CURSOR, USE_CASE_MESSAGES['general-search']].join('\n')
       );
-      expect(result).not.toContain('skill');
+      expect(result).toContain('npx skills');
+      expect(result).not.toContain('Follow the /');
     });
 
     it('appends a skill line for a specific use case', () => {
@@ -35,7 +36,8 @@ describe('buildPrompt', () => {
     it('combines install lines and use-case message for general-search', () => {
       const result = buildPrompt('general-search', 'cli');
       expect(result).toBe([...INSTALL_LINES_CLI, USE_CASE_MESSAGES['general-search']].join('\n'));
-      expect(result).not.toContain('skill');
+      expect(result).toContain('npx skills');
+      expect(result).not.toContain('Follow the /');
     });
 
     it('appends a skill line for a specific use case', () => {
