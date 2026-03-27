@@ -119,8 +119,12 @@ export class OAuthAuthorizationService {
   ): 'oauth_authorization_code' | 'ears' {
     const authType = config?.authType || config?.auth?.type;
 
-    if (authMode === 'per-user' || authType === 'oauth_authorization_code' || authType === 'ears') {
+    if (authType === 'oauth_authorization_code' || authType === 'ears') {
       return authType;
+    }
+
+    if (authMode === 'per-user') {
+      return 'oauth_authorization_code';
     }
 
     throw new Error('Connector does not use OAuth Authorization Code or EARS flow');

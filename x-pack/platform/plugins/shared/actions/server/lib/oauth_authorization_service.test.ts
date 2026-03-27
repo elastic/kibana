@@ -168,6 +168,7 @@ describe('OAuthAuthorizationService', () => {
       const result = await service.getOAuthConfig('connector-1', undefined);
 
       expect(result).toEqual({
+        authTypeId: 'oauth_authorization_code',
         authorizationUrl: 'https://provider.example.com/authorize',
         clientId: 'client-id',
         scope: undefined,
@@ -197,7 +198,7 @@ describe('OAuthAuthorizationService', () => {
       mockActionsClient.get.mockResolvedValue(getResult);
 
       await expect(service.getOAuthConfig('connector-1', undefined)).rejects.toThrow(
-        'Connector does not use OAuth Authorization Code flow'
+        'Connector does not use OAuth Authorization Code or EARS flow'
       );
     });
 
