@@ -10057,7 +10057,7 @@
             "standard_events_count": {
               "type": "long",
               "_meta": {
-                "description": "Total number of scheduled events across all standard (non-DST) calendars. DST event counts are excluded because they are auto-generated and always approximately 40 per calendar."
+                "description": "Total number of scheduled events across all standard (non-DST) calendars. DST event counts are excluded because they are auto-generated."
               }
             }
           }
