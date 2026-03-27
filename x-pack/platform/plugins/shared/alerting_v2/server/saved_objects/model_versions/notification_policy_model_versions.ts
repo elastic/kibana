@@ -16,10 +16,7 @@ export const notificationPolicyModelVersions: SavedObjectsModelVersionMap = {
         {},
         { unknowns: 'ignore' }
       ),
-      // Note: `create` schema is omitted because the SO check cannot reconcile
-      // arrayOf(object) schema paths with indexed sub-property mapping paths
-      // (e.g. destinations.id, destinations.type). Create-time validation is
-      // handled by API-layer Zod schemas; read-time by forwardCompatibility.
+      create: notificationPolicySavedObjectAttributesSchemaV1,
     },
   },
 };

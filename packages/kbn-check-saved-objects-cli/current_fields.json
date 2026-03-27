@@ -116,7 +116,6 @@
     "updatedByUsername"
   ],
   "alerting_rule": [
-    "artifacts",
     "createdAt",
     "createdBy",
     "enabled",
@@ -143,7 +142,6 @@
     "schedule",
     "schedule.every",
     "schedule.lookback",
-    "state_transition",
     "time_field",
     "updatedAt",
     "updatedBy"

@@ -50,7 +50,6 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
         },
       },
     },
-    state_transition: { type: 'object', enabled: false },
     grouping: {
       properties: {
         fields: { type: 'keyword' },
@@ -62,8 +61,6 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
         timeframe: { type: 'keyword' },
       },
     },
-    artifacts: { type: 'object', enabled: false },
-
     enabled: { type: 'boolean' },
     createdBy: { type: 'keyword' },
     createdAt: { type: 'date' },

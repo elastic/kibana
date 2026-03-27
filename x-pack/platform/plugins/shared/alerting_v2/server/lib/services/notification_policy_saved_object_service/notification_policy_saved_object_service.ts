@@ -221,7 +221,7 @@ export class NotificationPolicySavedObjectService
     perPage,
     search,
     filter,
-    sortField = 'name',
+    sortField = 'name.keyword',
     sortOrder = 'asc',
   }: {
     page: number;

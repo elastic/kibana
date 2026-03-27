@@ -329,7 +329,8 @@
           "owner": {
             "type": "keyword"
           }
-        }
+        },
+        "type": "object"
       },
       "createdAt": {
         "type": "date"
@@ -341,6 +342,12 @@
         "type": "keyword"
       },
       "description": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
         "type": "text"
       },
       "destinations": {
@@ -351,7 +358,8 @@
           "type": {
             "type": "keyword"
           }
-        }
+        },
+        "type": "object"
       },
       "enabled": {
         "type": "boolean"
@@ -360,7 +368,13 @@
         "type": "keyword"
       },
       "name": {
-        "type": "keyword"
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
       },
       "snoozedUntil": {
         "type": "date"
