@@ -340,9 +340,6 @@ export const RuleDetailsPage = connector(
     const mlCapabilities = useMlCapabilities();
     const { globalFullScreen } = useGlobalFullScreen();
     const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
-    const storeGapsInEventLogEnabled = useIsExperimentalFeatureEnabled(
-      'storeGapsInEventLogEnabled'
-    );
     // TODO: Refactor license check + hasMlAdminPermissions to common check
     const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
     const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
@@ -931,12 +928,8 @@ export const RuleDetailsPage = connector(
                           theme={theme}
                         />
                         <EuiSpacer size="xl" />
-                        {storeGapsInEventLogEnabled && (
-                          <>
-                            <RuleGaps ruleId={ruleId} enabled={isRuleEnabled} />
-                            <EuiSpacer size="xl" />
-                          </>
-                        )}
+                        <RuleGaps ruleId={ruleId} enabled={isRuleEnabled} />
+                        <EuiSpacer size="xl" />
                         <RuleBackfillsInfo ruleId={ruleId} />
                       </>
                     </Route>

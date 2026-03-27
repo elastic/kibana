@@ -35,6 +35,8 @@ import {
   DELETE_SELECTED,
 } from '../../../stream_detail_systems/stream_features/use_stream_features_table';
 
+const featureKey = (feature: Feature) => `${feature.id}::${feature.stream_name}`;
+
 export function FeaturesTable() {
   const { data, isLoading: loading, refetch } = useFetchFeatures();
   const { deleteFeaturesInBulk } = useDiscoveryFeaturesApi();
@@ -47,8 +49,10 @@ export function FeaturesTable() {
   const [isBulkDeleteModalVisible, { on: showBulkDeleteModal, off: hideBulkDeleteModal }] =
     useBoolean(false);
 
-  const handleSelectFeature = useCallback((feature: Feature | null) => {
-    setSelectedFeature(feature);
+  const handleSelectFeature = useCallback((feature: Feature) => {
+    setSelectedFeature((prev) =>
+      prev !== null && featureKey(prev) === featureKey(feature) ? null : feature
+    );
   }, []);
 
   const handleCloseFlyout = useCallback(() => {
@@ -143,17 +147,21 @@ export function FeaturesTable() {
         field: 'details',
         name: '',
         width: '40px',
-        render: (_: unknown, feature: Feature) => (
-          <EuiButtonIcon
-            data-test-subj="featuresDiscoveryDetailsButton"
-            iconType="expand"
-            aria-label={i18n.translate(
-              'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.detailsButtonAriaLabel',
-              { defaultMessage: 'View details' }
-            )}
-            onClick={() => handleSelectFeature(feature)}
-          />
-        ),
+        render: (_: unknown, feature: Feature) => {
+          const isSelected =
+            selectedFeature !== null && featureKey(selectedFeature) === featureKey(feature);
+          return (
+            <EuiButtonIcon
+              data-test-subj="featuresDiscoveryDetailsButton"
+              iconType={isSelected ? 'minimize' : 'expand'}
+              aria-label={i18n.translate(
+                'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.detailsButtonAriaLabel',
+                { defaultMessage: 'View details' }
+              )}
+              onClick={() => handleSelectFeature(feature)}
+            />
+          );
+        },
       },
       {
         field: 'name',
@@ -167,22 +175,12 @@ export function FeaturesTable() {
         truncateText: true,
         render: (_name: string, feature: Feature) => {
           const displayTitle = feature.title ?? feature.id;
-          const secondaryText = feature.subtype ?? feature.type ?? '';
           return (
             <EuiLink
               onClick={() => handleSelectFeature(feature)}
               data-test-subj="featuresDiscoveryFeatureNameLink"
             >
-              <EuiFlexGroup direction="column" gutterSize="none">
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">{displayTitle}</EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    {secondaryText}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiText size="s">{displayTitle}</EuiText>
             </EuiLink>
           );
         },
@@ -228,7 +226,7 @@ export function FeaturesTable() {
         ),
       },
     ],
-    [handleSelectFeature]
+    [handleSelectFeature, selectedFeature]
   );
 
   if (loading && !data) {
@@ -286,8 +284,12 @@ export function FeaturesTable() {
             { defaultMessage: 'Knowledge Indicators table' }
           )}
           columns={columns}
-          itemId="uuid"
+          itemId={featureKey}
           items={data?.features ?? []}
+          rowProps={(feature: Feature) => ({
+            isSelected:
+              selectedFeature !== null && featureKey(selectedFeature) === featureKey(feature),
+          })}
           loading={loading}
           selection={{
             initialSelected: selectedFeatures,
