@@ -574,7 +574,7 @@ const UnifiedHistoryTableComponent = () => {
     if (visibleSet.has('query')) {
       cols.push({
         field: 'queryText',
-        name: i18n.translate('xpack.osquery.liveQueryActions.table.queryColumnTitle', {
+        name: i18n.translate('xpack.osquery.liveQueryActions.table.queryOrPackColumnTitle', {
           defaultMessage: 'Query or Pack',
         }),
         width: '42%',
