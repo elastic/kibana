@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import { TaskStatus } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
@@ -175,48 +176,48 @@ export function Summary({ count }: { count: number }) {
           defaultMessage: 'Significant event',
         }),
         render: (title: string, insight: Insight) => (
-          <div
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="xs"
             css={css`
               max-width: 100%;
               overflow: hidden;
             `}
           >
-            <EuiFlexGroup direction="column" gutterSize="xs">
-              <EuiFlexItem>
-                <EuiLink
-                  onClick={() => handleSelectInsight(insight)}
-                  data-test-subj="streamsInsightTitleLink"
-                  title={title}
-                  css={css`
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    display: block;
-                    max-width: 100%;
-                  `}
-                >
-                  {title}
-                </EuiLink>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText
-                  size="xs"
-                  color="subdued"
-                  title={insight.description}
-                  css={css`
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    max-width: 100%;
-                    display: block;
-                    width: 100%;
-                  `}
-                >
-                  {insight.description}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
+            <EuiFlexItem>
+              <EuiLink
+                onClick={() => handleSelectInsight(insight)}
+                data-test-subj="streamsInsightTitleLink"
+                title={title}
+                css={css`
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  display: block;
+                  max-width: 100%;
+                `}
+              >
+                {title}
+              </EuiLink>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText
+                size="xs"
+                color="subdued"
+                title={insight.description}
+                css={css`
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  max-width: 100%;
+                  display: block;
+                  width: 100%;
+                `}
+              >
+                {insight.description}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
       },
       {
@@ -235,11 +236,10 @@ export function Summary({ count }: { count: number }) {
           defaultMessage: 'Discovered',
         }),
         width: '150px',
-  render: (generatedAt: string) => (
-    <EuiText size="s" color="subdued">
-      {moment(generatedAt).fromNow()}
-    </EuiText>
-  ),
+        render: (generatedAt: string) => (
+          <EuiText size="s" color="subdued">
+            {moment(generatedAt).fromNow()}
+          </EuiText>
         ),
       },
     ],
