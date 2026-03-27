@@ -348,6 +348,7 @@ const styles = {
       gridRowStart: `span 1`,
       gridRowEnd: `start-${sectionId}`,
       height: `${euiTheme.size.xl}`,
+      touchAction: 'none', // prevents default drag behaviour on mobile
       ...(readOnly
         ? {
             cursor: 'pointer',
@@ -390,6 +391,7 @@ const styles = {
 
       // these styles ensure that dragged sections are rendered **above** everything else + the move icon stays visible
       '&.kbnGridSectionHeader--active': {
+        touchAction: 'none', // prevents default drag behaviour on mobile
         zIndex: euiTheme.levels.modal,
         '.kbnGridSection--dragHandle': {
           cursor: 'move',
