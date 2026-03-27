@@ -256,17 +256,9 @@ export const settingsPanelTexts = {
     'sharedUXPackages.dateRangePicker.settingsPanel.roundRelativeTimeLabel',
     { defaultMessage: 'Round relative time ranges' }
   ),
-  roundRelativeTimeDescription: i18n.translate(
-    'sharedUXPackages.dateRangePicker.settingsPanel.roundRelativeTimeDescription',
-    { defaultMessage: 'Relative ranges round to the nearest full unit (minute, hour, etc.)' }
-  ),
   timePrecisionLabel: i18n.translate(
     'sharedUXPackages.dateRangePicker.settingsPanel.timePrecisionLabel',
     { defaultMessage: 'Time precision' }
-  ),
-  timePrecisionDescription: i18n.translate(
-    'sharedUXPackages.dateRangePicker.settingsPanel.timePrecisionDescription',
-    { defaultMessage: 'Sub-minute precision shown in absolute timestamps' }
   ),
   timePrecisionSeconds: i18n.translate(
     'sharedUXPackages.dateRangePicker.settingsPanel.timePrecisionSeconds',
@@ -278,33 +270,38 @@ export const settingsPanelTexts = {
   ),
   timePrecisionNone: i18n.translate(
     'sharedUXPackages.dateRangePicker.settingsPanel.timePrecisionNone',
-    { defaultMessage: 'Minutes only' }
+    { defaultMessage: 'Minutes' }
   ),
   timeFormatHeading: i18n.translate(
     'sharedUXPackages.dateRangePicker.settingsPanel.timeFormatHeading',
     { defaultMessage: 'Time format and zone' }
   ),
-  timeFormatDescription: i18n.translate(
-    'sharedUXPackages.dateRangePicker.settingsPanel.timeFormatDescription',
-    {
+  timeFormatDescription: (timeZoneLabel: string) =>
+    i18n.translate('sharedUXPackages.dateRangePicker.settingsPanel.timeFormatDescription', {
       defaultMessage:
-        'Time zone and format can be set by the space administrator in Advanced settings and affect all the users of this space.',
-    }
+        'Time zone is set to {timeZoneLabel} by your administrator. This applies to all users in this space.',
+      values: { timeZoneLabel },
+    }),
+  timeZoneBrowserLocale: (abbreviation: string) =>
+    i18n.translate('sharedUXPackages.dateRangePicker.settingsPanel.timeZoneBrowserLocale', {
+      defaultMessage: "your browser's locale ({abbreviation})",
+      values: { abbreviation },
+    }),
+  relativeTimeRangeHeading: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.relativeTimeRangeHeading',
+    { defaultMessage: 'Relative time range' }
+  ),
+  absoluteTimeRangeHeading: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.absoluteTimeRangeHeading',
+    { defaultMessage: 'Absolute time range' }
+  ),
+  timePrecisionPrompt: i18n.translate(
+    'sharedUXPackages.dateRangePicker.settingsPanel.timePrecisionPrompt',
+    { defaultMessage: 'Show timestamps with precision of:' }
   ),
   advancedSettingsLink: i18n.translate(
     'sharedUXPackages.dateRangePicker.settingsPanel.advancedSettingsLink',
     { defaultMessage: 'Advanced settings' }
-  ),
-  newTimePickerHeading: i18n.translate(
-    'sharedUXPackages.dateRangePicker.settingsPanel.newTimePickerHeading',
-    { defaultMessage: 'New time picker' }
-  ),
-  newTimePickerDescription: i18n.translate(
-    'sharedUXPackages.dateRangePicker.settingsPanel.newTimePickerDescription',
-    {
-      defaultMessage:
-        'Don\'t like new time picker UX? Opt out from it in advanced settings under "".',
-    }
   ),
 };
 

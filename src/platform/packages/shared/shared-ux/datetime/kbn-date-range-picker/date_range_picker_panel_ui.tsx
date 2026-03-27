@@ -162,8 +162,10 @@ export const PanelBodySection = ({
 export interface PanelBodySectionInfoProps {
   /** Optional bold heading rendered as an h3. */
   heading?: string;
+  /** Optional content rendered before the markdown block. */
+  children?: React.ReactNode;
   /** Markdown content rendered with EuiMarkdownFormat. */
-  markdown: string;
+  markdown?: string;
   /** Label for an optional external link shown below the markdown. Requires `linkHref`. */
   linkLabel?: string;
   /** href for the optional external link. Requires `linkLabel`. */
@@ -175,6 +177,7 @@ export interface PanelBodySectionInfoProps {
 /** An info block within `PanelBody`: optional bold heading, markdown content, and an optional external link. */
 export const PanelBodySectionInfo = ({
   heading,
+  children,
   markdown,
   linkLabel,
   linkHref,
@@ -191,19 +194,22 @@ export const PanelBodySectionInfo = ({
   return (
     <EuiFlexGroup gutterSize="s" direction="column">
       {heading && <h3 css={headingStyles}>{heading}</h3>}
-      <EuiMarkdownFormat
-        color="text"
-        textSize={textSize}
-        css={css`
-          .euiCode {
-            color: ${euiTheme.colors.textSubdued};
-            font-weight: ${euiTheme.font.weight.semiBold};
-            padding-block: 0.0125em;
-          }
-        `}
-      >
-        {markdown}
-      </EuiMarkdownFormat>
+      {children}
+      {markdown && (
+        <EuiMarkdownFormat
+          color="text"
+          textSize={textSize}
+          css={css`
+            .euiCode {
+              color: ${euiTheme.colors.textSubdued};
+              font-weight: ${euiTheme.font.weight.semiBold};
+              padding-block: 0.0125em;
+            }
+          `}
+        >
+          {markdown}
+        </EuiMarkdownFormat>
+      )}
       {linkLabel && linkHref && (
         <EuiText size="xs">
           <EuiLink href={linkHref} target="_blank" external>

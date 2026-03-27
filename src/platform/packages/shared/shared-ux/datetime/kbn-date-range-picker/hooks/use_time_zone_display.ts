@@ -20,7 +20,8 @@ import { useMemo } from 'react';
  */
 export const useTimeZoneDisplay = (
   timeZone: string | undefined,
-  date?: Date | null
+  date?: Date | null,
+  abbreviated?: boolean
 ): string | null => {
   return useMemo(() => {
     if (!timeZone) return null;
@@ -39,6 +40,8 @@ export const useTimeZoneDisplay = (
       const offset = offsetParts.find((p) => p.type === 'timeZoneName')?.value ?? null;
       if (!offset) return null;
 
+      if (abbreviated) return offset;
+
       const abbrParts = new Intl.DateTimeFormat('en', {
         timeZone: resolvedTimeZone,
         timeZoneName: 'short',
@@ -55,5 +58,5 @@ export const useTimeZoneDisplay = (
     } catch {
       return null;
     }
-  }, [timeZone, date]);
+  }, [timeZone, date, abbreviated]);
 };

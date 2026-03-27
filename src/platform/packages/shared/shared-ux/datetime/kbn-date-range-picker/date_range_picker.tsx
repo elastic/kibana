@@ -153,6 +153,12 @@ export interface DateRangePickerProps {
   timeZone?: string;
   /** Fires at the end of each auto-refresh interval while `settings.autoRefresh` exists, is enabled and timer is unpaused. */
   onRefresh?: () => void;
+  /**
+   * Prepends the Kibana server `basePath` to an internal URL path.
+   * Typically provided as `core.http.basePath.prepend`.
+   * When omitted, paths are used as-is.
+   */
+  prependBasePath?: (path: string) => string;
 }
 
 export interface DateRangePickerOnChangeProps extends TimeRangeBounds {

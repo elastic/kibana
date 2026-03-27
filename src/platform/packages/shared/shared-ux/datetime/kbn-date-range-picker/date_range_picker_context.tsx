@@ -128,6 +128,8 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   toggleAutoRefresh: () => void;
   /** Whether an `onRefresh` callback was provided; used to gate auto-refresh UI without exposing the function. */
   hasAutoRefresh: boolean;
+  /** Prepends the Kibana server basePath to a URL path. Identity function when not provided. */
+  prependBasePath: (path: string) => string;
 }
 
 const DateRangePickerContext = createContext<DateRangePickerInternalContextValue | null>(null);
@@ -170,7 +172,12 @@ export function DateRangePickerProvider({
   onSettingsChange,
   timeZone,
   onRefresh,
+  prependBasePath: prependBasePathProp,
 }: PropsWithChildren<DateRangePickerProps>) {
+  const prependBasePath = useCallback(
+    (path: string) => (prependBasePathProp ? prependBasePathProp(path) : path),
+    [prependBasePathProp]
+  );
   const inputRef = useRef<HTMLInputElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement | null>(null);
@@ -334,6 +341,7 @@ export function DateRangePickerProvider({
       autoRefreshSecondsRemaining,
       toggleAutoRefresh,
       hasAutoRefresh,
+      prependBasePath,
     }),
     [
       text,
@@ -364,6 +372,7 @@ export function DateRangePickerProvider({
       autoRefreshSecondsRemaining,
       toggleAutoRefresh,
       hasAutoRefresh,
+      prependBasePath,
     ]
   );
 
