@@ -38,10 +38,7 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
 
   const location = useLocation<LocationState>();
   const shouldStickToBottom = location.state?.shouldStickToBottom ?? true;
-  const autoSendInitialMessage = location.state?.autoSendInitialMessage ?? true;
-
-  const [initialMessage, setInitialMessage] = useState(location.state?.initialMessage);
-  const resetInitialMessage = useCallback(() => setInitialMessage(undefined), []);
+  const initialMessage = location.state?.initialMessage;
 
   // Get search params for agent ID syncing
   const [searchParams] = useSearchParams();
@@ -140,8 +137,7 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       isEmbeddedContext: false,
       conversationActions,
       initialMessage,
-      autoSendInitialMessage,
-      resetInitialMessage,
+      autoSendInitialMessage: true,
       attachments,
       upsertAttachments,
       resetAttachments,
@@ -152,8 +148,6 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       shouldStickToBottom,
       conversationActions,
       initialMessage,
-      autoSendInitialMessage,
-      resetInitialMessage,
       attachments,
       upsertAttachments,
       resetAttachments,
