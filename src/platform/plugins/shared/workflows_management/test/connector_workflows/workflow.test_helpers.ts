@@ -22,7 +22,10 @@ import { WORKFLOW_ZOD_SCHEMA } from '../../common/schema';
 const TEMPLATE_DELIMITERS: OpeningAndClosingTags = ['<%=', '%>'];
 
 const internalRegistry = new ServerStepRegistry();
-registerInternalStepDefinitions({} as any, internalRegistry);
+registerInternalStepDefinitions(
+  {} as unknown as Parameters<typeof registerInternalStepDefinitions>[0],
+  internalRegistry
+);
 
 const CORE_STEPS = new Map<string, { id: string; handler: Function }>(
   internalRegistry.getAll().map((def) => [def.id, def])

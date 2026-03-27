@@ -147,12 +147,12 @@ describe('servicenow workflows', () => {
     for (const wf of workflows) {
       // get_attachment has long Liquid expressions that get folded by updateYamlField
       // (known line-folding bug tracked separately). Skip its liquid validation here.
-      if (wf.name.includes('get_attachment')) continue;
-
-      expect({ workflow: wf.name, liquidErrors: wf.liquidErrors }).toEqual({
-        workflow: wf.name,
-        liquidErrors: [],
-      });
+      if (!wf.name.includes('get_attachment')) {
+        expect({ workflow: wf.name, liquidErrors: wf.liquidErrors }).toEqual({
+          workflow: wf.name,
+          liquidErrors: [],
+        });
+      }
     }
   });
 

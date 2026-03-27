@@ -134,12 +134,12 @@ describe('google drive workflows', () => {
     for (const wf of workflows) {
       // download has long Liquid expressions that get folded by updateYamlField
       // (known line-folding bug tracked separately). Skip its liquid validation here.
-      if (wf.name.includes('download')) continue;
-
-      expect({ workflow: wf.name, liquidErrors: wf.liquidErrors }).toEqual({
-        workflow: wf.name,
-        liquidErrors: [],
-      });
+      if (!wf.name.includes('download')) {
+        expect({ workflow: wf.name, liquidErrors: wf.liquidErrors }).toEqual({
+          workflow: wf.name,
+          liquidErrors: [],
+        });
+      }
     }
   });
 
