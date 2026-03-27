@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
+import { sortBy } from 'lodash';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useBoolean } from '@kbn/react-hooks';
 import type { CriteriaWithPagination } from '@elastic/eui';
@@ -69,6 +70,11 @@ export function useStreamFeaturesTable({
   } = useKibana();
   const { deleteFeature, deleteFeaturesInBulk, excludeFeaturesInBulk, restoreFeaturesInBulk } =
     useStreamFeaturesApi(definition);
+
+  const sortedFeatures = useMemo(
+    () => sortBy(features, (f) => (f.title ?? f.id).toLowerCase()),
+    [features]
+  );
 
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
   const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>([]);
@@ -274,7 +280,7 @@ export function useStreamFeaturesTable({
         render: (_: unknown, feature: Feature) => (
           <EuiButtonIcon
             data-test-subj="streamsAppFeatureDetailsButton"
-            iconType="expand"
+            iconType="maximize"
             isDisabled={isIdentifyingFeatures}
             aria-label={VIEW_DETAILS_ARIA_LABEL}
             onClick={() => onSelectFeature(feature)}
@@ -407,6 +413,7 @@ export function useStreamFeaturesTable({
     clearSelection,
     handleTableChange,
     columns,
+    items: sortedFeatures,
     noItemsMessage: NO_FEATURES_MESSAGE,
     bulkActions,
     flyoutActions,

@@ -4726,6 +4726,23 @@
       }
     }
   },
+  "watchlist-entity-source": {
+    "dynamic": false,
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "managed": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "text"
+      },
+      "type": {
+        "type": "keyword"
+      }
+    }
+  },
   "workplace_search_telemetry": {
     "dynamic": false,
     "properties": {}
