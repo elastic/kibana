@@ -181,7 +181,7 @@ function createLogProgressPlugin(log?: ToolingLog): RspackPluginInstance {
       log.info(message);
     } else {
       // eslint-disable-next-line no-console
-      console.log(`[rspack] ${message}`);
+      console.log(`[@kbn/rspack-optimizer] ${message}`);
     }
   };
 
@@ -198,7 +198,7 @@ function createLogProgressPlugin(log?: ToolingLog): RspackPluginInstance {
       log.error(message);
     } else {
       // eslint-disable-next-line no-console
-      console.error(`[rspack] ${message}`);
+      console.error(`[@kbn/rspack-optimizer] ${message}`);
     }
   };
 

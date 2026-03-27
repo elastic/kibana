@@ -123,14 +123,32 @@ function getSwcOptions(dist: boolean, hmr: boolean = false) {
 export function getSwcLoaderRules(dist: boolean, hmr: boolean = false): RuleSetRule[] {
   const swcOptions = getSwcOptions(dist, hmr);
 
+  const hmrBoundaryLoaderPath = Path.resolve(__dirname, '../loaders/hmr_boundary_loader.ts');
+
   return [
-    // TypeScript files - SWC only
-    {
-      test: /\.tsx?$/,
-      exclude: /node_modules/,
-      loader: 'builtin:swc-loader',
-      options: swcOptions,
-    },
+    // TypeScript files - SWC + optional HMR boundary loader
+    // When HMR is enabled, the boundary loader runs after SWC (loaders execute bottom to top)
+    // and injects module.hot.accept() into React files with mixed exports.
+    hmr
+      ? {
+          test: /\.tsx?$/,
+          exclude: /node_modules/,
+          use: [
+            {
+              loader: hmrBoundaryLoaderPath,
+            },
+            {
+              loader: 'builtin:swc-loader',
+              options: swcOptions,
+            },
+          ],
+        }
+      : {
+          test: /\.tsx?$/,
+          exclude: /node_modules/,
+          loader: 'builtin:swc-loader',
+          options: swcOptions,
+        },
     // JavaScript files - require interop loader + SWC
     // The interop loader transforms CJS require() calls to handle ESM default exports
     // This matches webpack's babel-plugin-transform-require-default behavior

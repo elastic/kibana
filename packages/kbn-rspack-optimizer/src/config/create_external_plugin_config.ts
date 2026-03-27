@@ -84,7 +84,7 @@ export async function createExternalPluginConfig(
   const sharedDepsExternals = getExternals();
 
   // eslint-disable-next-line no-console
-  console.log(`[rspack] Building external plugin: ${pluginId}`);
+  console.log(`[@kbn/rspack-optimizer] Building external plugin: ${pluginId}`);
 
   return {
     name: `plugin-${pluginId}`,

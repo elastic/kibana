@@ -236,7 +236,11 @@ describe('shared_config', () => {
       it('sets refresh=true when hmr is enabled', () => {
         const rules = getSwcLoaderRules(false, true);
         const tsRule = rules[0];
-        const options = tsRule.options as any;
+        // When hmr is enabled, the TS rule uses a `use` array (hmr_boundary_loader + swc-loader)
+        const swcEntry = Array.isArray(tsRule.use)
+          ? (tsRule.use as any[]).find((u: any) => u.loader === 'builtin:swc-loader')
+          : undefined;
+        const options = swcEntry ? swcEntry.options : (tsRule.options as any);
         expect(options.jsc.transform.react.refresh).toBe(true);
       });
 
@@ -257,7 +261,10 @@ describe('shared_config', () => {
       it('propagates hmr through getSharedModuleRules', () => {
         const rules = getSharedModuleRules(REPO_ROOT, false, undefined, undefined, false, true);
         const tsRule = rules.find((r) => r.test?.toString() === '/\\.tsx?$/');
-        const options = tsRule?.options as any;
+        const swcEntry = Array.isArray(tsRule?.use)
+          ? (tsRule!.use as any[]).find((u: any) => u.loader === 'builtin:swc-loader')
+          : undefined;
+        const options = swcEntry ? swcEntry.options : (tsRule?.options as any);
         expect(options.jsc.transform.react.refresh).toBe(true);
       });
     });

@@ -15,6 +15,7 @@ export class HmrServer {
   private readonly server: http.Server;
   private readonly clients = new Set<http.ServerResponse>();
   private assignedPort = 0;
+  private lastState: Record<string, unknown> | null = null;
 
   constructor() {
     this.server = http.createServer((req, res) => {
@@ -36,6 +37,10 @@ export class HmrServer {
 
       res.write('\n');
       this.clients.add(res);
+
+      if (this.lastState) {
+        res.write(`data: ${JSON.stringify({ ...this.lastState, replay: true })}\n\n`);
+      }
 
       req.on('close', () => {
         this.clients.delete(res);
@@ -61,14 +66,24 @@ export class HmrServer {
   }
 
   broadcast(hash: string, time?: string, files?: string[]): void {
-    const payload = `data: ${JSON.stringify({ hash, time, files })}\n\n`;
+    this.lastState = { hash, time, files };
+    const payload = `data: ${JSON.stringify(this.lastState)}\n\n`;
+    for (const client of this.clients) {
+      client.write(payload);
+    }
+  }
+
+  broadcastBuilding(): void {
+    this.lastState = { building: true };
+    const payload = `data: ${JSON.stringify(this.lastState)}\n\n`;
     for (const client of this.clients) {
       client.write(payload);
     }
   }
 
   broadcastErrors(errors: string[]): void {
-    const payload = `data: ${JSON.stringify({ errors })}\n\n`;
+    this.lastState = { errors };
+    const payload = `data: ${JSON.stringify(this.lastState)}\n\n`;
     for (const client of this.clients) {
       client.write(payload);
     }

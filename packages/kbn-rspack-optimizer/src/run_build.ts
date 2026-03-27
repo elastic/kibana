@@ -218,6 +218,14 @@ async function runWatchBuild(
     log?.debug('Watcher will ignore: /node_modules/');
     log?.debug('Aggregate timeout: 300ms');
 
+    if (hmrServer) {
+      compiler.hooks.compile.tap('kbn-hmr-building', () => {
+        if (!isFirstBuild) {
+          hmrServer.broadcastBuilding();
+        }
+      });
+    }
+
     const watching = compiler.watch(
       {
         aggregateTimeout: 50,
