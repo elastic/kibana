@@ -24,7 +24,6 @@ interface CreateTestConfigOptions {
   disabledPlugins?: string[];
   ssl?: boolean;
   enableActionsProxy: boolean;
-  /** When set with enableActionsProxy, Kibana uses xpack.actions.proxyUser / proxyPassword and the FTR proxy requires matching Proxy-Authorization. */
   actionsProxyBasicAuth?: { user: string; password: string };
   verificationMode?: 'full' | 'none' | 'certificate';
   publicBaseUrl?: boolean;

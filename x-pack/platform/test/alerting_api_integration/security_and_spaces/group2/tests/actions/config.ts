@@ -7,15 +7,11 @@
 
 import { createTestConfig } from '../../../../common/config';
 
-export const ProxyAuthUser = 'ftr_proxy_user';
-export const ProxyAuthPassword = 'ftr_proxy_pass';
-
 export default createTestConfig('security_and_spaces', {
   disabledPlugins: [],
   license: 'trial',
   ssl: true,
   enableActionsProxy: true,
-  actionsProxyBasicAuth: { user: ProxyAuthUser, password: ProxyAuthPassword },
   publicBaseUrl: true,
   testFiles: [require.resolve('.')],
   useDedicatedTaskRunner: true,

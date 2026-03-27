@@ -74,7 +74,19 @@ export const getHttpProxyServer = async (
       'utf8'
     ).toString('base64')}`;
     const server = http.createServer((req, res) => {
-      if (req.headers['proxy-authorization'] !== expectedAuth) {
+      const proxyAuthHeader = req.headers['proxy-authorization'];
+
+      if (proxyAuthHeader !== expectedAuth) {
+        if (proxyAuthHeader == null) {
+          // eslint-disable-next-line no-console
+          console.log('Proxy-Authorization header is missing');
+        } else {
+          const encodedCreds = proxyAuthHeader.replace('Basic ', '');
+          const decodedAuth = Buffer.from(encodedCreds, 'base64').toString('utf8');
+          // eslint-disable-next-line no-console
+          console.log(`Proxy-Authorization header is using credentials ${decodedAuth}`);
+        }
+
         res.writeHead(407, { 'Proxy-Authenticate': 'Basic realm="proxy"' });
         res.end();
         return;

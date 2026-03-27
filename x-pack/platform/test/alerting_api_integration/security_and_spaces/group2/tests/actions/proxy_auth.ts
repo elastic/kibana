@@ -10,9 +10,9 @@ import expect from '@kbn/expect';
 import getPort from 'get-port';
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import { getWebhookServer } from '@kbn/actions-simulators-plugin/server/plugin';
-import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { ObjectRemover } from '../../../../common/lib';
-import { ProxyAuthUser, ProxyAuthPassword } from './config';
+import { ProxyAuthUser, ProxyAuthPassword } from '../../../../common/lib';
 
 const BasicAuthCreds = Buffer.from(`${ProxyAuthUser}:${ProxyAuthPassword}`).toString('base64');
 const BasicAuthHeader = `Basic ${BasicAuthCreds}`;
@@ -79,12 +79,12 @@ export default function httpProxyBasicAuthTest({ getService }: FtrProviderContex
 
       objectRemover.add('default', createdAction.id, 'connector', 'actions', false);
 
-      const { body: result } = await supertest
+      const { body: result, statusCode } = await supertest
         .post(`/api/actions/connector/${createdAction.id}/_execute`)
         .set('kbn-xsrf', 'test')
-        .send({ params: {} })
-        .expect(200);
+        .send({ params: {} });
 
+      expect(statusCode).to.eql(200);
       expect(result.status).to.eql('ok');
       expect(proxyHasBeenCalled).to.be(true);
       expect(proxyAuthHeader).to.eql(BasicAuthHeader);
