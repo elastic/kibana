@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useContext, useState, useMemo } from 'react';
-import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { AddToCaseContextProvider } from '../../cases/add_to_cases';
@@ -22,11 +22,10 @@ interface RowKebabMenuProps {
   addToTimeline?: AddToTimelineHandler;
   scheduleId?: string;
   executionCount?: number;
-  onViewQuery: () => void;
 }
 
 const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
-  ({ row, actionId, agentIds, addToTimeline, scheduleId, executionCount, onViewQuery }) => {
+  ({ row, actionId, agentIds, addToTimeline, scheduleId, executionCount }) => {
     const isCasesAttachment = useContext(CasesAttachmentWrapperContext);
     const [isOpen, setIsOpen] = useState(false);
     const close = useCallback(() => setIsOpen(false), []);
@@ -36,15 +35,6 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
       'xpack.osquery.pack.queriesTable.viewResultsMoreActionsAriaLabel',
       { defaultMessage: 'More actions' }
     );
-
-    const handleViewQueryClick = useCallback(() => {
-      close();
-      onViewQuery();
-    }, [close, onViewQuery]);
-
-    const viewQueryLabel = i18n.translate('xpack.osquery.pack.queriesTable.viewQueryMenuLabel', {
-      defaultMessage: 'View query',
-    });
 
     const menuItems = useMemo(
       () => [
@@ -76,9 +66,6 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
               />,
             ]
           : []),
-        <EuiContextMenuItem key="viewQuery" icon="expand" onClick={handleViewQueryClick}>
-          {viewQueryLabel}
-        </EuiContextMenuItem>,
       ],
       [
         isCasesAttachment,
@@ -89,10 +76,10 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
         scheduleId,
         executionCount,
         close,
-        handleViewQueryClick,
-        viewQueryLabel,
       ]
     );
+
+    if (menuItems.length === 0) return null;
 
     return (
       <EuiPopover

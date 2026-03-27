@@ -7,6 +7,10 @@
 
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IngestPipelineProcessor } from '../../../types/processors/ingest_pipeline_processors';
+import {
+  getStreamlangResolverForProcessor,
+  type StreamlangResolverOptions,
+} from '../../../types/resolvers';
 
 import type { StreamlangProcessorDefinition } from '../../../types/processors';
 import { conditionToPainless } from '../../conditions/condition_to_painless';
@@ -21,16 +25,18 @@ import type { ActionToIngestType } from './processors/processor';
 import { processRemoveByPrefixProcessor } from './processors/remove_by_prefix_processor';
 
 import type { IngestPipelineTranspilationOptions } from '.';
-import { processJoinProcessor } from './processors/join_processor';
 import { processConcatProcessor } from './processors/concat_processor';
 import { processSortProcessor } from './processors/sort_processor';
 import { processJsonExtractProcessor } from './processors/json_extract_processor';
+import { processEnrichProcessor } from './processors/enrich_processor';
+import { processJoinProcessor } from './processors/join_processor';
 
-export function convertStreamlangDSLActionsToIngestPipelineProcessors(
+export async function convertStreamlangDSLActionsToIngestPipelineProcessors(
   actionSteps: StreamlangProcessorDefinition[],
-  transpilationOptions?: IngestPipelineTranspilationOptions
-): IngestProcessorContainer[] {
-  return actionSteps.flatMap((actionStep) => {
+  transpilationOptions?: IngestPipelineTranspilationOptions,
+  resolverOptions?: StreamlangResolverOptions
+): Promise<IngestProcessorContainer[]> {
+  const processors = actionSteps.flatMap((actionStep) => {
     const renames = processorFieldRenames[actionStep.action] || {};
     const { action, ...rest } = actionStep;
 
@@ -109,6 +115,19 @@ export function convertStreamlangDSLActionsToIngestPipelineProcessors(
       ];
     }
 
+    if (action === 'enrich') {
+      const resolver = getStreamlangResolverForProcessor(actionStep, resolverOptions);
+      if (!resolver) {
+        throw new Error('Enrich processor requires an enrich policy resolver.');
+      }
+      return processEnrichProcessor(
+        processorWithCompiledConditions as Parameters<typeof processEnrichProcessor>[0],
+        resolver
+      );
+    }
+
     return applyPreProcessing(action, processorWithCompiledConditions as IngestPipelineProcessor);
   });
+
+  return Promise.all(processors);
 }

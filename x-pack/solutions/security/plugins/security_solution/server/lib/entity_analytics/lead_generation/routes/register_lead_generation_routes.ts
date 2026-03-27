@@ -9,11 +9,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { generateLeadsRoute } from './generate_leads';
 import { getLeadsRoute } from './get_leads';
 
-export const registerLeadGenerationRoutes = ({
-  router,
-  logger,
-  getStartServices,
-}: EntityAnalyticsRoutesDeps) => {
-  generateLeadsRoute(router, logger, getStartServices);
+export const registerLeadGenerationRoutes = ({ router, logger }: EntityAnalyticsRoutesDeps) => {
+  generateLeadsRoute(router, logger);
   getLeadsRoute(router, logger);
 };

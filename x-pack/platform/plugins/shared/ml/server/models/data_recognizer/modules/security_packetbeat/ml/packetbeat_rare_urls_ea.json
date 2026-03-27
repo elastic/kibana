@@ -16,7 +16,8 @@
     "influencers": [
       "host.name",
       "host.id",
-      "destination.ip"
+      "destination.ip",
+      "url.full"
     ]
   },
   "allow_lazy_open": true,
