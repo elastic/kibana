@@ -25,12 +25,17 @@ jest.mock('@kbn/expandable-flyout', () => ({
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../../common/lib/kibana');
   return {
+    ...actual,
     useKibana: () => ({
+      ...actual.useKibana(),
       services: {
+        ...actual.useKibana().services,
         telemetry: mockedTelemetry,
       },
     }),
+    useUiSetting: jest.fn().mockReturnValue(false),
   };
 });
 

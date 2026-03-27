@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { WORKFLOWS_DOCUMENTATION_URL } from '../../../common';
 import { useKibana } from '../../hooks/use_kibana';
 interface WorkflowsEmptyStateProps {
   onCreateWorkflow?: () => void;
@@ -97,7 +98,7 @@ export function WorkflowsEmptyState({
               />
             </span>
           </EuiTitle>{' '}
-          <EuiLink href="https://ela.st/workflows-docs" target="_blank">
+          <EuiLink href={WORKFLOWS_DOCUMENTATION_URL} target="_blank">
             <FormattedMessage
               id="workflows.emptyState.footer.link"
               defaultMessage="Read documentation"

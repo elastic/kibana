@@ -25,6 +25,7 @@ import { mockServiceRiskScoreState } from '../mocks';
 
 const mockProps: ServicePanelProps = {
   serviceName: 'test',
+  entityId: 'test-entity-id',
   contextID: 'test-service-panel',
   scopeId: 'test-scope-id',
 };

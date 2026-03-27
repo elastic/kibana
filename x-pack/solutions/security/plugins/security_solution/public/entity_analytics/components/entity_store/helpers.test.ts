@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getEntityType, sourceFieldToText } from './helpers';
+import { getEntityType, sanitizeEntityRecordForUpsert, sourceFieldToText } from './helpers';
 import { render } from '@testing-library/react';
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import type {
@@ -160,6 +160,21 @@ describe('helpers', () => {
       expect(getEntityType(genericEntity)).toBe('generic');
     });
 
+    it('should return "host" when flattened record has entity.type "Host"', () => {
+      const record = { 'entity.type': 'Host' } as unknown as Entity;
+      expect(getEntityType(record)).toBe('host');
+    });
+
+    it('should return "user" when flattened record has entity.type "Identity"', () => {
+      const record = { 'entity.type': 'Identity' } as unknown as Entity;
+      expect(getEntityType(record)).toBe('user');
+    });
+
+    it('should return "service" when flattened record has entity.type "Service"', () => {
+      const record = { 'entity.type': 'Service' } as unknown as Entity;
+      expect(getEntityType(record)).toBe('service');
+    });
+
     it('should throw an error if the record does not match any entity type', () => {
       const unknownEntity = {
         '@timestamp': '2021-08-02T14:00:00.000Z',
@@ -172,6 +187,87 @@ describe('helpers', () => {
       expect(() => getEntityType(unknownEntity)).toThrow(
         'Unexpected entity: {"@timestamp":"2021-08-02T14:00:00.000Z","entity":{"name":"unknown_entity","source":"logs-test"}}'
       );
+    });
+  });
+
+  describe('sanitizeEntityRecordForUpsert', () => {
+    it('strips top-level agent and keeps only allowed HostEntity keys', () => {
+      const recordWithExtras = {
+        '@timestamp': '2026-03-04T15:24:56.317Z',
+        entity: {
+          id: 'host:B377958D-B4A8-5FCA-B237-F2DE40404617',
+          name: 'MacBookPro.localdomain',
+          EngineMetadata: { Type: 'host', UntypedId: 'B377958D-B4A8-5FCA-B237-F2DE40404617' },
+        },
+        host: { name: 'MacBookPro.localdomain' },
+        agent: { id: 'bbcb2260-62b6-45ae-8e9a-4077419e38a7', type: 'auditbeat' },
+        asset: { criticality: 'high_impact' },
+      } as unknown as Entity;
+
+      const out = sanitizeEntityRecordForUpsert(recordWithExtras);
+
+      expect(out).not.toHaveProperty('agent');
+      expect(out).toHaveProperty('entity');
+      expect(out).toHaveProperty('host');
+      expect(out).toHaveProperty('asset');
+      expect((out as HostEntity).asset?.criticality).toBe('high_impact');
+    });
+
+    it('omits entity.EngineMetadata so backend does not reject it as not allowed to be updated', () => {
+      const recordWithUntypedId = {
+        entity: {
+          id: 'host:abc-123',
+          name: 'myhost',
+          EngineMetadata: { Type: 'host', UntypedId: 'B377958D-B4A8-5FCA-B237-F2DE40404617' },
+        },
+        host: { name: 'myhost' },
+      } as unknown as Entity;
+
+      const out = sanitizeEntityRecordForUpsert(recordWithUntypedId);
+
+      expect(out.entity.EngineMetadata).toBeUndefined();
+    });
+
+    it('strips ECS event fields; keeps only event.ingested for user upsert', () => {
+      const record = {
+        entity: {
+          id: 'user:some-id',
+          name: 'alice',
+          EngineMetadata: { Type: 'Identity' },
+        },
+        user: { name: 'alice', id: ['id-1'] },
+        event: {
+          kind: 'signal',
+          module: 'endpoint',
+          category: ['process'],
+          type: ['info'],
+          ingested: '2026-01-01T12:00:00.000Z',
+        },
+        asset: { criticality: 'low_impact' },
+      } as unknown as Entity;
+
+      const out = sanitizeEntityRecordForUpsert(record);
+
+      expect((out as UserEntity).event).toEqual({ ingested: '2026-01-01T12:00:00.000Z' });
+    });
+
+    it('omits event when the document has only ECS event fields (no ingested)', () => {
+      const record = {
+        entity: {
+          id: 'user:some-id',
+          name: 'alice',
+          EngineMetadata: { Type: 'Identity' },
+        },
+        user: { name: 'alice' },
+        event: {
+          kind: 'signal',
+          module: 'endpoint',
+        },
+      } as unknown as Entity;
+
+      const out = sanitizeEntityRecordForUpsert(record);
+
+      expect(out).not.toHaveProperty('event');
     });
   });
 

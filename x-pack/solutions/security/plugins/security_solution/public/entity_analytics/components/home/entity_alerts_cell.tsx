@@ -69,7 +69,7 @@ export const EntityAlertsCell: React.FC<{
     query: getAlertsByStatusQuery({
       from,
       to,
-      entityFilter: { field: filterField, value: entityName },
+      identityFields: { [filterField]: entityName },
     }),
     indexName: signalIndexName,
     queryName: ALERTS_QUERY_NAMES.BY_STATUS,
@@ -80,7 +80,7 @@ export const EntityAlertsCell: React.FC<{
       getAlertsByStatusQuery({
         from,
         to,
-        entityFilter: { field: filterField, value: entityName },
+        identityFields: { [filterField]: entityName },
       })
     );
   }, [setAlertsQuery, from, to, entityName, filterField]);

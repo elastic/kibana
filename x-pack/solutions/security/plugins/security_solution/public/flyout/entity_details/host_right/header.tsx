@@ -26,13 +26,14 @@ import type { FirstLastSeenData } from '../shared/components/observed_entity/typ
 interface HostPanelHeaderProps {
   hostName: string;
   lastSeen: FirstLastSeenData;
+  entityId?: string;
 }
 
 const linkTitleCSS = { width: 'fit-content' };
 
 const urlParamOverride = { timeline: { isOpen: false } };
 
-export const HostPanelHeader = ({ hostName, lastSeen }: HostPanelHeaderProps) => {
+export const HostPanelHeader = ({ hostName, lastSeen, entityId }: HostPanelHeaderProps) => {
   const lastSeenDate = lastSeen?.date;
   const isLoading = lastSeen?.isLoading ?? false;
   const lastSeenDateFormatted = useMemo(
@@ -57,16 +58,32 @@ export const HostPanelHeader = ({ hostName, lastSeen }: HostPanelHeaderProps) =>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <SecuritySolutionLinkAnchor
-            deepLinkId={SecurityPageName.hosts}
-            path={getHostDetailsUrl(hostName)}
-            target={'_blank'}
-            external={false}
-            css={linkTitleCSS}
-            override={urlParamOverride}
+          <EuiFlexGroup
+            gutterSize="xs"
+            responsive={false}
+            direction="column"
+            alignItems="flexStart"
           >
-            <FlyoutTitle title={hostName} iconType={'storage'} isLink />
-          </SecuritySolutionLinkAnchor>
+            <EuiFlexItem grow={false}>
+              <SecuritySolutionLinkAnchor
+                deepLinkId={SecurityPageName.hosts}
+                path={getHostDetailsUrl(hostName)}
+                target={'_blank'}
+                external={false}
+                css={linkTitleCSS}
+                override={urlParamOverride}
+              >
+                <FlyoutTitle title={hostName} iconType={'storage'} isLink />
+              </SecuritySolutionLinkAnchor>
+            </EuiFlexItem>
+            {entityId ? (
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued" data-test-subj="host-panel-header-entity-id">
+                  {entityId}
+                </EuiText>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
         </EuiFlexItem>
         {isLoading ? (
           <EuiFlexItem grow={true}>
