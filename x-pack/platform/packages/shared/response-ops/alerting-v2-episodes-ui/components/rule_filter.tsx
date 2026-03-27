@@ -24,13 +24,13 @@ interface RuleFilterProps {
   'data-test-subj'?: string;
 }
 
-export const RuleFilter: React.FC<RuleFilterProps> = ({
+export function RuleFilter({
   selectedRuleId,
   onRuleChange,
   ruleOptions,
   services: { http },
   'data-test-subj': dataTestSubj = 'ruleFilter',
-}) => {
+}: RuleFilterProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search, RULE_SEARCH_DEBOUNCE_MS);
@@ -111,4 +111,4 @@ export const RuleFilter: React.FC<RuleFilterProps> = ({
       />
     </EuiPopover>
   );
-};
+}

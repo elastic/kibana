@@ -16,13 +16,18 @@ import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
 
+const ruleIdSchema = z.string().trim().min(1).describe('A rule identifier.');
+
 const getRulesBulkQuerySchema = z.object({
-  ids: z
-    .array(z.string().describe('A rule identifier.'))
-    .min(1)
-    .max(1000)
-    .optional()
-    .describe('A list of rule identifiers to retrieve.'),
+  ids: z.union([
+    ruleIdSchema,
+    z
+      .array(ruleIdSchema)
+      .min(1)
+      .max(1000)
+      .optional()
+      .describe('A list of rule identifiers to retrieve.'),
+  ]),
 });
 
 @injectable()

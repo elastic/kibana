@@ -6,7 +6,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { buildPhraseFilter, type Filter } from '@kbn/es-query';
+import { buildPhraseFilter, buildQueryFilter, type Filter } from '@kbn/es-query';
 import type { EpisodesFilterState } from './build_episodes_esql_query';
 
 /**
@@ -42,19 +42,17 @@ export function buildEpisodesFilters(
 
   // Kuery (textual query) as a filter
   if (filterState.kuery?.trim()) {
-    filters.push({
-      meta: {
-        index: dataView.id,
-        alias: null,
-        disabled: false,
-        negate: false,
-      },
-      query: {
-        query_string: {
-          query: filterState.kuery.trim(),
+    filters.push(
+      buildQueryFilter(
+        {
+          query_string: {
+            query: filterState.kuery.trim(),
+          },
         },
-      },
-    });
+        dataView.id!,
+        ''
+      )
+    );
   }
 
   return filters;

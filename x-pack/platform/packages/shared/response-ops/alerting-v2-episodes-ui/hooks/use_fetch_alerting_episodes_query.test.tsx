@@ -111,7 +111,7 @@ describe('useFetchAlertingEpisodesQuery', () => {
       { wrapper }
     );
 
-    await waitFor(() => result.current.isSuccess);
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(fetchAlertingEpisodesMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -139,7 +139,7 @@ describe('useFetchAlertingEpisodesQuery', () => {
       { wrapper }
     );
 
-    await waitFor(() => result.current.isSuccess);
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     executeEsqlQueryMock.mockClear();
 
@@ -176,7 +176,7 @@ describe('useFetchAlertingEpisodesQuery', () => {
       { wrapper }
     );
 
-    await waitFor(() => result.current.isSuccess);
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     fetchAlertingEpisodesMock.mockClear();
 
@@ -274,7 +274,7 @@ describe('useFetchAlertingEpisodesQuery', () => {
       { wrapper }
     );
 
-    await waitFor(() => result.current.isSuccess);
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.dataView).toBe(mockDataView);
   });

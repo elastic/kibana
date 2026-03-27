@@ -52,7 +52,7 @@ const computedFields: Record<string, RuntimeField> = {
         includeSpaceWithSuffix: true,
         inputFormat: 'milliseconds',
         outputFormat: 'humanizePrecise',
-        outputPrecision: 2,
+        outputPrecision: 0,
         useShortSuffix: true,
       },
     },
