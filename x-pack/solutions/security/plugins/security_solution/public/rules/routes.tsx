@@ -113,8 +113,10 @@ const getRulesSubRoutes = (
   ...(hasCapabilities(capabilities, RULES_UI_READ_PRIVILEGE) // regular detection rules are enabled
     ? [
         {
-          path: `/rules/id/:detailName/:tabName(${RuleDetailTabs.overview}|${RuleDetailTabs.alerts}|${RuleDetailTabs.exceptions}|${RuleDetailTabs.endpointExceptions}|${RuleDetailTabs.executionResults}|${RuleDetailTabs.executionEvents})`,
-          main: RuleDetailsPage,
+          path: endpointExceptionsTabEnabled
+            ? `/rules/id/:detailName/:tabName(${RuleDetailTabs.overview}|${RuleDetailTabs.alerts}|${RuleDetailTabs.exceptions}|${RuleDetailTabs.endpointExceptions}|${RuleDetailTabs.executionResults}|${RuleDetailTabs.executionEvents})`
+            : `/rules/id/:detailName/:tabName(${RuleDetailTabs.overview}|${RuleDetailTabs.alerts}|${RuleDetailTabs.exceptions}|${RuleDetailTabs.executionResults}|${RuleDetailTabs.executionEvents})`,
+          main: RuleDetailsTabGuard,
           exact: true,
         },
         {
