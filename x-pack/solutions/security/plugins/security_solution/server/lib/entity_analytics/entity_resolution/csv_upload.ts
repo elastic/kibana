@@ -10,28 +10,18 @@ import Papa from 'papaparse';
 import type { Logger } from '@kbn/logging';
 import type { EntityStoreCRUDClient, ResolutionClient } from '@kbn/entity-store/server';
 import { ENGINE_METADATA_TYPE_FIELD } from '@kbn/entity-store/server';
+import type {
+  ResolutionCsvUploadRowResponse,
+  ResolutionCsvUploadResponse,
+} from '../../../../common/entity_analytics/entity_store/resolution_csv_upload';
+
+export type { ResolutionCsvUploadRowResponse, ResolutionCsvUploadResponse };
 
 const VALID_ENTITY_TYPES = new Set(['user', 'host', 'service', 'generic']);
 const RESERVED_COLUMNS = new Set(['type', 'resolved_to']);
 const ENTITY_SEARCH_PAGE_SIZE = 100;
 const ENTITY_ID_FIELD = 'entity.id';
 const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
-
-export interface ResolutionCsvUploadRowResponse {
-  status: 'success' | 'unmatched' | 'error';
-  matchedEntities: number;
-  linkedEntities: number;
-  skippedEntities: number;
-  error?: string;
-}
-
-export interface ResolutionCsvUploadResponse {
-  total: number;
-  successful: number;
-  failed: number;
-  unmatched: number;
-  items: ResolutionCsvUploadRowResponse[];
-}
 
 interface CsvResolutionUploadDeps {
   crudClient: EntityStoreCRUDClient;

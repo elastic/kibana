@@ -34,18 +34,7 @@ export enum FileUploaderSteps {
   RESULT = 3,
 }
 
-export interface ResolutionCsvUploadRowResponse {
-  status: 'success' | 'unmatched' | 'error';
-  matchedEntities: number;
-  linkedEntities: number;
-  skippedEntities: number;
-  error?: string;
-}
-
-export interface ResolutionCsvUploadResponse {
-  total: number;
-  successful: number;
-  failed: number;
-  unmatched: number;
-  items: ResolutionCsvUploadRowResponse[];
-}
+export type {
+  ResolutionCsvUploadRowResponse,
+  ResolutionCsvUploadResponse,
+} from '../../../../common/entity_analytics/entity_store/resolution_csv_upload';
