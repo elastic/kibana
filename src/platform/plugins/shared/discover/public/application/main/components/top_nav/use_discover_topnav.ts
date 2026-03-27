@@ -69,8 +69,12 @@ const useDiscoverTopNavShared = ({
 /** Embedded / by-value: top nav shows Inspect; mounts {@link useInspector}. */
 export const useDiscoverTopNavWithInspector = ({
   persistedDiscoverSession,
+  onOpenSaveModal,
+  onOpenSaveAsModal,
 }: {
   persistedDiscoverSession: DiscoverSession | undefined;
+  onOpenSaveModal: () => void;
+  onOpenSaveAsModal: () => void;
 }) => {
   const shared = useDiscoverTopNavShared({ persistedDiscoverSession });
   const onOpenInspector = useInspector({ inspector: shared.services.inspector });
@@ -84,6 +88,8 @@ export const useDiscoverTopNavWithInspector = ({
     adHocDataViews: shared.adHocDataViews,
     hasShareIntegration: shared.hasShareIntegration,
     persistedDiscoverSession,
+    onOpenSaveModal,
+    onOpenSaveAsModal,
   });
 
   return {
@@ -95,8 +101,12 @@ export const useDiscoverTopNavWithInspector = ({
 /** Standalone tabbed Discover: Inspect is on the tab menu only — do not mount {@link useInspector}. */
 export const useDiscoverTopNavWithoutInspector = ({
   persistedDiscoverSession,
+  onOpenSaveModal,
+  onOpenSaveAsModal,
 }: {
   persistedDiscoverSession: DiscoverSession | undefined;
+  onOpenSaveModal: () => void;
+  onOpenSaveAsModal: () => void;
 }) => {
   const shared = useDiscoverTopNavShared({ persistedDiscoverSession });
 
@@ -109,6 +119,8 @@ export const useDiscoverTopNavWithoutInspector = ({
     adHocDataViews: shared.adHocDataViews,
     hasShareIntegration: shared.hasShareIntegration,
     persistedDiscoverSession,
+    onOpenSaveModal,
+    onOpenSaveAsModal,
   });
 
   return {

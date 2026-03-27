@@ -15,6 +15,8 @@ interface SaveModalDocumentInfo {
   description?: string;
 }
 
+export type DashboardSavingOption = 'new' | 'existing' | null;
+
 export interface SaveModalDashboardProps<T = void> {
   documentInfo: SaveModalDocumentInfo;
   canSaveByReference: boolean;
@@ -26,4 +28,7 @@ export interface SaveModalDashboardProps<T = void> {
   tagOptions?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
   // include a message if the user has to copy on save
   mustCopyOnSaveMessage?: string;
+  customModalTitle?: React.ReactNode;
+  hideDashboardOptions?: boolean;
+  initialDashboardOption?: DashboardSavingOption;
 }

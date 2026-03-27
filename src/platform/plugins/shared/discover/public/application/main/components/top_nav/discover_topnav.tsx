@@ -44,7 +44,7 @@ import {
 } from '../../state_management/redux';
 import { DiscoverTopNavMenu } from './discover_topnav_menu';
 import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
-import { onSaveDiscoverSession } from './save_discover_session';
+import { DiscoverSessionSaveModalContainer } from './save_discover_session';
 import {
   isDiscoverInspectorInTabMenu,
   useDiscoverTopNavWithInspector,
@@ -55,33 +55,63 @@ import type { UpdateESQLQueryFn } from '../../../../context_awareness/types';
 
 function DiscoverTopNavMenuSection({
   persistedDiscoverSession,
+  onOpenSaveModal,
+  onOpenSaveAsModal,
 }: {
   persistedDiscoverSession: DiscoverSession | undefined;
+  onOpenSaveModal: () => void;
+  onOpenSaveAsModal: () => void;
 }) {
   const services = useDiscoverServices();
   const customizationContext = useDiscoverCustomizationContext();
   if (isDiscoverInspectorInTabMenu(services, customizationContext)) {
-    return <DiscoverTopNavMenuNoInspector persistedDiscoverSession={persistedDiscoverSession} />;
+    return (
+      <DiscoverTopNavMenuNoInspector
+        persistedDiscoverSession={persistedDiscoverSession}
+        onOpenSaveModal={onOpenSaveModal}
+        onOpenSaveAsModal={onOpenSaveAsModal}
+      />
+    );
   }
-  return <DiscoverTopNavMenuWithInspector persistedDiscoverSession={persistedDiscoverSession} />;
+  return (
+    <DiscoverTopNavMenuWithInspector
+      persistedDiscoverSession={persistedDiscoverSession}
+      onOpenSaveModal={onOpenSaveModal}
+      onOpenSaveAsModal={onOpenSaveAsModal}
+    />
+  );
 }
 
 function DiscoverTopNavMenuWithInspector({
   persistedDiscoverSession,
+  onOpenSaveModal,
+  onOpenSaveAsModal,
 }: {
   persistedDiscoverSession: DiscoverSession | undefined;
+  onOpenSaveModal: () => void;
+  onOpenSaveAsModal: () => void;
 }) {
-  const { topNavBadges, topNavMenu } = useDiscoverTopNavWithInspector({ persistedDiscoverSession });
+  const { topNavBadges, topNavMenu } = useDiscoverTopNavWithInspector({
+    persistedDiscoverSession,
+    onOpenSaveModal,
+    onOpenSaveAsModal,
+  });
   return <DiscoverTopNavMenu topNavBadges={topNavBadges} topNavMenu={topNavMenu} />;
 }
 
 function DiscoverTopNavMenuNoInspector({
   persistedDiscoverSession,
+  onOpenSaveModal,
+  onOpenSaveAsModal,
 }: {
   persistedDiscoverSession: DiscoverSession | undefined;
+  onOpenSaveModal: () => void;
+  onOpenSaveAsModal: () => void;
 }) {
   const { topNavBadges, topNavMenu } = useDiscoverTopNavWithoutInspector({
     persistedDiscoverSession,
+    onOpenSaveModal,
+    onOpenSaveAsModal,
   });
   return <DiscoverTopNavMenu topNavBadges={topNavBadges} topNavMenu={topNavMenu} />;
 }
@@ -114,6 +144,10 @@ export const DiscoverTopNav = ({
   const { dataViewEditor, navigation, dataViewFieldEditor, data } = services;
   const customizationContext = useDiscoverCustomizationContext();
   const [controlGroupApi, setControlGroupApi] = useState<ControlGroupRendererApi | undefined>();
+  const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
+  const [initialCopyOnSave, setInitialCopyOnSave] = useState(false);
+
+  const onSaveCbRef = useRef<(() => void) | undefined>(undefined);
 
   const query = useAppStateSelector((state) => state.query);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
@@ -251,29 +285,44 @@ export const DiscoverTopNav = ({
         services.storage.set(ESQL_TRANSITION_MODAL_KEY, true);
       }
       dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(false));
-      // the user dismissed the modal, we don't need to save the search or switch to the data view mode
       if (needsSave == null) {
         return;
       }
       if (needsSave) {
-        onSaveDiscoverSession({
-          services,
-          dispatch,
-          getState,
-          runtimeStateManager,
-          onClose: () =>
-            dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(false)),
-          onSaveCb: () => {
-            dispatch(transitionFromESQLToDataView({ dataViewId: dataView.id ?? '' }));
-          },
-        });
-      } else {
-        dispatch(transitionFromESQLToDataView({ dataViewId: dataView.id ?? '' }));
+        setInitialCopyOnSave(false);
+        onSaveCbRef.current = () => {
+          const tabId = getState().tabs.unsafeCurrentId;
+          dispatch(
+            internalStateActions.transitionFromESQLToDataView({
+              tabId,
+              dataViewId: dataView.id ?? '',
+            })
+          );
+        };
+        setIsSaveModalVisible(true);
+        return;
       }
+      dispatch(transitionFromESQLToDataView({ dataViewId: dataView.id ?? '' }));
     },
-    [dataView.id, dispatch, services, getState, runtimeStateManager, transitionFromESQLToDataView]
+    [dataView.id, dispatch, getState, services, transitionFromESQLToDataView]
   );
 
+  const onOpenSaveModal = useCallback(() => {
+    setInitialCopyOnSave(false);
+    onSaveCbRef.current = undefined;
+    setIsSaveModalVisible(true);
+  }, []);
+
+  const onOpenSaveAsModal = useCallback(() => {
+    setInitialCopyOnSave(true);
+    onSaveCbRef.current = undefined;
+    setIsSaveModalVisible(true);
+  }, []);
+
+  const onCloseSaveModal = useCallback(() => {
+    setIsSaveModalVisible(false);
+    onSaveCbRef.current = undefined;
+  }, []);
   const changeDataView = useCurrentTabAction(internalStateActions.changeDataView);
   const onChangeDataView = useCallback(
     (dataViewOrDataViewId: string | DataView) => {
@@ -375,7 +424,11 @@ export const DiscoverTopNav = ({
 
   return (
     <span>
-      <DiscoverTopNavMenuSection persistedDiscoverSession={persistedDiscoverSession} />
+      <DiscoverTopNavMenuSection
+        persistedDiscoverSession={persistedDiscoverSession}
+        onOpenSaveModal={onOpenSaveModal}
+        onOpenSaveAsModal={onOpenSaveAsModal}
+      />
       <SearchBar
         useBackgroundSearchButton={
           customizationContext.displayMode !== 'embedded' &&
@@ -453,6 +506,17 @@ export const DiscoverTopNav = ({
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />
+      )}
+      {isSaveModalVisible && (
+        <DiscoverSessionSaveModalContainer
+          dispatch={dispatch}
+          getState={getState}
+          initialCopyOnSave={initialCopyOnSave}
+          onClose={onCloseSaveModal}
+          onSaveCb={onSaveCbRef.current}
+          runtimeStateManager={runtimeStateManager}
+          services={services}
+        />
       )}
     </span>
   );
