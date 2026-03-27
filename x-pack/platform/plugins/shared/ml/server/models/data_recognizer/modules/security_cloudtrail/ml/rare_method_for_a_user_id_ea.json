@@ -20,7 +20,8 @@
       "source.ip",
       "source.geo.city_name",
       "aws.cloudtrail.user_identity.arn",
-      "event.module"
+      "event.module",
+      "event.action"
     ]
   },
   "allow_lazy_open": true,

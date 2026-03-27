@@ -38,18 +38,15 @@ steps:
     condition: "${{inputs.item_type == 'schedules'}}"
     steps:
       - name: list-schedules
-        type: mcp.callTool
-        connector-id: <%= mcp-stack-connector-id %>
+        type: pagerduty_mcp.listSchedules
+        connector-id: <%= pagerduty_mcp-stack-connector-id %>
         with:
-          name: "list_schedules"
-          arguments:
-            query_model:
-              limit: ${{inputs.limit}}
-              query: "${{inputs.query}}"
-              include: ${{inputs.include}}
+          limit: ${{inputs.limit}}
+          query: "${{inputs.query}}"
+          include: ${{inputs.include}}
       - name: get-schedules
         type: data.map
-        items: ${{steps['list-schedules'].output.content[0].text | json_parse}}
+        items: ${{steps['list-schedules'].output}}
         with:
           fields:
             response:
@@ -80,17 +77,14 @@ steps:
         condition: "${{inputs.item_type == 'escalation_policies'}}"
         steps:
           - name: list-escalation-policies
-            type: mcp.callTool
-            connector-id: <%= mcp-stack-connector-id %>
+            type: pagerduty_mcp.listEscalationPolicies
+            connector-id: <%= pagerduty_mcp-stack-connector-id %>
             with:
-              name: "list_escalation_policies"
-              arguments:
-                query_model:
-                  limit: ${{inputs.limit}}
-                  query: "${{inputs.query}}"
+              limit: ${{inputs.limit}}
+              query: "${{inputs.query}}"
           - name: get-escalation-policies
             type: data.map
-            items: ${{steps['list-escalation-policies'].output.content[0].text | json_parse}}
+            items: ${{steps['list-escalation-policies'].output}}
             with:
               fields:
                 response:
@@ -121,17 +115,14 @@ steps:
             condition: "${{inputs.item_type == 'users'}}"
             steps:
               - name: list-users
-                type: mcp.callTool
-                connector-id: <%= mcp-stack-connector-id %>
+                type: pagerduty_mcp.listUsers
+                connector-id: <%= pagerduty_mcp-stack-connector-id %>
                 with:
-                  name: "list_users"
-                  arguments:
-                    query_model:
-                      limit: ${{inputs.limit}}
-                      query: "${{inputs.query}}"
+                  limit: ${{inputs.limit}}
+                  query: "${{inputs.query}}"
               - name: get-users
                 type: data.map
-                items: ${{steps['list-users'].output.content[0].text | json_parse}}
+                items: ${{steps['list-users'].output}}
                 with:
                   fields:
                     response:
@@ -145,17 +136,14 @@ steps:
             condition: "${{inputs.item_type == 'teams'}}"
             steps:
               - name: list-teams
-                type: mcp.callTool
-                connector-id: <%= mcp-stack-connector-id %>
+                type: pagerduty_mcp.listTeams
+                connector-id: <%= pagerduty_mcp-stack-connector-id %>
                 with:
-                  name: "list_teams"
-                  arguments:
-                    query_model:
-                      limit: ${{inputs.limit}}
-                      query: "${{inputs.query}}"
+                  limit: ${{inputs.limit}}
+                  query: "${{inputs.query}}"
               - name: get-teams
                 type: data.map
-                items: ${{steps['list-teams'].output.content[0].text | json_parse}}
+                items: ${{steps['list-teams'].output}}
                 with:
                   fields:
                     response:

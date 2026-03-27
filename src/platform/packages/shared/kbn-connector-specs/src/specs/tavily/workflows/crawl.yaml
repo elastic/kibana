@@ -39,14 +39,12 @@ inputs:
     description: 'Depth of extraction. Advanced retrieves more data including tables and embedded content.'
 steps:
   - name: tavily-crawl
-    type: mcp.callTool
-    connector-id: <%= mcp-stack-connector-id %>
+    type: tavily_mcp.tavilyCrawl
+    connector-id: <%= tavily_mcp-stack-connector-id %>
     with:
-      name: "tavily_crawl"
-      arguments:
-        url: "${{inputs.url}}"
-        max_depth: ${{inputs.max_depth}}
-        max_breadth: ${{inputs.max_breadth}}
-        limit: ${{inputs.limit}}
-        instructions: "${{inputs.instructions}}"
-        extract_depth: "${{inputs.extract_depth}}"
+      url: "${{inputs.url}}"
+      max_depth: ${{inputs.max_depth}}
+      max_breadth: ${{inputs.max_breadth}}
+      limit: ${{inputs.limit}}
+      instructions: "${{inputs.instructions}}"
+      extract_depth: "${{inputs.extract_depth}}"

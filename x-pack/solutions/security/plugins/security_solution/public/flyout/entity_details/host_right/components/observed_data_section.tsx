@@ -27,18 +27,22 @@ import { FormattedRelativePreferenceDate } from '../../../../common/components/f
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import type { HostItem } from '../../../../../common/search_strategy';
 import { useAnomaliesTableData } from '../../../../common/components/ml/anomaly/use_anomalies_table_data';
+import type { IdentityFields } from '../../../document_details/shared/utils';
+import type { EntityStoreRecord } from '../../shared/hooks/use_entity_from_store';
 
-type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'>;
+type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'> & {
+  entityRecord?: EntityStoreRecord | null;
+};
 
 export const ObservedDataSection = memo(
   ({
-    hostName,
+    identityFields,
     observedHost,
     contextID,
     scopeId,
     queryId,
   }: {
-    hostName: string;
+    identityFields: IdentityFields;
     observedHost: ObservedHostData;
     contextID: string;
     scopeId: string;
@@ -123,7 +127,7 @@ export const ObservedDataSection = memo(
             <EuiLoadingSpinner data-test-subj="observedDataSectionLoadingSpinner" />
           ) : (
             <ObservedDataSectionContent
-              hostName={hostName}
+              identityFields={identityFields}
               observedHost={observedHost}
               contextID={contextID}
               scopeId={scopeId}
@@ -139,13 +143,13 @@ ObservedDataSection.displayName = 'ObservedDataSection';
 
 const ObservedDataSectionContent = memo(
   ({
-    hostName,
+    identityFields,
     observedHost,
     contextID,
     scopeId,
     queryId,
   }: {
-    hostName: string;
+    identityFields: IdentityFields;
     observedHost: ObservedHostData;
     contextID: string;
     scopeId: string;
@@ -167,6 +171,7 @@ const ObservedDataSectionContent = memo(
     const observedHostWithAnomalies = useMemo(
       (): ObservedEntityData<HostItem> => ({
         ...observedHost,
+        entityId: observedHost.entityRecord?.entity.id,
         anomalies: {
           isLoading: isLoadingAnomaliesData,
           anomalies: anomaliesData,
