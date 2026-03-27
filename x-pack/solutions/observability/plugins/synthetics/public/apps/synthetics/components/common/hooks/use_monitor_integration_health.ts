@@ -41,7 +41,6 @@ interface UseMonitorIntegrationHealthReturn {
   isUnhealthy: (configId: string) => boolean;
   isFixableByReset: (configId: string) => boolean;
   getUnhealthyLocationStatuses: (configId: string) => MonitorIntegrationStatus[];
-  getUnhealthyLocationCount: () => number;
   getUnhealthyMonitorCountForLocation: (locationId: string) => number;
   getUnhealthyConfigIdsForLocation: (locationId: string) => string[];
 }
@@ -129,14 +128,6 @@ export const useMonitorIntegrationHealth = (
     [statuses]
   );
 
-  const getUnhealthyLocationCount = useCallback((): number => {
-    let count = 0;
-    for (const locationStatuses of statuses.values()) {
-      if (locationStatuses.some((s) => s.isUnhealthy)) count++;
-    }
-    return count;
-  }, [statuses]);
-
   const getUnhealthyMonitorCountForLocation = useCallback(
     (locationId: string): number => {
       let count = 0;
@@ -216,7 +207,6 @@ export const useMonitorIntegrationHealth = (
     isUnhealthy,
     isFixableByReset,
     getUnhealthyLocationStatuses,
-    getUnhealthyLocationCount,
     getUnhealthyMonitorCountForLocation,
     getUnhealthyConfigIdsForLocation,
   };
