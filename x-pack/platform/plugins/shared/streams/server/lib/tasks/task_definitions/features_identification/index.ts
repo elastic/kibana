@@ -375,6 +375,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
               });
               taskLogger.debug(`Using connector ${connectorId} for knowledge indicator extraction`);
 
+              let hasTrackedIteration = false;
               try {
                 const [
                   stream,
@@ -410,6 +411,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                     signal: runContext.abortController.signal,
                     systemPrompt: featurePromptOverride,
                     onIterationComplete: async (it, changedFeatures) => {
+                      hasTrackedIteration = true;
                       if (changedFeatures.length > 0) {
                         await featureClient.bulk(
                           stream.name,
@@ -490,7 +492,9 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   taskContext.logger.debug(
                     () => `Task ${runContext.taskInstance.id} was canceled: ${errorMessage}`
                   );
-                  trackEmptyTelemetry('canceled');
+                  if (!hasTrackedIteration) {
+                    trackEmptyTelemetry('canceled');
+                  }
                   return getDeleteTaskRunResult();
                 }
 
@@ -505,7 +509,9 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   errorMessage
                 );
 
-                trackEmptyTelemetry('failure');
+                if (!hasTrackedIteration) {
+                  trackEmptyTelemetry('failure');
+                }
 
                 return getDeleteTaskRunResult();
               }
