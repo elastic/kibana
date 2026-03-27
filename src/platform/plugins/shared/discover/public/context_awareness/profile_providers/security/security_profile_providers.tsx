@@ -30,13 +30,15 @@ export const createSecurityDocumentProfileProviders = (
 
         return {
           ...prevDocViewer,
-          renderHeader: (props) => (
-            <EnhancedAlertFlyoutHeaderLazy
-              {...props}
-              providerServices={providerServices}
-              fallbackRenderHeader={prevDocViewer.renderHeader}
-            />
-          ),
+          renderHeader: isAlert
+            ? (props) => (
+                <EnhancedAlertFlyoutHeaderLazy
+                  {...props}
+                  providerServices={providerServices}
+                  fallbackRenderHeader={prevDocViewer.renderHeader}
+                />
+              )
+            : prevDocViewer.renderHeader,
           docViewsRegistry: (registry) => {
             if (isAlert) {
               registry.add({

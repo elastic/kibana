@@ -31,6 +31,7 @@ describe('Data stream routes - upload samples', () => {
         },
         getCurrentUser: mockGetCurrentUser,
         esClient: { search: mockEsSearch },
+        isAvailable: () => true,
       }),
     } as unknown as AutomaticImportV2PluginRequestHandlerContext);
 

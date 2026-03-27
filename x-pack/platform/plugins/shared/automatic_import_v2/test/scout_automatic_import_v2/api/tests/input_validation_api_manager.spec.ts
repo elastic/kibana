@@ -19,7 +19,7 @@
  *   path-like names); uploads are not gated on file extension.
  *
  * Payload size / abuse guards (see OpenAPI + Zod in `common/model/`): e.g. upload `samples` max
- * 1000 lines; create `dataStreams` max 50; approve `categories` max 50;
+ * 1000 lines; create `dataStreams` max 50; approve `categories` required, min 1 / max 50;
  * PATCH pipeline string max 10MB and object `processors` max 10000 (validated in `data_stream_routes`).
  */
 
@@ -285,6 +285,35 @@ apiTest.describe(
         },
         responseType: 'json',
       });
+      expect(response).toHaveStatusCode(400);
+      expectZodBadRequest(response.body);
+    });
+
+    apiTest(
+      'POST .../approve: rejects body without categories (strict / required)',
+      async ({ apiClient }) => {
+        const response = await apiClient.post(
+          `${INTEGRATION_API_BASE_PATH}/${VALIDATION_INTEGRATION_ID}/approve`,
+          {
+            headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+            body: { version: '1.0.0' },
+            responseType: 'json',
+          }
+        );
+        expect(response).toHaveStatusCode(400);
+        expectZodBadRequest(response.body);
+      }
+    );
+
+    apiTest('POST .../approve: rejects empty categories array', async ({ apiClient }) => {
+      const response = await apiClient.post(
+        `${INTEGRATION_API_BASE_PATH}/${VALIDATION_INTEGRATION_ID}/approve`,
+        {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: { version: '1.0.0', categories: [] },
+          responseType: 'json',
+        }
+      );
       expect(response).toHaveStatusCode(400);
       expectZodBadRequest(response.body);
     });
