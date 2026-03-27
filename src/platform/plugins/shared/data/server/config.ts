@@ -74,9 +74,9 @@ export const searchConfigSchema = schema.object({
      */
     pollInterval: schema.maybe(schema.number({ min: 200 })),
     /**
-     * How long to wait for results before initiating a new poll request. If not provided, defaults to 30s.
+     * How long to wait for results before initiating a new poll request (in milliseconds).
      */
-    pollLength: schema.duration({ defaultValue: '0s' }),
+    pollLength: schema.maybe(schema.number({ min: 0 })),
   }),
   aggs: schema.object({
     shardDelay: schema.object({

@@ -65,6 +65,7 @@ import type {
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import { AbortReason, defaultFreeze } from '@kbn/kibana-utils-plugin/common';
 import type { ICPSManager } from '@kbn/cps-utils';
+import moment from 'moment';
 import {
   EVENT_TYPE_DATA_SEARCH_TIMEOUT,
   EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
@@ -110,6 +111,8 @@ export interface SearchInterceptorDeps {
 
 const MAX_CACHE_ITEMS = 50;
 const MAX_CACHE_SIZE_MB = 10;
+
+const DEFAULT_MULTIPLEXING_POLL_LENGTH = 30_000;
 
 export class SearchInterceptor {
   private uiSettingsSubs: Subscription[] = [];
@@ -425,10 +428,17 @@ export class SearchInterceptor {
     // Preserve and project first request params into responses.
     let firstRequestParams: SanitizedConnectionRequestParams;
 
+    const pollInterval = this.deps.searchConfig.asyncSearch.pollInterval
+      ? // the types incorrectly report asyncSearch.pollInterval as a duration already, but it
+        // is actually a duration string that needs to be initialized with moment.duration
+        // TODO — can we fix this?
+        moment.duration(this.deps.searchConfig.asyncSearch.pollInterval).asMilliseconds()
+      : this.protocolSupportsMultiplexing
+      ? 0
+      : undefined;
+
     return pollSearch(search, cancel, {
-      pollInterval:
-        this.deps.searchConfig.asyncSearch.pollInterval ??
-        (this.protocolSupportsMultiplexing ? 0 : undefined),
+      pollInterval,
       ...options,
       abortSignal: searchAbortController.getSignal(),
     }).pipe(
@@ -518,14 +528,19 @@ export class SearchInterceptor {
     const requestHash = params ? createRequestHashForBackgroundSearches(params) : undefined;
 
     const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
-
-    // FIXME: the dropNullColumns param shouldn't be needed during polling
-    // once https://github.com/elastic/elasticsearch/issues/138439 is resolved
-    // at that point, exclude all params when request.id is defined (polling phase)
     const paramsToUse = request.id
       ? {
+          wait_for_completion_timeout:
+            typeof this.deps.searchConfig.asyncSearch.pollLength === 'number'
+              ? `${this.deps.searchConfig.asyncSearch.pollLength}ms`
+              : this.protocolSupportsMultiplexing
+              ? `${DEFAULT_MULTIPLEXING_POLL_LENGTH}ms` // todo - limit to socket timeout
+              : undefined,
+
+          // FIXME: the dropNullColumns param shouldn't be needed during polling
+          // once https://github.com/elastic/elasticsearch/issues/138439 is resolved
+          // at that point, exclude all params when request.id is defined (polling phase)
           dropNullColumns: params?.dropNullColumns,
-          wait_for_completion_timeout: this.protocolSupportsMultiplexing ? '30s' : undefined,
         }
       : params || {};
     return this.deps.http
