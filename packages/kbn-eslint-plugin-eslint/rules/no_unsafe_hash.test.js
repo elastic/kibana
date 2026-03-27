@@ -77,7 +77,7 @@ ruleTester.run('@kbn/eslint/no_unsafe_hash', rule, {
       `,
       filename: path.resolve(
         KIBANA_ROOT,
-        'x-pack/solutions/security/plugins/entity_store/server/domain/crud/utils.ts'
+        'packages/kbn-failed-test-reporter-cli/failed_tests_reporter/report_failures_to_file.ts'
       ),
     },
   ],
