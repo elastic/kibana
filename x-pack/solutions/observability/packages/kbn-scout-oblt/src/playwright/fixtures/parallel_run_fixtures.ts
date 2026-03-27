@@ -6,7 +6,6 @@
  */
 
 import { spaceTest as spaceBase } from '@kbn/scout';
-import type { ApiServicesFixture } from '@kbn/scout';
 import { extendPageObjects } from '../page_objects';
 
 import type { ObltParallelTestFixtures, ObltParallelWorkerFixtures } from './types';
