@@ -9,10 +9,12 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
-import type { FieldValues, Path } from 'react-hook-form';
-import { Controller, useFormContext } from 'react-hook-form';
+import type { FieldValues, Path, PathValue } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import { useSelector } from 'react-redux';
+import usePrevious from 'react-use/lib/usePrevious';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
-
+import { selectAgentPolicies } from '../../../state/agent_policies';
 import type { ClientPluginsStart } from '../../../../../plugin';
 
 interface SpaceSelectorProps {
@@ -28,49 +30,69 @@ export const SpaceSelector = <T extends FieldValues>({
   const { services } = useKibana<ClientPluginsStart>();
   const [spacesList, setSpacesList] = React.useState<Array<{ id: string; label: string }>>([]);
   const data = services.spaces?.ui.useSpaces();
+  const AGENT_POLICY_FIELD_NAME = 'agentPolicyId' as Path<T>;
+  const { data: agentPolicies } = useSelector(selectAgentPolicies);
 
-  const {
+  const { control, trigger, setValue } = useFormContext<T>();
+
+  const selectedAgentPolicyId: string = useWatch({
     control,
-    formState: { isSubmitted },
-    trigger,
-  } = useFormContext<T>();
-  const { isTouched, error } = control.getFieldState(NAMESPACES_NAME);
+    name: AGENT_POLICY_FIELD_NAME,
+  });
 
-  const showFieldInvalid = (isSubmitted || isTouched) && !!error;
+  const prevAgentPolicyId = usePrevious(selectedAgentPolicyId);
 
   useEffect(() => {
-    if (data?.spacesDataPromise) {
-      data.spacesDataPromise.then((spacesData) => {
-        setSpacesList([
-          allSpacesOption,
-          ...[...spacesData.spacesMap].map(([spaceId, dataS]) => ({
-            id: spaceId,
-            label: dataS.name,
-          })),
-        ]);
+    if (
+      selectedAgentPolicyId !== prevAgentPolicyId &&
+      selectedAgentPolicyId &&
+      agentPolicies &&
+      data?.spacesDataPromise
+    ) {
+      if (isDisabled) return;
+      const selectedPolicy = agentPolicies.find((policy) => policy.id === selectedAgentPolicyId);
+      if (!selectedPolicy) {
+        throw new Error('Selected agent policy not found, this should never happen');
+      }
+
+      data.spacesDataPromise.then(({ spacesMap }) => {
+        const policySpaceIds = selectedPolicy.spaceIds || [];
+        const spaceOptions: { id: string; label: string }[] = [];
+        const spaceOptionBySpaceId: Record<string, { id: string; label: string }> = {};
+        spacesMap.forEach((spaceData, spaceId) => {
+          spaceOptionBySpaceId[spaceId] = { id: spaceId, label: spaceData.name };
+        });
+
+        // If the policy belongs to all spaces or fleet agent policies are not space aware, show all spaces
+        if (policySpaceIds.includes(ALL_SPACES_ID) || !policySpaceIds.length) {
+          spaceOptions.push(...Object.values(spaceOptionBySpaceId));
+        } else {
+          spaceOptions.push(...policySpaceIds.map((spaceId) => spaceOptionBySpaceId[spaceId]));
+        }
+        setSpacesList(spaceOptions);
+        setValue(NAMESPACES_NAME, spaceOptions.map((space) => space.id) as PathValue<T, Path<T>>);
       });
     }
-  }, [data]);
+  }, [
+    agentPolicies,
+    data?.spacesDataPromise,
+    isDisabled,
+    prevAgentPolicyId,
+    selectedAgentPolicyId,
+    setValue,
+  ]);
 
   return (
-    <EuiFormRow
-      fullWidth
-      label={SPACES_LABEL}
-      helpText={helpText}
-      isInvalid={showFieldInvalid}
-      error={showFieldInvalid ? NAMESPACES_NAME : undefined}
-    >
+    <EuiFormRow fullWidth label={SPACES_LABEL} helpText={helpText}>
       <Controller
         name={NAMESPACES_NAME}
         control={control}
-        rules={{ required: true }}
         render={({ field }) => (
           <EuiComboBox
             isDisabled={isDisabled}
             fullWidth
             aria-label={SPACES_LABEL}
             placeholder={SPACES_LABEL}
-            isInvalid={showFieldInvalid}
             {...field}
             onBlur={async () => {
               await trigger();
@@ -89,25 +111,6 @@ export const SpaceSelector = <T extends FieldValues>({
             isClearable={true}
             onChange={(selected) => {
               const selectedIds = selected.map((option) => option.id);
-
-              // if last value is not all spaces, remove all spaces value
-              if (
-                selectedIds.length > 0 &&
-                selectedIds[selectedIds.length - 1] !== allSpacesOption.id
-              ) {
-                field.onChange(selectedIds.filter((id) => id !== allSpacesOption.id));
-                return;
-              }
-
-              // if last value is all spaces, remove all other values
-              if (
-                selectedIds.length > 0 &&
-                selectedIds[selectedIds.length - 1] === allSpacesOption.id
-              ) {
-                field.onChange([allSpacesOption.id]);
-                return;
-              }
-
               field.onChange(selectedIds);
             }}
           />
@@ -115,15 +118,6 @@ export const SpaceSelector = <T extends FieldValues>({
       />
     </EuiFormRow>
   );
-};
-
-export const ALL_SPACES_LABEL = i18n.translate('xpack.synthetics.spaceList.allSpacesLabel', {
-  defaultMessage: `* All spaces`,
-});
-
-const allSpacesOption = {
-  id: ALL_SPACES_ID,
-  label: ALL_SPACES_LABEL,
 };
 
 const SPACES_LABEL = i18n.translate('xpack.synthetics.privateLocation.spacesLabel', {

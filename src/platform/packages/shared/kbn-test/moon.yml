@@ -18,8 +18,8 @@ project:
   sourceRoot: src/platform/packages/shared/kbn-test
 dependsOn:
   - '@kbn/kbn-client'
-  - '@kbn/dev-utils'
   - '@kbn/std'
+  - '@kbn/test-es-server'
   - '@kbn/tooling-log'
   - '@kbn/get-repo-files'
   - '@kbn/peggy'
@@ -33,7 +33,7 @@ dependsOn:
   - '@kbn/stdio-dev-helpers'
   - '@kbn/babel-register'
   - '@kbn/repo-packages'
-  - '@kbn/mock-idp-utils'
+  - '@kbn/test-saml-auth'
   - '@kbn/code-owners'
   - '@kbn/scout-reporting'
   - '@kbn/scout-info'
