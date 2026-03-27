@@ -19,6 +19,7 @@ import { labels } from '../../../utils/i18n';
 import { useSkill } from '../../../hooks/skills/use_skills';
 import { DetailRow } from '../common/detail_row';
 import { DetailPanelLayout } from '../common/detail_panel_layout';
+import { RenderSkillContentReadOnly } from '../common/render_skill_content_read_only';
 
 interface SkillDetailPanelProps {
   skillId: string;
@@ -97,19 +98,13 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
           padding: ${euiTheme.size.m};
         `}
       >
-        <DetailRow
-          label={labels.agentSkills.skillDetailInstructionsLabel}
-          isLast={!skill?.tool_ids || skill.tool_ids.length === 0}
+        <div
+          css={css`
+            padding: ${euiTheme.size.m};
+          `}
         >
-          <div
-            css={css`
-              white-space: pre-wrap;
-              word-break: break-word;
-            `}
-          >
-            <EuiText size="s">{skill?.content}</EuiText>
-          </div>
-        </DetailRow>
+          <RenderSkillContentReadOnly content={skill?.content ?? ''} />
+        </div>
         {skill?.tool_ids && skill.tool_ids.length > 0 && (
           <DetailRow label={labels.skills.toolsLabel} isLast>
             <EuiFlexGroup direction="column" gutterSize="xs">

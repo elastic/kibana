@@ -27,6 +27,7 @@ import { usePlugin } from '../../../hooks/plugins/use_plugin';
 import { useSkill } from '../../../hooks/skills/use_skills';
 import { DetailRow } from '../common/detail_row';
 import { DetailPanelLayout } from '../common/detail_panel_layout';
+import { RenderSkillContentReadOnly } from '../common/render_skill_content_read_only';
 
 interface PluginDetailPanelProps {
   pluginId: string;
@@ -161,44 +162,32 @@ const SkillDetailFlyout: React.FC<{
             <EuiLoadingSpinner size="l" />
           </EuiFlexGroup>
         ) : skill ? (
-          <>
-            <EuiFlexGroup direction="column" gutterSize="l">
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xxxs">
-                  <h4>{labels.agentPlugins.pluginDetailNameLabel}</h4>
-                </EuiTitle>
-                <EuiText size="s">{skill.name}</EuiText>
-              </EuiFlexItem>
-              <EuiHorizontalRule margin="none" />
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xxxs">
-                  <h4>{labels.agentPlugins.pluginDetailIdLabel}</h4>
-                </EuiTitle>
-                <EuiText size="s">{skill.id}</EuiText>
-              </EuiFlexItem>
-              <EuiHorizontalRule margin="none" />
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xxxs">
-                  <h4>{labels.agentPlugins.pluginDetailDescriptionLabel}</h4>
-                </EuiTitle>
-                <EuiText size="s">{skill.description || '\u2014'}</EuiText>
-              </EuiFlexItem>
-              <EuiHorizontalRule margin="none" />
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xxxs">
-                  <h4>{labels.agentSkills.skillDetailInstructionsLabel}</h4>
-                </EuiTitle>
-                <div
-                  css={css`
-                    white-space: pre-wrap;
-                    word-break: break-word;
-                  `}
-                >
-                  <EuiText size="s">{skill.content || '\u2014'}</EuiText>
-                </div>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
+          <EuiFlexGroup direction="column" gutterSize="l">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xxxs">
+                <h4>{labels.agentPlugins.pluginDetailNameLabel}</h4>
+              </EuiTitle>
+              <EuiText size="s">{skill.name}</EuiText>
+            </EuiFlexItem>
+            <EuiHorizontalRule margin="none" />
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xxxs">
+                <h4>{labels.agentPlugins.pluginDetailIdLabel}</h4>
+              </EuiTitle>
+              <EuiText size="s">{skill.id}</EuiText>
+            </EuiFlexItem>
+            <EuiHorizontalRule margin="none" />
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xxxs">
+                <h4>{labels.agentPlugins.pluginDetailDescriptionLabel}</h4>
+              </EuiTitle>
+              <EuiText size="s">{skill.description || '\u2014'}</EuiText>
+            </EuiFlexItem>
+            <EuiHorizontalRule margin="none" />
+            <EuiFlexItem grow={false}>
+              <RenderSkillContentReadOnly content={skill.content ?? ''} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ) : null}
       </EuiFlyoutBody>
     </EuiFlyout>
