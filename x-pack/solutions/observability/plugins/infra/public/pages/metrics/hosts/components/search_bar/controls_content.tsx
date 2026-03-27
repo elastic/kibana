@@ -57,19 +57,20 @@ export const ControlsContent = ({
     if (!schema || !dataView?.id) return [];
     const inventoryModel = findInventoryModel('host');
     const nodeFilterQueries = inventoryModel.nodeFilter?.({ schema }) ?? [];
-    if (nodeFilterQueries.length === 0) return [];
 
     const apmDatasetFilter: Record<string, object> =
       schema === 'ecs'
-        ? { prefix: { [DATASTREAM_DATASET]: 'apm.transaction.' } }
-        : { wildcard: { [DATASTREAM_DATASET]: 'transaction.*.otel' } };
+        ? { prefix: { [DATASTREAM_DATASET]: { value: 'apm.transaction.' } } }
+        : { wildcard: { [DATASTREAM_DATASET]: { value: 'transaction.*.otel' } } };
+
+    const shouldClauses = [...nodeFilterQueries, apmDatasetFilter];
 
     return [
       buildCustomFilter(
         dataView.id!,
         {
           bool: {
-            should: [...nodeFilterQueries, apmDatasetFilter],
+            should: shouldClauses,
             minimum_should_match: 1,
           },
         },

@@ -12,10 +12,8 @@
  * OTel APM traces from services running on those hosts.
  */
 
-import { Serializable } from '@kbn/synthtrace-client';
+import { apm, Serializable, ApmSynthtracePipelineSchema } from '@kbn/synthtrace-client';
 import type { OtelInstance, ApmOtelFields, Fields } from '@kbn/synthtrace-client';
-import { ApmSynthtracePipelineSchema } from '@kbn/synthtrace-client';
-import { apm } from '@kbn/synthtrace-client/src/lib/apm';
 import { random, times } from 'lodash';
 import type { Scenario } from '../cli/scenario';
 import { getNumberOpt } from './helpers/scenario_opts_helpers';
@@ -30,7 +28,8 @@ const scenario: Scenario<Fields | ApmOtelFields> = async ({ logger, scenarioOpts
   return {
     generate: ({ range, clients: { infraEsClient, apmEsClient } }) => {
       // Only half of the instances will have host metrics
-      const hosts = times(numInstances / 2).map((index) => `semconv-host-${index}`);
+      const numHostInstances = Math.floor(numInstances / 2);
+      const hosts = times(numHostInstances).map((index) => `semconv-host-${index}`);
 
       const metrics = range
         .interval('30s')
