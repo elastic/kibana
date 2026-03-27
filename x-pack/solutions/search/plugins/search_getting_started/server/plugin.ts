@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext, Logger } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+  Logger,
+} from '@kbn/core/server';
 import type { SearchGettingStartedSetupDependencies } from './types';
 import { registerSearchAgent } from './agent/register_search_agent';
 
