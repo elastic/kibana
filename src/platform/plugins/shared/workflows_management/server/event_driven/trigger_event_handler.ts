@@ -15,9 +15,18 @@ import type {
   EventChainContext,
   TriggerEventHandlerParams,
 } from '@kbn/workflows-extensions/server';
-import type { ResolveMatchingWorkflowSubscriptionsParams } from './resolve_workflow_subscriptions';
+import type {
+  ResolveMatchingWorkflowSubscriptionsParams,
+  ResolveMatchingWorkflowSubscriptionsResult,
+} from './resolve_workflow_subscriptions';
+import {
+  createEmptyTriggerScheduleStats,
+  type TriggerEventScheduleStats,
+} from './trigger_event_stats';
 import type { WorkflowsManagementApi } from '../api/workflows_management_api';
 import { validateWorkflowForExecution } from '../connectors/workflows/validate_workflow_for_execution';
+import { type TriggerEventDispatchedTelemetryEvent } from '../telemetry/events';
+import type { WorkflowsManagementTelemetryClient } from '../telemetry/workflows_management_telemetry_client';
 import { type TriggerEventsDataStreamClient, writeTriggerEvent } from '../trigger_events_log';
 
 const SCHEDULE_CONCURRENCY = 20;
@@ -81,13 +90,13 @@ async function scheduleMatchingWorkflows(
   maxEventChainDepth: number,
   request: TriggerEventHandlerParams['request'],
   logger: Logger
-): Promise<void> {
+): Promise<TriggerEventScheduleStats> {
   if (workflows.length === 0) {
-    return;
+    return createEmptyTriggerScheduleStats();
   }
   const scheduleConcurrency = pLimit(SCHEDULE_CONCURRENCY);
   const schedulePromises = workflows.map((workflow) =>
-    scheduleConcurrency(async () => {
+    scheduleConcurrency(async (): Promise<'depth_skipped' | 'success' | 'failure'> => {
       const eventContext = getEventContextForScheduledWorkflow(
         workflow,
         eventParams,
@@ -95,46 +104,75 @@ async function scheduleMatchingWorkflows(
         logger
       );
       if (eventContext === null) {
-        return;
+        return 'depth_skipped';
       }
-      validateWorkflowForExecution(workflow, workflow.id);
-      const workflowToRun: WorkflowExecutionEngineModel = {
-        id: workflow.id,
-        name: workflow.name,
-        enabled: workflow.enabled,
-        definition: workflow.definition,
-        yaml: workflow.yaml,
-      };
-      await api.scheduleWorkflow(
-        workflowToRun,
-        spaceId,
-        { event: eventContext },
-        request,
-        eventParams.triggerId
-      );
+      try {
+        validateWorkflowForExecution(workflow, workflow.id);
+        const workflowToRun: WorkflowExecutionEngineModel = {
+          id: workflow.id,
+          name: workflow.name,
+          enabled: workflow.enabled,
+          definition: workflow.definition,
+          yaml: workflow.yaml,
+        };
+        await api.scheduleWorkflow(
+          workflowToRun,
+          spaceId,
+          { event: eventContext },
+          request,
+          eventParams.triggerId,
+          {
+            eventDispatchTimestamp: eventParams.timestamp,
+            eventTriggerId: eventParams.triggerId,
+          }
+        );
+        return 'success';
+      } catch (reason) {
+        const message = reason instanceof Error ? reason.message : String(reason);
+        logger.warn(
+          `Event-driven workflow scheduling failed for workflow ${workflow.id} (trigger: ${eventParams.triggerId}): ${message}`
+        );
+        return 'failure';
+      }
     })
   );
-  const results = await Promise.allSettled(schedulePromises);
-  results.forEach((result, index) => {
-    if (result.status === 'rejected') {
+  const outcomes = await Promise.allSettled(schedulePromises);
+  const stats = createEmptyTriggerScheduleStats();
+  for (const [index, outcome] of outcomes.entries()) {
+    if (outcome.status === 'rejected') {
       const workflow = workflows[index];
       const message =
-        result.reason instanceof Error ? result.reason.message : String(result.reason);
+        outcome.reason instanceof Error ? outcome.reason.message : String(outcome.reason);
       logger.warn(
         `Event-driven workflow scheduling failed for workflow ${workflow.id} (trigger: ${eventParams.triggerId}): ${message}`
       );
+      stats.scheduledAttemptCount += 1;
+      stats.scheduledFailureCount += 1;
+    } else {
+      if (outcome.value === 'depth_skipped') {
+        stats.depthSkippedCount += 1;
+      } else {
+        stats.scheduledAttemptCount += 1;
+        if (outcome.value === 'success') {
+          stats.scheduledSuccessCount += 1;
+        } else {
+          stats.scheduledFailureCount += 1;
+        }
+      }
     }
-  });
+  }
+  return stats;
 }
 
 export interface CreateTriggerEventHandlerParams {
   api: WorkflowsManagementApi;
   logger: Logger;
+  telemetryClient: Pick<WorkflowsManagementTelemetryClient, 'reportTriggerEventDispatched'>;
   getTriggerEventsClient: () => TriggerEventsDataStreamClient | null;
   getWorkflowExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>;
   resolveMatchingWorkflowSubscriptions: (
     params: ResolveMatchingWorkflowSubscriptionsParams
-  ) => Promise<WorkflowDetailDto[]>;
+  ) => Promise<ResolveMatchingWorkflowSubscriptionsResult>;
 }
 
 /**
@@ -147,14 +185,23 @@ export interface CreateTriggerEventHandlerParams {
 export function createTriggerEventHandler({
   api,
   logger,
+  telemetryClient,
   getTriggerEventsClient,
   getWorkflowExecutionEngine,
   resolveMatchingWorkflowSubscriptions,
 }: CreateTriggerEventHandlerParams): (params: TriggerEventHandlerParams) => Promise<void> {
+  const reportDispatchedEvent = (event: TriggerEventDispatchedTelemetryEvent): void =>
+    telemetryClient.reportTriggerEventDispatched(event);
+
   return async (params: TriggerEventHandlerParams): Promise<void> => {
     const engine = await getWorkflowExecutionEngine();
     const executionEnabled = engine.isEventDrivenExecutionEnabled();
     const logEventsEnabled = engine.isLogTriggerEventsEnabled();
+    const baseTelemetry = {
+      triggerId: params.triggerId,
+      executionEnabled,
+      logEventsEnabled,
+    };
 
     if (!executionEnabled && !logEventsEnabled) {
       logger.debug(
@@ -166,11 +213,18 @@ export function createTriggerEventHandler({
     const { timestamp, triggerId, payload, request, spaceId, eventChainContext } = params;
 
     const eventContextForResolution = { ...payload, timestamp, spaceId, eventChainDepth: 0 };
-    const workflows = await resolveMatchingWorkflowSubscriptions({
+    const resolutionStartMs = Date.now();
+    const { workflows, stats: resolutionStats } = await resolveMatchingWorkflowSubscriptions({
       triggerId,
       spaceId,
       eventContext: eventContextForResolution,
     });
+    const subscriberResolutionMs = Math.max(0, Date.now() - resolutionStartMs);
+    logger.trace(
+      `Workflows trigger resolution funnel: triggerId=${triggerId} ${JSON.stringify(
+        resolutionStats
+      )}`
+    );
     const subscriptions = workflows.map((w) => w.id);
 
     await writeTriggerEvents(
@@ -180,9 +234,10 @@ export function createTriggerEventHandler({
       logger
     );
 
+    let scheduleStats = createEmptyTriggerScheduleStats();
     if (executionEnabled && workflows.length > 0) {
       const maxEventChainDepth = engine.getMaxEventChainDepth();
-      await scheduleMatchingWorkflows(
+      scheduleStats = await scheduleMatchingWorkflows(
         api,
         workflows,
         spaceId,
@@ -191,6 +246,19 @@ export function createTriggerEventHandler({
         request,
         logger
       );
+      logger.trace(
+        `Workflows trigger schedule outcomes: triggerId=${triggerId} ${JSON.stringify(
+          scheduleStats
+        )}`
+      );
     }
+    reportDispatchedEvent({
+      ...baseTelemetry,
+      eventChainDepth: eventChainContext?.depth ?? 0,
+      auditOnly: !executionEnabled && logEventsEnabled,
+      subscriberResolutionMs,
+      ...resolutionStats,
+      ...scheduleStats,
+    });
   };
 }
