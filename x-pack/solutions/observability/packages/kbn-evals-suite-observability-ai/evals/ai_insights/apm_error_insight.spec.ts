@@ -50,10 +50,10 @@ function createScenarioTest(scenario: ApmErrorScenario) {
             bool: {
               filter: [
                 { term: { 'service.name': scenario.errorQuery.serviceName } },
-                { term: { 'error.exception.type': 'Error' } },
+                { term: { 'event.name': 'exception' } },
                 {
                   match_phrase: {
-                    'error.exception.message': scenario.errorQuery.errorMessage,
+                    'error.grouping_name': scenario.errorQuery.errorMessage,
                   },
                 },
               ],
