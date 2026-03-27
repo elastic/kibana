@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import { TaskStatus } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
@@ -31,7 +32,7 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { useTaskPolling } from '../../../../hooks/use_task_polling';
 import { getFormattedError } from '../../../../util/errors';
 import { FeedbackButtons } from './feedback_buttons';
-import { formatGeneratedAt, impactBadgeColors, impactLabels } from './insight_constants';
+import { impactBadgeColors, impactLabels } from './insight_constants';
 import { InsightFlyout } from './insight_flyout';
 
 export function Summary({ count }: { count: number }) {
@@ -213,7 +214,7 @@ export function Summary({ count }: { count: number }) {
         width: '150px',
         render: (generatedAt: string) => (
           <EuiText size="s" color="subdued">
-            {formatGeneratedAt(generatedAt)}
+            {moment(generatedAt).fromNow()}
           </EuiText>
         ),
       },
