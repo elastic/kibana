@@ -19,6 +19,7 @@ import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { hasTimestampFields } from '../utils/utils';
+import { createMockEndpointAppContextService } from '../../../../endpoint/mocks';
 
 jest.mock('@kbn/data-views-plugin/server', () => ({
   ...jest.requireActual('@kbn/data-views-plugin/server'),
@@ -79,6 +80,7 @@ describe('Custom Query Alerts', () => {
     eventsTelemetry,
     licensing,
     scheduleNotificationResponseActionsService: () => null,
+    endpointAppContextService: createMockEndpointAppContextService(),
   });
 
   afterEach(() => {
