@@ -164,6 +164,7 @@ describe('OAuthAuthorizationService', () => {
         attributes: {
           secrets: {
             authorizationUrl: 'https://provider.example.com/authorize',
+            tokenUrl: 'https://provider.example.com/token',
             clientId: 'client-id',
           },
           config: {},
@@ -174,6 +175,7 @@ describe('OAuthAuthorizationService', () => {
 
       expect(result).toEqual({
         authorizationUrl: 'https://provider.example.com/authorize',
+        tokenUrl: 'https://provider.example.com/token',
         clientId: 'client-id',
         scope: undefined,
       });

@@ -134,18 +134,14 @@ export class OAuthAuthorizationService {
     const tokenUrl = secrets.tokenUrl || config?.tokenUrl;
     const clientId = secrets.clientId || config?.clientId;
     const scope = secrets.scope || config?.scope;
+
     if (!authorizationUrl || !tokenUrl || !clientId) {
       throw new Error(
         'Connector missing required OAuth configuration (authorizationUrl, tokenUrl, clientId)'
       );
     }
 
-    return {
-      authorizationUrl,
-      tokenUrl,
-      clientId,
-      scope,
-    };
+    return { authorizationUrl, tokenUrl, clientId, scope };
   }
 
   /**
