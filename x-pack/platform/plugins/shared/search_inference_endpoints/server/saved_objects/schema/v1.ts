@@ -15,7 +15,7 @@ export const inferenceSettingsSchemaV1 = schema.object({
         schema.object({
           id: schema.string({ minLength: 1, maxLength: 256 }),
         }),
-        { minSize: 1, maxSize: 30 }
+        { minSize: 0, maxSize: 30 }
       ),
     }),
     { maxSize: 30 }
