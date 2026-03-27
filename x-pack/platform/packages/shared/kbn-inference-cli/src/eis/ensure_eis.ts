@@ -127,7 +127,9 @@ async function getES(log: ToolingLog) {
 
         if (isValid) {
           log.info(
-            `Connected to Elasticsearch at ${chalk.cyan(baseUrl)} (${credentials.type} credentials: ${credentials.username})`
+            `Connected to Elasticsearch at ${chalk.cyan(baseUrl)} (${
+              credentials.type
+            } credentials: ${credentials.username})`
           );
 
           return {
@@ -266,7 +268,10 @@ async function setCcmApiKey(
 
       throw new Error(`HTTP ${statusCode}`);
     } catch (error) {
-      if (attempt < maxRetries && !(error instanceof Error && /HTTP (401|403)/.test(error.message))) {
+      if (
+        attempt < maxRetries &&
+        !(error instanceof Error && /HTTP (401|403)/.test(error.message))
+      ) {
         log.debug(`Attempt ${attempt} failed, retrying in ${retryDelayMs}ms...`);
         await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
       } else {
@@ -288,7 +293,9 @@ export async function ensureEis({ log }: { log: ToolingLog }) {
     log.info(`EIS endpoint: ${chalk.cyan(eisEndpoint)}`);
   } else {
     log.warning(
-      `Could not detect xpack.inference.elastic.url — make sure Elasticsearch was started with ${chalk.cyan('-E xpack.inference.elastic.url=...')}`
+      `Could not detect xpack.inference.elastic.url — make sure Elasticsearch was started with ${chalk.cyan(
+        '-E xpack.inference.elastic.url=...'
+      )}`
     );
   }
 
