@@ -6,17 +6,10 @@
  */
 
 import React, { memo } from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import { SCRIPT_LIBRARY_LABELS as filterLabel } from '../../../translations';
 
-const StyledEuiButtonEmpty = euiStyled(EuiButtonEmpty).attrs({
-  iconType: 'cross',
-  color: 'danger',
-})`
-  border-top: ${(props) => `${props.theme.eui.euiBorderThin}`};
-  border-radius : 0;
-`;
 export const ClearAllButton = memo(
   ({
     'data-test-subj': dataTestSubj,
@@ -27,10 +20,21 @@ export const ClearAllButton = memo(
     isDisabled: boolean;
     onClick: () => void;
   }) => {
+    const { euiTheme } = useEuiTheme();
     return (
-      <StyledEuiButtonEmpty data-test-subj={dataTestSubj} isDisabled={isDisabled} onClick={onClick}>
+      <EuiButtonEmpty
+        iconType="cross"
+        color="danger"
+        data-test-subj={dataTestSubj}
+        isDisabled={isDisabled}
+        onClick={onClick}
+        css={css`
+          border-top: ${euiTheme.border.thin};
+          border-radius: 0;
+        `}
+      >
         {filterLabel.filterClearAll}
-      </StyledEuiButtonEmpty>
+      </EuiButtonEmpty>
     );
   }
 );
