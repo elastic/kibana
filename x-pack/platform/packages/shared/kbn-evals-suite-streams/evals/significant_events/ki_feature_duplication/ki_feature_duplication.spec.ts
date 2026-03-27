@@ -133,11 +133,13 @@ evaluate.describe('KI feature duplication', { tag: tags.serverless.observability
                     index: MANAGED_STREAM_SEARCH_PATTERN,
                     size: input.sample_document_count,
                     query: {
-                      // random_score produces a different ordering each call, giving a
-                      // different sample subset per run
+                      // random_score with seed=i gives a different but deterministic
+                      // ordering per run — a failing run can be replayed by re-running
+                      // with the same run index, while each run still samples a distinct
+                      // subset of documents
                       function_score: {
                         query: { match_all: {} },
-                        functions: [{ random_score: {} }],
+                        functions: [{ random_score: { seed: i } }],
                       },
                     },
                     sort: [{ _score: { order: 'desc' } }],
