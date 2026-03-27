@@ -66,8 +66,13 @@ export const SharepointServer: ConnectorSpec = {
   actions: {
     getWeb: {
       isTool: true,
-      description:
-        'Returns metadata about the SharePoint site: title, URL, description, and locale. Use this to orient yourself or confirm the connector is pointed at the right site.',
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.sharepointServer.actions.getWeb.description',
+        {
+          defaultMessage:
+            'Get metadata about the SharePoint site (title, URL, description, locale).',
+        }
+      ),
       input: z.object({}).optional(),
       output: z.any(),
       handler: async (ctx) => {
@@ -82,8 +87,10 @@ export const SharepointServer: ConnectorSpec = {
 
     getLists: {
       isTool: true,
-      description:
-        'Returns all lists and document libraries on the site. Each result includes a Title (use this as listTitle for getListItems) and a RootFolder.ServerRelativeUrl (use this as path for getFolderContents).',
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.sharepointServer.actions.getLists.description',
+        { defaultMessage: 'List all lists and document libraries on the SharePoint site.' }
+      ),
       input: z.object({}).optional(),
       output: ODataCollectionOutputSchema,
       handler: async (ctx) => {
@@ -101,8 +108,10 @@ export const SharepointServer: ConnectorSpec = {
 
     getListItems: {
       isTool: true,
-      description:
-        'Returns items from a list or document library by its display name. To find valid list titles, call getLists first and use the Title field from those results.',
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.sharepointServer.actions.getListItems.description',
+        { defaultMessage: 'Get items from a list or document library by display name.' }
+      ),
       input: z.object({
         listTitle: z
           .string()
@@ -128,8 +137,10 @@ export const SharepointServer: ConnectorSpec = {
 
     getFolderContents: {
       isTool: true,
-      description:
-        "Lists files and subfolders at a given folder path. Returns two arrays: 'files' (each has Name, ServerRelativeUrl, TimeLastModified, Length) and 'folders' (each has Name, ServerRelativeUrl). Use the ServerRelativeUrl values as the path for further getFolderContents or downloadFile calls. To get a starting path, call getLists and use the RootFolder.ServerRelativeUrl of a document library.",
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.sharepointServer.actions.getFolderContents.description',
+        { defaultMessage: 'List files and subfolders at a given server-relative folder path.' }
+      ),
       input: z.object({
         path: z
           .string()
@@ -165,8 +176,10 @@ export const SharepointServer: ConnectorSpec = {
 
     downloadFile: {
       isTool: true,
-      description:
-        'Downloads a file and returns its content as text. Best for plain-text files (.txt, .csv, .md, .xml, .json). For binary files (PDF, Word, Excel), the text output will be garbled — use the download workflow instead. Get the path from getFolderContents results (the ServerRelativeUrl field on a file).',
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.sharepointServer.actions.downloadFile.description',
+        { defaultMessage: 'Download a file by server-relative URL and return its content as text.' }
+      ),
       input: z.object({
         path: z
           .string()
@@ -199,8 +212,10 @@ export const SharepointServer: ConnectorSpec = {
 
     getSitePageContents: {
       isTool: true,
-      description:
-        "Returns the content of a SharePoint site page (wiki or modern page). To find a pageId, call getListItems with listTitle='Site Pages' and use the Id field (an integer) from the desired item.",
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.sharepointServer.actions.getSitePageContents.description',
+        { defaultMessage: 'Get the content of a SharePoint site page by integer item ID.' }
+      ),
       input: z.object({
         pageId: z
           .number()
@@ -229,8 +244,10 @@ export const SharepointServer: ConnectorSpec = {
 
     search: {
       isTool: true,
-      description:
-        "Runs a full-text search across the site using Keyword Query Language (KQL). Use this when you don't know where content lives. Results include file paths, titles, and URLs. Use from/size to page through large result sets.",
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.sharepointServer.actions.search.description',
+        { defaultMessage: 'Search SharePoint site content using Keyword Query Language (KQL).' }
+      ),
       input: z.object({
         query: z
           .string()
@@ -259,8 +276,13 @@ export const SharepointServer: ConnectorSpec = {
 
     callRestApi: {
       isTool: true,
-      description:
-        "Call a SharePoint Server REST API endpoint by path only (for example, _api/web/title). Path must start with '_api/'.",
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.sharepointServer.actions.callRestApi.description',
+        {
+          defaultMessage:
+            "Call a SharePoint Server REST API endpoint directly by path (must start with '_api/').",
+        }
+      ),
       input: z.object({
         method: z.enum(['GET', 'POST']).describe('HTTP method'),
         path: z
