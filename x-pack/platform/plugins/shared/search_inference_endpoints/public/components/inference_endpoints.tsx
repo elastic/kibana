@@ -16,7 +16,6 @@ import { useKibana } from '../hooks/use_kibana';
 import { isElasticInferenceServiceEnabled } from '../feature_flag';
 import { isEndpointPreconfigured } from '../utils/preconfigured_endpoint_helper';
 import { TabularPage } from './all_inference_endpoints/tabular_page';
-import { EisCallouts } from './all_inference_endpoints/eis_callouts';
 import { InferenceEndpointsHeader } from './inference_endpoints_header';
 import { ExternalInferenceHeader } from './external_inference_header';
 import { AddInferenceFlyoutWrapper } from './add_inference_endpoints/add_inference_flyout_wrapper';
@@ -47,8 +46,7 @@ const PageContent: React.FC<{
     <>
       <Header onFlyoutOpen={onFlyoutOpen} />
       <EuiPageTemplate.Section className="eui-yScroll" data-test-subj="inferenceManagementPage">
-        {!isEisEnabled && <EisCallouts />}
-        <TabularPage inferenceEndpoints={inferenceEndpoints} />
+        <TabularPage inferenceEndpoints={inferenceEndpoints} isEisEnabled={isEisEnabled} />
       </EuiPageTemplate.Section>
     </>
   );
