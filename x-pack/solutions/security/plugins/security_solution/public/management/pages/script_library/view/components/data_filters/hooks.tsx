@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { OS_TITLES } from '../../../../../common/translations';
 import {
@@ -28,13 +28,10 @@ export type FilterItems = Array<{
   'data-test-subj'?: string;
 }>;
 
-const BadgeLabel = ({ label }: { label: string }) => <EuiBadge color="hollow">{label}</EuiBadge>;
-
 export const useScriptLibraryFilter = (
   filterName: FilterName
 ): {
   items: FilterItems;
-  setItems: React.Dispatch<React.SetStateAction<FilterItems>>;
   hasActiveFilters: boolean;
   numActiveFilters: number;
   numFilters: number;
@@ -49,8 +46,8 @@ export const useScriptLibraryFilter = (
   const isPlatformFilter = filterName === 'platform';
   const isTagsFilter = filterName === 'tags';
 
-  const [items, setItems] = useState<FilterItems>(
-    isFileTypeFilter
+  const items = useMemo<FilterItems>(() => {
+    return isFileTypeFilter
       ? SCRIPT_LIBRARY_ALLOWED_FILE_TYPES.map((key) => ({
           key,
           label: FILTER_PLACEHOLDERS.fileType[key],
@@ -60,7 +57,7 @@ export const useScriptLibraryFilter = (
       : isPlatformFilter
       ? [...SUPPORTED_HOST_OS_TYPE].sort().map((key) => ({
           key,
-          label: (<BadgeLabel label={OS_TITLES[key]} />) as unknown as string,
+          label: (<EuiBadge color="hollow">{OS_TITLES[key]}</EuiBadge>) as unknown as string,
           searchableLabel: OS_TITLES[key],
           checked: os?.includes(key) ? 'on' : undefined,
           'data-test-subj': `${filterName}-filter-option`,
@@ -73,8 +70,8 @@ export const useScriptLibraryFilter = (
           checked: category?.includes(key) ? 'on' : undefined,
           'data-test-subj': `${filterName}-filter-option`,
         }))
-      : []
-  );
+      : [];
+  }, [filterName, fileType, os, category, isFileTypeFilter, isPlatformFilter, isTagsFilter]);
 
   const hasActiveFilters = useMemo(() => !!items.find((item) => item.checked === 'on'), [items]);
   const numActiveFilters = useMemo(
@@ -88,7 +85,6 @@ export const useScriptLibraryFilter = (
 
   return {
     items,
-    setItems,
     hasActiveFilters,
     numActiveFilters,
     numFilters,

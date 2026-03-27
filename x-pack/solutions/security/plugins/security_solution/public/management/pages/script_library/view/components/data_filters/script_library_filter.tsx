@@ -33,7 +33,6 @@ export const ScriptLibraryFilter = memo<ScriptLibraryFilterProps>(
 
     const {
       items,
-      setItems,
       hasActiveFilters,
       numActiveFilters,
       numFilters,
@@ -46,9 +45,6 @@ export const ScriptLibraryFilter = memo<ScriptLibraryFilterProps>(
 
     const onOptionsChange = useCallback(
       (newOptions: FilterItems) => {
-        setItems(newOptions);
-
-        // compute a selected list of options
         const selectedItems = newOptions.reduce<string[]>((acc, curr) => {
           if (curr.checked === 'on' && curr.key) {
             acc.push(curr.key);
@@ -67,24 +63,10 @@ export const ScriptLibraryFilter = memo<ScriptLibraryFilterProps>(
         // update overall query state with selected options
         onChangeFilter(selectedItems);
       },
-      [
-        filterName,
-        setItems,
-        setUrlOsFilter,
-        setUrlFileTypeFilter,
-        setUrlCategoryFilter,
-        onChangeFilter,
-      ]
+      [filterName, setUrlOsFilter, setUrlFileTypeFilter, setUrlCategoryFilter, onChangeFilter]
     );
 
     const onClearAll = useCallback(() => {
-      setItems(
-        items.map((option) => ({
-          ...option,
-          checked: undefined,
-        }))
-      );
-
       if (filterName === 'fileType') {
         setUrlFileTypeFilter('');
       } else if (filterName === 'platform') {
@@ -94,15 +76,7 @@ export const ScriptLibraryFilter = memo<ScriptLibraryFilterProps>(
       }
 
       onChangeFilter([]);
-    }, [
-      setItems,
-      items,
-      filterName,
-      onChangeFilter,
-      setUrlOsFilter,
-      setUrlFileTypeFilter,
-      setUrlCategoryFilter,
-    ]);
+    }, [filterName, onChangeFilter, setUrlOsFilter, setUrlFileTypeFilter, setUrlCategoryFilter]);
 
     return (
       <ScriptLibraryFilterPopover
