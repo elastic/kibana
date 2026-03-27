@@ -131,10 +131,11 @@ export interface SmlDocument {
 }
 
 /**
- * An SML search result — an SML document enriched with a search score.
+ * An SML search result — same fields as {@link SmlDocument} plus relevance score.
+ * `content` is optional when the query excluded it from `_source` (e.g. `skipContent`).
  */
-export type SmlSearchResult = SmlDocument & {
-  /** Search relevance score */
+export type SmlSearchResult = Omit<SmlDocument, 'content'> & {
+  content?: string;
   score: number;
 };
 

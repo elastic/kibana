@@ -398,7 +398,7 @@ const searchSml = async ({
           type: source.type ?? '',
           title: source.title ?? '',
           origin_id: source.origin_id ?? '',
-          content: source.content ?? '',
+          content: source.content,
           created_at: source.created_at ?? '',
           updated_at: source.updated_at ?? '',
           spaces: source.spaces ?? [],

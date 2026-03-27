@@ -44,7 +44,7 @@ export const placeCursorAfter = (node: Node, sel: Selection): void => {
   const range = document.createRange();
   if (node instanceof Text) {
     /**
-     * For text nodes, collapse inside the node at the end of its data. That avoids
+     * (Firefox bug) For text nodes, collapse inside the node at the end of its data. That avoids
      * a parent-boundary range when a sibling empty text node follows (common after
      * Range mutations), which can paint the caret at the wrong horizontal position.
      * */
