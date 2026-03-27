@@ -18,6 +18,25 @@ import { ALLOWED_METRIC_TYPES } from '../../../../common/constants';
 
 const ALLOWED_METRIC_TYPES_SET = new Set(ALLOWED_METRIC_TYPES);
 
+/**
+ * Dimension names that are internal metadata and should not be exposed to users.
+ * See: https://github.com/elastic/observability-dev/issues/5412
+ */
+const INTERNAL_DIMENSION_EXACT_NAMES = new Set(['_metric_names_hash', 'unit']);
+
+/**
+ * Dimension name prefixes that indicate internal metadata fields.
+ * Any dimension whose name starts with one of these prefixes will be hidden.
+ */
+const INTERNAL_DIMENSION_PREFIXES = ['labels._'];
+
+const isInternalDimension = (name: string): boolean => {
+  if (INTERNAL_DIMENSION_EXACT_NAMES.has(name)) {
+    return true;
+  }
+  return INTERNAL_DIMENSION_PREFIXES.some((prefix) => name.startsWith(prefix));
+};
+
 export const parseMetricsResponse = (
   response: MetricsESQLResponse[],
   getFieldType?: (name: string) => string | undefined
@@ -44,7 +63,9 @@ export const parseMetricsResponse = (
     const dataStreams = toArray(metric.data_stream);
     const units = toArray(metric.unit);
     const fieldTypes = toArray(metric.field_type);
-    const dimensions = toArray(metric.dimension_fields);
+    const dimensions = toArray(metric.dimension_fields).filter(
+      (name) => !isInternalDimension(name)
+    );
 
     const dimensionFields = dimensions.map((name) => {
       allDimensionsSet.add(name);

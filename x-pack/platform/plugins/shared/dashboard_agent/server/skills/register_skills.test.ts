@@ -21,4 +21,9 @@ describe('registerSkills', () => {
     expect(register).toHaveBeenCalledTimes(1);
     expect(register).toHaveBeenCalledWith(dashboardManagementSkill);
   });
+
+  it('includes SML discovery instructions in the skill content', () => {
+    expect(dashboardManagementSkill.content).toContain('platform.core.sml_search');
+    expect(dashboardManagementSkill.content).toContain('platform.core.sml_attach');
+  });
 });

@@ -30,7 +30,7 @@ describe('Lead Generation Task', () => {
         logger,
         telemetry: {} as never,
         taskManager: undefined,
-        experimentalFeatures: { entityThreatHuntingEnabled: true } as never,
+        experimentalFeatures: { leadGenerationEnabled: true } as never,
         kibanaVersion: '9.0.0',
         config: {} as never,
       });
@@ -48,7 +48,7 @@ describe('Lead Generation Task', () => {
         logger,
         telemetry: {} as never,
         taskManager: mockTaskManager,
-        experimentalFeatures: { entityThreatHuntingEnabled: false } as never,
+        experimentalFeatures: { leadGenerationEnabled: false } as never,
         kibanaVersion: '9.0.0',
         config: {} as never,
       });
@@ -64,7 +64,7 @@ describe('Lead Generation Task', () => {
         logger,
         telemetry: {} as never,
         taskManager: mockTaskManager,
-        experimentalFeatures: { entityThreatHuntingEnabled: true } as never,
+        experimentalFeatures: { leadGenerationEnabled: true } as never,
         kibanaVersion: '9.0.0',
         config: {} as never,
       });
