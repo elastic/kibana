@@ -21,11 +21,19 @@ export async function exportSource(
   dashboardState: DashboardState
 ): Promise<DashboardExportSourceResponseBody> {
   try {
+    /**
+     * Temporary escape hatch for lens as code
+     * TODO remove transforms when lens as code transforms are ready for production
+     * We need to run the full round-trip transform on the incoming state since Lens embeddable serializes
+     * state in the editor format. Once we the Lens embeddable supports the API format we can remove the
+     * transformDashboardIn and transformDashboardOut calls.
+     */
     const { attributes: storedDashboardState, references } = transformDashboardIn(dashboardState);
     const transformedApiDashboardState = transformDashboardOut(
       storedDashboardState ?? {},
       references ?? []
     );
+
     const { data: scopedDashboardState, warnings } = stripUnmappedKeys(
       transformedApiDashboardState as Partial<DashboardState>
     );

@@ -18,8 +18,8 @@ export const exportSourceDashboardShareIntegration =
       id: 'exportSourceDashboard',
       groupId: 'exportDerivatives',
       getShareIntegrationConfig: async (...args) => {
-        const { getShareMenuItems } = await import('./json_export_config');
-        return getShareMenuItems()(...args);
+        const { getJsonExportConfig } = await import('../dashboard_renderer/dashboard_module');
+        return getJsonExportConfig()(...args);
       },
     };
   };

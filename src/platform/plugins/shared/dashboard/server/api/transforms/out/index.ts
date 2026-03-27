@@ -8,4 +8,3 @@
  */
 
 export { transformDashboardOut } from './transform_dashboard_out';
-export { transformPanelsOut } from './transform_panels_out';

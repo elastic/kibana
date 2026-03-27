@@ -435,12 +435,8 @@ export const useDashboardMenuItems = ({
       items.push(menuItems.duplicate);
     }
 
-    // Only show the export button if the current user meets the requirements for at least one export integration or derivative
-    if (shareService && hasExportMenuItems) {
-      items.push(menuItems.export);
-    }
-
     if (shareService) {
+      items.push(menuItems.export);
       items.push(menuItems.share);
     }
 
@@ -474,7 +470,6 @@ export const useDashboardMenuItems = ({
     menuItems.backgroundSearch,
     menuItems.labs,
     resetChangesMenuItem,
-    hasExportMenuItems,
     dashboardApi.isManaged,
     showResetChange,
     isLabsEnabled,
@@ -485,7 +480,6 @@ export const useDashboardMenuItems = ({
 
     const items: AppMenuItemType[] = [menuItems.switchToViewMode, menuItems.settings];
 
-    // Only show the export button if the current user meets the requirements for at least one export integration or derivative
     if (shareService && hasExportMenuItems) {
       items.push(menuItems.export);
     }

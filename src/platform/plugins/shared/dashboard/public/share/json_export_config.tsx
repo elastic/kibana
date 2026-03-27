@@ -21,7 +21,7 @@ export interface ExportSourceSharingData {
   exportSource: () => DashboardState;
 }
 
-export const getShareMenuItems =
+export const getJsonExportConfig =
   () =>
   (
     _ctx: ShareContext
