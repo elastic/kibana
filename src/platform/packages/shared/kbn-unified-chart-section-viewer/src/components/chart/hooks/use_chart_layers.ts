@@ -16,6 +16,7 @@ import {
   getLensMetricFormat,
   firstNonNullable,
 } from '../../../common/utils';
+import { normalizeUnit } from '../../../common/utils/metric_unit/normalize_unit';
 
 interface UseChartLayersParams {
   dimensions?: Dimension[];
@@ -26,12 +27,24 @@ interface UseChartLayersParams {
 }
 
 /**
+ * Resolves the unit for a metric by normalizing and selecting the best option.
+ * Normalizes raw units (e.g., 'byte' -> 'bytes') and handles multiple units.
+ */
+const resolveMetricUnit = (metricName: string, units: (string | null | undefined)[]): string | undefined => {
+  // Filter out null/undefined values and normalize each unit
+  const normalizedUnits = units
+    .filter((u) => u != null)
+    .map((unit) => normalizeUnit({ fieldName: metricName, unit: unit as string }))
+    .filter((u) => u != null);
+
+  // Return the first normalized unit, or undefined if none exist
+  return normalizedUnits[0];
+};
+
+/**
  * A hook that computes the Lens series layer configuration for the metrics chart.
- *
- * @param dimensions - An array of dimension fields to break down the series by.
- * @param metric - The metric field to be visualized.
- * @param color - The color to apply to the series.
- * @returns An array of LensSeriesLayer configurations.
+ * Properly normalizes metric units to ensure they are displayed correctly in the chart
+ * (e.g., 'byte' -> 'bytes', handling multiple units over time).
  */
 export const useChartLayers = ({
   dimensions = [],
@@ -43,7 +56,7 @@ export const useChartLayers = ({
   return useMemo((): LensSeriesLayer[] => {
     const type = firstNonNullable(metricItem.fieldTypes);
     const instrument = firstNonNullable(metricItem.metricTypes);
-    const resolvedUnit = firstNonNullable(metricItem.units);
+    const resolvedUnit = resolveMetricUnit(metricItem.metricName, metricItem.units);
 
     if (!type || !instrument) {
       return [];

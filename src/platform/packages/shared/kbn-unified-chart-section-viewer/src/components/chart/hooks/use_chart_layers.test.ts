@@ -18,6 +18,17 @@ jest.mock('../../../common/utils', () => ({
   createTimeBucketAggregation: jest.fn(() => 'time_bucket_agg'),
 }));
 
+jest.mock('../../../common/utils/metric_unit/normalize_unit', () => ({
+  normalizeUnit: jest.fn((params: { fieldName: string; unit: string | undefined }) => {
+    const { unit } = params;
+    // Normalize some common mappings
+    if (unit === 'byte') return 'bytes';
+    if (unit === '%') return 'percent';
+    if (unit === '1') return 'count';
+    return unit;
+  }),
+}));
+
 describe('useChartLayers', () => {
   const mockMetric: ParsedMetricItem = {
     metricName: 'system.cpu.total.norm.pct',
@@ -88,6 +99,38 @@ describe('useChartLayers', () => {
     const [layer] = result.current;
     expect(layer.yAxis[0]).toHaveProperty('format');
     expect(layer.yAxis[0]).toHaveProperty('format');
+  });
+
+  it('should normalize denormalized units like "byte" to "bytes"', () => {
+    const metricWithDenormalizedUnit: ParsedMetricItem = {
+      ...mockMetric,
+      units: ['byte'] as any[],
+    };
+    const { result } = renderHook(() =>
+      useChartLayers({
+        metricItem: metricWithDenormalizedUnit,
+        dimensions: [],
+      })
+    );
+    const [layer] = result.current;
+    expect(layer.yAxis[0]).toHaveProperty('format');
+    expect(layer.yAxis[0].format).toBe('bytes');
+  });
+
+  it('should select the first non-null normalized unit when multiple units exist', () => {
+    const metricWithMultipleUnits: ParsedMetricItem = {
+      ...mockMetric,
+      units: [null, 'byte', 'bytes'] as any[],
+    };
+    const { result } = renderHook(() =>
+      useChartLayers({
+        metricItem: metricWithMultipleUnits,
+        dimensions: [],
+      })
+    );
+    const [layer] = result.current;
+    expect(layer.yAxis[0]).toHaveProperty('format');
+    expect(layer.yAxis[0].format).toBe('bytes');
   });
 
   it('should not include format options if the metric has no unit', () => {
