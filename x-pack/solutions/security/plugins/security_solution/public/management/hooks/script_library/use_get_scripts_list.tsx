@@ -44,7 +44,7 @@ const buildSearchTermKql = (searchTerms: string[]): string => {
   const escapedSearchTerms = searchTerms.map((term) =>
     term
       .trim()
-      .replace(/([\)\(\<\>\}\{\"\:\\])/gm, '\\$&')
+      .replace(/([\)\(\<\>\}\{\"\*\:\\])/gm, '\\$&')
       .replace(/\s/gm, '*')
   );
   const clauses = escapedSearchTerms.map(
