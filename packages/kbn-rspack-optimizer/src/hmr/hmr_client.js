@@ -32,10 +32,11 @@ var updateFlashTimeout = null;
 var indicatorObserver = null;
 
 var STATE_CONFIG = {
-  idle:     { color: '#4caf50', text: 'HMR: Connected',   animation: 'none' },
-  building: { color: '#ff9800', text: 'HMR: Building...', animation: 'kbnHmrPulse 1.2s ease-in-out infinite' },
-  updated:  { color: '#4caf50', text: 'HMR: Updated',     animation: 'kbnHmrFlash 0.6s ease-out' },
-  error:    { color: '#f44336', text: 'HMR: Error',       animation: 'kbnHmrBounce 0.4s ease-out' },
+  idle:         { color: '#4caf50', text: 'HMR: Connected',    animation: 'none' },
+  building:     { color: '#ff9800', text: 'HMR: Building...',  animation: 'kbnHmrPulse 1.2s ease-in-out infinite' },
+  updated:      { color: '#4caf50', text: 'HMR: Updated',      animation: 'kbnHmrFlash 0.6s ease-out' },
+  error:        { color: '#f44336', text: 'HMR: Error',        animation: 'kbnHmrBounce 0.4s ease-out' },
+  disconnected: { color: '#888',    text: 'HMR: Disconnected', animation: 'none' },
 };
 
 function injectIndicatorStyles() {
@@ -298,73 +299,94 @@ document.addEventListener('keydown', onKeyDown);
 // --- HMR client -----------------------------------------------------------
 
 if (module.hot) {
-  var source = new EventSource('http://localhost:' + __KBN_HMR_PORT__ + '/');
+  var RECONNECT_INITIAL = 1000;
+  var RECONNECT_MAX = 30000;
+  var reconnectDelay = RECONNECT_INITIAL;
+  var reconnectTimer = null;
+  var source = null;
 
-  source.onmessage = function (event) {
-    try {
-      var data = JSON.parse(event.data);
+  function connect() {
+    source = new EventSource('http://localhost:' + __KBN_HMR_PORT__ + '/');
 
-      if (data.building) {
-        setIndicatorState('building');
-        return;
-      }
+    source.onmessage = function (event) {
+      reconnectDelay = RECONNECT_INITIAL;
+      try {
+        var data = JSON.parse(event.data);
 
-      if (data.errors && data.errors.length > 0) {
-        console.error(LOG_PREFIX + ' Build failed with ' + data.errors.length + ' error(s)');
-        if (!data.replay) {
-          showOverlay(data.errors);
-        } else {
-          lastErrors = data.errors;
+        if (data.building) {
+          setIndicatorState('building');
+          return;
         }
-        setIndicatorState('error');
-        return;
-      }
 
-      if (!data.hash) return;
+        if (data.errors && data.errors.length > 0) {
+          console.error(LOG_PREFIX + ' Build failed with ' + data.errors.length + ' error(s)');
+          if (!data.replay) {
+            showOverlay(data.errors);
+          } else {
+            lastErrors = data.errors;
+          }
+          setIndicatorState('error');
+          return;
+        }
 
-      hideOverlay();
-      lastErrors = null;
-      setIndicatorState('updated');
+        if (!data.hash) return;
 
-      var lastTime = data.time;
-      var lastFiles = data.files;
+        hideOverlay();
+        lastErrors = null;
+        setIndicatorState('updated');
 
-      upToDate(data.hash);
-      if (upToDate()) return;
+        var lastTime = data.time;
+        var lastFiles = data.files;
 
-      module.hot
-        .check({ ignoreDeclined: true, ignoreUnaccepted: true })
-        .then(function (updatedModules) {
-          if (!updatedModules || updatedModules.length === 0) {
-            console.log(LOG_PREFIX + ' Nothing to update \u2013 reloading page');
+        upToDate(data.hash);
+        if (upToDate()) return;
+
+        module.hot
+          .check({ ignoreDeclined: true, ignoreUnaccepted: true })
+          .then(function (updatedModules) {
+            if (!updatedModules || updatedModules.length === 0) {
+              console.log(LOG_PREFIX + ' Nothing to update \u2013 reloading page');
+              window.location.reload();
+              return;
+            }
+            var fileLabel = lastFiles && lastFiles.length > 0
+              ? lastFiles.map(function (f) { return f.split('/').pop(); }).join(', ')
+              : '';
+            var timeLabel = lastTime ? ' in ' + lastTime + 's' : '';
+            var prefix = fileLabel ? fileLabel + ' \u2192 ' : '';
+            var moduleCount = updatedModules.length > 1
+              ? ' (' + updatedModules.length + ' modules re-evaluated)'
+              : '';
+            console.log(LOG_PREFIX + ' ' + prefix + 'Updated' + timeLabel + moduleCount);
+            if (!upToDate()) {
+              module.hot.check({ ignoreDeclined: true, ignoreUnaccepted: true });
+            }
+          })
+          .catch(function (err) {
+            console.warn(LOG_PREFIX + ' Update failed, reloading page:', err);
             window.location.reload();
-            return;
-          }
-          var fileLabel = lastFiles && lastFiles.length > 0
-            ? lastFiles.map(function (f) { return f.split('/').pop(); }).join(', ')
-            : '';
-          var timeLabel = lastTime ? ' in ' + lastTime + 's' : '';
-          var prefix = fileLabel ? fileLabel + ' \u2192 ' : '';
-          var moduleCount = updatedModules.length > 1
-            ? ' (' + updatedModules.length + ' modules re-evaluated)'
-            : '';
-          console.log(LOG_PREFIX + ' ' + prefix + 'Updated' + timeLabel + moduleCount);
-          if (!upToDate()) {
-            module.hot.check({ ignoreDeclined: true, ignoreUnaccepted: true });
-          }
-        })
-        .catch(function (err) {
-          console.warn(LOG_PREFIX + ' Update failed, reloading page:', err);
-          window.location.reload();
-        });
-    } catch (e) {
-      // ignore parse errors
-    }
-  };
+          });
+      } catch (e) {
+        // ignore parse errors
+      }
+    };
 
-  source.onerror = function () {
-    // EventSource auto-reconnects; nothing to do
-  };
+    source.onerror = function () {
+      source.close();
+      source = null;
+      setIndicatorState('disconnected');
+      scheduleReconnect();
+    };
+  }
+
+  function scheduleReconnect() {
+    if (reconnectTimer) return;
+    reconnectTimer = setTimeout(function () {
+      reconnectTimer = null;
+      connect();
+    }, reconnectDelay);
+    reconnectDelay = Math.min(reconnectDelay * 2, RECONNECT_MAX);
+  }
 
   // Create indicator once DOM is ready
   if (document.body) {
@@ -373,5 +395,6 @@ if (module.hot) {
     document.addEventListener('DOMContentLoaded', createIndicator);
   }
 
+  connect();
   console.log(LOG_PREFIX + ' Connected on port ' + __KBN_HMR_PORT__);
 }
