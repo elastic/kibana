@@ -10,10 +10,9 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
   getWorkflowYaml,
-  loadWorkflowsThroughProductionPath,
+  loadWorkflowsFromConnectorSpec,
   type ProcessedWorkflow,
 } from '../workflow.test_helpers';
-import { salesforceDataSource } from './data_type';
 
 const CONNECTOR_NAME = 'fake-salesforce-connector';
 const CONNECTOR_ID = 'fake-salesforce-connector-uuid';
@@ -22,9 +21,9 @@ describe('salesforce workflows', () => {
   let fixture: WorkflowRunFixture;
   let workflows: ProcessedWorkflow[];
 
-  beforeAll(async () => {
-    workflows = await loadWorkflowsThroughProductionPath(salesforceDataSource, {
-      stackConnectorId: CONNECTOR_NAME,
+  beforeAll(() => {
+    workflows = loadWorkflowsFromConnectorSpec('.salesforce', {
+      connectorName: CONNECTOR_NAME,
     });
   });
 

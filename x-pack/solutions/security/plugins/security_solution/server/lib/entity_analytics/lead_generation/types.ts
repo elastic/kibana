@@ -1,0 +1,123 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
+
+// ---------------------------------------------------------------------------
+// Entity representation flowing through the lead generation pipeline.
+//
+// Entity Store V2 records already embed risk scores (entity.risk), attributes
+// (entity.attributes.privileged, etc.), and behaviors, so we carry the full
+// entity record through the pipeline rather than fetching data separately.
+// ---------------------------------------------------------------------------
+
+export interface LeadEntity {
+  /** The full Entity Store V2 record (UserEntity | HostEntity | ...) */
+  readonly record: Entity;
+  /** Convenience: entity type derived from entity.type */
+  readonly type: string;
+  /** Convenience: entity name derived from entity.name */
+  readonly name: string;
+  /** EUID — the definitive unique identifier from entity.id */
+  readonly id: string;
+}
+
+// ---------------------------------------------------------------------------
+// Observation - a single signal produced by an ObservationModule
+// ---------------------------------------------------------------------------
+
+export type ObservationSeverity = 'low' | 'medium' | 'high' | 'critical';
+
+export interface Observation {
+  /** Which entity this observation is about (format: "type:name") */
+  readonly entityId: string;
+  /** The module that produced this observation */
+  readonly moduleId: string;
+  /** A descriptive type, e.g. 'high_risk_score', 'alert_spike', 'lateral_movement' */
+  readonly type: string;
+  /** Numeric score representing the severity of this observation (0-100) */
+  readonly score: number;
+  /** Bucketed severity */
+  readonly severity: ObservationSeverity;
+  /** Confidence in the observation (0.0-1.0) */
+  readonly confidence: number;
+  /** Human-readable description of what was observed */
+  readonly description: string;
+  /** Arbitrary metadata specific to the module */
+  readonly metadata: Record<string, unknown>;
+}
+
+// ---------------------------------------------------------------------------
+// ObservationModule - the contract every pluggable module must satisfy
+// ---------------------------------------------------------------------------
+
+export interface ObservationModuleConfig {
+  /** Unique identifier for this module */
+  readonly id: string;
+  /** Display name */
+  readonly name: string;
+  /** Execution order (higher = earlier) */
+  readonly priority: number;
+  /** Weight applied to observations from this module during scoring (0.0-1.0) */
+  readonly weight: number;
+}
+
+export interface ObservationModule {
+  /** Module configuration */
+  readonly config: ObservationModuleConfig;
+  /** Check whether the module can run (e.g. required data sources are available) */
+  isEnabled(): boolean;
+  /** Collect observations for a batch of entities */
+  collect(entities: LeadEntity[]): Promise<Observation[]>;
+}
+
+// ---------------------------------------------------------------------------
+// Lead - the final output of the lead generation engine
+// ---------------------------------------------------------------------------
+
+export type LeadStaleness = 'fresh' | 'stale' | 'expired';
+
+export interface Lead {
+  /** Unique lead identifier */
+  readonly id: string;
+  /** High-impact hypothesis title (e.g. "Potential Data Staging by Terminated Employee") */
+  readonly title: string;
+  /** One-sentence context byline */
+  readonly byline: string;
+  /** Detailed description: evidence chain, investigation guide, the "why" */
+  readonly description: string;
+  /** Entities involved in this lead */
+  readonly entities: LeadEntity[];
+  /** Tags: keywords + MITRE ATT&CK tactics/techniques */
+  readonly tags: string[];
+  /** Priority score (1-10, 10 = most urgent) - normalized from composite score */
+  readonly priority: number;
+  /** Suggested follow-up questions or investigation prompts */
+  readonly chatRecommendations: string[];
+  /** ISO-8601 timestamp of when this lead was generated */
+  readonly timestamp: string;
+  /** Staleness based on age: fresh (0-24h), stale (24-72h), expired (>72h) */
+  readonly staleness: LeadStaleness;
+  /** All observations that contributed to this lead */
+  readonly observations: Observation[];
+}
+
+// ---------------------------------------------------------------------------
+// Engine configuration
+// ---------------------------------------------------------------------------
+
+export interface LeadGenerationEngineConfig {
+  /** Minimum number of observations required for an entity to qualify for a lead */
+  readonly minObservations: number;
+  /** Maximum number of leads to return */
+  readonly maxLeads: number;
+}
+
+export const DEFAULT_ENGINE_CONFIG: LeadGenerationEngineConfig = {
+  minObservations: 1,
+  maxLeads: 10,
+};
