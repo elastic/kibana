@@ -9,9 +9,10 @@
 
 /**
  * Static helpers for the split UI / background-tasks Kibana processes used in tests.
- * (FTR also exposes a service class named {@link DedicatedTaskRunner} from `@kbn/test`.)
+ * The FTR service class {@link DedicatedTaskRunner} in `@kbn/test` wraps these helpers
+ * with runtime state (port, URL, KbnClient, etc.).
  */
-export class DedicatedTaskRunner {
+export class DedicatedTaskRunnerConfig {
   private constructor() {}
 
   static getPort(uiPort: number): number {

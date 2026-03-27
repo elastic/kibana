@@ -14,7 +14,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ProcRunner } from '@kbn/dev-proc-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import { DedicatedTaskRunner } from './dedicated_task_runner';
+import { DedicatedTaskRunnerConfig } from './dedicated_task_runner';
 import type { KibanaTestServerLaunchConfig } from './kibana_test_server_launch_config';
 import { getArgValue, parseRawFlags, remapPluginPaths } from './kibana_cli_args';
 
@@ -137,11 +137,11 @@ export async function runKibanaServer(options: RunKibanaServerOptions) {
           ...prefixArgs,
           ...parseRawFlags([
             ...kbnFlags,
-            `--server.port=${DedicatedTaskRunner.getPort(kibanaPort)}`,
+            `--server.port=${DedicatedTaskRunnerConfig.getPort(kibanaPort)}`,
             '--node.roles=["background_tasks"]',
             `--path.data=${Path.resolve(Os.tmpdir(), `${taskPrefix}-task-runner-${uuidv4()}`)}`,
             ...(typeof mainUuid === 'string' && mainUuid
-              ? [`--server.uuid=${DedicatedTaskRunner.getUuid(mainUuid)}`]
+              ? [`--server.uuid=${DedicatedTaskRunnerConfig.getUuid(mainUuid)}`]
               : []),
             ...(devMode ? ['--no-optimizer'] : []),
           ]),

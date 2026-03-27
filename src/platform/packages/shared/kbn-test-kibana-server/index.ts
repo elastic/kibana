@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DedicatedTaskRunner } from './src/dedicated_task_runner';
+export { DedicatedTaskRunnerConfig } from './src/dedicated_task_runner';
 export type { KibanaTestServerLaunchConfig } from './src/kibana_test_server_launch_config';
 export type { RunKibanaServerOptions } from './src/run_kibana_server';
 export { runKibanaServer } from './src/run_kibana_server';

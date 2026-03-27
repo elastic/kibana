@@ -13,19 +13,16 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import Supertest from 'supertest';
 
 import { KbnClient } from '@kbn/kbn-client';
-import {
-  DedicatedTaskRunner as DedicatedTaskRunnerProcess,
-  getKibanaCliArg,
-} from '@kbn/test-kibana-server';
+import { DedicatedTaskRunnerConfig, getKibanaCliArg } from '@kbn/test-kibana-server';
 import type { Config } from './config';
 
 export class DedicatedTaskRunner {
   static getPort(uiPort: number) {
-    return DedicatedTaskRunnerProcess.getPort(uiPort);
+    return DedicatedTaskRunnerConfig.getPort(uiPort);
   }
 
   static getUuid(mainUuid: string) {
-    return DedicatedTaskRunnerProcess.getUuid(mainUuid);
+    return DedicatedTaskRunnerConfig.getUuid(mainUuid);
   }
 
   /**
@@ -52,7 +49,7 @@ export class DedicatedTaskRunner {
 
     this.enabled = true;
 
-    const port = DedicatedTaskRunnerProcess.getPort(config.get('servers.kibana.port'));
+    const port = DedicatedTaskRunnerConfig.getPort(config.get('servers.kibana.port'));
     const url = Url.format({
       ...config.get('servers.kibana'),
       port,
@@ -66,7 +63,7 @@ export class DedicatedTaskRunner {
 
     const mainUuid = getKibanaCliArg(config.get('kbnTestServer.serverArgs'), 'server.uuid');
     const uuid =
-      typeof mainUuid === 'string' ? DedicatedTaskRunnerProcess.getUuid(mainUuid) : undefined;
+      typeof mainUuid === 'string' ? DedicatedTaskRunnerConfig.getUuid(mainUuid) : undefined;
 
     this.enabledProps = { port, url, client, uuid };
   }
