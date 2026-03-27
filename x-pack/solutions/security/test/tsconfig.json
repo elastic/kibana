@@ -63,6 +63,7 @@
     "@kbn/rison",
     "@kbn/core-chrome-browser",
     "@kbn/kubernetes-security-plugin",
-    "@kbn/es-query"
+    "@kbn/es-query",
+    "@kbn/kbn-client",
   ]
 }

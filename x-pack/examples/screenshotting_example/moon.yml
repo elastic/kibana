@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/screenshotting-example-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/screenshotting-example-plugin'
+  title: '@kbn/screenshotting-example-plugin'
   description: Moon project for @kbn/screenshotting-example-plugin
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: x-pack/examples/screenshotting_example
+  sourceRoot: x-pack/examples/screenshotting_example
 dependsOn:
   - '@kbn/core'
   - '@kbn/developer-examples-plugin'
