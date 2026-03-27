@@ -6589,7 +6589,7 @@
         "label": "DataGridDensity",
         "description": [],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
-        "lineNumber": 30,
+        "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7723,6 +7723,23 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.IS_ESQL_DEFAULT_FEATURE_FLAG_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "IS_ESQL_DEFAULT_FEATURE_FLAG_KEY",
+        "description": [],
+        "signature": [
+          "\"discover.isEsqlDefault\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.KubernetesContainerLogsProfile",
         "type": "Type",
         "tags": [],
@@ -7817,7 +7834,7 @@
           "\"discover:maxDocFieldsDisplayed\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
-        "lineNumber": 17,
+        "lineNumber": 18,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7851,7 +7868,7 @@
           "\"discover:modifyColumnsOnSwitch\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
-        "lineNumber": 18,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8174,7 +8191,7 @@
           "\"discover:rowHeightOption\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
-        "lineNumber": 19,
+        "lineNumber": 20,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8251,7 +8268,7 @@
           "\"discover:sampleRowsPerPage\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
-        "lineNumber": 20,
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8268,7 +8285,7 @@
           "\"discover:sampleSize\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
-        "lineNumber": 21,
+        "lineNumber": 22,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8285,7 +8302,7 @@
           "\"discover_session\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
-        "lineNumber": 25,
+        "lineNumber": 26,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8302,7 +8319,7 @@
           "\"discover:searchOnPageLoad\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
-        "lineNumber": 26,
+        "lineNumber": 27,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8427,7 +8444,7 @@
           "\"discover:showFieldStatistics\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
-        "lineNumber": 27,
+        "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8444,7 +8461,7 @@
           "\"discover:showMultiFields\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
-        "lineNumber": 28,
+        "lineNumber": 29,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8461,7 +8478,7 @@
           "\"discover:sort:defaultOrder\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
-        "lineNumber": 29,
+        "lineNumber": 30,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

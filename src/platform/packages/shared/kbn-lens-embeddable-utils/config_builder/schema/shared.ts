@@ -61,7 +61,15 @@ export const sharedPanelInfoSchema = {
       },
     })
   ),
-  filters: schema.maybe(schema.arrayOf(asCodeFilterSchema, { maxSize: 100 })),
+  filters: schema.maybe(
+    schema.arrayOf(asCodeFilterSchema, {
+      maxSize: 100,
+      meta: {
+        id: 'lensPanelFilters',
+        description: 'Filters applied to the panel',
+      },
+    })
+  ),
 };
 
 export const dslOnlyPanelInfoSchema = {
@@ -145,9 +153,7 @@ const layerSettingsSchemaWrapped = schema.object(layerSettingsSchema);
 export type LayerSettingsSchema = TypeOf<typeof layerSettingsSchemaWrapped>;
 
 export const axisTitleSchemaProps = {
-  value: schema.maybe(
-    schema.string({ defaultValue: '', meta: { description: 'Axis title text' } })
-  ),
+  text: schema.maybe(schema.string({ defaultValue: '', meta: { description: 'Axis title text' } })),
   visible: schema.maybe(schema.boolean({ meta: { description: 'Show the title' } })),
 };
 

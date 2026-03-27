@@ -444,6 +444,35 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-server.EntityUpdateClient",
+        "type": "Type",
+        "tags": [],
+        "label": "EntityUpdateClient",
+        "description": [],
+        "signature": [
+          "{ updateEntity: (entityType: z.infer<any>, doc: z.infer<any>, force: boolean) => Promise<void>; bulkUpdateEntity: ({ objects, force, }: BulkUpdateEntityParams) => Promise<",
+          {
+            "pluginId": "entityStore",
+            "scope": "server",
+            "docId": "kibEntityStorePluginApi",
+            "section": "def-server.BulkObjectResponse",
+            "text": "BulkObjectResponse"
+          },
+          "[]>; listEntities: (params?: ",
+          "ListEntitiesParams",
+          " | undefined) => Promise<",
+          "ListEntitiesResult",
+          ">; }"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [],
@@ -813,6 +842,42 @@
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
         "lineNumber": 80,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.AssetCriticalityLevel",
+        "type": "Type",
+        "tags": [],
+        "label": "AssetCriticalityLevel",
+        "description": [
+          "\nThe criticality level of the asset."
+        ],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
+        "lineNumber": 129,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.AssetCriticalityLevel",
+        "type": "Any",
+        "tags": [],
+        "label": "AssetCriticalityLevel",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
+        "lineNumber": 133,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
