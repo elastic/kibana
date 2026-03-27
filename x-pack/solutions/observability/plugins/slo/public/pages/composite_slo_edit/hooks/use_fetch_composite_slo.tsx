@@ -6,7 +6,8 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE, type GetCompositeSLOResponse } from '@kbn/slo-schema';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 import type { CreateCompositeSLOForm } from '../types';
 
 interface Response {
@@ -16,18 +17,16 @@ interface Response {
 }
 
 export function useFetchCompositeSlo(compositeSloId: string | undefined): Response {
+  const { sloClient } = usePluginContext();
+
   const { isLoading, isError, data } = useQuery({
     queryKey: ['fetchCompositeSlo', compositeSloId],
-    queryFn: async () => {
-      // TODO: replace with real GET /api/observability/slos/composite/{id} once backend is implemented
-      return {
-        name: 'Mock composite SLO',
-        description: '',
-        members: [{ sloId: 'mock-slo-id', sloName: 'Mock SLO', instanceId: ALL_VALUE, weight: 1 }],
-        timeWindow: { duration: '30d' as const, type: 'rolling' as const },
-        objective: { target: 99 },
-        tags: [],
-      } satisfies CreateCompositeSLOForm;
+    queryFn: async ({ signal }) => {
+      const response = await sloClient.fetch(
+        'GET /api/observability/slo_composites/{id} 2023-10-31',
+        { params: { path: { id: compositeSloId! } }, signal }
+      );
+      return toFormValues(response);
     },
     enabled: Boolean(compositeSloId),
     retry: false,
@@ -35,4 +34,21 @@ export function useFetchCompositeSlo(compositeSloId: string | undefined): Respon
   });
 
   return { isLoading, isError, data };
+}
+
+function toFormValues(response: GetCompositeSLOResponse): CreateCompositeSLOForm {
+  return {
+    name: response.name,
+    description: response.description,
+    members: response.members.map(({ sloId, instanceId, weight }) => ({
+      sloId,
+      sloName: sloId,
+      groupBy: instanceId && instanceId !== ALL_VALUE ? instanceId : ALL_VALUE,
+      instanceId: instanceId ?? ALL_VALUE,
+      weight,
+    })),
+    timeWindow: response.timeWindow,
+    objective: { target: response.objective.target * 100 },
+    tags: response.tags ?? [],
+  };
 }

@@ -8,9 +8,11 @@
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
+import { ALL_VALUE, type UpdateCompositeSLOResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useKibana } from '../../../hooks/use_kibana';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { sloKeys } from '../../../hooks/query_key_factory';
 import type { CreateCompositeSLOForm } from '../types';
 
@@ -22,21 +24,22 @@ export function useUpdateCompositeSlo() {
     theme,
     notifications: { toasts },
   } = useKibana().services;
+  const { sloClient } = usePluginContext();
   const queryClient = useQueryClient();
 
   return useMutation<
-    void,
+    UpdateCompositeSLOResponse,
     ServerError,
     { compositeSloId: string; compositeSlo: CreateCompositeSLOForm }
   >(
     ['updateCompositeSlo'],
-    (_vars) => {
-      // TODO: replace with real endpoint once backend is implemented
-      // return http.put(
-      //   `/api/observability/slos/composite/${encodeURIComponent(_vars.compositeSloId)}`,
-      //   { body: JSON.stringify(toApiPayload(_vars.compositeSlo)) }
-      // );
-      return Promise.resolve();
+    ({ compositeSloId, compositeSlo }) => {
+      return sloClient.fetch('PUT /api/observability/slo_composites/{id} 2023-10-31', {
+        params: {
+          path: { id: compositeSloId },
+          body: toApiPayload(compositeSlo),
+        },
+      });
     },
     {
       onSuccess: (_data, { compositeSlo }) => {
@@ -65,20 +68,19 @@ export function useUpdateCompositeSlo() {
   );
 }
 
-// TODO: uncomment when backend is implemented
-// function toApiPayload(form: CreateCompositeSLOForm) {
-//   return {
-//     name: form.name,
-//     description: form.description,
-//     members: form.members.map(({ sloId, instanceId, weight }) => ({
-//       sloId,
-//       ...(instanceId ? { instanceId } : {}),
-//       weight,
-//     })),
-//     compositeMethod: 'weightedAverage',
-//     timeWindow: form.timeWindow,
-//     budgetingMethod: 'occurrences',
-//     objective: { target: form.objective.target / 100 },
-//     tags: form.tags,
-//   };
-// }
+function toApiPayload(form: CreateCompositeSLOForm) {
+  return {
+    name: form.name,
+    description: form.description,
+    members: form.members.map(({ sloId, instanceId, weight }) => ({
+      sloId,
+      ...(instanceId && instanceId !== ALL_VALUE ? { instanceId } : {}),
+      weight,
+    })),
+    compositeMethod: 'weightedAverage' as const,
+    timeWindow: form.timeWindow,
+    budgetingMethod: 'occurrences' as const,
+    objective: { target: form.objective.target / 100 },
+    tags: form.tags,
+  };
+}
