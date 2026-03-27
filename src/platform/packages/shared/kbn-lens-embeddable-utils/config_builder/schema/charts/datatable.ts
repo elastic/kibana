@@ -25,6 +25,7 @@ import {
 } from './shared';
 import { horizontalAlignmentSchema } from '../alignments';
 import { bucketOperationDefinitionSchema } from '../bucket_ops';
+import { builderEnums } from '../enums';
 
 /**
  * Datatable supports an additional "badge" mode (render colored values as badges),
@@ -49,9 +50,7 @@ const sortingSchema = schema.oneOf(
           min: 0,
           meta: { description: 'Index of the column/row to sort by (0-based)' },
         }),
-        direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-          meta: { description: 'Sort direction' },
-        }),
+        direction: builderEnums.direction({ meta: { description: 'Sort direction' } }),
       },
       { meta: { description: 'Sort by a metric or row column' } }
     ),
@@ -73,9 +72,7 @@ const sortingSchema = schema.oneOf(
             description: 'Array of pivot values, one for each split_metrics_by column in order',
           },
         }),
-        direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-          meta: { description: 'Sort direction' },
-        }),
+        direction: builderEnums.direction({ meta: { description: 'Sort direction' } }),
       },
       {
         meta: {
@@ -192,10 +189,19 @@ const datatableStateSharedOptionsSchema = {
    */
   sort_by: schema.maybe(sortingSchema),
   /**
-   * Whether to show row numbers
+   * Show row numbers
    */
-  show_row_numbers: schema.maybe(
-    schema.boolean({ meta: { description: 'Whether to show row numbers' } })
+  row_numbers: schema.maybe(
+    schema.object(
+      {
+        visible: schema.boolean({ meta: { description: 'Show row numbers' } }),
+      },
+      {
+        meta: {
+          description: 'Configuration for row numbers',
+        },
+      }
+    )
   ),
 };
 
@@ -205,7 +211,7 @@ const datatableStateCommonOptionsSchema = {
    */
   apply_color_to: schema.maybe(applyColorToDatatableSchema),
   /**
-   * Whether to show the column
+   * Show the column
    */
   visible: schema.maybe(schema.boolean({ defaultValue: true })),
   /**

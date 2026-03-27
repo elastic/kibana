@@ -49,26 +49,54 @@ export const controlsGroupSchema = schema.arrayOf(
    * - control order will be determined by the array
    */
   schema.discriminatedUnion('type', [
-    schema.object({
-      type: schema.literal(ESQL_CONTROL),
-      config: optionsListESQLControlSchema,
-      ...pinnedControlSchema,
-    }),
-    schema.object({
-      type: schema.literal(OPTIONS_LIST_CONTROL),
-      config: optionsListDSLControlSchema,
-      ...pinnedControlSchema,
-    }),
-    schema.object({
-      type: schema.literal(RANGE_SLIDER_CONTROL),
-      config: rangeSliderControlSchema,
-      ...pinnedControlSchema,
-    }),
-    schema.object({
-      type: schema.literal(TIME_SLIDER_CONTROL),
-      config: timeSliderControlSchema,
-      ...pinnedControlSchema,
-    }),
+    schema.object(
+      {
+        type: schema.literal(ESQL_CONTROL),
+        config: optionsListESQLControlSchema,
+        ...pinnedControlSchema,
+      },
+      {
+        meta: {
+          title: ESQL_CONTROL,
+        },
+      }
+    ),
+    schema.object(
+      {
+        type: schema.literal(OPTIONS_LIST_CONTROL),
+        config: optionsListDSLControlSchema,
+        ...pinnedControlSchema,
+      },
+      {
+        meta: {
+          title: OPTIONS_LIST_CONTROL,
+        },
+      }
+    ),
+    schema.object(
+      {
+        type: schema.literal(RANGE_SLIDER_CONTROL),
+        config: rangeSliderControlSchema,
+        ...pinnedControlSchema,
+      },
+      {
+        meta: {
+          title: RANGE_SLIDER_CONTROL,
+        },
+      }
+    ),
+    schema.object(
+      {
+        type: schema.literal(TIME_SLIDER_CONTROL),
+        config: timeSliderControlSchema,
+        ...pinnedControlSchema,
+      },
+      {
+        meta: {
+          title: TIME_SLIDER_CONTROL,
+        },
+      }
+    ),
   ]),
   {
     defaultValue: [],
