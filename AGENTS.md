@@ -18,17 +18,17 @@
 Always run `node scripts/check_changes.ts` to validate your changes
 
 ### Jest unit
-`yarn test:jest [--config=<pathToConfigFile>] [TestPathPattern]`
+`node scripts/jest [--config=<pathToConfigFile>] [TestPathPattern]`
 - Config is auto-discovered from the test file path (walks up to nearest `jest.config.js`). Simplest usage:
-  `yarn test:jest src/core/packages/http/server-internal/src/http_server.test.ts`
+  `node scripts/jest src/core/packages/http/server-internal/src/http_server.test.ts`
 - Only one `--config` per run. To test multiple packages, run separate commands.
 
 ### Jest integration
-`yarn test:jest_integration [--config=<pathToConfigFile>] [TestPathPattern]`
+`node scripts/jest_integration [--config=<pathToConfigFile>] [TestPathPattern]`
 - Auto-discovers `jest.integration.config.js` (not `jest.config.js`). Same single-config constraint as above.
 
 ### Function Test Runner (FTR)
-`yarn test:ftr [--config <file1> [--config <file2> ...]]`
+`node scripts/functional_tests [--config <file1> [--config <file2> ...]]`
 - For new tests, prefer using Scout
 
 ### Scout (UI/API with Playwright)
@@ -38,9 +38,9 @@ Always run `node scripts/check_changes.ts` to validate your changes
 Follow existing patterns in the target area first; below are common defaults.
 
 ### Type check
-`yarn test:type_check [--project path/to/tsconfig.json]`
+`node scripts/type_check [--project path/to/tsconfig.json]`
 - Without `--project` it checks **all** projects (very slow). Always scope to a single project:
-  `yarn test:type_check --project src/core/packages/http/server-internal/tsconfig.json`
+  `node scripts/type_check --project src/core/packages/http/server-internal/tsconfig.json`
 - Only one `--project` per run. To check multiple packages, run separate commands.
 
 ### TypeScript & Types

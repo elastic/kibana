@@ -94,6 +94,7 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       destination: 'entity.lifecycle.last_seen',
       mapping: { type: 'date' },
     }),
+    // Raw indices have no entity.lifecycle.*; derive from @timestamp like last_seen.
     newestValue({
       source: `${prefix}.lifecycle.last_activity`,
       destination: 'entity.lifecycle.last_activity',
@@ -194,5 +195,17 @@ export function isNotEmptyCondition(field: string): Condition {
       { field, exists: true },
       { field, neq: '' },
     ],
+  };
+}
+
+/** Returns a condition that is true when the field value is not one of the given values. */
+export function fieldNotOneOfCondition(field: string, values: string[]): Condition {
+  if (values.length === 0) {
+    return { always: {} };
+  }
+  return {
+    not: {
+      or: values.map((v) => ({ field, eq: v })),
+    },
   };
 }

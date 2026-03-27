@@ -30,21 +30,17 @@ export {
   type SamlSessionManagerOptions,
   type HostOptions,
   type GetCookieOptions,
-} from './src/auth';
+  type Role,
+} from '@kbn/test-saml-auth';
 
 export type {
   CreateTestEsClusterOptions,
   EsTestCluster,
   ICluster,
   EsClientForTestingOptions,
-} from './src/es';
-export {
-  esTestConfig,
-  createTestEsCluster,
-  createEsClientForTesting,
-  createEsClientForFtrConfig,
-  createRemoteEsClientForFtrConfig,
-} from './src/es';
+} from '@kbn/test-es-server';
+export { esTestConfig, createTestEsCluster, createEsClientForTesting } from '@kbn/test-es-server';
+export { createEsClientForFtrConfig, createRemoteEsClientForFtrConfig } from './src/ftr_es_client';
 
 export { kbnTestConfig } from './kbn_test_config';
 export type { UrlParts } from './kbn_test_config';
@@ -60,7 +56,7 @@ export {
 // @internal
 export { setupJUnitReportGeneration, escapeCdata } from './src/mocha';
 
-export { CI_PARALLEL_PROCESS_PREFIX } from './src/ci_parallel_process_prefix';
+export { CI_PARALLEL_PROCESS_PREFIX } from '@kbn/test-es-server';
 
 export * from './src/functional_test_runner';
 

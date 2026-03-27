@@ -9,6 +9,7 @@
 
 import { isEmpty } from 'lodash';
 import React, { useMemo, useState } from 'react';
+import { BehaviorSubject } from 'rxjs';
 
 import type { UseEuiTheme } from '@elastic/eui';
 import {
@@ -24,13 +25,15 @@ import {
 import { css } from '@emotion/react';
 import type { OptionsListSelection } from '@kbn/controls-schemas';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects, type PublishingSubject } from '@kbn/presentation-publishing';
 
 import { isCompressed } from '../../../../control_group/utils/is_compressed';
-import { ConditionalLabelWrapper } from '../../../control_labels';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
+import { ConditionalLabelWrapper } from '../../../control_labels';
+import { isDSLOptionsListApi } from '../../../utils';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
+import type { DSLOptionsListComponentApi } from '../types';
 import { OptionsListPopover } from './options_list_popover';
 
 const optionListControlStyles = {
@@ -93,24 +96,37 @@ export const OptionsListControl = ({
   const { componentApi, displaySettings, customStrings } = useOptionsListContext();
 
   const [isPopoverOpen, setPopoverOpen] = useState<boolean>(false);
+
+  const conditionalApiSubjects: [
+    PublishingSubject<boolean>,
+    PublishingSubject<boolean>,
+    DSLOptionsListComponentApi['field$'] | PublishingSubject<undefined>,
+    DSLOptionsListComponentApi['fieldFormatter'] | PublishingSubject<undefined>
+  ] = useMemo(() => {
+    const isDSLControl = isDSLOptionsListApi(componentApi);
+    return [
+      isDSLControl ? componentApi.exclude$ : new BehaviorSubject(false),
+      isDSLControl ? componentApi.existsSelected$ : new BehaviorSubject(false),
+      isDSLControl ? componentApi.field$ : new BehaviorSubject(undefined),
+      isDSLControl ? componentApi.fieldFormatter : new BehaviorSubject(undefined),
+    ];
+  }, [componentApi]);
+
   const [
-    excludeSelected,
-    existsSelected,
     selectedOptions,
     invalidSelections,
-    field,
     loading,
     label,
+    excludeSelected,
+    existsSelected,
+    field,
     fieldFormatter,
   ] = useBatchedPublishingSubjects(
-    componentApi.exclude$,
-    componentApi.existsSelected$,
     componentApi.selectedOptions$,
     componentApi.invalidSelections$,
-    componentApi.field$,
     componentApi.dataLoading$,
     componentApi.label$,
-    componentApi.fieldFormatter
+    ...conditionalApiSubjects
   );
 
   const delimiter = useMemo(() => OptionsListStrings.control.getSeparator(field?.type), [field]);
@@ -141,8 +157,10 @@ export const OptionsListControl = ({
                 <>
                   {selectedOptions?.length
                     ? selectedOptions.map((value: OptionsListSelection, i, { length }) => {
-                        const text = `${fieldFormatter(value)}${i + 1 === length ? '' : delimiter}`;
-                        const isInvalid = invalidSelections?.has(value);
+                        const text = `${fieldFormatter ? fieldFormatter(value) : value}${
+                          i + 1 === length ? '' : delimiter
+                        }`;
+                        const isInvalid = invalidSelections?.has(value as string);
                         return (
                           <span
                             key={value}

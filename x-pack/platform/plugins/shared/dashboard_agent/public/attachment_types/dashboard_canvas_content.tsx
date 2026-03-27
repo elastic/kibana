@@ -14,7 +14,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
-import { DEFAULT_TIME_RANGE, getStateFromAttachment } from './attachment_to_dashboard_state';
+import { DEFAULT_TIME_RANGE, attachmentToDashboardState } from '@kbn/dashboard-agent-common';
 import type { SavedObjectStatus } from './use_register_action_buttons';
 import { useRegisterActionButtons } from './use_register_action_buttons';
 
@@ -107,7 +107,7 @@ export const DashboardCanvasContent = ({
     [attachmentOrigin, checkSavedDashboardExist]
   );
 
-  const dashboardState = useMemo(() => getStateFromAttachment(attachment), [attachment]);
+  const dashboardState = useMemo(() => attachmentToDashboardState(attachment), [attachment]);
 
   const [timeRange, setTimeRange] = useState<{ from: string; to: string }>(
     dashboardState.time_range ?? DEFAULT_TIME_RANGE
@@ -161,24 +161,26 @@ export const DashboardCanvasContent = ({
         />
       </div>
       <div css={styles.renderer}>
-        <DashboardRenderer
-          getCreationOptions={getCreationOptions}
-          showPlainSpinner
-          locator={dashboardLocator}
-          savedObjectId={
-            savedObjectStatus.status === 'resolved' && savedObjectStatus.exists
-              ? attachmentOrigin
-              : undefined
-          }
-          onApiAvailable={(api) => {
-            api.setViewMode('view');
-            const initialTimeRange = api.timeRange$.value;
-            if (initialTimeRange) {
-              api.setTimeRange(initialTimeRange);
+        {savedObjectStatus.status !== 'resolved' ? null : (
+          <DashboardRenderer
+            getCreationOptions={getCreationOptions}
+            showPlainSpinner
+            locator={dashboardLocator}
+            savedObjectId={
+              savedObjectStatus.status === 'resolved' && savedObjectStatus.exists
+                ? attachmentOrigin
+                : undefined
             }
-            setDashboardApi(api);
-          }}
-        />
+            onApiAvailable={(api) => {
+              api.setViewMode('view');
+              const initialTimeRange = api.timeRange$.value;
+              if (initialTimeRange) {
+                api.setTimeRange(initialTimeRange);
+              }
+              setDashboardApi(api);
+            }}
+          />
+        )}
       </div>
     </div>
   );

@@ -103,7 +103,8 @@ export default function httpTest({ getService }: FtrProviderContext) {
     return createdAction.id;
   }
 
-  describe('http action', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/254838
+  describe.skip('http action', () => {
     let httpSimulatorURL: string = '';
     let httpServer: http.Server;
     let kibanaURL: string = '<could not determine kibana url>';
