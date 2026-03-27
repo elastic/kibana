@@ -7,7 +7,7 @@
 import { OTEL_COLLECTOR_INPUT_TYPE } from '../constants';
 import type { PackageInfo, PackagePolicyInput } from '../types';
 
-import { getNormalizedInputs } from './policy_template';
+import { getNormalizedInputs, isInputOnlyPolicyTemplate } from './policy_template';
 
 export const OTEL_INPUTS_MINIMUM_VERSION = '9.2.0';
 
@@ -21,12 +21,12 @@ export const packageInfoHasOtelInputs = (packageInfo: PackageInfo | undefined) =
   );
 
 export const hasDynamicSignalTypes = (packageInfo: PackageInfo | undefined): boolean =>
-  (packageInfo?.policy_templates || []).some(
-    (template) =>
-      isInputOnlyPolicyTemplate(template) &&
-      template.input === OTEL_COLLECTOR_INPUT_TYPE &&
-      template.dynamic_signal_types === true
-  );
+  (packageInfo?.policy_templates || []).some((template) => {
+    if (!isInputOnlyPolicyTemplate(template)) {
+      return false;
+    }
+    return template.input === OTEL_COLLECTOR_INPUT_TYPE && template.dynamic_signal_types === true;
+  });
 
 export const packagePolicyHasOtelInputs = (packagePolicyInputs: PackagePolicyInput[] | undefined) =>
   (packagePolicyInputs || []).some(

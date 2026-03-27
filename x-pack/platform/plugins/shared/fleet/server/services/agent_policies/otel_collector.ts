@@ -25,6 +25,7 @@ import { FleetError } from '../../errors';
 import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpers';
 import { pkgToPkgKey } from '../epm/registry';
 import { packagePolicyInputAllowsUndefinedDataStreamType } from '../../../common/services';
+import { hasDynamicSignalTypes } from '../../../common/services/otelcol_helpers';
 
 // Generate OTel Collector policy
 export function generateOtelcolConfig(
