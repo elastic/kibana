@@ -161,9 +161,13 @@ describe('MonitorIntegrationHealthApi', () => {
 
   describe('monitor fetching and partial errors', () => {
     it('returns empty monitors and errors when all monitors fail to fetch', async () => {
+      const notFoundError = SavedObjectsErrorHelpers.createGenericNotFoundError(
+        'synthetics-monitor',
+        'mon-1'
+      );
       const api = buildApi({
         monitorConfigRepository: {
-          get: jest.fn().mockRejectedValue(new Error('Saved object not found')),
+          get: jest.fn().mockRejectedValue(notFoundError),
         },
       });
 
@@ -171,17 +175,21 @@ describe('MonitorIntegrationHealthApi', () => {
 
       expect(result.monitors).toHaveLength(0);
       expect(result.errors).toEqual([
-        { configId: 'mon-1', message: 'Saved object not found', statusCode: 500 },
-        { configId: 'mon-2', message: 'Saved object not found', statusCode: 500 },
+        { configId: 'mon-1', message: notFoundError.message, statusCode: 404 },
+        { configId: 'mon-2', message: notFoundError.message, statusCode: 404 },
       ]);
     });
 
     it('returns partial results when some monitors fail', async () => {
       const successSO = createMonitorSO('mon-1', { name: 'Good Monitor' });
+      const notFoundError = SavedObjectsErrorHelpers.createGenericNotFoundError(
+        'synthetics-monitor',
+        'mon-2'
+      );
       const getMock = jest
         .fn()
         .mockResolvedValueOnce(successSO)
-        .mockRejectedValueOnce(new Error('Not found'));
+        .mockRejectedValueOnce(notFoundError);
 
       const api = buildApi({ monitorConfigRepository: { get: getMock } });
 
@@ -189,7 +197,9 @@ describe('MonitorIntegrationHealthApi', () => {
 
       expect(result.monitors).toHaveLength(1);
       expect(result.monitors[0].configId).toBe('mon-1');
-      expect(result.errors).toEqual([{ configId: 'mon-2', message: 'Not found', statusCode: 500 }]);
+      expect(result.errors).toEqual([
+        { configId: 'mon-2', message: notFoundError.message, statusCode: 404 },
+      ]);
     });
 
     it('provides a default error message when rejection has no message', async () => {
@@ -202,24 +212,6 @@ describe('MonitorIntegrationHealthApi', () => {
       const result = await api.getHealth(['mon-1']);
 
       expect(result.errors).toEqual([{ configId: 'mon-1', message: 'Failed to fetch monitor', statusCode: 500 }]);
-    });
-
-    it('includes statusCode 404 for SavedObjects not found errors', async () => {
-      const notFoundError = SavedObjectsErrorHelpers.createGenericNotFoundError(
-        'synthetics-monitor',
-        'mon-1'
-      );
-      const api = buildApi({
-        monitorConfigRepository: {
-          get: jest.fn().mockRejectedValue(notFoundError),
-        },
-      });
-
-      const result = await api.getHealth(['mon-1']);
-
-      expect(result.errors).toEqual([
-        { configId: 'mon-1', message: notFoundError.message, statusCode: 404 },
-      ]);
     });
 
     it('includes statusCode for non-404 SavedObjects errors via output.statusCode', async () => {
