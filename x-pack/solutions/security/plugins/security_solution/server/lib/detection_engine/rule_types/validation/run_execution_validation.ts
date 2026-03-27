@@ -69,6 +69,9 @@ export const runExecutionValidation = async (
   try {
     const indexPatternsWithMatches = await indexPatterns.getIndexPatternsWithMatches(inputIndex);
 
+    // Collect rule execution metrics
+    ruleExecutionLogger.logMetric('matched_indices_count', indexPatternsWithMatches.length);
+
     if (indexPatternsWithMatches.length === 0) {
       warnings.push(
         `Unable to find matching indices for rule ${ruleName}. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.`
