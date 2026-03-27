@@ -35,6 +35,7 @@ export async function getMissingDataStreams({
         missing.push(name);
         continue;
       }
+      throw error;
     }
   }
 
