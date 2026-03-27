@@ -11,5 +11,5 @@ export {
   registerExtensionSteps,
   getWorkflowYaml,
   loadWorkflowsFromConnectorSpec,
+  type ProcessedWorkflow,
 } from './src/workflow_test_helpers';
-export type { ProcessedWorkflow } from './src/workflow_test_helpers';

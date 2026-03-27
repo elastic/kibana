@@ -31,11 +31,11 @@ export type { ProcessedWorkflow } from '@kbn/connector-specs-test-helpers';
 export async function loadWorkflowsThroughProductionPath(
   dataSource: DataSource,
   options?: { stackConnectorId?: string; dataSourceName?: string }
-): Promise<import('@kbn/connector-specs-test-helpers').ProcessedWorkflow[]> {
+): Promise<ProcessedWorkflow[]> {
   const stackConnectorId = options?.stackConnectorId ?? 'fake-connector-id';
   const dataSourceName = options?.dataSourceName ?? 'test-data-source';
 
-  const capturedWorkflows: import('@kbn/connector-specs-test-helpers').ProcessedWorkflow[] = [];
+  const capturedWorkflows: ProcessedWorkflow[] = [];
 
   const workflowManagement = {
     management: {
@@ -73,7 +73,7 @@ export async function loadWorkflowsThroughProductionPath(
     type: 'data-source',
     attributes: {},
     references: [],
-  } as ReturnType<typeof mockSavedObjectsClient.create> extends Promise<infer T> ? T : never);
+  } as Awaited<ReturnType<typeof mockSavedObjectsClient.create>>);
 
   const mockAgentBuilder = agentBuilderMocks.createStart();
   const mockToolRegistry = createToolRegistryMock();

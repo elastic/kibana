@@ -22,10 +22,17 @@ import { getWorkflowTemplatesForConnector } from '@kbn/connector-specs';
 const TEMPLATE_DELIMITERS: OpeningAndClosingTags = ['<%=', '%>'];
 
 const internalRegistry = new ServerStepRegistry();
-registerInternalStepDefinitions({} as any, internalRegistry);
+// Core services are not used during step registration, only at execution time.
+const coreStub = {} as unknown as Parameters<typeof registerInternalStepDefinitions>[0];
+registerInternalStepDefinitions(coreStub, internalRegistry);
 
-const CORE_STEPS = new Map<string, { id: string; handler: Function }>(
-  internalRegistry.getAll().map((def) => [def.id, def])
+interface StepLike {
+  id: string;
+  handler: (...args: any[]) => any;
+}
+
+const CORE_STEPS: Map<string, StepLike> = new Map(
+  internalRegistry.getAll().map((def) => [def.id, def] as [string, StepLike])
 );
 
 const approvedStepIds = new Set(APPROVED_STEP_DEFINITIONS.map((d) => d.id));
@@ -41,10 +48,7 @@ const approvedStepIds = new Set(APPROVED_STEP_DEFINITIONS.map((d) => d.id));
  * routes them correctly, but invoking one without a handler provided via
  * additionalSteps will fail with a clear message telling you what to do.
  */
-export function registerExtensionSteps(
-  fixture: WorkflowRunFixture,
-  additionalSteps?: Array<{ id: string; handler: Function }>
-) {
+export function registerExtensionSteps(fixture: WorkflowRunFixture, additionalSteps?: StepLike[]) {
   const steps = new Map(CORE_STEPS);
   for (const step of additionalSteps ?? []) {
     steps.set(step.id, step);
