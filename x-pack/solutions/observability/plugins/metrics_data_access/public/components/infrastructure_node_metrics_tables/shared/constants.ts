@@ -50,3 +50,12 @@ export const KUBERNETES_NODE_MEMORY_USAGE_BYTES = 'kubernetes.node.memory.usage.
 /** SemConv K8s pod metric field names */
 export const SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION = 'metrics.k8s.pod.cpu_limit_utilization';
 export const SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION = 'metrics.k8s.pod.memory_limit_utilization';
+
+// --- OTel dataset filter helper ---
+
+/**
+ * Builds a KQL source filter that matches OTel data regardless of whether the
+ * dataset value is stored under `data_stream.dataset` or `event.dataset`.
+ */
+export const otelDatasetFilter = (dataset: string) =>
+  `(data_stream.dataset: "${dataset}" OR event.dataset: "${dataset}")`;

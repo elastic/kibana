@@ -8,6 +8,7 @@
 import {
   ECS_POD_CPU_USAGE_LIMIT_PCT,
   MEMORY_LIMIT_UTILIZATION,
+  otelDatasetFilter,
   SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION,
 } from '../shared/constants';
 import { usePodMetricsTable } from './use_pod_metrics_table';
@@ -76,7 +77,7 @@ describe('usePodMetricsTable hook', () => {
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         metricsExplorerOptions: expect.objectContaining({
-          kuery: `(data_stream.dataset: "kubeletstatsreceiver.otel" OR event.dataset: "kubeletstatsreceiver.otel") AND (${kuery})`,
+          kuery: `${otelDatasetFilter('kubeletstatsreceiver.otel')} AND (${kuery})`,
           metrics: expect.arrayContaining([
             expect.objectContaining({ field: SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION }),
             expect.objectContaining({ field: MEMORY_LIMIT_UTILIZATION }),

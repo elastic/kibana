@@ -20,6 +20,7 @@ import {
   useInfrastructureNodeMetrics,
 } from '../shared';
 import {
+  otelDatasetFilter,
   SEMCONV_SYSTEM_CPU_LOGICAL_COUNT,
   SEMCONV_SYSTEM_CPU_UTILIZATION,
   SEMCONV_SYSTEM_MEMORY_LIMIT,
@@ -60,8 +61,7 @@ type HostMetricsFieldsOtel =
   | typeof SEMCONV_SYSTEM_MEMORY_UTILIZATION;
 
 const hostsMetricsQueryConfigOtel: MetricsQueryOptions<HostMetricsFieldsOtel> = {
-  sourceFilter:
-    '(data_stream.dataset: "hostmetricsreceiver.otel" OR event.dataset: "hostmetricsreceiver.otel")',
+  sourceFilter: otelDatasetFilter('hostmetricsreceiver.otel'),
   groupByField: 'host.name',
   metricsMap: {
     [SEMCONV_SYSTEM_CPU_LOGICAL_COUNT]: {

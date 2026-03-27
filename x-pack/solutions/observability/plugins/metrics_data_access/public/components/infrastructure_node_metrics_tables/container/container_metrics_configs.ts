@@ -10,6 +10,7 @@ import { createMetricByFieldLookup, makeUnpackMetric, metricsToApiOptions } from
 import {
   ECS_CONTAINER_CPU_USAGE_LIMIT_PCT,
   ECS_CONTAINER_MEMORY_USAGE_BYTES,
+  otelDatasetFilter,
   SEMCONV_DOCKER_CONTAINER_MEMORY_PERCENT,
   SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION,
   SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION,
@@ -43,8 +44,7 @@ type ContainerMetricsFieldSemconvDocker =
 
 const containerMetricsQueryConfigSemconvDocker: MetricsQueryOptions<ContainerMetricsFieldSemconvDocker> =
   {
-    sourceFilter:
-      '(data_stream.dataset: "dockerstatsreceiver.otel" OR event.dataset: "dockerstatsreceiver.otel")',
+    sourceFilter: otelDatasetFilter('dockerstatsreceiver.otel'),
     groupByField: 'container.id',
     metricsMap: {
       [SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION]: {
@@ -65,8 +65,7 @@ type ContainerMetricsFieldSemconvK8s =
 
 const containerMetricsQueryConfigSemconvK8s: MetricsQueryOptions<ContainerMetricsFieldSemconvK8s> =
   {
-    sourceFilter:
-      '(data_stream.dataset: "kubeletstatsreceiver.otel" OR event.dataset: "kubeletstatsreceiver.otel")',
+    sourceFilter: otelDatasetFilter('kubeletstatsreceiver.otel'),
     groupByField: 'container.id',
     metricsMap: {
       [SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION]: {

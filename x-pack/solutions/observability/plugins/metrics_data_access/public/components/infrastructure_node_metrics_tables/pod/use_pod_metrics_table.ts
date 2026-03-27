@@ -24,6 +24,7 @@ import {
   KUBERNETES_NODE_MEMORY_ALLOCATABLE_BYTES,
   KUBERNETES_NODE_MEMORY_USAGE_BYTES,
   MEMORY_LIMIT_UTILIZATION,
+  otelDatasetFilter,
   SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION,
   SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION,
 } from '../shared/constants';
@@ -63,8 +64,7 @@ type PodMetricsFieldsOtel =
   | typeof MEMORY_LIMIT_UTILIZATION;
 
 const podMetricsQueryConfigOtel: MetricsQueryOptions<PodMetricsFieldsOtel> = {
-  sourceFilter:
-    '(data_stream.dataset: "kubeletstatsreceiver.otel" OR event.dataset: "kubeletstatsreceiver.otel")',
+  sourceFilter: otelDatasetFilter('kubeletstatsreceiver.otel'),
   groupByField: ['k8s.pod.uid', 'k8s.pod.name'],
   metricsMap: {
     // this is an optional field and wont populate unless specifically enabled in kubeletstatreceiver.

@@ -6,6 +6,7 @@
  */
 
 import {
+  otelDatasetFilter,
   SEMCONV_SYSTEM_CPU_LOGICAL_COUNT,
   SEMCONV_SYSTEM_CPU_UTILIZATION,
   SEMCONV_SYSTEM_MEMORY_LIMIT,
@@ -81,7 +82,7 @@ describe('useHostMetricsTable hook', () => {
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         metricsExplorerOptions: expect.objectContaining({
-          kuery: `(data_stream.dataset: "hostmetricsreceiver.otel" OR event.dataset: "hostmetricsreceiver.otel") AND (${kuery})`,
+          kuery: `${otelDatasetFilter('hostmetricsreceiver.otel')} AND (${kuery})`,
           metrics: expect.arrayContaining([
             expect.objectContaining({ field: SEMCONV_SYSTEM_CPU_LOGICAL_COUNT }),
             expect.objectContaining({ field: SEMCONV_SYSTEM_CPU_UTILIZATION }),
@@ -96,6 +97,7 @@ describe('useHostMetricsTable hook', () => {
   it('should transform OTel rows into populated host metrics', () => {
     const kuery = `host.name: "gke-edge-oblt-pool-1-9a60016d-lgg9"`;
 
+    useInfrastructureNodeMetricsMock.mockClear();
     useInfrastructureNodeMetricsMock.mockReturnValue({
       isLoading: true,
       data: { state: 'empty-indices' },
@@ -111,20 +113,23 @@ describe('useHostMetricsTable hook', () => {
       })
     );
 
-    const [firstCallArgs] = useInfrastructureNodeMetricsMock.mock.calls;
-    const transform = firstCallArgs?.[0]?.transform;
+    const lastCallArgs = useInfrastructureNodeMetricsMock.mock.calls.at(-1);
+    const { transform, metricsExplorerOptions } = lastCallArgs?.[0] ?? {};
     expect(transform).toBeDefined();
 
-    const row = transform({
+    const metrics = metricsExplorerOptions?.metrics ?? [];
+    const metricIndexByField = new Map(metrics.map((metric, index) => [metric.field, index]));
+
+    const row = transform!({
       id: 'otel-host-1',
       columns: [],
       rows: [
         {
           timestamp: Date.now(),
-          metric_0: 8,
-          metric_1: 0.42,
-          metric_2: 16_000_000_000,
-          metric_3: 0.25,
+          [`metric_${metricIndexByField.get(SEMCONV_SYSTEM_CPU_LOGICAL_COUNT)}`]: 8,
+          [`metric_${metricIndexByField.get(SEMCONV_SYSTEM_CPU_UTILIZATION)}`]: 0.42,
+          [`metric_${metricIndexByField.get(SEMCONV_SYSTEM_MEMORY_LIMIT)}`]: 16_000_000_000,
+          [`metric_${metricIndexByField.get(SEMCONV_SYSTEM_MEMORY_UTILIZATION)}`]: 0.25,
         },
       ],
     });
