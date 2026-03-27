@@ -38,7 +38,6 @@ const scenario: Scenario<Fields | ApmOtelFields> = async ({ logger, scenarioOpts
         .generator((timestamp) =>
           hosts.flatMap((hostName) => {
             const base = {
-              _index: 'metrics-generic.otel-default',
               'agent.id': `agent-${hostName}`,
               'host.hostname': hostName,
               '@timestamp': timestamp,

@@ -48,7 +48,6 @@ export class InfraSynthtraceEsClientImpl
       'metrics-kubernetes*',
       'metrics-docker*',
       'metrics-aws*',
-      'metrics-generic.otel*',
     ];
   }
 
@@ -105,11 +104,6 @@ function getRoutingTransform() {
   return new Transform({
     objectMode: true,
     transform(document: ESDocumentWithOperation<InfraDocument>, encoding, callback) {
-      if (document._index) {
-        callback(null, document);
-        return;
-      }
-
       const metricset = document['metricset.name'];
 
       if (metricset === 'cpu') {
