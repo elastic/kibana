@@ -205,7 +205,7 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
           }}
           css={css`
             align-items: stretch;
-            row-gap: 2px;
+            row-gap: ${euiTheme.size.xxs};
             column-gap: 0;
 
             & > .euiDescriptionList__title,
