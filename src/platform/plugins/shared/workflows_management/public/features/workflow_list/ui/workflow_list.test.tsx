@@ -119,10 +119,6 @@ jest.mock('../../../widgets/worflows_triggers_list/worflows_triggers_list', () =
   WorkflowsTriggersList: () => <span>{'Triggers'}</span>,
 }));
 
-jest.mock('../../../widgets/workflow_tags/workflow_tags', () => ({
-  WorkflowTags: () => <span>{'Tags'}</span>,
-}));
-
 // --- Test helpers ---
 
 const createMockWorkflow = (overrides: Partial<WorkflowListItemDto> = {}): WorkflowListItemDto => ({
