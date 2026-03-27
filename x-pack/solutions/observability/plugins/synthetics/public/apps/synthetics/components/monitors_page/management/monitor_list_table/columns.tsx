@@ -321,14 +321,19 @@ export function useMonitorListColumns({
           'data-test-subj': 'syntheticsMonitorResetAction',
           isPrimary: false,
           name: (fields) => (
-            <span
-              aria-label={i18n.translate('xpack.synthetics.management.monitorList.resetLabel', {
-                defaultMessage: 'Reset monitor {monitorName}',
-                values: { monitorName: fields[ConfigKey.NAME] },
-              })}
+            <NoPermissionsTooltip
+              canEditSynthetics={canEditSynthetics}
+              canUsePublicLocations={isPublicLocationsAllowed(fields)}
             >
-              {labels.RESET_LABEL}
-            </span>
+              <span
+                aria-label={i18n.translate('xpack.synthetics.management.monitorList.resetLabel', {
+                  defaultMessage: 'Reset monitor {monitorName}',
+                  values: { monitorName: fields[ConfigKey.NAME] },
+                })}
+              >
+                {labels.RESET_LABEL}
+              </span>
+            </NoPermissionsTooltip>
           ),
           description: labels.RESET_LABEL,
           icon: 'refresh' as const,
@@ -336,7 +341,10 @@ export function useMonitorListColumns({
           color: 'warning' as const,
           available: (fields) => isResetFixable(fields[ConfigKey.CONFIG_ID]),
           enabled: (fields) =>
-            canEditSynthetics && !isActionLoading(fields) && isServiceAllowed,
+            canEditSynthetics &&
+            !isActionLoading(fields) &&
+            isServiceAllowed &&
+            isPublicLocationsAllowed(fields),
           onClick: (fields) => {
             setMonitorPendingReset({
               resetIds: [fields[ConfigKey.CONFIG_ID]],
