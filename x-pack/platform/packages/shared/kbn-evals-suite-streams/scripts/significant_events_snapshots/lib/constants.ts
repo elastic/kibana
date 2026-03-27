@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { IndicesUpdateAliasesAddAction } from '@elastic/elasticsearch/lib/api/types';
 import type { Scenario } from './types';
 
 export const DEFAULT_LOGS_INDEX = 'logs';
@@ -21,12 +22,47 @@ export const KI_FEATURE_EXTRACTION_POLL_INTERVAL_MS = 10_000;
 export const KI_FEATURE_EXTRACTION_TIMEOUT_MS = 5 * 60 * 1000;
 
 export const HEALTHY_BASELINE_SCENARIO: Scenario = { id: 'healthy-baseline' };
-export const DEFAULT_ALERT_INDICES = ['.internal.alerts-streams.alerts-default-*'];
 export const STREAMS_REGISTRY_PATTERN = '.kibana_streams-*';
 
-export const DEFAULT_SYSTEM_INDICES = [
+export const VALID_SYSTEM_INDICES = [
   '.kibana_streams_features-*',
   '.kibana_streams_assets-*',
   '.kibana_streams_insights-*',
-  STREAMS_REGISTRY_PATTERN,
-];
+  '.kibana_streams_tasks-*',
+  // STREAMS_REGISTRY_PATTERN,
+] as const;
+
+export const VALID_ALERT_INDICES = ['.internal.alerts-streams.alerts-default-*'] as const;
+
+type ValidStreamsSystemIndices = (typeof VALID_SYSTEM_INDICES)[number];
+type ValidStreamsAlertIndices = (typeof VALID_ALERT_INDICES)[number];
+type ValidStreamsIndices = ValidStreamsSystemIndices | ValidStreamsAlertIndices;
+
+export const INDEX_ALIAS_CONFIG: Record<
+  ValidStreamsIndices,
+  Pick<IndicesUpdateAliasesAddAction, 'alias' | 'is_hidden'>
+> = {
+  '.kibana_streams_features-*': {
+    alias: '.kibana_streams_features',
+    is_hidden: true,
+  },
+  '.kibana_streams_assets-*': {
+    alias: '.kibana_streams_assets',
+    is_hidden: true,
+  },
+  '.kibana_streams_insights-*': {
+    alias: '.kibana_streams_insights',
+    is_hidden: true,
+  },
+  '.kibana_streams_tasks-*': {
+    alias: '.kibana_streams_tasks',
+    is_hidden: true,
+  },
+  // [STREAMS_REGISTRY_PATTERN]: {
+  //   alias: '.kibana_streams',
+  //   is_hidden: true,
+  // },
+  '.internal.alerts-streams.alerts-default-*': {
+    alias: '.alerts-streams.alerts-default',
+  },
+};

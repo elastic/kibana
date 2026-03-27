@@ -7,11 +7,15 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
+import inquirer from 'inquirer';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { ConnectionConfig } from './get_connection_config';
+import { kibanaRequest } from './kibana';
 import {
-  DEFAULT_ALERT_INDICES,
-  DEFAULT_SYSTEM_INDICES,
   DEFAULT_ENV_SNAPSHOT_LOGS_INDEX,
+  INDEX_ALIAS_CONFIG,
+  VALID_ALERT_INDICES,
+  VALID_SYSTEM_INDICES,
 } from './constants';
 
 export const parseRepeatableFlag = (value: unknown): string[] => {
@@ -34,19 +38,31 @@ export const parseCommonSnapshotFlags = (flags: Record<string, unknown>): Common
   }
 
   const systemIndicesFlag = parseRepeatableFlag(flags['system-indices']);
-  const systemIndices = systemIndicesFlag.length > 0 ? systemIndicesFlag : DEFAULT_SYSTEM_INDICES;
+  const systemIndices =
+    systemIndicesFlag.length > 0 ? systemIndicesFlag : [...VALID_SYSTEM_INDICES];
 
+  const validSystemSet = new Set<string>(VALID_SYSTEM_INDICES);
   for (const pattern of systemIndices) {
-    if (!pattern.startsWith('.kibana')) {
+    if (!validSystemSet.has(pattern)) {
       throw new Error(
-        `--system-indices patterns must start with ".kibana", got "${pattern}". ` +
-          `Only .kibana system indices are supported.`
+        `Invalid --system-indices value "${pattern}". ` +
+          `Allowed values: ${VALID_SYSTEM_INDICES.join(', ')}`
       );
     }
   }
 
   const alertIndicesFlag = parseRepeatableFlag(flags['alert-indices']);
-  const alertIndices = alertIndicesFlag.length > 0 ? alertIndicesFlag : DEFAULT_ALERT_INDICES;
+  const alertIndices = alertIndicesFlag.length > 0 ? alertIndicesFlag : [...VALID_ALERT_INDICES];
+
+  const validAlertSet = new Set<string>(VALID_ALERT_INDICES);
+  for (const idx of alertIndices) {
+    if (!validAlertSet.has(idx)) {
+      throw new Error(
+        `Invalid --alert-indices value "${idx}". ` +
+          `Allowed values: ${VALID_ALERT_INDICES.join(', ')}`
+      );
+    }
+  }
 
   const logsIndex = String(flags['logs-index'] || DEFAULT_ENV_SNAPSHOT_LOGS_INDEX);
 
@@ -128,58 +144,28 @@ export const validateIndexPrivileges = async (
   log.debug('Index privilege check passed');
 };
 
-const ALIAS_REGEX = /^(?:\.internal)?(.+)-\d+$/;
-
-const deriveAliasName = (indexName: string): string | undefined => {
-  const match = indexName.match(ALIAS_REGEX);
-  return match ? match[1] : undefined;
-};
-
-async function resolveDataStreamIndices(esClient: Client, indices: string[]): Promise<Set<string>> {
-  const result = new Set<string>();
-  if (indices.length === 0) return result;
-
-  try {
-    const response = await esClient.indices.get({
-      index: indices,
-      filter_path: '*.data_stream',
-    });
-    for (const [name, meta] of Object.entries(response)) {
-      if (meta.data_stream) {
-        result.add(name);
-      }
-    }
-  } catch (err) {
-    if (err instanceof errors.ResponseError && err.statusCode === 404) {
-      return result;
-    }
-    throw err;
-  }
-
-  return result;
-}
-
-export const createMissingAliases = async ({
+export const ensureKnownAliases = async ({
   esClient,
   log,
-  resolvedIndices,
+  systemIndices,
+  alertIndices,
 }: {
   esClient: Client;
   log: ToolingLog;
-  resolvedIndices: string[];
+  systemIndices: string[];
+  alertIndices: string[];
 }): Promise<void> => {
-  const indicesWithAliases = resolvedIndices.filter((name) => deriveAliasName(name) != null);
-  const dataStreamIndices = await resolveDataStreamIndices(esClient, indicesWithAliases);
-
-  log.debug(`Indices needing aliases: ${indicesWithAliases.join(', ')}`);
-  log.debug(`Data stream backed indices: ${[...dataStreamIndices].join(', ') || 'none'}`);
-
   let created = 0;
   let skipped = 0;
 
-  for (const indexName of indicesWithAliases) {
-    const aliasName = deriveAliasName(indexName)!;
-    const isDataStream = dataStreamIndices.has(indexName);
+  for (const indexPattern of [...systemIndices, ...alertIndices]) {
+    const config = INDEX_ALIAS_CONFIG[indexPattern as keyof typeof INDEX_ALIAS_CONFIG];
+    if (!config?.alias) {
+      log.warning(`No alias config for "${indexPattern}" — skipping`);
+      continue;
+    }
+
+    const { alias: aliasName } = config;
 
     const aliasExists = await esClient.indices.existsAlias({ name: aliasName });
     if (aliasExists) {
@@ -188,20 +174,180 @@ export const createMissingAliases = async ({
       continue;
     }
 
-    log.info(
-      `Creating alias "${aliasName}" → "${indexName}"${isDataStream ? ' (data stream)' : ''}`
-    );
-    await esClient.indices.updateAliases({
-      actions: [
-        {
-          add: isDataStream
-            ? { index: indexName, alias: aliasName, is_write_index: true }
-            : { index: indexName, alias: aliasName, is_write_index: true, is_hidden: true },
-        },
-      ],
-    });
-    created++;
+    try {
+      const resolved = await esClient.indices.resolveIndex({
+        name: indexPattern,
+        expand_wildcards: 'all',
+      });
+      const concreteIndex = resolved.indices?.[0]?.name;
+      if (!concreteIndex) {
+        log.debug(`No index found for pattern "${indexPattern}" — skipping alias`);
+        continue;
+      }
+
+      log.info(`Creating alias "${aliasName}" → "${concreteIndex}"`);
+      await esClient.indices.updateAliases({
+        actions: [{ add: { index: concreteIndex, is_write_index: true, ...config } }],
+      });
+      created++;
+    } catch (err) {
+      log.warning(
+        `Failed to create alias for "${indexPattern}": ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    }
   }
 
-  log.info(`Aliases complete: ${created} created, ${skipped} already existed`);
+  log.info(`Aliases: ${created} created, ${skipped} already existed`);
 };
+
+export async function resolveExisting(esClient: Client, patterns: string[]): Promise<string[]> {
+  const found: string[] = [];
+  for (const pattern of patterns) {
+    try {
+      const response = await esClient.indices.resolveIndex({
+        name: pattern,
+        expand_wildcards: 'all',
+      });
+      found.push(
+        ...(response.indices ?? []).map((i) => i.name),
+        ...(response.data_streams ?? []).map((d) => d.name)
+      );
+    } catch (err) {
+      if (err instanceof errors.ResponseError && err.statusCode === 404) {
+        continue;
+      }
+      throw err;
+    }
+  }
+  return found;
+}
+
+export async function deleteExisting(
+  esClient: Client,
+  log: ToolingLog,
+  names: string[]
+): Promise<void> {
+  for (const name of names) {
+    try {
+      await esClient.indices.deleteDataStream({ name });
+      log.info(`  deleted data stream: ${name}`);
+    } catch (dsErr) {
+      log.debug(
+        `  not a data stream "${name}" (${
+          dsErr instanceof Error ? dsErr.message : String(dsErr)
+        }) — trying index delete`
+      );
+      try {
+        await esClient.indices.delete({ index: name, ignore_unavailable: true });
+        log.info(`  deleted index: ${name}`);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        log.warning(`  failed to delete "${name}": ${msg}`);
+        throw new Error(`Cannot continue restore: failed to delete "${name}": ${msg}`);
+      }
+    }
+  }
+}
+
+async function promptConfirm(question: string): Promise<boolean> {
+  const { confirmed } = await inquirer.prompt<{ confirmed: boolean }>([
+    { type: 'confirm', name: 'confirmed', message: question, default: false },
+  ]);
+  return confirmed;
+}
+
+export async function ensureCleanEnvironment({
+  esClient,
+  log,
+  systemIndices,
+  alertIndices,
+  logsIndex,
+  clean,
+}: {
+  esClient: Client;
+  log: ToolingLog;
+  systemIndices: string[];
+  alertIndices: string[];
+  logsIndex: string;
+  clean: boolean;
+}): Promise<void> {
+  const allExisting = await resolveExisting(esClient, [
+    logsIndex,
+    ...systemIndices,
+    ...alertIndices,
+  ]);
+
+  if (allExisting.length === 0) {
+    log.debug('Environment is clean — no existing indices found');
+    return;
+  }
+
+  log.warning('Found existing indices that will conflict with the restore:');
+  for (const name of allExisting) {
+    log.warning(`  - ${name}`);
+  }
+
+  if (!clean) {
+    if (!process.stdin.isTTY) {
+      throw new Error(
+        `Environment is not clean. Re-run with --clean to automatically delete the listed indices, or delete them manually before restoring.`
+      );
+    }
+
+    const confirmed = await promptConfirm(
+      `This will permanently delete all existing Streams and Significant Events data (${allExisting.length} indices listed above) and replace it with the snapshot contents. Proceed?`
+    );
+    if (!confirmed) {
+      throw new Error(
+        `Restore aborted. Delete the listed indices manually or re-run with --clean.`
+      );
+    }
+  }
+
+  log.info('Cleaning up environment...');
+  await deleteExisting(esClient, log, allExisting);
+}
+
+export async function getEnabledStreams(esClient: Client, log: ToolingLog): Promise<string[]> {
+  try {
+    const response = (await esClient.transport.request({
+      method: 'GET',
+      path: '/_streams/status',
+    })) as Record<string, { enabled?: boolean }>;
+
+    const enabled = Object.entries(response)
+      .filter(([, v]) => v?.enabled)
+      .map(([name]) => name);
+
+    if (enabled.length > 0) {
+      log.info(`Enabled ES streams: ${enabled.join(', ')}`);
+    }
+    return enabled;
+  } catch {
+    log.debug('GET /_streams/status not available — no pipeline exclusions');
+    return [];
+  }
+}
+
+export async function ensureStreamsEnabled(
+  config: ConnectionConfig,
+  log: ToolingLog
+): Promise<void> {
+  const { status, data } = await kibanaRequest(config, 'POST', '/api/streams/_enable');
+  if (status === 200) {
+    log.info('Streams enabled successfully');
+  } else if (status === 400) {
+    const msg = JSON.stringify(data ?? '');
+    if (msg.includes('already enabled') || msg.includes('Cannot change stream types')) {
+      log.info('Streams already enabled');
+    } else {
+      throw new Error(`Failed to enable streams: ${status} ${msg}`);
+    }
+  } else if (status === 404) {
+    log.warning('Streams API not available — skipping');
+  } else {
+    throw new Error(`Failed to enable streams: ${status} ${JSON.stringify(data)}`);
+  }
+}

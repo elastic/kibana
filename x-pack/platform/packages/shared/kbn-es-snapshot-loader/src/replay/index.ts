@@ -52,7 +52,16 @@ export async function getMaxTimestampFromData({
 }
 
 export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> {
-  const { esClient, log, repository, snapshotName, patterns, concurrency, beforeReindex } = config;
+  const {
+    esClient,
+    log,
+    repository,
+    snapshotName,
+    patterns,
+    concurrency,
+    pipelineExcludePatterns,
+    beforeReindex,
+  } = config;
 
   const result: LoadResult = {
     success: false,
@@ -140,6 +149,8 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
       originalIndices: indicesToRestore,
       concurrency,
       pipelineName,
+      maxTimestamp: result.maxTimestamp!,
+      pipelineExcludePatterns,
     });
     result.reindexedIndices = reindexedIndices;
 

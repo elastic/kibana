@@ -7,6 +7,7 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { captureEnvSnapshot } from './capture_env_snapshot';
+import { DEFAULT_LOGS_INDEX, VALID_ALERT_INDICES, VALID_SYSTEM_INDICES } from '../lib/constants';
 
 run(({ log, flags }) => captureEnvSnapshot({ log, flags }), {
   description: `
@@ -38,9 +39,13 @@ run(({ log, flags }) => captureEnvSnapshot({ log, flags }), {
     help: `
       --snapshot-name         (required) Name for the snapshot
       --run-id                Run identifier for GCS repo name and base path (default: today's date YYYY-MM-DD)
-      --logs-index            Logs index to include in snapshot + replay. (default: logs.otel)
-      --alert-indices         Alert index to include in snapshot + replay. Can be repeated. (default: .internal.alerts-streams.alerts-default-*)
-      --system-indices        .kibana system index pattern to capture. Can be repeated. (default: .kibana_streams_features-* .kibana_streams_assets-*)
+      --logs-index            Logs index to include in snapshot + replay. (default: ${DEFAULT_LOGS_INDEX})
+      --alert-indices         Alert index to include in snapshot + replay. Valid: ${VALID_ALERT_INDICES.join(
+        ', '
+      )}
+      --system-indices        .kibana system index pattern to capture. Valid: ${VALID_SYSTEM_INDICES.join(
+        ', '
+      )}
       --es-url                Elasticsearch URL (default: from kibana.dev.yml)
       --es-username           ES username (default: from kibana.dev.yml)
       --es-password           ES password (default: from kibana.dev.yml)

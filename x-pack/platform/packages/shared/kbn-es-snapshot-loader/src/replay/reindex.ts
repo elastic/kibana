@@ -6,13 +6,13 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { errors } from '@elastic/elasticsearch';
 import type {
   BulkIndexByScrollFailure,
   ReindexResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { extractDataStreamName, getErrorMessage } from '../utils';
+import { TIMESTAMP_REINDEX_SCRIPT } from './pipeline';
 
 export interface DestinationInfo {
   destIndex: string;
@@ -54,136 +54,6 @@ function throwOnReindexFailures(
   throw new Error(`Reindex had failures for ${destIndex}`);
 }
 
-function isPipelineRejected(error: unknown): boolean {
-  return error instanceof errors.ResponseError && error.statusCode === 400;
-}
-
-async function getDefaultPipelineSetting(
-  esClient: Client,
-  index: string
-): Promise<string | undefined> {
-  const settings = await esClient.indices.getSettings({ index });
-  const indexSettings = settings[index]?.settings?.index;
-  return (indexSettings as Record<string, unknown>)?.default_pipeline as string | undefined;
-}
-
-async function tryResolveExisting(esClient: Client, name: string): Promise<string | undefined> {
-  try {
-    const response = await esClient.indices.resolveIndex({
-      name,
-      expand_wildcards: 'all',
-    });
-    const dataStreams = response.data_streams ?? [];
-    if (dataStreams.length > 0) {
-      return name;
-    }
-    const indices = response.indices ?? [];
-    if (indices.length > 0) {
-      return name;
-    }
-  } catch (err) {
-    if (err instanceof errors.ResponseError && err.statusCode === 404) {
-      return undefined;
-    }
-    throw err;
-  }
-  return undefined;
-}
-
-async function resolveWriteIndex(esClient: Client, destIndex: string): Promise<string | undefined> {
-  const existing = await tryResolveExisting(esClient, destIndex);
-  if (!existing) {
-    return undefined;
-  }
-
-  try {
-    const dsResponse = await esClient.indices.getDataStream({ name: destIndex });
-    const ds = dsResponse.data_streams[0];
-    if (ds) {
-      return ds.indices[ds.indices.length - 1]?.index_name;
-    }
-  } catch {
-    // not a data stream — return index name directly
-  }
-
-  return destIndex;
-}
-
-async function reindexWithDefaultPipeline({
-  esClient,
-  log,
-  sourceIndex,
-  destIndex,
-  pipelineName,
-  requestTimeoutMs,
-}: {
-  esClient: Client;
-  log: ToolingLog;
-  sourceIndex: string;
-  destIndex: string;
-  pipelineName: string;
-  requestTimeoutMs: number;
-}): Promise<ReindexJobResult> {
-  const writeIndex = await resolveWriteIndex(esClient, destIndex);
-  if (!writeIndex) {
-    throw new Error(
-      `Cannot resolve write index for "${destIndex}" — no existing index or data stream found`
-    );
-  }
-
-  log.info(
-    `Pipeline rejected for "${destIndex}", falling back to default_pipeline on write index "${writeIndex}"`
-  );
-
-  // Known limitation: concurrent fallback invocations targeting the same write index
-  // can interfere with each other's default_pipeline save/restore. Acceptable for
-  // dev tooling; callers needing correctness guarantees should set concurrency: 1.
-  const previousPipeline = await getDefaultPipelineSetting(esClient, writeIndex);
-
-  try {
-    await esClient.indices.putSettings({
-      index: writeIndex,
-      settings: { default_pipeline: pipelineName },
-    });
-
-    const response: ReindexResponse = await esClient.reindex(
-      {
-        wait_for_completion: true,
-        source: { index: sourceIndex },
-        dest: { index: destIndex, op_type: 'create' },
-      },
-      { requestTimeout: requestTimeoutMs }
-    );
-
-    const failures = response.failures ?? [];
-    const timedOut = response.timed_out;
-    const created = response.created ?? 0;
-    const total = response.total ?? 0;
-
-    if (timedOut) {
-      throw new Error(`Reindex timed out for ${destIndex}`);
-    }
-
-    if (failures.length > 0) {
-      throwOnReindexFailures(failures, destIndex, log);
-    }
-
-    log.debug(`Reindexed ${created} documents to ${destIndex} (via default_pipeline fallback)`);
-    return { total, created, failures: 0, timedOut: false };
-  } finally {
-    await esClient.indices
-      .putSettings({
-        index: writeIndex,
-        settings: { default_pipeline: previousPipeline ?? '_none' },
-      })
-      .catch((err) => {
-        log.warning(
-          `Failed to restore default_pipeline on "${writeIndex}": ${getErrorMessage(err)}`
-        );
-      });
-  }
-}
-
 export async function reindexThroughPipeline({
   esClient,
   log,
@@ -191,6 +61,8 @@ export async function reindexThroughPipeline({
   destIndex,
   isDataStream,
   pipelineName,
+  maxTimestamp,
+  useInlineScript = false,
   requestTimeoutMs = DEFAULT_REINDEX_REQUEST_TIMEOUT_MS,
 }: {
   esClient: Client;
@@ -199,9 +71,11 @@ export async function reindexThroughPipeline({
   destIndex: string;
   isDataStream: boolean;
   pipelineName: string;
+  maxTimestamp: string;
+  useInlineScript?: boolean;
   requestTimeoutMs?: number;
 }): Promise<ReindexJobResult> {
-  log.debug(`Reindexing to ${destIndex}`);
+  log.debug(`Reindexing to ${destIndex}${useInlineScript ? ' (inline script)' : ''}`);
 
   try {
     const response: ReindexResponse = await esClient.reindex(
@@ -210,9 +84,16 @@ export async function reindexThroughPipeline({
         source: { index: sourceIndex },
         dest: {
           index: destIndex,
-          pipeline: pipelineName,
+          ...(!useInlineScript && { pipeline: pipelineName }),
           op_type: isDataStream ? 'create' : 'index',
         },
+        ...(useInlineScript && {
+          script: {
+            lang: 'painless',
+            source: TIMESTAMP_REINDEX_SCRIPT,
+            params: { max_timestamp: maxTimestamp },
+          },
+        }),
       },
       { requestTimeout: requestTimeoutMs }
     );
@@ -233,16 +114,6 @@ export async function reindexThroughPipeline({
     log.debug(`Reindexed ${created} documents to ${destIndex}`);
     return { total, created, failures: 0, timedOut: false };
   } catch (error) {
-    if (isPipelineRejected(error)) {
-      return reindexWithDefaultPipeline({
-        esClient,
-        log,
-        sourceIndex,
-        destIndex,
-        pipelineName,
-        requestTimeoutMs,
-      });
-    }
     log.error(`Failed to start reindex for ${destIndex}`);
     throw error;
   }
@@ -261,6 +132,8 @@ export async function reindexAllIndices({
   originalIndices,
   concurrency,
   pipelineName,
+  maxTimestamp,
+  pipelineExcludePatterns = [],
 }: {
   esClient: Client;
   log: ToolingLog;
@@ -268,8 +141,11 @@ export async function reindexAllIndices({
   originalIndices: string[];
   concurrency?: number;
   pipelineName: string;
+  maxTimestamp: string;
+  pipelineExcludePatterns?: string[];
 }): Promise<string[]> {
   const successfullyReindexed: string[] = [];
+  const pipelineExcludePatternsSet = new Set(pipelineExcludePatterns);
 
   const jobs: ReindexJob[] = restoredIndices.map((sourceIndex, i) => {
     const { destIndex, isDataStream } = getDestinationInfo(originalIndices[i]);
@@ -291,7 +167,16 @@ export async function reindexAllIndices({
     await Promise.all(
       batch.map(async (job) => {
         try {
-          await reindexThroughPipeline({ esClient, log, pipelineName, ...job });
+          await reindexThroughPipeline({
+            esClient,
+            log,
+            pipelineName,
+            maxTimestamp,
+            useInlineScript:
+              pipelineExcludePatternsSet.has(job.destIndex) ||
+              pipelineExcludePatterns.some((p) => job.destIndex.startsWith(`${p}.`)),
+            ...job,
+          });
           successfullyReindexed.push(job.destIndex);
         } catch (error) {
           log.error(`Failed to reindex ${job.destIndex}: ${getErrorMessage(error)}`);

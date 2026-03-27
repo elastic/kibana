@@ -11,8 +11,9 @@ import {
   DEFAULT_REINDEX_REQUEST_TIMEOUT_MS,
   getDestinationInfo,
   reindexAllIndices,
+  reindexThroughPipeline,
 } from './reindex';
-import { createTimestampPipeline } from './pipeline';
+import { createTimestampPipeline, TIMESTAMP_REINDEX_SCRIPT } from './pipeline';
 import { getMaxTimestampFromData } from '.';
 
 const log = new ToolingLog({
@@ -96,6 +97,7 @@ describe('reindexAllIndices', () => {
       restoredIndices: ['snapshot-loader-temp-a'],
       originalIndices: ['logs-nginx-default'],
       pipelineName: 'my-pipeline',
+      maxTimestamp: '2024-01-15T12:00:00.000Z',
       concurrency: 1,
     });
 
@@ -129,6 +131,7 @@ describe('reindexAllIndices', () => {
       restoredIndices: ['snapshot-loader-temp-a'],
       originalIndices: ['logs-nginx-default'],
       pipelineName: 'my-pipeline',
+      maxTimestamp: '2024-01-15T12:00:00.000Z',
       concurrency: 1,
     });
 
@@ -150,6 +153,7 @@ describe('reindexAllIndices', () => {
       restoredIndices: ['snapshot-loader-temp-a'],
       originalIndices: ['logs-nginx-default'],
       pipelineName: 'my-pipeline',
+      maxTimestamp: '2024-01-15T12:00:00.000Z',
       concurrency: 1,
     });
 
@@ -184,5 +188,69 @@ describe('getMaxTimestampFromData', () => {
         tempIndices: ['snapshot-loader-temp-logs-1'],
       })
     ).rejects.toThrow(/No @timestamp found in restored indices/);
+  });
+});
+
+describe('reindexThroughPipeline', () => {
+  it('uses explicit pipeline when useInlineScript is false', async () => {
+    const esClient = createMockEsClient();
+    (esClient.reindex as unknown as jest.Mock).mockResolvedValue({
+      timed_out: false,
+      total: 5,
+      created: 5,
+      failures: [],
+    });
+
+    const result = await reindexThroughPipeline({
+      esClient,
+      log,
+      sourceIndex: 'temp-idx',
+      destIndex: 'logs-nginx-default',
+      isDataStream: true,
+      pipelineName: 'ts-pipeline',
+      maxTimestamp: '2024-01-15T12:00:00.000Z',
+    });
+
+    expect(esClient.reindex).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dest: expect.objectContaining({ pipeline: 'ts-pipeline' }),
+      }),
+      expect.anything()
+    );
+    expect(esClient.reindex).toHaveBeenCalledWith(
+      expect.not.objectContaining({ script: expect.anything() }),
+      expect.anything()
+    );
+    expect(result).toEqual({ total: 5, created: 5, failures: 0, timedOut: false });
+  });
+
+  it('uses inline script when useInlineScript is true', async () => {
+    const esClient = createMockEsClient();
+    (esClient.reindex as unknown as jest.Mock).mockResolvedValue({
+      timed_out: false,
+      total: 5,
+      created: 5,
+      failures: [],
+    });
+
+    const result = await reindexThroughPipeline({
+      esClient,
+      log,
+      sourceIndex: 'temp-idx',
+      destIndex: 'logs.otel',
+      isDataStream: true,
+      pipelineName: 'ts-pipeline',
+      maxTimestamp: '2024-01-15T12:00:00.000Z',
+      useInlineScript: true,
+    });
+
+    const reindexCall = (esClient.reindex as unknown as jest.Mock).mock.calls[0][0];
+    expect(reindexCall.dest).not.toHaveProperty('pipeline');
+    expect(reindexCall.script).toEqual({
+      lang: 'painless',
+      source: TIMESTAMP_REINDEX_SCRIPT,
+      params: { max_timestamp: '2024-01-15T12:00:00.000Z' },
+    });
+    expect(result).toEqual({ total: 5, created: 5, failures: 0, timedOut: false });
   });
 });

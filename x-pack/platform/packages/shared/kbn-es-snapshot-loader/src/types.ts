@@ -49,6 +49,7 @@ export interface RestoreConfig extends BaseConfig {
 export interface ReplayConfig extends BaseConfig {
   patterns: string[];
   concurrency?: number;
+  pipelineExcludePatterns?: string[];
   beforeReindex?: (params: {
     esClient: Client;
     log: ToolingLog;
