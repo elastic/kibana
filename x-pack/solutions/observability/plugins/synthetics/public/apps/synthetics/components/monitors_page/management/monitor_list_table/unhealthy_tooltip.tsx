@@ -17,12 +17,20 @@ export const UnhealthyTooltip = ({ configId }: { configId: string }) => {
 
   const isUnhealthy = isMonitorUnhealthy(configId);
   const unhealthyStatuses = getUnhealthyLocationStatuses(configId);
+
   const tooltipContent =
-    unhealthyStatuses.length > 0
-      ? unhealthyStatuses
-          .map((s) => `${s.locationLabel}: ${getStatusLabel(s.status) ?? UNHEALTHY_TOOLTIP_BADGE}`)
-          .join('\n')
-      : UNHEALTHY_TOOLTIP_BADGE;
+    unhealthyStatuses.length > 0 ? (
+      <>
+        {unhealthyStatuses.map((s, i) => (
+          <React.Fragment key={s.locationId}>
+            {i > 0 && <br />}
+            {`${s.locationLabel}: ${getStatusLabel(s.status) ?? UNHEALTHY_TOOLTIP_BADGE}`}
+          </React.Fragment>
+        ))}
+      </>
+    ) : (
+      UNHEALTHY_TOOLTIP_BADGE
+    );
 
   if (!isUnhealthy) {
     return null;
