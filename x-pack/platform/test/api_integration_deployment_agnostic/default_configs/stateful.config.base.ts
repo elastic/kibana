@@ -43,10 +43,6 @@ interface CreateTestConfigOptions<T> {
   indexRefreshInterval?: string | false;
 }
 
-// ⚠️  DO NOT add args to esTestCluster.serverArgs or kbnTestServer.serverArgs in this file
-//     to make tests pass — they won't be set on ESS/Cloud.
-//     If your test needs a feature flag, create a config under feature_flag_configs/ using
-//     createStatefulFeatureFlagTestConfig from feature_flag.stateful.config.base.ts.
 export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServices>(
   options: CreateTestConfigOptions<T>
 ) {
@@ -105,6 +101,8 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
         exclude: [...(options.suiteTags?.exclude || []), 'skipStateful'],
       },
 
+      // ⚠️  DO NOT add args here to make tests pass as they won't be set on ECH.
+      //     If your test needs a feature flag, use createStatefulFeatureFlagTestConfig (feature_flag_configs/).
       esTestCluster: {
         ...xPackAPITestsConfig.get('esTestCluster'),
         serverArgs: [
@@ -129,6 +127,8 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           path.resolve(REPO_ROOT, STATEFUL_ROLES_ROOT_PATH, 'roles.yml'),
         ],
       },
+      // ⚠️  DO NOT add args here to make tests pass as they won't be set on ECH.
+      //     If your test needs a feature flag, use createStatefulFeatureFlagTestConfig (feature_flag_configs/).
       kbnTestServer: {
         ...xPackAPITestsConfig.get('kbnTestServer'),
         serverArgs: [
